@@ -1,0 +1,6 @@
+This example reads the mesh in the ExodusII format. 
+To enable it, set WITH_EXODUSII to YES in the file
+CMake.vars. You will also need to install the 
+ExodusII and NetCFD packages (both available for 
+free from the web). 
+

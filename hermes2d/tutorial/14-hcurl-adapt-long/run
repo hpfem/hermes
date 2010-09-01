@@ -1,0 +1,4 @@
+rm *~  
+./hcurl-adapt-long
+python plot_graph.py &
+

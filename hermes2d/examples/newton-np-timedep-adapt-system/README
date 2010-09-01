@@ -1,0 +1,12 @@
+Default solution method is *non-adaptive*. To run adaptive:
+./newton-np-timedep-adapt-system adapt
+
+Notice that the adaptive version requires pressing key to continue i.e. the graphs are renewed and calculation is stopped
+after each iteration.
+
+To compile a video:
+mencoder "mf://velocity*.bmp" -mf fps=20 -o velocity.avi -ovc lavc -lavcopts vcodec=mpeg4
+
+To make sure that widnows can show it, use 
+vcodec=msmpeg4v2
+

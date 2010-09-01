@@ -1,0 +1,6 @@
+include_directories(${hermes1d_SOURCE_DIR}/src)
+
+include_directories(${hermes1d_SOURCE_DIR}/hermes_common/)
+include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+
+target_link_libraries(${PROJECT_NAME} hermes_common ${HERMES_BIN})

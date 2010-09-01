@@ -1,0 +1,4 @@
+rm *~ 
+./smooth-aniso-y
+python plot_graph.py &
+

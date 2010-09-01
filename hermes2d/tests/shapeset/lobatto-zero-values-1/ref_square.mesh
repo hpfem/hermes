@@ -1,0 +1,23 @@
+
+vertices =
+{
+  { -1, -1 },    # ref. square vertex 0
+  { 1, -1 },     # ref. square vertex 1
+  { 1, 1 },      # ref. square vertex 2
+  { -1, 1 }      # ref. square vertex 3
+}
+
+elements =
+{
+  { 0, 1, 2, 3, 0 }  # ref. square
+
+}
+
+boundaries =
+{
+  { 0, 1, 1 },
+  { 1, 2, 2 },
+  { 2, 3, 3 },
+  { 3, 0, 4 }
+}
+

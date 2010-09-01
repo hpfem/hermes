@@ -1,0 +1,5 @@
+// to save solutions
+//ordview.save_numbered_screenshot("./video/mesh%04d.bmp", n, true);
+//magview.save_numbered_screenshot("./video/sol%04d.bmp", n, true);
+
+

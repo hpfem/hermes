@@ -1,0 +1,4 @@
+clean
+laplace_bc_newton2
+python plot.py &
+

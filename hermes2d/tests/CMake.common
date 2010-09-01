@@ -1,0 +1,43 @@
+#add_executable(${PROJECT_NAME} main.cpp)
+
+# Each example can define the particular hermes library to link with, or not
+# define anything, in which case the "real" version will be used if hermes was
+# built with "real" support, otherwise the "complex" version will be used:
+if(NOT DEFINED HERMES)
+    if(H2D_REAL)
+        set(HERMES ${HERMES_REAL_BIN})
+    else(H2D_REAL)
+        set(HERMES ${HERMES_CPLX_BIN})
+    endif(H2D_REAL)
+endif(NOT DEFINED HERMES)
+
+#allow all report flags and flush resuls to a log file
+set(FLAGS "-DH2D_REPORT_ALL -DH2D_TEST")
+
+if(H2D_COMPLEX)
+# if the complex version is being used, define 'H2D_COMPLEX'
+if(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
+    set(FLAGS "${FLAGS} -DH2D_COMPLEX")
+endif(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
+endif(H2D_COMPLEX)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${FLAGS}")
+
+if(NOT H2D_COMPLEX)
+	message("${REPORT_FLAGS}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${REPORT_FLAGS}")
+endif(NOT H2D_COMPLEX)
+
+find_package(JUDY REQUIRED)
+include_directories(${JUDY_INCLUDE_DIR})
+include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${hermes2d_SOURCE_DIR}/src)
+include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
+include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+include_directories(${TRILINOS_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} hermes_common ${HERMES}
+        ${PYTHON_LIBRARIES}
+        ${UMFPACK_LIBRARY}
+        ${AMD_LIBRARY} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${TRILINOS_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${HERMES})

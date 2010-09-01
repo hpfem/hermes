@@ -1,0 +1,106 @@
+r1 = 0.1          # Inner radius
+r2 = 1            # Outer radius
+da = pi/4.        # Angular increment 
+eps = 0.95	  # Relative eccentricity in 0..1
+
+ee = eps*(r2-r1)  # Absolute eccentricity, shifts outer center in x-direction
+
+uc0x = cos(da*0)  # Unit Circle
+uc1x = cos(da*1)  # Unit Circle
+uc2x = cos(da*2)  # Unit Circle
+uc3x = cos(da*3)  # Unit Circle
+uc4x = cos(da*4)  # Unit Circle
+uc5x = cos(da*5)  # Unit Circle
+uc6x = cos(da*6)  # Unit Circle
+uc7x = cos(da*7)  # Unit Circle
+uc0y = sin(da*0)  # Unit Circle
+uc1y = sin(da*1)  # Unit Circle
+uc2y = sin(da*2)  # Unit Circle
+uc3y = sin(da*3)  # Unit Circle
+uc4y = sin(da*4)  # Unit Circle
+uc5y = sin(da*5)  # Unit Circle
+uc6y = sin(da*6)  # Unit Circle
+uc7y = sin(da*7)  # Unit Circle
+
+rr0 = ee*uc0x+sqrt(r2*r2-ee*ee*(1-uc0x*uc0x))	  # Outer radius from inner center
+rr1 = ee*uc1x+sqrt(r2*r2-ee*ee*(1-uc1x*uc1x))	  # Outer radius from inner center
+rr2 = ee*uc2x+sqrt(r2*r2-ee*ee*(1-uc2x*uc2x))	  # Outer radius from inner center
+rr3 = ee*uc3x+sqrt(r2*r2-ee*ee*(1-uc3x*uc3x))	  # Outer radius from inner center
+rr4 = ee*uc4x+sqrt(r2*r2-ee*ee*(1-uc4x*uc4x))	  # Outer radius from inner center
+rr5 = ee*uc5x+sqrt(r2*r2-ee*ee*(1-uc5x*uc5x))	  # Outer radius from inner center
+rr6 = ee*uc6x+sqrt(r2*r2-ee*ee*(1-uc6x*uc6x))	  # Outer radius from inner center
+rr7 = ee*uc7x+sqrt(r2*r2-ee*ee*(1-uc7x*uc7x))	  # Outer radius from inner center
+
+vertices =
+{
+  { r1*uc0x, r1*uc0y },
+  { r1*uc1x, r1*uc1y },
+  { r1*uc2x, r1*uc2y },
+  { r1*uc3x, r1*uc3y },
+  { r1*uc4x, r1*uc4y },
+  { r1*uc5x, r1*uc5y },
+  { r1*uc6x, r1*uc6y },
+  { r1*uc7x, r1*uc7y },
+  { rr0*uc0x, rr0*uc0y },
+  { rr1*uc1x, rr1*uc1y },
+  { rr2*uc2x, rr2*uc2y },
+  { rr3*uc3x, rr3*uc3y },
+  { rr4*uc4x, rr4*uc4y },
+  { rr5*uc5x, rr5*uc5y },
+  { rr6*uc6x, rr6*uc6y },
+  { rr7*uc7x, rr7*uc7y }
+}
+
+elements =
+{
+  { 0, 8, 9, 1, 0 },
+  { 1, 9, 10, 2, 0 },
+  { 2, 10, 11, 3, 0 },
+  { 3, 11, 12, 4, 0 },
+  { 4, 12, 13, 5, 0 },
+  { 5, 13, 14, 6, 0 },
+  { 6, 14, 15, 7, 0 },
+  { 7, 15, 8, 0, 0 }
+}
+
+boundaries =
+{
+  { 0, 1, 1 },
+  { 1, 2, 1 },
+  { 2, 3, 1 },
+  { 3, 4, 1 },
+  { 4, 5, 1 },
+  { 5, 6, 1 },
+  { 6, 7, 1 },
+  { 7, 0, 1 },
+  { 8, 9, 2 },
+  { 9, 10, 2 },
+  { 10, 11, 2 },
+  { 11, 12, 2 },
+  { 12, 13, 2 },
+  { 13, 14, 2 },
+  { 14, 15, 2 },
+  { 15, 8, 2 }
+}
+
+curves =
+{
+  { 0, 1, 45 },   
+  { 1, 2, 45 },   
+  { 2, 3, 45 },   
+  { 3, 4, 45 },   
+  { 4, 5, 45 },   
+  { 5, 6, 45 },   
+  { 6, 7, 45 },   
+  { 7, 0, 45},  
+  { 8, 9, 180/pi*acos(( (rr0*uc0x-ee)*(rr1*uc1x-ee)+rr0*uc0y*rr1*uc1y )/(r2*r2)) },    
+  { 9, 10, 180/pi*acos(( (rr1*uc1x-ee)*(rr2*uc2x-ee)+rr1*uc1y*rr2*uc2y )/(r2*r2)) },   
+  { 10, 11, 180/pi*acos(( (rr2*uc2x-ee)*(rr3*uc3x-ee)+rr2*uc2y*rr3*uc3y )/(r2*r2)) },   
+  { 11, 12, 180/pi*acos(( (rr3*uc3x-ee)*(rr4*uc4x-ee)+rr3*uc3y*rr4*uc4y )/(r2*r2)) },   
+  { 12, 13, 180/pi*acos(( (rr4*uc4x-ee)*(rr5*uc5x-ee)+rr4*uc4y*rr5*uc5y )/(r2*r2)) },   
+  { 13, 14, 180/pi*acos(( (rr5*uc5x-ee)*(rr6*uc6x-ee)+rr5*uc5y*rr6*uc6y )/(r2*r2)) },   
+  { 14, 15, 180/pi*acos(( (rr6*uc6x-ee)*(rr7*uc7x-ee)+rr6*uc6y*rr7*uc7y )/(r2*r2)) },   
+  { 15, 8,  180/pi*acos(( (rr7*uc7x-ee)*(rr0*uc0x-ee)+rr7*uc7y*rr0*uc0y )/(r2*r2)) }  
+}
+
+

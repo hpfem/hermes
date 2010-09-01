@@ -1,0 +1,62 @@
+Vertices (count = 18)
+  id = 1, (x = -1.000000, y = -1.000000, z = -1.000000)
+  id = 2, (x = 0.000000, y = -1.000000, z = -1.000000)
+  id = 3, (x = 0.000000, y = 0.000000, z = -1.000000)
+  id = 4, (x = -1.000000, y = 0.000000, z = -1.000000)
+  id = 5, (x = -1.000000, y = -1.000000, z = 1.000000)
+  id = 6, (x = 0.000000, y = -1.000000, z = 1.000000)
+  id = 7, (x = 0.000000, y = 0.000000, z = 1.000000)
+  id = 8, (x = -1.000000, y = 0.000000, z = 1.000000)
+  id = 9, (x = 1.000000, y = -1.000000, z = -1.000000)
+  id = 10, (x = 1.000000, y = 0.000000, z = -1.000000)
+  id = 11, (x = 1.000000, y = 1.000000, z = -1.000000)
+  id = 12, (x = 0.000000, y = 1.000000, z = -1.000000)
+  id = 13, (x = -1.000000, y = 1.000000, z = -1.000000)
+  id = 14, (x = 1.000000, y = -1.000000, z = 1.000000)
+  id = 15, (x = 1.000000, y = 0.000000, z = 1.000000)
+  id = 16, (x = 1.000000, y = 1.000000, z = 1.000000)
+  id = 17, (x = 0.000000, y = 1.000000, z = 1.000000)
+  id = 18, (x = -1.000000, y = 1.000000, z = 1.000000)
+Elements (count = 4)
+  id = 1 (1, 1, 0), vertices(1, 2, 3, 4, 5, 6, 7, 8), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = -1
+  id = 2 (1, 1, 0), vertices(2, 9, 10, 3, 6, 14, 15, 7), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = -1
+  id = 3 (1, 1, 0), vertices(3, 10, 11, 12, 7, 15, 16, 17), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = -1
+  id = 4 (1, 1, 0), vertices(4, 3, 12, 13, 8, 7, 17, 18), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = -1
+Boundaries (count = 16)
+  id = 1, marker = 1
+  id = 2, marker = 1
+  id = 3, marker = 1
+  id = 4, marker = 1
+  id = 5, marker = 1
+  id = 6, marker = 1
+  id = 7, marker = 1
+  id = 8, marker = 1
+  id = 9, marker = 1
+  id = 10, marker = 1
+  id = 11, marker = 1
+  id = 12, marker = 1
+  id = 13, marker = 1
+  id = 14, marker = 1
+  id = 15, marker = 1
+  id = 16, marker = 1
+Facets (count = 20)
+  id = 1, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 0),  right (bdr = 8), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 2, type = INNER (QUAD), [1, 1], left (elem = 1, face = 1),  right (elem = 2, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 3, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 2),  right (bdr = 1), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 4, type = INNER (QUAD), [1, 1], left (elem = 1, face = 3),  right (elem = 4, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 5, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 4),  right (bdr = 13), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 6, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 5),  right (bdr = 9), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 7, type = OUTER (QUAD), [1, 1], left (elem = 2, face = 1),  right (bdr = 3), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 8, type = OUTER (QUAD), [1, 1], left (elem = 2, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 9, type = INNER (QUAD), [1, 1], left (elem = 2, face = 3),  right (elem = 3, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 10, type = OUTER (QUAD), [1, 1], left (elem = 2, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 11, type = OUTER (QUAD), [1, 1], left (elem = 2, face = 5),  right (bdr = 10), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 12, type = INNER (QUAD), [1, 1], left (elem = 3, face = 0),  right (elem = 4, face = 1), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 13, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 1),  right (bdr = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 14, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 3),  right (bdr = 5), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 15, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 4),  right (bdr = 15), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 16, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 5),  right (bdr = 11), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 17, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 0),  right (bdr = 7), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 18, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 3),  right (bdr = 6), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 19, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 4),  right (bdr = 16), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 20, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 5),  right (bdr = 12), ref_mask = 0, sons = [-1, -1, -1, -1], no parent

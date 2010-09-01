@@ -1,0 +1,4 @@
+rm *~ 
+./line-singularity
+python plot_graph.py &
+

@@ -1,0 +1,5 @@
+adapt-exact-sin-L2
+python plot.py &
+python plot_mesh.py &
+python plot_error.py &
+show_graph

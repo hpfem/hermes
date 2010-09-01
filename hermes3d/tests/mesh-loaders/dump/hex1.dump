@@ -1,0 +1,25 @@
+Vertices (count = 8)
+  id = 1, (x = -1.000000, y = -1.000000, z = -1.000000)
+  id = 2, (x = 1.000000, y = -1.000000, z = -1.000000)
+  id = 3, (x = 1.000000, y = 1.000000, z = -1.000000)
+  id = 4, (x = -1.000000, y = 1.000000, z = -1.000000)
+  id = 5, (x = -1.000000, y = -1.000000, z = 1.000000)
+  id = 6, (x = 1.000000, y = -1.000000, z = 1.000000)
+  id = 7, (x = 1.000000, y = 1.000000, z = 1.000000)
+  id = 8, (x = -1.000000, y = 1.000000, z = 1.000000)
+Elements (count = 1)
+  id = 1 (1, 1, 0), vertices(1, 2, 3, 4, 5, 6, 7, 8), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = -1
+Boundaries (count = 6)
+  id = 1, marker = 5
+  id = 2, marker = 3
+  id = 3, marker = 2
+  id = 4, marker = 4
+  id = 5, marker = 1
+  id = 6, marker = 6
+Facets (count = 6)
+  id = 1, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 0),  right (bdr = 5), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 2, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 1),  right (bdr = 3), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 3, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 4, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 3),  right (bdr = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 5, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 4),  right (bdr = 1), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 6, type = OUTER (QUAD), [1, 1], left (elem = 1, face = 5),  right (bdr = 6), ref_mask = 0, sons = [-1, -1, -1, -1], no parent

@@ -1,0 +1,3 @@
+rm *~
+./heat-and-moisture-adapt
+

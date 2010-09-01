@@ -1,0 +1,42 @@
+if [ "$SAGE_LOCAL" = "" ]; then
+   echo "SAGE_LOCAL undefined ... exiting";
+   echo "Maybe run 'sage -sh'?"
+   exit 1
+fi
+
+PACKAGE_NAME=hermes1d
+
+PY_VER=`python -c "import sys;print '%d.%d' % sys.version_info[:2]"`
+echo "Detected Python version: $PY_VER"
+
+# Set the hermes1d build options:
+# If you don't want to build examples/tests, uncomment this line:
+#python -c 'print "set(WITH_EXAMPLES no)\nset(WITH_TESTS no)"' > CMake.vars
+
+
+if [ `uname` = "Darwin" ]; then
+    SO=dylib
+else
+    SO=so
+fi
+
+cmake -DCMAKE_INSTALL_PREFIX="$SAGE_LOCAL" \
+    -DPYTHON_INCLUDE_PATH="$SAGE_LOCAL/include/python$PY_VER" \
+    -DPYTHON_LIBRARY="$SAGE_LOCAL/lib/libpython2.6.$SO" \
+    .
+if [ $? -ne 0 ]; then
+   echo "Error configuring $PACKAGE_NAME."
+   exit 1
+fi
+
+make
+if [ $? -ne 0 ]; then
+   echo "Error building $PACKAGE_NAME."
+   exit 1
+fi
+
+make install
+if [ $? -ne 0 ]; then
+   echo "Error installing $PACKAGE_NAME."
+   exit 1
+fi

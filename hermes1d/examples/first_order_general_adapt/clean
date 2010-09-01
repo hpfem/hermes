@@ -1,0 +1,4 @@
+rm refsol* proj*
+rm solution* error* conv*
+rm *.gp *.eps
+

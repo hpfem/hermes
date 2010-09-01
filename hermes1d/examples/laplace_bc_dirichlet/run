@@ -1,0 +1,4 @@
+clean
+laplace_bc_dirichlet
+python plot.py &
+

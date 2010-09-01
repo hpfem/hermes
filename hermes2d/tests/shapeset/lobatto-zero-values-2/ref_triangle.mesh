@@ -1,0 +1,24 @@
+
+vertices =
+{
+  { -1, -1 },    # ref. triangle vertex 0
+  { 1, -1 },     # ref. triangle vertex 1
+  { -1, 1 }      # ref. triangle vertex 2
+}
+
+elements =
+{
+  { 0, 1, 2, 0 }  # ref. triangle
+
+}
+
+boundaries =
+{
+  { 0, 1, 1 },
+  { 1, 2, 2 },
+  { 2, 0, 3 }
+}
+
+curves =
+{
+}

@@ -1,0 +1,33 @@
+
+[executer]
+RunInTerminal=true
+
+[Project State]
+clean before build=false
+
+[filenumbers]
+0=52
+1=639
+2=122
+
+[filemarkers]
+0=
+1=
+2=
+
+[File View]
+filter.file.unmatch=*.so *.o *.a *.la
+filter.file.ignore.hidden=0
+filter.dir.ignore.hidden=0
+
+[filelist]
+0=/home/jakub/hermes2d/test/palette/palette.cpp
+1=/home/jakub/sources/grid2/view.cpp
+2=/home/jakub/sources/grid2/view.h
+
+[Project Tree]
+0=0
+1=0:0
+
+[File Tree]
+0=0

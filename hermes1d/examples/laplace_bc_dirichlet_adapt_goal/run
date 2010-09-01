@@ -1,0 +1,6 @@
+clean
+laplace_bc_dirichlet_adapt_goal
+python plot.py &
+python plot_mesh.py &
+python plot_error.py &
+show_graph &

@@ -1,0 +1,101 @@
+
+a = 0.25   # horizontal size of an eleemnt
+b = 0.1    # vertical size of an element
+w = 0.001  # width of the cracks
+
+vertices =
+{
+  { 0*a, 0 },         # vertex 0
+  { 1*a, 0 },         # vertex 1
+  { 2*a, 0 },         # vertex 2
+  { 3*a, 0 },         # vertex 3
+  { 4*a, 0 },         # vertex 4
+  { 5*a, 0 },         # vertex 5
+  { 6*a, 0 },         # vertex 6
+  { 0*a, b },         # vertex 7
+  { 1*a, b },         # vertex 8
+  { 2*a, b },         # vertex 9
+  { 3*a, b },         # vertex 10
+  { 4*a, b - w/2},    # vertex 11
+  { 4*a, b + w/2},    # vertex 12
+  { 5*a, b },         # vertex 13
+  { 6*a, b },         # vertex 14
+  { 0*a, 2*b },       # vertex 15
+  { 1*a, 2*b },       # vertex 16
+  { 2*a, 2*b - w/2},  # vertex 17
+  { 2*a, 2*b + w/2},  # vertex 18
+  { 3*a, 2*b },       # vertex 19
+  { 4*a, 2*b },       # vertex 20
+  { 5*a, 2*b },       # vertex 21
+  { 6*a, 2*b },       # vertex 22
+  { 0*a, 3*b },       # vertex 23
+  { 1*a, 3*b },       # vertex 24
+  { 2*a, 3*b },       # vertex 25
+  { 3*a, 3*b },       # vertex 26
+  { 4*a, 3*b },       # vertex 27
+  { 5*a, 3*b },       # vertex 28
+  { 6*a, 3*b }        # vertex 29
+}
+
+elements =
+{
+  { 0, 1, 8, 7, 0 },      # quad 0
+  { 1, 2, 9, 8, 0 },      # quad 1
+  { 2, 3, 10, 9, 0 },     # quad 2
+  { 3, 4, 11, 10, 0 },    # quad 3
+  { 4, 5, 13, 11, 0 },    # quad 4
+  { 5, 6, 14, 13, 0 },    # quad 5
+
+  { 7, 8, 16, 15, 0 },    # quad 6
+  { 8, 9, 17, 16, 0 },    # quad 7
+  { 9, 10, 19, 17, 0 },   # quad 8
+  { 10, 12, 20, 19, 0 },  # quad 9
+  { 12, 13, 21, 20, 0 },  # quad 10
+  { 13, 14, 22, 21, 0 },  # quad 11
+
+  { 15, 16, 24, 23, 0 },  # quad 12
+  { 16, 18, 25, 24, 0 },  # quad 13
+  { 18, 19, 26, 25, 0 },  # quad 14
+  { 19, 20, 27, 26, 0 },  # quad 15
+  { 20, 21, 28, 27, 0 },  # quad 16
+  { 21, 22, 29, 28, 0 }   # quad 17
+}
+
+boundaries =
+{
+  { 0, 1, 3 },   # bottom edges
+  { 1, 2, 3 },
+  { 2, 3, 3 },
+  { 3, 4, 3 },
+  { 4, 5, 3 },
+  { 5, 6, 3 },
+
+  { 6, 14, 3 },  # right edges
+  { 14, 22, 3 },
+  { 22, 29, 3 },
+
+  { 29, 28, 2 }, # top edges
+  { 28, 27, 2 },
+  { 27, 26, 2 },
+  { 26, 25, 2 },
+  { 25, 24, 2 },
+  { 24, 23, 2 },
+
+
+  { 23, 15, 1 }, # left edges
+  { 15, 7, 1 },
+  { 7, 0, 1 },
+
+  { 16, 17, 3 }, # left crack
+  { 17, 19, 3 },
+  { 19, 18, 3 },
+  { 18, 16, 3 },
+
+  { 10, 11, 3 }, # right crack
+  { 11, 13, 3 },
+  { 13, 12, 3 },
+  { 12, 10, 3 }
+
+
+}
+

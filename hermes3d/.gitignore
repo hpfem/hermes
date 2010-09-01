@@ -1,0 +1,9 @@
+.project
+.cproject
+build
+.settings/*
+CMake.vars
+config.h
+h3dconfig.h
+doc/Doxyfile
+#doc/conf.py

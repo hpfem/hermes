@@ -1,0 +1,4 @@
+gnuplot conv_dof.gp
+epstopdf conv_dof.eps
+okular conv_dof.pdf &
+

@@ -1,0 +1,4 @@
+rm *~ 
+./richards-seepage-adapt
+python plot_graph.py &
+

@@ -1,0 +1,4 @@
+clean
+system_sin
+python plot.py &
+

@@ -1,0 +1,4 @@
+clean
+system_pendulum
+python plot.py &
+

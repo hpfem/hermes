@@ -1,0 +1,10 @@
+
+$(NAME): main.o $(HERMES)
+	$(CC) main.o -o $@ $(HERMES) $(LIBS) -pthread
+
+main.o: main.cpp ../../Make.config ../../include/*.h
+	$(CC) -c $(FLAGS) $< -o $@ -I../../include
+
+clean:
+	rm -f $(NAME) *.o core core.[0-9]*
+

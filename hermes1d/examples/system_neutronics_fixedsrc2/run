@@ -1,0 +1,3 @@
+./system_neutronics_fixedsrc2
+python plot.py &
+python plot_mesh.py &

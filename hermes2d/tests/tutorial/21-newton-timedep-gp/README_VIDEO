@@ -1,0 +1,9 @@
+    // uncomment one of the following lines to generate a series of video
+    // frames
+    //view.save_numbered_screenshot("sol%03d.bmp", n, true);
+    //pview.save_numbered_screenshot("pressure%03d.bmp", i, true);
+    // the frames can then be converted to a video file with the
+    // command
+    // mencoder "mf://velocity*.bmp" -mf fps=20 -o velocity.avi
+    // -ovc lavc -lavcopts vcodec=mpeg4
+

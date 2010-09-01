@@ -1,0 +1,12 @@
+./neutronics-2-group-adapt
+
+if [ ! -d "res/$1" ]; then
+	mkdir "res/$1"
+fi
+
+gnuplot *.gp
+mv *.dat "res/$1"
+mv *.gp "res/$1"
+mv *.eps "res/$1"
+mv *.png "res/$1"
+mv *.bmp "res/$1"

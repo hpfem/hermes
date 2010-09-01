@@ -1,0 +1,242 @@
+Vertices (count = 70)
+  id = 1, (x = -1.000000, y = -1.000000, z = -1.000000)
+  id = 2, (x = 0.000000, y = -1.000000, z = -1.000000)
+  id = 3, (x = 0.000000, y = 0.000000, z = -1.000000)
+  id = 4, (x = -1.000000, y = 0.000000, z = -1.000000)
+  id = 5, (x = -1.000000, y = -1.000000, z = 1.000000)
+  id = 6, (x = 0.000000, y = -1.000000, z = 1.000000)
+  id = 7, (x = 0.000000, y = 0.000000, z = 1.000000)
+  id = 8, (x = -1.000000, y = 0.000000, z = 1.000000)
+  id = 9, (x = 1.000000, y = -1.000000, z = -1.000000)
+  id = 10, (x = 1.000000, y = 0.000000, z = -1.000000)
+  id = 11, (x = 1.000000, y = 1.000000, z = -1.000000)
+  id = 12, (x = 0.000000, y = 1.000000, z = -1.000000)
+  id = 13, (x = -1.000000, y = 1.000000, z = -1.000000)
+  id = 14, (x = 1.000000, y = -1.000000, z = 1.000000)
+  id = 15, (x = 1.000000, y = 0.000000, z = 1.000000)
+  id = 16, (x = 1.000000, y = 1.000000, z = 1.000000)
+  id = 17, (x = 0.000000, y = 1.000000, z = 1.000000)
+  id = 18, (x = -1.000000, y = 1.000000, z = 1.000000)
+  id = 19, (x = 0.500000, y = -1.000000, z = -1.000000)
+  id = 20, (x = 1.000000, y = -0.500000, z = -1.000000)
+  id = 21, (x = 0.500000, y = 0.000000, z = -1.000000)
+  id = 22, (x = 0.000000, y = -0.500000, z = -1.000000)
+  id = 23, (x = 0.000000, y = -1.000000, z = 0.000000)
+  id = 24, (x = 1.000000, y = -1.000000, z = 0.000000)
+  id = 25, (x = 1.000000, y = 0.000000, z = 0.000000)
+  id = 26, (x = 0.000000, y = 0.000000, z = 0.000000)
+  id = 27, (x = 0.500000, y = -1.000000, z = 1.000000)
+  id = 28, (x = 1.000000, y = -0.500000, z = 1.000000)
+  id = 29, (x = 0.500000, y = 0.000000, z = 1.000000)
+  id = 30, (x = 0.000000, y = -0.500000, z = 1.000000)
+  id = 31, (x = 0.000000, y = -0.500000, z = 0.000000)
+  id = 32, (x = 1.000000, y = -0.500000, z = 0.000000)
+  id = 33, (x = 0.500000, y = -1.000000, z = 0.000000)
+  id = 34, (x = 0.500000, y = 0.000000, z = 0.000000)
+  id = 35, (x = 0.500000, y = -0.500000, z = -1.000000)
+  id = 36, (x = 0.500000, y = -0.500000, z = 1.000000)
+  id = 37, (x = 0.500000, y = -0.500000, z = 0.000000)
+  id = 38, (x = 0.250000, y = -1.000000, z = -1.000000)
+  id = 39, (x = 0.500000, y = -0.750000, z = -1.000000)
+  id = 40, (x = 0.250000, y = -0.500000, z = -1.000000)
+  id = 41, (x = 0.000000, y = -0.750000, z = -1.000000)
+  id = 42, (x = 0.000000, y = -1.000000, z = -0.500000)
+  id = 43, (x = 0.500000, y = -1.000000, z = -0.500000)
+  id = 44, (x = 0.500000, y = -0.500000, z = -0.500000)
+  id = 45, (x = 0.000000, y = -0.500000, z = -0.500000)
+  id = 46, (x = 0.250000, y = -1.000000, z = 0.000000)
+  id = 47, (x = 0.500000, y = -0.750000, z = 0.000000)
+  id = 48, (x = 0.250000, y = -0.500000, z = 0.000000)
+  id = 49, (x = 0.000000, y = -0.750000, z = 0.000000)
+  id = 50, (x = 0.000000, y = -0.750000, z = -0.500000)
+  id = 51, (x = 0.500000, y = -0.750000, z = -0.500000)
+  id = 52, (x = 0.250000, y = -1.000000, z = -0.500000)
+  id = 53, (x = 0.250000, y = -0.500000, z = -0.500000)
+  id = 54, (x = 0.250000, y = -0.750000, z = -1.000000)
+  id = 55, (x = 0.250000, y = -0.750000, z = 0.000000)
+  id = 56, (x = 0.250000, y = -0.750000, z = -0.500000)
+  id = 57, (x = -0.500000, y = -1.000000, z = -1.000000)
+  id = 58, (x = -0.500000, y = 0.000000, z = -1.000000)
+  id = 59, (x = -1.000000, y = -0.500000, z = -1.000000)
+  id = 60, (x = -1.000000, y = -1.000000, z = 0.000000)
+  id = 61, (x = -1.000000, y = 0.000000, z = 0.000000)
+  id = 62, (x = -0.500000, y = -1.000000, z = 1.000000)
+  id = 63, (x = -0.500000, y = 0.000000, z = 1.000000)
+  id = 64, (x = -1.000000, y = -0.500000, z = 1.000000)
+  id = 65, (x = -1.000000, y = -0.500000, z = 0.000000)
+  id = 66, (x = -0.500000, y = -1.000000, z = 0.000000)
+  id = 67, (x = -0.500000, y = 0.000000, z = 0.000000)
+  id = 68, (x = -0.500000, y = -0.500000, z = -1.000000)
+  id = 69, (x = -0.500000, y = -0.500000, z = 1.000000)
+  id = 70, (x = -0.500000, y = -0.500000, z = 0.000000)
+Elements (count = 28)
+  id = 1 (0, 1, 7), vertices(1, 2, 3, 4, 5, 6, 7, 8), sons(21, 22, 23, 24, 25, 26, 27, 28), marker = 1
+  id = 2 (0, 1, 7), vertices(2, 9, 10, 3, 6, 14, 15, 7), sons(5, 6, 7, 8, 9, 10, 11, 12), marker = 2
+  id = 3 (1, 1, 0), vertices(3, 10, 11, 12, 7, 15, 16, 17), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 3
+  id = 4 (1, 1, 0), vertices(4, 3, 12, 13, 8, 7, 17, 18), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 4
+  id = 5 (0, 1, 7), vertices(2, 19, 35, 22, 23, 33, 37, 31), sons(13, 14, 15, 16, 17, 18, 19, 20), marker = 2
+  id = 6 (1, 1, 0), vertices(19, 9, 20, 35, 33, 24, 32, 37), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 7 (1, 1, 0), vertices(35, 20, 10, 21, 37, 32, 25, 34), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 8 (1, 1, 0), vertices(22, 35, 21, 3, 31, 37, 34, 26), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 9 (1, 1, 0), vertices(23, 33, 37, 31, 6, 27, 36, 30), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 10 (1, 1, 0), vertices(33, 24, 32, 37, 27, 14, 28, 36), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 11 (1, 1, 0), vertices(37, 32, 25, 34, 36, 28, 15, 29), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 12 (1, 1, 0), vertices(31, 37, 34, 26, 30, 36, 29, 7), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 13 (1, 1, 0), vertices(2, 38, 54, 41, 42, 52, 56, 50), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 14 (1, 1, 0), vertices(38, 19, 39, 54, 52, 43, 51, 56), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 15 (1, 1, 0), vertices(54, 39, 35, 40, 56, 51, 44, 53), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 16 (1, 1, 0), vertices(41, 54, 40, 22, 50, 56, 53, 45), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 17 (1, 1, 0), vertices(42, 52, 56, 50, 23, 46, 55, 49), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 18 (1, 1, 0), vertices(52, 43, 51, 56, 46, 33, 47, 55), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 19 (1, 1, 0), vertices(56, 51, 44, 53, 55, 47, 37, 48), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 20 (1, 1, 0), vertices(50, 56, 53, 45, 49, 55, 48, 31), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 2
+  id = 21 (1, 1, 0), vertices(1, 57, 68, 59, 60, 66, 70, 65), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 22 (1, 1, 0), vertices(57, 2, 22, 68, 66, 23, 31, 70), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 23 (1, 1, 0), vertices(68, 22, 3, 58, 70, 31, 26, 67), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 24 (1, 1, 0), vertices(59, 68, 58, 4, 65, 70, 67, 61), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 25 (1, 1, 0), vertices(60, 66, 70, 65, 5, 62, 69, 64), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 26 (1, 1, 0), vertices(66, 23, 31, 70, 62, 6, 30, 69), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 27 (1, 1, 0), vertices(70, 31, 26, 67, 69, 30, 7, 63), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+  id = 28 (1, 1, 0), vertices(65, 70, 67, 61, 64, 69, 63, 8), sons(-1, -1, -1, -1, -1, -1, -1, -1), marker = 1
+Boundaries (count = 16)
+  id = 1, marker = 1
+  id = 2, marker = 1
+  id = 3, marker = 1
+  id = 4, marker = 1
+  id = 5, marker = 1
+  id = 6, marker = 1
+  id = 7, marker = 1
+  id = 8, marker = 1
+  id = 9, marker = 1
+  id = 10, marker = 1
+  id = 11, marker = 1
+  id = 12, marker = 1
+  id = 13, marker = 1
+  id = 14, marker = 1
+  id = 15, marker = 1
+  id = 16, marker = 1
+Facets (count = 124)
+  id = 1, type = OUTER (QUAD), [0, 0], left (elem = 1, face = 0),  right (bdr = 8), ref_mask = 3, sons = [93, 94, 95, 96], no parent
+  id = 2, type = INNER (QUAD), [0, 0], left (elem = 1, face = 1),  right (elem = 2, face = 0), ref_mask = 3, sons = [21, 22, 23, 24], no parent
+  id = 3, type = OUTER (QUAD), [0, 0], left (elem = 1, face = 2),  right (bdr = 1), ref_mask = 3, sons = [97, 98, 99, 100], no parent
+  id = 4, type = INNER (QUAD), [0, 1], left (elem = 1, face = 3),  right (elem = 4, face = 2), ref_mask = 3, sons = [101, 102, 103, 104], no parent
+  id = 5, type = OUTER (QUAD), [0, 0], left (elem = 1, face = 4),  right (bdr = 13), ref_mask = 3, sons = [105, 106, 107, 108], no parent
+  id = 6, type = OUTER (QUAD), [0, 0], left (elem = 1, face = 5),  right (bdr = 9), ref_mask = 3, sons = [109, 110, 111, 112], no parent
+  id = 7, type = OUTER (QUAD), [0, 0], left (elem = 2, face = 1),  right (bdr = 3), ref_mask = 3, sons = [25, 26, 27, 28], no parent
+  id = 8, type = OUTER (QUAD), [0, 0], left (elem = 2, face = 2),  right (bdr = 2), ref_mask = 3, sons = [29, 30, 31, 32], no parent
+  id = 9, type = INNER (QUAD), [0, 1], left (elem = 2, face = 3),  right (elem = 3, face = 2), ref_mask = 3, sons = [33, 34, 35, 36], no parent
+  id = 10, type = OUTER (QUAD), [0, 0], left (elem = 2, face = 4),  right (bdr = 14), ref_mask = 3, sons = [37, 38, 39, 40], no parent
+  id = 11, type = OUTER (QUAD), [0, 0], left (elem = 2, face = 5),  right (bdr = 10), ref_mask = 3, sons = [41, 42, 43, 44], no parent
+  id = 12, type = INNER (QUAD), [1, 1], left (elem = 3, face = 0),  right (elem = 4, face = 1), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 13, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 1),  right (bdr = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 14, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 3),  right (bdr = 5), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 15, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 4),  right (bdr = 15), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 16, type = OUTER (QUAD), [1, 1], left (elem = 3, face = 5),  right (bdr = 11), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 17, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 0),  right (bdr = 7), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 18, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 3),  right (bdr = 6), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 19, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 4),  right (bdr = 16), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 20, type = OUTER (QUAD), [1, 1], left (elem = 4, face = 5),  right (bdr = 12), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 21, type = INNER (QUAD), [1, 0], left (elem = 22, face = 1),  right (elem = 5, face = 0), ref_mask = 3, sons = [57, 58, 59, 60], parent = 2
+  id = 22, type = INNER (QUAD), [1, 1], left (elem = 23, face = 1),  right (elem = 8, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 2
+  id = 23, type = INNER (QUAD), [1, 1], left (elem = 27, face = 1),  right (elem = 12, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 2
+  id = 24, type = INNER (QUAD), [1, 1], left (elem = 26, face = 1),  right (elem = 9, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 2
+  id = 25, type = OUTER (QUAD), [1, 1], left (elem = 6, face = 1),  right (bdr = 3), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 7
+  id = 26, type = OUTER (QUAD), [1, 1], left (elem = 7, face = 1),  right (bdr = 3), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 7
+  id = 27, type = OUTER (QUAD), [1, 1], left (elem = 11, face = 1),  right (bdr = 3), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 7
+  id = 28, type = OUTER (QUAD), [1, 1], left (elem = 10, face = 1),  right (bdr = 3), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 7
+  id = 29, type = OUTER (QUAD), [0, 0], left (elem = 5, face = 2),  right (bdr = 2), ref_mask = 3, sons = [65, 66, 67, 68], parent = 8
+  id = 30, type = OUTER (QUAD), [1, 1], left (elem = 6, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 8
+  id = 31, type = OUTER (QUAD), [1, 1], left (elem = 10, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 8
+  id = 32, type = OUTER (QUAD), [1, 1], left (elem = 9, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 8
+  id = 33, type = INNER (QUAD), [1, 0], left (elem = 8, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 9
+  id = 34, type = INNER (QUAD), [1, 0], left (elem = 7, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 9
+  id = 35, type = INNER (QUAD), [1, 0], left (elem = 11, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 9
+  id = 36, type = INNER (QUAD), [1, 0], left (elem = 12, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 9
+  id = 37, type = OUTER (QUAD), [0, 0], left (elem = 5, face = 4),  right (bdr = 14), ref_mask = 3, sons = [73, 74, 75, 76], parent = 10
+  id = 38, type = OUTER (QUAD), [1, 1], left (elem = 6, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 10
+  id = 39, type = OUTER (QUAD), [1, 1], left (elem = 7, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 10
+  id = 40, type = OUTER (QUAD), [1, 1], left (elem = 8, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 10
+  id = 41, type = OUTER (QUAD), [1, 1], left (elem = 9, face = 5),  right (bdr = 10), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 11
+  id = 42, type = OUTER (QUAD), [1, 1], left (elem = 10, face = 5),  right (bdr = 10), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 11
+  id = 43, type = OUTER (QUAD), [1, 1], left (elem = 11, face = 5),  right (bdr = 10), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 11
+  id = 44, type = OUTER (QUAD), [1, 1], left (elem = 12, face = 5),  right (bdr = 10), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 11
+  id = 45, type = INNER (QUAD), [0, 1], left (elem = 5, face = 1),  right (elem = 6, face = 0), ref_mask = 3, sons = [61, 62, 63, 64], no parent
+  id = 46, type = INNER (QUAD), [1, 1], left (elem = 8, face = 1),  right (elem = 7, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 47, type = INNER (QUAD), [1, 1], left (elem = 9, face = 1),  right (elem = 10, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 48, type = INNER (QUAD), [1, 1], left (elem = 12, face = 1),  right (elem = 11, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 49, type = INNER (QUAD), [0, 1], left (elem = 5, face = 3),  right (elem = 8, face = 2), ref_mask = 3, sons = [69, 70, 71, 72], no parent
+  id = 50, type = INNER (QUAD), [1, 1], left (elem = 6, face = 3),  right (elem = 7, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 51, type = INNER (QUAD), [1, 1], left (elem = 9, face = 3),  right (elem = 12, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 52, type = INNER (QUAD), [1, 1], left (elem = 10, face = 3),  right (elem = 11, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 53, type = INNER (QUAD), [0, 1], left (elem = 5, face = 5),  right (elem = 9, face = 4), ref_mask = 3, sons = [77, 78, 79, 80], no parent
+  id = 54, type = INNER (QUAD), [1, 1], left (elem = 6, face = 5),  right (elem = 10, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 55, type = INNER (QUAD), [1, 1], left (elem = 7, face = 5),  right (elem = 11, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 56, type = INNER (QUAD), [1, 1], left (elem = 8, face = 5),  right (elem = 12, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 57, type = INNER (QUAD), [0, 1], left (elem = -1, face = -1),  right (elem = 13, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 21
+  id = 58, type = INNER (QUAD), [0, 1], left (elem = -1, face = -1),  right (elem = 16, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 21
+  id = 59, type = INNER (QUAD), [0, 1], left (elem = -1, face = -1),  right (elem = 20, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 21
+  id = 60, type = INNER (QUAD), [0, 1], left (elem = -1, face = -1),  right (elem = 17, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 21
+  id = 61, type = INNER (QUAD), [1, 0], left (elem = 14, face = 1),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 45
+  id = 62, type = INNER (QUAD), [1, 0], left (elem = 15, face = 1),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 45
+  id = 63, type = INNER (QUAD), [1, 0], left (elem = 19, face = 1),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 45
+  id = 64, type = INNER (QUAD), [1, 0], left (elem = 18, face = 1),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 45
+  id = 65, type = OUTER (QUAD), [1, 1], left (elem = 13, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 29
+  id = 66, type = OUTER (QUAD), [1, 1], left (elem = 14, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 29
+  id = 67, type = OUTER (QUAD), [1, 1], left (elem = 18, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 29
+  id = 68, type = OUTER (QUAD), [1, 1], left (elem = 17, face = 2),  right (bdr = 2), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 29
+  id = 69, type = INNER (QUAD), [1, 0], left (elem = 16, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 49
+  id = 70, type = INNER (QUAD), [1, 0], left (elem = 15, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 49
+  id = 71, type = INNER (QUAD), [1, 0], left (elem = 19, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 49
+  id = 72, type = INNER (QUAD), [1, 0], left (elem = 20, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 49
+  id = 73, type = OUTER (QUAD), [1, 1], left (elem = 13, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 37
+  id = 74, type = OUTER (QUAD), [1, 1], left (elem = 14, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 37
+  id = 75, type = OUTER (QUAD), [1, 1], left (elem = 15, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 37
+  id = 76, type = OUTER (QUAD), [1, 1], left (elem = 16, face = 4),  right (bdr = 14), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 37
+  id = 77, type = INNER (QUAD), [1, 0], left (elem = 17, face = 5),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 53
+  id = 78, type = INNER (QUAD), [1, 0], left (elem = 18, face = 5),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 53
+  id = 79, type = INNER (QUAD), [1, 0], left (elem = 19, face = 5),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 53
+  id = 80, type = INNER (QUAD), [1, 0], left (elem = 20, face = 5),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 53
+  id = 81, type = INNER (QUAD), [1, 1], left (elem = 13, face = 1),  right (elem = 14, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 82, type = INNER (QUAD), [1, 1], left (elem = 16, face = 1),  right (elem = 15, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 83, type = INNER (QUAD), [1, 1], left (elem = 17, face = 1),  right (elem = 18, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 84, type = INNER (QUAD), [1, 1], left (elem = 20, face = 1),  right (elem = 19, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 85, type = INNER (QUAD), [1, 1], left (elem = 13, face = 3),  right (elem = 16, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 86, type = INNER (QUAD), [1, 1], left (elem = 14, face = 3),  right (elem = 15, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 87, type = INNER (QUAD), [1, 1], left (elem = 17, face = 3),  right (elem = 20, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 88, type = INNER (QUAD), [1, 1], left (elem = 18, face = 3),  right (elem = 19, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 89, type = INNER (QUAD), [1, 1], left (elem = 13, face = 5),  right (elem = 17, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 90, type = INNER (QUAD), [1, 1], left (elem = 14, face = 5),  right (elem = 18, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 91, type = INNER (QUAD), [1, 1], left (elem = 15, face = 5),  right (elem = 19, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 92, type = INNER (QUAD), [1, 1], left (elem = 16, face = 5),  right (elem = 20, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 93, type = OUTER (QUAD), [1, 1], left (elem = 21, face = 0),  right (bdr = 8), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 1
+  id = 94, type = OUTER (QUAD), [1, 1], left (elem = 24, face = 0),  right (bdr = 8), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 1
+  id = 95, type = OUTER (QUAD), [1, 1], left (elem = 28, face = 0),  right (bdr = 8), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 1
+  id = 96, type = OUTER (QUAD), [1, 1], left (elem = 25, face = 0),  right (bdr = 8), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 1
+  id = 97, type = OUTER (QUAD), [1, 1], left (elem = 21, face = 2),  right (bdr = 1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 3
+  id = 98, type = OUTER (QUAD), [1, 1], left (elem = 22, face = 2),  right (bdr = 1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 3
+  id = 99, type = OUTER (QUAD), [1, 1], left (elem = 26, face = 2),  right (bdr = 1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 3
+  id = 100, type = OUTER (QUAD), [1, 1], left (elem = 25, face = 2),  right (bdr = 1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 3
+  id = 101, type = INNER (QUAD), [1, 0], left (elem = 24, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 4
+  id = 102, type = INNER (QUAD), [1, 0], left (elem = 23, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 4
+  id = 103, type = INNER (QUAD), [1, 0], left (elem = 27, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 4
+  id = 104, type = INNER (QUAD), [1, 0], left (elem = 28, face = 3),  right (elem = -1, face = -1), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 4
+  id = 105, type = OUTER (QUAD), [1, 1], left (elem = 21, face = 4),  right (bdr = 13), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 5
+  id = 106, type = OUTER (QUAD), [1, 1], left (elem = 22, face = 4),  right (bdr = 13), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 5
+  id = 107, type = OUTER (QUAD), [1, 1], left (elem = 23, face = 4),  right (bdr = 13), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 5
+  id = 108, type = OUTER (QUAD), [1, 1], left (elem = 24, face = 4),  right (bdr = 13), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 5
+  id = 109, type = OUTER (QUAD), [1, 1], left (elem = 25, face = 5),  right (bdr = 9), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 6
+  id = 110, type = OUTER (QUAD), [1, 1], left (elem = 26, face = 5),  right (bdr = 9), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 6
+  id = 111, type = OUTER (QUAD), [1, 1], left (elem = 27, face = 5),  right (bdr = 9), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 6
+  id = 112, type = OUTER (QUAD), [1, 1], left (elem = 28, face = 5),  right (bdr = 9), ref_mask = 0, sons = [-1, -1, -1, -1], parent = 6
+  id = 113, type = INNER (QUAD), [1, 1], left (elem = 21, face = 1),  right (elem = 22, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 114, type = INNER (QUAD), [1, 1], left (elem = 24, face = 1),  right (elem = 23, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 115, type = INNER (QUAD), [1, 1], left (elem = 25, face = 1),  right (elem = 26, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 116, type = INNER (QUAD), [1, 1], left (elem = 28, face = 1),  right (elem = 27, face = 0), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 117, type = INNER (QUAD), [1, 1], left (elem = 21, face = 3),  right (elem = 24, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 118, type = INNER (QUAD), [1, 1], left (elem = 22, face = 3),  right (elem = 23, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 119, type = INNER (QUAD), [1, 1], left (elem = 25, face = 3),  right (elem = 28, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 120, type = INNER (QUAD), [1, 1], left (elem = 26, face = 3),  right (elem = 27, face = 2), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 121, type = INNER (QUAD), [1, 1], left (elem = 21, face = 5),  right (elem = 25, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 122, type = INNER (QUAD), [1, 1], left (elem = 22, face = 5),  right (elem = 26, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 123, type = INNER (QUAD), [1, 1], left (elem = 23, face = 5),  right (elem = 27, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent
+  id = 124, type = INNER (QUAD), [1, 1], left (elem = 24, face = 5),  right (elem = 28, face = 4), ref_mask = 0, sons = [-1, -1, -1, -1], no parent

@@ -1,0 +1,21 @@
+
+mesh   := { assig }
+assig  := ident "=" item ";"
+item   := expr | list
+list   := "(" item {"," item} ")"
+
+expr   := term | term "+" expr | term "-" expr
+term   := power | power "*" term | power "/" term
+power  := factor | factor "^" expon
+expon  := number | "(" expr ")"
+factor := number | ident | funct | "(" expr ")"
+funct  := ident "(" args ")"
+args   := expr | expr "," args
+
+
+
+ident
+number
+=
+;
++ - * / ( ) ^ ,

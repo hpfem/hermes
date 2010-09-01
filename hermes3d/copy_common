@@ -1,0 +1,18 @@
+#! /bin/sh
+
+# Copies the hermes_common into the current tree.
+
+# Set the path to your hermes_common git directory:
+
+HERMES_COMMON=../hermes_common
+
+# How it works: the old hermes_common directory gets deleted, and the new
+# hermes_common gets copied instead of it. This means that all local
+# modifications will be lost (that means that one needs to modify the
+# hermes_common itself with all fixes). The cmake automatically picks it up and
+# builds it correctly.
+
+cur_dir=`pwd`
+rm -rf hermes_common
+cd $HERMES_COMMON
+git archive --format=tar --prefix=hermes_common/ master | (cd $cur_dir && tar xf -)

@@ -1,0 +1,22 @@
+Corrected:
+1.	STOKES forms were wrong.
+2.	Newton solver did not reflect update of bc values, thus repeating every second time step
+	  the previous solution. I tried to resolve that by projection, PLEASE CHECK it, I did that
+	  without much understanding. 
+
+Issues: 
+1.	The pressure level is not fixed (eg. by prescribing its mean value over domain)
+	  (this can possibly lead to other problems, since the pressure is not unique and the matrix is singular)
+2.	I think that pressure integral is not correct (e.g. shift by constant should not change the integral)
+3.	(tests: r1=0.6,eps=0.3,REFs=(2,2-iso)):
+	STOKES, PRESSURE H1, NEWTON=true : 
+		diverges completely after while...
+		... this can be due to missing pressure level fix!
+		... also it is WRONG that the diverged solution is claimed to be converged.
+	-''-, NEWTON=false :
+		converges well, but pressure is shifted.
+	STOKES, PRESSURE L2, NEWTON=true/false :
+		pressure oscillations (element-based), same order as pressure profile!
+		(the pressure mean value does not shift from zero, but that is only a luck)
+		NEWTON true/false give similar results (except for the pressure integral)
+		

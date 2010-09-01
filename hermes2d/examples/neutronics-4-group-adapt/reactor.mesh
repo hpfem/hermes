@@ -1,0 +1,81 @@
+ax = 1.48
+bx = 2.42
+cx = 3.4
+ay = 1.585
+by = ay + 7.93
+cy = by + 1.185
+
+#materials
+reflector = 1
+core = 2
+
+#bc
+vacuum = 1
+sym = 2
+
+vertices =
+{
+  { 0, 0 },
+  { ax, 0 },
+  { bx, 0 },
+  { cx, 0 },
+  { 0, ay },
+  { ax, ay },
+  { bx, ay },
+  { cx, ay },
+  { 0, by },
+  { ax, by },
+  { bx, by },
+  { cx, by },
+  { 0, cy },
+  { ax, cy },
+  { bx, cy },
+  { cx, cy }
+}
+
+elements =
+{
+  { 0, 1, 5, 4, reflector },
+  { 1, 2, 6, 5, reflector },
+  { 2, 3, 7, 6, reflector },
+  { 4, 5, 9, 8, reflector },
+  { 5, 6, 10, 9, core },
+  { 6, 7, 11, 10, reflector },
+  { 8, 9, 13, 12, reflector },
+  { 9, 10, 14, 13, reflector },
+  { 10, 11, 15, 14, reflector }
+}
+
+boundaries =
+{
+  {  0,  1, vacuum },
+  {  1,  2, vacuum },
+  {  2,  3, vacuum },
+  {  3,  7, vacuum },
+  {  7, 11, vacuum },
+  { 11, 15, vacuum },
+  { 15, 14, vacuum },
+  { 14, 13, vacuum },
+  { 13, 12, vacuum },
+  { 12,  8, sym },
+  {  8,  4, sym },
+  {  4,  0, sym },
+
+  { 5, 6, -1 },
+  { 6, 10, -1 },
+  { 10, 9, -1 },
+  { 9, 5, -1 }
+}
+
+refinements =
+{
+  { 3, 1 },
+  { 4, 1 },
+  { 5, 1 },
+  { 9, 1 },
+  { 10, 1 },
+  { 11, 1 },
+  { 12, 1 },
+  { 13, 1 },
+  { 14, 1 }
+}

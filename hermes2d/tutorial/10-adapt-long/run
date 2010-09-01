@@ -1,0 +1,4 @@
+rm *~ 
+./adapt-long
+python plot_graph.py &
+

@@ -1,0 +1,3 @@
+neutronics
+python plot.py &
+python plot_mesh.py &

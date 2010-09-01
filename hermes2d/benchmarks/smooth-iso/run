@@ -1,0 +1,4 @@
+rm *~ 
+./smooth-iso
+python plot_graph.py &
+

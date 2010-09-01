@@ -1,0 +1,4 @@
+rm *~ 
+./waveguide-long
+python plot_graph.py &
+

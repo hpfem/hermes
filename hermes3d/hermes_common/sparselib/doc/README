@@ -1,0 +1,78 @@
+
+         SparseLib++ v. 1.7:  Numerical Sparse Matrix Classes in C++
+
+SparseLib++ is a C++ class library for efficient sparse matrix computations
+across various computational platforms.  The software package consists of 
+matrix objects representing several sparse storage formats currently in use 
+(in this release: compressed row, compressed column and coordinate formats), 
+providing basic functionality for managing sparse matrices, together with 
+efficient kernel mathematical operations (e.g. sparse matrix-vector multiply).
+Routines based on the Sparse BLAS are used to enhance portability and 
+performance. Included in the package are various preconditioners commonly 
+used in iterative solvers for linear systems of equations.  The focus is on 
+computational support for iterative methods, but the sparse matrix objects 
+presented here can be used on their own.
+
+Version 1.7 has been updated to ANSI C++ and has been tested with g++ v. 4.0.1
+Version 1.6 has been updated to adhere to the latest ANSI C++ standards, 
+including complex(> class, iostreams, and updated MV++ library.  
+
+1) More About SparseLib++
+------------------------
+i) User's Guide and man-style pages are available via
+
+       WWW:     http://math.nist.gov/sparselib
+
+ii) Code examples are in ./testing/*.cc
+
+
+
+
+2) Installing SparseLib++ library 
+----------------------------------
+
+You'll need to build the following three libraries
+
+    ./lib/libmv.a              MV++ basic matrix/vector library
+    ./lib/libsparselib.a          sparse matrix library
+    ./lib/libspblas.a             sparse BLAS library
+
+i)   cd to root directory where SparseLib++ will be installed
+ii)  edit makefile.def to specify your specify your particular C++ compiler
+iii) type "make sp". ("make" by itself will provide a list of options.)
+
+
+
+
+3) Testing SparseLib++
+----------------------
+
+i)  cd to SparseLib++ root dir
+ii) "make test" will run a test suites and leave their output in 
+                ./testing/sp_test.out.  
+
+
+4) Package components
+---------------------
+
+i)   SparseLib++ and Sparse BLAS include files are in ./include
+ii)  SparseLib++ and Sparse BLAS libraries are in ./lib
+iii) Lower-level Fortran-compatible Matrix/Vector library (MV++)is in 
+         ./lib/libmv.a
+
+
+
+5) Help!
+--------
+
+Questions, comments, suggestions, etc. can be sent to pozo@nist.gov.
+
+
+6) #include <std/disclaimer.h>
+------------------------------
+
+Be aware that SparseLib++ has been tested with GNU g++ 4.1.2, 4.0.1, 2.7.0, 
+and 2.6.3, together with Sun C++ (CC) v. 4.0.1. and may not necessarily 
+work with earlier versions of these compilers.  To find out the version 
+of your compiler use "g++ -v" or "CC -V foo".
+

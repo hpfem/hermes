@@ -1,0 +1,14 @@
+#cmakedefine HAVE_FMEMOPEN
+#cmakedefine HAVE_LOG2
+#cmakedefine EXTREME_QUAD
+
+#cmakedefine WITH_TRILINOS
+#cmakedefine HAVE_AMESOS
+#cmakedefine HAVE_AZTECOO
+#cmakedefine HAVE_EPETRA
+#cmakedefine HAVE_IFPACK
+#cmakedefine HAVE_ML
+#cmakedefine HAVE_NOX
+#cmakedefine HAVE_KOMPLEX
+#cmakedefine WITH_EXODUSII
+
