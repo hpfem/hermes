@@ -11,14 +11,14 @@ Hermes Documentation
 
     src/intro-1
     src/intro-2
-    src/tutorial-1
-    src/tutorial-2
-    src/tutorial-3
-    src/tutorial-4
-    src/tutorial-5
-    src/tutorial-6
-    src/benchmarks
-    src/examples
+    src/hermes2d/tutorial-1
+    src/hermes2d/tutorial-2
+    src/hermes2d/tutorial-3
+    src/hermes2d/tutorial-4
+    src/hermes2d/tutorial-5
+    src/hermes2d/tutorial-6
+    src/hermes2d/benchmarks
+    src/hermes2d/examples
 
 .. #####
 

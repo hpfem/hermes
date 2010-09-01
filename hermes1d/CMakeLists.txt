@@ -61,22 +61,22 @@ if(WITH_TESTS)
 	add_subdirectory(tests)
 endif(WITH_TESTS)
 
-add_subdirectory(doc)
+add_subdirectory(doc.old)
 
-add_custom_target(doc DEPENDS ${PROJECT_BINARY_DIR}/doc/xml/index.xml)
+add_custom_target(doc.old DEPENDS ${PROJECT_BINARY_DIR}/doc.old/xml/index.xml)
 add_custom_command(
-	TARGET    doc
-	COMMAND   ${SPHINX_BUILD_BIN} -N -b html ${PROJECT_SOURCE_DIR}/doc ${PROJECT_BINARY_DIR}/doc/html
+	TARGET    doc.old
+	COMMAND   ${SPHINX_BUILD_BIN} -N -b html ${PROJECT_SOURCE_DIR}/doc.old ${PROJECT_BINARY_DIR}/doc.old/html
 )
 
-add_custom_target(doc-tex DEPENDS ${PROJECT_BINARY_DIR}/doc/xml/index.xml)
+add_custom_target(doc-tex DEPENDS ${PROJECT_BINARY_DIR}/doc.old/xml/index.xml)
 add_custom_command(
 	TARGET    doc-tex
-	COMMAND   ${SPHINX_BUILD_BIN} -N -b latex ${PROJECT_SOURCE_DIR}/doc ${PROJECT_BINARY_DIR}/doc/tex
+	COMMAND   ${SPHINX_BUILD_BIN} -N -b latex ${PROJECT_SOURCE_DIR}/doc.old ${PROJECT_BINARY_DIR}/doc.old/tex
 )
 
 add_custom_command(
-	OUTPUT    ${PROJECT_BINARY_DIR}/doc/xml/index.xml
+	OUTPUT    ${PROJECT_BINARY_DIR}/doc.old/xml/index.xml
 	COMMAND   ${DOXYGEN_BINARY} ${DOXYGEN_CONFIG_FILE}
 )
 
