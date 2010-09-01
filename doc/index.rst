@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Hermes2D Documentation
-======================
+Hermes Documentation
+====================
 
 .. toctree::
     :maxdepth: 2
@@ -34,7 +34,7 @@ Hermes2D Documentation
 
     * :ref:`search`
 
-    .. _Hermes2D: http://www.hpfem.org/hermes2d
+    .. _Hermes: http://www.hpfem.org/hermes
     .. _FEMhub: http://www.hpfem.org/femhub
     .. _Agros2D: http://www.hpfem.org/agros2d
     .. _hp-FEM: http://www.hpfem.org
