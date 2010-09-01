@@ -2,54 +2,53 @@
 Introduction
 ============
 
-About Hermes2D
---------------
+About Hermes
+------------
 
-Hermes2D is a free C++/Python library for rapid development of
+Hermes is a free C++/Python library for rapid development of
 adaptive *hp*-FEM and *hp*-DG solvers for partial differential equations (PDE)
 and multiphysics PDE systems. The developer team includes the 
 `hp-FEM group <http://hpfem.org/>`_ at the `University of Nevada, Reno <http://www.unr.edu>`_ 
-and their `collaborators <http://git.hpfem.org/git/hermes2d.git/tree/HEAD:/AUTHORS>`_ 
+and their `collaborators <http://git.hpfem.org/git/hermes.git/tree/HEAD:/AUTHORS>`_ 
 from numerous places around the globe.
 
-The standard way to use Hermes2D is to write short C++ user programs, but for 
+The standard way to use Hermes is to write short C++ user programs, but for 
 those who prefer to use a graphical interface, there is an 
 `interactive GUI Agros2D <http://hpfem.org/agros2d/>`_. We also provide 
 an `interactive online lab <http://nb.femhub.org/>`_ where
-the user can compute with Hermes2D and other FEM codes in `FEMhub <http://femhub.org>`_ 
+the user can compute with Hermes and other FEM codes in `FEMhub <http://femhub.org>`_ 
 via any web browser without having to install anything (CPU time is on us). 
 
-Although Hermes2D is much younger than major FEM packages, it is loaded with 
+Although Hermes is much younger than major FEM packages, it is loaded with 
 unique technology and its user base is growing fast. We hope that you will 
 enjoy the software and that you will find this documentation useful. Let us know if 
 you find mistakes or with any improvement suggestions. Anyone who contributes
 a patch becomes automatically a 
-`co-author <http://git.hpfem.org/git/hermes2d.git/tree/HEAD:/AUTHORS>`_ of the code.
+`co-author <http://git.hpfem.org/git/hermes.git/tree/HEAD:/AUTHORS>`_ of the code.
 
-The library is available under the GPL license (Version 2, 1991). In the following, we will
-abbreviate Hermes2D with Hermes. 
+The library is available under the GPL license (Version 2, 1991). 
 
 About this Document
 -------------------
 
 Prior to reading this document, we recommend that you install Hermes using instructions on 
-its `home page <http://hpfem.org/hermes2d/>`_, and subscribe to the `mailing list 
-<http://groups.google.com/group/hermes2d/>`_. Our mailing list is a very active place where 
+its `home page <http://hpfem.org/hermes/>`_, and subscribe to the `mailing list 
+<http://groups.google.com/group/hermes/>`_. Our mailing list is a very active place where 
 you will get any questions answered quickly. You can also follow the development 
 via the `group activity list <http://groups.google.com/group/hpfem-group/>`_ 
 that contains a weekly log of all core team members.
 
 The best way of reading this tutorial is to run the code at the same time. 
 After making your way through the tutorial, you may want to browse the directories 
-with `benchmarks <http://git.hpfem.org/git/hermes2d.git/tree/HEAD:/benchmarks>`_ 
-and `examples <http://git.hpfem.org/git/hermes2d.git/tree/HEAD:/examples>`_ 
+with `benchmarks <http://git.hpfem.org/git/hermes.git/tree/HEAD:/benchmarks>`_ 
+and `examples <http://git.hpfem.org/git/hermes.git/tree/HEAD:/examples>`_ 
 that contain a variety of different PDE models. If you create an interesting model 
 using Hermes, let us know and we will add it to the repository. 
 
 The source code can be 
-viewed in the `git repository <http://git.hpfem.org/git/hermes2d.git/tree>`_, 
+viewed in the `git repository <http://git.hpfem.org/git/hermes.git/tree>`_, 
 and all tutorial examples can be found in the directory 
-`tutorial/ <http://git.hpfem.org/git/hermes2d.git/tree/HEAD:/tutorial>`_.
+`tutorial/ <http://git.hpfem.org/git/hermes.git/tree/HEAD:/tutorial>`_.
 For the 1D and 3D codes, see the `Hermes1D <http://hpfem.org/hermes1d/>`_ and 
 `Hermes3D <http://hpfem.org/hermes3d/>`_ home pages, respectively.
 
@@ -58,15 +57,15 @@ User and Developer Documentation
 
 User documentation (tutorial, benchmarks, examples) can be found in
 the directory 'doc/'. Type 'make html' there to build it. The documentation is
-available online at http://hpfem.org/hermes2d/doc/index.html.
+available online at http://hpfem.org/hermes/doc/index.html.
 
-To compile the C++ reference manual, go to 'hermes2d/doc.cpp/'. There
-type 'doxygen hermes2d.lib-real.doxyfile' to build references for the 
-real version, or 'doxygen hermes2d.lib-cplx.doxyfile' to build refs for the 
-complex version. The html files are in 'h2d-real/html/index.html' and
+To compile the C++ reference manual for HermesXD, go to 'hermesXd/doc.cpp/'. There
+type 'doxygen hermesXd.lib-real.doxyfile' to build references for the 
+real version, or 'doxygen hermesXd.lib-cplx.doxyfile' to build refs for the 
+complex version. The html files are in 'hXd-real/html/index.html' and
 'h2d-real/cplx/index.html', respectively. This documentation is also 
-available online at http://hpfem.org/hermes2d/doc.cpp/h2d-real/html/index.html
-and http://hpfem.org/hermes2d/doc.cpp/h2d-cplx/html/index.html, respectively.
+available online at http://hpfem.org/hermesXd/doc.cpp/h2d-real/html/index.html
+and http://hpfem.org/hermesXd/doc.cpp/h2d-cplx/html/index.html, respectively.
 
 Mathematical Background
 -----------------------
@@ -160,7 +159,7 @@ Interactive Web Accessibility
    :height: 450
    :alt: Hermes in iPhone.
 
-See the `Hermes home page <http://hpfem.org/hermes2d/>`_ for more information. An overview of books, 
+See the `Hermes home page <http://hpfem.org/hermes/>`_ for more information. An overview of books, 
 journal articles, conference proceedings papers and talks about Hermes and adaptive *hp*-FEM can be 
 found in its `publications section <http://hpfem.org/publications/>`_.
 

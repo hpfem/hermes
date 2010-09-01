@@ -1,8 +1,24 @@
-All people who contributed to Hermes2D by sending at 
-least a patch or more (in the order of the date of 
-their first contribution):
+Hermes Authors File
+===================
 
+All people who contributed to Hermes1D, Hermes2D 
+or Hermes3D by sending at least one patch (in the 
+order of the date of their first contribution):
+
+Hermes1D
+--------
 Pavel Solin (project leader) <solin@unr.edu>
+Ondrej Certik <ondrej@certik.cz>
+Pavel Karban <karban@kte.zcu.cz>
+Frantisek Mach <mach.frantisek@gmail.com>
+David Panek <panek50@kte.zcu.cz>
+Milan Hanus <mhanus@kma.zcu.cz>
+
+
+Hermes2D
+--------
+
+Pavel Solin <solin@unr.edu>
 Martin Zitka
 Tomas Vejchodsky <vejchod@math.cas.cz>
 Svatava Vyvialova
@@ -21,3 +37,15 @@ Damien Lebrun-Grandie <lebrungd@neo.tamu.edu>
 Lukas Korous <lukas.korous@gmail.com>
 Martin Lanzendorfer <lanz@cs.cas.cz>
 Valmor de Almeida <val.hpfem@gmail.com>
+
+
+Hermes3D
+--------
+
+Pavel Solin <solin@unr.edu>
+Martin Zitka
+Pavel Kus <pavel.kus@gmail.com>
+Martin Lazar 
+David Andrs <andrsd@gmail.com>
+Ondrej Certik <ondrej@certik.cz>
+Quan Zou <quan.zou.math@gmail.com>

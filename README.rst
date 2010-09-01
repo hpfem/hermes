@@ -92,18 +92,20 @@ Generating and Viewing Developer Documentation Offline (Linux)
 --------------------------------------------------------------
 
 Source files of the (Doxygen) developer documentation are
-in the directory doc.cpp/. In order to build them you need
-to install Doxygen. Then do:
+kept in the directories hermes1d/doc.cpp, hermes2d/doc.cpp 
+and hermes3d/doc.cpp. In order to build them you need
+to install Doxygen. If you are in hermesXd/,
+do:;
 
-cd doc.cpp/
-doxygen hermes2d.lib-real.doxyfile
-doxygen hermes2d.lib-cplx.doxyfile
+    cd doc.cpp/
+    doxygen hermesXd.lib-real.doxyfile
+    doxygen hermesXd.lib-cplx.doxyfile
 
 This will generate documentation for the real and complex
 version of the library, respectively. To view the docs, 
-type
+type::
 
-firefox h2d-real/html/index.html
-firefox h2d-cplx/html/index.html
+    firefox hXd-real/html/index.html
+    firefox hXd-cplx/html/index.html
 
 
