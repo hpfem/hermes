@@ -17,12 +17,12 @@ If you are using a Debian-based system, install the required libraries first:
 (Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
 least 0.98.5.2 or higher.)
 
-Clone the Git repository, configure and build:
-
-::
+Clone the Git repository::
   
-    git clone http://git.hpfem.org/git/hermes2d.git
-    cd hermes2d/
+    git clone http://git.hpfem.org/git/hermes.git
+
+Change dir to hermes1d/, hermes2d/ or hermes3d/. Then::
+
     cmake .
     make
 
@@ -32,16 +32,12 @@ the number of CPUs of your computer.
 Tests
 ~~~~~
 
-To execute all tests, do:
-
-::
+To execute all tests, do::
 
     make test
 
-Note that some of the tests take a long time to finish. To just execute the
-short running tests, do:
-
-::
+Note that some tests take a long time to finish. To just execute the
+short running tests, do::
 
     make test-quick
 
@@ -49,9 +45,7 @@ More options
 ~~~~~~~~~~~~
 
 You can turn on and off various components to build, just create the CMake.vars
-file and add the following:
-
-::
+file and add the following::
 
     set(WITH_EXAMPLES NO)
     set(WITH_PYTHON YES)
@@ -59,31 +53,23 @@ file and add the following:
 (and any other option that you would like to change, see CMakeLists.txt for the
 whole list).
 
-You can also easily generate it from a script (e.g. a debian/rules file) by:
-
-::
+You can also easily generate it from a script (e.g. a debian/rules file) by::
 
     python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)"' > CMake.vars
 
 If you are on OS X, you have to disable GLUT as the glut library is not easily
 installable on OS X. To do so, just put the following line into your
-CMake.vars:
-
-::
+CMake.vars::
 
     set(WITH_GLUT NO)
 
 
-For development, it is good to say (in global CMake.vars):
-
-::
+For development, it is good to say (in global CMake.vars)::
 
     set(DEBUG YES) to compile debug versions
     set(RELEASE YES) to compile release versions
 
-Then type:
-
-::
+Then type::
  
     make debug    (to build debug versions)
     make release  (to build release versions)
@@ -91,9 +77,7 @@ Then type:
 Debugging with Eclipse
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To use eclipse as debugger, in the root folder of the project:
-
-::
+To use eclipse as debugger, in the root folder of the project::
 
     mkdir eclipse_build
     cd eclipse_build
@@ -107,8 +91,8 @@ In Eclipse:
     - Keep "Copy projects into workspace" unchecked.
 
 
-Install Hermes2D
-~~~~~~~~~~~~~~~~
+Install Hermes
+~~~~~~~~~~~~~~
 
 ::
 
@@ -124,7 +108,7 @@ Compilation
 
 **Step 1**: Make sure you have XCode installed. This should be on the installation 
 disks which came with your Mac. XCode contains the GNU compilers, make 
-and many other things which are required to build Hermes2D.
+and many other things which are required to build Hermes.
 
 **Step 2**: Download and install MacPython version 2.6 using the disk image for 
 your version of OSX at http://www.python.org/download/releases/2.6.5/. 
@@ -149,14 +133,14 @@ libraries and applications on your Mac) by doing the following:
   (d) If you don't already have cmake installed, do 
       'sudo port install cmake'.
 
-**Step 4**: Get the Hermes2D source code. Change to the directory where you want 
-to download the Hermes2D source and clone the git repository by doing 
-'git clone http://git.hpfem.org/git/hermes2d.git'.
+**Step 4**: Get the Hermes source code. Change to the directory where you want 
+to download the Hermes source and clone the git repository by doing 
+'git clone http://git.hpfem.org/git/hermes.git'.
 
-**Step 5**: Configure and build Hermes by doing 'cd hermes2d/ && cmake . 
-&& make'.
+**Step 5**: Configure and build Hermes by changing dir to 'hermes1d/', 'hermes2d/' 
+or 'hermes3d/', and then typing 'cmake .' and 'make'.
 If you have more than one CPU, you can use 'make -jN' where N is the 
-number of CPUs of your computer. To set the location where Hermes2D 
+number of CPUs of your computer. To set the location where Hermes 
 will be installed, pass the -DCMAKE_INSTALL_PREFIX=<your location> 
 flag to cmake (i.e. to install in /usr/local, replace the cmake 
 command above with 'cmake -DCMAKE_INSTALL_PREFIX=/usr/local .').
@@ -165,21 +149,17 @@ command above with 'cmake -DCMAKE_INSTALL_PREFIX=/usr/local .').
 take a long time to finish. To just execute the short running tests, 
 do 'make test-quick'.
 
-**Step 7**: Install Hermes2D by doing 'make install'.
+**Step 7**: Install Hermes by doing 'make install'.
 
 Tests
 ~~~~~
 
-To execute all tests, do:
-
-::
+To execute all tests, do::
  
     make test
 
 Note that some of the tests take a long time to finish. To just execute the
-short running tests, do:
-
-::
+short running tests, do::
 
     make test-quick
 
@@ -188,9 +168,7 @@ More options
 ~~~~~~~~~~~~
 
 You can turn on and off various components to build, just create the CMake.vars
-file and add the following:
-
-::
+file and add the following::
 
     set(WITH_EXAMPLES NO)
     set(WITH_PYTHON YES)
@@ -205,16 +183,12 @@ You can also easily generate it from a script (e.g. a debian/rules file) by:
     python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)"' > CMake.vars
 
 
-For development, it is good to say (in global CMake.vars):
-
-::
+For development, it is good to say (in global CMake.vars)::
 
     set(DEBUG YES) to compile debug versions
     set(RELEASE YES) to compile release versions
 
-Then type:
-
-::
+Then type::
 
     make debug    (to build debug versions)
     make release  (to build release versions)
@@ -225,17 +199,16 @@ Windows Cygwin Users
 Compilation
 ~~~~~~~~~~~
 
-Download and install the Linux emulator Cygwin from `here <http://www.cygwin.com/>`_ (the small icon in the top-right corner). While running setup.exe, you need to install 
+Download and install the Linux emulator Cygwin from `here <http://www.cygwin.com/>`_ (the small icon in the top-right corner). While running setup.exe, you need to install:: 
 
-cmake, gcc4, gfortran, git, gitk, libX11-devel, libXext-devel, libXt-devel, libXt, libXext, make, m4, openssl-devel, perl, 
-python, wget, xextproto.
+    cmake, gcc4, gfortran, git, gitk, libX11-devel, libXext-devel, libXt-devel, libXt, libXext, make, m4, openssl-devel, perl, python, wget, xextproto.
 
-Then download, unpack, and build FEMhub as in Linux:
+Then download, unpack, and build Hermes as in Linux::
 
-::
+    git clone http://git.hpfem.org/git/hermes.git
 
-    git clone http://git.hpfem.org/git/hermes2d.git
-    cd hermes2d
+The change dir to hermes1d/, hermes2d/ or hermes3d/, and type::
+
     cmake .
     make
 
@@ -244,7 +217,7 @@ For more details go to the Linux section above.
 Windows MSVC Users
 ------------------
 
-This section describes how to build and use Hermes2D in Microsoft Visual C++ 2008 (Express Edition). 
+This section describes how to build and use Hermes in Microsoft Visual C++ 2008 (Express Edition). 
 These instructions should probably work even for older versions of MS Visual C++ up to version 2003.
 
 Known limitations and issues
@@ -254,23 +227,19 @@ Known limitations and issues
  - Trilinos not supported.
  - Python not supported.
 
-Building Hermes2D
-~~~~~~~~~~~~~~~~~
+Building Hermes
+~~~~~~~~~~~~~~~
 
  In order to build the library and examples, you need to:
 
  - Prepare dependecy libraries, see 'Dependency Check-list'.
  - Copy a file 'my_hermes_root\\MSVC2008\\CMake.vars' to 'my_hermes_root'. The file contains settings for the projekct.
  - Modify the file 'my_hermes_root\\CMake.vars'. Only the first line has to be modified, the rest of lines depends on project settings. Please, follow comments in the file. For example, you 
-   could set the first line as:  
-
-   ::
+   could set the first line as::
 
        set(DEP_ROOT "../dependencies")
 
- - In the directory 'my_hermes_root', to create project files by running CMAKE from a command prompt:
-
-   ::
+ - In the directory 'my_hermes_root', to create project files by running CMAKE from a command prompt::
 
        cmake . -G "Visual Studio 9 2008"  # MSVC2008 user
        cmake . -G "Visual Studio 10"      # MSVC2010 user
@@ -278,27 +247,27 @@ Building Hermes2D
    If you have Cygwin installed, your might have an error "Coulld not create named generator Visual Studio 10". This is because your 
    cmake path is contaminated by Cygwin's cmake. Try to use absoluted path for windows cmake.exe. 
 
- - Open a SLN file 'my_hermes_root\\hermes2d.sln' and build Hermes2D. Actually, this step is not necessary if you plan to use Hermes2D in your projects rather than explore tutorials.
+ - Open a SLN file 'my_hermes_root\\hermes.sln' and build Hermes. Actually, this step is not necessary if you plan to use Hermes in your projects rather than explore tutorials.
 
 Configuration options
 ~~~~~~~~~~~~~~~~~~~~~
 
- Hermes2D is configured through preprocessor directives. Directives are generated by CMAKE and your settings might be overriden by CMAKE. The directives are:
+ Hermes is configured through preprocessor directives. Directives are generated by CMAKE and your settings might be overriden by CMAKE. The directives are:
 
   - NOGLUT : excludes GLUT-dependant parts. This replaces viewers with an empty implementation that does nothing if invoked. If used, a library 'freeglut.lib' does not need to be linked. 
 
   - ENABLE_VIEWER_GUI : enables GUI for viewers. Currently, only 'ScalarView' support GUI because this is an experimental feature. This directive is mutually exclusive with NOGLUT. If used, a library 'AntTweakBar.lib' does not need to be linked.
 
-Using Hermes2D
-~~~~~~~~~~~~~~
+Using Hermes
+~~~~~~~~~~~~
  
-In order to used Hermes2D in your project, you need to do following steps. Steps has 5, 6, and 7 to be repeated for every configuration, i.e., Debug, Release. Except the step 7b, this can be done easily by setting the drop-down Configuration to 'All configurations' in the Project Property dialog.
+In order to use Hermes in your project, you need to do the following steps. Steps has 5, 6, and 7 to be repeated for every configuration, i.e., Debug, Release. Except the step 7b, this can be done easily by setting the drop-down Configuration to 'All configurations' in the Project Property dialog.
 
-  - Prepare Hermes2D to be buildable by MSVC, see 'Building Hermes2D'.
+  - Prepare Hermes to be buildable by MSVC, see 'Building Hermes'.
   - Create your project in MSVC. Set the project to be empty Win32 console project.
-  - Add either 'my_hermes2d_root\\src\\hermes2d-real.vcproj' or 'my_hermes2d_root\\src\\hermes2d-cplx.vcproj' project to your solution (<right click on solution>\\Add\\Existing Project...).
-  - Set that your project depends on hermes2d-real/cplx project (<right click on your project>\\Project Dependences...).
-  - Add directories 'my_hermes2d_directory\\src' and 'dependencies\\include' to additional include directories (<right click on your project>\\Properties\\Configuration Properties\\C/C++\\Additional Include Directories).
+  - Add either 'my_hermes_root\\src\\hermes-real.vcproj' or 'my_hermes_root\\src\\hermes-cplx.vcproj' project to your solution (<right click on solution>\\Add\\Existing Project...).
+  - Set that your project depends on hermes-real/cplx project (<right click on your project>\\Project Dependences...).
+  - Add directories 'my_hermes_directory\\src' and 'dependencies\\include' to additional include directories (<right click on your project>\\Properties\\Configuration Properties\\C/C++\\Additional Include Directories).
   - Add directories 'dependencies\\lib' to additional library directories (<right click on your project>\\Properties\\Configuration Properties\\Linker\\Additional Library Directories).
   - Deny warnings that are not indicating anything dangerous:
 
@@ -308,16 +277,14 @@ In order to used Hermes2D in your project, you need to do following steps. Steps
 Dependency check-list
 ~~~~~~~~~~~~~~~~~~~~~
 
-This list works for 32-bit version of Hermes2D. If you intend to cross-compile 64-bit version, you have to cross-compile all libraries. As the first step, create a  directory structure.
+This list works for 32-bit version of Hermes. If you intend to cross-compile 64-bit version, you have to cross-compile all libraries. As the first step, create a  directory structure.
 	
-  - In order to create the structure, execute the following command: 
-
-    ::
+  - In order to create the structure, execute the following command::
 
         'prepare_dep_dir.bat'. 
 
     Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable.
-  - All Hermes2D project files assumes that dependency libraries are available in a fixed directory structure. The root of this structure has to have the same parent as does Hermes2D director, i.e., if 'C:\\my_work\\hermes2d\\' is a root of the Hermes2D directory, then 'C:\\my_work\\dependecies\\' is a root of the dependency directory. Subdirectories are:
+  - All Hermes project files assumes that dependency libraries are available in a fixed directory structure. The root of this structure has to have the same parent as does Hermes director, i.e., if 'C:\\my_work\\hermes\\' is a root of the Hermes directory, then 'C:\\my_work\\dependecies\\' is a root of the dependency directory. Subdirectories are:
 
     - dependencies\\include: Header files (\*.h) of dependency libraries.
     - dependencies\\lib: Library files (\*.lib) of dependency libraries.   
@@ -328,9 +295,7 @@ This list works for 32-bit version of Hermes2D. If you intend to cross-compile 6
 
     - Download Python 2.6.5 windows installer (http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi) and run it. 
     - If you Python installation path is 'C:\\Python26', add it to System Path variable. You may need to reboot to have the Path variable updated. 
-    - Open a command prompt, execute python, and you will see something like:
-
-      ::
+    - Open a command prompt, execute python, and you will see something like::
 
           python.exe
           Python 2.6.5 (r265:79096, Mar 19 2010, 21:48:26) [MSC v.1500 32 bit (Intel)] on win32
@@ -341,9 +306,7 @@ This list works for 32-bit version of Hermes2D. If you intend to cross-compile 6
     - Numpy(ver-1.4.1)
 
       - Download Numpy-1.4.1-py2.6-superpack-python2.6.exe (http://sourceforge.net/projects/numpy/files/) and run it.
-      - Open a command prompt, excute following command from python shell:
-
-        ::
+      - Open a command prompt, excute following command from python shell::
 
             >>> import numpy
             >>> print numpy.get_include()
@@ -353,9 +316,7 @@ This list works for 32-bit version of Hermes2D. If you intend to cross-compile 6
     - Cython(ver-0.12.1)
 
       - Download Cython (http://www.cython.org/#download), and unpack it. 
-      - Open a command prompt, got to 'my_Cython_root', and excute following: 
-
-        ::
+      - Open a command prompt, got to 'my_Cython_root', and excute following::
 
             python.exe setup.py install
 	
@@ -383,14 +344,14 @@ This list works for 32-bit version of Hermes2D. If you intend to cross-compile 6
 
       - Download AMD source file package (http://www.cise.ufl.edu/research/sparse/amd/).
       - Unpack source file into a directory that has the same parent as a directory where you unpacked UFconfig.
-      - Copy the file 'my_hermes2d_root\\MSVC2008\\AMD.nmake' to a directory 'my_amd_directory\\Lib'.
+      - Copy the file 'my_hermes_root\\MSVC2008\\AMD.nmake' to a directory 'my_amd_directory\\Lib'.
       - Run MSVC command prompt similar as in the case of Judy and switch to 'my_amd_directory\\Lib'.
       - Compile AMD using 'nmake -f AMD.nmake'.
       - Copy 'Include\\amd.h', 'Include\\amd_internal.h', and 'Lib\\libamd.lib' to 'include', and 'lib' dependecy directories respectively.
 
     - Download UMFPACK source file package (http://www.cise.ufl.edu/research/sparse/umfpack/).
     - Unpack source file into a directory that has the same parent as a directory where you unpacked UFconfig.
-    - Copy the file 'my_hermes2d_root\\MSVC2008\\UMFPACK.nmake' to the 'my_umfpack_root\\Lib' directory.
+    - Copy the file 'my_hermes_root\\MSVC2008\\UMFPACK.nmake' to the 'my_umfpack_root\\Lib' directory.
     - Run MSVC command prompt similar as in the case of Judy and switch to 'my_umfpack_root\\Lib'.
     - Compile UMFPACK using 'nmake -f UMFPACK.nmake'. Linking might take some time, please, be patient.
     - Copy 'libumfpack.dll', all include files, and 'libumfpack.lib' to 'bin', 'include', and 'lib' dependecy directories, respectively.
@@ -456,14 +417,14 @@ This list works for 32-bit version of Hermes2D. If you intend to cross-compile 6
 
         ::
 
-            set HDF5_EXT_ZLIB="C:\my_hermes2d_root\dependencies\lib\zlib1.lib
+            set HDF5_EXT_ZLIB="C:\my_hermes_root\dependencies\lib\zlib1.lib
 
 
       - If SLIB is used, set variable HDF5_EXT_SLIB similarly as:
 
         ::
 
-            set HDF5_EXT_SLIB="C:\my_hermes2d_root\dependencies\lib\slib.lib
+            set HDF5_EXT_SLIB="C:\my_hermes_root\dependencies\lib\slib.lib
 
       - To open SLN file in MSVC by issusing the following in the command prompot, and let MSVC to convert files: 
 
@@ -526,48 +487,42 @@ How to Submit the First Patch
 The following is an embarrassingly trivial git primer
 whose objective is to show you how to create and send 
 your first patch without losing much time and good humor. 
-We begin with cloning the Hermes2D git repository and 
+We begin with cloning the Hermes git repository and 
 continue through setting 
 up the .gitconfig file, creating a new branch, committing 
 changes, and generating patches. A good reference for 
 further reading is given at the end. 
 
-Clone the Hermes2D Git Repository
----------------------------------
+Clone the Hermes Git Repository
+-------------------------------
 
 To clone the repository, type
 
 ::
 
-    git clone http://git.hpfem.org/git/hermes2d.git
+    git clone http://git.hpfem.org/git/hermes.git
 
-This will create a new directory hermes2d/ with a copy 
-of the entire Hermes2D git repository. Before doing anything 
-else, you may want to build Hermes2D to make sure that 
-everything works:
+This will create a new directory hermes/ with a copy 
+of the entire Hermes git repository. Before doing anything 
+else, you may want to build Hermes1D, Hermes2D or Hermes3D 
+(whiever one you are interested in) to make sure that 
+everything works. So change dir to either hermes1d/, hermes2d/
+or hermes3d/ and type::
 
-::
-
-    cd hermes2d/
     cmake .
     make
 
 The list of prerequisites and installation instructions 
 for various platforms can be found 
-`here <http://hpfem.org/hermes2d/doc/src/intro-2.html>`_.
+`here <http://hpfem.org/hermes/doc/src/intro-2.html>`_.
 
 Create the .gitconfig File
 --------------------------
 
 The .gitconfig file can be used to define your identity
-for git as well as useful abbreviations. In hermes2d/
-type 
-
-::
-
-    cd .. 
-
-Then adjust and save the following as "~/.gitconfig":
+for git as well as useful abbreviations. Change dir to your 
+home directory. Then adjust and save the following as 
+"~/.gitconfig":
 
 ::
 
@@ -608,15 +563,8 @@ Then adjust and save the following as "~/.gitconfig":
 Create a Local Branch
 ---------------------
 
-Type 
-
-::
-
-    cd hermes2d/ 
-
-You can get an overview of existing branches by typing 
-
-::
+Change dir back to hermes1d/, hermes2d/ or hermes3d/. 
+You can get an overview of existing branches by typing::
 
     git branch 
 
@@ -683,18 +631,17 @@ means that you want only the last commit included in
 the patch. If you typed '-2', git would include the last 
 two commits, etc. 
 
-Last, send an email with the patch to the mailing 
-list hermes2d@googlegroups.com, begin the subject 
+Last, send an email with the patch to the relevant 
+mailing list hermes1d@googlegroups.com, hermes2d@googlegroups
+or hermes3d@googlegroups.com. Begin the subject 
 line with saying "[PATCH] ...", and attach the 
 text file with the patch to your email. Someone
-will be with you shortly!
+will look at your patch shortly.
 
 Change to Master and Update the Repository
 ------------------------------------------
 
-Before changing to a different branch, type 
-
-::
+Before changing to a different branch, type::
 
     git st
 
@@ -727,9 +674,7 @@ you will see
    :alt: Terminal screenshot
 
 Now you can proceed with "git commit" as described above. 
-After the commit, you can switch to the master branch:
-
-::
+After the commit, you can switch to the master branch::
 
     git co master
 
@@ -738,16 +683,12 @@ return to the beginning of this short
 tutorial, and start working on a new change.
 
 To update your master to the latest state of
-the repository, just type:
+the repository, just type::
 
-::
-
-    git remote add origin http://git.hpfem.org/git/hermes2d.git
+    git remote add origin http://git.hpfem.org/git/hermes.git
 
 This tells git where to download the git repository from
-(needs to be done just the first time). Then type
-
-::
+(needs to be done just the first time). Then type::
 
     git pull origin master
 
@@ -755,20 +696,16 @@ Special Note on Sphinx Docs
 ---------------------------
 
 The Sphinx documentation you are just reading is also 
-part of the Hermes2D git repository and can be developed
-in the same way as source files of Hermes2D. This very 
-file can be found in doc/src/intro-2.rst. After making 
-any changes to Sphinx docs, type 
-
-::
+part of the Hermes git repository and can be developed
+in the same way as source files of Hermes. This very 
+file can be found in doc/src/intro-2.rst. After 
+making any changes to Sphinx docs, type::
 
     make html
 
 in the doc/ directory. This will launch 
 a build process that will take a few seconds. 
-After it finishes, type
-
-::
+After it finishes, type::
 
     firefox _build/html
 
