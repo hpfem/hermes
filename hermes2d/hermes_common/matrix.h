@@ -273,12 +273,18 @@ public:
     }
     virtual void set_c_array(double* ptr, int size)
     {
-        this->v = ptr;
+//        if (this->v == NULL)
+//            throw std::runtime_error("internal error in set_c_array(): this->v == NULL");
+        this->v = (double*)realloc(this->v, sizeof(double) * size);
+        memcpy(this->v, ptr, sizeof(double) * size);
         this->size = size;
     }
     virtual void set_c_array_cplx(cplx* ptr, int size)
     {
-        this->v_cplx = ptr;
+//        if (this->v_cplx == NULL)
+//            throw std::runtime_error("internal error in set_c_array_cplx(): this->v_cplx == NULL");
+        this->v_cplx = (cplx*)realloc(this->v_cplx, sizeof(cplx) * size);
+        memcpy(this->v_cplx, ptr, sizeof(cplx) * size);
         this->size = size;
     }
 
