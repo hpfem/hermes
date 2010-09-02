@@ -22,7 +22,7 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 5;       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;             // Initial polynomial degree of all mesh elements.
 const double NEWTON_TOL = 1e-6;   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;  // Maximum allowed number of Newton iterations.
