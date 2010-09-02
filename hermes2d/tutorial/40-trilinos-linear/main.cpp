@@ -196,5 +196,6 @@ int main(int argc, char **argv)
 
   // Wait for all views to be closed.
   View::wait();
+  delete nox_solver;
   return 0;
 }
