@@ -1215,8 +1215,10 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf,
   // NOTE: this may change target_vector length.
   if (target_vec != NULL) {
     target_vec->free_data();
-    target_vec->set_c_array(rhs->get_c_array(), rhs->get_size());
-    target_vec->set_c_array_cplx(rhs->get_c_array_cplx(), rhs->get_size());
+    if (target_vec->is_complex())
+        target_vec->set_c_array_cplx(rhs->get_c_array_cplx(), rhs->get_size());
+    else
+        target_vec->set_c_array(rhs->get_c_array(), rhs->get_size());
     // NOTE: rhs must not be deleted.
   } else {
     delete rhs;
