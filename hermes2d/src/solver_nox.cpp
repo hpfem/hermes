@@ -57,14 +57,14 @@ public:
 	void set_init_sln(double *ic);
 
 	/// Accessor for preconditioner
-	Precond *get_precond() { return precond; }
-	void set_precond(Precond *pc);
+    Teuchos::RCP<Precond> get_precond() { return precond; }
+	void set_precond(Teuchos::RCP<Precond> &pc);
 
 	FeProblem* fep;			// finite element problem being solved
 
 	EpetraVector init_sln;		// initial solution
 	EpetraMatrix jacobian;		// jacobian (optional)
-        Precond* precond;		// preconditiner (optional)
+    Teuchos::RCP<Precond> precond;		// preconditiner (optional)
 
 	void prealloc_jacobian();
 };
@@ -77,7 +77,7 @@ NoxProblemInterface::NoxProblemInterface(FeProblem* problem)
   init_sln.alloc(ndof);
   if (!fep->is_matrix_free()) prealloc_jacobian();
 
-  precond = NULL;
+  this->precond = Teuchos::null;
 }
 
 NoxProblemInterface::~NoxProblemInterface()
@@ -92,7 +92,7 @@ void NoxProblemInterface::prealloc_jacobian()
   jacobian.finish();
 }
 
-void NoxProblemInterface::set_precond(Precond *pc)
+void NoxProblemInterface::set_precond(Teuchos::RCP<Precond> &pc)
 {
   precond = pc;
   prealloc_jacobian();
@@ -137,7 +137,7 @@ bool NoxProblemInterface::computeJacobian(const Epetra_Vector &x, Epetra_Operato
 bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
                                                 Teuchos::ParameterList *precParams)
 {
-  assert(precond != NULL);
+  assert(precond != Teuchos::null);
   EpetraVector xx(x);			// wrap our structures around core Epetra objects
 
   jacobian.zero();
@@ -201,7 +201,7 @@ NoxSolver::~NoxSolver()
 #endif
 }
 
-void NoxSolver::set_precond(Precond *pc)
+void NoxSolver::set_precond(Teuchos::RCP<Precond> &pc)
 {
 #ifdef HAVE_NOX
   precond_yes = true;
@@ -282,7 +282,7 @@ bool NoxSolver::solve()
    ls_pars.set("Tolerance", ls_tolerance);
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
    // precond stuff
-   Precond *precond = interface->get_precond();
+   Teuchos::RCP<Precond> precond = interface->get_precond();
    if (precond_yes == false) {
      ls_pars.set("Preconditioner", "None");
    }
@@ -309,7 +309,7 @@ bool NoxSolver::solve()
 
      if (interface->fep->is_matrix_free()) {
        // Matrix-Free (Epetra_Operator)
-       if (precond == NULL) {
+       if (precond == Teuchos::null) {
 	 Teuchos::RCP<NOX::Epetra::MatrixFree> mf = 
            Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, interface, nox_sln_vec));
 	 i_jac = mf;
@@ -317,7 +317,7 @@ bool NoxSolver::solve()
 				i_jac, mf, nox_sln_vec));
        }
        else {
-	 const Teuchos::RCP<Epetra_Operator> pc = Teuchos::RCP<Epetra_Operator>(precond);
+	 const Teuchos::RCP<Epetra_Operator> pc = precond;
 	 lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
 				i_prec, pc, nox_sln_vec));
        }

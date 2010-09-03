@@ -4,6 +4,7 @@
 #define H2D_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+using namespace Teuchos;
 using namespace RefinementSelectors;
 
 //  The purpose of this example is to show how to use Trilinos
@@ -96,10 +97,10 @@ int main(int argc, char* argv[])
   NoxSolver solver(&fep);
 
   // Select preconditioner.
-  MlPrecond pc("sa");
+  RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {
-    if (JFNK) solver.set_precond(&pc);
+    if (JFNK) solver.set_precond(pc);
     else solver.set_precond("ML");
   }
 
