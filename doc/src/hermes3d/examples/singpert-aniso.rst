@@ -3,7 +3,7 @@
 Singular Perturbation
 =====================
 
-**Git reference:** Examples `singular perturbation <http://git.hpfem.org/hermes3d.git/tree/HEAD:/examples/singpert-aniso>`_.
+**Git reference:** Examples `singular perturbation <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/examples/singpert-aniso>`_.
 
 We solve a singularly perturbed elliptic problem that exibits a thin anis-tropic boundary layer 
 that is difficult to solve. This examples demonstrates how the anisotropic refinements can save 

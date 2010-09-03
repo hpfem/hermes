@@ -1,6 +1,6 @@
-=================================
-Tutorial Part I (Linear Problems)
-=================================
+===========================================
+Hermes2D Tutorial: Part I (Linear Problems)
+===========================================
 
 This tutorial should give you a good idea of how Hermes2D works. After reading it, you will
 be able to create your own applications and/or adjust existing Hermes examples for your 
@@ -11,9 +11,9 @@ This document is under continuous development. If you find bugs, typos, dead lin
 let us know through the `mailing list <http://groups.google.com/group/hermes2d/>`_.
 
 Finite Element Mesh (01)
---------------------------------
+------------------------
 
-**Git reference:** Tutorial example `01-mesh <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/01-mesh>`_. 
+**Git reference:** Tutorial example `01-mesh <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/01-mesh>`_. 
 
 Every finite element computation starts with partitioning the domain
 into a finite element mesh. Hermes uses triangles and quadrilaterals, and 
@@ -147,7 +147,7 @@ Loading Mesh
 
 As a ''Hello world'' example, let us load the mesh we have just created, and display it in a window. 
 Every main.cpp file in the git repository contains lots of comments and instructions. Skipping those, 
-the `main.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/01-mesh/main.cpp>`_ 
+the `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/01-mesh/main.cpp>`_ 
 file begins with creating an instance of the class Mesh. In order to load
 the mesh file, you have to create a mesh loader class (in our case that is ``H2DReader``) and
 call the method ``load()``:
@@ -196,7 +196,7 @@ Other ways of modifying meshes on the fly include
     Mesh::unrefine_element(int id);
     Mesh::unrefine_all_elements();
 
-See the file `src/mesh.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/mesh.cpp>`_ for more details. 
+See the file `src/mesh.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh.cpp>`_ for more details. 
 The following code illustrates how to visualize the mesh using the class MeshView:
 ::
 
@@ -230,7 +230,7 @@ so that you have a chance to see the graphical output.
 Setting Up Finite Element Space (02)
 ------------------------------------
 
-**Git reference:** Tutorial example `02-space <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/02-space>`_. 
+**Git reference:** Tutorial example `02-space <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/02-space>`_. 
 
 Hermes follows the mathematical concept of FEM closely -- after creating a mesh,
 in the next step one needs to construct a finite element space on it.
@@ -262,11 +262,11 @@ Therefore, Hermes offers several shapesets from which
 you need to choose one when creating a FE space. The ones which perform best
 in most computations (according to our experience) are simply called
 H1Shapeset, HcurlShapeset, HdivShapeset and L2Shapeset.
-Others can be found in the files `src/shapeset* <http://git.hpfem.org/hermes2d.git/tree/HEAD:/src>`_ in the git repo.
+Others can be found in the files `src/shapeset* <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/src>`_ in the git repo.
 Any shapeset can be used for more than one space.
 
 We are now ready for an example. The following is (up to some comments) the complete
-`main.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/02-space/main.cpp>`_ file
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/02-space/main.cpp>`_ file
 of the example 02-space::
 
     #include "hermes2d.h"
@@ -327,7 +327,7 @@ hanging nodes to see how basis functions on irregular meshes look like.
 Solving Poisson Equation (03)
 -----------------------------
 
-**Git reference:** Tutorial example `03-poisson <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/03-poisson>`_. 
+**Git reference:** Tutorial example `03-poisson <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/03-poisson>`_. 
 
 Let us solve the Poisson equation
 
@@ -430,7 +430,7 @@ Short and Long Versions of Examples
 
 Most tutorial examples come in two versions: A short one that is intended for effortless basic use, and a long one that is more explicit and thus more convenient for development. The first example with a long version is 03-poisson.
 
-**Git reference:** Tutorial example `03-poisson-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/03-poisson-long>`_. 
+**Git reference:** Tutorial example `03-poisson-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/03-poisson-long>`_. 
 
 The long version does not employ the function solve_linear(). Instead, after initializing the weak formulation, one initializes the LinearProblem class::
 
@@ -479,7 +479,7 @@ Examples 04, 05 and 06 also come in long versions but we will not discuss them e
 Dirichlet BC
 ~~~~~~~~~~~~
 
-**Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/04-bc-dirichlet>`_. Long version: `04-bc-dirichlet-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/04-bc-dirichlet-long>`_. 
+**Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet>`_. Long version: `04-bc-dirichlet-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet-long>`_. 
 
 Since essential boundary conditions eliminate degrees of freedom (DOF) from the FE space, 
 they need to be incorporated while the space is set up.
@@ -536,7 +536,7 @@ For the value $CONST_F = -4$, the output is shown below:
 Neumann BC
 ~~~~~~~~~~
 
-**Git reference:** Tutorial example `05-bc-neumann <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/05-bc-neumann>`_. Long version: `05-bc-neumann-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/05-bc-neumann-long>`_.
+**Git reference:** Tutorial example `05-bc-neumann <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann>`_. Long version: `05-bc-neumann-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann-long>`_.
 
 Next, let us consider Neumann boundary conditions. The new model problem
 will have the form
@@ -589,7 +589,7 @@ The surface linear form is defined as::
     }
 
 Here, we have used the predefined surface integral int_v (see the
-file `src/integrals_h1.h <http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/integrals_h1.h>`_). 
+file `src/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_). 
 If the boundary conditions were more complicated, we could also
 have used int_F_v, where F stands for an arbitrary user-supplied
 function returning the value $\partial u/\partial n$.
@@ -639,7 +639,7 @@ shown in the following figures:
 Newton BC
 ~~~~~~~~~
 
-**Git reference:** Tutorial example `06-bc-newton <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/06-bc-newton>`_. Long version: `06-bc-newton-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/06-bc-newton-long>`_.
+**Git reference:** Tutorial example `06-bc-newton <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton>`_. Long version: `06-bc-newton-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton-long>`_.
 
 Another common natural boundary condition is the Newton (sometimes called Robin) condition
 of the form
@@ -661,7 +661,7 @@ The surface bilinear form must have the following prototype:
 
 Inside this function you can use predefined
 forms such as int_u_v, int_F_u_v (see the
-file `src/integrals_h1.h <http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/integrals_h1.h>`_) or your custom forms.
+file `src/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_) or your custom forms.
 
 The following code snippet contains the linear and bilinear forms:
 ::
@@ -767,7 +767,7 @@ and registered using the callback() macro,
     wf.add_vector_form(callback(linear_form));
    
 The callback() macro, defined in `src/forms.h 
-<http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/forms.h>`_ by
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_ by
 
 ::
 
@@ -802,7 +802,7 @@ the bilinear form defined above gives
 The <double, scalar> copy is used to obtain the result of the numerical integration,
 the <Ord, Ord> copy for automatic evaluation of the quadrature order. 
 The parser (see `src/forms.h 
-<http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/forms.h>`_) 
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_) 
 works well for algebraic expressions. If the weak form bilinear_form() is complicated, 
 one can create and register a simpler weak form bilinear_form_order() for the parser,
 that provides an arbitrary expression with the same polynomial degree as 
@@ -846,15 +846,15 @@ It is also possible to return a constant order (for example 5) by using
 
 Currently, one cannot make the integration order dependent on spatial coordinates and such. However,
 one can assign different weak forms to elements with different material markers. This is
-described in examples `iron-water <http://git.hpfem.org/hermes2d.git/tree/HEAD:/examples/iron-water>`_,
-`saphir <http://git.hpfem.org/hermes2d.git/blob/HEAD:/examples/saphir/main.cpp>`_ and others.
+described in examples `iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/iron-water>`_,
+`saphir <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/saphir/main.cpp>`_ and others.
 
 The following example handles quadrature orders manually. 
 
 General 2nd-Order Linear Equation (07)
 --------------------------------------
 
-**Git reference:** Tutorial example `07-general <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/07-general>`_. Long version: `07-general-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/07-general-long>`_.
+**Git reference:** Tutorial example `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. Long version: `07-general-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general-long>`_.
 
 This example deals with a linear second-order equation of the form 
 
@@ -877,7 +877,7 @@ and so on. Then we define boundary conditions as usual. The weak formulation con
 both volumetric and surface integrals. 
 
 The Ord class in Hermes (see the file `src/forms.h 
-<http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/forms.h>`_) provides
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_) provides
 an automatic parser of weak forms that is able to determine the integration orders for 
 algebraic expressions. So, in order to define an integration order explicitly, one can 
 provide on top the weak form another function that defines a simple algebraic expression 
@@ -952,7 +952,7 @@ The output of this example is shown below:
 Systems of Equations (08)
 -------------------------
 
-**Git reference:** Tutorial example `08-system <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/08-system>`_. Long version `08-system-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/08-system-long>`_.
+**Git reference:** Tutorial example `08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system>`_. Long version `08-system-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system-long>`_.
 
 So far we have just solved single linear PDE problems with a weak formulation
 of the form $a(u,v) = l(v)$, where $u, v$ were continuous approximations in the
@@ -1121,7 +1121,7 @@ We will say more about visualization and Filters in a moment, after showing the 
 Long Version of Example 08
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Git reference:** Tutorial example `08-system-long <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/08-system-long>`_.
+**Git reference:** Tutorial example `08-system-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system-long>`_.
 
 As in example 03, the long version of this example does not employ the function solve_linear(). Instead, after initializing the weak formulation, one initializes the LinearProblem class, selects a matrix solver, assembles the matrix problem, solves it, and translates the resulting coefficient vector into Solutions::
 
@@ -1196,7 +1196,7 @@ displacements. Of course, the color map still shows the Von Mises stress as befo
 Time-Dependent Problems (09)
 ----------------------------
 
-**Git reference:** Tutorial example `09-timedep <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/09-timedep>`_. 
+**Git reference:** Tutorial example `09-timedep <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/09-timedep>`_. 
 
 This section describes the implementation of a simple time-dependent
 heat transfer model that describes, in a naive approximation, how the St. Vitus cathedral

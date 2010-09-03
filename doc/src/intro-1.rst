@@ -33,24 +33,15 @@ About this Document
 
 Prior to reading this document, we recommend that you install Hermes using instructions on 
 its `home page <http://hpfem.org/hermes/>`_, and subscribe to the `mailing list 
-<http://groups.google.com/group/hermes/>`_. Our mailing list is a very active place where 
+<http://groups.google.com/group/hermes/>`_. Our mailing list is an active place where 
 you will get any questions answered quickly. You can also follow the development 
 via the `group activity list <http://groups.google.com/group/hpfem-group/>`_ 
-that contains a weekly log of all core team members.
+that contains a weekly logs of all core team members.
 
-The best way of reading this tutorial is to run the code at the same time. 
-After making your way through the tutorial, you may want to browse the directories 
-with `benchmarks <http://git.hpfem.org/git/hermes.git/tree/HEAD:/benchmarks>`_ 
-and `examples <http://git.hpfem.org/git/hermes.git/tree/HEAD:/examples>`_ 
-that contain a variety of different PDE models. If you create an interesting model 
-using Hermes, let us know and we will add it to the repository. 
-
-The source code can be 
-viewed in the `git repository <http://git.hpfem.org/git/hermes.git/tree>`_, 
-and all tutorial examples can be found in the directory 
-`tutorial/ <http://git.hpfem.org/git/hermes.git/tree/HEAD:/tutorial>`_.
-For the 1D and 3D codes, see the `Hermes1D <http://hpfem.org/hermes1d/>`_ and 
-`Hermes3D <http://hpfem.org/hermes3d/>`_ home pages, respectively.
+The best way to benefit from this document is to run the code at the same time. 
+It is recomnmended that you start with the tutorial to Hermes2D, even if you are 
+interested in Hermes1D or Hermes3D. After making your way through the tutorial, 
+browse benchmarks and examples. If you create an interesting model, let us know!
 
 User and Developer Documentation
 --------------------------------
@@ -80,7 +71,7 @@ The following list describes the above in more detail:
 
 * **Mature hp-adaptivity algorithms**. Hermes puts a major emphasis on error control and automatic adaptivity. Practitioners know well how painful it is to use automatic adaptivity in conjunction with standard lower-order approximations such as linear or quadratic elements - the error decreases somehow during a few initial adaptivity steps, but then it slows down and it does not help to invest more unknowns or CPU time. This is typical for low-order methods. In contrast to this, the exponentially-convergent adaptive *hp*-FEM and *hp*-DG do not have this problem - the error drops steadily and fast during adaptivity all the way to the desired accuracy. The following graph shows typical convergence rates of *h*-FEM with linear elements, *h*-FEM with quadratic elements, and *hp*-FEM on a log-log scale:
 
-.. image:: img/intro/conv_dof.png
+.. image:: hermes2d/img/intro/conv_dof.png
    :align: center
    :width: 600
    :height: 400
@@ -88,7 +79,7 @@ The following list describes the above in more detail:
 
 Same graphs as above but now in terms of CPU time:
 
-.. image:: img/intro/conv_cpu.png
+.. image:: hermes2d/img/intro/conv_cpu.png
    :align: center
    :width: 600
    :height: 400
@@ -96,7 +87,7 @@ Same graphs as above but now in terms of CPU time:
 
 * **Wide applicability**. Hermes is PDE-independent. Standard FEM codes are designed to solve some narrow class(es) of PDE problems (such as elliptic equations, fluid dynamics, electromagnetics etc.). Hermes does not employ any technique or algorithm that would limit its applicability to some particular class(es) of PDE problems. Automatic adaptivity is guided by a universal computational a-posteriori error estimate that works in the same way for any PDE. Of course this does not mean that the algorithms perform equally well on all PDE - some equations simply are more difficult to solve than others. However, Hermes allows you to tackle an arbitrary PDE or multiphysics PDE system and add your own equation-specific extensions if necessary. Visit the `hp-FEM group home page <http://hpfem.org/>`_ and especially the `gallery <http://hpfem.org/gallery/>`_ to see numerous examples.
 
-.. image:: img/intro/ns.jpg
+.. image:: hermes2d/img/intro/ns.jpg
    :align: center
    :width: 650
    :height: 300
@@ -105,14 +96,14 @@ Same graphs as above but now in terms of CPU time:
 
 * **Arbitrary-level hanging nodes**. Hermes has a unique original methodology for handling irregular meshes with arbitrary-level hanging nodes. This means that extremely small elements can be adjacent to very large ones. When an element is refined, its neighbors are never split forcefully as in conventional adaptivity algorithms. It is well known that approximations with one-level hanging nodes are more efficient compared to regular meshes. However, the technique of arbitrary-level hanging nodes brings this to a perfection.
 
-.. image:: img/intro/ord_2d_c.png
+.. image:: hermes2d/img/intro/ord_2d_c.png
    :align: center
    :width: 370
    :height: 350
    :alt: Illustration of arbitrary-level hanging nodes.
 
 .. ######
-    .. image:: img/intro/mixer-mesh.png
+    .. image:: hermes2d/img/intro/mixer-mesh.png
        :align: right
        :width: 300
        :height: 300
@@ -124,13 +115,13 @@ Same graphs as above but now in terms of CPU time:
 
 * **Multimesh hp-FEM**. Various physical fields or solution components in multiphysics problems can be approximated on individual meshes, combining quality $H^1$, $H(curl)$, $H(div)$, and $L^2$ conforming higher-order elements. Due to a unique original methodology, no error is caused by operator splitting, transferring data between different meshes, and the like. The following figure illustrates a coupled problem of heat and moisture transfer in massive concrete walls of a nuclear reactor vessel. 
 
-.. image:: img/intro/hm-sln-frame.png
+.. image:: hermes2d/img/intro/hm-sln-frame.png
    :align: left
    :width: 500
    :height: 410
    :alt: Illustration of multimesh hp-FEM.
 
-.. image:: img/intro/hm-mesh-frame.png
+.. image:: hermes2d/img/intro/hm-mesh-frame.png
    :align: right
    :width: 500
    :height: 410
@@ -142,7 +133,7 @@ Same graphs as above but now in terms of CPU time:
 
 * **Dynamical meshes for time-dependent problems**. In time-dependent problems, different physical fields or solution components can be approximated on individual meshes that evolve in time independently of each other. Due to a unique original methodology, no error is caused by transfering solution data between different meshes and time levels. No such transfer takes place in the multimesh *hp*-FEM - the discretization of the time-dependent PDE system is monolithic. 
 
-.. image:: img/intro/flame.jpg
+.. image:: hermes2d/img/intro/flame.jpg
    :align: center
    :width: 700
    :height: 360
@@ -153,7 +144,7 @@ Interactive Web Accessibility
 
 * **Interactive web usage**. You can use Hermes (and other major open source FEM codes) remotely via any web browser, using the `FEMhub Online Numerical Methods Laboratory <http://lab.femhub.org/>`_. Your hardware will not be used as the online lab is powered by the University of Nevada, Reno (UNR) high-performance computing facility (`Research Grid <http://hpc.unr.edu/wiki/index.php/Main_Page>`_). In this way you can compute with Hermes using any platform that supports web browsing, such as an iPhone:
 
-.. image:: img/intro/iphone_large.png
+.. image:: hermes2d/img/intro/iphone_large.png
    :align: center
    :width: 250
    :height: 450

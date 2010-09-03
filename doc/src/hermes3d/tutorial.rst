@@ -3,7 +3,7 @@
 Tutorial
 ========
 
-Welcome to the hermes3d tutorial. It is intended to help you master hermes3d library.
+Welcome to the Hermes3D tutorial. 
 
 .. toctree::
    :maxdepth: 2

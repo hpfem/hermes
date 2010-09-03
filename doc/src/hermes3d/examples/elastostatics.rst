@@ -3,7 +3,7 @@
 Elastostatics
 =============
 
-**Git reference:** Example `elastostatics <http://git.hpfem.org/hermes3d.git/tree/HEAD:/examples/elastostatics>`_.
+**Git reference:** Example `elastostatics <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/examples/elastostatics>`_.
 
 This example deals with equations of linear elasticity inside an L-shaped domain. Elastostatics studies 
 linear elastic deformations under the conditions of equilibrium where all forces acting on the elastic 

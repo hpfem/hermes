@@ -4,7 +4,7 @@ Bessel (Maxwell's Equations)
 ============================
 
 **Git reference:** Benchmark 
-`bessel <http://git.hpfem.org/hermes3d.git/tree/HEAD:/benchmarks/bessel>`_.
+`bessel <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/benchmarks/bessel>`_.
 
 .. index::
    single: mesh; fixed

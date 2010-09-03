@@ -1,6 +1,5 @@
-============
-Introduction
-============
+Hermes1D
+========
 
 About Hermes1D
 --------------
@@ -44,12 +43,12 @@ User and Developer Documentation
 
 User documentation can be found in
 the directory 'doc/'. Type 'make html' there to build it. The documentation is
-available online at http://hpfem.org/hermes1d/doc/index.html.
+available online at http://hpfem.org/hermes/doc/hermes1d/index.html.
 
 To compile the C++ reference manual, go to 'hermes1d/doc.cpp/'. There
 type 'doxygen hermes1d.lib-real.doxyfile'. The html files are in 
 'h1d-real/html/index.html'. This documentation is also 
-available online at http://hpfem.org/hermes1d/doc.cpp/h1d-real/html/index.html.
+available online at http://hpfem.org/hermes/hermes1d/doc.cpp/h1d-real/html/index.html.
 
 Mathematical Background
 ----------------------
@@ -204,4 +203,4 @@ Interactive Web Accessibility
    :height: 450
    :alt: Hermes in iPhone.
 
-See the `Hermes home page <http://hpfem.org/hermes1d/>`_ for more information. An overview of books, journal articles, conference proceedings papers and talks about Hermes and adaptive *hp*-FEM can be found in its `publications section <http://hpfem.org/publications/>`_.
+See the `Hermes home page <http://hpfem.org/hermes/>`_ for more information. An overview of books, journal articles, conference proceedings papers and talks about Hermes and adaptive *hp*-FEM can be found in its `publications section <http://hpfem.org/publications/>`_.

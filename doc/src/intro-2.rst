@@ -21,7 +21,7 @@ Clone the Git repository::
   
     git clone http://git.hpfem.org/git/hermes.git
 
-Change dir to hermes1d/, hermes2d/ or hermes3d/. Then::
+Change dir to hermes1d/, hermes2d/ or hermes3d/ and::
 
     cmake .
     make
@@ -134,7 +134,7 @@ libraries and applications on your Mac) by doing the following:
       'sudo port install cmake'.
 
 **Step 4**: Get the Hermes source code. Change to the directory where you want 
-to download the Hermes source and clone the git repository by doing 
+to download the Hermes source and clone the git repository by typing 
 'git clone http://git.hpfem.org/git/hermes.git'.
 
 **Step 5**: Configure and build Hermes by changing dir to 'hermes1d/', 'hermes2d/' 
@@ -570,7 +570,7 @@ You can get an overview of existing branches by typing::
 
 This will show you something like this:
 
-  .. image:: img/intro/terminal-git.png
+  .. image:: hermes2d/img/intro/terminal-git.png
    :align: center
    :width: 600
    :alt: Terminal screenshot
@@ -648,7 +648,7 @@ Before changing to a different branch, type::
 This stands for 'git status'. You will see 
 something like this:
 
-  .. image:: img/intro/terminal-git-2.png
+  .. image:: hermes2d/img/intro/terminal-git-2.png
    :align: center
    :width: 600
    :alt: Terminal screenshot
@@ -668,7 +668,7 @@ typing
 
 you will see
 
-  .. image:: img/intro/terminal-git-3.png
+  .. image:: hermes2d/img/intro/terminal-git-3.png
    :align: center
    :width: 600
    :alt: Terminal screenshot
@@ -712,7 +712,7 @@ After it finishes, type::
 This will open a new tab in your Firefox where you will
 see something like 
 
-  .. image:: img/intro/firefox.png
+  .. image:: hermes2d/img/intro/firefox.png
    :align: center
    :width: 600
    :alt: Firefox screenshot

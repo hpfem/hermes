@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+====================
 Hermes Documentation
 ====================
 
@@ -11,6 +12,7 @@ Hermes Documentation
 
     src/intro-1
     src/intro-2
+
     src/hermes2d/tutorial-1
     src/hermes2d/tutorial-2
     src/hermes2d/tutorial-3
@@ -19,6 +21,15 @@ Hermes Documentation
     src/hermes2d/tutorial-6
     src/hermes2d/benchmarks
     src/hermes2d/examples
+
+    src/hermes1d/intro-1.rst
+    src/hermes1d/examples.rst
+    
+    src/hermes3d/benchmarks.rst
+    src/hermes3d/examples.rst
+
+
+
 
 .. #####
 

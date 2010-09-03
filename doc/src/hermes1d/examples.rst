@@ -1,6 +1,6 @@
-========
-Examples
-========
+==================
+Hermes1D: Examples
+==================
 
 The best way to understand the above machinery is to solve examples which we
 will do in this section.

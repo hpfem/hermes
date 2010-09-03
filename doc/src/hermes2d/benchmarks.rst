@@ -1,8 +1,8 @@
-Benchmarks with Known Exact Solution
-====================================
+Hermes2D: Benchmarks with Known Exact Solution
+==============================================
 
 This section contains the description of selected `benchmarks 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks>`_.
 Contrary to regular examples, benchmarks typically do not have 
 a significant physical or engineering motivation but they come with 
 a known exact solution and thus they are a great resource for 
@@ -11,7 +11,7 @@ comparisons of various methods and adaptivity algorithms.
 Smooth-iso (Elliptic)
 ---------------------
 
-**Git reference:** Benchmark `smooth-iso <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/smooth-iso>`_.
+**Git reference:** Benchmark `smooth-iso <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/smooth-iso>`_.
 
 We show that it is a very bad idea to approximate smooth solutions using low-order 
 elements.
@@ -146,7 +146,7 @@ CPU time convergence graphs:
 Smooth-aniso-x (Elliptic)
 -------------------------
 
-**Git reference:** Benchmark `smooth-aniso-x <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/smooth-aniso-x>`_.
+**Git reference:** Benchmark `smooth-aniso-x <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/smooth-aniso-x>`_.
 
 We show that one should use (spatially as well as polynomially) anisotropic refinements for solutions 
 containing anisotropy. 
@@ -260,7 +260,7 @@ CPU time convergence graphs:
 Smooth-aniso-y (Elliptic)
 -------------------------
 
-**Git reference:** Benchmark `smooth-aniso-y <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/smooth-aniso-y>`_.
+**Git reference:** Benchmark `smooth-aniso-y <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/smooth-aniso-y>`_.
 
 This example is very similar to the previous one, except now the solution is 
 constant in the x-direction. It is good to have both to be able to check that 
@@ -269,7 +269,7 @@ anisotropic refinements work correctly.
 L-Shape (Elliptic)
 ------------------
 
-**Git reference:** Benchmark `lshape <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/lshape>`_.
+**Git reference:** Benchmark `lshape <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/lshape>`_.
 
 This is a standard adaptivity benchmark whose exact solution is smooth but
 contains singular gradient in a re-entrant corner. 
@@ -390,7 +390,7 @@ CPU time convergence graphs:
 Interior Layer (Elliptic)
 -------------------------
 
-**Git reference:** Benchmark `layer-interior <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/layer-interior>`_.
+**Git reference:** Benchmark `layer-interior <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/layer-interior>`_.
 
 This example has a smooth solution that exhibits a steep interior layer.
 
@@ -534,7 +534,7 @@ CPU time convergence graphs:
 Boundary Layer (Elliptic)
 -------------------------
 
-**Git reference:** Benchmark `layer-boundary <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/layer-boundary>`_.
+**Git reference:** Benchmark `layer-boundary <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/layer-boundary>`_.
 
 This example is a singularly perturbed problem with known exact solution that exhibits a thin boundary layer, that 
 the reader can use to perform various experiments with adaptivity for problems with boundary layers. The sample 
@@ -795,7 +795,7 @@ equally important as allowing spatially anisotropic ones.
 Line Singularity (Elliptic)
 ---------------------------
 
-**Git reference:** Benchmark `line-singularity <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/line-singularity>`_.
+**Git reference:** Benchmark `line-singularity <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/line-singularity>`_.
 
 The is another example with anisotropic solution that is suitable for testing 
 anisotropic element refinements.
@@ -930,7 +930,7 @@ CPU convergence graphs:
 Kellogg (Elliptic)
 ------------------
 
-**Git reference:** Benchmark `kellogg <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/kellogg>`_.
+**Git reference:** Benchmark `kellogg <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/kellogg>`_.
 
 The solution to this elliptic problems contains a severe singularity that poses a challenge to 
 adaptive methods. 
@@ -1054,7 +1054,7 @@ CPU time convergence graphs:
 2-Group Neutronics (Neutronics)
 -------------------------------
 
-**Git reference:** Benchmark `neutronics-2-group-adapt <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/neutronics-2-group-adapt>`_.
+**Git reference:** Benchmark `neutronics-2-group-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt>`_.
 
 This benchmark uses automatic adaptivity to solve a system of weakly coupled elliptic PDEs describing diffusion of neutrons through given medium.
 It employs the simple (yet often used in practice) two-group approximation by which all neutrons are divided into two distinct groups according to their energy (speed). This leads to the system of two equations shown below.
@@ -1067,7 +1067,7 @@ Equations solved:
     - \nabla \cdot D_1 \nabla \phi_1 + \Sigma_{r1}\phi_1 - \nu\Sigma_{f1} \phi_1 - \nu\Sigma_{f2} \phi_2 = Q_1,\\
     - \nabla \cdot D_2 \nabla \phi_2 + \Sigma_{r2}\phi_2 - \Sigma_{s,2\leftarrow 1} \phi_1 = Q_2.    
 
-For physical meaning of the various material parameters, see the example `4-Group Neutronics <http://hpfem.org/hermes2d/doc/src/examples.html#group-neutronics>`_. Their numerical values for this benchmark will be given below.
+For physical meaning of the various material parameters, see the example `4-Group Neutronics <http://hpfem.org/hermes/doc/hermes2d/src/examples.html#group-neutronics>`_. Their numerical values for this benchmark will be given below.
 
 Domain of interest: 
 
@@ -1178,7 +1178,7 @@ The corresponding code snippet is shown below:
   }
 
 where the function *get_material* is used to obtain the material marker given the physical coordinates (see 
-`main.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/benchmarks/neutronics-2-group-adapt/main.cpp>`_). 
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt/main.cpp>`_). 
 The following picture shows the two right-hand side functions (distribution of neutron sources/sinks) - :math:`Q_1` is plotted on the left, :math:`Q_2` on the right.
 
 .. image:: img/benchmark-neutronics-2-group-adapt/rhs.png
@@ -1187,7 +1187,7 @@ The following picture shows the two right-hand side functions (distribution of n
    :height: 275
    :alt: Right-hand side.
    
-Weak formulation of the present two-group neutron diffusion problem with fixed source terms may be derived from the general multigroup formulation shown in the `4-Group Neutronics <http://hpfem.org/hermes2d/doc/src/examples.html#group-neutronics>`_ example. Concerning its implementation (see the file `forms.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/benchmarks/neutronics-2-group-adapt/forms.cpp>`_), it is worth noticing that we manually define a higher integration order for the volumetric linear forms to correctly integrate the non-polynomial source terms, although we may set it lower for the group-1 equations than for the group-2 equations as :math:`Q_1` is much smoother than :math:`Q_2`:
+Weak formulation of the present two-group neutron diffusion problem with fixed source terms may be derived from the general multigroup formulation shown in the `4-Group Neutronics <http://hpfem.org/hermes/doc/src/hermes2d/examples.html#group-neutronics>`_ example. Concerning its implementation (see the file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt/forms.cpp>`_), it is worth noticing that we manually define a higher integration order for the volumetric linear forms to correctly integrate the non-polynomial source terms, although we may set it lower for the group-1 equations than for the group-2 equations as :math:`Q_1` is much smoother than :math:`Q_2`:
 
 ::
 
@@ -1209,7 +1209,7 @@ The following figures show the computed distributions of neutron flux for both n
    :height: 415
    :alt: Both components of solution.
 
-Notice the largely different behavior of the two solution components, where the first one is quite smooth while the other one more oscillating. It reflects the typical behavior observed in real cases, which arises from the different rate of interactions of fast (`1`\ :sup:`st` group) and slow (`2`\ :sup:`nd` group) neutrons with surrounding nuclei. This makes `multimesh <http://hpfem.org/hermes2d/doc/src/tutorial-2.html#multimesh-hp-fem>`_ a preferred choice for automatic adaptivity, as can be clearly seen from the first of the series of convergence comparisons presented below. 
+Notice the largely different behavior of the two solution components, where the first one is quite smooth while the other one more oscillating. It reflects the typical behavior observed in real cases, which arises from the different rate of interactions of fast (`1`\ :sup:`st` group) and slow (`2`\ :sup:`nd` group) neutrons with surrounding nuclei. This makes `multimesh <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-2.html#multimesh-hp-fem>`_ a preferred choice for automatic adaptivity, as can be clearly seen from the first of the series of convergence comparisons presented below. 
 
 In each convergence comparison, the reported error is the true approximation error calculated wrt. the exact solution given above and measured in a `H`\ :sup:`1` norm. The calculation was ended when the energy error estimate (often used to guide adaptivity in real multiphysics problems where exact solution is not known) became lower than 0.1%.
 
@@ -1342,7 +1342,7 @@ CPU convergence graphs:
 Screen (Maxwell's Equations)
 ----------------------------
 
-**Git reference:** Benchmark `screen <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks/screen>`_.
+**Git reference:** Benchmark `screen <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/screen>`_.
 
 This example solves time-harmonic Maxwell's equations. It describes an electromagnetic wave that 
 hits a thin screen under the angle of 45 degrees, causing a singularity at the tip of the screen.
@@ -1366,11 +1366,11 @@ the midpoint of the left side. It is filled with air:
 
 Boundary conditions: Tangential component of solution taken from known exact solution 
 (essential BC). See the 
-`main.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/benchmarks/screen/main.cpp>`_ file.
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/main.cpp>`_ file.
 
 Exact solution: This is rather complicated in this case - please look into the 
 corresponding file 
-`exact_sol.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/benchmarks/screen/exact_sol.cpp>`_.
+`exact_sol.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/exact_sol.cpp>`_.
 
 Code for the weak forms:
 

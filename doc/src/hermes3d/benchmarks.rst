@@ -1,9 +1,10 @@
 .. _benchmarks-doc:
 
-Benchmarks with Known Exact Solution
-=====================================
+Hermes3D: Benchmarks with Known Exact Solution
+==============================================
+
 This section contains the description of selected `benchmarks
-<http://git.hpfem.org/hermes3d.git/tree/HEAD:/benchmarks>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/benchmarks>`_.
 Contrary to regular examples, benchmarks typically do not have 
 a significant physical or engineering motivation but they came 
 with a known exact solution and thus they are a great resource 

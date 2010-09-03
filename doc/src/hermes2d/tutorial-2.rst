@@ -1,6 +1,6 @@
-=======================================
-Tutorial Part II (Automatic Adaptivity)
-=======================================
+=================================================
+Hermes2D Tutorial: Part II (Automatic Adaptivity)
+=================================================
 
 So far we have not paid any attention to the accuracy of the results. In general, 
 a computation on a fixed mesh is not likely to be very accurate. There is a need 
@@ -57,10 +57,10 @@ has to resort to adaptive *hp*-FEM. The *hp*-FEM takes advantage of
 the following facts:
 
 * Large high-degree elements approximate smooth parts of solution *much* better than small linear ones. 
-  The benchmark `smooth-iso <http://hpfem.org/hermes2d/doc/src/benchmarks.html#smooth-iso-elliptic>`_ 
+  The benchmark `smooth-iso <http://hpfem.org/hermes/doc/hermes2d/src/benchmarks.html#smooth-iso-elliptic>`_ 
   illustrates this - spend a few minutes to check it out, the results are truly impressive. In the 
   Hermes2D repository, it can be found in the directory 
-  `benchmarks/ <http://git.hpfem.org/hermes2d.git/tree/HEAD:/benchmarks>`_.
+  `benchmarks/ <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks>`_.
 * This holds the other way where the solution is not smooth, i.e., singularities,
   steep gradients, oscillations and such are approximated best using locally small 
   low-order elements.
@@ -68,13 +68,13 @@ the following facts:
   that can refine meshes anisotropically both in $h$ and $p$. Often this is the case with 
   boundary layers (viscous flows, singularly perturbed problems, etc.). This is illustrated 
   in  benchmarks 
-  `smooth-aniso-x <http://hpfem.org/hermes2d/doc/src/benchmarks.html#smooth-aniso-x-elliptic>`_ and
-  `boundary layer <http://hpfem.org/hermes2d/doc/src/benchmarks.html#boundary-layer-elliptic>`_. However, 
+  `smooth-aniso-x <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#smooth-aniso-x-elliptic>`_ and
+  `boundary layer <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#boundary-layer-elliptic>`_. However, 
   solutions without boundary layers can have significant anisotropic behavior too, as illustrated
-  in benchmark  `line singularity <http://hpfem.org/hermes2d/doc/src/benchmarks.html#line-singularity-elliptic>`_.
+  in benchmark  `line singularity <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#line-singularity-elliptic>`_.
 
-Large number of possible element refinements in hp-FEM
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Large number of possible element refinements in 'hp'-FEM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Automatic adaptivity in the *hp*-FEM is substantially different from adaptivity
 in low-order FEM, since every element can be refined in many different ways.
@@ -227,7 +227,7 @@ This is shown in the figure below.
 In problems with extremely strong singularities the difference between the 
 exact and estimated error can be significant. This is illustrated in the 
 following graph that belongs to the benchmark 
-`kellogg <http://hpfem.org/hermes2d/doc/src/benchmarks.html#kellogg-elliptic>`_.
+`kellogg <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#kellogg-elliptic>`_.
 
  .. image:: img/benchmark-kellogg/kellogg.png
    :align: center
@@ -238,7 +238,7 @@ following graph that belongs to the benchmark
 Electrostatic Micromotor Problem (10)
 -------------------------------------
 
-**Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/10-adapt>`_. 
+**Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt>`_. 
 
 Let us demonstrate the use of adaptive h-FEM and hp-FEM on a linear elliptic problem
 concerned with the calculation of
@@ -388,7 +388,7 @@ The reference (fine mesh) solution is computed on a globally refined copy of the
 using the class RefSystem. The constructor of the class RefSystem allows the  user
 to choose a different polynomial degree increment (default value 1)
 and another element refinement (default value 1) - see the file 
-`src/refsystem.h <http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/refsystem.h>`_::
+`src/refsystem.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/refsystem.h>`_::
 
     RefSystem(LinSystem* base, int order_increase = 1, int refinement = 1);
 
@@ -618,7 +618,7 @@ The input parameter of the method calc_error() is a combination that is a pair: 
 Simplified Fitzhugh-Nagumo System (11)
 --------------------------------------
 
-**Git reference:** Tutorial example `11-system-adapt <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/11-system-adapt>`_. 
+**Git reference:** Tutorial example `11-system-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt>`_. 
 
 We consider a simplified version of the Fitzhugh-Nagumo equation.
 This equation is a~prominent example of activator-inhibitor systems in two-component reaction-diffusion 
@@ -694,7 +694,7 @@ are not extremely pretty, but they are not too bad either:
     }
 
 The weak forms can be found in the 
-file `forms.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/11-system-adapt/forms.cpp>`_ and 
+file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/11-system-adapt/forms.cpp>`_ and 
 they are registered as follows::
 
     // Initialize the weak formulation.
@@ -708,7 +708,7 @@ they are registered as follows::
 
 Beware that although each of the forms is actually symmetric, one cannot use the H2D_SYM flag as in the 
 elasticity equations, since it has a slightly different 
-meaning (see example `08-system <http://hpfem.org/hermes2d/doc/src/tutorial-1.html#systems-of-equations-08>`_).
+meaning (see example `08-system <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1.html#systems-of-equations-08>`_).
 
 At the beginning of the adaptivity loop, a coarse and fine mesh approximation on both 
 meshes is obtained as follows::
@@ -816,13 +816,13 @@ CPU time convergence graphs:
 Adaptivity for General 2nd-Order Linear Equation (12)
 -----------------------------------------------------
 
-**Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/12-general-adapt>`_. 
+**Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt>`_. 
 
 This example does not bring anything substantially new and its purpose is solely to 
 save you work adding adaptivity to the tutorial example 
-`07-general <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/07-general>`_. 
+`07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. 
 Feel free to adjust the 
-`main.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/12-general-adapt/main.cpp>`_ 
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/12-general-adapt/main.cpp>`_ 
 file for your own applications.
 
 Solution:
@@ -861,7 +861,7 @@ Convergence comparison in terms of CPU time.
 Complex-Valued Problem (13)
 ---------------------------
 
-**Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/13-complex-adapt>`_. 
+**Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt>`_. 
 
 This example solves a complex-valued vector potential problem
 
@@ -879,7 +879,7 @@ shown in the following schematic picture:
 
 The computational domain is a rectangle of height 0.003 and width 0.004. 
 Different material markers are used for the wire, air, and iron 
-(see mesh file `domain2.mesh <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/13-complex-adapt/domain2.mesh>`_).
+(see mesh file `domain2.mesh <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/13-complex-adapt/domain2.mesh>`_).
 
 Boundary conditions are zero Dirichlet on the top and right edges, and zero Neumann
 elsewhere.
@@ -975,7 +975,7 @@ and hp-FEM are shown below.
 Time-Harmonic Maxwell's Equations (14)
 --------------------------------------
 
-**Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/14-hcurl-adapt>`_. 
+**Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt>`_. 
 
 This example solves time-harmonic Maxwell's equations in an L-shaped domain and it 
 describes the diffraction of an electromagnetic wave from a re-entrant corner. It comes with an 
@@ -998,7 +998,7 @@ fourth quadrant. It is filled with air:
    :alt: Computational domain.
 
 Boundary conditions: Combined essential and natural, see the 
-`main.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/14-hcurl-adapt/main.cpp>`_ file.
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/main.cpp>`_ file.
 
 Exact solution:
 
@@ -1035,7 +1035,7 @@ computer code, this reads:
     }  
 
 Here jv() is the Bessel function $\bfJ_{\alpha}$. For its source code see the 
-`forms.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/14-hcurl-adapt/forms.cpp>`_ file.
+`forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/forms.cpp>`_ file.
 
 Code for the weak forms:
 

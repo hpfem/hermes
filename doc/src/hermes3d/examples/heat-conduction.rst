@@ -3,7 +3,7 @@
 Heat Conduction
 ===============
 
-**Git reference:** Examples `heat conduction <http://git.hpfem.org/hermes3d.git/tree/HEAD:/examples/heat-conduction>`_.
+**Git reference:** Examples `heat conduction <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/examples/heat-conduction>`_.
 
 This example describes the implementation of a simple time-dependent heat conduction problem inside the domain. 
 

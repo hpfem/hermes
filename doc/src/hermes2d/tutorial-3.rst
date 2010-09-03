@@ -1,6 +1,6 @@
-======================================
-Tutorial Part III (Nonlinear Problems)
-======================================
+================================================
+Hermes2D Tutorial: Part III (Nonlinear Problems)
+================================================
 
 This part of the tutorial assumes that the reader is familiar with the solution of 
 linear problems (Part I). We will begin with explaining the basics of the Newton's 
@@ -120,7 +120,7 @@ Constant Initial Condition (15)
 -------------------------------
 
 **Git reference:** Tutorial example `15-newton-elliptic-1 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/15-newton-elliptic-1>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/15-newton-elliptic-1>`_.
 
 Let us solve the nonlinear model problem from the previous section,
 
@@ -198,7 +198,7 @@ the ExtData structure, and the coordinates of the integration points via the Geo
 The contents of ExtData is user-defined and the Geom structure contains geometrical information 
 including the unit normal and tangential vectors to the boundary at the integration points 
 (also for curved boundaries). See the file 
-`src/forms.h <http://git.hpfem.org/hermes2d.git/blob/HEAD:/src/forms.h>`_ for more details. 
+`src/forms.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_ for more details. 
 
 The Newton's method always has to start from an initial condition, and in this example 
 this is 
@@ -283,7 +283,7 @@ General Initial Condition (16)
 ------------------------------
 
 **Git reference:** Tutorial example `16-newton-elliptic-2 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/16-newton-elliptic-2>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/16-newton-elliptic-2>`_.
 
 We will solve the nonlinear model problem from the previous section again,
 
@@ -376,7 +376,7 @@ Newton's Method and Adaptivity (17)
 -----------------------------------
 
 **Git reference:** Tutorial example `17-newton-elliptic-adapt 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/17-newton-elliptic-adapt>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/17-newton-elliptic-adapt>`_.
 
 We will still keep the simple model problem
 
@@ -548,7 +548,7 @@ Nonlinear Parabolic Problem (18)
 --------------------------------
 
 **Git reference:** Tutorial example `18-newton-timedep-heat 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/18-newton-timedep-heat>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/18-newton-timedep-heat>`_.
 
 We will employ the Newton's method to solve a nonlinear parabolic PDE discretized 
 in time by the implicit Euler method. To keep things simple, our model problem is 
@@ -649,7 +649,7 @@ Flame Propagation Problem (19)
 ------------------------------
 
 **Git reference:** Tutorial example `19-newton-timedep-flame 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/19-newton-timedep-flame>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/19-newton-timedep-flame>`_.
 
 We will employ the Newton's method to solve a nonlinear system of two parabolic equations 
 describing a very simple flame propagation model (laminar flame, no fluid mechanics involved).
@@ -749,7 +749,7 @@ via Filters::
 
 Details on the functions omega_fn, omega_dt_fn, omega_dy_fn and the weak 
 forms can be found in the file `forms.cpp 
-<http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/19-newton-timedep-flame/forms.cpp>`_
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-flame/forms.cpp>`_
 Here is how we register the weak forms,
 
 ::
@@ -841,7 +841,7 @@ Navier-Stokes Equations (20)
 ----------------------------
 
 **Git reference:** Tutorial example `20-newton-timedep-ns 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/20-newton-timedep-ns>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/20-newton-timedep-ns>`_.
 
 In this example, the time-dependent laminar incompressible Navier-Stokes equations are
 discretized in time via the implicit Euler method. If NEWTON == true,
@@ -1065,7 +1065,7 @@ Gross-Pitaevski Equation (21)
 -----------------------------
 
 **Git reference:** Tutorial example `21-newton-timedep-gp 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/21-newton-timedep-gp>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/21-newton-timedep-gp>`_.
 
 In this example we use the Newton's method to solve the nonlinear complex-valued 
 time-dependent Gross-Pitaevski equation. This equation describes the ground state of 
@@ -1086,14 +1086,14 @@ $g$ the coupling constant (proportional to the scattering length of two interact
 $\omega$ the frequency.
 
 From the implementation point of view, the only detail worth mentioning is the 
-use of the complex version of Hermes in the file `CMakeLists.txt <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/19-newton-timedep-gp/CMakeLists.txt>`_:
+use of the complex version of Hermes in the file `CMakeLists.txt <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-gp/CMakeLists.txt>`_:
 
 ::
 
     # use the complex version of the library:
     set(HERMES ${HERMES_CPLX_BIN})
 
-The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes2d.git/blob/HEAD:/tutorial/19-newton-timedep-gp/forms.cpp>`_:
+The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-gp/forms.cpp>`_:
 
 ::
 

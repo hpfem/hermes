@@ -1,6 +1,6 @@
-=========================================================
-Tutorial Part IV (Adaptivity for Time-Dependent Problems)
-=========================================================
+===================================================================
+Hermes2D Tutorial: Part IV (Adaptivity for Time-Dependent Problems)
+===================================================================
 
 (Space-time) adaptive FEM and *hp*-FEM for time-dependent PDE and PDE systems is one of 
 the most advanced techniques Hermes can do. Although we have published it 
@@ -60,7 +60,7 @@ Nonlinear Parabolic Problem (22)
 --------------------------------
 
 **Git reference:** Tutorial example `22-newton-timedep-heat-adapt 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/22-newton-timedep-heat-adapt>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/22-newton-timedep-heat-adapt>`_.
 
 Description coming soon.
 
@@ -69,7 +69,7 @@ Heat and Moisture Transfer in Concrete (23)
 -------------------------------------------
 
 **Git reference:** Tutorial example `23-heat-and-moisture-adapt 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/23-heat-and-moisture-adapt>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/23-heat-and-moisture-adapt>`_.
 
 Description coming soon.
 
@@ -77,6 +77,6 @@ Gross-Pitaevski Equation (24)
 -----------------------------
 
 **Git reference:** Tutorial example `24-newton-timedep-gp-adapt 
-<http://git.hpfem.org/hermes2d.git/tree/HEAD:/tutorial/24-newton-timedep-gp-adapt>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/24-newton-timedep-gp-adapt>`_.
 
 Description coming soon.

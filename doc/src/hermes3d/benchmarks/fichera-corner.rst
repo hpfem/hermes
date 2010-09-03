@@ -4,7 +4,7 @@ Fichera Corner (Elliptic)
 =========================
 
 **Git reference:** Benchmark
-`fichera <http://git.hpfem.org/hermes3d.git/tree/HEAD:/benchmarks/fichera>`_.
+`fichera <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/benchmarks/fichera>`_.
 
 .. index::
    single: mesh; dynamical
