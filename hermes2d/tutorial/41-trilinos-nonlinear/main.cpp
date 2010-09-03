@@ -22,6 +22,8 @@
 //
 //  The following parameters can be changed:
 
+using namespace Teuchos;
+
 const int INIT_REF_NUM = 2;       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;             // Initial polynomial degree of all mesh elements.
 const double NEWTON_TOL = 1e-6;   // Stopping criterion for the Newton's method.
@@ -144,10 +146,10 @@ int main(int argc, char* argv[])
   nox_solver.set_init_sln(coeff_vec->get_c_array());
 
   // Choose preconditioning.
-  MlPrecond pc("sa");
+  RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {
-    if (JFNK) nox_solver.set_precond(&pc);
+    if (JFNK) nox_solver.set_precond(pc);
     else nox_solver.set_precond("ML");
   }
 

@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   }
 
   // Initialize the view.
-  ScalarView Tview("Temperature", 0, 0, 450, 600);
+  ScalarView Tview("Temperature", 0, 0, 450, 400);
   Tview.set_min_max_range(10,20);
 
   // Time stepping loop:

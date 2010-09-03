@@ -4,6 +4,8 @@
 #define H2D_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+using namespace Teuchos;
+
 //  The purpose of this example is to show how to use Trilinos
 //  for linear PDE problems. It compares performance of the LinearProblem 
 //  class in Hermes using the UMFpack matrix solver with the performance
@@ -149,10 +151,10 @@ int main(int argc, char **argv)
   nox_solver->set_init_sln(coeff_vec->get_c_array());
 
   // Choose preconditioning.
-  MlPrecond pc("sa");
+  RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {
-    if (JFNK) nox_solver->set_precond(&pc);
+    if (JFNK) nox_solver->set_precond(pc);
     else nox_solver->set_precond("ML");
   }
 

@@ -4,6 +4,7 @@
 #define H2D_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+using namespace Teuchos;
 using namespace RefinementSelectors;
 
 //  The purpose of this example is to show how to use Trilinos while adapting mesh
@@ -20,7 +21,7 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 4;              // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 1;              // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                    // Initial polynomial degree of all mesh elements.
 const bool JFNK = true;                  // true = jacobian-free method,
                                          // false = Newton.
@@ -127,7 +128,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  info("Number of DOF: %d", space.get_num_dofs());
+  //info("Number of DOF: %d", space.get_num_dofs());
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);
@@ -159,20 +160,20 @@ int main(int argc, char* argv[])
     NoxSolver solver(&fep);
 
     // Choose preconditioner.
-    MlPrecond pc("sa");
+    RCP<Precond> pc = rcp(new MlPrecond("sa"));
     if (PRECOND)
     {
-      if (JFNK) solver.set_precond(&pc);
+      if (JFNK) solver.set_precond(pc);
       else solver.set_precond("ML");
     }
 
     // Solve the matrix problem.
-    info("Coarse mesh problem: Assembling by FeProblem, solving by NOX.");
+    int ndof = get_num_dofs(&space);
+    info("Coarse mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
     bool solved = solver.solve();
     if (solved)
     {
       double* s = solver.get_solution_vector();
-      int ndof = get_num_dofs(&space);
       Vector* tmp_vector = new AVector(ndof);
       tmp_vector->set_c_array(s, ndof);
       sln.set_fe_solution(&space, tmp_vector);
@@ -209,17 +210,17 @@ int main(int argc, char* argv[])
     NoxSolver ref_solver(&ref_fep);
     if (PRECOND)
     {
-      if (JFNK) ref_solver.set_precond(&pc);
+      if (JFNK) ref_solver.set_precond(pc);
       else ref_solver.set_precond("ML");
     }
 
     // Solve the matrix problem using NOX.
-    info("Fine mesh problem: Assembling by FeProblem, solving by NOX.");
+    ndof = get_num_dofs(&rspace);
+    info("Fine mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
     solved = ref_solver.solve();
     if (solved)
     {
       double* s = ref_solver.get_solution_vector();
-      int ndof = get_num_dofs(&rspace);
       AVector* tmp_vector = new AVector(ndof);
       tmp_vector->set_c_array(s, ndof);
       ref_sln.set_fe_solution(&rspace, tmp_vector);

@@ -4,6 +4,9 @@
 #define H2D_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+using Teuchos::RCP;
+using Teuchos::rcp;
+
 //  The purpose of this example is to show how to use Trilinos for nonlinear time-dependent coupled PDE systems.
 //  Solved by NOX solver via Newton, or JFNK with or without preconditioning.
 //
@@ -13,11 +16,12 @@
 //
 //  The following parameters can be changed:
 
+
 const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
 const int P_INIT = 2;               // Initial polynomial degree of all mesh elements.
-const bool JFNK = false;            // true = jacobian-free method,
+const bool JFNK = true;            // true = jacobian-free method,
                                     // false = Newton
-const int PRECOND = 1;              // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
+const int PRECOND = 2;              // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
                                     // or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
                                     // in case of jfnk,
                                     // default Ifpack proconditioner in case of Newton.
@@ -54,6 +58,7 @@ scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
 
 // Weak forms. 
 # include "forms.cpp"
+
 
 int main(int argc, char* argv[])
 {
@@ -130,10 +135,10 @@ int main(int argc, char* argv[])
 
   // Initialize NOX solver and preconditioner.
   NoxSolver solver(&fep);
-  MlPrecond pc("sa");
+  RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {
-    if (JFNK) solver.set_precond(&pc);
+    if (JFNK) solver.set_precond(pc);
     else solver.set_precond("Ifpack");
   }
   if (TRILINOS_OUTPUT)
@@ -172,6 +177,7 @@ int main(int argc, char* argv[])
       // Visualization.
       DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
       rview.set_min_max_range(0.0,2.0);
+      rview.show(&omega_view);
       cpu_time.tick(HERMES_SKIP);
 			
       // Skip visualization time.

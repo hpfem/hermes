@@ -164,13 +164,13 @@ NoxSolver::NoxSolver(FeProblem* problem)
   // linear solver settings
   ls_type = "GMRES";
   ls_max_iters = 800;
-  ls_tolerance = 1e-10;
+  ls_tolerance = 1e-8;
   ls_sizeof_krylov_subspace = 50;
   precond_yes = false;
   precond_type = "None";
   // convergence test
   conv.max_iters = 10;
-  conv.abs_resid = 1.0e-8;
+  conv.abs_resid = 1.0e-6;
   conv.rel_resid = 1.0e-2;
   conv.norm_type = NOX::Abstract::Vector::TwoNorm;
   conv.stype = NOX::StatusTest::NormF::Scaled;
