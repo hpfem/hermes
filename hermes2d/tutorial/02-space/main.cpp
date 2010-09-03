@@ -46,15 +46,11 @@ int main(int argc, char* argv[])
   // Refine all elements (optional).
   mesh.refine_all_elements();
 
-  // Create an H1 space with default shapeset,
-  // natural BC, and linear elements.
-  H1Space space(&mesh);
-
-  // Change the poly order of elements (optional).
-  space.set_uniform_order(P_INIT);
+  // Create an H1 space with default shapeset and natural BC.
+  H1Space space(&mesh, NULL, NULL, P_INIT);
 
   // View FE basis functions.
-  BaseView bview("FE Space", 0, 0, 600, 600);
+  BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
   bview.show(&space);
 
   // Practice some keyboard and mouse controls.

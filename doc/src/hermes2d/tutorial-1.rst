@@ -2,13 +2,23 @@
 Hermes2D Tutorial: Part I (Linear Problems)
 ===========================================
 
-This tutorial should give you a good idea of how Hermes2D works. After reading it, you will
-be able to create your own applications and/or adjust existing Hermes examples for your 
-purposes. At the beginning of every section we give a reference to the corresponding example in the 
-Hermes git repository -- there you will always find the corresponding main.cpp file, mesh file(s) etc.
+This tutorial should give you a good idea of how Hermes works. It begins with eight
+sections related to Hermes2D (six tutorial sections, benchmarks, and examples). 
+Then we discuss selected examples for Hermes1D and several benchmarks and examples 
+for Hermes3D. 
 
-This document is under continuous development. If you find bugs, typos, dead links or such,
-let us know through the `mailing list <http://groups.google.com/group/hermes2d/>`_.
+After reading the tutorial, you will be able to create your own applications and/or 
+adjust existing Hermes examples for your 
+purposes. At the beginning of every section we give a reference to the corresponding example in the 
+Hermes git repository -- there you will always find the corresponding main.cpp file, weak forms, 
+mesh file, etc.
+
+This document is under continuous development and certainly it is not perfect. 
+If you find bugs, typos, dead links or such, help us improve it by reporting them
+through one of the mailing lists for `Hermes1D <http://groups.google.com/group/hermes1d/>`_,
+`Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
+`Hermes3D <http://groups.google.com/group/hermes2d/>`_. Looking forward to your feedback!
+
 
 Finite Element Mesh (01)
 ------------------------
@@ -43,7 +53,7 @@ Hermes can read meshes in its own generic format as well as in the
 (this is, for example, the output of `Cubit <http://cubit.sandia.gov/>`_).
 First let us discuss the generic Hermes mesh data format. Reading
 of ExodusII mesh files is very simple as we will see in example 
-`iron-water <http://hpfem.org/hermes2d/doc/src/examples.html#iron-water-neutronics>`_. 
+`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples.html#iron-water-neutronics>`_. 
 
 Generic Hermes mesh file consists of variable assignments. Each variable can hold a real number, 
 list of real numbers, or list of lists. The following are all valid definitions in 
@@ -150,14 +160,13 @@ Every main.cpp file in the git repository contains lots of comments and instruct
 the `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/01-mesh/main.cpp>`_ 
 file begins with creating an instance of the class Mesh. In order to load
 the mesh file, you have to create a mesh loader class (in our case that is ``H2DReader``) and
-call the method ``load()``:
-::
+call the method ``load()``::
 
     #include "hermes2d.h"
 
     int main(int argc, char* argv[])
     {
-      // load the mesh file
+      // Load the mesh file.
       Mesh mesh;
       H2DReader mloader;
       mloader.load("domain.mesh", &mesh);
@@ -166,10 +175,9 @@ Note: To load the exodus-II mesh file, one has to use ``ExodusIIReader`` class i
 
 The following portion of code illustrates various types of initial mesh refinements.
 It does not matter if the mesh becomes irregular, in fact, arbitrarily irregular
-meshes are at the heart of Hermes: 
-::
+meshes are at the heart of Hermes::
 
-      // perform some sample initial refinements
+      // Perform some sample initial refinements.
       mesh.refine_all_elements();          // refines all elements
       mesh.refine_towards_vertex(3, 4);    // refines mesh towards
                                            // vertex #3 (4x)
@@ -184,8 +192,7 @@ meshes are at the heart of Hermes:
       mesh.refine_element(114, 1);         // refines element #114
                                            // anisotropically
 
-Other ways of modifying meshes on the fly include
-::
+Other ways of modifying meshes on the fly include::
 
     Mesh::refine_element(int id, int refinement = 0);
     Mesh::convert_quads_to_triangles();
@@ -197,13 +204,12 @@ Other ways of modifying meshes on the fly include
     Mesh::unrefine_all_elements();
 
 See the file `src/mesh.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh.cpp>`_ for more details. 
-The following code illustrates how to visualize the mesh using the class MeshView:
-::
+The following code illustrates how to visualize the mesh using the class MeshView::
 
-    // display the mesh
-    // (100, 100) is the upper left corner position
-    // 500 x 500 is the window size
-    MeshView mview("Hello world!", 100, 100, 500, 500);
+    // Display the mesh.
+    // (0, 0) is the upper left corner position
+    // 350 x 350 is the window size
+    MeshView mview("Hello world!", new WinGeom(0, 0, 350, 350));
     mview.show(&mesh);
 
 You can initialize it by supplying the title of the window and its initial position and size (all of these
@@ -215,16 +221,14 @@ parameters are optional). The class MeshView provides the method show() that dis
    :height: 400
    :alt: Image of the mesh created via the MeshView class.
 
-Every main.cpp file is finished with 
-::
+Every main.cpp file is finished with::
 
-    // wait for keyboard or mouse input
+    // Wait for the view to be closed.
     View::wait();
     return 0;
   }
 
 so that you have a chance to see the graphical output.
-
 
 
 Setting Up Finite Element Space (02)
@@ -237,9 +241,9 @@ in the next step one needs to construct a finite element space on it.
 The following predefined spaces are currently available:
 
 * H1Space - the most common space of continuous, piecewise-polynomial functions belonging to $H^1(\Omega) = \{ v \in L^2(\Omega); \nabla u \in [L^2(\Omega)]^2 \}$,
-* HcurlSpace - the space of vector-valued functions discontinuous along mesh edges, with continuous tangential component on the edges $H(\mbox{curl},\Omega) = \{ E \in [L^2(\Omega)]^2; \nabla \times E \in L^2(\Omega)\}$,
-* HdivSpace - the space of vector-valued functions discontinuous along mesh edges, with continuous normal component on the edges $H(\mbox{div},\Omega) = \{ v \in [L^2(\Omega)^2; \nabla \cdot v \in L^2(\Omega)\}$,
-* L2Space -  the space of functions discontinuous along mesh edges, belonging to the space $L^2(\Omega)$.
+* HcurlSpace - space of vector-valued functions discontinuous along mesh edges, with continuous tangential component on the edges $H(\mbox{curl},\Omega) = \{ E \in [L^2(\Omega)]^2; \nabla \times E \in L^2(\Omega)\}$,
+* HdivSpace - space of vector-valued functions discontinuous along mesh edges, with continuous normal component on the edges $H(\mbox{div},\Omega) = \{ v \in [L^2(\Omega)^2; \nabla \cdot v \in L^2(\Omega)\}$,
+* L2Space - space of functions discontinuous along mesh edges, belonging to the space $L^2(\Omega)$.
 
 All these spaces allow for higher-order elements and meshes with arbitrary-level hanging nodes.
 If you are not familiar with higher-order FEM, let us just say that the spaces can contain
@@ -282,7 +286,7 @@ of the example 02-space::
       H1Space space(&mesh, NULL, NULL, P_INIT);
 
       // View FE basis functions.
-      BaseView bview("FE Space", 0, 0, 600, 600);
+      BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
       bview.show(&space);
 
       // Wait for the view to be closed.
@@ -406,15 +410,14 @@ With the space and weak formulation in hand, the problem is solved via::
 
     // Solve the linear problem.
     Solution sln;
-    solve_linear(&space, &wf, &sln, SOLVER_UMFPACK);
+    solve_linear(&space, &wf, SOLVER_UMFPACK, &sln);
 
 The parameter SOLVER_UMFPACK indicates that we are using the direct sparse matrix solver UMFpack. Other options include SOLVER_PETSC, SOLVER_MUMPS, a variety of SciPy matrix solvers and others - the choice of matrix solvers will be discussed in more detail later. 
 
 The solution can be visualized via the ScalarView class::
 
     // Visualize the solution.
-    WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
-    ScalarView view("Solution", sln_win_geom);
+    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
     view.show(&sln);
 
 The following figure shows the output of this example (again, press '3' for 3D view).
@@ -458,6 +461,11 @@ After this, the matrix problem is solved::
       if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
 
 And finally, the solution vector is translated into a Solution::
+
+      // Convert coefficient vector into a Solution.
+      Solution* sln = new Solution(&space, rhs);
+
+For this, one can also use the method Solution::set_fe_solution()::
 
       // Convert coefficient vector into a Solution.
       Solution sln;
@@ -1138,10 +1146,9 @@ As in example 03, the long version of this example does not employ the function 
     // Solve the matrix problem.
     if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
 
-    // Convert coefficient vector into a Solution.
-    Solution u_sln, v_sln;
-    u_sln.set_fe_solution(&u_space, rhs);
-    v_sln.set_fe_solution(&v_space, rhs);
+    // Convert coefficient vector into a Solution.  
+    Solution* u_sln = new Solution(&u_space, rhs);
+    Solution* v_sln = new Solution(&v_space, rhs);
 
 Visualization and Filters
 -------------------------
@@ -1155,7 +1162,7 @@ as another Solution (which can be visualized, passed into another Filter,
 passed into a weak form, etc.). More advanced usage of Filters will be discussed 
 later. In elasticity examples we typically use the predefined VonMisesFilter::
 
-    VonMisesFilter stress(&u_sln, &v_sln, lambda, mu);
+    VonMisesFilter stress(Tuple<MeshFunction*>(u_sln, v_sln), lambda, mu);
     view.show_mesh(false);
     view.show(&stress, H2D_EPS_HIGH);
 
@@ -1180,7 +1187,7 @@ Finally, in elasticity problems it may be desirable to deform the computational
 domain according to the calculated displacements. The method View::show() has
 additional three optional parameters for this::
 
-    VonMisesFilter stress(Tuple<MeshFunction*>(&u_sln, &v_sln), mu, lambda);
+    VonMisesFilter stress(Tuple<MeshFunction*>(&u_sln, &v_sln), lambda, mu);
     view.show(&stress, H2D_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
 Here the fourth and fifth parameters are the displacement components used to 
@@ -1270,7 +1277,7 @@ boundary condition types::
 
     BCType bc_types(int marker)
     {
-      if (marker == marker_ground) return BC_ESSENTIAL;
+      if (marker == bdy_ground) return BC_ESSENTIAL;
       else return BC_NATURAL;
     }
 
@@ -1278,14 +1285,14 @@ and values::
 
     scalar essential_bc_values(int ess_bdy_marker, double x, double y)
     {
-      if (ess_bdy_marker == marker_ground) return T_INIT;
+      if (ess_bdy_marker == bdy_ground) return T_INIT;
     }
 
 Then the space for the temperature $T$ is set up::
 
     // Initialize an H1 space with default shepeset.
     H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-    info("ndof = %d", get_num_dofs(&space));
+    int ndof = get_num_dofs(&space);
 
 Bilinear and linear forms are defined as follows::
 
@@ -1329,9 +1336,9 @@ The weak forms are registered as follows::
     // Initialize weak formulation.
     WeakForm wf();
     wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-    wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, marker_air);
-    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, H2D_ANY, 1, &tsln);
-    wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, marker_air);
+    wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
+    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, H2D_ANY, &tsln);
+    wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
 Next, the LinearProblem class and the matrix solver structures are initialized::
 
@@ -1349,8 +1356,6 @@ re-construct the load vector. This is done via the Boolean variable rhsonly
 which is set to false before the time stepping begins. For completeness, we show 
 the entire time stepping loop below::
 
-    // Time stepping:
-    int nsteps = (int)(FINAL_TIME/TAU + 0.5);
     bool rhsonly = false;
     for(int ts = 1; ts <= nsteps; ts++)
     {

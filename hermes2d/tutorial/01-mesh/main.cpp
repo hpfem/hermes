@@ -48,8 +48,9 @@ int main(int argc, char* argv[])
   mesh.refine_element(114, 1);         // 1... anisotropic refinement.
 
   // Display the mesh.
-  // (100, 0) is the upper left corner position, 600 x 500 is the window size
-  MeshView mview("Hello world!", 100, 0, 600, 500);
+  // (0, 0) is the upper left corner position, 
+  // 350 x 350 is the window size.
+  MeshView mview("Hello world!", new WinGeom(0, 0, 350, 350));
   mview.show(&mesh);
 
   // Practice some keyboard and mouse controls.

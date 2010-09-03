@@ -22,7 +22,6 @@ Hermes Documentation
     src/hermes2d/benchmarks
     src/hermes2d/examples
 
-    src/hermes1d/intro-1.rst
     src/hermes1d/examples.rst
     
     src/hermes3d/benchmarks.rst
