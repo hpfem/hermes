@@ -125,8 +125,8 @@ protected:
 
   // Caching transformed values for element
   std::map<Key, Func<double>*, Compare> cache_fn;
-  Geom<double>* cache_e[g_max_quad + 1 + 4];
-  double* cache_jwt[g_max_quad + 1 + 4];
+  Geom<double>* cache_e[g_max_quad + 1 + 4 * g_max_quad + 4];
+  double* cache_jwt[g_max_quad + 1 + 4 * g_max_quad + 4];
 
   void init_cache();
   void delete_cache();
