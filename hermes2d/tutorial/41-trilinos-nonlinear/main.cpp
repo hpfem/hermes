@@ -5,9 +5,9 @@
 #include "hermes2d.h"
 
 //  The purpose of this example is to show how to use Trilinos for nonlinear PDE problems. It 
-//  compares performance of The Newton's method in the NonlinSystem class in Hermes (using the 
-//  Umfpack solver) with the performance of the Trilinos/NOX solver (using the Newton's method 
-//  or JFNK, and with or without preconditioning).
+//  compares performance of the Newton's method in Hermes (assembling via the DiscreteProblem 
+//  class and matrix problem solution via UMFpack) with the performance of the Trilinos/NOX 
+//  solver (using the Hermes FeProblem class to assemble discrete problems).
 //
 //  PDE:  - \nabla (k \nabla u) = f
 //  k = (1 + sqr(u_x) + sqr(u_y))^{-0.5}

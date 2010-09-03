@@ -123,7 +123,7 @@ int main(int argc, char **argv)
   // an initial vector by projecting init_cond() on the FE space, see below.
   coeff_vec->set_zero();
 
-  /* // Generate an initial vector for NOX by projecting init_cond().
+  /* // Alternatively: Generate an initial vector for NOX by projecting init_cond().
   // Project the initial condition on the FE space. 
   info("Projecting initial solution on the FE mesh.");
   // The NULL pointer means that we do not want the projection result as a Solution.

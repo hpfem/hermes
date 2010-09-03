@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   // Define constant initial condition. 
   Solution t_prev_time;
-  t_prev_time.set_const(&mesh, 20.0);
+  t_prev_time.set_const(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);

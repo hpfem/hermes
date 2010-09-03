@@ -7,9 +7,9 @@
 using namespace Teuchos;
 using namespace RefinementSelectors;
 
-//  The purpose of this example is to show how to use Trilinos while adapting mesh
-//  Solved by NOX solver, either using Newton's method or JFNK, with or without preconditioning.
-//  The underlying problem is the "layer" benchmark with known exact solution.
+//  The purpose of this example is to show how to use Trilinos while adapting mesh.
+//  Solved by NOX solver, either using Newton's method or JFNK, with or without 
+//  preconditioning. The underlying problem is benchmark "layer-internal".
 //
 //  PDE: -Laplace u = f.
 //
@@ -21,8 +21,8 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 1;              // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                    // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;              // Number of initial uniform mesh refinements.
 const bool JFNK = true;                  // true = jacobian-free method,
                                          // false = Newton.
 const bool PRECOND = true;               // Preconditioning by jacobian in case of jfnk,
@@ -38,7 +38,7 @@ const int STRATEGY = 0;                  // Adaptive strategy:
                                          // STRATEGY = 2 ... refine all elements whose error is larger
                                          //   than THRESHOLD.
                                          // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO; // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO_H; // Predefined list of element refinement candidates. Possible values are
                                          // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                          // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                          // See User Documentation for details.
@@ -48,7 +48,7 @@ const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nod
                                          // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                          // Note that regular meshes are not supported, this is due to
                                          // their notoriously bad performance.
-const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
+const double CONV_EXP = 0.5;             // Default value is 1.0. This parameter influences the selection of
                                          // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 1.0;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                          // fine mesh and coarse mesh solution in percent).
@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
   wf.add_vector_form(callback(residual_form));
 
   // Initialize views.
-  ScalarView sview("Coarse mesh solution", 0, 100, 798, 700);
-  OrderView  oview("Coarse mesh", 800, 100, 798, 700);
+  ScalarView sview("Coarse mesh solution", new WinGeom(0, 0, 440, 350));
+  OrderView  oview("Coarse mesh", new WinGeom(450, 0, 400, 350));
 
   // DOF convergence graphs.
   SimpleGraph graph_dof_est, graph_dof_exact;
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
       else solver.set_precond("ML");
     }
 
-    // Solve the matrix problem.
+    // Assemble on coarse mesh and solve the matrix problem using NOX.
     int ndof = get_num_dofs(&space);
     info("Coarse mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
     bool solved = solver.solve();
@@ -195,14 +195,17 @@ int main(int argc, char* argv[])
       // Skip visualization time.
       cpu_time.tick(HERMES_SKIP);
     }
+    else
+      error("NOX failed on coarse mesh.");
 
     // Create uniformly refined reference mesh.
     Mesh rmesh; rmesh.copy(&mesh); 
     rmesh.refine_all_elements();
     // Reference FE space.
-    H1Space rspace(&rmesh, bc_types, essential_bc_values, 1);
+    H1Space rspace(&rmesh, bc_types, essential_bc_values, P_INIT);
     int order_increase = 1;
     rspace.copy_orders(&space, order_increase); // increase orders by one
+
     // Initialize FE problem on reference mesh.
     FeProblem ref_fep(&wf, &rspace);
 
@@ -214,7 +217,7 @@ int main(int argc, char* argv[])
       else ref_solver.set_precond("ML");
     }
 
-    // Solve the matrix problem using NOX.
+    // Assemble on fine mesh and solve the matrix problem using NOX.
     ndof = get_num_dofs(&rspace);
     info("Fine mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
     solved = ref_solver.solve();
@@ -233,7 +236,7 @@ int main(int argc, char* argv[])
             ref_solver.get_num_lin_iters(), ref_solver.get_achieved_tol());
     }
     else
-      error("NOX failed.");
+      error("NOX failed on fine mesh.");
 
     // Calculate element errors.
     info("Calculating error (est).");

@@ -8,7 +8,7 @@ using Teuchos::RCP;
 using Teuchos::rcp;
 
 //  The purpose of this example is to show how to use Trilinos for nonlinear time-dependent coupled PDE systems.
-//  Solved by NOX solver via Newton, or JFNK with or without preconditioning.
+//  Solved by NOX solver via Newton or JFNK, with or without preconditioning.
 //
 //  PDE: Flame propagation (same as tutorial example 19-newton-timedep-flame).
 //
@@ -124,7 +124,8 @@ int main(int argc, char* argv[])
   info("Projecting initial solutions on the FE meshes.");
   Vector* coeff_vec = new AVector(ndof);
   project_global(Tuple<Space *>(t_space, c_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                 Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1), Tuple<Solution*>(&t_prev_time_1, &c_prev_time_1),
+                 Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1), 
+                 Tuple<Solution*>(&t_prev_time_1, &c_prev_time_1),
                  coeff_vec);
 
   // Measure the projection time.
@@ -159,7 +160,7 @@ int main(int argc, char* argv[])
     if (solved)
     {
       double* s = solver.get_solution_vector();
-      AVector *tmp_vector = new AVector(ndof);
+      Vector *tmp_vector = new AVector(ndof);
       tmp_vector->set_c_array(s, ndof);
       t_prev_newton.set_fe_solution(t_space, tmp_vector);
       c_prev_newton.set_fe_solution(c_space, tmp_vector);
