@@ -157,11 +157,8 @@ int main(int argc, char* argv[])
     bool solved = solver.solve();
     if (solved)
     {
-      double* s = solver.get_solution_vector();
-      Vector* tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      sln.set_fe_solution(&space, tmp_vector);
-      delete tmp_vector;
+      double* coeffs = solver.get_solution_vector();
+      sln.set_fe_solution(&space, coeffs, ndof);
 
       info("Coarse Solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)", 
@@ -194,11 +191,8 @@ int main(int argc, char* argv[])
     solved = ref_solver.solve();
     if (solved)
     {
-      double* s = ref_solver.get_solution_vector();
-      AVector* tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      ref_sln.set_fe_solution(&rspace, tmp_vector);
-      delete tmp_vector;
+      double* coeffs = ref_solver.get_solution_vector();
+      ref_sln.set_fe_solution(&rspace, coeffs, ndof);
 
       info("Reference solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)",

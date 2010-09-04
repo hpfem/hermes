@@ -144,11 +144,9 @@ int main(int argc, char **argv)
   Solution sln_nox;
   if (solved)
   {
-    double *s = nox_solver->get_solution_vector();
-    Vector *tmp_vector = new AVector(ndof);
-    tmp_vector->set_c_array(s, ndof);
-    sln_nox.set_fe_solution(&space, tmp_vector);
-    delete tmp_vector;
+    double *coeffs = nox_solver->get_solution_vector();
+    sln_nox.set_fe_solution(&space, coeffs, ndof);
+
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
       nox_solver->get_num_iters(), nox_solver->get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 

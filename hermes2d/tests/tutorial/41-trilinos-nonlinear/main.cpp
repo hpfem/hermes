@@ -143,10 +143,8 @@ int main(int argc, char* argv[])
   Solution sln_nox;
   if (solved)
   {
-    double *s = nox_solver.get_solution_vector();
-    AVector *tmp_vector = new AVector(ndof);
-    tmp_vector->set_c_array(s, ndof);
-    sln_nox.set_fe_solution(&space, tmp_vector);
+    double *coeffs = nox_solver.get_solution_vector();
+    sln_nox.set_fe_solution(&space, coeffs, ndof);
 
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
          nox_solver.get_num_iters(), nox_solver.get_residual());

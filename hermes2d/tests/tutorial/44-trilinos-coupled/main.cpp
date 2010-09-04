@@ -18,7 +18,7 @@ const int PRECOND = 2;              // Preconditioning by jacobian (1) (less GMR
                                     // in case of jfnk,
                                     // default Ifpack proconditioner in case of Newton.
 const double TAU = 0.05;            // Time step.
-const double T_FINAL = 60.0;        // Time interval length.
+const double T_FINAL = 2*TAU + 1e-4;        // Time interval length.
 const bool TRILINOS_OUTPUT = true;  // Display more details about nonlinear and linear solvers.
 
 // Problem parameters.
@@ -151,12 +151,9 @@ int main(int argc, char* argv[])
     bool solved = solver.solve();
     if (solved)
     {
-      double* s = solver.get_solution_vector();
-      AVector *tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      t_prev_newton.set_fe_solution(t_space, tmp_vector);
-      c_prev_newton.set_fe_solution(c_space, tmp_vector);
-      delete tmp_vector;
+      double* coeffs = solver.get_solution_vector();
+      t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
+      c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",
@@ -213,20 +210,18 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   double coor_x[8] = {0.0, 8.0, 15.0, 24.0, 30.0, 40.0, 50.0, 60.0};
   double coor_y = 8.0;
-  double t_value[8] = {1.000000, 0.850946, 0.624183, 0.524876, 0.696210, 0.964166, 0.998641, 0.001120};
-  double c_value[8] = {0.000000, -0.000000, 0.000002, 0.000009, 0.000001, -0.000000, 0.000042, 0.998844};
-  for (int i = 0; i < 6; i++)
+  double t_value[8] = {1.000000, 1.006876, 0.013766, 0.000004, 0.000000, 0.000000, 0.000000, 0.000000};
+  double c_value[8] = {0.000000, -0.006876, 0.986234, 0.999996, 1.000000, 1.000000, 1.000000, 1.000000};
+  for (int i = 0; i < 8; i++)
   {
-    if (((t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-6) && ((c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-6))
-    {
-      printf("Success!\n");
-    }
-    else
+    if (!((t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-4) || 
+        !((c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-4))
     {
       printf("Failure!\n");
       return ERROR_FAILURE;
     }
   }
+  printf("Success!\n");
   return ERROR_SUCCESS;
 }
 

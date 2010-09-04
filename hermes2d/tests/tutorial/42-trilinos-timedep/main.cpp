@@ -106,11 +106,8 @@ int main(int argc, char* argv[])
     bool solved = solver.solve();
     if (solved)
     {
-      double *s = solver.get_solution_vector();
-      AVector *tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      t_prev_time.set_fe_solution(&space, tmp_vector);
-      delete tmp_vector;
+      double *coeffs = solver.get_solution_vector();
+      t_prev_time.set_fe_solution(&space, coeffs, ndof);
     }
     else
       error("NOX failed.");
