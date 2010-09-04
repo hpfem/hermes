@@ -54,7 +54,7 @@ const int STRATEGY = 1;                    // Adaptive strategy:
                                            // STRATEGY = 2 ... refine all elements whose error is larger
                                            //   than THRESHOLD.
                                            // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO;    // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;   // Predefined list of element refinement candidates. Possible values are
                                            // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                            // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                            // See the User Documentation for details.
@@ -66,7 +66,7 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 1.0;               // Default value is 1.0. This parameter influences the selection of
                                            // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;              // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;               // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -162,8 +162,8 @@ int main(int argc, char* argv[])
   Solution u_prev_time;
 
   // Adapt mesh to represent initial condition with given accuracy.
-  bool verbose = true;        // Report results.
-  double err_stop_temp = 5.0;  // 
+  bool verbose = true;         // Report results.
+  double err_stop_temp = 6.0;  
   adapt_to_exact_function(space, H2D_H1_NORM, init_cond, &selector, THRESHOLD, STRATEGY, 
                           MESH_REGULARITY, err_stop_temp, NDOF_STOP, 
                           verbose, &u_prev_time);

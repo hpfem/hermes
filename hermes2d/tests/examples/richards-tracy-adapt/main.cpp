@@ -13,7 +13,7 @@ const int INIT_REF_NUM = 0;                // Number of initial uniform mesh ref
 const int INIT_REF_NUM_BDY = 8;            // Number of initial mesh refinements towards the top edge.
 const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements.
 const double TAU = 0.001;                  // Time step.
-const double T_FINAL = 1.0;                // Time interval length.
+const double T_FINAL = 2*TAU + 1e-4;       // Time interval length.
 const int TIME_INTEGRATION = 1;            // 1... implicit Euler, 2... Crank-Nicolson.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
@@ -43,7 +43,7 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 1.0;               // Default value is 1.0. This parameter influences the selection of
                                            // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;              // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;               // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -139,8 +139,8 @@ int main(int argc, char* argv[])
   Solution u_prev_time;
 
   // Adapt mesh to represent initial condition with given accuracy.
-  bool verbose = true;        // Report results.
-  double err_stop_temp = 5.0;  // 
+  bool verbose = false;        // Report results.
+  double err_stop_temp = 6.0;  // 
   adapt_to_exact_function(space, H2D_H1_NORM, init_cond, &selector, THRESHOLD, STRATEGY, 
                           MESH_REGULARITY, err_stop_temp, NDOF_STOP, 
                           verbose, &u_prev_time);
