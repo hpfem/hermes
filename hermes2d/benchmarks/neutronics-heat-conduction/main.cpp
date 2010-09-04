@@ -224,8 +224,8 @@ int main(int argc, char* argv[])
       error("Newton's method did not converge.");
     
     // Translate the resulting coefficient vector into the actual solutions. 
-    T_prev_newton.set_fe_solution(&space_T, coeff_vec);
-    phi_prev_newton.set_fe_solution(&space_phi, coeff_vec);
+    T_prev_newton.set_coeff_vector(&space_T, coeff_vec);
+    phi_prev_newton.set_coeff_vector(&space_phi, coeff_vec);
     
     // Show the new time level solution.
     sprintf(title, "Approx. solution for T, t = %g s", TIME);

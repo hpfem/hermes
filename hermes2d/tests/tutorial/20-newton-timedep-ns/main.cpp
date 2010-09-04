@@ -185,9 +185,9 @@ int main(int argc, char* argv[])
         error("Newton's method did not converge.");
   
       // Update previous time level solutions.
-      xvel_prev_time.set_fe_solution(xvel_space, coeff_vec);
-      yvel_prev_time.set_fe_solution(yvel_space, coeff_vec);
-      p_prev_time.set_fe_solution(p_space, coeff_vec);
+      xvel_prev_time.set_coeff_vector(xvel_space, coeff_vec);
+      yvel_prev_time.set_coeff_vector(yvel_space, coeff_vec);
+      p_prev_time.set_coeff_vector(p_space, coeff_vec);
     }
     else {
       // Linear solve.  

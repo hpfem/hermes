@@ -657,7 +657,7 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
   // estimate the required number of vertices and triangles
   Mesh* mesh = sln->get_mesh();
   if (mesh == NULL) {
-    warn("Have you used Solution::set_fe_solution() ?");
+    warn("Have you used Solution::set_coeff_vector() ?");
     error("Mesh is NULL in Linearizer:process_solution().");
   }
   int nn = mesh->get_num_elements();

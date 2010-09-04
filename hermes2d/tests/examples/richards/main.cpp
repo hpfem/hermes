@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
       error("Newton's method did not converge.");
 
     // Update previous time level solution.
-    u_prev_time.set_fe_solution(&space, coeff_vec);
+    u_prev_time.set_coeff_vector(&space, coeff_vec);
 
     // Update time.
     current_time += TAU;

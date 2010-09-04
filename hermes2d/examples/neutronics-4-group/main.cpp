@@ -202,10 +202,10 @@ int main(int argc, char* argv[])
     if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
 
     // Convert coefficient vector into Solutions.
-    sln1.set_fe_solution(&space1, rhs);
-    sln2.set_fe_solution(&space2, rhs);
-    sln3.set_fe_solution(&space3, rhs);
-    sln4.set_fe_solution(&space4, rhs);
+    sln1.set_coeff_vector(&space1, rhs);
+    sln2.set_coeff_vector(&space2, rhs);
+    sln3.set_coeff_vector(&space3, rhs);
+    sln4.set_coeff_vector(&space4, rhs);
 
     // Show solutions.
     view1.show(&sln1);    

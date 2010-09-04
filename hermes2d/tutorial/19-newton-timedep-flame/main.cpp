@@ -171,8 +171,8 @@ int main(int argc, char* argv[])
       for (int i = 0; i < ndof; i++) coeff_vec->add(i, rhs->get(i));
       
       // Set current solutions to the latest Newton iterate and reinitialize filters of these solutions.
-      t_prev_newton.set_fe_solution(tspace, coeff_vec);
-      c_prev_newton.set_fe_solution(cspace, coeff_vec);
+      t_prev_newton.set_coeff_vector(tspace, coeff_vec);
+      c_prev_newton.set_coeff_vector(cspace, coeff_vec);
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();
@@ -200,8 +200,8 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-    t_prev_time_1.set_fe_solution(tspace, coeff_vec);
-    c_prev_time_1.set_fe_solution(cspace, coeff_vec);
+    t_prev_time_1.set_coeff_vector(tspace, coeff_vec);
+    c_prev_time_1.set_coeff_vector(cspace, coeff_vec);
 
     ts++;
   } 

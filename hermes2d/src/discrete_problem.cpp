@@ -256,7 +256,7 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
   for (int i = 0; i < wf->neq; i++) {
     if (init_vec != NULL) {
       u_ext.push_back(new Solution(spaces[i]->get_mesh()));
-      u_ext[i]->set_fe_solution(spaces[i], this->pss[i], init_vec);
+      u_ext[i]->set_coeff_vector(spaces[i], this->pss[i], init_vec);
     }
     else u_ext.push_back(NULL);
   }
@@ -1207,7 +1207,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf,
   // If the user wants the resulting Solutions.
   if (target_slns != Tuple<Solution *>()) {
     for (int i=0; i < target_slns.size(); i++) {
-      if (target_slns[i] != NULL) target_slns[i]->set_fe_solution(spaces[i], rhs);
+      if (target_slns[i] != NULL) target_slns[i]->set_coeff_vector(spaces[i], rhs);
     }
   }
 
@@ -1593,7 +1593,7 @@ H2D_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *coe
   }
 
   // Store the result in sln.
-  for (int i = 0; i < num_comps; i++) slns[i]->set_fe_solution(spaces[i], coeff_vec);
+  for (int i = 0; i < num_comps; i++) slns[i]->set_coeff_vector(spaces[i], coeff_vec);
     
   // FIXME: this needs to be solved more elegantly.
   Tuple<MeshFunction*> slns_mf = Tuple<MeshFunction*>();
@@ -1656,7 +1656,7 @@ H2D_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *coe
       error("Newton's method did not converge.");
 
     // Store the result in ref_sln.
-    for (int i = 0; i < num_comps; i++) ref_slns[i]->set_fe_solution(ref_spaces[i], coeff_vec);
+    for (int i = 0; i < num_comps; i++) ref_slns[i]->set_coeff_vector(ref_spaces[i], coeff_vec);
 
     // Calculate element errors.
     if (verbose) info("Calculating error.");

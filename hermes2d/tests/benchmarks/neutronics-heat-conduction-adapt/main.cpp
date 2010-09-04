@@ -224,8 +224,8 @@ int main(int argc, char* argv[])
     error("Newton's method did not converge.");
 
   // Translate the resulting coefficient vector into the actual solutions. 
-  T_coarse.set_fe_solution(&space_T, coeff_vec);
-  phi_coarse.set_fe_solution(&space_phi, coeff_vec);
+  T_coarse.set_coeff_vector(&space_T, coeff_vec);
+  phi_coarse.set_coeff_vector(&space_phi, coeff_vec);
   
   // Update the time iterates.
   T_prev_time.copy(&T_coarse);
@@ -262,8 +262,8 @@ int main(int argc, char* argv[])
             error("Newton's method did not converge.");
           
           // Translate the resulting coefficient vector into the actual solutions. 
-          T_coarse.set_fe_solution(&space_T, coeff_vec);
-          phi_coarse.set_fe_solution(&space_phi, coeff_vec);
+          T_coarse.set_coeff_vector(&space_T, coeff_vec);
+          phi_coarse.set_coeff_vector(&space_phi, coeff_vec);
           
         } else {
           // Projection onto the globally derefined meshes.
@@ -310,8 +310,8 @@ int main(int argc, char* argv[])
         error("Newton's method did not converge."); 
       
       // Translate the resulting coefficient vector into the actual solutions. 
-      T_fine.set_fe_solution(ref_spaces[0], coeff_vec);
-      phi_fine.set_fe_solution(ref_spaces[1], coeff_vec);
+      T_fine.set_coeff_vector(ref_spaces[0], coeff_vec);
+      phi_fine.set_coeff_vector(ref_spaces[1], coeff_vec);
       
       // Calculate error estimates and exact errors.
       info("Calculating errors.");
@@ -356,8 +356,8 @@ int main(int argc, char* argv[])
               error("Newton's method did not converge.");
             
             // Translate the resulting coefficient vector into the actual solutions. 
-            T_coarse.set_fe_solution(&space_T, coeff_vec);
-            phi_coarse.set_fe_solution(&space_phi, coeff_vec);
+            T_coarse.set_coeff_vector(&space_T, coeff_vec);
+            phi_coarse.set_coeff_vector(&space_phi, coeff_vec);
                                         
           } else {
             // Projection onto the new coarse meshes.

@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     if (solved)
     {
       double *coeffs = solver.get_solution_vector();
-      t_prev_time.set_fe_solution(&space, coeffs, ndof);
+      t_prev_time.set_coeff_vector(&space, coeffs, ndof);
     }
     else
       error("NOX failed.");

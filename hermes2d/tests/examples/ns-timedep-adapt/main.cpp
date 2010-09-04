@@ -235,9 +235,9 @@ int main(int argc, char* argv[])
                        NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
 
     // Copy new time level reference solution into prev_time.
-    xvel_prev_time.set_fe_solution(xvel_space, coeff_vec);
-    yvel_prev_time.set_fe_solution(yvel_space, coeff_vec);
-    p_prev_time.set_fe_solution(p_space, coeff_vec);
+    xvel_prev_time.set_coeff_vector(xvel_space, coeff_vec);
+    yvel_prev_time.set_coeff_vector(yvel_space, coeff_vec);
+    p_prev_time.set_coeff_vector(p_space, coeff_vec);
   }
 
   ndof = get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));

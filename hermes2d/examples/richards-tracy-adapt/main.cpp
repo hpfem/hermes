@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 
   // Store the result in sln.
   Solution sln, ref_sln;
-  sln.set_fe_solution(space, coeff_vec);
+  sln.set_coeff_vector(space, coeff_vec);
 
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
         error("Newton's method did not converge.");
 
       // Store the result in ref_sln.
-      ref_sln.set_fe_solution(ref_space, coeff_vec);
+      ref_sln.set_coeff_vector(ref_space, coeff_vec);
 
       // Calculate error estimate wrt. fine mesh solution.
       info("Calculating error (est).");

@@ -143,8 +143,8 @@ int main(int argc, char* argv[])
     if (solved)
     {
       double* coeffs = solver.get_solution_vector();
-      t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
-      c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
+      t_prev_newton.set_coeff_vector(t_space, coeffs, ndof);
+      c_prev_newton.set_coeff_vector(c_space, coeffs, ndof);
 
       info("Number of nonlin iterations: %d (norm of residual: %g)",
           solver.get_num_iters(), solver.get_residual());

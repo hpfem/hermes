@@ -196,8 +196,8 @@ int main(int argc, char* argv[])
       error("Newton's method did not converge.");
     
     // Translate the resulting coefficient vector into the actual solutions. 
-    T_prev_newton.set_fe_solution(&space_T, coeff_vec);
-    phi_prev_newton.set_fe_solution(&space_phi, coeff_vec);
+    T_prev_newton.set_coeff_vector(&space_T, coeff_vec);
+    phi_prev_newton.set_coeff_vector(&space_phi, coeff_vec);
     
     // Exact solution for comparison with computational results.
     T_exact_solution.update(&mesh, T_exact);

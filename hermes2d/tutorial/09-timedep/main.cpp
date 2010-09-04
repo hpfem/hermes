@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
 
     // Update tsln.
-    tsln.set_fe_solution(&space, rhs);
+    tsln.set_coeff_vector(&space, rhs);
 
     // Update the time variable.
     TIME += TAU;

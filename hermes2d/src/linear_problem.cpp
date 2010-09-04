@@ -76,7 +76,7 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
 
   // Convert coefficient vector into a Solution.
   for (int i=0; i < solutions.size(); i++) {
-    solutions[i]->set_fe_solution(spaces[i], rhs);
+    solutions[i]->set_coeff_vector(spaces[i], rhs);
   }
 	
   // Copy the coefficient vector into coeff_vec.

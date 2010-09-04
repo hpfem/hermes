@@ -164,9 +164,9 @@ public:
 public:
 
   /// Converts a coefficient vector into a Solution.
-  virtual void set_fe_solution(Space* space, PrecalcShapeset* pss, Vector* vec, double dir = 1.0);
-  virtual void set_fe_solution(Space* space, Vector* vec, double dir = 1.0);
-  virtual void set_fe_solution(Space* space, double* coeffs, int ndof, double dir = 1.0);
+  virtual void set_coeff_vector(Space* space, PrecalcShapeset* pss, Vector* vec, double dir = 1.0);
+  virtual void set_coeff_vector(Space* space, Vector* vec, double dir = 1.0);
+  virtual void set_coeff_vector(Space* space, double* coeffs, int ndof, double dir = 1.0);
 
   /// Internal.
   virtual void set_active_element(Element* e);

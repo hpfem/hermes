@@ -200,7 +200,7 @@ Solution::Solution(Space* s, Vector* vec) : MeshFunction(s->get_mesh())
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
-  this->set_fe_solution(s, vec);
+  this->set_coeff_vector(s, vec);
 }
 
 void Solution::assign(Solution* sln)
@@ -312,7 +312,7 @@ Solution::~Solution()
 }
 
 
-//// set_fe_solution ///////////////////////////////////////////////////////////////////////////////
+//// set_coeff_vector ///////////////////////////////////////////////////////////////////////////////
 
 static struct mono_lu_init
 {
@@ -367,49 +367,49 @@ double** Solution::calc_mono_matrix(int o, int*& perm)
 }
 
 // for public use
-void Solution::set_fe_solution(Space* space, Vector* vec, double dir)
+void Solution::set_coeff_vector(Space* space, Vector* vec, double dir)
 {
     // sanity check
-    if (space == NULL) error("Space == NULL in Solutin::set_fe_solution().");
+    if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
 
     // initialize precalc shapeset using the space's shapeset
     Shapeset *shapeset = space->get_shapeset();
-    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_fe_solution().");
+    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_coeff_vector().");
     PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_fe_solution().");
+    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
     
-    this->set_fe_solution(space, pss, vec, dir);
+    this->set_coeff_vector(space, pss, vec, dir);
 }
 
 // for public use
-void Solution::set_fe_solution(Space* space, double* coeffs, int ndof, double dir)
+void Solution::set_coeff_vector(Space* space, double* coeffs, int ndof, double dir)
 {
     // sanity check
-    if (space == NULL) error("Space == NULL in Solutin::set_fe_solution().");
+    if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
 
     // initialize precalc shapeset using the space's shapeset
     Shapeset *shapeset = space->get_shapeset();
-    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_fe_solution().");
+    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_coeff_vector().");
     PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_fe_solution().");
+    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
     
     bool is_complex = (sizeof(scalar) == sizeof(double));
     Vector *tmp_vector = new AVector(ndof);
     tmp_vector->set_c_array(coeffs, ndof);
-    this->set_fe_solution(space, pss, tmp_vector, dir);
+    this->set_coeff_vector(space, pss, tmp_vector, dir);
     delete tmp_vector;
 }
 
 // for internal use
-void Solution::set_fe_solution(Space* space, PrecalcShapeset* pss, Vector* vec, double dir)
+void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, Vector* vec, double dir)
 {
   int o;
 
   // some sanity checks
-  if (space == NULL) error("Space == NULL in Solution::set_fe_solution().");
-  if (space->get_mesh() == NULL) error("Mesh == NULL in Solution::set_fe_solution().");
-  if (pss == NULL) error("PrecalcShapeset == NULL in Solution::set_fe_solution().");
-  if (vec == NULL) error("Coefficient vector == NULL in Solution::set_fe_solution().");
+  if (space == NULL) error("Space == NULL in Solution::set_coeff_vector().");
+  if (space->get_mesh() == NULL) error("Mesh == NULL in Solution::set_coeff_vector().");
+  if (pss == NULL) error("PrecalcShapeset == NULL in Solution::set_coeff_vector().");
+  if (vec == NULL) error("Coefficient vector == NULL in Solution::set_coeff_vector().");
   if (!space->is_up_to_date())
     error("Provided 'space' is not up to date.");
   if (space->get_shapeset() != pss->get_shapeset())
@@ -576,7 +576,7 @@ void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
   int ndof = space->get_num_dofs();
   Vector *temp = new AVector(ndof);
   for (int i = 0; i < ndof; i++) temp->set(i, 0);
-  set_fe_solution(space, pss, temp);
+  set_coeff_vector(space, pss, temp);
   delete temp;
 }
 

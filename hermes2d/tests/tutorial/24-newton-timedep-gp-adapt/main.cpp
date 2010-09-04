@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
   ScalarView magview("Projection of initial condition", new WinGeom(0, 0, 440, 350));
   magview.fix_scale_width(60);
   Solution *init_proj = new Solution();
-  init_proj->set_fe_solution(space, coeff_vec);
+  init_proj->set_coeff_vector(space, coeff_vec);
   AbsFilter mag(init_proj);
   //magview.show(&mag);
   delete init_proj;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
   
   // Set initial coarse mesh solution, create a variable for reference solutions.
   Solution sln, ref_sln;
-  sln.set_fe_solution(space, coeff_vec);
+  sln.set_coeff_vector(space, coeff_vec);
   
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
         error("Newton's method did not converge.");
       
       
-      sln.set_fe_solution(space, coeff_vec);
+      sln.set_coeff_vector(space, coeff_vec);
     }
 
     // Adaptivity loop:
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
         error("Newton's method did not converge.");
 
       // Store the result in ref_sln.
-      ref_sln.set_fe_solution(ref_space, coeff_vec);
+      ref_sln.set_coeff_vector(ref_space, coeff_vec);
 
       // Calculate element errors.
       info("Calculating error (est).");

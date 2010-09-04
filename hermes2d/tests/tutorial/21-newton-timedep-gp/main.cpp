@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
       error("Newton's method did not converge.");
 
     // Update previous time level solution.
-    psi_prev_time.set_fe_solution(space, coeff_vec);
+    psi_prev_time.set_coeff_vector(space, coeff_vec);
   }
 
   delete coeff_vec;

@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
   }
 
   // Store the result in sln.
-  sln->set_fe_solution(space, coeff_vec);
+  sln->set_coeff_vector(space, coeff_vec);
 
   // Adaptivity loop:
   bool done = false; int as = 1;
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
       error("Newton's method did not converge.");
 
     // Store the result in ref_sln.
-    ref_sln->set_fe_solution(ref_space, coeff_vec);
+    ref_sln->set_coeff_vector(ref_space, coeff_vec);
 
     // Calculate element errors.
     info("Calculating error (est).");

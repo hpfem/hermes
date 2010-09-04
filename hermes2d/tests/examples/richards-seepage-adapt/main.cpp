@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
                        NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
 
     // Copy new time level reference solution into u_prev_time.
-    u_prev_time.set_fe_solution(&space, coeff_vec);
+    u_prev_time.set_coeff_vector(&space, coeff_vec);
   }
 
   // Waiting for test.
