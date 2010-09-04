@@ -381,6 +381,25 @@ void Solution::set_fe_solution(Space* space, Vector* vec, double dir)
     this->set_fe_solution(space, pss, vec, dir);
 }
 
+// for public use
+void Solution::set_fe_solution(Space* space, double* coeffs, int ndof, double dir)
+{
+    // sanity check
+    if (space == NULL) error("Space == NULL in Solutin::set_fe_solution().");
+
+    // initialize precalc shapeset using the space's shapeset
+    Shapeset *shapeset = space->get_shapeset();
+    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_fe_solution().");
+    PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
+    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_fe_solution().");
+    
+    bool is_complex = (sizeof(scalar) == sizeof(double));
+    Vector *tmp_vector = new AVector(ndof);
+    tmp_vector->set_c_array(coeffs, ndof);
+    this->set_fe_solution(space, pss, tmp_vector, dir);
+    delete tmp_vector;
+}
+
 // for internal use
 void Solution::set_fe_solution(Space* space, PrecalcShapeset* pss, Vector* vec, double dir)
 {

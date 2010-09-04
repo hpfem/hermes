@@ -91,17 +91,10 @@ Now we are ready to call the NOX solver to assemble the discrete problem and sol
     // Assemble and solve using NOX.
     bool solved = nox_solver->solve();
 
-The solution vector is extracted from NOX as follows::
+The solution vector is extracted from NOX and turned into a Solution as follows::
 
-    double *s = nox_solver->get_solution_vector();
-
-In order to use Solution::set_fe_solution, we have to convert the raw
-double* vector to Vector::
-
-    Vector *tmp_vector = new AVector(ndof);
-    tmp_vector->set_c_array(s, ndof);
-    sln_nox.set_fe_solution(&space, tmp_vector);
-    delete tmp_vector;
+    double *coeffs = nox_solver->get_solution_vector();
+    sln_nox.set_fe_solution(&space, coeffs, ndof);
 
 That's it! 
 
@@ -256,11 +249,8 @@ this needs to be done in each time step. The time stepping loop is as follows::
       bool solved = solver.solve();
       if (solved)
       {
-        double *s = solver.get_solution_vector();
-        AVector *tmp_vector = new AVector(ndof);
-        tmp_vector->set_c_array(s, ndof);
-        t_prev_time.set_fe_solution(&space, tmp_vector);
-        delete tmp_vector;
+        double *coeffs = solver.get_solution_vector();
+        t_prev_time.set_fe_solution(&space, coeffs, ndof);
       }
       else
         error("NOX failed.");
@@ -314,11 +304,8 @@ visualization, this reads::
     bool solved = solver.solve();
     if (solved)
     {
-      double* s = solver.get_solution_vector();
-      Vector* tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      sln.set_fe_solution(&space, tmp_vector);
-      delete tmp_vector;
+      double* coeffs = solver.get_solution_vector();
+      sln.set_fe_solution(&space, coeffs, ndof);
     }
     else
       error("NOX failed on coarse mesh.");
@@ -355,10 +342,7 @@ into a Solution. Again, skipping info outputs and visualization this reads::
     if (solved)
     {
       double* s = ref_solver.get_solution_vector();
-      AVector* tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      ref_sln.set_fe_solution(&rspace, tmp_vector);
-      delete tmp_vector;
+      ref_sln.set_fe_solution(&rspace, coeffs, ndof);
     }
     else
       error("NOX failed on fine mesh.");
@@ -446,12 +430,9 @@ it has the form::
       bool solved = solver.solve();
       if (solved)
       {
-        double* s = solver.get_solution_vector();
-        Vector *tmp_vector = new AVector(ndof);
-        tmp_vector->set_c_array(s, ndof);
-        t_prev_newton.set_fe_solution(t_space, tmp_vector);
-        c_prev_newton.set_fe_solution(c_space, tmp_vector);
-        delete tmp_vector;
+        double* coeffs = solver.get_solution_vector();
+        t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
+        c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
 
         // Update global time.
         total_time += TAU;

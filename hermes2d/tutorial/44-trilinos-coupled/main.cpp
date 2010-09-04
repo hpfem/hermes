@@ -159,12 +159,9 @@ int main(int argc, char* argv[])
     bool solved = solver.solve();
     if (solved)
     {
-      double* s = solver.get_solution_vector();
-      Vector *tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      t_prev_newton.set_fe_solution(t_space, tmp_vector);
-      c_prev_newton.set_fe_solution(c_space, tmp_vector);
-      delete tmp_vector;
+      double* coeffs = solver.get_solution_vector();
+      t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
+      c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",

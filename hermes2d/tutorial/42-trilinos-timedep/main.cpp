@@ -53,10 +53,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -90,9 +86,6 @@ int main(int argc, char* argv[])
   Vector* coeff_vec = new AVector(ndof);
   project_global(&space, H2D_H1_NORM, &t_prev_time, &t_prev_time, coeff_vec);
 
-  // Measure the projection time.
-  double proj_time = cpu_time.tick().last();
-
   // Initialize NOX solver.
   NoxSolver solver(&fep);
 
@@ -110,7 +103,6 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double total_time = 0.0;
-  cpu_time.tick_reset();
   for (int ts = 1; total_time <= 2000.0; ts++)
   {
     info("---- Time step %d, t = %g s", ts, total_time += TAU);
@@ -120,11 +112,8 @@ int main(int argc, char* argv[])
     bool solved = solver.solve();
     if (solved)
     {
-      double *s = solver.get_solution_vector();
-      AVector *tmp_vector = new AVector(ndof);
-      tmp_vector->set_c_array(s, ndof);
-      t_prev_time.set_fe_solution(&space, tmp_vector);
-      delete tmp_vector;
+      double *coeffs = solver.get_solution_vector();
+      t_prev_time.set_fe_solution(&space, coeffs, ndof);
     }
     else
       error("NOX failed.");
@@ -137,8 +126,6 @@ int main(int argc, char* argv[])
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
       solver.get_num_lin_iters(), solver.get_achieved_tol());
   }
-
-  info("Total running time: %g", cpu_time.accumulated());
 
   // Wait for all views to be closed.
   View::wait();
