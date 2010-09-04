@@ -46,6 +46,7 @@ int bdy_left = 1;
 BCType bc_types(int marker)
   { return (marker == bdy_left) ? BC_ESSENTIAL : BC_NATURAL; }
 
+// Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_t(int ess_bdy_marker, double x, double y)
   { return (ess_bdy_marker == bdy_left) ? 1.0 : 0; }
 
