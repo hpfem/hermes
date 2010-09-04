@@ -106,7 +106,7 @@ public:
 	void set_zero();
 	void set_zero_3(); // three-component zero
 
-	virtual void set_fe_solution(Space *space, scalar *vec, double dir = 1.0);
+	virtual void set_coeff_vector(Space *space, scalar *vec, double dir = 1.0);
 
 	virtual void set_active_element(Element *e);
 

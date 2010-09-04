@@ -490,7 +490,7 @@ int main(int argc, char **args) {
 //				}
 
 				Solution sln(&mesh);
-				sln.set_fe_solution(&space, solver.get_solution());
+				sln.set_coeff_vector(&space, solver.get_solution());
 
 				ExactSolution exsln(&mesh, exact_solution);
 				// norm

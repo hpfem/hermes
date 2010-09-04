@@ -465,11 +465,11 @@ And finally, the solution vector is translated into a Solution::
       // Convert coefficient vector into a Solution.
       Solution* sln = new Solution(&space, rhs);
 
-For this, one can also use the method Solution::set_fe_solution()::
+For this, one can also use the method Solution::set_coeff_vector()::
 
       // Convert coefficient vector into a Solution.
       Solution sln;
-      sln.set_fe_solution(&space, rhs);
+      sln.set_coeff_vector(&space, rhs);
 
 Visualization and the rest of the main() function are the same as in the short version.
 
@@ -1369,7 +1369,7 @@ the entire time stepping loop below::
       if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
 
       // Update tsln.
-      tsln.set_fe_solution(&space, rhs);
+      tsln.set_coeff_vector(&space, rhs);
 
       // Update the time variable.
       TIME += TAU;

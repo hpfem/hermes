@@ -135,7 +135,7 @@ void DiscreteProblem::assemble(Vector *rhs, Matrix *jac, Vector *x)
 	for (int i = 0; i < this->wf->neq; i++) {
 	  if (x != NULL) {
             u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-	    u_ext[i]->set_fe_solution(this->spaces[i], vv);
+	    u_ext[i]->set_coeff_vector(this->spaces[i], vv);
           }
           else u_ext.push_back(NULL);
 	}

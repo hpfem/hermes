@@ -202,7 +202,7 @@ int main(int argc, char **args) {
 	if (solved) {
 		// solution 1
 		Solution sln1(&mesh);
-		sln1.set_fe_solution(&space1, solver.get_solution());
+		sln1.set_coeff_vector(&space1, solver.get_solution());
 
 		ExactSolution esln1(&mesh, exact_sln_fn_1);
 		// norm
@@ -224,7 +224,7 @@ int main(int argc, char **args) {
 
 		// solution 2
 		Solution sln2(&mesh);
-		sln2.set_fe_solution(&space2, solver.get_solution());
+		sln2.set_coeff_vector(&space2, solver.get_solution());
 
 		ExactSolution esln2(&mesh, exact_sln_fn_2);
 		// norm

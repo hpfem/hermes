@@ -502,7 +502,7 @@ void calc_mono_matrix(const order3_t &ord, mono_lu_init &mono) {
 
 static Quad3D *cheb_quad[] = { H3D_QUAD_CHEB_TETRA, H3D_QUAD_CHEB_HEX, H3D_QUAD_CHEB_PRISM };
 
-void Solution::set_fe_solution(Space *space, scalar *vec, double dir) {
+void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 	_F_
 
 	free();

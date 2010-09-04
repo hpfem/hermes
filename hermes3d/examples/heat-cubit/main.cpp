@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 		double *s = solver.get_solution();
 
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, s);
+		sln.set_coeff_vector(&space, s);
 
 		if (do_output) {
 			printf("  - output... "); fflush(stdout);

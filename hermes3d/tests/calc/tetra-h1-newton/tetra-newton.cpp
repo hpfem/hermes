@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
 
 	if (solved) {
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		ExactSolution ex_sln(&mesh, exact_solution);
 		// norm

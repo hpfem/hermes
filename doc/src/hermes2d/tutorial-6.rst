@@ -94,7 +94,7 @@ Now we are ready to call the NOX solver to assemble the discrete problem and sol
 The solution vector is extracted from NOX and turned into a Solution as follows::
 
     double *coeffs = nox_solver->get_solution_vector();
-    sln_nox.set_fe_solution(&space, coeffs, ndof);
+    sln_nox.set_coeff_vector(&space, coeffs, ndof);
 
 That's it! 
 
@@ -250,7 +250,7 @@ this needs to be done in each time step. The time stepping loop is as follows::
       if (solved)
       {
         double *coeffs = solver.get_solution_vector();
-        t_prev_time.set_fe_solution(&space, coeffs, ndof);
+        t_prev_time.set_coeff_vector(&space, coeffs, ndof);
       }
       else
         error("NOX failed.");
@@ -305,7 +305,7 @@ visualization, this reads::
     if (solved)
     {
       double* coeffs = solver.get_solution_vector();
-      sln.set_fe_solution(&space, coeffs, ndof);
+      sln.set_coeff_vector(&space, coeffs, ndof);
     }
     else
       error("NOX failed on coarse mesh.");
@@ -342,7 +342,7 @@ into a Solution. Again, skipping info outputs and visualization this reads::
     if (solved)
     {
       double* s = ref_solver.get_solution_vector();
-      ref_sln.set_fe_solution(&rspace, coeffs, ndof);
+      ref_sln.set_coeff_vector(&rspace, coeffs, ndof);
     }
     else
       error("NOX failed on fine mesh.");
@@ -431,8 +431,8 @@ it has the form::
       if (solved)
       {
         double* coeffs = solver.get_solution_vector();
-        t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
-        c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
+        t_prev_newton.set_coeff_vector(t_space, coeffs, ndof);
+        c_prev_newton.set_coeff_vector(c_space, coeffs, ndof);
 
         // Update global time.
         total_time += TAU;

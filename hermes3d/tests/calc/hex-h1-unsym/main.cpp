@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 	if (solved) {
 		// solution
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		ExactSolution esln(&mesh, exact_sln_fn);
 		// norm

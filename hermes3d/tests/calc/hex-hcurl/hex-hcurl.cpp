@@ -188,7 +188,7 @@ int main(int argc, char **args) {
 
 	if (solved) {
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		printf("* Solution:\n");
 //		scalar *s = sln.get_solution_vector();

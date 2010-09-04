@@ -554,7 +554,7 @@ int main(int argc, char **args)
 		Timer sln_pre_tmr;
 		Solution sln(&mesh1);
 		sln_pre_tmr.start();
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 		sln_pre_tmr.stop();
 
 		printf("* Solution:\n");
@@ -581,9 +581,9 @@ int main(int argc, char **args)
 		Solution sln2(&mesh2);
 		Solution sln3(&mesh3);
 
-		sln1.set_fe_solution(&space1, solver.get_solution());
-		sln2.set_fe_solution(&space2, solver.get_solution());
-		sln3.set_fe_solution(&space3, solver.get_solution());
+		sln1.set_coeff_vector(&space1, solver.get_solution());
+		sln2.set_coeff_vector(&space2, solver.get_solution());
+		sln3.set_coeff_vector(&space3, solver.get_solution());
 
 		ExactSolution esln1(&mesh1, exact_sln_fn_1);
 		ExactSolution esln2(&mesh2, exact_sln_fn_2);

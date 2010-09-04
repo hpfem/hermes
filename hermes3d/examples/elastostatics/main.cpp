@@ -169,9 +169,9 @@ int main(int argc, char **argv) {
   // Construct a solution. 
   double *s = solver.get_solution();
   Solution xsln(&mesh), ysln(&mesh), zsln(&mesh);
-  xsln.set_fe_solution(&xdisp, s);
-  ysln.set_fe_solution(&ydisp, s);
-  zsln.set_fe_solution(&zdisp, s);
+  xsln.set_coeff_vector(&xdisp, s);
+  ysln.set_coeff_vector(&ydisp, s);
+  zsln.set_coeff_vector(&zdisp, s);
 
   // Output the solutions. 
   printf("  - Output... "); fflush(stdout);

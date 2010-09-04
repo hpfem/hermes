@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
 		scalar *s = solver.get_solution();
 
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, s);
+		sln.set_coeff_vector(&space, s);
 
 		printf("* Solution:\n");
 		for (int i = 1; i <= ndofs; i++) {

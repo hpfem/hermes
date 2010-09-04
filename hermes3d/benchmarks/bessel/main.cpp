@@ -171,7 +171,7 @@ int main(int argc, char **argv)
   // Construct the solution.
   std::complex<double> *s = solver.get_solution();
   Solution sln(&mesh);
-  sln.set_fe_solution(&sp, s);
+  sln.set_coeff_vector(&sp, s);
 
   // Output the solution.
   if (do_output) {

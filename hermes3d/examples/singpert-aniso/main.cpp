@@ -182,7 +182,7 @@ int main(int argc, char **args) {
 
     // Construct a solution.
     Solution sln(&mesh);
-    sln.set_fe_solution(&space, solver.get_solution());
+    sln.set_coeff_vector(&space, solver.get_solution());
 
     // Output the orders and the solution.
     if (do_output) 
@@ -239,7 +239,7 @@ int main(int argc, char **args) {
 
     // Construct the reference solution.
     Solution rsln(&rmesh);
-    rsln.set_fe_solution(rspace, rsolver.get_solution());
+    rsln.set_coeff_vector(rspace, rsolver.get_solution());
 
     // Compare coarse and fine mesh.
     // Calculate the error estimate wrt. refined mesh solution.

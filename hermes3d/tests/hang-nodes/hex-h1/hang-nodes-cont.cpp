@@ -468,7 +468,7 @@ int main(int argc, char **args) {
 		if (!solved) throw ERR_FAILURE;
 
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		{
 			double *s = solver.get_solution();
@@ -585,7 +585,7 @@ int main(int argc, char **args) {
 			double sln_vector[ndofs];
 			memset(sln_vector, 0, ndofs * sizeof(double));
 			sln_vector[dof] = 1.0;
-			sln.set_fe_solution(&space, sln_vector);
+			sln.set_coeff_vector(&space, sln_vector);
 
 			double max_difference = 0.;
 			double max_pt_x, max_pt_y, max_pt_z, max_val_1, max_val_2;
@@ -645,7 +645,7 @@ int main(int argc, char **args) {
 			double sln_vector[ndofs];
 			memset(sln_vector, 0, ndofs * sizeof(double));
 			sln_vector[dof] = 1.0;
-			sln.set_fe_solution(&space, sln_vector);
+			sln.set_coeff_vector(&space, sln_vector);
 
 #ifdef OUTPUT_DIR
 			char of_name[512];

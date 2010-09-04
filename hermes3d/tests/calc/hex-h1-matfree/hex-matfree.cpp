@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
 	if (solved) {
 		double *s = solver.get_solution();
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, s);
+		sln.set_coeff_vector(&space, s);
 
 		Solution ex_sln(&mesh);
 		ex_sln.set_exact(exact_solution);

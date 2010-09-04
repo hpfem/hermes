@@ -184,7 +184,7 @@ int main(int argc, char **args) {
 		Timer sln_pre_tmr;
 		Solution sln(&mesh);
 		sln_pre_tmr.start();
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 		sln_pre_tmr.stop();
 
 		printf("* Solution:\n");

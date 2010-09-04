@@ -38,6 +38,9 @@
 #elif defined(__PGI)
 # define COMPILER_ID "PGI"
 
+#elif defined(__PATHSCALE__)
+# define COMPILER_ID "PathScale"
+
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
 
@@ -156,11 +159,36 @@ char* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
 
 #endif
 
+/* For windows compilers MSVC and Intel we can determine
+   the architecture of the compiler being used.  This is becase
+   the compilers do not have flags that can change the architecture,
+   but rather depend on which compiler is being used
+*/
+#if defined(_WIN32) && defined(_MSC_VER)
+# if defined(_M_IA64)
+#  define ARCHITECTURE_ID "IA64"
+
+# elif defined(_M_X64) || defined(_M_AMD64)
+#  define ARCHITECTURE_ID "x64" 
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#else
+#  define ARCHITECTURE_ID ""
+#endif
+
 /* Construct the string literal in pieces to prevent the source from
    getting matched.  Store it in a pointer rather than an array
    because some compilers will just produce instructions to fill the
    array rather than assigning a pointer to a static array.  */
 char* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+char* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+
 
 
 /*--------------------------------------------------------------------------*/

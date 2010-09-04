@@ -458,7 +458,7 @@ int main(int argc, char **args) {
 		bool solved = solver.solve();
 		if (!solved) throw ERR_FAILURE;
 
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		ExactSolution exsln(&mesh, exact_solution);
 		// norm
@@ -491,7 +491,7 @@ int main(int argc, char **args) {
 			double sln_vector[ndofs + 1];
 			memset(sln_vector, 0, (ndofs + 1) * sizeof(double));
 			sln_vector[0] = 1.0;
-			sln.set_fe_solution(&space, sln_vector);
+			sln.set_coeff_vector(&space, sln_vector);
 
 			rm.set_active_element(mesh.elements[2]);
 
@@ -626,7 +626,7 @@ int main(int argc, char **args) {
 			double sln_vector[ndofs];
 			memset(sln_vector, 0, ndofs * sizeof(double));
 			sln_vector[dof] = 1.0;
-			sln.set_fe_solution(&space, sln_vector);
+			sln.set_coeff_vector(&space, sln_vector);
 
 			double max_difference[3] = { 0., 0.0, 0.0 };
 			double max_pt_x, max_pt_y, max_pt_z, max_val_1[3], max_val_2[3];
@@ -762,7 +762,7 @@ int main(int argc, char **args) {
 			double sln_vector[ndofs];
 			memset(sln_vector, 0, ndofs * sizeof(double));
 			sln_vector[idof] = 1.0;
-			sln.set_fe_solution(&space, sln_vector);
+			sln.set_coeff_vector(&space, sln_vector);
 
 //			sln.enable_transform(false);
 

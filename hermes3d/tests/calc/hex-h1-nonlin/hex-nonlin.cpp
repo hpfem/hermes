@@ -315,7 +315,7 @@ int main(int argc, char **argv)
 
 		double *s = solver.get_solution();
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, s);
+		sln.set_coeff_vector(&space, s);
 
 		Solution ex_sln(&mesh);
 #ifdef NONLIN1

@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 	solver.solve();
 
 	Solution sln(&mesh);
-	sln.set_fe_solution(&space, solver.get_solution());
+	sln.set_coeff_vector(&space, solver.get_solution());
 
 	for (Word_t idx = mesh.elements.first(); idx <= ne; idx = mesh.elements.next(idx)) {
 		Element *e = mesh.elements[idx];

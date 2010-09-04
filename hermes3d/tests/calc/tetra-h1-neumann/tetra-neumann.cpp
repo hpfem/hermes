@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 
 	if (solved) {
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		double *s = solver.get_solution();
 		for (int i = 1; i <= ndofs; i++) {

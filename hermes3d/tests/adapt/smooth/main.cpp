@@ -410,7 +410,7 @@ int main(int argc, char **argv)
 		}
 
 		Solution sln(&mesh);
-		sln.set_fe_solution(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver.get_solution());
 
 		printf("Reference solution\n");
 
@@ -459,7 +459,7 @@ int main(int argc, char **argv)
 			break;
 		}
 		Solution rsln(&rmesh);
-		rsln.set_fe_solution(rspace, rsolver.get_solution());
+		rsln.set_coeff_vector(rspace, rsolver.get_solution());
 #else
 		ExactSolution rsln(&rmesh, exact_solution);
 #endif
