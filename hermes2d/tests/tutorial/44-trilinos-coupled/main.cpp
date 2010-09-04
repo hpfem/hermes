@@ -54,10 +54,6 @@ scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
 
 int main(int argc, char* argv[])
 {
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -120,9 +116,6 @@ int main(int argc, char* argv[])
                  Tuple<Solution*>(&t_prev_time_1, &c_prev_time_1),
                  coeff_vec);
 
-  // Measure the projection time.
-  double proj_time = cpu_time.tick().last();
-
   // Initialize finite element problem.
   FeProblem fep(&wf, Tuple<Space*>(t_space, c_space));
 
@@ -141,12 +134,10 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double total_time = 0.0;
-  cpu_time.tick_reset();
   for (int ts = 1; total_time <= T_FINAL; ts++)
   {
     info("---- Time step %d, t = %g s", ts, total_time + TAU);
 
-    cpu_time.tick(HERMES_SKIP);
     solver.set_init_sln(coeff_vec->get_c_array());
     bool solved = solver.solve();
     if (solved)
@@ -155,23 +146,10 @@ int main(int argc, char* argv[])
       t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
       c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
 
-      cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",
           solver.get_num_iters(), solver.get_residual());
       info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
           solver.get_num_lin_iters(), solver.get_achieved_tol());
-
-      // Time measurement.
-      cpu_time.tick(HERMES_SKIP);
-
-      // Visualization.
-      DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-      rview.set_min_max_range(0.0,2.0);
-      rview.show(&omega_view);
-      cpu_time.tick(HERMES_SKIP);
-			
-      // Skip visualization time.
-      cpu_time.tick(HERMES_SKIP);
 
       // Update global time.
       total_time += TAU;
@@ -185,7 +163,6 @@ int main(int argc, char* argv[])
     else
       error("NOX failed.");
 
-    info("Total running time for time level %d: %g s.", ts, cpu_time.tick().last());
   }
 
   info("Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
