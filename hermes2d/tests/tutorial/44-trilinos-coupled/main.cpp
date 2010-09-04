@@ -7,19 +7,11 @@
 using Teuchos::RCP;
 using Teuchos::rcp;
 
-//  The purpose of this example is to show how to use Trilinos for nonlinear time-dependent coupled PDE systems.
-//  Solved by NOX solver via Newton or JFNK, with or without preconditioning.
-//
-//  PDE: Flame propagation (same as tutorial example 19-newton-timedep-flame).
-//
-//  Domain: Same as in tutorial example 19-newton-timedep-flame.
-//
-//  The following parameters can be changed:
-
+// This test makes sure that example 44-trilinos-coupled works correctly.
 
 const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
 const int P_INIT = 2;               // Initial polynomial degree of all mesh elements.
-const bool JFNK = true;            // true = jacobian-free method,
+const bool JFNK = true;             // true = jacobian-free method,
                                     // false = Newton
 const int PRECOND = 2;              // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
                                     // or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
@@ -159,9 +151,12 @@ int main(int argc, char* argv[])
     bool solved = solver.solve();
     if (solved)
     {
-      double* coeffs = solver.get_solution_vector();
-      t_prev_newton.set_fe_solution(t_space, coeffs, ndof);
-      c_prev_newton.set_fe_solution(c_space, coeffs, ndof);
+      double* s = solver.get_solution_vector();
+      AVector *tmp_vector = new AVector(ndof);
+      tmp_vector->set_c_array(s, ndof);
+      t_prev_newton.set_fe_solution(t_space, tmp_vector);
+      c_prev_newton.set_fe_solution(c_space, tmp_vector);
+      delete tmp_vector;
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",
@@ -196,8 +191,42 @@ int main(int argc, char* argv[])
     info("Total running time for time level %d: %g s.", ts, cpu_time.tick().last());
   }
 
-  // Wait for all views to be closed.
-  View::wait();
-  return 0;
+  info("Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
+  info("Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
+  info("Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
+  info("Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
+  info("Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
+  info("Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
+  info("Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
+  info("Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
+
+  info("Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
+  info("Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
+  info("Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
+  info("Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
+  info("Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
+  info("Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
+  info("Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
+  info("Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
+
+#define ERROR_SUCCESS                                0
+#define ERROR_FAILURE                               -1
+  double coor_x[8] = {0.0, 8.0, 15.0, 24.0, 30.0, 40.0, 50.0, 60.0};
+  double coor_y = 8.0;
+  double t_value[8] = {1.000000, 0.850946, 0.624183, 0.524876, 0.696210, 0.964166, 0.998641, 0.001120};
+  double c_value[8] = {0.000000, -0.000000, 0.000002, 0.000009, 0.000001, -0.000000, 0.000042, 0.998844};
+  for (int i = 0; i < 6; i++)
+  {
+    if (((t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-6) && ((c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-6))
+    {
+      printf("Success!\n");
+    }
+    else
+    {
+      printf("Failure!\n");
+      return ERROR_FAILURE;
+    }
+  }
+  return ERROR_SUCCESS;
 }
 
