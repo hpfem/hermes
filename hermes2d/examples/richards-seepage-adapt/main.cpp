@@ -68,7 +68,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 const double NEWTON_TOL_COARSE = 0.0001;   // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.0005;     // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 50;            // Maximum allowed number of Newton iterations.
-const double NEWTON_TOL = 1e-6;        // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-6;            // Stopping criterion for the Newton's method.
 
 // Problem parameters.
 const double TAU = 5e-3;                   // Time step.
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Solutions for the time stepping and the Newton's method.
-  Solution sln, ref_sln, u_prev_time;
+  Solution sln, ref_sln, sln_prev_time;
 
   // Adapt mesh to represent initial condition with given accuracy.
   int proj_norm = 1;  // H1 norm.
@@ -205,49 +205,44 @@ int main(int argc, char* argv[])
   double err_stop_init_cond = 0.1 * ERR_STOP; 
   adapt_to_exact_function(&space, proj_norm, init_cond, &selector, THRESHOLD, STRATEGY, 
                           MESH_REGULARITY, ERR_STOP, NDOF_STOP, 
-                          verbose, &u_prev_time);
-
-  // Initialize views.
-  ScalarView sview("Solution", 0, 0, 500, 350);
-  sview.set_min_max_range(-9.5, 2.2);
-  OrderView oview("Mesh", 510, 0, 500, 350);
+                          verbose, &sln_prev_time);
 
   // Assign initial condition to mesh.
-  u_prev_time.set_exact(&mesh, init_cond);
+  ndof = get_num_dofs(&space);
   Vector *coeff_vec = new AVector(ndof);
 
   // Calculating initial vector for Newton.
   info("Projecting initial condition to obtain coefficient vector for Newton on coarse mesh.");
-  project_global(&space, H2D_H1_NORM, &u_prev_time, &u_prev_time, coeff_vec);
+  project_global(&space, H2D_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
 
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
     wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, H2D_UNSYM, H2D_ANY, 
-                       Tuple<MeshFunction*>(&u_prev_time));
+                       &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_euler, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_euler, jac_form_surf_4_ord, BDY_4);
     wf.add_matrix_form_surf(jac_form_surf_6_euler, jac_form_surf_6_ord, BDY_6);
     wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, H2D_ANY, 
-                       Tuple<MeshFunction*>(&u_prev_time));
+                       &sln_prev_time);
     wf.add_vector_form_surf(res_form_surf_1_euler, res_form_surf_1_ord, BDY_1); 
     wf.add_vector_form_surf(res_form_surf_4_euler, res_form_surf_4_ord, BDY_4);
     wf.add_vector_form_surf(res_form_surf_6_euler, res_form_surf_6_ord, BDY_6);
   }
   else {
     wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, H2D_UNSYM, H2D_ANY, 
-                       Tuple<MeshFunction*>(&u_prev_time));
+                       &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_cranic, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_cranic, jac_form_surf_4_ord, BDY_4);
     wf.add_matrix_form_surf(jac_form_surf_6_cranic, jac_form_surf_6_ord, BDY_6); 
     wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, H2D_ANY, 
-                       Tuple<MeshFunction*>(&u_prev_time));
+                       &sln_prev_time);
     wf.add_vector_form_surf(res_form_surf_1_cranic, res_form_surf_1_ord, BDY_1, 
-			    Tuple<MeshFunction*>( &u_prev_time));
+			    &sln_prev_time);
     wf.add_vector_form_surf(res_form_surf_4_cranic, res_form_surf_4_ord, BDY_4, 
-			    Tuple<MeshFunction*>(&u_prev_time));
+			    &sln_prev_time);
     wf.add_vector_form_surf(res_form_surf_6_cranic, res_form_surf_6_ord, BDY_6, 
-			    Tuple<MeshFunction*>(&u_prev_time));
+			    &sln_prev_time);
   }
  
   // Initialize adaptivity parameters.
@@ -256,7 +251,7 @@ int main(int argc, char* argv[])
   // Visualize the projection and mesh.
   ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
   OrderView ordview("Initial mesh", new WinGeom(450, 0, 400, 350));
-  view.show(&u_prev_time);
+  view.show(&sln_prev_time);
   ordview.show(&space);
 
   // Time stepping loop.
@@ -272,9 +267,9 @@ int main(int argc, char* argv[])
       space.set_uniform_order(P_INIT);
     }
 
-    // Update the coefficient vector and u_prev_time.
+    // Update the coefficient vector and sln_prev_time.
     info("Projecting to obtain coefficient vector on coarse mesh.");
-    project_global(&space, H2D_H1_NORM, &u_prev_time, &u_prev_time, coeff_vec);
+    project_global(&space, H2D_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
 
     bool verbose = true;     // Print info during adaptivity.
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
@@ -292,8 +287,8 @@ int main(int argc, char* argv[])
     ordview.set_title(title);
     ordview.show(&space);
 
-    // Copy new time level reference solution into u_prev_time.
-    u_prev_time.set_fe_solution(&space, coeff_vec);
+    // Copy new time level reference solution into sln_prev_time.
+    sln_prev_time.set_fe_solution(&space, coeff_vec);
   }
 
   // Wait for all views to be closed.

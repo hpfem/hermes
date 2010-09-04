@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
 
   // Create an H1 space with default shapeset.
-  H1Space* space  =new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = get_num_dofs(space);
 
   // Initialize the weak formulation.

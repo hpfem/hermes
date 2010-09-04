@@ -740,7 +740,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
                     int mesh_regularity, double err_stop, int ndof_stop, bool verbose,
                     Solution* sln)
 {
-  if (verbose == true) printf("Mesh adaptivity to an exact function:\n");
+  if (verbose == true) info("Mesh adaptivity to an exact function:");
 
   // Initialize views.
   char title[200];
@@ -778,7 +778,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
     Adapt hp(space, proj_norm);
     hp.set_solutions(sln_coarse, sln_fine);
     double err_est = hp.calc_elem_errors() * 100;
-    if (verbose == true) printf("Step %d, ndof %d, proj_error %g%%\n",
+    if (verbose == true) info("Step %d, ndof %d, proj_error %g%%",
                  as, space->get_num_dofs(), err_est);
 
     // If err_est too large, adapt the mesh.
