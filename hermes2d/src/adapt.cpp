@@ -756,7 +756,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
   int as = 1; bool done = false;
   do
   {
-    // Construct the globally refined reference mesh.
+    // Construct a globally refined reference mesh.
     Mesh rmesh;
     rmesh.copy(space->get_mesh());
     rmesh.refine_all_elements();
@@ -770,9 +770,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
     sln_fine->set_exact(&rmesh, exactfn);
 
     // Project the function f() on the coarse mesh.
-    Solution sln_tmp;
-    sln_tmp.set_exact(space->get_mesh(), exactfn);
-    project_global(space, proj_norm, &sln_tmp, sln_coarse);
+    project_global(space, proj_norm, sln_fine, sln_coarse);
 
     // Calculate element errors and total error estimate.
     Adapt hp(space, proj_norm);

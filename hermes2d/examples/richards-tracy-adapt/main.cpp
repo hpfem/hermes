@@ -163,9 +163,8 @@ int main(int argc, char* argv[])
 
   // Adapt mesh to represent initial condition with given accuracy.
   bool verbose = true;         // Report results.
-  double err_stop_temp = 6.0;  
   adapt_to_exact_function(space, H2D_H1_NORM, init_cond, &selector, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY, err_stop_temp, NDOF_STOP, 
+                          MESH_REGULARITY, ERR_STOP, NDOF_STOP, 
                           verbose, &u_prev_time);
 
   // Initialize the weak formulation.

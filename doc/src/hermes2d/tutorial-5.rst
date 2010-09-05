@@ -329,3 +329,14 @@ part of the code that is relevant for this example is::
 In the code above, do not worry about the parameters 'xdisp', 'ydisp' and 'dmult'
 as these are only used to deform the domain (in linear elasticity problems and such,
 see example 08-system).
+
+A function adapt_to_exact_function() that does the above can be found in
+`adapt.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/adapt.h>`_. 
+It has the following header::
+
+    void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
+                        RefinementSelectors::Selector* selector, double threshold, int strategy,
+                        int mesh_regularity, double err_stop, int ndof_stop, bool verbose,
+                        Solution* sln)
+
+
