@@ -138,7 +138,6 @@ int main(int argc, char* argv[])
   {
     if ((value[i] - u_prev_time.get_pt_value(coor_x_y[i], coor_x_y[i])) < 1E-6)
     {
-      printf("Success!\n");
     }
     else
     {
@@ -146,6 +145,7 @@ int main(int argc, char* argv[])
       return ERROR_FAILURE;
     }
   }
+  printf("Success!\n");
   return ERROR_SUCCESS;
 }
 
