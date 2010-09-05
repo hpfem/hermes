@@ -278,10 +278,60 @@ int main(int argc, char* argv[])
 
     ts++;
   }
+  info("Coordinate (  5.0,  4.0) T value = %lf", T_prev.get_pt_value(5.0, 4.0));
+  info("Coordinate ( 12.0,  4.0) T value = %lf", T_prev.get_pt_value(12.0, 4.0));
+  info("Coordinate ( 12.0, 17.0) T value = %lf", T_prev.get_pt_value(12.0, 17.0));
+  info("Coordinate ( 12.0, 29.0) T value = %lf", T_prev.get_pt_value(12.0, 29.0));
+  info("Coordinate (  5.0, 29.0) T value = %lf", T_prev.get_pt_value(5.0, 29.0));
+
+  info("Coordinate (  5.0,  4.0) M value = %lf", M_prev.get_pt_value(5.0, 4.0));
+  info("Coordinate ( 12.0,  4.0) M value = %lf", M_prev.get_pt_value(12.0, 4.0));
+  info("Coordinate ( 12.0, 17.0) M value = %lf", M_prev.get_pt_value(12.0, 17.0));
+  info("Coordinate ( 12.0, 29.0) M value = %lf", M_prev.get_pt_value(12.0, 29.0));
+  info("Coordinate (  5.0, 29.0) M value = %lf", M_prev.get_pt_value(5.0, 29.0));
 
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
-  printf("Success!\n");
-  return ERROR_SUCCESS;
+  int success = 1;
+  double eps = 1e-5;
+  if (fabs(T_prev.get_pt_value(5.0, 4.0) - 294.128000) > eps) {
+    success = 0;
+  }
+  if (fabs(T_prev.get_pt_value(12.0, 4.0) - 293.091307) > eps) {
+    success = 0;
+  }
+  if (fabs(T_prev.get_pt_value(12.0, 17.0) - 297.046535) > eps) {
+    success = 0;
+  }
+  if (fabs(T_prev.get_pt_value(12.0, 29.0) - 293.666772) > eps) {
+    success = 0;
+  }
+  if (fabs(T_prev.get_pt_value(5.0, 29.0) - 308.780420) > eps) {
+    success = 0;
+  }
 
+  if (fabs(M_prev.get_pt_value(5.0, 4.0) - 0.900089) > eps) {
+    success = 0;
+  }
+  if (fabs(M_prev.get_pt_value(12.0, 4.0) - 0.899224) > eps) {
+    success = 0;
+  }
+  if (fabs(M_prev.get_pt_value(12.0, 17.0) - 0.899553) > eps) {
+    success = 0;
+  }
+  if (fabs(M_prev.get_pt_value(12.0, 29.0) - 0.899292) > eps) {
+    success = 0;
+  }
+  if (fabs(M_prev.get_pt_value(5.0, 29.0) - 0.900779) > eps) {
+    success = 0;
+  }
+
+  if (success == 1) {
+    printf("Success!\n");
+    return ERROR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERROR_FAILURE;
+  }
 }
