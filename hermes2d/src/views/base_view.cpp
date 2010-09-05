@@ -25,6 +25,7 @@
 #include <GL/freeglut.h>
 #include "../common.h"
 #include "base_view.h"
+#include "view_support.h"
 
 BaseView::BaseView(const char* title, int x, int y, int width, int height)
         : ScalarView(title, x, y, width, height)
@@ -101,6 +102,22 @@ void BaseView::update_title()
   if (base_index < 0)
     str << " (Dirichlet lift)";
   set_title(str.str().c_str());
+}
+
+void BaseView::set_title(const char* title)
+{
+  bool do_set_title = true;
+  
+  view_sync.enter();
+  if (output_id < 0)
+    // If the window does not exist, do nothing else and wait until it is created.
+    do_set_title = false;
+  
+  view_sync.leave();
+  
+  // If the window already exists, show the new title in its header.
+  if (do_set_title)
+    set_view_title(output_id, title);
 }
 
 
