@@ -179,14 +179,8 @@ void NeighborSearch::set_active_edge(int edge)
 
 
 
-//way up
-/*! \brief Function for finding "bigger" neighbor.
- *
- * We use recurrence in this way.
- * If the neighbor is "bigger" then this means central element is descendant of some inactive elements. We go threw this parents and
- * stop when against an edge, which has same local number as the original edge, we have active element.
- * Important is that all sons have same orientation as parent, so local number of the edge is same.
- */
+// way up
+
 void NeighborSearch::finding_act_elem_up( Element* elem, int* orig_vertex_id, Node** road_vertices, int n_road_vertices)
 {
 	Node* edge = NULL;
@@ -307,13 +301,8 @@ void NeighborSearch::finding_act_elem_up( Element* elem, int* orig_vertex_id, No
 		}
 };
 
-/*! \brief On active edge we have more neighbors. Gives us information from all neighbors.
- *
- *	Again we use recurrence in this way. In every step we take middle vertex of the edge (starting with active edge). This vertex split the edge
- *	on two parts. On every part (an edge) we test if the new edge is active. If not, the middle vertex is found and the method is called
- *	again with this new vertex on this part.
- */
-//way down
+// way down
+
 void NeighborSearch::finding_act_elem_down( Node* vertex, int* par_vertex_id, int* road, int n_road)
 {
 	int son = vertex->id;
