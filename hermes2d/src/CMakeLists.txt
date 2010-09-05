@@ -33,7 +33,12 @@ set(SRC
        compat/fmemopen.cpp compat/c99_functions.cpp
        )
 
+if(MSVC)
+include_directories(${hermes2d_SOURCE_DIR}/../hermes_common/)
+else(MSVC)
 include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
+endif(MSVC)
+
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 
 find_package(PTHREAD REQUIRED)
