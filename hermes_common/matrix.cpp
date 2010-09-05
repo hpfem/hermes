@@ -470,7 +470,7 @@ void CooMatrix::print()
         {
             for(std::map<size_t, cplx>::const_iterator it_col = it_row->second.begin(); it_col != it_row->second.end(); ++it_col)
             {
-                printf("(%lu, %lu): (%g, %g)\n",
+                printf("(%u, %u): (%g, %g)\n",
                        it_row->first,
                        it_col->first,
                        ((cplx) it_col->second).real(),
@@ -484,7 +484,7 @@ void CooMatrix::print()
         {
             for(std::map<size_t, double>::const_iterator it_col = it_row->second.begin(); it_col != it_row->second.end(); ++it_col)
             {
-                printf("(%lu, %lu): %g\n",
+                printf("(%u, %u): %g\n",
                        it_row->first,
                        it_col->first,
                        it_col->second);
