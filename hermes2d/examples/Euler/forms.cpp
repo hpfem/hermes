@@ -602,7 +602,7 @@ Scalar bilinear_form_0_0(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Fun
   Scalar result = 0;
 	for (int i = 0; i < n; i++)
     result += wt[i] * (u->val[i] * v->val[i]);
-  return result / tau;
+  return result / TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -648,7 +648,7 @@ Scalar bilinear_form_1_1(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Fun
 {
   Scalar result = 0;
 	for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->val[i] / tau;
+    result += wt[i] * u->val[i] * v->val[i] / TAU;
 
 	for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * (A_1_1_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i] + A_2_1_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i]);
@@ -696,7 +696,7 @@ Scalar bilinear_form_2_2(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Fun
 {
   Scalar result = 0;
 	for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->val[i] / tau;
+    result += wt[i] * u->val[i] * v->val[i] / TAU;
 
 	for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * (A_1_2_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i] + A_2_2_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i]);
@@ -744,7 +744,7 @@ Scalar bilinear_form_3_3(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Fun
 {
   Scalar result = 0;
 	for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->val[i] / tau;
+    result += wt[i] * u->val[i] * v->val[i] / TAU;
 
 	for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * (A_1_3_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i] + A_2_3_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i]);
@@ -909,7 +909,7 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 
 double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
-	return int_u_v<double,double>(n, wt, ext->fn[0], v) / tau;
+	return int_u_v<double,double>(n, wt, ext->fn[0], v) / TAU;
 }
 
 ///////////////////////////////////////////////////

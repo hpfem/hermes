@@ -1,9 +1,16 @@
 #include "forms.cpp"
 #include "filters.cpp"
 
-const int p_init = 0;
+// Development version of Euler equations example. For testing the equations are solved on a simple rectangular mesh.
+// Boundary conditions are specified for Inlet / Outlet / Solid wall parts of the boundary in a common way.
 
-double tau = 1E-5;
+// Initial conditions :  w0 = 0.0, w1 = 50.0 * (1-y) * y, w2 = 0.0, w3 = 1E5 + 0.5 * w1 * w1.
+// Prescribed boundary values correspond with the initial conditions.
+
+
+const int P_INIT = 0;
+
+double TAU = 1E-5;
 
 double R = 300; // Gas constant
 
@@ -21,18 +28,18 @@ BCType bc_types(int marker)
 int main(int argc, char* argv[])
 {
 	Mesh mesh;
-  H2DReader mloader;
-  mloader.load("quad.mesh", &mesh);
+	H2DReader mloader;
+	mloader.load("quad.mesh", &mesh);
 
 	mesh.refine_all_elements();
 	mesh.refine_all_elements();
 	mesh.refine_all_elements();
 	mesh.refine_all_elements();
 
-	L2Space space_d(&mesh,p_init);
-  L2Space space_dv1(&mesh,p_init);
-  L2Space space_dv2(&mesh,p_init);
-  L2Space space_e(&mesh,p_init);
+	L2Space space_d(&mesh,P_INIT);
+	L2Space space_dv1(&mesh,P_INIT);
+	L2Space space_dv2(&mesh,P_INIT);
+	L2Space space_e(&mesh,P_INIT);
 
 	space_d.set_bc_types(bc_types);
 	space_dv1.set_bc_types(bc_types);
@@ -105,18 +112,17 @@ int main(int argc, char* argv[])
 
 	std::ofstream out;
 	
-	//SimpleFilter pressure(calc_pressure_func, &sln_d, &sln_dv1, &sln_dv2, &sln_e);
+	SimpleFilter pressure(calc_pressure_func, Tuple<MeshFunction*>(&sln_d, &sln_dv1, &sln_dv2, &sln_e));
 	SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_d, &sln_dv1, &sln_dv2, &sln_e));
   SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_d, &sln_dv1, &sln_dv2, &sln_e));
 
-	ScalarView view;
-	ScalarView view2;
-	VectorView vview;
+	VectorView vview("Velocity", 0, 0, 600, 300);
+	ScalarView sview("Pressure", 700, 0, 600, 300);
 
 	// Iteration, for screenshot saving.
 	int i = 0;
   // assemble and solve the finite element problem
-	for(t = 0.0; t < tau * 1000; t += tau)
+	for(t = 0.0; t < TAU * 1000; t += TAU)
 	{		
 		i++;
 
@@ -130,33 +136,24 @@ int main(int argc, char* argv[])
     // Solve the matrix problem.
     if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
 
+		sln_d.set_coeff_vector(&space_d, rhs);
+		sln_dv1.set_coeff_vector(&space_dv1, rhs);
+		sln_dv2.set_coeff_vector(&space_dv2, rhs);
+		sln_e.set_coeff_vector(&space_e, rhs);
+
 		prev_d.copy(&sln_d);
 		prev_dv1.copy(&sln_dv1);
 		prev_dv2.copy(&sln_dv2);
 		prev_e.copy(&sln_e);
 
 		// Visualization.
-		//pressure.reinit();
-		//view.set_title("Pressure");
-		//view.show(&pressure);
-
+		pressure.reinit();
 		u.reinit();
 		w.reinit();
-		vview.set_title("Velocity");
+		sview.show(&pressure);
 		vview.show(&u,&w);
-
-		View::wait();
-
-		/* Screenshot saving.
-		char * t_n = new char[10];
-		itoa(i,t_n,10);
-		vview.save_screenshot(t_n);
-		*/
-
 	}
-	view.close();
 	vview.close();
-
 	return 0;
 }
 
