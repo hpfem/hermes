@@ -949,16 +949,16 @@ cdef class ScalarFunction(Function):
 
 cdef class MeshFunction(ScalarFunction):
 
-    def __add__(x, y):
-        return SumFilter(x, y)
+    #def __add__(x, y):
+    #    return SumFilter(x, y)
 
-    def __sub__(x, y):
-        return DiffFilter(x, y)
+    #def __sub__(x, y):
+    #    return DiffFilter(x, y)
 
-    def __pow__(x, y, z):
-        if y == 2:
-            return SquareFilter(x)
-        return NotImplemented
+    #def __pow__(x, y, z):
+    #    if y == 2:
+    #        return SquareFilter(x)
+    #    return NotImplemented
 
     def __neg__(x):
         return x-x-x
@@ -967,13 +967,13 @@ cdef class MeshFunction(ScalarFunction):
     #    cdef c_MeshFunction *m = <c_MeshFunction *>(self.thisptr)
     #    return integrate(m)
 
-    def l2_norm(self):
-        cdef c_MeshFunction *m = <c_MeshFunction *>(self.thisptr)
-        return l2_norm(m)
+#    def l2_norm(self):
+#        cdef c_MeshFunction *m = <c_MeshFunction *>(self.thisptr)
+#        return l2_norm(m)
 
-    def h1_norm(self):
-        cdef c_MeshFunction *m = <c_MeshFunction *>(self.thisptr)
-        return h1_norm(m)
+#    def h1_norm(self):
+#        cdef c_MeshFunction *m = <c_MeshFunction *>(self.thisptr)
+#        return h1_norm(m)
 
     def get_pt_value(self, x, y):
         cdef c_MeshFunction *m = <c_MeshFunction *>(self.thisptr)
@@ -1019,8 +1019,8 @@ cdef class Solution(MeshFunction):
         from numpy import array
         cdef ndarray vec = array(v, dtype="double")
         cdef scalar *pvec = <scalar *>vec.data
-        (<c_Solution *>(self.thisptr)).set_fe_solution(s.thisptr, pss.thisptr,
-                pvec)
+        #(<c_Solution *>(self.thisptr)).set_fe_solution(s.thisptr, pss.thisptr,
+        #        pvec)
 
     def plot(self, *args, **kwargs):
         """
@@ -1064,45 +1064,45 @@ cdef class Filter(MeshFunction):
 cdef class SimpleFilter(Filter):
     pass
 
-cdef class VonMisesFilter(Filter):
+#cdef class VonMisesFilter(Filter):
+#
+#    def __cinit__(self, MeshFunction sln1, MeshFunction sln2, double l, double m):
+#        self.thisptr = <c_Function *>new_VonMisesFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, l, m)
+#
+    #def __dealloc__(self):
+    #    delete(self.thisptr)
 
-    def __cinit__(self, MeshFunction sln1, MeshFunction sln2, double l, double m):
-        self.thisptr = <c_Function *>new_VonMisesFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, l, m)
+#cdef class MagFilter(SimpleFilter):
+#
+#    def __cinit__(self, MeshFunction sln1, MeshFunction sln2, int item1, int item2):
+#        self.thisptr = <c_Function *>new_MagFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, item1, item2)
+#
+    #def __dealloc__(self):
+    #    delete(self.thisptr)
+
+#cdef class DiffFilter(SimpleFilter):
+#
+#    def __cinit__(self, MeshFunction sln1, MeshFunction sln2,
+#            int item1=H2D_FN_VAL, int item2=H2D_FN_VAL):
+#        self.thisptr = <c_Function *>new_DiffFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, item1, item2)
+#
+    #def __dealloc__(self):
+    #    delete(self.thisptr)
+
+#cdef class SumFilter(SimpleFilter):
+#
+#    def __cinit__(self, MeshFunction sln1, MeshFunction sln2,
+#            int item1=H2D_FN_VAL, int item2=H2D_FN_VAL):
+#        self.thisptr = <c_Function *>new_SumFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, item1, item2)
 
     #def __dealloc__(self):
     #    delete(self.thisptr)
 
-cdef class MagFilter(SimpleFilter):
-
-    def __cinit__(self, MeshFunction sln1, MeshFunction sln2, int item1, int item2):
-        self.thisptr = <c_Function *>new_MagFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, item1, item2)
-
-    #def __dealloc__(self):
-    #    delete(self.thisptr)
-
-cdef class DiffFilter(SimpleFilter):
-
-    def __cinit__(self, MeshFunction sln1, MeshFunction sln2,
-            int item1=H2D_FN_VAL, int item2=H2D_FN_VAL):
-        self.thisptr = <c_Function *>new_DiffFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, item1, item2)
-
-    #def __dealloc__(self):
-    #    delete(self.thisptr)
-
-cdef class SumFilter(SimpleFilter):
-
-    def __cinit__(self, MeshFunction sln1, MeshFunction sln2,
-            int item1=H2D_FN_VAL, int item2=H2D_FN_VAL):
-        self.thisptr = <c_Function *>new_SumFilter(<c_MeshFunction *>sln1.thisptr, <c_MeshFunction *>sln2.thisptr, item1, item2)
-
-    #def __dealloc__(self):
-    #    delete(self.thisptr)
-
-cdef class SquareFilter(SimpleFilter):
-
-    def __cinit__(self, MeshFunction sln, int item=H2D_FN_VAL):
-        self.thisptr = <c_Function *>new_SquareFilter(<c_MeshFunction *>sln.thisptr, item)
-
+#cdef class SquareFilter(SimpleFilter):
+#
+#    def __cinit__(self, MeshFunction sln, int item=H2D_FN_VAL):
+#        self.thisptr = <c_Function *>new_SquareFilter(<c_MeshFunction *>sln.thisptr, item)
+#
     #def __dealloc__(self):
     #    delete(self.thisptr)
 
@@ -1125,7 +1125,8 @@ cdef class DummySolver(CommonSolver):
 cdef class LinSystem:
 
     def __init__(self, WeakForm wf):
-        self.thisptr = new_LinSystem(wf.thisptr)
+        pass
+        #self.thisptr = new_LinSystem(wf.thisptr)
    # def __init__(self, WeakForm wf, CommonSolver solver):
    #     self.thisptr = new_LinSystem(wf.thisptr, solver.thisptr)
    # def __init__(self, WeakForm wf, H1Space sp):
@@ -1140,17 +1141,17 @@ cdef class LinSystem:
         cdef H1Space a, b, c, d
         if n == 1:
             a = args[0]
-            self.thisptr.set_spaces2(n, a.thisptr)
+            #self.thisptr.set_spaces2(n, a.thisptr)
         elif n == 2:
             a, b = args
-            self.thisptr.set_spaces2(n, a.thisptr, b.thisptr)
+            #self.thisptr.set_spaces2(n, a.thisptr, b.thisptr)
         elif n == 3:
             a, b, c = args
-            self.thisptr.set_spaces2(n, a.thisptr, b.thisptr, c.thisptr)
+            #self.thisptr.set_spaces2(n, a.thisptr, b.thisptr, c.thisptr)
         elif n == 4:
             a, b, c, d = args
-            self.thisptr.set_spaces2(n, a.thisptr, b.thisptr, c.thisptr,
-                    d.thisptr)
+            #self.thisptr.set_spaces2(n, a.thisptr, b.thisptr, c.thisptr,
+            #        d.thisptr)
         else:
             raise NotImplementedError()
 
@@ -1176,24 +1177,24 @@ cdef class LinSystem:
             raise NotImplementedError()
         """
         pass
-        
+
     def set_pss2(self, *args):
         self._pss = args
         cdef int n = len(args)
         cdef PrecalcShapeset s1, s2, s3, s4
         if n == 1:
             s1, = args
-            self.thisptr.set_pss2(n, s1.thisptr)
+            #self.thisptr.set_pss2(n, s1.thisptr)
         elif n == 2:
             s1, s2 = args
-            self.thisptr.set_pss2(n, s1.thisptr, s2.thisptr)
+            #self.thisptr.set_pss2(n, s1.thisptr, s2.thisptr)
         elif n == 3:
             s1, s2, s3 = args
-            self.thisptr.set_pss2(n, s1.thisptr, s2.thisptr, s3.thisptr)
+            #self.thisptr.set_pss2(n, s1.thisptr, s2.thisptr, s3.thisptr)
         elif n == 4:
             s1, s2, s3, s4 = args
-            self.thisptr.set_pss2(n, s1.thisptr, s2.thisptr, s3.thisptr,
-                    s4.thisptr)
+            #self.thisptr.set_pss2(n, s1.thisptr, s2.thisptr, s3.thisptr,
+            #        s4.thisptr)
         else:
             raise NotImplementedError()
 
@@ -1232,17 +1233,17 @@ cdef class LinSystem:
 
             if n == 1:
                 s0 = args[0]
-                self.thisptr.solve2(n, s0.thisptr)
+                #self.thisptr.solve2(n, s0.thisptr)
             elif n == 2:
                 s0, s1 = args
-                self.thisptr.solve2(n, s0.thisptr, s1.thisptr)
+                #self.thisptr.solve2(n, s0.thisptr, s1.thisptr)
             elif n == 3:
                 s0, s1, s2 = args
-                self.thisptr.solve2(n, s0.thisptr, s1.thisptr, s2.thisptr)
+                #self.thisptr.solve2(n, s0.thisptr, s1.thisptr, s2.thisptr)
             elif n == 4:
                 s0, s1, s2, s3 = args
-                self.thisptr.solve2(n, s0.thisptr, s1.thisptr, s2.thisptr,
-                        s3.thisptr)
+                #self.thisptr.solve2(n, s0.thisptr, s1.thisptr, s2.thisptr,
+                #        s3.thisptr)
             else:
                 raise NotImplementedError()
                           
@@ -1261,16 +1262,17 @@ cdef class LinSystem:
             vec = array(x, dtype="double")
             pvec = <scalar *>vec.data
 
-            for i, sln in enumerate(args):
-                (<c_Solution *>((<Solution>sln).thisptr)).set_fe_solution(
-                        self.thisptr.get_space(i),
-                        self.thisptr.get_pss(i),
-                        pvec)
+            #for i, sln in enumerate(args):
+            #    (<c_Solution *>((<Solution>sln).thisptr)).set_fe_solution(
+            #            self.thisptr.get_space(i),
+            #            self.thisptr.get_pss(i),
+            #            pvec)
         else:
             raise NotImplementedError("Unknown library")
 
     def assemble(self):
-        self.thisptr.assemble()
+        #self.thisptr.assemble()
+        pass
 
     def get_matrix_csc(self):
         """
@@ -1280,7 +1282,7 @@ cdef class LinSystem:
         """
         cdef int *Ap, *Ai, n, nnz
         cdef scalar *Ax
-        self.thisptr.get_matrix(Ap, Ai, Ax, n)
+        #self.thisptr.get_matrix(Ap, Ai, Ax, n)
         nnz = Ap[n]
         aAp = c2numpy_int(Ap, n+1)
         aAi = c2numpy_int(Ai, nnz)
@@ -1301,19 +1303,20 @@ cdef class LinSystem:
         """
         cdef scalar *rhs
         cdef int n
-        self.thisptr.get_rhs(rhs, n)
+        #self.thisptr.get_rhs(rhs, n)
         return c2numpy_double(rhs, n)
 
     def get_num_dofs(self):
-        self.thisptr.get_num_dofs()
+        pass
+        #self.thisptr.get_num_dofs()
 
-cdef class RefSystem(LinSystem):
-
-    def __init__(self, LinSystem ls):
-        self.thisptr = <c_LinSystem *>new_RefSystem(ls.thisptr)
-
-    def assemble(self):
-        (<c_RefSystem *>(self.thisptr)).assemble()
+#cdef class RefSystem(LinSystem):
+#
+#    def __init__(self, LinSystem ls):
+#        self.thisptr = <c_LinSystem *>new_RefSystem(ls.thisptr)
+#
+#    def assemble(self):
+#        (<c_RefSystem *>(self.thisptr)).assemble()
 
     # this is commented out, because get_ref_space() is not yet implemented in
     # C++ hermes2d
@@ -1591,7 +1594,8 @@ cdef class Adapt:
 
         Suggested Use: ```err_percent = hp.calc_error() * 100```
     """
-        return self.thisptr.calc_error(error_flags)
+    pass
+        #return self.thisptr.calc_error(error_flags)
 
     def adapt(self, ProjBasedSelector selector, double thr, int strat = 0, int regularize = -1, double to_be_processed = 0.0):
         """ Does adaptive refinement based on errors of elements.
@@ -1614,45 +1618,45 @@ cdef class Adapt:
         """
         return self.thisptr.adapt(selector.thisptr, thr, strat, regularize, to_be_processed)
 
-cdef class H1Adapt(Adapt):
-    """ Adaptivity class for H1 space.
-        For details on class members, see the parent class Adapt.
-
-        Suggested Use:
-
-    - single component: ```hp = H1Adapt([h1_space1])```
-    - multiple components: ```hp = H1Adapt([h1_space1, h1_space2])```
-    """
-    """
-    def __cinit__(self, space_list):
-        cdef c_H1SpaceTuple spaces
-        for i in range(len(space_list)):
-            spaces.push_back((<H1Space>(space_list[i])).thisptr)
-        self.thisptr = <c_Adapt*>(new_H1Adapt(spaces))
-    """
-    
-    def __cinit__(self, LinSystem ls):
-        self.thisptr = <c_Adapt*>(new_H1Adapt(ls.thisptr))
-            
-cdef class L2Adapt(Adapt):
-    """ Adaptivity class for L2 space.
-        For details on class members, see the parent class Adapt.
-
-        Suggested Use:
-
-    - single component: ```hp = L2Adapt([l2_space1])```
-    - multiple components: ```hp = L2Adapt([l2_space1, l2_space2])```
-    """
-    """
-    def __cinit__(self, space_list):
-        cdef c_L2SpaceTuple spaces
-        for i in range(len(space_list)):
-            spaces.push_back((<L2Space>(space_list[i])).thisptr)
-        self.thisptr = <c_Adapt*>(new_L2Adapt(spaces))
-    """
-    def __cinit__(self, LinSystem ls):
-        self.thisptr = <c_Adapt*>(new_L2Adapt(ls.thisptr))    
-
+#cdef class H1Adapt(Adapt):
+#    """ Adaptivity class for H1 space.
+#        For details on class members, see the parent class Adapt.
+#
+#        Suggested Use:
+#
+#    - single component: ```hp = H1Adapt([h1_space1])```
+#    - multiple components: ```hp = H1Adapt([h1_space1, h1_space2])```
+#    """
+#    """
+#    def __cinit__(self, space_list):
+#        cdef c_H1SpaceTuple spaces
+#        for i in range(len(space_list)):
+#            spaces.push_back((<H1Space>(space_list[i])).thisptr)
+#        self.thisptr = <c_Adapt*>(new_H1Adapt(spaces))
+#    """
+#    
+#    def __cinit__(self, LinSystem ls):
+#        self.thisptr = <c_Adapt*>(new_H1Adapt(ls.thisptr))
+#
+#cdef class L2Adapt(Adapt):
+#    """ Adaptivity class for L2 space.
+#        For details on class members, see the parent class Adapt.
+#
+#        Suggested Use:
+#
+#    - single component: ```hp = L2Adapt([l2_space1])```
+#    - multiple components: ```hp = L2Adapt([l2_space1, l2_space2])```
+#    """
+#    """
+#    def __cinit__(self, space_list):
+#        cdef c_L2SpaceTuple spaces
+#        for i in range(len(space_list)):
+#            spaces.push_back((<L2Space>(space_list[i])).thisptr)
+#        self.thisptr = <c_Adapt*>(new_L2Adapt(spaces))
+#    """
+#    def __cinit__(self, LinSystem ls):
+#        self.thisptr = <c_Adapt*>(new_L2Adapt(ls.thisptr))    
+#
 cdef class Linearizer:
     """
     Linearizes the solution.
