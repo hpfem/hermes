@@ -51,7 +51,7 @@ type 'doxygen hermes1d.lib-real.doxyfile'. The html files are in
 available online at http://hpfem.org/hermes/hermes1d/doc.cpp/h1d-real/html/index.html.
 
 Mathematical Background
-----------------------
+-----------------------
 
 When one speaks about the numerical solution of ODEs, one usually has in mind
 initial value problems for equations of the form
