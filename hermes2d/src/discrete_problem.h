@@ -21,6 +21,7 @@
 #include "matrix_old.h"
 #include "forms.h"
 #include "weakform.h"
+#include "neighbor.h"
 #include <map>
 #include "views/scalar_view.h"
 #include "views/vector_view.h"
@@ -163,8 +164,11 @@ protected:
 
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge);
+  ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order);
+  ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
+  Func<double>* get_fn(ExtendedShapeFnPtr efu);
 
   // Key for caching transformed function values on elements
   struct Key
@@ -225,6 +229,10 @@ protected:
   scalar eval_form(WeakForm::VectorFormSurf *lf, Tuple<Solution *> sln, PrecalcShapeset *fv, 
                    RefMap *rv, EdgePos* ep);
 
+  scalar eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, NeighborSearch* nbs_u, NeighborSearch* nbs_v, 
+                            ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv, EdgePos* ep);
+  scalar eval_form_neighbor(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln, NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv, EdgePos* ep);
+  
   scalar** get_matrix_buffer(int n)
   {
     if (n <= mat_size) return buffer;
