@@ -133,12 +133,11 @@ int main(int argc, char* argv[])
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
   double coor_x_y[5] = {0.0, 25.0, 50.0, 75.0, 100.0};
-  double value[5] = {-1000.000000, -913.016598, -709.440069, -575.643683, -1000.000000};
+  double value[5] = {-1000.000000, -969.316013, -836.504249, -651.433710, -1000.000000};
   for (int i = 0; i < 5; i++)
   {
     if ((value[i] - u_prev_time.get_pt_value(coor_x_y[i], coor_x_y[i])) < 1E-6)
     {
-      printf("Success!\n");
     }
     else
     {
@@ -146,6 +145,7 @@ int main(int argc, char* argv[])
       return ERROR_FAILURE;
     }
   }
+  printf("Success!\n");
   return ERROR_SUCCESS;
 }
 
