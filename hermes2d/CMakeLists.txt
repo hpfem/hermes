@@ -106,7 +106,12 @@ if(WITH_EXODUSII)
     find_package(EXODUSII REQUIRED)
 endif(WITH_EXODUSII)
 
+if(MSVC)
+add_subdirectory(../hermes_common ../hermes_common)
+else(MSVC)
 add_subdirectory(hermes_common)
+endif(MSVC)
+
 add_subdirectory(src)
 
 find_package(PythonLibs REQUIRED)
