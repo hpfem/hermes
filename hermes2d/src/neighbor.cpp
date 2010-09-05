@@ -175,6 +175,10 @@ void NeighborSearch::set_active_edge(int edge)
 	}
 	else
 		error("The given edge isn't inner");
+  
+  // Reset the neighbor information to force the user to set the correct active segment.
+  neighb_el = NULL;
+  neighbor_edge = -1;
 };
 
 

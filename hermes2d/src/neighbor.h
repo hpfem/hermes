@@ -24,25 +24,17 @@
               "Precalculated shapeset and refmap have not been attached or have a wrong active element." )
 
 /*!\class NeighborSearch neighbor.h "src/neighbor.h"
- * \brief This class serves to find and offer all information from neighbors at a given(active) element and its concrete edge.
+ * \brief This class characterizes a neighborhood of a given edge in terms of adjacent elements 
+ *        and provides methods for getting limit values of discontinuous functions from both sides of the edge.
  *
- * How works the finding neighbors
- * We will call the active  element as a central element.
- * If we have irregular mesh, there can be three options in relation of central element and neighbor element at common edge.
+ * Each instance of the class is connected to a mesh and its active element. The active element becomes the
+ * <em> central element </em> of the neighborhood and all adjacent elements the <em> neighbors </em>.
+ *
+ * In order to enumerate the neighboring elements, one selects a particular edge of the central element and calls the method \c set_active_edge, 
+ * which enumerates the neighbors and fills the array \c transformations. There can be three options in relation of central element and neighbor element at common edge.
  * First, the neighbor is same "size" as central, so the edge has active elements on both sides. This option is tested by function get_neighbor().
  * Second, the neighbor is "bigger" then central. Then we have to go "way up" and use method finding_act_elem_up().
  * Third, the neighbor is "smaller", we have more neighbors against the edge. This solves "way down" by method finding_act_elem_down().
- * The choice between way up or way down is made by testing if we can find vertex in the middle of the common edge. If we can
- * then we go way down.
-
- * Also at every way we fill function values, derivatives and etc. of central and neighbor elements threw method set_fn_values(). Last step is
- * possible change of order of neighbor's function values to correspond function values of central element at same points.
-
- * We also need transform solution either on neighbor or central element to get points at correct part of the edge. We use method "push_transform"
- * and use only range [0-3]. These types of transformation are common for triangles and quads and choosing right transformation can
- * be derived from local numbers of edges.
-
- * For numbering and ordering of edges, vertices and sons of an element look into mesh.cpp
  */
 
 class H2D_API NeighborSearch
@@ -54,11 +46,21 @@ public:
   
   // Methods for changing active state for further calculations.
   
-	///\brief Set active edge and compute all information about the neighbors.
+	/// Set active edge and compute all information about the neighbors.
+  ///
+  /// In particular, it fills the \c neighbors and \c neighbor_edges vectors and the \c transformations array used
+  /// for transforming either the central or the neighboring elements to the same size. It also sets the \c way_flag 
+  /// variable. Which way we go in searching for the neighbors depends on whether we can find a vertex in the middle 
+  /// of the active edge - if we can, then way down is taken and the transformations array will be filled for the bigger
+  /// central element. This is performed by the method \c finding_act_elem_down. Otherwise, we go way up and will later
+  /// push the transformations from \c transfomations to functions on the bigger neighboring element. Way up is realized
+  /// by the method \c finding_act_elem_up.
+  ///
 	/// \param[in] edge Local (element dependent) number of the edge.
 	void set_active_edge(int edge);
   
-  ///\brief Set the part of active edge shared by the central element and a given neighbor.
+  /// Set the part of active edge shared by the central element and a given neighbor.
+  ///
   /// \param[in] neighbor   Number of the neighbor as enumerated in set_active_edge (i.e. its index in the vector neighbors).
   /// \param[in] with_neighbor_pss  If true, also creates and/or sets the transformation of a PrecalcShapeset on the given 
   ///                               neighbor element; this is then used for forming the extended shapeset.
@@ -68,7 +70,7 @@ public:
   
   // Methods for computing values of external functions.
 
-  ///\brief Fill arrays with function values / derivatives at both sides of the active segment of active edge.
+  /// Fill arrays with function values / derivatives at both sides of the active segment of active edge.
   /// \param[in] fu MeshFunction whose values are requested.
   /// \return Pointer to a discontinuous function allowing to access the values from each side of the active edge.
   DiscontinuousFunc<scalar>* init_ext_fn(MeshFunction* fu);
@@ -78,7 +80,7 @@ public:
   /// \return Pointer to a discontinuous function allowing to access the order from each side of the active edge.
   DiscontinuousFunc<Ord>* init_ext_fn_ord(Solution* fu);
   
-  ///\brief Initialize the polynomial orders of the given function at both sides of the active segment of active edge.
+  /// Initialize the polynomial orders of the given function at both sides of the active segment of active edge.
   /// The order can be computed more precisely for Solutions than for general MeshFunctions, since we know the individual 
   /// orders of the solution on both the central and neighbor elements. Note that we could even obtain the appropriate 
   /// axial orders for the active edge, if we could obtain the pointer to the Solution's approximation space (this is
@@ -118,15 +120,15 @@ public:
   
   // Methods for retrieving additional information about the neighborhood.
 
-  ///\brief Return the number of elements (neighbors) adjacent to the active (central) element across a common (active) edge.
+  /// Return the number of elements (neighbors) adjacent to the active (central) element across a common (active) edge.
   /// \return The number of neighbors.
   int get_number_of_neighbs() { return n_neighbors; }
 
   /// Return pointer to the vector of neighboring elements.
   std::vector<Element*>* get_neighbors() { return &neighbors; }
 
-  ///\brief Get transfomations that must be pushed to a Transormable either on the central or neighbor element in order for its
-  ///\brief values from both sides to match.
+  /// Get transfomations that must be pushed to a Transormable either on the central or neighbor element in order for its
+  /// values from both sides to match.
   /// \param[in] segment Part of active edge shared by the central element and selected neighbor.
   /// \return the array of transformation sub-indices.
   int* get_transformations(int segment) { 
@@ -135,12 +137,12 @@ public:
     return transformations[segment]; 
   }
 
-  ///\brief Return local number of the selected active edge segment relatively to the neighboring element.
+  /// Return local number of the selected active edge segment relatively to the neighboring element.
   /// \param[in] segment Part of active edge shared by the central element and selected neighbor.
   /// \return Local number of the active edge in the neighboring element.
   int get_neighb_edge_number(int segment);
 
-  ///\brief Return orientation of the selected active edge segment with respect to both adjacent elements.
+  /// Return orientation of the selected active edge segment with respect to both adjacent elements.
   /// \param[in] active_segment  Part of active edge shared by the central element and selected neighbor.
   /// \return 0 if orientation of the common edge is the same on both adjacent elements,
   /// \return 1 otherwise.
@@ -215,8 +217,7 @@ private:
     H2D_WAY_UP = 2      ///< Transformation of neighbor element, central element is son.
   };
   
-	/** \brief Method "way up" for finding neighbor element, from smaller to larger.
-   * 
+  /** Method "way up" for finding neighbor element, from smaller to larger.
    * We use recurrence in this way.
    * If the neighbor is "bigger" then this means central element is descendant of some inactive elements. We go threw this parents and
    * stop when against an edge, which has same local number as the original edge, we have active element.
@@ -229,11 +230,10 @@ private:
   **/
 	void finding_act_elem_up( Element* elem, int* orig_vertex_id, Node** road_vertices, int n_road_vertices);
 
-	/** \brief Method "Way down" for finding neighbor elements, from larger to smaller.
-	 *
-   *  Again we use recurrence in this way. In every step we take middle vertex of the edge (starting with active edge). This vertex split the edge
-   *  on two parts. On every part (an edge) we test if the new edge is active. If not, the middle vertex is found and the method is called
-   *  again with this new vertex on this part.
+  /** Method "Way down" for finding neighbor elements, from larger to smaller.
+	 * Again we use recurrence in this way. In every step we take middle vertex of the edge (starting with active edge). This vertex split the edge
+   * on two parts. On every part (an edge) we test if the new edge is active. If not, the middle vertex is found and the method is called
+   * again with this new vertex on this part.
    *
 	 * \param[in] vertex The pointer to a vertex which was in the middle of the edge we were working with in previous step.
 	 * \param[in] par_vertex_id Array containing id of vertices which are "parents" of the middle vertex (first parameter). They are passed separated because we need to conserve orientation of the vertices.
