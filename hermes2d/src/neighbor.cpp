@@ -1,13 +1,11 @@
 #include "neighbor.h"
-
-const char* NeighborSearch::ERR_ACTIVE_SEGMENT_NOT_SET = "Active segment of the active edge has not been set.";
-
+                                          
 void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(int index, AsmList* central_al, AsmList* neighb_al)
 {
-  assert_msg(neibhood->active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
+  ensure_active_segment(neibhood);
+  ensure_central_pss_rm(neibhood);
+  assert_msg(neibhood->neighb_pss != NULL, "Cannot activate extended shape function. PrecalcShapeset for neighbor not set.");
   assert_msg(index >= 0, "Wrong shape function index.");
-  assert_msg(neibhood->neighb_pss != NULL && neibhood->central_pss != NULL, 
-             "Cannot activate extended shape function. PrecalcShapesets not set.");
 
   if (index >= central_al->cnt) 
   {
@@ -396,7 +394,11 @@ void NeighborSearch::finding_act_elem_down( Node* vertex, int* par_vertex_id, in
 
 bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 {
-  active_segment = neighbor;
+  ensure_active_edge(this);
+  
+  active_segment = neighbor; 
+  ensure_active_segment(this);
+  
   neighb_el = neighbors[active_segment];
   neighbor_edge = neighbor_edges[active_segment].local_num_of_edge;
   
@@ -404,6 +406,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
     return false;
  
   if(central_pss != NULL) {
+    ensure_central_pss_rm(this);
+    
     if(central_pss->get_transform() != original_central_el_transform)
       central_pss->set_transform(original_central_el_transform);
     
@@ -441,7 +445,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 
 int NeighborSearch::extend_attached_shapeset(Space *space, AsmList* al)
 {
-  assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
+  ensure_central_pss_rm(this);
+  ensure_active_segment(this);
     
   if (supported_shapes == NULL) 
     supported_shapes = new ExtendedShapeset(this, al, space);
@@ -454,6 +459,9 @@ int NeighborSearch::extend_attached_shapeset(Space *space, AsmList* al)
 // Init geometry and jacobian*weights.
 Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, EdgePos *ep)
 {
+  ensure_central_pss_rm(this);
+  ensure_active_segment(this);
+  
   int eo = get_quad_eo();
   
   if (n_neighbors == 1) 
@@ -471,6 +479,9 @@ Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, EdgePos 
 
 double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 {
+  ensure_central_pss_rm(this);
+  ensure_active_segment(this);
+  
   int eo = get_quad_eo();
   
   if (ext_cache_jwt[eo] == NULL) {
@@ -498,8 +509,7 @@ double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 // test functions), would be actually more efficient than this. This would require implementing the copy operation for Filters.
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 {
-  assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
-      
+  ensure_active_segment(this);
   
   if(fu->get_active_element() != central_el) {
     // Just in case - the input function should have the active element set to the central element from get_next_state
@@ -534,14 +544,14 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
 {
-  assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
+  ensure_active_segment(this);
   Func<Ord>* fo = init_fn_ord(fu->get_edge_fn_order(active_edge));
   return new DiscontinuousFunc<Ord>(fo, fo);
 }
 
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
 {   
-  assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
+  ensure_active_segment(this);
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   int central_order = fu->get_edge_fn_order(active_edge) + inc;
   int neighbor_order = fu->get_edge_fn_order(neighbor_edge) + inc;
@@ -553,7 +563,6 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
 // Returns 1 if the orientation is reversed, 0 otherwise.
 int NeighborSearch::direction_neighbor_edge(int parent1, int parent2, int segment)
 {
-  assert_msg(segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
 	if (segment == 0)
 	{
 		if (neighb_el->vn[neighbor_edge]->id != parent1)
@@ -589,18 +598,20 @@ void NeighborSearch::reset_neighb_info()
 }
 
 
-int NeighborSearch::get_neighb_edge_number(int active_segment)
+int NeighborSearch::get_neighb_edge_number(int segment)
 {
-	if(active_segment >= neighbor_edges.size())
+  ensure_active_edge(this);
+	if(segment >= neighbor_edges.size())
 		error("given number is bigger than actual number of neighbors ");
 	else
-		return neighbor_edges[active_segment].local_num_of_edge;
+		return neighbor_edges[segment].local_num_of_edge;
 };
 
-int NeighborSearch::get_neighb_edge_orientation(int active_segment)
+int NeighborSearch::get_neighb_edge_orientation(int segment)
 {
-	if(active_segment >= neighbor_edges.size())
+  ensure_active_edge(this);
+	if(segment >= neighbor_edges.size())
 		error("given number is bigger than actual number of neighbors ");
 	else
-		return neighbor_edges[active_segment].orientation;
+		return neighbor_edges[segment].orientation;
 };

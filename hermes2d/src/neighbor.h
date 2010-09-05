@@ -8,6 +8,20 @@
 #include "forms.h"
 #include "refmap.h"
 
+// Global sanity checks for the NeighborSearch class
+
+#define ensure_active_edge(obj) \
+  assert_msg( obj->active_edge >= 0 && obj->active_edge < obj->central_el->nvert,\
+              "Wrong active edge or active edge not set." )
+
+#define ensure_active_segment(obj) \
+  assert_msg( obj->active_segment >= 0 && obj->active_segment < obj->n_neighbors,\
+              "Active segment of the active edge has not been set or exceeds the number of neighbors" )
+
+#define ensure_central_pss_rm(obj) \
+  assert_msg( obj->central_pss != NULL && obj->central_pss->get_active_element() == obj->central_el &&\
+              obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
+              "Precalculated shapeset and refmap have not been attached or have a wrong active element." )
 
 /*!\class NeighborSearch neighbor.h "src/neighbor.h"
  * \brief This class serves to find and offer all information from neighbors at a given(active) element and its concrete edge.
@@ -76,6 +90,7 @@ public:
   
   void set_quad_order(int order)
   {
+    ensure_active_segment(this);
     quad->set_mode(central_el->get_mode());
     central_quad.init(quad, quad->get_edge_points(active_edge, order));
     quad->set_mode(neighb_el->get_mode());
@@ -103,17 +118,17 @@ public:
   //! element in order for its values from both sides to match.
   //! \param[in] active_segment Part of active edge shared by the central element and selected neighbor.
   //! \return the array of transformation sub-indices.
-  int* get_transformations(int active_segment) { return transformations[active_segment]; }
+  int* get_transformations(int segment) { 
+    ensure_active_edge(this);
+    assert(segment >= 0 && segment < n_neighbors);
+    return transformations[segment]; 
+  }
 
   //! Return local number of the selected active edge segment relatively to the neighboring element.
   //! \param[in] active_segment Part of active edge shared by the central element and selected neighbor.
   int get_neighb_edge_number(int active_segment);
 
-  //! Return orientation of the selected active edge segment with respect to both adjacent elements.
-  //! \param[in] active_segment  Part of active edge shared by the central element and selected neighbor.
-  //! \return 0 if orientation of the common edge is the same on both adjacent elements,
   //! \return 1 otherwise.
-  int get_neighb_edge_orientation(int active_segment);
   
   // Methods for cleaning up.
   
@@ -133,9 +148,8 @@ public:
   ~NeighborSearch();
   
   
-private:
-  static const char* ERR_ACTIVE_SEGMENT_NOT_SET;
-	static const int max_n_trans = 20;    //!< Number of allowed transformations, see "push_transform" in transform.h.
+private:  
+  static const int max_n_trans = 20;    ///< Number of allowed transformations, see "push_transform" in transform.h.
 
   bool ignore_if_visited;
 	int n_neighbors; //!< Number of neighbors.
