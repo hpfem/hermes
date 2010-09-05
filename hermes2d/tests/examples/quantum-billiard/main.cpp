@@ -7,11 +7,11 @@
 
 // This test makes sure that example "quantum-billiard" works correctly.
 
-const int INIT_REF_NUM = 5;      // Number of initial uniform refinements.
-const int P_INIT = 1;            // Initial polynomial degree.
-const double TAU = 0.05;          // Time step.
-const double T_FINAL = 1000;     // Time interval length.
-const int TIME_DISCR = 2;        // 1 for implicit Euler, 2 for Crank-Nicolson.
+const int INIT_REF_NUM = 5;         // Number of initial uniform refinements.
+const int P_INIT = 1;               // Initial polynomial degree.
+const double TAU = 0.05;            // Time step.
+const double T_FINAL = 100;         // Time interval length.
+const int TIME_DISCR = 2;           // 1 for implicit Euler, 2 for Crank-Nicolson.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
 
@@ -105,31 +105,88 @@ int main(int argc, char* argv[])
     psi_prev_time.copy(&psi);
   }
 
-/*  
-  info("Coordinate (   0,   0) value = %lf", psi_prev_time.get_pt_value(0.0, 0.0));
-  info("Coordinate (-0.5,-0.5) value = %lf", psi_prev_time.get_pt_value(-0.5, -0.5));
-  info("Coordinate ( 0.5,-0.5) value = %lf", psi_prev_time.get_pt_value(0.5, -0.5));
-  info("Coordinate ( 0.5, 0.5) value = %lf", psi_prev_time.get_pt_value(0.5, 0.5));
-  info("Coordinate (-0.5, 0.5) value = %lf", psi_prev_time.get_pt_value(-0.5, 0.5));
-*/
+  AbsFilter mag2(&psi_prev_time);
+  AbsFilter mag3(&phi_prev_time);
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
-/*
-  double coor_x[5] = {0.0, -0.5, 0.5, 0.5, -0.5};
-  double coor_y[5] = {0.0, -0.5, -0.5, 0.5, 0.5};
-  double value[5] = {-1000.000000, -913.016598, -709.440069, -575.643683, -1000.000000};
-  for (int i = 0; i < 5; i++)
-  {
-    if ((value[i] - psi_prev_time.get_pt_value(coor_x[i], coor_y[i])) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERROR_FAILURE;
-    }
+  int success = 1;
+  double eps = 1e-5;
+  double val = std::abs(mag2.get_pt_value(0.0, 0.0));
+  info("Coordinate (   0,   0) psi value = %lf", std::abs(mag2.get_pt_value(0.0, 0.0)));
+  if (fabs(val - (0.000008)) > eps) {
+    printf("Coordinate (   0,   0) psi value = %lf\n", val);
+    success = 0;
   }
-*/
-  return ERROR_SUCCESS;
+
+  val = std::abs(mag2.get_pt_value(-0.5, -0.5));
+  info("Coordinate (-0.5,-0.5) psi value = %lf", std::abs(mag2.get_pt_value(-0.5, -0.5)));
+  if (fabs(val - (0.000004)) > eps) {
+    printf("Coordinate (-0.5,-0.5) psi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag2.get_pt_value(0.5, -0.5));
+  info("Coordinate ( 0.5,-0.5) psi value = %lf", std::abs(mag2.get_pt_value(0.5, -0.5)));
+  if (fabs(val - (0.000004)) > eps) {
+    printf("Coordinate ( 0.5,-0.5) psi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag2.get_pt_value(0.5, 0.5));
+  info("Coordinate ( 0.5, 0.5) psi value = %lf", std::abs(mag2.get_pt_value(0.5, 0.5)));
+  if (fabs(val - (0.000004)) > eps) {
+    printf("Coordinate ( 0.5, 0.5) psi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag2.get_pt_value(-0.5, 0.5));
+  info("Coordinate (-0.5, 0.5) psi value = %lf", std::abs(mag2.get_pt_value(-0.5, 0.5)));
+  if (fabs(val - (0.000004)) > eps) {
+    printf("Coordinate (-0.5, 0.5) psi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag3.get_pt_value(0.0, 0.0));
+  info("Coordinate (   0,   0) phi value = %lf", std::abs(mag3.get_pt_value(0.0, 0.0)));
+  if (fabs(val - (0.000003)) > eps) {
+    printf("Coordinate (   0,   0) phi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag3.get_pt_value(-0.5, -0.5));
+  info("Coordinate (-0.5,-0.5) phi value = %lf", std::abs(mag3.get_pt_value(-0.5, -0.5)));
+  if (fabs(val - (0.000001)) > eps) {
+    printf("Coordinate (-0.5,-0.5) phi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag3.get_pt_value(0.5, -0.5));
+  info("Coordinate ( 0.5,-0.5) phi value = %lf", std::abs(mag3.get_pt_value(0.5, -0.5)));
+  if (fabs(val - (0.000001)) > eps) {
+    printf("Coordinate ( 0.5,-0.5) phi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag3.get_pt_value(0.5, 0.5));
+  info("Coordinate ( 0.5, 0.5) phi value = %lf", std::abs(mag3.get_pt_value(0.5, 0.5)));
+  if (fabs(val - (0.000001)) > eps) {
+    printf("Coordinate ( 0.5, 0.5) phi value = %lf\n", val);
+    success = 0;
+  }
+
+  val = std::abs(mag3.get_pt_value(-0.5, 0.5));
+  info("Coordinate (-0.5, 0.5) phi value = %lf", std::abs(mag3.get_pt_value(-0.5, 0.5)));
+  if (fabs(val - (0.000001)) > eps) {
+    printf("Coordinate (-0.5, 0.5) phi value = %lf\n", val);
+    success = 0;
+  }
+
+  if (success == 1) {
+    printf("Success!\n");
+    return ERROR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERROR_FAILURE;
+  }
 }
