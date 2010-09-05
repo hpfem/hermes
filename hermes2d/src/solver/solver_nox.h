@@ -71,7 +71,9 @@ public:
 		conv.wrms_atol = atol;
 	}
 
+#ifdef HAVE_TEUCHOS
 	void set_precond(Teuchos::RCP<Precond> &pc);
+#endif
         void set_precond(const char *pc);
 
 protected:
