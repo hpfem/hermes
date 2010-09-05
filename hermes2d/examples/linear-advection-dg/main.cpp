@@ -1,18 +1,24 @@
+#define H2D_REPORT_INFO
 #include "hermes2d.h"
-#define H2D_REPORT_FILE "test.log"
 
-/*
- *  Linear transport equation.
- */
-
-// General settings.
+//  This example solves a linear advection equation using Dicontinuous Galerkin (DG) method.
+//	It is intended to show how evalutiation of surface matrix forms that take basis functions defined
+//	on different elements work.
+//
+//  PDE: \nabla \cdot (\Beta u) = 0, where \Beta = (-x_2, x_1) / |x| represents a circular counterclockwise flow field.
+//
+//  Domain: Square (0, 1)x(0, 1).
+//
+//  BC:		Dirichlet,  u = g where \Beta(x) \cdot n(x) < 0, where g = 1 on [0,0.5] x {0}, g = anywhere else.
+//				
+//  The following parameters can be changed:
 
 const int INIT_REF = 1;       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;         // Polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
 
-// Flux stuff.
+// Flux definition.
 
 template<typename Real>
 inline Real calculate_a_dot_v(Real x, Real y, Real vx, Real vy) 
