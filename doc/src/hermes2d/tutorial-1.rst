@@ -431,7 +431,7 @@ The following figure shows the output of this example (again, press '3' for 3D v
 Short and Long Versions of Examples
 -----------------------------------
 
-Most tutorial examples come in two versions: A short one that is intended for effortless basic use, and a long one that is more explicit and thus more convenient for development. The first example with a long version is 03-poisson.
+Some tutorial examples come in two versions: A short one that is intended for effortless basic use, and a long one that is more explicit and thus more convenient for development. The first example with a long version is 03-poisson.
 
 **Git reference:** Tutorial example `03-poisson-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/03-poisson-long>`_. 
 

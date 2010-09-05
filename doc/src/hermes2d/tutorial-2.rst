@@ -57,7 +57,7 @@ has to resort to adaptive *hp*-FEM. The *hp*-FEM takes advantage of
 the following facts:
 
 * Large high-degree elements approximate smooth parts of solution *much* better than small linear ones. 
-  The benchmark `smooth-iso <http://hpfem.org/hermes/doc/hermes2d/src/benchmarks.html#smooth-iso-elliptic>`_ 
+  The benchmark `smooth-iso <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#smooth-iso-elliptic>`_ 
   illustrates this - spend a few minutes to check it out, the results are truly impressive. In the 
   Hermes2D repository, it can be found in the directory 
   `benchmarks/ <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks>`_.
@@ -229,7 +229,7 @@ exact and estimated error can be significant. This is illustrated in the
 following graph that belongs to the benchmark 
 `kellogg <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#kellogg-elliptic>`_.
 
- .. image:: img/benchmark-kellogg/kellogg.png
+ .. image:: img/benchmark-kellogg/kellogg-conv.png
    :align: center
    :width: 600
    :height: 450
@@ -238,14 +238,13 @@ following graph that belongs to the benchmark
 Electrostatic Micromotor Problem (10)
 -------------------------------------
 
-**Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt>`_. 
+**Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt>`_. Long version: `10-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt-long>`_.
 
 Let us demonstrate the use of adaptive h-FEM and hp-FEM on a linear elliptic problem
-concerned with the calculation of
-the electrostatic potential in the vicinity of the electrodes of an electrostatic
-micromotor. This is a MEMS device free of any coils, and thus resistive to
-strong electromagnetic waves (as opposed to classical electromotors).
-The following figure shows one half of the domain $\Omega$
+describing an electrostatic micromotor. This is a MEMS device free of any coils, and 
+thus (as opposed to classical electromotors) resistive to strong electromagnetic waves.
+
+The following figure shows a symmetric half of the domain $\Omega$
 (dimensions need to be scaled with $10^{-5}$ and are in meters):
 
 .. image:: img/tutorial-10/micromotor.png
@@ -348,93 +347,139 @@ In this case, default settings are used. If expressed explicitly, the code would
     selector.set_option(H2D_PREFER_SYMMETRIC_MESH, true);
     selector.set_option(H2D_APPLY_CONV_EXP_DOF, false);
 
-Computing the coarse and fine mesh approximations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Short version
+~~~~~~~~~~~~~
 
-After the selector has been created, the adaptivity can begin. The adaptivity loop is an ordinary while-loop 
-or a for-loop that (for linear problems) usually starts like this::
+If you prefer to avoid technical details of automatic adaptivity, fill the structure 
+AdaptivityParamType with parameters ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
+and MESH_REGULARITY::
 
-    // Adaptivity loop:
-    Solution sln_coarse, sln_fine;
+    // Initialize adaptivity parameters.
+    AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
+                            MESH_REGULARITY);
+
+The algorithm will stop after the relative error estimate in percent drops 
+below ERR_STOP or if the number of degrees of freedom exceeds NDOF_STOP.
+The meaning of the other three parameters will be explained below.
+
+Next, just call the function solve_linear_adapt()::
+
+    // Adaptivity loop.
+    Solution *sln = new Solution();
+    Solution *ref_sln = new Solution();
+    WinGeom* sln_win_geom = new WinGeom(0, 0, 400, 600);
+    WinGeom* mesh_win_geom = new WinGeom(410, 0, 400, 600);
+    bool verbose = true;     // Print info during adaptivity.
+    // The NULL pointer means that we do not want the resulting coefficient vector.
+    solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+                       sln_win_geom, mesh_win_geom, &selector, &apt, verbose);
+
+Here 'sln' and 'ref_sln' stand for solutions on the coarse and globally refined mesh,
+respectively, and the WinGeom structures hold positions and geometries for visualization
+of the coarse mesh solution and the mesh during adaptivity. The visualization can be 
+turned off by providing NULL pointers. After adaptivity is finished, the Space contains 
+the latest coarse mesh, and the user can request the coefficient vector by providing 
+a non-NULL pointer to Vector as the third argument. The latest solutions on the coarse and 
+globally refined meshes are in 'sln' and 'ref_sln'.
+
+Long version 
+~~~~~~~~~~~~
+
+The long version of this example, 
+`10-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt-long>`_, exposes all
+details of the adaptivity algorithm. First one needs to initialize
+the matrix solver (as in example 03)::
+
+    // Initialize matrix solver.
+    Matrix* mat; Vector* rhs; CommonSolver* solver;  
+    init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver);
+
+Next one can initialize views for the solution and mesh during adaptivity::
+
+    // Initialize views.
+    ScalarView s_view("Solution", new WinGeom(0, 0, 400, 600));
+    OrderView  o_view("Mesh", new WinGeom(410, 0, 400, 600));
+
+In order to plot convergence graphs, one can use the SimpleGraph class::
+
+    // DOF and CPU convergence graphs.
+    SimpleGraph graph_dof_est, graph_cpu_est;
+
+This class will save convergence data as two numbers per line: either 
+the number of DOF and error, or CPU time and error. A more advanced 
+GnuplotGraph class is also available, see the file `graph.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/graph.h>`_ for more details. 
+
+**Adaptivity loop**
+
+The adaptivity algorithm in Hermes needs a coarse mesh solution and a reference
+solution on globally refined mesh. These solutions are subtracted in each adaptivity 
+step in order to obtain an error estimate (as a function). This function is used to 
+decide which elements need to be refined as well as to select optimal hp-refinement 
+for each element that needs to be refined. Hence the adaptivity loop begins with refining 
+the mesh globally and calculating the reference solution::
+
+    // Adaptivity loop.
+    Solution *sln = new Solution();
+    Solution *ref_sln = new Solution();
     int as = 1; bool done = false;
     do
     {
       info("---- Adaptivity step %d:", as);
+      info("Solving on reference mesh.");
 
-      // Assemble and solve the fine mesh problem.
-      info("Solving on fine mesh.");
-      RefSystem rs(&ls);
-      rs.assemble();
-      rs.solve(&sln_fine);    
+      // Construct globally refined reference mesh
+      // and setup reference space.
+      Mesh *ref_mesh = new Mesh();
+      ref_mesh->copy(space->get_mesh());
+      ref_mesh->refine_all_elements();
+      Space* ref_space = space->dup(ref_mesh);
+      int order_increase = 1;
+      ref_space->copy_orders(space, order_increase);
 
-      // Either solve on coarse mesh or project the fine mesh solution 
-      // on the coarse mesh.
-      if (SOLVE_ON_COARSE_MESH) {
-        info("Solving on coarse mesh.");
-        ls.assemble();
-        ls.solve(&sln_coarse);
-      }
-      else {
-        info("Projecting fine mesh solution on coarse mesh.");
-        ls.project_global(&sln_fine, &sln_coarse);
-      }
+      // Solve the reference problem.
+      solve_linear(ref_space, &wf, matrix_solver, ref_sln);
 
-The code above creates the pair of coarse and fine mesh approximations, 
-either by solving on both meshes or by just solving on the fine mesh and projecting 
-the fine mesh solution on the coarse mesh. We prefer the latter approach as for us it has 
-worked better in many situations.
+In the next step, the reference solution is projected on the coarse 
+mesh in order to extract its low-order part::
 
-The reference (fine mesh) solution is computed on a globally refined copy of the mesh
-using the class RefSystem. The constructor of the class RefSystem allows the  user
-to choose a different polynomial degree increment (default value 1)
-and another element refinement (default value 1) - see the file 
-`src/refsystem.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/refsystem.h>`_::
+      // Project the reference solution on the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      // NULL means that we do not want to know the resulting coefficient vector.
+      project_global(space, H2D_H1_NORM, ref_sln, sln, NULL); 
 
-    RefSystem(LinSystem* base, int order_increase = 1, int refinement = 1);
+The coarse and reference mesh approximations are inserted into the class Adapt
+and a global error estimate as well as element error estimates are calculated::
 
-In particular, sometimes one may want to use order_increase = 2 or 3 at the very beginning 
-of computation when the reference mesh is still very coarse and thus the reference solution 
-with order_increase = 1 does not give a meaningful error estimate. 
- 
-Adapting the mesh
-~~~~~~~~~~~~~~~~~
+    // Calculate element errors.
+    info("Calculating error (est).");
+    Adapt hp(space, H2D_H1_NORM);
+    hp.set_solutions(sln, ref_sln);
+    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
 
-In the third and last step of each iteration, we use the class H1Dadpt to adjust the coarse mesh and polynomial degrees 
-of finite elements stored in the corresponding Space. (Classes HcurlAdapt, HdivAdapt and L2Adapt will be discussed later.)
-The H1Adapt class has two main functionalities:
-
-* It estimates the overall error of the coarse solution in the $H^1$ norm (user-defined norms for 
-  error calculation will be discussed later),
-* It selects elements with the highest error and uses the user-supplied refinement selector to find a refinement for each of them.
-
-The class H1Adapt is initialized with a pointer to the underlying LinSystem (or NonlinSystem - this will be discussed
-later). Then the user sets the coarse solution and the fine solution and evaluates the error. By default, the error is calculated as
+The error estimate is calculated as
 
 .. math::
 
     e = \frac{|| u - u_{ref} ||_{H^1}}{|| u_{ref} ||_{H^1}}.
 
-In the code this looks as follows::
+This example uses the H1-norm but Hcurl, Hdiv and L2 norms are also possible.
+If the problem is vector-valued (PDE system), arbitrary combinations are possible.
+This will be discussed later. 
 
-    // Calculate element errors and total error estimate.
-    info("Calculating error.");
-    H1Adapt hp(&ls);
-    hp.set_solutions(&sln_coarse, &sln_fine);
-    double err_est = hp.calc_error() * 100;
-
-Finally, if ``err_est`` is still above the threshold ``ERR_STOP``, we perform one
-adaptivity step:
-
-::
+Finally, if ``err_est_rel`` is still above the threshold ``ERR_STOP``, we perform
+mesh adaptation::
 
     // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) done = true;
+    if (err_est_rel < ERR_STOP) done = true;
     else {
-      info("Adapting coarse mesh.");
+      info("Adapting the coarse mesh.");
       done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (ls.get_num_dofs() >= NDOF_STOP) done = true;
+      if (get_num_dofs(space) >= NDOF_STOP) done = true;
     }
+
+    // Free reference space and mesh.
+    ref_space->free();
 
 The constants ``THRESHOLD``, ``STRATEGY`` and ``MESH_REGULARITY`` have the following meaning:
 
@@ -473,9 +518,7 @@ solution.
 
 The gradient was visualized using the class VectorView. We have
 seen this in the previous section. We plug in the same solution for both vector
-components, but specify that its derivatives should be used:
-
-::
+components, but specify that its derivatives should be used::
 
     gview.show(&sln, &sln, H2D_EPS_NORMAL, H2D_FN_DX_0, H2D_FN_DY_0);
 
@@ -618,7 +661,7 @@ The input parameter of the method calc_error() is a combination that is a pair: 
 Simplified Fitzhugh-Nagumo System (11)
 --------------------------------------
 
-**Git reference:** Tutorial example `11-system-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt>`_. 
+**Git reference:** Tutorial example `11-system-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt>`_. Long version: `11-system-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt-long>`_
 
 We consider a simplified version of the Fitzhugh-Nagumo equation.
 This equation is a~prominent example of activator-inhibitor systems in two-component reaction-diffusion 
@@ -643,8 +686,6 @@ In order to make it simpler for this tutorial, we replace the function $f(u)$ wi
 .. math::
 
     f(u) = u.
-
-The original nonlinear version of this example is planned for inclusion in benchmarks. 
 
 Our computational domain is the square $(-1,1)^2$ and we consider zero Dirichlet conditions 
 for both $u$ and $v$. In order to enable fair convergence comparisons, we will use the following 
@@ -710,51 +751,125 @@ Beware that although each of the forms is actually symmetric, one cannot use the
 elasticity equations, since it has a slightly different 
 meaning (see example `08-system <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1.html#systems-of-equations-08>`_).
 
-At the beginning of the adaptivity loop, a coarse and fine mesh approximation on both 
-meshes is obtained as follows::
+Short version
+~~~~~~~~~~~~~
 
-    // Assemble and solve the fine mesh problem.
-    info("Solving on fine meshes.");
-    RefSystem rs(&ls);
-    rs.assemble();
-    rs.solve(Tuple<Solution*>(&u_sln_fine, &v_sln_fine));
+For the short version it is enough to call the function solve_linear_adapt()::
 
-    // Either solve on coarse mesh or project the fine mesh solution 
-    // on the coarse mesh.
-    if (SOLVE_ON_COARSE_MESH) {
-      info("Solving on coarse meshes.");
-      ls.assemble();
-      ls.solve(Tuple<Solution*>(&u_sln_coarse, &v_sln_coarse));
-    }
-    else {
-      info("Projecting fine mesh solutions on coarse meshes.");
-      ls.project_global(Tuple<MeshFunction*>(&u_sln_fine, &v_sln_fine), 
-                        Tuple<Solution*>(&u_sln_coarse, &v_sln_coarse));
-    }
+    // Adaptivity loop.
+    Solution *u_sln = new Solution();
+    Solution *v_sln = new Solution();
+    Solution *ref_u_sln = new Solution();
+    Solution *ref_v_sln = new Solution();
+    ExactSolution u_exact(&u_mesh, uexact);
+    ExactSolution v_exact(&v_mesh, vexact);
+    bool verbose = true;  // Print info during adaptivity.
+    // The NULL pointer means that we do not want the resulting coefficient vector.
+    solve_linear_adapt(Tuple<Space *>(&u_space, &v_space), &wf, NULL, matrix_solver,
+                       Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+                       Tuple<Solution *>(u_sln, v_sln), 
+                       Tuple<Solution *>(ref_u_sln, ref_v_sln), 
+                       Tuple<WinGeom *>(u_sln_win_geom, v_sln_win_geom), 
+                       Tuple<WinGeom *>(u_mesh_win_geom, v_mesh_win_geom), 
+                       Tuple<RefinementSelectors::Selector *> (&selector, &selector), &apt, 
+                       verbose, Tuple<ExactSolution *>(&u_exact, &v_exact));
 
-Error estimate for adaptivity is now calculated using an energetic norm
-that employs the original weak forms of the problem::
+The only differences compared to example 10 are that (a) one needs two coarse and 
+two reference mesh solutions, and that (b) we provide an exact solution for exact error 
+calculation. Note that H1-norms are used for both solution components. 
 
-    // Calculate element errors and total error estimate.
+Long version
+~~~~~~~~~~~~
+
+The adaptivity workflow is the same as in example 10-adapt: First we perform 
+global refinement of each mesh::
+
+    // Construct globally refined reference mesh
+    // and setup reference space.
+    Mesh *u_ref_mesh = new Mesh();
+    u_ref_mesh->copy(u_space->get_mesh());
+    u_ref_mesh->refine_all_elements();
+    Space* u_ref_space = u_space->dup(u_ref_mesh);
+    int order_increase = 1;
+    u_ref_space->copy_orders(u_space, order_increase);
+    Mesh *v_ref_mesh = new Mesh();
+    v_ref_mesh->copy(v_space->get_mesh());
+    v_ref_mesh->refine_all_elements();
+    Space* v_ref_space = v_space->dup(v_ref_mesh);
+    v_ref_space->copy_orders(v_space, order_increase);
+
+Then we calculate the reference solutions::
+
+    // Solve the reference problem.
+    // The NULL pointer means that we do not want the resulting coefficient vector. 
+    solve_linear(Tuple<Space *>(u_ref_space, v_ref_space), &wf, matrix_solver,
+                 Tuple<Solution *>(u_ref_sln, v_ref_sln), NULL);
+
+Next we project each reference solutions on the corresponding coarse mesh in order to extract 
+their low-order parts::
+
+    // Project the reference solution on the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    // NULL means that we do not want to know the resulting coefficient vector.
+    project_global(Tuple<Space *>(u_space, v_space), 
+                   Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+                   Tuple<MeshFunction *>(u_ref_sln, v_ref_sln), 
+                   Tuple<Solution *>(u_sln, v_sln), NULL); 
+
+The error estimate for adaptivity is calculated as follows::
+
+    // Calculate element errors.
     info("Calculating error (est).");
-    H1Adapt hp(&ls);
-    hp.set_solutions(Tuple<Solution*>(&u_sln_coarse, &v_sln_coarse), 
-                     Tuple<Solution*>(&u_sln_fine, &v_sln_fine));
-    hp.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
-    hp.set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
-    hp.set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
-    hp.set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
-    double err_est = hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;
+    Adapt hp(Tuple<Space *>(u_space, v_space), 
+             Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+    hp.set_solutions(Tuple<Solution *>(u_sln, v_sln), 
+                     Tuple<Solution *>(u_ref_sln, v_ref_sln));
+    hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL);
+ 
+    // Calculate error estimate for each solution component.
+    double u_err_est_abs = calc_abs_error(u_sln, u_ref_sln, H2D_H1_NORM);
+    double u_norm_est = calc_norm(u_ref_sln, H2D_H1_NORM);
+    double v_err_est_abs = calc_abs_error(v_sln, v_ref_sln, H2D_H1_NORM);
+    double v_norm_est = calc_norm(v_ref_sln, H2D_H1_NORM);
+    double err_est_abs_total = sqrt(u_err_est_abs*u_err_est_abs + v_err_est_abs*v_err_est_abs);
+    double norm_est_total = sqrt(u_norm_est*u_norm_est + v_norm_est*v_norm_est);
+    double err_est_rel_total = err_est_abs_total / norm_est_total * 100.;
 
-We also calculate error wrt. exact solution for comparison purposes::
+We also calculate exact error for each solution component::
 
-    // Calculate error wrt. exact solution.
-    info("Calculating error (exact).");
-    ExactSolution uexact(&umesh, u_exact);
-    ExactSolution vexact(&vmesh, v_exact);
-    double u_error = h1_error(&u_sln_coarse, &uexact) * 100;
-    double v_error = h1_error(&v_sln_coarse, &vexact) * 100;
-    double error = std::max(u_error, v_error);
+    // Calculate exact error for each solution component.   
+    double err_exact_abs_total = 0;
+    double norm_exact_total = 0;
+    double u_err_exact_abs = calc_abs_error(u_sln, &u_exact, H2D_H1_NORM);
+    double u_norm_exact = calc_norm(&u_exact, H2D_H1_NORM);
+    err_exact_abs_total += u_err_exact_abs * u_err_exact_abs;
+    norm_exact_total += u_norm_exact * u_norm_exact;
+    double v_err_exact_abs = calc_abs_error(v_sln, &v_exact, H2D_H1_NORM);
+    double v_norm_exact = calc_norm(&v_exact, H2D_H1_NORM);
+    err_exact_abs_total += v_err_exact_abs * v_err_exact_abs;
+    norm_exact_total += v_norm_exact * v_norm_exact;
+    err_exact_abs_total = sqrt(err_exact_abs_total);
+    norm_exact_total = sqrt(norm_exact_total);
+    double err_exact_rel_total = err_exact_abs_total / norm_exact_total * 100.;
+
+The mesh adaptation step comes last, if the error estimate exceeds the 
+allowed tolerance ERR_STOP::
+
+    // If err_est too large, adapt the mesh.
+    if (err_est_rel_total < ERR_STOP) done = true;
+    else {
+      info("Adapting the coarse mesh.");
+      done = hp.adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+                      THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+      if (get_num_dofs(Tuple<Space *>(u_space, v_space)) >= NDOF_STOP) done = true;
+    }
+
+    // Free reference meshes and spaces.
+    u_ref_space->free();
+    v_ref_space->free();
+
+    as++;
 
 The following two figures show the solutions $u$ and $v$. Notice their 
 large qualitative differences: While $u$ is smooth in the entire domain, 
@@ -816,14 +931,12 @@ CPU time convergence graphs:
 Adaptivity for General 2nd-Order Linear Equation (12)
 -----------------------------------------------------
 
-**Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt>`_. 
+**Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt>`_. Long version: `12-general-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt-long>`_.
 
 This example does not bring anything substantially new and its purpose is solely to 
 save you work adding adaptivity to the tutorial example 
 `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. 
-Feel free to adjust the 
-`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/12-general-adapt/main.cpp>`_ 
-file for your own applications.
+Feel free to adjust this example for your own applications.
 
 Solution:
 
@@ -861,7 +974,7 @@ Convergence comparison in terms of CPU time.
 Complex-Valued Problem (13)
 ---------------------------
 
-**Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt>`_. 
+**Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt>`_. Long version: `13-complex-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt-long>`_.
 
 This example solves a complex-valued vector potential problem
 
@@ -939,6 +1052,51 @@ The weak forms are registered as follows:
     wf.add_matrix_form(callback(bilinear_form_air), H2D_SYM, 1);
     wf.add_vector_form(callback(linear_form_wire), 2);
 
+Short version
+~~~~~~~~~~~~~
+
+The only thing worth noticing here is that a Boolean variable 
+'is_complex = true' is passed into the function solve_linear_adapt()::
+
+    // Adaptivity loop.
+    Solution *sln = new Solution();
+    Solution *ref_sln = new Solution();
+    WinGeom* sln_win_geom = new WinGeom(0, 0, 600, 350);
+    WinGeom* mesh_win_geom = new WinGeom(610, 0, 520, 350);
+    bool verbose = true;     // Print info during adaptivity.
+    bool is_complex = true;
+    // The NULL pointer means that we do not want the resulting coefficient vector.
+    solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+                       sln_win_geom, mesh_win_geom, &selector, &apt, verbose,
+                       Tuple<ExactSolution *>(), is_complex);
+
+
+Long version
+~~~~~~~~~~~~
+
+In the long version, the variable 'is_complex' is used at several places.
+First during the matrix initialization::
+
+    // Initialize matrix solver.
+    bool is_complex = true;
+    Matrix* mat; Vector* rhs; CommonSolver* solver;  
+    init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver, is_complex);
+
+Then in the solution of the linear problem on the globally refined reference mesh::
+
+    // Solve the reference problem.
+    // The NULL pointer means that we do not want the resulting coefficient vector.
+    solve_linear(ref_space, &wf, matrix_solver, ref_sln, NULL, is_complex);
+
+And finally in the global projection on the coarse mesh::
+
+    // Project the reference solution on the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    // NULL means that we do not want to know the resulting coefficient vector.
+    project_global(space, H2D_H1_NORM, ref_sln, sln, NULL, is_complex); 
+
+Otherwise everything is the same as in example 10.
+
 Let us compare adaptive $h$-FEM with linear and quadratic elements and the $hp$-FEM.
 
 Final mesh for $h$-FEM with linear elements: 18694 DOF, error = 1.02 \%
@@ -975,11 +1133,11 @@ and hp-FEM are shown below.
 Time-Harmonic Maxwell's Equations (14)
 --------------------------------------
 
-**Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt>`_. 
+**Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt>`_. Long version: `14-hcurl-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt-long>`_.
 
-This example solves time-harmonic Maxwell's equations in an L-shaped domain and it 
+This example solves the time-harmonic Maxwell's equations in an L-shaped domain and it 
 describes the diffraction of an electromagnetic wave from a re-entrant corner. It comes with an 
-exact solution that contains singularity.
+exact solution that contains a strong singularity.
 
 Equation solved: Time-harmonic Maxwell's equations
 
@@ -1037,9 +1195,56 @@ computer code, this reads:
 Here jv() is the Bessel function $\bfJ_{\alpha}$. For its source code see the 
 `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/forms.cpp>`_ file.
 
-Code for the weak forms:
+New in this example is the fact that we solve in the Hcurl space::
+
+    // Create an Hcurl space with default shapeset.
+    HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
+
+Also the refinement selector is for the Hcurl space::
+
+    // Initialize refinement selector.
+    HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+Short version
+~~~~~~~~~~~~~
+
+In the short version we need to use the H2D_HCURL_NORM::
+
+    // Adaptivity loop.
+    Solution *sln = new Solution();
+    Solution *ref_sln = new Solution();
+    ExactSolution exact_sln(&mesh, exact);
+    WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
+    WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
+    bool verbose = true;     // Print info during adaptivity.
+    bool is_complex = true;
+    // The NULL pointer means that we do not want the resulting coefficient vector.
+    solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_HCURL_NORM, sln, ref_sln,  
+                       sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln, is_complex);
+
+
+Long version
+~~~~~~~~~~~~
+
+In the long version it is worth noticing that H2D_HCURL_NORM is used in the 
+global projection
 
 ::
+
+    // Project the reference solution on the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    // NULL means that we do not want to know the resulting coefficient vector.
+    project_global(space, H2D_HCURL_NORM, ref_sln, sln, NULL, is_complex); 
+
+as well as in the initialization of the Adapt class::
+
+    // Calculate element errors.
+    info("Calculating error (est).");
+    Adapt hp(space, H2D_HCURL_NORM);
+    hp.set_solutions(sln, ref_sln);
+    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100.;
+
+The code for the weak forms looks as follows::
 
     template<typename Real, typename Scalar>
     Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
