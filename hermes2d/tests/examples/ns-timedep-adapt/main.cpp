@@ -62,7 +62,7 @@ const double VEL_INLET = 1.0;        // Inlet velocity (reached after STARTUP_TI
 const double STARTUP_TIME = 1.0;     // During this time, inlet velocity increases gradually
                                      // from 0 to VEL_INLET, then it stays constant.
 const double TAU = 0.01;             // Time step.
-const double T_FINAL = 30000.0;      // Time interval length.
+const double T_FINAL = 2*TAU + 1e-4; // Time interval length.
 
 // Newton's method
 const double NEWTON_TOL_COARSE = 0.01;     // Stopping criterion for Newton on coarse mesh.
