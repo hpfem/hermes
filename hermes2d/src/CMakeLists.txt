@@ -31,6 +31,8 @@ set(SRC
        views/base_view.cpp views/mesh_view.cpp views/order_view.cpp views/scalar_view.cpp views/stream_view.cpp views/vector_base_view.cpp views/vector_view.cpp views/view.cpp views/view_data.cpp views/view_support.cpp
 
        compat/fmemopen.cpp compat/c99_functions.cpp
+
+       numerical_flux.cpp
        )
 
 if(MSVC)

@@ -30,6 +30,9 @@ set_target_properties(forms PROPERTIES
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/python/hermes2d"
     )
 
+cython_add_module(_numerical_flux)
+target_link_libraries(_numerical_flux ${HERMES_REAL_BIN})
+
 install(TARGETS _hermes2d
             RUNTIME DESTINATION lib/python/hermes2d
             ARCHIVE DESTINATION lib/python/hermes2d
