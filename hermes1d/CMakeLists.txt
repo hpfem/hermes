@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-set(WITH_PYTHON yes)
+set(WITH_PYTHON no)
 set(DEBUG yes)
 set(RELEASE no)
 set(WITH_EXAMPLES yes)
@@ -29,7 +29,6 @@ endif(DEBUG)
 if(RELEASE)
         set(HERMES_BIN hermes1d)
 endif(RELEASE)
-
 
 add_subdirectory(hermes_common)
 add_subdirectory(src)

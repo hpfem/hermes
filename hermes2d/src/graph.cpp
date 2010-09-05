@@ -241,7 +241,7 @@ void GnuplotGraph::save(const char* filename)
   FILE* f = fopen(filename, "w");
   if (f == NULL) error("Error writing to %s", filename);
 
-  fprintf(f, terminal_str.c_str());
+  fprintf(f, "%s", terminal_str.c_str());
 
   int len = strlen(filename);
   AUTOLA_OR(char, outname, len + 10);
