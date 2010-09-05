@@ -1,15 +1,15 @@
 scalar phi_exact(double x, double y, double& dx, double& dy)
 {
-  dx = CF*(1+exp(rF*TIME))*sin(PI*x/LX)*sin(PI*y/LY)/LX*y/LY
-       + CF*(1+exp(rF*TIME))*PI/LX*cos(PI*x/LX)*sin(PI*y/LY)*x/LX*y/LY;
-  dy = CF*(1+exp(rF*TIME))*sin(PI*x/LX)*sin(PI*y/LY)*x/LX/LY
-       + CF*(1+exp(rF*TIME))*sin(PI*x/LX)*PI/LY*cos(PI*y/LY)*x/LX*y/LY;
-  return CF*(1+exp(rF*TIME))*sin(PI*x/LX)*sin(PI*y/LY)*x/LX*y/LY;
+  dx = CF*PHI_FTIME(x,y)*(sin(PI*x/LX)*sin(PI*y/LY)/LX*y/LY
+		     + PI/LX*cos(PI*x/LX)*sin(PI*y/LY)*x/LX*y/LY);
+  dy = CF*PHI_FTIME(x,y)*(sin(PI*x/LX)*sin(PI*y/LY)*x/LX/LY
+		     + sin(PI*x/LX)*PI/LY*cos(PI*y/LY)*x/LX*y/LY);
+  return CF*PHI_FTIME(x,y)*sin(PI*x/LX)*sin(PI*y/LY)*x/LX*y/LY;
 }
 
 scalar T_exact(double x, double y, double& dx, double& dy)
 {
-  dx = CT*(1+tanh(rT*TIME))*PI/LX*cos(PI*x/LX)*sin(PI*y/LY);
-  dy = CT*(1+tanh(rT*TIME))*sin(PI*x/LX)*PI/LY*cos(PI*y/LY);
-  return CT*(1+tanh(rT*TIME))*sin(PI*x/LX)*sin(PI*y/LY);
+  dx = CT*T_FTIME(x,y)*PI/LX*cos(PI*x/LX)*sin(PI*y/LY);
+  dy = CT*T_FTIME(x,y)*sin(PI*x/LX)*PI/LY*cos(PI*y/LY);
+  return CT*T_FTIME(x,y)*sin(PI*x/LX)*sin(PI*y/LY);
 }

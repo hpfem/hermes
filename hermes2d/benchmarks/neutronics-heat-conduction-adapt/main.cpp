@@ -30,10 +30,11 @@ const bool SOLVE_ON_COARSE_MESH = false;   // true... Newton is done on coarse m
 const int INIT_GLOB_REF_NUM = 2;           // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;            // Number of initial refinements towards boundary.
 const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements
-
+const int PROJ_TYPE = 1;                   // For the projection of the initial condition.
+                                           // on the initial mesh: 1 = H1 projection, 0 = L2 projection.
 // Time-stepping:
 const double TAU = 0.1;                    // Time step.
-const double T_FINAL = 10.0;               // Time interval length.
+const double T_FINAL = TAU;//10.0;               // Time interval length.
 
 // Adaptivity:
 const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
@@ -60,16 +61,20 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 1.0;               // Default value is 1.0. This parameter influences the selection of
                                            // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;              // Stopping criterion for hp-adaptivity
+const int MAX_P = 6;                       // Maximum polynomial order allowed in hp-adaptivity
+                                           // had to be limited due to complicated integrals.
+const double ERR_STOP = 0.001;              // Stopping criterion for hp-adaptivity
                                            // (relative error between reference and coarse solution in percent).
-const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
+const int NDOF_STOP = 100000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
+const int ORDER_INCREASE = 1;              // The two following parameters are used in the constructor of the class RefSystem
+const int REFINEMENT = 1;                  //   Default values are 1
 
 
 // Newton's method:
-const double NEWTON_TOL_COARSE = 1.0e-2;          // Stopping criterion for Newton on coarse mesh.
-const double NEWTON_TOL_FINE = 5.0e-2;            // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
+const double NEWTON_TOL_COARSE = 1.0e-6;   // Stopping criterion for Newton on coarse mesh.
+const double NEWTON_TOL_FINE = 5.0e-6;     // Stopping criterion for Newton on fine mesh.
+const int NEWTON_MAX_ITER = 100;            // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS
                                                   // and more are coming.
 
@@ -82,7 +87,7 @@ const double LX = 100.0;          // Domain sizes in the x and y dimensions.
 const double LY = 100.0;
 const double invvel = 2.0e-4;     // Inverse of neutron velocity.
 const double xsdiff = 1.268;      // Diffusion coefficient.
-const double Tref = 0.0;          // Temperature at boundary.
+const double Tref = 0.0;
 
 const double nu = 2.41;           // Number of neutrons emitted per fission event.
 const double xsfiss = 0.00191244; // Fission cross section.
@@ -94,6 +99,7 @@ const double PI = acos(-1.0);
 const double normalization_const = 1.0;
 
 const double energy_per_fission = kappa * xsfiss;
+const double PI_ = PI;
 
 // Miscellaneous:
 double TIME = 0.0;                // Current time.
@@ -117,29 +123,51 @@ const double xsa_ref = 0.0349778;
 const double doppler_coeff = 1.0e-5;
 template<typename Real>
 Real xsrem(Real T) {
-  return xsa_ref + doppler_coeff * (sqrt(T+1.0e-10) - sqrt(Tref));
-  //return xsa_ref + doppler_coeff * (sqrt(T) - sqrt(Tref));
+  return xsa_ref + doppler_coeff * (sqrt(T) - sqrt(Tref));
 }
 
-// Derivative of the removal cross section with respect to temperature
+// Derivative of the removal cross section with respect to temperature.
 template<typename Real>
 Real dxsrem_dT(Real T) {
-  return doppler_coeff / (2*sqrt(T+1.0e-10));
-  //return doppler_coeff / (2*sqrt(T));
+  return doppler_coeff / (2*sqrt(T));
+}
+
+// Time dependence of the temperature.
+template<typename Real>
+Real T_FTIME(Real x, Real y) {
+  return 1.0;
+  return 1+tanh(rT*TIME);
+}
+
+template<typename Real>
+Real DT_FTIME(Real x, Real y) {
+  return 0.0;
+  return rT*(1-pow(tanh(rT*TIME),2));
+}
+
+// Time dependence of the neutron flux.
+template<typename Real>
+Real PHI_FTIME(Real x, Real y) {
+  return T_FTIME(x, y);
+  return 1+exp(rF*TIME);
+}
+
+template<typename Real>
+Real DPHI_FTIME(Real x, Real y) {
+  return DT_FTIME(x, y);
+  return rF*(1+exp(rF*TIME));
 }
 
 // Heat source.
 template<typename Real>
 Real qT(Real x, Real y) {
-  return
-rho*cp*CT*(1.0-pow(tanh(rT*TIME),2.0))*rT*sin(x/LX*PI)*sin(y/LY*PI)-k1*CT*CT*pow(1.0+tanh(rT*TIME),2.0)*pow(cos(x/LX*PI),2.0)/(LX*LX)*PI*PI*pow(sin(y/LY*PI),2.0)+(k0+k1*(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI)-Tref))*CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)/(LX*LX)*PI*PI*sin(y/LY*PI)-k1*CT*CT*pow(1.0+tanh(rT*TIME),2.0)*pow(sin(x/LX*PI),2.0)*pow(cos(y/LY*PI),2.0)/(LY*LY)*PI*PI+(k0+k1*(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI)-Tref))*CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI)/(LY*LY)*PI*PI-normalization_const*energy_per_fission*xsfiss*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY;
+  return CT*DT_FTIME(x,y)*cp*rho*sin((PI_*x)/LX)*sin((PI_*y)/LY)+CT*1/(LX*LX)*(PI_*PI_)*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))+CT*1/(LY*LY)*(PI_*PI_)*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))-(CT*CT)*1/(LX*LX)*(PI_*PI_)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((PI_*x)/LX),2.0)*pow(sin((PI_*y)/LY),2.0)-(CT*CT)*1/(LY*LY)*(PI_*PI_)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((PI_*y)/LY),2.0)*pow(sin((PI_*x)/LX),2.0)-(CF*PHI_FTIME(x,y)*kappa*x*xsfiss*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY);
 }
 
 // Extraneous neutron source.
 template<typename Real>
 Real q(Real x, Real y) {
-  return 
-invvel*CF*rF*exp(rF*TIME)*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY-xsdiff*(-CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)/(LX*LX*LX)*PI*PI*sin(y/LY*PI)*x*y/LY+2.0*CF*(1.0+exp(rF*TIME))*cos(x/LX*PI)/(LX*LX)*PI*sin(y/LY*PI)*y/LY)-xsdiff*(-CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)/(LY*LY*LY)*PI*PI*x/LX*y+2.0*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*cos(y/LY*PI)/(LY*LY)*PI*x/LX)+(xsa_ref+doppler_coeff*(sqrt(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI))-sqrt(Tref)))*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY-nu*xsfiss*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY;
+  return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*PI_*x*cos((PI_*y)/LY)*sin((PI_*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(PI_*PI_)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*PI_*y*cos((PI_*x)/LX)*sin((PI_*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(PI_*PI_)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY);
 }
 
 // Boundary condition types.
@@ -156,7 +184,7 @@ BCType bc_types_phi(int marker)
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 {
-  return Tref;
+  return 0.0;
 }
  
 scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
@@ -172,13 +200,18 @@ scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Load the mesh.
   Mesh basemesh, mesh_T, mesh_phi;
   H2DReader mloader;
   mloader.load("domain.mesh", &basemesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i < INIT_GLOB_REF_NUM; i++)  basemesh.refine_all_elements();
+  for (int i=0; i < INIT_GLOB_REF_NUM; i++)
+    basemesh.refine_all_elements();
   basemesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
   
   // Create a special mesh for each physical field.
@@ -230,6 +263,10 @@ int main(int argc, char* argv[])
   ordview_phi_coarse.fix_scale_width(80);
   
   char title[100]; // Character array to store the title for an actual view and time step.
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est_T, graph_dof_exact_T, graph_cpu_est_T, graph_cpu_exact_T;
+  SimpleGraph graph_dof_est_phi, graph_dof_exact_phi, graph_cpu_est_phi, graph_cpu_exact_phi;
   
   // Exact solutions for error evaluation.
   ExactSolution T_exact_solution(&mesh_T, T_exact);
@@ -391,6 +428,30 @@ int main(int argc, char* argv[])
         err_est += sqr(cur_field_err_est);
         norm_est += sqr(cur_field_norm_est);
       }
+
+/*
+      if (ts==1) {
+	// Add entries to DOF convergence graph.
+	graph_dof_exact_T.add_values(space_T.get_num_dofs(), T_err_exact);
+	graph_dof_exact_T.save("conv_dof_exact_T.dat");
+	graph_dof_est_T.add_values(space_T.get_num_dofs(), T_err_est);
+	graph_dof_est_T.save("conv_dof_est_T.dat");
+	graph_dof_exact_phi.add_values(space_phi.get_num_dofs(), phi_err_exact);
+	graph_dof_exact_phi.save("conv_dof_exact_phi.dat");
+	graph_dof_est_phi.add_values(space_phi.get_num_dofs(), phi_err_est);
+	graph_dof_est_phi.save("conv_dof_est_phi.dat");
+
+	// Add entries to CPU convergence graph.
+	graph_cpu_exact_T.add_values(cpu_time.accumulated(), T_err_exact);
+	graph_cpu_exact_T.save("conv_cpu_exact_T.dat");
+	graph_cpu_est_T.add_values(cpu_time.accumulated(), T_err_est);
+	graph_cpu_est_T.save("conv_cpu_est_T.dat");
+	graph_cpu_exact_phi.add_values(cpu_time.accumulated(), phi_err_exact);
+	graph_cpu_exact_phi.save("conv_cpu_exact_phi.dat");
+	graph_cpu_est_phi.add_values(cpu_time.accumulated(), phi_err_est);
+	graph_cpu_est_phi.save("conv_cpu_est_phi.dat");
+      }
+*/
 
       err_est = sqrt(err_est/norm_est) * 100.;  // Get the percentual relative error estimate.
       
