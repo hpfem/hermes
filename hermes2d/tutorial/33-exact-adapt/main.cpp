@@ -97,14 +97,11 @@ int main(int argc, char* argv[])
     int order_increase = 1;
     ref_space->copy_orders(&space, order_increase);
 
-
     // Assign the function f() to the fine mesh.
     sln_fine.set_exact(ref_mesh, f);
 
     // Project the function f() on the coarse mesh.
-    Solution sln_tmp;
-    sln_tmp.set_exact(&mesh, f);
-    project_global(&space, H2D_H1_NORM, &sln_tmp, &sln_coarse);
+    project_global(&space, H2D_H1_NORM, &sln_file, &sln_coarse);
  
     // Time measurement.
     cpu_time.tick();
