@@ -27,7 +27,7 @@ set(SRC
 	refdomain.cpp
 	refmap.cpp
 	shapefn.cpp
-	shapeset.cpp
+	shapeset/shapeset.cpp
 	shapeset/lobatto.cpp
 	shapeset/h1lobattotetra.cpp
 	shapeset/h1lobattotetradx.cpp
@@ -37,7 +37,7 @@ set(SRC
 	shapeset/hcurllobattohex.cpp
 	shapeset/refmapss.cpp
 	solution.cpp
-	space.cpp
+	space/space.cpp
 	space/h1.cpp
 	space/hcurl.cpp
 	transform.cpp

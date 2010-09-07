@@ -20,7 +20,7 @@
 #ifndef _SPACE_HCURL_H_
 #define _SPACE_HCURL_H_
 
-#include "../space.h"
+#include "space.h"
 
 /// Hcurl space
 ///

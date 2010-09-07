@@ -3,8 +3,8 @@ set(SRC
        transform.cpp traverse.cpp
        limit_order.cpp
        shapeset/shapeset.cpp precalc.cpp solution.cpp filter.cpp
-       space.cpp space_h1.cpp space_hcurl.cpp space_l2.cpp
-       space_hdiv.cpp
+       space/space.cpp space/space_h1.cpp space/space_hcurl.cpp space/space_l2.cpp
+       space/space_hdiv.cpp
        linear1.cpp linear2.cpp linear3.cpp graph.cpp
        quad_std.cpp
        shapeset/shapeset_h1_ortho.cpp shapeset/shapeset_h1_jacobi.cpp shapeset/shapeset_h1_quad.cpp

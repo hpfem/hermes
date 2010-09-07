@@ -19,7 +19,7 @@
 #include "linear_problem.h"
 #include "weakform.h"
 #include "solver.h"
-#include "space.h"
+#include "space/space.h"
 #include "precalc.h"
 #include "refmap.h"
 #include "solution.h"

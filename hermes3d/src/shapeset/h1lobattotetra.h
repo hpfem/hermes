@@ -20,7 +20,7 @@
 #ifndef _SHAPESET_H1_LOBATTO_TETRA_H_
 #define _SHAPESET_H1_LOBATTO_TETRA_H_
 
-#include "../shapeset.h"
+#include "../shapeset/shapeset.h"
 #include "../refdomain.h"
 #include "tetra.h"
 

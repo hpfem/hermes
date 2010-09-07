@@ -21,7 +21,7 @@
 #define _SHAPEFN_H_
 
 #include "function.h"
-#include "shapeset.h"
+#include "shapeset/shapeset.h"
 
 // Represents a shape function on a ref. domain
 //

@@ -16,11 +16,11 @@
 #ifndef __H2D_SPACE_H
 #define __H2D_SPACE_H
 
-#include "mesh.h"
-#include "shapeset/shapeset.h"
-#include "asmlist.h"
-#include "precalc.h"
-#include "quad_all.h"
+#include "../mesh.h"
+#include "../shapeset/shapeset.h"
+#include "../asmlist.h"
+#include "../precalc.h"
+#include "../quad_all.h"
 
 
 // Possible return values for bc_type_callback():

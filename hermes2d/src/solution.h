@@ -17,7 +17,7 @@
 #define __H2D_SOLUTION_H
 
 #include "function.h"
-#include "space.h"
+#include "space/space.h"
 #include "refmap.h"
 #include "matrix.h"
 

@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "space.h"
-#include "matrix_old.h"
-#include "auto_local_array.h"
+#include "../matrix_old.h"
+#include "../auto_local_array.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
              scalar (*bc_value_callback_by_coord)(int, double, double), int p_init)

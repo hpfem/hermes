@@ -28,10 +28,10 @@
 #include "h2d_reader.h"
 #include "exodusii.h"
 
-#include "space_h1.h"
-#include "space_hcurl.h"
-#include "space_l2.h"
-#include "space_hdiv.h"
+#include "space/space_h1.h"
+#include "space/space_hcurl.h"
+#include "space/space_l2.h"
+#include "space/space_hdiv.h"
 
 #include "quad_all.h"
 #include "shapeset/shapeset_h1_all.h"

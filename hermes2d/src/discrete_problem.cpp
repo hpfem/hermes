@@ -17,7 +17,7 @@
 #include "discrete_problem.h"
 #include "solver.h"
 #include "traverse.h"
-#include "space.h"
+#include "space/space.h"
 #include "precalc.h"
 #include "shapeset/shapeset_h1_all.h"
 #include "integrals_h1.h"

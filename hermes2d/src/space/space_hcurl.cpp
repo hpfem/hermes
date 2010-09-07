@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "space_hcurl.h"
-#include "matrix_old.h"
-#include "quad_all.h"
-#include "shapeset/shapeset_hc_all.h"
+#include "../matrix_old.h"
+#include "../quad_all.h"
+#include "../shapeset/shapeset_hc_all.h"
 
 
 double** HcurlSpace::hcurl_proj_mat = NULL;

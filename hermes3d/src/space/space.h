@@ -20,13 +20,13 @@
 #ifndef __SPACE_H
 #define __SPACE_H
 
-#include "mesh.h"
-#include "shapeset.h"
-#include "asmlist.h"
-#include "quad.h"
-#include "order.h"
+#include "../mesh.h"
+#include "../shapeset/shapeset.h"
+#include "../asmlist.h"
+#include "../quad.h"
+#include "../order.h"
 
-#include <common/bitarray.h>
+#include <../common/bitarray.h>
 
 /// @defgroup spaces Spaces
 ///

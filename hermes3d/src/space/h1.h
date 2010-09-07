@@ -20,7 +20,7 @@
 #ifndef _SPACE_H1_H_
 #define _SPACE_H1_H_
 
-#include "../space.h"
+#include "space.h"
 
 /// H1 space
 ///

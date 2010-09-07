@@ -22,7 +22,7 @@
 
 #include "function.h"
 #include "shapefn.h"
-#include "space.h"
+#include "space/space.h"
 #include "asmlist.h"
 #include "refmap.h"
 

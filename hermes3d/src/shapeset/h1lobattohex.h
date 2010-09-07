@@ -21,7 +21,7 @@
 #define _H1_SHAPESET_LOBATTO_HEX_H_
 
 #include "common.h"
-#include "../shapeset.h"
+#include "../shapeset/shapeset.h"
 #include "../mesh.h"
 #include "../refdomain.h"
 #include "hex.h"

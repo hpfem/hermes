@@ -18,7 +18,7 @@
 
 #include "norm.h"
 #include "forms.h"
-#include "space.h"
+#include "space/space.h"
 #include "tuple.h"
 #include "weakform.h"
 #include "integrals_h1.h"

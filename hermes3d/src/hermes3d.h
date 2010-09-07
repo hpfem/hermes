@@ -41,7 +41,7 @@
 #include "loader/exodusii.h"
 
 // spaces
-#include "space.h"
+#include "space/space.h"
 #include "space/h1.h"
 #include "space/hcurl.h"
 
@@ -60,7 +60,7 @@
 #include "shapefn.h"
 
 // shapesets
-#include "shapeset.h"
+#include "shapeset/shapeset.h"
 #include "shapeset/common.h"
 #include "shapeset/h1lobattotetra.h"
 #include "shapeset/h1lobattohex.h"
