@@ -366,42 +366,36 @@ double** Solution::calc_mono_matrix(int o, int*& perm)
   return mat;
 }
 
-// for public use
+// using coefficient vector
 void Solution::set_coeff_vector(Space* space, Vector* vec, double dir)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
-
-    // initialize precalc shapeset using the space's shapeset
-    Shapeset *shapeset = space->get_shapeset();
-    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_coeff_vector().");
-    PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
     
-    this->set_coeff_vector(space, pss, vec, dir);
+    if(!vec->is_complex())
+      this->set_coeff_vector(space, (scalar*)vec->get_c_array(), dir);
+    else
+      this->set_coeff_vector(space, (scalar*)vec->get_c_array_cplx(), dir);
 }
 
-// for public use
-void Solution::set_coeff_vector(Space* space, double* coeffs, int ndof, double dir)
+// using coefficient array (no pss)
+void Solution::set_coeff_vector(Space* space, scalar* coeffs, double dir)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
+    int ndof = space->get_num_dofs();
 
     // initialize precalc shapeset using the space's shapeset
     Shapeset *shapeset = space->get_shapeset();
     if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_coeff_vector().");
     PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
     if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
-    
-    bool is_complex = (sizeof(scalar) == sizeof(double));
-    Vector *tmp_vector = new AVector(ndof);
-    tmp_vector->set_c_array(coeffs, ndof);
-    this->set_coeff_vector(space, pss, tmp_vector, dir);
-    delete tmp_vector;
+
+    set_coeff_vector(space, pss, coeffs, dir);
 }
 
-// for internal use
-void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, Vector* vec, double dir)
+// using pss and coefficient array
+void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, double dir)
 {
   int o;
 
@@ -409,11 +403,12 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, Vector* vec,
   if (space == NULL) error("Space == NULL in Solution::set_coeff_vector().");
   if (space->get_mesh() == NULL) error("Mesh == NULL in Solution::set_coeff_vector().");
   if (pss == NULL) error("PrecalcShapeset == NULL in Solution::set_coeff_vector().");
-  if (vec == NULL) error("Coefficient vector == NULL in Solution::set_coeff_vector().");
+  if (coeffs == NULL) error("Coefficient vector == NULL in Solution::set_coeff_vector().");
   if (!space->is_up_to_date())
     error("Provided 'space' is not up to date.");
   if (space->get_shapeset() != pss->get_shapeset())
     error("Provided 'space' and 'pss' must have the same shapesets.");
+  int ndof = space->get_num_dofs();
 
   space_type = space->get_type();
 
@@ -486,11 +481,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, Vector* vec,
         pss->set_active_shape(al.idx[k]);
         pss->set_quad_order(o, H2D_FN_VAL);
         int dof = al.dof[k];
-#ifdef H2D_COMPLEX
-        scalar coef = al.coef[k] * (dof >= 0 ? vec->get_cplx(dof) : dir);
-#else
-        scalar coef = al.coef[k] * (dof >= 0 ? vec->get(dof) : dir);
-#endif
+        scalar coef = al.coef[k] * (dof >= 0 ? coeffs[dof] : dir);
         double* shape = pss->get_fn_values(l);
         for (int i = 0; i < np; i++)
           val[i] += shape[i] * coef;
@@ -574,13 +565,11 @@ void Solution::set_zero_2(Mesh* mesh)
 void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
 {
   int ndof = space->get_num_dofs();
-  Vector *temp = new AVector(ndof);
-  for (int i = 0; i < ndof; i++) temp->set(i, 0);
-  set_coeff_vector(space, pss, temp);
-  delete temp;
+  scalar *temp = new scalar(ndof);
+  memset(temp, 0, sizeof(scalar)*ndof);
+  this->set_coeff_vector(space, pss, temp, ndof);
+  delete [] temp;
 }
-
-
 
 void Solution::enable_transform(bool enable)
 {

@@ -22,8 +22,8 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;      // Number of initial uniform mesh refinements.
-const int P_INIT = 3;            // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;      // Number of initial uniform mesh refinements.
+const int P_INIT = 2;            // Initial polynomial degree of all mesh elements.
 const bool JFNK = false;         // true = Jacobian-free method (for NOX),
                                  // false = Newton (for NOX).
 const bool PRECOND = true;       // Preconditioning by jacobian in case of JFNK (for NOX),
@@ -167,11 +167,12 @@ int main(int argc, char **argv)
     double *coeffs = nox_solver->get_solution_vector();
 
     // debug
+    //int ndof = space.get_num_dofs();
     //printf("nox vector: ");
-    //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
+    //for (int i=0; i<ndof; i++) printf("%g ", coeffs[i]);
     //printf("\n");
 
-    sln_nox.set_coeff_vector(&space, coeffs, ndof);
+    sln_nox.set_coeff_vector(&space, coeffs);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
       nox_solver->get_num_iters(), nox_solver->get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -184,7 +185,7 @@ int main(int argc, char **argv)
 
   // Show the NOX solution.
   ScalarView view2("Solution 2", 450, 0, 440, 350);
-  view2.set_min_max_range(0, 2);
+  //view2.set_min_max_range(0, 2);
   view2.show(&sln_nox);
 
   // Calculate errors.

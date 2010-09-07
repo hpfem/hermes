@@ -203,11 +203,11 @@ void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, 
   }
  
   // Extract values from the vector 'init_vec'.
-  Vector* vv;
+  scalar *vv;
   if (init_vec != NULL) {
-    vv = new AVector(this->ndof);
-    memset(vv->get_c_array(), 0, this->ndof * sizeof(scalar));
-    for (int i=0; i<this->ndof; i++) vv->set(i, init_vec->get(i));
+    vv = new scalar[this->ndof]; //MEM_CHECK(vv);
+    memset(vv, 0, this->ndof * sizeof(scalar));
+    init_vec->extract(vv);
   }
 
   // Convert the coefficient vector 'init_vec' into solutions Tuple 'u_ext'.

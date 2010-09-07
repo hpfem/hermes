@@ -76,21 +76,21 @@ void BaseView::free()
 
 void BaseView::update_solution()
 {
-  Vector* vec = new AVector(ndof);
-  memset(vec->get_c_array(), 0, sizeof(scalar) * ndof);
+  scalar* coeffs = new scalar(ndof);
+  memset(coeffs, 0, sizeof(scalar) * ndof);
   if (base_index >= 0)
   {
-    if (base_index < ndof) vec->set(base_index, 1.0);
-    sln->set_coeff_vector(space, pss, vec, 0.0);
+    if (base_index < ndof) coeffs[base_index] = 1.0;
+    sln->set_coeff_vector(space, pss, coeffs, 0.0);
   }
   else
   {
-    sln->set_coeff_vector(space, pss, vec, 1.0);
+    sln->set_coeff_vector(space, pss, coeffs, 1.0);
   }
 
   ScalarView::show(sln, eps, item);
   update_title();
-  delete vec;
+  delete coeffs;
 }
 
 

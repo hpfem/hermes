@@ -44,8 +44,8 @@ public:
 	void set_space(Space* sp);
 
 	void create(SparseMatrix *mat);
-	void assemble(Vector* rhs, Matrix* jac, Vector* x = NULL);
-	void assemble(Vector* rhs, Matrix* jac, Tuple<Solution*> u_ext =  Tuple<Solution*> ());
+	void assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, _Vector* dir_ext,
+                      bool rhsonly = false, bool is_complex = false);
 
 	int get_num_dofs();
 	bool is_matrix_free() { return wf->is_matrix_free(); }

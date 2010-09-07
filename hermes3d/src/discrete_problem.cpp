@@ -112,23 +112,39 @@ scalar **DiscreteProblem::get_matrix_buffer(int n)
 	return (matrix_buffer = new_matrix<scalar>(n, n));
 }
 
-void DiscreteProblem::assemble(Vector *rhs, Matrix *jac, Vector *x)
+void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
+                      bool rhsonly, bool is_complex)
 {
 	_F_
-        // Sanity checks.
-	if (x->length() != this->ndof) error("Wrong vector length in assemble().");
-	if (!have_spaces) error("You have to call set_spaces() before calling assemble().");
-        for (int i=0; i<this->wf->neq; i++) {
-          if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
-        }
+  if (init_vec == NULL) error("init_vec is NULL in FeProblem::assemble().");
+  if (init_vec->length() != this->ndof) error("Wrong init_vec length in FeProblem::assemble().");
+  if (rhs_ext != NULL && rhs_ext->length() != this->ndof) error("Wrong rhs_ext length in FeProblem::assemble().");
+  if (dir_ext != NULL && dir_ext->length() != this->ndof) error("Wrong dir_ext length in FeProblem::assemble().");
+  if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
+  for (int i=0; i<this->wf->neq; i++) {
+    if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
+  }
  
-        // Extract values from the vector 'x'.
-	scalar *vv;
-        if (x != NULL) {
-          vv = new scalar[this->ndof]; MEM_CHECK(vv);
-	  memset(vv, 0, this->ndof * sizeof(scalar));
-	  x->extract(vv);
-        }
+  // Extract values from the vector 'init_vec'.
+  scalar *vv;
+  if (init_vec != NULL) {
+    vv = new scalar[this->ndof]; MEM_CHECK(vv);
+    memset(vv, 0, this->ndof * sizeof(scalar));
+    init_vec->extract(vv);
+  }
+
+  // Convert the coefficient vector 'init_vec' into solutions Tuple 'u_ext'.
+  Tuple<Solution*> u_ext;
+  for (int i = 0; i < this->wf->neq; i++) {
+    if (init_vec != NULL) {
+      u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
+      u_ext[i]->set_coeff_vector(this->spaces[i], this->pss[i], vv);
+    }
+    else u_ext.push_back(NULL);
+  }
+  if (init_vec != NULL) delete [] vv;
+ 
+
 
         // Convert the coefficient vector 'x' into solutions Tuple 'u_ext'.
         Tuple<Solution*> u_ext;

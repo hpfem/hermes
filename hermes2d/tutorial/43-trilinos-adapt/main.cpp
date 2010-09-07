@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
     if (solved)
     {
       double* coeffs = solver.get_solution_vector();
-      sln.set_coeff_vector(&space, coeffs, ndof);
+      sln.set_coeff_vector(&space, coeffs);
 
       info("Coarse Solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)", 
@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
     if (solved)
     {
       double* coeffs = ref_solver.get_solution_vector();
-      ref_sln.set_coeff_vector(&rspace, coeffs, ndof);
+      ref_sln.set_coeff_vector(&rspace, coeffs);
 
       info("Reference solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)",
