@@ -1,15 +1,15 @@
 #define H2D_REPORT_INFO
 #include "hermes2d.h"
 
-//  This example solves a linear advection equation using Dicontinuous Galerkin (DG) method.
-//	It is intended to show how evalutiation of surface matrix forms that take basis functions defined
-//	on different elements work.
+//  This example solves a linear advection equation using Discontinuous Galerkin (DG) method.
+//	It is intended to show how to evaluate surface matrix forms that take basis functions defined
+//	on different elements.
 //
 //  PDE: \nabla \cdot (\Beta u) = 0, where \Beta = (-x_2, x_1) / |x| represents a circular counterclockwise flow field.
 //
 //  Domain: Square (0, 1)x(0, 1).
 //
-//  BC:		Dirichlet,  u = g where \Beta(x) \cdot n(x) < 0, where g = 1 on [0,0.5] x {0}, g = anywhere else.
+//  BC:		Dirichlet,  u = g where \Beta(x) \cdot n(x) < 0; g = 1 on [0,0.5] x {0}, g = 0 anywhere else.
 //				
 //  The following parameters can be changed:
 
@@ -157,11 +157,11 @@ int main(int argc, char* argv[])
   //mesh.refine_all_elements();
   //mesh.refine_all_elements();
   
-  // create the L2 space
+  // Create the L2 space.
   L2Space space(&mesh,P_INIT);
   space.set_bc_types(bc_types);
 
-  // display the mesh
+  // Display the mesh.
   OrderView oview("Distribution of polynomial orders", 100, 100, 500, 500);
   oview.show(&space);
   BaseView bview("Distribution of polynomial orders", 600, 100, 500, 500);
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 
   Solution sln;
 
-  // initialize the weak formulation
+  // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form));
   wf.add_vector_form(callback(linear_form));
@@ -179,14 +179,14 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(callback(linear_form_boundary), H2D_DG_BOUNDARY_EDGE);
   wf.add_matrix_form_surf(callback(bilinear_form_interface), H2D_DG_INNER_EDGE);
 
-  // assemble and solve the finite element problem
+  // Assemble and solve the finite element problem.
   solve_linear(&space, &wf, matrix_solver, &sln);
   
-  // visualize the solution
+  // Visualize the solution.
   ScalarView view1("Solution", 600, 600, 500, 500);
   view1.show(&sln);
 
-  // wait for keyboard or mouse input
+  // Wait for keyboard or mouse input.
   View::wait();
   return 0;
 }
