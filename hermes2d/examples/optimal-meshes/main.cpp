@@ -5,114 +5,143 @@
 #include "hermes2d.h"
 #include "function.h"
 
+using namespace RefinementSelectors;
+
+
 //  This example is part of a research project on the design of 
 //  optimal meshes.
 //
-//  PDE: no PDE solved.
+//  Solved PDE: - Laplace u + u = f
 //
-//  Domain: unit square (0, 1)^2
+//  Domain: Square (-1, 1) x (-1, 1)
+//  
+//  Exact solution: u(x,y) = atan(K*x) 
 //
-//  BC: No BC imposed
-//
-//  The following parameters can be changed:
+//  BC: Neumann, given by exact solution.
 
-const int P_INIT = 1;                             // Initial polynomial degree.
+int P_INIT = 2;                                   // Uniform polynomial degree of all mesh elements.
+int UNIFORM_REF_LEVEL = 0;                        // Number of initial uniform mesh refinements.
+const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+                                                  // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 0;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                                  // See User Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double CONV_EXP = 0.5;                      // Default value is 1.0. This parameter influences the selection of
+                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.01;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // reference mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
+                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
 
-// Initial condition. It will be projected on the FE mesh. 
-scalar init_cond(double x, double y, double& dx, double& dy)
-{
-  dx = (1 - 2*x)*exp(x) + (x - x*x)*exp(x);
-  dy = 0;
-  return (x - x*x) * exp(x);
-}
+// Problem parameters.
+double K = 10.0;
+
+// Boundary markers.
+const int NEWTON_BDY = 1;
+
+// Boundary condition types.
+BCType bc_types(int marker)
+  { return BC_NATURAL; }
+
+// Exact solution.
+#include "exact_solution.cpp"
+
+// Weak forms.
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
-  // Read the command-line arguments.
-  if (argc != 10) error("You must provide 5 real numbers (mesh vertices) and 4 integers (poly degrees).");
-  double x0 = atof(argv[1]);
-  double x1 = atof(argv[2]);
-  double x2 = atof(argv[3]);
-  double x3 = atof(argv[4]);
-  double x4 = atof(argv[5]);
-  int o0 = atoi(argv[6]);
-  int o1 = atoi(argv[7]);
-  int o2 = atoi(argv[8]);
-  int o3 = atoi(argv[9]);
-
-  // Prepare mesh geometry.
-  int nv = 10;
-  double2 verts[10];
-  verts[0][0] = x0; verts[0][1] = 0;
-  verts[1][0] = x1; verts[1][1] = 0;
-  verts[2][0] = x2; verts[2][1] = 0;
-  verts[3][0] = x3; verts[3][1] = 0;
-  verts[4][0] = x4; verts[4][1] = 0;
-  verts[5][0] = x0; verts[5][1] = 1;
-  verts[6][0] = x1; verts[6][1] = 1;
-  verts[7][0] = x2; verts[7][1] = 1;
-  verts[8][0] = x3; verts[8][1] = 1;
-  verts[9][0] = x4; verts[9][1] = 1;
-  int nt = 0;
-  int4* tris = NULL;
-  int nq = 4;
-  int5 quads[4];
-  quads[0][0] = 0; quads[0][1] = 1; quads[0][2] = 6; quads[0][3] = 5; quads[0][4] = 0;
-  quads[1][0] = 1; quads[1][1] = 2; quads[1][2] = 7; quads[1][3] = 6; quads[1][4] = 0;
-  quads[2][0] = 2; quads[2][1] = 3; quads[2][2] = 8; quads[2][3] = 7; quads[2][4] = 0;
-  quads[3][0] = 3; quads[3][1] = 4; quads[3][2] = 9; quads[3][3] = 8; quads[3][4] = 0;
-  int nm = 10;
-  int3 mark[10];
-  mark[0][0] = 0; mark[0][1] = 1; mark[0][2] = 1;
-  mark[1][0] = 1; mark[1][1] = 2; mark[1][2] = 1;
-  mark[2][0] = 2; mark[2][1] = 3; mark[2][2] = 1;
-  mark[3][0] = 3; mark[3][1] = 4; mark[3][2] = 1;
-  mark[4][0] = 4; mark[4][1] = 9; mark[4][2] = 1;
-  mark[5][0] = 9; mark[5][1] = 8; mark[5][2] = 1;
-  mark[6][0] = 8; mark[6][1] = 7; mark[6][2] = 1;
-  mark[7][0] = 7; mark[7][1] = 6; mark[7][2] = 1;
-  mark[8][0] = 6; mark[8][1] = 5; mark[8][2] = 1;
-  mark[9][0] = 5; mark[9][1] = 0; mark[9][2] = 1;
-
-  // Create a mesh with 10 vertices, 4 elements and 10 boundary 
-  // edges from the above data.
+  // Load the mesh.
   Mesh mesh;
-  mesh.create(nv, verts, nt, tris, nq, quads, nm, mark);
+  H2DReader mloader;
+  mloader.load("square_2_elem.mesh", &mesh);
+
+  // Perform initial mesh refinements.
+  for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, bc_types, NULL, P_INIT);
+  int ndof = get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
-  // Set element poly orders.
-  space.set_element_order(0, H2D_MAKE_QUAD_ORDER(o0, 1));
-  space.set_element_order(1, H2D_MAKE_QUAD_ORDER(o1, 1));
-  space.set_element_order(2, H2D_MAKE_QUAD_ORDER(o2, 1));
-  space.set_element_order(3, H2D_MAKE_QUAD_ORDER(o3, 1));
+  // Initialize the weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(callback(bilinear_form_vol));
+  wf.add_vector_form(callback(linear_form_vol));
+  wf.add_vector_form_surf(callback(linear_form_surf_right), 2);
+  wf.add_vector_form_surf(callback(linear_form_surf_left), 2);
 
-  // Perform orthogonal projection in the H1 norm.
-  Solution sln_approx;
-  ExactSolution sln_exact(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, &sln_exact, &sln_approx);
 
-  // Calculate the error.
-  double err = calc_abs_error(&sln_approx, &sln_exact, H2D_H1_NORM);
-  printf("\nMesh: %g, %g, %g, %g, %g\n", x0, x1, x2, x3, x4);
-  printf("Poly degrees: %d, %d, %d, %d\n", o0, o1, o2, o3);
+  // NON-ADAPTIVE VERSION
+  
+  // Initialize the linear problem.
+  LinearProblem lp(&wf, &space);
+
+  // Select matrix solver.
+  Matrix* mat; Vector* rhs; CommonSolver* solver;
+  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+
+  // Assemble stiffness matrix and rhs.
+  lp.assemble(mat, rhs);
+
+  // Solve the matrix problem.
+  if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+
+  // Convert coefficient vector into a Solution.
+  Solution* sln = new Solution(&space, rhs);
+
+  // Visualize the solution.
+  ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+  view.show(sln);
+
+  // Calculate error wrt. exact solution.
+  Solution sln_exact;
+  sln_exact.set_exact(&mesh, exact);
+  double err = calc_abs_error(sln, &sln_exact, H2D_H1_NORM);
   printf("err = %g, err_squared = %g\n\n", err, err*err);
+ 
 
   /*
-  // Visualise the solution and mesh.
+  // ADAPTIVE VERSION
+
+  // Initialize refinement selector.
+  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Initialize adaptivity parameters.
+  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
+                          MESH_REGULARITY);
+
+  // Adaptivity loop.
+  Solution *sln = new Solution();
+  Solution *ref_sln = new Solution();
+  ExactSolution exact_sln(&mesh, exact);
   WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
-  ScalarView sview("Solution", sln_win_geom);
-  sview.show(&sln_approx);
   WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
-  OrderView oview("Mesh", mesh_win_geom);
-  oview.show(&space);
+  bool verbose = true;     // Print info during adaptivity.
+  // The NULL pointer means that we do not want the resulting coefficient vector.
+  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+                     sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln);
+  */
 
   // Wait for all views to be closed.
   View::wait();
   return 0;
-  */
 }
-
