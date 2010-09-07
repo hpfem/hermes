@@ -18,8 +18,8 @@
 
 #include "common.h"
 #include "mesh.h"
-#include "shapeset.h"
-#include "shapeset_h1_all.h"
+#include "shapeset/shapeset.h"
+#include "shapeset/shapeset_h1_all.h"
 #include "quad.h"
 #include "quad_all.h"
 

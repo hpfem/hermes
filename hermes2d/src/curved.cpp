@@ -14,8 +14,8 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
-#include "shapeset_h1_all.h"
-#include "shapeset_common.h"
+#include "shapeset/shapeset_h1_all.h"
+#include "shapeset/shapeset_common.h"
 #include "precalc.h"
 #include "curved.h"
 #include "mesh.h"

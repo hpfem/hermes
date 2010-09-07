@@ -17,7 +17,7 @@
 #define __H2D_PRECALC_H
 
 #include "function.h"
-#include "shapeset.h"
+#include "shapeset/shapeset.h"
 
 
 /// \brief Caches precalculated shape function values.

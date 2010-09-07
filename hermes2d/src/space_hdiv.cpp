@@ -17,7 +17,7 @@
 #include "space_hdiv.h"
 #include "matrix_old.h"
 #include "quad_all.h"
-#include "shapeset_hd_all.h"
+#include "shapeset/shapeset_hd_all.h"
 
 
 double** HdivSpace::hdiv_proj_mat = NULL;

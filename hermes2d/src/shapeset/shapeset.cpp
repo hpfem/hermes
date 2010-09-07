@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "../common.h"
 #include "shapeset.h"
-#include "matrix_old.h"
+#include "../matrix_old.h"
 
 
 /*    numbering of edge intervals: (the variable 'part')

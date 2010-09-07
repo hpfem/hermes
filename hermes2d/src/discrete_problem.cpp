@@ -19,7 +19,7 @@
 #include "traverse.h"
 #include "space.h"
 #include "precalc.h"
-#include "shapeset_h1_all.h"
+#include "shapeset/shapeset_h1_all.h"
 #include "integrals_h1.h"
 #include "refmap.h"
 #include "solution.h"

@@ -1,5 +1,5 @@
 #include <hermes2d.h>
-#include <shapeset_common.h>
+#include <shapeset/shapeset_common.h>
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

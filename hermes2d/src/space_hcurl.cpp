@@ -17,7 +17,7 @@
 #include "space_hcurl.h"
 #include "matrix_old.h"
 #include "quad_all.h"
-#include "shapeset_hc_all.h"
+#include "shapeset/shapeset_hc_all.h"
 
 
 double** HcurlSpace::hcurl_proj_mat = NULL;

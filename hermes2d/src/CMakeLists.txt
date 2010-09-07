@@ -2,15 +2,15 @@ set(SRC
        hash.cpp mesh.cpp regul.cpp refmap.cpp curved.cpp
        transform.cpp traverse.cpp
        limit_order.cpp
-       shapeset.cpp precalc.cpp solution.cpp filter.cpp
+       shapeset/shapeset.cpp precalc.cpp solution.cpp filter.cpp
        space.cpp space_h1.cpp space_hcurl.cpp space_l2.cpp
        space_hdiv.cpp
        linear1.cpp linear2.cpp linear3.cpp graph.cpp
        quad_std.cpp
-       shapeset_h1_ortho.cpp shapeset_h1_jacobi.cpp shapeset_h1_quad.cpp
-       shapeset_hc_legendre.cpp shapeset_hc_gradleg.cpp
-       shapeset_hd_legendre.cpp
-       shapeset_l2_legendre.cpp
+       shapeset/shapeset_h1_ortho.cpp shapeset/shapeset_h1_jacobi.cpp shapeset/shapeset_h1_quad.cpp
+       shapeset/shapeset_hc_legendre.cpp shapeset/shapeset_hc_gradleg.cpp
+       shapeset/shapeset_hd_legendre.cpp
+       shapeset/shapeset_l2_legendre.cpp
        qsort.cpp norm.cpp
        trans.cpp
 

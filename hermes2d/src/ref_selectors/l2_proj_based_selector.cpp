@@ -1,7 +1,7 @@
 #include "../common.h"
 #include "../matrix_old.h"
 #include "../solution.h"
-#include "../shapeset_l2_all.h"
+#include "../shapeset/shapeset_l2_all.h"
 #include "../element_to_refine.h"
 #include "l2_proj_based_selector.h"
 

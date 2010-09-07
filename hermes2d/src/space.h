@@ -17,7 +17,7 @@
 #define __H2D_SPACE_H
 
 #include "mesh.h"
-#include "shapeset.h"
+#include "shapeset/shapeset.h"
 #include "asmlist.h"
 #include "precalc.h"
 #include "quad_all.h"

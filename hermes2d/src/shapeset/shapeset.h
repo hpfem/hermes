@@ -16,7 +16,7 @@
 #ifndef __H2D_SHAPESET_H
 #define __H2D_SHAPESET_H
 
-#include "common.h"
+#include "../common.h"
 
 
 #define H2D_CHECK_MODE      assert(mode == H2D_MODE_TRIANGLE || mode == H2D_MODE_QUAD)

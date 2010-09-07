@@ -16,7 +16,7 @@
 #include "common.h"
 #include "mesh.h"
 #include "refmap.h"
-#include "shapeset_h1_all.h"
+#include "shapeset/shapeset_h1_all.h"
 
 
 H1ShapesetJacobi ref_map_shapeset;

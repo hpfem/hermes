@@ -17,7 +17,7 @@
 #include "space_l2.h"
 #include "matrix_old.h"
 #include "quad_all.h"
-#include "shapeset_l2_all.h"
+#include "shapeset/shapeset_l2_all.h"
 
 L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
   : Space(mesh, shapeset, NULL, NULL, p_init)
