@@ -16,7 +16,7 @@
 #ifndef __H2D_ITERSOLVER_H
 #define __H2D_ITERSOLVER_H
 
-#include "common.h"
+#include "../common.h"
 
 /// Abstract class for defining solver interface
 ///

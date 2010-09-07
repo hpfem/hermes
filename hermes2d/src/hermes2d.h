@@ -49,15 +49,15 @@
 #include "linear_problem.h"
 #include "forms.h"
 
-#include "itersolver.h"
-#include "solver_epetra.h"
-#include "solver_aztecoo.h"
-#include "solver_nox.h"
+#include "solver/itersolver.h"
+#include "solver/solver_epetra.h"
+#include "solver/solver_aztecoo.h"
+#include "solver/solver_nox.h"
 
 // preconditioners
-#include "precond.h"
-#include "precond_ifpack.h"
-#include "precond_ml.h"
+#include "solver/precond.h"
+#include "solver/precond_ifpack.h"
+#include "solver/precond_ml.h"
 
 #include "integrals_h1.h"
 #include "integrals_hcurl.h"

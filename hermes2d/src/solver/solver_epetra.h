@@ -16,9 +16,9 @@
 #ifndef __H2D_SOLVER_EPETRA_H_
 #define __H2D_SOLVER_EPETRA_H_
 
-#include "config.h"
+#include "../config.h"
 #include "itersolver.h"
-#include "matrix_old.h"
+#include "../matrix_old.h"
 
 #ifdef HAVE_EPETRA
 #include <Epetra_SerialComm.h>

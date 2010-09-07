@@ -17,7 +17,7 @@
 #define __H2D_SOLVER_NOX_H_
 
 #include "itersolver.h"
-#include "feproblem.h"
+#include "../feproblem.h"
 #include "precond.h"
 #include "solver_epetra.h"
 

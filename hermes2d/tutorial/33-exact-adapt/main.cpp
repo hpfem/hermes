@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     sln_fine.set_exact(ref_mesh, f);
 
     // Project the function f() on the coarse mesh.
-    project_global(&space, H2D_H1_NORM, &sln_file, &sln_coarse);
+    project_global(&space, H2D_H1_NORM, &sln_fine, &sln_coarse);
  
     // Time measurement.
     cpu_time.tick();

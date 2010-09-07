@@ -20,8 +20,8 @@ set(SRC
 
        common.cpp 
 	   matrix_old.cpp weakform.cpp discrete_problem.cpp
-       feproblem.cpp linear_problem.cpp solver_nox.cpp solver_epetra.cpp solver_aztecoo.cpp
-       precond_ml.cpp precond_ifpack.cpp
+       feproblem.cpp linear_problem.cpp solver/solver_nox.cpp solver/solver_epetra.cpp solver/solver_aztecoo.cpp
+       solver/precond_ml.cpp solver/precond_ifpack.cpp
        forms.cpp
        mesh_parser.cpp mesh_lexer.cpp
        exodusii.cpp h2d_reader.cpp

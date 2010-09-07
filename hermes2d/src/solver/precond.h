@@ -16,8 +16,8 @@
 #ifndef __H2D_PRECOND_H_
 #define __H2D_PRECOND_H_
 
-#include "matrix_old.h"
-#include "weakform.h"
+#include "../matrix_old.h"
+#include "../weakform.h"
 
 #ifdef HAVE_EPETRA
 #include <Epetra_Operator.h>

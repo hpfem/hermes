@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "config.h"
+#include "../config.h"
 #include "precond_ml.h"
 
 #define ML_NOT_COMPILED "hermes3d was not built with ML support."

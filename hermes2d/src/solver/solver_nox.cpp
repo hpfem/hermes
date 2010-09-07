@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "config.h"
+#include "../config.h"
 #include "solver_nox.h"
 
 #define NOX_NOT_COMPILED "hermes2d was not built with NOX support."
