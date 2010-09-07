@@ -37,7 +37,7 @@ public:
 
 	//! Common constructor. 
 	//
-	NeighborSearch(Element* el, Space* space, bool ignore_if_visited = true);
+	NeighborSearch(Element* el, Mesh* mesh, bool ignore_if_visited = true);
   
   // Methods for changing active state for further calculations.
   
@@ -68,8 +68,8 @@ public:
   class ExtendedShapeset;
   ExtendedShapeset *supported_shapes; 
   
-  int extend_attached_shapeset(AsmList* al);
-  void attach_pss(PrecalcShapeset *pss, RefMap *rm);
+  int extend_attached_shapeset(Space* space, AsmList* al);
+  void attach_pss(PrecalcShapeset* pss, RefMap* rm);
   void detach_pss();
   
   // Methods for working with quadrature on the active edge.
@@ -141,8 +141,7 @@ private:
 	int n_neighbors; //!< Number of neighbors.
 	
 	Mesh* mesh;
-  Space* space;
-  
+ 
   Quad2D* quad;
   struct QuadInfo
   { 
@@ -334,16 +333,16 @@ public:
         memcpy(dof + central_al->cnt, neighbor_al->dof, sizeof(int)*neighbor_al->cnt);
       }
       
-      void update(NeighborSearch* neighborhood) {
+      void update(NeighborSearch* neighborhood, Space* space) {
         delete [] this->dof;
-        neighborhood->space->get_edge_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
+        space->get_edge_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
         combine_assembly_lists();
       }
       
-      ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al) : central_al(central_al)
+      ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space *space) : central_al(central_al)
       {
         neighbor_al = new AsmList();
-        neighborhood->space->get_edge_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
+        space->get_edge_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
         combine_assembly_lists();
         active_shape = new ExtendedShapeFunction(neighborhood);
       }

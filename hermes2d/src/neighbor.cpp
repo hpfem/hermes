@@ -38,11 +38,10 @@ void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(int index
   order = active_pss->get_edge_fn_order(neibhood->active_edge);
 }
 
-NeighborSearch::NeighborSearch(Element* el, Space* space, bool ignore_if_visited) : 
+NeighborSearch::NeighborSearch(Element* el, Mesh* mesh, bool ignore_if_visited) : 
   central_el(el), central_pss(NULL), central_rm(NULL),
   neighb_el(NULL), neighb_pss(NULL), neighb_rm(NULL),
-  space(space), mesh(space->get_mesh()), 
-  supported_shapes(NULL), quad(&g_quad_2d_std), ignore_if_visited(ignore_if_visited)
+  mesh(mesh), supported_shapes(NULL), quad(&g_quad_2d_std), ignore_if_visited(ignore_if_visited)
 {
   assert_msg(central_el != NULL, "You must set an active element before using RefMap in NeighborSearch.");  
   neighbors.reserve(max_n_trans);
@@ -404,15 +403,16 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   if (neighb_el->visited && ignore_if_visited)
     return false;
  
-  if(central_pss->get_transform() != original_central_el_transform)
-    central_pss->set_transform(original_central_el_transform);
-  
-  if (way_flag == H2D_WAY_DOWN) {
-    for(int i = 0; i < n_trans[active_segment]; i++)
-      central_pss->push_transform(transformations[active_segment][i]);
-    central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm()); 
-  }
-  
+  if(central_pss != NULL) {
+    if(central_pss->get_transform() != original_central_el_transform)
+      central_pss->set_transform(original_central_el_transform);
+    
+    if (way_flag == H2D_WAY_DOWN) {
+      for(int i = 0; i < n_trans[active_segment]; i++)
+        central_pss->push_transform(transformations[active_segment][i]);
+      central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm()); 
+    }
+  }  
   if (with_neighbor_pss) {
     if (neighb_pss == NULL) {
       neighb_pss = new PrecalcShapeset(central_pss->get_shapeset());
@@ -439,14 +439,14 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   return true;
 }
 
-int NeighborSearch::extend_attached_shapeset(AsmList* al)
+int NeighborSearch::extend_attached_shapeset(Space *space, AsmList* al)
 {
   assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
     
   if (supported_shapes == NULL) 
-    supported_shapes = new ExtendedShapeset(this, al);
+    supported_shapes = new ExtendedShapeset(this, al, space);
   else
-    supported_shapes->update(this);
+    supported_shapes->update(this, space);
   
   return supported_shapes->cnt;
 }
@@ -487,43 +487,47 @@ double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 }
 
 
-/*! \brief Fill function values / derivatives for the central element and one of its neighbors.
- *
- */
 //NOTE: This is not very efficient, since it sets the active elements and possibly pushes transformations
 // for each mesh function in each cycle of the innermost assembly loop. This is neccessary because only in
-// this innermost cycle (in function LinSystem::eval_form), we know the quadrature order (dependent on 
+// this innermost cycle (in function DiscreteProblem::eval_form), we know the quadrature order (dependent on 
 // the actual basis and test function), which is needed for creating the Func<scalar> objects via init_fn.
 // The reason for storing the central and neighbor values of any given function in these objects is that otherwise
 // we would have to have one independent copy of the function for each of the neighboring elements. However, it 
 // could unify the way PrecalcShapesets and MeshFunctions are treated in NeighborSearch and maybe these additional 
 // deep memory copying, performed only after setting the active edge part (before the nested loops over basis and 
 // test functions), would be actually more efficient than this. This would require implementing the copy operation for Filters.
-//WARNING: Contrary to LinSystem::init_ext_fn, the order here is the real edge order (like 'order'), not the pseudo-order (like 'eo').
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 {
   assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
       
-  fu->set_active_element(neighb_el);
   
-  if (way_flag == H2D_WAY_UP) 
-    // Transform neighbor element on appropriate part.
-    for(int i = 0; i < n_trans[active_segment]; i++)        
-      fu->push_transform(transformations[active_segment][i]);
-      
-  Func<scalar>* fn_neighbor = init_fn(fu, fu->get_refmap(), get_quad_eo(true));  
-
-  fu->set_active_element(central_el);
-  
+  if(fu->get_active_element() != central_el) {
+    // Just in case - the input function should have the active element set to the central element from get_next_state
+    // called in the assembling procedure.  
+    fu->set_active_element(central_el);
+    fu->set_transform(original_central_el_transform);
+  }
+        
   if (way_flag == H2D_WAY_DOWN)
-    // Transform central element on appropriate part.
+    // Shrink the bigger central element to match the smaller neighbor (shrinks the active edge to the active segment).
     for(int i = 0; i < n_trans[active_segment]; i++)
       fu->push_transform(transformations[active_segment][i]);
   
   Func<scalar>* fn_central = init_fn(fu, fu->get_refmap(), get_quad_eo(false));
 
-  // Reset transformations.
-  fu->reset_transform();
+  // Change the active element of the function. Note that this also resets the transformations on the function.
+  fu->set_active_element(neighb_el);  
+  
+  if (way_flag == H2D_WAY_UP) 
+    // Shrink the bigger neighbor to match the smaller central element.
+    for(int i = 0; i < n_trans[active_segment]; i++)        
+      fu->push_transform(transformations[active_segment][i]);
+    
+  Func<scalar>* fn_neighbor = init_fn(fu, fu->get_refmap(), get_quad_eo(true));  
+  
+  // Restore the original function.
+  fu->set_active_element(central_el);
+  fu->set_transform(original_central_el_transform);
 
   return new DiscontinuousFunc<scalar>(fn_central, fn_neighbor, (neighbor_edges[active_segment].orientation == 1));    
 }
@@ -538,9 +542,9 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
 {   
   assert_msg(active_segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
-  int inc = (space->get_shapeset()->get_num_components() == 2) ? 1 : 0;
-  int central_order = fu->get_edge_fn_order(active_edge, space, central_el) + inc;
-  int neighbor_order = fu->get_edge_fn_order(neighbor_edge, space, neighb_el) + inc;
+  int inc = (fu->get_num_components() == 2) ? 1 : 0;
+  int central_order = fu->get_edge_fn_order(active_edge) + inc;
+  int neighbor_order = fu->get_edge_fn_order(neighbor_edge) + inc;
   return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
 }
 
@@ -550,7 +554,6 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
 int NeighborSearch::direction_neighbor_edge(int parent1, int parent2, int segment)
 {
   assert_msg(segment != -1, ERR_ACTIVE_SEGMENT_NOT_SET);
-  
 	if (segment == 0)
 	{
 		if (neighb_el->vn[neighbor_edge]->id != parent1)

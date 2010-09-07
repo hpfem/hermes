@@ -331,7 +331,7 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
       // If not, we continue with another state.
       Element* e0 = NULL;
       for (unsigned int i = 0; i < s->idx.size(); i++)
-      if ((e0 = e[i]) != NULL) break;
+      	if ((e0 = e[i]) != NULL) break;
       if (e0 == NULL) continue;
 
       // Set maximum integration order for use in integrals, see limit_order().
@@ -600,24 +600,24 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
               
               // Find all neighbors of active element accross active edge and divide it into segements
               // shared by the active element and distinct neighbors.
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]);
+              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
               nbs_v->set_active_edge(edge);
               nbs_v->attach_pss(fv, &refmap[m]);
               
-              nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]);
+              nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
               nbs_u->set_active_edge(edge);
               nbs_u->attach_pss(fu, &refmap[n]);
               
               // Go through each segment of the active edge.
-              for (int segment = 0; segment < nbs_v->get_number_of_neighbs(); segment++) 
+              for (int neighbor = 0; neighbor < nbs_v->get_number_of_neighbs(); neighbor++) 
               { 
-                bool needs_processing_u = nbs_u->set_active_segment(segment);
-                bool needs_processing_v = nbs_v->set_active_segment(segment);
+                bool needs_processing_u = nbs_u->set_active_segment(neighbor);
+                bool needs_processing_v = nbs_v->set_active_segment(neighbor);
                 
                 if (!needs_processing_u) continue;
                 
-                int u_shapes_cnt = nbs_u->extend_attached_shapeset(an);
-                int v_shapes_cnt = nbs_v->extend_attached_shapeset(am);
+                int u_shapes_cnt = nbs_u->extend_attached_shapeset(spaces[n], an);
+                int v_shapes_cnt = nbs_v->extend_attached_shapeset(spaces[m], am);
                 
                 scalar **local_stiffness_matrix = get_matrix_buffer(std::max(u_shapes_cnt, v_shapes_cnt));
                 for (int i = 0; i < v_shapes_cnt; i++)
@@ -687,13 +687,13 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
             // here the form will use for evaluation information from neighbors
             else if(vfs->area == H2D_DG_INNER_EDGE)
             {       
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m], false);
+              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh(), false);
               nbs_v->set_active_edge(edge);
               nbs_v->attach_pss(fv, &refmap[m]);              
               
-              for (int segment = 0; segment < nbs_v->get_number_of_neighbs(); segment++) 
+              for (int neighbor = 0; neighbor < nbs_v->get_number_of_neighbs(); neighbor++) 
               {
-                nbs_v->set_active_segment(segment, false);
+                nbs_v->set_active_segment(neighbor, false);
                 for (int i = 0; i < am->cnt; i++)       
                 {
                   if (am->dof[i] < 0) continue;
@@ -853,7 +853,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   // Determine the integration order.
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   
-  // Order of solutions from the previous iteration level.
+  // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (sln != Tuple<Solution *>()) {
@@ -916,7 +916,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
 
-  // Function values and values of external functions.
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
   if (sln != Tuple<Solution *>()) {
@@ -950,7 +950,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   // Determine the integration order.
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
   
-  // Order of solutions from the previous iteration level.
+  // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (sln != Tuple<Solution *>()) {
@@ -1009,7 +1009,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
 
-  // Function values and values of external functions.
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
   if (sln != Tuple<Solution *>()) {
@@ -1045,7 +1045,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // Determine the integration order.
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   
-  // Order of solutions from the previous iteration level.
+  // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (sln != Tuple<Solution *>()) {
@@ -1110,7 +1110,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   Geom<double>* e = cache_e[eo];
   double* jwt = cache_jwt[eo];
 
-  // Function values and values of external functions.
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, eo);
   if (sln != Tuple<Solution *>()) {
@@ -1150,7 +1150,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   // Determine the integration order.
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
   
-  // Order of solutions from the previous iteration level.
+  // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (sln != Tuple<Solution *>()) {
@@ -1211,7 +1211,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   Geom<double>* e = cache_e[eo];
   double* jwt = cache_jwt[eo];
 
-  // Function values and values of external functions.
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, eo);
   if (sln != Tuple<Solution *>()) {
