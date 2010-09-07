@@ -189,54 +189,38 @@ void FeProblem::create(SparseMatrix* mat)
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::assemble(_Vector *rhs, _Matrix *jac, _Vector *x)
-{
-        // Sanity checks.
-	if (x->length() != this->ndof) error("Wrong vector length in assemble().");
-	if (!have_spaces) error("You have to call set_spaces() before calling assemble().");
-        for (int i=0; i<this->wf->neq; i++) {
-          if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
-        }
- 
-        // Extract values from the vector 'x'.
-	Vector* vv;
-        if (x != NULL) {
-          vv = new AVector(this->ndof);
-	  memset(vv->get_c_array(), 0, this->ndof * sizeof(scalar));
-	  for (int i=0; i<this->ndof; i++) vv->set(i, x->get(i));
-        }
-
-        // Convert the coefficient vector 'x' into solutions Tuple 'u_ext'.
-        Tuple<Solution*> u_ext;
-	for (int i = 0; i < this->wf->neq; i++) {
-	  if (x != NULL) {
-            u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-	    u_ext[i]->set_coeff_vector(this->spaces[i], this->pss[i], vv);
-          }
-          else u_ext.push_back(NULL);
-	}
-	if (x != NULL) delete vv;
-
-        // Perform assembling.
-        this->assemble(rhs, jac, u_ext);
-
-        // Delete temporary solutions.
-	for (int i = 0; i < wf->neq; i++) {
-	  if (u_ext[i] != NULL) {
-            delete u_ext[i];
-	    u_ext[i] = NULL;
-          }
-	}
-}
-
-void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
+void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, _Vector* dir_ext,
+                bool rhsonly, bool is_complex)
 {
   // Sanity checks.
-  if (!have_spaces) error("You have to call set_spaces() before calling assemble().");
+  if (init_vec == NULL) error("init_vec is NULL in FeProblem::assemble().");
+  if (init_vec->length() != this->ndof) error("Wrong init_vec length in FeProblem::assemble().");
+  if (rhs_ext != NULL && rhs_ext->length() != this->ndof) error("Wrong rhs_ext length in FeProblem::assemble().");
+  if (dir_ext != NULL && dir_ext->length() != this->ndof) error("Wrong dir_ext length in FeProblem::assemble().");
+  if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
   for (int i=0; i<this->wf->neq; i++) {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
+ 
+  // Extract values from the vector 'init_vec'.
+  Vector* vv;
+  if (init_vec != NULL) {
+    vv = new AVector(this->ndof);
+    memset(vv->get_c_array(), 0, this->ndof * sizeof(scalar));
+    for (int i=0; i<this->ndof; i++) vv->set(i, init_vec->get(i));
+  }
 
+  // Convert the coefficient vector 'init_vec' into solutions Tuple 'u_ext'.
+  Tuple<Solution*> u_ext;
+  for (int i = 0; i < this->wf->neq; i++) {
+    if (init_vec != NULL) {
+      u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
+      u_ext[i]->set_coeff_vector(this->spaces[i], this->pss[i], vv);
+    }
+    else u_ext.push_back(NULL);
+  }
+  if (init_vec != NULL) delete vv;
+ 
   int k, m, n, marker;
   AUTOLA_CL(AsmList, al, wf->neq);
   AsmList *am, *an;
@@ -265,7 +249,7 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
-  wf->get_stages(spaces, NULL, stages, jac == NULL);
+  wf->get_stages(spaces, NULL, stages, mat_ext == NULL);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -315,7 +299,7 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
 
       init_cache();
       //// assemble volume matrix forms //////////////////////////////////////
-      if (jac != NULL)
+      if (mat_ext != NULL)
       {
         for (unsigned ww = 0; ww < s->mfvol.size(); ww++)
         {
@@ -328,45 +312,88 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
           bool sym = (m == n) && (mfv->sym == 1);
 
           // assemble the local stiffness matrix for the form mfv
-          scalar bi, **mat = get_matrix_buffer(std::max(am->cnt, an->cnt));
+          scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
           for (int i = 0; i < am->cnt; i++)
           {
-            if (!tra && (k = am->dof[i]) < 0) continue;
+            if (!tra && am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
 
             if (!sym) // unsymmetric block
             {
               for (int j = 0; j < an->cnt; j++) {
                 fu->set_active_shape(an->idx[j]);
-                bi = eval_form(mfv, u_ext, fu, fv, refmap+n, refmap+m) * an->coef[j] * am->coef[i];
-                if (an->dof[j] >= 0) mat[i][j] = bi;
+                if (an->dof[j] < 0) {
+                  if (dir_ext != NULL) {
+                    scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                    dir_ext->add(am->dof[i], val);
+                  } 
+                }
+                else if (rhsonly == false) {
+                  scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                  local_stiffness_matrix[i][j] = val;
+                }
               }
+	    /* OLD CODE
+              for (int j = 0; j < an->cnt; j++) {
+                fu->set_active_shape(an->idx[j]);
+                bi = eval_form(mfv, u_ext, fu, fv, refmap+n, refmap+m) * an->coef[j] * am->coef[i];
+                if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = bi;
+              }
+	    */
             }
             else // symmetric block
             {
               for (int j = 0; j < an->cnt; j++) {
                 if (j < i && an->dof[j] >= 0) continue;
                 fu->set_active_shape(an->idx[j]);
+                if (an->dof[j] < 0) {
+                  if (dir_ext != NULL) {
+                    scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                    dir_ext->add(am->dof[i], val);
+                  }
+                } 
+                else if (rhsonly == false) {
+                  scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                  local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+                }
+	      /* OLD CODE
                 bi = eval_form(mfv, u_ext, fu, fv, refmap+n, refmap+m) * an->coef[j] * am->coef[i];
-                if (an->dof[j] >= 0) mat[i][j] = mat[j][i] = bi;
+                if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = bi;
+	      */
               }
             }
           }
           // insert the local stiffness matrix into the global one
-          jac->add(am->cnt, an->cnt, mat, am->dof, an->dof);
+          mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
 
           // insert also the off-diagonal (anti-)symmetric block, if required
           if (tra)
           {
-            if (mfv->sym < 0) chsgn(mat, am->cnt, an->cnt);
-            transpose(mat, am->cnt, an->cnt);
-            jac->add(am->cnt, an->cnt, mat, am->dof, an->dof);
+            if (mfv->sym < 0) chsgn(local_stiffness_matrix, am->cnt, an->cnt);
+            transpose(local_stiffness_matrix, am->cnt, an->cnt);
+            if (rhsonly == false) {
+              mat_ext->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
+            }
+
+            // we also need to take care of the RHS...
+            for (int j = 0; j < am->cnt; j++) {
+              if (am->dof[j] < 0) {
+                for (int i = 0; i < an->cnt; i++) {
+                  if (an->dof[i] >= 0) {
+                    if (dir_ext != NULL) dir_ext->add(an->dof[i], local_stiffness_matrix[i][j]);
+                  }
+                }
+              }
+            }
+  	    /* OLD CODE
+            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+	    */
           }
         }
       }
 
       //// assemble volume linear forms ////////////////////////////////////////
-      if (rhs != NULL)
+      if (rhs_ext != NULL)
       {
         for (unsigned int ww = 0; ww < s->vfvol.size(); ww++)
         {
@@ -379,7 +406,7 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
           {
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
-            rhs->add(am->dof[i], eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i]);
+            rhs_ext->add(am->dof[i], eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i]);
           }
         }
       }
@@ -399,7 +426,7 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
         }
 
         // assemble surface matrix forms ///////////////////////////////////
-        if (jac != NULL)
+        if (mat_ext != NULL)
         {
           for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
           {
@@ -414,23 +441,42 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
             ep[edge].space_v = spaces[m];
             ep[edge].space_u = spaces[n];
 
-            scalar bi, **mat = get_matrix_buffer(std::max(am->cnt, an->cnt));
+            scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
             for (int i = 0; i < am->cnt; i++)
             {
-              if ((k = am->dof[i]) < 0) continue;
+              if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
               for (int j = 0; j < an->cnt; j++)
               {
                 fu->set_active_shape(an->idx[j]);
-                bi = eval_form(mfs, u_ext, fu, fv, refmap+n, refmap+m, ep+edge) * an->coef[j] * am->coef[i];
-                if (an->dof[j] >= 0) mat[i][j] = bi;
+                if (an->dof[j] < 0) {
+                  if (dir_ext != NULL) {
+                    scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
+                                 * an->coef[j] * am->coef[i];
+                    dir_ext->add(am->dof[i], val);
+                  }
+                }
+                else if (rhsonly == false) {
+                  scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
+                               * an->coef[j] * am->coef[i];
+                  local_stiffness_matrix[i][j] = val;
+                } 
               }
             }
-            jac->add(am->cnt, an->cnt, mat, am->dof, an->dof);
+            if (rhsonly == false) {
+              mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
+            }
+	    /* OLD CODE
+                bi = eval_form(mfs, u_ext, fu, fv, refmap+n, refmap+m, ep+edge) * an->coef[j] * am->coef[i];
+                if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = bi;
+              }
+            }
+            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+            */
           }
         }
         // assemble surface linear forms /////////////////////////////////////
-        if (rhs != NULL)
+        if (rhs_ext != NULL)
         {
           for (unsigned ww = 0; ww < s->vfsurf.size(); ww++)
           {
@@ -447,7 +493,7 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
             {
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
-              rhs->add(am->dof[i], eval_form(vfs, u_ext, fv, refmap+m, ep+edge) * am->coef[i]);
+              rhs_ext->add(am->dof[i], eval_form(vfs, u_ext, fv, refmap+m, ep+edge) * am->coef[i]);
             }
           }
         }
@@ -462,6 +508,13 @@ void FeProblem::assemble(_Vector *rhs, _Matrix *jac, Tuple<Solution*> u_ext)
   buffer = NULL;
   mat_size = 0;
 
+  // Delete temporary solutions.
+  for (int i = 0; i < wf->neq; i++) {
+    if (u_ext[i] != NULL) {
+      delete u_ext[i];
+      u_ext[i] = NULL;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

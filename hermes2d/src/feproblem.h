@@ -44,9 +44,8 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   void create(SparseMatrix *mat);
-  // OLD void assemble(const _Vector *x, _Vector *f, _Matrix *jac);
-  void assemble(_Vector* rhs, _Matrix* jac, _Vector* x = NULL);
-  void assemble(_Vector* rhs, _Matrix* jac, Tuple<Solution*> u_ext =  Tuple<Solution*> ());
+  void assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, _Vector* dir_ext,
+                bool rhsonly = false, bool is_complex = false);
 
   int get_num_dofs();
   bool is_matrix_free() { return wf->is_matrix_free(); }

@@ -165,6 +165,12 @@ int main(int argc, char **argv)
   if (solved)
   {
     double *coeffs = nox_solver->get_solution_vector();
+
+    // debug
+    //printf("nox vector: ");
+    //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
+    //printf("\n");
+
     sln_nox.set_coeff_vector(&space, coeffs, ndof);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
       nox_solver->get_num_iters(), nox_solver->get_residual());
