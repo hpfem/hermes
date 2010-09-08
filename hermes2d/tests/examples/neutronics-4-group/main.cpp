@@ -19,7 +19,7 @@ const MatrixSolverType matrix_solver = SOLVER_UMFPACK;    // Possibilities: SOLV
                                                           // SOLVER_MUMPS, and more are coming.
 
 // Initial eigenvalue approximation.
-double k_eff = 1.140;         
+double k_eff = 1.0;         
 
 // Element markers.
 const int marker_reflector = 1;
@@ -258,19 +258,17 @@ int main(int argc, char* argv[])
     sln2.set_coeff_vector(&space2, rhs);
     sln3.set_coeff_vector(&space3, rhs);
     sln4.set_coeff_vector(&space4, rhs);
-/*    
+    
     SimpleFilter source(source_fn, Tuple<MeshFunction*>(&sln1, &sln2, &sln3, &sln4));
     SimpleFilter source_prev(source_fn, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
 
     // Compute eigenvalue.
     double k_new = k_eff * (integrate(&source, marker_core) / integrate(&source_prev, marker_core));
     info("Largest eigenvalue: %.8g, rel. difference from previous it.: %g", k_eff, fabs((k_eff - k_new) / k_new));
-*/
-    double k_new = k_eff + .001;
-    // Stopping criterion.
-    //if (fabs((k_eff - k_new) / k_new) < ERROR_STOP) done = true;
-    if (iter > 10) done = true;
 
+    // Stopping criterion.
+    if (fabs((k_eff - k_new) / k_new) < ERROR_STOP) done = true;
+    
     // Save solutions for the next iteration.
     iter1.copy(&sln1);    
     iter2.copy(&sln2);
