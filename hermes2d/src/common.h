@@ -79,7 +79,7 @@ inline void blas_copy(int n, complex *x, int incx, complex *y, int incy) { zcopy
 
 #else
 
-typedef double scalar;
+//typedef double scalar;
 #define CONJ(a)				(a)
 #define REAL(a)				(a)
 #define IMAG(a)				(0)

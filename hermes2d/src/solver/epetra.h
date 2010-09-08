@@ -88,8 +88,8 @@ public:
 	virtual void free();
 #ifdef HAVE_EPETRA
 	virtual scalar get(int idx) { return (*vec)[idx]; }
-#ifndef H3D_COMPLEX
-	virtual void extract(scalar *v) const { vec->ExtractCopy(v); }
+#ifndef H2D_COMPLEX
+	virtual void extract(double *v) const { vec->ExtractCopy(v); }
 #else
 	virtual void extract(scalar *v) const { }
 #endif

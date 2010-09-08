@@ -805,14 +805,10 @@ Scalar L2projection_liform(int n, double *wt, Func<Real> *v, Geom<Real> *e, ExtD
 
 double get_l2_norm(Vector* vec) 
 {
-  double val = 0;
-  for (int i = 0; i < vec->length(); i++) val += vec->get(i)*vec->get(i);
-  val = sqrt(val);
-  return val;
+  scalar val = 0;
+  for (int i = 0; i < vec->length(); i++) val = val + vec->get(i)*vec->get(i);
+  return std::abs(val);
 }
-
-
-
 
 // Basic Newton's method, takes a coefficient vector and returns a coefficient vector. 
 bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 

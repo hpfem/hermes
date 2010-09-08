@@ -420,10 +420,10 @@ bool NoxSolver::solve()
 #endif
 		// extract solution
 		int n = interface->fep.get_num_dofs();
+#ifndef H2D_COMPLEX
 		delete [] sln;
-		sln = new scalar[n];
+		sln = new double[n];
 		memset(sln, 0, n * sizeof(double));
-#ifndef H3D_COMPLEX
 		f_sln.ExtractCopy(sln);
 #else
 #endif
