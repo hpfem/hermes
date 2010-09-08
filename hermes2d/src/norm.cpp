@@ -16,7 +16,6 @@
 #include "common.h"
 #include "norm.h"
 #include "limit_order.h"
-#include "discrete_problem.h"
 #include "refmap.h"
 #include "integrals_h1.h"
 #include "traverse.h"

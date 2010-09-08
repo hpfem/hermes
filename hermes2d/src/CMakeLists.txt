@@ -18,10 +18,10 @@ set(SRC
        ref_selectors/selector.cpp ref_selectors/order_permutator.cpp ref_selectors/optimum_selector.cpp ref_selectors/proj_based_selector.cpp ref_selectors/l2_proj_based_selector.cpp ref_selectors/h1_proj_based_selector.cpp ref_selectors/hcurl_proj_based_selector.cpp
        adapt.cpp
 
-       common.cpp 
-	   matrix_old.cpp weakform.cpp discrete_problem.cpp
-       feproblem.cpp linear_problem.cpp solver/solver_nox.cpp solver/solver_epetra.cpp solver/solver_aztecoo.cpp
-       solver/precond_ml.cpp solver/precond_ifpack.cpp
+       common.cpp matrix.cpp weakform.cpp feproblem.cpp 
+       solver/nox.cpp solver/epetra.cpp solver/aztecoo.cpp solver/amesos.cpp
+       solver/mumps.cpp solver/pardiso.cpp solver/petsc.cpp solver/umfpack.cpp
+       solver/precond_ml.cpp solver/precond_ifpack.cpp 
        forms.cpp
        mesh_parser.cpp mesh_lexer.cpp
        exodusii.cpp h2d_reader.cpp

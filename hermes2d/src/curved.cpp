@@ -20,7 +20,7 @@
 #include "curved.h"
 #include "mesh.h"
 #include "quad_all.h"
-#include "matrix_old.h"
+#include "matrix.h"
 
 
 // defined in refmap.cpp

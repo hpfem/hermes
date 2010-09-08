@@ -15,7 +15,7 @@
 
 #include "../common.h"
 #include "space_hdiv.h"
-#include "../matrix_old.h"
+#include "../matrix.h"
 #include "../quad_all.h"
 #include "../shapeset/shapeset_hd_all.h"
 

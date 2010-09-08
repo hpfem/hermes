@@ -19,10 +19,12 @@
 #include "traverse.h"
 #include "space/space.h"
 #include "precalc.h"
+#include "matrix.h"
+#include "solver.h"
+#include "solver/umfpack.h"
 #include "refmap.h"
 #include "solution.h"
 #include "config.h"
-#include "discrete_problem.h"
 
 FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces)
 {
@@ -189,7 +191,7 @@ void FeProblem::create(SparseMatrix* mat)
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, _Vector* dir_ext,
+void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
                 bool rhsonly, bool is_complex)
 {
   // Sanity checks.
@@ -801,57 +803,74 @@ Scalar L2projection_liform(int n, double *wt, Func<Real> *v, Geom<Real> *e, ExtD
   return result;
 }
 
-
-Projection::Projection(int n, ...)
+double get_l2_norm(Vector* vec) 
 {
-  num = n;
-
-  va_list ap;
-  va_start(ap, n);
-  for (int i = 0; i < num; i++)
-    slns[i] = va_arg(ap, MeshFunction*);
-  for (int i = 0; i < num; i++)
-    spaces[i] = va_arg(ap, Space*);
-  for (int i = 0; i < num; i++)
-    pss[i] = va_arg(ap, PrecalcShapeset*);
-  va_end(ap);
+  double val = 0;
+  for (int i = 0; i < vec->length(); i++) val += vec->get(i)*vec->get(i);
+  val = sqrt(val);
+  return val;
 }
 
-Projection::~Projection()
-{
-  delete [] vec;
-}
 
-void Projection::set_solver(Solver* solver)
-{
-  this->solver = solver;
-}
 
-scalar* Projection::project()
+
+// Basic Newton's method, takes a coefficient vector and returns a coefficient vector. 
+bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 
+                  Matrix* mat, Solver* solver, double newton_tol, 
+                  int newton_max_iter, bool verbose, bool is_complex) 
 {
-  error("project() in FeProblem does not work currently. Employ DiscreteProblem::project_global()");
-  /*
-  WeakForm wf(num);
-  for (int i = 0; i < num; i++)
-  {
-    wf.add_matrix_form(i, i, callback(L2projection_biform));
-    wf.add_vector_form(i, callback(L2projection_liform), H2D_ANY, 1, slns[i]);
+  int ndof = get_num_dofs(spaces);
+  
+  // sanity checks
+  if (coeff_vec == NULL) error("coeff_vec == NULL in solve_newton().");
+  int n = spaces.size();
+  if (spaces.size() != wf->neq) 
+    error("The number of spaces in newton_solve() must match the number of equation in the PDE system.");
+  for (int i=0; i < n; i++) {
+    if (spaces[i] == NULL) error("spaces[%d] is NULL in solve_newton().", i);
   }
+  if (coeff_vec->length() != ndof) error("Bad vector length in solve_newton().");
 
-  DiscreteProblem ps(&wf, solver, // SPACES MISSING HERE ));
-  ps.assemble();
-  Solution temp;
-  ps.solve(0);
-  const scalar* sln_vec = ps.get_solution_vector();
-  int ndof = ps.get_num_dofs();
-  vec = new scalar[ndof];
-  memcpy(vec, sln_vec, ndof * sizeof(scalar));
-  return vec;
-  */
-// For Visual Studio compiler it is necessary to return a value.
-#ifdef _MSC_VER
-	return new scalar(0.0);
-#endif
+  // Initialize the discrete problem.
+  FeProblem fep(wf, spaces);
+  //info("ndof = %d", fep.get_num_dofs());
+
+  Vector* rhs = new UMFPackVector();
+  rhs->alloc(ndof);
+
+  int it = 1;
+  while (1)
+  {
+    // Assemble the Jacobian matrix and residual vector.
+    // the NULL stands for the dir vector which is not needed here
+    fep.assemble(coeff_vec, mat, NULL, rhs);
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm;
+    res_l2_norm = get_l2_norm(rhs);
+    if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", 
+                        it, get_num_dofs(spaces), res_l2_norm);
+
+    // If l2 norm of the residual vector is in tolerance, quit.
+    if (res_l2_norm < newton_tol|| it > newton_max_iter) break;
+
+    // Solve the matrix problem.
+    if (!solver->solve()) error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec->add(i, rhs->get(i));  
+    
+    it++;
+  };
+
+  delete rhs;
+  delete mat;
+  delete solver; // TODO: Create destructors for solvers.
+  return (it <= newton_max_iter);
 }
 
 

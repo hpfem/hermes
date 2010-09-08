@@ -16,7 +16,7 @@
 #include "common.h"
 #include "limit_order.h"
 #include "solution.h"
-#include "discrete_problem.h"
+#include "feproblem.h"
 #include "refmap.h"
 #include "quad_all.h"
 #include "matrix.h"
@@ -25,6 +25,9 @@
 #include "element_to_refine.h"
 #include "ref_selectors/selector.h"
 #include "adapt.h"
+#include "views/scalar_view.h"
+#include "views/order_view.h"
+
 
 using namespace std;
 

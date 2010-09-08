@@ -15,7 +15,7 @@
 
 #include "../common.h"
 #include "space.h"
-#include "../matrix_old.h"
+#include "../matrix.h"
 #include "../auto_local_array.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 

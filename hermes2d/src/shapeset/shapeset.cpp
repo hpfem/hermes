@@ -15,7 +15,7 @@
 
 #include "../common.h"
 #include "shapeset.h"
-#include "../matrix_old.h"
+#include "../matrix.h"
 
 
 /*    numbering of edge intervals: (the variable 'part')

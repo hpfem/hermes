@@ -74,20 +74,15 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
   wf.add_vector_form(callback(res), H2D_ANY);
 
-  // Project the initial condition on the FE space to obtain initial 
-  // coefficient vector for the Newton's method.
-  info("Projecting to obtain initial vector for the Newton's method.");
-  Vector* coeff_vec = new AVector();
-  Solution* init_sln = new Solution();
-  init_sln->set_const(&mesh, INIT_COND_CONST);
-  // The NULL means that we do not want the resulting Solution, just the vector.
-  project_global(space, H2D_H1_NORM, init_sln, NULL, coeff_vec); 
-  delete init_sln;
+  _Matrix* mat = new UMFPackMatrix(ndof, ndof);
+  _Vector* coeff_vec = new UMFPackVector(ndof);
+  coeff_vec->zero();
+  Solver* solver = new UMFPackLinearSolver(mat, coeff_vec);
 
   // Perform Newton's iteration.
   info("Performing Newton's iteration.");
   bool verbose = true;
-  if (!solve_newton(space, &wf, coeff_vec, matrix_solver, 
+  if (!solve_newton(space, &wf, coeff_vec, mat, solver, 
 		    NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
     error("Newton's method did not converge.");
   };

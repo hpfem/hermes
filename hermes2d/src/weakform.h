@@ -21,8 +21,7 @@
 #include "solution.h"
 
 class RefMap;
-class DiscreteProblem;
-class LinearProblem;
+class FeProblem;
 class Space;
 class MeshFunction;
 struct EdgePos;

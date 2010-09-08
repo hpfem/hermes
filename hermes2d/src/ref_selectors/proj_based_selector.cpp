@@ -1,6 +1,6 @@
 #include "../common.h"
 #include "../solution.h"
-#include "../discrete_problem.h"
+#include "../feproblem.h"
 #include "../quad_all.h"
 #include "../element_to_refine.h"
 #include "order_permutator.h"

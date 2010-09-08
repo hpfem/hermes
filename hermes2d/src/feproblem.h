@@ -17,18 +17,36 @@
 #ifndef __H2D_FEPROBLEM_H
 #define __H2D_FEPROBLEM_H
 
-#include "matrix_old.h"
+#include "matrix.h"
 #include "forms.h"
 #include "weakform.h"
 #include <map>
 
+typedef enum {H2D_L2_NORM, H2D_H1_NORM, H2D_HCURL_NORM, H2D_HDIV_NORM} ProjNormType;
+
 class Space;
 class PrecalcShapeset;
 class WeakForm;
-class _Matrix;
+class Matrix;
 class SparseMatrix;
-class _Vector;
+class Vector;
 class Solver;
+
+// Default H2D projection norm in H1 norm.
+extern int H2D_DEFAULT_PROJ_NORM;
+
+/// Instantiated template. It is used to create a clean Windows DLL interface.
+H2D_API_USED_TEMPLATE(Tuple<int>);
+H2D_API_USED_TEMPLATE(Tuple<Space*>);
+H2D_API_USED_TEMPLATE(Tuple<MeshFunction*>);
+H2D_API_USED_TEMPLATE(Tuple<Solution*>);
+H2D_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
+
+/// For projection, the user may provide bi/linear forms for each solution component stored
+/// in tuples of following types
+typedef Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> > matrix_forms_tuple_t;
+typedef Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > vector_forms_tuple_t;
+
 
 /// Finite Element problem class
 ///
@@ -44,7 +62,7 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   void create(SparseMatrix *mat);
-  void assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, _Vector* dir_ext,
+  void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
                 bool rhsonly = false, bool is_complex = false);
 
   int get_num_dofs();
@@ -130,38 +148,53 @@ protected:
   void init_cache();
   void delete_cache();
 
-  scalar eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
-  scalar eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv);
-  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution *> u_ext, PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep);
-  scalar eval_form(WeakForm::VectorFormSurf *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv, EdgePos* ep);
+  scalar eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
+  scalar eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, 
+         PrecalcShapeset *fv, RefMap *rv);
+  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution *> u_ext, 
+         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep);
+  scalar eval_form(WeakForm::VectorFormSurf *vfv, Tuple<Solution *> u_ext, 
+         PrecalcShapeset *fv, RefMap *rv, EdgePos* ep);
 
 };
 
+H2D_API int get_num_dofs(Tuple<Space *> spaces);
 
-///
-///   Class for projecting solution, from Meshfunction obtain solution vector
-///   Solution vector needed for nonlinear methods as initial guess
-///
-class Projection
-{
-public:
+H2D_API void init_matrix_solver(MatrixSolverType matrix_solver, int ndof, 
+                        Matrix* &mat, Vector* &rhs, 
+                        Solver* &solver, bool is_complex = false);
 
-  Projection(int n, ...);
-  ~Projection();
+// Underlying function for global orthogonal projection.
+// Not intended for the user. NOTE: the weak form here must be 
+// a special projection weak form, which is different from 
+// the weak form of the PDE. If you supply a weak form of the 
+// PDE, the PDE will just be solved. 
+void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, 
+                    Tuple<Solution*> target_slns = Tuple<Solution*>(), Vector* target_vec = NULL, bool is_complex = false);
 
-  void set_solver(Solver* solver);
-  scalar* project();
-  scalar* get_solution_vector() const { return vec; }
+H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction *> source_meshfns, 
+                    Tuple<Solution*> target_slns = Tuple<Solution*>(), Vector* target_vec = NULL, bool is_complex = false);
 
-protected:
+H2D_API void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
+                    vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
+                    Tuple<Solution*> target_slns = Tuple<Solution*>(),
+                    Vector* target_vec = NULL, bool is_complex = false);
 
-  int num;
-  MeshFunction* slns[10];
-  Space* spaces[10];
-  PrecalcShapeset* pss[10];
-  Solver* solver;
-  scalar* vec;
-};
+H2D_API void project_global(Space *space, 
+                    std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> proj_biform,
+                    std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
+                    ExactFunction source_fn, Solution* target_sln = NULL,
+                    Vector* target_vec = NULL, bool is_complex = false);
+
+H2D_API void project_global(Space *space, ExactFunction2 source_fn, Solution* target_sln = NULL, Vector* target_vec = NULL, 
+                    bool is_complex = false);
+
+/// Basic Newton's loop. Takes a coefficient vector, delivers a coefficient vector (in the 
+/// same variable "init_coeff_vector").
+H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_coeff_vec,
+                  MatrixSolverType matrix_solver, double newton_tol = 1e-5, 
+                  int newton_max_iter = 100, bool verbose = false, bool is_complex = false);
 
 #endif
 

@@ -1,5 +1,5 @@
 #include "../common.h"
-#include "../matrix_old.h"
+#include "../matrix.h"
 #include "../solution.h"
 #include "../shapeset/shapeset_hc_all.h"
 #include "../element_to_refine.h"

@@ -29,10 +29,65 @@
 #include <pthread.h>
 #include <math.h>
 #include <time.h>
-
 #include <float.h>
-
 #include <cmath>
+
+// error codes
+#define H3D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
+#define H3D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
+#define H3D_ERR_FACE_INDEX_OUT_OF_RANGE         "Face index out of range."
+#define H3D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
+#define H3D_ERR_TETRA_NOT_COMPILED              "hermes3d was not built with tetra elements."
+#define H3D_ERR_HEX_NOT_COMPILED                "hermes3d was not built with hex elements."
+#define H3D_ERR_PRISM_NOT_COMPILED              "hermes3d was not built with prism elements."
+#define H3D_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
+
+#ifdef H3D_COMPLEX
+
+#include <complex>
+
+typedef std::complex<double> complex;
+typedef complex scalar;
+typedef complex complex2[2];
+#define CONJ(a)				(std::conj(a))
+#define REAL(a)				(std::real(a))
+#define IMAG(a)				(std::imag(a))
+#define ABS(a)				(std::abs(a))
+#define SCALAR_FMT			"(%lf, %lf)"
+#define SCALAR(a)			std::real(a), std::imag(a)
+
+// BLAS-related function
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int zscal_(int *, complex *, complex *, int *);
+extern int zaxpy_(int *, complex *, complex *, int *, complex *, int *);
+extern int zcopy_(int *,            complex *, int *, complex *, int *);
+
+#ifdef __cplusplus
+}
+#endif
+
+/// x <- alpha * x
+inline void blas_scal(int n, complex alpha, complex *x, int incx) { zscal_(&n, &alpha, x, &incx); }
+/// y <- alpha * x + y
+inline void blas_axpy(int n, complex alpha, complex *x, int incx, complex *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
+/// y <- x
+inline void blas_copy(int n, complex *x, int incx, complex *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
+
+#else
+
+typedef double scalar;
+#define CONJ(a)				(a)
+#define REAL(a)				(a)
+#define IMAG(a)				(0)
+#define ABS(a)				(fabs(a))
+#define SCALAR_FMT			"%lf"
+#define SCALAR(a)			(a)
+
+#endif
 
 // Matrix solvers
 enum MatrixSolverType 
@@ -59,7 +114,7 @@ enum MatrixSolverType
 #include <Judy.h>
 #include "auto_local_array.h"
 #include "common_time_period.h"
-#include "../../hermes_common/tuple.h"
+#include "tuple.h"
 
 // Enabling second derivatives in weak forms. Turned off by default. Second
 // derivatives are employed, among others, by stabilization methods for

@@ -15,7 +15,7 @@
 
 #include "common.h"
 #include "solution.h"
-#include "matrix_old.h"
+#include "matrix.h"
 #include "precalc.h"
 #include "refmap.h"
 #include "auto_local_array.h"
@@ -372,10 +372,9 @@ void Solution::set_coeff_vector(Space* space, Vector* vec, double dir)
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
     
-    if(!vec->is_complex())
-      this->set_coeff_vector(space, (scalar*)vec->get_c_array(), dir);
-    else
-      this->set_coeff_vector(space, (scalar*)vec->get_c_array_cplx(), dir);
+    scalar* coeffs = new scalar(vec->length());
+    vec->extract(coeffs);
+    this->set_coeff_vector(space, coeffs, dir);
 }
 
 // using coefficient array (no pss)
