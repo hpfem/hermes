@@ -3,9 +3,6 @@
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
-// This file was written by:
-// - David Andrs
-//
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
@@ -190,8 +187,7 @@ int main(int argc, char **args) {
 	wf.add_matrix_form(1, 1, bilinear_form_2_2<double, scalar>, bilinear_form_2_2<ord_t, ord_t>, SYM);
 	wf.add_vector_form(1, linear_form_2<double, scalar>, linear_form_2<ord_t, ord_t>);
 
-	LinearProblem lp(&wf);
-	lp.set_spaces(Tuple<Space *>(&space1, &space2));
+	LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2));
 
 	// assemble stiffness matrix
 	Timer assemble_timer("Assembling stiffness matrix");

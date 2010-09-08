@@ -3,9 +3,6 @@
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
-// This file was written by:
-// - David Andrs
-//
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
@@ -292,17 +289,16 @@ int main(int argc, char **argv) {
 	printf("* Calculating a solution\n");
 
 	WeakForm wf(true);
-	wf.add_resform(form_0<double, scalar>, form_0<ord_t, ord_t>);
+	wf.add_vector_form(form_0<double, scalar>, form_0<ord_t, ord_t>);
 #if defined LIN_NEUMANN || defined LIN_NEWTON
-	wf.add_resform_surf(form_0_surf<double, scalar>, form_0_surf<ord_t, ord_t>);
+	wf.add_vector_form_surf(form_0_surf<double, scalar>, form_0_surf<ord_t, ord_t>);
 #endif
 #if defined LIN_DIRICHLET || defined NLN_DIRICHLET
 	// preconditioner
-	wf.add_jacform(precond_0_0<double, scalar>, precond_0_0<ord_t, ord_t>, SYM);
+	wf.add_matrix_form(precond_0_0<double, scalar>, precond_0_0<ord_t, ord_t>, SYM);
 #endif
 
-	FeProblem fep(&wf);
-	fep.set_space(&space);
+	DiscreteProblem fep(&wf, &space);
 
 #if defined LIN_DIRICHLET || defined NLN_DIRICHLET
 	// use ML preconditioner to speed-up things

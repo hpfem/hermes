@@ -3,9 +3,6 @@
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
-// This file was written by:
-// - David Andrs
-//
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
@@ -214,7 +211,7 @@ res_t resid_form(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *
 // PROJ
 
 template<typename f_t, typename res_t>
-res_t biproj_form(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e,
+res_t biproj_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e,
                   user_data_t<res_t> *data)
 {
 	res_t res = 0.0;
@@ -224,7 +221,7 @@ res_t biproj_form(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e,
 }
 
 template<typename f_t, typename res_t>
-res_t liproj_form(int n, double *wt, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data)
+res_t liproj_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data)
 {
 	res_t res = 0.0;
 	return res;
@@ -267,11 +264,10 @@ int main(int argc, char **argv)
 #if defined NONLIN2
 	// do L2 projection of zero function
 	WeakForm proj_wf;
-	proj_wf.add_biform(biproj_form<double, scalar>, biproj_form<ord_t, ord_t>, SYM);
-	proj_wf.add_liform(liproj_form<double, scalar>, liproj_form<ord_t, ord_t>);
+	proj_wf.add_matrix_form(biproj_form<double, scalar>, biproj_form<ord_t, ord_t>, SYM);
+	proj_wf.add_vector_form(liproj_form<double, scalar>, liproj_form<ord_t, ord_t>);
 
-	LinProblem lp(&proj_wf);
-	lp.set_space(&space);
+	LinearProblem lp(&proj_wf, &space);
 
 #ifdef WITH_UMFPACK
 	UMFPackMatrix m;
@@ -291,13 +287,12 @@ int main(int argc, char **argv)
 	printf("* Calculating a solution\n");
 
 	WeakForm wf(1);
-	wf.add_jacform(0, 0, jacobi_form<double, scalar>, jacobi_form<ord_t, ord_t>, UNSYM);
-	wf.add_resform(0, resid_form<double, scalar>, resid_form<ord_t, ord_t>);
+	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<ord_t, ord_t>, UNSYM);
+	wf.add_vector_form(0, resid_form<double, scalar>, resid_form<ord_t, ord_t>);
 
-	FeProblem fep(&wf);
-	fep.set_spaces(1, &space);
+	DiscreteProblem dp(&wf, &space);
 
-	NoxSolver solver(&fep);
+	NoxSolver solver(&dp);
 #if defined NONLIN2
 	solver.set_init_sln(ps);
 #endif

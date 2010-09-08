@@ -1,6 +1,13 @@
+set(WITH_TRILINOS YES)
+set(TRILINOS_ROOT /opt/packages/trilinos)
+
+SET(WITH_EXODUSII YES)
+SET(EXODUSII_ROOT /opt/packages/exodusii)
+SET(NETCDF_ROOT /opt/packages/netcdf)
+
 set(DEBUG       YES)	# built debug version
 set(DEBUG_ORDER YES)	# integrate with maximal possible quadrature order
-set(PROFILING   YES)	# turn on prifiling support
+set(PROFILING   YES)	# turn on profiling support
 
 # real/complex version of the library
 set(H3D_REAL        YES)	# build real version of H3D

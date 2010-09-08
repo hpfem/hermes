@@ -3,9 +3,6 @@
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
-// This file was written by:
-// - David Andrs
-//
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
@@ -442,8 +439,7 @@ int main(int argc, char **args) {
 #endif
 
 	// assemble stiffness matrix
-	LinearProblem lp(&wf);
-	lp.set_space(&space);
+	LinearProblem lp(&wf, &space);
 
 	lp.assemble(&mat, &rhs);
 

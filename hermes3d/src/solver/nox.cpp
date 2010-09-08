@@ -130,42 +130,43 @@ void NoxProblemInterface::set_init_sln(double *ic)
 
 bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
 {
-	_F_
-	EpetraVector xx(x);			// wrap our structures around core Epetra objects
-	EpetraVector rhs(f);
+  _F_
+  EpetraVector xx(x);			// wrap our structures around core Epetra objects
+  EpetraVector rhs(f);
 
-	Timer tmr;
-	tmr.start();
+  Timer tmr;
+  tmr.start();
 
-	rhs.zero();
-	fep.assemble(&xx, &rhs, NULL);
+  // The first NULL is for the global matrix, the other for the Dir vector.
+  fep.assemble(&xx, NULL, &rhs, NULL);
 
-	tmr.stop();
-	assembly_time += tmr.get_seconds();
+  tmr.stop();
+  assembly_time += tmr.get_seconds();
 
-	return true;
+  return true;
 }
 
 bool NoxProblemInterface::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
 {
-	_F_
-	Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
-	assert(jac != NULL);
+  _F_
+  Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
+  assert(jac != NULL);
 
-	EpetraVector xx(x);			// wrap our structures around core Epetra objects
-	EpetraMatrix jacobian(*jac);
+  EpetraVector xx(x);			// wrap our structures around core Epetra objects
+  EpetraMatrix jacobian(*jac);
 
-	Timer tmr;
-	tmr.start();
+  Timer tmr;
+  tmr.start();
 
-	jacobian.zero();
-	fep.assemble(&xx, NULL, &jacobian);
-	jacobian.finish();
+  jacobian.zero();
+  // The first NULL is for the right-hand side, the other for the Dir vector.
+  fep.assemble(&xx, &jacobian, NULL, NULL);
+  jacobian.finish();
 
-	tmr.stop();
-	assembly_time += tmr.get_seconds();
+  tmr.stop();
+  assembly_time += tmr.get_seconds();
 
-	return true;
+  return true;
 }
 
 /// Computes a user supplied preconditioner based on input vector x.
@@ -173,29 +174,30 @@ bool NoxProblemInterface::computeJacobian(const Epetra_Vector &x, Epetra_Operato
 bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
                                                 Teuchos::ParameterList *precParams)
 {
-	_F_
-	assert(precond != NULL);
-	EpetraVector xx(x);			// wrap our structures around core Epetra objects
+  _F_
+  assert(precond != NULL);
+  EpetraVector xx(x);			// wrap our structures around core Epetra objects
 
-	Timer tmr;
-	tmr.start();
+  Timer tmr;
+  tmr.start();
 
-	jacobian.zero();
-	fep.assemble(&xx, NULL, &jacobian);
-	jacobian.finish();
+  jacobian.zero();
+  // The first NULL is for the right-hand side, the other for the Dir vector.
+  fep.assemble(&xx, &jacobian, NULL, NULL);
+  jacobian.finish();
 
-	tmr.stop();
-	assembly_time += tmr.get_seconds();
-	tmr.start(true);
+  tmr.stop();
+  assembly_time += tmr.get_seconds();
+  tmr.start(true);
 
-	precond->create(&jacobian);
-	precond->compute();
-	m = *precond->get_obj();
+  precond->create(&jacobian);
+  precond->compute();
+  m = *precond->get_obj();
 
-	tmr.stop();
-	precond_time += tmr.get_seconds();
+  tmr.stop();
+  precond_time += tmr.get_seconds();
 
-	return true;
+  return true;
 }
 
 #endif

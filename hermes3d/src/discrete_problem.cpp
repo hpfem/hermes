@@ -52,7 +52,7 @@ void DiscreteProblem::FnCache::free()
 
 // DiscreteProblem ///////////////////////////////////////////////////////////////////////////////////////
 
-DiscreteProblem::DiscreteProblem(WeakForm *wf)
+DiscreteProblem::DiscreteProblem(WeakForm *wf, Tuple<Space *> sp)
 {
 	_F_
 	this->wf = wf;
@@ -65,6 +65,8 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf)
 
 	matrix_buffer = NULL;
 	matrix_buffer_dim = 0;
+
+        this->set_spaces(sp);
 }
 
 DiscreteProblem::~DiscreteProblem()
@@ -138,251 +140,275 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ex
   for (int i = 0; i < this->wf->neq; i++) {
     if (init_vec != NULL) {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      u_ext[i]->set_coeff_vector(this->spaces[i], this->pss[i], vv);
+      u_ext[i]->set_coeff_vector(this->spaces[i], vv);
     }
     else u_ext.push_back(NULL);
   }
   if (init_vec != NULL) delete [] vv;
- 
 
 
-        // Convert the coefficient vector 'x' into solutions Tuple 'u_ext'.
-        Tuple<Solution*> u_ext;
-	for (int i = 0; i < this->wf->neq; i++) {
-	  if (x != NULL) {
-            u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-	    u_ext[i]->set_coeff_vector(this->spaces[i], vv);
+  bool bnd[10];			    // FIXME: magic number - maximal possible number of faces
+  FacePos fp[10];
+  bool nat[wf->neq], isempty[wf->neq];
+
+  AsmList al[wf->neq];
+  AsmList *am, *an;
+  ShapeFunction base_fn[wf->neq];
+  ShapeFunction test_fn[wf->neq];
+  ShapeFunction *fu, *fv;
+  RefMap refmap[wf->neq];
+  for (int i = 0; i < wf->neq; i++) {
+    base_fn[i].set_shapeset(spaces[i]->get_shapeset());
+    test_fn[i].set_shapeset(spaces[i]->get_shapeset());
+    refmap[i].set_mesh(spaces[i]->get_mesh());
+  }
+
+  matrix_buffer = NULL;
+  get_matrix_buffer(10);
+
+  // obtain a list of assembling stages
+  std::vector<WeakForm::Stage> stages;
+  wf->get_stages(spaces, stages, mat_ext == NULL);
+
+  // Loop through all assembling stages -- the purpose of this is increased performance
+  // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
+  // In such a case, the matrix forms are assembled over one mesh, and only the rhs
+  // traverses through the union mesh. On the other hand, if you don't use multi-mesh
+  // at all, there will always be only one stage in which all forms are assembled as usual.
+  Traverse trav;
+  for (unsigned ss = 0; ss < stages.size(); ss++) {
+    WeakForm::Stage *s = &stages[ss];
+    for (unsigned i = 0; i < s->idx.size(); i++) s->fns[i] = &base_fn[s->idx[i]];
+    trav.begin(s->meshes.size(), &(s->meshes.front()), &(s->fns.front()));
+
+    // assemble one stage
+    Element **e;
+    while ((e = trav.get_next_state(bnd, fp)) != NULL) {
+      // find a non-NULL e[i]
+      Element *e0;
+      for (unsigned i = 0; i < s->idx.size(); i++)
+	if ((e0 = e[i]) != NULL) break;
+      if (e0 == NULL) continue;
+
+      // obtain assembly lists for the element at all spaces
+      memset(isempty, 0, sizeof(bool) * wf->neq);
+      for (unsigned i = 0; i < s->idx.size(); i++) {
+        int j = s->idx[i];
+        if (e[i] == NULL) { isempty[j] = true; continue; }
+
+        // TODO: do not obtain again if the element was not changed
+        spaces[j]->get_element_assembly_list(e[i], al + j);
+        test_fn[j].set_active_element(e[i]);
+        test_fn[j].set_transform(base_fn + j);
+
+	u_ext[j]->set_active_element(e[i]);
+	u_ext[j]->force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
+
+	refmap[j].set_active_element(e[i]);
+	refmap[j].force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
+      }
+      int marker = e0->marker;
+
+      fn_cache.free();
+      if (mat_ext != NULL) {
+	// assemble volume matrix forms //////////////////////////////////////
+	for (unsigned ww = 0; ww < s->mfvol.size(); ww++) {
+	  WeakForm::MatrixFormVol *mfv = s->mfvol[ww];
+	  if (isempty[mfv->i] || isempty[mfv->j]) continue;
+	  if (mfv->area != ANY && !wf->is_in_area(marker, mfv->area)) continue;
+	  int m = mfv->i; fv = test_fn + m; am = al + m;
+	  int n = mfv->j; fu = base_fn + n; an = al + n;
+	  bool tra = (m != n) && (mfv->sym != UNSYM);
+	  bool sym = (m == n) && (mfv->sym == SYM);
+
+	  // assemble the local stiffness matrix for the form mfv
+          scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
+
+	  for (int i = 0; i < am->cnt; i++) {
+	    int k = am->dof[i];
+            if (!tra && k == H3D_DIRICHLET_DOF) continue;
+            fv->set_active_shape(am->idx[i]);
+
+	    if (!sym) { // unsymmetric block
+	      for (int j = 0; j < an->cnt; j++) {
+	        fu->set_active_shape(an->idx[j]);
+                if (an->dof[j] == H3D_DIRICHLET_DOF) {
+                  if (dir_ext != NULL) {
+	            scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
+                    dir_ext->add(am->dof[i], val);
+                  } 
+                }
+                else if (rhsonly == false) {
+	          scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
+                  local_stiffness_matrix[i][j] = val;
+                }
+              }
+	      /* OLD CODE
+	        if (an->dof[j] != H3D_DIRICHLET_DOF) local_stiffness_matrix[i][j] = val;
+	      }
+              */
+	    }
+	    else { // symmetric block
+	      for (int j = 0; j < an->cnt; j++) {
+	        if (j < i && an->dof[j] >= 0) continue;
+	        fu->set_active_shape(an->idx[j]);
+                if (an->dof[j] == H3D_DIRICHLET_DOF) {
+                  if (dir_ext != NULL) {
+                    scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                    dir_ext->add(am->dof[i], val);
+                  }
+                } 
+                else if (rhsonly == false) {
+                  scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                  local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+                } 
+	        /* OLD CODE
+		  if (an->dof[j] != H3D_DIRICHLET_DOF) local_stiffness_matrix[i][j] = 
+                                                       local_stiffness_matrix[j][i] = bi;              
+                */
+	      }
+	    }
+	  }
+
+	  // insert the local stiffness matrix into the global one
+          mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+
+          // insert also the off-diagonal (anti-)symmetric block, if required
+          if (tra) {
+            if (mfv->sym < 0) chsgn(local_stiffness_matrix, am->cnt, an->cnt);
+            transpose(local_stiffness_matrix, am->cnt, an->cnt);
+            mat_ext->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
+
+            // we also need to take care of the RHS...
+            for (int j = 0; j < am->cnt; j++) {
+              if (am->dof[j] < 0) {
+                for (int i = 0; i < an->cnt; i++) {
+                  if (an->dof[i] >= 0) {
+                    if (dir_ext != NULL) dir_ext->add(an->dof[i], local_stiffness_matrix[i][j]);
+                  }
+                }
+              }
+            }
           }
-          else u_ext.push_back(NULL);
-	}
-	if (x != NULL) delete [] vv;
+        }
+      }
 
-        // Perform assembling.
-        this->assemble(rhs, jac, u_ext);
+      // assemble volume vector forms ////////////////////////////////////////
+      if (rhs_ext != NULL) {
+        for (unsigned ww = 0; ww < s->vfvol.size(); ww++) {
+          WeakForm::VectorFormVol *vfv = s->vfvol[ww];
+          if (isempty[vfv->i]) continue;
+          if (vfv->area != ANY && !wf->is_in_area(marker, vfv->area)) continue;
+          int m = vfv->i;  fv = test_fn + m;  am = al + m;
 
-        // Delete temporary solutions.
-	for (int i = 0; i < wf->neq; i++) {
-	  if (u_ext[i] != NULL) {
-            delete u_ext[i];
-	    u_ext[i] = NULL;
+          for (int i = 0; i < am->cnt; i++) {
+            if (am->dof[i] == H3D_DIRICHLET_DOF) continue;
+            fv->set_active_shape(am->idx[i]);
+            rhs_ext->add(am->dof[i], eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i]);
           }
-	}
-}
+        }
+      }
 
+      /////////////////////////
 
-void DiscreteProblem::assemble(Vector *rhs, Matrix *jac, Tuple<Solution*> u_ext)
-{
-	_F_
-        // Sanity checks.
-	if (!have_spaces) error("You have to call set_spaces() before calling assemble().");
-        for (int i=0; i<this->wf->neq; i++) {
-          if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
+      // assemble surface integrals now: loop through boundary faces of the element
+      for (int iface = 0; iface < e[0]->get_num_faces(); iface++) {
+        fn_cache.free();
+	if (!bnd[iface]/* || !e0->en[edge]->bnd*/) continue;
+        int marker = fp[iface].marker;
+
+        // obtain the list of shape functions which are nonzero on this edge
+        for (unsigned i = 0; i < s->idx.size(); i++) {
+          if (e[i] == NULL) continue;
+          int j = s->idx[i];
+          if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
+             spaces[j]->get_boundary_assembly_list(e[i], iface, al + j);
         }
 
-	bool bnd[10];						// FIXME: magic number - maximal possible number of faces
-	FacePos fp[10];
-	bool nat[wf->neq], isempty[wf->neq];
+        if (mat_ext != NULL) {
+          // assemble surface matrix forms ///////////////////////////////////
+          for (unsigned ww = 0; ww < s->mfsurf.size(); ww++) {
+            WeakForm::MatrixFormSurf *mfs = s->mfsurf[ww];
+            if (isempty[mfs->i] || isempty[mfs->j]) continue;
+            if (mfs->area != ANY && !wf->is_in_area(marker, mfs->area)) continue;
+            int m = mfs->i; fv = test_fn + m; am = al + m;
+            int n = mfs->j; fu = base_fn + n; an = al + n;
 
-	AsmList al[wf->neq];
-	AsmList *am, *an;
-	ShapeFunction base_fn[wf->neq];
-	ShapeFunction test_fn[wf->neq];
-	ShapeFunction *fu, *fv;
-	RefMap refmap[wf->neq];
-	for (int i = 0; i < wf->neq; i++) {
-		base_fn[i].set_shapeset(spaces[i]->get_shapeset());
-		test_fn[i].set_shapeset(spaces[i]->get_shapeset());
-		refmap[i].set_mesh(spaces[i]->get_mesh());
+            if (!nat[m] || !nat[n]) continue;
+            fp[iface].base = trav.get_base();
+            fp[iface].space_v = spaces[m];
+            fp[iface].space_u = spaces[n];
+
+            scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
+            for (int i = 0; i < am->cnt; i++) {
+	      if (am->dof[i] == H3D_DIRICHLET_DOF) continue;
+	      fv->set_active_shape(am->idx[i]);
+	      for (int j = 0; j < an->cnt; j++) {
+	        fu->set_active_shape(an->idx[j]);
+                if (an->dof[j] == H3D_DIRICHLET_DOF) {
+                  if (dir_ext != NULL) {
+                    scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], fp + iface) 
+                                 * an->coef[j] * am->coef[i];
+                    dir_ext->add(am->dof[i], val);
+                  }
+                }
+                else if (rhsonly == false) {
+                  scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], fp + iface) 
+                               * an->coef[j] * am->coef[i];
+                  local_stiffness_matrix[i][j] = val;
+                } 
+              }
+            }
+            if (rhsonly == false) {
+              mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
+            }
+	    /* OLD CODE
+	        scalar bi = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m,
+	      	      fp + iface) * an->coef[j] * am->coef[i];
+	        if (an->dof[j] != H3D_DIRICHLET_DOF) local_stiffness_matrix[i][j] = bi;
+	      }
+	    }
+	    mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+	    */
+	  }
+        }
+
+        // assemble surface vector forms /////////////////////////////////////
+        if (rhs_ext != NULL) {
+          for (unsigned ww = 0; ww < s->vfsurf.size(); ww++) {
+            WeakForm::VectorFormSurf *vfs = s->vfsurf[ww];
+            if (isempty[vfs->i]) continue;
+            if (vfs->area != ANY && !wf->is_in_area(marker, vfs->area)) continue;
+            int m = vfs->i; fv = test_fn + m; am = al + m;
+
+            if (!nat[m]) continue;
+            fp[iface].base = trav.get_base();
+            fp[iface].space_v = spaces[m];
+
+            for (int i = 0; i < am->cnt; i++) {
+      	      if (am->dof[i] == H3D_DIRICHLET_DOF) continue;
+	      fv->set_active_shape(am->idx[i]);
+	      rhs_ext->add(am->dof[i],
+	      eval_form(vfs, u_ext, fv, refmap + m, fp + iface) * am->coef[i]);
+	    }
+	  }
 	}
+      }
+    }
+    trav.finish();
+  }
 
-	matrix_buffer = NULL;
-	get_matrix_buffer(10);
+  delete [] matrix_buffer;
+  matrix_buffer = NULL;
+  matrix_buffer_dim = 0;
 
-	// obtain a list of assembling stages
-	std::vector<WeakForm::Stage> stages;
-	wf->get_stages(spaces, stages, jac == NULL);
-
-	// Loop through all assembling stages -- the purpose of this is increased performance
-	// in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
-	// In such a case, the matrix forms are assembled over one mesh, and only the rhs
-	// traverses through the union mesh. On the other hand, if you don't use multi-mesh
-	// at all, there will always be only one stage in which all forms are assembled as usual.
-	Traverse trav;
-	for (unsigned ss = 0; ss < stages.size(); ss++) {
-		WeakForm::Stage *s = &stages[ss];
-		for (unsigned i = 0; i < s->idx.size(); i++)
-			s->fns[i] = &base_fn[s->idx[i]];
-		trav.begin(s->meshes.size(), &(s->meshes.front()), &(s->fns.front()));
-
-		// assemble one stage
-		Element **e;
-		while ((e = trav.get_next_state(bnd, fp)) != NULL) {
-			// find a non-NULL e[i]
-			Element *e0;
-			for (unsigned i = 0; i < s->idx.size(); i++)
-				if ((e0 = e[i]) != NULL) break;
-			if (e0 == NULL) continue;
-
-			// obtain assembly lists for the element at all spaces
-			memset(isempty, 0, sizeof(bool) * wf->neq);
-			for (unsigned i = 0; i < s->idx.size(); i++) {
-				int j = s->idx[i];
-				if (e[i] == NULL) { isempty[j] = true; continue; }
-
-				// TODO: do not obtain again if the element was not changed
-				spaces[j]->get_element_assembly_list(e[i], al + j);
-				test_fn[j].set_active_element(e[i]);
-				test_fn[j].set_transform(base_fn + j);
-
-				u_ext[j]->set_active_element(e[i]);
-				u_ext[j]->force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
-
-				refmap[j].set_active_element(e[i]);
-				refmap[j].force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
-			}
-			int marker = e0->marker;
-
-			fn_cache.free();
-			if (jac != NULL) {
-				// assemble volume matrix forms //////////////////////////////////////
-				for (unsigned ww = 0; ww < s->mfvol.size(); ww++) {
-					WeakForm::MatrixFormVol *mfv = s->mfvol[ww];
-					if (isempty[mfv->i] || isempty[mfv->j]) continue;
-					if (mfv->area != ANY && !wf->is_in_area(marker, mfv->area)) continue;
-					int m = mfv->i; fv = test_fn + m; am = al + m;
-					int n = mfv->j; fu = base_fn + n; an = al + n;
-					bool tra = (m != n) && (mfv->sym != UNSYM);
-					bool sym = (m == n) && (mfv->sym == SYM);
-
-					// assemble the local stiffness matrix for the form mfv
-					scalar **mat = get_matrix_buffer(std::max(am->cnt, an->cnt));
-
-					for (int i = 0; i < am->cnt; i++) {
-						int k = am->dof[i];
-						if (!tra && k == H3D_DIRICHLET_DOF) continue;
-						fv->set_active_shape(am->idx[i]);
-
-						if (!sym) { // unsymmetric block
-							for (int j = 0; j < an->cnt; j++) {
-								fu->set_active_shape(an->idx[j]);
-								scalar bi = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m)
-									* an->coef[j] * am->coef[i];
-								if (an->dof[j] != H3D_DIRICHLET_DOF) mat[i][j] = bi;
-							}
-						}
-						else { // symmetric block
-							for (int j = 0; j < an->cnt; j++) {
-								if (j < i && an->dof[j] >= 0) continue;
-								fu->set_active_shape(an->idx[j]);
-								scalar bi = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m)
-									* an->coef[j] * am->coef[i];
-								if (an->dof[j] != H3D_DIRICHLET_DOF) mat[i][j] = mat[j][i] = bi;
-							}
-						}
-					}
-
-					// insert the local stiffness matrix into the global one
-					jac->add(am->cnt, an->cnt, mat, am->dof, an->dof);
-
-					// insert also the off-diagonal (anti-)symmetric block, if required
-					if (tra) {
-						if (mfv->sym < 0) chsgn(mat, am->cnt, an->cnt);
-						transpose(mat, am->cnt, an->cnt);
-						jac->add(an->cnt, am->cnt, mat, an->dof, am->dof);
-					}
-				}
-			}
-
-			// assemble volume vector forms ////////////////////////////////////////
-			if (rhs != NULL) {
-				for (unsigned ww = 0; ww < s->vfvol.size(); ww++) {
-					WeakForm::VectorFormVol *vfv = s->vfvol[ww];
-					if (isempty[vfv->i]) continue;
-					if (vfv->area != ANY && !wf->is_in_area(marker, vfv->area)) continue;
-					int m = vfv->i;  fv = test_fn + m;  am = al + m;
-
-					for (int i = 0; i < am->cnt; i++) {
-						if (am->dof[i] == H3D_DIRICHLET_DOF) continue;
-						fv->set_active_shape(am->idx[i]);
-						rhs->add(am->dof[i], eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i]);
-					}
-				}
-			}
-
-			/////////////////////////
-
-			// assemble surface integrals now: loop through boundary faces of the element
-			for (int iface = 0; iface < e[0]->get_num_faces(); iface++) {
-				fn_cache.free();
-				if (!bnd[iface]/* || !e0->en[edge]->bnd*/) continue;
-				int marker = fp[iface].marker;
-
-				// obtain the list of shape functions which are nonzero on this edge
-				for (unsigned i = 0; i < s->idx.size(); i++) {
-					if (e[i] == NULL) continue;
-					int j = s->idx[i];
-					if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
-						spaces[j]->get_boundary_assembly_list(e[i], iface, al + j);
-				}
-
-				if (jac != NULL) {
-					// assemble surface matrix forms ///////////////////////////////////
-					for (unsigned ww = 0; ww < s->mfsurf.size(); ww++) {
-						WeakForm::MatrixFormSurf *mfs = s->mfsurf[ww];
-						if (isempty[mfs->i] || isempty[mfs->j]) continue;
-						if (mfs->area != ANY && !wf->is_in_area(marker, mfs->area)) continue;
-						int m = mfs->i; fv = test_fn + m; am = al + m;
-						int n = mfs->j; fu = base_fn + n; an = al + n;
-
-						if (!nat[m] || !nat[n]) continue;
-						fp[iface].base = trav.get_base();
-						fp[iface].space_v = spaces[m];
-						fp[iface].space_u = spaces[n];
-
-						scalar **mat = get_matrix_buffer(std::max(am->cnt, an->cnt));
-						for (int i = 0; i < am->cnt; i++) {
-							int k = am->dof[i];
-							if (k == H3D_DIRICHLET_DOF) continue;
-							fv->set_active_shape(am->idx[i]);
-							for (int j = 0; j < an->cnt; j++) {
-								fu->set_active_shape(an->idx[j]);
-								scalar bi = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m,
-									fp + iface) * an->coef[j] * am->coef[i];
-								if (an->dof[j] != H3D_DIRICHLET_DOF) mat[i][j] = bi;
-							}
-						}
-						jac->add(am->cnt, an->cnt, mat, am->dof, an->dof);
-					}
-				}
-
-				// assemble surface vector forms /////////////////////////////////////
-				if (rhs != NULL) {
-					for (unsigned ww = 0; ww < s->vfsurf.size(); ww++) {
-						WeakForm::VectorFormSurf *vfs = s->vfsurf[ww];
-						if (isempty[vfs->i]) continue;
-						if (vfs->area != ANY && !wf->is_in_area(marker, vfs->area)) continue;
-						int m = vfs->i; fv = test_fn + m; am = al + m;
-
-						if (!nat[m]) continue;
-						fp[iface].base = trav.get_base();
-						fp[iface].space_v = spaces[m];
-
-						for (int i = 0; i < am->cnt; i++) {
-							if (am->dof[i] == H3D_DIRICHLET_DOF) continue;
-							fv->set_active_shape(am->idx[i]);
-							rhs->add(am->dof[i],
-								eval_form(vfs, u_ext, fv, refmap + m, fp + iface) * am->coef[i]);
-						}
-					}
-				}
-			}
-		}
-		trav.finish();
-	}
-
-	delete [] matrix_buffer;
-	matrix_buffer = NULL;
-	matrix_buffer_dim = 0;
+  // Delete temporary solutions.
+  for (int i = 0; i < wf->neq; i++) {
+    if (u_ext[i] != NULL) {
+      delete u_ext[i];
+      u_ext[i] = NULL;
+    }
+  }
 }
 
 bool DiscreteProblem::is_up_to_date()

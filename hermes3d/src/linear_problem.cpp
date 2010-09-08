@@ -26,7 +26,7 @@
 #include <common/timer.h>
 
 
-LinearProblem::LinearProblem(WeakForm *wf)
+LinearProblem::LinearProblem(WeakForm *wf, Tuple<Space *> sp)
 {
 	_F_
 	this->wf = wf;
@@ -37,6 +37,8 @@ LinearProblem::LinearProblem(WeakForm *wf)
 
 	matrix_buffer = NULL;
 	matrix_buffer_dim = 0;
+
+        this->set_spaces(sp);
 }
 
 LinearProblem::~LinearProblem()

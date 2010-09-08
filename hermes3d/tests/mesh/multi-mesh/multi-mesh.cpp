@@ -3,9 +3,6 @@
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
-// This file was written by:
-// - David Andrs
-//
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
@@ -515,8 +512,8 @@ int main(int argc, char **args)
 	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, ANY, &fsln);
 
-	LinearProblem lp(&wf);
-	lp.set_space(&space);
+	LinearProblem lp(&wf, &space);
+
 #elif defined SYS3
 	WeakForm wf(3);
 	wf.add_matrix_form(0, 0, biform_1_1<double, scalar>, biform_1_1<ord_t, ord_t>, SYM);
@@ -529,8 +526,8 @@ int main(int argc, char **args)
 
 	wf.add_matrix_form(2, 2, biform_3_3<double, scalar>, biform_3_3<ord_t, ord_t>, SYM);
 
-	LinearProblem lp(&wf);
-	lp.set_spaces(Tuple<Space *>(&space1, &space2, &space3));
+	LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2, &space3));
+
 #endif
 
 	// assemble stiffness matrix

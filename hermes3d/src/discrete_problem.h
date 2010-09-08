@@ -36,7 +36,7 @@ class FacePos;
 ///
 class DiscreteProblem {
 public:
-	DiscreteProblem(WeakForm *wf);
+        DiscreteProblem(WeakForm *wf, Tuple<Space *> sp);
 	virtual ~DiscreteProblem();
 	void free();
 
@@ -44,7 +44,7 @@ public:
 	void set_space(Space* sp);
 
 	void create(SparseMatrix *mat);
-	void assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, _Vector* dir_ext,
+	void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
                       bool rhsonly = false, bool is_complex = false);
 
 	int get_num_dofs();

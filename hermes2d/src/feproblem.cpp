@@ -341,8 +341,7 @@ void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, 
               }
 	    */
             }
-            else // symmetric block
-            {
+            else {// symmetric block
               for (int j = 0; j < an->cnt; j++) {
                 if (j < i && an->dof[j] >= 0) continue;
                 fu->set_active_shape(an->idx[j]);
@@ -392,7 +391,7 @@ void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, 
         }
       }
 
-      //// assemble volume linear forms ////////////////////////////////////////
+      //// assemble volume vector forms ////////////////////////////////////////
       if (rhs_ext != NULL)
       {
         for (unsigned int ww = 0; ww < s->vfvol.size(); ww++)
@@ -691,7 +690,6 @@ scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ex
   for (int i = 0; i < wf->neq; i++) {  prev[i]->free_fn(); delete prev[i]; }
   ext->free(); delete ext;
   return res;
-
 }
 
 

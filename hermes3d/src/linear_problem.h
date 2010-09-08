@@ -31,7 +31,7 @@ class FacePos;
 
 class LinearProblem {
 public:
-	LinearProblem(WeakForm *wf);
+        LinearProblem(WeakForm *wf, Tuple<Space *> sp);
 	virtual ~LinearProblem();
 	void free();
 
