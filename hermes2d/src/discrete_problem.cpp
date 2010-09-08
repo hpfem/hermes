@@ -257,9 +257,9 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
     if (init_vec != NULL) {
       u_ext.push_back(new Solution(spaces[i]->get_mesh()));
       if (!init_vec->is_complex())
-        u_ext[i]->set_coeff_vector(spaces[i], this->pss[i], (scalar*)init_vec->get_c_array(), ndof);
+        u_ext[i]->set_coeff_vector(spaces[i], this->pss[i], (scalar*)init_vec->get_c_array());
       else
-        u_ext[i]->set_coeff_vector(spaces[i], this->pss[i], (scalar*)init_vec->get_c_array_cplx(), ndof);
+        u_ext[i]->set_coeff_vector(spaces[i], this->pss[i], (scalar*)init_vec->get_c_array_cplx());
     }
     else u_ext.push_back(NULL);
   }
