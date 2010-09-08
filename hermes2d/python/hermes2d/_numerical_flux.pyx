@@ -2,8 +2,8 @@ from _hermes_common cimport c2numpy_double, numpy2c_double_inplace
 
 
 cdef extern from "numerical_flux.h":
-    double c_R "R"
-    double c_c_v "c_v"
+    double c_R "H2D_PARAM_R"
+    double c_c_v "H2D_PARAM_c_v"
 
     double c_f_x "f_x"(int i, double w0, double w1, double w3, double w4)
     double c_f_z "f_z"(int i, double w0, double w1, double w3, double w4)

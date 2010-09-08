@@ -1,5 +1,10 @@
 #include "numerical_flux.h"
 
+// shortcuts for physical constants
+#define R H2D_PARAM_R
+#define c_v H2D_PARAM_c_v
+#define kappa H2D_PARAM_kappa
+
 double f_x(int i, double w0, double w1, double w3, double w4)
 {
     if (i == 0)
@@ -376,7 +381,7 @@ void riemann_solver_invert(double result[4], double w_l[4], double w_r[4])
 
 // Calculates the numerical flux in the normal (nx, ny) by rotating into the
 // local system, solving the Riemann problem and rotating back. It returns the
-// state.
+// state as a 4-component vector.
 void numerical_flux(double result[4], double w_l[4], double w_r[4],
         double nx, double ny)
 {
@@ -392,4 +397,13 @@ void numerical_flux(double result[4], double w_l[4], double w_r[4],
     dot_vector(w_r_local, mat_rot, w_r);
     riemann_solver(flux_local, w_l_local, w_r_local);
     dot_vector(result, mat_rot_inv, flux_local);
+}
+
+// The same as numerical_flux, but only returns the i-th component:
+double numerical_flux_i(int i, double w_l[4], double w_r[4],
+        double nx, double ny)
+{
+    double result[4];
+    numerical_flux(result, w_l, w_r, nx, ny);
+    return result[i];
 }
