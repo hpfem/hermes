@@ -25,7 +25,7 @@ extern "C" {
 }
 #endif
 
-#include "umfpack.h"
+#include "umfpack_solver.h"
 #include "../feproblem.h"
 #include "../../common/trace.h"
 #include "../../common/error.h"

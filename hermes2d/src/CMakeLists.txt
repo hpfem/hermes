@@ -1,34 +1,75 @@
 set(SRC
-       hash.cpp mesh.cpp regul.cpp refmap.cpp curved.cpp
-       transform.cpp traverse.cpp
+       hash.cpp 
+       mesh.cpp 
+       regul.cpp 
+       refmap.cpp 
+       curved.cpp
+       transform.cpp 
+       traverse.cpp
        limit_order.cpp
-       shapeset/shapeset.cpp precalc.cpp solution.cpp filter.cpp
-       space/space.cpp space/space_h1.cpp space/space_hcurl.cpp space/space_l2.cpp
+       precalc.cpp 
+       solution.cpp 
+       filter.cpp
+       space/space.cpp 
+       space/space_h1.cpp 
+       space/space_hcurl.cpp 
+       space/space_l2.cpp
        space/space_hdiv.cpp
-       linear1.cpp linear2.cpp linear3.cpp graph.cpp
+       linear1.cpp 
+       linear2.cpp 
+       linear3.cpp 
+       graph.cpp
        quad_std.cpp
-       shapeset/shapeset_h1_ortho.cpp shapeset/shapeset_h1_jacobi.cpp shapeset/shapeset_h1_quad.cpp
-       shapeset/shapeset_hc_legendre.cpp shapeset/shapeset_hc_gradleg.cpp
+       shapeset/shapeset.cpp 
+       shapeset/shapeset_h1_ortho.cpp 
+       shapeset/shapeset_h1_jacobi.cpp 
+       shapeset/shapeset_h1_quad.cpp
+       shapeset/shapeset_hc_legendre.cpp 
+       shapeset/shapeset_hc_gradleg.cpp
        shapeset/shapeset_hd_legendre.cpp
        shapeset/shapeset_l2_legendre.cpp
        qsort.cpp norm.cpp
        trans.cpp
-
-       refinement_type.cpp element_to_refine.cpp
-       ref_selectors/selector.cpp ref_selectors/order_permutator.cpp ref_selectors/optimum_selector.cpp ref_selectors/proj_based_selector.cpp ref_selectors/l2_proj_based_selector.cpp ref_selectors/h1_proj_based_selector.cpp ref_selectors/hcurl_proj_based_selector.cpp
        adapt.cpp
-
-       common.cpp matrix.cpp weakform.cpp feproblem.cpp 
-       solver/nox.cpp solver/epetra.cpp solver/aztecoo.cpp solver/amesos.cpp
-       solver/mumps.cpp solver/pardiso.cpp solver/petsc.cpp solver/umfpack.cpp
-       solver/precond_ml.cpp solver/precond_ifpack.cpp 
+       refinement_type.cpp 
+       element_to_refine.cpp
+       ref_selectors/selector.cpp 
+       ref_selectors/order_permutator.cpp 
+       ref_selectors/optimum_selector.cpp 
+       ref_selectors/proj_based_selector.cpp 
+       ref_selectors/l2_proj_based_selector.cpp 
+       ref_selectors/h1_proj_based_selector.cpp 
+       ref_selectors/hcurl_proj_based_selector.cpp
+       common.cpp 
+       matrix.cpp 
+       weakform.cpp 
+       feproblem.cpp 
+       solver/nox.cpp 
+       solver/epetra.cpp 
+       solver/aztecoo.cpp 
+       solver/amesos.cpp
+       solver/mumps.cpp 
+       solver/pardiso.cpp 
+       solver/petsc.cpp 
+       solver/umfpack_solver.cpp
+       solver/precond_ml.cpp 
+       solver/precond_ifpack.cpp 
        forms.cpp
        mesh_parser.cpp mesh_lexer.cpp
-       exodusii.cpp h2d_reader.cpp
-
-       views/base_view.cpp views/mesh_view.cpp views/order_view.cpp views/scalar_view.cpp views/stream_view.cpp views/vector_base_view.cpp views/vector_view.cpp views/view.cpp views/view_data.cpp views/view_support.cpp
-
-       compat/fmemopen.cpp compat/c99_functions.cpp
+       exodusii.cpp 
+       h2d_reader.cpp
+       views/base_view.cpp 
+       views/mesh_view.cpp 
+       views/order_view.cpp 
+       views/scalar_view.cpp 
+       views/stream_view.cpp 
+       views/vector_base_view.cpp 
+       views/vector_view.cpp 
+       views/view.cpp 
+       views/view_data.cpp 
+       views/view_support.cpp
+       compat/fmemopen.cpp 
+       compat/c99_functions.cpp
        )
 
 include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)

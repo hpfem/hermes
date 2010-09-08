@@ -28,8 +28,13 @@ set(WITH_GLUT       YES)
 set(WITH_VIEWER_GUI NO)
 set(WITH_UTIL       YES)
 set(WITH_UMFPACK    YES)
+set(WITH_PETSC      NO)
+set(WITH_PARDISO    NO)
+set(WITH_MUMPS      NO)
 set(WITH_TRILINOS   NO)
+
 set(WITH_EXODUSII   NO)
+set(WITH_HDF5       NO)
 
 # reporting and logging
 set(REPORT_WITH_LOGO YES) #logo will be shown
@@ -107,6 +112,35 @@ if(WITH_EXODUSII)
     find_package(EXODUSII REQUIRED)
 endif(WITH_EXODUSII)
 
+# If using PETSc or UMFPack, we need to enable Fortran support and look for BLAS and LAPACK
+if(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
+	enable_language(Fortran)
+	find_package(LAPACK REQUIRED)
+endif(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
+
+# solvers
+if(WITH_PETSC)
+	find_package(PETSC REQUIRED)
+endif(WITH_PETSC)
+
+if(WITH_UMFPACK)
+	find_package(UMFPACK REQUIRED)
+endif(WITH_UMFPACK)
+
+if(WITH_PARDISO)
+	find_package(PARDISO REQUIRED)
+endif(WITH_PARDISO)
+
+if(WITH_MUMPS)
+    find_package(Threads REQUIRED)			# needs pthread
+    find_package(MUMPS REQUIRED)
+endif(WITH_MUMPS)
+
+if(WITH_TRILINOS)
+	find_package(LAPACK REQUIRED)			# trilinos needs LAPACK
+	find_package(TRILINOS REQUIRED)
+endif(WITH_TRILINOS)
+
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
 
@@ -176,6 +210,9 @@ message("Build with viewer GUI: ${WITH_VIEWER_GUI}")
 message("Build with util: ${WITH_UTIL}")
 message("Build with tests: ${WITH_TESTS}")
 message("Build with UMFPACK: ${WITH_UMFPACK}")
+message("Build with PETSC: ${WITH_PETSC}")
+message("Build with PARDISO: ${WITH_PARDISO}")
+message("Build with MUMPS: ${WITH_MUMPS}")
 message("Build with TRILINOS: ${WITH_TRILINOS}")
 message("---------------------")
 message("Hermes2D logo: ${REPORT_WITH_LOGO}")
@@ -199,5 +236,9 @@ else(REPORT_ALL)
   message("Report program execution: ${REPORT_TRACE}")
   message("Report internal time measurements: ${REPORT_TIME}")
 endif(REPORT_ALL)
+
+
+
+
 
 message("\n")

@@ -1,3 +1,6 @@
+set(WITH_UMFPACK YES)	# build the support for UMFPACK
+set(UMFPACK_ROOT )	# root directory of UMFPACK
+
 set(WITH_TRILINOS YES)
 set(TRILINOS_ROOT /opt/packages/trilinos)
 

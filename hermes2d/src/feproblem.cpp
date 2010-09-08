@@ -21,7 +21,7 @@
 #include "precalc.h"
 #include "matrix.h"
 #include "solver.h"
-#include "solver/umfpack.h"
+#include "solver/umfpack_solver.h"
 #include "refmap.h"
 #include "solution.h"
 #include "config.h"

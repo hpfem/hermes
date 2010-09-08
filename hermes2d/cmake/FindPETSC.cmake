@@ -1,0 +1,67 @@
+#
+# PETSc
+#
+# To use PETSc, you need to say (in global CMake.vars):
+#   set(WITH_PETSC YES)
+#   set(PETSC_ROOT /root/dir/of/petsc/)
+#   set(PETSC_ARCH petsc-arch)
+#
+# Example:
+#   set(PETSC_ROOT /opt/petsc)
+#   set(PETSC_ARCH linux-gnu-c-opt)
+#
+
+# PETSc 2.0
+IF(EXISTS ${PETSC_ROOT}/lib/${PETSC_ARCH} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH})
+	SET(PETSC_DIR ${PETSC_ROOT}/lib/${PETSC_ARCH})
+	FIND_PATH(PETSC_INCLUDE_DIR petsc.h PATHS ${PETSC_ROOT}/include)
+	FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR})
+
+	IF(EXISTS ${PETSC_ROOT}/include/mpiuni)
+		SET(PETSC_INCLUDE_DIR ${PETSC_INCLUDE_DIR} ${PETSC_ROOT}/include/mpiuni)
+	ENDIF(EXISTS ${PETSC_ROOT}/include/mpiuni)
+
+	SET(PETSC_INCLUDE_DIR ${PETSC_INCLUDE_DIR} ${PETSC_ROOT}/bmake/${PETSC_ARCH})
+ENDIF(EXISTS ${PETSC_ROOT}/lib/${PETSC_ARCH} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH})
+
+# PETSc 3.0
+IF(EXISTS ${PETSC_ROOT}/${PETSC_ARCH})
+	SET(PETSC_DIR ${PETSC_ROOT}/${PETSC_ARCH})
+	IF(EXISTS ${PETSC_ROOT}/include)
+		FIND_PATH(PETSC_INCLUDE_DIR petsc.h PATHS ${PETSC_ROOT}/include)
+		SET(PETSC_INCLUDE_DIR ${PETSC_INCLUDE_DIR} ${PETSC_DIR}/include)
+	ELSE(EXISTS ${PETSC_ROOT}/include)
+		FIND_PATH(PETSC_INCLUDE_DIR petsc.h PATHS ${PETSC_DIR}/include)
+	ENDIF(EXISTS ${PETSC_ROOT}/include)
+	FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib)
+
+	# add path for mpiuni
+	IF(EXISTS ${PETSC_DIR}/include/mpiuni)
+		SET(PETSC_INCLUDE_DIR ${PETSC_INCLUDE_DIR} ${PETSC_DIR}/include/mpiuni)
+	ENDIF(EXISTS ${PETSC_DIR}/include/mpiuni)
+	IF(EXISTS ${PETSC_ROOT}/include/mpiuni)
+		SET(PETSC_INCLUDE_DIR ${PETSC_INCLUDE_DIR} ${PETSC_ROOT}/include/mpiuni)
+	ENDIF(EXISTS ${PETSC_ROOT}/include/mpiuni)
+ENDIF(EXISTS ${PETSC_ROOT}/${PETSC_ARCH})
+
+IF (PETSC_INCLUDE_DIR AND PETSC_LIB)
+   SET(PETSC_FOUND TRUE)
+ENDIF (PETSC_INCLUDE_DIR AND PETSC_LIB)
+
+IF (PETSC_FOUND)
+	# libs has to be in this order
+	FOREACH(L petscts petscsnes petscksp petscdm petscmat petscvec petsc mpiuni)
+		SET(PETSC_LIBRARIES ${PETSC_LIBRARIES} ${PETSC_DIR}/lib/lib${L}.a)
+	ENDFOREACH(L)
+
+	# linux specific (?)
+	SET(PETSC_LIBRARIES ${PETSC_LIBRARIES} dl)
+
+	IF (NOT PETSC_FIND_QUIETLY)
+		MESSAGE(STATUS "Found PETSc: ${PETSC_DIR}")
+	ENDIF (NOT PETSC_FIND_QUIETLY)
+ELSE (PETSC_FOUND)
+	IF (PETSC_FIND_REQUIRED)
+		MESSAGE(FATAL_ERROR "Could not find PETSc")
+	ENDIF (PETSC_FIND_REQUIRED)
+ENDIF (PETSC_FOUND)
