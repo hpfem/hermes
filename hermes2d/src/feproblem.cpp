@@ -249,7 +249,7 @@ void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, 
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
-  wf->get_stages(spaces, NULL, stages, mat_ext == NULL);
+  wf->get_stages(spaces, u_ext, stages, mat_ext == NULL);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -279,7 +279,10 @@ void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, 
       // set maximum integration order for use in integrals, see limit_order()
       update_limit_table(e0->get_mode());
 
-      // obtain assembly lists for the element at all spaces, set appropriate mode for each pss
+      // Obtain assembly lists for the element at all spaces of the stage, set appropriate mode for each pss.
+      // NOTE: Active elements and transformations for external functions (including the solutions from previous
+      // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in 
+      // trav.get_next_state(...).
       memset(isempty, 0, sizeof(bool) * wf->neq);
       for (unsigned int i = 0; i < s->idx.size(); i++)
       {
@@ -291,9 +294,6 @@ void FeProblem::assemble(_Vector* init_vec, _Matrix* mat_ext, _Vector* rhs_ext, 
         spss[j]->set_master_transform();
         refmap[j].set_active_element(e[i]);
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
-
-        u_ext[j]->set_active_element(e[i]);
-        u_ext[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
       }
       marker = e0->marker;
 
