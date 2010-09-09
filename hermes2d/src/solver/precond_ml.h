@@ -18,7 +18,7 @@
 #define __H2D_PRECOND_ML_H_
 
 #include "precond.h"
-#include "solver_epetra.h"
+#include "epetra.h"
 #ifdef HAVE_ML
 #include <ml_MultiLevelPreconditioner.h>
 #endif
@@ -43,7 +43,7 @@ public:
 #endif
 
 	/// @param[in] a
-	virtual void create(_Matrix *mat);
+	virtual void create(Matrix *mat);
 	/// Destroy the preconditioner object
 	virtual void destroy();
 	/// Compute the preconditioner

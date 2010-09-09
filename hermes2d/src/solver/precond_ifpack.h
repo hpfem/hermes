@@ -17,7 +17,7 @@
 #define __H2D_PRECOND_IFPACK_H_
 
 #include "precond.h"
-#include "solver_epetra.h"
+#include "epetra.h"
 #ifdef HAVE_IFPACK
 #include <Ifpack_Preconditioner.h>
 #endif
@@ -47,7 +47,7 @@ public:
 	virtual Epetra_Operator *get_obj() { return prec; }
 #endif
 
-	virtual void create(_Matrix *mat);
+	virtual void create(Matrix *mat);
 	virtual void destroy() { }
 	virtual void compute();
 

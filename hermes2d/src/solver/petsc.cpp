@@ -24,7 +24,7 @@
 #include "../../common/callstack.h"
 #include "../../common/timer.h"
 
-#define H3D_PETSC_NOT_COMPILED	"hermes3d was not built with PETSc support."
+#define H2D_PETSC_NOT_COMPILED	"hermes3d was not built with PETSc support."
 
 
 PetscMatrix::PetscMatrix() {
@@ -32,7 +32,7 @@ PetscMatrix::PetscMatrix() {
 #ifdef WITH_PETSC
 	inited = false;
 #else
-	error(H3D_PETSC_NOT_COMPILED);
+	error(H2D_PETSC_NOT_COMPILED);
 #endif
 }
 
@@ -112,7 +112,7 @@ void PetscMatrix::zero() {
 void PetscMatrix::add(int m, int n, scalar v) {
 	_F_
 #ifdef WITH_PETSC
-	if (v != 0.0 && m != H3D_DIRICHLET_DOF && n != H3D_DIRICHLET_DOF)		// ignore "dirichlet DOF"
+	if (v != 0.0 && m >= 0 && n >/ 0)		// ignore "dirichlet DOF"
 		MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
 #endif
 }
@@ -152,7 +152,7 @@ PetscVector::PetscVector() {
 #ifdef WITH_PETSC
 	inited = false;
 #else
-	error(H3D_PETSC_NOT_COMPILED);
+	error(H2D_PETSC_NOT_COMPILED);
 #endif
 }
 
@@ -251,7 +251,7 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
 	_F_
 #ifdef WITH_PETSC
 #else
-	warning(H3D_PETSC_NOT_COMPILED);
+	warning(H2D_PETSC_NOT_COMPILED);
 	exit(128);
 #endif
 }
@@ -263,7 +263,7 @@ PetscLinearSolver::PetscLinearSolver(FeProblem *lp)
 	m = new PetscMatrix;
 	rhs = new PetscVector;
 #else
-	warning(H3D_PETSC_NOT_COMPILED);
+	warning(H2D_PETSC_NOT_COMPILED);
 	exit(128);
 #endif
 }

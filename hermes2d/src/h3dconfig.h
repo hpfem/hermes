@@ -20,17 +20,10 @@
 #define DEBUG
 #define DEBUG_ORDER
 
-// elements
-#define WITH_TETRA
-#define WITH_HEX
-/* #undef WITH_PRISM */
-
-/* #undef PRELOADING */
-
 /* --- */
-#define PACKAGE_BUGREPORT "dandrs@unr.edu"
-#define PACKAGE_NAME "Hermes3D"
-#define PACKAGE_TARNAME "hermes3d"
+#define PACKAGE_BUGREPORT "solin@unr.edu"
+#define PACKAGE_NAME "Hermes2D"
+#define PACKAGE_TARNAME "hermes2d"
 #define PACKAGE_VERSION "0.0.1"
-#define PACKAGE_STRING "Hermes3D v" PACKAGE_VERSION
+#define PACKAGE_STRING "Hermes2D v" PACKAGE_VERSION
 

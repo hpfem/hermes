@@ -16,7 +16,7 @@
 #ifndef __H2D_PRECOND_H_
 #define __H2D_PRECOND_H_
 
-#include "../matrix_old.h"
+#include "../matrix.h"
 #include "../weakform.h"
 
 #ifdef HAVE_EPETRA
@@ -36,7 +36,7 @@ class Precond
 #endif
 {
 public:
-	virtual void create(_Matrix *mat) = 0;
+	virtual void create(Matrix *mat) = 0;
 	virtual void destroy() = 0;
 	virtual void compute() = 0;
 

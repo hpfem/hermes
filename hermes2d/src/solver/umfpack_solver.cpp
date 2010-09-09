@@ -21,7 +21,9 @@
 
 #ifdef WITH_UMFPACK
 extern "C" {
-#include <umfpack.h>
+// FIXME
+//#include <umfpack.h>
+#include "/usr/include/suitesparse/umfpack.h"
 }
 #endif
 
@@ -144,7 +146,7 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 		}
 
 		case DF_PLAIN_ASCII:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(H2D_ERR_NOT_IMPLEMENTED);
 			return false;
 
 		default:
@@ -253,7 +255,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 		}
 
 		case DF_PLAIN_ASCII:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(H2D_ERR_NOT_IMPLEMENTED);
 			return false;
 
 		default:
@@ -263,7 +265,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 // UMFPack solver //////
 
-#ifndef H3D_COMPLEX
+#ifndef H2D_COMPLEX
 // real case
 #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)		umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
 #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)			umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)
@@ -341,9 +343,13 @@ bool UMFPackLinearSolver::solve() {
 #ifdef WITH_UMFPACK
 	assert(m != NULL);
 	assert(rhs != NULL);
+        Vector* dir = NULL;    //FIXME: this is unfinished.
+	assert(dir != NULL);
 
 	if (lp != NULL)
-		lp->assemble(m, rhs);
+	  lp->assemble(NULL, m, rhs, dir);
+        // FIXME: now one must subtract "dir" from "rhs"
+        // since this is a linear problem. That will fix this.
 	assert(m->size == rhs->size);
 
 	Timer tmr;

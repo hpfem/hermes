@@ -69,7 +69,7 @@ void MlPrecond::set_param(const char *name, double value)
 #endif
 }
 
-void MlPrecond::create(_Matrix *m)
+void MlPrecond::create(Matrix *m)
 {
 #ifdef HAVE_ML
 	EpetraMatrix *mt = dynamic_cast<EpetraMatrix *>(m);

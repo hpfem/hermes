@@ -33,16 +33,16 @@
 #include <cmath>
 
 // error codes
-#define H3D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
-#define H3D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
-#define H3D_ERR_FACE_INDEX_OUT_OF_RANGE         "Face index out of range."
-#define H3D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
-#define H3D_ERR_TETRA_NOT_COMPILED              "hermes3d was not built with tetra elements."
-#define H3D_ERR_HEX_NOT_COMPILED                "hermes3d was not built with hex elements."
-#define H3D_ERR_PRISM_NOT_COMPILED              "hermes3d was not built with prism elements."
-#define H3D_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
+#define H2D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
+#define H2D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
+#define H2D_ERR_FACE_INDEX_OUT_OF_RANGE         "Face index out of range."
+#define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
+#define H2D_ERR_TETRA_NOT_COMPILED              "hermes3d was not built with tetra elements."
+#define H2D_ERR_HEX_NOT_COMPILED                "hermes3d was not built with hex elements."
+#define H2D_ERR_PRISM_NOT_COMPILED              "hermes3d was not built with prism elements."
+#define H2D_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
 
-#ifdef H3D_COMPLEX
+#ifdef H2D_COMPLEX
 
 #include <complex>
 

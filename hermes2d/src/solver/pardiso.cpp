@@ -159,7 +159,7 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 		}
 
 		case DF_PLAIN_ASCII:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(H2D_ERR_NOT_IMPLEMENTED);
 			return false;
 
 		default:
@@ -268,7 +268,7 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 		}
 
 		case DF_PLAIN_ASCII:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(H2D_ERR_NOT_IMPLEMENTED);
 			return false;
 
 		default:
