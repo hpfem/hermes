@@ -367,18 +367,18 @@ double** Solution::calc_mono_matrix(int o, int*& perm)
 }
 
 // using coefficient vector
-void Solution::set_coeff_vector(Space* space, Vector* vec, double dir)
+void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
     
     scalar* coeffs = new scalar(vec->length());
     vec->extract(coeffs);
-    this->set_coeff_vector(space, coeffs, dir);
+    this->set_coeff_vector(space, coeffs, add_dir_lift);
 }
 
 // using coefficient array (no pss)
-void Solution::set_coeff_vector(Space* space, scalar* coeffs, double dir)
+void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
@@ -390,11 +390,11 @@ void Solution::set_coeff_vector(Space* space, scalar* coeffs, double dir)
     PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
     if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
 
-    set_coeff_vector(space, pss, coeffs, dir);
+    set_coeff_vector(space, pss, coeffs, add_dir_lift);
 }
 
 // using pss and coefficient array
-void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, double dir)
+void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, bool add_dir_lift)
 {
   int o;
 
@@ -480,7 +480,8 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
         pss->set_active_shape(al.idx[k]);
         pss->set_quad_order(o, H2D_FN_VAL);
         int dof = al.dof[k];
-        scalar coef = al.coef[k] * (dof >= 0 ? coeffs[dof] : dir);
+        double dir_lift_coeff = add_dir_lift ? 1.0 : 0.0;
+        scalar coef = al.coef[k] * (dof >= 0 ? coeffs[dof] : dir_lift_coeff);
         double* shape = pss->get_fn_values(l);
         for (int i = 0; i < np; i++)
           val[i] += shape[i] * coef;
@@ -564,9 +565,9 @@ void Solution::set_zero_2(Mesh* mesh)
 void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
 {
   int ndof = space->get_num_dofs();
-  scalar *temp = new scalar(ndof);
+  scalar *temp = new scalar[ndof];
   memset(temp, 0, sizeof(scalar)*ndof);
-  this->set_coeff_vector(space, pss, temp, ndof);
+  this->set_coeff_vector(space, pss, temp, true);
   delete [] temp;
 }
 

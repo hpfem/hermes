@@ -211,7 +211,6 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
   scalar *vv;
   if (init_vec != NULL) {
     vv = new scalar[this->ndof]; //MEM_CHECK(vv);
-    memset(vv, 0, this->ndof * sizeof(scalar));
     init_vec->extract(vv);
   }
 
