@@ -11,8 +11,10 @@ set(SRC
        solution.cpp 
        filter.cpp
        common_time_period.cpp
-       ../common/timer.cpp
        ../common/callstack.cpp
+       ../common/error.cpp
+       ../common/timer.cpp
+       ../common/utils.cpp
        space/space.cpp 
        space/space_h1.cpp 
        space/space_hcurl.cpp 
