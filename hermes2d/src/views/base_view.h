@@ -44,6 +44,12 @@ public:
   BaseView(char* title, WinGeom* wg = NULL);
 
   void show(Space* space, double eps = H2D_EPS_LOW, int item = H2D_FN_VAL_0);
+  
+  virtual void set_title(const char* t) { 
+    if (basic_title.length() == 0)
+      basic_title.assign(t);  
+    View::set_title(t);
+  }
 
   virtual ~BaseView() { free(); }
 
@@ -56,6 +62,8 @@ protected:
   double eps;
   int ndof, item;
   int base_index;
+  
+  std::string basic_title;
 
   void free();
   void update_solution();

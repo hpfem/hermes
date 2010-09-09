@@ -32,18 +32,24 @@ class H2D_API VectorBaseView : public VectorView
 public:
 
   VectorBaseView(const char* title = "BaseView", DEFAULT_WINDOW_POS)
-    : VectorView(title, x, y, width, height) { pss = NULL; sln = NULL; lines = false; }
+    : VectorView(title, x, y, width, height) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
 
 #ifndef _MSC_VER
 	VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
-		: VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; }
+		: VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
 #endif
 
 	VectorBaseView(char* title, WinGeom* wg = NULL)
-    : VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; }
+    : VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
 
   void show(Space* space);
-
+  
+  virtual void set_title(const char* t) { 
+    if (basic_title.length() == 0) 
+      basic_title.assign(t); 
+    View::set_title(t);
+  }
+  
   virtual ~VectorBaseView() { free(); }
 
 protected:
@@ -55,6 +61,8 @@ protected:
   int ndof, component;
   int base_index;
 
+  std::string basic_title;
+  
   void free();
   void update_solution();
   void update_title();

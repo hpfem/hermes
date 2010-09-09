@@ -61,10 +61,10 @@ void VectorBaseView::update_solution()
 void VectorBaseView::update_title()
 {
   std::stringstream str;
-  str << title << " - dof = " << base_index;
+  str << basic_title << " - dof = " << base_index;
   if (base_index < 0)
     str << " (Dirichlet lift)";
-  set_title(str.str().c_str());
+  View::set_title(str.str().c_str());
 }
 
 
