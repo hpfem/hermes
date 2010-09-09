@@ -46,7 +46,7 @@ void VectorBaseView::free()
 
 void VectorBaseView::update_solution()
 {
-  scalar* coeffs = new scalar(ndof + 1);
+  scalar* coeffs = new scalar[ndof + 1];
   memset(coeffs, 0, sizeof(scalar) * (ndof + 1));
   if (base_index >= -1 && base_index < ndof)
     coeffs[base_index + 1] = 1.0;
@@ -54,7 +54,8 @@ void VectorBaseView::update_solution()
 
   VectorView::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
   update_title();
-  delete coeffs;
+  
+  delete [] coeffs;
 }
 
 

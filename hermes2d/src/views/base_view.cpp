@@ -93,6 +93,8 @@ void BaseView::update_solution()
 
   ScalarView::show(sln, eps, item);
   update_title();
+  
+  delete [] coeffs;
 }
 
 
