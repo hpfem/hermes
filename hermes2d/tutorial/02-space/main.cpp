@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset and natural BC.
   H1Space space(&mesh, NULL, NULL, P_INIT);
+  info("ndof: %d", get_num_dofs(&space));
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));

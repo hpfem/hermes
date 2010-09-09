@@ -76,7 +76,7 @@ void BaseView::free()
 
 void BaseView::update_solution()
 {
-  scalar* coeffs = new scalar(ndof);
+  scalar* coeffs = new scalar[ndof];
   memset(coeffs, 0, sizeof(scalar) * ndof);
   if (base_index >= 0)
   {
@@ -90,7 +90,6 @@ void BaseView::update_solution()
 
   ScalarView::show(sln, eps, item);
   update_title();
-  delete coeffs;
 }
 
 
