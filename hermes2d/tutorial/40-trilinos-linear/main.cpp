@@ -91,6 +91,8 @@ int main(int argc, char **argv)
   wf1.add_matrix_form(callback(bilinear_form));
   wf1.add_vector_form(callback(linear_form));
 
+  /* LINEAR PROBLEM CLASS WAS DELETED
+
   // Initialize the linear problem.
   LinearProblem lp(&wf1, &space);
 
@@ -112,6 +114,8 @@ int main(int argc, char **argv)
   // CPU time needed by UMFpack.
   double umf_time = cpu_time.tick().last();
 
+  */
+
   // TRILINOS PART:
 
   info("---- Assembling by FeProblem, solving by NOX:");
@@ -121,7 +125,9 @@ int main(int argc, char **argv)
 
   // Set initial vector for NOX to zero. Alternatively, you can obtain 
   // an initial vector by projecting init_cond() on the FE space, see below.
-  coeff_vec->set_zero();
+  EpetraVector* coeff_vec = new EpetraVector();
+  coeff_vec->alloc(ndof);
+  coeff_vec->zero();
 
   /* // Alternatively: Generate an initial vector for NOX by projecting init_cond().
   // Project the initial condition on the FE space. 
@@ -148,7 +154,9 @@ int main(int argc, char **argv)
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
   NoxSolver* nox_solver = new NoxSolver(fep);
-  nox_solver->set_init_sln(coeff_vec->get_c_array());
+  scalar* vec;
+  coeff_vec->extract(vec);
+  nox_solver->set_init_sln(vec);
 
   // Choose preconditioning.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -192,9 +200,9 @@ int main(int argc, char **argv)
   Solution ex;
   ex.set_exact(mesh, &exact);
   Adapt hp(&space, H2D_H1_NORM);
-  hp.set_solutions(&sln_hermes, &ex);
-  double err_est_rel_1 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
-  info("Solution 1 (LinearProblem - UMFpack): exact H1 error: %g (time %g s)", err_est_rel_1, umf_time);
+  //hp.set_solutions(&sln_hermes, &ex);
+  //double err_est_rel_1 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+  //info("Solution 1 (LinearProblem - UMFpack): exact H1 error: %g (time %g s)", err_est_rel_1, umf_time);
   hp.set_solutions(&sln_nox, &ex);
   double err_est_rel_2 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
   info("Solution 2 (FeProblem - NOX):  exact H1 error: %g (time %g + %g s)", 

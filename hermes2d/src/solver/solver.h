@@ -20,7 +20,7 @@
 #ifndef _SOLVER_H_
 #define _SOLVER_H_
 
-#include "common.h"
+#include "../common.h"
 
 class FeProblem;
 

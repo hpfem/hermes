@@ -20,8 +20,11 @@
 #include "space/space.h"
 #include "precalc.h"
 #include "matrix.h"
-#include "solver.h"
-#include "solver/umfpack_solver.h"
+#include "solver/solver.h"
+#include "solver/umfpack_solver.h" // FIXME: this is because a Vector 
+// is needed in solve_newton(), and we cannot allocate a pure Vector, 
+// so we use UmfpackVector temporarily. But this should not be 
+// UmfpackVector.
 #include "refmap.h"
 #include "solution.h"
 #include "config.h"
@@ -768,7 +771,7 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
 ////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename Real, typename Scalar>
-Scalar H1projection_biform(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -777,7 +780,7 @@ Scalar H1projection_biform(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom
 }
 
 template<typename Real, typename Scalar>
-Scalar H1projection_liform(int n, double *wt, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -786,7 +789,7 @@ Scalar H1projection_liform(int n, double *wt, Func<Real> *v, Geom<Real> *e, ExtD
 }
 
 template<typename Real, typename Scalar>
-Scalar L2projection_biform(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -795,11 +798,37 @@ Scalar L2projection_biform(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom
 }
 
 template<typename Real, typename Scalar>
-Scalar L2projection_liform(int n, double *wt, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
+  return result;
+}
+
+// Hcurl projections
+template<typename Real, typename Scalar>
+Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (u->curl[i] * conj(v->curl[i]));
+    result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+  }
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                              Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (ext->fn[0]->curl[i] * conj(v->curl[i]));
+    result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
+  }
+
   return result;
 }
 
@@ -869,4 +898,154 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
   return (it <= newton_max_iter);
 }
 
+int get_num_dofs(Tuple<Space *> spaces)
+{
+  int ndof = 0;
+  for (int i=0; i<spaces.size(); i++) {
+    ndof += spaces[i]->get_num_dofs();
+  }
+  return ndof;
+}
+
+// Underlying function for global orthogonal projection.
+// Not intended for the user. NOTE: the weak form here must be 
+// a special projection weak form, which is different from 
+// the weak form of the PDE. If you supply a weak form of the 
+// PDE, the PDE will just be solved. 
+void project_internal(Tuple<Space *> spaces, WeakForm *wf, 
+                      Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+{
+  int n = spaces.size();
+
+  // sanity checks
+  if (n <= 0 || n > 10) error("Wrong number of projected functions in project_global().");
+  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_global().", i);
+  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_global().");
+  if (target_slns.size() != n && target_slns.size() != 0) 
+    error("Mismatched numbers of projected functions and solutions in project_global().");
+
+  // this is needed since spaces may have their DOFs enumerated only locally.
+  int ndof = assign_dofs(spaces);
+
+  // FIXME: enable other types of matrices and vectors.
+  UMFPackVector* rhs = new UMFPackVector();
+  rhs->alloc(ndof);
+  UMFPackVector* dir = new UMFPackVector();
+  dir->alloc(ndof);
+  UMFPackMatrix* mat = new UMFPackMatrix();
+  mat->alloc();
+  UMFPackLinearSolver* solver = new UMFPackLinearSolver(mat, rhs);
+
+  // Calculate the coefficient vector.
+  solver->solve();
+
+  // If the user wants the resulting Solutions.
+  scalar* coeff_vec = new scalar[ndof];
+  rhs->extract(coeff_vec);
+  if (target_slns != Tuple<Solution *>()) {
+    for (int i=0; i < target_slns.size(); i++) {
+      if (target_slns[i] != NULL) target_slns[i]->set_coeff_vector(spaces[i], coeff_vec);
+    }
+  }
+
+  // If the user wants the resulting coefficient vector
+  // NOTE: this may change target_vector length.
+  if (target_vec != NULL) 
+    for (int i=0; i<ndof; i++) target_vec->set(i, coeff_vec[i]);
+
+  delete [] coeff_vec;
+  delete dir;
+  delete rhs;
+}
+
+// global orthogonal projection
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
+                    Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+{
+  int n = spaces.size();  
+
+  // define temporary projection weak form
+  WeakForm* proj_wf = new WeakForm(n);
+  int found[100];
+  for (int i = 0; i < 100; i++) found[i] = 0;
+  for (int i = 0; i < n; i++) {
+    int norm;
+    if (proj_norms == Tuple<int>()) norm = 1;
+    else norm = proj_norms[i];
+    if (norm == 0) {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
+                     H2D_ANY, source_meshfns[i]);
+    }
+    if (norm == 1) {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
+                     H2D_ANY, source_meshfns[i]);
+    }
+    if (norm == 2) {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
+                     H2D_ANY, source_meshfns[i]);
+    }
+  }
+  for (int i=0; i < n; i++) {
+    if (found[i] == 0) {
+      warn("index of component: %d\n", i);
+      error("Wrong projection norm in project_global().");
+    }
+  }
+
+  project_internal(spaces, proj_wf, target_slns, target_vec, is_complex);
+}
+
+void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
+                    vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
+                    Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+{
+  int n = spaces.size();
+  matrix_forms_tuple_t::size_type n_biforms = proj_biforms.size();
+  if (n_biforms == 0)
+    error("Please use the simpler version of project_global with the argument Tuple<int> proj_norms if you do not provide your own projection norm.");
+  if (n_biforms != proj_liforms.size())
+    error("Mismatched numbers of projection forms in project_global().");
+  if (n != n_biforms)
+    error("Mismatched numbers of projected functions and projection forms in project_global().");
+
+  // This is needed since spaces may have their DOFs enumerated only locally
+  // when they come here.
+  int ndof = assign_dofs(spaces);
+
+  // Define projection weak form.
+  WeakForm proj_wf(n);
+  for (int i = 0; i < n; i++) {
+    proj_wf.add_matrix_form(i, i, proj_biforms[i].first, proj_biforms[i].second);
+    proj_wf.add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second,
+                    H2D_ANY, source_meshfns[i]);
+  }
+
+  project_internal(spaces, &proj_wf, target_slns, target_vec, is_complex);
+}
+
+/// Global orthogonal projection of one vector-valued ExactFunction.
+void project_global(Space *space, ExactFunction2 source_fn, Solution* target_sln, 
+                    Vector* target_vec, bool is_complex)
+{
+  int proj_norm = 2; // Hcurl
+  Mesh *mesh = space->get_mesh();
+  if (mesh == NULL) error("Mesh is NULL in project_global().");
+  Solution source_sln;
+  source_sln.set_exact(mesh, source_fn);
+  project_global(space, proj_norm, (MeshFunction*)&source_sln, target_sln, target_vec, is_complex);
+};
+
+/// Projection-based interpolation of an exact function. This is faster than the
+/// global projection since no global matrix problem is solved.
+void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
+                   Solution* target_sln, bool is_complex)
+{
+  /// TODO
+}
 

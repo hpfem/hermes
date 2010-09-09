@@ -20,6 +20,10 @@
 
 #include "common.h"
 
+#include "common_time_period.h" 
+#include "../common/timer.h" 
+#include "../common/callstack.h" 
+
 #include "range.h"
 #include "limit_order.h"
 
@@ -44,15 +48,18 @@
 #include "trans.h"
 
 #include "weakform.h"
-#include "discrete_problem.h"
 #include "feproblem.h"
-#include "linear_problem.h"
 #include "forms.h"
 
-#include "solver/itersolver.h"
-#include "solver/solver_epetra.h"
-#include "solver/solver_aztecoo.h"
-#include "solver/solver_nox.h"
+// solvers
+#include "solver/amesos.h"
+#include "solver/aztecoo.h"
+#include "solver/epetra.h"
+#include "solver/mumps.h"
+#include "solver/nox.h"
+#include "solver/pardiso.h"
+#include "solver/petsc.h"
+#include "solver/umfpack_solver.h"
 
 // preconditioners
 #include "solver/precond.h"

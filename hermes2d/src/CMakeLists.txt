@@ -10,6 +10,9 @@ set(SRC
        precalc.cpp 
        solution.cpp 
        filter.cpp
+       common_time_period.cpp
+       ../common/timer.cpp
+       ../common/callstack.cpp
        space/space.cpp 
        space/space_h1.cpp 
        space/space_hcurl.cpp 
@@ -72,7 +75,7 @@ set(SRC
        compat/c99_functions.cpp
        )
 
-include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
+#include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 
 find_package(PTHREAD REQUIRED)
@@ -98,7 +101,7 @@ endmacro(MAKE_PATH)
 # Sets linker settings
 macro(LIBRARY_SETTINGS BIN)
     target_link_libraries(${BIN} ${JUDY_LIBRARY} ${PTHREAD_LIBRARY})
-    target_link_libraries(${BIN} hermes_common)
+#    target_link_libraries(${BIN} hermes_common)
 
     if(NOT MSVC)
         IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

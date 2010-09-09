@@ -22,7 +22,7 @@
 
 #include "../h3dconfig.h"
 #include "../matrix.h"
-#include "../solver.h"
+#include "solver.h"
 
 #ifdef WITH_PETSC
 #include <petsc.h>

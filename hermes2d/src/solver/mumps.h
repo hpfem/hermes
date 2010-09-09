@@ -20,7 +20,7 @@
 #ifndef _MUMPS_SOLVER_H_
 #define _MUMPS_SOLVER_H_
 
-#include "../solver.h"
+#include "solver.h"
 #include "../matrix.h"
 
 #ifdef WITH_MUMPS

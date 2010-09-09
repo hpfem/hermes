@@ -20,7 +20,7 @@
 #ifndef _AMESOS_SOLVER_H_
 #define _AMESOS_SOLVER_H_
 
-#include "../solver.h"
+#include "solver.h"
 #include "epetra.h"
 
 #ifdef HAVE_AMESOS

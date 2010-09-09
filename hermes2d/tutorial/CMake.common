@@ -22,10 +22,10 @@ endif(H2D_COMPLEX)
 include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${hermes2d_SOURCE_DIR}/src)
-include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
+#include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 include_directories(${TRILINOS_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} hermes_common ${HERMES}
+target_link_libraries(${PROJECT_NAME} ${HERMES}
         ${PYTHON_LIBRARIES}
         ${UMFPACK_LIBRARY}
         ${AMD_LIBRARY} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${TRILINOS_LIBRARIES})

@@ -20,7 +20,7 @@
 #ifndef _UMFPACK_SOLVER_H_
 #define _UMFPACK_SOLVER_H_
 
-#include "../solver.h"
+#include "solver.h"
 #include "../matrix.h"
 
 class FeProblem;
