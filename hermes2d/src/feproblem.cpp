@@ -67,8 +67,8 @@ FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
     this->num_user_pss++;
   }  
 
-  // Create global enumeration of dof.
-  assign_dofs(this->spaces);
+  // Create global enumeration of dof and fill the ndof variable
+  this->ndof = assign_dofs(this->spaces);
 }
 
 FeProblem::~FeProblem()

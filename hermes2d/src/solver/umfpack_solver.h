@@ -28,6 +28,7 @@ class FeProblem;
 class UMFPackMatrix : public SparseMatrix {
 public:
 	UMFPackMatrix();
+	UMFPackMatrix(int size);
 	virtual ~UMFPackMatrix();
 
 	virtual void alloc();
@@ -54,6 +55,7 @@ protected:
 class UMFPackVector : public Vector {
 public:
 	UMFPackVector();
+	UMFPackVector(int size);
 	virtual ~UMFPackVector();
 
 	virtual void alloc(int ndofs);

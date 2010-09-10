@@ -1,20 +1,20 @@
-// This file is part of Hermes3D
+// This file is part of Hermes
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
-// Hermes3D is free software; you can redistribute it and/or modify
+// Hermes is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
 // or (at your option) any later version.
 //
-// Hermes3D is distributed in the hope that it will be useful,
+// Hermes is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
+// along with Hermes; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "../h3dconfig.h"
@@ -37,9 +37,16 @@ extern "C" {
 
 UMFPackMatrix::UMFPackMatrix() {
 	_F_
+	size = 0;
 	Ap = NULL;
 	Ai = NULL;
 	Ax = NULL;
+}
+
+UMFPackMatrix::UMFPackMatrix(int size) {
+	_F_
+	this->size = size;
+        this->alloc();
 }
 
 UMFPackMatrix::~UMFPackMatrix() {
@@ -50,6 +57,7 @@ UMFPackMatrix::~UMFPackMatrix() {
 void UMFPackMatrix::alloc() {
 	_F_
 	assert(pages != NULL);
+        assert(size != 0);
 
 	// initialize the arrays Ap and Ai
 	Ap = new int [size + 1];
@@ -193,6 +201,12 @@ UMFPackVector::UMFPackVector() {
 	size = 0;
 }
 
+UMFPackVector::UMFPackVector(int size) {
+	_F_
+	this->size = size;
+        this->alloc(size);
+}
+
 UMFPackVector::~UMFPackVector() {
 	_F_
 	free();
@@ -201,10 +215,10 @@ UMFPackVector::~UMFPackVector() {
 void UMFPackVector::alloc(int n) {
 	_F_
 	free();
-	size = n;
+	this->size = n;
 	v = new scalar [n];
 	MEM_CHECK(v);
-	zero();
+	this->zero();
 }
 
 void UMFPackVector::zero() {
@@ -290,7 +304,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 	_F_
 #ifdef WITH_UMFPACK
 #else
-	error("hermes3d was not built with UMFPACK support.");
+	error("hermes2d was not built with UMFPACK support.");
 #endif
 }
 
@@ -299,10 +313,11 @@ UMFPackLinearSolver::UMFPackLinearSolver(FeProblem *lp)
 {
 	_F_
 #ifdef WITH_UMFPACK
-	m = new UMFPackMatrix;
-	rhs = new UMFPackVector;
+	int size = lp->get_num_dofs();
+	this->m = new UMFPackMatrix(size);
+	this->rhs = new UMFPackVector(size);
 #else
-	error("hermes3d was not built with UMFPACK support.");
+	error("hermes2d was not built with UMFPACK support.");
 #endif
 }
 

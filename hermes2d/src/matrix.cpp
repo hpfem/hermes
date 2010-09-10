@@ -121,6 +121,16 @@ SparseMatrix::SparseMatrix()
 	col_storage = false;
 }
 
+SparseMatrix::SparseMatrix(int size)
+{
+	_F_
+	this->size = size;
+	pages = NULL;
+
+	row_storage = false;
+	col_storage = false;
+}
+
 SparseMatrix::~SparseMatrix()
 {
 	_F_

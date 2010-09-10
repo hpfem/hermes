@@ -232,6 +232,8 @@ enum EMatrixDumpFormat {
 class Matrix {
 public:
 	virtual ~Matrix() { }
+	Matrix() {this->size = 0;};
+	Matrix(int size) {this->size = size;};
 
 	/// allocate the memory for stiffness matrix and right-hand side
 	virtual void alloc() = 0;
@@ -245,7 +247,7 @@ public:
 	/// @param[in] n - the number of column
 	virtual scalar get(int m, int n) = 0;
 
-	virtual int get_size() = 0;
+	virtual int get_size() {return this->size;};
 
 	/// Zero the matrix
 	virtual void zero() = 0;
@@ -271,11 +273,16 @@ public:
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
 
 	virtual int get_matrix_size() const = 0;
+
+ protected:
+
+        int size;							// matrix size
 };
 
 class SparseMatrix : public Matrix {
 public:
 	SparseMatrix();
+        SparseMatrix(int size);
 	virtual ~SparseMatrix();
 
 	/// prepare memory
@@ -337,7 +344,6 @@ protected:
 		Page *next;
 	};
 
-	int size;							// number of unknowns
 	Page **pages;
 
 	int sort_and_store_indices(Page *page, int *buffer, int *max);
