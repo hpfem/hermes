@@ -51,8 +51,6 @@ public:
   /// Version for linear problems -- adds the dir vector to rhs.
   virtual void assemble(Matrix* mat_ext, Vector* rhs_ext, bool rhsonly = false, bool is_complex = false);
 
-  friend class RefDiscreteProblem;
-
 };
 
 H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
