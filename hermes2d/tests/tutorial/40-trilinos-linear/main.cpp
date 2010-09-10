@@ -179,11 +179,11 @@ int main(int argc, char **argv)
 #define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
-  if (fabs(sln_nox.get_pt_value(-0.6, -0.6) - 0.720000) > eps) {
+  if (fabs(sln_nox.get_pt_value(-0.6, -0.6) - 56.400000) > eps) {
     printf("Coordinate (-0.6, -0.6) sln_nox value is %g\n", sln_nox.get_pt_value(-0.6, -0.6));
     success = 0;
   }
-  if (fabs(sln_nox.get_pt_value( 0.4, -0.6) - 0.520000) > eps) {
+  if (fabs(sln_nox.get_pt_value( 0.4, -0.6) - 28.360000) > eps) {
     printf("Coordinate ( 0.4, -0.6) sln_nox value is %g\n", sln_nox.get_pt_value( 0.4, -0.6));
     success = 0;
   }
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
     printf("Coordinate ( 0.4,  0.4) sln_nox value is %g\n", sln_nox.get_pt_value( 0.4,  0.4));
     success = 0;
   }
-  if (fabs(sln_nox.get_pt_value(-0.6,  0.0) - 0.360000) > eps) {
+  if (fabs(sln_nox.get_pt_value(-0.6,  0.0) - 24.360000) > eps) {
     printf("Coordinate (-0.6,  0.0) sln_nox value is %g\n", sln_nox.get_pt_value(-0.6,  0.0));
     success = 0;
   }

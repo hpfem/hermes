@@ -130,23 +130,23 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
-  if (fabs(t_prev_time.get_pt_value(0.6, 0.6) - 15.241357) > eps) {
+  if (fabs(t_prev_time.get_pt_value(0.6, 0.6) - 107.502097) > eps) {
     printf("Coordinate (0.6, 0.6) t_prev_time value is %g\n", t_prev_time.get_pt_value(0.6, 0.6));
     success = 0;
   }
-  if (fabs(t_prev_time.get_pt_value( 0.4, 0.6) - 15.241357) > eps) {
+  if (fabs(t_prev_time.get_pt_value( 0.4, 0.6) - 107.502097) > eps) {
     printf("Coordinate ( 0.4, 0.6) t_prev_time value is %g\n", t_prev_time.get_pt_value( 0.4, 0.6));
     success = 0;
   }
-  if (fabs(t_prev_time.get_pt_value( 0.4,  0.4) - 13.825044) > eps) {
+  if (fabs(t_prev_time.get_pt_value( 0.4,  0.4) - 275.152875) > eps) {
     printf("Coordinate ( 0.4,  0.4) t_prev_time value is %g\n", t_prev_time.get_pt_value( 0.4,  0.4));
     success = 0;
   }
-  if (fabs(t_prev_time.get_pt_value(0.6,  0.0) - 10.000000) > eps) {
+  if (fabs(t_prev_time.get_pt_value(0.6,  0.0) - 2720.000000) > eps) {
     printf("Coordinate (0.6,  0.0) t_prev_time value is %g\n", t_prev_time.get_pt_value(0.6,  0.0));
     success = 0;
   }
-  if (fabs(t_prev_time.get_pt_value( 0.5,  0.5) - 14.345194) > eps) {
+  if (fabs(t_prev_time.get_pt_value( 0.5,  0.5) - 176.925923) > eps) {
     printf("Coordinate ( 0.5,  0.5) t_prev_time value is %g\n", t_prev_time.get_pt_value( 0.5,  0.5));
     success = 0;
   }
