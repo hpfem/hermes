@@ -51,6 +51,7 @@ public:
     View::set_title(t);
   }
 
+  virtual void set_title(const char* title);
   virtual ~BaseView() { free(); }
 
 protected:

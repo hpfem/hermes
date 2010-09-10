@@ -71,10 +71,10 @@ public:
 		conv.wrms_atol = atol;
 	}
 
-#ifdef HAVE_TEUCHOS
+#ifdef HAVE_NOX
 	void set_precond(Teuchos::RCP<Precond> &pc);
 #endif
-        void set_precond(const char *pc);
+	void set_precond(const char *pc);
 
 protected:
 #ifdef HAVE_NOX

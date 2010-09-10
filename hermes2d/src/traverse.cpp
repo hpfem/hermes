@@ -184,14 +184,11 @@ void Traverse::set_boundary_info(State* s, bool* bnd, EdgePos* ep)
 
   for (unsigned int i = 0; i < base->nvert; i++)
   {
-    if (bnd[i])
-    {
-      int j = base->next_vert(i);
-      ep[i].v1 = base->vn[i]->id;
-      ep[i].v2 = base->vn[j]->id;
-      ep[i].marker = e->en[i]->marker;
-      ep[i].edge = i;
-    }
+    int j = base->next_vert(i);
+    ep[i].v1 = base->vn[i]->id;
+    ep[i].v2 = base->vn[j]->id;
+    ep[i].marker = e->en[i]->marker;
+    ep[i].edge = i;
   }
 }
 

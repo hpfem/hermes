@@ -89,6 +89,7 @@
 #include "ref_selectors/hcurl_proj_based_selector.h"
 
 #include "adapt.h"
+#include "neighbor.h"
 
 /**
 

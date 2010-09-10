@@ -61,9 +61,11 @@ protected:
   virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) {}
   virtual void get_edge_assembly_list_internal(Element* e, int ie, AsmList* al);
   virtual void get_bubble_assembly_list(Element* e, AsmList* al);
-
-  virtual scalar* get_bc_projection(EdgePos* ep, int order);
-
+  
+  virtual scalar* get_bc_projection(EdgePos* ep, int order) { 
+    error("Cannot use essential b. c. projection in L2.");
+    return new scalar(0.0); 
+  }
 };
 
 

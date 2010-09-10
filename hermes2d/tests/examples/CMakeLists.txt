@@ -21,4 +21,4 @@ add_subdirectory(richards-seepage-adapt)
 add_subdirectory(ns-bearing)
 add_subdirectory(ns-two-phase)
 add_subdirectory(ns-timedep-adapt)
-
+add_subdirectory(linear-advection-dg)
