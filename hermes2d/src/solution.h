@@ -92,7 +92,8 @@ public:
   Solution();
   Solution(Mesh *mesh);
   Solution(Mesh *mesh, ExactFunction exactfn);
-  Solution (Space* s, Vector* vec);
+  Solution (Space* s, Vector* coeff_vec);
+  Solution (Space* s, scalar* coeff_vec);
   virtual ~Solution();
   virtual void free();
 

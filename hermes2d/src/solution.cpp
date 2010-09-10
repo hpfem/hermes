@@ -195,12 +195,20 @@ Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
   this->set_exact(mesh, exactfn);
 }
 
-Solution::Solution(Space* s, Vector* vec) : MeshFunction(s->get_mesh()) 
+Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh()) 
 {
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
-  this->set_coeff_vector(s, vec);
+  this->set_coeff_vector(s, coeff_vec);
+}
+
+Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh()) 
+{
+  this->init();
+  this->mesh = s->get_mesh();
+  this->own_mesh = false;
+  this->set_coeff_vector(s, coeff_vec);
 }
 
 void Solution::assign(Solution* sln)
