@@ -57,6 +57,8 @@ protected:
   int ndof, item;
   int base_index;
 
+  std::string basic_title;
+
   void free();
   void update_solution();
   void update_title();

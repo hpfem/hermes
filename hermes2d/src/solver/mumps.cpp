@@ -408,8 +408,7 @@ bool MumpsSolver::solve()
 	assert(m != NULL);
 	assert(rhs != NULL);
 
-	if (lp != NULL)
-		lp->assemble(m, rhs);
+	if (lp != NULL) lp->assemble(m, rhs);
 	assert(m->size == rhs->size);
 
 	Timer tmr;

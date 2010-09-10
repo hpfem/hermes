@@ -45,6 +45,7 @@ public:
 
 	int get_error() { return error; }
 	double get_time() { return time; }
+        
 
 protected:
 	scalar *sln;

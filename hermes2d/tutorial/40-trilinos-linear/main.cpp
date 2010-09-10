@@ -146,17 +146,15 @@ int main(int argc, char **argv)
   wf2.add_matrix_form(callback(jacobian_form), H2D_SYM);
   wf2.add_vector_form(callback(residual_form));
 
-  // FIXME: The entire FeProblem should be removed
-  // and functionality merged into LinearProblem.
   // Initialize FeProblem.
   FeProblem* fep = new FeProblem(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
   NoxSolver* nox_solver = new NoxSolver(fep);
-  scalar* vec;
-  coeff_vec->extract(vec);
-  nox_solver->set_init_sln(vec);
+  nox_solver->set_init_sln(coeff_vec);
+
+  printf("HERE\n");
 
   // Choose preconditioning.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -169,16 +167,18 @@ int main(int argc, char **argv)
   // Assemble and solve using NOX.
   bool solved = nox_solver->solve();
 
+  printf("HERE 2\n");
+
   Solution sln_nox;
   if (solved)
   {
-    double *coeffs = nox_solver->get_solution_vector();
+    scalar *coeffs = nox_solver->get_solution_vector();
 
     // debug
-    //int ndof = space.get_num_dofs();
-    //printf("nox vector: ");
-    //for (int i=0; i<ndof; i++) printf("%g ", coeffs[i]);
-    //printf("\n");
+    int ndof = space.get_num_dofs();
+    printf("nox vector: ");
+    for (int i=0; i<ndof; i++) printf("%g ", coeffs[i]);
+    printf("\n");
 
     sln_nox.set_coeff_vector(&space, coeffs);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 

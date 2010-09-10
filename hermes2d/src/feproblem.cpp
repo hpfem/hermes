@@ -21,16 +21,15 @@
 #include "precalc.h"
 #include "matrix.h"
 #include "solver/solver.h"
-#include "solver/umfpack_solver.h" // FIXME: this is because a Vector 
-// is needed in solve_newton(), and we cannot allocate a pure Vector, 
-// so we use UmfpackVector temporarily. But this should not be 
-// UmfpackVector.
+#include "solver/umfpack_solver.h"
 #include "refmap.h"
 #include "solution.h"
 #include "config.h"
 
-FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces)
+FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
 {
+  this->is_linear = is_linear;
+
   // sanity checks
   int n = spaces.size();
   this->wf = wf;
@@ -194,36 +193,24 @@ void FeProblem::create(SparseMatrix* mat)
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
-                bool rhsonly, bool is_complex)
+void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, bool rhsonly)
 {
   // Sanity checks.
-  if (init_vec == NULL) error("init_vec is NULL in FeProblem::assemble().");
-  if (init_vec->length() != this->ndof) error("Wrong init_vec length in FeProblem::assemble().");
-  if (rhs_ext != NULL && rhs_ext->length() != this->ndof) error("Wrong rhs_ext length in FeProblem::assemble().");
-  if (dir_ext != NULL && dir_ext->length() != this->ndof) error("Wrong dir_ext length in FeProblem::assemble().");
+  if (init_vec == NULL && this->is_linear == false) error("init_vec is NULL in FeProblem::assemble().");
   if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
   for (int i=0; i<this->wf->neq; i++) {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
-  // Extract values from the vector 'init_vec'.
-  scalar *vv;
-  if (init_vec != NULL) {
-    vv = new scalar[this->ndof]; //MEM_CHECK(vv);
-    init_vec->extract(vv);
-  }
-
   // Convert the coefficient vector 'init_vec' into solutions Tuple 'u_ext'.
   Tuple<Solution*> u_ext;
-  for (int i = 0; i < this->wf->neq; i++) {
-    if (init_vec != NULL) {
+  if (this->is_linear == false) {
+    for (int i = 0; i < this->wf->neq; i++) {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      u_ext[i]->set_coeff_vector(this->spaces[i], this->pss[i], vv);
+      u_ext[i]->set_coeff_vector(this->spaces[i], init_vec);
     }
-    else u_ext.push_back(NULL);
   }
-  if (init_vec != NULL) delete vv;
+  else u_ext.push_back(NULL);
  
   int k, m, n, marker;
   AUTOLA_CL(AsmList, al, wf->neq);
@@ -296,8 +283,10 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
         refmap[j].set_active_element(e[i]);
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
 
-        u_ext[j]->set_active_element(e[i]);
-        u_ext[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
+        if (this->is_linear == false) {
+          u_ext[j]->set_active_element(e[i]);
+          u_ext[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
+        }
       }
       marker = e0->marker;
 
@@ -327,9 +316,11 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
               for (int j = 0; j < an->cnt; j++) {
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
-                  if (dir_ext != NULL) {
+                  // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+                  if (rhs_ext != NULL && this->is_linear) {
                     scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
-                    dir_ext->add(am->dof[i], val);
+                    //dir_ext[am->dof[i]] += val;
+                    rhs_ext->add(am->dof[i], -val);
                   } 
                 }
                 else if (rhsonly == false) {
@@ -350,9 +341,11 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
                 if (j < i && an->dof[j] >= 0) continue;
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
-                  if (dir_ext != NULL) {
+                  // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+                  if (rhs_ext != NULL && this->is_linear) {
                     scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
-                    dir_ext->add(am->dof[i], val);
+                    //dir_ext[am->dof[i]] += val;
+                    rhs_ext->add(am->dof[i], -val);
                   }
                 } 
                 else if (rhsonly == false) {
@@ -378,12 +371,15 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
               mat_ext->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
             }
 
-            // we also need to take care of the RHS...
-            for (int j = 0; j < am->cnt; j++) {
-              if (am->dof[j] < 0) {
-                for (int i = 0; i < an->cnt; i++) {
-                  if (an->dof[i] >= 0) {
-                    if (dir_ext != NULL) dir_ext->add(an->dof[i], local_stiffness_matrix[i][j]);
+            // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+            if (rhs_ext != NULL && this->is_linear) {
+              for (int j = 0; j < am->cnt; j++) {
+                if (am->dof[j] < 0) {
+                  for (int i = 0; i < an->cnt; i++) {
+                    if (an->dof[i] >= 0) {
+                      //dir_ext[an->dof[i]] += local_stiffness_matrix[i][j];
+                      rhs_ext->add(an->dof[i], -local_stiffness_matrix[i][j]);
+                    }
                   }
                 }
               }
@@ -409,7 +405,8 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
           {
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
-            rhs_ext->add(am->dof[i], eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i]);
+            scalar val = eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i];
+            rhs_ext->add(am->dof[i], val);
           }
         }
       }
@@ -453,10 +450,12 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
               {
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
-                  if (dir_ext != NULL) {
+                  // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+                  if (rhs_ext != NULL && this->is_linear) {
                     scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
                                  * an->coef[j] * am->coef[i];
-                    dir_ext->add(am->dof[i], val);
+                    //dir_ext[am->dof[i]] += val;
+                    rhs_ext->add(am->dof[i], -val);
                   }
                 }
                 else if (rhsonly == false) {
@@ -496,7 +495,8 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vec
             {
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
-              rhs_ext->add(am->dof[i], eval_form(vfs, u_ext, fv, refmap+m, ep+edge) * am->coef[i]);
+              scalar val = eval_form(vfs, u_ext, fv, refmap+m, ep+edge) * am->coef[i];
+              rhs_ext->add(am->dof[i], val);
             }
           }
         }
@@ -589,24 +589,33 @@ void FeProblem::delete_cache()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Actual evaluation of volume matrix form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   // determine the integration order
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+  for (int i = 0; i < wf->neq; i++) {
+    if (this->is_linear == false) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+  }
   Func<Ord>* ou = init_fn_ord(fu->get_fn_order() + inc);
   Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
   ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
+  Ord o = Ord(0);
+  if (this->is_linear == false) o = mfv->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
   int order = ru->get_inv_ref_order();
   order += o.get_order();
   limit_order_nowarn(order);
 
-  for (int i = 0; i < wf->neq; i++) {  oi[i]->free_ord(); delete oi[i]; }
+  if (this->is_linear == false) {
+    for (int i = 0; i < wf->neq; i++) {  
+      oi[i]->free_ord(); 
+      delete oi[i]; 
+    }
+  }
   ou->free_ord(); delete ou;
   ov->free_ord(); delete ov;
   delete fake_e;
@@ -631,18 +640,25 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ex
 
   // function values and values of external functions
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(u_ext[i], rv, order);
+  for (int i = 0; i < wf->neq; i++) {
+    if (this->is_linear == false) prev[i] = init_fn(u_ext[i], rv, order);
+    else prev[i] = NULL;
+  }
   Func<double>* u = get_fn(fu, ru, order);
   Func<double>* v = get_fn(fv, rv, order);
   ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
 
   scalar res = mfv->fn(np, jwt, prev, u, v, e, ext);
 
-  for (int i = 0; i < wf->neq; i++) {  prev[i]->free_fn(); delete prev[i]; }
+  if (this->is_linear == false) {
+    for (int i = 0; i < wf->neq; i++) { 
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  }
   ext->free(); delete ext;
   return res;
 }
-
 
 // Actual evaluation of volume linear form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
@@ -650,18 +666,26 @@ scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ex
   // determine the integration order
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+  for (int i = 0; i < wf->neq; i++) {
+    if (this->is_linear == false) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+  }
   Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
   ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = vfv->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
+  Ord o = Ord(0);
+  if (this->is_linear == false) o = vfv->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
   int order = rv->get_inv_ref_order();
   order += o.get_order();
   limit_order_nowarn(order);
 
-  for (int i = 0; i < wf->neq; i++) {  oi[i]->free_ord(); delete oi[i]; }
+  if (this->is_linear == false) {
+    for (int i = 0; i < wf->neq; i++) {  
+      oi[i]->free_ord(); 
+      delete oi[i]; 
+    }
+  }
   ov->free_ord(); delete ov;
   delete fake_e;
   fake_ext->free_ord(); delete fake_ext;
@@ -691,11 +715,15 @@ scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ex
 
   scalar res = vfv->fn(np, jwt, prev, v, e, ext);
 
-  for (int i = 0; i < wf->neq; i++) {  prev[i]->free_fn(); delete prev[i]; }
+  if (this->is_linear == false) {
+    for (int i = 0; i < wf->neq; i++) {  
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  }
   ext->free(); delete ext;
   return res;
 }
-
 
 // Actual evaluation of surface matrix form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep)
@@ -720,14 +748,22 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
 
   // function values and values of external functions
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(u_ext[i], rv, eo);
+  for (int i = 0; i < wf->neq; i++) {
+    if (this->is_linear == false) prev[i] = init_fn(u_ext[i], rv, eo);
+    else prev[i] = NULL;
+  }
   Func<double>* u = get_fn(fu, ru, eo);
   Func<double>* v = get_fn(fv, rv, eo);
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
 
   scalar res = mfs->fn(np, jwt, prev, u, v, e, ext);
 
-  for (int i = 0; i < wf->neq; i++) {  prev[i]->free_fn(); delete prev[i]; }
+  if (this->is_linear == false) {
+    for (int i = 0; i < wf->neq; i++) {  
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  }
   ext->free(); delete ext;
   return 0.5 * res;
 }
@@ -756,13 +792,21 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
 
   // function values and values of external functions
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(u_ext[i], rv, eo);
+  for (int i = 0; i < wf->neq; i++) {
+    if (this->is_linear == false) prev[i]  = init_fn(u_ext[i], rv, eo);
+    else prev[i] = NULL;
+  }
   Func<double>* v = get_fn(fv, rv, eo);
   ExtData<scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
 
   scalar res = vfs->fn(np, jwt, prev, v, e, ext);
 
-  for (int i = 0; i < wf->neq; i++) {  prev[i]->free_fn(); delete prev[i]; }
+  if (this->is_linear == false) {
+    for (int i = 0; i < wf->neq; i++) {  
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  }
   ext->free(); delete ext;
   return 0.5 * res;
 }
@@ -834,47 +878,49 @@ Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Rea
 double get_l2_norm(Vector* vec) 
 {
   scalar val = 0;
-  for (int i = 0; i < vec->length(); i++) val = val + vec->get(i)*vec->get(i);
-  return std::abs(val);
+  for (int i = 0; i < vec->length(); i++) {
+    scalar inc = vec->get(i);
+    val = val + inc*conj(inc);
+  }
+  return sqrt(std::abs(val));
 }
 
 // Basic Newton's method, takes a coefficient vector and returns a coefficient vector. 
-bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 
-                  Matrix* mat, Solver* solver, double newton_tol, 
-                  int newton_max_iter, bool verbose, bool is_complex) 
+// Assumes that the matrix and vector weak forms are Jacobian and residual forms. 
+bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec, 
+                  Matrix* mat, Solver* solver, Vector* rhs, double newton_tol, 
+                  int newton_max_iter, bool verbose) 
 {
   int ndof = get_num_dofs(spaces);
   
   // sanity checks
-  if (coeff_vec == NULL) error("coeff_vec == NULL in solve_newton().");
+  if (init_vec == NULL) error("init_vec == NULL in solve_newton().");
+  if (rhs == NULL) error("rhs == NULL in solve_newton().");
   int n = spaces.size();
   if (spaces.size() != wf->neq) 
     error("The number of spaces in newton_solve() must match the number of equation in the PDE system.");
   for (int i=0; i < n; i++) {
     if (spaces[i] == NULL) error("spaces[%d] is NULL in solve_newton().", i);
   }
-  if (coeff_vec->length() != ndof) error("Bad vector length in solve_newton().");
 
   // Initialize the discrete problem.
-  FeProblem fep(wf, spaces);
-  //info("ndof = %d", fep.get_num_dofs());
+  bool is_linear = false;
+  FeProblem fep(wf, spaces, is_linear);
+  //info("ndof = %d", ndof);
 
-  Vector* rhs = new UMFPackVector();
-  rhs->alloc(ndof);
 
   int it = 1;
   while (1)
   {
     // Assemble the Jacobian matrix and residual vector.
-    // the NULL stands for the dir vector which is not needed here
-    fep.assemble(coeff_vec, mat, NULL, rhs);
+    fep.assemble(init_vec, mat, rhs);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
     
     // Calculate the l2-norm of residual vector.
-    double res_l2_norm;
+    double res_l2_norm; 
     res_l2_norm = get_l2_norm(rhs);
     if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", 
                         it, get_num_dofs(spaces), res_l2_norm);
@@ -886,14 +932,11 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
     if (!solver->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec->add(i, rhs->get(i));  
+    for (int i = 0; i < ndof; i++) init_vec->add(i, rhs->get(i));  
     
     it++;
   };
 
-  delete rhs;
-  delete mat;
-  delete solver; // TODO: Create destructors for solvers.
   return (it <= newton_max_iter);
 }
 
@@ -911,55 +954,38 @@ int get_num_dofs(Tuple<Space *> spaces)
 // a special projection weak form, which is different from 
 // the weak form of the PDE. If you supply a weak form of the 
 // PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm *wf, 
-                      Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
 {
   int n = spaces.size();
 
   // sanity checks
-  if (n <= 0 || n > 10) error("Wrong number of projected functions in project_global().");
-  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_global().", i);
-  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_global().");
-  if (target_slns.size() != n && target_slns.size() != 0) 
-    error("Mismatched numbers of projected functions and solutions in project_global().");
+  if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
+  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
+  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
   int ndof = assign_dofs(spaces);
 
-  // FIXME: enable other types of matrices and vectors.
-  UMFPackVector* rhs = new UMFPackVector();
-  rhs->alloc(ndof);
-  UMFPackVector* dir = new UMFPackVector();
-  dir->alloc(ndof);
-  UMFPackMatrix* mat = new UMFPackMatrix();
-  mat->alloc();
-  UMFPackLinearSolver* solver = new UMFPackLinearSolver(mat, rhs);
+  // Initialize FeProblem.
+  bool is_linear = true;
+  FeProblem* fep = new FeProblem(wf, spaces, is_linear);
+
+  // Initialize the UMFpack solver.
+  // FIXME: More solvers need to be enabled here.
+  UMFPackLinearSolver* solver = new UMFPackLinearSolver(fep);
 
   // Calculate the coefficient vector.
-  solver->solve();
+  bool solved = solver->solve();
+  scalar* coeffs;
+  if (solved) coeffs = solver->get_solution();
 
-  // If the user wants the resulting Solutions.
-  scalar* coeff_vec = new scalar[ndof];
-  rhs->extract(coeff_vec);
-  if (target_slns != Tuple<Solution *>()) {
-    for (int i=0; i < target_slns.size(); i++) {
-      if (target_slns[i] != NULL) target_slns[i]->set_coeff_vector(spaces[i], coeff_vec);
-    }
-  }
-
-  // If the user wants the resulting coefficient vector
-  // NOTE: this may change target_vector length.
   if (target_vec != NULL) 
-    for (int i=0; i<ndof; i++) target_vec->set(i, coeff_vec[i]);
-
-  delete [] coeff_vec;
-  delete dir;
-  delete rhs;
+    for (int i=0; i<ndof; i++) target_vec[i] = coeffs[i];
 }
 
 // global orthogonal projection
 void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
-                    Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+                    scalar* target_vec)
 {
   int n = spaces.size();  
 
@@ -997,12 +1023,12 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
     }
   }
 
-  project_internal(spaces, proj_wf, target_slns, target_vec, is_complex);
+  project_internal(spaces, proj_wf, target_vec);
 }
 
 void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
-                    Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+                    scalar* target_vec)
 {
   int n = spaces.size();
   matrix_forms_tuple_t::size_type n_biforms = proj_biforms.size();
@@ -1025,26 +1051,61 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
                     H2D_ANY, source_meshfns[i]);
   }
 
-  project_internal(spaces, &proj_wf, target_slns, target_vec, is_complex);
+  project_internal(spaces, &proj_wf, target_vec);
 }
 
 /// Global orthogonal projection of one vector-valued ExactFunction.
-void project_global(Space *space, ExactFunction2 source_fn, Solution* target_sln, 
-                    Vector* target_vec, bool is_complex)
+void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec)
 {
   int proj_norm = 2; // Hcurl
   Mesh *mesh = space->get_mesh();
   if (mesh == NULL) error("Mesh is NULL in project_global().");
   Solution source_sln;
   source_sln.set_exact(mesh, source_fn);
-  project_global(space, proj_norm, (MeshFunction*)&source_sln, target_sln, target_vec, is_complex);
+  project_global(space, proj_norm, (MeshFunction*)&source_sln, target_vec);
 };
 
 /// Projection-based interpolation of an exact function. This is faster than the
 /// global projection since no global matrix problem is solved.
 void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
-                   Solution* target_sln, bool is_complex)
+                   scalar* target_vec)
 {
   /// TODO
 }
+
+// Solve a typical linear problem (without automatic adaptivity).
+// Feel free to adjust this function for more advanced applications.
+bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
+                  Tuple<Solution *> solutions, scalar* coeff_vec) 
+{
+  // Initialize the linear problem.
+  bool is_linear = true;
+  FeProblem fep(wf, spaces, is_linear);
+  int ndof = get_num_dofs(spaces);
+  //info("ndof = %d", ndof);
+
+  // Initialize matrix solver.
+  UMFPackLinearSolver* solver = new UMFPackLinearSolver(&fep);
+
+  // Solve the matrix problem.
+  if (!solver->solve()) error ("Matrix solver failed.\n");
+
+  // Extract solution vector.
+  scalar *coeffs = solver->get_solution();
+
+  // Convert coefficient vector into a Solution.
+  for (int i=0; i < solutions.size(); i++) {
+    solutions[i]->set_coeff_vector(spaces[i], coeffs);
+  }
+	
+  delete solver;
+
+  return true;
+}
+
+
+
+
+
+
 

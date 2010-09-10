@@ -32,6 +32,7 @@ BaseView::BaseView(const char* title, int x, int y, int width, int height)
   pss = NULL;
   sln = NULL;
   show_edges = true;
+  basic_title.assign(title);
 }
 
 #ifndef _MSC_VER
@@ -41,6 +42,7 @@ BaseView::BaseView(const char* title, WinGeom* wg)
   pss = NULL;
   sln = NULL;
   show_edges = true;
+  basic_title.assign(title);
 }
 #endif
 
@@ -50,6 +52,7 @@ BaseView::BaseView(char* title, WinGeom* wg)
   pss = NULL;
   sln = NULL;
   show_edges = true;
+  basic_title.assign(title);
 }
 
 void BaseView::show(Space* space, double eps, int item)
@@ -76,7 +79,7 @@ void BaseView::free()
 
 void BaseView::update_solution()
 {
-  scalar* coeffs = new scalar(ndof);
+  scalar* coeffs = new scalar[ndof];
   memset(coeffs, 0, sizeof(scalar) * ndof);
   if (base_index >= 0)
   {
@@ -90,19 +93,18 @@ void BaseView::update_solution()
 
   ScalarView::show(sln, eps, item);
   update_title();
-  delete coeffs;
+  
+  delete [] coeffs;
 }
-
 
 void BaseView::update_title()
 {
   std::stringstream str;
-  str << title << " - dof = " << base_index;
+  str << basic_title << " - dof = " << base_index;
   if (base_index < 0)
     str << " (Dirichlet lift)";
-  set_title(str.str().c_str());
+  View::set_title(str.str().c_str());
 }
-
 
 void BaseView::on_special_key(int key, int x, int y)
 {

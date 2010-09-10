@@ -107,13 +107,9 @@ bool AmesosSolver::solve()
 #ifdef HAVE_AMESOS
 	assert(m != NULL);
 	assert(rhs != NULL);
-        Vector* dir = NULL;    //FIXME: this is unfinished.
-	assert(dir != NULL);
         
 	if (lp != NULL)
-	  lp->assemble(NULL, m, rhs, dir);
-        // FIXME: now one must subtract "dir" from "rhs"
-        // since this is a linear problem. That will fix this.
+	  lp->assemble(NULL, m, rhs);
 	assert(m->size == rhs->size);
 
 	Timer tmr;

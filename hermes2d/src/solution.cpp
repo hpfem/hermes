@@ -374,7 +374,13 @@ void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
     
     scalar* coeffs = new scalar(vec->length());
     vec->extract(coeffs);
+    // debug
+    //printf("coeffs:\n");
+    //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
+    //printf("\n");
     this->set_coeff_vector(space, coeffs, add_dir_lift);
+    // FIXME: the vector "coeffs" should be freed here but this segfaults
+    //delete [] coeffs;
 }
 
 // using coefficient array (no pss)

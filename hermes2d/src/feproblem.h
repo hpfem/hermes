@@ -54,7 +54,7 @@ typedef Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_
 ///
 class FeProblem {
 public:
-  FeProblem(WeakForm *wf, Tuple<Space *> spaces);
+  FeProblem(WeakForm *wf, Tuple<Space *> spaces, bool is_linear = false);
   virtual ~FeProblem();
   void free();
 
@@ -62,8 +62,8 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   void create(SparseMatrix *mat);
-  void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
-                bool rhsonly = false, bool is_complex = false);
+  void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext,
+                bool rhsonly = false);
 
   int get_num_dofs();
   bool is_matrix_free() { return wf->is_matrix_free(); }
@@ -71,6 +71,8 @@ public:
 
 protected:
   WeakForm *wf;
+
+  bool is_linear;
 
   int ndof;
   int *sp_seq;
@@ -161,40 +163,35 @@ protected:
 
 H2D_API int get_num_dofs(Tuple<Space *> spaces);
 
-H2D_API void init_matrix_solver(MatrixSolverType matrix_solver, int ndof, 
-                        Matrix* &mat, Vector* &rhs, 
-                        Solver* &solver, bool is_complex = false);
-
 // Underlying function for global orthogonal projection.
 // Not intended for the user. NOTE: the weak form here must be 
 // a special projection weak form, which is different from 
 // the weak form of the PDE. If you supply a weak form of the 
 // PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, 
-                    Tuple<Solution*> target_slns = Tuple<Solution*>(), Vector* target_vec = NULL, bool is_complex = false);
+void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec);
 
 H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction *> source_meshfns, 
-                    Tuple<Solution*> target_slns = Tuple<Solution*>(), Vector* target_vec = NULL, bool is_complex = false);
+                    scalar* target_vec);
 
 H2D_API void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
-                    Tuple<Solution*> target_slns = Tuple<Solution*>(),
-                    Vector* target_vec = NULL, bool is_complex = false);
+                    scalar* target_vec);
 
 H2D_API void project_global(Space *space, 
                     std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> proj_biform,
                     std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
-                    ExactFunction source_fn, Solution* target_sln = NULL,
-                    Vector* target_vec = NULL, bool is_complex = false);
+                    ExactFunction source_fn, scalar* target_vec);
 
-H2D_API void project_global(Space *space, ExactFunction2 source_fn, Solution* target_sln = NULL, Vector* target_vec = NULL, 
-                    bool is_complex = false);
+H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec);
 
 /// Basic Newton's loop. Takes a coefficient vector, delivers a coefficient vector (in the 
 /// same variable "init_coeff_vector").
-H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_coeff_vec,
-                  MatrixSolverType matrix_solver, double newton_tol = 1e-5, 
-                  int newton_max_iter = 100, bool verbose = false, bool is_complex = false);
+H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec, 
+                          Matrix* mat, Solver* solver, Vector* rhs, double newton_tol, 
+                          int newton_max_iter, bool verbose);
+
+H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
+                          Tuple<Solution *> solutions, scalar*coeff_vec = NULL);
 
 #endif
 

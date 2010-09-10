@@ -773,7 +773,10 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
     sln_fine->set_exact(&rmesh, exactfn);
 
     // Project the function f() on the coarse mesh.
-    project_global(space, proj_norm, sln_fine, sln_coarse);
+    scalar* coeff_vec = new scalar[rspace->get_num_dofs()];
+    project_global(space, proj_norm, sln_fine, coeff_vec);
+    sln_coarse->set_coeff_vector(space, coeff_vec);
+    delete [] coeff_vec;
 
     // Calculate element errors and total error estimate.
     Adapt hp(space, proj_norm);
