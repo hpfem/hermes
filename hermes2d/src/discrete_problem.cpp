@@ -797,7 +797,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext
 // Initialize shape function values and derivatives (fill in the cache)
 Func<double>* DiscreteProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
-  Key key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
+  PrecalcShapeset::Key key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
   if (cache_fn[key] == NULL)
     cache_fn[key] = init_fn(fu, rm, order);
 
@@ -837,7 +837,7 @@ void DiscreteProblem::delete_cache()
       delete [] cache_jwt[i];
     }
   }
-  for (std::map<Key, Func<double>*, Compare>::iterator it = cache_fn.begin(); it != cache_fn.end(); it++)
+  for (std::map<PrecalcShapeset::Key, Func<double>*, PrecalcShapeset::Compare>::iterator it = cache_fn.begin(); it != cache_fn.end(); it++)
   {
     (it->second)->free_fn(); delete (it->second);
   }
