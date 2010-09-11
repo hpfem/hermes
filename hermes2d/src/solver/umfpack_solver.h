@@ -78,7 +78,7 @@ protected:
 /// Encapsulation of UMFPACK linear solver
 ///
 /// @ingroup solvers
-class UMFPackLinearSolver : public LinearSolver {
+class H2D_API UMFPackLinearSolver : public LinearSolver {
 public:
 	UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs);
 	UMFPackLinearSolver(FeProblem *lp);

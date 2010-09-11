@@ -1,3 +1,9 @@
+# Enabling multiprocessor build on MSVC
+if(MSVC)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif(MSVC)
+
+
 set(SRC
        hash.cpp 
        mesh.cpp 
@@ -79,7 +85,6 @@ set(SRC
 
 #include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-
 find_package(PTHREAD REQUIRED)
 find_package(JUDY REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
@@ -104,6 +109,9 @@ endmacro(MAKE_PATH)
 macro(LIBRARY_SETTINGS BIN)
     target_link_libraries(${BIN} ${JUDY_LIBRARY} ${PTHREAD_LIBRARY})
 #    target_link_libraries(${BIN} hermes_common)
+    if(WITH_UMFPACK)
+	target_link_libraries(${BIN} ${UMFPACK_LIBRARY})
+    endif(WITH_UMFPACK)
 
     if(NOT MSVC)
         IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -216,6 +224,10 @@ macro(BUILD_LIB_ALL LIB FLAGS)
 			COMMAND if exist ${SOURCE_RELEASE_FILE} copy /Y ${SOURCE_RELEASE_FILE} ${TARGET_DIR})
 		unset(TARGET_DIR)
 		unset(SOURCE_FILE)
+		if(WITH_UMFPACK)
+			ADD_DEFINITIONS(-DWITH_UMFPACK)
+		endif(WITH_UMFPACK)
+# FIXME : do this for other packages.
 	endif(MSVC)
 endmacro(BUILD_LIB_ALL)
 
@@ -235,6 +247,7 @@ if(MSVC)
 	if(H2D_COMPLEX)
 		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "${MSVC_DLL_DEFINES} -DH2D_COMPLEX")
 	endif(H2D_COMPLEX)
+
 else(MSVC)
 	set(CXX_OTHER_FLAGS "-Wuninitialized")
 

@@ -52,7 +52,7 @@ typedef Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_
 ///
 /// This class does assembling into passed-in structures.
 ///
-class FeProblem {
+class H2D_API FeProblem {
 public:
   FeProblem(WeakForm *wf, Tuple<Space *> spaces, bool is_linear = false);
   virtual ~FeProblem();
