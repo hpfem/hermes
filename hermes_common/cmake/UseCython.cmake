@@ -36,7 +36,7 @@ macro(CYTHON_ADD_MODULE name)
     add_custom_command(
         OUTPUT ${name}.cpp
         COMMAND cython
-        ARGS -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+        ARGS --cplus -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
         DEPENDS ${name}.pyx ${name}.pxd
         COMMENT "Cythonizing ${name}.pyx")
     CYTHON_ADD_MODULE_COMPILE(${name} ${ARGN})
