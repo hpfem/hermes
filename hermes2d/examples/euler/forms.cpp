@@ -2,6 +2,10 @@
 #include "params.h"
 #include "numerical_flux.h"
 
+#define R H2D_PARAM_R
+#define c_v H2D_PARAM_c_v
+#define kappa H2D_PARAM_kappa
+
 // The following boundary conditions are the prescribed values used on 
 // the inlet and outlet part of the boundary.
 // Density boundary condition.
