@@ -9,23 +9,28 @@
 
 #include "solvers.h"
 
-DiscreteProblem::DiscreteProblem() {
-  // precalculating values and derivatives 
-  // of all polynomials at all possible 
-  // integration points
-  fprintf(stderr, "Precalculating Legendre polynomials...");
-  fflush(stderr);
-  precalculate_legendre_1d();
-  precalculate_legendre_1d_left();
-  precalculate_legendre_1d_right();
-  fprintf(stderr, "done.\n");
+static int _precalculated = 0;
 
-  fprintf(stderr, "Precalculating Lobatto shape functions...");
-  fflush(stderr);
-  precalculate_lobatto_1d();
-  precalculate_lobatto_1d_left();
-  precalculate_lobatto_1d_right();
-  fprintf(stderr, "done.\n");
+DiscreteProblem::DiscreteProblem() {
+    if (_precalculated == 0) {
+        // precalculating values and derivatives 
+        // of all polynomials at all possible 
+        // integration points
+        fprintf(stderr, "Precalculating Legendre polynomials...");
+        fflush(stderr);
+        precalculate_legendre_1d();
+        precalculate_legendre_1d_left();
+        precalculate_legendre_1d_right();
+        fprintf(stderr, "done.\n");
+
+        fprintf(stderr, "Precalculating Lobatto shape functions...");
+        fflush(stderr);
+        precalculate_lobatto_1d();
+        precalculate_lobatto_1d_left();
+        precalculate_lobatto_1d_right();
+        fprintf(stderr, "done.\n");
+        _precalculated = 1;
+    }
 }
 
 void DiscreteProblem::add_matrix_form(int i, int j, matrix_form fn, int marker)

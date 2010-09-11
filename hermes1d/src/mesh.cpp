@@ -127,6 +127,14 @@ void Element::get_coeffs_from_vector(double *y, int sln)
   }
 }
 
+void Element::get_coeffs(int sln, int comp, double coeffs[])
+{
+  if (!this->is_active()) error("Internal in get_coeffs().");
+    for (int j=0; j < this->p + 1; j++) {
+      coeffs[j] = this->coeffs[sln][comp][j];
+    }
+}
+
 // Copies coefficients from element coeffs arrays to the solution vector.
 // Assumes that Dirichlet boundary conditions have been set. 
 void Element::copy_coeffs_to_vector(double *y, int sln)
@@ -230,6 +238,28 @@ void Element::get_solution_plot(double x_phys[MAX_PLOT_PTS_NUM], int pts_num,
     }
   }
 } 
+
+// Evaluate solution (just the specified component) at a point 'x_phys' in the
+// element.
+double Element::get_solution_value(double x_phys, int comp)
+{
+    double val[MAX_EQN_NUM];
+    double der[MAX_EQN_NUM];
+    // This needs the coefficients to be copied to the mesh, with index 0:
+    this->get_solution_point(x_phys, val, der, 0);
+    return val[comp];
+}
+
+// Evaluate solution derivative (just the specified component) at a point
+// 'x_phys' in the element.
+double Element::get_solution_deriv(double x_phys, int comp)
+{
+    double val[MAX_EQN_NUM];
+    double der[MAX_EQN_NUM];
+    // This needs the coefficients to be copied to the mesh, with index 0:
+    this->get_solution_point(x_phys, val, der, 0);
+    return der[comp];
+}
 
 // Calculates square of the L2 or H1 norm of the solution in element
 double Element::calc_elem_norm_squared(int norm)

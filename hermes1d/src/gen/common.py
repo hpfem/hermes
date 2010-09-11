@@ -68,16 +68,25 @@ def gauss_lobatto_points(p):
     Returns the list of Gauss-Lobatto points of the order 'p'.
     """
     x = Symbol("x")
-    e = (1-x**2)*legendre(p, x).diff(x)
+    print "creating"
+    e = legendre(p, x).diff(x)
     e = Poly(e, x)
+    print "polydone"
     if e == 0:
         return []
-    with workdps(40):
-        r, err = polyroots(e.all_coeffs(), error=True)
-    if err > 1e-40:
-        raise Exception("Internal Error: Root is not precise")
+    print "roots"
+    if e == 1:
+        r = []
+    else:
+        with workdps(40):
+            r, err = polyroots(e.all_coeffs(), error=True)
+        #if err > 1e-40:
+        #    raise Exception("Internal Error: Root is not precise")
+    print "done"
     p = []
+    p.append("-1.0")
     for x in r:
         if abs(x) < 1e-40: x = 0
         p.append(str(x))
+    p.append("1.0")
     return p

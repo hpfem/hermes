@@ -5,7 +5,7 @@ def solve_eig_numpy(A, B):
     Uses numpy to solve the A*x = lambda*B*x eigenproblem.
     """
     from numpy import array, dot
-    from numpy.linalg import inv, eig, eigh
+    from numpy.linalg import inv, eig
     A = A.todense()
     B = B.todense()
 
@@ -26,6 +26,36 @@ def solve_eig_numpy(A, B):
         if w > 0:
             break
         print w
+        eigs.append(vec)
+    return r
+
+def solve_eig_scipy(A, B):
+    """
+    A, B .... scipy sparse matrices
+
+    Uses scipy to solve the A*x = lambda*B*x eigenproblem.
+    """
+    from numpy import array
+    from scipy.linalg import eigh
+    A = A.todense()
+    B = B.todense()
+
+    print "solving"
+    w, v = eigh(A, B)
+    print "sorting the eigenvalues"
+
+    r = []
+    for i in range(len(w)):
+        vec = v[:, i]
+        E = w[i]
+        r.append((E, vec))
+    r.sort(key=lambda x: x[0])
+    print "eigenvalues:"
+    eigs = []
+    for w, vec in r:
+        #if w > 0:
+        #    break
+        #print w
         eigs.append(vec)
     return r
 

@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 from common import lobatto, horner_scheme, ccode_pow2
 from common import gauss_lobatto_points
 
-N = 13
+N = 51
 
 print "Generating points"
 points = []

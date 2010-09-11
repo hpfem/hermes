@@ -18,7 +18,8 @@
 // Assumes that the element was not refined in space for the 
 // reference solution. 
 // FIXME: to be moved to the Element class
-double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref);
+double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref,
+        int sln=0);
 
 // Calculates the square in L2 or H1 norm of the difference between 
 // the coarse and fine mesh solution, for all solution components.
@@ -26,13 +27,14 @@ double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref);
 // reference solution.
 // FIXME: to be moved to the Element class
 double calc_elem_est_error_squared_hp(int norm, Element *e, 
-                        Element *e_ref_left, Element *e_ref_right);
+                        Element *e_ref_left, Element *e_ref_right,
+                        int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
 // and reference solutions in all active elements of 'mesh'. Total
 // error is returned.
 double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref, 
-			   double *err_array);
+			   double *err_array, int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
 // and reference solutions in all active elements of 'mesh'. Total
@@ -102,26 +104,6 @@ double calc_solution_norm(int norm, exact_sol_type exact_sol,
 int select_hp_refinement(Element *e, Element *e_ref, Element * e_ref2,
                          int num_cand, int3 *cand_list, int ref_sol_type, 
                          int norm); 
-
-
-// Refine coarse mesh elements whose id_array >= 0, and 
-// adjust the reference mesh accordingly.  
-// Returns updated coarse and reference meshes, with the last 
-// coarse and reference mesh solutions on them, respectively. 
-// The coefficient vectors and numbers of degrees of freedom 
-// on both meshes are also updated. 
-void adapt(int norm, int adapt_type, double threshold, 
-           double *err_squared_array,
-           Mesh* &mesh, Mesh* &mesh_ref, 
-           double * &y_prev, double* &y_prev_ref, 
-           int &n_dof, int &n_dof_ref);
-
-void adapt_plotting(Mesh *mesh, Mesh *mesh_ref, 
-              double *y_prev, double *y_prev_ref,
-              int norm, int exact_sol_provided, 
-              exact_sol_type exact_sol); 
-
-
 
 
 #endif
