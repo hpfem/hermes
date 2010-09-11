@@ -464,7 +464,7 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
       }
 
 
-      // assemble surface integrals now: loop through boundary edges of the element
+      // assemble surface integrals now: loop through all edges of the element
       for (unsigned int edge = 0; edge < e0->nvert; edge++)
       {
         //if (!bnd[edge]) continue;
@@ -550,12 +550,14 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
             }
           }
         }
-        else
+        else  // Assemble inner edges (in discontinuous Galerkin discretization):
         {
+          // The following variables will be used to search for neighbors of the currently assembled element on 
+          // the u- and v- meshes and work with the produced elemental neighborhoods.
           NeighborSearch *nbs_u = NULL;
           NeighborSearch *nbs_v = NULL;
           
-          // assemble surface bilinear forms ///////////////////////////////////
+          // assemble inner surface bilinear forms ///////////////////////////////////
           for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
           {        
             WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
@@ -563,84 +565,89 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
             if (isempty[mfs->i] || isempty[mfs->j]) continue;         
             if (mfs->area != H2D_DG_INNER_EDGE) continue;
             
-            
             m = mfs->i;  fv = spss[m];  am = &al[m];
             n = mfs->j;  fu = pss[n];   an = &al[n];
             
             ep[edge].base = trav.get_base();
             ep[edge].space_v = spaces[m];
             ep[edge].space_u = spaces[n];
+
+            // Assemble DG inner surface matrix form - a single mesh version (all functions are defined on the
+            // same mesh, with the same neighborhood of active element.
             
-              // Single mesh version: 
-              // All functions are defined on the same mesh, with the same neighborhood of a given element.
+            // Find all neighbors of active element across active edge and partition it into segements
+            // shared by the active element and distinct neighbors.
+            nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+            nbs_v->set_active_edge(edge);
+            nbs_v->attach_pss(fv, &refmap[m]);
+            
+            nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
+            nbs_u->set_active_edge(edge);
+            nbs_u->attach_pss(fu, &refmap[n]);
+            
+            // Go through each segment of the active edge. If the active segment has already
+            // been processed (when the neighbor element was assembled), it is skipped.
+            for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
+            { 
+              bool needs_processing_u = nbs_u->set_active_segment(neighbor);
+              bool needs_processing_v = nbs_v->set_active_segment(neighbor);
               
-              // Find all neighbors of active element accross active edge and divide it into segements
-              // shared by the active element and distinct neighbors.
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
-              nbs_v->set_active_edge(edge);
-              nbs_v->attach_pss(fv, &refmap[m]);
+              if (!needs_processing_u) continue;
               
-              nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
-              nbs_u->set_active_edge(edge);
-              nbs_u->attach_pss(fu, &refmap[n]);
+              // Create the extended shapeset on the union of the central element and its current neighbor.
+              int u_shapes_cnt = nbs_u->create_extended_shapeset(spaces[n], an);
+              int v_shapes_cnt = nbs_v->create_extended_shapeset(spaces[m], am);
               
-              // Go through each segment of the active edge.
-              for (int neighbor = 0; neighbor < nbs_v->get_number_of_neighbs(); neighbor++) 
-              { 
-                bool needs_processing_u = nbs_u->set_active_segment(neighbor);
-                bool needs_processing_v = nbs_v->set_active_segment(neighbor);
+              scalar **local_stiffness_matrix = get_matrix_buffer(std::max(u_shapes_cnt, v_shapes_cnt));
+              for (int i = 0; i < v_shapes_cnt; i++)
+              {               
+                if (nbs_v->supported_shapes->dof[i] < 0) continue;
                 
-                if (!needs_processing_u) continue;
+                // Get a pointer to the i-th shape function from the extended shapeset. If i is less than the 
+                // number of shape functions on the central element, the extended shape function will have non-zero
+                // values on the central element and will be zero on neighbor. Otherwise vice-versa.
+                ExtendedShapeFnPtr active_shape_v = nbs_v->supported_shapes->get_extended_shape_fn(i);
                 
-                int u_shapes_cnt = nbs_u->extend_attached_shapeset(spaces[n], an);
-                int v_shapes_cnt = nbs_v->extend_attached_shapeset(spaces[m], am);
-                
-                scalar **local_stiffness_matrix = get_matrix_buffer(std::max(u_shapes_cnt, v_shapes_cnt));
-                for (int i = 0; i < v_shapes_cnt; i++)
-                {               
-                  if (nbs_v->supported_shapes->dof[i] < 0) continue;
-                  ExtendedShapeFnPtr active_shape_v = nbs_v->supported_shapes->get_extended_shape_fn(i);
-                  
-                  for (int j = 0; j < u_shapes_cnt; j++)
-                  { 
-                    ExtendedShapeFnPtr active_shape_u = nbs_u->supported_shapes->get_extended_shape_fn(j);
-                    
-                    // NOTE: V eval_form_neighbor pouzivam NeighborSearch jen pro vyhodnocovani ext funkci. Diky single meshi jsem vzal jiz nastaveny nbs_v,
-                    //  protoze to odpovida tomu, jak se v klasickem eval_formu vola vola init_ext_fn s RefMapou rv (ktera se ale nikde v te funkci nepouzije).
-                    //  Nechapu ale, proc se tam geometricky veci (body, normaly, ...) inicializujou podle RefMapy ru. Moje hypoteza je ta, ze se assembluje
-                    //  na union meshi a obe refmapy ru i rv tedy transformuji integracni body na stejne fyzikalni souradnice, ale nevim. 
-                    //  Jinak v multimeshi asi budeme muset mit pro vyhodnocovani ext funkci jeste jeden specialni NeighborSearch pro kazdou z nich, protoze kazda z nich muze byt
-                    //  def. na jinem meshi, nezavisle na u,v. Bohuzel v soucasnosti Solution neuchovava ukazatel na Space, ktery potrebuju pro urceni spravneho
-                    //  radu na aktivni hrane, takze bude treba se v Solution jeste trochu vrtat.
-                    
-                    if (nbs_u->supported_shapes->dof[j] < 0) {
-                      if (dir_ext != NULL) {
-                        scalar val = eval_form_neighbor(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, ep+edge) * active_shape_v->coef * active_shape_u->coef;
-                        dir_ext->add(nbs_v->supported_shapes->dof[i], val);
-                      }
-                    } 
-                    else if (rhsonly == false) {
-                      scalar val = eval_form_neighbor(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, ep+edge) * active_shape_v->coef * active_shape_u->coef;
-                      local_stiffness_matrix[i][j] = val;
+                for (int j = 0; j < u_shapes_cnt; j++)
+                { 
+                  ExtendedShapeFnPtr active_shape_u = nbs_u->supported_shapes->get_extended_shape_fn(j);
+                                      
+                  if (nbs_u->supported_shapes->dof[j] < 0) {
+                    if (dir_ext != NULL) {
+                      // Evaluate the form with the activated discontinuous shape functions.
+                      scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, ep+edge) 
+                                      * active_shape_v->coef * active_shape_u->coef;
+                                      
+                      // Add the contribution to the global dof index (corresponding to the central element if 'i' is
+                      // less than the number of shape functions on the central element, to the neighbor otherwise).
+                      dir_ext->add(nbs_v->supported_shapes->dof[i], val);
                     }
+                  } 
+                  else if (rhsonly == false) {
+                    scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, ep+edge) 
+                                      * active_shape_v->coef * active_shape_u->coef;
+                    local_stiffness_matrix[i][j] = val;
                   }
                 }
-                if (rhsonly == false) {
-                  insert_block(mat_ext, local_stiffness_matrix, nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof, v_shapes_cnt, u_shapes_cnt);
-                }
               }
-              
-              nbs_u->detach_pss();
-              nbs_v->detach_pss();
-              
-              delete nbs_u;
-              delete nbs_v;
-          }
+              if (rhsonly == false) {
+                insert_block(mat_ext, local_stiffness_matrix, 
+                             nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof, 
+                             v_shapes_cnt, u_shapes_cnt);
+              }
+            }
+            
+            // This automatically restores the transformations pushed to the attached PrecalcShapesets fu/fv, so that
+            // they are ready for any further form evaluation.
+            delete nbs_u;
+            delete nbs_v;
+          }  
           
-          // assemble surface linear forms /////////////////////////////////////
+          // assemble inner surface linear forms /////////////////////////////////////
           for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
           {
             WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
+            
             if (isempty[vfs->i]) continue;
             if (vfs->area != H2D_DG_INNER_EDGE) continue;
             
@@ -651,23 +658,32 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
             
             // Assemble DG inner surface vector form - a single mesh version.
             
+            // Find all neighbors of active element across active edge and partition it into segements
+            // shared by the active element and distinct neighbors.
             nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
             nbs_v->set_active_edge(edge, false);
             nbs_v->attach_pss(fv, &refmap[m]);              
             
+            // Go through each segment of the active edge. Do not skip if the segment has already been 
+            // processed.
             for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
             {
               nbs_v->set_active_segment(neighbor, false);
               
+              // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
+              // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
+              // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
               for (int i = 0; i < am->cnt; i++)       
               {
                 if (am->dof[i] < 0) continue;
                 fv->set_active_shape(am->idx[i]); 
-                scalar val = eval_form_neighbor(vfs, u_ext, nbs_v, fv, &refmap[m], ep+edge) * am->coef[i];
+                scalar val = eval_dg_form(vfs, u_ext, nbs_v, fv, &refmap[m], ep+edge) * am->coef[i];
                 rhs_ext->add(am->dof[i], val);
               }
             }
             
+            // This automatically restores the transformations pushed to the attached PrecalcShapeset fv, so that
+            // it is ready for any further form evaluation.
             delete nbs_v;
           }
         }
@@ -729,7 +745,8 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext
   return fake_ext;
 }
 
-// Initialize external functions (obtain values, derivatives,...)
+// Initialize discontinuous external functions (obtain values, derivatives,... on both sides of the 
+// supplied NeighborSearch's active edge).
 ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 {  
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
@@ -743,7 +760,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext,
   return ext_data;
 }
 
-// Initialize integration order for external functions
+// Initialize integration order for discontinuous external functions.
 ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 { 
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
@@ -764,19 +781,6 @@ Func<double>* DiscreteProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int
   if (cache_fn[key] == NULL)
     cache_fn[key] = init_fn(fu, rm, order);
 
-  return cache_fn[key];
-}
-
-// Initialize shape function values and derivatives (fill in the cache)
-Func<double>* DiscreteProblem::get_fn(ExtendedShapeFnPtr efu)
-{
-  PrecalcShapeset* fu = efu->get_activated_pss(); 
-  int eo = efu->get_quad_eo();
-
-  Key key(256 - fu->get_active_shape(), eo, fu->get_transform(), fu->get_shapeset()->get_id());
-  if (cache_fn[key] == NULL)
-    cache_fn[key] = efu->get_active_func(eo);
-  
   return cache_fn[key];
 }
 
@@ -1204,8 +1208,10 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 }
 
 
-scalar DiscreteProblem::eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, NeighborSearch* nbs_u, NeighborSearch* nbs_v, 
-                                     ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv, EdgePos* ep)
+scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, 
+                                     NeighborSearch* nbs_u, NeighborSearch* nbs_v, 
+                                     ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv, 
+                                     EdgePos* ep)
 { 
   // FIXME for treating a discontinuous previous Newton iteration.
   
@@ -1223,8 +1229,8 @@ scalar DiscreteProblem::eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<
   }
   
   // Order of shape functions.
-  DiscontinuousFunc<Ord>* ou = efu->make_discontinuous( efu->get_active_func_ord() );
-  DiscontinuousFunc<Ord>* ov = efv->make_discontinuous( efv->get_active_func_ord() );
+  DiscontinuousFunc<Ord>* ou = efu->get_fn_ord();
+  DiscontinuousFunc<Ord>* ov = efv->get_fn_ord();
   
   // Order of additional external functions.
   ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, nbs_v);  
@@ -1278,8 +1284,8 @@ scalar DiscreteProblem::eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<
   }
   
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-  DiscontinuousFunc<double>* u = efu->make_discontinuous( get_fn(efu) );
-  DiscontinuousFunc<double>* v = efv->make_discontinuous( get_fn(efv) );
+  DiscontinuousFunc<double>* u = efu->get_fn(cache_fn);
+  DiscontinuousFunc<double>* v = efv->get_fn(cache_fn);
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, nbs_v);
   
   scalar res = mfs->fn(nbs_v->get_quad_np(), jwt, prev, u, v, e, ext);
@@ -1292,6 +1298,12 @@ scalar DiscreteProblem::eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<
   }
   if (ext != NULL) {ext->free(); delete ext;}
   
+  // Delete the DiscontinuousFunctions. This does not clear their component functions (DiscontinuousFunc::free_fn()
+  // must be called in order to do that) as they are contained in cache_fn and may be used by another form - they
+  // will be cleared in DiscreteProblem::delete_cache.
+  delete u;
+  delete v;
+  
   return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
@@ -1300,7 +1312,9 @@ scalar DiscreteProblem::eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<
 
 // Actual evaluation of surface linear form, just in case using information from neighbors.
 // Used only for inner edges.
-scalar DiscreteProblem::eval_form_neighbor(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln, NeighborSearch* nbs_v, PrecalcShapeset *fv, RefMap *rv, EdgePos* ep)
+scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln, 
+                                     NeighborSearch* nbs_v, PrecalcShapeset *fv, RefMap *rv,
+                                     EdgePos* ep)
 { 
   // FIXME for treating a discontinuous previous Newton iteration.
   

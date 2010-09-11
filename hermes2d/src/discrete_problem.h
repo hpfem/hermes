@@ -168,7 +168,6 @@ protected:
   ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order);
   ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-  Func<double>* get_fn(ExtendedShapeFnPtr efu);
 
   // Caching transformed values for element
   std::map<PrecalcShapeset::Key, Func<double>*, PrecalcShapeset::Compare> cache_fn;
@@ -178,7 +177,7 @@ protected:
   void init_cache();
   void delete_cache();
 
-  // evaluation of forms, general case
+  // Evaluation of forms, continuous FEM case.
   scalar eval_form(WeakForm::MatrixFormVol *bf, Tuple<Solution *> sln, PrecalcShapeset *fu, 
                    PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
   scalar eval_form(WeakForm::VectorFormVol *lf, Tuple<Solution *> sln, PrecalcShapeset *fv, 
@@ -188,9 +187,13 @@ protected:
   scalar eval_form(WeakForm::VectorFormSurf *lf, Tuple<Solution *> sln, PrecalcShapeset *fv, 
                    RefMap *rv, EdgePos* ep);
 
-  scalar eval_form_neighbor(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, NeighborSearch* nbs_u, NeighborSearch* nbs_v, 
-                            ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv, EdgePos* ep);
-  scalar eval_form_neighbor(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln, NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv, EdgePos* ep);
+  // Evaluation of forms, discontinuous Galerkin case.
+  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, 
+                      NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
+                      EdgePos* ep);
+  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln,
+                      NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
+                      EdgePos* ep);
   
   scalar** get_matrix_buffer(int n)
   {
