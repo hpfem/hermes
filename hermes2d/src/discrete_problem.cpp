@@ -478,20 +478,24 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
           spaces[j]->get_edge_assembly_list(e[i], edge, &al[j]);
         }
 		
-        if(bnd[edge] == 1)
+        if(bnd[edge] == 1)  // Assemble boundary edges:
         {
-          // assemble surface matrix forms ///////////////////////////////////
+          // assemble boundary matrix forms ///////////////////////////////////
           for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
           {
             WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
             if (isempty[mfs->i] || isempty[mfs->j]) continue;
             if (mfs->area == H2D_DG_INNER_EDGE) continue;
-            if ((mfs->area != H2D_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE && mfs->area != H2D_DG_ANY_EDGE)&& !wf->is_in_area(marker, mfs->area)) continue;
+            if (mfs->area != H2D_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE && !wf->is_in_area(marker, mfs->area)) continue;
             
             m = mfs->i;  fv = spss[m];  am = &al[m];
             n = mfs->j;  fu = pss[n];   an = &al[n];
 
-            if ((!nat[m] || !nat[n]) && mfs->area != H2D_DG_BOUNDARY_EDGE && mfs->area != H2D_DG_ANY_EDGE) continue;
+            // If the user added the form with H2D_ANY, it will be evaluated only for natural boundaries
+            // (as usual in H2D for standard FEM). If the user added the form with area corresponding to the actual edge 
+            // marker, or just with H2D_DG_BOUNDARY_EDGE, it will be evaluated since in DG, there may be weak forms that
+            // enforce essential conditions or describe special BC_NONE boundaries.
+            if (mfs->area == H2D_ANY && (!nat[m] || !nat[n])) continue;
             ep[edge].base = trav.get_base();
             ep[edge].space_v = spaces[m];
             ep[edge].space_u = spaces[n];
@@ -523,16 +527,16 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
             }
           }
 
-          // assemble surface linear forms /////////////////////////////////////
+          // assemble boundary linear forms /////////////////////////////////////
           for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
           {
             WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
             if (isempty[vfs->i]) continue;
             if (vfs->area == H2D_DG_INNER_EDGE) continue;
-            if ((vfs->area != H2D_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE && vfs->area != H2D_DG_ANY_EDGE) && !wf->is_in_area(marker, vfs->area)) continue;
+            if (vfs->area != H2D_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE && !wf->is_in_area(marker, vfs->area)) continue;
             m = vfs->i;  fv = spss[m];  am = &al[m];
             
-            if (!nat[m] && vfs->area != H2D_DG_BOUNDARY_EDGE && vfs->area != H2D_DG_ANY_EDGE) continue;
+            if (vfs->area == H2D_ANY && !nat[m]) continue;
 
             ep[edge].base = trav.get_base();
             ep[edge].space_v = spaces[m];
@@ -556,9 +560,9 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
           {        
             WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
             
-            if (isempty[mfs->i] || isempty[mfs->j]) continue;
+            if (isempty[mfs->i] || isempty[mfs->j]) continue;         
+            if (mfs->area != H2D_DG_INNER_EDGE) continue;
             
-            if (mfs->area != H2D_DG_ANY_EDGE && mfs->area != H2D_DG_INNER_EDGE) continue;
             
             m = mfs->i;  fv = spss[m];  am = &al[m];
             n = mfs->j;  fu = pss[n];   an = &al[n];
@@ -567,34 +571,6 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
             ep[edge].space_v = spaces[m];
             ep[edge].space_u = spaces[n];
             
-            if(mfs->area == H2D_DG_ANY_EDGE)
-            {
-              scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
-              for (int i = 0; i < am->cnt; i++)
-              {
-                if (am->dof[i] < 0) continue;
-                fv->set_active_shape(am->idx[i]);
-                for (int j = 0; j < an->cnt; j++)
-                {
-                  fu->set_active_shape(an->idx[j]);
-                  if (an->dof[j] < 0) {
-                    if (dir_ext != NULL) {
-                      scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
-                      * an->coef[j] * am->coef[i];
-                      dir_ext->add(am->dof[i], val);
-                    }
-                  }
-                  else if (rhsonly == false) {
-                    scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
-                    * an->coef[j] * am->coef[i];
-                    local_stiffness_matrix[i][j] = val;
-                  } 
-                }
-              }
-              insert_block(mat_ext, local_stiffness_matrix, am->dof, an->dof, am->cnt, an->cnt);
-            }
-            else if(mfs->area == H2D_DG_INNER_EDGE)
-            {
               // Single mesh version: 
               // All functions are defined on the same mesh, with the same neighborhood of a given element.
               
@@ -659,7 +635,6 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
               
               delete nbs_u;
               delete nbs_v;
-            }  
           }
           
           // assemble surface linear forms /////////////////////////////////////
@@ -667,45 +642,33 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
           {
             WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
             if (isempty[vfs->i]) continue;
+            if (vfs->area != H2D_DG_INNER_EDGE) continue;
             
-            if (vfs->area != H2D_DG_ANY_EDGE && vfs->area != H2D_DG_INNER_EDGE) continue;
             m = vfs->i;  fv = spss[m];  am = &al[m];
             
             ep[edge].base = trav.get_base();
             ep[edge].space_v = spaces[m];
             
-            if(vfs->area == H2D_DG_ANY_EDGE)
+            // Assemble DG inner surface vector form - a single mesh version.
+            
+            nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+            nbs_v->set_active_edge(edge, false);
+            nbs_v->attach_pss(fv, &refmap[m]);              
+            
+            for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
             {
-              for (int i = 0; i < am->cnt; i++)
+              nbs_v->set_active_segment(neighbor, false);
+              
+              for (int i = 0; i < am->cnt; i++)       
               {
                 if (am->dof[i] < 0) continue;
-                fv->set_active_shape(am->idx[i]);
-                scalar val = eval_form(vfs, u_ext, fv, &refmap[m], &(ep[edge])) * am->coef[i];
+                fv->set_active_shape(am->idx[i]); 
+                scalar val = eval_form_neighbor(vfs, u_ext, nbs_v, fv, &refmap[m], ep+edge) * am->coef[i];
                 rhs_ext->add(am->dof[i], val);
               }
             }
-            // here the form will use for evaluation information from neighbors
-            else if(vfs->area == H2D_DG_INNER_EDGE)
-            {       
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh(), false);
-              nbs_v->set_active_edge(edge);
-              nbs_v->attach_pss(fv, &refmap[m]);              
-              
-              for (int neighbor = 0; neighbor < nbs_v->get_number_of_neighbs(); neighbor++) 
-              {
-                nbs_v->set_active_segment(neighbor, false);
-                for (int i = 0; i < am->cnt; i++)       
-                {
-                  if (am->dof[i] < 0) continue;
-                  fv->set_active_shape(am->idx[i]);
-                  scalar val = eval_form_neighbor(vfs, u_ext, nbs_v, fv, &refmap[m], ep+edge) * am->coef[i];
-                  rhs_ext->add(am->dof[i], val);
-                }
-              }
-              
-              nbs_v->detach_pss();
-              delete nbs_v;
-            }
+            
+            delete nbs_v;
           }
         }
       }

@@ -90,7 +90,6 @@ const int H2D_ANY = -1234;
 enum DG_EdgeType
 {
 	H2D_DG_BOUNDARY_EDGE = -12345,
-	H2D_DG_ANY_EDGE = -123456,
 	H2D_DG_INNER_EDGE = -1234567
 };
 
