@@ -22,7 +22,12 @@
 
 #include <stdio.h>
 
+// __PRETTY_FUNCTION__ missing on MSVC
+#ifdef _MSC_VER
+#define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
+#else
 #define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
+#endif
 
 /// Holds data for one call stack object
 ///
