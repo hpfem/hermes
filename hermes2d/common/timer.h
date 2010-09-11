@@ -20,9 +20,12 @@
 #ifndef _H_
 #define _H_
 
+#ifdef _MSC_VER
+#include <time.h>
+#else
 #include <sys/time.h>
 #include <sys/resource.h>
-
+#endif
 /// \class Timer
 ///
 /// TODO: Measure time that CPU spent on the task
