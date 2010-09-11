@@ -192,7 +192,6 @@ template<typename T>
 class DiscontinuousFunc : public Func<T>
 {
   private:
-    Func<T> *fn_central, *fn_neighbor;
     bool reverse_neighbor_side;
     static T zero;
     
@@ -217,24 +216,33 @@ class DiscontinuousFunc : public Func<T>
                  "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
     }
     
-    T& get_val_central(int k) const { GET_CENT(val); }
-    T& get_val_neighbor(int k) const { GET_NEIB(val); }
-    T& get_dx_central(int k) const { GET_CENT(dx); }
-    T& get_dx_neighbor(int k) const { GET_NEIB(dx); }
-    T& get_dy_central(int k) const { GET_CENT(dy); }
-    T& get_dy_neighbor(int k) const { GET_NEIB(dy); }
+    // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
+    
+    virtual T& get_val_central(int k) const { GET_CENT(val); }
+    virtual T& get_val_neighbor(int k) const { GET_NEIB(val); }
+    virtual T& get_dx_central(int k) const { GET_CENT(dx); }
+    virtual T& get_dx_neighbor(int k) const { GET_NEIB(dx); }
+    virtual T& get_dy_central(int k) const { GET_CENT(dy); }
+    virtual T& get_dy_neighbor(int k) const { GET_NEIB(dy); }
     
     #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-      T& get_laplace_central(int k) { GET_CENT(laplace); }
-      T& get_laplace_neighbor(int k) { GET_NEIB(laplace); }
+      virtual T& get_laplace_central(int k) { GET_CENT(laplace); }
+      virtual T& get_laplace_neighbor(int k) { GET_NEIB(laplace); }
     #endif
     
-    void subtract(const Func<T>& func) { if (fn_central != NULL) fn_central->subtract(func); else fn_neighbor->subtract(func); }
-    void subtract(const DiscontinuousFunc<T>& func) { /*TODO*/ }
+    void subtract(const DiscontinuousFunc<T>& func) 
+    { 
+      // TODO: Add sanity checks, revise for adaptivity.
+      if (fn_central != NULL && func.fn_central != NULL)
+        fn_central->subtract(func.fn_central);
+      if (fn_neighbor != NULL && func.fn_neighbor != NULL)
+        fn_neighbor->subtract(func.fn_neighbor);
+    }
     
     // Default destructor may be used. Deallocation is done using the following functions.
-    // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized destructors should be used instead (also in Func).
-    void free_fn() { 
+    // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized
+    //  destructors should be used instead (also in Func).
+    virtual void free_fn() { 
       if (fn_central != NULL) {
         fn_central->free_fn(); 
         fn_central = NULL;
@@ -244,7 +252,7 @@ class DiscontinuousFunc : public Func<T>
         fn_neighbor = NULL;
       }
     }
-    void free_ord() {
+    virtual void free_ord() {
       if (fn_central != NULL) {
         fn_central->free_ord(); 
         fn_central = NULL;
