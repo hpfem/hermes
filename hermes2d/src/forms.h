@@ -177,6 +177,9 @@ public:
   virtual ~Func() { }; // All deallocation done via free_fn / free_ord. 
                        // This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
   
+  // NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
+  // Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
+  // expected from a continuous function. 
   virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; } 
   virtual T& get_val_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
   virtual T& get_dx_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
@@ -188,14 +191,38 @@ public:
 
 #define GET_CENT(__ATTRIB) return (fn_central != NULL) ? fn_central->__ATTRIB[k] : zero;
 #define GET_NEIB(__ATTRIB) return (fn_neighbor != NULL) ? fn_neighbor->__ATTRIB[ reverse_neighbor_side ? fn_neighbor->num_gip-k-1 : k ] : zero;
+
+/** \class DiscontinuousFunc forms.h "src/forms.h"
+ *  \brief This class represents a function with jump discontinuity on an interface of two elements.
+ *
+ *  We will refer to one of the elements sharing the interface of discontinuity  as to the \em central element,
+ *  while to the other one as to the \em neighbor element.
+ *
+ *  Instance of the class may be constructed either with two \c Func objects, which represent the continuous 
+ *  components on the central and the neighbor element, respectively, or with only one \c Func object and
+ *  information about its support (where it attains non-zero value). The discontinuous function is in the latter
+ *  case constructed by extending the supplied function by zero to the other element. Values and derivatives from 
+ *  both elements may then be obtained by querying the corresponding \c Func object, using methods
+ *  \c get_val_central, \c get_val_neighbor, etc.
+ **/
 template<typename T>
 class DiscontinuousFunc : public Func<T>
 {
   private:
-    bool reverse_neighbor_side;
-    static T zero;
+    bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
+                                ///< (when retrieving values on an edge that is oriented differently in both elements).
+    static T zero;              ///< Zero value used for the zero-extension.
     
   public: 
+    Func<T> *fn_central;        ///< Central element's component.
+    Func<T> *fn_neighbor;       ///< Neighbor element's component.
+    
+    /// One-component constructor.
+    ///
+    /// \param[in]  fn                  Function defined either on the central or the neighbor element.
+    /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
+    /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+    ///
     DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false) :
       Func<T>(fn->num_gip, fn->nc), 
       fn_central(NULL), fn_neighbor(NULL),
@@ -205,6 +232,12 @@ class DiscontinuousFunc : public Func<T>
       if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
     }
     
+    /// Two-component constructor.
+    ///
+    /// \param[in]  fn_c                Function defined on the central element.
+    /// \param[in]  fn_n                Function defined on the neighbor element.
+    /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+    ///
     DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) : 
       Func<T>(fn_c->num_gip, fn_c->nc),
       fn_central(fn_c),
