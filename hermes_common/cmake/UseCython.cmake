@@ -9,6 +9,7 @@ if(NOT CYTHON_INCLUDE_DIRECTORIES)
     set(CYTHON_INCLUDE_DIRECTORIES .)
 endif(NOT CYTHON_INCLUDE_DIRECTORIES)
 
+# Compiles the generated .cpp file properly on all architectures
 macro(CYTHON_ADD_MODULE_COMPILE name)
     # When linking Python extension modules, a special care must be taken about
     # the link flags, which is platform dependent:
@@ -32,12 +33,18 @@ macro(CYTHON_ADD_MODULE_COMPILE name)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 endmacro(CYTHON_ADD_MODULE_COMPILE)
 
-macro(CYTHON_ADD_MODULE name)
+# Cythonizes the .pyx files into .cpp file (but doesn't compile it)
+macro(CYTHON_ADD_MODULE_PYX name)
     add_custom_command(
         OUTPUT ${name}.cpp
         COMMAND cython
         ARGS --cplus -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
         DEPENDS ${name}.pyx ${name}.pxd
         COMMENT "Cythonizing ${name}.pyx")
+endmacro(CYTHON_ADD_MODULE_PYX)
+
+# Cythonizes and compiles a .pyx file
+macro(CYTHON_ADD_MODULE name)
+    CYTHON_ADD_MODULE_PYX(${name} ${ARGN})
     CYTHON_ADD_MODULE_COMPILE(${name} ${ARGN})
 endmacro(CYTHON_ADD_MODULE)
