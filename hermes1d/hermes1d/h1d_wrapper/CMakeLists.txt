@@ -1,5 +1,5 @@
 SET(CYTHON_INCLUDE_DIRECTORIES . -I../../../hermes_common/)
-cython_add_module(h1d_wrapper)
+cython_add_module_compile(h1d_wrapper)
 target_link_libraries(h1d_wrapper hermes_common ${HERMES_BIN})
 set_property(TARGET h1d_wrapper PROPERTY COMPILE_FLAGS "-g")
 
