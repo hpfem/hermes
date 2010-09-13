@@ -167,8 +167,7 @@ int main(int argc, char **argv)
 	wf.add_matrix_form(bilinear_form2<double, scalar>, bilinear_form2<ord_t, ord_t>, SYM, 2);
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, ANY);
 
-	LinearProblem lp(&wf);
-	lp.set_space(&space);
+	LinearProblem lp(&wf, &space);
 
 #if defined WITH_UMFPACK
 	UMFPackMatrix mat;
