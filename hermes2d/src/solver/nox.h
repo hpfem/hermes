@@ -76,7 +76,7 @@ public:
 	void set_precond(const char *pc);
 
 protected:
-#ifdef HAVE_TEUCHOS
+#ifdef HAVE_NOX
 	Teuchos::RCP<NoxProblemInterface> interface;
 #endif
 	int num_iters;
