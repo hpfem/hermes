@@ -103,7 +103,7 @@ bool LinearProblem::assemble(Matrix *matrix, Vector *rhs)
 
 	// obtain a list of assembling stages
 	std::vector<WeakForm::Stage> stages;
-	wf->get_stages(spaces, stages, matrix == NULL);
+	wf->get_stages(spaces, NULL, stages, matrix == NULL);
 
 	// Loop through all assembling stages -- the purpose of this is increased performance
 	// in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.

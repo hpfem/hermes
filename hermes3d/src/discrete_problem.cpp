@@ -168,7 +168,7 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ex
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
-  wf->get_stages(spaces, stages, mat_ext == NULL);
+  wf->get_stages(spaces, u_ext, stages, mat_ext == NULL);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -187,7 +187,7 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ex
       // find a non-NULL e[i]
       Element *e0;
       for (unsigned i = 0; i < s->idx.size(); i++)
-	if ((e0 = e[i]) != NULL) break;
+        if ((e0 = e[i]) != NULL) break;
       if (e0 == NULL) continue;
 
       // obtain assembly lists for the element at all spaces
@@ -197,15 +197,12 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ex
         if (e[i] == NULL) { isempty[j] = true; continue; }
 
         // TODO: do not obtain again if the element was not changed
-        spaces[j]->get_element_assembly_list(e[i], al + j);
+        spaces[j]->get_element_assembly_list(e[i], al + j);       
         test_fn[j].set_active_element(e[i]);
         test_fn[j].set_transform(base_fn + j);
-
-	u_ext[j]->set_active_element(e[i]);
-	u_ext[j]->force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
-
-	refmap[j].set_active_element(e[i]);
-	refmap[j].force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
+        
+        refmap[j].set_active_element(e[i]);
+        refmap[j].force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
       }
       int marker = e0->marker;
 

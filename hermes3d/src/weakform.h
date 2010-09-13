@@ -24,6 +24,7 @@
 #define _WEAKFORM_H_
 
 #include "function.h"
+#include "solution.h"
 #include "forms.h"
 #include "tuple.h"
 
@@ -161,7 +162,7 @@ protected:
 		std::set<MeshFunction *> ext_set;
 	};
 
-	void get_stages(Space **spaces, std::vector<Stage> &stages, bool rhsonly);
+	void get_stages(Space** spaces, Tuple< Solution* > u_ext, std::vector<Stage> &stages, bool rhsonly);
 	bool **get_blocks();
 
 	bool is_in_area(int marker, int area) const
@@ -175,15 +176,11 @@ protected:
 	}
 
 private:
-	Stage *find_stage(std::vector<Stage> &stages, int ii, int jj, Mesh *m1, Mesh *m2,
-	                  std::vector<MeshFunction *> &ext);
+	Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
+                    Mesh* m1, Mesh* m2, 
+                    std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext);
 
 	bool is_in_area_2(int marker, int area) const;
-
-	// FIXME: pretty dumb to test this in such a way
-	bool is_linear() {
-		return mfvol.size() > 0 || mfsurf.size() > 0 || vfvol.size() > 0 || vfsurf.size() > 0;
-	}
 
 	friend class LinearProblem;
 	friend class DiscreteProblem;

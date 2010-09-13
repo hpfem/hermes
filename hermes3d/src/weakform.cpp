@@ -114,187 +114,161 @@ void WeakForm::set_ext_fns(void *fn, Tuple<MeshFunction*> ext)
 /// that share the same meshes. Each stage is then assembled separately. This
 /// improves the performance of multi-mesh assembling.
 ///
-void WeakForm::get_stages(Space **spaces, std::vector<WeakForm::Stage> &stages, bool rhsonly)
+void WeakForm::get_stages(Space** spaces, Tuple<Solution *> u_ext, std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
-	_F_
-	unsigned i;
-	stages.clear();
+  _F_
+  unsigned i;
+  stages.clear();
 
-	if (!rhsonly) {
-		if (is_linear()) {
-			// process volume biforms
-			for (i = 0; i < mfvol.size(); i++) {
-				int ii = mfvol[i].i, jj = mfvol[i].j;
-				Mesh *m1 = spaces[ii]->get_mesh();
-				Mesh *m2 = spaces[jj]->get_mesh();
-				Stage *s = find_stage(stages, ii, jj, m1, m2, mfvol[i].ext);
-				s->mfvol.push_back(&mfvol[i]);
-			}
+  // process volume matrix_forms
+  if (!rhsonly) {
+    for (i = 0; i < mfvol.size(); i++)
+    {
+      int ii = mfvol[i].i, jj = mfvol[i].j;
+      Mesh* m1 = spaces[ii]->get_mesh();
+      Mesh* m2 = spaces[jj]->get_mesh();
+      Stage* s = find_stage(stages, ii, jj, m1, m2, mfvol[i].ext, u_ext);
+      s->mfvol.push_back(&mfvol[i]);
+    }
 
-			// process surface biforms
-			for (i = 0; i < mfsurf.size(); i++) {
-				int ii = mfsurf[i].i, jj = mfsurf[i].j;
-				Mesh *m1 = spaces[ii]->get_mesh();
-				Mesh *m2 = spaces[jj]->get_mesh();
-				Stage *s = find_stage(stages, ii, jj, m1, m2, mfsurf[i].ext);
-				s->mfsurf.push_back(&mfsurf[i]);
-			}
-		}
-		else {
-			// process volume jac forms
-			for (unsigned i = 0; i < mfvol.size(); i++) {
-				int ii = mfvol[i].i, jj = mfvol[i].j;
-				Mesh *m1 = spaces[ii]->get_mesh();
-				Mesh *m2 = spaces[jj]->get_mesh();
-				Stage *s = find_stage(stages, ii, jj, m1, m2, mfvol[i].ext);
-				s->mfvol.push_back(&mfvol[i]);
-			}
+    // process surface matrix_forms
+    for (i = 0; i < mfsurf.size(); i++)
+    {
+      int ii = mfsurf[i].i, jj = mfsurf[i].j;
+      Mesh* m1 = spaces[ii]->get_mesh();
+      Mesh* m2 = spaces[jj]->get_mesh();
+      Stage* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i].ext, u_ext);
+      s->mfsurf.push_back(&mfsurf[i]);
+    }
+  }
 
-			// process surface jac forms
-			for (unsigned i = 0; i < mfsurf.size(); i++) {
-				int ii = mfsurf[i].i, jj = mfsurf[i].j;
-				Mesh *m1 = spaces[ii]->get_mesh();
-				Mesh *m2 = spaces[jj]->get_mesh();
-				Stage *s = find_stage(stages, ii, jj, m1, m2, mfsurf[i].ext);
-				s->mfsurf.push_back(&mfsurf[i]);
-			}
+  // process volume res forms
+  for (unsigned i = 0; i < vfvol.size(); i++) {
+    int ii = vfvol[i].i;
+    Mesh *m = spaces[ii]->get_mesh();
+    Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i].ext, u_ext);
+    s->vfvol.push_back(&vfvol[i]);
+  }
 
-		}
-	}
+  // process surface res forms
+  for (unsigned i = 0; i < vfsurf.size(); i++) {
+    int ii = vfsurf[i].i;
+    Mesh *m = spaces[ii]->get_mesh();
+    Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i].ext, u_ext);
+    s->vfsurf.push_back(&vfsurf[i]);
+  }
 
-	if (is_linear()) {
-		// process volume liforms
-		for (i = 0; i < vfvol.size(); i++) {
-			int ii = vfvol[i].i;
-			Mesh *m = spaces[ii]->get_mesh();
-			Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i].ext);
-			s->vfvol.push_back(&vfvol[i]);
-		}
+  // helper macro for iterating in a set
+  #define set_for_each(myset, type) \
+    for (std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
 
-		// process surface liforms
-		for (i = 0; i < vfsurf.size(); i++) {
-			int ii = vfsurf[i].i;
-			Mesh *m = spaces[ii]->get_mesh();
-			Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i].ext);
-			s->vfsurf.push_back(&vfsurf[i]);
-		}
-	}
-	else {
-		// process volume res forms
-		for (unsigned i = 0; i < vfvol.size(); i++) {
-			int ii = vfvol[i].i;
-			Mesh *m = spaces[ii]->get_mesh();
-			Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i].ext);
-			s->vfvol.push_back(&vfvol[i]);
-		}
-
-		// process surface res forms
-		for (unsigned i = 0; i < vfsurf.size(); i++) {
-			int ii = vfsurf[i].i;
-			Mesh *m = spaces[ii]->get_mesh();
-			Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i].ext);
-			s->vfsurf.push_back(&vfsurf[i]);
-		}
-	}
-
-	// helper macro for iterating in a set
-	#define SET_FOR_EACH(myset, type) \
-		for (std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
-
-	// initialize the arrays meshes and fns needed by Traverse for each stage
-	for (i = 0; i < stages.size(); i++) {
-		Stage *s = &stages[i];
-		SET_FOR_EACH(s->idx_set, int) {
-			s->idx.push_back(*it);
-			s->meshes.push_back(spaces[*it]->get_mesh());
-			s->fns.push_back(NULL);
-		}
-		SET_FOR_EACH(s->ext_set, MeshFunction *) {
-			s->ext.push_back(*it);
-			s->meshes.push_back((*it)->get_mesh());
-			s->fns.push_back(*it);
-		}
-		s->idx_set.clear();
-		s->seq_set.clear();
-		s->ext_set.clear();
-	}
+  // initialize the arrays meshes and fns needed by Traverse for each stage
+  for (i = 0; i < stages.size(); i++)
+  {
+    Stage* s = &stages[i];
+    
+    // First, initialize arrays for the test functions. A pointer to the PrecalcShapeset 
+    // corresponding to each space will be assigned to s->fns later during assembling.
+    set_for_each(s->idx_set, int)
+    {
+      s->idx.push_back(*it);
+      s->meshes.push_back(spaces[*it]->get_mesh());
+      s->fns.push_back(NULL);
+    }
+    
+    // Next, append to the existing arrays the external functions (including the solutions
+    // from previous Newton iteration) and their meshes. Also fill in a special array with
+    // these external functions only.
+    set_for_each(s->ext_set, MeshFunction*)
+    {
+      s->ext.push_back(*it);
+      s->meshes.push_back((*it)->get_mesh());
+      s->fns.push_back(*it);
+    }
+    
+    s->idx_set.clear();
+    s->seq_set.clear();
+    s->ext_set.clear();
+  }
 }
 
-/// Finds an assembling stage with the same set of meshes as [m1, m2, ext]. If no such
+
+/// Finds an assembling stage with the same set of meshes as [m1, m2, ext, u_ext]. If no such
 /// stage can be found, a new one is created and returned.
 ///
-WeakForm::Stage *WeakForm::find_stage(std::vector<WeakForm::Stage> &stages, int ii, int jj,
-                                      Mesh *m1, Mesh *m2, std::vector<MeshFunction *> &ext)
+WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
+                                      Mesh* m1, Mesh* m2, 
+                                      std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext)
 {
-	_F_
-	// first create a list of meshes the form uses
-	std::set<unsigned> seq;
-	seq.insert(m1->get_seq());
-	seq.insert(m2->get_seq());
-	for (unsigned i = 0; i < ext.size(); i++)
-		seq.insert(ext[i]->get_mesh()->get_seq());
+  _F_
+  // first create a list of meshes the form uses
+  std::set<unsigned> seq;
+  seq.insert(m1->get_seq());
+  seq.insert(m2->get_seq());
+  Mesh *mmm;
+  for (unsigned i = 0; i < ext.size(); i++) {
+    mmm = ext[i]->get_mesh();
+    if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+    seq.insert(mmm->get_seq());
+  }
+  for (unsigned i = 0; i < u_ext.size(); i++) {
+    if (u_ext[i] != NULL) {
+      mmm = u_ext[i]->get_mesh();
+      if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
+      seq.insert(mmm->get_seq());
+    }
+  }
+  
+  // find a suitable existing stage for the form
+  Stage* s = NULL;
+  for (unsigned i = 0; i < stages.size(); i++)
+    if (seq.size() == stages[i].seq_set.size() &&
+        equal(seq.begin(), seq.end(), stages[i].seq_set.begin()))
+      { s = &stages[i]; break; }
 
-	// find a suitable existing stage for the form
-	Stage *s = NULL;
-	for (unsigned i = 0; i < stages.size(); i++)
-		if (seq.size() == stages[i].seq_set.size() &&
-			equal(seq.begin(), seq.end(), stages[i].seq_set.begin()))
-		{
-			s = &stages[i];
-			break;
-		}
+  // create a new stage if not found
+  if (s == NULL)
+  {
+    Stage newstage;
+    stages.push_back(newstage);
+    s = &stages.back();
+    s->seq_set = seq;
+  }
 
-	// create a new stage if not found
-	if (s == NULL) {
-		Stage newstage;
-		stages.push_back(newstage);
-		s = &stages.back();
-		s->seq_set = seq;
-	}
-
-	// update and return the stage
-	for (unsigned i = 0; i < ext.size(); i++)
-		s->ext_set.insert(ext[i]);
-	s->idx_set.insert(ii);
-	s->idx_set.insert(jj);
-
-	return s;
+  // update and return the stage
+  for (unsigned int i = 0; i < ext.size(); i++)
+    s->ext_set.insert(ext[i]);
+  for (unsigned int i = 0; i < u_ext.size(); i++)
+    if (u_ext[i] != NULL)
+      s->ext_set.insert(u_ext[i]);
+  
+  s->idx_set.insert(ii);
+  s->idx_set.insert(jj);
+  return s;
 }
 
 
 /// Returns a (neq x neq) array containing true in each element, if the corresponding
 /// block of weak forms is used, and false otherwise.
 ///
-bool **WeakForm::get_blocks()
+bool** WeakForm::get_blocks()
 {
-	_F_
-	bool **blocks = new_matrix<bool>(neq, neq);
-	for (int i = 0; i < neq; i++)
-		for (int j = 0; j < neq; j++)
-			blocks[i][j] = false;
+  _F_
+  bool** blocks = new_matrix<bool>(neq, neq);
+  for (int i = 0; i < neq; i++)
+    for (int j = 0; j < neq; j++)
+      blocks[i][j] = false;
 
-	if (is_linear()) {
-		for (unsigned i = 0; i < mfvol.size(); i++) {
-			blocks[mfvol[i].i][mfvol[i].j] = true;
-			if (mfvol[i].sym)
-				blocks[mfvol[i].j][mfvol[i].i] = true;
-		}
+  for (unsigned i = 0; i < mfvol.size(); i++) {
+    blocks[mfvol[i].i][mfvol[i].j] = true;
+    if (mfvol[i].sym)
+      blocks[mfvol[i].j][mfvol[i].i] = true;
+  }
 
-		for (unsigned i = 0; i < mfsurf.size(); i++)
-			blocks[mfsurf[i].i][mfsurf[i].j] = true;
-	}
-	else {
-		for (unsigned i = 0; i < mfvol.size(); i++) {
-			blocks[mfvol[i].i][mfvol[i].j] = true;
-			if (mfvol[i].sym)
-				blocks[mfvol[i].j][mfvol[i].i] = true;
-		}
+  for (unsigned i = 0; i < mfsurf.size(); i++)
+    blocks[mfsurf[i].i][mfsurf[i].j] = true;
 
-		for (unsigned i = 0; i < mfsurf.size(); i++)
-			blocks[mfsurf[i].i][mfsurf[i].j] = true;
-	}
-
-	return blocks;
+  return blocks;
 }
 
 //// areas /////////////////////////////////////////////////////////////////////////////////////////
