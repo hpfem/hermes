@@ -109,9 +109,6 @@ endmacro(MAKE_PATH)
 macro(LIBRARY_SETTINGS BIN)
     target_link_libraries(${BIN} ${JUDY_LIBRARY} ${PTHREAD_LIBRARY})
 #    target_link_libraries(${BIN} hermes_common)
-    if(WITH_UMFPACK)
-	target_link_libraries(${BIN} ${UMFPACK_LIBRARY})
-    endif(WITH_UMFPACK)
 
     if(NOT MSVC)
         IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -138,6 +135,10 @@ macro(LIBRARY_SETTINGS BIN)
         include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
         target_link_libraries(${BIN} ${ANTTWEAKBAR_LIBRARY})	
     endif(WITH_VIEWER_GUI)
+    if(WITH_UMFPACK)
+	target_link_libraries(${BIN} ${UMFPACK_LIBRARY})
+	target_link_libraries(${BIN} ${AMD_LIBRARY})
+    endif(WITH_UMFPACK)
 endmacro(LIBRARY_SETTINGS)
 
 macro(BUILD_REPORT_FLAGS FLAGS)
@@ -177,6 +178,13 @@ set(${FLAGS} "${REPORT_FLAGS}")
 endmacro(BUILD_REPORT_FLAGS)
 
 macro(BUILD_LIB LIB FLAGS)
+	if(WITH_UMFPACK)
+	    add_definitions(-DWITH_UMFPACK)
+	    find_package(UMFPACK REQUIRED)
+	    include_directories(${UMFPACK_INCLUDE_DIR})
+	    include_directories(${AMD_INCLUDE_DIR})
+	endif(WITH_UMFPACK)
+
         BUILD_REPORT_FLAGS(REPORT_FLAGS)
 	set(BUILD_FLAGS "${FLAGS} ${REPORT_FLAGS}")
 	if(WITH_VIEWER_GUI)
@@ -194,6 +202,12 @@ macro(BUILD_LIB LIB FLAGS)
 endmacro(BUILD_LIB)
 
 macro(BUILD_LIB_ALL LIB FLAGS)
+	if(WITH_UMFPACK)
+	    add_definitions(-DWITH_UMFPACK)
+	    find_package(UMFPACK REQUIRED)
+	    include_directories(${UMFPACK_INCLUDE_DIR})
+	    include_directories(${AMD_INCLUDE_DIR})
+	endif(WITH_UMFPACK)
 	BUILD_REPORT_FLAGS(REPORT_FLAGS)
 	set(BUILD_FLAGS "${FLAGS} ${REPORT_FLAGS}")
 	if(WITH_VIEWER_GUI)
@@ -224,10 +238,6 @@ macro(BUILD_LIB_ALL LIB FLAGS)
 			COMMAND if exist ${SOURCE_RELEASE_FILE} copy /Y ${SOURCE_RELEASE_FILE} ${TARGET_DIR})
 		unset(TARGET_DIR)
 		unset(SOURCE_FILE)
-		if(WITH_UMFPACK)
-			ADD_DEFINITIONS(-DWITH_UMFPACK)
-		endif(WITH_UMFPACK)
-# FIXME : do this for other packages.
 	endif(MSVC)
 endmacro(BUILD_LIB_ALL)
 
@@ -237,6 +247,9 @@ CHECK_FUNCTION_EXISTS(fmemopen HAVE_FMEMOPEN)
 CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
     ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+
+
+
 
 # build MSVC version:
 if(MSVC)
