@@ -21,9 +21,8 @@
 
 #ifdef WITH_UMFPACK
 extern "C" {
-// FIXME
-//#include <umfpack.h>
-#include "/usr/include/suitesparse/umfpack.h"
+#include <umfpack.h>
+//#include "/usr/include/suitesparse/umfpack.h"
 }
 #endif
 
