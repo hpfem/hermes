@@ -61,7 +61,7 @@ public:
   Space* get_space(int n) {  return this->spaces[n];  }
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
-  void create(SparseMatrix *mat);
+  void create(SparseMatrix* mat, Vector* rhs = NULL);
   void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext,
                 bool rhsonly = false);
 
@@ -98,6 +98,7 @@ protected:
   }
 
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext);
+  ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge);
   ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 

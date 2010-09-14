@@ -312,9 +312,9 @@ UMFPackLinearSolver::UMFPackLinearSolver(FeProblem *lp)
 {
 	_F_
 #ifdef WITH_UMFPACK
-	int size = lp->get_num_dofs();
-	this->m = new UMFPackMatrix(size);
-	this->rhs = new UMFPackVector(size);
+        this->m = new UMFPackMatrix();
+        this->rhs = new UMFPackVector();
+        lp->create(this->m, this->rhs);
 #else
 	error("hermes2d was not built with UMFPACK support.");
 #endif

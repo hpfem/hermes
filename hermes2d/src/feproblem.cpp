@@ -121,7 +121,7 @@ bool FeProblem::is_up_to_date()
 
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::create(SparseMatrix* mat)
+void FeProblem::create(SparseMatrix* mat, Vector* rhs)
 {
   assert(mat != NULL);
 
@@ -181,6 +181,7 @@ void FeProblem::create(SparseMatrix* mat)
   delete [] blocks;
 
   mat->alloc();
+  if (rhs != NULL) rhs->alloc(ndof);
 
   // save space seq numbers and weakform seq number, so we can detect their changes
   for (int i = 0; i < wf->neq; i++)
@@ -283,7 +284,7 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, boo
         refmap[j].set_active_element(e[i]);
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
 
-        if (this->is_linear == false) {
+        if (u_ext[j] != NULL) {
           u_ext[j]->set_active_element(e[i]);
           u_ext[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
         }
@@ -368,8 +369,11 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, boo
             if (mfv->sym < 0) chsgn(local_stiffness_matrix, am->cnt, an->cnt);
             transpose(local_stiffness_matrix, am->cnt, an->cnt);
             if (rhsonly == false) {
-              mat_ext->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
+              mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
             }
+  	    /* OLD CODE
+            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+	    */
 
             // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
             if (rhs_ext != NULL && this->is_linear) {
@@ -384,9 +388,6 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, boo
                 }
               }
             }
-  	    /* OLD CODE
-            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
-	    */
           }
         }
       }
@@ -540,13 +541,28 @@ ExtData<scalar>* FeProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMa
 {
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
-  for (unsigned i = 0; i < ext.size(); i++)
-    ext_fn[i] = init_fn(ext[i], rm, order);
+  for (unsigned i = 0; i < ext.size(); i++) {
+    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], rm, order);
+    else ext_fn[i] = NULL;
+  }
   ext_data->nf = ext.size();
   ext_data->fn = ext_fn;
 
   return ext_data;
 
+}
+
+// Initialize integration order on a given edge for external functions
+ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge)
+{
+  ExtData<Ord>* fake_ext = new ExtData<Ord>;
+  fake_ext->nf = ext.size();
+  Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
+  for (int i = 0; i < fake_ext->nf; i++)
+    fake_ext_fn[i] = init_fn_ord(ext[i]->get_edge_fn_order(edge));
+  fake_ext->fn = fake_ext_fn;
+  
+  return fake_ext;
 }
 
 // Initialize shape function values and derivatives (fill in the cache)
@@ -588,45 +604,65 @@ void FeProblem::delete_cache()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/* OLD CODE
 // Actual evaluation of volume matrix form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
-  // determine the integration order
+  // Determine the integration order.
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
+
+  // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+      else oi[i] = init_fn_ord(0);
+    }
   }
+  else {
+    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
+  }
+  
+  // Order of shape functions.
   Func<Ord>* ou = init_fn_ord(fu->get_fn_order() + inc);
   Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
+
+  // Order of additional external functions.
   ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
 
+  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = Ord(0);
-  if (this->is_linear == false) o = mfv->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
+
+  // Total order of the matrix form.
+  Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
+
+  // Increase due to reference map.
   int order = ru->get_inv_ref_order();
   order += o.get_order();
   limit_order_nowarn(order);
 
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) {  
-      oi[i]->free_ord(); 
-      delete oi[i]; 
-    }
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) {  
+    if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
   }
-  ou->free_ord(); delete ou;
-  ov->free_ord(); delete ov;
-  delete fake_e;
-  fake_ext->free_ord(); delete fake_ext;
+  if (ou != NULL) {
+    ou->free_ord(); delete ou;
+  }
+  if (ov != NULL) {
+    ov->free_ord(); delete ov;
+  }
+  if (fake_e != NULL) delete fake_e;
+  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
 
-  // eval the form
+  // Evaluate the form using the quadrature of the just calculated order.
   Quad2D* quad = fu->get_quad_2d();
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
 
-  // init geometry and jacobian*weights
+  // Init geometry and jacobian*weights.
   if (cache_e[order] == NULL)
   {
     cache_e[order] = init_geom_vol(ru, order);
@@ -638,64 +674,185 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ex
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
 
-  // function values and values of external functions
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) prev[i] = init_fn(u_ext[i], rv, order);
-    else prev[i] = NULL;
+  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, order);
+      else prev[i] = NULL;
+    }
   }
+  else {
+    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+  }
+
   Func<double>* u = get_fn(fu, ru, order);
   Func<double>* v = get_fn(fv, rv, order);
   ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
 
   scalar res = mfv->fn(np, jwt, prev, u, v, e, ext);
 
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) { 
-      prev[i]->free_fn(); 
-      delete prev[i]; 
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) {  
+    if (prev[i] != NULL) prev[i]->free_fn(); delete prev[i]; 
+  }
+  if (ext != NULL) {ext->free(); delete ext;}
+
+  return res;
+}
+*/
+
+// Actual evaluation of volume matrix form (calculates integral)
+scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+                        PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+{
+  // Determine the integration order.
+  int inc = (fu->get_num_components() == 2) ? 1 : 0;
+  
+  // Order of solutions from the previous Newton iteration.
+  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+      else oi[i] = init_fn_ord(0);
     }
   }
-  ext->free(); delete ext;
+  else {
+    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
+  }
+  
+  // Order of shape functions.
+  Func<Ord>* ou = init_fn_ord(fu->get_fn_order() + inc);
+  Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
+  
+  // Order of additional external functions.
+  ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
+  
+  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+  double fake_wt = 1.0;
+  Geom<Ord>* fake_e = init_geom_ord();
+  
+  // Total order of the matrix form.
+  Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
+  
+  // Increase due to reference map.
+  int order = ru->get_inv_ref_order();
+  order += o.get_order();
+  limit_order_nowarn(order);
+  
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) {  
+    if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
+  }
+  if (ou != NULL) {
+    ou->free_ord(); delete ou;
+  }
+  if (ov != NULL) {
+    ov->free_ord(); delete ov;
+  }
+  if (fake_e != NULL) delete fake_e;
+  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
+  
+  // Evaluate the form using the quadrature of the just calculated order.
+  Quad2D* quad = fu->get_quad_2d();
+  double3* pt = quad->get_points(order);
+  int np = quad->get_num_points(order);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[order] == NULL)
+  {
+    cache_e[order] = init_geom_vol(ru, order);
+    double* jac = ru->get_jacobian(order);
+    cache_jwt[order] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[order][i] = pt[i][2] * jac[i];
+  }
+  Geom<double>* e = cache_e[order];
+  double* jwt = cache_jwt[order];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, order);
+      else prev[i] = NULL;
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+  }
+
+  Func<double>* u = get_fn(fu, ru, order);
+  Func<double>* v = get_fn(fv, rv, order);
+  ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
+
+  scalar res = mfv->fn(np, jwt, prev, u, v, e, ext);
+
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) {  
+    if (prev[i] != NULL) prev[i]->free_fn(); delete prev[i]; 
+  }
+  if (ext != NULL) {ext->free(); delete ext;}
   return res;
 }
 
+/* OLD CODE
 // Actual evaluation of volume linear form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
 {
-  // determine the integration order
+  // Determine the integration order.
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
+
+  // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+      else oi[i] = init_fn_ord(0);
+    }
   }
+  else {
+    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
+  }
+ 
+  // Order of the shape function.
   Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
+
+  // Order of additional external functions.
   ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
 
+  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = Ord(0);
-  if (this->is_linear == false) o = vfv->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
+
+  // Total order of the vector form.
+  Ord o = vfv->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
+
+  // Increase due to reference map.
   int order = rv->get_inv_ref_order();
   order += o.get_order();
   limit_order_nowarn(order);
 
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) {  
-      oi[i]->free_ord(); 
-      delete oi[i]; 
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) { 
+    if (oi[i] != NULL) {
+      oi[i]->free_ord(); delete oi[i]; 
     }
   }
-  ov->free_ord(); delete ov;
-  delete fake_e;
-  fake_ext->free_ord(); delete fake_ext;
+  if (ov != NULL) {ov->free_ord(); delete ov;}
+  if (fake_e != NULL) delete fake_e;
+  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
 
-  // eval the form
+  // Evaluate the form using the quadrature of the just calculated order.
   Quad2D* quad = fv->get_quad_2d();
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
 
-  // init geometry and jacobian*weights
+  // Init geometry and jacobian*weights.
   if (cache_e[order] == NULL)
   {
     cache_e[order] = init_geom_vol(rv, order);
@@ -707,24 +864,130 @@ scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ex
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
 
-  // function values and values of external functions
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(u_ext[i], rv, order);
+  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, order);
+      else prev[i] = NULL;
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+  }
+
   Func<double>* v = get_fn(fv, rv, order);
   ExtData<scalar>* ext = init_ext_fns(vfv->ext, rv, order);
 
   scalar res = vfv->fn(np, jwt, prev, v, e, ext);
 
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) {  
-      prev[i]->free_fn(); 
-      delete prev[i]; 
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) { 
+    if (prev[i] != NULL) {
+      prev[i]->free_fn(); delete prev[i]; 
     }
   }
-  ext->free(); delete ext;
+  if (ext != NULL) {ext->free(); delete ext;}
+
+  return res;
+}
+*/
+
+// Actual evaluation of volume vector form (calculates integral)
+scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
+{
+  // Determine the integration order.
+  int inc = (fv->get_num_components() == 2) ? 1 : 0;
+  
+  // Order of solutions from the previous Newton iteration.
+  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
+      else oi[i] = init_fn_ord(0);
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
+  }
+  
+  // Order of the shape function.
+  Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
+  
+  // Order of additional external functions.
+  ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
+  
+  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+  double fake_wt = 1.0;
+  Geom<Ord>* fake_e = init_geom_ord();
+  
+  // Total order of the vector form.
+  Ord o = vfv->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
+  
+  // Increase due to reference map.
+  int order = rv->get_inv_ref_order();
+  order += o.get_order();
+  limit_order_nowarn(order);
+
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) { 
+    if (oi[i] != NULL) {
+      oi[i]->free_ord(); delete oi[i]; 
+    }
+  }
+  if (ov != NULL) {ov->free_ord(); delete ov;}
+  if (fake_e != NULL) delete fake_e;
+  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
+
+  // Evaluate the form using the quadrature of the just calculated order.
+  Quad2D* quad = fv->get_quad_2d();
+  double3* pt = quad->get_points(order);
+  int np = quad->get_num_points(order);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[order] == NULL)
+  {
+    cache_e[order] = init_geom_vol(rv, order);
+    double* jac = rv->get_jacobian(order);
+    cache_jwt[order] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[order][i] = pt[i][2] * jac[i];
+  }
+  Geom<double>* e = cache_e[order];
+  double* jwt = cache_jwt[order];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, order);
+      else prev[i] = NULL;
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+  }
+
+  Func<double>* v = get_fn(fv, rv, order);
+  ExtData<scalar>* ext = init_ext_fns(vfv->ext, rv, order);
+
+  scalar res = vfv->fn(np, jwt, prev, v, e, ext);
+
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) { 
+    if (prev[i] != NULL) {
+      prev[i]->free_fn(); delete prev[i]; 
+    }
+  }
+  if (ext != NULL) {ext->free(); delete ext;}
+  
   return res;
 }
 
+/* OLD CODE
 // Actual evaluation of surface matrix form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep)
 {
@@ -749,7 +1012,7 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
   // function values and values of external functions
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) prev[i] = init_fn(u_ext[i], rv, eo);
+    if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, eo);
     else prev[i] = NULL;
   }
   Func<double>* u = get_fn(fu, ru, eo);
@@ -767,8 +1030,113 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
   ext->free(); delete ext;
   return 0.5 * res;
 }
+*/
 
+// Actual evaluation of surface matrix forms (calculates integral)
+scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, 
+                        PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep)
+{
+  // Determine the integration order.
+  int inc = (fu->get_num_components() == 2) ? 1 : 0;
+  
+  // Order of solutions from the previous Newton iteration.
+  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(ep->edge) + inc);
+      else oi[i] = init_fn_ord(0);
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
+  }
+  
+  // Order of shape functions.
+  Func<Ord>* ou = init_fn_ord(fu->get_edge_fn_order(ep->edge) + inc);
+  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(ep->edge) + inc);
+  
+  // Order of additional external functions.
+  ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, ep->edge);
+  
+  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+  double fake_wt = 1.0;
+  Geom<Ord>* fake_e = init_geom_ord();
+  
+  // Total order of the matrix form.
+  Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
+  
+  // Increase due to reference map.
+  int order = ru->get_inv_ref_order();
+  
+  order += o.get_order();
+  limit_order_nowarn(order);
+  
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) {  
+    if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
+  }
+  if (ou != NULL) {
+    ou->free_ord(); delete ou;
+  }
+  if (ov != NULL) {
+    ov->free_ord(); delete ov;
+  }
+  if (fake_e != NULL) delete fake_e;
+  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
+  
+  // Evaluate the form using the quadrature of the just calculated order.
+  Quad2D* quad = fu->get_quad_2d();
+  
+  int eo = quad->get_edge_points(ep->edge, order);
+  double3* pt = quad->get_points(eo);
+  int np = quad->get_num_points(eo);
 
+  // Init geometry and jacobian*weights.
+  if (cache_e[eo] == NULL)
+  {
+    cache_e[eo] = init_geom_surf(ru, ep, eo);
+    double3* tan = ru->get_tangent(ep->edge, eo);
+    cache_jwt[eo] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+  }
+  Geom<double>* e = cache_e[eo];
+  double* jwt = cache_jwt[eo];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, eo);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, eo);
+      else prev[i] = NULL;
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+  }
+
+  Func<double>* u = get_fn(fu, ru, eo);
+  Func<double>* v = get_fn(fv, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
+
+  scalar res = mfs->fn(np, jwt, prev, u, v, e, ext);
+
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) { 
+    if (prev[i] != NULL) {
+      prev[i]->free_fn(); delete prev[i]; 
+    }
+  }
+  if (ext != NULL) {ext->free(); delete ext;}
+  
+  return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
+                    // are defined in (-1, 1). Thus multiplying with 0.5 to correct
+                    // the weights.
+}
+
+/* OLD CODE
 // Actual evaluation of surface linear form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv, EdgePos* ep)
 {
@@ -793,7 +1161,7 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
   // function values and values of external functions
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) prev[i]  = init_fn(u_ext[i], rv, eo);
+    if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, eo);
     else prev[i] = NULL;
   }
   Func<double>* v = get_fn(fv, rv, eo);
@@ -810,6 +1178,105 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
   ext->free(); delete ext;
   return 0.5 * res;
 }
+*/
+
+// Actual evaluation of surface vector form (calculates integral)
+scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
+                        PrecalcShapeset *fv, RefMap *rv, EdgePos* ep)
+{
+  // Determine the integration order.
+  int inc = (fv->get_num_components() == 2) ? 1 : 0;
+  
+  // Order of solutions from the previous Newton iteration.
+  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(ep->edge) + inc);
+      else oi[i] = init_fn_ord(0);
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
+  }
+  
+  // Order of the shape function.
+  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(ep->edge) + inc);
+  
+  // Order of additional external functions.
+  ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, ep->edge);
+  
+  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+  double fake_wt = 1.0;
+  Geom<Ord>* fake_e = init_geom_ord();
+  
+  // Total order of the vector form.
+  Ord o = vfs->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
+  
+  // Increase due to reference map.
+  int order = rv->get_inv_ref_order();
+  
+  order += o.get_order();
+  limit_order_nowarn(order);
+  
+  // Clean up.
+  for (int i = 0; i < wf->neq; i++) { 
+    if (oi[i] != NULL) {
+      oi[i]->free_ord(); delete oi[i]; 
+    }
+  }
+  if (ov != NULL) {ov->free_ord(); delete ov;}
+  if (fake_e != NULL) delete fake_e;
+  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
+  
+  // Evaluate the form using the quadrature of the just calculated order.
+  Quad2D* quad = fv->get_quad_2d();
+  
+  int eo = quad->get_edge_points(ep->edge, order);
+  double3* pt = quad->get_points(eo);
+  int np = quad->get_num_points(eo);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[eo] == NULL)
+  {
+    cache_e[eo] = init_geom_surf(rv, ep, eo);
+    double3* tan = rv->get_tangent(ep->edge, eo);
+    cache_jwt[eo] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+  }
+  Geom<double>* e = cache_e[eo];
+  double* jwt = cache_jwt[eo];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
+  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, eo);
+  if (u_ext != Tuple<Solution *>()) {
+    for (int i = 0; i < wf->neq; i++) {
+      if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, eo);
+      else prev[i] = NULL;
+    }
+  }
+  else {
+    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+  }
+
+  Func<double>* v = get_fn(fv, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
+
+  scalar res = vfs->fn(np, jwt, prev, v, e, ext);
+
+  for (int i = 0; i < wf->neq; i++) {  
+    if (prev[i] != NULL) {prev[i]->free_fn(); delete prev[i]; }
+  }
+  if (ext != NULL) {ext->free(); delete ext;}
+  
+  // Clean up.
+  return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
+                    // are defined in (-1, 1). Thus multiplying with 0.5 to correct
+                    // the weights.
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
