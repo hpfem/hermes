@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
     // Project the reference solution on the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
     // NULL means that we do not want to know the resulting coefficient vector.
-    project_global(&space, H2D_H1_NORM, &ref_sln, &sln, NULL); 
+    project_global(&space, H2D_L2_NORM, &ref_sln, &sln, NULL); 
 
     // Time measurement.
     cpu_time.tick();
