@@ -19,7 +19,7 @@
 //     du_x/dn = du_y/dn = du_z/dn = 0 elsewhere
 //
 // The following parameters can be changed:
-const int INIT_REF_NUM = 3;					// Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 1;					// Number of initial uniform mesh refinements.
 const int P_INIT = 4;						// Initial polynomial degree of all mesh elements.
 
 // Problem parameters. 
@@ -86,18 +86,22 @@ int main(int argc, char **argv) {
   H1ShapesetLobattoHex shapeset;
 
 #if defined WITH_UMFPACK
+  printf("Using UMFpack.\n");
   UMFPackMatrix mat;
   UMFPackVector rhs;
   UMFPackLinearSolver solver(&mat, &rhs);
 #elif defined WITH_PARDISO
+  printf("Using PARDISO.\n");
   PardisoMatrix mat;
   PardisoVector rhs;
   PardisoLinearSolver solver(&mat, &rhs);
 #elif defined WITH_PETSC
+  printf("Using PETSC.\n");
   PetscMatrix mat;
   PetscVector rhs;
   PetscLinearSolver solver(&mat, &rhs);
 #elif defined WITH_MUMPS
+  printf("Using MUMPS.\n");
   MumpsMatrix mat;
   MumpsVector rhs;
   MumpsSolver solver(&mat, &rhs);
