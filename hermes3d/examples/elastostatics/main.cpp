@@ -140,8 +140,7 @@ int main(int argc, char **argv) {
   wf.add_vector_form_surf(2, surf_linear_form_2<double, scalar>, surf_linear_form_2<ord_t, ord_t>, 5);
 
   // Initialize the mesh problem.
-  LinearProblem lp(&wf);
-  lp.set_spaces(Tuple<Space *>(&xdisp, &ydisp, &zdisp));
+  LinearProblem lp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp));
 
   // Assemble stiffness matrix
   printf("  - Assembling... "); fflush(stdout);

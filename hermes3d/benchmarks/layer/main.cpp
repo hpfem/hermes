@@ -109,7 +109,7 @@ int main(int argc, char **args)
   printf("Performing %d initial mesh refinements.\n", INIT_REF_NUM);
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
   Word_t (nelem) = mesh.get_num_elements();
-  printf("New number of elements is %d.\n", nelem);
+  printf("New number of elements is %d.\n", (int)nelem);
 
   //Initialize the shapeset and the cache.
   H1ShapesetLobattoHex shapeset;
@@ -147,8 +147,7 @@ int main(int argc, char **args)
   wf.add_vector_form(liform<double, double>, liform<ord_t, ord_t>, ANY);
 
   // Initialize the coarse mesh problem.
-  LinProblem lp(&wf);
-  lp.set_space(&space);
+  LinearProblem lp(&wf, &space);
 
   // Adaptivity loop.
   int as = 0;  bool done = false;
@@ -213,8 +212,7 @@ int main(int argc, char **args)
     rspace->copy_orders(space, 1);
 
     // Initialize the mesh problem for reference solution.
-    LinProblem rlp(&wf);
-    rlp.set_space(rspace);
+    LinearProblem rlp(&wf, rspace);
 
     // Assign DOF.
     int rndof = rspace->assign_dofs();
