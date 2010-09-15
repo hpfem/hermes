@@ -1549,7 +1549,6 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
   bool is_linear = true;
   FeProblem fep(wf, spaces, is_linear);
   int ndof = get_num_dofs(spaces);
-  //info("ndof = %d", ndof);
 
   // Initialize matrix solver.
   UMFPackLinearSolver* solver = new UMFPackLinearSolver(&fep);

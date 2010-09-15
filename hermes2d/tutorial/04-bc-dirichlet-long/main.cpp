@@ -48,20 +48,23 @@ int main(int argc, char* argv[])
   wf.add_vector_form(callback(linear_form));
 
   // Initialize the linear problem.
-  LinearProblem lp(&wf, &space);
+  bool is_linear = true;
+  FeProblem fep(&wf, &space, is_linear);
 
-  // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
-
-  // Assemble stiffness matrix and rhs.
-  lp.assemble(mat, rhs);
+  // Initialize matrix solver.
+  UMFPackLinearSolver* solver = new UMFPackLinearSolver(&fep);
 
   // Solve the matrix problem.
-  if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+  if (!solver->solve()) error ("Matrix solver failed.\n");
+
+  // Extract solution vector.
+  scalar *coeffs = solver->get_solution();
 
   // Convert coefficient vector into a Solution.
-  Solution* sln = new Solution(&space, rhs);
+  Solution* sln = new Solution(&space, coeffs);
+
+  // Destroy matrix solver.
+  delete solver;
 
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
