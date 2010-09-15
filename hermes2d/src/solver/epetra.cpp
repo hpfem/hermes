@@ -29,7 +29,7 @@
 static Epetra_SerialComm seq_comm;
 #endif
 
-#define H2D_EPETRA_NOT_COMPILED "hermes3d was not built with Epetra support."
+#define H2D_EPETRA_NOT_COMPILED "hermes2d was not built with Epetra support."
 
 EpetraMatrix::EpetraMatrix()
 {

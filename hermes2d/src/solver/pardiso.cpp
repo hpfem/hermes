@@ -284,7 +284,7 @@ PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
 	_F_
 #ifdef WITH_PARDISO
 #else
-	warning("hermes3d was not built with Pardiso support.");
+	warning("hermes2d was not built with Pardiso support.");
 	exit(128);
 #endif
 }
@@ -297,7 +297,7 @@ PardisoLinearSolver::PardisoLinearSolver(FeProblem *lp)
 	m = new PardisoMatrix;
 	rhs = new PardisoVector;
 #else
-	warning("hermes3d was not built with Pardiso support.");
+	warning("hermes2d was not built with Pardiso support.");
 	exit(128);
 #endif
 }

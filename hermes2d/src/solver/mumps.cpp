@@ -26,7 +26,7 @@
 #include "../../common/callstack.h"
 #include "../../common/timer.h"
 
-#define H2D_ERR_MUMPS_NOT_COMPILED		"Hermes3D was not compiled with MUMPS support"
+#define H2D_ERR_MUMPS_NOT_COMPILED    "Hermes2D was not compiled with MUMPS support"
 
 #ifndef H2D_COMPLEX
 	#define MUMPS			dmumps_c

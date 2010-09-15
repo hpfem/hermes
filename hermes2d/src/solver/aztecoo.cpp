@@ -26,7 +26,7 @@
 #include <Komplex_LinearProblem.h>
 #endif
 
-#define H2D_AZTECOO_NOT_COMPILED "hermes2d was not built with AztecOO support."
+#define H2D_AZTECOO_NOT_COMPILED   "hermes2d was not built with AztecOO support."
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 

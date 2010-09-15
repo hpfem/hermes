@@ -24,7 +24,7 @@
 #include "../../common/callstack.h"
 #include "../../common/timer.h"
 
-#define H2D_PETSC_NOT_COMPILED	"hermes3d was not built with PETSc support."
+#define H2D_PETSC_NOT_COMPILED    "hermes2d was not built with PETSc support."
 
 
 PetscMatrix::PetscMatrix() {

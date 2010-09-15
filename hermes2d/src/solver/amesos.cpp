@@ -41,7 +41,7 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 	solver = factory.Create(solver_type, problem);
 	assert(solver != NULL);
 #else
-	warning("hermes3d was not built with AMESOS support.");
+	warning("hermes2d was not built with AMESOS support.");
 	exit(128);
 #endif
 }
@@ -56,7 +56,7 @@ AmesosSolver::AmesosSolver(const char *solver_type, FeProblem *lp)
 	m = new EpetraMatrix;
 	rhs = new EpetraVector;
 #else
-	warning("hermes3d was not built with AMESOS support.");
+	warning("hermes2d was not built with AMESOS support.");
 	exit(128);
 #endif
 }
