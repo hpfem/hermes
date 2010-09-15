@@ -98,7 +98,19 @@ int main(int argc, char* argv[])
   FeProblem fep(&wf, &space, is_linear);
 
   // Initialize matrix solver.
-  UMFPackLinearSolver* solver = new UMFPackLinearSolver(&fep);
+  Solver * solver;
+  if(matrix_solver == SOLVER_UMFPACK)
+    solver = new UMFPackLinearSolver(&fep);
+  else if(matrix_solver == SOLVER_PETSC)
+    solver = new PetscLinearSolver(&fep);
+  else if(matrix_solver == SOLVER_MUMPS)
+    solver = new MumpsSolver(&fep);
+  else if(matrix_solver == SOLVER_PARDISO)
+    solver = new PardisoLinearSolver(&fep);
+  else if(matrix_solver == SOLVER_AMESOS)
+    solver = new AmesosSolver("Amesos_Klu", &fep);
+  else if(matrix_solver == SOLVER_NOX)
+    solver = new NoxSolver(&fep);
 
   // Solve the matrix problem.
   if (!solver->solve()) error ("Matrix solver failed.\n");
