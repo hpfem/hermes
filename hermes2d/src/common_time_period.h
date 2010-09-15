@@ -7,9 +7,10 @@
 #define __HERMES_COMMON_TIME_PERIOD_H
 
 // For uint64_t type on windows.
+#include "compat.h"
+
 #ifdef _MSC_VER
 #include <inttypes.h>
-#include "compat.h"
 #endif
 
 /// Tick type. Used by the class TimePeriod.
