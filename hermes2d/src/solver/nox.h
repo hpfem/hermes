@@ -16,7 +16,7 @@
 #ifndef __H2D_SOLVER_NOX_H_
 #define __H2D_SOLVER_NOX_H_
 
-#include "itersolver.h"
+#include "solver.h"
 #include "../feproblem.h"
 #include "precond.h"
 #include "epetra.h"
@@ -31,7 +31,7 @@ class NoxProblemInterface;
 /// Encapsulation of NOX nonlinear solver
 ///
 /// @ingroup solvers
-class NoxSolver : public IterSolver
+ class H2D_API NoxSolver : public IterSolver
 {
 public:
 	NoxSolver(FeProblem *problem);

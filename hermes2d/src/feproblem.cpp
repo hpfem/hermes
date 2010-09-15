@@ -26,6 +26,14 @@
 #include "solution.h"
 #include "config.h"
 
+//  Solvers
+#include "solver/amesos.h"
+#include "solver/pardiso.h"
+#include "solver/petsc.h"
+#include "solver/mumps.h"
+#include "solver/nox.h"
+
+
 FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
 {
   this->is_linear = is_linear;
@@ -1550,8 +1558,21 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
   FeProblem fep(wf, spaces, is_linear);
   int ndof = get_num_dofs(spaces);
 
+  Solver * solver;
+
   // Initialize matrix solver.
-  UMFPackLinearSolver* solver = new UMFPackLinearSolver(&fep);
+  if(matrix_solver == SOLVER_UMFPACK)
+    solver = new UMFPackLinearSolver(&fep);
+  else if(matrix_solver == SOLVER_PETSC)
+    solver = new PetscLinearSolver(&fep);
+  else if(matrix_solver == SOLVER_MUMPS)
+    solver = new MumpsSolver(&fep);
+  else if(matrix_solver == SOLVER_PARDISO)
+    solver = new PardisoLinearSolver(&fep);
+  else if(matrix_solver == SOLVER_AMESOS)
+    solver = new AmesosSolver("Amesos_Klu", &fep);
+  else if(matrix_solver == SOLVER_NOX)
+    solver = new NoxSolver(&fep);
 
   // Solve the matrix problem.
   if (!solver->solve()) error ("Matrix solver failed.\n");

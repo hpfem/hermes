@@ -31,7 +31,7 @@
 /// Encapsulation of Amesos linear solver
 ///
 /// @ingroup solvers
-class AmesosSolver : public LinearSolver {
+class H2D_API AmesosSolver : public LinearSolver {
 public:
 	AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs);
 	AmesosSolver(const char *solver_type, FeProblem *lp);

@@ -104,7 +104,7 @@ protected:
 /// Encapsulation of MUMPS linear solver
 ///
 /// @ingroup solvers
-class MumpsSolver : public LinearSolver {
+class H2D_API MumpsSolver : public LinearSolver {
 public:
 	MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
 	MumpsSolver(FeProblem *lp);

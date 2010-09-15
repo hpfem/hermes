@@ -94,7 +94,10 @@ enum MatrixSolverType
 {
    SOLVER_UMFPACK, 
    SOLVER_PETSC, 
-   SOLVER_MUMPS
+   SOLVER_MUMPS,
+   SOLVER_PARDISO,
+   SOLVER_NOX,
+   SOLVER_AMESOS
 };
 
 // STL stuff

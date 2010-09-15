@@ -82,4 +82,12 @@ protected:
 	                      // NonlinearProblem(DiscreteProblem *) ctor
 };
 
+class IterSolver : public Solver
+{
+public:
+  IterSolver() { sln = NULL; }
+  virtual ~IterSolver() { delete [] sln; }
+  int get_error() { return error; }
+};
+
 #endif
