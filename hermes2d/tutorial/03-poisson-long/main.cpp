@@ -59,11 +59,11 @@ int main(int argc, char* argv[])
   // Extract solution vector.
   scalar *coeffs = solver->get_solution();
 
-  // Destroy matrix solver.
-  delete solver;
-
   // Convert coefficient vector into a Solution.
   Solution* sln = new Solution(&space, coeffs);
+
+  // Destroy matrix solver.
+  delete solver;
 
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));

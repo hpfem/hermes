@@ -62,7 +62,6 @@ int main(int argc, char* argv[])
 
   // Solve the linear problem.
   Solution sln;
-  // The NULL pointer means that we do not want the coefficient vector.
   solve_linear(&space, &wf, matrix_solver, &sln);
 
   // Visualize the solution.
