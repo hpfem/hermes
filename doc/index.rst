@@ -10,8 +10,10 @@ Hermes Documentation
 .. toctree::
     :maxdepth: 2
 
-    src/intro-1
-    src/intro-2
+    src/introduction
+    src/installation
+    src/matrix_solvers
+    src/first_patch
 
     src/hermes2d/tutorial-1
     src/hermes2d/tutorial-2
