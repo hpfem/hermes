@@ -1716,7 +1716,7 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_s
 
     // Project the reference solution on the coarse mesh.
     if (verbose) info("Projecting reference solution on coarse mesh.");
-    scalar* coeff_vec = new scalar[ndof];
+    scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
     project_global(spaces, proj_norms, ref_slns_mf, coeff_vec); 
 
     // Set projected Solutions on the coarse mesh.
