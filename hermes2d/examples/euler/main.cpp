@@ -1,6 +1,3 @@
-#include "forms.cpp"
-#include "filters.cpp"
-
 // Development version of Euler equations example. For testing the equations are solved on a simple rectangular mesh.
 // Boundary conditions are specified for Inlet / Outlet / Solid wall parts of the boundary in a common way.
 // Explicit Euler's method used is used for the time discretization.
@@ -10,7 +7,7 @@
 
 const int P_INIT = 0;
 
-double TAU = 1E-4;
+double TAU = 1E-6;
 
 double R = 300; // Gas constant
 
@@ -18,6 +15,8 @@ double c_v = 700; // The specific heat capacity at constant volume
 
 double t = 0;
 
+#include "forms.cpp"
+#include "filters.cpp"
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;
 
 BCType bc_types(int marker)
