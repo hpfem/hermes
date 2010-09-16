@@ -75,16 +75,15 @@ const double E_FIELD = VOLTAGE / height;    // Boundary condtion for positive vo
 
 
 /* Simulation parameters */
-const int NSTEP = 50;                 // Number of time steps.
-const double TAU = 0.1;               // Size of the time step.
-const int P_INIT = 3;       	      // Initial polynomial degree of all mesh elements.
+const double TAU = 0.05;              // Size of the time step
+const int T_FINAL = 2;              // Final time
+const int P_INIT = 2;       	        // Initial polynomial degree of all elements.
 const int REF_INIT = 1;     	      // Number of initial refinements.
 const bool MULTIMESH = false;	      // Multimesh?
-const int TIME_DISCR = 2;             // 1 for implicit Euler, 2 for Crank-Nicolson.
+const int TIME_DISCR = 1;             // 1 for implicit Euler, 2 for Crank-Nicolson.
 const int VOLT_BOUNDARY = 1;          // 1 for Dirichlet, 2 for Neumann.
 
-/* Nonadaptive solution parameters */
-const double NEWTON_TOL = 1e-6;       // Stopping criterion for nonadaptive solution.
+
 
 /* Adaptive solution parameters */
 const bool SOLVE_ON_COARSE_MESH = false;  // true... Newton is done on coarse mesh in every adaptivity step.
@@ -94,7 +93,7 @@ const double NEWTON_TOL_COARSE = 0.01;// Stopping criterion for Newton on coarse
 const double NEWTON_TOL_FINE = 0.05;  // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 100;      // Maximum allowed number of Newton iterations.
 
-const int UNREF_FREQ = 5;             // every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 1;             // every UNREF_FREQth time step the mesh is unrefined.
 const double THRESHOLD = 0.3;         // This is a quantitative parameter of the adapt(...) function and
                                       // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;               // Adaptive strategy:
@@ -119,7 +118,7 @@ const int MESH_REGULARITY = -1;  // Maximum allowed level of hanging nodes:
 const double CONV_EXP = 1.0;     // Default value is 1.0. This parameter influences the selection of
                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const int NDOF_STOP = 5000;		        // To prevent adaptivity from going on forever.
-const double ERR_STOP = 0.1;          // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.5;          // Stopping criterion for adaptivity (rel. error tolerance between the
                                       // fine mesh and coarse mesh solution in percent).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
@@ -132,7 +131,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 
 // Poisson takes Dirichlet and Neumann boundaries
 BCType phi_bc_types(int marker) {
-  return (marker == SIDE_MARKER || (marker == TOP_MARKER && VOLT_BOUNDARY == 2)) 
+  return (marker == SIDE_MARKER) 
     ? BC_NATURAL : BC_ESSENTIAL;
 }
 
@@ -151,10 +150,6 @@ scalar phi_essential_bc_values(int ess_bdy_marker, double x, double y) {
   return ess_bdy_marker == TOP_MARKER ? VOLTAGE : 0.0;
 }
 
-template<class Real, class Scalar>
-Scalar linear_form_surf_top(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-  return -E_FIELD * int_v<Real, Scalar>(n, wt, v);
-}
 
 scalar voltage_ic(double x, double y, double &dx, double &dy) {
   // y^2 function for the domain.
@@ -168,18 +163,28 @@ scalar concentration_ic(double x, double y, double &dx, double &dy) {
 
 int main (int argc, char* argv[]) {
 
-  bool adaptive = true;
 
   // Load the mesh file.
   Mesh Cmesh, phimesh, basemesh;
   H2DReader mloader;
   mloader.load("small.mesh", &basemesh);
-  
-  // When nonadaptive solution, refine the mesh.
-  basemesh.refine_towards_boundary(TOP_MARKER,
-           adaptive ? REF_INIT : REF_INIT * 25);
-  basemesh.refine_towards_boundary(BOT_MARKER,
-           adaptive ? REF_INIT - 1 : (REF_INIT * 25) - 1);
+ #ifdef CIRCULAR
+  mloader.load("circular.mesh", &basemesh);
+  basemesh.refine_all_elements(0);
+  basemesh.refine_towards_boundary(TOP_MARKER, 2);
+  basemesh.refine_towards_boundary(BOT_MARKER, 4);
+  MeshView mview("Mesh", 0, 600, 400, 400);
+  mview.show(&basemesh);
+#else
+  mloader.load("small.mesh", &basemesh);
+  basemesh.refine_all_elements(1);
+  //basemesh.refine_all_elements(1); // when only p-adapt is used
+  //basemesh.refine_all_elements(1); // when only p-adapt is used
+  basemesh.refine_towards_boundary(TOP_MARKER, REF_INIT);
+  //basemesh.refine_towards_boundary(BOT_MARKER, (REF_INIT - 1) + 8); // when only p-adapt is used
+  basemesh.refine_towards_boundary(BOT_MARKER, REF_INIT - 1);
+#endif
+
   Cmesh.copy(&basemesh);
   phimesh.copy(&basemesh);
 
@@ -210,10 +215,6 @@ int main (int argc, char* argv[]) {
     wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), H2D_UNSYM);
   }
 
-  // Neumann voltage boundary.
-  if (VOLT_BOUNDARY == 2) {
-    wf.add_vector_form_surf(1, callback(linear_form_surf_top), TOP_MARKER);
-  }
 
   // Initialize adaptivity parameters.
   double to_be_processed = 0;
@@ -237,11 +238,12 @@ int main (int argc, char* argv[]) {
 
   // Time stepping loop.
   int ts = 1; //for saving screenshot
-  for (int n = 1; n <= NSTEP; n++)
+  int nstep = (int) (T_FINAL / TAU + 0.5);
+  for (int n = 1; n <= nstep; n++)
   {
     info("---- Time step %d:", ts);
     // Periodic global derefinements.
-    if (n % UNREF_FREQ == 0)
+    if (n > 1 && n % UNREF_FREQ == 0)
     {
       info("Global mesh derefinement.");
       Cmesh.copy(&basemesh);
@@ -251,16 +253,15 @@ int main (int argc, char* argv[]) {
       }
       C.set_uniform_order(P_INIT);
       phi.set_uniform_order(P_INIT);
-      int ndofs;
-      ndofs = C.assign_dofs();
-      phi.assign_dofs(ndofs);
     }
 
     // Update the coefficient vector and u_prev_time.
     project_global(Tuple<Space*>(&C, &phi), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
                    Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time),
                    Tuple<Solution*>(&C_prev_time, &phi_prev_time), coeff_vec);
-
+    Cview.show(&C_prev_time);
+	phiview.show(&phi_prev_time);
+	View::wait();
     // Adaptivity loop (in space):
     bool verbose = true;     // Print info during adaptivity.
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
@@ -272,6 +273,8 @@ int main (int argc, char* argv[]) {
                        NULL, NULL, 
                        Tuple<Selector *>(&selector, &selector), &apt,
                        NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
+	C_prev_time.set_coeff_vector(&C, coeff_vec);
+	phi_prev_time.set_coeff_vector(&phi, coeff_vec);
 
     Cview.show(&C_prev_time);  
     Cordview.show(&C);
