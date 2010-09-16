@@ -1591,7 +1591,7 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
 
 // Solve a typical linear problem using automatic adaptivity.
 // Feel free to adjust this function for more advanced applications.
-bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
+bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_start, 
                         MatrixSolverType matrix_solver, Tuple<int> proj_norms, 
                         Tuple<Solution *> slns, Tuple<Solution *> ref_slns, 
                         Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 
@@ -1705,6 +1705,13 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
     // Solve the reference problem.
     // The NULL pointer means that we do not want the resulting coefficient vector.
     solve_linear(ref_spaces, wf, matrix_solver, ref_slns, NULL);
+    
+    // FIXME: Conversion from Tuple<Solution *> to Tuple<MeshFunction *>
+    // temporary so that project_global() below compiles. 
+    ref_slns_mf.clear();
+    for (int i = 0; i < num_comps; i++) 
+      ref_slns_mf.push_back((MeshFunction*)ref_slns[i]);
+    //
 
     // Project the reference solution on the coarse mesh.
     if (verbose) info("Projecting reference solution on coarse mesh.");
@@ -1834,6 +1841,22 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
 
   if (verbose) info("Total running time: %g s", cpu_time.accumulated());
 	
+
+  for (int i = 0; i < num_comps; i++) 
+  {
+      switch (proj_norms[i]) 
+      {
+        case H2D_L2_NORM:    delete s_view[i];
+                             break;
+        case H2D_H1_NORM:    delete s_view[i];
+                             break;
+        case H2D_HCURL_NORM: delete v_view[i];
+                             break;
+        case H2D_HDIV_NORM:  delete v_view[i];
+                             break;
+      }
+  }
+
   return true;
 }
 

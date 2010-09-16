@@ -205,7 +205,7 @@ H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType 
 
 // Solve a typical linear problem using automatic adaptivity.
 // Feel free to adjust this function for more advanced applications.
-H2D_API bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
+H2D_API bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_start, 
                                 MatrixSolverType matrix_solver, Tuple<int> proj_norms, 
                                 Tuple<Solution *> slns, Tuple<Solution *> ref_slns, 
                                 Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 
