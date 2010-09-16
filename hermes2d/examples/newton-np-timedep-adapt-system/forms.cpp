@@ -33,7 +33,7 @@ Scalar Fphi_euler(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<
 template<class Real, class Scalar>
 Scalar J_euler_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
 	Scalar result = 0;
-	Func<Scalar>* phi_prev_newton = u_ext[0];
+	Func<Scalar>* phi_prev_newton = u_ext[1];
 	for (int i = 0; i < n; i++) {
 		result += wt[i] * (u->val[i] * v->val[i] / TAU +
 				D * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) +
@@ -96,14 +96,15 @@ Scalar Fc_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<R
 template<class Real, class Scalar>
 Scalar Fphi_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
   Func<Scalar>* dummy;
-  return Fphi_euler(n, wt, &dummy, v, e, ext);
+  //return Fphi_euler(n, wt, &dummy, v, e, ext);
+  return Fphi_euler(n, wt, u_ext, v, e, ext);
 }
 
 
 template<class Real, class Scalar>
 Scalar J_cranic_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
   Scalar result = 0;
-  Func<Scalar>* phi_prev_newton = u_ext[0];
+  Func<Scalar>* phi_prev_newton = u_ext[1];
   Func<Scalar>* phi_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * (u->val[i] * v->val[i] / TAU +
@@ -129,7 +130,8 @@ Scalar J_cranic_DFcDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 template<class Real, class Scalar>
 Scalar J_cranic_DFphiDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
   Func<Scalar>* dummy;
-  return J_euler_DFphiDYc(n, wt, &dummy, u, v, e, ext);
+  //return J_euler_DFphiDYc(n, wt, &dummy, u, v, e, ext);
+  return J_euler_DFphiDYc(n, wt, u_ext, u, v, e, ext);
 }
 
 template<class Real, class Scalar>
