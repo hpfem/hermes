@@ -141,8 +141,7 @@ int main(int argc, char **argv)
   wf.add_vector_form_surf(liform_surf, liform_surf_ord);
 
   // Initialize the coarse mesh problem. 
-  LinProblem lp(&wf);
-  lp.set_space(&sp);
+  LinearProblem lp(&wf, &sp);
 
   // Assemble stiffness matrix.
   printf("  - assembling... "); fflush(stdout);
