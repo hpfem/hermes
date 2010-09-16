@@ -5,8 +5,8 @@
 // This is a long version of example 08-system: function solve_linear() is not used.
 
 const int P_INIT = 4;                                      // Initial polynomial degree of all elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                           // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                           // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double E  = 200e9;                                   // Young modulus (steel).
@@ -55,21 +55,30 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), GAMMA_3_BDY);
 
   // Initialize the linear problem.
-  LinearProblem lp(&wf, Tuple<Space *>(&u_space, &v_space));
+  bool is_linear = true;
+  FeProblem fep(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
 
-  // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
-
-  // Assemble stiffness matrix and rhs.
-  lp.assemble(mat, rhs);
+  // Initialize matrix solver.
+  Solver* solver;
+  switch (matrix_solver) {
+    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos"); break;
+    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps"); break;
+    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox"); break;
+    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso"); break;
+    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc"); break;
+    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack"); break;
+    default: error("Unknown matrix solver requested.");
+  }
 
   // Solve the matrix problem.
-  if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+  if (!solver->solve()) error ("Matrix solver failed.\n");
+
+  // Extract solution vector.
+  scalar* coeffs = solver->get_solution();
 
   // Convert coefficient vector into a Solution.
-  Solution* u_sln = new Solution(&u_space, rhs);
-  Solution* v_sln = new Solution(&v_space, rhs);
+  Solution* u_sln = new Solution(&u_space, coeffs);
+  Solution* v_sln = new Solution(&v_space, coeffs);
 
   // Visualize the solution.
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));

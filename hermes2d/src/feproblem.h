@@ -17,9 +17,16 @@
 #ifndef __H2D_FEPROBLEM_H
 #define __H2D_FEPROBLEM_H
 
+#include "adapt.h"
 #include "matrix.h"
+#include "graph.h"
 #include "forms.h"
 #include "weakform.h"
+#include "views/view.h"
+#include "views/scalar_view.h"
+#include "views/vector_view.h"
+#include "views/order_view.h"
+#include "ref_selectors/selector.h"
 #include <map>
 
 typedef enum {H2D_L2_NORM, H2D_H1_NORM, H2D_HCURL_NORM, H2D_HDIV_NORM} ProjNormType;
@@ -191,8 +198,19 @@ H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec,
                           Matrix* mat, Solver* solver, Vector* rhs, double newton_tol, 
                           int newton_max_iter, bool verbose);
 
+// Solve a typical linear problem (without automatic adaptivity).
+// Feel free to adjust this function for more advanced applications.
 H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
                           Tuple<Solution *> solutions, scalar*coeff_vec = NULL);
+
+// Solve a typical linear problem using automatic adaptivity.
+// Feel free to adjust this function for more advanced applications.
+H2D_API bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
+                                MatrixSolverType matrix_solver, Tuple<int> proj_norms, 
+                                Tuple<Solution *> slns, Tuple<Solution *> ref_slns, 
+                                Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 
+                                Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
+				bool verbose, Tuple<ExactSolution *> exact_slns = Tuple<ExactSolution *>());
 
 #endif
 

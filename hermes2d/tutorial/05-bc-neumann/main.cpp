@@ -17,9 +17,8 @@
 
 int P_INIT = 4;                                   // Initial polynomial degree in all elements.
 int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
-
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 double CONST_F = -1.0;                            // Right-hand side.
@@ -75,8 +74,7 @@ int main(int argc, char* argv[])
   // (Note that the gradient at the re-entrant
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
-  MagFilter grad(Tuple<MeshFunction *>(&sln, &sln), 
-                 Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Tuple<MeshFunction *>(&sln, &sln), Tuple<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for the views to be closed.

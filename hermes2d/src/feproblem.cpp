@@ -1558,27 +1558,23 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
   FeProblem fep(wf, spaces, is_linear);
   int ndof = get_num_dofs(spaces);
 
-  Solver * solver;
-
   // Initialize matrix solver.
-  if(matrix_solver == SOLVER_UMFPACK)
-    solver = new UMFPackLinearSolver(&fep);
-  else if(matrix_solver == SOLVER_PETSC)
-    solver = new PetscLinearSolver(&fep);
-  else if(matrix_solver == SOLVER_MUMPS)
-    solver = new MumpsSolver(&fep);
-  else if(matrix_solver == SOLVER_PARDISO)
-    solver = new PardisoLinearSolver(&fep);
-  else if(matrix_solver == SOLVER_AMESOS)
-    solver = new AmesosSolver("Amesos_Klu", &fep);
-  else if(matrix_solver == SOLVER_NOX)
-    solver = new NoxSolver(&fep);
+  Solver* solver;
+  switch (matrix_solver) {
+    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos"); break;
+    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps"); break;
+    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox"); break;
+    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso"); break;
+    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc"); break;
+    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack"); break;
+    default: error("Unknown matrix solver requested.");
+  }
 
   // Solve the matrix problem.
   if (!solver->solve()) error ("Matrix solver failed.\n");
 
   // Extract solution vector.
-  scalar *coeffs = solver->get_solution();
+  scalar* coeffs = solver->get_solution();
 
   // Convert coefficient vector into a Solution.
   for (int i=0; i < solutions.size(); i++) {
@@ -1590,6 +1586,253 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
   return true;
 }
 
+// Solve a typical linear problem using automatic adaptivity.
+// Feel free to adjust this function for more advanced applications.
+bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
+                        MatrixSolverType matrix_solver, Tuple<int> proj_norms, 
+                        Tuple<Solution *> slns, Tuple<Solution *> ref_slns, 
+                        Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 
+                        Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
+                        bool verbose, Tuple<ExactSolution *> exact_slns) 
+{
+  // sanity checks
+  if (spaces.size() != selectors.size()) 
+    error("There must be a refinement selector for each solution component in solve_linear_adapt().");
+  if (spaces.size() != proj_norms.size()) 
+    error("There must be a projection norm for each solution component in solve_linear_adapt().");
+
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
+  // Adaptivity parameters.
+  double err_stop = apt->err_stop; 
+  int ndof_stop = apt->ndof_stop;
+  double threshold = apt->threshold;
+  int strategy = apt->strategy; 
+  int mesh_regularity = apt->mesh_regularity;
+  double to_be_processed = apt->to_be_processed;
+  int total_error_flag = apt->total_error_flag;
+  int elem_error_flag = apt->elem_error_flag;
+
+  // Number of physical fields in the problem.
+  int num_comps = spaces.size();
+
+  // Number of degreeso of freedom 
+  int ndof = get_num_dofs(spaces);
+
+  // Number of exact solutions given.
+  if (exact_slns.size() != 0 && exact_slns.size() != num_comps) 
+    error("Number of exact solutions does not match number of equations.");
+  bool is_exact_solution;
+  if (exact_slns.size() == num_comps) is_exact_solution = true;
+  else is_exact_solution = false;
+
+  // Initialize views.
+  ScalarView* s_view[H2D_MAX_COMPONENTS];
+  VectorView* v_view[H2D_MAX_COMPONENTS];
+  OrderView*  o_view[H2D_MAX_COMPONENTS];
+  for (int i = 0; i < num_comps; i++) {
+    char* title = (char*)malloc(100*sizeof(char));
+    if (sln_win_geom != Tuple<WinGeom *>() && sln_win_geom[i] != NULL) {
+      if (num_comps == 1) sprintf(title, "Solution", i); 
+      else sprintf(title, "Solution[%d]", i); 
+      switch (proj_norms[i]) {
+        case H2D_L2_NORM:    s_view[i] = new ScalarView(title, sln_win_geom[i]);
+                             s_view[i]->show_mesh(false);
+                             v_view[i] = NULL;
+                             break;
+        case H2D_H1_NORM:    s_view[i] = new ScalarView(title, sln_win_geom[i]);
+                             s_view[i]->show_mesh(false);
+                             v_view[i] = NULL;
+                             break;
+        case H2D_HCURL_NORM: s_view[i] = NULL;
+                             v_view[i] = new VectorView(title, sln_win_geom[i]);
+                             break;
+        case H2D_HDIV_NORM:  s_view[i] = NULL;
+		             v_view[i] = new VectorView(title, sln_win_geom[i]);
+                             break;
+      default: error("Unknown norm in solve_linear_adapt().");
+      }
+    }
+    else {
+      s_view[i] = NULL;
+      v_view[i] = NULL;
+    }
+    if (mesh_win_geom != Tuple<WinGeom *>() && mesh_win_geom[i] != NULL) {
+      if (num_comps == 1) sprintf(title, "Mesh", i); 
+      else sprintf(title, "Mesh[%d]", i); 
+      o_view[i] = new OrderView(title, mesh_win_geom[i]);
+    }
+    else o_view[i] = NULL;
+  }
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
+
+  // FIXME: Conversion from Tuple<Solution *> to Tuple<MeshFunction *>
+  // temporary so that project_global() below compiles. 
+  Tuple<MeshFunction *> ref_slns_mf;
+  for (int i = 0; i < num_comps; i++) {
+    ref_slns_mf.push_back((MeshFunction*)ref_slns[i]);
+  }
+
+  int as = 1; bool done = false;
+  do
+  {
+    if (verbose) {
+      info("---- Adaptivity step %d:", as);
+      info("Solving on reference mesh.");
+    }
+
+    // Construct globally refined reference mesh(es)
+    // and setup reference space(s).
+    Tuple<Space *> ref_spaces;
+    Tuple<Mesh *> ref_meshes;
+    for (int i = 0; i < num_comps; i++) {
+      ref_meshes.push_back(new Mesh());
+      Mesh *ref_mesh = ref_meshes.back();
+      ref_mesh->copy(spaces[i]->get_mesh());
+      ref_mesh->refine_all_elements();
+      ref_spaces.push_back(spaces[i]->dup(ref_mesh));
+      int order_increase = 1;
+      ref_spaces[i]->copy_orders(spaces[i], order_increase);
+    }
+
+    // Solve the reference problem.
+    // The NULL pointer means that we do not want the resulting coefficient vector.
+    solve_linear(ref_spaces, wf, matrix_solver, ref_slns, NULL);
+
+    // Project the reference solution on the coarse mesh.
+    if (verbose) info("Projecting reference solution on coarse mesh.");
+    scalar* coeff_vec = new scalar[ndof];
+    project_global(spaces, proj_norms, ref_slns_mf, coeff_vec); 
+
+    // Set projected Solutions on the coarse mesh.
+    for (int i = 0; i < num_comps; i++)
+      slns[i]->set_coeff_vector(spaces[i], coeff_vec);
+    delete [] coeff_vec;
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // View the coarse mesh solution(s).
+    for (int i = 0; i < num_comps; i++) {
+      if (proj_norms[i] == H2D_H1_NORM || proj_norms[i] == H2D_L2_NORM) {
+        if (s_view[i] != NULL) s_view[i]->show(slns[i]);
+      }
+      if (proj_norms[i] == H2D_HCURL_NORM || proj_norms[i] == H2D_HDIV_NORM) {
+        if (v_view[i] != NULL) v_view[i]->show(slns[i]);
+      }
+      if (o_view[i] != NULL) o_view[i]->show(spaces[i]);
+    }
+
+    // Skip visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
+    // Calculate element errors.
+    if (verbose) info("Calculating error (est).");
+    Adapt hp(spaces, proj_norms);
+    // Pass special error forms if any.
+    for (int k = 0; k < apt->error_form_val.size(); k++) {
+      hp.set_error_form(apt->error_form_i[k], apt->error_form_j[k], 
+                        apt->error_form_val[k], apt->error_form_ord[k]);
+    }
+    hp.set_solutions(slns, ref_slns);
+    // Below, apt->total_error_flag = H2D_TOTAL_ERROR_REL or H2D_TOTAL_ERROR_ABS
+    // and apt->elem_error_flag = H2D_ELEMENT_ERROR_REL or H2D_ELEMENT_ERROR_ABS
+    hp.calc_elem_errors(total_error_flag | elem_error_flag);
+ 
+    // Calculate error estimate for each solution component. Note, these can 
+    // have different norms, such as L2, H1, Hcurl and Hdiv. 
+    double err_est_abs[H2D_MAX_COMPONENTS];
+    double norm_est[H2D_MAX_COMPONENTS];
+    double err_est_abs_total = 0;
+    double norm_est_total = 0;
+    double err_est_rel_total;
+    for (int i = 0; i < num_comps; i++) {
+      err_est_abs[i] = calc_abs_error(slns[i], ref_slns[i], proj_norms[i]);
+      norm_est[i] = calc_norm(ref_slns[i], proj_norms[i]);
+      err_est_abs_total += err_est_abs[i] * err_est_abs[i];
+      norm_est_total += norm_est[i] * norm_est[i];
+    }
+    err_est_abs_total = sqrt(err_est_abs_total);
+    norm_est_total = sqrt(norm_est_total);
+    err_est_rel_total = err_est_abs_total / norm_est_total * 100.;
+
+    // Calculate exact error for each solution component.   
+    double err_exact_abs[H2D_MAX_COMPONENTS];
+    double norm_exact[H2D_MAX_COMPONENTS];
+    double err_exact_abs_total = 0;
+    double norm_exact_total = 0;
+    double err_exact_rel_total;
+    if (is_exact_solution == true) {
+      for (int i = 0; i < num_comps; i++) {
+        err_exact_abs[i] = calc_abs_error(slns[i], exact_slns[i], proj_norms[i]);
+        norm_exact[i] = calc_norm(exact_slns[i], proj_norms[i]);
+        err_exact_abs_total += err_exact_abs[i] * err_exact_abs[i];
+        norm_exact_total += norm_exact[i] * norm_exact[i];
+      }
+      err_exact_abs_total = sqrt(err_exact_abs_total);
+      norm_exact_total = sqrt(norm_exact_total);
+      err_exact_rel_total = err_exact_abs_total / norm_exact_total * 100.;
+    }
+
+    // Report results.
+    if (verbose) {
+      if (num_comps == 1) {
+        info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%", 
+             get_num_dofs(spaces), get_num_dofs(ref_spaces), err_est_rel_total);
+        if (is_exact_solution == true) info("err_exact_rel_total: %g%%", err_exact_rel_total);
+      }
+      else {
+        for (int i = 0; i < num_comps; i++) {
+          info("ndof[%d]: %d, ref_ndof[%d]: %d, err_est_rel[%d]: %g%%", 
+               i, spaces[i]->get_num_dofs(), i, ref_spaces[i]->get_num_dofs(),
+               i, err_est_abs[i]/norm_est[i]*100);
+          if (is_exact_solution == true) info("err_exact_rel[%d]: %g%%", 
+                                              i, err_exact_abs[i]/norm_exact[i]*100);
+        }
+        info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%", 
+             get_num_dofs(spaces), get_num_dofs(ref_spaces), err_est_rel_total);
+      }
+    }
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(get_num_dofs(spaces), err_est_rel_total);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
+    graph_cpu_est.save("conv_cpu_est.dat");
+    if (is_exact_solution == true) {
+      graph_dof_exact.add_values(get_num_dofs(spaces), err_exact_rel_total);
+      graph_dof_exact.save("conv_dof_exact.dat");
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
+      graph_cpu_exact.save("conv_cpu_exact.dat");
+    }
+
+    // If err_est too large, adapt the mesh.
+    if (err_est_rel_total < err_stop) done = true;
+    else {
+      if (verbose) info("Adapting the coarse mesh.");
+      done = hp.adapt(selectors, threshold, strategy, mesh_regularity, to_be_processed);
+
+      if (get_num_dofs(spaces) >= ndof_stop) done = true;
+    }
+
+    // Free reference meshes and spaces.
+    for (int i = 0; i < num_comps; i++) {
+      ref_spaces[i]->free(); // This does not free the associated mesh, we must do it separately.
+      ref_meshes[i]->free();
+    }
+
+    as++;
+  }
+  while (done == false);
+
+  if (verbose) info("Total running time: %g s", cpu_time.accumulated());
+	
+  return true;
+}
 
 
 

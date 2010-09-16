@@ -12,6 +12,11 @@ Pardiso
 
 In preparation.
 
+PETSc
+-----
+
+In preparation.
+
 Trilinos
 --------
 

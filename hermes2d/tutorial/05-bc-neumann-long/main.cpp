@@ -5,9 +5,8 @@
 
 int P_INIT = 4;                                   // Initial polynomial degree in all elements.
 int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
-
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 double CONST_F = -1.0;                            // Right-hand side.
@@ -56,25 +55,22 @@ int main(int argc, char* argv[])
   FeProblem fep(&wf, &space, is_linear);
 
   // Initialize matrix solver.
-  Solver * solver;
-  if(matrix_solver == SOLVER_UMFPACK)
-    solver = new UMFPackLinearSolver(&fep);
-  else if(matrix_solver == SOLVER_PETSC)
-    solver = new PetscLinearSolver(&fep);
-  else if(matrix_solver == SOLVER_MUMPS)
-    solver = new MumpsSolver(&fep);
-  else if(matrix_solver == SOLVER_PARDISO)
-    solver = new PardisoLinearSolver(&fep);
-  else if(matrix_solver == SOLVER_AMESOS)
-    solver = new AmesosSolver("Amesos_Klu", &fep);
-  else if(matrix_solver == SOLVER_NOX)
-    solver = new NoxSolver(&fep);
+  Solver* solver;
+  switch (matrix_solver) {
+    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos"); break;
+    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps"); break;
+    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox"); break;
+    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso"); break;
+    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc"); break;
+    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack"); break;
+    default: error("Unknown matrix solver requested.");
+  }
 
   // Solve the matrix problem.
   if (!solver->solve()) error ("Matrix solver failed.\n");
 
   // Extract solution vector.
-  scalar *coeffs = solver->get_solution();
+  scalar* coeffs = solver->get_solution();
 
   // Convert coefficient vector into a Solution.
   Solution* sln = new Solution(&space, coeffs);

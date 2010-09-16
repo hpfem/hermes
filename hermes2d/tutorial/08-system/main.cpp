@@ -16,8 +16,8 @@
 // The following parameters can be changed:
 
 const int P_INIT = 4;                                      // Initial polynomial degree of all elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                           // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                           // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double E  = 200e9;                                   // Young modulus (steel).

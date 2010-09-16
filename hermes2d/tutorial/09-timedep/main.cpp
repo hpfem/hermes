@@ -26,16 +26,16 @@ const int P_INIT = 4;                             // Polynomial degree of all me
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
 const double TAU = 300.0;                         // Time step in seconds.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double T_INIT = 10;        // Temperature of the ground (also initial temperature).
-const double ALPHA = 10;         // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;       // Thermal conductivity of the material.
-const double HEATCAP = 1e6;      // Heat capacity.
-const double RHO = 3000;         // Material density.
-const double FINAL_TIME = 86400; // Length of time interval (24 hours) in seconds.
+const double T_INIT = 10;          // Temperature of the ground (also initial temperature).
+const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e5;         // Thermal conductivity of the material.
+const double HEATCAP = 1e6;        // Heat capacity.
+const double RHO = 3000;           // Material density.
+const double FINAL_TIME = 86400;   // Length of time interval (24 hours) in seconds.
 
 // Global time variable.
 double TIME = 0;
@@ -93,11 +93,20 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
   // Initialize the linear problem.
-  LinearProblem lp(&wf, &space);
+  bool is_linear = true;
+  FeProblem fep(&wf, &space, is_linear);
 
   // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;  
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+  Solver* solver;
+  switch (matrix_solver) {
+    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos"); break;
+    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps"); break;
+    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox"); break;
+    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso"); break;
+    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc"); break;
+    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack"); break;
+    default: error("Unknown matrix solver requested.");
+  }
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
@@ -109,20 +118,18 @@ int main(int argc, char* argv[])
 
   // Time stepping:
   int nsteps = (int)(FINAL_TIME/TAU + 0.5);
-  bool rhsonly = false;
   for(int ts = 1; ts <= nsteps; ts++)
   {
     info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
 
-    // Assemble stiffness matrix and rhs.
-    lp.assemble(mat, rhs, rhsonly);
-    rhsonly = true;
-
     // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    if (!solver->solve()) error ("Matrix solver failed.\n");
+
+    // Extract solution vector.
+    scalar* coeffs = solver->get_solution();
 
     // Update tsln.
-    tsln.set_coeff_vector(&space, rhs);
+    tsln.set_coeff_vector(&space, coeffs);
 
     // Update the time variable.
     TIME += TAU;
