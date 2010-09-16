@@ -372,7 +372,8 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, boo
             }
           }
           // insert the local stiffness matrix into the global one
-          mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+          if (rhsonly == false)
+            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
 
           // insert also the off-diagonal (anti-)symmetric block, if required
           if (tra)
