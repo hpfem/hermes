@@ -213,13 +213,16 @@ void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, boo
  
   // Convert the coefficient vector 'init_vec' into solutions Tuple 'u_ext'.
   Tuple<Solution*> u_ext;
-  if (this->is_linear == false) {
-    for (int i = 0; i < this->wf->neq; i++) {
+  for (int i = 0; i < this->wf->neq; i++) 
+  {
+    if (this->is_linear == false)
+    {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
       u_ext[i]->set_coeff_vector(this->spaces[i], init_vec);
     }
+    else
+      u_ext.push_back(NULL);
   }
-  else u_ext.push_back(NULL);
  
   int k, m, n, marker;
   AUTOLA_CL(AsmList, al, wf->neq);
