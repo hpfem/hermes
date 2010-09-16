@@ -1542,12 +1542,14 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf,
                       Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
 {
   int n = spaces.size();
+  //printf("n = %d\n", n);
 
   // sanity checks
   if (n <= 0 || n > 10) error("Wrong number of projected functions in project_global().");
   for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_global().", i);
   if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_global().");
-  if (target_slns.size() != n && target_slns.size() != 0) 
+  //printf("target_slns.size() = %d\n", target_slns.size());
+  if ( target_slns != Tuple<Solution*>() && target_slns.size() != n) 
     error("Mismatched numbers of projected functions and solutions in project_global().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
@@ -2137,7 +2139,7 @@ H2D_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *coe
   while (done == false);
 
   // Obtain the coefficient vector on the coarse mesh.
-  project_global(spaces, proj_norms, ref_slns_mf, NULL, coeff_vec, is_complex);
+  project_global(spaces, proj_norms, ref_slns_mf, Tuple<Solution*>(), coeff_vec, is_complex);
 
   // If the user wants, give him the coarse mesh solutions.
   if (target_slns != Tuple<Solution *>()) {

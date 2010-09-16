@@ -261,7 +261,7 @@ int main (int argc, char* argv[]) {
                    Tuple<Solution*>(&C_prev_time, &phi_prev_time), coeff_vec);
     Cview.show(&C_prev_time);
 	phiview.show(&phi_prev_time);
-	View::wait();
+	View::wait(H2DV_WAIT_KEYPRESS);
     // Adaptivity loop (in space):
     bool verbose = true;     // Print info during adaptivity.
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
