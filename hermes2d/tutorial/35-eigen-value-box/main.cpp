@@ -3,7 +3,7 @@
 #include <stdio.h>
 // This is a long version of example 03-poisson: function solve_linear() is not used.
 
-int P_INIT = 3;                                   // Uniform polynomial degree of mesh elements.
+int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
 
