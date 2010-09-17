@@ -13,7 +13,7 @@ Hermes Documentation
     src/introduction
     src/installation
     src/matrix_solvers
-    src/first_patch
+    src/first_pull_request
 
     src/hermes2d/tutorial-1
     src/hermes2d/tutorial-2

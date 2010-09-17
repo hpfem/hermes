@@ -5,8 +5,8 @@ Installation
 Linux Users
 -----------
 
-Compilation
-~~~~~~~~~~~
+Download and compilation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are using a Debian-based system, install the required libraries first:
 
@@ -17,11 +17,24 @@ If you are using a Debian-based system, install the required libraries first:
 (Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
 least 0.98.5.2 or higher.)
 
-Clone the Git repository::
-  
+There are multiple ways to obtain the source code. The simplest one 
+is to clone the Git repository either from the hpfem.org server::
+
     git clone http://git.hpfem.org/git/hermes.git
 
-Change dir to hermes1d/, hermes2d/ or hermes3d/ and::
+or from Github::
+  
+    git clone git://github.com/hpfem/hermes.git
+
+These two repositories are synchronized. For more advanced users we recommend to 
+create a free account at `Github <http://github.com>`_ (if you do not have one yet),
+fork the `Hermes repository <http://github.com/hpfem/hermes>`_, and then clone your 
+Github copy of Hermes to your local computer. This will establish links between
+your local copy and the master repository, and you'll become part of the Hermes 
+network at Github
+
+Once you have a local copy of the Hermes repository on your computer, change dir 
+to hermes/hermes1d/, hermes/hermes2d/ or hermes/hermes3d/ and type::
 
     cmake .
     make
@@ -103,8 +116,8 @@ Install Hermes
 Mac OS X Users
 --------------
 
-Compilation
-~~~~~~~~~~~
+Download and compilation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Step 1**: Make sure you have XCode installed. This should be on the installation 
 disks which came with your Mac. XCode contains the GNU compilers, make 
@@ -133,7 +146,8 @@ libraries and applications on your Mac) by doing the following:
   (d) If you don't already have cmake installed, do 
       'sudo port install cmake'.
 
-**Step 4**: Get the Hermes source code. Change to the directory where you want 
+**Step 4**: Get the Hermes source code as described at the beginning of the Linux section
+above. Change to the directory where you want 
 to download the Hermes source and clone the git repository by typing 
 'git clone http://git.hpfem.org/git/hermes.git'.
 
@@ -196,23 +210,14 @@ Then type::
 Windows Cygwin Users
 --------------------
 
-Compilation
-~~~~~~~~~~~
+Download and compilation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download and install the Linux emulator Cygwin from `here <http://www.cygwin.com/>`_ (the small icon in the top-right corner). While running setup.exe, you need to install:: 
 
     cmake, gcc4, gfortran, git, gitk, libX11-devel, libXext-devel, libXt-devel, libXt, libXext, make, m4, openssl-devel, perl, python, wget, xextproto.
 
-Then download, unpack, and build Hermes as in Linux::
-
-    git clone http://git.hpfem.org/git/hermes.git
-
-The change dir to hermes1d/, hermes2d/ or hermes3d/, and type::
-
-    cmake .
-    make
-
-For more details go to the Linux section above.
+Then download and build Hermes as described in the Linux section above.
 
 Windows MSVC Users
 ------------------
