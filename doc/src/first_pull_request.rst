@@ -196,6 +196,8 @@ branch are displayed above the text window and you can
 change them when you click on them. When you are ready,
 click on "Send pull request".
 
+For more details on pull requests visit `this page <http://help.github.com/pull-requests/>`_.
+
 Switching Branches
 ------------------
 
@@ -230,7 +232,10 @@ you will see
    :alt: Terminal screenshot
 
 Now you can proceed with "git commit" as described above. 
-After the commit, you can switch to a different branch.
+After the commit, you can switch to a different branch
+by typing::
+
+    git co branch-name
 
 Special Note on Sphinx Docs
 ---------------------------

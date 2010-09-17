@@ -69,7 +69,7 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   void create(SparseMatrix* mat, Vector* rhs = NULL);
-  void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext,
+  void assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext,
                 bool rhsonly = false);
 
   int get_num_dofs();
@@ -194,8 +194,8 @@ H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* targ
 
 /// Basic Newton's loop. Takes a coefficient vector, delivers a coefficient vector (in the 
 /// same variable "init_coeff_vector").
-H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec, 
-                          Matrix* mat, Solver* solver, Vector* rhs, double newton_tol, 
+H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
+                          MatrixSolverType matrix_solver, double newton_tol, 
                           int newton_max_iter, bool verbose);
 
 // Solve a typical linear problem (without automatic adaptivity).

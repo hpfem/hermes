@@ -51,8 +51,8 @@ const double ERR_STOP = 0.01;                     // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 double EXACT_SOL_P = 10;                          // The exact solution is a polynomial of degree 2*EXACT_SOL_P in the x-direction
@@ -100,8 +100,8 @@ int main(int argc, char* argv[])
                           MESH_REGULARITY);
 
   // Adaptivity loop.
-  Solution *sln = new Solution();
-  Solution *ref_sln = new Solution();
+  Solution* sln = new Solution();
+  Solution* ref_sln = new Solution();
   ExactSolution exact(&mesh, fndd);
   WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
   WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);

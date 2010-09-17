@@ -34,7 +34,7 @@ const int PROJ_TYPE = 1;                   // For the projection of the initial 
                                            // on the initial mesh: 1 = H1 projection, 0 = L2 projection.
 // Time-stepping:
 const double TAU = 0.1;                    // Time step.
-const double T_FINAL = TAU;//10.0;               // Time interval length.
+const double T_FINAL = TAU;                // Time interval length.
 
 // Adaptivity:
 const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
@@ -63,9 +63,9 @@ const double CONV_EXP = 1.0;               // Default value is 1.0. This paramet
                                            // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const int MAX_P = 6;                       // Maximum polynomial order allowed in hp-adaptivity
                                            // had to be limited due to complicated integrals.
-const double ERR_STOP = 0.001;              // Stopping criterion for hp-adaptivity
+const double ERR_STOP = 0.001;             // Stopping criterion for hp-adaptivity
                                            // (relative error between reference and coarse solution in percent).
-const int NDOF_STOP = 100000;               // Adaptivity process stops when the number of degrees of freedom grows
+const int NDOF_STOP = 100000;              // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
 const int ORDER_INCREASE = 1;              // The two following parameters are used in the constructor of the class RefSystem
 const int REFINEMENT = 1;                  //   Default values are 1
@@ -74,9 +74,9 @@ const int REFINEMENT = 1;                  //   Default values are 1
 // Newton's method:
 const double NEWTON_TOL_COARSE = 1.0e-6;   // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 5.0e-6;     // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 100;            // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS
-                                                  // and more are coming.
+const int NEWTON_MAX_ITER = 100;           // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double CT = 1.0;

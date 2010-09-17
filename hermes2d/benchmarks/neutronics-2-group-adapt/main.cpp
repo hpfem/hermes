@@ -61,7 +61,7 @@ const double CONV_EXP = 1.0;                // Default value is 1.0. This parame
                                             // candidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 0.1;                // Stopping criterion for adaptivity (rel. error tolerance between the
                                             // reference and coarse mesh solution in percent).
-const int NDOF_STOP = 1000000;                // Adaptivity process stops when the number of degrees of freedom grows over
+const int NDOF_STOP = 100000;               // Adaptivity process stops when the number of degrees of freedom grows over
                                             // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int MAX_ADAPT_NUM = 60;               // Adaptivity process stops when the number of adaptation steps grows over
                                             // this limit.
@@ -69,6 +69,8 @@ const int ADAPTIVITY_NORM = 2;              // Specifies the norm used by H1Adap
                                             // ADAPTIVITY_NORM = 0 ... H1 norm.
                                             // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
                                             // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Variables used for reporting of results
 TimePeriod cpu_time;            // Time measurements.
@@ -352,10 +354,6 @@ int main(int argc, char* argv[])
   // Start time measurement.
   cpu_time.tick();
 
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(SOLVER_UMFPACK, get_num_dofs(Tuple<Space *>(&space1, &space2)), mat, rhs, solver);
-
   double cta;
   for (int iadapt = 0; iadapt < MAX_ADAPT_NUM; iadapt++) {
 
@@ -397,9 +395,12 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     info("---- Projecting reference solution on new coarse mesh; NDOF=%d ----", ndof);
     cpu_time.tick(HERMES_SKIP);
+    scalar* coeff_vec = new scalar[get_num_dofs(Tuple<Space *>(&space1, &space2))];
     project_global(Tuple<Space *>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                   Tuple<MeshFunction*>(&ref_sln1, &ref_sln2),
-                   Tuple<Solution*>(&sln1, &sln2));
+                   Tuple<MeshFunction*>(&ref_sln1, &ref_sln2), coeff_vec);
+    sln1.set_coeff_vector(&space1, coeff_vec);
+    sln2.set_coeff_vector(&space2, coeff_vec);
+    delete [] coeff_vec;
 
     // Calculate element errors and total error estimate.
 

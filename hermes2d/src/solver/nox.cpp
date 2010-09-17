@@ -112,7 +112,9 @@ bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, Fil
 
   rhs.zero();
   // The first NULL is for the global matrix.
-  fep->assemble(&xx, NULL, &rhs);
+  scalar* coeff_vec;
+  xx.extract(coeff_vec);
+  fep->assemble(coeff_vec, NULL, &rhs);
 
   return true;
 }
@@ -127,7 +129,9 @@ bool NoxProblemInterface::computeJacobian(const Epetra_Vector &x, Epetra_Operato
 
   jacobian.zero();
   // The first NULL is for the right-hand side.
-  fep->assemble(&xx, &jacobian, NULL);
+  scalar* coeff_vec;
+  xx.extract(coeff_vec);
+  fep->assemble(coeff_vec, &jacobian, NULL);
   jacobian.finish();
 
   return true;
@@ -143,7 +147,9 @@ bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_O
 
   jacobian.zero();
   // The first NULL is for the right-hand side.
-  fep->assemble(&xx, &jacobian, NULL);
+  scalar* coeff_vec;
+  xx.extract(coeff_vec);
+  fep->assemble(coeff_vec, &jacobian, NULL);
   jacobian.finish();
 
   precond->create(&jacobian);

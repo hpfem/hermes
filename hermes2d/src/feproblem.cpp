@@ -202,23 +202,23 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs)
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, bool rhsonly)
+void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bool rhsonly)
 {
   // Sanity checks.
-  if (init_vec == NULL && this->is_linear == false) error("init_vec is NULL in FeProblem::assemble().");
+  if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
   if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
   for (int i=0; i<this->wf->neq; i++) {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
-  // Convert the coefficient vector 'init_vec' into solutions Tuple 'u_ext'.
+  // Convert the coefficient vector 'coeff_vec' into solutions Tuple 'u_ext'.
   Tuple<Solution*> u_ext;
   for (int i = 0; i < this->wf->neq; i++) 
   {
     if (this->is_linear == false)
     {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      u_ext[i]->set_coeff_vector(this->spaces[i], init_vec);
+      u_ext[i]->set_coeff_vector(this->spaces[i], coeff_vec);
     }
     else
       u_ext.push_back(NULL);
@@ -1366,15 +1366,14 @@ double get_l2_norm(Vector* vec)
 
 // Basic Newton's method, takes a coefficient vector and returns a coefficient vector. 
 // Assumes that the matrix and vector weak forms are Jacobian and residual forms. 
-bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec, 
-                  Matrix* mat, Solver* solver, Vector* rhs, double newton_tol, 
+bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
+                  MatrixSolverType matrix_solver, double newton_tol, 
                   int newton_max_iter, bool verbose) 
 {
   int ndof = get_num_dofs(spaces);
   
   // sanity checks
-  if (init_vec == NULL) error("init_vec == NULL in solve_newton().");
-  if (rhs == NULL) error("rhs == NULL in solve_newton().");
+  if (coeff_vec == NULL) error("coeff_vec == NULL in solve_newton().");
   int n = spaces.size();
   if (spaces.size() != wf->neq) 
     error("The number of spaces in newton_solve() must match the number of equation in the PDE system.");
@@ -1387,20 +1386,61 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec,
   FeProblem fep(wf, spaces, is_linear);
   //info("ndof = %d", ndof);
 
+  // Initialize matrix solver.
+  Matrix* mat; Vector* vec; Solver* solver;
+  switch (matrix_solver) {
+    case SOLVER_AMESOS: 
+      mat = new EpetraMatrix();
+      vec = new EpetraVector();
+      solver = new AmesosSolver("Amesos_Klu", (EpetraMatrix*)mat, (EpetraVector*)vec); 
+      info("Using Amesos"); 
+      break;
+    case SOLVER_MUMPS: 
+      mat = new MumpsMatrix();
+      vec = new MumpsVector();
+      solver = new MumpsSolver((MumpsMatrix*)mat, (MumpsVector*)vec); 
+      info("Using Mumps"); 
+      break;
+    case SOLVER_NOX: 
+      //mat = new EpetraMatrix();
+      //vec = new EpetraVector();
+      //solver = new NoxSolver((EpetraMatrix*)mat, (EpetraVector*)vec); 
+      //info("Using Nox"); 
+      break;
+    case SOLVER_PARDISO: 
+      //mat = new PardisoMatrix();
+      //vec = new PardisoVector();
+      //solver = new PardisoLinearSolver((PardisoMatrix*)mat, (PardisoVector*)vec); 
+      //info("Using Pardiso"); 
+      break;
+    case SOLVER_PETSC: 
+      mat = new PetscMatrix();
+      vec = new PetscVector();
+      solver = new PetscLinearSolver((PetscMatrix*)mat, (PetscVector*)vec); 
+      info("Using PETSc"); 
+      break;
+    case SOLVER_UMFPACK: 
+      mat = new UMFPackMatrix();
+      vec = new UMFPackVector();
+      solver = new UMFPackLinearSolver((UMFPackMatrix*)mat, (UMFPackVector*)vec); 
+      info("Using UMFPack"); 
+      break;
+    default: error("Unknown matrix solver requested.");
+  }
 
   int it = 1;
   while (1)
   {
     // Assemble the Jacobian matrix and residual vector.
-    fep.assemble(init_vec, mat, rhs);
+    fep.assemble(coeff_vec, mat, vec, false);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    for (int i = 0; i < ndof; i++) vec->set(i, -vec->get(i));
     
     // Calculate the l2-norm of residual vector.
     double res_l2_norm; 
-    res_l2_norm = get_l2_norm(rhs);
+    res_l2_norm = get_l2_norm(vec);
     if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", 
                         it, get_num_dofs(spaces), res_l2_norm);
 
@@ -1411,12 +1451,18 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* init_vec,
     if (!solver->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) init_vec->add(i, rhs->get(i));  
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += vec->get(i);
     
+    if (it >= newton_max_iter) {
+      return false;
+    }
+
     it++;
   };
 
-  return (it <= newton_max_iter);
+  // FIXME: matrices and vectors should be deallocated here.
+
+  return true;
 }
 
 int get_num_dofs(Tuple<Space *> spaces)
@@ -1565,12 +1611,12 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
   // Initialize matrix solver.
   Solver* solver;
   switch (matrix_solver) {
-    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos"); break;
-    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps"); break;
-    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox"); break;
-    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso"); break;
-    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc"); break;
-    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack"); break;
+    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos."); break;
+    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps."); break;
+    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox."); break;
+    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso."); break;
+    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc."); break;
+    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack."); break;
     default: error("Unknown matrix solver requested.");
   }
 

@@ -59,8 +59,8 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 50000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double e_0  = 8.8541878176 * 1e-12;
@@ -129,9 +129,8 @@ int main(int argc, char* argv[])
   WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
   WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
   bool verbose = true;     // Print info during adaptivity.
-  bool is_complex = true;
   solve_linear_adapt(&space, &wf, NULL,  matrix_solver, H2D_HCURL_NORM, sln, ref_sln,  
-                     sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln, is_complex);
+                     sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln);
 
   // Wait for all views to be closed.
   View::wait();
