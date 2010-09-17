@@ -358,7 +358,12 @@ bool UMFPackLinearSolver::solve() {
 	assert(m != NULL);
 	assert(rhs != NULL);
 
-	if (lp != NULL) lp->assemble(NULL, m, rhs);
+	if (lp != NULL) 
+  {
+    this->m->zero();
+    this->rhs->zero();
+    lp->assemble(NULL, m, rhs);
+  }
 	assert(m->size == rhs->size);
 
 	Timer tmr;
