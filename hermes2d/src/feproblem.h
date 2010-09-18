@@ -68,8 +68,8 @@ public:
   Space* get_space(int n) {  return this->spaces[n];  }
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
-  void create(SparseMatrix* mat, Vector* rhs = NULL);
-  void assemble(scalar* coeff_vec, SparseMatrix* mat_ext, Vector* rhs_ext,
+  void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
                 bool rhsonly = false);
 
   int get_num_dofs();

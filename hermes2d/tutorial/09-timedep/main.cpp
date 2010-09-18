@@ -80,10 +80,11 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = get_num_dofs(&space);
   info("ndof = %d.", ndof);
-
-  // Set initial condition.
+ 
+  // Initialize Solution and solution vector and set the initial condition.
   Solution tsln;
   tsln.set_const(&mesh, T_INIT);
+  scalar * solution_vector;
 
   // Initialize weak formulation.
   WeakForm wf;
@@ -92,21 +93,14 @@ int main(int argc, char* argv[])
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, H2D_ANY, &tsln);
   wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
-  // Initialize the linear problem.
+  // Initialize the FEM problem being solved.
   bool is_linear = true;
-  FeProblem fep(&wf, &space, is_linear);
+  FeProblem fep(&wf, Tuple<Space*>(&space), is_linear);
 
-  // Initialize matrix solver.
-  Solver* solver;
-  switch (matrix_solver) {
-    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos"); break;
-    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps"); break;
-    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox"); break;
-    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso"); break;
-    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc"); break;
-    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack"); break;
-    default: error("Unknown matrix solver requested.");
-  }
+  // Set up the solver, matrix and rhs according to the solver selection.
+  SparseMatrix * matrix = select_matrix_type(matrix_solver);
+  Vector * rhs = select_vector_type(matrix_solver);
+  Solver * solver = select_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
@@ -122,14 +116,20 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
 
-    // Solve the matrix problem.
-    if (!solver->solve()) error ("Matrix solver failed.\n");
+    // Assemble the linear system.
+    // NULL means that we do not have any previous time-level solution vector to pass.
+    info("Assembling the linear system.");
+    fep.assemble(NULL, matrix, rhs, ts == 1 ? false : true);
 
-    // Extract solution vector.
-    scalar* coeffs = solver->get_solution();
-
-    // Update tsln.
-    tsln.set_coeff_vector(&space, coeffs);
+    // Solve the linear system and if successful, obtain the solution vector and solution(s).
+    info("Solving the linear system.");
+    if(solver->solve())
+    {
+      solution_vector = solver->get_solution();
+      Solution::get_solutions_from_coeffs(solution_vector, Tuple<Space*>(&space), Tuple<Solution*>(&tsln));
+    }
+    else
+      error ("Matrix solver failed.\n");
 
     // Update the time variable.
     TIME += TAU;
@@ -142,5 +142,9 @@ int main(int argc, char* argv[])
 
   // Wait for the view to be closed.
   View::wait();
+  delete solution_vector;
+  delete solver;
+  delete matrix;
+  delete rhs;
   return 0;
 }

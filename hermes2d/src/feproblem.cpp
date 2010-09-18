@@ -129,14 +129,16 @@ bool FeProblem::is_up_to_date()
 
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::create(SparseMatrix* mat, Vector* rhs)
+void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
   assert(mat != NULL);
 
   if (is_up_to_date())
   {
     verbose("Reusing matrix sparse structure.");
-    mat->zero();
+    if (!rhsonly)
+      mat->zero();
+    rhs->zero();
     return;
   }
 
@@ -211,7 +213,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
-  this->create(mat, rhs);
+  this->create(mat, rhs, rhsonly);
 
   // Convert the coefficient vector 'coeff_vec' into solutions Tuple 'u_ext'.
   Tuple<Solution*> u_ext;
@@ -327,49 +329,45 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
 
             if (!sym) // unsymmetric block
             {
-              for (int j = 0; j < an->cnt; j++) {
+              for (int j = 0; j < an->cnt; j++) 
+              {
                 fu->set_active_shape(an->idx[j]);
-                if (an->dof[j] < 0) {
+                if (an->dof[j] < 0) 
+                {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-                  if (rhs != NULL && this->is_linear) {
+                  if (rhs != NULL && this->is_linear) 
+                  {
                     scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
-                    //dir_ext[am->dof[i]] += val;
                     rhs->add(am->dof[i], -val);
                   } 
                 }
-                else if (rhsonly == false) {
+                else if (rhsonly == false) 
+                {
                   scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 }
               }
-	    /* OLD CODE
-              for (int j = 0; j < an->cnt; j++) {
-                fu->set_active_shape(an->idx[j]);
-                bi = eval_form(mfv, u_ext, fu, fv, refmap+n, refmap+m) * an->coef[j] * am->coef[i];
-                if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = bi;
-              }
-	    */
             }
-            else {// symmetric block
-              for (int j = 0; j < an->cnt; j++) {
+            else // symmetric block
+            {
+              for (int j = 0; j < an->cnt; j++) 
+              {
                 if (j < i && an->dof[j] >= 0) continue;
                 fu->set_active_shape(an->idx[j]);
-                if (an->dof[j] < 0) {
+                if (an->dof[j] < 0) 
+                {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-                  if (rhs != NULL && this->is_linear) {
+                  if (rhs != NULL && this->is_linear) 
+                  {
                     scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
-                    //dir_ext[am->dof[i]] += val;
                     rhs->add(am->dof[i], -val);
                   }
                 } 
-                else if (rhsonly == false) {
+                else if (rhsonly == false) 
+                {
                   scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
                 }
-	      /* OLD CODE
-                bi = eval_form(mfv, u_ext, fu, fv, refmap+n, refmap+m) * an->coef[j] * am->coef[i];
-                if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = bi;
-	      */
               }
             }
           }
@@ -382,20 +380,21 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
           {
             if (mfv->sym < 0) chsgn(local_stiffness_matrix, am->cnt, an->cnt);
             transpose(local_stiffness_matrix, am->cnt, an->cnt);
-            if (rhsonly == false) {
+            
+            if (rhsonly == false) 
               mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
-            }
-  	    /* OLD CODE
-            mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
-	    */
-
+  	       
             // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-            if (rhs != NULL && this->is_linear) {
-              for (int j = 0; j < am->cnt; j++) {
-                if (am->dof[j] < 0) {
-                  for (int i = 0; i < an->cnt; i++) {
-                    if (an->dof[i] >= 0) {
-                      //dir_ext[an->dof[i]] += local_stiffness_matrix[i][j];
+            if (rhs != NULL && this->is_linear) 
+            {
+              for (int j = 0; j < am->cnt; j++) 
+              {
+                if (am->dof[j] < 0) 
+                {
+                  for (int i = 0; i < an->cnt; i++) 
+                  {
+                    if (an->dof[i] >= 0) 
+                    {
                       rhs->add(an->dof[i], -local_stiffness_matrix[i][j]);
                     }
                   }
@@ -433,7 +432,8 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
         marker = ep[edge].marker;
 
         // obtain the list of shape functions which are nonzero on this edge
-        for (unsigned int i = 0; i < s->idx.size(); i++) {
+        for (unsigned int i = 0; i < s->idx.size(); i++) 
+        {
           if (e[i] == NULL) continue;
           int j = s->idx[i];
           if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
@@ -466,30 +466,21 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-                  if (rhs != NULL && this->is_linear) {
-                    scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
-                                 * an->coef[j] * am->coef[i];
-                    //dir_ext[am->dof[i]] += val;
+                  if (rhs != NULL && this->is_linear) 
+                  {
+                    scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   }
                 }
-                else if (rhsonly == false) {
-                  scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
-                               * an->coef[j] * am->coef[i];
+                else if (rhsonly == false) 
+                {
+                  scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 } 
               }
             }
-            if (rhsonly == false) {
+            if (rhsonly == false) 
               mat->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
-            }
-	    /* OLD CODE
-                bi = eval_form(mfs, u_ext, fu, fv, refmap+n, refmap+m, ep+edge) * an->coef[j] * am->coef[i];
-                if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = bi;
-              }
-            }
-            mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
-            */
           }
         }
         // assemble surface linear forms /////////////////////////////////////
@@ -1596,14 +1587,17 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
   bool is_linear = true;
   FeProblem* fep = new FeProblem(wf, spaces, is_linear);
 
-  Matrix * matrix = select_matrix_type(SOLVER_UMFPACK);
+  SparseMatrix * matrix = select_matrix_type(SOLVER_UMFPACK);
   Vector * rhs = select_vector_type(SOLVER_UMFPACK);
   Solver * solver = select_linear_solver(SOLVER_UMFPACK, matrix, rhs);
+
+  fep->assemble(NULL, matrix, rhs, false);
 
   // Calculate the coefficient vector.
   bool solved = solver->solve();
   scalar* coeffs;
-  if (solved) coeffs = solver->get_solution();
+  if (solved) 
+    coeffs = solver->get_solution();
 
   if (target_vec != NULL) 
     for (int i=0; i<ndof; i++) target_vec[i] = coeffs[i];
