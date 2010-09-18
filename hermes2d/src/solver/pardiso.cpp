@@ -19,7 +19,6 @@
 
 //#include "../h3dconfig.h"
 #include "pardiso.h"
-#include "../feproblem.h"
 
 #include "../../common/trace.h"
 #include "../../common/error.h"
@@ -242,6 +241,11 @@ void PardisoVector::add(int idx, scalar y) {
 	if (idx >= 0) v[idx] += y;
 }
 
+void PardisoVector::extract(scalar *v) const
+{
+  return;
+}
+
 void PardisoVector::add(int n, int *idx, scalar *y) {
 	_F_
 	for (int i = 0; i < n; i++)
@@ -289,19 +293,6 @@ PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
 #endif
 }
 
-PardisoLinearSolver::PardisoLinearSolver(FeProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef WITH_PARDISO
-	m = new PardisoMatrix;
-	rhs = new PardisoVector;
-#else
-	warning("hermes2d was not built with Pardiso support.");
-	exit(128);
-#endif
-}
-
 PardisoLinearSolver::~PardisoLinearSolver() {
 	_F_
 #ifdef WITH_PARDISO
@@ -317,10 +308,6 @@ bool PardisoLinearSolver::solve() {
 #ifdef WITH_PARDISO
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL)
-		lp->assemble(m, rhs);
-	assert(m->size == rhs->size);
 
 	bool res = true;
 	int n = m->size;

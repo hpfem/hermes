@@ -22,12 +22,12 @@
 
 #include "../common.h"
 
-class FeProblem;
 
 /// @defgroup solvers Solvers
 ///
 /// TODO: description
 
+class FeProblem;
 
 /// Abstract class for defining solver interface
 ///
@@ -58,14 +58,10 @@ protected:
 ///
 ///
 /// @ingroup solvers
-class LinearSolver : public Solver {
+class LinearSolver : public Solver 
+{
 public:
-	LinearSolver() : Solver() { lp = NULL; }
-	LinearSolver(FeProblem *lp) : Solver() { this->lp = lp; }
-
-protected:
-	FeProblem *lp;        // linear problem being solved (not NULL in case of using
-	                      // LinearProblem(LinearProblem *) ctor
+	LinearSolver() : Solver() {}
 };
 
 /// Abstract class for defining interface for LinearSolvers

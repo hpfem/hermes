@@ -397,8 +397,8 @@ public:
 	/// @param[in] y   - values
 	virtual void add(int n, int *idx, scalar *y) = 0;
 
-        /// get vector size
-        int length() {return this->size;}
+  /// get vector size
+  int length() {return this->size;}
 
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
 

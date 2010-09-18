@@ -91,7 +91,6 @@ protected:
 class H2D_API PetscLinearSolver : public LinearSolver {
 public:
 	PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
-	PetscLinearSolver(FeProblem *lp);
 	virtual ~PetscLinearSolver();
 
 	virtual bool solve();

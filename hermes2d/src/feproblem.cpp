@@ -202,7 +202,7 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs)
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
-void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bool rhsonly)
+void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
   // Sanity checks.
   if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
@@ -211,6 +211,8 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
+  this->create(mat, rhs);
+
   // Convert the coefficient vector 'coeff_vec' into solutions Tuple 'u_ext'.
   Tuple<Solution*> u_ext;
   for (int i = 0; i < this->wf->neq; i++) 
@@ -252,7 +254,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
-  wf->get_stages(spaces, NULL, stages, mat_ext == NULL);
+  wf->get_stages(spaces, NULL, stages, mat == NULL);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -304,7 +306,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
 
       init_cache();
       //// assemble volume matrix forms //////////////////////////////////////
-      if (mat_ext != NULL)
+      if (mat != NULL)
       {
         for (unsigned ww = 0; ww < s->mfvol.size(); ww++)
         {
@@ -329,10 +331,10 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-                  if (rhs_ext != NULL && this->is_linear) {
+                  if (rhs != NULL && this->is_linear) {
                     scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
                     //dir_ext[am->dof[i]] += val;
-                    rhs_ext->add(am->dof[i], -val);
+                    rhs->add(am->dof[i], -val);
                   } 
                 }
                 else if (rhsonly == false) {
@@ -354,10 +356,10 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-                  if (rhs_ext != NULL && this->is_linear) {
+                  if (rhs != NULL && this->is_linear) {
                     scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
                     //dir_ext[am->dof[i]] += val;
-                    rhs_ext->add(am->dof[i], -val);
+                    rhs->add(am->dof[i], -val);
                   }
                 } 
                 else if (rhsonly == false) {
@@ -373,7 +375,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
           }
           // insert the local stiffness matrix into the global one
           if (rhsonly == false)
-            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+            mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
 
           // insert also the off-diagonal (anti-)symmetric block, if required
           if (tra)
@@ -381,20 +383,20 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
             if (mfv->sym < 0) chsgn(local_stiffness_matrix, am->cnt, an->cnt);
             transpose(local_stiffness_matrix, am->cnt, an->cnt);
             if (rhsonly == false) {
-              mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+              mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
             }
   	    /* OLD CODE
-            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+            mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
 	    */
 
             // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-            if (rhs_ext != NULL && this->is_linear) {
+            if (rhs != NULL && this->is_linear) {
               for (int j = 0; j < am->cnt; j++) {
                 if (am->dof[j] < 0) {
                   for (int i = 0; i < an->cnt; i++) {
                     if (an->dof[i] >= 0) {
                       //dir_ext[an->dof[i]] += local_stiffness_matrix[i][j];
-                      rhs_ext->add(an->dof[i], -local_stiffness_matrix[i][j]);
+                      rhs->add(an->dof[i], -local_stiffness_matrix[i][j]);
                     }
                   }
                 }
@@ -405,7 +407,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
       }
 
       //// assemble volume vector forms ////////////////////////////////////////
-      if (rhs_ext != NULL)
+      if (rhs != NULL)
       {
         for (unsigned int ww = 0; ww < s->vfvol.size(); ww++)
         {
@@ -419,7 +421,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
             scalar val = eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i];
-            rhs_ext->add(am->dof[i], val);
+            rhs->add(am->dof[i], val);
           }
         }
       }
@@ -439,7 +441,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
         }
 
         // assemble surface matrix forms ///////////////////////////////////
-        if (mat_ext != NULL)
+        if (mat != NULL)
         {
           for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
           {
@@ -464,11 +466,11 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-                  if (rhs_ext != NULL && this->is_linear) {
+                  if (rhs != NULL && this->is_linear) {
                     scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) 
                                  * an->coef[j] * am->coef[i];
                     //dir_ext[am->dof[i]] += val;
-                    rhs_ext->add(am->dof[i], -val);
+                    rhs->add(am->dof[i], -val);
                   }
                 }
                 else if (rhsonly == false) {
@@ -479,19 +481,19 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
               }
             }
             if (rhsonly == false) {
-              mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
+              mat->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
             }
 	    /* OLD CODE
                 bi = eval_form(mfs, u_ext, fu, fv, refmap+n, refmap+m, ep+edge) * an->coef[j] * am->coef[i];
                 if (an->dof[j] >= 0) local_stiffness_matrix[i][j] = bi;
               }
             }
-            mat_ext->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+            mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
             */
           }
         }
         // assemble surface linear forms /////////////////////////////////////
-        if (rhs_ext != NULL)
+        if (rhs != NULL)
         {
           for (unsigned ww = 0; ww < s->vfsurf.size(); ww++)
           {
@@ -509,7 +511,7 @@ void FeProblem::assemble(scalar* coeff_vec, Matrix* mat_ext, Vector* rhs_ext, bo
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
               scalar val = eval_form(vfs, u_ext, fv, refmap+m, ep+edge) * am->coef[i];
-              rhs_ext->add(am->dof[i], val);
+              rhs->add(am->dof[i], val);
             }
           }
         }
@@ -1289,7 +1291,112 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
                     // the weights.
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+Vector * select_vector_type(MatrixSolverType matrix_solver)
+{
+  switch (matrix_solver) 
+  {
+    case SOLVER_AMESOS:
+      {
+        return new EpetraVector;
+        break;
+      }
+    case SOLVER_MUMPS: 
+      {
+        return new MumpsVector;
+        break;
+      }
+    case SOLVER_PARDISO: 
+      {
+        return new PardisoVector;
+        break;
+      }
+    case SOLVER_PETSC: 
+      {
+        return new PetscVector;
+        break;
+      }
+    case SOLVER_UMFPACK: 
+      {
+        return new UMFPackVector;
+        break;
+      }
+    default: 
+      error("Unknown matrix solver requested.");
+  }
+}
 
+SparseMatrix * select_matrix_type(MatrixSolverType matrix_solver)
+{
+  switch (matrix_solver) 
+  {
+    case SOLVER_AMESOS:
+      {
+        return new EpetraMatrix;
+        break;
+      }
+    case SOLVER_MUMPS: 
+      {
+        return new MumpsMatrix;
+        break;
+      }
+    case SOLVER_PARDISO: 
+      {
+        return new PardisoMatrix;
+        break;
+      }
+    case SOLVER_PETSC: 
+      {
+        return new PetscMatrix;
+        break;
+      }
+    case SOLVER_UMFPACK: 
+      {
+        return new UMFPackMatrix;
+        break;
+      }
+    default: 
+      error("Unknown matrix solver requested.");
+  }
+}
+Solver * select_linear_solver(MatrixSolverType matrix_solver, Matrix * matrix, Vector * rhs)
+{
+  switch (matrix_solver) 
+  {
+    case SOLVER_AMESOS:
+      {
+        return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        info("Using Amesos"); 
+        break;
+      }
+    case SOLVER_MUMPS: 
+      {
+        return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
+        info("Using Mumps"); 
+        break;
+      }
+    case SOLVER_PARDISO: 
+      {
+        return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
+        info("Using Pardiso"); 
+        break;
+      }
+    case SOLVER_PETSC: 
+      {
+        return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
+        info("Using PETSc");
+        break;
+      }
+    case SOLVER_UMFPACK: 
+      {
+        return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
+        info("Using UMFPack"); 
+        break;
+      }
+    default: 
+      error("Unknown matrix_ solver requested.");
+  }
+}
 ////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename Real, typename Scalar>
@@ -1387,7 +1494,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
   //info("ndof = %d", ndof);
 
   // Initialize matrix solver.
-  Matrix* mat; Vector* vec; Solver* solver;
+  SparseMatrix* mat; Vector* vec; Solver* solver;
   switch (matrix_solver) {
     case SOLVER_AMESOS: 
       mat = new EpetraMatrix();
@@ -1400,12 +1507,6 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
       vec = new MumpsVector();
       solver = new MumpsSolver((MumpsMatrix*)mat, (MumpsVector*)vec); 
       info("Using Mumps"); 
-      break;
-    case SOLVER_NOX: 
-      //mat = new EpetraMatrix();
-      //vec = new EpetraVector();
-      //solver = new NoxSolver((EpetraMatrix*)mat, (EpetraVector*)vec); 
-      //info("Using Nox"); 
       break;
     case SOLVER_PARDISO: 
       //mat = new PardisoMatrix();
@@ -1495,9 +1596,9 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
   bool is_linear = true;
   FeProblem* fep = new FeProblem(wf, spaces, is_linear);
 
-  // Initialize the UMFpack solver.
-  // FIXME: More solvers need to be enabled here.
-  UMFPackLinearSolver* solver = new UMFPackLinearSolver(fep);
+  Matrix * matrix = select_matrix_type(SOLVER_UMFPACK);
+  Vector * rhs = select_vector_type(SOLVER_UMFPACK);
+  Solver * solver = select_linear_solver(SOLVER_UMFPACK, matrix, rhs);
 
   // Calculate the coefficient vector.
   bool solved = solver->solve();
@@ -1598,44 +1699,7 @@ void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* m
   /// TODO
 }
 
-// Solve a typical linear problem (without automatic adaptivity).
-// Feel free to adjust this function for more advanced applications.
-bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
-                  Tuple<Solution *> solutions, scalar* coeff_vec) 
-{
-  // Initialize the linear problem.
-  bool is_linear = true;
-  FeProblem fep(wf, spaces, is_linear);
-  int ndof = get_num_dofs(spaces);
-
-  // Initialize matrix solver.
-  Solver* solver;
-  switch (matrix_solver) {
-    case SOLVER_AMESOS: solver = new AmesosSolver("Amesos_Klu", &fep); info("Using Amesos."); break;
-    case SOLVER_MUMPS: solver = new MumpsSolver(&fep); info("Using Mumps."); break;
-    case SOLVER_NOX: solver = new NoxSolver(&fep); info("Using Nox."); break;
-    case SOLVER_PARDISO: solver = new PardisoLinearSolver(&fep); info("Using Pardiso."); break;
-    case SOLVER_PETSC: solver = new PetscLinearSolver(&fep); info("Using PETSc."); break;
-    case SOLVER_UMFPACK: solver = new UMFPackLinearSolver(&fep); info("Using UMFPack."); break;
-    default: error("Unknown matrix solver requested.");
-  }
-
-  // Solve the matrix problem.
-  if (!solver->solve()) error ("Matrix solver failed.\n");
-
-  // Extract solution vector.
-  scalar* coeffs = solver->get_solution();
-
-  // Convert coefficient vector into a Solution.
-  for (int i=0; i < solutions.size(); i++) {
-    solutions[i]->set_coeff_vector(spaces[i], coeffs);
-  }
-	
-  delete solver;
-
-  return true;
-}
-
+/*
 // Solve a typical linear problem using automatic adaptivity.
 // Feel free to adjust this function for more advanced applications.
 bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_start, 
@@ -1912,3 +1976,4 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_s
 
 
 
+*/

@@ -27,7 +27,6 @@ extern "C" {
 #endif
 
 #include "umfpack_solver.h"
-#include "../feproblem.h"
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/utils.h"
@@ -307,27 +306,9 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 #endif
 }
 
-UMFPackLinearSolver::UMFPackLinearSolver(FeProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef WITH_UMFPACK
-        this->m = new UMFPackMatrix();
-        this->rhs = new UMFPackVector();
-        lp->create(this->m, this->rhs);
-#else
-	error("hermes2d was not built with UMFPACK support.");
-#endif
-}
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
 	_F_
-#ifdef WITH_UMFPACK
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
-#endif
 }
 
 #ifdef WITH_UMFPACK
@@ -358,12 +339,6 @@ bool UMFPackLinearSolver::solve() {
 	assert(m != NULL);
 	assert(rhs != NULL);
 
-	if (lp != NULL) 
-  {
-    this->m->zero();
-    this->rhs->zero();
-    lp->assemble(NULL, m, rhs);
-  }
 	assert(m->size == rhs->size);
 
 	Timer tmr;

@@ -81,7 +81,6 @@ protected:
 class H2D_API UMFPackLinearSolver : public LinearSolver {
 public:
 	UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs);
-	UMFPackLinearSolver(FeProblem *lp);
 	virtual ~UMFPackLinearSolver();
 
 	virtual bool solve();

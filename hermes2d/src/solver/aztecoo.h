@@ -34,7 +34,6 @@
 class AztecOOSolver : public LinearSolver {
 public:
 	AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs);
-	AztecOOSolver(FeProblem *lp);
 	virtual ~AztecOOSolver();
 
 	virtual bool solve();

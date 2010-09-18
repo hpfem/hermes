@@ -46,21 +46,6 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 #endif
 }
 
-AmesosSolver::AmesosSolver(const char *solver_type, FeProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef HAVE_AMESOS
-	solver = factory.Create(solver_type, problem);
-	assert(solver != NULL);
-	m = new EpetraMatrix;
-	rhs = new EpetraVector;
-#else
-	warning("hermes2d was not built with AMESOS support.");
-	exit(128);
-#endif
-}
-
 AmesosSolver::~AmesosSolver()
 {
 	_F_
@@ -107,11 +92,7 @@ bool AmesosSolver::solve()
 #ifdef HAVE_AMESOS
 	assert(m != NULL);
 	assert(rhs != NULL);
-        
-	if (lp != NULL)
-	  lp->assemble(NULL, m, rhs);
-	assert(m->size == rhs->size);
-
+  
 	Timer tmr;
 	tmr.start();
 

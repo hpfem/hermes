@@ -19,7 +19,6 @@
 
 //#include "../h3dconfig.h"
 #include "mumps.h"
-#include "../feproblem.h"
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/utils.h"
@@ -353,18 +352,6 @@ MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
 #endif
 }
 
-MumpsSolver::MumpsSolver(FeProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef WITH_MUMPS
-	m = new MumpsMatrix;
-	rhs = new MumpsVector;
-#else
-	EXIT(H2D_ERR_MUMPS_NOT_COMPILED);
-#endif
-}
-
 MumpsSolver::~MumpsSolver()
 {
 	_F_
@@ -407,9 +394,6 @@ bool MumpsSolver::solve()
 	bool ret = false;
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL) lp->assemble(m, rhs);
-	assert(m->size == rhs->size);
 
 	Timer tmr;
 	tmr.start();

@@ -34,7 +34,6 @@
 class H2D_API AmesosSolver : public LinearSolver {
 public:
 	AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs);
-	AmesosSolver(const char *solver_type, FeProblem *lp);
 	virtual ~AmesosSolver();
 
 	static bool is_available(const char *name);

@@ -18,7 +18,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "petsc.h"
-#include "../feproblem.h"
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/callstack.h"
@@ -256,19 +255,6 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
 #endif
 }
 
-PetscLinearSolver::PetscLinearSolver(FeProblem *lp)
-	: LinearSolver(lp)
-{
-#ifdef WITH_PETSC
-	m = new PetscMatrix;
-	rhs = new PetscVector;
-#else
-	warning(H2D_PETSC_NOT_COMPILED);
-	exit(128);
-#endif
-}
-
-
 PetscLinearSolver::~PetscLinearSolver() {
 	_F_
 #ifdef WITH_PETSC
@@ -284,9 +270,6 @@ bool PetscLinearSolver::solve() {
 #ifdef WITH_PETSC
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL) lp->assemble(m, rhs);
-	assert(m->size == rhs->size);
 
 	PetscErrorCode ec;
 	KSP ksp;

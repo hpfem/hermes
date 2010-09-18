@@ -107,7 +107,6 @@ protected:
 class H2D_API MumpsSolver : public LinearSolver {
 public:
 	MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
-	MumpsSolver(FeProblem *lp);
 	virtual ~MumpsSolver();
 
 	virtual bool solve();

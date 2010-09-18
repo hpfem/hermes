@@ -45,24 +45,6 @@ AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
 #endif
 }
 
-AztecOOSolver::AztecOOSolver(FeProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef HAVE_AZTECOO
-	m = new EpetraMatrix;
-	rhs = new EpetraVector;
-
-	// set default values
-	max_iters = 10000;
-	tolerance = 10e-8;
-	pc = NULL;
-#else
-	warning(H2D_AZTECOO_NOT_COMPILED);
-	exit(128);
-#endif
-}
-
 
 AztecOOSolver::~AztecOOSolver()
 {
@@ -128,8 +110,6 @@ bool AztecOOSolver::solve()
 #ifdef HAVE_AZTECOO
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL) lp->assemble(NULL, m, rhs);
 	assert(m->size == rhs->size);
 
 	Timer tmr;

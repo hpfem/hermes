@@ -62,6 +62,7 @@ public:
 	virtual void zero();
 	virtual void set(int idx, scalar y);
 	virtual void add(int idx, scalar y);
+  virtual void extract(scalar *v) const;
 	virtual void add(int n, int *idx, scalar *y);
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
@@ -77,7 +78,6 @@ protected:
 class H2D_API PardisoLinearSolver : public LinearSolver {
 public:
 	PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
-	PardisoLinearSolver(FeProblem *lp);
 	virtual ~PardisoLinearSolver();
 
 	virtual bool solve();
