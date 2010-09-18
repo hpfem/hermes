@@ -106,15 +106,39 @@ int main(int argc, char* argv[])
   wf.add_vector_form(linear_form, linear_form_ord);
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, 2);
 
-  // Solve the linear problem.
+  // Initialize the FEM problem being solved.
+  bool is_linear = true;
+  FeProblem fep(&wf, Tuple<Space*>(&space), is_linear);
+
+  // Set up the solver, matrix and rhs according to the solver selection.
+  SparseMatrix * matrix = select_matrix_type(matrix_solver);
+  Vector * rhs = select_vector_type(matrix_solver);
+  Solver * solver = select_linear_solver(matrix_solver, matrix, rhs);
+
+  // Initialize Solution and solution vector.
   Solution sln;
-  solve_linear(&space, &wf, matrix_solver, &sln);
+  scalar * solution_vector;
+
+  // Assemble the linear system.
+  // NULL means that we do not have any previous Newton solution vector to pass.
+  info("Assembling the linear system.");
+  fep.assemble(NULL, matrix, rhs);
+
+  // Solve the linear system and if successful, obtain the solution vector and solution(s).
+  info("Solving the linear system.");
+  if(solver->solve())
+  {
+    solution_vector = solver->get_solution();
+    Solution::get_solutions_from_coeffs(solution_vector, Tuple<Space*>(&space), Tuple<Solution*>(&sln));
+  }
+  else
+    error ("Matrix solver failed.\n");
 
   // Time measurement.
   cpu_time.tick();
 
   // View the solution and mesh.
-  ScalarView sview("Coarse solution", new WinGeom(0, 0, 440, 350));
+  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show(&sln);
   OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
   oview.show(&space);
