@@ -99,23 +99,114 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(callback(biform1), H2D_SYM, OMEGA_1);
   wf.add_matrix_form(callback(biform2), H2D_SYM, OMEGA_2);
 
+
+  // Initialize coarse and fine Solutions.
+  Solution sln, ref_sln;
+
+  // Set up the solver, matrix and rhs according to the solver selection.
+  SparseMatrix * matrix = select_matrix_type(matrix_solver);
+  Vector * rhs = select_vector_type(matrix_solver);
+  Solver * solver = select_linear_solver(matrix_solver, matrix, rhs);
+  
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY);
+  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-  // Adaptivity loop.
-  Solution *sln = new Solution();
-  Solution *ref_sln = new Solution();
-  WinGeom* sln_win_geom = new WinGeom(0, 0, 400, 600);
-  WinGeom* mesh_win_geom = new WinGeom(410, 0, 400, 600);
-  bool verbose = true;     // Print info during adaptivity.
-  // The NULL pointer means that we do not want the resulting coefficient vector.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
-                     sln_win_geom, mesh_win_geom, &selector, &apt, verbose);
+  // Initialize views.
+  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  
+  // DOF and CPU convergence graphs initialization.
+  SimpleGraph graph_dof, graph_cpu;
+  
+  // Time measurement.
+  TimePeriod cpu_time;
+  
+  // Adaptivity preparations.
+  lin_adapt_begin(Tuple<Space*>(&space), Tuple<RefinementSelectors::Selector*>(&selector), Tuple<int>(H2D_H1_NORM), &cpu_time);
 
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh(es) and setup reference space(s).
+    Tuple<Space *> ref_space = construct_refined_space(Tuple<Space*>(&space));
+
+    // Assemble and solve the fine mesh problem.
+    info("Solving on fine mesh.");
+    bool is_linear = true;
+    FeProblem fep(&wf, ref_space, is_linear);
+    SparseMatrix * matrix = select_matrix_type(matrix_solver);
+    Vector * rhs = select_vector_type(matrix_solver);
+    Solver * solver = select_linear_solver(matrix_solver, matrix, rhs);
+    fep.assemble(NULL, matrix, rhs, false);
+
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the linear system.");
+    if(solver->solve())
+    {
+      Solution::get_solutions_from_coeffs(solver->get_solution(), ref_space, Tuple<Solution*>(&ref_sln));
+    }
+    else
+      error ("Matrix solver failed.\n");
+  
+    // Time measurement.
+    cpu_time.tick();
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting the fine mesh solution onto the coarse mesh.");
+    project_global(Tuple<Space*>(&space), Tuple<int>(H2D_H1_NORM), Tuple<Solution*> (&ref_sln), Tuple<Solution*> (&sln)); 
+   
+    // View the coarse mesh solution and polynomial orders.
+    sview.show(&sln);
+    oview.show(&space);
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error."); 
+    Adapt * adaptivity = new Adapt(Tuple<Space*>(&space), Tuple<int>(H2D_H1_NORM));
+    adaptivity->set_solutions(&sln, &ref_sln);
+    double err_est = adaptivity->calc_elem_errors() * 100;
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", get_num_dofs(Tuple<Space*>(&space)), get_num_dofs(ref_space), err_est);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(get_num_dofs(Tuple<Space*>(&space)), err_est);
+    graph_dof.save("conv_dof.dat");
+    graph_cpu.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu.save("conv_cpu.dat");
+
+    // If err_est too large, adapt the mesh.
+    if (err_est < ERR_STOP) done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+    }
+    if (get_num_dofs(Tuple<Space*>(&space)) >= NDOF_STOP)
+      done = true;
+    as++;
+  }
+  while (done == false);
+  
+  verbose("Total running time: %g s", cpu_time.accumulated());
+
+  // Show the fine mesh solution - the final result.
+  sview.set_title("Fine mesh solution");
+  sview.show_mesh(false);
+  sview.show(&ref_sln);
+  
   // Wait for all views to be closed.
   View::wait();
   return 0;

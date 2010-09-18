@@ -1646,6 +1646,21 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   project_internal(spaces, proj_wf, target_vec);
 }
 
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest)
+{
+  scalar * target_vec = new scalar[get_num_dofs(spaces)];
+  Tuple<MeshFunction *> ref_slns_mf;
+  for (int i = 0; i < sols_src.size(); i++) 
+    ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
+  
+  project_global(spaces, proj_norms, ref_slns_mf, target_vec);
+  
+  for (int i = 0; i < sols_src.size(); i++)
+      sols_dest[i]->set_coeff_vector(spaces[i], target_vec);
+  
+  delete [] target_vec;
+}
+
 void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
                     scalar* target_vec)
@@ -1692,6 +1707,33 @@ void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* m
 {
   /// TODO
 }
+
+void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<int> proj_norms, TimePeriod * cpu_time)
+{
+  if (spaces.size() != selectors.size()) 
+    error("There must be a refinement selector for each solution component in solve_linear_adapt().");
+  if (spaces.size() != proj_norms.size()) 
+    error("There must be a projection norm for each solution component in solve_linear_adapt().");
+
+  // Time measurement.
+  cpu_time->tick();
+}
+
+Tuple<Space *> construct_refined_space(Tuple<Space *> coarse)
+{
+  Tuple<Space *> ref_spaces;
+  for (int i = 0; i < coarse.size(); i++) 
+  {
+    Mesh * ref_mesh = new Mesh;
+    ref_mesh->copy(coarse[i]->get_mesh());
+    ref_mesh->refine_all_elements();
+    ref_spaces.push_back(coarse[i]->dup(ref_mesh));
+    int order_increase = 1;
+    ref_spaces[i]->copy_orders(coarse[i], order_increase);
+  }
+  return ref_spaces;
+}
+
 
 /*
 // Solve a typical linear problem using automatic adaptivity.
@@ -1964,10 +2006,4 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_s
 
   return true;
 }
-
-
-
-
-
-
 */
