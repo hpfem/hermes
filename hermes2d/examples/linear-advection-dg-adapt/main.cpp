@@ -16,8 +16,8 @@
 
 using namespace RefinementSelectors;
 
-const int INIT_REF = 2;       // Number of initial uniform mesh refinements.
-const int P_INIT = 0;         // Polynomial degree of mesh elements.
+const int INIT_REF = 2;                         // Number of initial uniform mesh refinements.
+const int P_INIT = 0;                           // Polynomial degree of mesh elements.
 
 const double THRESHOLD = 0.2;                   // This is a quantitative parameter of the adapt(...) function and
                                                 // it has different meanings for various adaptive strategies (see below).
@@ -30,7 +30,7 @@ const int STRATEGY = 1;                         // Adaptive strategy:
                                                 // STRATEGY = 2 ... refine all elements whose error is larger
                                                 //   than THRESHOLD.
                                                 // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ISO;        	// Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_H_ANISO;         // Predefined list of element refinement candidates. Possible values are
                                                 // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
                                                 // H2D_HP_ANISO_P, H2D_HP_ANISO. See User Documentation for details.
 const int MESH_REGULARITY = -1;                 // Maximum allowed level of hanging nodes:
@@ -39,8 +39,8 @@ const int MESH_REGULARITY = -1;                 // Maximum allowed level of hang
                                                 // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                 // Note that regular meshes are not supported, this is due to
                                                 // their notoriously bad performance.
-const double ERR_STOP = 10.0;					// Stopping criterion for adaptivity (rel. error tolerance between the
-												// fine mesh and coarse mesh solution in percent).
+const double ERR_STOP = 3.0;                    // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                // fine mesh and coarse mesh solution in percent).
 const double CONV_EXP = 1.0;                    // Default value is 1.0. This parameter influences the selection of
                                                 // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
                                                 // fine mesh and coarse mesh solution in percent).
@@ -181,7 +181,8 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Display the mesh.
-  OrderView oview("Distribution of polynomial orders", 100, 100, 500, 500);
+  OrderView oview("Coarse", 100, 100, 500, 500);
+  OrderView oview1("Fine", 100, 100, 500, 500);
   oview.show(&space);
   BaseView bview("Distribution of polynomial orders", 600, 100, 500, 500);
   bview.show(&space);
@@ -229,7 +230,8 @@ int main(int argc, char* argv[])
 
     // View the coarse mesh solution.
     view1.show(&sln);
-
+    oview.show(&space);
+    oview1.show(ref_space);
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
 
@@ -242,13 +244,7 @@ int main(int argc, char* argv[])
     // Report results.
     info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%", get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
 
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
-    graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu_est.save("conv_cpu_est.dat");
-
-    // If err_est too large, adapt the mesh.
+       // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else {
       info("Adapting the coarse mesh.");
