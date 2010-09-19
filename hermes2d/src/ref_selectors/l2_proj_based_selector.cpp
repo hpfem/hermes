@@ -19,7 +19,7 @@ namespace RefinementSelectors {
       current_max_order = (20 - element->iro_cache)/2 - 2; // default
     else
       current_max_order = std::min(current_max_order, (20 - element->iro_cache)/2 - 2); // user specified
-    current_min_order = 1;
+    current_min_order = 0;
   }
 
   void L2ProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {

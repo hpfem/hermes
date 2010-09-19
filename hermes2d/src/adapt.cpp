@@ -145,8 +145,15 @@ bool Adapt::adapt(Tuple<RefinementSelectors::Selector *> refinement_selectors, d
       //check if adaptivity loop should end
       if (inx_element >= 0) {
         //prepare error threshold for strategy 1
-        if (first_regular_element) {
-          error_squared_threshod = thr * err_squared;
+        if (first_regular_element) 
+        {
+          double err_squared_max = 0.;
+          Element * e_util;
+          for_all_active_elements(e_util, mesh)
+            if(errors_squared[comp][e_util->id] > err_squared_max)
+              err_squared_max = errors_squared[comp][e_util->id];
+
+          error_squared_threshod = thr * err_squared_max;
           first_regular_element = false;
         }
 
