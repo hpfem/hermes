@@ -115,49 +115,8 @@ protected:
   ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 
-  // Key for caching transformed function values on elements
-  struct Key
-  {
-    int index;
-    int order;
-    int sub_idx;
-    int shapeset_type;
-
-    Key(int index, int order, int sub_idx, int shapeset_type)
-    {
-      this->index = index;
-      this->order = order;
-      this->sub_idx = sub_idx;
-      this->shapeset_type = shapeset_type;
-    }
-  };
-
-  struct Compare
-  {
-    bool operator()(Key a, Key b) const
-    {
-      if (a.index < b.index) return true;
-      else if (a.index > b.index) return false;
-      else
-      {
-        if (a.order < b.order) return true;
-        else if (a.order > b.order) return false;
-        else
-        {
-          if (a.sub_idx < b.sub_idx) return true;
-          else if (a.sub_idx > b.sub_idx) return false;
-          else
-          {
-            if (a.shapeset_type < b.shapeset_type) return true;
-            else return false;
-          }
-        }
-      }
-    }
-  };
-
   // Caching transformed values for element
-  std::map<Key, Func<double>*, Compare> cache_fn;
+  std::map<PrecalcShapeset::Key, Func<double>*, PrecalcShapeset::Compare> cache_fn;
   Geom<double>* cache_e[g_max_quad + 1 + 4 * g_max_quad + 4];
   double* cache_jwt[g_max_quad + 1 + 4 * g_max_quad + 4];
 

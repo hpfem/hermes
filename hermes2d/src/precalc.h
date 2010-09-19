@@ -115,6 +115,50 @@ protected:
 
   friend class Solution;
   friend class RefMap;
+  
+public:
+    
+    /// Key for caching precalculated shapeset values on transformed elements.
+    struct Key
+    {
+      int index;
+      int order;
+      int sub_idx;
+      int shapeset_type;
+      
+      Key(int index, int order, int sub_idx, int shapeset_type)
+      {
+        this->index = index;
+        this->order = order;
+        this->sub_idx = sub_idx;
+        this->shapeset_type = shapeset_type;
+      }
+    };
+    
+    /// Functor that compares two PrecalcShapeset keys (needed e.g. to create a std::map indexed by these keys);
+    struct Compare
+    {
+      bool operator()(Key a, Key b) const
+      {
+        if (a.index < b.index) return true;
+        else if (a.index > b.index) return false;
+        else
+        {
+          if (a.order < b.order) return true;
+          else if (a.order > b.order) return false;
+          else
+          {
+            if (a.sub_idx < b.sub_idx) return true;
+            else if (a.sub_idx > b.sub_idx) return false;
+            else
+            {
+              if (a.shapeset_type < b.shapeset_type) return true;
+              else return false;
+            }
+          }
+        }
+      }
+    };
 
 };
 
