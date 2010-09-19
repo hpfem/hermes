@@ -325,7 +325,10 @@ public:
   /// Destructor.
   ~NeighborSearch();
   
-  
+  /// This variable has the meaning how many neighbors have been used for a single edge so far, 
+  /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
+  static int max_neighbors;
+
 private:  
   
   Mesh* mesh;
@@ -335,10 +338,10 @@ private:
   static const int max_n_trans = 20;              ///< Number of allowed transformations (or equiv. number of neighbors
                                                   ///< in a go-down neighborhood) - see Transformable::push_transform.
                                                   ///< TODO: Revise this for multimesh.
-  int transformations[max_n_trans][max_n_trans];  ///< Table of transformations of the central element to each neighbor
+  std::vector<int *> transformations;             ///< Vector of transformations of the central element to each neighbor
                                                   ///< (in a go-down neighborhood; stored row-wise for each neighbor) 
                                                   ///< or of the neighbor to the central element (go-up).
-  int n_trans[max_n_trans];                       ///< Number of transforms stored in each row of \c transformations.
+  std::vector<int> n_trans;                       ///< Number of transforms stored in each row of \c transformations.
   int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the 
                                                   ///< assembly, before transforms from \c transformations are pushed
                                                   ///< to it.

@@ -1,15 +1,26 @@
 #include "neighbor.h"
 
+
+int NeighborSearch::max_neighbors = 2;
+
 NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) : 
   central_el(el), central_pss(NULL), central_rm(NULL),
   neighb_el(NULL), neighb_pss(NULL), neighb_rm(NULL),
   mesh(mesh), supported_shapes(NULL), quad(&g_quad_2d_std),
   ignore_visited_segments(true)
 {
+  transformations.reserve(NeighborSearch::max_neighbors * 2);
+  for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
+    transformations.push_back(new int[NeighborSearch::max_n_trans]);
+
+  n_trans.reserve(NeighborSearch::max_neighbors*2);
+  for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
+    n_trans.push_back(0);
+
   assert_msg(central_el != NULL && central_el->active == 1, 
              "You must pass an active element to the NeighborSearch constructor.");  
-  neighbors.reserve(max_n_trans);
-  neighbor_edges.reserve(max_n_trans);
+  neighbors.reserve(NeighborSearch::max_neighbors * 2);
+  neighbor_edges.reserve(NeighborSearch::max_neighbors * 2);
 } 
  
 
@@ -21,6 +32,8 @@ NeighborSearch::~NeighborSearch()
   clear_supported_shapes();
   clear_neighbor_pss();
   detach_pss();
+  transformations.clear();
+  n_trans.clear();
 }
 
 void NeighborSearch::reset_neighb_info()
@@ -37,7 +50,7 @@ void NeighborSearch::reset_neighb_info()
   n_neighbors = 0;
   
   // Reset transformations.
-  for(int i = 0; i < max_n_trans; i++)
+  for(int i = 0; i < NeighborSearch::max_neighbors; i++)
   {
     n_trans[i] = 0;
     for(int j = 0; j < max_n_trans; j++)
@@ -203,6 +216,8 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
         // adjacent to the single big neighbor.
 				assert(n_neighbors == 0);
 				n_trans[n_neighbors] = n_parents;
+        if(n_neighbors > NeighborSearch::max_neighbors)
+          NeighborSearch::max_neighbors = n_neighbors;
 	
         /*
 				for(int k = 0 ; k < n_parents; k++)
@@ -329,6 +344,8 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
 
           // Append the new neighbor.
           n_neighbors++;
+          if(n_neighbors > NeighborSearch::max_neighbors)
+            NeighborSearch::max_neighbors = n_neighbors;
           neighbors.push_back(neighb_el);
         }
 			}
