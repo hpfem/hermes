@@ -45,7 +45,7 @@ const int STRATEGY = 1;                    // Adaptive strategy:
                                            // STRATEGY = 2 ... refine all elements whose error is larger
                                            //   than THRESHOLD.
                                            // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ISO;        // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ISO;     // Predefined list of element refinement candidates. Possible values are
                                            // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                            // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                            // See User Documentation for details.
@@ -57,17 +57,18 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 1.0;               // Default value is 1.0. This parameter influences the selection of
                                            // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;                 // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.01;              // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // reference and coarse mesh solution in percent).
-const int NDOF_STOP = 40000;               // Adaptivity process stops when the number of degrees of freedom grows over
+const int NDOF_STOP = 100000;              // Adaptivity process stops when the number of degrees of freedom grows over
                                            // this limit. This is mainly to prevent h-adaptivity to go on forever.
-const int MAX_ADAPT_NUM = 50;              // Adaptivity process stops when the number of adaptation steps grows over
+const int MAX_ADAPT_NUM = 60;              // Adaptivity process stops when the number of adaptation steps grows over
                                            // this limit.
 const int ADAPTIVITY_NORM = 2;             // Specifies the norm used by H1Adapt to calculate the error and norm.
                                            // ADAPTIVITY_NORM = 0 ... H1 norm.
                                            // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
                                            // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
-
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 // Variables used for reporting of results
 TimePeriod cpu_time;			                 // Time measurements.
 
@@ -287,10 +288,6 @@ int main(int argc, char* argv[])
 
   // Start time measurement.
   cpu_time.tick();
-
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(SOLVER_UMFPACK, get_num_dofs(Tuple<Space *>(&space1, &space2)), mat, rhs, solver);
   
   double cta;
   int order_increase = 1;
@@ -332,23 +329,24 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     info("---- Projecting reference solution on new coarse mesh; NDOF=%d ----", ndof);
     cpu_time.tick(HERMES_SKIP);
-    project_global(Tuple<Space *>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
-                   Tuple<MeshFunction*>(&ref_sln1, &ref_sln2),
-                   Tuple<Solution*>(&sln1, &sln2));
+    scalar* coeff_vec = new scalar[ndof];
+    project_global(Tuple<Space *>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+                   Tuple<MeshFunction*>(&ref_sln1, &ref_sln2), coeff_vec);
+    sln1.set_coeff_vector(&space1, coeff_vec);
+    sln2.set_coeff_vector(&space2, coeff_vec);
+    delete [] coeff_vec;
 
     // Calculate element errors and total error estimate.
 
-    Adapt hp(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));  
+    Adapt hp(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
     if (ADAPTIVITY_NORM == 2) {
       hp.set_error_form(0, 0, callback(biform_0_0));
       hp.set_error_form(0, 1, callback(biform_0_1));
       hp.set_error_form(1, 0, callback(biform_1_0));
       hp.set_error_form(1, 1, callback(biform_1_1));
-    } else {
-      if (ADAPTIVITY_NORM == 1) {
-        hp.set_error_form(0, 0, callback(biform_0_0));
-        hp.set_error_form(1, 1, callback(biform_1_1));
-      }
+    } else if (ADAPTIVITY_NORM == 1) {
+      hp.set_error_form(0, 0, callback(biform_0_0));
+      hp.set_error_form(1, 1, callback(biform_1_1));
     }
 
     Tuple<Solution*> slns(&sln1, &sln2);
@@ -387,7 +385,7 @@ int main(int argc, char* argv[])
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) break;
     else hp.adapt(Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
-                  THRESHOLD, STRATEGY,  MESH_REGULARITY);
+                  THRESHOLD, STRATEGY, MESH_REGULARITY);
   }
 
   cpu_time.tick();

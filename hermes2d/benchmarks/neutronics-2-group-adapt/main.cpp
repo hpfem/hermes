@@ -395,7 +395,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     info("---- Projecting reference solution on new coarse mesh; NDOF=%d ----", ndof);
     cpu_time.tick(HERMES_SKIP);
-    scalar* coeff_vec = new scalar[get_num_dofs(Tuple<Space *>(&space1, &space2))];
+    scalar* coeff_vec = new scalar[ndof];
     project_global(Tuple<Space *>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
                    Tuple<MeshFunction*>(&ref_sln1, &ref_sln2), coeff_vec);
     sln1.set_coeff_vector(&space1, coeff_vec);
@@ -469,7 +469,7 @@ int main(int argc, char* argv[])
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) break;
     else hp.adapt(Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
-         MULTIMESH ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY,  MESH_REGULARITY);
+         MULTIMESH ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY, MESH_REGULARITY);
   }
 
   cpu_time.tick();
