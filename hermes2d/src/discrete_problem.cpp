@@ -349,14 +349,14 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
         // FIXME: Do not retrieve assembly list again if the element has not changed.
         spaces[j]->get_element_assembly_list(e[i], &al[j]);
 
-	// Set active element to all test function PrecalcShapesets.
+      	// Set active element to all test function PrecalcShapesets.
         spss[j]->set_active_element(e[i]);
-	// Set the subelement transformation as it is set on all the appropriate solution function PrecalcShapeset.
+	      // Set the subelement transformation as it is set on all the appropriate solution function PrecalcShapeset.
         spss[j]->set_master_transform();
-	// Set the active element to the reference mapping.
+      	// Set the active element to the reference mapping.
         refmap[j].set_active_element(e[i]);
-	// Important : the reference mapping gets the same subelement transformation as the
-	// appropriate PrecalcShapeset (~test function). This is used in eval_form functions.
+	      // Important : the reference mapping gets the same subelement transformation as the
+	      // appropriate PrecalcShapeset (~test function). This is used in eval_form functions.
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
         
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
