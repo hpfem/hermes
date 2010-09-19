@@ -1637,7 +1637,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
     it++;
   };
 
-  // FIXME: matrices and vectors should be deallocated here.
+  // FIXME: matrices, vectors and solver should be deallocated here.
 
   return true;
 }
@@ -1686,6 +1686,9 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
 
   if (target_vec != NULL) 
     for (int i=0; i<ndof; i++) target_vec[i] = coeffs[i];
+    
+  delete solver;
+  delete fep;
 }
 
 // global orthogonal projection

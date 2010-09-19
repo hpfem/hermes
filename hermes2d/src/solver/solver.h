@@ -38,7 +38,7 @@ class FeProblem;
 class Solver {
 public:
 	Solver() { sln = NULL; time = -1.0; }
-	virtual ~Solver() { }
+	virtual ~Solver() { if (sln != NULL) delete [] sln; }
 
 	virtual bool solve() = 0;
 	scalar *get_solution() { return sln; }
