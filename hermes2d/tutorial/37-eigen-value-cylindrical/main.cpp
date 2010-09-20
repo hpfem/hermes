@@ -137,11 +137,12 @@ int main(int argc, char* argv[])
       // Convert coefficient vector into a Solution.
       Solution* sln = new Solution(&space, eivec);
       // printf("value at x=0,y=0 is %24.15e\n",sln->get_pt_value(0.0,0.0,H2D_FN_VAL_0));
-      ScalarView view("Solution", new WinGeom(0, 0, 1024, 768));
+      ScalarView view("Solution", new WinGeom(0, 0, 512, 384));
       // Visualize the solution.
+      view.set_3d_mode();
       view.show(sln);
       // Wait for the view to be closed.
-      View::wait();
+      View::wait(H2DV_WAIT_KEYPRESS);
     }  
   fclose(file);
   return 0; 

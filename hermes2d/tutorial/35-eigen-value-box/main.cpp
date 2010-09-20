@@ -110,11 +110,12 @@ int main(int argc, char* argv[])
 	}
       // Convert coefficient vector into a Solution.
       Solution* sln = new Solution(&space, eivec);
-      ScalarView view("Solution", new WinGeom(0, 0, 1024, 768));
+      ScalarView view("Solution", new WinGeom(0, 0, 512, 384));
       // Visualize the solution.
+      view.set_3d_mode();
       view.show(sln);
       // Wait for the view to be closed.
-      View::wait();
+      View::wait(H2DV_WAIT_KEYPRESS);
     }  
   fclose(file);
   return 0; 
