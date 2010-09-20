@@ -187,9 +187,9 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Display the mesh.
-  OrderView oview("Coarse mesh", 100, 100, 500, 500);
+  OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
   oview.show(&space);
-  BaseView bview("Distribution of polynomial orders", 600, 100, 500, 500);
+  BaseView bview("Distribution of polynomial orders", new WinGeom(450, 0, 440, 350));
   bview.show(&space);
 
   Solution sln;
@@ -203,7 +203,8 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(callback(linear_form_boundary), H2D_DG_BOUNDARY_EDGE);
   wf.add_matrix_form_surf(callback(bilinear_form_interface), H2D_DG_INNER_EDGE);
 
-  ScalarView view1("Solution", 600, 600, 500, 500);
+  ScalarView view1("Solution", new WinGeom(900, 0, 450, 350));
+  view1.fix_scale_width(60);
 
   int as = 1; bool done = false;
   do
