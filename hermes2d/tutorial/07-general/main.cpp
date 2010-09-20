@@ -22,6 +22,8 @@ const int INIT_REF_NUM = 3;                       // Number of initial uniform r
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
+const int BDY_VERTICAL = 2;
+
 // Problem parameters.
 double a_11(double x, double y) {
   if (y > 0) return 1 + x*x + y*y;
@@ -104,32 +106,31 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, H2D_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
-  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, 2);
+  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
 
-  // Initialize the FEM problem being solved.
+  // Initialize the FE problem.
   bool is_linear = true;
-  FeProblem fep(&wf, Tuple<Space*>(&space), is_linear);
+  FeProblem fep(&wf, &space, is_linear);
 
-  // Set up the solver, matrix and rhs according to the solver selection.
-  SparseMatrix * matrix = select_matrix_type(matrix_solver);
-  Vector * rhs = select_vector_type(matrix_solver);
-  Solver * solver = select_linear_solver(matrix_solver, matrix, rhs);
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
   // Initialize Solution and solution vector.
   Solution sln;
-  scalar * solution_vector;
+  scalar* solution_vector;
 
-  // Assemble the linear system.
-  // NULL means that we do not have any previous Newton solution vector to pass.
-  info("Assembling the linear system.");
-  fep.assemble(NULL, matrix, rhs);
+  // Assemble the stiffness matrix and right-hand side vector.
+  info("Assembling the stiffness matrix and right-hand side vector.");
+  fep.assemble(matrix, rhs);
 
   // Solve the linear system and if successful, obtain the solution vector and solution(s).
-  info("Solving the linear system.");
+  info("Solving the matrix problem.");
   if(solver->solve())
   {
     solution_vector = solver->get_solution();
-    Solution::get_solutions_from_coeffs(solution_vector, Tuple<Space*>(&space), Tuple<Solution*>(&sln));
+    vector_to_solution(solution_vector, &space, &sln);
   }
   else
     error ("Matrix solver failed.\n");
@@ -151,5 +152,12 @@ int main(int argc, char* argv[])
 
   // Wait for all views to be closed.
   View::wait();
+
+  // Clean up.
+  delete solution_vector;
+  delete solver;
+  delete matrix;
+  delete rhs;
+
   return 0;
 }

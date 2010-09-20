@@ -575,7 +575,7 @@ void Solution::set_zero_2(Mesh* mesh)
   set_const(mesh, 0.0, 0.0);
 }
 
-void Solution::get_solutions_from_coeffs(scalar * solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions)
+void vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions)
 {
   assert(spaces.size() == solutions.size());
   for(int i = 0; i < solutions.size(); i++)
@@ -583,6 +583,10 @@ void Solution::get_solutions_from_coeffs(scalar * solution_vector, Tuple<Space*>
   return;
 }
 
+void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution)
+{
+  vector_to_solutions(solution_vector, Tuple<Space*>(space), Tuple<Solution*>(solution));
+}
 
 void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
 {

@@ -50,10 +50,8 @@ AztecOOSolver::~AztecOOSolver()
 {
 	_F_
 #ifdef HAVE_AZTECOO
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
+	if (m != NULL) delete m;
+	if (rhs != NULL) delete rhs;
 #endif
 }
 

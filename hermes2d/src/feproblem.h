@@ -69,8 +69,14 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+
+  // General assembling procedure for nonlinear problems. coeff_vec is the 
+  // previous Newton vector.
   void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
                 bool rhsonly = false);
+  // Assembling for linear problems. Same as the previous functions, but 
+  // does not need the coeff_vector.
+  void assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly = false);
 
   int get_num_dofs();
   bool is_matrix_free() { return wf->is_matrix_free(); }
@@ -195,9 +201,9 @@ H2D_API void project_global(Space *space,
 H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec);
 
 /// Selects the appropriate linear solver.
-H2D_API Vector * select_vector_type(MatrixSolverType matrix_solver);
-H2D_API SparseMatrix * select_matrix_type(MatrixSolverType matrix_solver);
-H2D_API Solver * select_linear_solver(MatrixSolverType matrix_solver, Matrix * matrix, Vector * rhs);
+H2D_API Vector* create_vector(MatrixSolverType matrix_solver);
+H2D_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
+H2D_API Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
 /// Basic Newton's loop. Takes a coefficient vector, delivers a coefficient vector (in the 
 /// same variable "init_coeff_vector").
@@ -214,7 +220,8 @@ H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType 
 H2D_API void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<int> proj_norms, TimePeriod * cpu_time);
 
 // Create globally refined space.
-H2D_API Tuple<Space *> construct_refined_space(Tuple<Space *> coarse);
+H2D_API Tuple<Space *> construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
+H2D_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 #endif
 
 

@@ -50,11 +50,8 @@ AmesosSolver::~AmesosSolver()
 {
 	_F_
 #ifdef HAVE_AMESOS
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
-	delete solver;
+	if (m != NULL) delete m;
+	if (rhs != NULL) delete rhs;
 #endif
 }
 

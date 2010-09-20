@@ -115,9 +115,6 @@ public:
   virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
   int get_edge_fn_order(int edge, Space* space, Element* e = NULL);
   
-  /// Passes solution components calculated from solution vector as Solutions.
-  static void get_solutions_from_coeffs(scalar * solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions);
-
   /// Sets solution equal to Dirichlet lift only, solution vector = 0
   void set_dirichlet_lift(Space* space, PrecalcShapeset* pss = NULL);
 
@@ -213,6 +210,10 @@ protected:
   Element* e_last; ///< last visited element when getting solution values at specific points
 
 };
+
+/// Passes solution components calculated from solution vector as Solutions.
+void vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions);
+void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution);
 
 
 /// \brief Represents an exact solution of a PDE.

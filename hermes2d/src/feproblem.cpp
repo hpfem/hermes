@@ -204,6 +204,14 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
+// Light version for linear problems.
+void FeProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly) 
+{
+  assemble(NULL, mat, rhs, rhsonly);
+}
+
+// General assembling function for nonlinear problem. For linear problems use the 
+// light version above.
 void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
   // Sanity checks.
@@ -1283,7 +1291,7 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-Vector * select_vector_type(MatrixSolverType matrix_solver)
+Vector* create_vector(MatrixSolverType matrix_solver)
 {
   switch (matrix_solver) 
   {
@@ -1317,7 +1325,7 @@ Vector * select_vector_type(MatrixSolverType matrix_solver)
   }
 }
 
-SparseMatrix * select_matrix_type(MatrixSolverType matrix_solver)
+SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {
   switch (matrix_solver) 
   {
@@ -1350,7 +1358,7 @@ SparseMatrix * select_matrix_type(MatrixSolverType matrix_solver)
       error("Unknown matrix solver requested.");
   }
 }
-Solver * select_linear_solver(MatrixSolverType matrix_solver, Matrix * matrix, Vector * rhs)
+Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
   switch (matrix_solver) 
   {
@@ -1587,9 +1595,9 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
   bool is_linear = true;
   FeProblem* fep = new FeProblem(wf, spaces, is_linear);
 
-  SparseMatrix * matrix = select_matrix_type(SOLVER_UMFPACK);
-  Vector * rhs = select_vector_type(SOLVER_UMFPACK);
-  Solver * solver = select_linear_solver(SOLVER_UMFPACK, matrix, rhs);
+  SparseMatrix* matrix = create_matrix(SOLVER_UMFPACK);
+  Vector* rhs = create_vector(SOLVER_UMFPACK);
+  Solver* solver = create_solver(SOLVER_UMFPACK, matrix, rhs);
 
   fep->assemble(NULL, matrix, rhs, false);
 
@@ -1719,20 +1727,27 @@ void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector 
   cpu_time->tick();
 }
 
-Tuple<Space *> construct_refined_space(Tuple<Space *> coarse)
+// Performs uniform global refinement of a FE space. 
+Tuple<Space *> construct_refined_spaces(Tuple<Space *> coarse, int order_increase)
 {
   Tuple<Space *> ref_spaces;
   for (int i = 0; i < coarse.size(); i++) 
   {
-    Mesh * ref_mesh = new Mesh;
+    Mesh* ref_mesh = new Mesh;
     ref_mesh->copy(coarse[i]->get_mesh());
     ref_mesh->refine_all_elements();
     ref_spaces.push_back(coarse[i]->dup(ref_mesh));
-    int order_increase = 1;
     ref_spaces[i]->copy_orders(coarse[i], order_increase);
   }
   return ref_spaces;
 }
+
+// Light version for a single space.
+Space* construct_refined_space(Space* coarse, int order_increase)
+{
+  return construct_refined_spaces(Tuple<Space*>(coarse), order_increase)[0];
+}
+
 
 
 /*
