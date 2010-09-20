@@ -1,5 +1,5 @@
 # size of of the mesh
-a =  4.0
+a =  6.0
 vertices =
 { 
   { 0 , 0},     # vertex 0

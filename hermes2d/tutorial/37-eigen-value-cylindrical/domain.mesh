@@ -1,0 +1,24 @@
+PI=3.141592653589793116;
+# size of of the mesh
+a =  1.0
+vertices =
+{ 
+  { 0 , 0},     # vertex 0
+  { a, 0 },    # vertex 1
+  { a, PI },    # vertex 2
+  { 0, PI }    # vertex3
+}
+elements =
+{
+{0,1,2,3,1}
+}
+
+boundaries =
+{
+  { 0, 1, 1},
+  { 1, 2 ,2},
+  { 2, 3 ,3},
+  { 3, 0, 4}
+}
+
+

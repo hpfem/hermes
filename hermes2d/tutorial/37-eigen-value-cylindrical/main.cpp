@@ -1,9 +1,11 @@
 #define H2D_REPORT_INFO
 #include "hermes2d.h"
 #include <stdio.h>
-// This is a solver for the 2D Schroedinger equation
+// This is a solver for the Schroedinger equation in cylindrical coordinates rho and z and the magnetic quantum number m being a parameter.
 
-int P_INIT = 6;                                   // Uniform polynomial degree of mesh elements.
+int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
+int m = 0;                                        // Magnetic Quantum number
+int zp = 1;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
 
@@ -11,7 +13,16 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
 {
-  return BC_ESSENTIAL;
+  if (marker == 2 or marker == 3)
+    return BC_ESSENTIAL;
+  if (marker == 1 and zp == -1) 
+    return BC_ESSENTIAL;
+  if (marker == 1 and zp == 1)
+    return BC_NATURAL;
+  if (marker == 4 and m>0)
+    return BC_ESSENTIAL;
+  if (marker ==4 and m ==0)
+    return BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values.
@@ -20,8 +31,8 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
   return 0;
 }
 
-double pot(double x, double y) {
-  return x*x+y*y;
+double pot(double rho, double z) {
+  return m*m/(rho*rho);
 }
 
 // Weak forms.
@@ -44,8 +55,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation for the left hand side i.e. H 
   WeakForm wfH;
-  wfH.add_matrix_form(callback(bilinear_form_H));
-  //wfH.add_vector_form(callback(linear_form));
+  wfH.add_matrix_form(bilinear_form_H, bilinear_form_ord, H2D_SYM);
   // Initialize the linear problem.
   LinearProblem lpH(&wfH, &space);
 
@@ -59,19 +69,17 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation for the potential matrix 
   WeakForm wfPot;
-  wfPot.add_matrix_form(bilinear_form_V, bilinear_form_V_ord, H2D_SYM);
+  wfPot.add_matrix_form(bilinear_form_V, bilinear_form_ord, H2D_SYM);
   // Initialize the linear problem.
   LinearProblem lpPot(&wfPot, &space);
   init_matrix_solver(matrix_solver, ndof, Vmat, eivec, solver);
   // Assemble potential matrix
   lpPot.assemble(Vmat,eivec);
 
-  
-
 
   // Initialize the weak formulation for the right hand side i.e. U 
   WeakForm wfU;
-  wfU.add_matrix_form(callback(bilinear_form_U));
+  wfU.add_matrix_form(bilinear_form_U, bilinear_form_ord, H2D_SYM);
   // Initialize the linear problem.
   LinearProblem lpU(&wfU, &space);
   init_matrix_solver(matrix_solver, ndof, Umat, eivec, solver);
@@ -113,7 +121,7 @@ int main(int argc, char* argv[])
 	if (tmp != 0) fprintf( out,"%d %d %24.15e\n",i+1,j+1,tmp);
       } 
   fclose(out);
-  system("python solveGenEigenFromMtx.py hmat.mtx umat.mtx 1.0 1");
+  system("python solveGenEigenFromMtx.py hmat.mtx umat.mtx 7.0 1");
   FILE *file=fopen("eivecs.dat","r");
   char line [64]; /* or other suitable maximum line size */
   fgets ( line, sizeof line, file );
@@ -128,7 +136,7 @@ int main(int argc, char* argv[])
 	}
       // Convert coefficient vector into a Solution.
       Solution* sln = new Solution(&space, eivec);
-      printf("value at x=0,y=0 is %24.15e\n",sln->get_pt_value(0.0,0.0,H2D_FN_VAL_0));
+      // printf("value at x=0,y=0 is %24.15e\n",sln->get_pt_value(0.0,0.0,H2D_FN_VAL_0));
       ScalarView view("Solution", new WinGeom(0, 0, 1024, 768));
       // Visualize the solution.
       view.show(sln);
