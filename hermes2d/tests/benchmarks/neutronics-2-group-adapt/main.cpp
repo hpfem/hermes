@@ -20,7 +20,7 @@ using namespace RefinementSelectors;
  *
  *  \section s_res Expected results
  *  - DOFs: 446, 2682   (for the two solution components)
- *  - Iterations: 15    (the last iteration at which ERR_STOP is fulfilled)
+ *  - Iterations: 16    (the last iteration at which ERR_STOP is fulfilled)
  *  - Error:  3.46614%  (H1 norm of error with respect to the exact solution)
  *  - Negatives: 0      (number of negative values) 
  */
@@ -69,8 +69,6 @@ const int ADAPTIVITY_NORM = 2;             // Specifies the norm used by H1Adapt
                                            // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-// Variables used for reporting of results
-TimePeriod cpu_time;			                 // Time measurements.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Problem data:
@@ -260,13 +258,11 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM[0]; i++) mesh1.refine_all_elements();
   for (int i = 0; i < INIT_REF_NUM[1]; i++) mesh2.refine_all_elements();
 
-  // Solution variables.
-  Solution sln1, sln2;		 // Coarse mesh solution.
-  Solution ref_sln1, ref_sln2;	// Reference solution.
-
-  // Create H1 space with default shapesets.
+  // Create H1 spaces with default shapesets, declare pointers to them and declare norms in these spaces.
   H1Space space1(&mesh1, bc_types, essential_bc_values_1, P_INIT[0]);
-  H1Space space2(&mesh2, bc_types, essential_bc_values_2, P_INIT[0]);
+  H1Space space2(&mesh2, bc_types, essential_bc_values_2, P_INIT[1]);
+  Tuple<Space*> spaces(&space1, &space2);
+  Tuple<int> norms(H2D_H1_NORM, H2D_H1_NORM);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -278,88 +274,85 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, liform_1, liform_1_ord);
   wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_gamma);
   wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_gamma);
-
+  
+  // Initialize coarse and reference mesh solutions and declare pointers to them.
+  Solution sln1, sln2; 
+  Solution ref_sln1, ref_sln2;
+  Tuple<Solution*> slns(&sln1, &sln2);
+  Tuple<Solution*> ref_slns(&ref_sln1, &ref_sln2);
+  
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  //selector.set_option(H2D_PREFER_SYMMETRIC_MESH, false);
-  //selector.set_error_weights(2.25, 1, sqrt(2.0));
+  //selector.set_error_weights(2.1, 0.9, sqrt(2.0));
 
-  //////////////////////////////  Adaptivity loop  /////////////////////////////
-
-  // Start time measurement.
+  // Time measurement.
+  TimePeriod cpu_time;
   cpu_time.tick();
-  
-  double cta;
+
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
   int order_increase = 1;
-  int iadapt;
   double error_h1;
-  for (iadapt = 0; iadapt < MAX_ADAPT_NUM; iadapt++) {
-    
+  do
+  {
     int ndof = get_num_dofs(Tuple<Space *>(&space1, &space2));
     if (ndof >= NDOF_STOP) break;
 
-    cpu_time.tick();
-    info("!---- Adaptivity step %d ---------------------------------------------", iadapt);
-    cpu_time.tick(HERMES_SKIP);
+    info("!---- Adaptivity step %d ---------------------------------------------", as);
 
     // Construct globally refined reference meshes.
-    Mesh ref_mesh1, ref_mesh2;
-    ref_mesh1.copy(&mesh1);
-    ref_mesh2.copy(&mesh2);
-    ref_mesh1.refine_all_elements();
-    ref_mesh2.refine_all_elements();
-
-    // Setup spaces for the reference solution.
-    Space *ref_space1 = space1.dup(&ref_mesh1);
-    Space *ref_space2 = space2.dup(&ref_mesh2);
-    int order_increase = 1;
-    ref_space1->copy_orders(&space1, order_increase);
-    ref_space2->copy_orders(&space2, order_increase);
-
-    cpu_time.tick();
-    int ref_ndof = get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
+    Tuple<Space*> ref_spaces = construct_refined_spaces(spaces, order_increase);
+    
+    int ref_ndof = get_num_dofs(ref_spaces);
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
-    cpu_time.tick(HERMES_SKIP);
 
-    // Solve the reference problem.
-    solve_linear(Tuple<Space *>(ref_space1, ref_space2), &wf,
-                 SOLVER_UMFPACK, Tuple<Solution *>(&ref_sln1, &ref_sln2));
-
-    // Project the reference solution on the new coarse mesh.
+    // Assemble the reference problem.
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, ref_spaces, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
+    
+    // Time measurement.
     cpu_time.tick();
-    info("---- Projecting reference solution on new coarse mesh; NDOF=%d ----", ndof);
-    cpu_time.tick(HERMES_SKIP);
-    scalar* coeff_vec = new scalar[ndof];
-    project_global(Tuple<Space *>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                   Tuple<MeshFunction*>(&ref_sln1, &ref_sln2), coeff_vec);
-    sln1.set_coeff_vector(&space1, coeff_vec);
-    sln2.set_coeff_vector(&space2, coeff_vec);
-    delete [] coeff_vec;
 
+    // Solve the linear system associated with the reference problem.
+    info("Solving the matrix problem.");
+    if(solver->solve()) 
+      vector_to_solutions(solver->get_solution(), ref_spaces, ref_slns);
+    else error ("Matrix solver failed.\n");
+    
+    delete fep;
+    delete ref_spaces[0];
+    delete ref_spaces[1];
+    
+    // Time measurement.
+    cpu_time.tick();
+        
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on the coarse mesh; NDOF=%d ----", ndof);
+    project_global(spaces, norms, ref_slns, slns);                
+    
     // Calculate element errors and total error estimate.
-
-    Adapt hp(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+    info("Calculating error.");
+    Adapt adaptivity(spaces, norms);
     if (ADAPTIVITY_NORM == 2) {
-      hp.set_error_form(0, 0, callback(biform_0_0));
-      hp.set_error_form(0, 1, callback(biform_0_1));
-      hp.set_error_form(1, 0, callback(biform_1_0));
-      hp.set_error_form(1, 1, callback(biform_1_1));
+      adaptivity.set_error_form(0, 0, callback(biform_0_0));
+      adaptivity.set_error_form(0, 1, callback(biform_0_1));
+      adaptivity.set_error_form(1, 0, callback(biform_1_0));
+      adaptivity.set_error_form(1, 1, callback(biform_1_1));
     } else if (ADAPTIVITY_NORM == 1) {
-      hp.set_error_form(0, 0, callback(biform_0_0));
-      hp.set_error_form(1, 1, callback(biform_1_1));
+      adaptivity.set_error_form(0, 0, callback(biform_0_0));
+      adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
-
-    Tuple<Solution*> slns(&sln1, &sln2);
-    Tuple<Solution*> slns_ref(&ref_sln1, &ref_sln2);
-
-    hp.set_solutions(slns, slns_ref);
-
-    double err_est = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
-    double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, slns_ref) * 100;
+    adaptivity.set_solutions(slns, ref_slns);
+    double err_est = adaptivity.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
 
     // Report results.
-    cpu_time.tick();
-    cta = cpu_time.accumulated();
+    cpu_time.tick(); 
 
     // Error w.r.t. the exact solution.
     ExactSolution ex1(&mesh1, exact_flux1), ex2(&mesh2, exact_flux2);
@@ -367,7 +360,7 @@ int main(int argc, char* argv[])
     DiffFilter err_distrib_2(Tuple<MeshFunction*>(&ex2, &sln2));
 
     double err_exact_h1_1 = calc_rel_error(&ex1, &sln1, H2D_H1_NORM) * 100;
-    double err_exact_h1_2 = calc_rel_error(&ex2, &sln2, H2D_H1_NORM) * 100;;
+    double err_exact_h1_2 = calc_rel_error(&ex2, &sln2, H2D_H1_NORM) * 100;
 
     Tuple<Solution*> exslns(&ex1, &ex2);
     error_h1 = error_total(error_fn_h1, norm_fn_h1, slns, exslns) * 100;
@@ -383,16 +376,28 @@ int main(int argc, char* argv[])
     cpu_time.tick(HERMES_SKIP);
 
     // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) break;
-    else hp.adapt(Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
-                  THRESHOLD, STRATEGY, MESH_REGULARITY);
+    if (err_est < ERR_STOP) done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      adaptivity.adapt( Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
+                        THRESHOLD, STRATEGY, MESH_REGULARITY );
+                        
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;                       
+    }
+    
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
   }
-
-  cpu_time.tick();
-  cta = cpu_time.accumulated();
-  info("Total running time: %g s", cta);
+  while (done == false);
   
-  info("Number of iterations: %d", iadapt);
+  cpu_time.tick();
+  verbose("Total running time: %g s", cpu_time.accumulated());
+  
+  info("Number of iterations: %d", as);
   info("NDOF: %d, %d", space1.get_num_dofs(), space2.get_num_dofs());
 
 #define ERROR_SUCCESS                               0
@@ -405,8 +410,8 @@ int main(int argc, char* argv[])
   int n_neg = get_num_of_neg(&sln1) + get_num_of_neg(&sln2);
   int n_neg_allowed = 0;
   
-  int n_iter = iadapt;
-  int n_iter_allowed = 17;
+  int n_iter = as;
+  int n_iter_allowed = 18;
 
   double error = error_h1;
   double error_allowed = 3.55;
