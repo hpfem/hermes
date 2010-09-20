@@ -173,21 +173,21 @@ int main(int argc, char* argv[])
   L2Space space(&mesh,P_INIT);
   space.set_bc_types(bc_types);
 
+  // Initialize refinement selector.
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
+  
+  // Disable weighting of refinement candidates.
+  selector.set_error_weights(1, 1, 1);
 
   SimpleGraph graph_dof_est, graph_cpu_est;
   TimePeriod cpu_time;
   cpu_time.tick();
 
   // Display the mesh.
-  OrderView oview("Coarse", 100, 100, 500, 500);
-  OrderView oview1("Fine", 100, 100, 500, 500);
+  OrderView oview("Coarse mesh", 100, 100, 500, 500);
   oview.show(&space);
   BaseView bview("Distribution of polynomial orders", 600, 100, 500, 500);
   bview.show(&space);
-  MeshView mview("Mesh", 100, 600, 500, 500);
-  mview.show(&mesh);
 
   Solution sln;
 	Solution ref_sln;
@@ -231,7 +231,6 @@ int main(int argc, char* argv[])
     // View the coarse mesh solution.
     view1.show(&sln);
     oview.show(&space);
-    oview1.show(ref_space);
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
 

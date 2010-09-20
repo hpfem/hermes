@@ -124,7 +124,7 @@ namespace RefinementSelectors {
       c.error = sqrt(error_squared);
 
       //apply weights
-      /*
+      
       switch(c.split) {
       case H2D_REFINEMENT_H: c.error *= error_weight_h; break;
       case H2D_REFINEMENT_ANISO_H:
@@ -132,7 +132,7 @@ namespace RefinementSelectors {
       case H2D_REFINEMENT_P: c.error *= error_weight_p; break;
       default: error("Unknown split type \"%d\" at candidate %d", c.split, i);
       }
-      */
+      
       //calculate statistics
       if (i == 0 || c.error <= unrefined_c.error) {
         sum_err += log10(c.error);
