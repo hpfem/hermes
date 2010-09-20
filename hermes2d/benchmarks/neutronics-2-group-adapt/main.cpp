@@ -394,6 +394,7 @@ int main(int argc, char* argv[])
     // Time measurement.
     cpu_time.tick();
 
+    // Solve the linear system associated with the reference problem.
     info("Solving the matrix problem.");
     if(solver->solve()) 
       vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
@@ -471,21 +472,21 @@ int main(int argc, char* argv[])
     cpu_time.tick(HERMES_SKIP);
     
     // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) break;
+    if (err_est < ERR_STOP) done = true;
     else 
     {
       info("Adapting coarse mesh.");
-      adaptivity.adapt( Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
-                        MULTIMESH ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY, MESH_REGULARITY );
+      done = adaptivity.adapt( Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
+                               MULTIMESH ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY, MESH_REGULARITY );
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
     }
     
     // Clean up.
     delete solver;
     delete matrix;
     delete rhs;
-    
-    // Increase counter.
-    as++;
   }
   while (done == false);
 

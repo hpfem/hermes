@@ -182,6 +182,9 @@ int main(int argc, char* argv[])
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
     }
     if (get_num_dofs(&space) >= NDOF_STOP) done = true;
 
@@ -191,8 +194,6 @@ int main(int argc, char* argv[])
     delete rhs;
     delete adaptivity;
     
-    // Increase counter.
-    as++;
   }
   while (done == false);
   
