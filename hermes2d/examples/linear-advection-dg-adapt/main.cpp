@@ -179,7 +179,10 @@ int main(int argc, char* argv[])
   // Disable weighting of refinement candidates.
   selector.set_error_weights(1, 1, 1);
 
+  // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
+
+  // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
@@ -243,7 +246,13 @@ int main(int argc, char* argv[])
     // Report results.
     info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%", get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
 
-       // If err_est too large, adapt the mesh.
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu_est.save("conv_cpu_est.dat");
+
+    // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else {
       info("Adapting the coarse mesh.");
