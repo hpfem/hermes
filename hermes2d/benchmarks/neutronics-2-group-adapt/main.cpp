@@ -73,7 +73,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Variables used for reporting of results
-TimePeriod cpu_time;            // Time measurements.
 const int ERR_PLOT = 0;         // Row in the convergence graphs for exact errors .
 const int ERR_EST_PLOT = 1;     // Row in the convergence graphs for error estimates.
 const int GROUP_1 = 0;          // Row in the DOF evolution graph for group 1.
@@ -287,10 +286,6 @@ int main(int argc, char* argv[])
   else // Use just one mesh for both groups.
     for (int i = 0; i < INIT_REF_NUM[0]; i++) mesh1.refine_all_elements();
 
-  // Solution variables.
-  Solution sln1, sln2;          // Coarse mesh solution.
-  Solution ref_sln1, ref_sln2;  // Reference solution.
-
   // Create H1 space with default shapesets.
   H1Space space1(&mesh1, bc_types, essential_bc_values_1, P_INIT[0]);
   H1Space space2(MULTIMESH ? &mesh2 : &mesh1, bc_types, essential_bc_values_2, P_INIT[1]);
@@ -305,6 +300,16 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, liform_1, liform_1_ord);
   wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_gamma);
   wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_gamma);
+  
+  // Initialize coarse and reference mesh solutions and pointers to them.
+  Solution sln1, sln2; 
+  Solution ref_sln1, ref_sln2;
+  Tuple<Solution*> slns(&sln1, &sln2);
+  Tuple<Solution*> ref_slns(&ref_sln1, &ref_sln2);
+  
+  // Initialize refinement selector.
+  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  //selector.set_error_weights(2.1, 0.9, sqrt(2.0));
 
   // Initialize views.
   ScalarView view1("Neutron flux 1", 0, 0, 500, 460);
@@ -320,7 +325,7 @@ int main(int argc, char* argv[])
   view3.show_mesh(false); view3.set_3d_mode(true);
   view4.show_mesh(false); view4.set_3d_mode(true);
 
-  // DOF and CPU convergence graphs.
+  // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof("Error convergence", "Degrees of freedom", "Error [%]");
   graph_dof.add_row("exact error (H1)", "b", "-", "o");
   graph_dof.add_row("est.  error (H1)", "r", "-", "s");
@@ -342,26 +347,19 @@ int main(int argc, char* argv[])
   graph_dof_evol.show_legend();
   graph_dof_evol.set_legend_pos("bottom right");
   graph_dof_evol.show_grid();
-  
-
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  //selector.set_error_weights(2.1, 0.9, sqrt(2.0));
-  
-
-  //////////////////////////////  Adaptivity loop  /////////////////////////////
-
-  // Start time measurement.
+    
+  // Time measurement.
+  TimePeriod cpu_time;
   cpu_time.tick();
 
-  double cta;
-  for (int iadapt = 0; iadapt < MAX_ADAPT_NUM; iadapt++) {
-
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
     int ndof = get_num_dofs(Tuple<Space *>(&space1, &space2));
 
-    cpu_time.tick();
-    info("!---- Adaptivity step %d ---------------------------------------------", iadapt);
-    cpu_time.tick(HERMES_SKIP);
+    info("!---- Adaptivity step %d ---------------------------------------------", as);
 
     // Construct globally refined reference meshes.
     Mesh ref_mesh1, ref_mesh2;
@@ -380,56 +378,62 @@ int main(int argc, char* argv[])
     ref_space1->copy_orders(&space1, order_increase);
     ref_space2->copy_orders(&space2, order_increase);
 
-    cpu_time.tick();
     int ref_ndof = get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
-    cpu_time.tick(HERMES_SKIP);
                             
     if (ref_ndof >= NDOF_STOP) break;
 
-    // Solve the reference problem.
-    solve_linear(Tuple<Space *>(ref_space1, ref_space2), &wf,
-                 SOLVER_UMFPACK, Tuple<Solution *>(&ref_sln1, &ref_sln2));
-
-    // Project the reference solution on the new coarse mesh.
+    // Assemble the reference problem.
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
+    
+    // Time measurement.
     cpu_time.tick();
-    info("---- Projecting reference solution on new coarse mesh; NDOF=%d ----", ndof);
-    cpu_time.tick(HERMES_SKIP);
-    scalar* coeff_vec = new scalar[ndof];
-    project_global(Tuple<Space *>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                   Tuple<MeshFunction*>(&ref_sln1, &ref_sln2), coeff_vec);
-    sln1.set_coeff_vector(&space1, coeff_vec);
-    sln2.set_coeff_vector(&space2, coeff_vec);
-    delete [] coeff_vec;
 
-    // Calculate element errors and total error estimate.
-
-    Adapt hp(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
-    if (ADAPTIVITY_NORM == 2) {
-      hp.set_error_form(0, 0, callback(biform_0_0));
-      hp.set_error_form(0, 1, callback(biform_0_1));
-      hp.set_error_form(1, 0, callback(biform_1_0));
-      hp.set_error_form(1, 1, callback(biform_1_1));
-    } else if (ADAPTIVITY_NORM == 1) {
-      hp.set_error_form(0, 0, callback(biform_0_0));
-      hp.set_error_form(1, 1, callback(biform_1_1));
-    }
-
-    Tuple<Solution*> slns(&sln1, &sln2);
-    Tuple<Solution*> slns_ref(&ref_sln1, &ref_sln2);
-
-    hp.set_solutions(slns, slns_ref);
-
-    double err_est = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
-    double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, slns_ref) * 100;
-
-    // Report results.
+    info("Solving the matrix problem.");
+    if(solver->solve()) 
+      vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
+    else error ("Matrix solver failed.\n");
+    
+    delete fep;
+    delete ref_space1;
+    delete ref_space2;
+    
+    // Time measurement.
     cpu_time.tick();
-    cta = cpu_time.accumulated();
-
+        
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on the coarse mesh; NDOF=%d ----", ndof);
+    project_global(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+                   ref_slns, slns);
+    
+    // View the distribution of polynomial orders on the coarse meshes.
     info("flux1_dof=%d, flux2_dof=%d", get_num_dofs(&space1), get_num_dofs(&space2));
     oview1.show(&space1);
-    oview2.show(&space2);
+    oview2.show(&space2);                   
+    
+    // Calculate element errors and total error estimate.
+    info("Calculating error.");
+    Adapt adaptivity(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+    if (ADAPTIVITY_NORM == 2) {
+      adaptivity.set_error_form(0, 0, callback(biform_0_0));
+      adaptivity.set_error_form(0, 1, callback(biform_0_1));
+      adaptivity.set_error_form(1, 0, callback(biform_1_0));
+      adaptivity.set_error_form(1, 1, callback(biform_1_1));
+    } else if (ADAPTIVITY_NORM == 1) {
+      adaptivity.set_error_form(0, 0, callback(biform_0_0));
+      adaptivity.set_error_form(1, 1, callback(biform_1_1));
+    }
+    adaptivity.set_solutions(slns, ref_slns);
+    double err_est = adaptivity.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
+
+    // Report results.
+    cpu_time.tick(); 
 
     // Error w.r.t. the exact solution.
     ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
@@ -457,24 +461,36 @@ int main(int argc, char* argv[])
       graph_dof.add_values(ERR_PLOT, ndof, error_h1);
       graph_dof.add_values(ERR_EST_PLOT, ndof, err_est_h1);
       // Add entry to DOF evolution graphs.
-      graph_dof_evol.add_values(GROUP_1, iadapt, get_num_dofs(&space1));
-      graph_dof_evol.add_values(GROUP_2, iadapt, get_num_dofs(&space2));
+      graph_dof_evol.add_values(GROUP_1, as, get_num_dofs(&space1));
+      graph_dof_evol.add_values(GROUP_2, as, get_num_dofs(&space2));
       // Add entry to CPU convergence graphs.
-      graph_cpu.add_values(ERR_PLOT, cta, error_h1);
-      graph_cpu.add_values(ERR_EST_PLOT, cta, err_est_h1);
+      graph_cpu.add_values(ERR_PLOT, cpu_time.accumulated(), error_h1);
+      graph_cpu.add_values(ERR_EST_PLOT, cpu_time.accumulated(), err_est_h1);
     }
 
     cpu_time.tick(HERMES_SKIP);
     
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) break;
-    else hp.adapt(Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
-         MULTIMESH ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY, MESH_REGULARITY);
+    else 
+    {
+      info("Adapting coarse mesh.");
+      adaptivity.adapt( Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
+                        MULTIMESH ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY, MESH_REGULARITY );
+    }
+    
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    
+    // Increase counter.
+    as++;
   }
+  while (done == false);
 
   cpu_time.tick();
-  cta = cpu_time.accumulated();
-  verbose("Total running time: %g s", cta);
+  verbose("Total running time: %g s", cpu_time.accumulated());
 
   ////////////////////////  Save plots with results.  //////////////////////////
   
@@ -506,6 +522,14 @@ int main(int argc, char* argv[])
   graph_dof.save(cdfile.str().c_str());
   graph_cpu.save(ccfile.str().c_str());  
 
+  // Show the reference solution - the final result.
+  view1.set_title("Fine mesh solution");
+  view1.show_mesh(false);
+  view1.show(&ref_sln1);
+  view2.set_title("Fine mesh solution");
+  view2.show_mesh(false);
+  view2.show(&ref_sln2);
+  
   // Wait for all views to be closed.
   View::wait();
   return 0;
