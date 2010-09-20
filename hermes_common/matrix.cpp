@@ -471,8 +471,8 @@ void CooMatrix::print()
             for(std::map<size_t, cplx>::const_iterator it_col = it_row->second.begin(); it_col != it_row->second.end(); ++it_col)
             {
                 printf("(%u, %u): (%g, %g)\n",
-                       it_row->first,
-                       it_col->first,
+                       (unsigned int)it_row->first,
+                       (unsigned int)it_col->first,
                        ((cplx) it_col->second).real(),
                        ((cplx) it_col->second).imag());
             }
@@ -485,8 +485,8 @@ void CooMatrix::print()
             for(std::map<size_t, double>::const_iterator it_col = it_row->second.begin(); it_col != it_row->second.end(); ++it_col)
             {
                 printf("(%u, %u): %g\n",
-                       it_row->first,
-                       it_col->first,
+                       (unsigned int)it_row->first,
+                       (unsigned int)it_col->first,
                        it_col->second);
             }
         }
