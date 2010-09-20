@@ -105,9 +105,6 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, MESH_REGULARITY);
-
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 400, 600));
   OrderView  oview("Polynomial orders", new WinGeom(410, 0, 400, 600));
@@ -129,23 +126,26 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-    // Assemble and solve the reference mesh problem.
+    // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    FeProblem fep(&wf, ref_space, is_linear);
+    FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_solver(matrix_solver, matrix, rhs);
-    fep.assemble(matrix, rhs);
+    fep->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
     
-    // Solve the linear system and if successful, obtain the solution.
+    // Solve the linear system of the reference problem. If successful, obtain the solution.
     info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
   
+    delete ref_space;
+    delete fep;
+    
     // Time measurement.
     cpu_time.tick();
 
@@ -189,6 +189,7 @@ int main(int argc, char* argv[])
     delete solver;
     delete matrix;
     delete rhs;
+    delete adaptivity;
     
     // Increase counter.
     as++;
