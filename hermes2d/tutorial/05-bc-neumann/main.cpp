@@ -62,9 +62,28 @@ int main(int argc, char* argv[])
   wf.add_vector_form(callback(linear_form));
   wf.add_vector_form_surf(callback(linear_form_surf));
 
-  // Solve the linear problem.
+  // Initialize the FE problem.
+  bool is_linear = true;
+  FeProblem fep(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_solver(matrix_solver, matrix, rhs);
+
+  // Initialize the solution.
   Solution sln;
-  solve_linear(&space, &wf, matrix_solver, &sln);
+
+  // Assemble the stiffness matrix and right-hand side vector.
+  info("Assembling the stiffness matrix and right-hand side vector.");
+  fep.assemble(matrix, rhs);
+
+  // Solve the linear system and if successful, obtain the solution.
+  info("Solving the matrix problem.");
+  if(solver->solve())
+    vector_to_solution(solver->get_solution(), &space, &sln);
+  else
+    error ("Matrix solver failed.\n");
 
   // Visualize the approximation.
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
@@ -79,5 +98,11 @@ int main(int argc, char* argv[])
 
   // Wait for the views to be closed.
   View::wait();
+
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
+
   return 0;
 }
