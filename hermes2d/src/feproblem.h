@@ -179,7 +179,7 @@ H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType 
 H2D_API void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<int> proj_norms, TimePeriod * cpu_time);
 
 // Create globally refined space.
-H2D_API Tuple<Space *> construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
+H2D_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
 H2D_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 #endif
 
