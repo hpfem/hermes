@@ -212,8 +212,8 @@ protected:
 };
 
 /// Passes solution components calculated from solution vector as Solutions.
-void vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions);
-void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution);
+void H2D_API vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions);
+void H2D_API vector_to_solution(scalar* solution_vector, Space* space, Solution* solution);
 
 
 /// \brief Represents an exact solution of a PDE.
