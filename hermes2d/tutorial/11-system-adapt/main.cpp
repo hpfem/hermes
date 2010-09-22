@@ -126,36 +126,116 @@ int main(int argc, char* argv[])
   wf.add_vector_form(0, linear_form_0, linear_form_0_ord);
   wf.add_vector_form(1, linear_form_1, linear_form_1_ord);
 
+  // Initialize coarse and reference mesh Solutions.
+  Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
+
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY);
+  // Initialize views.
+  ScalarView u_sview("Solution u", new WinGeom(0, 0, 360, 300));
+  OrderView  u_oview("Polynomial orders u", new WinGeom(370, 0, 360, 300));
+  ScalarView v_sview("Solution v", new WinGeom(740, 0, 400, 300));
+  OrderView  v_oview("Polynomial orders v", new WinGeom(1150, 0, 400, 300));
 
-  // Geometry and position of visualization windows.
-  WinGeom* u_sln_win_geom = new WinGeom(0, 0, 360, 300);
-  WinGeom* u_mesh_win_geom = new WinGeom(370, 0, 360, 300);
-  WinGeom* v_sln_win_geom = new WinGeom(740, 0, 400, 300);
-  WinGeom* v_mesh_win_geom = new WinGeom(1150, 0, 400, 300);
+  // DOF and CPU convergence graphs initialization.
+  SimpleGraph graph_dof, graph_cpu;
 
-  // Adaptivity loop.
-  Solution *u_sln = new Solution();
-  Solution *v_sln = new Solution();
-  Solution *ref_u_sln = new Solution();
-  Solution *ref_v_sln = new Solution();
-  ExactSolution u_exact(&u_mesh, uexact);
-  ExactSolution v_exact(&v_mesh, vexact);
-  bool verbose = true;  // Print info during adaptivity.
-  // The NULL pointer means that we do not want the resulting coefficient vector.
-  solve_linear_adapt(Tuple<Space *>(&u_space, &v_space), &wf, NULL, matrix_solver,
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                     Tuple<Solution *>(u_sln, v_sln), 
-                     Tuple<Solution *>(ref_u_sln, ref_v_sln), 
-                     Tuple<WinGeom *>(u_sln_win_geom, v_sln_win_geom), 
-                     Tuple<WinGeom *>(u_mesh_win_geom, v_mesh_win_geom), 
-                     Tuple<RefinementSelectors::Selector *> (&selector, &selector), &apt, 
-                     verbose, Tuple<ExactSolution *>(&u_exact, &v_exact));
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+
+    Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&u_space, &v_space));
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
+
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Solve the linear system of the reference problem. If successful, obtain the solutions.
+    info("Solving the matrix problem.");
+    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
+    else error ("Matrix solver failed.\n");
+  
+    // Time measurement.
+    cpu_time.tick();
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on the coarse mesh.");
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln)); 
+   
+    // View the coarse mesh solution and polynomial orders.
+    u_sview.show(&u_sln);
+    v_sview.show(&v_sln);
+    u_oview.show(&u_space);
+    v_oview.show(&v_space);
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error."); 
+    Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+    adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
+    double err_est = adaptivity->calc_elem_errors() * 100;
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
+      get_num_dofs(Tuple<Space*>(&u_space, &v_space)), get_num_dofs(*ref_spaces), err_est);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est);
+    graph_dof.save("conv_dof.dat");
+    graph_cpu.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu.save("conv_cpu.dat");
+
+    // If err_est too large, adapt the mesh.
+    if (err_est < ERR_STOP) 
+      done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+    }
+    if (get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
+
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    // Meshes are not deleted automatically with Space.
+    for(int i = 0; i < ref_spaces->size(); i++)
+      delete (*ref_spaces)[i]->mesh;
+    delete ref_spaces;
+    delete fep;
+    
+    // Increase counter.
+    as++;
+  }
+  while (done == false);
+
+  verbose("Total running time: %g s", cpu_time.accumulated());
+
+  // Show the reference solution - the final result.
+  u_sview.set_title("Fine mesh solution u");
+  u_sview.show_mesh(false);
+  u_sview.show(&u_ref_sln);
+  v_sview.set_title("Fine mesh solution v");
+  v_sview.show_mesh(false);
+  v_sview.show(&v_ref_sln);
 
   // Wait for all views to be closed.
   View::wait();

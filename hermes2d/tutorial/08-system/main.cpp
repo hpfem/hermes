@@ -15,7 +15,7 @@
 //
 // The following parameters can be changed:
 
-const int P_INIT = 4;                                      // Initial polynomial degree of all elements.
+const int P_INIT = 6;                                      // Initial polynomial degree of all elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                            // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
@@ -64,19 +64,43 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(0, callback(linear_form_surf_0), GAMMA_3_BDY);
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), GAMMA_3_BDY);
 
-  // Solve the linear problem.
-  Solution u_sln, v_sln;
-  solve_linear(Tuple<Space *>(&u_space, &v_space), &wf, matrix_solver,
-               Tuple<Solution*>(&u_sln, &v_sln));
+  // Initialize the FE problem.
+  bool is_linear = true;
+  FeProblem fep(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
 
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_solver(matrix_solver, matrix, rhs);
+
+  // Initialize the solutions.
+  Solution u_sln, v_sln;
+
+  // Assemble the stiffness matrix and right-hand side vector.
+  info("Assembling the stiffness matrix and right-hand side vector.");
+  fep.assemble(matrix, rhs);
+
+  // Solve the linear system and if successful, obtain the solutions.
+  info("Solving the matrix problem.");
+  if(solver->solve())
+    vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_sln, &v_sln));
+  else
+    error ("Matrix solver failed.\n");
+  
   // Visualize the solution.
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
-  VonMisesFilter stress(Tuple<MeshFunction*>(&u_sln, &v_sln), lambda, mu);
+  VonMisesFilter stress(Tuple<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
   view.show_mesh(false);
   view.show(&stress, H2D_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
   // Wait for the view to be closed.
   View::wait();
+
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
+
   return 0;
 }
 

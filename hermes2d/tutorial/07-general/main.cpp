@@ -117,21 +117,17 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
-  // Initialize Solution and solution vector.
+  // Initialize the solution.
   Solution sln;
-  scalar* solution_vector;
 
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
   fep.assemble(matrix, rhs);
 
-  // Solve the linear system and if successful, obtain the solution vector and solution(s).
+  // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
   if(solver->solve())
-  {
-    solution_vector = solver->get_solution();
-    vector_to_solution(solution_vector, &space, &sln);
-  }
+    vector_to_solution(solver->get_solution(), &space, &sln);
   else
     error ("Matrix solver failed.\n");
 
@@ -154,7 +150,6 @@ int main(int argc, char* argv[])
   View::wait();
 
   // Clean up.
-  delete solution_vector;
   delete solver;
   delete matrix;
   delete rhs;

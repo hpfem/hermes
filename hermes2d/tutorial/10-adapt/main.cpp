@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(callback(biform1), H2D_SYM, OMEGA_1);
   wf.add_matrix_form(callback(biform2), H2D_SYM, OMEGA_2);
 
-  // Initialize coarse and reference mesh Solutions.
+  // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
   
   // Initialize refinement selector.
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
     info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
-      
+
     // Time measurement.
     cpu_time.tick();
 
@@ -194,6 +194,9 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
+    delete ref_space->mesh;
+    delete ref_space;
+    delete fep;
     
   }
   while (done == false);
