@@ -1,10 +1,4 @@
 #include "config.h"
-#ifdef USE_PETSC
-#include <petsc.h>
-#endif
-#ifdef USE_UMFPACK
-#include <umfpack.h>
-#endif
 #include <getopt.h>
 #include <hermes3d.h>
 
@@ -99,10 +93,6 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
  * main program                                                                    *
  ***********************************************************************************/
 int main(int argc, char **args) {
-#ifdef WITH_PETSC
-  PetscInitialize(NULL, NULL, PETSC_NULL, PETSC_NULL);
-  PetscPushErrorHandler(PetscIgnoreErrorHandler, PETSC_NULL);		// disable PETSc error handler
-#endif
 
   // Load the inital mesh.
   Mesh mesh;
@@ -259,10 +249,6 @@ int main(int argc, char **args) {
     as++;
 
   } while (!done);
-
-#ifdef WITH_PETSC
-  PetscFinalize();
-#endif
 
   return 1;
 }
