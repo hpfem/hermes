@@ -91,18 +91,13 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   
-  if (PROB_PARAM == 0){
-   mloader.load("geom0.mesh", &mesh);
-   }
-  else if (PROB_PARAM == 1){
-   mloader.load("geom1.mesh", &mesh);
-   }
-  else if (PROB_PARAM == 2){
-   mloader.load("geom2.mesh", &mesh);
-   }
-  else{
-   mloader.load("geom3.mesh", &mesh);
-   } 
+  switch (PROB_PARAM) {
+    case 0: mloader.load("geom0.mesh", &mesh); break;
+    case 1: mloader.load("geom1.mesh", &mesh); break;
+    case 2: mloader.load("geom2.mesh", &mesh); break;
+    case 3: mloader.load("geom3.mesh", &mesh); break;
+    default: error("Admissible values of PROB_PARAM are 0, 1, 2, 3.");
+  }
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
