@@ -145,23 +145,23 @@ H2D_API int get_num_dofs(Tuple<Space *> spaces);
 // a special projection weak form, which is different from 
 // the weak form of the PDE. If you supply a weak form of the 
 // PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec);
+void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
 H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction *> source_meshfns, 
-                    scalar* target_vec);
+                    scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
-H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest);
+H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
 H2D_API void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec);
+                    scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
 H2D_API void project_global(Space *space, 
                     std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> proj_biform,
                     std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
-                    ExactFunction source_fn, scalar* target_vec);
+                    ExactFunction source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
-H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec);
+H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
 /// Selects the appropriate linear solver.
 H2D_API Vector* create_vector(MatrixSolverType matrix_solver);

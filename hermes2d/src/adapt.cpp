@@ -741,7 +741,7 @@ void Adapt::fill_regular_queue(Mesh** meshes, Mesh** ref_meshes) {
 void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
                     RefinementSelectors::Selector* selector, double threshold, int strategy,
                     int mesh_regularity, double err_stop, int ndof_stop, bool verbose,
-                    Solution* sln)
+                    Solution* sln, MatrixSolverType matrix_solver)
 {
   if (verbose == true) info("Mesh adaptivity to an exact function:");
 
@@ -774,7 +774,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
 
     // Project the function f() on the coarse mesh.
     scalar* coeff_vec = new scalar[rspace->get_num_dofs()];
-    project_global(space, proj_norm, sln_fine, coeff_vec);
+    project_global(space, proj_norm, sln_fine, coeff_vec, matrix_solver);
     sln_coarse->set_coeff_vector(space, coeff_vec);
     delete [] coeff_vec;
 

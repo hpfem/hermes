@@ -1370,7 +1370,7 @@ int get_num_dofs(Tuple<Space *> spaces)
 // a special projection weak form, which is different from 
 // the weak form of the PDE. If you supply a weak form of the 
 // PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
+void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int n = spaces.size();
@@ -1387,11 +1387,11 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
   bool is_linear = true;
   FeProblem* fep = new FeProblem(wf, spaces, is_linear);
 
-  SparseMatrix* matrix = create_matrix(SOLVER_UMFPACK);
-  Vector* rhs = create_vector(SOLVER_UMFPACK);
-  Solver* solver = create_solver(SOLVER_UMFPACK, matrix, rhs);
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
-  fep->assemble(NULL, matrix, rhs, false);
+  fep->assemble(matrix, rhs, false);
 
   // Calculate the coefficient vector.
   bool solved = solver->solve();
@@ -1411,7 +1411,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
 
 // global orthogonal projection
 void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec)
+                    scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int n = spaces.size();  
@@ -1450,10 +1450,10 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
     }
   }
 
-  project_internal(spaces, proj_wf, target_vec);
+  project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest)
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver)
 {
   _F_
   scalar* target_vec = new scalar[get_num_dofs(spaces)];
@@ -1461,7 +1461,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution
   for (int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
-  project_global(spaces, proj_norms, ref_slns_mf, target_vec);
+  project_global(spaces, proj_norms, ref_slns_mf, target_vec, matrix_solver);
   
   for (int i = 0; i < sols_src.size(); i++)
       sols_dest[i]->set_coeff_vector(spaces[i], target_vec);
@@ -1471,7 +1471,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution
 
 void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec)
+                    scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int n = spaces.size();
@@ -1499,7 +1499,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
 }
 
 /// Global orthogonal projection of one vector-valued ExactFunction.
-void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec)
+void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int proj_norm = 2; // Hcurl
