@@ -1490,8 +1490,8 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
   // Define projection weak form.
   WeakForm* proj_wf = new WeakForm(n);
   for (int i = 0; i < n; i++) {
-    proj_wf.add_matrix_form(i, i, proj_biforms[i].first, proj_biforms[i].second);
-    proj_wf.add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second,
+    proj_wf->add_matrix_form(i, i, proj_biforms[i].first, proj_biforms[i].second);
+    proj_wf->add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second,
                     HERMES_ANY, source_meshfns[i]);
   }
 
