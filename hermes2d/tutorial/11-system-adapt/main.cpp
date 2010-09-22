@@ -133,10 +133,10 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView u_sview("Solution u", new WinGeom(0, 0, 400, 300));
-  OrderView  u_oview("Polynomial orders u", new WinGeom(410, 0, 360, 300));
-  ScalarView v_sview("Solution v", new WinGeom(780, 0, 400, 300));
-  OrderView  v_oview("Polynomial orders v", new WinGeom(1190, 0, 400, 300));
+  ScalarView u_sview("Solution u", new WinGeom(0, 0, 360, 300));
+  OrderView  u_oview("Polynomial orders u", new WinGeom(370, 0, 360, 300));
+  ScalarView v_sview("Solution v", new WinGeom(740, 0, 400, 300));
+  OrderView  v_oview("Polynomial orders v", new WinGeom(1150, 0, 400, 300));
 
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
