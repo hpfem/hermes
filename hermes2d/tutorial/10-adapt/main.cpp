@@ -164,10 +164,6 @@ int main(int argc, char* argv[])
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
       get_num_dofs(&space), get_num_dofs(ref_space), err_est);
 
-    // Clean up.
-    delete ref_space;
-    delete fep;
-
     // Time measurement.
     cpu_time.tick();
 

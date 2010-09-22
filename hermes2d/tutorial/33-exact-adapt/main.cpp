@@ -67,6 +67,12 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf_dummy;
 
+  // Initialize coarse and reference mesh solution.
+  Solution sln, ref_sln;
+
+  // Initialize refinement selector.
+  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
   // Initialize views.
   ScalarView sview("Scalar potential Phi", 0, 0, 600, 300);
   OrderView  oview("Mesh", 620, 0, 600, 300);
@@ -74,78 +80,77 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu;
 
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;  
-  init_matrix_solver(matrix_solver, get_num_dofs(&space), mat, rhs, solver);
-
   // Adaptivity loop:
-  Solution sln_coarse, sln_fine;
-  int as = 1; bool done = false;
+  int as = 1; 
+  bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
-    // Construct globally refined reference mesh
-    // and setup reference space.
-    Mesh *ref_mesh = new Mesh();
-    ref_mesh->copy(space.get_mesh());
-    ref_mesh->refine_all_elements();
-    Space* ref_space = space.dup(ref_mesh);
-    int order_increase = 1;
-    ref_space->copy_orders(&space, order_increase);
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
 
-    // Assign the function f() to the fine mesh.
-    sln_fine.set_exact(ref_mesh, f);
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    ref_sln.set_exact(ref_space->get_mesh(), f);
 
-    // Project the function f() on the coarse mesh.
-    project_global(&space, H2D_H1_NORM, &sln_fine, &sln_coarse);
- 
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on the coarse mesh.");
+    project_global(&space, H2D_H1_NORM, &ref_sln, &sln); 
+   
+    // View the coarse mesh solution and polynomial orders.
+    sview.show(&sln);
+    oview.show(&space);
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error."); 
+    Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
+    adaptivity->set_solutions(&sln, &ref_sln);
+    double err_est = adaptivity->calc_elem_errors() * 100;
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
+      get_num_dofs(&space), get_num_dofs(ref_space), err_est);
+
     // Time measurement.
     cpu_time.tick();
 
-    // View the coarse mesh solution.
-    sview.show(&sln_coarse);
-    oview.show(&space);
-
-    // Time measurement.
-    cpu_time.tick(HERMES_SKIP);
-
-    // Calculate element errors and total error estimate.
-    info("Calculating error.");
-    Adapt hp(&space, H2D_H1_NORM);
-    hp.set_solutions(&sln_coarse, &sln_fine);
-    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
-
-    // Report results.
-    info("ndof_coarse: %d, err_est: %g%%", get_num_dofs(&space), err_est_rel);
-
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof.add_values(get_num_dofs(&space), err_est);
     graph_dof.save("conv_dof.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu.add_values(cpu_time.accumulated(), err_est);
     graph_cpu.save("conv_cpu.dat");
 
     // If err_est too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
-    else {
+    if (err_est < ERR_STOP) done = true;
+    else 
+    {
       info("Adapting coarse mesh.");
-      done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-
-      if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
     }
+    if (get_num_dofs(&space) >= NDOF_STOP) done = true;
 
-    as++;
+    // Clean up.
+    delete adaptivity;
+    if(!done)
+      delete ref_space->mesh;
+    delete ref_space;
   }
   while (done == false);
+  
   verbose("Total running time: %g s", cpu_time.accumulated());
 
-  // Show the fine mesh solution - the final result.
+  // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
   sview.show_mesh(false);
-  sview.show(&sln_fine);
+  sview.show(&ref_sln);
 
   // Wait for all views to be closed.
   View::wait();
