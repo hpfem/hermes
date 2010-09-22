@@ -8,8 +8,10 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 1;    // Number of initial uniform mesh refinements.
-const int P_INIT = 3;          // Polynomial degree of mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 3;                             // Polynomial degree of mesh elements.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Projected function.
 scalar F(double x, double y, double& dx, double& dy)
@@ -44,7 +46,7 @@ int main(int argc, char* argv[])
   Solution sln;
   Solution sln_exact(&mesh, F);
 
-  project_global(&space, H2D_L2_NORM, &sln_exact, &sln);
+  project_global(&space, H2D_L2_NORM, &sln_exact, &sln, matrix_solver);
 
   // Visualize the solution.
   ScalarView view1("Projection", 610, 0, 600, 500);

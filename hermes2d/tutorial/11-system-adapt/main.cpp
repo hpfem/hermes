@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln)); 
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     u_sview.show(&u_sln);
@@ -216,9 +216,9 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    // Meshes are not deleted automatically with Space.
-    for(int i = 0; i < ref_spaces->size(); i++)
-      delete (*ref_spaces)[i]->mesh;
+    if(done == false)
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i]->mesh;
     delete ref_spaces;
     delete fep;
     

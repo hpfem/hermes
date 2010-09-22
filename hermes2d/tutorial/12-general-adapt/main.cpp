@@ -113,8 +113,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 400, 600));
-  OrderView  oview("Polynomial orders", new WinGeom(410, 0, 400, 600));
+  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, H2D_H1_NORM, &ref_sln, &sln); 
+    project_global(&space, H2D_H1_NORM, &ref_sln, &sln, matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     sview.show(&sln);
@@ -190,7 +190,8 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    delete ref_space->mesh;
+    if (done == false)
+      delete ref_space->mesh;
     delete ref_space;
     delete fep;
     
