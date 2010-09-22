@@ -74,8 +74,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Scalar potential Phi", 0, 0, 600, 300);
-  OrderView  oview("Mesh", 620, 0, 600, 300);
+  ScalarView sview("Scalar potential Phi", new WinGeom(0, 0, 600, 300));
+  OrderView  oview("Mesh", new WinGeom(620, 0, 600, 300));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu;
