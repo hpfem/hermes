@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "../common/callstack.h"
 #include "common.h"
 #include "weakform.h"
 #include "matrix.h"
@@ -24,6 +25,7 @@
 
 WeakForm::WeakForm(int neq, bool mat_free)
 {
+  _F_
   this->neq = neq;
   seq = 0;
   this->is_matfree = mat_free;
@@ -32,13 +34,14 @@ WeakForm::WeakForm(int neq, bool mat_free)
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
                                matrix_form_ord_t ord, SymFlag sym, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
     error("Invalid equation number.");
   if (sym < -1 || sym > 1)
     error("\"sym\" must be -1, 0 or 1.");
   if (sym < 0 && i == j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
   if (mfvol.size() > 100)
     warn("Large number of forms (> 100). Is this the intent?");
@@ -55,6 +58,7 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
 // single equation case
 void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   int i = 0, j = 0;
 
   // FIXME: the code below should be replaced with a call to the full function.
@@ -62,7 +66,7 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
     error("\"sym\" must be -1, 0 or 1.");
   if (sym < 0 && i == j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
   if (mfvol.size() > 100)
     warn("Large number of forms (> 100). Is this the intent?");
@@ -78,9 +82,10 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
 
 void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
     error("Invalid equation number.");
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   MatrixFormSurf form = { i, j, area, fn, ord };
@@ -95,10 +100,11 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 // single equation case
 void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   int i = 0, j = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   MatrixFormSurf form = { i, j, area, fn, ord };
@@ -112,9 +118,10 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
 
 void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   VectorFormVol form = { i, area, fn, ord };
@@ -129,10 +136,11 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 // single equation case
 void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   VectorFormVol form = { i, area, fn, ord };
@@ -146,9 +154,10 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int 
 
 void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   VectorFormSurf form = { i, area, fn, ord };
@@ -163,10 +172,11 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
 // single equation case
 void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area, Tuple<MeshFunction*>ext)
 {
+  _F_
   int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != H2D_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   VectorFormSurf form = { i, area, fn, ord };
@@ -180,6 +190,7 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
 
 void WeakForm::set_ext_fns(void* fn, Tuple<MeshFunction*>ext)
 {
+  _F_
   error("Not implemented yet.");
 }
 
@@ -189,45 +200,52 @@ void WeakForm::set_ext_fns(void* fn, Tuple<MeshFunction*>ext)
 /// Constructs a list of assembling stages. Each stage contains a list of forms
 /// that share the same meshes. Each stage is then assembled separately. This
 /// improves the performance of multi-mesh assembling.
+/// This function is identical in H2D and H3D.
 ///
-void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext, std::vector<WeakForm::Stage>& stages, bool rhsonly)
+void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext, 
+               std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
+  _F_
   unsigned i;
   stages.clear();
 
-  // process volume matrix_forms
+  // process volume matrix forms
   for (i = 0; i < mfvol.size(); i++)
   {
     int ii = mfvol[i].i, jj = mfvol[i].j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
-    Stage* s = find_stage(stages, ii, jj, m1, m2, mfvol[i].ext, u_ext);
+    Stage* s = find_stage(stages, ii, jj, m1, m2, 
+                          mfvol[i].ext, u_ext);
     s->mfvol.push_back(&mfvol[i]);
   }
 
-  // process surface matrix_forms
+  // process surface matrix forms
   for (i = 0; i < mfsurf.size(); i++)
   {
     int ii = mfsurf[i].i, jj = mfsurf[i].j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
-    Stage* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i].ext, u_ext);
+    Stage* s = find_stage(stages, ii, jj, m1, m2, 
+                          mfsurf[i].ext, u_ext);
     s->mfsurf.push_back(&mfsurf[i]);
   }
 
-  // process volume res forms
+  // process volume vector forms
   for (unsigned i = 0; i < vfvol.size(); i++) {
     int ii = vfvol[i].i;
     Mesh *m = spaces[ii]->get_mesh();
-    Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i].ext, u_ext);
+    Stage *s = find_stage(stages, ii, ii, m, m, 
+                          vfvol[i].ext, u_ext);
     s->vfvol.push_back(&vfvol[i]);
   }
 
-  // process surface res forms
+  // process surface vector forms
   for (unsigned i = 0; i < vfsurf.size(); i++) {
     int ii = vfsurf[i].i;
     Mesh *m = spaces[ii]->get_mesh();
-    Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i].ext, u_ext);
+    Stage *s = find_stage(stages, ii, ii, m, m, 
+                          vfsurf[i].ext, u_ext);
     s->vfsurf.push_back(&vfsurf[i]);
   }
 
@@ -268,11 +286,13 @@ void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext, std::v
 
 /// Finds an assembling stage with the same set of meshes as [m1, m2, ext, u_ext]. If no such
 /// stage can be found, a new one is created and returned.
+/// This function is the same in H2D and H3D.
 ///
 WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2, 
                                       std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext)
 {
+  _F_
   // first create a list of meshes the form uses
   std::set<unsigned> seq;
   seq.insert(m1->get_seq());
@@ -322,9 +342,11 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
 
 /// Returns a (neq x neq) array containing true in each element, if the corresponding
 /// block of weak forms is used, and false otherwise.
+/// This function is the same in H2D and H3D.
 ///
 bool** WeakForm::get_blocks()
 {
+  _F_
   bool** blocks = new_matrix<bool>(neq, neq);
   for (int i = 0; i < neq; i++)
     for (int j = 0; j < neq; j++)
@@ -347,6 +369,7 @@ bool** WeakForm::get_blocks()
 
 bool WeakForm::is_in_area_2(int marker, int area) const
 {
+  _F_
   if (-area > (int)areas.size()) error("Invalid area number.");
   const Area* a = &areas[-area-1];
 

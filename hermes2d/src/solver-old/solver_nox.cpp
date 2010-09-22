@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../config.h"
-#include "nox.h"
+#include "solver_nox.h"
 
 #define NOX_NOT_COMPILED "hermes2d was not built with NOX support."
 
@@ -33,7 +33,7 @@ class NoxProblemInterface :
 	public NOX::Epetra::Interface::Preconditioner
 {
 public:
-	NoxProblemInterface(DiscreteProblem* problem);
+	NoxProblemInterface(FeProblem* problem);
 	virtual ~NoxProblemInterface();
 
 	/// Compute and return F
@@ -60,7 +60,7 @@ public:
     Teuchos::RCP<Precond> get_precond() { return precond; }
 	void set_precond(Teuchos::RCP<Precond> &pc);
 
-	DiscreteProblem* fep;			// finite element problem being solved
+	FeProblem* fep;			// finite element problem being solved
 
 	EpetraVector init_sln;		// initial solution
 	EpetraMatrix jacobian;		// jacobian (optional)
@@ -69,7 +69,7 @@ public:
 	void prealloc_jacobian();
 };
 
-NoxProblemInterface::NoxProblemInterface(DiscreteProblem* problem)
+NoxProblemInterface::NoxProblemInterface(FeProblem* problem)
 {
   fep = problem;
   int ndof = fep->get_num_dofs();
@@ -111,10 +111,8 @@ bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, Fil
   EpetraVector rhs(f);
 
   rhs.zero();
-  // The first NULL is for the global matrix.
-  scalar* coeff_vec;
-  xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, NULL, &rhs);
+  // The first NULL is for the global matrix, the other for the Dir vector.
+  fep->assemble(&xx, NULL, &rhs, NULL);
 
   return true;
 }
@@ -128,10 +126,8 @@ bool NoxProblemInterface::computeJacobian(const Epetra_Vector &x, Epetra_Operato
   EpetraMatrix jacobian(*jac);
 
   jacobian.zero();
-  // The first NULL is for the right-hand side.
-  scalar* coeff_vec;
-  xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, &jacobian, NULL);
+  // The first NULL is for the right-hand side, the other for the Dir vector.
+  fep->assemble(&xx, &jacobian, NULL, NULL);
   jacobian.finish();
 
   return true;
@@ -146,10 +142,8 @@ bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_O
   EpetraVector xx(x);			// wrap our structures around core Epetra objects
 
   jacobian.zero();
-  // The first NULL is for the right-hand side.
-  scalar* coeff_vec;
-  xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, &jacobian, NULL);
+  // The first NULL is for the right-hand side, the other for the Dir vector.
+  fep->assemble(&xx, &jacobian, NULL, NULL);
   jacobian.finish();
 
   precond->create(&jacobian);
@@ -163,7 +157,7 @@ bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_O
 
 // NOX solver //////////////////////////////////////////////////////////////////////////////////////
 
-NoxSolver::NoxSolver(DiscreteProblem* problem)
+NoxSolver::NoxSolver(FeProblem* problem)
 {
 #ifdef HAVE_NOX
   // default values
@@ -209,7 +203,6 @@ NoxSolver::~NoxSolver()
 #endif
 }
 
-#ifdef HAVE_TEUCHOS
 void NoxSolver::set_precond(Teuchos::RCP<Precond> &pc)
 {
 #ifdef HAVE_NOX
@@ -217,7 +210,6 @@ void NoxSolver::set_precond(Teuchos::RCP<Precond> &pc)
   interface->set_precond(pc);
 #endif
 }
-#endif
 
 void NoxSolver::set_precond(const char *pc)
 {
@@ -305,7 +297,7 @@ bool NoxSolver::solve()
        else if (strcasecmp(precond_type, "Ifpack") == 0)
          ls_pars.set("Preconditioner", "Ifpack");
        else {
-         printf("Warning: Unsupported type of preconditioner.\n");
+         warn("Unsupported type of preconditioner.");
          ls_pars.set("Preconditioner", "None");
        }
      }

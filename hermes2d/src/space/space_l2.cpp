@@ -90,15 +90,9 @@ void L2Space::get_element_assembly_list(Element* e, AsmList* al)
     error("The space is out of date. You need to update it with assign_dofs()"
           " any time the mesh changes.");
 
-  // add vertex, edge and bubble functions to the assembly list
+  // add bubble functions to the assembly list
   al->clear();
   shapeset->set_mode(e->get_mode());
-  /*
-  for (i = 0; i < e->nvert; i++)
-    get_vertex_assembly_list(e, i, al);
-  for (i = 0; i < e->nvert; i++)
-    get_edge_assembly_list_internal(e, i, al);
-  */
   get_bubble_assembly_list(e, al);
 }
 
@@ -114,22 +108,23 @@ void L2Space::get_bubble_assembly_list(Element* e, AsmList* al)
   }
 }
 
-
-void L2Space::get_edge_assembly_list_internal(Element* e, int ie, AsmList* al)
+// FIXME: this should only return bubble functions which are nonzero on the
+// given element surface 
+void L2Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
 {
     this->get_bubble_assembly_list(e, al);
 }
 
-scalar* L2Space::get_bc_projection(EdgePos* ep, int order)
+scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
 {
   assert(order >= 1);
   scalar* proj = new scalar[order + 1];
 
   // obtain linear part of the projection
-  ep->t = ep->lo;
-  proj[0] = bc_value_callback_by_edge(ep);
-  ep->t = ep->hi;
-  proj[1] = bc_value_callback_by_edge(ep);
+  surf_pos->t = surf_pos->lo;
+  proj[0] = bc_value_callback_by_edge(surf_pos);
+  surf_pos->t = surf_pos->hi;
+  proj[1] = bc_value_callback_by_edge(surf_pos);
 
   if (order-- > 1)
   {
@@ -147,9 +142,9 @@ scalar* L2Space::get_bc_projection(EdgePos* ep, int order)
       {
         double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
         scalar l = proj[0] * s + proj[1] * t;
-        ep->t = ep->lo * s + ep->hi * t;
+        surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
         rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-                           * (bc_value_callback_by_edge(ep) - l);
+                           * (bc_value_callback_by_edge(surf_pos) - l);
       }
     }
 

@@ -2392,3 +2392,16 @@ void Space::dump() {
 		elm_data[eid]->dump(eid);
 	}
 }
+
+// This is identical to H2D.
+int assign_dofs(Tuple<Space*> spaces) 
+{
+  int n = spaces.size();
+  // assigning dofs to each space
+  int ndof = 0;  
+  for (int i = 0; i < n; i++) {
+    ndof += spaces[i]->assign_dofs(ndof);
+  }
+
+  return ndof;
+}

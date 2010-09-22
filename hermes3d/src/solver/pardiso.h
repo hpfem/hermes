@@ -21,7 +21,7 @@
 #ifndef _PARDISO_SOLVER_H_
 #define _PARDISO_SOLVER_H_
 
-#include "../solver.h"
+#include "solver.h"
 #include "../matrix.h"
 
 class PardisoMatrix : public SparseMatrix {
@@ -62,6 +62,7 @@ public:
 	virtual void zero();
 	virtual void set(int idx, scalar y);
 	virtual void add(int idx, scalar y);
+  virtual void extract(scalar *v) const;
 	virtual void add(int n, int *idx, scalar *y);
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
@@ -77,7 +78,6 @@ protected:
 class PardisoLinearSolver : public LinearSolver {
 public:
 	PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
-	PardisoLinearSolver(LinearProblem *lp);
 	virtual ~PardisoLinearSolver();
 
 	virtual bool solve();

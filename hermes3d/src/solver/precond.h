@@ -1,27 +1,23 @@
-// This file is part of Hermes3D
+// This file is part of Hermes2D
 //
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Hermes2D is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
 //
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
+// Hermes2D is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _PRECOND_H_
-#define _PRECOND_H_
+#ifndef __H2D_PRECOND_H_
+#define __H2D_PRECOND_H_
 
-#include "matrix.h"
-#include "weakform.h"
+#include "../matrix.h"
+#include "../weakform.h"
 
 #ifdef HAVE_EPETRA
 #include <Epetra_Operator.h>
@@ -44,8 +40,6 @@ public:
 	virtual void destroy() = 0;
 	virtual void compute() = 0;
 
-	double get_time() { return time; }
-
 #ifdef HAVE_EPETRA
 	virtual Epetra_Operator *get_obj() = 0;
 
@@ -61,9 +55,6 @@ public:
 	virtual const Epetra_Map &OperatorDomainMap() const = 0;
 	virtual const Epetra_Map &OperatorRangeMap() const = 0;
 #endif
-
-protected:
-	double time;
 };
 
 #endif /* _PRECOND_H_ */

@@ -21,8 +21,8 @@
 #define _AZTECOO_SOLVER_H_
 
 #include "epetra.h"
-#include "../solver.h"
-#include "../precond/ifpack.h"
+#include "solver.h"
+#include "precond_ifpack.h"
 
 #ifdef HAVE_AZTECOO
 #include <AztecOO.h>
@@ -34,7 +34,6 @@
 class AztecOOSolver : public LinearSolver {
 public:
 	AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs);
-	AztecOOSolver(LinearProblem *lp);
 	virtual ~AztecOOSolver();
 
 	virtual bool solve();

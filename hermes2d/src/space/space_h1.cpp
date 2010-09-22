@@ -177,9 +177,9 @@ void H1Space::get_vertex_assembly_list(Element* e, int iv, AsmList* al)
 }
 
 
-void H1Space::get_edge_assembly_list_internal(Element* e, int ie, AsmList* al)
+void H1Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
 {
-  Node* en = e->en[ie];
+  Node* en = e->en[surf_num];
   NodeData* nd = &ndata[en->id];
   if (get_element_order(e->id) == 0) return;
 
@@ -187,15 +187,15 @@ void H1Space::get_edge_assembly_list_internal(Element* e, int ie, AsmList* al)
   {
     if (nd->dof >= 0)
     {
-      int ori = (e->vn[ie]->id < e->vn[e->next_vert(ie)]->id) ? 0 : 1;
+      int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
       for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-        al->add_triplet(shapeset->get_edge_index(ie, ori, j+2), dof, 1.0);
+        al->add_triplet(shapeset->get_edge_index(surf_num, ori, j+2), dof, 1.0);
     }
     else
     {
       for (int j = 0; j < nd->n; j++)
       {
-        al->add_triplet(shapeset->get_edge_index(ie, 0, j+2), -1, nd->edge_bc_proj[j+2]);
+        al->add_triplet(shapeset->get_edge_index(surf_num, 0, j+2), -1, nd->edge_bc_proj[j+2]);
       }
     }
   }
@@ -207,23 +207,23 @@ void H1Space::get_edge_assembly_list_internal(Element* e, int ie, AsmList* al)
 
     nd = &ndata[nd->base->id];
     for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-      al->add_triplet(shapeset->get_constrained_edge_index(ie, j+2, ori, part), dof, 1.0);
+      al->add_triplet(shapeset->get_constrained_edge_index(surf_num, j+2, ori, part), dof, 1.0);
   }
 }
 
 
 //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
-scalar* H1Space::get_bc_projection(EdgePos* ep, int order)
+scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 {
   assert(order >= 1);
   scalar* proj = new scalar[order + 1];
 
   // obtain linear part of the projection
-  ep->t = ep->lo;
-  proj[0] = bc_value_callback_by_edge(ep);
-  ep->t = ep->hi;
-  proj[1] = bc_value_callback_by_edge(ep);
+  surf_pos->t = surf_pos->lo;
+  proj[0] = bc_value_callback_by_edge(surf_pos);
+  surf_pos->t = surf_pos->hi;
+  proj[1] = bc_value_callback_by_edge(surf_pos);
 
   if (order-- > 1)
   {
@@ -241,9 +241,9 @@ scalar* H1Space::get_bc_projection(EdgePos* ep, int order)
       {
         double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
         scalar l = proj[0] * s + proj[1] * t;
-        ep->t = ep->lo * s + ep->hi * t;
+        surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
         rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-                           * (bc_value_callback_by_edge(ep) - l);
+                           * (bc_value_callback_by_edge(surf_pos) - l);
       }
     }
 

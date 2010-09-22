@@ -1,63 +1,49 @@
-// This file is part of Hermes3D
+// This file is part of Hermes2D
 //
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Hermes2D is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
 //
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
+// Hermes2D is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-//#include "../h3dconfig.h"
-#include "aztecoo.h"
-#include "../discrete_problem.h"
-#include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../config.h"
+#include "solver_aztecoo.h"
 #ifdef HAVE_KOMPLEX
 #include <Komplex_LinearProblem.h>
 #endif
 
-#define H2D_AZTECOO_NOT_COMPILED   "hermes2d was not built with AztecOO support."
+#define AZTECOO_NOT_COMPILED "hermes2d was not built with AztecOO support."
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
-AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
-	: LinearSolver(), m(m), rhs(rhs)
+AztecOOSolver::AztecOOSolver(EpetraMatrix &m, EpetraVector &rhs)
+	: IterSolver(), m(m), rhs(rhs)
 {
-	_F_
 #ifdef HAVE_AZTECOO
 	// set default values
 	max_iters = 10000;
 	tolerance = 10e-8;
 	pc = NULL;
 #else
-	warning(H2D_AZTECOO_NOT_COMPILED);
-	exit(128);
+	error(AZTECOO_NOT_COMPILED);
 #endif
 }
 
-
 AztecOOSolver::~AztecOOSolver()
 {
-	_F_
 #ifdef HAVE_AZTECOO
-	if (m != NULL) delete m;
-	if (rhs != NULL) delete rhs;
 #endif
 }
 
 void AztecOOSolver::set_solver(const char *name)
 {
-	_F_
 #ifdef HAVE_AZTECOO
 	int az_solver;
 	if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
@@ -73,7 +59,6 @@ void AztecOOSolver::set_solver(const char *name)
 
 void AztecOOSolver::set_precond(const char *name)
 {
-	_F_
 #ifdef HAVE_AZTECOO
 	int az_precond;
 	if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
@@ -86,41 +71,19 @@ void AztecOOSolver::set_precond(const char *name)
 #endif
 }
 
-void AztecOOSolver::set_option(int option, int value)
-{
-	_F_
-#ifdef HAVE_AZTECOO
-	aztec.SetAztecOption(option, value);
-#endif
-}
-
-void AztecOOSolver::set_param(int param, double value)
-{
-	_F_
-#ifdef HAVE_AZTECOO
-	aztec.SetAztecParam(param, value);
-#endif
-}
-
 bool AztecOOSolver::solve()
 {
-	_F_
 #ifdef HAVE_AZTECOO
-	assert(m != NULL);
-	assert(rhs != NULL);
-	assert(m->size == rhs->size);
-
-	Timer tmr;
-	tmr.start();
+	assert(m.size == rhs.size);
 
 	// no output
 	aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
 
 #ifndef H2D_COMPLEX
 	// setup the problem
-	aztec.SetUserMatrix(m->mat);
-	aztec.SetRHS(rhs->vec);
-	Epetra_Vector x(*rhs->std_map);
+	aztec.SetUserMatrix(m.mat);
+	aztec.SetRHS(rhs.vec);
+	Epetra_Vector x(*rhs.std_map);
 	aztec.SetLHS(&x);
 
 	if (pc != NULL) {
@@ -132,24 +95,20 @@ bool AztecOOSolver::solve()
 	// solve it
 	aztec.Iterate(max_iters, tolerance);
 
-	tmr.stop();
-	time = tmr.get_seconds();
-
 	delete [] sln;
-	sln = new scalar[m->size];
-	MEM_CHECK(sln);
-	memset(sln, 0, m->size * sizeof(scalar));
+	sln = new scalar[m.size];
+	memset(sln, 0, m.size * sizeof(scalar));
 
 	// copy the solution into sln vector
-	for (int i = 0; i < m->size; i++) sln[i] = x[i];
+	for (int i = 0; i < m.size; i++) sln[i] = x[i];
 #else
 	double c0r = 1.0, c0i = 0.0;
 	double c1r = 0.0, c1i = 1.0;
 
-	Epetra_Vector xr(*rhs->std_map);
-	Epetra_Vector xi(*rhs->std_map);
+	Epetra_Vector xr(*rhs.std_map);
+	Epetra_Vector xi(*rhs.std_map);
 
-	Komplex_LinearProblem kp(c0r, c0i, *m->mat, c1r, c1i, *m->mat_im, xr, xi, *rhs->vec, *rhs->vec_im);
+	Komplex_LinearProblem kp(c0r, c0i, *m.mat, c1r, c1i, *m.mat_im, xr, xi, *rhs.vec, *rhs.vec_im);
 	Epetra_LinearProblem *lp = kp.KomplexProblem();
 	aztec.SetProblem(*lp);
 
@@ -159,12 +118,11 @@ bool AztecOOSolver::solve()
 	kp.ExtractSolution(xr, xi);
 
 	delete [] sln;
-	sln = new scalar[m->size];
-	MEM_CHECK(sln);
-	memset(sln, 0, m->size * sizeof(scalar));
+	sln = new scalar[m.size];
+	memset(sln, 0, m.size * sizeof(scalar));
 
 	// copy the solution into sln vector
-	for (int i = 0; i < m->size; i++) sln[i] = scalar(xr[i], xi[i]);
+	for (int i = 0; i < m.size; i++) sln[i] = scalar(xr[i], xi[i]);
 #endif
 	return true;
 #else
@@ -174,21 +132,9 @@ bool AztecOOSolver::solve()
 
 int AztecOOSolver::get_num_iters()
 {
-	_F_
 #ifdef HAVE_AZTECOO
 	return aztec.NumIters();
 #else
 	return -1;
 #endif
 }
-
-double AztecOOSolver::get_residual()
-{
-	_F_
-#ifdef HAVE_AZTECOO
-	return aztec.TrueResidual();
-#else
-	return -1.0;
-#endif
-}
-

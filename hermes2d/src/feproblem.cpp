@@ -36,30 +36,33 @@
 
 FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
 {
-  this->is_linear = is_linear;
-
+  _F_
   // sanity checks
   int n = spaces.size();
-  this->wf = wf;
   if (n != wf->neq) error("Bad number of spaces in FeProblem.");
 
   this->wf = wf;
   this->spaces = spaces;
+  this->is_linear = is_linear;
 
   sp_seq = new int[wf->neq];
   memset(sp_seq, -1, sizeof(int) * wf->neq);
   wf_seq = -1;
+
+  // This is different from H3D.
   pss = new PrecalcShapeset*[wf->neq];
   num_user_pss = 0;
 
-  buffer = NULL;
-  mat_size = 0;
+  matrix_buffer = NULL;
+  matrix_buffer_dim = 0;
 
   values_changed = true;
   struct_changed = true;
+
   have_matrix = false;
 
-  memset(sp_seq, -1, sizeof(int) * wf->neq);
+  this->spaces = Tuple<Space *>();
+  for (int i = 0; i < wf->neq; i++) this->spaces.push_back(spaces[i]);
   have_spaces = true;
 
   // initialize precalc shapesets
@@ -71,7 +74,7 @@ FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
     if (shapeset == NULL) error("Internal in DiscreteProblem::init_spaces().");
     PrecalcShapeset *p = new PrecalcShapeset(shapeset);
     if (p == NULL) error("New PrecalcShapeset could not be allocated in DiscreteProblem::init_spaces().");
-    this-> pss[i] = p;
+    this->pss[i] = p;
     this->num_user_pss++;
   }  
 
@@ -81,23 +84,15 @@ FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
 
 FeProblem::~FeProblem()
 {
+  _F_
   free();
   if (sp_seq != NULL) delete [] sp_seq;
   if (pss != NULL) delete [] pss;
 }
 
-/*
-void FeProblem::set_pss(Tuple<PrecalcShapeset*> pss)
-{
-  int n = pss.size();
-  //printf("size = %d\n", n);
-  if (n != this->wf->neq) error("Bad number of pss in FeProblem.");
-  for (int i = 0; i < n; i++) this->pss[i] = pss[i];
-}
-*/
-
 void FeProblem::free()
 {
+  _F_
   struct_changed = values_changed = true;
   memset(sp_seq, -1, sizeof(int) * wf->neq);
   wf_seq = -1;
@@ -105,16 +100,27 @@ void FeProblem::free()
 
 int FeProblem::get_num_dofs()
 {
+  _F_
   ndof = 0;
   for (int i = 0; i < wf->neq; i++)
     ndof += spaces[i]->get_num_dofs();
   return ndof;
 }
 
+scalar** FeProblem::get_matrix_buffer(int n)
+{
+  _F_
+  if (n <= matrix_buffer_dim) return matrix_buffer;
+  if (matrix_buffer != NULL) delete [] matrix_buffer;
+  return (matrix_buffer = new_matrix<scalar>(matrix_buffer_dim = n));
+}
+
 //// matrix structure precalculation ///////////////////////////////////////////////////////////////
 
+// This functions is identical in H2D and H3D.
 bool FeProblem::is_up_to_date()
 {
+  _F_
   // check if we can reuse the matrix structure
   bool up_to_date = true;
   if (!have_matrix) up_to_date = false;
@@ -129,8 +135,10 @@ bool FeProblem::is_up_to_date()
 
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
+// This functions is identical in H2D and H3D.
 void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
+  _F_
   assert(mat != NULL);
 
   if (is_up_to_date())
@@ -148,26 +156,26 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   int ndof = get_num_dofs();
   mat->prealloc(ndof);
 
+  // This is different in H3D.
   AUTOLA_CL(AsmList, al, wf->neq);
   AUTOLA_OR(Mesh*, meshes, wf->neq);
   bool **blocks = wf->get_blocks();
 
-  // init multi-mesh traversal
+  // Init multi-mesh traversal.
   for (int i = 0; i < wf->neq; i++)
     meshes[i] = spaces[i]->get_mesh();
 
   Traverse trav;
   trav.begin(wf->neq, meshes);
 
-  // loop through all elements
+  // Loop through all elements.
   Element **e;
   while ((e = trav.get_next_state(NULL, NULL)) != NULL)
   {
     // obtain assembly lists for the element at all spaces
     for (int i = 0; i < wf->neq; i++)
       // TODO: do not get the assembly list again if the element was not changed
-      if (e[i] != NULL)
-        spaces[i]->get_element_assembly_list(e[i], al + i);
+      if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
 
     // go through all equation-blocks of the local stiffness matrix
     for (int m = 0; m < wf->neq; m++)
@@ -207,6 +215,7 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 // Light version for linear problems.
 void FeProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly) 
 {
+  _F_
   assemble(NULL, mat, rhs, rhsonly);
 }
 
@@ -214,6 +223,9 @@ void FeProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 // light version above.
 void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
+  /* BEGIN IDENTICAL CODE WITH H3D */
+
+	_F_
   // Sanity checks.
   if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
   if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
@@ -236,13 +248,14 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
       u_ext.push_back(NULL);
   }
  
-  int k, m, n, marker;
+  /* END IDENTICAL CODE WITH H3D */
+
   AUTOLA_CL(AsmList, al, wf->neq);
   AsmList *am, *an;
-  bool bnd[4];
+  bool bnd[4];			    // FIXME: magic number - maximal possible number of element surfaces
   AUTOLA_OR(bool, nat, wf->neq);
   AUTOLA_OR(bool, isempty, wf->neq);
-  EdgePos ep[4];
+  SurfPos surf_pos[4];
   reset_warn_order();
 
   // create slave pss's for test functions, init quadrature points
@@ -257,9 +270,9 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
     refmap[i].set_quad_2d(&g_quad_2d_std);
   }
 
-  // initialize buffer
-  buffer = NULL;
-  mat_size = 0;
+  // initialize matrix buffer
+  matrix_buffer = NULL;
+  matrix_buffer_dim = 0;
   get_matrix_buffer(9);
 
   // obtain a list of assembling stages
@@ -283,7 +296,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
 
     // assemble one stage
     Element** e;
-    while ((e = trav.get_next_state(bnd, ep)) != NULL)
+    while ((e = trav.get_next_state(bnd, surf_pos)) != NULL)
     {
       // find a non-NULL e[i]
       Element* e0;
@@ -303,16 +316,22 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
       {
         int j = s->idx[i];
         if (e[i] == NULL) { isempty[j] = true; continue; }
-        spaces[j]->get_element_assembly_list(e[i], al+j);
 
+        // TODO: do not obtain again if the element was not changed
+        spaces[j]->get_element_assembly_list(e[i], al + j);
+
+        // This is different in H3D (PrecalcShapeset is not used)
         spss[j]->set_active_element(e[i]);
         spss[j]->set_master_transform();
+
+        // This is different in H2D (PrecalcShapeset is not used).
         refmap[j].set_active_element(e[i]);
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
       }
-      marker = e0->marker;
+      int marker = e0->marker;
 
-      init_cache();
+      init_cache();     // This is different in H2D.
+
       //// assemble volume matrix forms //////////////////////////////////////
       if (mat != NULL)
       {
@@ -320,11 +339,17 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
         {
           WeakForm::MatrixFormVol* mfv = s->mfvol[ww];
           if (isempty[mfv->i] || isempty[mfv->j]) continue;
-          if (mfv->area != H2D_ANY && !wf->is_in_area(marker, mfv->area)) continue;
-          m = mfv->i;  fv = spss[m];  am = &al[m];
-          n = mfv->j;  fu = pss[n];   an = &al[n];
+          if (mfv->area != HERMES_ANY && !wf->is_in_area(marker, mfv->area)) continue;
+          int m = mfv->i;  
+          int n = mfv->j;  
+          fu = pss[n]; 
+          fv = spss[m];  
+          am = &al[m];  
+          an = &al[n];
           bool tra = (m != n) && (mfv->sym != 0);
           bool sym = (m == n) && (mfv->sym == 1);
+
+	  /* BEGIN IDENTICAL CODE WITH H3D */
 
           // assemble the local stiffness matrix for the form mfv
           scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
@@ -343,13 +368,13 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {
-                    scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                    scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   } 
                 }
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                  scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 }
               }
@@ -365,18 +390,19 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {
-                    scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                    scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   }
                 } 
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfv, u_ext, fu, fv, &refmap[n], &refmap[m]) * an->coef[j] * am->coef[i];
+                  scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
                 }
               }
             }
           }
+
           // insert the local stiffness matrix into the global one
           if (rhsonly == false)
             mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
@@ -411,6 +437,10 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
         }
       }
 
+      /* END IDENTICAL CODE WITH H3D
+         Assembling of volume vector forms below is almost identical, there
+         is only one line of difference that is highlighted below */
+
       //// assemble volume vector forms ////////////////////////////////////////
       if (rhs != NULL)
       {
@@ -418,8 +448,10 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
         {
           WeakForm::VectorFormVol* vfv = s->vfvol[ww];
           if (isempty[vfv->i]) continue;
-          if (vfv->area != H2D_ANY && !wf->is_in_area(marker, vfv->area)) continue;
-          m = vfv->i;  fv = spss[m];  am = &al[m];
+          if (vfv->area != HERMES_ANY && !wf->is_in_area(marker, vfv->area)) continue;
+          int m = vfv->i;  
+          fv = spss[m];    // H3D uses fv = test_fn + m;
+          am = al + m;
 
           for (int i = 0; i < am->cnt; i++)
           {
@@ -431,19 +463,21 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
         }
       }
 
-      // assemble surface integrals now: loop through boundary edges of the element
-      for (unsigned int edge = 0; edge < e0->nvert; edge++)
+      // assemble surface integrals now: loop through surfaces of the element
+      for (unsigned int isurf = 0; isurf < e0->get_num_surf(); isurf++)
       {
-        if (!bnd[edge]) continue;
-        marker = ep[edge].marker;
+        // H3D is freeing a fn_cache at this point
 
-        // obtain the list of shape functions which are nonzero on this edge
+        if (!bnd[isurf]) continue;
+        int marker = surf_pos[isurf].marker;
+
+        // obtain the list of shape functions which are nonzero on this surface
         for (unsigned int i = 0; i < s->idx.size(); i++) 
         {
           if (e[i] == NULL) continue;
           int j = s->idx[i];
           if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
-            spaces[j]->get_edge_assembly_list(e[i], edge, al + j);
+            spaces[j]->get_boundary_assembly_list(e[i], isurf, al + j);
         }
 
         // assemble surface matrix forms ///////////////////////////////////
@@ -453,14 +487,18 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
           {
             WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
             if (isempty[mfs->i] || isempty[mfs->j]) continue;
-            if (mfs->area != H2D_ANY && !wf->is_in_area(marker, mfs->area)) continue;
-            m = mfs->i;  fv = spss[m];  am = &al[m];
-            n = mfs->j;  fu = pss[n];   an = &al[n];
+            if (mfs->area != HERMES_ANY && !wf->is_in_area(marker, mfs->area)) continue;
+            int m = mfs->i;  
+            int n = mfs->j;  
+            fu = pss[n];      // This is different in H3D.
+            fv = spss[m];     // This is different in H3D.
+            am = al + m;
+            an = al + n;
 
             if (!nat[m] || !nat[n]) continue;
-            ep[edge].base = trav.get_base();
-            ep[edge].space_v = spaces[m];
-            ep[edge].space_u = spaces[n];
+            surf_pos[isurf].base = trav.get_base();
+            surf_pos[isurf].space_v = spaces[m];
+            surf_pos[isurf].space_u = spaces[n];
 
             scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
             for (int i = 0; i < am->cnt; i++)
@@ -474,13 +512,15 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {
-                    scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) * an->coef[j] * am->coef[i];
+                    scalar val = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m, 
+                                           surf_pos + isurf) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   }
                 }
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfs, u_ext, fu, fv, &refmap[n], &refmap[m], &(ep[edge])) * an->coef[j] * am->coef[i];
+                  scalar val = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m, 
+                                         surf_pos + isurf) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 } 
               }
@@ -489,43 +529,52 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
               mat->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
           }
         }
-        // assemble surface linear forms /////////////////////////////////////
+
+        // assemble surface vector forms /////////////////////////////////////
         if (rhs != NULL)
         {
-          for (unsigned ww = 0; ww < s->vfsurf.size(); ww++)
+          for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
           {
             WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
             if (isempty[vfs->i]) continue;
-            if (vfs->area != H2D_ANY && !wf->is_in_area(marker, vfs->area)) continue;
-            m = vfs->i;  fv = spss[m];  am = &al[m];
+            if (vfs->area != HERMES_ANY && !wf->is_in_area(marker, vfs->area)) continue;
+            int m = vfs->i;  
+            fv = spss[m];        // This is different from H3D.  
+            am = al + m;
 
             if (!nat[m]) continue;
-            ep[edge].base = trav.get_base();
-            ep[edge].space_v = spaces[m];
+            surf_pos[isurf].base = trav.get_base();
+            surf_pos[isurf].space_v = spaces[m];
 
             for (int i = 0; i < am->cnt; i++)
             {
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
-              scalar val = eval_form(vfs, u_ext, fv, refmap+m, ep+edge) * am->coef[i];
+              scalar val = eval_form(vfs, u_ext, fv, refmap + m, surf_pos + isurf) * am->coef[i];
               rhs->add(am->dof[i], val);
             }
           }
         }
       }
-      delete_cache();
+
+      delete_cache();   // This is different in H3D.
     }
+
     trav.finish();
   }
 
-  for (int i = 0; i < wf->neq; i++) delete spss[i];
-  delete [] buffer;
-  buffer = NULL;
-  mat_size = 0;
+  for (int i = 0; i < wf->neq; i++) delete spss[i];  // This is different from H3D.
+
+  // Cleaning up.
+  delete [] matrix_buffer;
+  matrix_buffer = NULL;
+  matrix_buffer_dim = 0;
 
   // Delete temporary solutions.
-  for (int i = 0; i < wf->neq; i++) {
-    if (u_ext[i] != NULL) {
+  for (int i = 0; i < wf->neq; i++) 
+  {
+    if (u_ext[i] != NULL) 
+    {
       delete u_ext[i];
       u_ext[i] = NULL;
     }
@@ -537,6 +586,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
 // Initialize integration order for external functions
 ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext)
 {
+  _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
   fake_ext->nf = ext.size();
   Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
@@ -550,6 +600,7 @@ ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext)
 // Initialize external functions (obtain values, derivatives,...)
 ExtData<scalar>* FeProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order)
 {
+  _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
   for (unsigned i = 0; i < ext.size(); i++) {
@@ -566,6 +617,7 @@ ExtData<scalar>* FeProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMa
 // Initialize integration order on a given edge for external functions
 ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge)
 {
+  _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
   fake_ext->nf = ext.size();
   Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
@@ -579,6 +631,7 @@ ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int 
 // Initialize shape function values and derivatives (fill in the cache)
 Func<double>* FeProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
+  _F_
   PrecalcShapeset::Key key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
   if (cache_fn[key] == NULL)
     cache_fn[key] = init_fn(fu, rm, order);
@@ -589,6 +642,7 @@ Func<double>* FeProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order
 // Caching transformed values
 void FeProblem::init_cache()
 {
+  _F_
   for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
   {
     cache_e[i] = NULL;
@@ -598,6 +652,7 @@ void FeProblem::init_cache()
 
 void FeProblem::delete_cache()
 {
+  _F_
   for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
   {
     if (cache_e[i] != NULL)
@@ -615,109 +670,11 @@ void FeProblem::delete_cache()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* OLD CODE
-// Actual evaluation of volume matrix form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
-                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
-{
-  // Determine the integration order.
-  int inc = (fu->get_num_components() == 2) ? 1 : 0;
-
-  // Order of solutions from the previous Newton iteration.
-  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
-  if (u_ext != Tuple<Solution *>()) {
-    for (int i = 0; i < wf->neq; i++) {
-      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-      else oi[i] = init_fn_ord(0);
-    }
-  }
-  else {
-    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
-  }
-  
-  // Order of shape functions.
-  Func<Ord>* ou = init_fn_ord(fu->get_fn_order() + inc);
-  Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
-
-  // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
-
-  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-  double fake_wt = 1.0;
-  Geom<Ord>* fake_e = init_geom_ord();
-
-  // Total order of the matrix form.
-  Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
-
-  // Increase due to reference map.
-  int order = ru->get_inv_ref_order();
-  order += o.get_order();
-  limit_order_nowarn(order);
-
-  // Clean up.
-  for (int i = 0; i < wf->neq; i++) {  
-    if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
-  }
-  if (ou != NULL) {
-    ou->free_ord(); delete ou;
-  }
-  if (ov != NULL) {
-    ov->free_ord(); delete ov;
-  }
-  if (fake_e != NULL) delete fake_e;
-  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
-
-  // Evaluate the form using the quadrature of the just calculated order.
-  Quad2D* quad = fu->get_quad_2d();
-  double3* pt = quad->get_points(order);
-  int np = quad->get_num_points(order);
-
-  // Init geometry and jacobian*weights.
-  if (cache_e[order] == NULL)
-  {
-    cache_e[order] = init_geom_vol(ru, order);
-    double* jac = ru->get_jacobian(order);
-    cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++)
-      cache_jwt[order][i] = pt[i][2] * jac[i];
-  }
-  Geom<double>* e = cache_e[order];
-  double* jwt = cache_jwt[order];
-
-  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
-  if (u_ext != Tuple<Solution *>()) {
-    for (int i = 0; i < wf->neq; i++) {
-      if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, order);
-      else prev[i] = NULL;
-    }
-  }
-  else {
-    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
-  }
-
-  Func<double>* u = get_fn(fu, ru, order);
-  Func<double>* v = get_fn(fv, rv, order);
-  ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
-
-  scalar res = mfv->fn(np, jwt, prev, u, v, e, ext);
-
-  // Clean up.
-  for (int i = 0; i < wf->neq; i++) {  
-    if (prev[i] != NULL) prev[i]->free_fn(); delete prev[i]; 
-  }
-  if (ext != NULL) {ext->free(); delete ext;}
-
-  return res;
-}
-*/
-
 // Actual evaluation of volume matrix form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
+  _F_
   // Determine the integration order.
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   
@@ -810,104 +767,10 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ex
   return res;
 }
 
-/* OLD CODE
-// Actual evaluation of volume linear form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
-{
-  // Determine the integration order.
-  int inc = (fv->get_num_components() == 2) ? 1 : 0;
-
-  // Order of solutions from the previous Newton iteration.
-  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
-  if (u_ext != Tuple<Solution *>()) {
-    for (int i = 0; i < wf->neq; i++) {
-      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-      else oi[i] = init_fn_ord(0);
-    }
-  }
-  else {
-    for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(0);
-  }
-  
-  // Order of the shape function.
-  Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
-  
-  // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
-  
-  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-  double fake_wt = 1.0;
-  Geom<Ord>* fake_e = init_geom_ord();
-  
-  // Total order of the vector form.
-  Ord o = vfv->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
-  
-  // Increase due to reference map.
-  int order = rv->get_inv_ref_order();
-  order += o.get_order();
-  limit_order_nowarn(order);
-
-  // Clean up.
-  for (int i = 0; i < wf->neq; i++) { 
-    if (oi[i] != NULL) {
-      oi[i]->free_ord(); delete oi[i]; 
-    }
-  }
-  if (ov != NULL) {ov->free_ord(); delete ov;}
-  if (fake_e != NULL) delete fake_e;
-  if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
-
-  // Evaluate the form using the quadrature of the just calculated order.
-  Quad2D* quad = fv->get_quad_2d();
-  double3* pt = quad->get_points(order);
-  int np = quad->get_num_points(order);
-
-  // Init geometry and jacobian*weights.
-  if (cache_e[order] == NULL)
-  {
-    cache_e[order] = init_geom_vol(rv, order);
-    double* jac = rv->get_jacobian(order);
-    cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++)
-      cache_jwt[order][i] = pt[i][2] * jac[i];
-  }
-  Geom<double>* e = cache_e[order];
-  double* jwt = cache_jwt[order];
-
-  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
-  if (u_ext != Tuple<Solution *>()) {
-    for (int i = 0; i < wf->neq; i++) {
-      if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, order);
-      else prev[i] = NULL;
-    }
-  }
-  else {
-    for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
-  }
-
-  Func<double>* v = get_fn(fv, rv, order);
-  ExtData<scalar>* ext = init_ext_fns(vfv->ext, rv, order);
-
-  scalar res = vfv->fn(np, jwt, prev, v, e, ext);
-
-  // Clean up.
-  for (int i = 0; i < wf->neq; i++) { 
-    if (prev[i] != NULL) {
-      prev[i]->free_fn(); delete prev[i]; 
-    }
-  }
-  if (ext != NULL) {ext->free(); delete ext;}
-  
-  return res;
-}
-*/
-
 // Actual evaluation of volume vector form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
 {
+  _F_
   // Determine the integration order.
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
   
@@ -998,98 +861,11 @@ scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ex
   return res;
 }
 
-/* OLD CODE
-// Actual evaluation of surface matrix form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep)
-{
-  // Determine the integration order.
-  
-  int inc = (fu->get_num_components() == 2) ? 1 : 0;
-  
-  // Order of solutions from the previous Newton iteration.
-  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-  }
-  // Order of shape functions.
-  Func<Ord>* ou = init_fn_ord(fu->get_edge_fn_order(ep->edge) + inc);
-  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(ep->edge) + inc);
-  // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, ep->edge);
-  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-  Geom<Ord>* fake_e = init_geom_ord();
-  
-  // Total order of the matrix form.
-  Ord o = Ord(0);
-  if (this->is_linear == false) { 
-    double fake_wt = 1.0;
-    o = mfs->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
-  }
-  
-  // Order increase due to reference map.
-  int order = ru->get_inv_ref_order();
-  
-  order += o.get_order();
-  limit_order_nowarn(order);
-  
-  // Clean up.
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) {  
-      oi[i]->free_ord(); 
-      delete oi[i]; 
-    }
-  }
-  ou->free_ord(); delete ou;
-  ov->free_ord(); delete ov;
-  delete fake_e;
-  fake_ext->free_ord(); delete fake_ext;
-  
-  // Evaluate the form using the quadrature of determined order.
-  Quad2D* quad = fu->get_quad_2d();
-  int eo = quad->get_edge_points(ep->edge, order);
-  double3* pt = quad->get_points(eo);
-  int np = quad->get_num_points(eo);
-
-  // Initialize geometry and jacobian*weights.
-  if (cache_e[eo] == NULL)
-  {
-    cache_e[eo] = init_geom_surf(ru, ep, eo);
-    double3* tan = ru->get_tangent(ep->edge, eo);
-    cache_jwt[eo] = new double[np];
-    for(int i = 0; i < np; i++)
-      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
-  }
-  Geom<double>* e = cache_e[eo];
-  double* jwt = cache_jwt[eo];
-
-  // Values of solutions from the previous Newton iteration, shape functions and external functions in quadrature points.
-  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, eo);
-    else prev[i] = NULL;
-  }
-  Func<double>* u = get_fn(fu, ru, eo);
-  Func<double>* v = get_fn(fv, rv, eo);
-  ExtData<scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
-
-  scalar res = mfs->fn(np, jwt, prev, u, v, e, ext);
-
-  // Clean up.
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) {  
-      prev[i]->free_fn(); 
-      delete prev[i]; 
-    }
-  }
-  ext->free(); delete ext;
-  return 0.5 * res;
-}
-*/
-
 // Actual evaluation of surface matrix forms (calculates integral)
 scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, 
-                        PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep)
+                        PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
+  _F_
   // Determine the integration order.
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   
@@ -1098,7 +874,7 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (u_ext != Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
-      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(ep->edge) + inc);
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
       else oi[i] = init_fn_ord(0);
     }
   }
@@ -1107,11 +883,11 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
   }
   
   // Order of shape functions.
-  Func<Ord>* ou = init_fn_ord(fu->get_edge_fn_order(ep->edge) + inc);
-  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(ep->edge) + inc);
+  Func<Ord>* ou = init_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc);
+  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
   
   // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, ep->edge);
+  ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, surf_pos->surf_num);
   
   // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
   double fake_wt = 1.0;
@@ -1142,15 +918,15 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
   // Evaluate the form using the quadrature of the just calculated order.
   Quad2D* quad = fu->get_quad_2d();
   
-  int eo = quad->get_edge_points(ep->edge, order);
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
   double3* pt = quad->get_points(eo);
   int np = quad->get_num_points(eo);
 
   // Init geometry and jacobian*weights.
   if (cache_e[eo] == NULL)
   {
-    cache_e[eo] = init_geom_surf(ru, ep, eo);
-    double3* tan = ru->get_tangent(ep->edge, eo);
+    cache_e[eo] = init_geom_surf(ru, surf_pos, eo);
+    double3* tan = ru->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
     for(int i = 0; i < np; i++)
       cache_jwt[eo][i] = pt[i][2] * tan[i][2];
@@ -1190,90 +966,11 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
                     // the weights.
 }
 
-/* OLD CODE
-// Actual evaluation of surface linear form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv, EdgePos* ep)
-{
-  // Determine the integration order.
-  
-  int inc = (fv->get_num_components() == 2) ? 1 : 0;
-  
-  // Order of solutions from the previous Newton iteration.
-  AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (this->is_linear == false) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-  }
-  // Order of shape functions.
-  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(ep->edge) + inc);
-  // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, ep->edge);
-  // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-  Geom<Ord>* fake_e = init_geom_ord();
-  
-  // Total order of the matrix form.
-  Ord o = Ord(0);
-  if (this->is_linear == false) {
-    double fake_wt = 1.0;
-    Ord o = vfs->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
-  }
-  
-  // Order increase due to reference map.
-  int order = rv->get_inv_ref_order();
-  
-  order += o.get_order();
-  limit_order_nowarn(order);
-  
-  // Clean up.
-  for (int i = 0; i < wf->neq; i++) {  oi[i]->free_ord(); delete oi[i]; }
-  ov->free_ord(); delete ov;
-  delete fake_e;
-  fake_ext->free_ord(); delete fake_ext;
-  
-  // Evaluate the form using the quadrature of determined order.
-  Quad2D* quad = fv->get_quad_2d();
-  int eo = quad->get_edge_points(ep->edge, order);
-  double3* pt = quad->get_points(eo);
-  int np = quad->get_num_points(eo);
-
-  // Initialize geometry and jacobian*weights.
-  if (cache_e[eo] == NULL)
-  {
-    cache_e[eo] = init_geom_surf(rv, ep, eo);
-    double3* tan = rv->get_tangent(ep->edge, eo);
-    cache_jwt[eo] = new double[np];
-    for(int i = 0; i < np; i++)
-      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
-  }
-  Geom<double>* e = cache_e[eo];
-  double* jwt = cache_jwt[eo];
-
-  // Values of solutions from the previous Newton iteration, shape functions and external functions in quadrature points.
-  AUTOLA_OR(Func<scalar>*, prev, wf->neq);
-  for (int i = 0; i < wf->neq; i++) {
-    if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, eo);
-    else prev[i] = NULL;
-  }
-  Func<double>* v = get_fn(fv, rv, eo);
-  ExtData<scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
-
-  scalar res = vfs->fn(np, jwt, prev, v, e, ext);
-
-  // Clean up.
-  if (this->is_linear == false) {
-    for (int i = 0; i < wf->neq; i++) {  
-      prev[i]->free_fn(); 
-      delete prev[i]; 
-    }
-  }
-  ext->free(); delete ext;
-  return 0.5 * res;
-}
-*/
-
 // Actual evaluation of surface vector form (calculates integral)
 scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
-                        PrecalcShapeset *fv, RefMap *rv, EdgePos* ep)
+                        PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
+  _F_
   // Determine the integration order.
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
   
@@ -1282,7 +979,7 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (u_ext != Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
-      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(ep->edge) + inc);
+      if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
       else oi[i] = init_fn_ord(0);
     }
   }
@@ -1291,10 +988,10 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
   }
   
   // Order of the shape function.
-  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(ep->edge) + inc);
+  Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
   
   // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, ep->edge);
+  ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, surf_pos->surf_num);
   
   // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
   double fake_wt = 1.0;
@@ -1322,15 +1019,15 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
   // Evaluate the form using the quadrature of the just calculated order.
   Quad2D* quad = fv->get_quad_2d();
   
-  int eo = quad->get_edge_points(ep->edge, order);
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
   double3* pt = quad->get_points(eo);
   int np = quad->get_num_points(eo);
 
   // Init geometry and jacobian*weights.
   if (cache_e[eo] == NULL)
   {
-    cache_e[eo] = init_geom_surf(rv, ep, eo);
-    double3* tan = rv->get_tangent(ep->edge, eo);
+    cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
+    double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
     for(int i = 0; i < np; i++)
       cache_jwt[eo][i] = pt[i][2] * tan[i][2];
@@ -1368,8 +1065,11 @@ scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_e
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+
+// This function is identical in H2D and H3D.
 Vector* create_vector(MatrixSolverType matrix_solver)
 {
+  _F_
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
@@ -1402,8 +1102,10 @@ Vector* create_vector(MatrixSolverType matrix_solver)
   }
 }
 
+// This function is identical in H2D and H3D.
 SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {
+  _F_
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
@@ -1435,49 +1137,54 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
       error("Unknown matrix solver requested.");
   }
 }
+
+// This function is identical in H2D and H3D.
 Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
+  _F_
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
       {
         return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
-        info("Using Amesos"); 
+        info("Using Amesos."); 
         break;
       }
     case SOLVER_MUMPS: 
       {
         return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
-        info("Using Mumps"); 
+        info("Using Mumps."); 
         break;
       }
     case SOLVER_PARDISO: 
       {
         return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
-        info("Using Pardiso"); 
+        info("Using Pardiso."); 
         break;
       }
     case SOLVER_PETSC: 
       {
         return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
-        info("Using PETSc");
+        info("Using PETSc.");
         break;
       }
     case SOLVER_UMFPACK: 
       {
         return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
-        info("Using UMFPack"); 
+        info("Using UMFPack."); 
         break;
       }
     default: 
-      error("Unknown matrix_ solver requested.");
+      error("Unknown matrix solver requested.");
   }
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 
+// The projection functionality below is identical in H2D and H3D.
 template<typename Real, typename Scalar>
 Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
@@ -1487,6 +1194,7 @@ Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> 
 template<typename Real, typename Scalar>
 Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (ext->fn[0]->val[i] * v->val[i] + ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
@@ -1496,6 +1204,7 @@ Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> 
 template<typename Real, typename Scalar>
 Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->val[i] * v->val[i]);
@@ -1505,6 +1214,7 @@ Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> 
 template<typename Real, typename Scalar>
 Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
@@ -1516,6 +1226,7 @@ template<typename Real, typename Scalar>
 Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
     result += wt[i] * (u->curl[i] * conj(v->curl[i]));
@@ -1528,6 +1239,7 @@ template<typename Real, typename Scalar>
 Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                               Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
     result += wt[i] * (ext->fn[0]->curl[i] * conj(v->curl[i]));
@@ -1539,6 +1251,7 @@ Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Rea
 
 double get_l2_norm(Vector* vec) 
 {
+  _F_
   scalar val = 0;
   for (int i = 0; i < vec->length(); i++) {
     scalar inc = vec->get(i);
@@ -1553,6 +1266,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
                   MatrixSolverType matrix_solver, double newton_tol, 
                   int newton_max_iter, bool verbose) 
 {
+  _F_
   int ndof = get_num_dofs(spaces);
   
   // sanity checks
@@ -1644,6 +1358,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
 
 int get_num_dofs(Tuple<Space *> spaces)
 {
+  _F_
   int ndof = 0;
   for (int i=0; i<spaces.size(); i++) {
     ndof += spaces[i]->get_num_dofs();
@@ -1658,6 +1373,7 @@ int get_num_dofs(Tuple<Space *> spaces)
 // PDE, the PDE will just be solved. 
 void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
 {
+  _F_
   int n = spaces.size();
 
   // sanity checks
@@ -1695,6 +1411,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf, scalar* target_vec)
 void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
                     scalar* target_vec)
 {
+  _F_
   int n = spaces.size();  
 
   // define temporary projection weak form
@@ -1709,19 +1426,19 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
-                     H2D_ANY, source_meshfns[i]);
+                     HERMES_ANY, source_meshfns[i]);
     }
     if (norm == 1) {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
-                     H2D_ANY, source_meshfns[i]);
+                     HERMES_ANY, source_meshfns[i]);
     }
     if (norm == 2) {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
-                     H2D_ANY, source_meshfns[i]);
+                     HERMES_ANY, source_meshfns[i]);
     }
   }
   for (int i=0; i < n; i++) {
@@ -1736,6 +1453,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
 
 void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest)
 {
+  _F_
   scalar * target_vec = new scalar[get_num_dofs(spaces)];
   Tuple<MeshFunction *> ref_slns_mf;
   for (int i = 0; i < sols_src.size(); i++) 
@@ -1753,6 +1471,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
                     scalar* target_vec)
 {
+  _F_
   int n = spaces.size();
   matrix_forms_tuple_t::size_type n_biforms = proj_biforms.size();
   if (n_biforms == 0)
@@ -1771,7 +1490,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
   for (int i = 0; i < n; i++) {
     proj_wf.add_matrix_form(i, i, proj_biforms[i].first, proj_biforms[i].second);
     proj_wf.add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second,
-                    H2D_ANY, source_meshfns[i]);
+                    HERMES_ANY, source_meshfns[i]);
   }
 
   project_internal(spaces, &proj_wf, target_vec);
@@ -1780,6 +1499,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
 /// Global orthogonal projection of one vector-valued ExactFunction.
 void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec)
 {
+  _F_
   int proj_norm = 2; // Hcurl
   Mesh *mesh = space->get_mesh();
   if (mesh == NULL) error("Mesh is NULL in project_global().");
@@ -1793,11 +1513,13 @@ void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec)
 void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
                    scalar* target_vec)
 {
+  _F_
   /// TODO
 }
 
 void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<int> proj_norms, TimePeriod * cpu_time)
 {
+  _F_
   if (spaces.size() != selectors.size()) 
     error("There must be a refinement selector for each solution component in solve_linear_adapt().");
   if (spaces.size() != proj_norms.size()) 
@@ -1810,6 +1532,7 @@ void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector 
 // Performs uniform global refinement of a FE space. 
 Tuple<Space *> construct_refined_spaces(Tuple<Space *> coarse, int order_increase)
 {
+  _F_
   Tuple<Space *> ref_spaces;
   for (int i = 0; i < coarse.size(); i++) 
   {
@@ -1825,10 +1548,9 @@ Tuple<Space *> construct_refined_spaces(Tuple<Space *> coarse, int order_increas
 // Light version for a single space.
 Space* construct_refined_space(Space* coarse, int order_increase)
 {
+  _F_
   return construct_refined_spaces(Tuple<Space*>(coarse), order_increase)[0];
 }
-
-
 
 /*
 // Solve a typical linear problem using automatic adaptivity.
@@ -1840,6 +1562,7 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec_s
                         Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
                         bool verbose, Tuple<ExactSolution *> exact_slns) 
 {
+  _F_
   // sanity checks
   if (spaces.size() != selectors.size()) 
     error("There must be a refinement selector for each solution component in solve_linear_adapt().");

@@ -1,26 +1,20 @@
-// This file is part of Hermes3D
+// This file is part of Hermes2D
 //
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Hermes2D is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
 //
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
+// Hermes2D is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-//#include "../h3dconfig.h"
-#include "epetra.h"
-#include "../../common/error.h"
-#include "../../common/callstack.h"
+#include "../config.h"
+#include "solver_epetra.h"
 
 // EpetraMatrix ////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,11 +23,10 @@
 static Epetra_SerialComm seq_comm;
 #endif
 
-#define H2D_EPETRA_NOT_COMPILED "hermes2d was not built with Epetra support."
+#define EPETRA_NOT_COMPILED "hermes2d was not built with Epetra support."
 
 EpetraMatrix::EpetraMatrix()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	this->mat = NULL;
 #ifdef H2D_COMPLEX
@@ -46,14 +39,13 @@ EpetraMatrix::EpetraMatrix()
 	this->row_storage = true;
 	this->col_storage = false;
 #else
-	error(H2D_EPETRA_NOT_COMPILED);
+	error(EPETRA_NOT_COMPILED);
 #endif
 }
 
 #ifdef HAVE_EPETRA
 EpetraMatrix::EpetraMatrix(Epetra_RowMatrix &op)
 {
-	_F_
 	this->mat = dynamic_cast<Epetra_CrsMatrix *>(&op);
 	assert(mat != NULL);
 	this->grph = (Epetra_CrsGraph *) &this->mat->Graph();
@@ -67,7 +59,6 @@ EpetraMatrix::EpetraMatrix(Epetra_RowMatrix &op)
 
 EpetraMatrix::~EpetraMatrix()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	free();
 #endif
@@ -75,18 +66,16 @@ EpetraMatrix::~EpetraMatrix()
 
 void EpetraMatrix::prealloc(int n)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	this->size = n;
 	// alloc trilinos structs
-	std_map = new Epetra_Map(n, 0, seq_comm); MEM_CHECK(std_map);
-	grph = new Epetra_CrsGraph(Copy, *std_map, 0); MEM_CHECK(grph);
+	std_map = new Epetra_Map(n, 0, seq_comm);
+	grph = new Epetra_CrsGraph(Copy, *std_map, 0);
 #endif
 }
 
 void EpetraMatrix::pre_add_ij(int row, int col)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	grph->InsertGlobalIndices(row, 1, &col);
 #endif
@@ -94,7 +83,6 @@ void EpetraMatrix::pre_add_ij(int row, int col)
 
 void EpetraMatrix::finish()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	mat->FillComplete();
 #ifdef H2D_COMPLEX
@@ -105,20 +93,18 @@ void EpetraMatrix::finish()
 
 void EpetraMatrix::alloc()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	grph->FillComplete();
 	// create the matrix
-	mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
+	mat = new Epetra_CrsMatrix(Copy, *grph);
 #ifdef H2D_COMPLEX
-	mat_im = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat_im);
+	mat_im = new Epetra_CrsMatrix(Copy, *grph);
 #endif
 #endif
 }
 
 void EpetraMatrix::free()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	if (owner) {
 		delete mat; mat = NULL;
@@ -133,7 +119,6 @@ void EpetraMatrix::free()
 
 scalar EpetraMatrix::get(int m, int n)
 {
-	_F_
 #ifdef HAVE_EPETRA
     int n_entries = mat->NumGlobalEntries(m);
     std::vector<double> vals(n_entries);
@@ -146,7 +131,6 @@ scalar EpetraMatrix::get(int m, int n)
 
 int EpetraMatrix::get_num_row_entries(int row)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	return mat->NumGlobalEntries(row);
 #else
@@ -156,7 +140,6 @@ int EpetraMatrix::get_num_row_entries(int row)
 
 void EpetraMatrix::extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	mat->ExtractGlobalRowCopy(row, len, n_entries, vals, idxs);
 #endif
@@ -164,7 +147,6 @@ void EpetraMatrix::extract_row_copy(int row, int len, int &n_entries, double *va
 
 void EpetraMatrix::zero()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	mat->PutScalar(0.0);
 #ifdef H2D_COMPLEX
@@ -175,12 +157,11 @@ void EpetraMatrix::zero()
 
 void EpetraMatrix::add(int m, int n, scalar v)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	if (v != 0.0 && m >= 0 && n >= 0) {		// ignore dirichlet DOFs
 #ifndef H2D_COMPLEX
 		int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n);
-		if (ierr != 0) error("Failed to insert into Epetra matrix");
+		assert(ierr == 0);
 #else
 		int ierr = mat->SumIntoGlobalValues(m, 1, &std::real(v), &n);
 		assert(ierr == 0);
@@ -193,7 +174,6 @@ void EpetraMatrix::add(int m, int n, scalar v)
 
 void EpetraMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	for (int i = 0; i < m; i++)				// rows
 		for (int j = 0; j < n; j++)			// cols
@@ -205,25 +185,13 @@ void EpetraMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
 ///
 bool EpetraMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
-	_F_
 	return false;
 }
 
 int EpetraMatrix::get_matrix_size() const
 {
-	_F_
 #ifdef HAVE_EPETRA
 	return mat->NumGlobalNonzeros();
-#else
-	return -1;
-#endif
-}
-
-double EpetraMatrix::get_fill_in() const
-{
-	_F_
-#ifdef HAVE_EPETRA
-	return mat->NumGlobalNonzeros() / (double) (size * size);
 #else
 	return -1;
 #endif
@@ -234,7 +202,6 @@ double EpetraMatrix::get_fill_in() const
 
 EpetraVector::EpetraVector()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	this->std_map = NULL;
 	this->vec = NULL;
@@ -249,7 +216,6 @@ EpetraVector::EpetraVector()
 #ifdef HAVE_EPETRA
 EpetraVector::EpetraVector(const Epetra_Vector &v)
 {
-	_F_
 	this->vec = (Epetra_Vector *) &v;
 	this->std_map = (Epetra_BlockMap *) &v.Map();
 	this->size = v.MyLength();
@@ -259,7 +225,6 @@ EpetraVector::EpetraVector(const Epetra_Vector &v)
 
 EpetraVector::~EpetraVector()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	if (owner) free();
 #endif
@@ -267,14 +232,13 @@ EpetraVector::~EpetraVector()
 
 void EpetraVector::alloc(int n)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	free();
 	size = n;
-	std_map = new Epetra_Map(size, 0, seq_comm); MEM_CHECK(std_map);
-	vec = new Epetra_Vector(*std_map); MEM_CHECK(vec);
+	std_map = new Epetra_Map(size, 0, seq_comm);
+	vec = new Epetra_Vector(*std_map);
 #ifdef H2D_COMPLEX
-	vec_im = new Epetra_Vector(*std_map); MEM_CHECK(vec_im);
+	vec_im = new Epetra_Vector(*std_map);
 #endif
 	zero();
 #endif
@@ -282,7 +246,6 @@ void EpetraVector::alloc(int n)
 
 void EpetraVector::zero()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	for (int i = 0; i < size; i++) (*vec)[i] = 0.0;
 #ifdef H2D_COMPLEX
@@ -293,7 +256,6 @@ void EpetraVector::zero()
 
 void EpetraVector::free()
 {
-	_F_
 #ifdef HAVE_EPETRA
 	delete std_map; std_map = NULL;
 	delete vec; vec = NULL;
@@ -306,7 +268,6 @@ void EpetraVector::free()
 
 void EpetraVector::set(int idx, scalar y)
 {
-	_F_
 #ifdef HAVE_EPETRA
 #ifndef H2D_COMPLEX
 	if (idx >= 0) (*vec)[idx] = y;
@@ -321,7 +282,6 @@ void EpetraVector::set(int idx, scalar y)
 
 void EpetraVector::add(int idx, scalar y)
 {
-	_F_
 #ifdef HAVE_EPETRA
 #ifndef H2D_COMPLEX
 	if (idx >= 0) (*vec)[idx] += y;
@@ -336,7 +296,6 @@ void EpetraVector::add(int idx, scalar y)
 
 void EpetraVector::add(int n, int *idx, scalar *y)
 {
-	_F_
 #ifdef HAVE_EPETRA
 	for (int i = 0; i < n; i++)
 		add(idx[i], y[i]);
@@ -345,6 +304,5 @@ void EpetraVector::add(int n, int *idx, scalar *y)
 
 bool EpetraVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
-	_F_
 	return false;
 }

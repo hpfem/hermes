@@ -52,14 +52,14 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order)
 }
 
 // Initialize edge marker, coordinates, tangent and normals
-Geom<double>* init_geom_surf(RefMap *rm, EdgePos* ep, const int order)
+Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
 	Geom<double>* e = new Geom<double>;
-  e->marker = ep->marker;
+  e->marker = surf_pos->marker;
 	e->x = rm->get_phys_x(order);
 	e->y = rm->get_phys_y(order);
 	double3 *tan;
-  tan = rm->get_tangent(ep->edge, order);
+  tan = rm->get_tangent(surf_pos->surf_num, order);
 
   Quad2D* quad = rm->get_quad_2d();
   int np = quad->get_num_points(order);
@@ -72,7 +72,7 @@ Geom<double>* init_geom_surf(RefMap *rm, EdgePos* ep, const int order)
     e->tx[i] = tan[i][0];  e->ty[i] =   tan[i][1];
     e->nx[i] = tan[i][1];  e->ny[i] = - tan[i][0];
   }
-    e->orientation = rm->get_active_element()->get_edge_orientation(ep->edge);
+    e->orientation = rm->get_active_element()->get_edge_orientation(surf_pos->surf_num);
 	return e;
 }
 

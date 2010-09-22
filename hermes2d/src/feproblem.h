@@ -17,6 +17,7 @@
 #ifndef __H2D_FEPROBLEM_H
 #define __H2D_FEPROBLEM_H
 
+#include "../common/callstack.h"
 #include "adapt.h"
 #include "matrix.h"
 #include "graph.h"
@@ -55,35 +56,42 @@ typedef Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_
 typedef Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > vector_forms_tuple_t;
 
 
-/// Finite Element problem class
+/// Discrete problem class
 ///
-/// This class does assembling into passed-in structures.
+/// This class does assembling into external matrix / vactor structures.
 ///
 class H2D_API FeProblem {
 public:
-  FeProblem(WeakForm *wf, Tuple<Space *> spaces, bool is_linear = false);
+  FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear = false);
   virtual ~FeProblem();
   void free();
 
+  // Get pointer to n-th space.
   Space* get_space(int n) {  return this->spaces[n];  }
+
+  // This is different from H2D.
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
+  // Precalculate matrix sparse structure.
   void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
 
   // General assembling procedure for nonlinear problems. coeff_vec is the 
   // previous Newton vector.
-  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
-                bool rhsonly = false);
+  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly = false);
+
   // Assembling for linear problems. Same as the previous functions, but 
   // does not need the coeff_vector.
   void assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly = false);
 
+  // Get the number of unknowns.
   int get_num_dofs();
+
   bool is_matrix_free() { return wf->is_matrix_free(); }
+
   void invalidate_matrix() { have_matrix = false; }
 
 protected:
-  WeakForm *wf;
+  WeakForm* wf;
 
   bool is_linear;
 
@@ -91,24 +99,20 @@ protected:
   int *sp_seq;
   int wf_seq;
   Tuple<Space *> spaces;
-  PrecalcShapeset** pss;
 
-  int num_user_pss;
-  bool values_changed;
-  bool struct_changed;
+  scalar** matrix_buffer;                /// buffer for holding square matrix (during assembling)
+  int matrix_buffer_dim;                 /// dimension of the matrix held by 'matrix_buffer'
+  inline scalar** get_matrix_buffer(int n);
+
   bool have_spaces;
   bool have_matrix;
+
+  bool values_changed;
+  bool struct_changed;
   bool is_up_to_date();
 
-  scalar** buffer;
-  int mat_size;
-
-  scalar** get_matrix_buffer(int n)
-  {
-    if (n <= mat_size) return buffer;
-    if (buffer != NULL) delete [] buffer;
-    return (buffer = new_matrix<scalar>(mat_size = n));
-  }
+  PrecalcShapeset** pss;    // This is different from H3D.
+  int num_user_pss;         // This is different from H3D.
 
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge);
@@ -128,9 +132,9 @@ protected:
   scalar eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, 
          PrecalcShapeset *fv, RefMap *rv);
   scalar eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution *> u_ext, 
-         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep);
+         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
   scalar eval_form(WeakForm::VectorFormSurf *vfv, Tuple<Solution *> u_ext, 
-         PrecalcShapeset *fv, RefMap *rv, EdgePos* ep);
+         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
 
 };
 

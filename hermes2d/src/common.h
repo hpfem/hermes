@@ -143,7 +143,7 @@ enum ElementMode { // element modes
 // is temporarily in linsystem.cpp.
 //const int H2D_DEFAULT_PROJ_NORM = 1;
 
-const int H2D_ANY = -1234;
+const int HERMES_ANY = -1234;
 
 // how many bits the order number takes
 const int H2D_ORDER_BITS = 5;

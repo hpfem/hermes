@@ -17,6 +17,7 @@
 #define __H2D_SPACE_H
 
 #include "../mesh.h"
+#include "../traverse.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
 #include "../precalc.h"
@@ -117,7 +118,7 @@ public:
   /// Sets the BC values callback function, which takes absolute boundary coordinates.
   void set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y));
   /// Sets the BC values callback function, which takes parametric edge position.
-  void set_essential_bc_values(scalar (*bc_value_callback_by_edge)(EdgePos* ep)); // for EdgePos, see mesh.h
+  void set_essential_bc_values(scalar (*bc_value_callback_by_edge)(SurfPos* surf_pos)); // for SurfPos, see traverse.h
 
   /// Sets element polynomial order. Can be called by the user. Should not be called  
   /// for many elements at once, since assign_dofs() is called at the end of this function.
@@ -131,10 +132,10 @@ public:
   int get_element_order(int id) const;
   /// Sets the same polynomial order for all elements in the mesh. Intended for 
   /// the user and thus assign_dofs() is called at the end of this function.
-  void set_uniform_order(int order, int marker = H2D_ANY);
+  void set_uniform_order(int order, int marker = HERMES_ANY);
   /// Sets the same polynomial order for all elements in the mesh. Does not 
   /// call assign_dofs(). For internal use.
-  void set_uniform_order_internal(int order, int marker = H2D_ANY);
+  void set_uniform_order_internal(int order, int marker = HERMES_ANY);
   /// Sets the order automatically assigned to all newly created elements.
   /// (The order of these is normally undefined and has to be set explicitly.)
   void set_default_order(int tri_order, int quad_order = -1);
@@ -184,7 +185,7 @@ public:
   virtual void get_element_assembly_list(Element* e, AsmList* al);
 
   /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
-  void get_edge_assembly_list(Element* e, int edge, AsmList* al);
+  void get_boundary_assembly_list(Element* e, int surf_num, AsmList* al);
 
   /// Updates essential BC values. Typically used for time-dependent 
   /// essnetial boundary conditions.
@@ -265,7 +266,7 @@ protected: //debugging support
   virtual void assign_bubble_dofs() = 0;
 
   virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) = 0;
-  virtual void get_edge_assembly_list_internal(Element* e, int ie, AsmList* al) = 0;
+  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al) = 0;
   virtual void get_bubble_assembly_list(Element* e, AsmList* al);
 
   double** proj_mat;
@@ -273,8 +274,8 @@ protected: //debugging support
 
   void copy_callbacks(const Space* space);
   void precalculate_projection_matrix(int nv, double**& mat, double*& p);
-  virtual scalar* get_bc_projection(EdgePos* ep, int order) = 0;
-  void update_edge_bc(Element* e, EdgePos* ep);
+  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
+  void update_edge_bc(Element* e, SurfPos* surf_pos);
 
   /// Called by Space to update constraining relationships between shape functions due
   /// to hanging nodes in the mesh. As this is space-specific, this function is reimplemented
@@ -295,7 +296,7 @@ public:
 
   BCType (*bc_type_callback)(int);
   scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y);
-  scalar (*bc_value_callback_by_edge)(EdgePos* ep);
+  scalar (*bc_value_callback_by_edge)(SurfPos* surf_pos);
 
   /// Internal. Used by DiscreteProblem to detect changes in the space.
   int get_seq() const { return seq; }
@@ -305,7 +306,7 @@ public:
   virtual int get_type() const = 0;
 };
 
-// new way of enumerating degrees of freedom
+// This is the same in H2D and H3D.
 extern H2D_API int assign_dofs(Tuple<Space*> spaces);
 
 // updating time-dependent essential (Dirichlet) boundary conditions

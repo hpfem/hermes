@@ -215,7 +215,7 @@ Geom<Ord>* init_geom_ord();
 /// Init element geometry for volumetric integrals
 Geom<double>* init_geom_vol(RefMap *rm, const int order);
 /// Init element geometry for surface integrals
-Geom<double>* init_geom_surf(RefMap *rm, EdgePos* ep, const int order);
+Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
 
 
 /// Init the function for calculation the integration order

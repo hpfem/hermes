@@ -109,6 +109,7 @@ struct H2D_API Element
   bool is_quad() const { return nvert == 4; }
   bool is_curved() const { return cm != NULL; }
   int  get_mode() const { return is_triangle() ? H2D_MODE_TRIANGLE : H2D_MODE_QUAD; }
+  int get_num_surf() {return nvert; }
 
   // helper functions to obtain the index of the next or previous vertex/edge
   int next_vert(int i) const { return (i < (int)nvert-1) ? i+1 : 0; }
@@ -355,22 +356,6 @@ protected:
         for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
           if (((n) = (mesh)->get_node(_id))->used) \
             if ((n)->type)
-
-/// \brief Determines the position on an edge.
-/// \details Used for the retrieval of boundary condition values.
-///
-struct EdgePos
-{
-  int v1, v2; ///< edge endpoint vertex id numbers
-  int marker; ///< edge marker
-  int edge;   ///< element edge number (0..2 for triangles, 0..3 for quads)
-  double t;   ///< position between v1 and v2 in the range [0..1]
-
-  double lo, hi; ///< for internal use
-  Element* base; ///< for internal use
-  Space *space, *space_u, *space_v; ///< for internal use
-};
-
 
 const int TOP_LEVEL_REF = 123456;
 

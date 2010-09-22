@@ -36,7 +36,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
 
   this->set_bc_types_init(bc_type_callback);
   this->set_essential_bc_values(bc_value_callback_by_coord);
-  this->set_essential_bc_values((scalar (*)(EdgePos*)) NULL);
+  this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
 }
 
 Space::~Space()
@@ -150,7 +150,7 @@ void Space::set_uniform_order_internal(int order, int marker)
   Element* e;
   for_all_active_elements(e, mesh)
   {
-    if (marker == H2D_ANY || e->marker == marker)
+    if (marker == HERMES_ANY || e->marker == marker)
     {
       ElementData* ed = &edata[e->id];
       if (e->is_triangle())
@@ -407,18 +407,18 @@ void Space::get_element_assembly_list(Element* e, AsmList* al)
   for (unsigned int i = 0; i < e->nvert; i++)
     get_vertex_assembly_list(e, i, al);
   for (unsigned int i = 0; i < e->nvert; i++)
-    get_edge_assembly_list_internal(e, i, al);
+    get_boundary_assembly_list_internal(e, i, al);
   get_bubble_assembly_list(e, al);
 }
 
 
-void Space::get_edge_assembly_list(Element* e, int edge, AsmList* al)
+void Space::get_boundary_assembly_list(Element* e, int surf_num, AsmList* al)
 {
   al->clear();
   shapeset->set_mode(e->get_mode());
-  get_vertex_assembly_list(e, edge, al);
-  get_vertex_assembly_list(e, e->next_vert(edge), al);
-  get_edge_assembly_list_internal(e, edge, al);
+  get_vertex_assembly_list(e, surf_num, al);
+  get_vertex_assembly_list(e, e->next_vert(surf_num), al);
+  get_boundary_assembly_list_internal(e, surf_num, al);
 }
 
 
@@ -445,12 +445,12 @@ static scalar default_bc_value_by_coord(int marker, double x, double y)
   return 0;
 }
 
-scalar default_bc_value_by_edge(EdgePos* ep)
+scalar default_bc_value_by_edge(SurfPos* surf_pos)
 {
   double x, y;
-  Nurbs* nurbs = ep->base->is_curved() ? ep->base->cm->nurbs[ep->edge] : NULL;
-  nurbs_edge(ep->base, nurbs, ep->edge, 2.0*ep->t - 1.0, x, y);
-  return ep->space->bc_value_callback_by_coord(ep->marker, x, y);
+  Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
+  nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
+  return surf_pos->space->bc_value_callback_by_coord(surf_pos->marker, x, y);
 }
 
 
@@ -480,7 +480,7 @@ void Space::set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int, do
   seq++;
 }
 
-void Space::set_essential_bc_values(scalar (*bc_value_callback_by_edge)(EdgePos*))
+void Space::set_essential_bc_values(scalar (*bc_value_callback_by_edge)(SurfPos*))
 {
   if (bc_value_callback_by_edge == NULL) bc_value_callback_by_edge = default_bc_value_by_edge;
   this->bc_value_callback_by_edge = bc_value_callback_by_edge;
@@ -528,22 +528,22 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
 }
 
 
-void Space::update_edge_bc(Element* e, EdgePos* ep)
+void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 {
   if (e->active)
   {
-    Node* en = e->en[ep->edge];
+    Node* en = e->en[surf_pos->surf_num];
     NodeData* nd = &ndata[en->id];
     nd->edge_bc_proj = NULL;
 
     if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd && bc_type_callback(en->marker) == BC_ESSENTIAL)
     {
       int order = get_edge_order_internal(en);
-      ep->marker = en->marker;
-      nd->edge_bc_proj = get_bc_projection(ep, order);
+      surf_pos->marker = en->marker;
+      nd->edge_bc_proj = get_bc_projection(surf_pos, order);
       extra_data.push_back(nd->edge_bc_proj);
 
-      int i = ep->edge, j = e->next_vert(i);
+      int i = surf_pos->surf_num, j = e->next_vert(i);
       ndata[e->vn[i]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
       ndata[e->vn[j]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
     }
@@ -551,16 +551,16 @@ void Space::update_edge_bc(Element* e, EdgePos* ep)
   else
   {
     int son1, son2;
-    if (mesh->get_edge_sons(e, ep->edge, son1, son2) == 2)
+    if (mesh->get_edge_sons(e, surf_pos->surf_num, son1, son2) == 2)
     {
-      double mid = (ep->lo + ep->hi) * 0.5, tmp = ep->hi;
-      ep->hi = mid;
-      update_edge_bc(e->sons[son1], ep);
-      ep->lo = mid; ep->hi = tmp;
-      update_edge_bc(e->sons[son2], ep);
+      double mid = (surf_pos->lo + surf_pos->hi) * 0.5, tmp = surf_pos->hi;
+      surf_pos->hi = mid;
+      update_edge_bc(e->sons[son1], surf_pos);
+      surf_pos->lo = mid; surf_pos->hi = tmp;
+      update_edge_bc(e->sons[son2], surf_pos);
     }
     else
-      update_edge_bc(e->sons[son1], ep);
+      update_edge_bc(e->sons[son1], surf_pos);
   }
 }
 
@@ -575,8 +575,8 @@ void Space::update_essential_bc_values()
       int j = e->next_vert(i);
       if (e->vn[i]->bnd && e->vn[j]->bnd)
       {
-        EdgePos ep = { e->vn[i]->id, e->vn[j]->id, 0, i, 0.0, 0.0, 1.0, e, this, NULL, NULL };
-        update_edge_bc(e, &ep);
+        SurfPos surf_pos = {0, i, e, this, NULL, NULL, e->vn[i]->id, e->vn[j]->id, 0.0, 0.0, 1.0};
+        update_edge_bc(e, &surf_pos);
       }
     }
   }
@@ -615,7 +615,7 @@ void Space::free_extra_data()
   }
 }*/
 
-// new way of enumerating degrees of freedom
+// This is identical to H3D.
 H2D_API int assign_dofs(Tuple<Space*> spaces) 
 {
   int n = spaces.size();

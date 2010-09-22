@@ -57,43 +57,42 @@ typedef ord_t (*vector_form_ord_t)(int n, double *wt, fn_t<ord_t> *u_ext[], fn_t
 class WeakForm {
 
 public:
-	WeakForm(int neq, bool mat_free = false);
-	WeakForm(bool mat_free = false);            // single equation case
+	WeakForm(int neq = 1, bool mat_free = false);
 	virtual ~WeakForm();
 
 	int def_area(Tuple<int> area_markers);
 
 	void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym = UNSYM,
-	                 int area = ANY, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
+	                 int area = HERMES_ANY, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
         // single equation case
 	void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym = UNSYM,
-	                 int area = ANY, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ())
+	                 int area = HERMES_ANY, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ())
         {
 	  add_matrix_form(0, 0, fn, ord, sym, area, ext);
 
         }
-	void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area = ANY,
+	void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area = HERMES_ANY,
 	                          Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
         // single equation case
-	void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, int area = ANY,
+	void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, int area = HERMES_ANY,
 	                 Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ())
         {
 	  add_matrix_form_surf(0, 0, fn, ord, area, ext);
 
         }
 
-	void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area = ANY, 
+	void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area = HERMES_ANY, 
                              Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
         // single equation case
-	void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int area = ANY, 
+	void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int area = HERMES_ANY, 
                              Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ())
         {
   	  add_vector_form(0, fn, ord, area, ext);
         };
-	void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area = ANY, 
+	void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area = HERMES_ANY, 
                                   Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
         // single equation case
-	void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area = ANY, 
+	void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area = HERMES_ANY, 
                                   Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ()) 
         {
 	  add_vector_form_surf(0, fn, ord, area, ext); 
@@ -102,11 +101,20 @@ public:
 
 	void set_ext_fns(void *fn, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
 
+        /// Returns the number of equations
+        int get_neq() { return neq; }
+
+        /// Internal. Used by DiscreteProblem to detect changes in the weakform.
+        int get_seq() const { return seq; }
+
 	order3_t get_int_order();
 	bool is_matrix_free() { return is_matfree; }
 
+        int neq;
+
 protected:
-	int neq;
+
+        int seq;
 	bool is_matfree;
 
 	struct Area {
@@ -161,7 +169,11 @@ protected:
 		std::set<MeshFunction *> ext_set;
 	};
 
-	void get_stages(Space **spaces, std::vector<Stage> &stages, bool rhsonly);
+
+	// OLD CODE: 
+        // void get_stages(Space **spaces, std::vector<Stage> &stages, bool rhsonly);
+        void get_stages(Tuple< Space* > spaces, Tuple< Solution* > u_ext, 
+                        std::vector< WeakForm::Stage >& stages, bool rhsonly);
 	bool **get_blocks();
 
 	bool is_in_area(int marker, int area) const
@@ -175,8 +187,10 @@ protected:
 	}
 
 private:
-	Stage *find_stage(std::vector<Stage> &stages, int ii, int jj, Mesh *m1, Mesh *m2,
-	                  std::vector<MeshFunction *> &ext);
+
+        Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
+                          Mesh* m1, Mesh* m2, 
+                          std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext);
 
 	bool is_in_area_2(int marker, int area) const;
 

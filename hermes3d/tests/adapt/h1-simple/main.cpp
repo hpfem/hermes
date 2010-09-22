@@ -17,7 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-// Test to verify the hp-adaptivity
+// Test to verify that hp-adaptivity works correctly.
 //
 // Starts with linear elements and should find the solution (just using p refinements)
 //
@@ -30,6 +30,9 @@
 #include <common/trace.h>
 #include <common/timer.h>
 #include <common/error.h>
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 const double TOLERANCE = 0.001;		// error tolerance in percent
 const double THRESHOLD = 0.5;		// error threshold for element refinement
@@ -118,10 +121,11 @@ int main(int argc, char **argv) {
 	space.set_uniform_order(order);
 
 	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM, ANY);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, ANY);
+	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM, HERMES_ANY);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, HERMES_ANY);
 
-	LinearProblem lp(&wf, &space);
+        bool is_linear = true;
+	DiscreteProblem lp(&wf, &space, is_linear);
 
 	bool done = false;
 	int iter = 0;
@@ -133,26 +137,13 @@ int main(int argc, char **argv) {
 
 		printf("\nSolution\n");
 
-#if defined WITH_UMFPACK
-		UMFPackMatrix mat;
-		UMFPackVector rhs;
-		UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-		PardisoMatrix mat;
-		PardisoVector rhs;
-		PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-		PetscMatrix mat;
-		PetscVector rhs;
-		PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-		MumpsMatrix mat;
-		MumpsVector rhs;
-		MumpsSolver solver(&mat, &rhs);
-#endif
+                // Set up the solver, matrix, and rhs according to the solver selection.
+                SparseMatrix* matrix = create_matrix(matrix_solver);
+                Vector* rhs = create_vector(matrix_solver);
+                Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
-		int ndofs = space.assign_dofs();
-		printf("  - Number of DOFs: %d\n", ndofs);
+		int ndof = space.assign_dofs();
+		printf("  - Number of DOF: %d\n", ndof);
 
 		// assemble stiffness matrix
 		printf("  - Assembling... "); fflush(stdout);
@@ -178,15 +169,10 @@ int main(int argc, char **argv) {
 
 		printf("Reference solution\n");
 
-#if defined WITH_UMFPACK
-		UMFPackLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_PARDISO
-		PardisoLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_PETSC
-		PetscLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_MUMPS
-		MumpsSolver rsolver(&mat, &rhs);
-#endif
+                // Set up the solver, matrix, and rhs according to the solver selection.
+                SparseMatrix* matrix = create_matrix(matrix_solver);
+                Vector* rhs = create_vector(matrix_solver);
+                Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
 		Mesh rmesh;
 		rmesh.copy(mesh);
@@ -195,10 +181,10 @@ int main(int argc, char **argv) {
 		Space *rspace = space.dup(&rmesh);
 		rspace->copy_orders(space, 1);
 
-		LinearProblem rlp(&wf, rspace);
+		DiscreteProblem rlp(&wf, rspace, is_linear);
 
-		int rndofs = rspace->assign_dofs();
-		printf("  - Number of DOFs: %d\n", rndofs);
+		int rndof = rspace->assign_dofs();
+		printf("  - Number of DOFs: %d\n", rndof);
 
 		printf("  - Assembling... "); fflush(stdout);
 		assemble_timer.reset();

@@ -152,7 +152,7 @@ State* Traverse::push_state()
 }
 
 
-void Traverse::set_boundary_info(State* s, bool* bnd, EdgePos* ep)
+void Traverse::set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos)
 {
   Element* e;
   for (int i = 0; i < num; i++)
@@ -164,8 +164,8 @@ void Traverse::set_boundary_info(State* s, bool* bnd, EdgePos* ep)
     {
       if ((bnd[i] = (s->bnd[i] && e->en[i]->bnd)))
       {
-        ep[i].lo = (double) s->lo[i] / ONE;
-        ep[i].hi = (double) s->hi[i] / ONE;
+        surf_pos[i].lo = (double) s->lo[i] / ONE;
+        surf_pos[i].hi = (double) s->hi[i] / ONE;
       }
     }
   }
@@ -176,10 +176,10 @@ void Traverse::set_boundary_info(State* s, bool* bnd, EdgePos* ep)
     bnd[2] = (s->cr.t == ONE) && e->en[2]->bnd;
     bnd[3] = (s->cr.l == 0)   && e->en[3]->bnd;
 
-    if (bnd[0]) { ep[0].lo = (double) s->cr.l / ONE;        ep[0].hi = (double) s->cr.r / ONE; }
-    if (bnd[1]) { ep[1].lo = (double) s->cr.b / ONE;        ep[1].hi = (double) s->cr.t / ONE; }
-    if (bnd[2]) { ep[2].lo = (double) (ONE-s->cr.r) / ONE;  ep[2].hi = (double) (ONE-s->cr.l) / ONE; }
-    if (bnd[3]) { ep[3].lo = (double) (ONE-s->cr.t) / ONE;  ep[3].hi = (double) (ONE-s->cr.b) / ONE; }
+    if (bnd[0]) { surf_pos[0].lo = (double) s->cr.l / ONE;        surf_pos[0].hi = (double) s->cr.r / ONE; }
+    if (bnd[1]) { surf_pos[1].lo = (double) s->cr.b / ONE;        surf_pos[1].hi = (double) s->cr.t / ONE; }
+    if (bnd[2]) { surf_pos[2].lo = (double) (ONE-s->cr.r) / ONE;  surf_pos[2].hi = (double) (ONE-s->cr.l) / ONE; }
+    if (bnd[3]) { surf_pos[3].lo = (double) (ONE-s->cr.t) / ONE;  surf_pos[3].hi = (double) (ONE-s->cr.b) / ONE; }
   }
 
   for (unsigned int i = 0; i < base->nvert; i++)
@@ -187,16 +187,16 @@ void Traverse::set_boundary_info(State* s, bool* bnd, EdgePos* ep)
     if (bnd[i])
     {
       int j = base->next_vert(i);
-      ep[i].v1 = base->vn[i]->id;
-      ep[i].v2 = base->vn[j]->id;
-      ep[i].marker = e->en[i]->marker;
-      ep[i].edge = i;
+      surf_pos[i].v1 = base->vn[i]->id;
+      surf_pos[i].v2 = base->vn[j]->id;
+      surf_pos[i].marker = e->en[i]->marker;
+      surf_pos[i].surf_num = i;
     }
   }
 }
 
 
-Element** Traverse::get_next_state(bool* bnd, EdgePos* ep)
+Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
 {
   while (1)
   {
@@ -331,7 +331,7 @@ Element** Traverse::get_next_state(bool* bnd, EdgePos* ep)
     if (leaf)
     {
       if (bnd != NULL)
-        set_boundary_info(s, bnd, ep);
+        set_boundary_info(s, bnd, surf_pos);
       return s->e;
     }
 

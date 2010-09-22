@@ -1,7 +1,4 @@
 #include "config.h"
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
 #include <hermes3d.h>
 #include <common/trace.h>
 #include <common/timer.h>
@@ -19,8 +16,11 @@
 //     du_x/dn = du_y/dn = du_z/dn = 0 elsewhere
 //
 // The following parameters can be changed:
-const int INIT_REF_NUM = 1;					// Number of initial uniform mesh refinements.
-const int P_INIT = 4;						// Initial polynomial degree of all mesh elements.
+
+const int INIT_REF_NUM = 1;			    // Number of initial uniform mesh refinements.
+const int P_INIT = 4;				    // Initial polynomial degree of all mesh elements.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;    // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters. 
 const double E  = 200e9; 		// Young modulus for steel: 200 GPa.
@@ -66,11 +66,6 @@ void out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name)
  * main program                                                                    *
  ***********************************************************************************/
 int main(int argc, char **argv) {
-#ifdef WITH_PETSC
-  PetscInitialize(&argc, &argv, (char *) PETSC_NULL, PETSC_NULL);
-  PetscPushErrorHandler(PetscIgnoreErrorHandler, PETSC_NULL);                   // Disable PETSc error handler.
-#endif
-
   // Load the initial mesh. 
   Mesh mesh;
   Mesh3DReader mloader;
@@ -85,27 +80,7 @@ int main(int argc, char **argv) {
   // Initialize the shapeset and the cache. 
   H1ShapesetLobattoHex shapeset;
 
-#if defined WITH_UMFPACK
-  printf("Using UMFpack.\n");
-  UMFPackMatrix mat;
-  UMFPackVector rhs;
-  UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-  printf("Using PARDISO.\n");
-  PardisoMatrix mat;
-  PardisoVector rhs;
-  PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-  printf("Using PETSC.\n");
-  PetscMatrix mat;
-  PetscVector rhs;
-  PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-  printf("Using MUMPS.\n");
-  MumpsMatrix mat;
-  MumpsVector rhs;
-  MumpsSolver solver(&mat, &rhs);
-#endif
+
 
   // Create H1 spaces x-displacement component. 
   H1Space xdisp(&mesh, &shapeset);
@@ -143,25 +118,28 @@ int main(int argc, char **argv) {
   wf.add_matrix_form(2, 2, bilinear_form_2_2<double, scalar>, bilinear_form_2_2<ord_t, ord_t>, SYM);
   wf.add_vector_form_surf(2, surf_linear_form_2<double, scalar>, surf_linear_form_2<ord_t, ord_t>, 5);
 
-  // Initialize the mesh problem.
-  LinearProblem lp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp));
+  // Initialize the FE problem.
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp), is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
   // Assemble stiffness matrix
   printf("  - Assembling... "); fflush(stdout);
   Timer tmr_assemble;
   tmr_assemble.start();
-  bool assembled = lp.assemble(&mat, &rhs);
+  dp.assemble(matrix, rhs);
   tmr_assemble.stop();
-  if (assembled)
-    printf("done in %s (%lf secs)\n", tmr_assemble.get_human_time(), tmr_assemble.get_seconds());
-  else
-    error("failed!");
+  printf("done in %s (%lf secs)\n", tmr_assemble.get_human_time(), tmr_assemble.get_seconds());
 
   // Solve the stiffness matrix.
   printf("  - Solving... "); fflush(stdout);
   Timer tmr_solve;
   tmr_solve.start();
-  bool solved = solver.solve();
+  bool solved = solver->solve();
   tmr_solve.stop();
   if (solved)
     printf("done in %s (%lf secs)\n", tmr_solve.get_human_time(), tmr_solve.get_seconds());
@@ -170,22 +148,22 @@ int main(int argc, char **argv) {
   }
 
   // Construct a solution. 
-  double *s = solver.get_solution();
+  double *solution_vector = solver->get_solution();
   Solution xsln(&mesh), ysln(&mesh), zsln(&mesh);
-  xsln.set_coeff_vector(&xdisp, s);
-  ysln.set_coeff_vector(&ydisp, s);
-  zsln.set_coeff_vector(&zdisp, s);
+  xsln.set_coeff_vector(&xdisp, solution_vector);
+  ysln.set_coeff_vector(&ydisp, solution_vector);
+  zsln.set_coeff_vector(&zdisp, solution_vector);
 
   // Output the solutions. 
   printf("  - Output... "); fflush(stdout);
   out_fn(&xsln, &ysln, &zsln, "disp");
   printf("done\n");
 
-#ifdef WITH_PETSC
-  mat.free();
-  rhs.free();
-  PetscFinalize();
-#endif
+  // Clean up.
+  delete solution_vector;
+  delete solver;
+  delete matrix;
+  delete rhs;
 
-  return 1;
+  return 0;
 }

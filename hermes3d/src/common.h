@@ -42,6 +42,16 @@
 #define H3D_ERR_PRISM_NOT_COMPILED              "hermes3d was not built with prism elements."
 #define H3D_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
 
+// Matrix solvers
+enum MatrixSolverType 
+{
+   SOLVER_UMFPACK, 
+   SOLVER_PETSC, 
+   SOLVER_MUMPS,
+   SOLVER_PARDISO,
+   SOLVER_NOX,
+   SOLVER_AMESOS
+};
 
 #ifdef H3D_COMPLEX
 
@@ -111,8 +121,7 @@ inline void blas_axpy(int n, double alpha, double *x, int incx, double *y, int i
 /// y <- x
 inline void blas_copy(int n, double *x, int incx, double *y, int incy) { dcopy_(&n, x, &incx, y, &incx); }
 
-
-const int ANY = -1234;
+const int HERMES_ANY = -1234;
 
 // 1D element modes
 enum EMode1D {

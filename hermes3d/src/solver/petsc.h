@@ -20,9 +20,9 @@
 #ifndef _PETSC_SOLVER_H_
 #define _PETSC_SOLVER_H_
 
-#include "../h3dconfig.h"
+//#include "../h3dconfig.h"
 #include "../matrix.h"
-#include "../solver.h"
+#include "solver.h"
 
 #ifdef WITH_PETSC
 #include <petsc.h>
@@ -91,7 +91,6 @@ protected:
 class PetscLinearSolver : public LinearSolver {
 public:
 	PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
-	PetscLinearSolver(LinearProblem *lp);
 	virtual ~PetscLinearSolver();
 
 	virtual bool solve();

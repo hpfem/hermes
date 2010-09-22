@@ -17,14 +17,13 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../h3dconfig.h"
+//#include "../h3dconfig.h"
 #include "pardiso.h"
-#include "../linear_problem.h"
 
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/utils.h>
-#include <common/callstack.h>
+#include "../../common/trace.h"
+#include "../../common/error.h"
+#include "../../common/utils.h"
+#include "../../common/callstack.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -127,7 +126,7 @@ void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
 	_F_
 	for (int i = 0; i < m; i++)				// rows
 		for (int j = 0; j < n; j++)			// cols
-			if (mat[i][j] != 0.0 && rows[i] != H3D_DIRICHLET_DOF && cols[j] != H3D_DIRICHLET_DOF)		// ignore dirichlet DOFs
+			if (mat[i][j] != 0.0 && rows[i] >= 0 && cols[j] >= 0)		// ignore dirichlet DOFs
 				add(rows[i], cols[j], mat[i][j]);
 }
 
@@ -146,7 +145,7 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 			return true;
 
 		case DF_HERMES_BIN: {
-			hermes_fwrite("H2DX\001\000\000\000", 1, 8, file);
+			hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
 			int ssize = sizeof(scalar);
 			int nnz = Ap[size];
 			hermes_fwrite(&ssize, sizeof(int), 1, file);
@@ -242,6 +241,11 @@ void PardisoVector::add(int idx, scalar y) {
 	if (idx >= 0) v[idx] += y;
 }
 
+void PardisoVector::extract(scalar *v) const
+{
+  return;
+}
+
 void PardisoVector::add(int n, int *idx, scalar *y) {
 	_F_
 	for (int i = 0; i < n; i++)
@@ -259,7 +263,7 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 			return true;
 
 		case DF_HERMES_BIN: {
-			hermes_fwrite("H2DR\001\000\000\000", 1, 8, file);
+			hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
 			int ssize = sizeof(scalar);
 			hermes_fwrite(&ssize, sizeof(int), 1, file);
 			hermes_fwrite(&size, sizeof(int), 1, file);
@@ -284,20 +288,7 @@ PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
 	_F_
 #ifdef WITH_PARDISO
 #else
-	warning("hermes3d was not built with Pardiso support.");
-	exit(128);
-#endif
-}
-
-PardisoLinearSolver::PardisoLinearSolver(LinearProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef WITH_PARDISO
-	m = new PardisoMatrix;
-	rhs = new PardisoVector;
-#else
-	warning("hermes3d was not built with Pardiso support.");
+	warning("hermes2d was not built with Pardiso support.");
 	exit(128);
 #endif
 }
@@ -317,10 +308,6 @@ bool PardisoLinearSolver::solve() {
 #ifdef WITH_PARDISO
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL)
-		lp->assemble(m, rhs);
-	assert(m->size == rhs->size);
 
 	bool res = true;
 	int n = m->size;

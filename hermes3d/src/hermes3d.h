@@ -79,11 +79,10 @@
 #include "filter.h"
 #include "weakform.h"
 #include "discrete_problem.h"
-#include "linear_problem.h"
 
 // linear solvers
-#include "solver.h"
-#include "solver/umfpack.h"
+#include "solver/solver.h"
+#include "solver/umfpack_solver.h"
 #include "solver/pardiso.h"
 #include "solver/petsc.h"
 #include "solver/epetra.h"
@@ -93,9 +92,9 @@
 #include "solver/mumps.h"
 
 // preconditioners
-#include "precond.h"
-#include "precond/ifpack.h"
-#include "precond/ml.h"
+#include "solver/precond.h"
+#include "solver/precond_ifpack.h"
+#include "solver/precond_ml.h"
 
 // adapt
 #include "adapt/h1.h"

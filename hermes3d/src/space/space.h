@@ -21,6 +21,7 @@
 #define __SPACE_H
 
 #include "../mesh.h"
+#include "../tuple.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
 #include "../quad.h"
@@ -393,5 +394,7 @@ protected:
 	friend class LinearProblem;
 };
 
+// This is the same in H2D and H3D.
+extern int assign_dofs(Tuple<Space*> spaces);
 
 #endif

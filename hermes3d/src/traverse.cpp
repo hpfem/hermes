@@ -369,7 +369,7 @@ State *Traverse::push_state() {
 }
 
 
-void Traverse::set_boundary_info(State *s, bool *bnd, FacePos *fp) {
+void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 	_F_
 	Element *e = s->e[0];
 	Mesh *m = meshes[0];
@@ -413,8 +413,8 @@ void Traverse::set_boundary_info(State *s, bool *bnd, FacePos *fp) {
 			Facet *facet = m->facets[fid];
 			Boundary *b = m->boundaries[facet->right];
 
-			fp[iface].marker = b->marker;
-			fp[iface].face = iface;
+			surf_pos[iface].marker = b->marker;
+			surf_pos[iface].surf_num = iface;
 		}
 	}
 }
@@ -509,7 +509,7 @@ void Traverse::hex_push_son_states(State *s) {
 	}
 }
 
-Element **Traverse::get_next_state(bool *bnd, FacePos *fp) {
+Element **Traverse::get_next_state(bool *bnd, SurfPos *surf_pos) {
 	_F_
 	PRINTF("Traverse::get_next_state\n");
 
@@ -580,7 +580,7 @@ Element **Traverse::get_next_state(bool *bnd, FacePos *fp) {
 
 		// if yes, set boundary flags and return the state
 		if (leaf) {
-			if (bnd != NULL) set_boundary_info(s, bnd, fp);
+			if (bnd != NULL) set_boundary_info(s, bnd, surf_pos);
 			return s->e;
 		}
 

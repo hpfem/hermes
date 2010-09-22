@@ -20,48 +20,69 @@
 #ifndef _DISCRETE_PROBLEM_H_
 #define _DISCRETE_PROBLEM_H_
 
+#include "common.h"
 #include <common/array.h>
 #include "weakform.h"
 #include "tuple.h"
+#include "solver/solver.h"
 
 class Space;
 class Matrix;
 class SparseMatrix;
 class Vector;
-class FacePos;
+class SurfPos;
 
-/// Finite Element problem class
+/// Discrete problem class
 ///
-/// This class does assembling into passed-in structures.
+/// This class does assembling into external matrix / vactor structures.
 ///
 class DiscreteProblem {
 public:
-        DiscreteProblem(WeakForm *wf, Tuple<Space *> sp);
+        DiscreteProblem(WeakForm *wf, Tuple<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
 	void free();
 
-	void set_spaces(Tuple<Space *> sp);
-	void set_space(Space* sp);
+        // Get pointer to n-th space.
+        Space* get_space(int n) {  return this->spaces[n];  }
 
-	void create(SparseMatrix *mat);
-	void assemble(Vector* init_vec, Matrix* mat_ext, Vector* rhs_ext, Vector* dir_ext,
-                      bool rhsonly = false, bool is_complex = false);
+        // Precalculate matrix sparse structure.
+	void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
 
+        // General assembling procedure for nonlinear problems. coeff_vec is the 
+        // previous Newton vector.
+	void assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly = false);
+
+        // Assembling for linear problems. Same as the previous functions, but 
+        // does not need the coeff_vector.
+	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
+                      bool rhsonly = false);
+
+        // Get the number of unknowns.
 	int get_num_dofs();
+
 	bool is_matrix_free() { return wf->is_matrix_free(); }
+  
+        void invalidate_matrix() { have_matrix = false; }
 
 protected:
-	WeakForm *wf;
+	WeakForm* wf;
 
-	int ndof;					/// number of DOFs
-	int *sp_seq;				/// sequence numbers of spaces
-	Space **spaces;
-	Solution **slns;
-	bool have_spaces;
+        bool is_linear;
 
-	scalar **matrix_buffer;		/// buffer for holding square matrix (during assembling)
+	int ndof;				/// number of DOF
+	int* sp_seq;				/// sequence numbers of spaces
+        int wf_seq;
+        Tuple<Space *> spaces;
+
+	scalar** matrix_buffer;		/// buffer for holding square matrix (during assembling)
 	int matrix_buffer_dim;		/// dimension of the matrix held by 'matrix_buffer'
-	inline scalar **get_matrix_buffer(int n);
+	inline scalar** get_matrix_buffer(int n);
+
+	bool have_spaces;
+	bool have_matrix;
+
+        bool values_changed;
+        bool struct_changed;
 	bool is_up_to_date();
 
 	// pre-transforming and fn. caching
@@ -94,9 +115,9 @@ protected:
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv);
 	scalar eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
 	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, ShapeFunction *fu,
-	                 ShapeFunction *fv, RefMap *ru, RefMap *rv, FacePos *fp);
+	                 ShapeFunction *fv, RefMap *ru, RefMap *rv, SurfPos *surf_pos);
 	scalar eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
-	                 FacePos *fp);
+	                 SurfPos *surf_pos);
 
 	sfn_t *get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
 	sfn_t *get_fn(ShapeFunction *fu, int order, RefMap *rm, int iface, const int np,
@@ -108,4 +129,10 @@ protected:
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
-#endif /* _LINPROBLEM_H_ */
+int get_num_dofs(Tuple<Space *> spaces);
+
+Vector* create_vector(MatrixSolverType matrix_solver);
+SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
+Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+
+#endif /* _DISCRETE_PROBLEM_H_ */

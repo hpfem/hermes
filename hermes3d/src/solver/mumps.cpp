@@ -17,16 +17,15 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../h3dconfig.h"
+//#include "../h3dconfig.h"
 #include "mumps.h"
-#include "../linear_problem.h"
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/utils.h>
-#include <common/callstack.h>
-#include <common/timer.h>
+#include "../../common/trace.h"
+#include "../../common/error.h"
+#include "../../common/utils.h"
+#include "../../common/callstack.h"
+#include "../../common/timer.h"
 
-#define H3D_ERR_MUMPS_NOT_COMPILED		"Hermes3D was not compiled with MUMPS support"
+#define H3D_ERR_MUMPS_NOT_COMPILED    "Hermes2D was not compiled with MUMPS support"
 
 #ifndef H3D_COMPLEX
 	#define MUMPS			dmumps_c
@@ -154,7 +153,7 @@ void MumpsMatrix::zero()
 void MumpsMatrix::add(int m, int n, scalar v)
 {
 	_F_
-	if (m != H3D_DIRICHLET_DOF && n != H3D_DIRICHLET_DOF) {		// ignore dirichlet DOFs
+	if (m >= 0 && n >= 0) {		// ignore dirichlet DOFs
 		int pos = ap[n] + find_position(ai + ap[n], ap[n + 1] - ap[n], m);
 #ifndef H3D_COMPLEX
 		a[pos] += v;
@@ -324,7 +323,7 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 			return true;
 
 		case DF_HERMES_BIN: {
-			hermes_fwrite("H2DR\001\000\000\000", 1, 8, file);
+			hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
 			int ssize = sizeof(scalar);
 			hermes_fwrite(&ssize, sizeof(int), 1, file);
 			hermes_fwrite(&size, sizeof(int), 1, file);
@@ -348,18 +347,6 @@ MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
 {
 	_F_
 #ifdef WITH_MUMPS
-#else
-	EXIT(H3D_ERR_MUMPS_NOT_COMPILED);
-#endif
-}
-
-MumpsSolver::MumpsSolver(LinearProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef WITH_MUMPS
-	m = new MumpsMatrix;
-	rhs = new MumpsVector;
 #else
 	EXIT(H3D_ERR_MUMPS_NOT_COMPILED);
 #endif
@@ -407,10 +394,6 @@ bool MumpsSolver::solve()
 	bool ret = false;
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL)
-		lp->assemble(m, rhs);
-	assert(m->size == rhs->size);
 
 	Timer tmr;
 	tmr.start();

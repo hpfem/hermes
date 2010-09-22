@@ -142,10 +142,7 @@ int main(int argc, char* argv[])
     info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
-  
-    delete ref_space;
-    delete fep;
-    
+      
     // Time measurement.
     cpu_time.tick();
 
@@ -166,6 +163,10 @@ int main(int argc, char* argv[])
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
       get_num_dofs(&space), get_num_dofs(ref_space), err_est);
+
+    // Clean up.
+    delete ref_space;
+    delete fep;
 
     // Time measurement.
     cpu_time.tick();

@@ -17,11 +17,11 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../h3dconfig.h"
+//#include "../h3dconfig.h"
 #include "amesos.h"
-#include "../linear_problem.h"
-#include <common/callstack.h>
-#include <common/timer.h>
+#include "../discrete_problem.h"
+#include "../../common/callstack.h"
+#include "../../common/timer.h"
 
 #ifdef HAVE_AMESOS
 #include <Amesos_ConfigDefs.h>
@@ -41,22 +41,7 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 	solver = factory.Create(solver_type, problem);
 	assert(solver != NULL);
 #else
-	warning("hermes3d was not built with AMESOS support.");
-	exit(128);
-#endif
-}
-
-AmesosSolver::AmesosSolver(const char *solver_type, LinearProblem *lp)
-	: LinearSolver(lp)
-{
-	_F_
-#ifdef HAVE_AMESOS
-	solver = factory.Create(solver_type, problem);
-	assert(solver != NULL);
-	m = new EpetraMatrix;
-	rhs = new EpetraVector;
-#else
-	warning("hermes3d was not built with AMESOS support.");
+	warning("hermes2d was not built with AMESOS support.");
 	exit(128);
 #endif
 }
@@ -65,11 +50,8 @@ AmesosSolver::~AmesosSolver()
 {
 	_F_
 #ifdef HAVE_AMESOS
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
-	delete solver;
+	if (m != NULL) delete m;
+	if (rhs != NULL) delete rhs;
 #endif
 }
 
@@ -107,11 +89,7 @@ bool AmesosSolver::solve()
 #ifdef HAVE_AMESOS
 	assert(m != NULL);
 	assert(rhs != NULL);
-
-	if (lp != NULL)
-		lp->assemble(m, rhs);
-	assert(m->size == rhs->size);
-
+  
 	Timer tmr;
 	tmr.start();
 

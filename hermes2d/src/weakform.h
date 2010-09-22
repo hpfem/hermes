@@ -66,21 +66,21 @@ public:
 
   // general case
   void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-		   SymFlag sym = H2D_UNSYM, int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
+		   SymFlag sym = H2D_UNSYM, int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
   void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, 
-		   SymFlag sym = H2D_UNSYM, int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
+		   SymFlag sym = H2D_UNSYM, int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
   void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-			int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
+			int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
   void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, 
-			int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
+			int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
   void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, 
-		   int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
+		   int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
   void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, 
-		   int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
+		   int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
   void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, 
-			int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
+			int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
   void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, 
-			int area = H2D_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
+			int area = HERMES_ANY, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>()); // single equation case
 
   void set_ext_fns(void* fn, Tuple<MeshFunction*>ext = Tuple<MeshFunction*>());
 
@@ -139,7 +139,8 @@ protected:
     std::set<MeshFunction*> ext_set;
   };
 
-  void get_stages(Tuple< Space* > spaces, Tuple< Solution* > u_ext, std::vector< WeakForm::Stage >& stages, bool rhsonly);
+  void get_stages(Tuple< Space* > spaces, Tuple< Solution* > u_ext, 
+                  std::vector< WeakForm::Stage >& stages, bool rhsonly);
   bool** get_blocks();
 
   bool is_in_area(int marker, int area) const

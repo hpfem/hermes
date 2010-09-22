@@ -242,6 +242,7 @@ public:
 	virtual int get_num_vertices() const = 0;
 	virtual int get_num_edges() const = 0;
 	virtual int get_num_faces() const = 0;
+	virtual int get_num_surf() const = 0;
 
 	virtual Word_t get_vertex(int vertex_num) const = 0;
 	virtual void get_vertices(Word_t *vtcs) const = 0;
@@ -316,6 +317,7 @@ public:
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
+	virtual int get_num_surf() const { return NUM_FACES; }
 
 	virtual Word_t get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
 	virtual void get_vertices(Word_t *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
@@ -378,6 +380,7 @@ public:
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
+	virtual int get_num_surf() const { return NUM_FACES; }
 
 	virtual Word_t get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
 	virtual void get_vertices(Word_t *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
@@ -434,6 +437,7 @@ public:
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
+	virtual int get_num_surf() const { return NUM_FACES; }
 
 	virtual Word_t get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
 	virtual void get_vertices(Word_t *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }

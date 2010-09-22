@@ -116,23 +116,23 @@ void HdivSpace::assign_bubble_dofs()
 
 //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
-void HdivSpace::get_edge_assembly_list_internal(Element* e, int ie, AsmList* al)
+void HdivSpace::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
 {
-  Node* en = e->en[ie];
+  Node* en = e->en[surf_num];
   NodeData* nd = &ndata[en->id];
 
   if (nd->n >= 0) // unconstrained
   {
     if (nd->dof >= 0)
     {
-      int ori = (e->vn[ie]->id < e->vn[e->next_vert(ie)]->id) ? 0 : 1;
+      int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
       for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-        al->add_triplet(shapeset->get_edge_index(ie, ori, j), dof, 1.0);
+        al->add_triplet(shapeset->get_edge_index(surf_num, ori, j), dof, 1.0);
     }
     else
     {
       for (int j = 0; j < nd->n; j++)
-        al->add_triplet(shapeset->get_edge_index(ie, 0, j), -1, nd->edge_bc_proj[j]);
+        al->add_triplet(shapeset->get_edge_index(surf_num, 0, j), -1, nd->edge_bc_proj[j]);
     }
   }
   else // constrained
@@ -143,7 +143,7 @@ void HdivSpace::get_edge_assembly_list_internal(Element* e, int ie, AsmList* al)
 
     nd = &ndata[nd->base->id]; // ccc
     for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-      al->add_triplet(shapeset->get_constrained_edge_index(ie, j, ori, part), dof, 1.0);
+      al->add_triplet(shapeset->get_constrained_edge_index(surf_num, j, ori, part), dof, 1.0);
   }
 }
 
@@ -161,7 +161,7 @@ void HdivSpace::get_bubble_assembly_list(Element* e, AsmList* al)
 
 //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
-scalar* HdivSpace::get_bc_projection(EdgePos* ep, int order)
+scalar* HdivSpace::get_bc_projection(SurfPos* surf_pos, int order)
 {
   assert(order >= 0);
   scalar* proj = new scalar[order + 1];
@@ -171,10 +171,10 @@ scalar* HdivSpace::get_bc_projection(EdgePos* ep, int order)
   int mo = quad1d.get_max_order();
   double2* pt = quad1d.get_points(mo);
 
-  Node* vn1 = mesh->get_node(ep->v1);
-  Node* vn2 = mesh->get_node(ep->v2);
+  Node* vn1 = mesh->get_node(surf_pos->v1);
+  Node* vn2 = mesh->get_node(surf_pos->v2);
   double el = sqrt(sqr(vn1->x - vn2->x) + sqr(vn1->y - vn2->y));
-  el *= 0.5 * (ep->hi - ep->lo);
+  el *= 0.5 * (surf_pos->hi - surf_pos->lo);
 
   // get boundary values at integration points, construct rhs
   for (int i = 0; i <= order; i++)
@@ -184,9 +184,9 @@ scalar* HdivSpace::get_bc_projection(EdgePos* ep, int order)
     for (int j = 0; j < quad1d.get_num_points(mo); j++)
     {
       double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
-      ep->t = ep->lo * s + ep->hi * t;
+      surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
       rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
-                         * (bc_value_callback_by_edge(ep)) * el;
+                         * (bc_value_callback_by_edge(surf_pos)) * el;
     }
   }
 

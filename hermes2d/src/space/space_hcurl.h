@@ -51,13 +51,13 @@ protected:
   virtual void assign_bubble_dofs();
 
   virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) {}
-  virtual void get_edge_assembly_list_internal(Element* e, int ie, AsmList* al);
+  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al);
 
   static double** hcurl_proj_mat;
   static double*  hcurl_chol_p;
   static int      hcurl_proj_ref;
 
-  virtual scalar* get_bc_projection(EdgePos* ep, int order);
+  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
   struct EdgeInfo
   {

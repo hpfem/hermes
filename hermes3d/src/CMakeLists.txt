@@ -10,7 +10,6 @@ set(SRC
 	function.cpp
 	mesh.cpp
 	discrete_problem.cpp
-	linear_problem.cpp
 	loader/exodusii.cpp
 	loader/mesh3d.cpp
 	loader/hdf5.cpp
@@ -19,8 +18,6 @@ set(SRC
 	output/gmsh.cpp
 	output/vtk.cpp
 	output/graph.cpp
-	precond/ifpack.cpp
-	precond/ml.cpp
 	qsort.cpp
 	quadcheb.cpp
 	quadstd.cpp
@@ -45,12 +42,14 @@ set(SRC
 	weakform.cpp
 	solver/pardiso.cpp
 	solver/petsc.cpp
-	solver/umfpack.cpp
+	solver/umfpack_solver.cpp
 	solver/epetra.cpp
 	solver/amesos.cpp
 	solver/aztecoo.cpp
 	solver/nox.cpp
 	solver/mumps.cpp
+	solver/precond_ifpack.cpp
+	solver/precond_ml.cpp
 	adapt/h1.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
@@ -138,7 +137,6 @@ file(GLOB INC_SPACE     "${CMAKE_CURRENT_SOURCE_DIR}/space/*.h")
 file(GLOB INC_SHAPESET  "${CMAKE_CURRENT_SOURCE_DIR}/shapeset/*.h")
 file(GLOB INC_LOADER    "${CMAKE_CURRENT_SOURCE_DIR}/loader/*.h")
 file(GLOB INC_SOLVER    "${CMAKE_CURRENT_SOURCE_DIR}/solver/*.h")
-file(GLOB INC_PRECOND   "${CMAKE_CURRENT_SOURCE_DIR}/precond/*.h")
 file(GLOB INC_OUTPUT    "${CMAKE_CURRENT_SOURCE_DIR}/output/*.h")
 file(GLOB INC_INTEGRALS "${CMAKE_CURRENT_SOURCE_DIR}/integrals/*.h")
 file(GLOB INC_ADAPT     "${CMAKE_CURRENT_SOURCE_DIR}/adapt/*.h")
@@ -149,7 +147,6 @@ install(FILES ${INC_SPACE}     DESTINATION include/space)
 install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)
 install(FILES ${INC_LOADER}    DESTINATION include/loader)
 install(FILES ${INC_SOLVER}    DESTINATION include/solver)
-install(FILES ${INC_PRECOND}   DESTINATION include/precond)
 install(FILES ${INC_OUTPUT}    DESTINATION include/output)
 install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
 install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
