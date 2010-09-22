@@ -156,7 +156,6 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   int ndof = get_num_dofs();
   mat->prealloc(ndof);
 
-  // This is different in H3D.
   AUTOLA_CL(AsmList, al, wf->neq);
   AUTOLA_OR(Mesh*, meshes, wf->neq);
   bool **blocks = wf->get_blocks();
@@ -250,12 +249,12 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
  
   /* END IDENTICAL CODE WITH H3D */
 
-  AUTOLA_CL(AsmList, al, wf->neq);
-  AsmList *am, *an;
   bool bnd[4];			    // FIXME: magic number - maximal possible number of element surfaces
+  SurfPos surf_pos[4];
+  AUTOLA_CL(AsmList, al, wf->neq);
   AUTOLA_OR(bool, nat, wf->neq);
   AUTOLA_OR(bool, isempty, wf->neq);
-  SurfPos surf_pos[4];
+  AsmList *am, *an;
   reset_warn_order();
 
   // create slave pss's for test functions, init quadrature points

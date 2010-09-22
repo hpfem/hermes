@@ -169,10 +169,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   bool bnd[10];			    // FIXME: magic number - maximal possible number of element surfaces
   SurfPos surf_pos[10];
-  bool nat[wf->neq], isempty[wf->neq];
-
-  AsmList al[wf->neq];
+  AUTOLA_CL(AsmList, al, wf->neq);
+  AUTOLA_OR(bool, nat, wf->neq);
+  AUTOLA_OR(bool, isempty, wf->neq);
   AsmList *am, *an;
+
   ShapeFunction base_fn[wf->neq];
   ShapeFunction test_fn[wf->neq];
   ShapeFunction *fu, *fv;
@@ -525,9 +526,8 @@ void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
   int ndof = get_num_dofs();
   mat->prealloc(this->ndof);
 
-  // This is different in H2D.
-  AsmList al[wf->neq];
-  Mesh *meshes[wf->neq];
+  AUTOLA_CL(AsmList, al, wf->neq);
+  AUTOLA_OR(Mesh*, meshes, wf->neq);
   bool **blocks = wf->get_blocks();
 
   // init multi-mesh traversal.
