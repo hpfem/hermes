@@ -114,8 +114,10 @@ endif(WITH_EXODUSII)
 
 # If using PETSc or UMFPack, we need to enable Fortran support and look for BLAS and LAPACK
 if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
-        enable_language(Fortran)
-        find_package(LAPACK REQUIRED)
+	if(NOT MSVC)
+	        enable_language(Fortran)
+	        find_package(LAPACK REQUIRED)
+	endif(NOT MSVC)
 endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
 
 # solvers
