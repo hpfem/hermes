@@ -340,11 +340,11 @@ void H2DReader::load_stream(FILE *f, Mesh *mesh)
   }
   mesh->ninitial = mesh->elements.get_num_items();
 
-  // update refmap coefs of curvilinear elements
+  // update refmap coeffs of curvilinear elements
   Element* e;
   for_all_elements(e, mesh)
     if (e->cm != NULL)
-      e->cm->update_refmap_coefs(e);
+      e->cm->update_refmap_coeffs(e);
 
   fclose(f);
   mesh->seq = g_mesh_seq++;
@@ -646,11 +646,11 @@ bool H2DReader::load(const char *filename, Mesh *mesh)
     }
   }
 
-  // update refmap coefs of curvilinear elements
+  // update refmap coeffs of curvilinear elements
   Element* e;
   for_all_elements(e, mesh)
     if (e->cm != NULL)
-      e->cm->update_refmap_coefs(e);
+      e->cm->update_refmap_coeffs(e);
 
   //// refinements /////////////////////////////////////////////////////////////
 

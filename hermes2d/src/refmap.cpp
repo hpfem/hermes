@@ -71,10 +71,10 @@ void RefMap::set_active_element(Element* e)
   {
     for (unsigned int i = 0; i < e->nvert; i++)
     {
-      lin_coefs[i][0] = e->vn[i]->x;
-      lin_coefs[i][1] = e->vn[i]->y;
+      lin_coeffs[i][0] = e->vn[i]->x;
+      lin_coeffs[i][1] = e->vn[i]->y;
     }
-    coefs = lin_coefs;
+    coeffs = lin_coeffs;
     nc = e->nvert;
   }
   else // curvilinear element - edge and bubble shapes
@@ -88,7 +88,7 @@ void RefMap::set_active_element(Element* e)
     memcpy(indices + k, ref_map_shapeset.get_bubble_indices(o),
            ref_map_shapeset.get_num_bubbles(o) * sizeof(int));
 
-    coefs = e->cm->coefs;
+    coeffs = e->cm->coeffs;
     nc = e->cm->nc;
   }
 
@@ -138,10 +138,10 @@ void RefMap::calc_inv_ref_map(int order)
     ref_map_pss.get_dx_dy_values(dx, dy);
     for (j = 0; j < np; j++)
     {
-      m[j][0][0] += coefs[i][0] * dx[j];
-      m[j][0][1] += coefs[i][0] * dy[j];
-      m[j][1][0] += coefs[i][1] * dx[j];
-      m[j][1][1] += coefs[i][1] * dy[j];
+      m[j][0][0] += coeffs[i][0] * dx[j];
+      m[j][0][1] += coeffs[i][0] * dy[j];
+      m[j][1][0] += coeffs[i][1] * dx[j];
+      m[j][1][1] += coeffs[i][1] * dy[j];
     }
   }
 
@@ -185,12 +185,12 @@ void RefMap::calc_second_ref_map(int order)
     dxy = ref_map_pss.get_dxy_values();
     for (j = 0; j < np; j++)
     {
-      k[j][0][0] += coefs[i][0] * dxx[j];
-      k[j][0][1] += coefs[i][1] * dxx[j];
-      k[j][1][0] += coefs[i][0] * dxy[j];
-      k[j][1][1] += coefs[i][1] * dxy[j];
-      k[j][2][0] += coefs[i][0] * dyy[j];
-      k[j][2][1] += coefs[i][1] * dyy[j];
+      k[j][0][0] += coeffs[i][0] * dxx[j];
+      k[j][0][1] += coeffs[i][1] * dxx[j];
+      k[j][1][0] += coeffs[i][0] * dxy[j];
+      k[j][1][1] += coeffs[i][1] * dxy[j];
+      k[j][2][0] += coeffs[i][0] * dyy[j];
+      k[j][2][1] += coeffs[i][1] * dyy[j];
     }
   }
 
@@ -270,7 +270,7 @@ void RefMap::calc_phys_x(int order)
     ref_map_pss.set_quad_order(order);
     double* fn = ref_map_pss.get_fn_values();
     for (j = 0; j < np; j++)
-      x[j] += coefs[i][0] * fn[j];
+      x[j] += coeffs[i][0] * fn[j];
   }
 }
 
@@ -288,7 +288,7 @@ void RefMap::calc_phys_y(int order)
     ref_map_pss.set_quad_order(order);
     double* fn = ref_map_pss.get_fn_values();
     for (j = 0; j < np; j++)
-      y[j] += coefs[i][1] * fn[j];
+      y[j] += coeffs[i][1] * fn[j];
   }
 }
 
@@ -329,10 +329,10 @@ void RefMap::calc_tangent(int edge, int eo)
       ref_map_pss.get_dx_dy_values(dx, dy);
       for (j = 0; j < np; j++)
       {
-        m[j][0][0] += coefs[i][0] * dx[j];
-        m[j][0][1] += coefs[i][0] * dy[j];
-        m[j][1][0] += coefs[i][1] * dx[j];
-        m[j][1][1] += coefs[i][1] * dy[j];
+        m[j][0][0] += coeffs[i][0] * dx[j];
+        m[j][0][1] += coeffs[i][0] * dy[j];
+        m[j][1][0] += coeffs[i][1] * dx[j];
+        m[j][1][1] += coeffs[i][1] * dy[j];
       }
     }
 
@@ -407,15 +407,15 @@ void RefMap::inv_ref_map_at_point(double xi1, double xi2, double& x, double& y, 
   for (int i = 0; i < nc; i++)
   {
     double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0);
-    x += coefs[i][0] * val;
-    y += coefs[i][1] * val;
+    x += coeffs[i][0] * val;
+    y += coeffs[i][1] * val;
 
     double dx =  ref_map_shapeset.get_dx_value(indices[i], xi1, xi2, 0);
     double dy =  ref_map_shapeset.get_dy_value(indices[i], xi1, xi2, 0);
-    tmp[0][0] += coefs[i][0] * dx;
-    tmp[0][1] += coefs[i][0] * dy;
-    tmp[1][0] += coefs[i][1] * dx;
-    tmp[1][1] += coefs[i][1] * dy;
+    tmp[0][0] += coeffs[i][0] * dx;
+    tmp[0][1] += coeffs[i][0] * dy;
+    tmp[1][0] += coeffs[i][1] * dx;
+    tmp[1][1] += coeffs[i][1] * dy;
   }
 
   // inverse matrix

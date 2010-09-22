@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../common/callstack.h"
 #include "common.h"
 #include "shapeset/shapeset_h1_all.h"
 #include "shapeset/shapeset_common.h"
@@ -21,7 +22,6 @@
 #include "mesh.h"
 #include "quad_all.h"
 #include "matrix.h"
-
 
 // defined in refmap.cpp
 extern H1ShapesetJacobi ref_map_shapeset;
@@ -40,12 +40,12 @@ static Quad2DStd quad2d; // fixme: g_quad_2d_std
 
 static Trf ctm;
 
-
 //// NURBS //////////////////////////////////////////////////////////////////////////////////////////
 
 // recursive calculation of the basis function N_i,k
 double nurbs_basis_fn(int i, int k, double t, double* knot)
 {
+  _F_
   if (k == 0)
   {
     return (t >= knot[i] && t <= knot[i+1] && knot[i] < knot[i+1]) ? 1.0 : 0.0;
@@ -72,6 +72,7 @@ double nurbs_basis_fn(int i, int k, double t, double* knot)
 // nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
 void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y)
 {
+  _F_
   t = (t + 1) / 2.0; // nurbs curves are parametrized from 0 to 1
   if (nurbs == NULL)
   {
@@ -154,6 +155,7 @@ static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x
 // calculation of nonpolynomial reference mapping on curved element
 static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y)
 {
+  _F_
   double  fx,  fy;
   x = y = 0.0;
 
@@ -184,6 +186,7 @@ static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2
 static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
                               double& x, double& y)
 {
+  _F_
   double ex[4], ey[4];
 
   nurbs_edge(e, nurbs[0], 0,  xi_1, ex[0], ey[0]);
@@ -205,6 +208,7 @@ static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_
 
 static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
 {
+  _F_
   if (e->get_mode() == H2D_MODE_QUAD)
     calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
   else
@@ -217,6 +221,7 @@ static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, do
 // preparation of projection matrices, Cholesky factorization
 static void precalculate_cholesky_projection_matrix_edge()
 {
+  _F_
   int order = ref_map_shapeset.get_max_order();
   int n = order - 1; // number of edge basis functions
   edge_proj_matrix = new_matrix<double>(n, n);
@@ -245,10 +250,10 @@ static void precalculate_cholesky_projection_matrix_edge()
   choldc(edge_proj_matrix, n, edge_p);
 }
 
-
 // calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i,j < n, n is the number of bubble functions
 static double** calculate_bubble_projection_matrix(int nb, int* indices)
 {
+  _F_
   double** mat = new_matrix<double>(nb, nb);
 
   for (int i = 0; i < nb; i++)
@@ -282,6 +287,7 @@ static double** calculate_bubble_projection_matrix(int nb, int* indices)
 
 static void precalculate_cholesky_projection_matrices_bubble()
 {
+  _F_
   // *** triangles ***
   ref_map_pss.set_mode(H2D_MODE_TRIANGLE);
   int order = ref_map_shapeset.get_max_order();
@@ -316,6 +322,7 @@ static void precalculate_cholesky_projection_matrices_bubble()
 // compute point (x,y) in reference element, edge vector (v1, v2)
 static void edge_coord(Element* e, int edge, double t, double2& x, double2& v)
 {
+  _F_
   int mode = e->get_mode();
   double2 a, b;
   a[0] = ctm.m[0] * ref_vert[mode][edge][0] + ctm.t[0];
@@ -332,9 +339,9 @@ static void edge_coord(Element* e, int edge, double t, double2& x, double2& v)
   v[0] /= lenght; v[1] /= lenght;
 }
 
-
 static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj)
 {
+  _F_
   ref_map_pss.set_active_element(e);
 
   int i, j, k;
@@ -392,11 +399,11 @@ static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order,
   }
 }
 
-
 //// bubble part of projection based interpolation /////////////////////////////////////////////////
 
 static void old_projection(Element* e, int order, double2* proj, double* old[2])
 {
+  _F_
   int mo2 = quad2d.get_max_order();
   int np = quad2d.get_num_points(mo2);
 
@@ -429,9 +436,9 @@ static void old_projection(Element* e, int order, double2* proj, double* old[2])
   }
 }
 
-
 static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj)
 {
+  _F_
   ref_map_pss.set_active_element(e);
 
   int i, j, k;
@@ -502,6 +509,7 @@ static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2
 
 static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj)
 {
+  _F_
   // vertex part
   for (unsigned int i = 0; i < e->nvert; i++)
   {
@@ -521,8 +529,9 @@ static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* pr
 }
 
 
-void CurvMap::update_refmap_coefs(Element* e)
+void CurvMap::update_refmap_coeffs(Element* e)
 {
+  _F_
   ref_map_pss.set_quad_2d(&quad2d);
   //ref_map_pss.set_active_element(e);
 
@@ -539,10 +548,13 @@ void CurvMap::update_refmap_coefs(Element* e)
   int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
   int nb = ref_map_shapeset.get_num_bubbles(qo);
   nc = nv + nv*ne + nb;
-  if (coefs != NULL) delete [] coefs;
-  coefs = new double2[nc];
+  if (coeffs != NULL) {
+    delete [] coeffs;
+    coeffs = NULL;
+  }
+  coeffs = new double2[nc];
 
-  // WARNING: do not change the format of the array 'coefs'. If it changes,
+  // WARNING: do not change the format of the array 'coeffs'. If it changes,
   // RefMap::set_active_element() has to be changed too.
 
   Nurbs** nurbs;
@@ -561,12 +573,12 @@ void CurvMap::update_refmap_coefs(Element* e)
   ref_map_pss.reset_transform(); // fixme - do we need this?
 
   // calculation of new projection coefficients
-  ref_map_projection(e, nurbs, order, coefs);
+  ref_map_projection(e, nurbs, order, coeffs);
 }
-
 
 void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
 {
+  _F_
   Nurbs** nurbs = this->nurbs;
   Transformable tran;
   tran.set_active_element(e);
@@ -588,9 +600,9 @@ void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
   }
 }
 
-
 void Nurbs::unref()
 {
+  _F_
   if (!--ref) // fixme: possible leak, we need ~Nurbs too
   {
     delete [] pt;
@@ -602,9 +614,10 @@ void Nurbs::unref()
 
 CurvMap::CurvMap(CurvMap* cm)
 {
+  _F_
   memcpy(this, cm, sizeof(CurvMap));
-  coefs = new double2[nc];
-  memcpy(coefs, cm->coefs, sizeof(double2) * nc);
+  coeffs = new double2[nc];
+  memcpy(coeffs, cm->coeffs, sizeof(double2) * nc);
 
   if (toplevel)
     for (int i = 0; i < 4; i++)
@@ -612,12 +625,13 @@ CurvMap::CurvMap(CurvMap* cm)
         nurbs[i]->ref++;
 }
 
-
 CurvMap::~CurvMap()
 {
-  if (coefs != NULL)
-    delete [] coefs;
-
+  _F_
+  if (coeffs != NULL) {
+    delete [] coeffs;
+    coeffs = NULL;
+  }
   if (toplevel)
     for (int i = 0; i < 4; i++)
       if (nurbs[i] != NULL)

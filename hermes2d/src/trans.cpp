@@ -60,8 +60,8 @@ double2 *transform_element(Element *e, int np, double2 *pt)
 	{
 		for (j = 0; j < np; j++) {
 			double fn = ref_map_shapeset.get_fn_value(indices[i], pt[j][0], pt[j][1], 0);
-			tpt[j][0] += e->cm->coefs[i][0] * fn;
-			tpt[j][1] += e->cm->coefs[i][1] * fn;
+			tpt[j][0] += e->cm->coeffs[i][0] * fn;
+			tpt[j][1] += e->cm->coeffs[i][1] * fn;
 		}
 	}
 

@@ -359,7 +359,7 @@ void Mesh::refine_triangle(Element* e)
   // update coefficients of curved reference mapping
   for (int i = 0; i < 4; i++)
     if (sons[i]->is_curved())
-      sons[i]->cm->update_refmap_coefs(sons[i]);
+      sons[i]->cm->update_refmap_coeffs(sons[i]);
 
   // deactivate this element and unregister from its nodes
   e->active = 0;
@@ -514,7 +514,7 @@ void Mesh::refine_quad(Element* e, int refinement)
   // update coefficients of curved reference mapping
   for (i = 0; i < 4; i++)
     if (sons[i] != NULL && sons[i]->cm != NULL)
-      sons[i]->cm->update_refmap_coefs(sons[i]);
+      sons[i]->cm->update_refmap_coeffs(sons[i]);
 
   // optimization: iro never gets worse
   if (e->iro_cache == 0)
@@ -1383,7 +1383,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
   {
     if (sons[i]->is_curved())
     {
-      sons[i]->cm->update_refmap_coefs(sons[i]);
+      sons[i]->cm->update_refmap_coeffs(sons[i]);
     }
   }
   nactive += 3;
@@ -1570,7 +1570,7 @@ void Mesh::refine_quad_to_triangles(Element* e)
   {
     if (sons[i]->is_curved())
     {
-      sons[i]->cm->update_refmap_coefs(sons[i]);
+      sons[i]->cm->update_refmap_coeffs(sons[i]);
     }
   }
   nactive += 2;

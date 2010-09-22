@@ -221,8 +221,8 @@ protected:
 
   int indices[70];
   int nc;
-  double2* coefs;
-  double2  lin_coefs[4];
+  double2* coeffs;
+  double2  lin_coeffs[4];
 
 };
 

@@ -53,7 +53,7 @@ struct Nurbs
 ///
 struct CurvMap
 {
-  CurvMap() { coefs = NULL; };
+  CurvMap() { coeffs = NULL; };
   CurvMap(CurvMap* cm);
   ~CurvMap();
 
@@ -80,14 +80,14 @@ struct CurvMap
   // finally here are the coefficients of the higher-order basis functions
   // that constitute the projected reference mapping:
   int nc; // number of coefficients (todo: mozna spis polyn. rad zobrazeni)
-  double2* coefs; // array of the coefficients
+  double2* coeffs; // array of the coefficients
 
   // this is called for every curvilinear element when it is created
   // or when it is necessary to re-calculate coefficients for another
   // order: 'e' is a pointer to the element to which this CurvMap
-  // belongs to. First, old "coefs" are removed if they are not NULL,
+  // belongs to. First, old "coeffs" are removed if they are not NULL,
   // then new coefficients are projected.
-  void update_refmap_coefs(Element* e);
+  void update_refmap_coeffs(Element* e);
 
   void get_mid_edge_points(Element* e, double2* pt, int n);
 
