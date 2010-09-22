@@ -39,11 +39,11 @@ public:
 	~H1Adapt();
 
 	typedef
-		scalar (*biform_val_t)(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<scalar> *u, fn_t<scalar> *v,
-		                       geom_t<double> *e, user_data_t<scalar> *);
+		scalar (*biform_val_t)(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v,
+		                       Geom<double> *e, ExtData<scalar> *);
 	typedef
-		ord_t (*biform_ord_t)(int n, double *wt, fn_t<ord_t> *u_ext[], fn_t<ord_t> *u, fn_t<ord_t> *v,
-		                      geom_t<ord_t> *e, user_data_t<ord_t> *);
+		Ord (*biform_ord_t)(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+		                      Geom<Ord> *e, ExtData<Ord> *);
 
 	/// Type-safe version of calc_error_n() for one solution.
 	double calc_error(Solution *sln, Solution *rsln)
@@ -135,12 +135,12 @@ protected:
 
 	/// Used by adapt(). Can be utilized in specialized adaptivity
 	/// procedures, for which adapt() is not sufficient.
-	void get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &order, Solution *rsln,
-	                            Shapeset *ss, int &split, order3_t p[8]);
-	double get_projection_error(Element *e, int split, int son, const order3_t &order, Solution *rsln, Shapeset *ss);
-	int get_dof_count(int split, order3_t order[]);
+	void get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, Solution *rsln,
+	                            Shapeset *ss, int &split, Ord3 p[8]);
+	double get_projection_error(Element *e, int split, int son, const Ord3 &order, Solution *rsln, Shapeset *ss);
+	int get_dof_count(int split, Ord3 order[]);
 
-	order3_t get_form_order(int marker, const order3_t &ordu, const order3_t &ordv, RefMap *ru,
+	Ord3 get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMap *ru,
 	                        biform_ord_t bf_ord);
 	scalar eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, MeshFunction *sln1,
 	                  MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2);
@@ -150,9 +150,9 @@ protected:
 	struct ProjKey {
 		int split;			// transformation index
 		int son;
-		order3_t order;			// element order
+		Ord3 order;			// element order
 
-		ProjKey(int t, int s, const order3_t &o) {
+		ProjKey(int t, int s, const Ord3 &o) {
 			split = t;
 			son = s;
 			order = o;

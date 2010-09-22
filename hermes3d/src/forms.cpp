@@ -22,23 +22,23 @@
 #include <common/callstack.h>
 #include "integrals/hcurl.h"
 
-geom_t<ord_t> init_geom(int marker) {
+Geom<Ord> init_geom(int marker) {
 	_F_
 
-	geom_t<ord_t> e;
+	Geom<Ord> e;
 	e.marker = marker;
 
-	static ord_t x[] = { ord_t(1) };
-	static ord_t y[] = { ord_t(1) };
-	static ord_t z[] = { ord_t(1) };
+	static Ord x[] = { Ord(1) };
+	static Ord y[] = { Ord(1) };
+	static Ord z[] = { Ord(1) };
 
-	static ord_t nx[] = { ord_t(1) };
-	static ord_t ny[] = { ord_t(1) };
-	static ord_t nz[] = { ord_t(1) };
+	static Ord nx[] = { Ord(1) };
+	static Ord ny[] = { Ord(1) };
+	static Ord nz[] = { Ord(1) };
 
-	static ord_t tx[] = { ord_t(1) };
-	static ord_t ty[] = { ord_t(1) };
-	static ord_t tz[] = { ord_t(1) };
+	static Ord tx[] = { Ord(1) };
+	static Ord ty[] = { Ord(1) };
+	static Ord tz[] = { Ord(1) };
 
 	e.x = x; e.y = y; e.z = z;
 	e.nx = nx; e.ny = ny; e.nz = nz;
@@ -46,10 +46,10 @@ geom_t<ord_t> init_geom(int marker) {
 	return e;
 }
 
-geom_t<double> init_geom(int marker, RefMap *rm, const int np, const QuadPt3D *pt) {
+Geom<double> init_geom(int marker, RefMap *rm, const int np, const QuadPt3D *pt) {
 	_F_
 
-	geom_t<double> e;
+	Geom<double> e;
 	e.marker = marker;
 	e.x = rm->get_phys_x(np, pt);
 	e.y = rm->get_phys_y(np, pt);
@@ -57,10 +57,10 @@ geom_t<double> init_geom(int marker, RefMap *rm, const int np, const QuadPt3D *p
 	return e;
 }
 
-geom_t<double> init_geom(int marker, RefMap *rm, int iface, const int np, const QuadPt3D *pt) {
+Geom<double> init_geom(int marker, RefMap *rm, int iface, const int np, const QuadPt3D *pt) {
 	_F_
 
-	geom_t<double> e;
+	Geom<double> e;
 	e.marker = marker;
 	e.x = rm->get_phys_x(np, pt);
 	e.y = rm->get_phys_y(np, pt);
@@ -69,7 +69,7 @@ geom_t<double> init_geom(int marker, RefMap *rm, int iface, const int np, const 
 	return e;
 }
 
-void free_geom(geom_t<double> *e) {
+void free_geom(Geom<double> *e) {
 	delete [] e->x;
 	delete [] e->y;
 	delete [] e->z;
@@ -79,14 +79,14 @@ void free_geom(geom_t<double> *e) {
 	delete [] e->nz;
 }
 
-fn_t<ord_t> init_fn(const order3_t &order) {
+Func<Ord> init_fn(const Ord3 &order) {
 	int o = order.get_ord();
-	ord_t *d = new ord_t(o);
+	Ord *d = new Ord(o);
 
-	fn_t<ord_t> f;
-	f.fn = d;
+	Func<Ord> f;
+	f.val = d;
 	f.dx = f.dy = f.dz = d;
-	f.fn0 = f.fn1 = f.fn2 = d;
+	f.val0 = f.val1 = f.val2 = d;
 	f.dx0 = f.dx1 = f.dx2 = d;
 	f.dy0 = f.dy1 = f.dy2 = d;
 	f.dz0 = f.dz1 = f.dz2 = d;
@@ -94,25 +94,25 @@ fn_t<ord_t> init_fn(const order3_t &order) {
 	return f;
 }
 
-sfn_t *init_fn(ShapeFunction *shfn, RefMap *rm, const int np, const QuadPt3D *pt) {
+sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, const int np, const QuadPt3D *pt) {
 	_F_
 
-	sfn_t *u = new sfn_t; MEM_CHECK(u);
+	sFunc *u = new sFunc; MEM_CHECK(u);
 	u->nc = shfn->get_num_components();
 	shfn->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
-		u->fn = new double [np]; MEM_CHECK(u->fn);
+		u->val = new double [np]; MEM_CHECK(u->val);
 		u->dx = new double [np]; MEM_CHECK(u->dx);
 		u->dy = new double [np]; MEM_CHECK(u->dy);
 		u->dz = new double [np]; MEM_CHECK(u->dz);
 
-		double *fn = shfn->get_fn_values();
+		double *val = shfn->get_fn_values();
 		double *dx = shfn->get_dx_values();
 		double *dy = shfn->get_dy_values();
 		double *dz = shfn->get_dz_values();
 		double3x3 *m = rm->get_inv_ref_map(np, pt);
 		for (int i = 0; i < np; i++) {
-			u->fn[i] = fn[i];
+			u->val[i] = val[i];
 			u->dx[i] = (dx[i] * m[i][0][0] + dy[i] * m[i][0][1] + dz[i] * m[i][0][2]);
 			u->dy[i] = (dx[i] * m[i][1][0] + dy[i] * m[i][1][1] + dz[i] * m[i][1][2]);
 			u->dz[i] = (dx[i] * m[i][2][0] + dy[i] * m[i][2][1] + dz[i] * m[i][2][2]);
@@ -120,19 +120,19 @@ sfn_t *init_fn(ShapeFunction *shfn, RefMap *rm, const int np, const QuadPt3D *pt
 		delete [] m;
 	}
 	else if (u->nc == 3) {
-		u->fn0 = new double [np]; MEM_CHECK(u->fn0);
-		u->fn1 = new double [np]; MEM_CHECK(u->fn1);
-		u->fn2 = new double [np]; MEM_CHECK(u->fn2);
+		u->val0 = new double [np]; MEM_CHECK(u->val0);
+		u->val1 = new double [np]; MEM_CHECK(u->val1);
+		u->val2 = new double [np]; MEM_CHECK(u->val2);
 
-		double *fn[3];
+		double *val[3];
 		for (int c = 0; c < 3; c++)
-			fn[c] = shfn->get_fn_values(c);
+			val[c] = shfn->get_fn_values(c);
 
 		double3x3 *irm = rm->get_inv_ref_map(np, pt);
 		for (int i = 0; i < np; i++) {
-			u->fn0[i] = fn[0][i] * irm[i][0][0] + fn[1][i] * irm[i][0][1] + fn[2][i] * irm[i][0][2];
-			u->fn1[i] = fn[0][i] * irm[i][1][0] + fn[1][i] * irm[i][1][1] + fn[2][i] * irm[i][1][2];
-			u->fn2[i] = fn[0][i] * irm[i][2][0] + fn[1][i] * irm[i][2][1] + fn[2][i] * irm[i][2][2];
+			u->val0[i] = val[0][i] * irm[i][0][0] + val[1][i] * irm[i][0][1] + val[2][i] * irm[i][0][2];
+			u->val1[i] = val[0][i] * irm[i][1][0] + val[1][i] * irm[i][1][1] + val[2][i] * irm[i][1][2];
+			u->val2[i] = val[0][i] * irm[i][2][0] + val[1][i] * irm[i][2][1] + val[2][i] * irm[i][2][2];
 		}
 		delete [] irm;
 	}
@@ -167,25 +167,25 @@ sfn_t *init_fn(ShapeFunction *shfn, RefMap *rm, const int np, const QuadPt3D *pt
 }
 
 
-sfn_t *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const QuadPt3D *pt) {
+sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const QuadPt3D *pt) {
 	_F_
 
-	sfn_t *u = new sfn_t; MEM_CHECK(u);
+	sFunc *u = new sFunc; MEM_CHECK(u);
 	u->nc = shfn->get_num_components();
 	shfn->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
-		u->fn = new double [np]; MEM_CHECK(u->fn);
+		u->val = new double [np]; MEM_CHECK(u->val);
 		u->dx = new double [np]; MEM_CHECK(u->dx);
 		u->dy = new double [np]; MEM_CHECK(u->dy);
 		u->dz = new double [np]; MEM_CHECK(u->dz);
 
-		double *fn = shfn->get_fn_values();
+		double *val = shfn->get_fn_values();
 		double *dx = shfn->get_dx_values();
 		double *dy = shfn->get_dy_values();
 		double *dz = shfn->get_dz_values();
 		double3x3 *m = rm->get_inv_ref_map(np, pt);
 		for (int i = 0; i < np; i++) {
-			u->fn[i] = fn[i];
+			u->val[i] = val[i];
 			u->dx[i] = (dx[i] * m[i][0][0] + dy[i] * m[i][0][1] + dz[i] * m[i][0][2]);
 			u->dy[i] = (dx[i] * m[i][1][0] + dy[i] * m[i][1][1] + dz[i] * m[i][1][2]);
 			u->dz[i] = (dx[i] * m[i][2][0] + dy[i] * m[i][2][1] + dz[i] * m[i][2][2]);
@@ -197,26 +197,26 @@ sfn_t *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const Q
 		double *nx, *ny, *nz;
 		rm->calc_face_normal(iface, np, pt, nx, ny, nz);
 
-		u->fn0 = new double [np]; MEM_CHECK(u->fn0);
-		u->fn1 = new double [np]; MEM_CHECK(u->fn1);
-		u->fn2 = new double [np]; MEM_CHECK(u->fn2);
+		u->val0 = new double [np]; MEM_CHECK(u->val0);
+		u->val1 = new double [np]; MEM_CHECK(u->val1);
+		u->val2 = new double [np]; MEM_CHECK(u->val2);
 
-		double *fn[3];
+		double *val[3];
 		for (int c = 0; c < 3; c++)
-			fn[c] = shfn->get_fn_values(c);
+			val[c] = shfn->get_fn_values(c);
 
 		double3x3 *m = rm->get_inv_ref_map(np, pt);
 		for (int i = 0; i < np; i++) {
 			double ev[3] = {
-				fn[0][i] * m[i][0][0] + fn[1][i] * m[i][0][1] + fn[2][i] * m[i][0][2],
-				fn[0][i] * m[i][1][0] + fn[1][i] * m[i][1][1] + fn[2][i] * m[i][1][2],
-				fn[0][i] * m[i][2][0] + fn[1][i] * m[i][2][1] + fn[2][i] * m[i][2][2]
+				val[0][i] * m[i][0][0] + val[1][i] * m[i][0][1] + val[2][i] * m[i][0][2],
+				val[0][i] * m[i][1][0] + val[1][i] * m[i][1][1] + val[2][i] * m[i][1][2],
+				val[0][i] * m[i][2][0] + val[1][i] * m[i][2][1] + val[2][i] * m[i][2][2]
 			};
 			double tpe[3];
 			calc_tan_proj(nx[i], ny[i], nz[i], ev, tpe);
-			u->fn0[i] = tpe[0];
-			u->fn1[i] = tpe[1];
-			u->fn2[i] = tpe[2];
+			u->val0[i] = tpe[0];
+			u->val1[i] = tpe[1];
+			u->val2[i] = tpe[2];
 		}
 
 		delete [] m;
@@ -228,32 +228,32 @@ sfn_t *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const Q
 	return u;
 }
 
-mfn_t *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
+mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	_F_
 
-	mfn_t *u = new mfn_t;
+	mFunc *u = new mFunc;
 	u->nc = f->get_num_components();
 	f->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
-		u->fn = new scalar [np]; MEM_CHECK(u->fn);
+		u->val = new scalar [np]; MEM_CHECK(u->val);
 		u->dx = new scalar [np]; MEM_CHECK(u->dx);
 		u->dy = new scalar [np]; MEM_CHECK(u->dy);
 		u->dz = new scalar [np]; MEM_CHECK(u->dz);
 
-		memcpy(u->fn, f->get_fn_values(), np * sizeof(scalar));
+		memcpy(u->val, f->get_fn_values(), np * sizeof(scalar));
 		memcpy(u->dx, f->get_dx_values(), np * sizeof(scalar));
 		memcpy(u->dy, f->get_dy_values(), np * sizeof(scalar));
 		memcpy(u->dz, f->get_dz_values(), np * sizeof(scalar));
 	}
 	else if (u->nc == 3) {
 		// FN
-		u->fn0 = new scalar [np]; MEM_CHECK(u->fn0);
-		u->fn1 = new scalar [np]; MEM_CHECK(u->fn1);
-		u->fn2 = new scalar [np]; MEM_CHECK(u->fn2);
+		u->val0 = new scalar [np]; MEM_CHECK(u->val0);
+		u->val1 = new scalar [np]; MEM_CHECK(u->val1);
+		u->val2 = new scalar [np]; MEM_CHECK(u->val2);
 
-		memcpy(u->fn0, f->get_fn_values(0), np * sizeof(scalar));
-		memcpy(u->fn1, f->get_fn_values(1), np * sizeof(scalar));
-		memcpy(u->fn2, f->get_fn_values(2), np * sizeof(scalar));
+		memcpy(u->val0, f->get_fn_values(0), np * sizeof(scalar));
+		memcpy(u->val1, f->get_fn_values(1), np * sizeof(scalar));
+		memcpy(u->val2, f->get_fn_values(2), np * sizeof(scalar));
 
 		// DX
 		u->dx0 = new scalar [np]; MEM_CHECK(u->dx0);
@@ -289,18 +289,18 @@ mfn_t *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	return u;
 }
 
-void free_fn(fn_t<ord_t> *f) {
-	delete f->fn;
+void free_fn(Func<Ord> *f) {
+	delete f->val;
 }
 
 template<typename T>
-void free_fn_tpl(fn_t<T> *f) {
-	delete [] f->fn;
+void free_Funcpl(Func<T> *f) {
+	delete [] f->val;
 	delete [] f->dx;
 	delete [] f->dy;
 	delete [] f->dz;
 
-	delete [] f->fn0; delete [] f->fn1; delete [] f->fn2;
+	delete [] f->val0; delete [] f->val1; delete [] f->val2;
 	delete [] f->dx0; delete [] f->dx1; delete [] f->dx2;
 	delete [] f->dy0; delete [] f->dy1; delete [] f->dy2;
 	delete [] f->dz0; delete [] f->dz1; delete [] f->dz2;
@@ -309,7 +309,7 @@ void free_fn_tpl(fn_t<T> *f) {
 	delete f;
 }
 
-void free_fn(sfn_t *f) { free_fn_tpl<double>(f); }
+void free_fn(sFunc *f) { free_Funcpl<double>(f); }
 #ifdef H3D_COMPLEX
-void free_fn(mfn_t *f) { free_fn_tpl<scalar>(f); }
+void free_fn(mFunc *f) { free_Funcpl<scalar>(f); }
 #endif

@@ -34,6 +34,7 @@
 
 DiscreteProblem::FnCache::~FnCache()
 {
+	_F_
 	free();
 }
 
@@ -169,9 +170,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   bool bnd[10];			    // FIXME: magic number - maximal possible number of element surfaces
   SurfPos surf_pos[10];
-  AUTOLA_CL(AsmList, al, wf->neq);
-  AUTOLA_OR(bool, nat, wf->neq);
-  AUTOLA_OR(bool, isempty, wf->neq);
+  AsmList al[wf->neq];
+  bool nat[wf->neq], isempty[wf->neq];
   AsmList *am, *an;
 
   ShapeFunction base_fn[wf->neq];
@@ -526,8 +526,8 @@ void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
   int ndof = get_num_dofs();
   mat->prealloc(this->ndof);
 
-  AUTOLA_CL(AsmList, al, wf->neq);
-  AUTOLA_OR(Mesh*, meshes, wf->neq);
+  AsmList al[wf->neq];
+  Mesh *meshes[wf->neq];
   bool **blocks = wf->get_blocks();
 
   // init multi-mesh traversal.
@@ -579,16 +579,16 @@ void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
   have_matrix = true;
 }
 
-void DiscreteProblem::init_ext_fns(user_data_t<scalar> &ud, std::vector<MeshFunction *> &ext, int order,
+void DiscreteProblem::init_ext_fns(ExtData<scalar> &ud, std::vector<MeshFunction *> &ext, int order,
                              RefMap *rm, const int np, const QuadPt3D *pt)
 {
 	_F_
 
 	ud.nf = ext.size();
-	mfn_t *ext_fn = new mfn_t[ud.nf];
+	mFunc *ext_fn = new mFunc[ud.nf];
 	for (int i = 0; i < ud.nf; i++) {
 		fn_key_t key(ext[i]->seq, order, ext[i]->get_transform());
-		mfn_t *efn = NULL;
+		mFunc *efn = NULL;
 		if (!fn_cache.ext.lookup(key, efn)) {
 			efn = init_fn(ext[i], rm, np, pt);
 			fn_cache.ext.set(key, efn);
@@ -596,25 +596,25 @@ void DiscreteProblem::init_ext_fns(user_data_t<scalar> &ud, std::vector<MeshFunc
 		assert(efn != NULL);
 		ext_fn[i] = *efn;
 	}
-	ud.ext = ext_fn;
+	ud.fn = ext_fn;
 }
 
-void DiscreteProblem::init_ext_fns(user_data_t<ord_t> &fake_ud, std::vector<MeshFunction *> &ext)
+void DiscreteProblem::init_ext_fns(ExtData<Ord> &fake_ud, std::vector<MeshFunction *> &ext)
 {
 	_F_
 
 	fake_ud.nf = ext.size();
-	fn_t<ord_t> *fake_ext_fn = new fn_t<ord_t>[fake_ud.nf];
+	Func<Ord> *fake_ext_fn = new Func<Ord>[fake_ud.nf];
 	for (int i = 0; i < fake_ud.nf; i++) {
 		fake_ext_fn[i] = init_fn(ext[i]->get_fn_order());
 	}
-	fake_ud.ext = fake_ext_fn;
+	fake_ud.fn = fake_ext_fn;
 }
 
-sfn_t *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
+sFunc *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
 {
 	fn_key_t key(fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->id);
-	sfn_t *u = NULL;
+	sFunc *u = NULL;
 	if (!fn_cache.fn.lookup(key, u)) {
 		u = init_fn(fu, rm, np, pt);
 		fn_cache.fn.set(key, u);
@@ -622,11 +622,11 @@ sfn_t *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, const i
 	return u;
 }
 
-sfn_t *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, int isurf, const int np,
+sFunc *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, int isurf, const int np,
                          const QuadPt3D *pt)
 {
 	fn_key_t key(fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->id);
-	sfn_t *u = NULL;
+	sFunc *u = NULL;
 	if (!fn_cache.fn.lookup(key, u)) {
 		u = init_fn(fu, rm, isurf, np, pt);
 		fn_cache.fn.set(key, u);
@@ -634,10 +634,10 @@ sfn_t *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, int isu
 	return u;
 }
 
-mfn_t *DiscreteProblem::get_fn(Solution *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
+mFunc *DiscreteProblem::get_fn(Solution *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
 {
 	fn_key_t key(fu->seq, order, fu->get_transform());
-	mfn_t *u = NULL;
+	mFunc *u = NULL;
 	if (!fn_cache.sln.lookup(key, u)) {
 		u = init_fn(fu, rm, np, pt);
 		fn_cache.sln.set(key, u);
@@ -652,21 +652,21 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 	Element *elem = fv->get_active_element();
 
 	// determine the integration order
-	fn_t<ord_t> *oi = new fn_t<ord_t>[wf->neq];
+	Func<Ord> *oi = new Func<Ord>[wf->neq];
 	for (int i = 0; i < wf->neq; i++) oi[i] = init_fn(u_ext[i]->get_fn_order());
-	fn_t<ord_t> ou = init_fn(fu->get_fn_order());
-	fn_t<ord_t> ov = init_fn(fv->get_fn_order());
+	Func<Ord> ou = init_fn(fu->get_fn_order());
+	Func<Ord> ov = init_fn(fv->get_fn_order());
 
-	user_data_t<ord_t> fake_ud;
+	ExtData<Ord> fake_ud;
 	init_ext_fns(fake_ud, mfv->ext);
 
 	double fake_wt = 1.0;
-	geom_t<ord_t> fake_e = init_geom(elem->marker);
-	ord_t o = mfv->ord(1, &fake_wt, &oi, &ou, &ov, &fake_e, &fake_ud);
-	order3_t order = ru->get_inv_ref_order();
+	Geom<Ord> fake_e = init_geom(elem->marker);
+	Ord o = mfv->ord(1, &fake_wt, &oi, &ou, &ov, &fake_e, &fake_ud);
+	Ord3 order = ru->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += order3_t(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += order3_t(o.get_order(), o.get_order(), o.get_order()); break;
+		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
+		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
 	int ord_idx = order.get_idx();
@@ -682,7 +682,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 	QuadPt3D *pt = quad->get_points(order);
 
 	double *jwt = NULL;
-	geom_t<double> e;
+	Geom<double> e;
 	if (!fn_cache.e.exists(ord_idx)) {
 		fn_cache.jwt[ord_idx] = ru->get_jacobian(np, pt);
 		fn_cache.e[ord_idx] = init_geom(elem->marker, ru, np, pt);
@@ -690,12 +690,12 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 	jwt = fn_cache.jwt[ord_idx];
 	e = fn_cache.e[ord_idx];
 
-	mfn_t *prev[wf->neq];
+	mFunc *prev[wf->neq];
 	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-	sfn_t *u = get_fn(fu, ord_idx, ru, np, pt);
-        sfn_t *v = get_fn(fv, ord_idx, rv, np, pt);
+	sFunc *u = get_fn(fu, ord_idx, ru, np, pt);
+        sFunc *v = get_fn(fv, ord_idx, rv, np, pt);
 
-	user_data_t<scalar> ud;
+	ExtData<scalar> ud;
 	init_ext_fns(ud, mfv->ext, ord_idx, rv, np, pt);
 
 	return mfv->fn(np, jwt, prev, u, v, &e, &ud);
@@ -707,20 +707,20 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 	Element *elem = fv->get_active_element();
 
 	// determine the integration order
-	fn_t<ord_t> *oi = new fn_t<ord_t>[wf->neq];
+	Func<Ord> *oi = new Func<Ord>[wf->neq];
 	for (int i = 0; i < wf->neq; i++) oi[i] = init_fn(u_ext[i]->get_fn_order());
-	fn_t<ord_t> ov = init_fn(fv->get_fn_order());
+	Func<Ord> ov = init_fn(fv->get_fn_order());
 
-	user_data_t<ord_t> fake_ud;
+	ExtData<Ord> fake_ud;
 	init_ext_fns(fake_ud, vfv->ext);
 
 	double fake_wt = 1.0;
-	geom_t<ord_t> fake_e = init_geom(elem->marker);
-	ord_t o = vfv->ord(1, &fake_wt, &oi, &ov, &fake_e, &fake_ud);
-	order3_t order = rv->get_inv_ref_order();
+	Geom<Ord> fake_e = init_geom(elem->marker);
+	Ord o = vfv->ord(1, &fake_wt, &oi, &ov, &fake_e, &fake_ud);
+	Ord3 order = rv->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += order3_t(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += order3_t(o.get_order(), o.get_order(), o.get_order()); break;
+		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
+		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
 	int ord_idx = order.get_idx();
@@ -735,7 +735,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 	QuadPt3D *pt = quad->get_points(order);
 
 	double *jwt = NULL;
-	geom_t<double> e;
+	Geom<double> e;
 	if (!fn_cache.e.exists(ord_idx)) {
 		fn_cache.jwt[ord_idx] = rv->get_jacobian(np, pt);
 		fn_cache.e[ord_idx] = init_geom(elem->marker, rv, np, pt);
@@ -743,11 +743,11 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 	jwt = fn_cache.jwt[ord_idx];
 	e = fn_cache.e[ord_idx];
 
-	mfn_t *prev[wf->neq];
+	mFunc *prev[wf->neq];
 	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-	sfn_t *v = get_fn(fv, ord_idx, rv, np, pt);
+	sFunc *v = get_fn(fv, ord_idx, rv, np, pt);
 
-	user_data_t<scalar> ud;
+	ExtData<scalar> ud;
 	init_ext_fns(ud, vfv->ext, ord_idx, rv, np, pt);
 
 	return vfv->fn(np, jwt, prev, v, &e, &ud);
@@ -759,24 +759,24 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution 
 	_F_
 
 	// determine the integration order
-	fn_t<ord_t> *oi = new fn_t<ord_t>[wf->neq];
+	Func<Ord> *oi = new Func<Ord>[wf->neq];
 	for (int i = 0; i < wf->neq; i++) oi[i] = init_fn(u_ext[i]->get_fn_order());
-	fn_t<ord_t> ou = init_fn(fu->get_fn_order());
-	fn_t<ord_t> ov = init_fn(fv->get_fn_order());
+	Func<Ord> ou = init_fn(fu->get_fn_order());
+	Func<Ord> ov = init_fn(fv->get_fn_order());
 
-	user_data_t<ord_t> fake_ud;
+	ExtData<Ord> fake_ud;
 	init_ext_fns(fake_ud, mfv->ext);
 
 	double fake_wt = 1.0;
-	geom_t<ord_t> fake_e = init_geom(surf_pos->marker);
-	ord_t o = mfv->ord(1, &fake_wt, &oi, &ou, &ov, &fake_e, &fake_ud);
-	order3_t order = ru->get_inv_ref_order();
+	Geom<Ord> fake_e = init_geom(surf_pos->marker);
+	Ord o = mfv->ord(1, &fake_wt, &oi, &ou, &ov, &fake_e, &fake_ud);
+	Ord3 order = ru->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += order3_t(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += order3_t(o.get_order(), o.get_order(), o.get_order()); break;
+		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
+		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
-	order2_t face_order = order.get_face_order(surf_pos->surf_num);
+	Ord2 face_order = order.get_face_order(surf_pos->surf_num);
 	int ord_idx = face_order.get_idx();
 
 	for (int i = 0; i < wf->neq; i++) free_fn(oi + i);
@@ -790,7 +790,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution 
 	QuadPt3D *pt = quad->get_face_points(surf_pos->surf_num, face_order);
 
 	double *jwt = NULL;
-	geom_t<double> e;
+	Geom<double> e;
 	if (!fn_cache.e.exists(ord_idx)) {
 		fn_cache.jwt[ord_idx] = ru->get_face_jacobian(surf_pos->surf_num, np, pt);
 		fn_cache.e[ord_idx] = init_geom(surf_pos->marker, ru, surf_pos->surf_num, np, pt);
@@ -798,12 +798,12 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution 
 	jwt = fn_cache.jwt[ord_idx];
 	e = fn_cache.e[ord_idx];
 
-	mfn_t *prev[wf->neq];
+	mFunc *prev[wf->neq];
 	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-	sfn_t *u = get_fn(fu, ord_idx, ru, surf_pos->surf_num, np, pt);
-	sfn_t *v = get_fn(fv, ord_idx, rv, surf_pos->surf_num, np, pt);
+	sFunc *u = get_fn(fu, ord_idx, ru, surf_pos->surf_num, np, pt);
+	sFunc *v = get_fn(fv, ord_idx, rv, surf_pos->surf_num, np, pt);
 
-	user_data_t<scalar> ud;
+	ExtData<scalar> ud;
 	init_ext_fns(ud, mfv->ext, ord_idx, rv, np, pt);
 
 	return mfv->fn(np, jwt, prev, u, v, &e, &ud);
@@ -815,22 +815,22 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 	_F_
 
 	// determine the integration order
-	user_data_t<ord_t> fake_ud;
+	ExtData<Ord> fake_ud;
 	init_ext_fns(fake_ud, vfs->ext);
 
-	fn_t<ord_t> *oi = new fn_t<ord_t>[wf->neq];
+	Func<Ord> *oi = new Func<Ord>[wf->neq];
 	for (int i = 0; i < wf->neq; i++) oi[i] = init_fn(u_ext[i]->get_fn_order());
-	fn_t<ord_t> ov = init_fn(fv->get_fn_order());
+	Func<Ord> ov = init_fn(fv->get_fn_order());
 	double fake_wt = 1.0;
-	geom_t<ord_t> fake_e = init_geom(surf_pos->marker);
-	ord_t o = vfs->ord(1, &fake_wt, &oi, &ov, &fake_e, &fake_ud);
-	order3_t order = rv->get_inv_ref_order();
+	Geom<Ord> fake_e = init_geom(surf_pos->marker);
+	Ord o = vfs->ord(1, &fake_wt, &oi, &ov, &fake_e, &fake_ud);
+	Ord3 order = rv->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += order3_t(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += order3_t(o.get_order(), o.get_order(), o.get_order()); break;
+		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
+		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
-	order2_t face_order = order.get_face_order(surf_pos->surf_num);
+	Ord2 face_order = order.get_face_order(surf_pos->surf_num);
 	int ord_idx = face_order.get_idx();
 
 	for (int i = 0; i < wf->neq; i++) free_fn(oi + i);
@@ -843,7 +843,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 	QuadPt3D *pt = quad->get_face_points(surf_pos->surf_num, face_order);
 
 	double *jwt = NULL;
-	geom_t<double> e;
+	Geom<double> e;
 	if (!fn_cache.e.exists(ord_idx)) {
 		fn_cache.jwt[ord_idx] = rv->get_face_jacobian(surf_pos->surf_num, np, pt);
 		fn_cache.e[ord_idx] = init_geom(surf_pos->marker, rv, surf_pos->surf_num, np, pt);
@@ -851,11 +851,11 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 	jwt = fn_cache.jwt[ord_idx];
 	e = fn_cache.e[ord_idx];
 
-	mfn_t *prev[wf->neq];
+	mFunc *prev[wf->neq];
 	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-	sfn_t *v = get_fn(fv, ord_idx, rv, surf_pos->surf_num, np, pt);
+	sFunc *v = get_fn(fv, ord_idx, rv, surf_pos->surf_num, np, pt);
 
-	user_data_t<scalar> ud;
+	ExtData<scalar> ud;
 	init_ext_fns(ud, vfs->ext, ord_idx, rv, np, pt);
 
 	return vfs->fn(np, jwt, prev, v, &e, &ud);
@@ -974,9 +974,8 @@ Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rh
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// The projection functionality below is identical in H2D and H3D.
 template<typename Real, typename Scalar>
-Scalar H1projection_biform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> *u, fn_t<Real> *v, geom_t<Real> *e, user_data_t<Scalar> *ext)
+Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -985,16 +984,16 @@ Scalar H1projection_biform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> 
 }
 
 template<typename Real, typename Scalar>
-Scalar H1projection_liform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> *v, geom_t<Real> *e, user_data_t<Scalar> *ext)
+Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (ext->fn[0]->val[i] * v->val[i] + ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
+    result += wt[i] * (ext->fn[0].val[i] * v->val[i] + ext->fn[0].dx[i] * v->dx[i] + ext->fn[0].dy[i] * v->dy[i]);
   return result;
 }
 
 template<typename Real, typename Scalar>
-Scalar L2projection_biform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> *u, fn_t<Real> *v, geom_t<Real> *e, user_data_t<Scalar> *ext)
+Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -1003,35 +1002,35 @@ Scalar L2projection_biform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> 
 }
 
 template<typename Real, typename Scalar>
-Scalar L2projection_liform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> *v, geom_t<Real> *e, user_data_t<Scalar> *ext)
+Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
+    result += wt[i] * (ext->fn[0].val[i] * v->val[i]);
   return result;
 }
 
 // Hcurl projections
 template<typename Real, typename Scalar>
-Scalar Hcurlprojection_biform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> *u, 
-                              fn_t<Real> *v, geom_t<Real> *e, user_data_t<Scalar> *ext)
+Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
-    result += wt[i] * (u->curl[i] * conj(v->curl[i]));
-    result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+    result = result + wt[i] * (u->curl0[i] * CONJ(v->curl0[i]) + u->curl1[i] * CONJ(v->curl1[i]) + u->curl2[i] * CONJ(v->curl2[i]));
+    result = result + wt[i] * (u->val0[i] * CONJ(v->val0[i]) + u->val1[i] * CONJ(v->val1[i]));
   }
   return result;
 }
 
 template<typename Real, typename Scalar>
-Scalar Hcurlprojection_liform(int n, double *wt, fn_t<Scalar> *u_ext[], fn_t<Real> *v, 
-                              geom_t<Real> *e, user_data_t<Scalar> *ext)
+Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                              Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
-    result += wt[i] * (ext->fn[0]->curl[i] * conj(v->curl[i]));
-    result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
+    result = result + wt[i] * (ext->fn[0].curl0[i] * CONJ(v->curl0[i]) + ext->fn[0].curl1[i] * CONJ(v->curl1[i]) + ext->fn[0].curl2[i] * CONJ(v->curl2[i]));
+    result = result + wt[i] * (ext->fn[0].val0[i] * CONJ(v->val0[i]) + ext->fn[0].val1[i] * CONJ(v->val1[i]));
   }
 
   return result;
@@ -1048,3 +1047,117 @@ double get_l2_norm(Vector* vec)
   return sqrt(std::abs(val));
 }
 */
+
+// Underlying function for global orthogonal projection.
+// Not intended for the user. NOTE: the weak form here must be 
+// a special projection weak form, which is different from 
+// the weak form of the PDE. If you supply a weak form of the 
+// PDE, the PDE will just be solved. 
+void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
+{
+  _F_
+  int n = spaces.size();
+
+  // sanity checks
+  if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
+  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
+  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
+
+  // this is needed since spaces may have their DOFs enumerated only locally.
+  int ndof = assign_dofs(spaces);
+
+  // Initialize FeProblem.
+  bool is_linear = true;
+  DiscreteProblem* dp = new DiscreteProblem(wf, spaces, is_linear);
+
+  SparseMatrix* matrix = create_matrix(SOLVER_UMFPACK);
+  Vector* rhs = create_vector(SOLVER_UMFPACK);
+  Solver* solver = create_solver(SOLVER_UMFPACK, matrix, rhs);
+
+  dp->assemble(NULL, matrix, rhs, false);
+
+  // Calculate the coefficient vector.
+  bool solved = solver->solve();
+  scalar* coeffs;
+  if (solved) 
+    coeffs = solver->get_solution();
+
+  if (target_vec != NULL) 
+    for (int i=0; i<ndof; i++) target_vec[i] = coeffs[i];
+    
+  delete solver;
+  delete matrix;
+  delete rhs;
+  delete dp;
+  delete wf;
+}
+
+// global orthogonal projection
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
+                    scalar* target_vec)
+{
+  _F_
+  int n = spaces.size();  
+
+  // define temporary projection weak form
+  WeakForm* proj_wf = new WeakForm(n);
+  int found[100];
+  for (int i = 0; i < 100; i++) found[i] = 0;
+  for (int i = 0; i < n; i++) {
+    int norm;
+    if (proj_norms == Tuple<int>()) norm = 1;
+    else norm = proj_norms[i];
+    if (norm == 0) {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
+                     HERMES_ANY, source_meshfns[i]);
+    }
+    if (norm == 1) {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
+                     HERMES_ANY, source_meshfns[i]);
+    }
+    if (norm == 2) {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
+                     HERMES_ANY, source_meshfns[i]);
+    }
+  }
+  for (int i=0; i < n; i++) {
+    if (found[i] == 0) {
+      printf("index of component: %d\n", i);
+      error("Wrong projection norm in project_global().");
+    }
+  }
+
+  project_internal(spaces, proj_wf, target_vec);
+}
+
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest)
+{
+  _F_
+  scalar* target_vec = new scalar[get_num_dofs(spaces)];
+  Tuple<MeshFunction *> ref_slns_mf;
+  for (int i = 0; i < sols_src.size(); i++) 
+    ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
+  
+  project_global(spaces, proj_norms, ref_slns_mf, target_vec);
+  
+  for (int i = 0; i < sols_src.size(); i++)
+      sols_dest[i]->set_coeff_vector(spaces[i], target_vec);
+  
+  delete [] target_vec;
+}
+
+int get_num_dofs(Tuple<Space *> spaces)
+{
+  _F_
+  int ndof = 0;
+  for (int i=0; i<spaces.size(); i++) {
+    ndof += spaces[i]->get_num_dofs();
+  }
+  return ndof;
+}

@@ -60,20 +60,20 @@ namespace Vtk {
 /// @ingroup visualization
 class OutputQuad : public Quad3D {
 public:
-	virtual QuadPt3D *get_points(const order3_t &order) {
+	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
 		if (!tables.exists(order.get_idx())) calculate_view_points(order);
 		return tables[order.get_idx()];
 	}
 
-	virtual int get_num_points(const order3_t &order) {
+	virtual int get_num_points(const Ord3 &order) {
 		_F_
 		if (!np.exists(order.get_idx())) calculate_view_points(order);
 		return np[order.get_idx()];
 	}
 
 protected:
-	virtual void calculate_view_points(order3_t order) = 0;
+	virtual void calculate_view_points(Ord3 order) = 0;
 };
 
 //// OutputQuadTetra ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ public:
 	virtual ~OutputQuadTetra();
 
 protected:
-	virtual void calculate_view_points(order3_t order);
+	virtual void calculate_view_points(Ord3 order);
 };
 
 OutputQuadTetra::OutputQuadTetra()
@@ -108,7 +108,7 @@ OutputQuadTetra::~OutputQuadTetra()
 #endif
 }
 
-void OutputQuadTetra::calculate_view_points(order3_t order)
+void OutputQuadTetra::calculate_view_points(Ord3 order)
 {
 	_F_
 #ifdef WITH_TETRA
@@ -136,7 +136,7 @@ public:
 	virtual ~OutputQuadHex();
 
 protected:
-	virtual void calculate_view_points(order3_t order);
+	virtual void calculate_view_points(Ord3 order);
 };
 
 OutputQuadHex::OutputQuadHex() {
@@ -156,7 +156,7 @@ OutputQuadHex::~OutputQuadHex() {
 #endif
 }
 
-void OutputQuadHex::calculate_view_points(order3_t order) {
+void OutputQuadHex::calculate_view_points(Ord3 order) {
 	_F_
 #ifdef WITH_HEX
 	int o = order.get_idx();
@@ -466,7 +466,7 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 
 		int mode = element->get_mode();
 		Vtk::OutputQuad *quad = output_quad[mode];
-		order3_t order = fn->get_order();
+		Ord3 order = fn->get_order();
 
 		int np = quad->get_num_points(order);
 		QuadPt3D *pt = quad->get_points(order);
@@ -591,7 +591,7 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 
 		int mode = e->get_mode();
 		Vtk::OutputQuad *quad = output_quad[mode];
-		order3_t order = max(fn1->get_order(), max(fn2->get_order(), fn3->get_order()));
+		Ord3 order = max(fn1->get_order(), max(fn2->get_order(), fn3->get_order()));
 
 		int np = quad->get_num_points(order);
 		QuadPt3D *pt = quad->get_points(order);
@@ -764,7 +764,7 @@ void VtkOutputEngine::out_orders(Space *space, const char *name)
 	Vtk::Linearizer l;
 	Mesh *mesh = space->get_mesh();
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		order3_t ord = space->get_element_order(idx);
+		Ord3 ord = space->get_element_order(idx);
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();

@@ -52,7 +52,7 @@ public:
 	virtual void push_transform(int son);
 	virtual void pop_transform();
 
-	virtual order3_t get_order();
+	virtual Ord3 get_order();
 
 protected:
 	int num;

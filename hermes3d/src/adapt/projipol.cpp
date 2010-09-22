@@ -55,7 +55,7 @@ void ProjectionIpol::free_proj()
 	delete [] proj;
 }
 
-void ProjectionIpol::calc_projection(int split, int son, const order3_t &order)
+void ProjectionIpol::calc_projection(int split, int son, const Ord3 &order)
 {
 	_F_
 	free_proj();
@@ -73,13 +73,13 @@ void ProjectionIpol::calc_projection(int split, int son, const order3_t &order)
 	for (int i = 0; i < Hex::NUM_VERTICES; i++, m++)
 		proj[m] = vertex_proj + i;
 	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-		order1_t edge_order = order.get_edge_order(iedge);
+		Ord1 edge_order = order.get_edge_order(iedge);
 		int edge_fns = edge_order - 1;
 		for (int i = 0; i < edge_fns; i++, m++)
 			proj[m] = edge_proj[iedge] + i;
 	}
 	for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-		order2_t face_order = order.get_face_order(iface);
+		Ord2 face_order = order.get_face_order(iface);
 		int face_fns = (face_order.x - 1) * (face_order.y - 1);
 		for (int i = 0; i < face_fns; i++, m++)
 			proj[m] = face_proj[iface] + i;

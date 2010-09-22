@@ -35,10 +35,10 @@ public:
 	Projection(Solution *afn, Element *e, Shapeset *ss);
 	virtual ~Projection();
 
-	virtual double get_error(int split, int son, const order3_t &order) = 0;
+	virtual double get_error(int split, int son, const Ord3 &order) = 0;
 
 protected:
-	order3_t order;
+	Ord3 order;
 	Mesh *mesh;
 	Solution *sln;
 	Element *base_elem;
@@ -52,7 +52,7 @@ protected:
 	double *proj_coef;				// projection coefficients
 
 	Trf *get_trf(int trf);
-	virtual void calc_projection(int split, int son, const order3_t &order) = 0;
+	virtual void calc_projection(int split, int son, const Ord3 &order) = 0;
 
 	// FIXME: Hex-specific
 	static const int NUM_TRF = 27;		// number of all possible transformations

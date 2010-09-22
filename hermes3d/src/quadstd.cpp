@@ -4173,7 +4173,7 @@ QuadStdTetra::QuadStdTetra() {
 	max_face_order = H3D_MAX_QUAD_ORDER_TRI;
 
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER_TETRA; i++) {
-		order3_t o(i);
+		Ord3 o(i);
 		Word_t oi = o.get_idx();
 		tables[oi] = std_tables_3d_tet[i];
 		np[oi] = std_np_3d_tet[i];
@@ -4189,7 +4189,7 @@ QuadStdTetra::QuadStdTetra() {
 		assert(tet_edge_vtcs != NULL);
 
 		for (int order = 0; order <= H3D_MAX_QUAD_ORDER; order++) {
-			order3_t o(order);
+			Ord3 o(order);
 			Word_t oi = o.get_idx();
 			int num = std_np_1d[oi];
 			np_edge[oi] = num;
@@ -4211,7 +4211,7 @@ QuadStdTetra::QuadStdTetra() {
 	// face points
 	face_tables = new Array<QuadPt3D *>[Tetra::NUM_FACES];
 	for (int order = 0; order <= quad_std_tri.get_max_order(); order++) {
-		order3_t o(order);
+		Ord3 o(order);
 		Word_t oi = o.get_idx();
 		int num = quad_std_tri.get_num_points(order);
 		np_face[oi] = num;
@@ -4296,14 +4296,14 @@ QuadStdHex::QuadStdHex() {
 	mode = MODE_HEXAHEDRON;
 
 	max_edge_order = H3D_MAX_QUAD_ORDER;
-	max_face_order = order2_t(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER);
-	max_order = order3_t(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER);
+	max_face_order = Ord2(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER);
+	max_order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER);
 
 	// element points
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER; i++)
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++)
 			for (int k = 0; k <= H3D_MAX_QUAD_ORDER; k++) {
-				order3_t m(i, j, k);
+				Ord3 m(i, j, k);
 				np[m.get_idx()] = std_np_1d[i] * std_np_1d[j] * std_np_1d[k];
 			}
 
@@ -4311,7 +4311,7 @@ QuadStdHex::QuadStdHex() {
 	face_tables = new Array<QuadPt3D *>[Hex::NUM_FACES];
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER; i++)
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++) {
-			order2_t m(i, j);
+			Ord2 m(i, j);
 			np_face[m.get_idx()] = std_np_1d[i] * std_np_1d[j];
 //			if (i ==24 && j==24) printf("AAA = %d\n", m.get_idx());
 		}
@@ -4378,7 +4378,7 @@ QuadStdHex::~QuadStdHex() {
 #endif
 }
 
-void QuadStdHex::calc_table(const order3_t &order) {
+void QuadStdHex::calc_table(const Ord3 &order) {
 	_F_
 #ifdef WITH_HEX
 	assert(order.type == mode);
@@ -4401,7 +4401,7 @@ void QuadStdHex::calc_table(const order3_t &order) {
 #endif
 }
 
-void QuadStdHex::calc_face_table(int face, const order2_t &order) {
+void QuadStdHex::calc_face_table(int face, const Ord2 &order) {
 	_F_
 #ifdef WITH_HEX
 	int idx = order.get_idx();
@@ -4456,17 +4456,17 @@ void QuadStdHex::calc_face_table(int face, const order2_t &order) {
 #endif
 }
 
-order3_t QuadStdHex::lower_order_same_accuracy(const order3_t &order) {
+Ord3 QuadStdHex::lower_order_same_accuracy(const Ord3 &order) {
 	_F_
 #ifdef WITH_HEX
 	assert(order.type == MODE_HEXAHEDRON);
-	order3_t ord = order;
+	Ord3 ord = order;
 	(ord.x % 2) ? ord.x-- : ord.x;
 	(ord.y % 2) ? ord.y-- : ord.y;
 	(ord.x % 2) ? ord.z-- : ord.z;
 	return ord;
 #else
-	return order3_t(0, 0, 0);
+	return Ord3(0, 0, 0);
 #endif
 }
 

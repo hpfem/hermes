@@ -61,16 +61,16 @@ void calc_tan_proj(S nx, S ny, S nz, T (&ev)[3], T (&tpe)[3]) {
 /// @ingroup hcurlintegrals
 
 template<typename f_t, typename res_t>
-res_t hcurl_int_u_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t hcurl_int_u_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->fn0[i] * v->fn0[i] + u->fn1[i] * v->fn1[i] + u->fn2[i] * v->fn2[i]);
+		result += wt[i] * (u->val0[i] * v->val0[i] + u->val1[i] * v->val1[i] + u->val2[i] * v->val2[i]);
 	return result;
 }
 
 template<typename f_t, typename res_t>
-res_t hcurl_int_curl_u_curl_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t hcurl_int_curl_u_curl_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
@@ -81,13 +81,13 @@ res_t hcurl_int_curl_u_curl_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geo
 /// Integral \F \v
 ///
 template<typename f_t, typename res_t>
-res_t hcurl_int_F_v(int n, double *wt, void (*F)(f_t, f_t, f_t, res_t (&)[3]), fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t hcurl_int_F_v(int n, double *wt, void (*F)(f_t, f_t, f_t, res_t (&)[3]), Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	res_t f[3];
 	for (int i = 0; i < n; i++) {
 		F(e->x[i], e->y[i], e->z[i], f);
-		result += wt[i] * (v->fn0[i] * f[0] + v->fn1[i] * f[1] + v->fn2[i] * f[2]);
+		result += wt[i] * (v->val0[i] * f[0] + v->val1[i] * f[1] + v->val2[i] * f[2]);
 	}
 	return result;
 }

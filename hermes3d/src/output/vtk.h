@@ -50,7 +50,7 @@ public:
 	virtual void out(Matrix *mat, bool structure = true);
 
 protected:
-	order3_t get_order(int mode);
+	Ord3 get_order(int mode);
 
 	/// file into which the output is done
 	FILE *out_file;

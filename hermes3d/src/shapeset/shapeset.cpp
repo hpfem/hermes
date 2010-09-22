@@ -151,7 +151,7 @@ Shapeset::~Shapeset() {
 	free_constrained_combinations();
 }
 
-int Shapeset::get_constrained_edge_index(int edge, int ori, order1_t order, Part part) {
+int Shapeset::get_constrained_edge_index(int edge, int ori, Ord1 order, Part part) {
 	_F_
 	CEDKey cedkey(CED_KEY_TYPE_EDGE, edge, order, ori, part);
 	int fn_idx;
@@ -166,7 +166,7 @@ int Shapeset::get_constrained_edge_index(int edge, int ori, order1_t order, Part
 	}
 }
 
-int Shapeset::get_constrained_edge_face_index(int edge, int ori, order2_t order, Part part, int dir, int variant) {
+int Shapeset::get_constrained_edge_face_index(int edge, int ori, Ord2 order, Part part, int dir, int variant) {
 	_F_
 	CEDKey ck(CED_KEY_TYPE_EDGE_FACE, edge, order, ori, part, dir, variant);
 	int fn_idx;
@@ -181,7 +181,7 @@ int Shapeset::get_constrained_edge_face_index(int edge, int ori, order2_t order,
 	}
 }
 
-int Shapeset::get_constrained_face_index(int face, int ori, order2_t order, Part part, int variant) {
+int Shapeset::get_constrained_face_index(int face, int ori, Ord2 order, Part part, int variant) {
 	_F_
 	CEDKey cedkey(CED_KEY_TYPE_FACE, face, order, ori, part, 0, variant);
 	int fn_idx;
@@ -214,8 +214,8 @@ CEDComb *Shapeset::get_ced_comb(const CEDKey &key) {
 	else {
 		// combination does not exist yet => calculate it
 		if (key.type == CED_KEY_TYPE_EDGE)           comb = calc_constrained_edge_combination(key.ori, key.order, key.part);
-		else if (key.type == CED_KEY_TYPE_EDGE_FACE) comb = calc_constrained_edge_face_combination(key.ori, order2_t::from_int(key.order), key.part, key.dir, key.variant);
-		else if (key.type == CED_KEY_TYPE_FACE)      comb = calc_constrained_face_combination(key.ori, order2_t::from_int(key.order), key.part, key.variant);
+		else if (key.type == CED_KEY_TYPE_EDGE_FACE) comb = calc_constrained_edge_face_combination(key.ori, Ord2::from_int(key.order), key.part, key.dir, key.variant);
+		else if (key.type == CED_KEY_TYPE_FACE)      comb = calc_constrained_face_combination(key.ori, Ord2::from_int(key.order), key.part, key.variant);
 		else EXIT("Unknown type of CED key.");
 
 		ced_comb.set(key, comb);
@@ -228,7 +228,7 @@ int *Shapeset::get_ced_indices(const CEDKey &key) {
 	_F_
 	int *idx;
 	if (key.type == CED_KEY_TYPE_EDGE) {
-		order1_t order = key.order;
+		Ord1 order = key.order;
 		idx = get_edge_indices(key.edge, key.ori, order);
 	}
 	else if (key.type == CED_KEY_TYPE_EDGE_FACE) {
@@ -236,11 +236,11 @@ int *Shapeset::get_ced_indices(const CEDKey &key) {
 		int dir = key.dir;
 		const int *eori = RefHex::get_face_edge_orientation(key.ori);
 		if (key.ori >= 4) dir = (key.dir == PART_ORI_VERT) ? PART_ORI_HORZ : PART_ORI_VERT; 			// turned face
-		order2_t o = order2_t::from_int(key.order);
+		Ord2 o = Ord2::from_int(key.order);
 		idx = (dir == PART_ORI_HORZ) ? get_edge_indices(key.edge, eori[0], o.x) : get_edge_indices(key.edge, eori[1], o.y);
 	}
 	else if (key.type == CED_KEY_TYPE_FACE) {
-		order2_t order = order2_t::from_int(key.order);
+		Ord2 order = Ord2::from_int(key.order);
 		idx = get_face_indices(key.face, key.ori, order);
 	}
 	else
@@ -285,50 +285,50 @@ double Shapeset::get_constrained_value(int n, int index, double x, double y, dou
 	return val;
 }
 
-order3_t Shapeset::get_ced_order(int index) const {
+Ord3 Shapeset::get_ced_order(int index) const {
 	_F_
 	assert(ced_key.exists(-1 - index));
 	CEDKey key = ced_key[-1 - index];
 
-	order3_t order;
+	Ord3 order;
 	if (key.type == CED_KEY_TYPE_EDGE || key.type == CED_KEY_TYPE_EDGE_FACE) {
 		int o;
 		if (key.type == CED_KEY_TYPE_EDGE_FACE) {
 			int dir;
 			if (key.ori < 4) dir = key.dir;
 			else dir = (key.dir == PART_ORI_VERT) ? PART_ORI_HORZ : PART_ORI_VERT; 			// turned face
-			order2_t fo = order2_t::from_int(key.order);
+			Ord2 fo = Ord2::from_int(key.order);
 			o = (dir == PART_ORI_HORZ) ? fo.x : fo.y;
 		}
 		else
 			o = key.order;
 
 		switch (key.edge) {
-			case  0: order = order3_t(o, 1, 1); break;
-			case  1: order = order3_t(1, o, 1); break;
-			case  2: order = order3_t(o, 1, 1); break;
-			case  3: order = order3_t(1, o, 1); break;
-			case  4: order = order3_t(1, 1, o); break;
-			case  5: order = order3_t(1, 1, o); break;
-			case  6: order = order3_t(1, 1, o); break;
-			case  7: order = order3_t(1, 1, o); break;
-			case  8: order = order3_t(o, 1, 1); break;
-			case  9: order = order3_t(1, o, 1); break;
-			case 10: order = order3_t(o, 1, 1); break;
-			case 11: order = order3_t(1, o, 1); break;
+			case  0: order = Ord3(o, 1, 1); break;
+			case  1: order = Ord3(1, o, 1); break;
+			case  2: order = Ord3(o, 1, 1); break;
+			case  3: order = Ord3(1, o, 1); break;
+			case  4: order = Ord3(1, 1, o); break;
+			case  5: order = Ord3(1, 1, o); break;
+			case  6: order = Ord3(1, 1, o); break;
+			case  7: order = Ord3(1, 1, o); break;
+			case  8: order = Ord3(o, 1, 1); break;
+			case  9: order = Ord3(1, o, 1); break;
+			case 10: order = Ord3(o, 1, 1); break;
+			case 11: order = Ord3(1, o, 1); break;
 			default: EXIT("Invalid edge number %d. Can be 0 - 11.", key.edge); break;
 		}
 	}
 	else if (key.type == CED_KEY_TYPE_FACE) {
-		order2_t o = order2_t::from_int(key.order);
+		Ord2 o = Ord2::from_int(key.order);
 
 		switch (key.face) {
-			case 0: order = order3_t(1, o.x, o.y); break;
-			case 1: order = order3_t(1, o.x, o.y); break;
-			case 2: order = order3_t(o.x, 1, o.y); break;
-			case 3: order = order3_t(o.x, 1, o.y); break;
-			case 4: order = order3_t(o.x, o.y, 1); break;
-			case 5: order = order3_t(o.x, o.y, 1); break;
+			case 0: order = Ord3(1, o.x, o.y); break;
+			case 1: order = Ord3(1, o.x, o.y); break;
+			case 2: order = Ord3(o.x, 1, o.y); break;
+			case 3: order = Ord3(o.x, 1, o.y); break;
+			case 4: order = Ord3(o.x, o.y, 1); break;
+			case 5: order = Ord3(o.x, o.y, 1); break;
 			default: EXIT("Invalid face number %d. Can be 0 - 5.", key.face); break;
 		}
 		if (key.ori >= 4) order = turn_hex_face_order(key.face, order);		// face function is turned due to orientation

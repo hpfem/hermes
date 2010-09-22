@@ -2325,9 +2325,9 @@ void Mesh::check_elem_oris()
 		Element *e = elements[eid];
 		refmap.set_active_element(e);
 
-		order3_t ord;
-		if (e->get_mode() == MODE_HEXAHEDRON) ord = order3_t(1, 1, 1);
-		else if (e->get_mode() == MODE_TETRAHEDRON) ord = order3_t(2);
+		Ord3 ord;
+		if (e->get_mode() == MODE_HEXAHEDRON) ord = Ord3(1, 1, 1);
+		else if (e->get_mode() == MODE_TETRAHEDRON) ord = Ord3(2);
 		else warning(H3D_ERR_NOT_IMPLEMENTED);
 		Quad3D *quad = get_quadrature(e->get_mode());
 		int np = quad->get_num_points(ord);

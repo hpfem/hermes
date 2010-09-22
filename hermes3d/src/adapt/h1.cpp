@@ -34,13 +34,13 @@
 //#define DEBUG_PRINT
 
 template<typename f_t, typename res_t>
-res_t h1_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<res_t> *u, fn_t<res_t> *v, geom_t<f_t> *e,
-              user_data_t<res_t> *ext)
+res_t h1_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<res_t> *v, Geom<f_t> *e,
+              ExtData<res_t> *ext)
 {
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
 		result += wt[i] * (
-				u->fn[i] * CONJ(v->fn[i]) +
+				u->val[i] * CONJ(v->val[i]) +
 				u->dx[i] * CONJ(v->dx[i]) +
 				u->dy[i] * CONJ(v->dy[i]) +
 				u->dz[i] * CONJ(v->dz[i]));
@@ -74,7 +74,7 @@ void H1Adapt::init(Tuple<Space *> sp)
 		for (int j = 0; j < num; j++) {
 			if (i == j) {
 				form[i][j] = h1_form<double, scalar>;
-				ord[i][j]  = h1_form<ord_t, ord_t>;
+				ord[i][j]  = h1_form<Ord, Ord>;
 			}
 			else {
 				form[i][j] = NULL;
@@ -120,7 +120,7 @@ void H1Adapt::set_error_form(int i, int j, biform_val_t bi_form, biform_ord_t bi
 	ord[i][j] = bi_ord;
 }
 
-double H1Adapt::get_projection_error(Element *e, int split, int son, const order3_t &order, Solution *rsln,
+double H1Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &order, Solution *rsln,
                                      Shapeset *ss)
 {
 	_F_
@@ -140,37 +140,37 @@ double H1Adapt::get_projection_error(Element *e, int split, int son, const order
 
 //// optimal refinement search /////////////////////////////////////////////////////////////////////
 
-static inline int ndofs_elem(const order3_t &order)
+static inline int ndofs_elem(const Ord3 &order)
 {
 	assert(order.type == MODE_HEXAHEDRON);
 	return (order.x + 1) * (order.y + 1) * (order.z + 1);
 }
 
-static inline int ndofs_bubble(const order3_t &order)
+static inline int ndofs_bubble(const Ord3 &order)
 {
 	return (order.x - 1) * (order.y - 1) * (order.z - 1);
 }
 
-static inline int ndofs_face(int face, const order3_t &order1, const order3_t &order2)
+static inline int ndofs_face(int face, const Ord3 &order1, const Ord3 &order2)
 {
-	order2_t forder[] = { order1.get_face_order(face), order2.get_face_order(face) };
+	Ord2 forder[] = { order1.get_face_order(face), order2.get_face_order(face) };
 	return (
 		(std::min(forder[0].x, forder[1].x) - 1) *
 		(std::min(forder[0].y, forder[1].y) - 1));
 }
 
-static inline int ndofs_edge(int edge, const order3_t &o)
+static inline int ndofs_edge(int edge, const Ord3 &o)
 {
 	return o.get_edge_order(edge) - 1;
 }
 
-static inline int ndofs_edge(int edge, const order3_t &o1, const order3_t &o2)
+static inline int ndofs_edge(int edge, const Ord3 &o1, const Ord3 &o2)
 {
 	return std::min(o1.get_edge_order(edge), o2.get_edge_order(edge)) - 1;
 }
 
-static inline int ndofs_edge(int edge, const order3_t &o1, const order3_t &o2, const order3_t &o3,
-                             const order3_t &o4)
+static inline int ndofs_edge(int edge, const Ord3 &o1, const Ord3 &o2, const Ord3 &o3,
+                             const Ord3 &o4)
 {
 	return
 		std::min(
@@ -179,7 +179,7 @@ static inline int ndofs_edge(int edge, const order3_t &o1, const order3_t &o2, c
 		) - 1;
 }
 
-int H1Adapt::get_dof_count(int split, order3_t order[])
+int H1Adapt::get_dof_count(int split, Ord3 order[])
 {
 	_F_
 	int dofs = 0;
@@ -295,8 +295,8 @@ int H1Adapt::get_dof_count(int split, order3_t order[])
 	return dofs;
 }
 
-void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &order, Solution *rsln,
-                                     Shapeset *ss, int &split, order3_t p[8])
+void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, Solution *rsln,
+                                     Shapeset *ss, int &split, Ord3 p[8])
 {
 	_F_
 	int i, k, n = 0;
@@ -305,7 +305,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 	struct Cand {
 		double error;
 		int dofs, split;
-		order3_t p[Hex::NUM_SONS];				// polynomial degree
+		Ord3 p[Hex::NUM_SONS];				// polynomial degree
 
 		Cand() {
 			error = 0.0;
@@ -358,12 +358,12 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 		cand[n].p[3] = (q3); \
 		n++; }}
 
-	order3_t pp[] = {
-		order3_t(order.x, order.y, order.z),
-		order3_t(std::min(max_order, order.x + 1),
+	Ord3 pp[] = {
+		Ord3(order.x, order.y, order.z),
+		Ord3(std::min(max_order, order.x + 1),
 				 std::min(max_order, order.y + 1),
 				 std::min(max_order, order.z + 1)),
-		order3_t(std::min(max_order, order.x + 2),
+		Ord3(std::min(max_order, order.x + 2),
 				 std::min(max_order, order.y + 2),
 				 std::min(max_order, order.z + 2))
 	};
@@ -388,7 +388,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 			for (unsigned int q0 = 0; q0 < countof(pp); q0++)
 				for (unsigned int q1 = 0; q1 < countof(pp); q1++)
 					for (unsigned int q2 = 0; q2 < countof(pp); q2++)
-						MAKE_P_CAND(order3_t(pp[q0].x, pp[q1].y, pp[q2].z));
+						MAKE_P_CAND(Ord3(pp[q0].x, pp[q1].y, pp[q2].z));
 		}
 		else {
 			MAKE_P_CAND(pp[0]);
@@ -398,9 +398,9 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 
 		// prepare hp-candidates
 		{
-			order3_t hpp[] = {
-				order3_t((order.x + 1) / 2, (order.y + 1) / 2, (order.z + 1) / 2),
-				order3_t(std::min(((order.x + 1) / 2) + 1, max_order),
+			Ord3 hpp[] = {
+				Ord3((order.x + 1) / 2, (order.y + 1) / 2, (order.z + 1) / 2),
+				Ord3(std::min(((order.x + 1) / 2) + 1, max_order),
 				         std::min(((order.y + 1) / 2) + 1, max_order),
 				         std::min(((order.z + 1) / 2) + 1, max_order))
 			};
@@ -420,34 +420,34 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 
 		if (aniso) {
 			// X
-			order3_t ppx[] = {
-				order3_t((order.x + 1) / 2, order.y, order.z),
-				order3_t(std::min(((order.x + 1) / 2) + 1, max_order), order.y, order.z),
+			Ord3 ppx[] = {
+				Ord3((order.x + 1) / 2, order.y, order.z),
+				Ord3(std::min(((order.x + 1) / 2) + 1, max_order), order.y, order.z),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppx); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppx); q1++)
 					MAKE_ANI2_CAND(H3D_REFT_HEX_X, ppx[q0], ppx[q1]);
 			// Y
-			order3_t ppy[] = {
-				order3_t(order.x, (order.y + 1) / 2, order.z),
-				order3_t(order.x, std::min(((order.y + 1) / 2) + 1, max_order), order.z),
+			Ord3 ppy[] = {
+				Ord3(order.x, (order.y + 1) / 2, order.z),
+				Ord3(order.x, std::min(((order.y + 1) / 2) + 1, max_order), order.z),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppy); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppy); q1++)
 					MAKE_ANI2_CAND(H3D_REFT_HEX_Y, ppy[q0], ppy[q1]);
 			// Z
-			order3_t ppz[] = {
-				order3_t(order.x, order.y, (order.z + 1) / 2),
-				order3_t(order.x, order.y, std::min(((order.z + 1) / 2) + 1, max_order)),
+			Ord3 ppz[] = {
+				Ord3(order.x, order.y, (order.z + 1) / 2),
+				Ord3(order.x, order.y, std::min(((order.z + 1) / 2) + 1, max_order)),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppz); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppz); q1++)
 					MAKE_ANI2_CAND(H3D_REFT_HEX_Z, ppz[q0], ppz[q1]);
 
 			// XY
-			order3_t ppxy[] = {
-				order3_t((order.x + 1) / 2, (order.y + 1) / 2, order.z),
-				order3_t(std::min(((order.x + 1) / 2) + 1, max_order),
+			Ord3 ppxy[] = {
+				Ord3((order.x + 1) / 2, (order.y + 1) / 2, order.z),
+				Ord3(std::min(((order.x + 1) / 2) + 1, max_order),
 				         std::min(((order.y + 1) / 2) + 1, max_order), order.z),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppxy); q0++)
@@ -456,9 +456,9 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 						for (unsigned int q3 = 0; q3 < countof(ppxy); q3++)
 							MAKE_ANI4_CAND(H3D_H3D_REFT_HEX_XY, ppxy[q0], ppxy[q1], ppxy[q2], ppxy[q3]);
 			// YZ
-			order3_t ppyz[] = {
-					order3_t(order.x, (order.y + 1) / 2, (order.z + 1) / 2),
-					order3_t(order.x, std::min(((order.y + 1) / 2) + 1, max_order),
+			Ord3 ppyz[] = {
+					Ord3(order.x, (order.y + 1) / 2, (order.z + 1) / 2),
+					Ord3(order.x, std::min(((order.y + 1) / 2) + 1, max_order),
 					         std::min(((order.z + 1) / 2) + 1, max_order)),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppyz); q0++)
@@ -467,9 +467,9 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 						for (unsigned int q3 = 0; q3 < countof(ppyz); q3++)
 							MAKE_ANI4_CAND(H3D_H3D_REFT_HEX_YZ, ppyz[q0], ppyz[q1], ppyz[q2], ppyz[q3]);
 			// XZ
-			order3_t ppxz[] = {
-				order3_t((order.x + 1) / 2, order.y, (order.z + 1) / 2),
-				order3_t(std::min(((order.x + 1) / 2) + 1, max_order), order.y,
+			Ord3 ppxz[] = {
+				Ord3((order.x + 1) / 2, order.y, (order.z + 1) / 2),
+				Ord3(std::min(((order.x + 1) / 2) + 1, max_order), order.y,
 				         std::min(((order.z + 1) / 2) + 1, max_order)),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppxz); q0++)
@@ -580,7 +580,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const order3_t &ord
 
 	// return result
 	split = cand[imax].split;
-	memcpy(p, cand[imax].p, Hex::NUM_SONS * sizeof(order3_t));
+	memcpy(p, cand[imax].p, Hex::NUM_SONS * sizeof(Ord3));
 
 #ifdef DEBUG_PRINT
 	printf(": best cand: #%d, split = %s", imax, split_str[cand[imax].split]);
@@ -636,9 +636,9 @@ void H1Adapt::adapt(double thr)
 #endif
 
 		int split = 0;
-		order3_t p[8];													// polynomial order of sons
-		for (int k = 0; k < 8; k++) p[k] = order3_t(0, 0, 0);
-		order3_t cur_order = spaces[comp]->get_element_order(id);
+		Ord3 p[8];													// polynomial order of sons
+		for (int k = 0; k < 8; k++) p[k] = Ord3(0, 0, 0);
+		Ord3 cur_order = spaces[comp]->get_element_order(id);
 
 		if (h_only && !aniso) {
 			p[0] = p[1] = p[2] = p[3] = p[4] = p[5] = p[6] = p[7] = cur_order;
@@ -717,21 +717,21 @@ static int compare(const void* p1, const void* p2)
 	return cmp_err[(*e1)[1]][(*e1)[0] - 1] < cmp_err[(*e2)[1]][(*e2)[0] - 1] ? 1 : -1;
 }
 
-order3_t H1Adapt::get_form_order(int marker, const order3_t &ordu, const order3_t &ordv, RefMap *ru,
+Ord3 H1Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMap *ru,
                                  matrix_form_ord_t mf_ord)
 {
 	_F_
 	// determine the integration order
-	fn_t<ord_t> ou = init_fn(ordu);
-	fn_t<ord_t> ov = init_fn(ordv);
+	Func<Ord> ou = init_fn(ordu);
+	Func<Ord> ov = init_fn(ordv);
 
 	double fake_wt = 1.0;
-	geom_t<ord_t> fake_e = init_geom(marker);
-	ord_t o = mf_ord(1, &fake_wt, NULL, &ou, &ov, &fake_e, NULL);
-	order3_t order = ru->get_inv_ref_order();
+	Geom<Ord> fake_e = init_geom(marker);
+	Ord o = mf_ord(1, &fake_wt, NULL, &ou, &ov, &fake_e, NULL);
+	Ord3 order = ru->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += order3_t(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += order3_t(o.get_order(), o.get_order(), o.get_order()); break;
+		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
+		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
 
@@ -750,7 +750,7 @@ scalar H1Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, 
 	RefMap *rrv1 = rsln1->get_refmap();
 	RefMap *rrv2 = rsln1->get_refmap();
 
-	order3_t order = get_form_order(marker, rsln1->get_fn_order(), rsln2->get_fn_order(), rrv1,
+	Ord3 order = get_form_order(marker, rsln1->get_fn_order(), rsln2->get_fn_order(), rrv1,
 	                                bi_ord);
 
 	// eval the form
@@ -759,19 +759,19 @@ scalar H1Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, 
 	int np = quad->get_num_points(order);
 
 	double *jwt = rrv1->get_jacobian(np, pt);
-	geom_t<double> e = init_geom(marker, rrv1, np, pt);
+	Geom<double> e = init_geom(marker, rrv1, np, pt);
 
-	fn_t<scalar> *err1 = init_fn(sln1, rv1, np, pt);
-	fn_t<scalar> *err2 = init_fn(sln2, rv2, np, pt);
-	fn_t<scalar> *v1 = init_fn(rsln1, rrv1, np, pt);
-	fn_t<scalar> *v2 = init_fn(rsln2, rrv2, np, pt);
+	Func<scalar> *err1 = init_fn(sln1, rv1, np, pt);
+	Func<scalar> *err2 = init_fn(sln2, rv2, np, pt);
+	Func<scalar> *v1 = init_fn(rsln1, rrv1, np, pt);
+	Func<scalar> *v2 = init_fn(rsln2, rrv2, np, pt);
 
 	for (int i = 0; i < np; i++) {
-		err1->fn[i] = err1->fn[i] - v1->fn[i];
+		err1->val[i] = err1->val[i] - v1->val[i];
 		err1->dx[i] = err1->dx[i] - v1->dx[i];
 		err1->dy[i] = err1->dy[i] - v1->dy[i];
 		err1->dz[i] = err1->dz[i] - v1->dz[i];
-		err2->fn[i] = err2->fn[i] - v2->fn[i];
+		err2->val[i] = err2->val[i] - v2->val[i];
 		err2->dx[i] = err2->dx[i] - v2->dx[i];
 		err2->dy[i] = err2->dy[i] - v2->dy[i];
 		err2->dz[i] = err2->dz[i] - v2->dz[i];
@@ -797,7 +797,7 @@ scalar H1Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, M
 	RefMap *rv1 = rsln1->get_refmap();
 	RefMap *rv2 = rsln1->get_refmap();
 
-	order3_t order = get_form_order(marker, rsln1->get_fn_order(), rsln2->get_fn_order(), rv1,
+	Ord3 order = get_form_order(marker, rsln1->get_fn_order(), rsln2->get_fn_order(), rv1,
 	                                bi_ord);
 
 	// eval the form
@@ -806,10 +806,10 @@ scalar H1Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, M
 	int np = quad->get_num_points(order);
 
 	double *jwt = rv1->get_jacobian(np, pt);
-	geom_t<double> e = init_geom(marker, rv1, np, pt);
+	Geom<double> e = init_geom(marker, rv1, np, pt);
 
-	fn_t<scalar> *v1 = init_fn(rsln1, rv1, np, pt);
-	fn_t<scalar> *v2 = init_fn(rsln2, rv2, np, pt);
+	Func<scalar> *v1 = init_fn(rsln1, rv1, np, pt);
+	Func<scalar> *v2 = init_fn(rsln2, rv2, np, pt);
 
 	scalar res = bi_fn(np, jwt, NULL, v1, v2, &e, NULL);
 

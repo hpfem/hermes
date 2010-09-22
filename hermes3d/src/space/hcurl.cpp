@@ -50,11 +50,11 @@ int HcurlSpace::get_vertex_ndofs() {
 	return 0;
 }
 
-int HcurlSpace::get_edge_ndofs(order1_t order) {
+int HcurlSpace::get_edge_ndofs(Ord1 order) {
 	return order + 1;
 }
 
-int HcurlSpace::get_face_ndofs(order2_t order) {
+int HcurlSpace::get_face_ndofs(Ord2 order) {
 	switch (order.type) {
 		case MODE_QUAD: return (order.x + 1) * order.y + order.x * (order.y + 1);
 		case MODE_TRIANGLE: EXIT(H3D_ERR_NOT_IMPLEMENTED); return -1;
@@ -62,7 +62,7 @@ int HcurlSpace::get_face_ndofs(order2_t order) {
 	}
 }
 
-int HcurlSpace::get_element_ndofs(order3_t order) {
+int HcurlSpace::get_element_ndofs(Ord3 order) {
 	switch (order.type) {
 		case MODE_HEXAHEDRON: return (order.x + 1) * order.y * order.z + order.x * (order.y + 1) * order.z + order.x * order.y * (order.z + 1);
 		case MODE_TETRAHEDRON: EXIT(H3D_ERR_NOT_IMPLEMENTED); return -1;
@@ -165,7 +165,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	ref_map.set_active_element(elem);
 
 	Quad3D *quad = get_quadrature(elem->get_mode());
-	order1_t order_rhs = quad->get_edge_max_order(iedge);
+	Ord1 order_rhs = quad->get_edge_max_order(iedge);
 	int np = quad->get_edge_num_points(iedge, order_rhs);
 	QuadPt3D *pt = quad->get_edge_points(iedge, order_rhs);
 
@@ -204,7 +204,7 @@ void HcurlSpace::calc_face_boundary_projection(Element *elem, int iface) {
 	ref_map.set_active_element(elem);
 
 	Quad3D *quad = get_quadrature(elem->get_mode());
-	order2_t order_rhs = quad->get_face_max_order(iface);
+	Ord2 order_rhs = quad->get_face_max_order(iface);
 	int np = quad->get_face_num_points(iface, order_rhs);
 	QuadPt3D *pt = quad->get_face_points(iface, order_rhs);
 

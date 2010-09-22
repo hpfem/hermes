@@ -46,31 +46,31 @@ namespace Gmsh {
 /// @ingroup visualization
 class OutputQuad : public Quad3D {
 public:
-	virtual QuadPt3D *get_points(const order3_t &order) {
+	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
 		if (!tables.exists(order.get_idx())) calculate_view_points(order);
 		return tables[order.get_idx()];
 	}
 
-	virtual int get_num_points(const order3_t &order) {
+	virtual int get_num_points(const Ord3 &order) {
 		_F_
 		if (!np.exists(order.get_idx())) calculate_view_points(order);
 		return np[order.get_idx()];
 	}
 
-	virtual int *get_subdiv_modes(order3_t order) {
+	virtual int *get_subdiv_modes(Ord3 order) {
 		_F_
 		if (!subdiv_modes.exists(order.get_idx())) calculate_view_points(order);
 		return subdiv_modes[order.get_idx()];
 	}
 
-	virtual int get_subdiv_num(order3_t order) {
+	virtual int get_subdiv_num(Ord3 order) {
 		_F_
 		if (!subdiv_num.exists(order.get_idx())) calculate_view_points(order);
 		return subdiv_num[order.get_idx()];
 	}
 
-	virtual QuadPt3D *get_face_points(int face, const order2_t &order) {
+	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) {
 		_F_
 		EXIT(H3D_ERR_NOT_IMPLEMENTED);
 		return NULL;
@@ -83,7 +83,7 @@ protected:
 	Array<int *> subdiv_modes;
 	int output_precision;
 
-	virtual void calculate_view_points(order3_t order) = 0;
+	virtual void calculate_view_points(Ord3 order) = 0;
 	virtual void recursive_division(const Point3D *ref_vtcs, QuadPt3D *table, int levels, int &idx) = 0;
 };
 
@@ -98,7 +98,7 @@ public:
 	virtual ~OutputQuadTetra();
 
 protected:
-	virtual void calculate_view_points(order3_t order);
+	virtual void calculate_view_points(Ord3 order);
 	virtual void recursive_division(const Point3D *ref_vtcs, QuadPt3D *table, int levels, int &idx);
 };
 
@@ -126,7 +126,7 @@ OutputQuadTetra::~OutputQuadTetra() {
 }
 
 
-void OutputQuadTetra::calculate_view_points(order3_t order) {
+void OutputQuadTetra::calculate_view_points(Ord3 order) {
 	_F_
 #ifdef WITH_TETRA
 	int orderidx = order.get_idx();
@@ -191,7 +191,7 @@ void OutputQuadTetra::recursive_division(const Point3D *tv, QuadPt3D *table, int
 
 //// OutputQuadHex ////////////////////////////////////////////////////////////////////////////////
 
-int get_principal_order(order3_t order) {
+int get_principal_order(Ord3 order) {
 	assert(order.type == MODE_HEXAHEDRON);
 	return std::max(order.x, std::max(order.y, order.z));
 }
@@ -205,7 +205,7 @@ public:
 	virtual ~OutputQuadHex();
 
 protected:
-	virtual void calculate_view_points(order3_t order);
+	virtual void calculate_view_points(Ord3 order);
 	virtual void recursive_division(const Point3D *tv, QuadPt3D *table, int levels, int &idx);
 };
 
@@ -231,7 +231,7 @@ OutputQuadHex::~OutputQuadHex() {
 #endif
 }
 
-void OutputQuadHex::calculate_view_points(order3_t order) {
+void OutputQuadHex::calculate_view_points(Ord3 order) {
 	_F_
 #ifdef WITH_HEX
 //	int o = get_principal_order(order);
@@ -421,10 +421,10 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 		Element *element = mesh->elements[idx];
 		int mode = element->get_mode();
 		// FIXME: get order from the space
-		order3_t order;
+		Ord3 order;
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = order3_t(1); break;
-			case MODE_HEXAHEDRON: order = order3_t(1, 1, 1); break;
+			case MODE_TETRAHEDRON: order = Ord3(1); break;
+			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
 			case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
 		}
@@ -510,10 +510,10 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 		Element *element = mesh->elements[idx];
 		int mode = element->get_mode();
 		// FIXME: get order from the space
-		order3_t order;
+		Ord3 order;
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = order3_t(1); break;
-			case MODE_HEXAHEDRON: order = order3_t(1, 1, 1); break;
+			case MODE_TETRAHEDRON: order = Ord3(1); break;
+			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
 			case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
 		}
@@ -872,7 +872,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		assert(mesh->elements[idx]->get_mode() == MODE_HEXAHEDRON);			// HEX-specific
 		// get order from the space
-		order3_t order = space->get_element_order(idx);
+		Ord3 order = space->get_element_order(idx);
 
 		for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
 			int dord;

@@ -176,8 +176,8 @@ void Solution::copy(const Solution *sln) {
 			memcpy(elem_coefs[l], sln->elem_coefs[l], sizeof(int) * (num_elems + 1));
 		}
 
-	    elem_orders = new order3_t[num_elems + 1];
-	    memcpy(elem_orders, sln->elem_orders, sizeof(order3_t) * (num_elems + 1));
+	    elem_orders = new Ord3[num_elems + 1];
+	    memcpy(elem_orders, sln->elem_orders, sizeof(Ord3) * (num_elems + 1));
 
 		init_dxdydz_buffer();
 	}
@@ -250,7 +250,7 @@ void Solution::set_zero_3() {
 }
 
 // differentiates the mono coefs by x
-static void make_dx_coefs(int mode, order3_t ord, scalar *mono, scalar *result) {
+static void make_dx_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 	int i, j, k;
 
 	switch (mode) {
@@ -285,7 +285,7 @@ static void make_dx_coefs(int mode, order3_t ord, scalar *mono, scalar *result) 
 }
 
 // differentiates the mono coefs by y
-static void make_dy_coefs(int mode, order3_t ord, scalar *mono, scalar *result) {
+static void make_dy_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 	int i, j, k;
 
 	switch (mode) {
@@ -320,7 +320,7 @@ static void make_dy_coefs(int mode, order3_t ord, scalar *mono, scalar *result) 
 }
 
 // differentiates the mono coefs by z
-static void make_dz_coefs(int mode, order3_t ord, scalar *mono, scalar *result) {
+static void make_dz_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 	int i, j, k;
 
 	switch (mode) {
@@ -384,15 +384,15 @@ void Solution::set_active_element(Element *e) {
 	}
 	else if (type == EXACT) {
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = order3_t(H3D_MAX_QUAD_ORDER_TETRA); break;
-			case MODE_HEXAHEDRON: order = order3_t(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
+			case MODE_TETRAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER_TETRA); break;
+			case MODE_HEXAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
 			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
 	else if (type == CONST) {
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = order3_t(0); break;
-			case MODE_HEXAHEDRON: order = order3_t(0, 0, 0); break;
+			case MODE_TETRAHEDRON: order = Ord3(0); break;
+			case MODE_HEXAHEDRON: order = Ord3(0, 0, 0); break;
 			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
@@ -419,7 +419,7 @@ public:
 
 } mono_lu;
 
-void calc_mono_matrix(const order3_t &ord, mono_lu_init &mono) {
+void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {
 	int i, j, k, p, q, r, m, row;
 	double x, y, z, xn, yn, zn;
 
@@ -515,7 +515,7 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 
 	// allocate the coefficient arrays
 	num_elems = mesh->get_max_element_id();
-	elem_orders = new order3_t [num_elems + 1];
+	elem_orders = new Ord3 [num_elems + 1];
 	for (int l = 0; l < num_components; l++) {
 		elem_coefs[l] = new int [num_elems + 1];
 		memset(elem_coefs[l], 0, sizeof(int) * num_elems);
@@ -527,9 +527,9 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 		Element *e = mesh->elements[eid];
 		int mode = e->get_mode();
 		Quad3D *quad = cheb_quad[mode];
-		order3_t ord = space->get_element_order(e->id);
+		Ord3 ord = space->get_element_order(e->id);
 		// FIXME: this is not very nice, could we handle this in a better (=more general) way
-		if (space->get_type() == Hcurl) ord += order3_t(1, 1, 1);		// FIXME: tetras need order3_t(1)
+		if (space->get_type() == Hcurl) ord += Ord3(1, 1, 1);		// FIXME: tetras need Ord3(1)
 
 		num_coefs += quad->get_num_points(ord);
 		elem_orders[e->id] = ord;
@@ -545,7 +545,7 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 		int mode = e->get_mode();
 		Quad3D *quad = cheb_quad[mode];
 
-		order3_t ord = elem_orders[e->id];
+		Ord3 ord = elem_orders[e->id];
 		int np = quad->get_num_points(ord);
 		QuadPt3D *pt = quad->get_points(ord);
 
@@ -639,7 +639,7 @@ void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) {
 	}
 
 	// obtain the solution values, this is the core of the whole module
-	order3_t ord = elem_orders[element->id];
+	Ord3 ord = elem_orders[element->id];
 	for (int l = 0; l < num_components; l++) {
 		for (int v = 0; v < 6; v++) {
 			if (newmask & idx2mask[v][l]) {
@@ -839,15 +839,15 @@ void Solution::enable_transform(bool enable) {
 	transform = enable;
 }
 
-order3_t Solution::get_order()
+Ord3 Solution::get_order()
 {
 	_F_
 	switch (element->get_mode()) {
 		case MODE_HEXAHEDRON:
 			switch (type) {
 				case SLN: return elem_orders[element->id];
-				case EXACT: return order3_t(10, 10, 10);
-				case CONST: return order3_t(0, 0, 0);
+				case EXACT: return Ord3(10, 10, 10);
+				case CONST: return Ord3(0, 0, 0);
 				default: EXIT("WTF?");
 			}
 			break;
@@ -855,8 +855,8 @@ order3_t Solution::get_order()
 		case MODE_TETRAHEDRON:
 			switch (type) {
 				case SLN: return elem_orders[element->id];
-				case EXACT: return order3_t(10);
-				case CONST: return order3_t(0);
+				case EXACT: return Ord3(10);
+				case CONST: return Ord3(0);
 				default: EXIT("WTF?");
 			}
 			break;
@@ -866,5 +866,5 @@ order3_t Solution::get_order()
 			break;
 	}
 
-	return order3_t(0);
+	return Ord3(0);
 }

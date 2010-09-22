@@ -50,22 +50,22 @@ public:
 	QuadStdHex();
 	~QuadStdHex();
 
-	virtual QuadPt3D *get_points(const order3_t &order) {
+	virtual QuadPt3D *get_points(const Ord3 &order) {
 		CHECK_MODE;
 		if (!tables.exists(order.get_idx())) calc_table(order);
 		return tables[order.get_idx()];
 	}
 
-	virtual QuadPt3D *get_face_points(int face, const order2_t &order) {
+	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) {
 		if (!face_tables[face].exists(order.get_idx())) calc_face_table(face, order);
 		return face_tables[face][order.get_idx()];
 	}
 
 protected:
-	void calc_table(const order3_t &order);
-	void calc_face_table(int face, const order2_t &order);
+	void calc_table(const Ord3 &order);
+	void calc_face_table(int face, const Ord2 &order);
 	///
-	order3_t lower_order_same_accuracy(const order3_t &ord);
+	Ord3 lower_order_same_accuracy(const Ord3 &ord);
 };
 
 

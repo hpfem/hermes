@@ -36,28 +36,28 @@ public:
 		EXIT("Hcurl shapeset do not have vertex functions");
 	}
 
-	virtual int *get_edge_indices(int edge, int ori, order1_t order) {
+	virtual int *get_edge_indices(int edge, int ori, Ord1 order) {
 		CHECK_EDGE(edge);
 		if (!edge_indices[edge][ori].exists(order)) compute_edge_indices(edge, ori, order);
 		return edge_indices[edge][ori][order];
 	}
 
-	virtual int *get_face_indices(int face, int ori, order2_t order) {
+	virtual int *get_face_indices(int face, int ori, Ord2 order) {
 		CHECK_FACE(face);
 		if (!face_indices[face][ori].exists(order.get_idx())) compute_face_indices(face, ori, order);
 		return face_indices[face][ori][order.get_idx()];
 	}
 
-	virtual int *get_bubble_indices(order3_t order) {
+	virtual int *get_bubble_indices(Ord3 order) {
 		if (!bubble_indices.exists(order.get_idx())) compute_bubble_indices(order);
 		return bubble_indices[order.get_idx()];
 	}
 
-	virtual int get_num_edge_fns(order1_t order) const { return (order + 1); }
+	virtual int get_num_edge_fns(Ord1 order) const { return (order + 1); }
 
-	virtual int get_num_face_fns(order2_t order) const { return (order.x + 1) * order.y + order.x * (order.y + 1); }
+	virtual int get_num_face_fns(Ord2 order) const { return (order.x + 1) * order.y + order.x * (order.y + 1); }
 
-	virtual int get_num_bubble_fns(order3_t order) const {
+	virtual int get_num_bubble_fns(Ord3 order) const {
 		return (order.x + 1) * order.y * order.z + order.x * (order.y + 1) * order.z + order.x * order.y * (order.z + 1);
 	}
 
@@ -67,9 +67,9 @@ public:
 
 	virtual int get_face_fn_variant(int index) const;
 
-	virtual order3_t get_order(int index) const;
+	virtual Ord3 get_order(int index) const;
 
-	virtual order3_t get_dcmp(int index) const;
+	virtual Ord3 get_dcmp(int index) const;
 
 	virtual int get_shape_type(int index) const;
 
@@ -103,16 +103,16 @@ protected:
 	Array<int *> face_indices[Hex::NUM_FACES][NUM_FACE_ORIS];
 	Array<int *> bubble_indices;
 
-	void compute_edge_indices(int edge, int ori, order1_t order);
-	void compute_face_indices(int face, int ori, order2_t order);
-	void compute_bubble_indices(order3_t order);
+	void compute_edge_indices(int edge, int ori, Ord1 order);
+	void compute_face_indices(int face, int ori, Ord2 order);
+	void compute_bubble_indices(Ord3 order);
 
 
 protected:
 	// CED stuff
-	virtual CEDComb *calc_constrained_edge_combination(int ori, const order1_t &order, Part part);
-	virtual CEDComb *calc_constrained_edge_face_combination(int ori, const order2_t &order, Part part, int dir, int variant = 0);
-	virtual CEDComb *calc_constrained_face_combination(int ori, const order2_t &order, Part part, int variant = 0);
+	virtual CEDComb *calc_constrained_edge_combination(int ori, const Ord1 &order, Part part);
+	virtual CEDComb *calc_constrained_edge_face_combination(int ori, const Ord2 &order, Part part, int dir, int variant = 0);
+	virtual CEDComb *calc_constrained_face_combination(int ori, const Ord2 &order, Part part, int variant = 0);
 };
 
 #undef CHECK_VERTEX

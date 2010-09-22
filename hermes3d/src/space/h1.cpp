@@ -51,11 +51,11 @@ int H1Space::get_vertex_ndofs() {
 	return 1;
 }
 
-int H1Space::get_edge_ndofs(order1_t order) {
+int H1Space::get_edge_ndofs(Ord1 order) {
 	return order - 1;
 }
 
-int H1Space::get_face_ndofs(order2_t order) {
+int H1Space::get_face_ndofs(Ord2 order) {
 	switch (order.type) {
 		case MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
 		case MODE_QUAD: return (order.x - 1) * (order.y - 1);
@@ -63,7 +63,7 @@ int H1Space::get_face_ndofs(order2_t order) {
 	}
 }
 
-int H1Space::get_element_ndofs(order3_t order) {
+int H1Space::get_element_ndofs(Ord3 order) {
 	switch (order.type) {
 		case MODE_TETRAHEDRON: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
 		case MODE_HEXAHEDRON: return (order.x - 1) * (order.y - 1) * (order.z - 1);
@@ -215,7 +215,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 		int iidx = edge_fn_idx[i];
 		for (int j = i; j < num_fns; j++) {
 			int jidx = edge_fn_idx[j];
-			order3_t order = shapeset->get_order(iidx) + shapeset->get_order(jidx);
+			Ord3 order = shapeset->get_order(iidx) + shapeset->get_order(jidx);
 			int edge_order = order.get_edge_order(iedge);
 
 			int np = quad->get_edge_num_points(iedge, edge_order);
@@ -358,8 +358,8 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 		for (int j = i; j < fnode->n; j++) {
 			int jidx = face_fn_idx[j];
 
-			order3_t order = shapeset->get_order(iidx) + shapeset->get_order(jidx);
-			order2_t face_order = order.get_face_order(iface);
+			Ord3 order = shapeset->get_order(iidx) + shapeset->get_order(jidx);
+			Ord2 face_order = order.get_face_order(iface);
 
 			int np = quad->get_face_num_points(iface, face_order);
 			QuadPt3D *pt = quad->get_face_points(iface, face_order);
@@ -373,7 +373,7 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 			proj_mat[i][j] += value;
 		}
 
-		order2_t order_rhs = quad->get_face_max_order(iface);
+		Ord2 order_rhs = quad->get_face_max_order(iface);
 		int np = quad->get_face_num_points(iface, order_rhs);
 		QuadPt3D *pt = quad->get_face_points(iface, order_rhs);
 

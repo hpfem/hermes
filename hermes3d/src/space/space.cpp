@@ -121,7 +121,8 @@ Space::Space(Mesh *mesh, Shapeset *shapeset) :
 	set_essential_bc_values((scalar3 &(*)(int, double, double, double)) NULL);
 	mesh_seq = -1;
 	seq = 0;
-	was_assigned = false;
+	this->was_assigned = false;
+        this->ndof = 0;
 
 	init_data_tables();
 }
@@ -170,7 +171,7 @@ void Space::free_data_tables() {
 // element orders ///////////////////////////////////////////////////////////////////////////////
 
 
-void Space::set_element_order(Word_t eid, order3_t order) {
+void Space::set_element_order(Word_t eid, Ord3 order) {
 	_F_
 	CHECK_ELEMENT_ID(eid);
 
@@ -185,7 +186,7 @@ void Space::set_element_order(Word_t eid, order3_t order) {
 	seq++;
 }
 
-order3_t Space::get_element_order(Word_t eid) const {
+Ord3 Space::get_element_order(Word_t eid) const {
 	_F_
 	CHECK_ELEMENT_ID(eid);
 	assert(elm_data.exists(eid));
@@ -193,7 +194,7 @@ order3_t Space::get_element_order(Word_t eid) const {
 	return elm_data[eid]->order;
 }
 
-void Space::set_uniform_order(order3_t order) {
+void Space::set_uniform_order(Ord3 order) {
 	_F_
 	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
 		assert(elm_data.exists(eid));
@@ -204,7 +205,7 @@ void Space::set_uniform_order(order3_t order) {
 	seq++;
 }
 
-void Space::set_order_recurrent(Word_t eid, order3_t order) {
+void Space::set_order_recurrent(Word_t eid, Ord3 order) {
 	_F_
 	Element *e = mesh->elements[eid];
 	if (e->active) {
@@ -232,13 +233,13 @@ void Space::copy_orders(const Space &space, int inc) {
 	_F_
 	Mesh *cmesh = space.get_mesh();
 	FOR_ALL_ACTIVE_ELEMENTS(eid, cmesh) {
-		order3_t oo = space.get_element_order(eid);
+		Ord3 oo = space.get_element_order(eid);
 		assert(cmesh->elements[eid]->get_mode() == mesh->elements[eid]->get_mode());
 
-		order3_t order;
+		Ord3 order;
 		switch (cmesh->elements[eid]->get_mode()) {
-			case MODE_TETRAHEDRON: order = oo + order3_t(inc); break;
-			case MODE_HEXAHEDRON: order = oo + order3_t(inc, inc, inc); break;
+			case MODE_TETRAHEDRON: order = oo + Ord3(inc); break;
+			case MODE_HEXAHEDRON: order = oo + Ord3(inc, inc, inc); break;
 			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 		}
 		order.limit();
@@ -253,7 +254,7 @@ void Space::enforce_minimum_rule() {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *elem = mesh->elements[idx];
 		ElementData *elem_node = elm_data[idx];
-		order3_t elm_order = elem_node->order;
+		Ord3 elm_order = elem_node->order;
 
 		switch (elem->get_mode()) {
 			case MODE_TETRAHEDRON:
@@ -262,7 +263,7 @@ void Space::enforce_minimum_rule() {
 					Word_t fidx = mesh->get_facet_id(elem, iface);
 					assert(fn_data.exists(fidx));
 					FaceData *fnode = fn_data[fidx];
-					order2_t forder = elem_node->order.get_face_order(iface);
+					Ord2 forder = elem_node->order.get_face_order(iface);
 					if (fnode->order.invalid() || forder.order < fnode->order.order)
 						fnode->order = forder;
 				}
@@ -273,7 +274,7 @@ void Space::enforce_minimum_rule() {
 					assert(en_data.exists(eidx));
 
 					EdgeData *enode = en_data[eidx];
-					order1_t eorder = elem_node->order.get_edge_order(iedge);
+					Ord1 eorder = elem_node->order.get_edge_order(iedge);
 					if (enode->order == H3D_INVALID_EDGE_ORDER || eorder < enode->order)
 						enode->order = eorder;
 				}
@@ -286,13 +287,13 @@ void Space::enforce_minimum_rule() {
 					FaceData *fnode = fn_data[fidx];
 
 					if (!fnode->ced) {
-						order2_t forder = elem_node->order.get_face_order(iface);
-						if (elem->get_face_orientation(iface) >= 4) forder = order2_t(forder.y, forder.x);		// switch h- and v- order
+						Ord2 forder = elem_node->order.get_face_order(iface);
+						if (elem->get_face_orientation(iface) >= 4) forder = Ord2(forder.y, forder.x);		// switch h- and v- order
 
 						if (fnode->order.invalid())
 							fnode->order = forder;
 						else
-							fnode->order = order2_t(std::min(fnode->order.x, forder.x), std::min(fnode->order.y, forder.y));
+							fnode->order = Ord2(std::min(fnode->order.x, forder.x), std::min(fnode->order.y, forder.y));
 					}
 				}
 
@@ -303,7 +304,7 @@ void Space::enforce_minimum_rule() {
 					if (mesh->edges[eidx].is_active()) {
 						EdgeData *enode = en_data[eidx];
 						if (!enode->ced) {
-							order1_t eorder = elem_node->order.get_edge_order(iedge);
+							Ord1 eorder = elem_node->order.get_edge_order(iedge);
 							if (enode->order == H3D_INVALID_EDGE_ORDER || eorder < enode->order)
 								enode->order = eorder;
 						}
@@ -409,7 +410,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 				int *indices = shapeset->get_edge_indices(iedge, 0, cng_enode->order);		// iedge bude 0 (?)
 				if (cng_enode->dof >= 0) {
 					for (int j = 0, dof = cng_enode->dof; j < cng_enode->n; j++, dof += stride) {
-						order1_t order = shapeset->get_order(indices[j]).get_edge_order(iedge);
+						Ord1 order = shapeset->get_order(indices[j]).get_edge_order(iedge);
 						int idx = shapeset->get_constrained_edge_index(iedge, ecomp->ori, order, ecomp->part);
 						assert(dof >= first_dof && dof < next_dof);
 						al->add(idx, dof, ecomp->coef);
@@ -417,7 +418,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 				}
 				else {
 					for (int j = 0; j < cng_enode->n; j++) {
-						order1_t order = shapeset->get_order(indices[j]).get_edge_order(iedge);
+						Ord1 order = shapeset->get_order(indices[j]).get_edge_order(iedge);
 						int idx = shapeset->get_constrained_edge_index(iedge, ecomp->ori, order, ecomp->part);
 						al->add(idx, H3D_DIRICHLET_DOF, ecomp->coef * cng_enode->bc_proj[j]);
 					}
@@ -434,7 +435,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 				int *indices = shapeset->get_face_indices(fcomp->iface, 0, cng_fnode->order);
 				if (cng_fnode->dof >= 0) {
 					for (int j = 0, dof = cng_fnode->dof; j < cng_fnode->n; j++, dof += stride) {
-						order2_t order = shapeset->get_order(indices[j]).get_face_order(fcomp->iface);
+						Ord2 order = shapeset->get_order(indices[j]).get_face_order(fcomp->iface);
 						int idx = shapeset->get_constrained_edge_face_index(iedge, fcomp->ori, order, fcomp->part, fcomp->dir, shapeset->get_face_fn_variant(indices[j]));
 						assert(dof >= first_dof && dof < next_dof);
 						al->add(idx, dof, fcomp->coef);
@@ -442,7 +443,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 				}
 				else {
 					for (int j = 0; j < cng_fnode->n; j++) {
-						order2_t order = shapeset->get_order(indices[j]).get_face_order(fcomp->iface);
+						Ord2 order = shapeset->get_order(indices[j]).get_face_order(fcomp->iface);
 						int idx = shapeset->get_constrained_edge_face_index(iedge, fcomp->ori, order, fcomp->part, fcomp->dir, shapeset->get_face_fn_variant(indices[j]));
 						al->add(idx, H3D_DIRICHLET_DOF, fcomp->coef * cng_fnode->bc_proj[j]);
 					}
@@ -482,7 +483,7 @@ void Space::get_face_assembly_list(Element *elem, int iface, AsmList *al) {
 				int *indices = shapeset->get_face_indices(iface, 0, cng_fnode->order);
 				if (cng_fnode->dof >= 0) {
 					for (int j = 0, dof = cng_fnode->dof; j < cng_fnode->n; j++, dof += stride) {
-						order2_t order = shapeset->get_order(indices[j]).get_face_order(iface);
+						Ord2 order = shapeset->get_order(indices[j]).get_face_order(iface);
 						int idx = shapeset->get_constrained_face_index(iface, fnode->ori, order, fnode->part, shapeset->get_face_fn_variant(indices[j]));
 						assert(dof == H3D_DIRICHLET_DOF || (dof >= first_dof && dof < next_dof));
 						al->add(idx, dof, 1.0);
@@ -1285,7 +1286,7 @@ void Space::calc_vertex_edge_ced(Word_t vtx, Word_t eid, int ori, int part) {
 			if (cng_enode->n > 0) {
 				int *indices = shapeset->get_edge_indices(0, ecomp->ori, cng_enode->order);
 				for (int j = 0, dof = cng_enode->dof; j < cng_enode->n; j++, nci++) {
-					order1_t order = shapeset->get_order(indices[j]).get_edge_order(0);
+					Ord1 order = shapeset->get_order(indices[j]).get_edge_order(0);
 					int idx = shapeset->get_constrained_edge_index(0, ecomp->ori, order, ecomp->part);
 					baselist[nci].dof = dof;
 					baselist[nci].coef = (ecomp->coef) * shapeset->get_fn_value(idx, 0, -1.0, -1.0, 0);
@@ -1303,7 +1304,7 @@ void Space::calc_vertex_edge_ced(Word_t vtx, Word_t eid, int ori, int part) {
 				int *indices = shapeset->get_face_indices(2, fcomp->ori, cng_fnode->order);
 				for (int j = 0, dof = cng_fnode->dof; j < cng_fnode->n; j++, nci++) {
 					// FIXME: Hex-specific
-					order2_t order = shapeset->get_order(indices[j]).get_face_order(2);
+					Ord2 order = shapeset->get_order(indices[j]).get_face_order(2);
 					int idx = shapeset->get_constrained_edge_face_index(0, fcomp->ori, order, fcomp->part, fcomp->dir);
 
 					baselist[nci].dof = dof;
@@ -1452,7 +1453,7 @@ void Space::calc_mid_vertex_edge_ced(Word_t vtx, Word_t fmp, Word_t eid, int ori
 			int *indices = shapeset->get_face_indices(2, fcomp->ori, cng_fnode->order);
 			for (int j = 0, dof = cng_fnode->dof; j < cng_fnode->n; j++, nci++) {
 				// FIXME: Hex-specific
-				order2_t order = shapeset->get_order(indices[j]).get_face_order(2);
+				Ord2 order = shapeset->get_order(indices[j]).get_face_order(2);
 				int idx = shapeset->get_constrained_edge_face_index(0, fcomp->ori, order, fcomp->part, fcomp->dir);
 
 				baselist[nci].dof = dof;
@@ -1537,7 +1538,7 @@ void Space::calc_vertex_face_ced(Word_t vtx, Word_t fid, int ori, int iface, int
 			int *indices = shapeset->get_face_indices(2, ori, fd->order);
 			for (int j = 0, dof = fd->dof; j < fd->n; j++) {
 				// FIXME: hex-specific
-				order2_t order = shapeset->get_order(indices[j]).get_face_order(2);
+				Ord2 order = shapeset->get_order(indices[j]).get_face_order(2);
 				Part part;
 				part.horz = hpart;
 				part.vert = vpart;
@@ -2195,9 +2196,10 @@ int Space::assign_dofs(int first_dof, int stride) {
 
 	mesh_seq = mesh->get_seq();
 	was_assigned = true;
+        this->ndof = (next_dof - first_dof) / stride;
 	seq++;
 
-	return get_dof_count();
+	return this->ndof;
 }
 
 
@@ -2405,3 +2407,6 @@ int assign_dofs(Tuple<Space*> spaces)
 
   return ndof;
 }
+
+
+

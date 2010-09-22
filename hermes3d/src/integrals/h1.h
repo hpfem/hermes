@@ -26,17 +26,17 @@
 #include <common/error.h>
 #include <common/callstack.h>
 
-/// @defgroup h1integrals H1 intergals
+/// @defgroup h1integrals H1 integrals
 
 /// Integral \u
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_u(int n, double *wt, fn_t<f_t> *u, geom_t<f_t> *e) {
+res_t int_u(int n, double *wt, Func<f_t> *u, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->fn[i]);
+		result += wt[i] * (u->val[i]);
 	return result;
 }
 
@@ -46,11 +46,11 @@ res_t int_u(int n, double *wt, fn_t<f_t> *u, geom_t<f_t> *e) {
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_u_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_u_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->fn[i] * v->fn[i]);
+		result += wt[i] * (u->val[i] * v->val[i]);
 	return result;
 }
 
@@ -58,11 +58,11 @@ res_t int_u_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_F_v(int n, double *wt, res_t (*F)(f_t x, f_t y, f_t z), fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_F_v(int n, double *wt, res_t (*F)(f_t x, f_t y, f_t z), Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (v->fn[i] * (*F)(e->x[i], e->y[i], e->z[i]));
+		result += wt[i] * (v->val[i] * (*F)(e->x[i], e->y[i], e->z[i]));
 	return result;
 }
 
@@ -72,7 +72,7 @@ res_t int_F_v(int n, double *wt, res_t (*F)(f_t x, f_t y, f_t z), fn_t<f_t> *v, 
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_grad_u_grad_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_grad_u_grad_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
@@ -84,11 +84,11 @@ res_t int_grad_u_grad_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_u_dvdx(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_u_dvdx(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->fn[i] * v->dx[i]);
+		result += wt[i] * (u->val[i] * v->dx[i]);
 	return result;
 }
 
@@ -96,11 +96,11 @@ res_t int_u_dvdx(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) 
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_u_dvdy(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_u_dvdy(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->fn[i] * v->dy[i]);
+		result += wt[i] * (u->val[i] * v->dy[i]);
 	return result;
 }
 
@@ -108,11 +108,11 @@ res_t int_u_dvdy(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) 
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_u_dvdz(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_u_dvdz(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->fn[i] * v->dz[i]);
+		result += wt[i] * (u->val[i] * v->dz[i]);
 	return result;
 }
 
@@ -120,11 +120,11 @@ res_t int_u_dvdz(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) 
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_dudx_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_dudx_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->dx[i] * v->fn[i]);
+		result += wt[i] * (u->dx[i] * v->val[i]);
 	return result;
 }
 
@@ -132,11 +132,11 @@ res_t int_dudx_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) 
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_dudy_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_dudy_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->dy[i] * v->fn[i]);
+		result += wt[i] * (u->dy[i] * v->val[i]);
 	return result;
 }
 
@@ -144,11 +144,11 @@ res_t int_dudy_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) 
 ///
 /// @ingroup h1integrals
 template<typename f_t, typename res_t>
-res_t int_dudz_v(int n, double *wt, fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e) {
+res_t int_dudz_v(int n, double *wt, Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e) {
 	_F_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
-		result += wt[i] * (u->dz[i] * v->fn[i]);
+		result += wt[i] * (u->dz[i] * v->val[i]);
 	return result;
 }
 

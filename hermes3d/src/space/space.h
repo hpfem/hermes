@@ -91,14 +91,18 @@ public:
 	// TODO: different callback: void (*bc_vec_value_callback_by_coord)(int marker, double x, double y, double z, scalar3 &result)
 	void set_essential_bc_values(scalar3 &(*bc_vec_value_callback_by_coord)(int ess_bdy_marker, double x, double y, double z));
 
-	void set_element_order(Word_t eid, order3_t order);
-	order3_t get_element_order(Word_t eid) const;
-	void set_uniform_order(order3_t order);
+	void set_element_order(Word_t eid, Ord3 order);
+	Ord3 get_element_order(Word_t eid) const;
+	void set_uniform_order(Ord3 order);
 	void copy_orders(const Space &space, int inc = 0);
 
 	virtual void enforce_minimum_rule();
 	virtual int assign_dofs(int first_dof = 0, int stride = 1);
+        /// \brief Returns the number of basis functions contained in the space.
+        int get_num_dofs() { return ndof; }
+
 	int get_dof_count() const { return (next_dof - first_dof) / stride; }
+        /// \brief Returns the DOF number of the last basis function.
 	int get_max_dof() const { return next_dof - stride; }
 
 	Shapeset *get_shapeset() const { return shapeset; }
@@ -112,8 +116,13 @@ public:
 	/// Returns true if the space is ready for computation, false otherwise.
 	bool is_up_to_date() const { return was_assigned && mesh_seq == mesh->get_seq(); }
 
-protected:
+        /// Number of degrees of freedom (dimension of the space)
+        int ndof;
+
+        /// FE mesh
 	Mesh *mesh;
+
+protected:
 	Shapeset *shapeset;
 	ESpaceType type;
 
@@ -194,7 +203,7 @@ protected:
 		union {
 			/// normal node
 			struct {
-				order1_t order;   					/// polynomial order
+				Ord1 order;   					/// polynomial order
 				int dof;
 				int n;								/// number of DOFs
 			};
@@ -226,7 +235,7 @@ protected:
 
 	struct FaceData : public NodeData  {
 		unsigned ced:1;								/// 1 = is constrained
-		order2_t order;   							/// polynomial order
+		Ord2 order;   							/// polynomial order
 		union {
 			struct {								/// normal node
 				int dof;
@@ -253,7 +262,7 @@ protected:
 	};
 
 	struct ElementData {
-		order3_t order;								/// Polynomial degree associated to the element node (interior).
+		Ord3 order;								/// Polynomial degree associated to the element node (interior).
 		int dof;									/// The number of the first degree of freedom belonging to the node.
 		int n;										/// Total number of degrees of freedom belonging to the node.
 
@@ -271,12 +280,12 @@ protected:
 	ArrayPtr<FaceData> fn_data;						/// Face node hash table
 	ArrayPtr<ElementData> elm_data;					/// Element node hash table
 
-	void set_order_recurrent(Word_t eid, order3_t order);
+	void set_order_recurrent(Word_t eid, Ord3 order);
 
 	virtual int get_vertex_ndofs() = 0;
-	virtual int get_edge_ndofs(order1_t order) = 0;
-	virtual int get_face_ndofs(order2_t order) = 0;
-	virtual int get_element_ndofs(order3_t order) = 0;
+	virtual int get_edge_ndofs(Ord1 order) = 0;
+	virtual int get_face_ndofs(Ord2 order) = 0;
+	virtual int get_element_ndofs(Ord3 order) = 0;
 
 	virtual void assign_vertex_dofs(Word_t vid);
 	virtual void assign_edge_dofs(Word_t eid);

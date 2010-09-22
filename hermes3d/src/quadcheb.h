@@ -42,13 +42,13 @@ public:
 	QuadChebHex();
 	~QuadChebHex();
 
-	virtual QuadPt3D *get_points(const order3_t &order) {
+	virtual QuadPt3D *get_points(const Ord3 &order) {
 		if (!tables.exists(order.get_idx())) calc_table(order);
 		return tables[order.get_idx()];
 	}
 
 protected:
-	void calc_table(const order3_t &order);
+	void calc_table(const Ord3 &order);
 };
 
 #endif

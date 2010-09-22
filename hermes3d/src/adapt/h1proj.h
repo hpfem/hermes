@@ -31,10 +31,10 @@ class H1Projection : public Projection {
 public:
 	H1Projection(Solution *afn, Element *e, Shapeset *ss);
 
-	virtual double get_error(int split, int son, const order3_t &order);
+	virtual double get_error(int split, int son, const Ord3 &order);
 
 protected:
-	virtual void calc_projection(int split, int son, const order3_t &order);
+	virtual void calc_projection(int split, int son, const Ord3 &order);
 
 	static void precalc_fn_prods(double fn[N_FNS][N_FNS]);
 	static void precalc_dx_prods(double dx[N_FNS][N_FNS]);

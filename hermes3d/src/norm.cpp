@@ -47,7 +47,7 @@ double calc_error(double (*fn)(MeshFunction*, MeshFunction*, int, QuadPt3D*), Me
 		EMode3D mode = ee[0]->get_mode();
 
 		RefMap *ru = sln1->get_refmap();
-		order3_t order = max(sln1->get_fn_order(), sln2->get_fn_order()) + ru->get_inv_ref_order();
+		Ord3 order = max(sln1->get_fn_order(), sln2->get_fn_order()) + ru->get_inv_ref_order();
 		order.limit();
 
 		Quad3D *quad = get_quadrature(mode);
@@ -72,7 +72,7 @@ double calc_norm(double (*fn)(MeshFunction*, int, QuadPt3D*), MeshFunction *sln)
 		sln->set_active_element(e);
 
 		RefMap *ru = sln->get_refmap();
-		order3_t o = sln->get_fn_order() + ru->get_inv_ref_order();
+		Ord3 o = sln->get_fn_order() + ru->get_inv_ref_order();
 		o.limit();
 
 		Quad3D *quad = get_quadrature(e->get_mode());

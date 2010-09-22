@@ -52,10 +52,10 @@ public:
 	virtual void set_active_element(Element *e);
 
 	/// @return The increase in the integration order due to the reference map.
-	order3_t get_ref_order() const { return ref_order; }
+	Ord3 get_ref_order() const { return ref_order; }
 
 	/// @return The increase in the integration order due to the inverse reference map.
-	order3_t get_inv_ref_order() const { return inv_ref_order; }
+	Ord3 get_inv_ref_order() const { return inv_ref_order; }
 
 	/// @return The array of jacobians of the reference map precalculated at the points 'pt'.
 	/// @param[in] np - The number of points
@@ -112,8 +112,8 @@ protected:
 	double3x3 const_inv_ref_map;
 	double3x3 const_ref_map;
 
-	order3_t ref_order;
-	order3_t inv_ref_order;
+	Ord3 ref_order;
+	Ord3 inv_ref_order;
 
 	int n_coefs;					// # of coeffs in 'indices' array
 	int indices[70];				// FIXME: magic number

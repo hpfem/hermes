@@ -253,15 +253,15 @@ int HcurlShapesetLobattoHex::get_face_fn_variant(int index) const {
 }
 
 
-order3_t HcurlShapesetLobattoHex::get_order(int index) const {
+Ord3 HcurlShapesetLobattoHex::get_order(int index) const {
 	_F_
 #ifdef WITH_HEX
 	if (index >= 0) {
-		order3_t ord;
+		Ord3 ord;
 		hc_hex_index_t idx(index);
-		if (idx.l == 0) ord = order3_t(legendre_order_1d[idx.x], lobatto_order_1d[idx.y], lobatto_order_1d[idx.z]);
-		else if (idx.l == 1) ord = order3_t(lobatto_order_1d[idx.x], legendre_order_1d[idx.y], lobatto_order_1d[idx.z]);
-		else if (idx.l == 2) ord = order3_t(lobatto_order_1d[idx.x], lobatto_order_1d[idx.y], legendre_order_1d[idx.z]);
+		if (idx.l == 0) ord = Ord3(legendre_order_1d[idx.x], lobatto_order_1d[idx.y], lobatto_order_1d[idx.z]);
+		else if (idx.l == 1) ord = Ord3(lobatto_order_1d[idx.x], legendre_order_1d[idx.y], lobatto_order_1d[idx.z]);
+		else if (idx.l == 2) ord = Ord3(lobatto_order_1d[idx.x], lobatto_order_1d[idx.y], legendre_order_1d[idx.z]);
 
 		if (idx.type == SHFN_FACE && idx.ori >= 4) ord = turn_hex_face_order(idx.ef, ord);		// face function is turned due to orientation
 		return ord;
@@ -271,15 +271,15 @@ order3_t HcurlShapesetLobattoHex::get_order(int index) const {
 #endif
 }
 
-order3_t HcurlShapesetLobattoHex::get_dcmp(int index) const
+Ord3 HcurlShapesetLobattoHex::get_dcmp(int index) const
 {
 	if (index >= 0) {
 		hc_hex_index_t idx(index);
-		order3_t ord(idx.x, idx.y, idx.z);
+		Ord3 ord(idx.x, idx.y, idx.z);
 		return ord;
 	}
 	else
-		return order3_t(-1);
+		return Ord3(-1);
 }
 
 
@@ -298,7 +298,7 @@ int HcurlShapesetLobattoHex::get_shape_type(int index) const
 #endif
 }
 
-void HcurlShapesetLobattoHex::compute_edge_indices(int edge, int ori, order1_t order) {
+void HcurlShapesetLobattoHex::compute_edge_indices(int edge, int ori, Ord1 order) {
 	_F_
 #ifdef WITH_HEX
 	int *indices = new int[get_num_edge_fns(order)];
@@ -325,7 +325,7 @@ void HcurlShapesetLobattoHex::compute_edge_indices(int edge, int ori, order1_t o
 #endif
 }
 
-void HcurlShapesetLobattoHex::compute_face_indices(int face, int ori, order2_t order) {
+void HcurlShapesetLobattoHex::compute_face_indices(int face, int ori, Ord2 order) {
 	_F_
 #ifdef WITH_HEX
 	int *indices = new int[get_num_face_fns(order)];
@@ -396,7 +396,7 @@ void HcurlShapesetLobattoHex::compute_face_indices(int face, int ori, order2_t o
 #endif
 }
 
-void HcurlShapesetLobattoHex::compute_bubble_indices(order3_t order) {
+void HcurlShapesetLobattoHex::compute_bubble_indices(Ord3 order) {
 	_F_
 #ifdef WITH_HEX
 	int *indices = new int[get_num_bubble_fns(order)];
@@ -420,7 +420,7 @@ void HcurlShapesetLobattoHex::compute_bubble_indices(order3_t order) {
 #endif
 }
 
-CEDComb *HcurlShapesetLobattoHex::calc_constrained_edge_combination(int ori, const order1_t &order, Part part) {
+CEDComb *HcurlShapesetLobattoHex::calc_constrained_edge_combination(int ori, const Ord1 &order, Part part) {
 	_F_
 #ifdef WITH_HEX
 	Part rp = transform_edge_part(ori, part);
@@ -468,7 +468,7 @@ CEDComb *HcurlShapesetLobattoHex::calc_constrained_edge_combination(int ori, con
 #endif
 }
 
-CEDComb *HcurlShapesetLobattoHex::calc_constrained_edge_face_combination(int ori, const order2_t &order, Part part, int dir, int variant) {
+CEDComb *HcurlShapesetLobattoHex::calc_constrained_edge_face_combination(int ori, const Ord2 &order, Part part, int dir, int variant) {
 	_F_
 #ifdef WITH_HEX
 	Part rp = transform_face_part(ori, part);
@@ -577,7 +577,7 @@ CEDComb *HcurlShapesetLobattoHex::calc_constrained_edge_face_combination(int ori
 #endif
 }
 
-CEDComb *HcurlShapesetLobattoHex::calc_constrained_face_combination(int ori, const order2_t &order, Part part, int variant) {
+CEDComb *HcurlShapesetLobattoHex::calc_constrained_face_combination(int ori, const Ord2 &order, Part part, int variant) {
 	_F_
 #ifdef WITH_HEX
 	int n = get_num_face_fns(order);					// total number of functions on the face
@@ -586,7 +586,7 @@ CEDComb *HcurlShapesetLobattoHex::calc_constrained_face_combination(int ori, con
 	int cng_idx;										// the index of a constraining function
 	int comp;											// the component of the constraining function
 	for (int i = 0; i < n; i++) {
-		order2_t face_order = get_order(fn_idx[i]).get_face_order(5);
+		Ord2 face_order = get_order(fn_idx[i]).get_face_order(5);
 		if ((face_order.x == order.x) && (face_order.y == order.y) && (get_face_fn_variant(fn_idx[i]) == variant)) {
 			cng_idx = fn_idx[i];
 			hc_hex_index_t ind(cng_idx);
@@ -648,7 +648,7 @@ CEDComb *HcurlShapesetLobattoHex::calc_constrained_face_combination(int ori, con
 	memset(b, 0, n * sizeof(double));
 
 	for (int row = 0; row < n; row++) {
-		order2_t face_order = get_order(fn_idx[row]).get_face_order(5);
+		Ord2 face_order = get_order(fn_idx[row]).get_face_order(5);
 		if ((get_face_fn_variant(fn_idx[row]) == variant) && (face_order.x <= horder) && (face_order.y <= vorder)) {
 			// the function is involved in CED
 			int i, j;
@@ -670,7 +670,7 @@ CEDComb *HcurlShapesetLobattoHex::calc_constrained_face_combination(int ori, con
 			double vs = 1.0 - vr;
 
 			for (int k = 0; k < n; k++) {
-				order2_t kfn_ord = get_order(fn_idx[k]).get_face_order(5);
+				Ord2 kfn_ord = get_order(fn_idx[k]).get_face_order(5);
 				if ((get_face_fn_variant(fn_idx[k]) == variant) && (kfn_ord.x <= horder) && (kfn_ord.y <= vorder))
 					a[row][k] = get_value(FN, fn_idx[k], hp, vp, 1.0, comp);
 				else

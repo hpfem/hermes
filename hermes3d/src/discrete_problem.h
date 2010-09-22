@@ -102,10 +102,10 @@ protected:
 
 	struct FnCache {
 		Array<double *> jwt;			// jacobian x weight
-		Array<geom_t<double> > e;		// geometries
-		Map<fn_key_t, sfn_t*> fn;		// shape functions
-		Map<fn_key_t, mfn_t*> ext;		// external functions
-		Map<fn_key_t, mfn_t*> sln;		// sln from prev iter
+		Array<Geom<double> > e;		// geometries
+		Map<fn_key_t, sFunc*> fn;		// shape functions
+		Map<fn_key_t, mFunc*> ext;		// external functions
+		Map<fn_key_t, mFunc*> sln;		// sln from prev iter
 
 		~FnCache();
 		void free();
@@ -119,13 +119,13 @@ protected:
 	scalar eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
 	                 SurfPos *surf_pos);
 
-	sfn_t *get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
-	sfn_t *get_fn(ShapeFunction *fu, int order, RefMap *rm, int iface, const int np,
+	sFunc *get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
+	sFunc *get_fn(ShapeFunction *fu, int order, RefMap *rm, int iface, const int np,
 	              const QuadPt3D *pt);
-	mfn_t *get_fn(Solution *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
+	mFunc *get_fn(Solution *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
 
-	void init_ext_fns(user_data_t<ord_t> &fake_ud, std::vector<MeshFunction *> &ext);
-	void init_ext_fns(user_data_t<scalar> &ud, std::vector<MeshFunction *> &ext, int order,
+	void init_ext_fns(ExtData<Ord> &fake_ud, std::vector<MeshFunction *> &ext);
+	void init_ext_fns(ExtData<scalar> &ud, std::vector<MeshFunction *> &ext, int order,
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
@@ -134,5 +134,11 @@ int get_num_dofs(Tuple<Space *> spaces);
 Vector* create_vector(MatrixSolverType matrix_solver);
 SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
 Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+
+void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec);
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, 
+                    Tuple<Solution *> sols_dest);
+void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
+                    scalar* target_vec);
 
 #endif /* _DISCRETE_PROBLEM_H_ */

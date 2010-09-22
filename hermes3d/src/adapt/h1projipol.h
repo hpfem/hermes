@@ -31,13 +31,13 @@ class H1ProjectionIpol : public ProjectionIpol {
 public:
 	H1ProjectionIpol(Solution *afn, Element *e, Shapeset *ss);
 
-	virtual double get_error(int split, int son, const order3_t &order);
+	virtual double get_error(int split, int son, const Ord3 &order);
 
 protected:
 	virtual void calc_vertex_proj(int split, int son);
-	virtual void calc_edge_proj(int edge, int split, int son, const order3_t &order);
-	virtual void calc_face_proj(int face, int split, int son, const order3_t &order);
-	virtual void calc_bubble_proj(int split, int son, const order3_t &order);
+	virtual void calc_edge_proj(int edge, int split, int son, const Ord3 &order);
+	virtual void calc_face_proj(int face, int split, int son, const Ord3 &order);
+	virtual void calc_bubble_proj(int split, int son, const Ord3 &order);
 
 	static double prod_fn[N_FNS][N_FNS];	// precalculated products of fn. values
 	static double prod_dx[N_FNS][N_FNS];	// precalculated products of derivatives

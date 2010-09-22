@@ -49,7 +49,7 @@ H1ProjectionIpol::H1ProjectionIpol(Solution *afn, Element *e, Shapeset *ss) : Pr
 	}
 }
 
-double H1ProjectionIpol::get_error(int split, int son, const order3_t &order)
+double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 {
 	_F_
 	sln->enable_transform(false);
@@ -57,7 +57,7 @@ double H1ProjectionIpol::get_error(int split, int son, const order3_t &order)
 	calc_projection(split, son, order);
 
 	// error
-	order3_t order_rhs = order;
+	Ord3 order_rhs = order;
 	QuadPt3D *pt = quad->get_points(order_rhs);
 	int np = quad->get_num_points(order_rhs);
 
@@ -144,10 +144,10 @@ void H1ProjectionIpol::calc_vertex_proj(int split, int son)
 	}
 }
 
-void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const order3_t &order)
+void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 &order)
 {
 	_F_
-	order1_t edge_order = order.get_edge_order(iedge);
+	Ord1 edge_order = order.get_edge_order(iedge);
 	int edge_fns = edge_order - 1;
 	if (edge_fns <= 0) return;
 
@@ -164,10 +164,10 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const order
 	int *edge_fn_idx = ss->get_edge_indices(iedge, 0, edge_order);	// indices of edge functions
 	for (int i = 0; i < edge_fns; i++) {
 		int iidx = edge_fn_idx[i];
-		order3_t oi = ss->get_dcmp(iidx);
+		Ord3 oi = ss->get_dcmp(iidx);
 		for (int j = 0; j < edge_fns; j++) {
 			int jidx = edge_fn_idx[j];
-			order3_t oj = ss->get_dcmp(jidx);
+			Ord3 oj = ss->get_dcmp(jidx);
 			double val = 0.0;
 			if (iedge == 0 || iedge == 2 || iedge == 8 || iedge == 10) {
 				val = prod_fn[oi.x][oj.x] + prod_dx[oi.x][oj.x];
@@ -195,7 +195,7 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const order
 			int iidx = edge_fn_idx[i];
 			fu->set_active_shape(iidx);
 
-			order1_t ord = (ss->get_order(iidx) + order).get_edge_order(iedge);
+			Ord1 ord = (ss->get_order(iidx) + order).get_edge_order(iedge);
 			QuadPt3D *pt = quad->get_edge_points(iedge, ord);
 			int np = quad->get_edge_num_points(iedge, ord);
 
@@ -302,10 +302,10 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const order
 	delete [] proj_rhs;
 }
 
-void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const order3_t &order)
+void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const Ord3 &order)
 {
 	_F_
-	order2_t face_order = order.get_face_order(iface);
+	Ord2 face_order = order.get_face_order(iface);
 	int face_fns = (face_order.x - 1) * (face_order.y - 1);
 	if (face_fns <= 0) return;
 
@@ -329,7 +329,7 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const order
 	for (int vtx = 0; vtx < RefHex::get_num_face_vertices(iface); vtx++, mm++)
 		ipol[mm] = vertex_proj[face_vertex[vtx]];
 	for (int iedge = 0; iedge < RefHex::get_num_face_edges(iface); iedge++) {
-		order1_t edge_order = order.get_edge_order(face_edge[iedge]);
+		Ord1 edge_order = order.get_edge_order(face_edge[iedge]);
 		int edge_fns = edge_order - 1;
 		for (int i = 0; i < edge_fns; i++, mm++)
 			ipol[mm] = edge_proj[face_edge[iedge]][i];
@@ -339,10 +339,10 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const order
 	int *face_fn_idx = ss->get_face_indices(iface, face_ori, face_order);
 	for (int i = 0; i < face_fns; i++) {
 		int iidx = face_fn_idx[i];
-		order3_t oi = ss->get_dcmp(iidx);
+		Ord3 oi = ss->get_dcmp(iidx);
 		for (int j = 0; j < face_fns; j++) {
 			int jidx = face_fn_idx[j];
-			order3_t oj = ss->get_dcmp(jidx);
+			Ord3 oj = ss->get_dcmp(jidx);
 			double val = 0.0;
 			if (iface == 0 || iface == 1) {
 				val =
@@ -377,7 +377,7 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const order
 			int iidx = face_fn_idx[i];
 			fu->set_active_shape(iidx);
 
-			order2_t ord = (ss->get_order(iidx) + order).get_face_order(iface);
+			Ord2 ord = (ss->get_order(iidx) + order).get_face_order(iface);
 			QuadPt3D *pt = quad->get_face_points(iface, ord);
 			int np = quad->get_face_num_points(iface, ord);
 
@@ -486,7 +486,7 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const order
 	delete [] proj_rhs;
 }
 
-void H1ProjectionIpol::calc_bubble_proj(int split, int son, const order3_t &order) {
+void H1ProjectionIpol::calc_bubble_proj(int split, int son, const Ord3 &order) {
 	_F_
 	int bubble_fns = (order.x - 1) * (order.y - 1) * (order.z - 1);
 	if (bubble_fns <= 0) return;
@@ -503,7 +503,7 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const order3_t &orde
 		ipol_fns += order.get_edge_order(iedge) - 1;
 	}
 	for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-		order2_t face_order = order.get_face_order(iface);
+		Ord2 face_order = order.get_face_order(iface);
 		ipol_fns += (face_order.x - 1) * (face_order.y - 1);
 	}
 
@@ -514,14 +514,14 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const order3_t &orde
 		ipol[mm] = vertex_proj[vtx];
 	// edge projection coefficients
 	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-		order1_t edge_order = order.get_edge_order(iedge);
+		Ord1 edge_order = order.get_edge_order(iedge);
 		int edge_fns = edge_order - 1;
 		for (int i = 0; i < edge_fns; i++, mm++)
 			ipol[mm] = edge_proj[iedge][i];
 	}
 	// face projection coefficients
 	for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-		order2_t face_order = order.get_face_order(iface);
+		Ord2 face_order = order.get_face_order(iface);
 		int face_fns = (face_order.x - 1) * (face_order.y - 1);
 		for (int i = 0; i < face_fns; i++, mm++)
 			ipol[mm] = face_proj[iface][i];
@@ -531,10 +531,10 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const order3_t &orde
 	int *bubble_fn_idx = ss->get_bubble_indices(order);
 	for (int i = 0; i < bubble_fns; i++) {
 		int iidx = bubble_fn_idx[i];
-		order3_t oi = ss->get_dcmp(iidx);
+		Ord3 oi = ss->get_dcmp(iidx);
 		for (int j = 0; j < bubble_fns; j++) {
 			int jidx = bubble_fn_idx[j];
-			order3_t oj = ss->get_dcmp(jidx);
+			Ord3 oj = ss->get_dcmp(jidx);
 			double val =
 				prod_fn[oi.x][oj.x] * prod_fn[oi.y][oj.y] * prod_fn[oi.z][oj.z] +
 				prod_dx[oi.x][oj.x] * prod_fn[oi.y][oj.y] * prod_fn[oi.z][oj.z] +
@@ -553,7 +553,7 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const order3_t &orde
 			int iidx = bubble_fn_idx[i];
 			fu->set_active_shape(iidx);
 
-			order3_t order_rhs = ss->get_order(iidx) + order;
+			Ord3 order_rhs = ss->get_order(iidx) + order;
 			QuadPt3D *pt = quad->get_points(order_rhs);
 			int np = quad->get_num_points(order_rhs);
 

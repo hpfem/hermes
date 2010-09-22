@@ -59,7 +59,7 @@ public:
 	RefMap *get_refmap() { update_refmap(); return refmap; }
 
 	/// @return Order of the function on the active element
-	virtual order3_t get_order() = 0;
+	virtual Ord3 get_order() = 0;
 
 protected:
 	Mesh *mesh;
@@ -124,7 +124,7 @@ public:
 
 	virtual void precalculate(const int np, const QuadPt3D *pt, int mask);
 
-	virtual order3_t get_order();
+	virtual Ord3 get_order();
 
 protected:
 	static const int NUM_ELEMENTS = 4;
@@ -136,7 +136,7 @@ protected:
 
 	scalar *mono_coefs;						/// monomial coefficient array
 	int *elem_coefs[3];						/// array of pointers into mono_coefs
-	order3_t *elem_orders;						/// stored element orders (copied from space)
+	Ord3 *elem_orders;						/// stored element orders (copied from space)
 	int num_coefs, num_elems;
 	int num_dofs;
 

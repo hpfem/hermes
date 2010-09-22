@@ -87,7 +87,7 @@ inline Ord exp(const Ord &a) { return Ord(3 * a.get_order()); }
 template<typename T>
 class Func
 {
-  const int num_gip; ///< A number of integration points used by this intance.
+  const int num_gip; ///< A number of integration points used by this instance.
 public:
   const int nc;	///< A number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
   T *val;					// function values. If orders differ for a diffrent

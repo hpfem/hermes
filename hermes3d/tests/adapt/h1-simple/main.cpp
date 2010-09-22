@@ -93,9 +93,6 @@ res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<
 int main(int argc, char **argv) {
 	int res = ERR_SUCCESS;
 
-#ifdef WITH_PETSC
-	PetscInitialize(&argc, &argv, (char *) PETSC_NULL, PETSC_NULL);
-#endif
 	set_verbose(false);
 
 	if (argc < 5) error("Not enough parameters.");
@@ -149,7 +146,7 @@ int main(int argc, char **argv) {
 		printf("  - Assembling... "); fflush(stdout);
 		assemble_timer.reset();
 		assemble_timer.start();
-		lp.assemble(&mat, &rhs);
+		lp.assemble(matrix, rhs);
 		assemble_timer.stop();
 		printf("done in %s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
 
@@ -157,7 +154,7 @@ int main(int argc, char **argv) {
 		printf("  - Solving... "); fflush(stdout);
 		solve_timer.reset();
 		solve_timer.start();
-		bool solved = solver.solve();
+		bool solved = solver->solve();
 		solve_timer.stop();
 		if (solved)
 			printf("done in %s (%lf secs)\n", solve_timer.get_human_time(), solve_timer.get_seconds());
@@ -169,11 +166,6 @@ int main(int argc, char **argv) {
 
 		printf("Reference solution\n");
 
-                // Set up the solver, matrix, and rhs according to the solver selection.
-                SparseMatrix* matrix = create_matrix(matrix_solver);
-                Vector* rhs = create_vector(matrix_solver);
-                Solver* solver = create_solver(matrix_solver, matrix, rhs);
-
 		Mesh rmesh;
 		rmesh.copy(mesh);
 		rmesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
@@ -184,19 +176,24 @@ int main(int argc, char **argv) {
 		DiscreteProblem rlp(&wf, rspace, is_linear);
 
 		int rndof = rspace->assign_dofs();
-		printf("  - Number of DOFs: %d\n", rndof);
+		printf("  - Number of DOF: %d\n", rndof);
+
+                // Set up the solver, matrix, and rhs according to the solver selection.
+                SparseMatrix* rmatrix = create_matrix(matrix_solver);
+                Vector* rrhs = create_vector(matrix_solver);
+                Solver* rsolver = create_solver(matrix_solver, matrix, rhs);
 
 		printf("  - Assembling... "); fflush(stdout);
 		assemble_timer.reset();
 		assemble_timer.start();
-		rlp.assemble(&mat, &rhs);
+		rlp.assemble(rmatrix, rrhs);
 		assemble_timer.stop();
 		printf("done in %s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
 
 		printf("  - Solving... "); fflush(stdout);
 		solve_timer.reset();
 		solve_timer.start();
-		bool rsolved = rsolver.solve();
+		bool rsolved = rsolver->solve();
 		solve_timer.stop();
 		if (rsolved)
 			printf("done in %s (%lf secs)\n", solve_timer.get_human_time(), solve_timer.get_seconds());
@@ -207,10 +204,10 @@ int main(int argc, char **argv) {
 		}
 
 		Solution sln(&mesh);
-		sln.set_coeff_vector(&space, solver.get_solution());
+		sln.set_coeff_vector(&space, solver->get_solution());
 
 		Solution rsln(&rmesh);
-		rsln.set_coeff_vector(rspace, rsolver.get_solution());
+		rsln.set_coeff_vector(rspace, rsolver->get_solution());
 
 		printf("Adaptivity:\n");
 		H1Adapt hp(&space);
@@ -248,11 +245,6 @@ int main(int argc, char **argv) {
 
 		iter++;
 	} while (!done);
-
-
-#ifdef WITH_PETSC
-	PetscFinalize();
-#endif
 
 	return res;
 }

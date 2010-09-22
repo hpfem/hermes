@@ -259,31 +259,31 @@ H1ShapesetLobattoHex::~H1ShapesetLobattoHex() {
 #endif
 }
 
-order3_t H1ShapesetLobattoHex::get_order(int index) const {
+Ord3 H1ShapesetLobattoHex::get_order(int index) const {
 	_F_
 #ifdef WITH_HEX
 	if (index >= 0) {
 		h1_hex_index_t idx(index);
-		order3_t ord(lobatto_order_1d[idx.x], lobatto_order_1d[idx.y], lobatto_order_1d[idx.z]);
+		Ord3 ord(lobatto_order_1d[idx.x], lobatto_order_1d[idx.y], lobatto_order_1d[idx.z]);
 		if (idx.type == SHFN_FACE && idx.ori >= 4) ord = turn_hex_face_order(idx.ef, ord);		// face function is turned due to orientation
 		return ord;
 	}
 	else
 		return get_ced_order(index);
 #else
-	return order3_t(0, 0, 0);
+	return Ord3(0, 0, 0);
 #endif
 }
 
-order3_t H1ShapesetLobattoHex::get_dcmp(int index) const
+Ord3 H1ShapesetLobattoHex::get_dcmp(int index) const
 {
 	if (index >= 0) {
 		h1_hex_index_t idx(index);
-		order3_t ord(idx.x, idx.y, idx.z);
+		Ord3 ord(idx.x, idx.y, idx.z);
 		return ord;
 	}
 	else
-		return order3_t(-1);
+		return Ord3(-1);
 }
 
 int H1ShapesetLobattoHex::get_shape_type(int index) const
@@ -301,7 +301,7 @@ int H1ShapesetLobattoHex::get_shape_type(int index) const
 #endif
 }
 
-void H1ShapesetLobattoHex::compute_edge_indices(int edge, int ori, order1_t order) {
+void H1ShapesetLobattoHex::compute_edge_indices(int edge, int ori, Ord1 order) {
 	_F_
 #ifdef WITH_HEX
 	assert(order > 1);
@@ -329,7 +329,7 @@ void H1ShapesetLobattoHex::compute_edge_indices(int edge, int ori, order1_t orde
 #endif
 }
 
-void H1ShapesetLobattoHex::compute_face_indices(int face, int ori, order2_t order) {
+void H1ShapesetLobattoHex::compute_face_indices(int face, int ori, Ord2 order) {
 	_F_
 #ifdef WITH_HEX
 	assert(order.x > 1);
@@ -385,7 +385,7 @@ void H1ShapesetLobattoHex::compute_face_indices(int face, int ori, order2_t orde
 #endif
 }
 
-void H1ShapesetLobattoHex::compute_bubble_indices(order3_t order) {
+void H1ShapesetLobattoHex::compute_bubble_indices(Ord3 order) {
 	_F_
 #ifdef WITH_HEX
 	assert(order.x > 1);
@@ -409,7 +409,7 @@ void H1ShapesetLobattoHex::compute_bubble_indices(order3_t order) {
 //
 // constraints are calculated on egde 0
 //
-CEDComb *H1ShapesetLobattoHex::calc_constrained_edge_combination(int ori, const order1_t &order, Part part) {
+CEDComb *H1ShapesetLobattoHex::calc_constrained_edge_combination(int ori, const Ord1 &order, Part part) {
 	_F_
 #ifdef WITH_HEX
 	Part rp = transform_edge_part(ori, part);
@@ -462,7 +462,7 @@ CEDComb *H1ShapesetLobattoHex::calc_constrained_edge_combination(int ori, const 
 //
 // constraints are calculated on face 5
 //
-CEDComb *H1ShapesetLobattoHex::calc_constrained_edge_face_combination(int ori, const order2_t &order, Part part, int dir, int variant) {
+CEDComb *H1ShapesetLobattoHex::calc_constrained_edge_face_combination(int ori, const Ord2 &order, Part part, int dir, int variant) {
 	_F_
 #ifdef WITH_HEX
 	Part rp = transform_face_part(ori, part);
@@ -575,7 +575,7 @@ CEDComb *H1ShapesetLobattoHex::calc_constrained_edge_face_combination(int ori, c
 //  v_lo +-----------+
 //     h_lo  edge0  h_hi
 //
-CEDComb *H1ShapesetLobattoHex::calc_constrained_face_combination(int ori, const order2_t &order, Part part, int variant) {
+CEDComb *H1ShapesetLobattoHex::calc_constrained_face_combination(int ori, const Ord2 &order, Part part, int variant) {
 	_F_
 #ifdef WITH_HEX
 	int n = get_num_face_fns(order);										// total number of functions on the face
@@ -629,7 +629,7 @@ CEDComb *H1ShapesetLobattoHex::calc_constrained_face_combination(int ori, const 
 
 	//
 	for (int row = 0; row < n; row++) {
-		order2_t face_order = get_order(fn_idx[row]).get_face_order(5);
+		Ord2 face_order = get_order(fn_idx[row]).get_face_order(5);
 		int i = face_order.x;
 		int j = face_order.y;
 

@@ -35,12 +35,12 @@ QuadChebTetra::QuadChebTetra() {
 	mode = MODE_TETRAHEDRON;
 
 	max_edge_order = 10;
-	max_face_order = order2_t(10);
-	max_order = order3_t(10);
+	max_face_order = Ord2(10);
+	max_order = Ord3(10);
 
 	QuadPt3D *pt;
 	for (int o = 0; o < 10; o++) {
-		order3_t ord(o);
+		Ord3 ord(o);
 		int idx = ord.get_idx();
 		np[idx] = (o + 1) * (o + 2) * (o + 3) / 6;
 
@@ -76,14 +76,14 @@ QuadChebHex::QuadChebHex() {
 	mode = MODE_HEXAHEDRON;
 
 	max_edge_order = 10;
-	max_face_order = order2_t(10, 10);
-	max_order = order3_t(10, 10, 10);
+	max_face_order = Ord2(10, 10);
+	max_order = Ord3(10, 10, 10);
 
 	int i, j, k;
 	for (i = 0; i <= 10; i++)
 		for (j = 0; j <= 10; j++)
 			for (k = 0; k <= 10; k++) {
-				order3_t o(i, j, k);
+				Ord3 o(i, j, k);
 				np[o.get_idx()] = (i + 1) * (j + 1) * (k + 1);
 			}
 #endif
@@ -97,7 +97,7 @@ QuadChebHex::~QuadChebHex() {
 #endif
 }
 
-void QuadChebHex::calc_table(const order3_t &order) {
+void QuadChebHex::calc_table(const Ord3 &order) {
 	_F_
 #ifdef WITH_HEX
 	QuadPt3D *pt;

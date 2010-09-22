@@ -155,7 +155,7 @@ public:
 	virtual ~Function();
 
 	/// @return The polynomial degree of the function currently being represented by the class.
-	order3_t get_fn_order() const { return order; }
+	Ord3 get_fn_order() const { return order; }
 
 	/// @return The number of vector components of the function being represented by the class.
 	int get_num_components() const { return num_components; }
@@ -271,7 +271,7 @@ public:
 protected:
 	static const int QUAD_COUNT = 8;
 
-	order3_t order;			/// current function polynomial order
+	Ord3 order;			/// current function polynomial order
 	int num_components; 	/// number of vector components
 
 	struct Node {

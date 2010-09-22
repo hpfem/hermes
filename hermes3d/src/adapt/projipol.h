@@ -35,7 +35,7 @@ public:
 	ProjectionIpol(Solution *afn, Element *e, Shapeset *ss);
 	virtual ~ProjectionIpol();
 
-	virtual double get_error(int split, int son, const order3_t &order) = 0;
+	virtual double get_error(int split, int son, const Ord3 &order) = 0;
 
 protected:
 	struct ProjItem {
@@ -52,11 +52,11 @@ protected:
 	int proj_fns;					// number of funcions
 
 	void free_proj();
-	void calc_projection(int split, int son, const order3_t &order);
+	void calc_projection(int split, int son, const Ord3 &order);
 	virtual void calc_vertex_proj(int split, int son) = 0;
-	virtual void calc_edge_proj(int edge, int split, int son, const order3_t &order) = 0;
-	virtual void calc_face_proj(int face, int split, int son, const order3_t &order) = 0;
-	virtual void calc_bubble_proj(int split, int son, const order3_t &order) = 0;
+	virtual void calc_edge_proj(int edge, int split, int son, const Ord3 &order) = 0;
+	virtual void calc_face_proj(int face, int split, int son, const Ord3 &order) = 0;
+	virtual void calc_bubble_proj(int split, int son, const Ord3 &order) = 0;
 };
 
 #endif

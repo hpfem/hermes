@@ -4831,12 +4831,12 @@ H1ShapesetLobattoTetra::~H1ShapesetLobattoTetra() {
 	_F_
 }
 
-order3_t H1ShapesetLobattoTetra::get_order(int index) const {
+Ord3 H1ShapesetLobattoTetra::get_order(int index) const {
 	_F_
 #ifdef WITH_TETRA
-	return order3_t(lobatto_tetra_index_to_order[index]);
+	return Ord3(lobatto_tetra_index_to_order[index]);
 #else
-	return order3_t(0);
+	return Ord3(0);
 #endif
 }
 

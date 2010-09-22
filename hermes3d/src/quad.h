@@ -181,21 +181,21 @@ class Quad3D {
 public:
 	virtual ~Quad3D() { }
 
-	virtual QuadPt3D *get_points(const order3_t &order) { CHECK_MODE; return tables[order.get_idx()]; }
-	virtual int get_num_points(const order3_t &order) { CHECK_MODE; return np[order.get_idx()]; }
+	virtual QuadPt3D *get_points(const Ord3 &order) { CHECK_MODE; return tables[order.get_idx()]; }
+	virtual int get_num_points(const Ord3 &order) { CHECK_MODE; return np[order.get_idx()]; }
 
-	virtual QuadPt3D *get_edge_points(int edge, const order1_t &order) { return edge_tables[edge][order]; }
-	int get_edge_num_points(int edge, const order1_t &order) const { return np_edge[order]; }
+	virtual QuadPt3D *get_edge_points(int edge, const Ord1 &order) { return edge_tables[edge][order]; }
+	int get_edge_num_points(int edge, const Ord1 &order) const { return np_edge[order]; }
 
-	virtual QuadPt3D *get_face_points(int face, const order2_t &order) { return face_tables[face][order.get_idx()]; }
-	int get_face_num_points(int face, const order2_t &order) const { return np_face[order.get_idx()]; }
+	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) { return face_tables[face][order.get_idx()]; }
+	int get_face_num_points(int face, const Ord2 &order) const { return np_face[order.get_idx()]; }
 
 	virtual QuadPt3D *get_vertex_points() { return vertex_table; }
 	int get_vertex_num_points() const { return np_vertex; }
 
-	order1_t get_edge_max_order(int edge) const { return max_edge_order; }
-	order2_t get_face_max_order(int face) const { return max_face_order; }
-	order3_t get_max_order() const { return max_order; }
+	Ord1 get_edge_max_order(int edge) const { return max_edge_order; }
+	Ord2 get_face_max_order(int face) const { return max_face_order; }
+	Ord3 get_max_order() const { return max_order; }
 
 	EMode3D get_mode() const { return mode; }
 
@@ -203,9 +203,9 @@ protected:
 	/// mode of quadratures (MODE_TETRAHEDRON, MODE_HEXAHEDRON, MODE_PRISM)
 	EMode3D mode;
 	/// maximal order for integration (interpretation depends on the mode)
-	order1_t max_edge_order;
-	order2_t max_face_order;
-	order3_t max_order;
+	Ord1 max_edge_order;
+	Ord2 max_face_order;
+	Ord3 max_order;
 
 	Array<QuadPt3D *> tables;
 	Array<QuadPt3D *> *edge_tables;

@@ -106,15 +106,15 @@ void RefMap::set_active_element(Element *e) {
 
 	// calculate the order of the reference map
 	switch (mode) {
-		case MODE_TETRAHEDRON: ref_order = order3_t(0); break;
-		case MODE_HEXAHEDRON:  ref_order = order3_t(1, 1, 1); break;
+		case MODE_TETRAHEDRON: ref_order = Ord3(0); break;
+		case MODE_HEXAHEDRON:  ref_order = Ord3(1, 1, 1); break;
 		case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 	}
 
 	// calculate the order of the inverse reference map
 	switch (mode) {
-		case MODE_TETRAHEDRON: inv_ref_order = order3_t(0); break;
-		case MODE_HEXAHEDRON:  inv_ref_order = order3_t(1, 1, 1); break;
+		case MODE_TETRAHEDRON: inv_ref_order = Ord3(0); break;
+		case MODE_HEXAHEDRON:  inv_ref_order = Ord3(1, 1, 1); break;
 		case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 	}
 

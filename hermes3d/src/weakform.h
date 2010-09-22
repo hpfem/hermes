@@ -35,14 +35,14 @@ enum SymFlag {
 };
 
 /// Matrix and vector forms.
-typedef scalar (*matrix_form_val_t)(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *vi,
-	        fn_t<double> *vj, geom_t<double> *e, user_data_t<scalar> *);
-typedef ord_t (*matrix_form_ord_t)(int n, double *wt, fn_t<ord_t> *u_ext[], fn_t<ord_t> *vi,
-	       fn_t<ord_t> *vj, geom_t<ord_t> *e, user_data_t<ord_t> *);
-typedef scalar (*vector_form_val_t)(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *vi,
-	        geom_t<double> *e, user_data_t<scalar> *);
-typedef ord_t (*vector_form_ord_t)(int n, double *wt, fn_t<ord_t> *u_ext[], fn_t<ord_t> *vi,
-	       geom_t<ord_t> *e, user_data_t<ord_t> *);
+typedef scalar (*matrix_form_val_t)(int n, double *wt, Func<scalar> *u_ext[], Func<double> *vi,
+	        Func<double> *vj, Geom<double> *e, ExtData<scalar> *);
+typedef Ord (*matrix_form_ord_t)(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *vi,
+	       Func<Ord> *vj, Geom<Ord> *e, ExtData<Ord> *);
+typedef scalar (*vector_form_val_t)(int n, double *wt, Func<scalar> *u_ext[], Func<double> *vi,
+	        Geom<double> *e, ExtData<scalar> *);
+typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *vi,
+	       Geom<Ord> *e, ExtData<Ord> *);
 
 /// Represents the weak formulation of a problem.
 ///
@@ -107,7 +107,7 @@ public:
         /// Internal. Used by DiscreteProblem to detect changes in the weakform.
         int get_seq() const { return seq; }
 
-	order3_t get_int_order();
+	Ord3 get_int_order();
 	bool is_matrix_free() { return is_matfree; }
 
         int neq;

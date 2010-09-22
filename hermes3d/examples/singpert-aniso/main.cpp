@@ -34,6 +34,8 @@ const double ERR_STOP  = 1;			// Stopping criterion for adaptivity (rel. error t
 const int NDOF_STOP = 100000;			// Adaptivity process stops when the number of degrees of freedom grows
 						// over this limit. This is to prevent h-adaptivity to go on forever.
 bool do_output = true;				// generate output files (if true)
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem constants
 const double K_squared = 1e4;			// Equation parameter.
@@ -52,13 +54,13 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 
 // Weak forms. 
 template<typename real, typename scalar>
-scalar biform(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<real> *u, fn_t<real> *v, geom_t<real> *e, user_data_t<scalar> *data)
+scalar biform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e, ExtData<scalar> *ext)
 {
   return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e) + K_squared * int_u_v<real, scalar>(n, wt, u, v, e);
 }
 
 template<typename real, typename scalar>
-scalar liform(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<real> *u, geom_t<real> *e, user_data_t<scalar> *data)
+scalar liform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Geom<real> *e, ExtData<scalar> *ext)
 {
   return K_squared * int_u<real, scalar>(n, wt, u, e);
 }
@@ -116,20 +118,6 @@ int main(int argc, char **args) {
   // Initialize the shapset and the cache.
   H1ShapesetLobattoHex shapeset;
 
-#if defined WITH_UMFPACK
-  UMFPackMatrix mat;
-  UMFPackVector rhs;
-  UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-  PetscMatrix mat;
-  PetscVector rhs;
-  PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-  MumpsMatrix mat;
-  MumpsVector rhs;
-  MumpsSolver solver(&mat, &rhs);
-#endif
-
   // Graphs of DOF convergence.
   GnuplotGraph graph;
   graph.set_captions("", "Degrees of Freedom", "Error [%]");
@@ -140,15 +128,16 @@ int main(int argc, char **args) {
   H1Space space(&mesh, &shapeset);
   space.set_bc_types(bc_types);
   space.set_essential_bc_values(essential_bc_values);
-  space.set_uniform_order(order3_t(P_INIT, P_INIT, P_INIT));
+  space.set_uniform_order(Ord3(P_INIT, P_INIT, P_INIT));
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(biform<double, double>, biform<ord_t, ord_t>, SYM, ANY);
-  wf.add_vector_form(liform<double, double>, liform<ord_t, ord_t>, ANY);
+  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, SYM, HERMES_ANY);
+  wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
 
   // Initialize the coarse mesh problem.
-  LinearProblem lp(&wf, &space);
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, &space, is_linear);
 
   // Adaptivity loop.
   int as = 0; bool done = false;
@@ -161,27 +150,24 @@ int main(int argc, char **args) {
     int ndof = space.assign_dofs();
     printf("  - Number of DOF: %d\n", ndof);
 
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
     // Assemble stiffness matrix and rhs.
     printf("  - Assembling... "); fflush(stdout);
-    if (lp.assemble(&mat, &rhs))
-      printf("done in %lf secs\n", lp.get_time());
-    else
-      error("failed!");
-
+    dp.assemble(matrix, rhs);
+    
     // Solve the system.
     printf("  - Solving... "); fflush(stdout);
-    bool solved = solver.solve();
-    if (solved)
-      printf("done in %lf secs\n", solver.get_time());
-    else {
-      printf("Failed\n");
-      break;
-    }
+    bool solved = solver->solve();
+    if (solved) printf("done in %lf secs\n", solver->get_time());
+    else printf("Failed\n");
 
     // Construct a solution.
     Solution sln(&mesh);
-    sln.set_coeff_vector(&space, solver.get_solution());
+    sln.set_coeff_vector(&space, solver->get_solution());
 
     // Output the orders and the solution.
     if (do_output) 
@@ -193,15 +179,6 @@ int main(int argc, char **args) {
     // Solving the fine mesh problem.
     printf("Solving on fine mesh:\n");
 
-    // Matrix solver. 
-#if defined WITH_UMFPACK
-    UMFPackLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_PETSC
-    PetscLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_MUMPS
-    MumpsSolver rsolver(&mat, &rhs);
-#endif
-
     // Construct the refined mesh for reference(refined) solution. 
     Mesh rmesh;
     rmesh.copy(mesh);
@@ -212,32 +189,30 @@ int main(int argc, char **args) {
     rspace->copy_orders(space, 1);
 
     // Initialize the mesh problem for reference solution.
-    LinearProblem rlp(&wf, rspace);
+    DiscreteProblem rdp(&wf, rspace, is_linear);
 
     // Assign DOF.
     int rndof = rspace->assign_dofs();
     printf("  - Number of DOF: %d\n", rndof);
 
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* rmatrix = create_matrix(matrix_solver);
+    Vector* rrhs = create_vector(matrix_solver);
+    Solver* rsolver = create_solver(matrix_solver, matrix, rhs);
+
     // Assemble stiffness matric and rhs.
     printf("  - Assembling... "); fflush(stdout);
-    if (rlp.assemble(&mat, &rhs))
-      printf("done in %lf secs\n", rlp.get_time());
-    else
-      error("failed!");
+    rdp.assemble(rmatrix, rrhs);
 
     // Solve the system.
     printf("  - Solving... "); fflush(stdout);
-    bool rsolved = rsolver.solve();
-    if (rsolved)
-      printf("done in %lf secs\n", rsolver.get_time());
-    else {
-      printf("failed\n");
-      break;
-    }
+    bool rsolved = rsolver->solve();
+    if (rsolved) printf("done in %lf secs\n", rsolver->get_time());
+    else printf("failed\n");
 
     // Construct the reference solution.
     Solution rsln(&rmesh);
-    rsln.set_coeff_vector(rspace, rsolver.get_solution());
+    rsln.set_coeff_vector(rspace, rsolver->get_solution());
 
     // Compare coarse and fine mesh.
     // Calculate the error estimate wrt. refined mesh solution.
@@ -275,12 +250,14 @@ int main(int argc, char **args) {
 
     // Clean up.
     delete rspace;
+    delete matrix;
+    delete rhs;
+    delete rmatrix;
+    delete rrhs;
 
     // Next iteration.
     as++;
 
-    mat.free();
-    rhs.free();
   } while (!done);
 
 #ifdef WITH_PETSC

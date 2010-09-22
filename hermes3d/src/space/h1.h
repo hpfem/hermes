@@ -37,9 +37,9 @@ public:
 
 protected:
 	virtual int get_vertex_ndofs();
-	virtual int get_edge_ndofs(order1_t order);
-	virtual int get_face_ndofs(order2_t order);
-	virtual int get_element_ndofs(order3_t order);
+	virtual int get_edge_ndofs(Ord1 order);
+	virtual int get_face_ndofs(Ord2 order);
+	virtual int get_element_ndofs(Ord3 order);
 
 	virtual void assign_dofs_internal();
 

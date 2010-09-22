@@ -129,8 +129,8 @@ void Filter::set_active_element(Element *e) {
 	}
 
 	switch (mode) {
-		case MODE_TETRAHEDRON: order = order3_t(H3D_MAX_QUAD_ORDER_TETRA); break;
-		case MODE_HEXAHEDRON: order = order3_t(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
+		case MODE_TETRAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER_TETRA); break;
+		case MODE_HEXAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
 		default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 	}
 }
@@ -168,13 +168,13 @@ void Filter::pop_transform() {
 	}
 }
 
-order3_t Filter::get_order()
+Ord3 Filter::get_order()
 {
 	_F_
 	switch (element->get_mode()) {
-		case MODE_HEXAHEDRON: return order3_t(10, 10, 10);
-		case MODE_TETRAHEDRON: return order3_t(10);
-		default: EXIT(H3D_ERR_NOT_IMPLEMENTED); return order3_t(10);
+		case MODE_HEXAHEDRON: return Ord3(10, 10, 10);
+		case MODE_TETRAHEDRON: return Ord3(10);
+		default: EXIT(H3D_ERR_NOT_IMPLEMENTED); return Ord3(10);
 	}
 }
 

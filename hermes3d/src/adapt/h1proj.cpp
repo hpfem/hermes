@@ -88,14 +88,14 @@ H1Projection::H1Projection(Solution *afn, Element *e, Shapeset *ss) : Projection
 	}
 }
 
-double H1Projection::get_error(int split, int son, const order3_t &order)
+double H1Projection::get_error(int split, int son, const Ord3 &order)
 {
 	_F_
 	sln->enable_transform(false);
 
 	calc_projection(split, son + 1, order);
 
-	order3_t order_rhs = order;
+	Ord3 order_rhs = order;
 	QuadPt3D *pt = quad->get_points(order_rhs);
 	int np = quad->get_num_points(order_rhs);
 
@@ -160,7 +160,7 @@ double H1Projection::get_error(int split, int son, const order3_t &order)
 	return error;
 }
 
-void H1Projection::calc_projection(int split, int son, const order3_t &order)
+void H1Projection::calc_projection(int split, int son, const Ord3 &order)
 {
 	_F_
 
@@ -174,7 +174,7 @@ void H1Projection::calc_projection(int split, int son, const order3_t &order)
 		fn_idx[mm] = ss->get_vertex_index(vtx);
 	// edge functions
 	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-		order1_t edge_order = order.get_edge_order(iedge);
+		Ord1 edge_order = order.get_edge_order(iedge);
 		int n_edge_fns = ss->get_num_edge_fns(edge_order);
 		if (n_edge_fns > 0) {
 			const int *edge_fn_idx = ss->get_edge_indices(iedge, 0, edge_order);
@@ -184,7 +184,7 @@ void H1Projection::calc_projection(int split, int son, const order3_t &order)
 	}
 	// face functions
 	for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-		order2_t face_order = order.get_face_order(iface);
+		Ord2 face_order = order.get_face_order(iface);
 		int n_face_fns = ss->get_num_face_fns(face_order);
 		if (n_face_fns > 0) {
 			const int *face_fn_idx = ss->get_face_indices(iface, 0, face_order);
@@ -209,12 +209,12 @@ void H1Projection::calc_projection(int split, int son, const order3_t &order)
 	// proj matrix
 	for (int i = 0; i < n_fns; i++) {
 		int iidx = fn_idx[i];
-		order3_t oi = ss->get_dcmp(iidx);
+		Ord3 oi = ss->get_dcmp(iidx);
 
 		for (int j = 0; j < n_fns; j++) {
 			int jidx = fn_idx[j];
 
-			order3_t oj = ss->get_dcmp(jidx);
+			Ord3 oj = ss->get_dcmp(jidx);
 			double val =
 				prod_fn[oi.x][oj.x] * prod_fn[oi.y][oj.y] * prod_fn[oi.z][oj.z] +
 				prod_dx[oi.x][oj.x] * prod_fn[oi.y][oj.y] * prod_fn[oi.z][oj.z] +
@@ -234,7 +234,7 @@ void H1Projection::calc_projection(int split, int son, const order3_t &order)
 			int iidx = fn_idx[i];
 			fu->set_active_shape(iidx);
 
-			order3_t order_rhs = ss->get_order(iidx) + order;
+			Ord3 order_rhs = ss->get_order(iidx) + order;
 			QuadPt3D *pt = quad->get_points(order_rhs);
 			int np = quad->get_num_points(order_rhs);
 
