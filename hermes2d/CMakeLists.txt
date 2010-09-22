@@ -113,10 +113,10 @@ if(WITH_EXODUSII)
 endif(WITH_EXODUSII)
 
 # If using PETSc or UMFPack, we need to enable Fortran support and look for BLAS and LAPACK
-if(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
+if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
         enable_language(Fortran)
         find_package(LAPACK REQUIRED)
-endif(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
+endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
 
 # solvers
 if(WITH_PETSC)
