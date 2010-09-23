@@ -19,9 +19,9 @@ BCType bc_types(int marker)
     return BC_ESSENTIAL;
   if (marker == 1 and zp == 1)
     return BC_NATURAL;
-  if (marker == 4 and m>0)
+  if (marker == 4 and m > 0)
     return BC_ESSENTIAL;
-  if (marker ==4 and m ==0)
+  if (marker == 4 and m == 0)
     return BC_NATURAL;
 }
 
@@ -36,8 +36,8 @@ double pot(double rho, double z) {
 }
 
 // Weak forms.
-
 #include "forms.cpp"
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -53,9 +53,10 @@ int main(int argc, char* argv[])
   int ndof = get_num_dofs(&space);
   info("ndof = %d", ndof);
 
-  // Initialize the weak formulation for the left hand side i.e. H 
+  // Initialize the weak formulation for the left hand side i.e. H.
   WeakForm wfH;
   wfH.add_matrix_form(bilinear_form_H, bilinear_form_ord, H2D_SYM);
+
   // Initialize the linear problem.
   LinearProblem lpH(&wfH, &space);
 
@@ -63,29 +64,32 @@ int main(int argc, char* argv[])
   Matrix *Hmat,*Vmat,*Umat; Vector* eivec; CommonSolver* solver;
   init_matrix_solver(matrix_solver, ndof, Hmat, eivec, solver);
 
-  // Assemble stiffness matrix
+  // Assemble stiffness matrix.
   lpH.assemble(Hmat, eivec);
 
-
-  // Initialize the weak formulation for the potential matrix 
+  // Initialize the weak formulation for the potential matrix.
   WeakForm wfPot;
   wfPot.add_matrix_form(bilinear_form_V, bilinear_form_ord, H2D_SYM);
+
   // Initialize the linear problem.
   LinearProblem lpPot(&wfPot, &space);
   init_matrix_solver(matrix_solver, ndof, Vmat, eivec, solver);
-  // Assemble potential matrix
+
+  // Assemble potential matrix.
   lpPot.assemble(Vmat,eivec);
 
-
-  // Initialize the weak formulation for the right hand side i.e. U 
+  // Initialize the weak formulation for the right hand side i.e. U.
   WeakForm wfU;
   wfU.add_matrix_form(bilinear_form_U, bilinear_form_ord, H2D_SYM);
+
   // Initialize the linear problem.
   LinearProblem lpU(&wfU, &space);
   init_matrix_solver(matrix_solver, ndof, Umat, eivec, solver);
-  // Assemble overlap matrix 
+
+  // Assemble overlap matrix.
   lpU.assemble(Umat,eivec);
-  // print H+V as MatrixMarket
+
+  // print H+V as MatrixMarket.
   FILE *out = fopen( "hmat.mtx", "w" );
   int nz=0;
   for (int i=0; i < ndof; i++) 
@@ -103,7 +107,8 @@ int main(int argc, char* argv[])
 	if (tmp != 0) fprintf(out, "%d %d %24.15e\n",i+1,j+1,tmp);
       } 
   fclose(out);
-  // print U as MatrixMarket
+
+  // Print U as MatrixMarket.
   out = fopen( "umat.mtx", "w" );
   nz=0;
   for (int i=0; i < ndof; i++) 
