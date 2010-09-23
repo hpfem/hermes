@@ -6,8 +6,12 @@
 
 using namespace RefinementSelectors;
 
-//  This is a simple elliptic problem with known exact solution where one
-//  can compare isotropic and anisotropic refinements.
+//  This is the 10th in the series of NIST benchmarks with known exact solutions. 
+//
+//  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
+//                          NIST Report 7668, February 2010.
+//
+//  Compare adaptivity with isotropic and anisotropic refinements.
 //
 //  PDE: -Laplace u = f.
 //  where f is dictated by the exact solution.
@@ -103,8 +107,8 @@ int main(int argc, char* argv[])
   ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 400, 600));
-  OrderView  oview("Polynomial orders", new WinGeom(410, 0, 400, 600));
+  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
   // Number of physical fields in the problem.
   int num_comps = Tuple<Space*>(&space).size();

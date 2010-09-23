@@ -1,4 +1,4 @@
 rm *~ 
-./line-singularity
+./nist-10
 python plot_graph.py &
 
