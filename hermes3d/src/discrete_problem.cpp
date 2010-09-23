@@ -145,7 +145,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   _F_
   // Sanity checks.
   if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
-  if (rhs != NULL && rhs->length() != this->ndof) error("Wrong rhs_ext length in FeProblem::assemble().");
   if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
   for (int i=0; i<this->wf->neq; i++) {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
@@ -235,8 +234,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         test_fn[j].set_transform(base_fn + j);
 
         // This is missing in H2D.
-	u_ext[j]->set_active_element(e[i]);
-	u_ext[j]->force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
+	//u_ext[j]->set_active_element(e[i]);
+	//u_ext[j]->force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
 
         // This is different in H2D (PrecalcShapeset is used).
 	refmap[j].set_active_element(e[i]);
@@ -1074,7 +1073,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
   Vector* rhs = create_vector(SOLVER_UMFPACK);
   Solver* solver = create_solver(SOLVER_UMFPACK, matrix, rhs);
 
-  dp->assemble(NULL, matrix, rhs, false);
+  dp->assemble(matrix, rhs);
 
   // Calculate the coefficient vector.
   bool solved = solver->solve();
