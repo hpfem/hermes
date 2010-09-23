@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     info("Calculating error."); 
     Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors() * 100;
+    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 

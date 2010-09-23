@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     info("Calculating error."); 
     Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors() * 100;
+    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
@@ -172,9 +172,9 @@ int main(int argc, char* argv[])
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof.add_values(get_num_dofs(&space), err_est);
-    graph_dof.save("conv_dof.dat");
+    graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est);
-    graph_cpu.save("conv_cpu.dat");
+    graph_cpu.save("conv_cpu_est.dat");
 
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) done = true;
