@@ -20,7 +20,7 @@
 #ifndef _SOLVER_EPETRA_H_
 #define _SOLVER_EPETRA_H_
 
-//#include "../h3dconfig.h"
+#include "../h3dconfig.h"
 #include "solver.h"
 #include "../matrix.h"
 
