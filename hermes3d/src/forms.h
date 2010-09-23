@@ -130,19 +130,25 @@ public:
 
 /// Init element geometry for calculating the integration order
 Geom<Ord> init_geom(int marker);
+
 /// Init element geometry for volumetric integrals
 Geom<double> init_geom(int marker, RefMap *rm, const int np, const QuadPt3D *pt);
+
 /// Init element geometry for surface integrals
 Geom<double> init_geom(int marker, RefMap *rm, int iface, const int np, const QuadPt3D *pt);
+
 /// Free data related to the element geometry
 void free_geom(Geom<double> *e);
 
 /// Init the function for calculation the integration order
-Func<Ord> init_fn(const Ord3 &order);
+Func<Ord> init_fn_ord(const Ord3 &order);
+
 /// Init the function for the evaluation of the volumetric integral
 sFunc *init_fn(ShapeFunction *fu, RefMap *rm, const int np, const QuadPt3D *pt);
+
 /// Init the function for the evaluation of the surface integral
 sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const QuadPt3D *pt);
+
 /// Init the mesh-function for the evaluation of the volumetric/surface integral
 mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt);
 

@@ -70,6 +70,7 @@ Geom<double> init_geom(int marker, RefMap *rm, int iface, const int np, const Qu
 }
 
 void free_geom(Geom<double> *e) {
+	_F_
 	delete [] e->x;
 	delete [] e->y;
 	delete [] e->z;
@@ -79,7 +80,8 @@ void free_geom(Geom<double> *e) {
 	delete [] e->nz;
 }
 
-Func<Ord> init_fn(const Ord3 &order) {
+Func<Ord> init_fn_ord(const Ord3 &order) {
+	_F_
 	int o = order.get_ord();
 	Ord *d = new Ord(o);
 
@@ -290,11 +292,13 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 }
 
 void free_fn(Func<Ord> *f) {
+	_F_
 	delete f->val;
 }
 
 template<typename T>
-void free_Funcpl(Func<T> *f) {
+void free_fn_tpl(Func<T> *f) {
+	_F_
 	delete [] f->val;
 	delete [] f->dx;
 	delete [] f->dy;
@@ -309,7 +313,7 @@ void free_Funcpl(Func<T> *f) {
 	delete f;
 }
 
-void free_fn(sFunc *f) { free_Funcpl<double>(f); }
+void free_fn(sFunc *f) { free_fn_tpl<double>(f); }
 #ifdef H3D_COMPLEX
-void free_fn(mFunc *f) { free_Funcpl<scalar>(f); }
+void free_fn(mFunc *f) { free_fn_tpl<scalar>(f); }
 #endif

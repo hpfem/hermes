@@ -79,7 +79,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 // Initialize integration order for function values and derivatives
 Func<Ord>* init_fn_ord(const int order)
 {
-  Ord *d = new Ord(order);
+        Ord *d = new Ord(order);
 
 	Func<Ord>* f = new Func<Ord>(1, 2);
 	f->val = d;

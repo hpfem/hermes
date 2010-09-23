@@ -722,8 +722,8 @@ Ord3 H1Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, Ref
 {
 	_F_
 	// determine the integration order
-	Func<Ord> ou = init_fn(ordu);
-	Func<Ord> ov = init_fn(ordv);
+	Func<Ord> ou = init_fn_ord(ordu);
+	Func<Ord> ov = init_fn_ord(ordv);
 
 	double fake_wt = 1.0;
 	Geom<Ord> fake_e = init_geom(marker);

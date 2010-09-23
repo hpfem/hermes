@@ -679,7 +679,6 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ex
   
   // Order of solutions from the previous Newton iteration.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
-  //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
   if (u_ext != Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
@@ -763,6 +762,7 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ex
     if (prev[i] != NULL) prev[i]->free_fn(); delete prev[i]; 
   }
   if (ext != NULL) {ext->free(); delete ext;}
+
   return res;
 }
 
