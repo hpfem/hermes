@@ -169,9 +169,9 @@ int main(int argc, char* argv[])
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof.add_values(get_num_dofs(&space), err_est);
-    graph_dof.save("conv_dof.dat");
+    graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est);
-    graph_cpu.save("conv_cpu.dat");
+    graph_cpu.save("conv_cpu_est.dat");
 
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) done = true;

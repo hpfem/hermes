@@ -138,8 +138,9 @@ int main(int argc, char* argv[])
   ScalarView v_sview("Solution v", new WinGeom(740, 0, 400, 300));
   OrderView  v_oview("Polynomial orders v", new WinGeom(1150, 0, 400, 300));
 
-  // DOF and CPU convergence graphs initialization.
-  SimpleGraph graph_dof, graph_cpu;
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est, 
+              graph_dof_exact, graph_cpu_exact;
 
   // Adaptivity loop:
   int as = 1; 
@@ -174,7 +175,8 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+                   Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     u_sview.show(&u_sln);
