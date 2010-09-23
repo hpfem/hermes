@@ -301,15 +301,25 @@ int main(int argc, char* argv[])
 
     info("!---- Adaptivity step %d ---------------------------------------------", as);
 
-    // Construct globally refined reference meshes.
-    Tuple<Space*> ref_spaces = construct_refined_spaces(spaces, order_increase);
-    
-    int ref_ndof = get_num_dofs(ref_spaces);
+    Mesh ref_mesh1, ref_mesh2;
+    ref_mesh1.copy(&mesh1);
+    ref_mesh1.refine_all_elements();
+    ref_mesh2.copy(&mesh2);
+    ref_mesh2.refine_all_elements();
+
+    int order_increase = 1;
+    Space *ref_space1 = space1.dup(&ref_mesh1);
+    Space *ref_space2 = space2.dup(&ref_mesh2);
+
+    ref_space1->copy_orders(&space1, order_increase);
+    ref_space2->copy_orders(&space2, order_increase);
+
+    int ref_ndof = get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
 
     // Assemble the reference problem.
     bool is_linear = true;
-    FeProblem* fep = new FeProblem(&wf, ref_spaces, is_linear);
+    FeProblem* fep = new FeProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_solver(matrix_solver, matrix, rhs);
@@ -321,12 +331,12 @@ int main(int argc, char* argv[])
     // Solve the linear system associated with the reference problem.
     info("Solving the matrix problem.");
     if(solver->solve()) 
-      vector_to_solutions(solver->get_solution(), ref_spaces, ref_slns);
+      vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
     else error ("Matrix solver failed.\n");
     
     delete fep;
-    delete ref_spaces[0];
-    delete ref_spaces[1];
+    delete ref_space1;
+    delete ref_space2;
     
     // Time measurement.
     cpu_time.tick();
