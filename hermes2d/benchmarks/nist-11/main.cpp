@@ -6,8 +6,13 @@
 
 using namespace RefinementSelectors;
 
-//  This is an elliptic problem with known exact solution. The solution contains
-//  a very strong singularity that represents a challenge for most adaptive methods.
+//  This is the 11th in the series of NIST benchmarks with known exact solutions.
+//
+//  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
+//                          NIST Report 7668, February 2010.
+//
+//  The solution contains a very strong singularity that represents a challenge for most 
+//  adaptive methods. While running this benchmark, note how much the error is underestimated.
 //
 //  PDE: -div(A(x,y) grad u) = 0
 //  where a(x,y) = R in the first and third quadrant
@@ -47,7 +52,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 5.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.

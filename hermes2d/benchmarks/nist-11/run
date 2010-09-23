@@ -1,4 +1,4 @@
 rm *~ 
-./kellogg
+./nist-11
 python plot_graph.py &
 
