@@ -1410,8 +1410,8 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, M
 }
 
 // global orthogonal projection
-void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec, MatrixSolverType matrix_solver)
+void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns, 
+                    scalar* target_vec, MatrixSolverType matrix_solver, Tuple<int> proj_norms)
 {
   _F_
   int n = spaces.size();  
@@ -1453,7 +1453,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver)
+void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, Tuple<int> proj_norms)
 {
   _F_
   scalar* target_vec = new scalar[get_num_dofs(spaces)];
@@ -1461,7 +1461,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution
   for (int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
-  project_global(spaces, proj_norms, ref_slns_mf, target_vec, matrix_solver);
+  project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
   
   for (int i = 0; i < sols_src.size(); i++)
       sols_dest[i]->set_coeff_vector(spaces[i], target_vec);
@@ -1507,7 +1507,7 @@ void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, 
   if (mesh == NULL) error("Mesh is NULL in project_global().");
   Solution source_sln;
   source_sln.set_exact(mesh, source_fn);
-  project_global(space, proj_norm, (MeshFunction*)&source_sln, target_vec);
+  project_global(space, (MeshFunction*)&source_sln, target_vec, matrix_solver, proj_norm);
 };
 
 /// Projection-based interpolation of an exact function. This is faster than the

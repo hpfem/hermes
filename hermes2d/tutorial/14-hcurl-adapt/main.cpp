@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, H2D_HCURL_NORM, &ref_sln, &sln, matrix_solver); 
+    project_global(&space, &ref_sln, &sln, matrix_solver, H2D_HCURL_NORM); 
    
     // View the coarse mesh solution and polynomial orders.
     sview.show(&sln);

@@ -175,8 +175,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                   Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     u_sview.show(&u_sln);

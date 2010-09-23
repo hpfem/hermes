@@ -774,7 +774,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
 
     // Project the function f() on the coarse mesh.
     scalar* coeff_vec = new scalar[rspace->get_num_dofs()];
-    project_global(space, proj_norm, sln_fine, coeff_vec, matrix_solver);
+    project_global(space, sln_fine, coeff_vec, matrix_solver, proj_norm);
     sln_coarse->set_coeff_vector(space, coeff_vec);
     delete [] coeff_vec;
 
