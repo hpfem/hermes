@@ -715,7 +715,16 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
 	mFunc *prev[wf->neq];
-	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+        if (u_ext != Tuple<Solution *>()) {
+          for (int i = 0; i < wf->neq; i++) {
+            if (u_ext[i] != NULL) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+            else prev[i] = NULL;
+          }
+        }
+        else {
+          for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+        }
 
 	sFunc *u = get_fn(fu, ord_idx, ru, np, pt);
         sFunc *v = get_fn(fv, ord_idx, rv, np, pt);
@@ -801,7 +810,16 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
 	mFunc *prev[wf->neq];
-	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+        if (u_ext != Tuple<Solution *>()) {
+          for (int i = 0; i < wf->neq; i++) {
+            if (u_ext[i] != NULL) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+            else prev[i] = NULL;
+          }
+        }
+        else {
+          for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+        }
 	sFunc *v = get_fn(fv, ord_idx, rv, np, pt);
 
 	ExtData<scalar> ext;
@@ -887,7 +905,17 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
 	mFunc *prev[wf->neq];
-	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+        if (u_ext != Tuple<Solution *>()) {
+          for (int i = 0; i < wf->neq; i++) {
+            if (u_ext[i] != NULL) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+            else prev[i] = NULL;
+          }
+        }
+        else {
+          for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+        }
+
 	sFunc *u = get_fn(fu, ord_idx, ru, surf_pos->surf_num, np, pt);
 	sFunc *v = get_fn(fv, ord_idx, rv, surf_pos->surf_num, np, pt);
 
@@ -970,7 +998,16 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
 	mFunc *prev[wf->neq];
-	for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+        if (u_ext != Tuple<Solution *>()) {
+          for (int i = 0; i < wf->neq; i++) {
+            if (u_ext[i] != NULL) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
+            else prev[i] = NULL;
+          }
+        }
+        else {
+          for (int i = 0; i < wf->neq; i++) prev[i] = NULL;
+        }
 	sFunc *v = get_fn(fv, ord_idx, rv, surf_pos->surf_num, np, pt);
 
 	ExtData<scalar> ext;
