@@ -80,10 +80,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
-  // Time measurement
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -100,24 +96,139 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(callback(bilinear_form), H2D_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
 
+  // Initialize coarse and reference mesh solution.
+  Solution sln, ref_sln;
+
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY);
-
-  // Adaptivity loop.
-  Solution *sln = new Solution();
-  Solution *ref_sln = new Solution();
   ExactSolution exact(&mesh, fndd);
-  WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
-  WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
-  bool verbose = true;     // Print info during adaptivity.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln,
-                     Tuple<WinGeom *>(), Tuple<WinGeom *>(), &selector, &apt, verbose, &exact);
 
-  int ndof = get_num_dofs(&space);
+  // Number of physical fields in the problem.
+  int num_comps = Tuple<Space*>(&space).size();
+
+  // Number of degreeso of freedom 
+  int ndof = get_num_dofs(Tuple<Space*>(&space));
+
+  // Number of exact solutions given.
+  if (Tuple<ExactSolution *>(&exact).size() != 0 && Tuple<ExactSolution *>(&exact).size() != num_comps)
+    error("Number of exact solutions does not match number of equations.");
+  bool is_exact_solution;
+  if (Tuple<ExactSolution *>(&exact).size() == num_comps) is_exact_solution = true;
+  else is_exact_solution = false;
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
+
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
+  // Adaptivity loop:
+  int as = 1;
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else error ("Matrix solver failed.\n");
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on the coarse mesh.");
+    project_global(&space, H2D_H1_NORM, &ref_sln, &sln, matrix_solver);
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error.");
+    Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
+    adaptivity->set_solutions(&sln, &ref_sln);
+    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+
+    // Calculate exact error for each solution component.   
+    double err_exact_abs[H2D_MAX_COMPONENTS];
+    double norm_exact[H2D_MAX_COMPONENTS];
+    double err_exact_abs_total = 0;
+    double norm_exact_total = 0;
+    double err_exact_rel_total;
+    if (is_exact_solution == true) {
+      err_exact_abs[0] = calc_abs_error(&sln, &exact, H2D_H1_NORM);
+      norm_exact[0] = calc_norm(&exact, H2D_H1_NORM);
+      err_exact_abs_total += err_exact_abs[0] * err_exact_abs[0];
+      norm_exact_total += norm_exact[0] * norm_exact[0];
+
+      err_exact_abs_total = sqrt(err_exact_abs_total);
+      norm_exact_total = sqrt(norm_exact_total);
+      err_exact_rel_total = err_exact_abs_total / norm_exact_total * 100.;
+    }
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%",
+      get_num_dofs(&space), get_num_dofs(ref_space), err_est);
+    if (is_exact_solution == true) info("err_exact_rel_total: %g%%", err_exact_rel_total);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(get_num_dofs(&space), err_est);
+    graph_dof.save("conv_dof_est.dat");
+    graph_cpu.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu.save("conv_cpu_est.dat");
+    if (is_exact_solution == true) {
+      graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel_total);
+      graph_dof_exact.save("conv_dof_exact.dat");
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
+      graph_cpu_exact.save("conv_cpu_exact.dat");
+    }
+
+    // If err_est too large, adapt the mesh.
+    if (err_est < ERR_STOP) done = true;
+    else
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
+    }
+    if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    if(done == false)
+      delete ref_space->mesh;
+    delete ref_space;
+    delete fep;
+
+  }
+  while (done == false);
+
+  verbose("Total running time: %g s", cpu_time.accumulated());
+
+  ndof = get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
