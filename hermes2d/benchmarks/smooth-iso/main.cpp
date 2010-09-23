@@ -116,8 +116,21 @@ int main(int argc, char* argv[])
   ScalarView sview("Solution", new WinGeom(0, 0, 400, 600));
   OrderView  oview("Polynomial orders", new WinGeom(410, 0, 400, 600));
 
-  // DOF and CPU convergence graphs initialization.
-  SimpleGraph graph_dof, graph_cpu;
+  // Number of physical fields in the problem.
+  int num_comps = Tuple<Space*>(&space).size();
+
+  // Number of degreeso of freedom 
+  int ndof = get_num_dofs(Tuple<Space*>(&space));
+
+  // Number of exact solutions given.
+  if (Tuple<ExactSolution *>(&exact).size() != 0 && Tuple<ExactSolution *>(&exact).size() != num_comps)
+    error("Number of exact solutions does not match number of equations.");
+  bool is_exact_solution;
+  if (Tuple<ExactSolution *>(&exact).size() == num_comps) is_exact_solution = true;
+  else is_exact_solution = false;
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -167,9 +180,27 @@ int main(int argc, char* argv[])
     adaptivity->set_solutions(&sln, &ref_sln);
     double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
 
+    // Calculate exact error for each solution component.   
+    double err_exact_abs[H2D_MAX_COMPONENTS];
+    double norm_exact[H2D_MAX_COMPONENTS];
+    double err_exact_abs_total = 0;
+    double norm_exact_total = 0;
+    double err_exact_rel_total;
+    if (is_exact_solution == true) {
+      err_exact_abs[0] = calc_abs_error(&sln, &exact, H2D_H1_NORM);
+      norm_exact[0] = calc_norm(&exact, H2D_H1_NORM);
+      err_exact_abs_total += err_exact_abs[0] * err_exact_abs[0];
+      norm_exact_total += norm_exact[0] * norm_exact[0];
+
+      err_exact_abs_total = sqrt(err_exact_abs_total);
+      norm_exact_total = sqrt(norm_exact_total);
+      err_exact_rel_total = err_exact_abs_total / norm_exact_total * 100.;
+    }
+
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%",
       get_num_dofs(&space), get_num_dofs(ref_space), err_est);
+    if (is_exact_solution == true) info("err_exact_rel_total: %g%%", err_exact_rel_total);
 
     // Time measurement.
     cpu_time.tick();
@@ -179,6 +210,12 @@ int main(int argc, char* argv[])
     graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est);
     graph_cpu.save("conv_cpu_est.dat");
+    if (is_exact_solution == true) {
+      graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel_total);
+      graph_dof_exact.save("conv_dof_exact.dat");
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
+      graph_cpu_exact.save("conv_cpu_exact.dat");
+    }
 
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) done = true;
