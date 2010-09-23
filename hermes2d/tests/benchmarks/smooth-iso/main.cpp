@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   int n_dof_allowed = 49;
   info("n_dof_actual = %d", ndof);
-  info("n_dof_allowed = %d", n_dof_allowed);// ndofs was 625 at the time this test was created
+  info("n_dof_allowed = %d", n_dof_allowed);// ndofs was 49 at the time this test was created
   if (ndof <= n_dof_allowed) {
     printf("Success!\n");
     return ERROR_SUCCESS;
