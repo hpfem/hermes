@@ -68,6 +68,48 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
   return norm;
 }
 
+bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<double> & err_abs, Tuple<double> & norm_vals, 
+      double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<int> norms)
+{
+  bool default_norms = false;
+  // Checks.
+  if(left.size() != right.size())
+    return false;
+  if (norms != Tuple<int>())
+  {
+    if(left.size() != norms.size())
+      return false;
+  }
+  else
+    default_norms = true;
+  
+  // Zero the resulting Tuples.
+  err_abs.clear();
+  norm_vals.clear();
+
+  // Zero the sums.
+  err_abs_total = 0;
+  norm_total = 0;
+  err_rel_total = 0;
+  
+  // Calculation.
+  for(int i = 0; i < left.size(); i++)
+  {
+    err_abs.push_back(calc_abs_error(left[i], right[i], default_norms ? H2D_H1_NORM : norms[i]));
+    norm_vals.push_back(calc_norm(right[i], default_norms ? H2D_H1_NORM : norms[i]));
+    err_abs_total += err_abs[i] * err_abs[i];
+    norm_total += norm_vals[i] * norm_vals[i];
+  }
+
+  err_abs_total = sqrt(err_abs_total);
+  norm_total = sqrt(norm_total);
+  err_rel_total = err_abs_total / norm_total * 100.;
+  
+  // Everything went well, return appropriate flag.
+  return true;
+}
+
+
 /// Calculates the absolute error between sln1 and sln2 using function fn
 double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), MeshFunction* sln1, 
                       MeshFunction* sln2)
