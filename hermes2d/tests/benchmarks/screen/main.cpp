@@ -112,26 +112,11 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), H2D_SYM);
 
-  // Initialize coarse and reference mesh solution.
-  Solution sln, ref_sln;
-
   // Initialize refinement selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
+  // Set exact solution.
   ExactSolution exact_sln(&mesh, exact);
-
-  // Number of physical fields in the problem.
-  int num_comps = Tuple<Space*>(&space).size();
-
-  // Number of degreeso of freedom 
-  int ndof = get_num_dofs(Tuple<Space*>(&space));
-
-  // Number of exact solutions given.
-  if (Tuple<ExactSolution *>(&exact_sln).size() != 0 && Tuple<ExactSolution *>(&exact_sln).size() != num_comps)
-    error("Number of exact solutions does not match number of equations.");
-  bool is_exact_solution;
-  if (Tuple<ExactSolution *>(&exact_sln).size() == num_comps) is_exact_solution = true;
-  else is_exact_solution = false;
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -163,6 +148,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Solve the linear system of the reference problem. If successful, obtain the solution.
+    Solution ref_sln;
     info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
@@ -171,54 +157,41 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Project the fine mesh solution onto the coarse mesh.
+    Solution sln;
     info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, H2D_HCURL_NORM, &ref_sln, &sln, matrix_solver);
+    project_global(&space, &ref_sln, &sln, matrix_solver, H2D_HCURL_NORM);
 
     // Calculate element errors and total error estimate.
     info("Calculating error.");
     Adapt* adaptivity = new Adapt(&space, H2D_HCURL_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
 
     // Calculate exact error for each solution component.   
-    double err_exact_abs[H2D_MAX_COMPONENTS];
-    double norm_exact[H2D_MAX_COMPONENTS];
-    double err_exact_abs_total = 0;
-    double norm_exact_total = 0;
-    double err_exact_rel_total;
-    if (is_exact_solution == true) {
-      err_exact_abs[0] = calc_abs_error(&sln, &exact_sln, H2D_HCURL_NORM);
-      norm_exact[0] = calc_norm(&exact_sln, H2D_HCURL_NORM);
-      err_exact_abs_total += err_exact_abs[0] * err_exact_abs[0];
-      norm_exact_total += norm_exact[0] * norm_exact[0];
-
-      err_exact_abs_total = sqrt(err_exact_abs_total);
-      norm_exact_total = sqrt(norm_exact_total);
-      err_exact_rel_total = err_exact_abs_total / norm_exact_total * 100.;
-    }
+    double err_exact_abs = calc_abs_error(&sln, &exact_sln, H2D_HCURL_NORM);
+    double norm_exact = calc_norm(&exact_sln, H2D_HCURL_NORM);
+    double err_exact_rel = err_exact_abs / norm_exact * 100.;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%",
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est);
-    if (is_exact_solution == true) info("err_exact_rel_total: %g%%", err_exact_rel_total);
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
+      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
+    info("err_exact_rel: %g%%", err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est);
+    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
     graph_dof.save("conv_dof_est.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu.save("conv_cpu_est.dat");
-    if (is_exact_solution == true) {
-      graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel_total);
-      graph_dof_exact.save("conv_dof_exact.dat");
-      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
-      graph_cpu_exact.save("conv_cpu_exact.dat");
-    }
+    graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.save("conv_dof_exact.dat");
+    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+    graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) done = true;
+    if (err_est_rel < ERR_STOP) done = true;
     else
     {
       info("Adapting coarse mesh.");
@@ -234,8 +207,7 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    if(done == false)
-      delete ref_space->mesh;
+    if(done == false) delete ref_space->mesh;
     delete ref_space;
     delete fep;
 
@@ -244,7 +216,7 @@ int main(int argc, char* argv[])
 
   verbose("Total running time: %g s", cpu_time.accumulated());
 
-  ndof = get_num_dofs(&space);
+  int ndof = get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

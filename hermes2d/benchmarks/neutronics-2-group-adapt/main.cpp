@@ -409,8 +409,7 @@ int main(int argc, char* argv[])
         
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh; NDOF=%d ----", ndof);
-    project_global(Tuple<Space*>(&space1, &space2), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                   ref_slns, slns);
+    project_global(Tuple<Space*>(&space1, &space2), ref_slns, slns);
     
     // View the distribution of polynomial orders on the coarse meshes.
     info("flux1_dof=%d, flux2_dof=%d", get_num_dofs(&space1), get_num_dofs(&space2));
