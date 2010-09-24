@@ -129,7 +129,11 @@ public:
 protected:
 	static const int NUM_ELEMENTS = 4;
 
+#ifndef _WIN32
 	enum { UNDEF = -1, SLN, EXACT, CONST } type;
+#else
+  enum { UNDEF = -1, SLN, EXACT, CNST } type;
+#endif
 
 	bool transform;
 	bool own_mesh;

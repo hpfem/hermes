@@ -359,13 +359,13 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 		n++; }}
 
 	Ord3 pp[] = {
-		Ord3(order.x, order.y, order.z),
-		Ord3(std::min(max_order, order.x + 1),
-				 std::min(max_order, order.y + 1),
-				 std::min(max_order, order.z + 1)),
-		Ord3(std::min(max_order, order.x + 2),
-				 std::min(max_order, order.y + 2),
-				 std::min(max_order, order.z + 2))
+    Ord3(order.x, order.y, order.z),
+    Ord3(std::min((int)max_order, (int)order.x + 1),
+				 std::min((int)max_order, (int)order.y + 1),
+				 std::min((int)max_order, (int)order.z + 1)),
+    Ord3(std::min((int)max_order, (int)order.x + 2),
+				 std::min((int)max_order, (int)order.y + 2),
+				 std::min((int)max_order, (int)order.z + 2))
 	};
 
 	if (h_only) {
@@ -400,9 +400,9 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 		{
 			Ord3 hpp[] = {
 				Ord3((order.x + 1) / 2, (order.y + 1) / 2, (order.z + 1) / 2),
-				Ord3(std::min(((order.x + 1) / 2) + 1, max_order),
-				         std::min(((order.y + 1) / 2) + 1, max_order),
-				         std::min(((order.z + 1) / 2) + 1, max_order))
+				Ord3(std::min((int)((order.x + 1) / 2) + 1, (int)max_order),
+				         std::min((int)((order.y + 1) / 2) + 1, (int)max_order),
+				         std::min((int)((order.z + 1) / 2) + 1, (int)max_order))
 			};
 
 			for (unsigned int q0 = 0; q0 < countof(hpp); q0++)
@@ -422,7 +422,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 			// X
 			Ord3 ppx[] = {
 				Ord3((order.x + 1) / 2, order.y, order.z),
-				Ord3(std::min(((order.x + 1) / 2) + 1, max_order), order.y, order.z),
+				Ord3(std::min((int)((order.x + 1) / 2) + 1, (int)max_order), order.y, order.z),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppx); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppx); q1++)
@@ -430,7 +430,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 			// Y
 			Ord3 ppy[] = {
 				Ord3(order.x, (order.y + 1) / 2, order.z),
-				Ord3(order.x, std::min(((order.y + 1) / 2) + 1, max_order), order.z),
+				Ord3(order.x, std::min((int)((order.y + 1) / 2) + 1, (int)max_order), order.z),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppy); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppy); q1++)
@@ -438,7 +438,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 			// Z
 			Ord3 ppz[] = {
 				Ord3(order.x, order.y, (order.z + 1) / 2),
-				Ord3(order.x, order.y, std::min(((order.z + 1) / 2) + 1, max_order)),
+				Ord3(order.x, order.y, std::min((int)((order.z + 1) / 2) + 1, (int)max_order)),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppz); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppz); q1++)
@@ -447,8 +447,8 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 			// XY
 			Ord3 ppxy[] = {
 				Ord3((order.x + 1) / 2, (order.y + 1) / 2, order.z),
-				Ord3(std::min(((order.x + 1) / 2) + 1, max_order),
-				         std::min(((order.y + 1) / 2) + 1, max_order), order.z),
+				Ord3(std::min((int)((order.x + 1) / 2) + 1, (int)max_order),
+				         std::min((int)((order.y + 1) / 2) + 1, (int)max_order), order.z),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppxy); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppxy); q1++)
@@ -458,8 +458,8 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 			// YZ
 			Ord3 ppyz[] = {
 					Ord3(order.x, (order.y + 1) / 2, (order.z + 1) / 2),
-					Ord3(order.x, std::min(((order.y + 1) / 2) + 1, max_order),
-					         std::min(((order.z + 1) / 2) + 1, max_order)),
+					Ord3(order.x, std::min((int)((order.y + 1) / 2) + 1, (int)max_order),
+					         std::min((int)((order.z + 1) / 2) + 1, (int)max_order)),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppyz); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppyz); q1++)
@@ -469,8 +469,8 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 			// XZ
 			Ord3 ppxz[] = {
 				Ord3((order.x + 1) / 2, order.y, (order.z + 1) / 2),
-				Ord3(std::min(((order.x + 1) / 2) + 1, max_order), order.y,
-				         std::min(((order.z + 1) / 2) + 1, max_order)),
+				Ord3(std::min((int)((order.x + 1) / 2) + 1, (int)max_order), order.y,
+				         std::min((int)((order.z + 1) / 2) + 1, (int)max_order)),
 			};
 			for (unsigned int q0 = 0; q0 < countof(ppxz); q0++)
 				for (unsigned int q1 = 0; q1 < countof(ppxz); q1++)
@@ -601,7 +601,7 @@ void H1Adapt::adapt(double thr)
 	Timer tmr;
 	tmr.start();
 
-	Mesh *mesh[num];
+	Mesh ** mesh = new Mesh*[num];
 	for (int j = 0; j < num; j++) {
 		mesh[j] = spaces[j]->get_mesh();
 		rsln[j]->enable_transform(false);
@@ -701,6 +701,7 @@ void H1Adapt::adapt(double thr)
 
 	tmr.stop();
 	adapt_time = tmr.get_seconds();
+  delete [] mesh;
 }
 
 //// Unrefinements /////////////////////////////////////////////////////////////////////////////////
@@ -842,8 +843,8 @@ double H1Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 	}
 
 	// prepare multi-mesh traversal and error arrays
-	Mesh *meshes[2 * num];
-	Transformable *tr[2 * num];
+	Mesh **meshes = new Mesh *[2 * num];
+	Transformable **tr = new Transformable *[2 * num];
 	Traverse trav;
 	nact = 0;
 	for (i = 0; i < num; i++) {
@@ -861,7 +862,7 @@ double H1Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 	}
 
 	double total_norm = 0.0;
-	double norms[num];
+	double *norms = new double[num];
 	memset(norms, 0, num * sizeof(double));
 	double total_error = 0.0;
 	if (esort != NULL) delete [] esort;
@@ -925,6 +926,11 @@ double H1Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 		printf("  - element error #%d = % e\n", esort[i][0], errors[0][esort[i][0] - 1]);
 	}
 #endif
+  
+  
+  delete [] meshes;
+  delete [] tr;
+  delete [] norms;
 
 	return sqrt(total_error / total_norm);
 }

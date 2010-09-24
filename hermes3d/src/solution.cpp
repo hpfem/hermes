@@ -221,7 +221,7 @@ void Solution::set_const(scalar c) {
 	cnst[0] = c;
 	cnst[1] = cnst[2] = 0.0;
 	num_components = 1;
-	type = CONST;
+	type = CNST;
 	num_dofs = -1;
 	seq = g_mfn_seq++;
 }
@@ -234,7 +234,7 @@ void Solution::set_const(scalar c0, scalar c1, scalar c2) {
 	cnst[1] = c1;
 	cnst[2] = c2;
 	num_components = 3;
-	type = CONST;
+	type = CNST;
 	num_dofs = -1;
 	seq = g_mfn_seq++;
 }
@@ -354,7 +354,7 @@ static void make_dz_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 
 void Solution::init_dxdydz_buffer() {
 	if (dxdydz_buffer != NULL) delete [] dxdydz_buffer;
-	dxdydz_buffer = new scalar[num_components * 5 * (int) pow(11, 3)];		// FIXME: 5?
+	dxdydz_buffer = new scalar[num_components * 5 * (int) pow(11., 3)];		// FIXME: 5?
 }
 
 void Solution::set_active_element(Element *e) {
@@ -389,8 +389,12 @@ void Solution::set_active_element(Element *e) {
 			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
-	else if (type == CONST) {
-		switch (mode) {
+#ifdef _WIN32
+	else if (type == CNST) {
+#else
+  else if (type == CONST) {
+#endif
+    switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(0); break;
 			case MODE_HEXAHEDRON: order = Ord3(0, 0, 0); break;
 			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
@@ -603,7 +607,11 @@ void Solution::precalculate(const int np, const QuadPt3D *pt, int mask) {
 	switch (type) {
 		case SLN: precalculate_fe(np, pt, mask); break;
 		case EXACT: precalculate_exact(np, pt, mask); break;
-		case CONST: precalculate_const(np, pt, mask); break;
+#ifdef _WIN32
+    case CNST: precalculate_const(np, pt, mask); break;
+#else
+    case CONST: precalculate_const(np, pt, mask); break;
+#endif
 		default: EXIT("WTF?");
 	}
 }
@@ -631,7 +639,11 @@ void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) {
 	Node *node = new_node(newmask, np);
 
 	// transform integration points by the current matrix
-	scalar x[np], y[np], z[np], tx[np], ty[np];
+	scalar * x = new scalar[np];
+  scalar * y = new scalar[np];
+  scalar * z = new scalar[np];
+  scalar * tx = new scalar[np];
+  scalar * ty = new scalar[np];
 	for (int i = 0; i < np; i++) {
 		x[i] = pt[i].x * ctm->m[0] + ctm->t[0];
 		y[i] = pt[i].y * ctm->m[1] + ctm->t[1];
@@ -745,6 +757,11 @@ void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) {
 		delete [] mat;
 	}
 
+  delete [] x;
+  delete [] y;
+  delete [] z;
+  delete [] tx;
+  delete [] ty;
 	replace_cur_node(node);
 }
 
@@ -847,7 +864,11 @@ Ord3 Solution::get_order()
 			switch (type) {
 				case SLN: return elem_orders[element->id];
 				case EXACT: return Ord3(10, 10, 10);
-				case CONST: return Ord3(0, 0, 0);
+#ifdef _WIN32
+        case CNST: return Ord3(0, 0, 0);
+#else
+        case CONST: return Ord3(0, 0, 0);
+#endif
 				default: EXIT("WTF?");
 			}
 			break;
@@ -856,7 +877,11 @@ Ord3 Solution::get_order()
 			switch (type) {
 				case SLN: return elem_orders[element->id];
 				case EXACT: return Ord3(10);
-				case CONST: return Ord3(0);
+#ifdef _WIN32
+        case CNST: return Ord3(0);
+#else
+        case CONST: return Ord3(0);
+#endif
 				default: EXIT("WTF?");
 			}
 			break;

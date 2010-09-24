@@ -135,7 +135,7 @@ void OutputQuadTetra::calculate_view_points(Ord3 order) {
 
 	// there should be refinement levels enough to catch the properties of order 'order' functions on an element
 	// choose a different formula if this does not behave well
-	int levels = int(log(order.order) / log(2)) + 1;
+	int levels = int(log(double(order.order))) / log(double(2)) + 1;
 
 	// each refinement level means that a tetrahedron is divided into 8 subtetrahedra
 	// i.e., there are 8^levels resulting tetrahedra
@@ -443,7 +443,7 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 
 		fn->precalculate(np2, pt2, item);
 
-		scalar *val[nc];
+		scalar **val = new scalar *[nc];
 		for (int ic = 0; ic < nc; ic++)
 			val[ic] = fn->get_values(comp[ic], b);
 
@@ -459,8 +459,11 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 			}
 
 			// small buffers to hold values for one sub-element
-			Point3D phys_pt[np * nc];
-			double v[nc][np];
+      Point3D *phys_pt = new Point3D[np * nc];
+      double **v = new double*[nc];
+			for(int i = 0; i < nc; i++)
+        v[i] = new double [np];
+
 			for (int j = 0; j < np; j++, pt_idx++) {
 				// physical coordinates of sub-element
 				phys_pt[j].x = phys_x[pt_idx];
@@ -488,8 +491,11 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 
 				default: assert(false); break;
 			}
+      delete [] phys_pt;
+      delete [] v;
 		}
-
+    
+    delete [] val;
 		delete [] phys_x;
 		delete [] phys_y;
 		delete [] phys_z;
@@ -556,8 +562,11 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 			}
 
 			// small buffers to hold values for one sub-element
-			Point3D phys_pt[np * COMPONENTS];
-			double v[COMPONENTS][np];
+			Point3D *phys_pt = new Point3D[np * COMPONENTS];
+      double **v = new double*[COMPONENTS];
+			for(int i = 0; i < COMPONENTS; i++)
+        v[i] = new double [np];
+
 			for (int j = 0; j < np; j++, pt_idx++) {
 				// physical coordinates of sub-element
 				phys_pt[j].x = phys_x[pt_idx];
@@ -572,7 +581,8 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 #endif
 				}
 			}
-
+      delete [] phys_pt;
+      delete [] v;
 			dump_vectors(mode, np, phys_pt, v[0], v[1], v[2]);
 		}
 	}
@@ -610,7 +620,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		n_edges += element->get_num_edges();
 		n_faces += element->get_num_faces();
 
-		Word_t vtcs[element->get_num_vertices()];
+		Word_t *vtcs = new Word_t[element->get_num_vertices()];
 		element->get_vertices(vtcs);
 
 		switch (element->get_mode()) {
@@ -632,6 +642,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 				EXIT(H3D_ERR_UNKNOWN_MODE);
 				break;
 		}
+    delete [] vtcs;
 	}
 	fprintf(this->out_file, "$EndElements\n");
 
@@ -657,7 +668,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		Element *element = mesh->elements[idx];
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
 			int nv = element->get_num_face_vertices(iface);
-			Word_t vtcs[nv];
+			Word_t *vtcs = new Word_t[nv];
 			element->get_face_vertices(iface, vtcs);
 			switch (element->get_face_mode(iface)) {
 				case MODE_TRIANGLE:
@@ -668,7 +679,8 @@ void GmshOutputEngine::out(Mesh *mesh) {
 					fprintf(this->out_file, "%ld 3 0 %ld %ld %ld %ld\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					break;
 			}
-		}
+      delete [] vtcs;
+    }
 	}
 	fprintf(this->out_file, "$EndElements\n");
 }
@@ -710,7 +722,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
 			int nv = element->get_num_face_vertices(iface);
-			Word_t vtcs[nv];
+			Word_t *vtcs = new Word_t[nv];
 			element->get_face_vertices(iface, vtcs);
 			Word_t fid = mesh->get_facet_id(element, iface);
 			Facet *facet = mesh->facets[fid];
@@ -729,6 +741,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 					EXIT(H3D_ERR_NOT_IMPLEMENTED);
 					break;
 			}
+      delete [] vtcs;
 		}
 	}
 	fprintf(this->out_file, "$EndElements\n");
@@ -784,7 +797,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
 		int nv = Hex::NUM_VERTICES;
-		Word_t vtcs[nv];
+		Word_t *vtcs = new Word_t[nv];
 		element->get_vertices(vtcs);
 
 		for (int i = 0; i < nv; i++) {
@@ -794,7 +807,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 		}
 
 		for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-			Word_t fvtcs[Quad::NUM_VERTICES];
+			Word_t *fvtcs = new Word_t[Quad::NUM_VERTICES];
 			element->get_face_vertices(iface, fvtcs);
 
 			Word_t k[] = { fvtcs[0], fvtcs[1], fvtcs[2], fvtcs[3] };
@@ -806,7 +819,9 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 				Word_t idx = out_vtcs.add(fcenter);
 				face_pts.set(k, Quad::NUM_VERTICES, idx);
 			}
+      delete [] fvtcs;
 		}
+
 
 		Word_t c[] = { vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7] };
 		Word_t idx = INVALID_IDX;
@@ -817,6 +832,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 			Word_t idx = out_vtcs.add(center);
 			ctr_pts.set(c, Hex::NUM_VERTICES, idx);
 		}
+    delete [] vtcs;
 	}
 
 	fprintf(this->out_file, "$Nodes\n");
@@ -839,7 +855,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	fprintf(this->out_file, "%ld\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
-		Word_t vtcs[element->get_num_vertices()];
+		Word_t *vtcs = new Word_t[element->get_num_vertices()];
 		element->get_vertices(vtcs);
 
 		for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
@@ -856,6 +872,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 			Word_t v[4] = { vtx_pt[evtcs[0]] + 1, fidx[0] + 1, vtx_pt[evtcs[1]] + 1, fidx[1] + 1 };
 			fprintf(this->out_file, "%d 3 0 %ld %ld %ld %ld\n", id++, v[0], v[1], v[2], v[3]);
 		}
+    delete [] vtcs;
 	}
 	fprintf(this->out_file, "$EndElements\n");
 

@@ -561,12 +561,13 @@ void Space::set_bc_information() {
 
 			// set boundary condition for vertices on the face
 			int vtx_num = elem->get_num_face_vertices(iface);
-			Word_t vtcs[vtx_num];
+			Word_t *vtcs = new Word_t[vtx_num];
 			elem->get_face_vertices(iface, vtcs);
 			for (int i = 0; i < vtx_num; i++) {
 				assert(vn_data.exists(vtcs[i]));
 				set_bc_info(vn_data[vtcs[i]], bc_type, marker);
 			}
+      delete [] vtcs;
 
 			// set boundary condition for edges on the face
 			const int *face_edges = elem->get_face_edges(iface);
@@ -683,7 +684,7 @@ void Space::fc_face(Word_t eid, int iface, bool ced) {
 	Element *elem = mesh->elements[eid];
 	// vertices
 	int nv = elem->get_num_face_vertices(iface);
-	Word_t vtcs[nv];
+	Word_t *vtcs = new Word_t[nv];
 	elem->get_face_vertices(iface, vtcs);
 
 	Word_t fid = mesh->get_facet_id(elem, iface);
@@ -751,6 +752,7 @@ void Space::fc_face(Word_t eid, int iface, bool ced) {
 			break;
 	}
 
+  delete [] vtcs;
 	// faces (common for all types of refinements)
 	for (int i = 0; i < Facet::MAX_SONS; i++) {
 		Word_t sid = facet->sons[i];
@@ -792,10 +794,11 @@ void Space::fc_element(Word_t idx) {
 
 		// vertices
 		int nv = elem->get_num_face_vertices(iface);
-		Word_t vtcs[nv];
+		Word_t *vtcs = new Word_t[nv];
 		elem->get_face_vertices(iface, vtcs);
 		for (int iv = 0; iv < nv; iv++)
 			create_vertex_node_data(vtcs[iv], false);
+    delete [] vtcs;
 		// edges
 		int ne = elem->get_num_face_edges(iface);
 		const int *edge_idx = elem->get_face_edges(iface);
@@ -846,10 +849,11 @@ void Space::fc_base(Word_t eid, int iface)
 
 	// vertices
 	int nv = elem->get_num_face_vertices(iface);
-	Word_t vtcs[nv];
+	Word_t *vtcs = new Word_t[nv];
 	elem->get_face_vertices(iface, vtcs);
 	for (int iv = 0; iv < nv; iv++)
 		create_vertex_node_data(vtcs[iv], false);
+  delete [] vtcs;
 	// edges
 	int ne = elem->get_num_face_edges(iface);
 	const int *edge_idx = elem->get_face_edges(iface);
@@ -1815,7 +1819,7 @@ void Space::uc_face(Word_t eid, int iface) {
 
 	// vertices
 	int nv = elem->get_num_face_vertices(iface);
-	Word_t vtcs[nv];
+	Word_t *vtcs = new Word_t[nv];
 	elem->get_face_vertices(iface, vtcs);
 	// face edges
 	const int *face_edge = elem->get_face_edges(iface);
@@ -2112,6 +2116,7 @@ void Space::uc_face(Word_t eid, int iface) {
 
 			break;
 	}
+  delete [] vtcs;
 }
 
 void Space::uc_element(Word_t idx) {

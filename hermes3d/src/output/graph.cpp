@@ -191,7 +191,7 @@ void GnuplotGraph::save(const char *filename)
 		if (f == NULL) warning("Error writing to %s: %s", filename, strerror(errno));
 
 		int len = strlen(filename);
-		char outname[len + 10];
+		char * outname = new char[len + 10];
 		strcpy(outname, filename);
 		char *slash = strrchr(outname, '/');
 		if (slash != NULL) strcpy(outname, ++slash);
@@ -199,6 +199,7 @@ void GnuplotGraph::save(const char *filename)
 		if (dot != NULL && dot > outname) *dot = 0;
 		strcat(outname, ".eps");
 		fprintf(f, "set output '%s'\n", outname);
+    delete [] outname;
 	}
 	else
 		f = stdout;

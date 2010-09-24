@@ -98,13 +98,14 @@ void ShapeFunction::precalculate(const int np, const QuadPt3D *pt, int mask) {
 		for (int j = 0; j < VALUE_TYPES; j++) {
 			if (newmask & idx2mask[j][ic]) {
 				// transform quadrature points
-				QuadPt3D trans_pt[np];
+				QuadPt3D *trans_pt = new QuadPt3D[np];
 				for (int k = 0; k < np; k++) {
 					trans_pt[k].x = ctm->m[0] * pt[k].x + ctm->t[0];
 					trans_pt[k].y = ctm->m[1] * pt[k].y + ctm->t[1];
 					trans_pt[k].z = ctm->m[2] * pt[k].z + ctm->t[2];
 				}
 				shapeset->get_values(j, index, np, trans_pt, ic, node->values[ic][j]);
+        delete [] trans_pt;
 			}
 		}
 	}

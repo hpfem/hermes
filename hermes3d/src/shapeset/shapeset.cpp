@@ -260,12 +260,13 @@ void Shapeset::get_constrained_values(int n, int index, int np, QuadPt3D *pt, in
 	assert(idx != NULL);
 
 	memset(vals, 0, np * sizeof(double));
-	double tmp[np];
+	double *tmp = new double[np];
 	for (int i = 0; i < comb->n; i++) {
 		get_values(n, idx[i], np, pt, component, tmp);
 		for (int j = 0; j < np; j++)
 			vals[j] += comb->coef[i] * tmp[j];
 	}
+  delete [] tmp;
 }
 
 double Shapeset::get_constrained_value(int n, int index, double x, double y, double z, int component) {

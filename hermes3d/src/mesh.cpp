@@ -771,9 +771,9 @@ void Mesh::copy(const Mesh &mesh) {
 		this->elements.set(i, e->copy());
 
 		// copy mid points on edges and edges
-		Word_t emp[e->get_num_edges()];
+		Word_t *emp = new Word_t[e->get_num_edges()];
 		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			Word_t edge_vtx[Edge::NUM_VERTICES];
+			Word_t *edge_vtx = new Word_t[Edge::NUM_VERTICES];
 			e->get_edge_vertices(iedge, edge_vtx);
 			emp[iedge] = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
 			if (emp[iedge] != INVALID_IDX)
@@ -782,6 +782,7 @@ void Mesh::copy(const Mesh &mesh) {
 			Edge edge;
 			if (mesh.edges.lookup(edge_vtx + 0, Edge::NUM_VERTICES, edge))
 				edges.set(edge_vtx, Edge::NUM_VERTICES, edge);
+      delete [] edge_vtx;
 		}
 
 		// copy mid points on faces
@@ -813,13 +814,14 @@ void Mesh::copy(const Mesh &mesh) {
 					break;
 			}
 		}
+    delete [] emp;
 	}
 
 	// facets
 	for (Word_t fid = mesh.facets.first(); fid != INVALID_IDX; fid = mesh.facets.next(fid)) {
 		Facet *facet = mesh.facets[fid];
 
-		Word_t face_idxs[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
+		Word_t *face_idxs = new Word_t[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
 		if (facet->left != INVALID_IDX) {
 			Element *left_e = mesh.elements[facet->left];
 			int nvtcs = left_e->get_face_vertices(facet->left_face_num, face_idxs);
@@ -832,6 +834,8 @@ void Mesh::copy(const Mesh &mesh) {
 		}
 		else
 			EXIT("WTF?");		// FIXME
+    
+    delete [] face_idxs;
 	}
 
 	nbase = mesh.nbase;
@@ -1166,7 +1170,7 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 
 		Element *e = elements[eid];
 		int nv = e->get_num_face_vertices(face_num);
-		Word_t face_vtx[nv];
+		Word_t *face_vtx = new Word_t[nv];
 		e->get_face_vertices(face_num, face_vtx);
 
 		// check if the vertices are there, if so => compatible refinement
@@ -1179,7 +1183,8 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 			emp[0] = peek_midpoint(face_vtx[0], face_vtx[1]);
 			emp[1] = peek_midpoint(face_vtx[2], face_vtx[3]);
 		}
-
+  
+    delete [] face_vtx;
 		return (emp[0] != INVALID_IDX && emp[1] != INVALID_IDX);
 	}
 	else {
@@ -2215,7 +2220,7 @@ Word_t Mesh::get_facing_facet(Word_t fid, Word_t elem_id) {
 
 Word_t Mesh::get_facet_id(int nv, ...) const {
 	_F_
-	Word_t k[nv];
+	Word_t *k = new Word_t[nv];
 
 	va_list ap;
 	va_start(ap, nv);
@@ -2223,7 +2228,9 @@ Word_t Mesh::get_facet_id(int nv, ...) const {
 		k[i] = va_arg(ap, Word_t);
 	va_end(ap);
 
-	return facets.get_idx(k + 0, nv);
+  Word_t k_returned = facets.get_idx(k + 0, nv);
+  delete [] k;
+  return k_returned;
 }
 
 void Mesh::regularize() {

@@ -21,8 +21,11 @@
 #define _CALLSTACK_H_
 
 #include <stdio.h>
-
+#ifdef _WIN32 //Win32
+#define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
+#else
 #define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
+#endif
 
 /// Holds data for one call stack object
 ///

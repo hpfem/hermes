@@ -34,6 +34,7 @@ public:
 
 	virtual int get_vertex_index(int vertex) const {
 		EXIT("Hcurl shapeset do not have vertex functions");
+    return -1;
 	}
 
 	virtual int *get_edge_indices(int edge, int ori, Ord1 order) {

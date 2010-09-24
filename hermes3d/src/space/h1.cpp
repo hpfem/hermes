@@ -220,7 +220,8 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 			int np = quad->get_edge_num_points(iedge, edge_order);
 			QuadPt3D *pt = quad->get_edge_points(iedge, edge_order);
-			double vi[np], vj[np];
+			double * vi = new double[np];
+      double * vj = new double[np];
 			shapeset->get_fn_values(iidx, np, pt, 0, vi);
 			shapeset->get_fn_values(jidx, np, pt, 0, vj);
 
@@ -228,6 +229,8 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 			for (int k = 0; k < np; k++)
 				value += pt[k].w * vi[k] * vj[k];
 			proj_mat[i][j] += value;
+      delete [] vi;
+      delete [] vj;
 		}
 
 		int order_rhs = quad->get_edge_max_order(iedge);
@@ -238,7 +241,9 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 		double *edge_phys_y = ref_map.get_phys_y(np, pt);
 		double *edge_phys_z = ref_map.get_phys_z(np, pt);
 
-		double v0[np], v1[np], vi[np];
+		double *v0 = new double[np];
+    double *v1 = new double[np];
+    double *vi = new double[np];
 		shapeset->get_fn_values(vtx_fn_idx[0], np, pt, 0, v0);
 		shapeset->get_fn_values(vtx_fn_idx[1], np, pt, 0, v1);
 		shapeset->get_fn_values(iidx, np, pt, 0, vi);
@@ -254,6 +259,9 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 		delete [] edge_phys_x;
 		delete [] edge_phys_y;
 		delete [] edge_phys_z;
+    delete [] v0;
+    delete [] v1;
+    delete [] vi;
 	}
 
 	double *chol_p = new double[num_fns];
@@ -363,7 +371,8 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 
 			int np = quad->get_face_num_points(iface, face_order);
 			QuadPt3D *pt = quad->get_face_points(iface, face_order);
-			double vi[np], vj[np];
+			double *vi = new double[np];
+			double *vj = new double[np];
 			shapeset->get_fn_values(iidx, np, pt, 0, vi);
 			shapeset->get_fn_values(jidx, np, pt, 0, vj);
 
@@ -371,6 +380,9 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 			for (int k = 0; k < np; k++)
 				value += pt[k].w * vi[k] * vj[k];
 			proj_mat[i][j] += value;
+
+      delete [] vi;
+      delete [] vj;
 		}
 
 		Ord2 order_rhs = quad->get_face_max_order(iface);
@@ -382,16 +394,17 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 		double *face_phys_z = ref_map.get_phys_z(np, pt);
 
 		scalar value = 0.0;
-		scalar g[np];		// lin. combination of vertex + edge functions
+		scalar *g = new scalar[np];		// lin. combination of vertex + edge functions
 		memset(g, 0, np * sizeof(double));
 		for (int l = 0; l < num_fns; l++) {
-			double fn[np];
+			double *fn = new double[np];
 			shapeset->get_fn_values(fn_idx[l], np, pt, 0, fn);
 			for (int k = 0; k < np; k++)
 				g[k] += coef[l] * fn[k];
+      delete [] fn;
 		}
 
-		double vi[np];
+		double *vi = new double[np];
 		shapeset->get_fn_values(iidx, np, pt, 0, vi);
 		for (int k = 0; k < np; k++) {
 			value += pt[k].w * vi[k] *
@@ -403,6 +416,8 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 		delete [] face_phys_x;
 		delete [] face_phys_y;
 		delete [] face_phys_z;
+    delete [] g;
+    delete [] vi;
 	}
 
 	// solve the system using a precalculated Cholesky decomposed projection matrix

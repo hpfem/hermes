@@ -673,10 +673,11 @@ uint64 hex_init_idx(Box *cr, Box *er) {
 void Traverse::hex_union_rec(Box *cr, Element **e, Box *er, uint64 *idx, Element *uni) {
 	_F_
 	// state arrays
-	Element *e_new[num];
-	Box er_new[num], cr_new;
-	int sons[num][8];
-	uint64 idx_new[num];
+	Element **e_new = new Element *[num];
+	Box *er_new = new Box[num];
+  Box cr_new;
+	int (*sons)[8] = new int[num][8];
+	uint64 * idx_new = new uint64[num];
 	memcpy(idx_new, idx, sizeof(idx_new));
 
 	// obtain split types and son numbers for the current Box on all elements
@@ -764,6 +765,9 @@ void Traverse::hex_union_rec(Box *cr, Element **e, Box *er, uint64 *idx, Element
 			union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
 			break;
 	}
+  delete [] idx_new;
+  delete [] e_new;
+  delete [] er_new;
 }
 
 void Traverse::union_recurrent(Box *cr, Element **e, Box *er, uint64 *idx, Element *uni) {
@@ -800,8 +804,9 @@ void Traverse::union_recurrent(Box *cr, Element **e, Box *er, uint64 *idx, Eleme
 UniData **Traverse::construct_union_mesh(Mesh *unimesh) {
 	_F_
 	int i;
-	Element *e[num];
-	Box er[num], cr;
+	Element **e = new Element *[num];
+	Box * er = new Box[num];
+  Box cr;
 
 	this->unimesh = unimesh;
 	unimesh->copy_base(*meshes[0]);
@@ -811,7 +816,7 @@ UniData **Traverse::construct_union_mesh(Mesh *unimesh) {
 	MEM_CHECK(unidata);
 	memset(unidata, 0, sizeof(UniData *) * num);
 
-	uint64 idx[num];
+	uint64 * idx = new uint64[num];
 	memset(idx, 0, sizeof(idx));
 
 	for (id = 1; id <= meshes[0]->get_num_base_elements(); id++) {
@@ -824,6 +829,9 @@ UniData **Traverse::construct_union_mesh(Mesh *unimesh) {
 		union_recurrent(&cr, e, er, idx, unimesh->elements[id]);
 	}
 
+  delete idx;
+  delete [] e;
+  delete [] er;
 	return unidata;
 }
 

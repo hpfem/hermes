@@ -72,9 +72,12 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 		scalar *rdx, *rdy, *rdz;
 		sln->get_dx_dy_dz_values(rdx, rdy, rdz);
 
-		QuadPt3D tpt[np];
+		QuadPt3D * tpt = new QuadPt3D[np];
 		transform_points(np, pt, tr, tpt);
-		scalar prfn[np], prdx[np], prdy[np], prdz[np];
+		scalar * prfn = new scalar[np];
+    scalar * prdx = new scalar[np];
+    scalar * prdy = new scalar[np];
+    scalar * prdz = new scalar[np];
 		memset(prfn, 0, np * sizeof(double));
 		memset(prdx, 0, np * sizeof(double));
 		memset(prdy, 0, np * sizeof(double));
@@ -82,7 +85,7 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 
 		for (int i = 0; i < proj_fns; i++) {
 #ifndef H3D_COMPLEX
-			double tmp[np];
+			double * tmp = new double[np];
 			ss->get_fn_values(proj[i]->idx, np, tpt, 0, tmp);
 			blas_axpy(np, proj[i]->coef, tmp, 1, prfn, 1);
 			ss->get_dx_values(proj[i]->idx, np, tpt, 0, tmp);
@@ -91,9 +94,10 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 			blas_axpy(np, proj[i]->coef, tmp, 1, prdy, 1);
 			ss->get_dz_values(proj[i]->idx, np, tpt, 0, tmp);
 			blas_axpy(np, proj[i]->coef, tmp, 1, prdz, 1);
+      delete[] tmp;
 #else
-			double tmp[np];
-			scalar sctmp[np];
+			double * tmp = new double[np];
+			scalar * sctmp = new scalar[np];
 			ss->get_fn_values(proj[i]->idx, np, tpt, 0, tmp);
 			for (int ii = 0; ii < np; ii++) sctmp[ii] = tmp[ii];
 			blas_axpy(np, proj[i]->coef, sctmp, 1, prfn, 1);
@@ -106,6 +110,8 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 			ss->get_dz_values(proj[i]->idx, np, tpt, 0, tmp);
 			for (int ii = 0; ii < np; ii++) sctmp[ii] = tmp[ii];
 			blas_axpy(np, proj[i]->coef, sctmp, 1, prdz, 1);
+      delete[] tmp;
+      delete[] sctmp;
 #endif
 		}
 
@@ -115,8 +121,15 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 				 sqr(rdx[k] * mdx[split] - prdx[k]) +
 				 sqr(rdy[k] * mdy[split] - prdy[k]) +
 				 sqr(rdz[k] * mdz[split] - prdz[k]));
+   
+  delete[] tpt;
+  delete[] prfn;
+  delete[] prdx;
+  delete[] prdy;
+  delete[] prdz;
 	}
 
+  
 	sln->enable_transform(true);
 
 	return error;
@@ -226,12 +239,12 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 
 			else
 				EXIT("Local edge number out of range.");
 
-			QuadPt3D tpt[np];
+			QuadPt3D *tpt = new QuadPt3D[np];
 			transform_points(np, pt, tr, tpt);
 
-			double tmp[np];
-			scalar sctmp[np];
-			scalar g[np];						// interpolant
+			double *tmp = new double[np];
+			scalar *sctmp = new scalar[np];
+			scalar *g = new scalar[np];						// interpolant
 			memset(g, 0, np * sizeof(scalar));
 #ifndef H3D_COMPLEX
 			ss->get_fn_values(vtxp[0].idx, np, tpt, 0, tmp);
@@ -247,7 +260,7 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 
 			blas_axpy(np, vtxp[1].coef, sctmp, 1, g, 1);
 #endif
 
-			scalar dg[np];
+			scalar *dg = new scalar[np];
 			memset(dg, 0, np * sizeof(scalar));
 			if (iedge == 0 || iedge == 2 || iedge == 8 || iedge == 10) {
 				ss->get_dx_values(vtxp[0].idx, np, tpt, 0, tmp);
@@ -275,29 +288,34 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 
 			}
 			else
 				EXIT("Local edge number out of range.");
-
+  
+      delete [] tmp;
+      delete [] sctmp;
+      delete [] dg;
+      delete [] tpt;
 
 			scalar value = 0.0;
 			for (int k = 0; k < np; k++)
 				value += pt[k].w * (uval[k] * (rval[k] - g[k]) + du[k] * ((dr[k] * md) - dg[k]));
 			proj_rhs[i] += value * (1 / (double) edge_ns[split][iedge]);
-
+    
+      delete [] g;
 			if (edge_trf[split][iedge][e] != -1) fu->pop_transform();
 		}
 	}
 
 	double d;
-	int iperm[edge_fns];
+	int * iperm = new int[edge_fns];
 	ludcmp(proj_mat, edge_fns, iperm, &d);
 	lubksb(proj_mat, edge_fns, iperm, proj_rhs);
 
+  delete [] iperm;
 	// copy functions and coefficients to the basis
 	edge_proj[iedge] = new ProjItem[edge_fns];
 	for (int i = 0; i < edge_fns; i++) {
 		edge_proj[iedge][i].coef = proj_rhs[i];
 		edge_proj[iedge][i].idx = edge_fn_idx[i];
 	}
-
 	delete [] proj_mat;
 	delete [] proj_rhs;
 }
@@ -324,7 +342,7 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const Ord3 
 		ipol_fns += order.get_edge_order(face_edge[iedge]) - 1;
 
 	// interpolant
-	ProjItem ipol[ipol_fns];
+	ProjItem * ipol = new ProjItem[ipol_fns];
 	int mm = 0;
 	for (int vtx = 0; vtx < RefHex::get_num_face_vertices(iface); vtx++, mm++)
 		ipol[mm] = vertex_proj[face_vertex[vtx]];
@@ -419,17 +437,19 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const Ord3 
 			else
 				EXIT("Local face number out of range.");
 
-			QuadPt3D tpt[np];
+			QuadPt3D *tpt = new QuadPt3D[np];
 			transform_points(np, pt, tr, tpt);
 
-			scalar g[np], dgdx[np], dgdy[np];
+			scalar * g = new scalar[np];
+      scalar * dgdx = new scalar[np];
+      scalar * dgdy = new scalar[np];
 			memset(g, 0, np * sizeof(scalar));
 			memset(dgdx, 0, np * sizeof(scalar));
 			memset(dgdy, 0, np * sizeof(scalar));
 
 			for (int l = 0; l < ipol_fns; l++) {
-				double h[np];
-				scalar sch[np];
+				double * h = new double[np];
+				scalar * sch = new scalar[np];
 				ss->get_fn_values(ipol[l].idx, np, tpt, 0, h);
 				for (int ii = 0; ii < np; ii++) sch[ii] = h[ii];
 				blas_axpy(np, ipol[l].coef, sch, 1, g, 1);
@@ -460,21 +480,31 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const Ord3 
 				}
 				else
 					EXIT("Local face number out of range.");
+        delete [] h;
+        delete [] sch;
 			}
+
+      delete tpt;
 
 			scalar value = 0.0;
 			for (int k = 0; k < np; k++)
 				value += pt[k].w * (uval[k] * (rval[k] - g[k]) + dudx[k] * ((drdx[k] * md) - dgdx[k]) + dudy[k] * ((drdy[k] * me) - dgdy[k]));
 			proj_rhs[i] += value * (1 / (double) face_ns[split][iface]);
 
+      delete [] g;
+      delete [] dgdx;
+      delete [] dgdy;
 			if (face_trf[split][iface][e] != -1) fu->pop_transform();
 		}
 	}
+  delete [] ipol;
 
 	double d;
-	int iperm[face_fns];
+	int * iperm = new int[face_fns];
 	ludcmp(proj_mat, face_fns, iperm, &d);
 	lubksb(proj_mat, face_fns, iperm, proj_rhs);
+
+  delete [] iperm;
 
 	face_proj[iface] = new ProjItem [face_fns];
 	for (int i = 0; i < face_fns; i++) {
@@ -507,7 +537,7 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const Ord3 &order) {
 		ipol_fns += (face_order.x - 1) * (face_order.y - 1);
 	}
 
-	ProjItem ipol[ipol_fns];
+	ProjItem * ipol = new ProjItem[ipol_fns];
 	int mm = 0;
 	// vertex projection coefficients
 	for (int vtx = 0; vtx < Hex::NUM_VERTICES; vtx++, mm++)
@@ -570,18 +600,21 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const Ord3 &order) {
 			fu->get_dx_dy_dz_values(dudx, dudy, dudz);
 			sln->get_dx_dy_dz_values(drdx, drdy, drdz);
 
-			QuadPt3D tpt[np];
+			QuadPt3D *tpt = new QuadPt3D[np];
 			transform_points(np, pt, tr, tpt);
 
-			scalar g[np], dgdx[np], dgdy[np], dgdz[np];
+			scalar *g = new scalar[np];
+      scalar *dgdx = new scalar[np];
+      scalar *dgdy = new scalar[np];
+      scalar *dgdz = new scalar[np];
 			memset(g, 0, np * sizeof(scalar));
 			memset(dgdx, 0, np * sizeof(scalar));
 			memset(dgdy, 0, np * sizeof(scalar));
 			memset(dgdz, 0, np * sizeof(scalar));
 
 			for (int l = 0; l < ipol_fns; l++) {
-				double h[np];
-				scalar sch[np];
+				double *h = new double[np];
+				scalar *sch = new scalar[np];
 				ss->get_fn_values(ipol[l].idx, np, tpt, 0, h);
 				for (int ii = 0; ii < np; ii++) sch[ii] = h[ii];
 				blas_axpy(np, ipol[l].coef, sch, 1, g, 1);
@@ -594,7 +627,11 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const Ord3 &order) {
 				ss->get_dz_values(ipol[l].idx, np, tpt, 0, h);
 				for (int ii = 0; ii < np; ii++) sch[ii] = h[ii];
 				blas_axpy(np, ipol[l].coef, sch, 1, dgdz, 1);
+        delete [] h;
+        delete [] sch;
 			}
+
+      delete [] tpt;
 
 			scalar value = 0.0;
 			for (int k = 0; k < quad->get_num_points(order_rhs); k++) {
@@ -603,17 +640,23 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const Ord3 &order) {
 					dudy[k] * ((drdy[k] * mdy[split]) - dgdy[k]) +
 					dudz[k] * ((drdz[k] * mdz[split]) - dgdz[k]));
 			}
+      delete [] g;
+      delete [] dgdx;
+      delete [] dgdy;
+      delete [] dgdz;
 			proj_rhs[i] += value * (1 / (double) int_ns[split]);
 
 			if (int_trf[split][e] != -1) fu->pop_transform();
 		}
 	}
+  delete [] ipol;
 
 	double d;
-	int iperm[bubble_fns];
+	int *iperm = new int[bubble_fns];
 	ludcmp(proj_mat, bubble_fns, iperm, &d);
 	lubksb(proj_mat, bubble_fns, iperm, proj_rhs);
 
+  delete iperm;
 	bubble_proj = new ProjItem [bubble_fns];
 	for (int i = 0; i < bubble_fns; i++) {
 		bubble_proj[i].coef = proj_rhs[i];

@@ -477,7 +477,7 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 		double *y = refmap->get_phys_y(np, pt);
 		double *z = refmap->get_phys_z(np, pt);
 
-		int vtx_pt[np];		// indices of the vertices for current element
+		int *vtx_pt = new int[np];		// indices of the vertices for current element
 		for (int i = 0; i < np; i++)
 			vtx_pt[i] = l.add_point(x[i], y[i], z[i]);
 
@@ -518,6 +518,7 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 				break;
 		} // switch
 
+    delete [] vtx_pt;
 		fn->precalculate(np, pt, item);
 		int a = 0, b = 0;
 		mask_to_comp_val(item, a, b);
@@ -602,7 +603,7 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 		double *y = refmap.get_phys_y(np, pt);
 		double *z = refmap.get_phys_z(np, pt);
 
-		int vtx_pt[np];		// indices of the vertices for current element
+		int *vtx_pt = new int[np];		// indices of the vertices for current element
 		for (int i = 0; i < np; i++)
 			vtx_pt[i] = l.add_point(x[i], y[i], z[i]);
 
@@ -642,7 +643,7 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 				EXIT(H3D_ERR_UNKNOWN_MODE);
 				break;
 		} // switch
-
+    delete []vtx_pt;
 		for (int i = 0; i < COMPONENTS; i++)
 			fn[i]->precalculate(np, pt, item);
 
@@ -680,10 +681,10 @@ void VtkOutputEngine::out(Mesh *mesh)
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();
-		Word_t vtcs[nv];
+		Word_t *vtcs = new Word_t[nv];
 		element->get_vertices(vtcs);
 
-		int vtx_pt[nv];
+		int *vtx_pt = new int[nv];
 		for (int i = 0; i < nv; i++) {
 			Vertex *v = mesh->vertices[vtcs[i]];
 			int idx = l.add_point(v->x, v->y, v->z);
@@ -704,6 +705,8 @@ void VtkOutputEngine::out(Mesh *mesh)
 				EXIT(H3D_ERR_NOT_IMPLEMENTED);
 				break;
 		}
+    delete [] vtcs;
+    delete [] vtx_pt;
 		l.set_cell_data(id, 0);
 	}
 
@@ -726,10 +729,10 @@ void VtkOutputEngine::out_bc(Mesh *mesh, const char *name)
 			if (facet->type == Facet::INNER) continue;
 
 			int nv = element->get_num_face_vertices(iface);
-			Word_t vtcs[nv];
+			Word_t *vtcs = new Word_t[nv];
 			element->get_face_vertices(iface, vtcs);
 
-			int vtx_pt[nv];		// indices of the vertices for current element
+			int *vtx_pt = new int[nv];		// indices of the vertices for current element
 			for (int i = 0; i < nv; i++) {
 				Vertex *v = mesh->vertices[vtcs[i]];
 				vtx_pt[i] = l.add_point(v->x, v->y, v->z);
@@ -747,7 +750,9 @@ void VtkOutputEngine::out_bc(Mesh *mesh, const char *name)
 					EXIT(H3D_ERR_NOT_IMPLEMENTED);
 					break;
 			}
-
+      
+      delete [] vtcs;
+      delete [] vtx_pt;
 			Boundary *bnd = mesh->boundaries[facet->right];
 			l.set_cell_data(id, bnd->marker);
 		}
@@ -768,10 +773,10 @@ void VtkOutputEngine::out_orders(Space *space, const char *name)
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();
-		Word_t vtcs[nv];
+		Word_t *vtcs = new Word_t[nv];
 		element->get_vertices(vtcs);
 
-		int vtx_pt[nv];
+		int *vtx_pt = new int[nv];
 		for (int i = 0; i < nv; i++) {
 			Vertex *v = mesh->vertices[vtcs[i]];
 			int idx = l.add_point(v->x, v->y, v->z);
@@ -817,10 +822,12 @@ void VtkOutputEngine::out_orders(Space *space, const char *name)
 				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
 				l.set_cell_data(id, ord.order);
 				break;
-
+    
 			default:
 				error(H3D_ERR_NOT_IMPLEMENTED);
 		}
+    delete [] vtcs;
+    delete [] vtx_pt;
 	}
 
 	Vtk::FileFormatter fmt(&l);
@@ -836,10 +843,10 @@ void VtkOutputEngine::out_elem_markers(Mesh *mesh, const char *name)
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();
-		Word_t vtcs[nv];
+		Word_t *vtcs = new Word_t[nv];
 		element->get_vertices(vtcs);
 
-		int vtx_pt[nv];		// indices of the vertices for current element
+		int *vtx_pt = new int[nv];		// indices of the vertices for current element
 		for (int i = 0; i < nv; i++) {
 			Vertex *v = mesh->vertices[vtcs[i]];
 			vtx_pt[i] = l.add_point(v->x, v->y, v->z);
@@ -860,6 +867,8 @@ void VtkOutputEngine::out_elem_markers(Mesh *mesh, const char *name)
 				break;
 		}
 		l.set_cell_data(id, element->marker);
+    delete [] vtcs;
+    delete [] vtx_pt;
 	}
 
 	Vtk::FileFormatter fmt(&l);

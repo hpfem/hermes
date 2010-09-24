@@ -196,7 +196,12 @@ NoxSolver::NoxSolver(DiscreteProblem* problem)
   // NOX_Epetra_Interface
   interface = Teuchos::rcp(new NoxProblemInterface(problem));
 #else
+  //FIXME: Why does not this work with MSVC (it does in H2D)
+#ifndef _MSC_VER
   error(NOX_NOT_COMPILED);
+#else
+  exit(1);
+#endif
 #endif
 }
 

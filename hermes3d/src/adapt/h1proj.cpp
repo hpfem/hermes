@@ -110,9 +110,12 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 		scalar *rdx, *rdy, *rdz;
 		sln->get_dx_dy_dz_values(rdx, rdy, rdz);
 
-		QuadPt3D tpt[np];
+		QuadPt3D *tpt = new QuadPt3D[np];
 		transform_points(np, pt, tr, tpt);
-		scalar prfn[np], prdx[np], prdy[np], prdz[np];
+		scalar *prfn = new scalar[np];
+    scalar *prdx = new scalar[np];
+    scalar *prdy = new scalar[np];
+    scalar *prdz = new scalar[np];
 		memset(prfn, 0, np * sizeof(double));
 		memset(prdx, 0, np * sizeof(double));
 		memset(prdy, 0, np * sizeof(double));
@@ -120,7 +123,7 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 
 		for (int i = 0; i < n_fns; i++) {
 #ifndef H3D_COMPLEX
-			double tmp[np];
+			double *tmp = new double[np];
 			ss->get_fn_values(fn_idx[i], np, tpt, 0, tmp);
 			blas_axpy(np, proj_coef[i], tmp, 1, prfn, 1);
 			ss->get_dx_values(fn_idx[i], np, tpt, 0, tmp);
@@ -129,9 +132,10 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 			blas_axpy(np, proj_coef[i], tmp, 1, prdy, 1);
 			ss->get_dz_values(fn_idx[i], np, tpt, 0, tmp);
 			blas_axpy(np, proj_coef[i], tmp, 1, prdz, 1);
+      delete tmp;
 #else
-			double tmp[np];
-			scalar sctmp[np];
+			double *tmp = new double[np];
+			scalar *sctmp = new scalar[np];
 			ss->get_fn_values(fn_idx[i], np, tpt, 0, tmp);
 			for (int ii = 0; ii < np; ii++) sctmp[ii] = tmp[ii];
 			blas_axpy(np, proj_coef[i], sctmp, 1, prfn, 1);
@@ -144,6 +148,8 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 			ss->get_dz_values(fn_idx[i], np, tpt, 0, tmp);
 			for (int ii = 0; ii < np; ii++) sctmp[ii] = tmp[ii];
 			blas_axpy(np, proj_coef[i], sctmp, 1, prdz, 1);
+      delete [] tmp;
+      delete [] sctmp;
 #endif
 		}
 
@@ -153,7 +159,14 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 				 sqr(rdx[k] * mdx[split] - prdx[k]) +
 				 sqr(rdy[k] * mdy[split] - prdy[k]) +
 				 sqr(rdz[k] * mdz[split] - prdz[k]));
+    delete [] prfn;
+    delete [] prdx;
+    delete [] prdy;
+    delete [] prdz;
+    delete tpt;
 	}
+
+  
 
 	sln->enable_transform(true);
 
@@ -251,8 +264,9 @@ void H1Projection::calc_projection(int split, int son, const Ord3 &order)
 			fu->get_dx_dy_dz_values(dudx, dudy, dudz);
 			sln->get_dx_dy_dz_values(drdx, drdy, drdz);
 
-			QuadPt3D tpt[np];
-			transform_points(np, pt, tr, tpt);
+			QuadPt3D *tpt = new QuadPt3D[np];
+			transform_points(np, pt, tr, tpt); // tpt is not used further, if this changes, the call to the destructor can be moved.
+      delete tpt;
 
 			scalar value = 0.0;
 			for (int k = 0; k < np; k++) {
@@ -268,10 +282,10 @@ void H1Projection::calc_projection(int split, int son, const Ord3 &order)
 	}
 
 	double d;
-	int iperm[n_fns];
+	int * iperm = new int[n_fns];
 	ludcmp(proj_mat, n_fns, iperm, &d);
 	lubksb(proj_mat, n_fns, iperm, proj_rhs);
-
+  delete [] iperm;
 	proj_coef = new double [n_fns];
 	memcpy(proj_coef, proj_rhs, n_fns * sizeof(double));
 

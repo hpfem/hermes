@@ -123,6 +123,11 @@ inline void blas_copy(int n, double *x, int incx, double *y, int incy) { dcopy_(
 
 const int HERMES_ANY = -1234;
 
+/// Pi.
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
+
 // 1D element modes
 enum EMode1D {
 	MODE_LINE = 0

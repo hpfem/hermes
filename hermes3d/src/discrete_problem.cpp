@@ -165,18 +165,19 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       u_ext.push_back(NULL);
   }
 
-  /* END IDENTICAL CODE WITH H3D */
+  /* END IDENTICAL CODE WITH H2D */
 
   bool bnd[10];			    // FIXME: magic number - maximal possible number of element surfaces
   SurfPos surf_pos[10];
-  AsmList al[wf->neq];
-  bool nat[wf->neq], isempty[wf->neq];
+  AsmList *al = new AsmList[wf->neq];
+  bool *nat = new bool[wf->neq];
+  bool *isempty = new bool[wf->neq];
   AsmList *am, *an;
 
-  ShapeFunction base_fn[wf->neq];
-  ShapeFunction test_fn[wf->neq];
+  ShapeFunction *base_fn = new ShapeFunction[wf->neq];
+  ShapeFunction *test_fn = new ShapeFunction[wf->neq];
   ShapeFunction *fu, *fv;
-  RefMap refmap[wf->neq];
+  RefMap * refmap = new RefMap[wf->neq];
   for (int i = 0; i < wf->neq; i++) {
     base_fn[i].set_shapeset(spaces[i]->get_shapeset());
     test_fn[i].set_shapeset(spaces[i]->get_shapeset());
@@ -482,6 +483,14 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       u_ext[i] = NULL;
     }
   }
+
+  // Clean up.
+  delete [] isempty;
+  delete [] nat;
+  delete [] al;
+  delete [] base_fn;
+  delete [] test_fn;
+  delete [] refmap;
 }
 
 //// matrix structure precalculation ///////////////////////////////////////////////////////////////
@@ -525,8 +534,8 @@ void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
   int ndof = get_num_dofs();
   mat->prealloc(this->ndof);
 
-  AsmList al[wf->neq];
-  Mesh *meshes[wf->neq];
+  AsmList *al = new AsmList[wf->neq];
+  Mesh **meshes = new Mesh*[wf->neq];
   bool **blocks = wf->get_blocks();
 
   // init multi-mesh traversal.
@@ -564,6 +573,8 @@ void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
   }
 
   trav.finish();
+  delete [] al;
+  delete [] meshes;
   delete [] blocks;
 
   mat->alloc();
@@ -714,7 +725,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 	e = fn_cache.e[ord_idx];
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-	mFunc *prev[wf->neq];
+	mFunc **prev = new mFunc *[wf->neq];
 	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
         if (u_ext != Tuple<Solution *>()) {
           for (int i = 0; i < wf->neq; i++) {
@@ -733,13 +744,10 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 
 	scalar res = mfv->fn(np, jwt, prev, u, v, &e, &ext);
 
-        // Clean up.
-        for (int i = 0; i < wf->neq; i++) {  
-          if (prev[i] != NULL) free_fn(prev[i]); delete prev[i]; 
-        }
-        //ext.free(); // FIXME: this needs to be unified with H2D.
-
-        return res;
+  // Clean up.
+  delete [] prev;
+  //ext.free(); // FIXME: this needs to be unified with H2D.
+  return res;
 }
 
 scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv)
@@ -809,7 +817,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 	e = fn_cache.e[ord_idx];
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-	mFunc *prev[wf->neq];
+	mFunc ** prev = new mFunc *[wf->neq];
 	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
         if (u_ext != Tuple<Solution *>()) {
           for (int i = 0; i < wf->neq; i++) {
@@ -827,13 +835,11 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 
 	scalar res = vfv->fn(np, jwt, prev, v, &e, &ext);
 
-        // Clean up.
-        for (int i = 0; i < wf->neq; i++) {  
-          if (prev[i] != NULL) free_fn(prev[i]); delete prev[i]; 
-        }
-        //ext.free();// FIXME: this needs to be unified with H2D.
-
-        return res;
+  // Clean up.
+  delete [] prev;
+  //ext.free();// FIXME: this needs to be unified with H2D.
+  
+  return res;
 }
 
 scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, ShapeFunction *fu,
@@ -904,7 +910,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
 	e = fn_cache.e[ord_idx];
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-	mFunc *prev[wf->neq];
+	mFunc **prev = new mFunc *[wf->neq];
 	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
         if (u_ext != Tuple<Solution *>()) {
           for (int i = 0; i < wf->neq; i++) {
@@ -924,13 +930,11 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
 
 	scalar res = mfs->fn(np, jwt, prev, u, v, &e, &ext);
 
-        // Clean up.
-        for (int i = 0; i < wf->neq; i++) {  
-          if (prev[i] != NULL) free_fn(prev[i]); delete prev[i]; 
-        }
-        //ext.free();// FIXME: this needs to be unified with H2D.
-
-        return res;
+  // Clean up.
+  delete [] prev;  
+  //ext.free();// FIXME: this needs to be unified with H2D.
+  
+  return res;
 }
 
 scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
@@ -997,7 +1001,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 	e = fn_cache.e[ord_idx];
 
         // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-	mFunc *prev[wf->neq];
+	mFunc **prev = new mFunc *[wf->neq];
 	// OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
         if (u_ext != Tuple<Solution *>()) {
           for (int i = 0; i < wf->neq; i++) {
@@ -1015,13 +1019,11 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 
 	scalar res = vfs->fn(np, jwt, prev, v, &e, &ext);
 
-        // Clean up.
-        for (int i = 0; i < wf->neq; i++) {  
-          if (prev[i] != NULL) free_fn(prev[i]); delete prev[i]; 
-        }
-        //ext.free();// FIXME: this needs to be unified with H2D.
-
-        return res;
+  // Clean up.
+  delete [] prev;
+  //ext.free();// FIXME: this needs to be unified with H2D.
+  
+  return res;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,7 @@
 
 #include "../config.h"
 #include "precond_ifpack.h"
+#include <string.h>
 
 #ifdef HAVE_IFPACK
 #include <Ifpack_PointRelaxation.h>

@@ -151,11 +151,51 @@ install(FILES ${INC_OUTPUT}    DESTINATION include/output)
 install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
 install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
 
+# MSVC (Win) helper macros
+
+# Makes Win32 path from Unix-style patch which is used by CMAKE. Used when a path is provided to an OS utility.
+macro(MAKE_PATH PATH_OUT PATH_IN)
+	if(WIN32)
+		string(REPLACE "/" "\\" ${PATH_OUT} ${PATH_IN})
+	else(WIN32)
+		set(${PATH_OUT} ${PATH_IN})
+	endif(WIN32)
+endmacro(MAKE_PATH)
+
+macro(BUILD_LIB_ALL LIB FLAGS)
+	set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME "${LIB}-debug")
+	set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB})
+	install(TARGETS ${LIB}
+		RUNTIME DESTINATION bin
+		ARCHIVE DESTINATION lib
+		LIBRARY DESTINATION lib)
+	MAKE_PATH(TARGET_DIR "${TARGET_ROOT}/bin")
+	get_target_property(SOURCE_DEBUG_FILE ${LIB} LOCATION_Debug)
+	MAKE_PATH(SOURCE_DEBUG_FILE ${SOURCE_DEBUG_FILE})
+	get_target_property(SOURCE_RELEASE_FILE ${LIB} LOCATION_Release)
+	MAKE_PATH(SOURCE_RELEASE_FILE ${SOURCE_RELEASE_FILE})
+	add_custom_command(TARGET ${LIB}
+		POST_BUILD
+		COMMAND if exist ${SOURCE_DEBUG_FILE} copy /Y ${SOURCE_DEBUG_FILE} ${TARGET_DIR}
+		COMMAND if exist ${SOURCE_RELEASE_FILE} copy /Y ${SOURCE_RELEASE_FILE} ${TARGET_DIR})
+	unset(TARGET_DIR)
+endmacro(BUILD_LIB_ALL)
+
 # install library
 if(H3D_REAL)
-	install(TARGETS ${HERMES_REAL_BIN} LIBRARY DESTINATION lib)
+	if(MSVC)
+		set(MSVC_DLL_DEFINES "-D_HERMESDLL")
+		BUILD_LIB_ALL(${HERMES_REAL_BIN} "${MSVC_DLL_DEFINES}")	
+	else(MSVC)
+		install(TARGETS ${HERMES_REAL_BIN} LIBRARY DESTINATION lib)
+	endif(MSVC)
 endif(H3D_REAL)
 
 if(H3D_COMPLEX)
-	install(TARGETS ${HERMES_CPLX_BIN} LIBRARY DESTINATION lib)
+	if(MSVC)
+		set(MSVC_DLL_DEFINES "-D_HERMESDLL")
+		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "${MSVC_DLL_DEFINES} -DH2D_COMPLEX")	
+	else(MSVC)
+		install(TARGETS ${HERMES_CPLX_BIN} LIBRARY DESTINATION lib)
+	endif(MSVC)
 endif(H3D_COMPLEX)
