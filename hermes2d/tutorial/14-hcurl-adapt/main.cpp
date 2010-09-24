@@ -53,7 +53,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 5.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -114,8 +114,9 @@ int main(int argc, char* argv[])
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  VectorView v_view("Solution (magnitude)", new WinGeom(0, 0, 460, 350));
+  v_view.set_min_max_range(0, 1.5);
+  OrderView  o_view("Polynomial orders", new WinGeom(470, 0, 400, 350));
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
@@ -143,6 +144,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     
     // Solve the linear system of the reference problem. If successful, obtain the solution.
+    Solution ref_sln;
     info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
@@ -155,14 +157,14 @@ int main(int argc, char* argv[])
     project_global(&space, &ref_sln, &sln, matrix_solver, H2D_HCURL_NORM); 
    
     // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
-    oview.show(&space);
+    v_view.show(&sln);
+    o_view.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
     Adapt* adaptivity = new Adapt(&space, H2D_HCURL_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors() * 100;
+    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
@@ -194,8 +196,7 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    if(done == false)
-      delete ref_space->mesh;
+    if(done == false) delete ref_space->mesh;
     delete ref_space;
     delete fep;
     
@@ -205,9 +206,8 @@ int main(int argc, char* argv[])
   verbose("Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
-  sview.set_title("Fine mesh solution");
-  sview.show_mesh(false);
-  sview.show(&ref_sln);
+  v_view.set_title("Fine mesh solution (magnitude)");
+  v_view.show(&ref_sln);
   
   // Wait for all views to be closed.
   View::wait();

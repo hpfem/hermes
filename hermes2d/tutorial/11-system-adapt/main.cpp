@@ -137,12 +137,12 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 360, 300));
+  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 400, 300));
   s_view_0.show_mesh(false);
-  ScalarView s_view_1("Solution[1]", new WinGeom(740, 0, 400, 300));
+  ScalarView s_view_1("Solution[1]", new WinGeom(780, 0, 400, 300));
   s_view_1.show_mesh(false);
-  OrderView  o_view_0("Mesh[0]", new WinGeom(370, 0, 360, 300));
-  OrderView  o_view_1("Mesh[1]", new WinGeom(1150, 0, 400, 300));
+  OrderView  o_view_0("Mesh[0]", new WinGeom(410, 0, 360, 300));
+  OrderView  o_view_1("Mesh[1]", new WinGeom(1190, 0, 400, 300));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 
@@ -172,7 +172,8 @@ int main(int argc, char* argv[])
     
     // Solve the linear system of the reference problem. If successful, obtain the solutions.
     info("Solving the matrix problem.");
-    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
+    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                            Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     else error ("Matrix solver failed.\n");
   
     // Time measurement.
@@ -180,7 +181,8 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
+                   Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     s_view_0.show(&u_sln); 
@@ -212,7 +214,7 @@ int main(int argc, char* argv[])
          err_exact_abs, norm_exact_vals, err_exact_abs_total, norm_exact_total, err_exact_rel_total))
       error("Error in calc_errors.");
 
-     // Report results.
+    // Report results.
     info("ndof[0]: %d, ref_ndof[0]: %d, err_est_rel[0]: %g%%",
          u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(),
          err_est_abs[0]/norm_est_vals[0]*100);

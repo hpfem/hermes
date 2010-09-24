@@ -71,7 +71,7 @@ void VectorView::show(MeshFunction* vsln, double eps)
 void VectorView::show(MeshFunction* xsln, MeshFunction* ysln, double eps)
 {
   if (xsln == ysln)
-    error("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
+    error("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
   show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
 }
 

@@ -15,19 +15,19 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;			// Number of initial uniform mesh refinements.
-const int P_INIT = 1;				// Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;			// Error threshold for element refinement of the adapt(...) function 
-						// (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
-						// times total error is processed. If more elements have similar errors, 
-						// refine all to keep the mesh symmetric.
-						// STRATEGY = 1 ... refine all elements whose error is larger
-						// than THRESHOLD times maximum element error.
-const double ERR_STOP  = 1;			// Stopping criterion for adaptivity (rel. error tolerance between the
-						// fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;			// Adaptivity process stops when the number of degrees of freedom grows
-						// over this limit. This is to prevent h-adaptivity to go on forever.
-bool do_output = true;				// generate output files (if true)
+const int INIT_REF_NUM = 3;			  // Number of initial uniform mesh refinements.
+const int P_INIT = 1;				  // Initial polynomial degree of all mesh elements.
+const double THRESHOLD = 0.3;			  // Error threshold for element refinement of the adapt(...) function 
+						  // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
+						  // times total error is processed. If more elements have similar errors, 
+						  // refine all to keep the mesh symmetric.
+						  // STRATEGY = 1 ... refine all elements whose error is larger
+						  // than THRESHOLD times maximum element error.
+const double ERR_STOP  = 1;			  // Stopping criterion for adaptivity (rel. error tolerance between the
+						  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;			  // Adaptivity process stops when the number of degrees of freedom grows
+						  // over this limit. This is to prevent h-adaptivity to go on forever.
+bool do_output = true;				  // generate output files (if true)
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
