@@ -92,7 +92,7 @@ Solution::Solution(Mesh *mesh) : MeshFunction(mesh) {
 	_F_
 
 	transform = true;
-	type = UNDEF;
+	type = HERMES_UNDEF;
 	num_components = 0;
 	mono_coefs = NULL;
 	elem_coefs[0] = elem_coefs[1] = elem_coefs[2] = NULL;
@@ -125,8 +125,8 @@ void Solution::free() {
 void Solution::assign(Solution *sln) {
 	_F_
 
-	if (sln->type == UNDEF) EXIT("Solution being assigned is uninitialized.");
-	if (sln->type != SLN) { copy(sln); return; }
+	if (sln->type == HERMES_UNDEF) EXIT("Solution being assigned is uninitialized.");
+	if (sln->type != HERMES_SLN) { copy(sln); return; }
 
 	free();
 
@@ -146,13 +146,13 @@ void Solution::assign(Solution *sln) {
 	num_components = sln->num_components;
 	seq = sln->seq;
 
-	sln->type = UNDEF;
+	sln->type = HERMES_UNDEF;
 }
 
 void Solution::copy(const Solution *sln) {
 	_F_
 
-	if (sln->type == UNDEF) EXIT("Solution being copied is uninitialized.");
+	if (sln->type == HERMES_UNDEF) EXIT("Solution being copied is uninitialized.");
 
 	free();
 
@@ -164,7 +164,7 @@ void Solution::copy(const Solution *sln) {
 	type = sln->type;
 	num_components = sln->num_components;
 
-	if (sln->type == SLN) { // standard solution: copy coefficient arrays
+	if (sln->type == HERMES_SLN) { // standard solution: copy coefficient arrays
 		num_coefs = sln->num_coefs;
 		num_elems = sln->num_elems;
 
@@ -198,7 +198,7 @@ void Solution::set_exact(exact_fn_t exactfn) {
 	this->mesh = mesh;
 	exact_fn = exactfn;
 	num_components = 1;
-	type = EXACT;
+	type = HERMES_EXACT;
 	num_dofs = -1;
 	seq = g_mfn_seq++;
 }
@@ -209,7 +209,7 @@ void Solution::set_exact(exact_vec_fn_t exactfn) {
 	this->mesh = mesh;
 	exact_vec_fn = exactfn;
 	num_components = 3;
-	type = EXACT;
+	type = HERMES_EXACT;
 	num_dofs = -1;
 	seq = g_mfn_seq++;
 }
@@ -221,7 +221,7 @@ void Solution::set_const(scalar c) {
 	cnst[0] = c;
 	cnst[1] = cnst[2] = 0.0;
 	num_components = 1;
-	type = CNST;
+	type = HERMES_CONST;
 	num_dofs = -1;
 	seq = g_mfn_seq++;
 }
@@ -234,7 +234,7 @@ void Solution::set_const(scalar c0, scalar c1, scalar c2) {
 	cnst[1] = c1;
 	cnst[2] = c2;
 	num_components = 3;
-	type = CNST;
+	type = HERMES_CONST;
 	num_dofs = -1;
 	seq = g_mfn_seq++;
 }
@@ -364,7 +364,7 @@ void Solution::set_active_element(Element *e) {
 	free_cur_node();
 
 	mode = e->get_mode();
-	if (type == SLN) {
+	if (type == HERMES_SLN) {
 		order = elem_orders[element->id];
 		int np;
 		switch (mode) {
@@ -382,18 +382,14 @@ void Solution::set_active_element(Element *e) {
 			make_dz_coefs(mode, order, mono, dxdydz_coefs[i][DZ] = dxdydz_buffer + m);  m += np;
 		}
 	}
-	else if (type == EXACT) {
+	else if (type == HERMES_EXACT) {
 		switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER_TETRA); break;
 			case MODE_HEXAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
 			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
-#ifdef _WIN32
-	else if (type == CNST) {
-#else
-  else if (type == CONST) {
-#endif
+	else if (type == HERMES_CONST) {
     switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(0); break;
 			case MODE_HEXAHEDRON: order = Ord3(0, 0, 0); break;
@@ -514,7 +510,7 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 	sptype = space->get_type();
 	Shapeset *ss = space->get_shapeset();
 	num_components = ss->get_num_components();
-	type = SLN;
+	type = HERMES_SLN;
 	num_dofs = space->get_dof_count();
 
 	// allocate the coefficient arrays
@@ -605,13 +601,10 @@ static inline void vec_x_vec_p_vec(int n, scalar *y, scalar *x, scalar *z) {
 void Solution::precalculate(const int np, const QuadPt3D *pt, int mask) {
 	_F_
 	switch (type) {
-		case SLN: precalculate_fe(np, pt, mask); break;
-		case EXACT: precalculate_exact(np, pt, mask); break;
-#ifdef _WIN32
-    case CNST: precalculate_const(np, pt, mask); break;
-#else
-    case CONST: precalculate_const(np, pt, mask); break;
-#endif
+		case HERMES_SLN: precalculate_fe(np, pt, mask); break;
+		case HERMES_EXACT: precalculate_exact(np, pt, mask); break;
+                case HERMES_CONST: precalculate_const(np, pt, mask); break;
+
 		default: EXIT("WTF?");
 	}
 }
@@ -862,26 +855,19 @@ Ord3 Solution::get_order()
 	switch (element->get_mode()) {
 		case MODE_HEXAHEDRON:
 			switch (type) {
-				case SLN: return elem_orders[element->id];
-				case EXACT: return Ord3(10, 10, 10);
-#ifdef _WIN32
-        case CNST: return Ord3(0, 0, 0);
-#else
-        case CONST: return Ord3(0, 0, 0);
-#endif
+				case HERMES_SLN: return elem_orders[element->id];
+				case HERMES_EXACT: return Ord3(10, 10, 10);
+                                case HERMES_CONST: return Ord3(0, 0, 0);
+
 				default: EXIT("WTF?");
 			}
 			break;
 
 		case MODE_TETRAHEDRON:
 			switch (type) {
-				case SLN: return elem_orders[element->id];
-				case EXACT: return Ord3(10);
-#ifdef _WIN32
-        case CNST: return Ord3(0);
-#else
-        case CONST: return Ord3(0);
-#endif
+				case HERMES_SLN: return elem_orders[element->id];
+				case HERMES_EXACT: return Ord3(10);
+                                case HERMES_CONST: return Ord3(0);
 				default: EXIT("WTF?");
 			}
 			break;
