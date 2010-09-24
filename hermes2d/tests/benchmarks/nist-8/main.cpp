@@ -6,23 +6,26 @@
 
 using namespace RefinementSelectors;
 
-//  This is the eight in the series of NIST benchmarks with known exact solutions. It solves
-//  the Helmholtz equation and has an oscillatory solution.
-//
-//  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
-//                          NIST Report 7668, February 2010.
-//
-//  The problem is made harder for adaptive algorithms by decreasing the parameter ALPHA.
-//
-//  PDE: -Laplace u - u/(ALPHA + r) = f where r(x,y) = sqrt(x*x + y*y)
-//
-//  Known exact solution, see functions fn() and fndd().
-//
-//  Domain: unit square (0, 1)x(0, 1), see the file square.mesh.
-//
-//  BC:  Dirichlet, given by exact solution.
-//
-//  The following parameters can be changed:
+/** \addtogroup t_bench_nist-8 Benchmarks/nist-8
+ *  \{
+ *  \brief This test makes sure that the benchmark "nist-8" works correctly.
+ *
+ *  \section s_params Parameters
+ *   - INIT_REF_NUM=1
+ *   - P_INIT=2
+ *   - THRESHOLD=0.3
+ *   - STRATEGY=0
+ *   - CAND_LIST=H2D_H_ANISO
+ *   - MESH_REGULARITY=-1
+ *   - CONV_EXP=1.0
+ *   - ERR_STOP=1e-3
+ *   - NDOF_STOP=100000
+ *   - matrix_solver = SOLVER_UMFPACK
+ *
+ *  \section s_res Results
+ *   - DOFs: 1241
+ *   - Adaptivity steps: 33 
+ */
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
@@ -101,10 +104,6 @@ int main(int argc, char* argv[])
   // Set exact solution.
   ExactSolution exact(&mesh, fndd);
 
-  // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
-
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
 
@@ -146,11 +145,7 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
     info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, H2D_H1_NORM, &ref_sln, &sln, matrix_solver);
-
-    // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
-    oview.show(&space);
+    project_global(&space, &ref_sln, &sln, matrix_solver);
 
     // Calculate element errors and total error estimate.
     info("Calculating error.");
@@ -207,7 +202,19 @@ int main(int argc, char* argv[])
 
   verbose("Total running time: %g s", cpu_time.accumulated());
 
-  // Wait for all views to be closed.
-  View::wait();
-  return 0;
+  int ndof = get_num_dofs(&space);
+
+#define ERROR_SUCCESS                               0
+#define ERROR_FAILURE                               -1
+  int n_dof_allowed = 3300;
+  printf("n_dof_actual = %d\n", ndof);
+  printf("n_dof_allowed = %d\n", n_dof_allowed);
+  if (ndof <= n_dof_allowed) {
+    printf("Success!\n");
+    return ERROR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERROR_FAILURE;
+  }
 }
