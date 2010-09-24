@@ -147,10 +147,10 @@ H2D_API int get_num_dofs(Tuple<Space *> spaces);
 // PDE, the PDE will just be solved. 
 void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
-H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction *> source_meshfns, 
-                    scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
+H2D_API void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
+                    scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<int> proj_norms = Tuple<int>());
 
-H2D_API void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
+H2D_API void project_global(Tuple<Space *> spaces, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<int> proj_norms = Tuple<int>());
 
 H2D_API void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 

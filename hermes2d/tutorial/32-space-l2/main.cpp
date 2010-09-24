@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   Solution sln;
   Solution sln_exact(&mesh, F);
 
-  project_global(&space, H2D_L2_NORM, &sln_exact, &sln, matrix_solver);
+  project_global(&space, &sln_exact, &sln, matrix_solver, H2D_L2_NORM);
 
   // Visualize the solution.
   ScalarView view1("Projection", 610, 0, 600, 500);

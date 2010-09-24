@@ -126,17 +126,23 @@ int main(int argc, char* argv[])
   wf.add_vector_form(0, linear_form_0, linear_form_0_ord);
   wf.add_vector_form(1, linear_form_1, linear_form_1_ord);
 
-  // Initialize coarse and reference mesh Solutions.
+  // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
+
+  // Initialize exact solutions.
+  ExactSolution u_exact(&u_mesh, uexact);
+  ExactSolution v_exact(&v_mesh, vexact);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView u_sview("Solution u", new WinGeom(0, 0, 360, 300));
-  OrderView  u_oview("Polynomial orders u", new WinGeom(370, 0, 360, 300));
-  ScalarView v_sview("Solution v", new WinGeom(740, 0, 400, 300));
-  OrderView  v_oview("Polynomial orders v", new WinGeom(1150, 0, 400, 300));
+  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 360, 300));
+  s_view_0.show_mesh(false);
+  ScalarView s_view_1("Solution[1]", new WinGeom(740, 0, 400, 300));
+  s_view_1.show_mesh(false);
+  OrderView  o_view_0("Mesh[0]", new WinGeom(370, 0, 360, 300));
+  OrderView  o_view_1("Mesh[1]", new WinGeom(1150, 0, 400, 300));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 
@@ -150,7 +156,6 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-
     Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&u_space, &v_space));
 
     // Assemble the reference problem.
@@ -175,14 +180,13 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                   Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
-    u_sview.show(&u_sln);
-    v_sview.show(&v_sln);
-    u_oview.show(&u_space);
-    v_oview.show(&v_space);
+    s_view_0.show(&u_sln); 
+    o_view_0.show(&u_space);
+    s_view_1.show(&v_sln); 
+    o_view_1.show(&v_space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
@@ -190,18 +194,46 @@ int main(int argc, char* argv[])
     adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     double err_est = adaptivity->calc_elem_errors() * 100;
 
-    // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
-      get_num_dofs(Tuple<Space*>(&u_space, &v_space)), get_num_dofs(*ref_spaces), err_est);
-
     // Time measurement.
     cpu_time.tick();
 
+    // Calculate error estimate and exact error for each solution component.
+    Tuple<double> err_est_abs, err_exact_abs;
+    Tuple<double> norm_est_vals, norm_exact_vals;
+    double err_est_abs_total, err_exact_abs_total;
+    double norm_est_total, norm_exact_total;
+    double err_est_rel_total, err_exact_rel_total;
+
+    if (!calc_errors(Tuple<Solution* >(&u_sln, &v_sln), Tuple<Solution *> (&u_ref_sln, &v_ref_sln), 
+         err_est_abs, norm_est_vals, err_est_abs_total, norm_est_total, err_est_rel_total))
+      error("Error in calc_errors.");
+
+    if(!calc_errors(Tuple<Solution* >(&u_sln, &v_sln), Tuple<Solution *> (&u_exact, &v_exact), 
+         err_exact_abs, norm_exact_vals, err_exact_abs_total, norm_exact_total, err_exact_rel_total))
+      error("Error in calc_errors.");
+
+     // Report results.
+    info("ndof[0]: %d, ref_ndof[0]: %d, err_est_rel[0]: %g%%",
+         u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(),
+         err_est_abs[0]/norm_est_vals[0]*100);
+    info("err_exact_rel[0]: %g%%", err_exact_abs[0]/norm_exact_vals[0]*100);
+    info("ndof[1]: %d, ref_ndof[1]: %d, err_est_rel[1]: %g%%",
+         v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs(),
+         err_est_abs[1]/norm_est_vals[1]*100);
+    info("err_exact_rel[1]: %g%%", err_exact_abs[1]/norm_exact_vals[1]*100);
+    info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%",
+         get_num_dofs(Tuple<Space *>(&u_space, &v_space)),
+         get_num_dofs(*ref_spaces), err_est_rel_total);
+
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est);
-    graph_dof.save("conv_dof.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est);
-    graph_cpu.save("conv_cpu.dat");
+    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
+    graph_cpu_est.save("conv_cpu_est.dat");
+    graph_dof_exact.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
+    graph_dof_exact.save("conv_dof_exact.dat");
+    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
+    graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est too large, adapt the mesh.
     if (err_est < ERR_STOP) 
@@ -232,12 +264,12 @@ int main(int argc, char* argv[])
   verbose("Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
-  u_sview.set_title("Fine mesh solution u");
-  u_sview.show_mesh(false);
-  u_sview.show(&u_ref_sln);
-  v_sview.set_title("Fine mesh solution v");
-  v_sview.show_mesh(false);
-  v_sview.show(&v_ref_sln);
+  s_view_0.set_title("Fine mesh Solution[0]");
+  s_view_0.show_mesh(false);
+  s_view_0.show(&u_ref_sln);
+  s_view_1.set_title("Fine mesh Solution[1]");
+  s_view_1.show_mesh(false);
+  s_view_1.show(&v_ref_sln);
 
   // Wait for all views to be closed.
   View::wait();
