@@ -158,7 +158,7 @@ void Solution::init()
   memset(elems,  0, sizeof(elems));
   memset(oldest, 0, sizeof(oldest));
   transform = true;
-  type = UNDEF;
+  type = HERMES_UNDEF;
   own_mesh = false;
   num_components = 0;
   e_last = NULL;
@@ -213,8 +213,8 @@ Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh())
 
 void Solution::assign(Solution* sln)
 {
-  if (sln->type == UNDEF) error("Solution being assigned is uninitialized.");
-  if (sln->type != SLN) { copy(sln); return; }
+  if (sln->type == HERMES_UNDEF) error("Solution being assigned is uninitialized.");
+  if (sln->type != HERMES_SLN) { copy(sln); return; }
 
   free();
 
@@ -234,14 +234,14 @@ void Solution::assign(Solution* sln)
   space_type = sln->space_type;
   num_components = sln->num_components;
 
-  sln->type = UNDEF;
+  sln->type = HERMES_UNDEF;
   memset(sln->tables, 0, sizeof(sln->tables));
 }
 
 
 void Solution::copy(const Solution* sln)
 {
-  if (sln->type == UNDEF) error("Solution being copied is uninitialized.");
+  if (sln->type == HERMES_UNDEF) error("Solution being copied is uninitialized.");
 
   free();
 
@@ -255,7 +255,7 @@ void Solution::copy(const Solution* sln)
   num_components = sln->num_components;
   num_dofs = sln->num_dofs;
 
-  if (sln->type == SLN) // standard solution: copy coefficient arrays
+  if (sln->type == HERMES_SLN) // standard solution: copy coefficient arrays
   {
     num_coefs = sln->num_coefs;
     num_elems = sln->num_elems;
@@ -428,7 +428,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   free();
 
   num_components = pss->get_num_components();
-  type = SLN;
+  type = HERMES_SLN;
   num_dofs = space->get_num_dofs();
 
   // copy the mesh   TODO: share meshes between solutions
@@ -522,7 +522,7 @@ void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
   this->mesh = mesh;
   exactfn1 = exactfn;
   num_components = 1;
-  type = EXACT;
+  type = HERMES_EXACT;
   exact_mult = 1.0;
   num_dofs = -1;
 }
@@ -534,7 +534,7 @@ void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
   this->mesh = mesh;
   exactfn2 = exactfn;
   num_components = 2;
-  type = EXACT;
+  type = HERMES_EXACT;
   exact_mult = 1.0;
   num_dofs = -1;
 }
@@ -547,7 +547,7 @@ void Solution::set_const(Mesh* mesh, scalar c)
   cnst[0] = c;
   cnst[1] = 0.0;
   num_components = 1;
-  type = CNST;
+  type = HERMES_CONST;
   num_dofs = -1;
 }
 
@@ -559,7 +559,7 @@ void Solution::set_const(Mesh* mesh, scalar c0, scalar c1)
   cnst[0] = c0;
   cnst[1] = c1;
   num_components = 2;
-  type = CNST;
+  type = HERMES_CONST;
   num_dofs = -1;
 }
 
@@ -606,17 +606,17 @@ void Solution::enable_transform(bool enable)
 
 void Solution::multiply(scalar coef)
 {
-  if (type == SLN)
+  if (type == HERMES_SLN)
   {
     for (int i = 0; i < num_coefs; i++)
       mono_coefs[i] *= coef;
   }
-  else if (type == CNST)
+  else if (type == HERMES_CONST)
   {
     cnst[0] *= coef;
     cnst[1] *= coef;
   }
-  else if (type == EXACT)
+  else if (type == HERMES_EXACT)
   {
     exact_mult *= coef;
   }
@@ -691,7 +691,7 @@ void Solution::set_active_element(Element* e)
     elems[cur_quad][cur_elem] = e;
   }
 
-  if (type == SLN)
+  if (type == HERMES_SLN)
   {
     int o = order = elem_orders[element->id];
     int n = mode ? sqr(o+1) : (o+1)*(o+2)/2;
@@ -708,11 +708,11 @@ void Solution::set_active_element(Element* e)
       make_dx_coefs(mode, o, dxdy_coefs[i][2], dxdy_coefs[i][5] = dxdy_buffer+m);  m += n;
     }
   }
-  else if (type == EXACT)
+  else if (type == HERMES_EXACT)
   {
     order = 20; // fixme
   }
-  else if (type == CNST)
+  else if (type == HERMES_CONST)
   {
     order = 0;
   }
@@ -855,7 +855,7 @@ int Solution::get_edge_fn_order(int edge, Space* space, Element* e)
 {
   if (e == NULL) e = element;
   
-  if (type == SLN && space != NULL) {
+  if (type == HERMES_SLN && space != NULL) {
     return space->get_edge_order(e, edge); 
   } else {
     return ScalarFunction::get_edge_fn_order(edge);
@@ -872,7 +872,7 @@ void Solution::precalculate(int order, int mask)
   H2D_CHECK_ORDER(quad, order);
   int np = quad->get_num_points(order);
 
-  if (type == SLN)
+  if (type == HERMES_SLN)
   {
     // if we are required to transform vectors, we must precalculate both their components
     const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
@@ -941,7 +941,7 @@ void Solution::precalculate(int order, int mask)
     if (transform)
       transform_values(order, node, newmask, oldmask, np);
   }
-  else if (type == EXACT)
+  else if (type == HERMES_EXACT)
   {
     if (mask & ~H2D_FN_DEFAULT)
       error("Cannot obtain second derivatives of an exact solution.");
@@ -998,7 +998,7 @@ void Solution::precalculate(int order, int mask)
       }
     }
   }
-  else if (type == CNST)
+  else if (type == HERMES_CONST)
   {
     if (mask & ~H2D_FN_DEFAULT)
       error("Second derivatives of a constant solution not implemented.");
@@ -1030,9 +1030,9 @@ void Solution::save(const char* filename, bool compress)
 {
   int i;
 
-  if (type == EXACT) error("Exact solution cannot be saved to a file.");
-  if (type == CNST)  error("Constant solution cannot be saved to a file.");
-  if (type == UNDEF) error("Cannot save -- uninitialized solution.");
+  if (type == HERMES_EXACT) error("Exact solution cannot be saved to a file.");
+  if (type == HERMES_CONST)  error("Constant solution cannot be saved to a file.");
+  if (type == HERMES_UNDEF) error("Cannot save -- uninitialized solution.");
 
   // open the stream
   std::string fname = filename;
@@ -1084,7 +1084,7 @@ void Solution::load(const char* filename)
   int i;
 
   free();
-  type = SLN;
+  type = HERMES_SLN;
 
   int len = strlen(filename);
   bool compressed = (len > 3 && !strcmp(filename + len - 3, ".gz"));
@@ -1258,7 +1258,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
   if (mask >= 0x40) { a = 1; mask >>= 6; }
   while (!(mask & 1)) { mask >>= 1; b++; }
 
-  if (type == EXACT)
+  if (type == HERMES_EXACT)
   {
     if (num_components == 1)
     {
@@ -1278,12 +1278,12 @@ scalar Solution::get_pt_value(double x, double y, int item)
     }
     error("Cannot obtain second derivatives of an exact solution.");
   }
-  else if (type == CNST)
+  else if (type == HERMES_CONST)
   {
     if (b = 0) return cnst[a];
     return 0.0;
   }
-  else if (type == UNDEF)
+  else if (type == HERMES_UNDEF)
   {
     error("Cannot obtain values -- uninitialized solution. The solution was either "
           "not calculated yet or you used the assignment operator which destroys "

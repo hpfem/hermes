@@ -175,7 +175,7 @@ public:
 
 protected:
 
-  enum { SLN, EXACT, CNST, UNDEF } type;
+  enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } type;
 
   bool own_mesh;
   bool transform;
