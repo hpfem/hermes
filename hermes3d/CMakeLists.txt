@@ -107,15 +107,19 @@ endif(DEBUG)
 
 # If using PETSc or UMFPack, we need to enable Fortran support and look for BLAS and LAPACK
 if(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
+	if(NOT MSVC)
 	enable_language(Fortran)
 	find_package(LAPACK REQUIRED)
+	endif(NOT MSVC)
 endif(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
 
 
 # find necessary packages
 find_package(JUDY REQUIRED)
-enable_language(Fortran)		# need a fortran compiler for checking BLAS
-find_package(BLAS REQUIRED)
+if(NOT MSVC)
+	enable_language(Fortran)		# need a fortran compiler for checking BLAS
+	find_package(BLAS REQUIRED)
+endif(NOT MSVC)
 
 # solvers
 if(WITH_PETSC)
