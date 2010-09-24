@@ -192,10 +192,10 @@ int main(int argc, char* argv[])
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, jac_TT, jac_TT_ord);
   wf.add_matrix_form(0, 1, jac_Tphi, jac_Tphi_ord);
-  wf.add_vector_form(0, res_T, res_T_ord, H2D_ANY, &T_prev_time);
+  wf.add_vector_form(0, res_T, res_T_ord, HERMES_ANY, &T_prev_time);
   wf.add_matrix_form(1, 0, jac_phiT, jac_phiT_ord);
   wf.add_matrix_form(1, 1, jac_phiphi, jac_phiphi_ord);
-  wf.add_vector_form(1, res_phi, res_phi_ord, H2D_ANY, &phi_prev_time);
+  wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
   
   // Initialize the nonlinear system.
   Tuple<int> proj_norms(H2D_H1_NORM, H2D_H1_NORM);
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
     info("Projecting to obtain initial vector for the Newton's method.");
 
     scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
-    project_global(spaces, proj_norms, time_iterates, coeff_vec);
+    project_global(spaces, time_iterates, coeff_vec, matrix_solver, proj_norms);
     T_prev_newton.set_coeff_vector(&space_T, coeff_vec);
     phi_prev_newton.set_coeff_vector(&space_phi, coeff_vec);
 
