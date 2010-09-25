@@ -3,22 +3,22 @@
 /* #undef WITH_MUMPS */
 /* #undef WITH_PETSC */
 /* #undef WITH_HDF5 */
-#define WITH_EXODUSII
+/* #undef WITH_EXODUSII */
 /* #undef WITH_MPI */
 
 // trilinos
-#define WITH_TRILINOS
-#define HAVE_AMESOS
-#define HAVE_AZTECOO
-#define HAVE_EPETRA
-#define HAVE_IFPACK
-#define HAVE_ML
-#define HAVE_NOX
+/* #undef WITH_TRILINOS */
+/* #undef HAVE_AMESOS */
+/* #undef HAVE_AZTECOO */
+/* #undef HAVE_EPETRA */
+/* #undef HAVE_IFPACK */
+/* #undef HAVE_ML */
+/* #undef HAVE_NOX */
 /* #undef HAVE_KOMPLEX */
 
 /* #undef TRACING */
 #define DEBUG
-#define DEBUG_ORDER
+/* #undef DEBUG_ORDER */
 
 // elements
 #define WITH_TETRA
