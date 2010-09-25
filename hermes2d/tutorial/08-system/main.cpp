@@ -16,7 +16,7 @@
 // The following parameters can be changed:
 
 const int P_INIT = 6;                                      // Initial polynomial degree of all elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                            // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.

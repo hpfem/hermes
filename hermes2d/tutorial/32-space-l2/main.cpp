@@ -10,7 +10,7 @@
 
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Polynomial degree of mesh elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Projected function.

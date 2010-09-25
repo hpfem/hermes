@@ -19,7 +19,7 @@
 int P_INIT = 6;                                   // Uniform polynomial degree of all mesh elements.
 int UNIFORM_REF_LEVEL = 2;                        // Number of initial uniform mesh refinements.
 int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
