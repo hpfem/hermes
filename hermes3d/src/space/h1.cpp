@@ -19,6 +19,7 @@
 
 #include "../h3dconfig.h"
 #include "h1.h"
+#include "../shapeset/h1lobattohex.h"
 #include "../matrix.h"
 #include "../refmap.h"
 #include <common/bitarray.h>
@@ -27,48 +28,63 @@
 #include <common/callstack.h>
 
 
-H1Space::H1Space(Mesh *mesh, Shapeset *ss) :
-	Space(mesh, ss)
+H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
+                 scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init, 
+                 Shapeset* shapeset)
+       : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-	_F_
-	this->type = H1;
+  _F_
+  // FIXME: this will fail if the mesh contains tetrahedra. 
+  if (shapeset == NULL) this->shapeset = new H1ShapesetLobattoHex;
+  this->type = H1;
+
+  // set uniform poly order in elements
+  if (p_init.x < 1 || p_init.y < 1 || p_init.x < 1) error("P_INIT must be >=  1 in an H1 space.");
+  else this->set_uniform_order_internal(p_init);
+
+  // enumerate basis functions
+  this->assign_dofs();
 }
 
 H1Space::~H1Space() {
-	_F_
+  _F_
 }
 
-Space *H1Space::dup(Mesh *mesh) const {
-	_F_
-	H1Space *space = new H1Space(mesh, shapeset);
-	space->copy_callbacks(this);
-	return space;
+Space *H1Space::dup(Mesh *mesh) const 
+{
+  _F_
+  H1Space *space = new H1Space(this->mesh, NULL, NULL, -1, this->shapeset);
+  space->copy_callbacks(this);
+  return space;
 }
 
 // ndofs ////
 
-int H1Space::get_vertex_ndofs() {
-	return 1;
+int H1Space::get_vertex_ndofs() 
+{
+  return 1;
 }
 
-int H1Space::get_edge_ndofs(Ord1 order) {
-	return order - 1;
+int H1Space::get_edge_ndofs(Ord1 order) 
+{
+  return order - 1;
 }
 
-int H1Space::get_face_ndofs(Ord2 order) {
-	switch (order.type) {
-		case MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
-		case MODE_QUAD: return (order.x - 1) * (order.y - 1);
-		default: EXIT(H3D_ERR_UNKNOWN_MODE); return -1;
-	}
+int H1Space::get_face_ndofs(Ord2 order) 
+{
+  switch (order.type) {
+    case MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
+    case MODE_QUAD: return (order.x - 1) * (order.y - 1);
+    default: EXIT(H3D_ERR_UNKNOWN_MODE); return -1;
+  }
 }
 
 int H1Space::get_element_ndofs(Ord3 order) {
-	switch (order.type) {
-		case MODE_TETRAHEDRON: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
-		case MODE_HEXAHEDRON: return (order.x - 1) * (order.y - 1) * (order.z - 1);
-		default: EXIT(H3D_ERR_UNKNOWN_MODE); return -1;
-	}
+  switch (order.type) {
+    case MODE_TETRAHEDRON: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
+    case MODE_HEXAHEDRON: return (order.x - 1) * (order.y - 1) * (order.z - 1);
+    default: EXIT(H3D_ERR_UNKNOWN_MODE); return -1;
+  }
 }
 
 void H1Space::assign_dofs_internal() {

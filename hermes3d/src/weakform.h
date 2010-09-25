@@ -29,9 +29,9 @@
 
 // Bilinear form symmetry flag, see WeakForm::add_matrix_form
 enum SymFlag {
-	ANTISYM = -1,
-	UNSYM = 0,
-	SYM = 1
+        HERMES_ANTISYM = -1,
+	HERMES_UNSYM = 0,
+	HERMES_SYM = 1
 };
 
 /// Matrix and vector forms.
@@ -62,10 +62,10 @@ public:
 
 	int def_area(Tuple<int> area_markers);
 
-	void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym = UNSYM,
+	void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym = HERMES_UNSYM,
 	                 int area = HERMES_ANY, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ());
         // single equation case
-	void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym = UNSYM,
+	void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym = HERMES_UNSYM,
 	                 int area = HERMES_ANY, Tuple<MeshFunction*> ext = Tuple<MeshFunction*> ())
         {
 	  add_matrix_form(0, 0, fn, ord, sym, area, ext);

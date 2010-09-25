@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   L2Space space(&mesh, P_INIT);
 
   // View basis functions.
-  BaseView bview("BaseView", 0, 0, 600, 500);
+  BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
   bview.show(&space);
   View::wait(H2DV_WAIT_KEYPRESS);
 
@@ -46,10 +46,10 @@ int main(int argc, char* argv[])
   Solution sln;
   Solution sln_exact(&mesh, F);
 
-  project_global(&space, &sln_exact, &sln, matrix_solver, H2D_L2_NORM);
+  project_global(&space, &sln_exact, &sln, matrix_solver, HERMES_L2_NORM);
 
   // Visualize the solution.
-  ScalarView view1("Projection", 610, 0, 600, 500);
+  ScalarView view1("Projection", new WinGeom(610, 0, 600, 500));
   view1.show(&sln);
 
   // Wait for all views to be closed.

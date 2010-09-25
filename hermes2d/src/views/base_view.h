@@ -43,7 +43,7 @@ public:
 #endif
   BaseView(char* title, WinGeom* wg = NULL);
 
-  void show(Space* space, double eps = H2D_EPS_LOW, int item = H2D_FN_VAL_0);
+  void show(Space* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
 
   virtual ~BaseView() { free(); }
 
@@ -77,7 +77,7 @@ public:
   BaseView(const char* title = "BaseView", WinGeom* wg = NULL) {};
   BaseView(char* title, WinGeom* wg = NULL) {};
   virtual ~BaseView() {}
-  void show(Space* space, double eps = H2D_EPS_LOW, int item = H2D_FN_VAL_0)
+  void show(Space* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0)
      { verbose("BaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }
 };
 

@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   WeakForm wf(1, JFNK ? true : false);
   wf.add_matrix_form(callback(jacobian));
   wf.add_matrix_form_surf(callback(jacobian_surf));
-  wf.add_vector_form(callback(residual), H2D_ANY, &t_prev_time);
+  wf.add_vector_form(callback(residual), HERMES_ANY, &t_prev_time);
   wf.add_vector_form_surf(callback(residual_surf));
 
   // Initialize the finite element problem.
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solution on the FE mesh.");
   Vector* coeff_vec = new AVector(ndof);
-  project_global(&space, H2D_H1_NORM, &t_prev_time, &t_prev_time, coeff_vec);
+  project_global(&space, HERMES_H1_NORM, &t_prev_time, &t_prev_time, coeff_vec);
 
   // Initialize NOX solver.
   NoxSolver solver(&fep);

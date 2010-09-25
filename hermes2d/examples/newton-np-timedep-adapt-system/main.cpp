@@ -195,19 +195,19 @@ int main (int argc, char* argv[]) {
   WeakForm wf(2);
   // Add the bilinear and linear forms.
   if (TIME_DISCR == 1) {  // Implicit Euler.
-    wf.add_vector_form(0, callback(Fc_euler), H2D_ANY, Tuple<MeshFunction*>(&C_prev_time));
-    wf.add_vector_form(1, callback(Fphi_euler), H2D_ANY);
-    wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), H2D_UNSYM);
-    wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), H2D_UNSYM);
+    wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, Tuple<MeshFunction*>(&C_prev_time));
+    wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY);
+    wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
+    wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
   } else {
-    wf.add_vector_form(0, callback(Fc_cranic), H2D_ANY, Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
-    wf.add_vector_form(1, callback(Fphi_cranic), H2D_ANY);
-    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&phi_prev_time));
-    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&C_prev_time));
-    wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), H2D_UNSYM);
-    wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), H2D_UNSYM);
+    wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY, Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
+    wf.add_vector_form(1, callback(Fphi_cranic), HERMES_ANY);
+    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&phi_prev_time));
+    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&C_prev_time));
+    wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_UNSYM);
+    wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_UNSYM);
   }
 
   // Neumann voltage boundary.
@@ -218,7 +218,7 @@ int main (int argc, char* argv[]) {
   // Initialize adaptivity parameters.
   double to_be_processed = 0;
   AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, MESH_REGULARITY,
-                          to_be_processed, H2D_TOTAL_ERROR_REL, H2D_ELEMENT_ERROR_REL);
+                          to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
 
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -257,7 +257,7 @@ int main (int argc, char* argv[]) {
     }
 
     // Update the coefficient vector and u_prev_time.
-    project_global(Tuple<Space*>(&C, &phi), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+    project_global(Tuple<Space*>(&C, &phi), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
                    Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time),
                    Tuple<Solution*>(&C_prev_time, &phi_prev_time), coeff_vec);
 
@@ -266,7 +266,7 @@ int main (int argc, char* argv[]) {
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
     // The NULL pointers mean that we are not interested in visualization during the Newton's loop.
     solve_newton_adapt(Tuple<Space*>(&C, &phi), &wf, coeff_vec, matrix_solver,
-                       Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+                       Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
                        Tuple<Solution*>(&C_sln, &phi_sln),
                        Tuple<Solution*>(&C_ref_sln, &phi_ref_sln),
                        NULL, NULL, 

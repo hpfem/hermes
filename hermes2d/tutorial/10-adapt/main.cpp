@@ -96,8 +96,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(biform1), H2D_SYM, OMEGA_1);
-  wf.add_matrix_form(callback(biform2), H2D_SYM, OMEGA_2);
+  wf.add_matrix_form(callback(biform1), HERMES_SYM, OMEGA_1);
+  wf.add_matrix_form(callback(biform2), HERMES_SYM, OMEGA_2);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -106,8 +106,10 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 400, 600));
-  OrderView  oview("Polynomial orders", new WinGeom(410, 0, 400, 600));
+  ScalarView sview("Solution", new WinGeom(0, 0, 410, 600));
+  sview.fix_scale_width(50);
+  sview.show_mesh(false);
+  OrderView  oview("Polynomial orders", new WinGeom(420, 0, 400, 600));
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
@@ -156,9 +158,9 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
-    Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 

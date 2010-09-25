@@ -105,9 +105,6 @@ int main(int argc, char **args) {
   Word_t (nelem) = mesh.get_num_elements();
   printf("New number of elements is %d.\n", (int) nelem);
 
-  // Initialize the shapset and the cache.
-  H1ShapesetLobattoHex shapeset;
-
   // Graphs of DOF convergence.
   GnuplotGraph graph;
   graph.set_captions("", "Degrees of Freedom", "Error [%]");
@@ -115,14 +112,11 @@ int main(int argc, char **args) {
   graph.add_row("Total error", "k", "-", "O");
 
   // Create H1 space to setup the problem.
-  H1Space space(&mesh, &shapeset);
-  space.set_bc_types(bc_types);
-  space.set_essential_bc_values(essential_bc_values);
-  space.set_uniform_order(Ord3(P_INIT, P_INIT, P_INIT));
+  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT, P_INIT, P_INIT));
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, SYM, HERMES_ANY);
+  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
   wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
 
   // Initialize the coarse mesh problem.

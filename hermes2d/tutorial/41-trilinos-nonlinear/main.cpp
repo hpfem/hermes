@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation,
   WeakForm wf1;
-  wf1.add_matrix_form(callback(jacobian_form_hermes), H2D_UNSYM, H2D_ANY);
-  wf1.add_vector_form(callback(residual_form_hermes), H2D_ANY);
+  wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_UNSYM, HERMES_ANY);
+  wf1.add_vector_form(callback(residual_form_hermes), HERMES_ANY);
 
   // Initialize NonlinSystem,
   DiscreteProblem dp(&wf1, &space);
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition on the FE space.");
   // The NULL pointer means that we do not want the projection result as a Solution.
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
+  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
   delete sln_tmp;
 
   // Perform Newton's iteration,
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition on the FE space.");
   // The NULL pointer means that we do not want the projection result as a Solution.
   sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
+  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
   delete sln_tmp;
 
   // Measure the projection time.
@@ -133,8 +133,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation for Trilinos.
   WeakForm wf2(1, JFNK ? true : false);
-  if (!JFNK || (JFNK && PRECOND == 1)) wf2.add_matrix_form(callback(jacobian_form_nox), H2D_SYM);
-  if (JFNK && PRECOND == 2) wf2.add_matrix_form(callback(precond_form_nox), H2D_SYM);
+  if (!JFNK || (JFNK && PRECOND == 1)) wf2.add_matrix_form(callback(jacobian_form_nox), HERMES_SYM);
+  if (JFNK && PRECOND == 2) wf2.add_matrix_form(callback(precond_form_nox), HERMES_SYM);
   wf2.add_vector_form(callback(residual_form_nox));
 
   // Initialize FeProblem.
@@ -176,11 +176,11 @@ int main(int argc, char* argv[])
   // Calculate exact errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  Adapt hp(&space, H2D_H1_NORM);
+  Adapt hp(&space, HERMES_H1_NORM);
   hp.set_solutions(&sln_hermes, &ex);
-  double err_est_rel_1 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+  double err_est_rel_1 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   hp.set_solutions(&sln_nox, &ex);
-  double err_est_rel_2 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+  double err_est_rel_2 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 1 (DiscreteProblem + UMFpack): exact H1 error: %g (time %g s)", err_est_rel_1, umf_time);
   info("Solution 2 (FeProblem + NOX):  exact H1 error: %g (time %g + %g s)", err_est_rel_2, proj_time, nox_time);
 

@@ -115,8 +115,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Initialize adaptivity parameters.
   AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   // The NULL pointer means that we do not want the projection result as a Solution.
   Vector *coeff_vec = new AVector();
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
+  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
   delete sln_tmp;
 
   // Adaptivity loop.
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
   bool verbose = true;     // Print info during adaptivity.
   // The empty Tuples mean that we do not want the resulting coarse and fine mesh solutions.
-  solve_newton_adapt(&space, &wf, coeff_vec, matrix_solver, H2D_H1_NORM, Tuple<Solution *>(), 
+  solve_newton_adapt(&space, &wf, coeff_vec, matrix_solver, HERMES_H1_NORM, Tuple<Solution *>(), 
                      Tuple<Solution *> (), sln_win_geom, mesh_win_geom, &selector, &apt,  
                      NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
 

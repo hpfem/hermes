@@ -102,9 +102,9 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), H2D_SYM);
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), H2D_SYM);
+  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
+  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
+  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_TOP);
 
   // Initialize views.
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     // Project the reference solutions on the coarse meshes.
     info("Projecting reference solutions on coarse meshes.");
     project_global(Tuple<Space *>(&u_space, &v_space), 
-                   Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+                   Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
                    Tuple<MeshFunction*>(&ref_u_sln, &ref_v_sln), 
                    Tuple<Solution*>(&u_sln, &v_sln));
 
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     // Visualize the solution and meshes.
     VonMisesFilter stress(Tuple<MeshFunction*>(&u_sln, &v_sln), lambda, mu);
     sview.set_min_max_range(0, 2e5);
-    sview.show(&stress, H2D_EPS_HIGH);
+    sview.show(&stress, HERMES_EPS_HIGH);
     xoview.show(&u_space);
     yoview.show(&v_space);
 
@@ -171,14 +171,14 @@ int main(int argc, char* argv[])
 
     // Calculate error estimate wrt. reference solution in energy norm.
     info("Calculating error (est).");
-    Adapt hp(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+    Adapt hp(Tuple<Space *>(&u_space, &v_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
     hp.set_solutions(Tuple<Solution*>(&u_sln, &v_sln), 
                      Tuple<Solution*>(&ref_u_sln, &ref_v_sln));
     hp.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     hp.set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     hp.set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
     hp.set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
-    double err_est = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Time measurement.
     cpu_time.tick();

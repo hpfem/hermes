@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   // Projecting initial conditions to obtain initial vector for the Newton's method.
   info("Projecting initial conditions to obtain initial vector for the Newton's method.");
   Vector* coeff_vec = new AVector(); 
-  project_global(Tuple<Space *>(tspace, cspace), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+  project_global(Tuple<Space *>(tspace, cspace), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
   Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton),Tuple<Solution*>(), coeff_vec);
 
   // Filters for the reaction rate omega and its derivatives.
@@ -101,15 +101,15 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), H2D_UNSYM, H2D_ANY, &omega_dt);
+  wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
   wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), 3);
-  wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), H2D_UNSYM, H2D_ANY, &omega_dc);
-  wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), H2D_UNSYM, H2D_ANY, &omega_dt);
-  wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), H2D_UNSYM, H2D_ANY, &omega_dc);
-  wf.add_vector_form(0, callback(newton_linear_form_0), H2D_ANY, 
+  wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+  wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
+  wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+  wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
                      Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
-  wf.add_vector_form(1, callback(newton_linear_form_1), H2D_ANY, 
+  wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
                      Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Initialize view.

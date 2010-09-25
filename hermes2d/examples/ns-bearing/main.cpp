@@ -171,11 +171,11 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Define projection norms.
-  int vel_proj_norm = H2D_H1_NORM;
+  int vel_proj_norm = HERMES_H1_NORM;
 #ifdef PRESSURE_IN_L2
-  int p_proj_norm = H2D_L2_NORM;
+  int p_proj_norm = HERMES_L2_NORM;
 #else
-  int p_proj_norm = H2D_H1_NORM;
+  int p_proj_norm = HERMES_H1_NORM;
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
@@ -188,31 +188,31 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm wf(3);
   if (NEWTON) {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), H2D_ANTISYM);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
-    wf.add_vector_form(0, callback(newton_F_0), H2D_ANY, 
+    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
+    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
+    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
+    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
+    wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
                        Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(1, callback(newton_F_1), H2D_ANY, 
+    wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
                        Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(2, callback(newton_F_2), H2D_ANY);
+    wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
   }
   else {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
+    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
+                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), H2D_ANTISYM);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
-    wf.add_vector_form(0, callback(simple_linear_form), H2D_ANY, &xvel_prev_time);
-    wf.add_vector_form(1, callback(simple_linear_form), H2D_ANY, &yvel_prev_time);
+                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
+    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
+    wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
+    wf.add_vector_form(1, callback(simple_linear_form), HERMES_ANY, &yvel_prev_time);
   }
 
   // Initialize views.
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", TIME);
     vview.set_title(title);
-    vview.show(&xvel_prev_time, &yvel_prev_time, H2D_EPS_LOW);
+    vview.show(&xvel_prev_time, &yvel_prev_time, HERMES_EPS_LOW);
     sprintf(title, "Pressure, time %g", TIME);
     pview.set_title(title);
     pview.show(&p_prev_time);

@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), H2D_SYM);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_matrix_form_surf(callback(bilinear_form_surf));
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord);
 
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, &ref_sln, &sln, matrix_solver, H2D_HCURL_NORM); 
+    project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM); 
    
     // View the coarse mesh solution and polynomial orders.
     v_view.show(&sln);
@@ -162,9 +162,9 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
-    Adapt* adaptivity = new Adapt(&space, H2D_HCURL_NORM);
+    Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 

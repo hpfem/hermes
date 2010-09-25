@@ -96,8 +96,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Project the initial condition on the FE space to obtain initial 
   // coefficient vector for the Newton's method.
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   // The NULL means that we do not want the resulting Solution, just the vector.
   Vector* coeff_vec = new AVector();
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec); 
+  project_global(space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec); 
   delete sln_tmp;
 
   // Perform Newton's iteration.

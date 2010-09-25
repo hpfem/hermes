@@ -84,12 +84,12 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if(TIME_DISCR == 1) {
-    wf.add_matrix_form(callback(J_euler), H2D_UNSYM, H2D_ANY);
-    wf.add_vector_form(callback(F_euler), H2D_ANY, &psi_prev_time);
+    wf.add_matrix_form(callback(J_euler), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(F_euler), HERMES_ANY, &psi_prev_time);
   }
   else {
-    wf.add_matrix_form(callback(J_cranic), H2D_UNSYM, H2D_ANY);
-    wf.add_vector_form(callback(F_cranic), H2D_ANY, &psi_prev_time);
+    wf.add_matrix_form(callback(J_cranic), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(F_cranic), HERMES_ANY, &psi_prev_time);
   }
 
   // Initialize views.
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   bool is_complex = true;
   Vector* coeff_vec = new AVector(0, is_complex); 
-  project_global(space, H2D_H1_NORM, &psi_prev_time, Tuple<Solution*>(), coeff_vec, is_complex);
+  project_global(space, HERMES_H1_NORM, &psi_prev_time, Tuple<Solution*>(), coeff_vec, is_complex);
 
   // Time stepping loop:
   int nstep = (int)(T_FINAL/TAU + 0.5);

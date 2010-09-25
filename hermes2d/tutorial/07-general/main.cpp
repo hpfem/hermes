@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form, bilinear_form_ord, H2D_SYM);
+  wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
 

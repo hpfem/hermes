@@ -128,8 +128,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 1, callback(bilinear_form_sym_0_1));
   wf.add_matrix_form(1, 1, callback(bilinear_form_sym_1_1));
   wf.add_matrix_form(1, 0, callback(bilinear_form_sym_1_0));
-  wf.add_vector_form(0, callback(linear_form_0), H2D_ANY, &T_prev);
-  wf.add_vector_form(1, callback(linear_form_1), H2D_ANY, &M_prev);
+  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &T_prev);
+  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &M_prev);
   wf.add_matrix_form_surf(0, 0, callback(bilinear_form_surf_0_0_ext), MARKER_EXTERIOR_WALL);
   wf.add_matrix_form_surf(1, 1, callback(bilinear_form_surf_1_1_ext), MARKER_EXTERIOR_WALL);
   wf.add_vector_form_surf(0, callback(linear_form_surf_0_ext), MARKER_EXTERIOR_WALL);
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
       info("Projecting reference solution on coarse mesh.");
       // NULL means that we do not want to know the resulting coefficient vector.
       project_global(Tuple<Space *>(&T_space, &M_space),
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+                     Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
                      Tuple<MeshFunction *>(&T_fine, &M_fine),
                      Tuple<Solution *>(&T_coarse, &M_coarse), NULL);
 
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
       // Initialize the adaptivity module, set the coarse and fine mesh 
       // solutions, and set the error form.
       Adapt hp(Tuple<Space *>(&T_space, &M_space),
-               Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+               Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
       hp.set_solutions(Tuple<Solution *>(&T_coarse, &M_coarse),
                        Tuple<Solution *>(&T_fine, &M_fine));
       hp.set_error_form(0, 0, callback(bilinear_form_sym_0_0));
@@ -243,13 +243,13 @@ int main(int argc, char* argv[])
 
       // Calculate element errors.
       info("Calculating error (est).");
-      hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL);
+      hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       // Calculate error estimate for each solution component.
-      double T_err_est_abs = calc_abs_error(&T_coarse, &T_fine, H2D_H1_NORM);
-      double T_norm_est = calc_norm(&T_fine, H2D_H1_NORM);
-      double M_err_est_abs = calc_abs_error(&M_coarse, &M_fine, H2D_H1_NORM);
-      double M_norm_est = calc_norm(&M_fine, H2D_H1_NORM);
+      double T_err_est_abs = calc_abs_error(&T_coarse, &T_fine, HERMES_H1_NORM);
+      double T_norm_est = calc_norm(&T_fine, HERMES_H1_NORM);
+      double M_err_est_abs = calc_abs_error(&M_coarse, &M_fine, HERMES_H1_NORM);
+      double M_norm_est = calc_norm(&M_fine, HERMES_H1_NORM);
       double err_est_abs_total = sqrt(T_err_est_abs*T_err_est_abs + M_err_est_abs*M_err_est_abs);
       double norm_est_total = sqrt(T_norm_est*T_norm_est + M_norm_est*M_norm_est);
       double err_est_rel_total = err_est_abs_total / norm_est_total * 100.;
@@ -289,10 +289,10 @@ int main(int argc, char* argv[])
     moist_ord.show(&M_space);
     sprintf(title, "T, time = %g days", CURRENT_TIME/86400.);
     temp_view.set_title(title);
-    temp_view.show(&T_coarse, H2D_EPS_HIGH);
+    temp_view.show(&T_coarse, HERMES_EPS_HIGH);
     sprintf(title, "M, time = %g days", CURRENT_TIME/86400.);
     moist_view.set_title(title);
-    moist_view.show(&M_coarse, H2D_EPS_HIGH);
+    moist_view.show(&M_coarse, HERMES_EPS_HIGH);
 
     // Add entries to convergence graphs.
     graph_time_err.add_values(ts*TAU, space_err_est);

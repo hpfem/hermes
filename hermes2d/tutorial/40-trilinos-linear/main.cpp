@@ -134,7 +134,7 @@ int main(int argc, char **argv)
   info("Projecting initial solution on the FE mesh.");
   // The NULL pointer means that we do not want the projection result as a Solution.
   Solution* sln_tmp = new Solution(mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
+  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
   delete sln_tmp;
   */
 
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
   
   // Initialize the weak formulation for Trilinos.
   WeakForm wf2(1, JFNK ? true : false);
-  wf2.add_matrix_form(callback(jacobian_form), H2D_SYM);
+  wf2.add_matrix_form(callback(jacobian_form), HERMES_SYM);
   wf2.add_vector_form(callback(residual_form));
 
   // Initialize FeProblem.
@@ -199,12 +199,12 @@ int main(int argc, char **argv)
   // Calculate errors.
   Solution ex;
   ex.set_exact(mesh, &exact);
-  Adapt hp(&space, H2D_H1_NORM);
+  Adapt hp(&space, HERMES_H1_NORM);
   //hp.set_solutions(&sln_hermes, &ex);
-  //double err_est_rel_1 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+  //double err_est_rel_1 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   //info("Solution 1 (LinearProblem - UMFpack): exact H1 error: %g (time %g s)", err_est_rel_1, umf_time);
   hp.set_solutions(&sln_nox, &ex);
-  double err_est_rel_2 = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+  double err_est_rel_2 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 2 (FeProblem - NOX):  exact H1 error: %g (time %g + %g s)", 
     err_est_rel_2, proj_time, nox_time);
 

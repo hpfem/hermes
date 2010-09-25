@@ -635,7 +635,7 @@ public:
 	void ugh();
 
 	// data
-  Array<Vertex *>   vertices;
+        Array<Vertex *>   vertices;
 	MapOrd<Edge>      edges;
 	Array<Element *>  elements;
 	Array<Boundary *> boundaries;
@@ -666,8 +666,10 @@ protected:
 	/// @param[in] face_refinement How to refine the face (see REFT_QUAD_XXX for possible values)
 	/// @param[in] eid ID of son element
 	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid);
-	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid0, Word_t eid1);
-	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid0, Word_t eid1, Word_t eid2, Word_t eid3);
+	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid0, 
+                               Word_t eid1);
+	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid0, 
+                               Word_t eid1, Word_t eid2, Word_t eid3);
 
 	/// @return true if we can refine the face, otherwise false
 	/// @param[in] facet - facet to refine

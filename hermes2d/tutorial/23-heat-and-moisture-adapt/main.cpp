@@ -135,8 +135,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 1, callback(bilinear_form_sym_0_1));
   wf.add_matrix_form(1, 1, callback(bilinear_form_sym_1_1));
   wf.add_matrix_form(1, 0, callback(bilinear_form_sym_1_0));
-  wf.add_vector_form(0, callback(linear_form_0), H2D_ANY, &T_prev);
-  wf.add_vector_form(1, callback(linear_form_1), H2D_ANY, &M_prev);
+  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &T_prev);
+  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &M_prev);
   wf.add_matrix_form_surf(0, 0, callback(bilinear_form_surf_0_0_ext), MARKER_EXTERIOR_WALL);
   wf.add_matrix_form_surf(1, 1, callback(bilinear_form_surf_1_1_ext), MARKER_EXTERIOR_WALL);
   wf.add_vector_form_surf(0, callback(linear_form_surf_0_ext), MARKER_EXTERIOR_WALL);
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
   // Initialize adaptivity parameters.
   double to_be_processed = 0;
   AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, H2D_TOTAL_ERROR_REL, H2D_ELEMENT_ERROR_REL);
+                          MESH_REGULARITY, to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
   apt.set_error_form(0, 0, callback(bilinear_form_sym_0_0));
   apt.set_error_form(0, 1, callback(bilinear_form_sym_0_1));
   apt.set_error_form(1, 0, callback(bilinear_form_sym_1_0));
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 
     // Adaptivity loop.
     solve_linear_adapt(Tuple<Space *>(&T_space, &M_space), &wf, NULL, matrix_solver,
-                       Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+                       Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
                        Tuple<Solution *>(&T_coarse, &M_coarse),
                        Tuple<Solution *>(&T_fine, &M_fine),
                        Tuple<WinGeom *>(), Tuple<WinGeom *>(),// Do not show solutions or meshes.

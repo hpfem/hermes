@@ -28,8 +28,8 @@
 #include "../solution.h"
 
 ///////////////// private constants /////////////////
-#define H2DV_WAIT_CLOSE_MSG "close all views to continue"
-#define H2DV_WAIT_KEYPRESS_MSG "press spacebar to continue"
+#define HERMES_WAIT_CLOSE_MSG "close all views to continue"
+#define HERMES_WAIT_KEYPRESS_MSG "press spacebar to continue"
 
 ///////////////// static variables /////////////////
 int View::screenshot_no = 1;
@@ -141,7 +141,7 @@ void View::close()
 
 void View::wait(const char* text)
 {
-  wait(H2DV_WAIT_CLOSE, text);
+  wait(HERMES_WAIT_CLOSE, text);
 }
 
 void View::wait(ViewWaitEvent wait_event, const char* text) {
@@ -152,8 +152,8 @@ void View::wait(ViewWaitEvent wait_event, const char* text) {
     str << text;
   else {
     switch(wait_event) {
-      case H2DV_WAIT_CLOSE: str << H2DV_WAIT_CLOSE_MSG; break;
-      case H2DV_WAIT_KEYPRESS: str << H2DV_WAIT_KEYPRESS_MSG; break;
+      case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
+      case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
       default: error("Unknown wait event"); break;
     }
   }
@@ -161,8 +161,8 @@ void View::wait(ViewWaitEvent wait_event, const char* text) {
 
   //do something
   switch(wait_event) {
-    case H2DV_WAIT_CLOSE: wait_for_all_views_close(str.str().c_str()); break;
-    case H2DV_WAIT_KEYPRESS: wait_for_any_key(str.str().c_str()); break;
+    case HERMES_WAIT_CLOSE: wait_for_all_views_close(str.str().c_str()); break;
+    case HERMES_WAIT_KEYPRESS: wait_for_any_key(str.str().c_str()); break;
     default: error("Unknown wait event"); break;
   }
 }
@@ -523,7 +523,7 @@ void View::on_special_key(int key, int x, int y)
 void View::wait_for_keypress(const char* text)
 {
   warn("Function View::wait_for_keypress deprecated: use View::wait instead");
-  View::wait(H2DV_WAIT_KEYPRESS, text);
+  View::wait(HERMES_WAIT_KEYPRESS, text);
 }
 
 void View::wait_for_close()

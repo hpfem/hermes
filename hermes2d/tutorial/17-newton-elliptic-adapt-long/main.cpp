@@ -105,8 +105,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   // The NULL pointer means that we do not want the projection result as a Solution.
   Vector* coeff_vec = new AVector();
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec); 
+  project_global(space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec); 
   delete sln_tmp;
 
   // Newton's loop on the coarse mesh.
@@ -175,12 +175,12 @@ int main(int argc, char* argv[])
     if (as == 1) {
       info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
       // The NULL means that we do not want the result as a Solution.
-      project_global(ref_space, H2D_H1_NORM, sln, NULL, coeff_vec);
+      project_global(ref_space, HERMES_H1_NORM, sln, NULL, coeff_vec);
     }
     else {
       info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
       // The NULL means that we do not want the result as a Solution.
-      project_global(ref_space, H2D_H1_NORM, ref_sln, NULL, coeff_vec);
+      project_global(ref_space, HERMES_H1_NORM, ref_sln, NULL, coeff_vec);
     }
 
     // Newton's method on fine mesh
@@ -193,10 +193,10 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error (est).");
-    Adapt hp(space, H2D_H1_NORM);
+    Adapt hp(space, HERMES_H1_NORM);
     // Pass coarse mesh and reference solutions for error estimation.
     hp.set_solutions(sln, ref_sln);
-    double err_est_rel_total = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100.;
+    double err_est_rel_total = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
 
     // Report results.
     info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
       // to obtain new coars emesh solution.
       info("Projecting reference solution on new coarse mesh for error calculation.");
       // NULL means that we do not want to know the resulting coefficient vector.
-      project_global(space, H2D_H1_NORM, ref_sln, sln, NULL); 
+      project_global(space, HERMES_H1_NORM, ref_sln, sln, NULL); 
     }
 
     // Free the reference space and mesh.

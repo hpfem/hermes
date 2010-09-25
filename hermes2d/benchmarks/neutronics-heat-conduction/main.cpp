@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
   
   // Initialize the nonlinear system.
-  Tuple<int> proj_norms(H2D_H1_NORM, H2D_H1_NORM);
+  Tuple<int> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
 
   // Set initial conditions.
   T_prev_time.set_exact(&mesh, T_exact);
@@ -253,8 +253,8 @@ int main(int argc, char* argv[])
     
     // Calculate exact error.
     info("Calculating error (exact).");
-    T_error = calc_rel_error(&T_prev_newton, &T_exact_solution, H2D_H1_NORM) * 100;
-    phi_error = calc_rel_error(&phi_prev_newton, &phi_exact_solution, H2D_H1_NORM) * 100;
+    T_error = calc_rel_error(&T_prev_newton, &T_exact_solution, HERMES_H1_NORM) * 100;
+    phi_error = calc_rel_error(&phi_prev_newton, &phi_exact_solution, HERMES_H1_NORM) * 100;
     error = std::max(T_error, phi_error);
     info("Exact solution error for T (H1 norm): %g %%", T_error);
     info("Exact solution error for phi (H1 norm): %g %%", phi_error);

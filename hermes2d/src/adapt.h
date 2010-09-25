@@ -50,18 +50,18 @@ H2D_API_USED_TEMPLATE(Tuple<Space*>); ///< Instantiated template. It is used to 
 H2D_API_USED_TEMPLATE(Tuple<Solution*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
 
 // Constant used by Adapt::calc_eror().
-#define H2D_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
+#define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                    ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
                                    ///  \note Used by Adapt::calc_elem_errors().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
-#define H2D_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
+#define HERMES_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                    ///  The total error is absolute, i.e., it is an integral over squares of differencies.
                                    ///  \note Used by Adapt::calc_elem_errors(). This flag is mutually exclusive with ::H2D_TOTAL_ERROR_REL.
-#define H2D_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
+#define HERMES_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
                                    ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
                                    ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
                                    ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
                                    ///  \note Used by Adapt::calc_elem_errors(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
-#define H2D_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
+#define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
                                    ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
                                    ///  \note Used by Adapt::calc_elem_errors(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_REL.
 
@@ -92,8 +92,8 @@ struct AdaptivityParamType {
   AdaptivityParamType(double err_stop = 1.0, int ndof_stop = 50000,
 	  	      double threshold = 0.3, int strategy = 0, 
                       int mesh_regularity = -1, double to_be_processed = 0.0,
-                      int total_error_flag = H2D_TOTAL_ERROR_REL,
-                      int elem_error_flag = H2D_ELEMENT_ERROR_REL)
+                      int total_error_flag = HERMES_TOTAL_ERROR_REL,
+                      int elem_error_flag = HERMES_ELEMENT_ERROR_REL)
   {
     this->err_stop = err_stop;
     this->ndof_stop = ndof_stop;
@@ -154,9 +154,9 @@ public:
 
   /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
-   *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::H2D_TOTAL_ERROR_REL, ::H2D_TOTAL_ERROR_ABS, ::H2D_ELEMENT_ERROR_REL, ::H2D_ELEMENT_ERROR_ABS.
+   *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-  virtual double calc_elem_errors(Tuple<double>* err_rel = new Tuple<double>(), unsigned int error_flags = H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS, Tuple<Solution *> solutions = Tuple<Solution *>());
+  virtual double calc_elem_errors(Tuple<double>* err_rel = new Tuple<double>(), unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *> solutions = Tuple<Solution *>());
 
   /// Refines elements based on results from calc_elem_errors().
   /** The behavior of adaptivity can be controlled through methods should_ignore_element()

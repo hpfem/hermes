@@ -103,14 +103,14 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY, &u_prev_time);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
   // Project the initial condition on the FE space
   // to obtain initial coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   Vector* coeff_vec = new AVector(); 
-  project_global(space, H2D_H1_NORM, &u_prev_time, Tuple<Solution*>(), coeff_vec);
+  project_global(space, HERMES_H1_NORM, &u_prev_time, Tuple<Solution*>(), coeff_vec);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));

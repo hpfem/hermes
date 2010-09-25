@@ -20,9 +20,9 @@
 #include "solution.h"
 
 
-const double H2D_EPS_LOW    = 0.0014;
-const double H2D_EPS_NORMAL = 0.0008;
-const double H2D_EPS_HIGH   = 0.0003;
+const double HERMES_EPS_LOW    = 0.0014;
+const double HERMES_EPS_NORMAL = 0.0008;
+const double HERMES_EPS_HIGH   = 0.0003;
 
 
 /// Linearizer is a utility class which converts a higher-order FEM solution defined on
@@ -41,7 +41,7 @@ public:
   ~Linearizer();
 
   void process_solution(MeshFunction* sln, int item = H2D_FN_VAL_0,
-                        double eps = H2D_EPS_NORMAL, double max_abs = -1.0,
+                        double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
                         MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
                         double dmult = 1.0);
 

@@ -135,12 +135,12 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if(TIME_DISCR == 1) {
-    wf.add_matrix_form(callback(J_euler), H2D_UNSYM, H2D_ANY);
-    wf.add_vector_form(callback(F_euler), H2D_ANY, &sln_prev_time);
+    wf.add_matrix_form(callback(J_euler), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(F_euler), HERMES_ANY, &sln_prev_time);
   }
   else {
-    wf.add_matrix_form(callback(J_cranic), H2D_UNSYM, H2D_ANY);
-    wf.add_vector_form(callback(F_cranic), H2D_ANY, &sln_prev_time);
+    wf.add_matrix_form(callback(J_cranic), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(F_cranic), HERMES_ANY, &sln_prev_time);
   }
 
   // Initialize adaptivity parameters.
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
   Vector *coeff_vec = new AVector();
   info("Projecting initial condition to obtain coefficient vector on coarse mesh.");
 
-  project_global(space, H2D_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
+  project_global(space, HERMES_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
 
   // Visualize initial condition.
   char title[100];
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      project_global(space, H2D_H1_NORM, &ref_sln, Tuple<Solution *>(), coeff_vec);
+      project_global(space, HERMES_H1_NORM, &ref_sln, Tuple<Solution *>(), coeff_vec);
 
       /*
       // Newton's method on derefined mesh (moving one time step forward).
@@ -218,11 +218,11 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        project_global(ref_space, H2D_H1_NORM, &sln, Tuple<Solution*>(), coeff_vec);
+        project_global(ref_space, HERMES_H1_NORM, &sln, Tuple<Solution*>(), coeff_vec);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        project_global(ref_space, H2D_H1_NORM, &ref_sln, Tuple<Solution*>(), coeff_vec);
+        project_global(ref_space, HERMES_H1_NORM, &ref_sln, Tuple<Solution*>(), coeff_vec);
       }
 
       // Newton's method on fine mesh
@@ -237,10 +237,10 @@ int main(int argc, char* argv[])
 
       // Calculate element errors.
       info("Calculating error (est).");
-      Adapt hp(space, H2D_H1_NORM);
+      Adapt hp(space, HERMES_H1_NORM);
       // Pass coarse mesh and reference solutions for error estimation.
       hp.set_solutions(&sln, &ref_sln);
-      double err_est_rel_total = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100.;
+      double err_est_rel_total = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
 
         info("Projecting fine mesh solution on new coarse mesh.");
         // The NULL pointer means that we do not want the resulting coefficient vector.
-        project_global(space, H2D_H1_NORM, &ref_sln, &sln, NULL);
+        project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
       }
 
       // Free the reference space and mesh.

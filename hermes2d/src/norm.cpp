@@ -28,16 +28,16 @@ double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type)
 {
   double error;
   switch (norm_type) {
-  case H2D_L2_NORM: 
+  case HERMES_L2_NORM: 
     error = calc_abs_error(error_fn_l2, sln1, sln2);
     break;
-  case H2D_H1_NORM: 
+  case HERMES_H1_NORM: 
     error = calc_abs_error(error_fn_h1, sln1, sln2);
     break;
-  case H2D_HCURL_NORM: 
+  case HERMES_HCURL_NORM: 
     error = calc_abs_error(error_fn_hc, sln1, sln2);
     break;
-  case H2D_HDIV_NORM: 
+  case HERMES_HDIV_NORM: 
     error = calc_abs_error(error_fn_hdiv, sln1, sln2);
     break;
   default: error("Unknown norm in calc_error().");
@@ -50,16 +50,16 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
 {
   double norm;
   switch (norm_type) {
-  case H2D_L2_NORM: 
+  case HERMES_L2_NORM: 
     norm = calc_norm(norm_fn_l2, ref_sln);
     break;
-  case H2D_H1_NORM: 
+  case HERMES_H1_NORM: 
     norm = calc_norm(norm_fn_h1, ref_sln);
     break;
-  case H2D_HCURL_NORM: 
+  case HERMES_HCURL_NORM: 
     norm = calc_norm(norm_fn_hc, ref_sln);
     break;
-  case H2D_HDIV_NORM: 
+  case HERMES_HDIV_NORM: 
     norm = calc_norm(norm_fn_hdiv, ref_sln);
     break;
   default: error("Unknown norm in calc_norm().");
@@ -95,8 +95,8 @@ bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<double> 
   // Calculation.
   for(int i = 0; i < left.size(); i++)
   {
-    err_abs.push_back(calc_abs_error(left[i], right[i], default_norms ? H2D_H1_NORM : norms[i]));
-    norm_vals.push_back(calc_norm(right[i], default_norms ? H2D_H1_NORM : norms[i]));
+    err_abs.push_back(calc_abs_error(left[i], right[i], default_norms ? HERMES_H1_NORM : norms[i]));
+    norm_vals.push_back(calc_norm(right[i], default_norms ? HERMES_H1_NORM : norms[i]));
     err_abs_total += err_abs[i] * err_abs[i];
     norm_total += norm_vals[i] * norm_vals[i];
   }

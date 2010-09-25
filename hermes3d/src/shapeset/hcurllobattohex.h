@@ -20,7 +20,8 @@
 #ifndef _HCURL_SHAPESET_LOBATTO_HEX_H_
 #define _HCURL_SHAPESET_LOBATTO_HEX_H_
 
-#include "../shapeset/shapeset.h"
+#include "shapeset.h"
+#include "../refdomain.h"
 #include "../mesh.h"
 #include "hex.h"
 

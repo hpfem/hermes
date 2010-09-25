@@ -44,7 +44,7 @@ public:
 
   /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
   /// and the distance between starting points is "step"
-  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps = H2D_EPS_NORMAL);
+  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
   void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps, int xitem, int yitem);
 
   /// Creates additional streamline with strarting point (x,y)
@@ -108,7 +108,7 @@ public:
   StreamView(const char* title = "StreamView", DEFAULT_WINDOW_POS) : View(title, x, y, width, height) {};
   virtual ~StreamView() {};
 
-  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps = H2D_EPS_NORMAL) {};
+  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) {};
   void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps, int xitem, int yitem) {};
 
   void add_streamline(double x, double y) {};

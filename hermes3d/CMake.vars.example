@@ -1,50 +1,10 @@
+set(WITH_UMFPACK YES)	# build the support for UMFPACK
+set(UMFPACK_ROOT )	# root directory of UMFPACK
+
 set(WITH_TRILINOS YES)
 set(TRILINOS_ROOT /opt/packages/trilinos)
 
 SET(WITH_EXODUSII YES)
 SET(EXODUSII_ROOT /opt/packages/exodusii)
 SET(NETCDF_ROOT /opt/packages/netcdf)
-
-set(DEBUG       YES)	# built debug version
-set(DEBUG_ORDER YES)	# integrate with maximal possible quadrature order
-set(PROFILING   YES)	# turn on profiling support
-
-# real/complex version of the library
-set(H3D_REAL        YES)	# build real version of H3D
-set(H3D_COMPLEX     NO)		# build complex version of H3D
-
-# supported element types
-set(WITH_TETRA  YES)	# build with tetrahedra
-set(WITH_HEX    YES)	# build with hexahedra
-set(WITH_PRISM  NO)		# build with prisms
-
-# linear solvers
-set(WITH_UMFPACK YES)	# build the support for UMFPACK
-set(UFCONFIG_ROOT )		# root directory of UFconfig
-set(UMFPACK_ROOT )		# root directory of UMFPACK
-set(AMD_ROOT )			# root directory of AMD
-
-set(WITH_PETSC   NO)	# build the support for PETSc
-set(PETSC_ROOT )		# root directory of PETSc
-set(PETSC_ARCH )		# PETSc architecture to use
-set(PETSC_LIBS )		# libraries that PETSc is linked against
-
-set(WITH_PARDISO NO)	# build the support for Pardiso
-set(PARDISO_ROOT )		# root directory of pardiso
-
-# 
-set(WITH_TESTS  YES)	# build tests
-set(WITH_TOOLS  NO)		# build tools
-
-# features
-set(WITH_HDF5 NO)		# build with HDF5 support
-set(HDF5_ROOT )			# root directory of HDF5
-
-set(WITH_MPI NO)		# no effect
-
-set(WITH_GLUT NO)		# no effect
-
-# Doxygen related
-set(DOXYGEN_BINARY doxygen)
-set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/doxygen-config)
 

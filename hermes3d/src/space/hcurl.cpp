@@ -17,20 +17,32 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#include "../shapeset/hcurllobattohex.h"
 #include "../h3dconfig.h"
 #include "hcurl.h"
 #include "../matrix.h"
 #include "../refmap.h"
+#include "../refdomain.h"
 #include <common/bitarray.h>
 #include <common/trace.h>
 #include <common/error.h>
 #include <common/callstack.h>
 
-HcurlSpace::HcurlSpace(Mesh *mesh, Shapeset *ss) :
-		Space(mesh, ss)
+HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
+                 scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init, 
+                 Shapeset* shapeset) 
+          : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-	_F_
-	this->type = Hcurl;
+  _F_
+  // FIXME: this will fail if the mesh contains tetrahedra. 
+  if (shapeset == NULL) this->shapeset = new HcurlShapesetLobattoHex;
+  this->type = Hcurl;
+
+  // set uniform poly order in elements
+  this->set_uniform_order_internal(p_init);
+
+  // enumerate basis functions
+  this->assign_dofs();
 }
 
 HcurlSpace::~HcurlSpace() {
@@ -39,7 +51,7 @@ HcurlSpace::~HcurlSpace() {
 
 Space *HcurlSpace::dup(Mesh *mesh) const {
 	_F_
-	HcurlSpace *space = new HcurlSpace(mesh, shapeset);
+	  HcurlSpace *space = new HcurlSpace(mesh, NULL, NULL, Ord3(-1,-1,-1), shapeset);
 	space->copy_callbacks(this);
 	return space;
 }

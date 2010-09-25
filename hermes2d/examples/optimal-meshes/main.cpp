@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
   // Calculate error wrt. exact solution.
   Solution sln_exact;
   sln_exact.set_exact(&mesh, exact);
-  double err = calc_abs_error(sln, &sln_exact, H2D_H1_NORM);
+  double err = calc_abs_error(sln, &sln_exact, HERMES_H1_NORM);
   printf("err = %g, err_squared = %g\n\n", err, err*err);
  
 
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
   bool verbose = true;     // Print info during adaptivity.
   // The NULL pointer means that we do not want the resulting coefficient vector.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+  solve_linear_adapt(&space, &wf, NULL, matrix_solver, HERMES_H1_NORM, sln, ref_sln, 
                      sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln);
   */
 

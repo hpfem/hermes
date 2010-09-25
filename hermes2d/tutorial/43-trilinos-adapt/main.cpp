@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);
-  if (PRECOND) wf.add_matrix_form(callback(precond_form), H2D_SYM);
+  if (PRECOND) wf.add_matrix_form(callback(precond_form), HERMES_SYM);
   wf.add_vector_form(callback(residual_form));
 
   // Initialize views.
@@ -234,13 +234,13 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error (est).");
-    Adapt hp(&space, H2D_H1_NORM);
+    Adapt hp(&space, HERMES_H1_NORM);
     hp.set_solutions(&sln, &ref_sln);
-    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
  
     // Calculate exact error.
     Solution* exact = new Solution(&mesh, fndd);
-    double err_exact_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%, err_exact: %g%%", 

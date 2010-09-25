@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), H2D_SYM);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_vector_form(callback(linear_form));
 
   // Initialize refinement selector.
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   Solution *sln = new Solution();
   Solution *ref_sln = new Solution();
   bool verbose = true;     // Print info during adaptivity.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+  solve_linear_adapt(&space, &wf, NULL, matrix_solver, HERMES_H1_NORM, sln, ref_sln, 
                      sln_win_geom, mesh_win_geom, &selector, &apt, verbose);
 
   // Wait for all views to be closed.

@@ -18,6 +18,7 @@
 #include "../matrix.h"
 #include "../quad_all.h"
 #include "../shapeset/shapeset_h1_all.h"
+#include "../../common/callstack.h"
 
 double** H1Space::h1_proj_mat = NULL;
 double*  H1Space::h1_chol_p   = NULL;
@@ -28,6 +29,7 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
                  Shapeset* shapeset)
         : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
+  _F_
   if (shapeset == NULL) this->shapeset = new H1Shapeset;
 
   if (!h1_proj_ref++)
@@ -49,6 +51,7 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 
 H1Space::~H1Space()
 {
+  _F_
   if (!--h1_proj_ref)
   {
     delete [] h1_proj_mat;
@@ -58,6 +61,7 @@ H1Space::~H1Space()
 
 Space* H1Space::dup(Mesh* mesh) const
 {
+  _F_
   H1Space* space = new H1Space(mesh, bc_type_callback, bc_value_callback_by_coord, 1, shapeset);
   space->copy_callbacks(this);
   return space;
@@ -68,6 +72,7 @@ Space* H1Space::dup(Mesh* mesh) const
 
 void H1Space::assign_vertex_dofs()
 {
+  _F_
   // Before assigning vertex DOFs, we must know which boundary vertex nodes are part of
   // a natural BC and which are part of an essential BC. The critical are those which
   // lie at an interface of both types of BCs and which must be treated as belonging
@@ -143,11 +148,13 @@ void H1Space::assign_vertex_dofs()
 
 void H1Space::assign_edge_dofs()
 {
+  _F_
   // TODO: remove this fn, we now assign all dofs at once
 }
 
 void H1Space::assign_bubble_dofs()
 {
+  _F_
   // TODO: remove this fn, we now assign all dofs at once
 }
 
@@ -156,6 +163,7 @@ void H1Space::assign_bubble_dofs()
 
 void H1Space::get_vertex_assembly_list(Element* e, int iv, AsmList* al)
 {
+  _F_
   Node* vn = e->vn[iv];
   NodeData* nd = &ndata[vn->id];
   int index = shapeset->get_vertex_index(iv);
@@ -179,6 +187,7 @@ void H1Space::get_vertex_assembly_list(Element* e, int iv, AsmList* al)
 
 void H1Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
 {
+  _F_
   Node* en = e->en[surf_num];
   NodeData* nd = &ndata[en->id];
   if (get_element_order(e->id) == 0) return;
@@ -216,6 +225,7 @@ void H1Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmL
 
 scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 {
+  _F_
   assert(order >= 1);
   scalar* proj = new scalar[order + 1];
 
@@ -260,6 +270,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 inline void H1Space::output_component(BaseComponent*& current, BaseComponent*& last, BaseComponent* min,
                                       Node*& edge, BaseComponent*& edge_dofs)
 {
+  _F_
   // if the dof is already in the list, just add half of the other coef
   if (last != NULL && last->dof == min->dof)
   {
@@ -292,6 +303,7 @@ inline void H1Space::output_component(BaseComponent*& current, BaseComponent*& l
 Space::BaseComponent* H1Space::merge_baselists(BaseComponent* l1, int n1, BaseComponent* l2, int n2,
                                                Node* edge, BaseComponent*& edge_dofs, int& ncomponents)
 {
+  _F_
   // estimate the upper bound of the result size
   int max_result = n1 + n2;
   if (edge != NULL) max_result += ndata[edge->id].n;
@@ -340,6 +352,7 @@ Space::BaseComponent* H1Space::merge_baselists(BaseComponent* l1, int n1, BaseCo
 
 static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
 {
+  _F_
   if (e->is_triangle()) return e->sons[3]->vn[e->prev_vert(i)];
   else if (e->sons[2] == NULL) return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
   else if (e->sons[0] == NULL) return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
@@ -349,6 +362,7 @@ static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
 
 void H1Space::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
 {
+  _F_
   int j, k;
   EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
   NodeData* nd;
@@ -501,6 +515,7 @@ void H1Space::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1,
 
 void H1Space::update_constraints()
 {
+  _F_
   Element* e;
   for_all_base_elements(e, mesh)
     update_constrained_nodes(e, NULL, NULL, NULL, NULL);
@@ -520,6 +535,7 @@ void H1Space::update_constraints()
 
 void H1Space::fix_vertex(int id, scalar value)
 {
+  _F_
   FixedVertex fv = { id, value };
   fixed_vertices.push_back(fv);
 }
@@ -527,6 +543,7 @@ void H1Space::fix_vertex(int id, scalar value)
 
 bool H1Space::is_fixed_vertex(int id) const
 {
+  _F_
   for (unsigned int i = 0; i < fixed_vertices.size(); i++)
     if (fixed_vertices[i].id == id)
       return true;
@@ -537,6 +554,7 @@ bool H1Space::is_fixed_vertex(int id) const
 
 void H1Space::post_assign()
 {
+  _F_
   // process fixed vertices -- put their values into nd->vertex_bc_coef
   for (unsigned int i = 0; i < fixed_vertices.size(); i++)
   {

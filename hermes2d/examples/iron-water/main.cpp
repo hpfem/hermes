@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form_water, bilinear_form_ord, H2D_SYM, WATER_1);
-  wf.add_matrix_form(bilinear_form_water, bilinear_form_ord, H2D_SYM, WATER_2);
-  wf.add_matrix_form(bilinear_form_iron, bilinear_form_ord, H2D_SYM, IRON);
+  wf.add_matrix_form(bilinear_form_water, bilinear_form_ord, HERMES_SYM, WATER_1);
+  wf.add_matrix_form(bilinear_form_water, bilinear_form_ord, HERMES_SYM, WATER_2);
+  wf.add_matrix_form(bilinear_form_iron, bilinear_form_ord, HERMES_SYM, IRON);
   wf.add_vector_form(linear_form_source, linear_form_ord, WATER_1);
 
   // Initialize refinement selector.
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
   WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
   bool verbose = true;     // Print info during adaptivity.
   // The NULL pointer means that we do not want the resulting coefficient vector.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+  solve_linear_adapt(&space, &wf, NULL, matrix_solver, HERMES_H1_NORM, sln, ref_sln, 
                      sln_win_geom, mesh_win_geom, &selector, &apt, verbose);
 
   // Wait for all views to be closed.

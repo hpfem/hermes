@@ -380,34 +380,34 @@ int main(int argc, char* argv[])
   // Problem initalization
   WeakForm wf(4);
   // OLD: wf.add_biform(0, 0, bilinear_form_0_0, 0, 0, 3, &lprev, &xprev, &yprev);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
+  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
 
   // OLD: wf.add_biform(0, 2, bilinear_form_0_2);
-  wf.add_matrix_form(0, 2, callback(bilinear_form_0_2), H2D_UNSYM, H2D_ANY);
+  wf.add_matrix_form(0, 2, callback(bilinear_form_0_2), HERMES_UNSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(1, 1, bilinear_form_0_0, 0, 0, 3, &lprev, &xprev, &yprev);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_0_0), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
+  wf.add_matrix_form(1, 1, callback(bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
 
   // OLD: wf.add_biform(1, 2, bilinear_form_1_2);
-  wf.add_matrix_form(1, 2, callback(bilinear_form_1_2), H2D_UNSYM, H2D_ANY);
+  wf.add_matrix_form(1, 2, callback(bilinear_form_1_2), HERMES_UNSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(2, 0, bilinear_form_2_0);
-  wf.add_matrix_form(2, 0, callback(bilinear_form_2_0), H2D_UNSYM, H2D_ANY);
+  wf.add_matrix_form(2, 0, callback(bilinear_form_2_0), HERMES_UNSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(2, 1, bilinear_form_2_1);
-  wf.add_matrix_form(2, 1, callback(bilinear_form_2_1), H2D_UNSYM, H2D_ANY);
+  wf.add_matrix_form(2, 1, callback(bilinear_form_2_1), HERMES_UNSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(3, 3, bilinear_form_3_3, 0, 0, 2, &xprev, &yprev);
-  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&xprev, &yprev));
+  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3), HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xprev, &yprev));
 
   // OLD: wf.add_liform(0, linear_form_0, 0, 2, &lprev, &xprev);
-  wf.add_vector_form(0, callback(linear_form_0), H2D_ANY, Tuple<MeshFunction*>(&lprev, &yprev));
+  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, Tuple<MeshFunction*>(&lprev, &yprev));
 
   // OLD: wf.add_liform(1, linear_form_1, 0, 2, &lprev, &yprev);
-  wf.add_vector_form(1, callback(linear_form_1), H2D_ANY, Tuple<MeshFunction*>(&lprev, &yprev));
+  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, Tuple<MeshFunction*>(&lprev, &yprev));
 
   // OLD: wf.add_liform(3, linear_form_3, 0, 1, &lprev);
-  wf.add_vector_form(3, callback(linear_form_3), H2D_ANY, &lprev);
+  wf.add_vector_form(3, callback(linear_form_3), HERMES_ANY, &lprev);
 
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
@@ -417,7 +417,7 @@ int main(int argc, char* argv[])
   // Initialize adaptivity parameters.
   double to_be_processed = 0;
   AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, H2D_TOTAL_ERROR_REL, H2D_ELEMENT_ERROR_REL);
+                          MESH_REGULARITY, to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
   apt.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
   apt.set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
   apt.set_error_form(1, 2, bilinear_form_1_2<scalar, scalar>, bilinear_form_1_2<Ord, Ord>);
@@ -447,7 +447,7 @@ int main(int argc, char* argv[])
 
   bool verbose = true; 
   solve_linear_adapt(Tuple<Space *>(&xvel, &yvel, &press, &lset), &wf, NULL, matrix_solver,
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM, H2D_H1_NORM, H2D_H1_NORM),
+                     Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM),
                      Tuple<Solution *>(&u1, &u2, &u3, &u4),
                      Tuple<Solution *>(&r1, &r2, &r3, &r4),
                      Tuple<WinGeom *>(), Tuple<WinGeom *>(),// Do not show solutions or meshes.

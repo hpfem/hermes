@@ -79,7 +79,8 @@ enum BCType
 /// @ingroup spaces
 class H3D_API Space {
 public:
-	Space(Mesh *mesh, Shapeset *shapeset);
+  Space(Mesh *mesh, Shapeset *shapeset, BCType (*bc_type_callback)(int), 
+        scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init = Ord3(1,1,1));
 	virtual ~Space();
 
 	virtual Space *dup(Mesh *mesh) const = 0;
@@ -87,13 +88,19 @@ public:
 	ESpaceType get_type() { return type; }
 
 	void set_bc_types(BCType (*bc_type_callback)(int marker));
+	void set_bc_types_init(BCType (*bc_type_callback)(int marker));
 	void set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y, double z));
 	// TODO: different callback: void (*bc_vec_value_callback_by_coord)(int marker, double x, double y, double z, scalar3 &result)
 	void set_essential_bc_values(scalar3 &(*bc_vec_value_callback_by_coord)(int ess_bdy_marker, double x, double y, double z));
 
 	void set_element_order(Word_t eid, Ord3 order);
 	Ord3 get_element_order(Word_t eid) const;
-	void set_uniform_order(Ord3 order);
+        /// Sets the same polynomial order for all elements in the mesh. Intended for 
+        /// the user and thus assign_dofs() is called at the end of this function.
+	void set_uniform_order(Ord3 order, int marker = HERMES_ANY);
+        /// Sets the same polynomial order for all elements in the mesh. Does not 
+        /// call assign_dofs(). For internal use.
+        void set_uniform_order_internal(Ord3 order, int marker = HERMES_ANY);
 	void copy_orders(const Space &space, int inc = 0);
 
 	virtual void enforce_minimum_rule();
@@ -262,23 +269,25 @@ protected:
 	};
 
 	struct ElementData {
-		Ord3 order;								/// Polynomial degree associated to the element node (interior).
-		int dof;									/// The number of the first degree of freedom belonging to the node.
-		int n;										/// Total number of degrees of freedom belonging to the node.
+		Ord3 order;	      /// Polynomial degree associated to the element node (interior).
+		int dof;	      /// The number of the first degree of freedom belonging to the node.
+		int n;		      /// Total number of degrees of freedom belonging to the node.
+	        int marker;           /// Material marker.  
 
 		ElementData() {
 			order = -1;
 			dof = H3D_DOF_NOT_ANALYZED;
 			n = -1;
+                        marker = -1;
 		}
 
 		void dump(int id);
 	};
 
-	ArrayPtr<VertexData> vn_data;					/// Vertex node hash table
-	ArrayPtr<EdgeData> en_data;						/// Edge node hash table
-	ArrayPtr<FaceData> fn_data;						/// Face node hash table
-	ArrayPtr<ElementData> elm_data;					/// Element node hash table
+	ArrayPtr<VertexData> vn_data;		/// Vertex node hash table
+	ArrayPtr<EdgeData> en_data;		/// Edge node hash table
+	ArrayPtr<FaceData> fn_data;		/// Face node hash table
+	ArrayPtr<ElementData> elm_data;		/// Element node hash table
 
 	void set_order_recurrent(Word_t eid, Ord3 order);
 

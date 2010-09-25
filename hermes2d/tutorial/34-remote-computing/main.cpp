@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
   wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
-  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, H2D_ANY, &tsln);
+  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
   wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
   // Initialize the linear problem.
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     if (ts % OUTPUT_FREQUENCY == 0) {
       Linearizer lin;
       int item = H2D_FN_VAL_0;
-      double eps = H2D_EPS_NORMAL;
+      double eps = HERMES_EPS_NORMAL;
       double max_abs = -1.0;
       MeshFunction* xdisp = NULL; 
       MeshFunction* ydisp = NULL;

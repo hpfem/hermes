@@ -103,12 +103,12 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, H2D_UNSYM, H2D_ANY, &u_prev_time);
-    wf.add_vector_form(res_euler, res_ord, H2D_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, H2D_UNSYM, H2D_ANY, &u_prev_time);
-    wf.add_vector_form(res_cranic, res_ord, H2D_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
   }
 
   // Initialize matrix solver.
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
   // to obtain initial coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, sln_tmp, &u_prev_time, coeff_vec);
+  project_global(&space, HERMES_H1_NORM, sln_tmp, &u_prev_time, coeff_vec);
   delete sln_tmp;
 
   // Initialize views.
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
   OrderView oview("Mesh", 520, 0, 450, 400);
   oview.show(&space);
   sview.show(&u_prev_time);
-  //View::wait(H2DV_WAIT_KEYPRESS);
+  //View::wait(HERMESV_WAIT_KEYPRESS);
 
   // Time stepping loop:
   double current_time = 0.0;

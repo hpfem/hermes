@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
-    Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
     double err_est = adaptivity->calc_elem_errors() * 100;
 

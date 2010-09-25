@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), H2D_SYM);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_vector_form(callback(linear_form));
 
   // Initialize refinement selector.
@@ -153,13 +153,13 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error.");
-    Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est_rel = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Calculate exact error for each solution component.   
-    double err_exact_abs = calc_abs_error(&sln, &exact, H2D_H1_NORM);
-    double norm_exact = calc_norm(&exact, H2D_H1_NORM);
+    double err_exact_abs = calc_abs_error(&sln, &exact, HERMES_H1_NORM);
+    double norm_exact = calc_norm(&exact, HERMES_H1_NORM);
     double err_exact_rel = err_exact_abs / norm_exact * 100.;
 
     // Report results.

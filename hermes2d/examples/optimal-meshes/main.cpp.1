@@ -93,10 +93,10 @@ int main(int argc, char* argv[])
   // Perform orthogonal projection in the H1 norm.
   Solution sln_approx;
   ExactSolution sln_exact(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, &sln_exact, &sln_approx);
+  project_global(&space, HERMES_H1_NORM, &sln_exact, &sln_approx);
 
   // Calculate the error.
-  double err = calc_abs_error(&sln_approx, &sln_exact, H2D_H1_NORM);
+  double err = calc_abs_error(&sln_approx, &sln_exact, HERMES_H1_NORM);
   printf("\nMesh: %g, %g, %g, %g, %g\n", x0, x1, x2, x3, x4);
   printf("Poly degrees: %d, %d, %d, %d\n", o0, o1, o2, o3);
   printf("err = %g, err_squared = %g\n\n", err, err*err);

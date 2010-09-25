@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 
   // Initialize the nonlinear system.
   FeProblem dp(&wf, spaces);
-  Tuple<int> proj_norms(H2D_H1_NORM, H2D_H1_NORM);
+  Tuple<int> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
   
   // Set initial conditions.
   T_prev_time.set_exact(&mesh_T, T_exact);
@@ -409,10 +409,10 @@ int main(int argc, char* argv[])
 
       // Calculate error estimates and exact errors.
       info("Calculating errors.");
-      double T_err_est = calc_rel_error(&T_coarse, &T_fine, H2D_H1_NORM) * 100;
-      double phi_err_est = calc_rel_error(&phi_coarse, &phi_fine, H2D_H1_NORM) * 100;
-      double T_err_exact = calc_rel_error(&T_coarse, &T_exact_solution, H2D_H1_NORM) * 100;
-      double phi_err_exact = calc_rel_error(&phi_coarse, &phi_exact_solution, H2D_H1_NORM) * 100;
+      double T_err_est = calc_rel_error(&T_coarse, &T_fine, HERMES_H1_NORM) * 100;
+      double phi_err_est = calc_rel_error(&phi_coarse, &phi_fine, HERMES_H1_NORM) * 100;
+      double T_err_exact = calc_rel_error(&T_coarse, &T_exact_solution, HERMES_H1_NORM) * 100;
+      double phi_err_exact = calc_rel_error(&phi_coarse, &phi_exact_solution, HERMES_H1_NORM) * 100;
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
             space_T.get_num_dofs(), ref_spaces[0]->get_num_dofs(), T_err_est, T_err_exact);
       info("phi: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
@@ -421,7 +421,7 @@ int main(int argc, char* argv[])
       // Calculate element errors and total error estimate for adaptivity.      
       Adapt hp(spaces, proj_norms);
       hp.set_solutions(coarse_mesh_solutions, fine_mesh_solutions);
-      hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;
+      hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       double err_est = 0.0, norm_est = 0.0;
       for (int i = 0; i < num_fields; i++) {
@@ -499,8 +499,8 @@ int main(int argc, char* argv[])
     phi_prev_time.copy(&phi_fine);
     
     // Compute exact error.
-    double T_error = calc_rel_error(&T_prev_time, &T_exact_solution, H2D_H1_NORM) * 100;
-    double phi_error = calc_rel_error(&phi_prev_time, &phi_exact_solution, H2D_H1_NORM) * 100;
+    double T_error = calc_rel_error(&T_prev_time, &T_exact_solution, HERMES_H1_NORM) * 100;
+    double phi_error = calc_rel_error(&phi_prev_time, &phi_exact_solution, HERMES_H1_NORM) * 100;
     info("Exact solution error for T (H1 norm): %g %%", T_error);
     info("Exact solution error for phi (H1 norm): %g %%", phi_error);
   }

@@ -58,9 +58,9 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), H2D_SYM);  // Note that only one symmetric part is
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);  // added in the case of symmetric bilinear
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), H2D_SYM);  // forms.
+  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // Note that only one symmetric part is
+  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
+  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms.
   wf.add_vector_form_surf(0, callback(linear_form_surf_0), GAMMA_3_BDY);
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), GAMMA_3_BDY);
 
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
   VonMisesFilter stress(Tuple<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
   view.show_mesh(false);
-  view.show(&stress, H2D_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
+  view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
   // Wait for the view to be closed.
   View::wait();

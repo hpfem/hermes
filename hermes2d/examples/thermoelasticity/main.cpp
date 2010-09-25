@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf(3);
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);
+  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
   wf.add_matrix_form(0, 2, callback(bilinear_form_0_2));
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));
   wf.add_matrix_form(1, 2, callback(bilinear_form_1_2));
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
   // Initialize adaptivity parameters.
   double to_be_processed = 0;
   AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, H2D_TOTAL_ERROR_REL, H2D_ELEMENT_ERROR_REL);
+                          MESH_REGULARITY, to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
 
   apt.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
   apt.set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
   Solution *ref_temp_sln = new Solution();
   bool verbose = true;  // Print info during adaptivity.
   solve_linear_adapt(Tuple<Space *>(&xdisp, &ydisp, &temp), &wf, NULL, matrix_solver,
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM, H2D_H1_NORM),
+                     Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM),
                      Tuple<Solution *>(xdisp_sln, ydisp_sln, temp_sln),
                      Tuple<Solution *>(ref_xdisp_sln, ref_ydisp_sln, ref_temp_sln),
                      Tuple<WinGeom *>(u_sln_win_geom, v_sln_win_geom, t_sln_win_geom),
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
   VonMisesFilter ref_stress(Tuple<MeshFunction*>(ref_xdisp_sln, ref_ydisp_sln), lambda, mu);
   sview.set_min_max_range(0, 3e4);
   sview.show_mesh(false);
-  sview.show(&ref_stress, H2D_EPS_HIGH);
+  sview.show(&ref_stress, HERMES_EPS_HIGH);
 
   // Wait for all views to be closed.
   View::wait();

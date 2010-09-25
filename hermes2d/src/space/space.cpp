@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../../common/callstack.h"
 #include "../common.h"
 #include "space.h"
 #include "../matrix.h"
@@ -22,6 +23,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
              scalar (*bc_value_callback_by_coord)(int, double, double), int p_init)
      : mesh(mesh), shapeset(shapeset)
 {
+  _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
   this->default_tri_order = -1;
   this->default_quad_order = -1;
@@ -41,11 +43,13 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
 
 Space::~Space()
 {
+  _F_
   free();
 }
 
 void Space::free()
 {
+  _F_
   free_extra_data();
   if (nsize) { ::free(ndata); ndata=NULL; }
   if (esize) { ::free(edata); edata=NULL; }
@@ -55,6 +59,7 @@ void Space::free()
 
 void Space::resize_tables()
 {
+  _F_
   if ((nsize < mesh->get_max_node_id()) || (ndata == NULL))
   {
     //HACK: definition of allocated size and the result number of elements
@@ -86,6 +91,7 @@ void Space::resize_tables()
 
 void Space::H2D_CHECK_ORDER(int order)
 {
+  _F_
   if (H2D_GET_H_ORDER(order) < 0 || H2D_GET_V_ORDER(order) < 0)
     error("Order cannot be negative.");
   if (H2D_GET_H_ORDER(order) > 10 || H2D_GET_V_ORDER(order) > 10)
@@ -96,6 +102,7 @@ void Space::H2D_CHECK_ORDER(int order)
 // is updated
 void Space::set_element_order(int id, int order)
 {
+  _F_
   set_element_order_internal(id, order);
 
   // since space changed, enumerate basis functions
@@ -105,6 +112,7 @@ void Space::set_element_order(int id, int order)
 // just sets the element order without enumerating dof
 void Space::set_element_order_internal(int id, int order)
 {
+  _F_
   //NOTE: We need to take into account that L2 and Hcurl may use zero orders. The latter has its own version of this method, however.
   assert_msg(mesh->get_element(id)->is_triangle() || get_type() == 3 || H2D_GET_V_ORDER(order) != 0, "Element #%d is quad but given vertical order is zero", id);
   assert_msg(mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical is not zero", id);
@@ -122,6 +130,7 @@ void Space::set_element_order_internal(int id, int order)
 
 int Space::get_element_order(int id) const
 {
+  _F_
   // sanity checks (for internal purposes)
   if (this->mesh == NULL) error("NULL Mesh pointer detected in Space::get_element_order().");
   if(edata == NULL) error("NULL edata detected in Space::get_element_order().");
@@ -135,6 +144,7 @@ int Space::get_element_order(int id) const
 
 void Space::set_uniform_order(int order, int marker)
 {
+  _F_
   set_uniform_order_internal(order, marker);
 
   // since space changed, enumerate basis functions
@@ -143,6 +153,7 @@ void Space::set_uniform_order(int order, int marker)
   
 void Space::set_uniform_order_internal(int order, int marker)
 {
+  _F_
   resize_tables();
   H2D_CHECK_ORDER(order);
   int quad_order = H2D_MAKE_QUAD_ORDER(order, order);
@@ -164,6 +175,7 @@ void Space::set_uniform_order_internal(int order, int marker)
 
 void Space::set_element_orders(int* elem_orders_)
 {
+  _F_
   resize_tables();
   
   Element* e;
@@ -182,6 +194,7 @@ void Space::set_element_orders(int* elem_orders_)
 
 void Space::set_default_order(int tri_order, int quad_order)
 {
+  _F_
   if (quad_order == -1) quad_order = H2D_MAKE_QUAD_ORDER(tri_order, tri_order);
   default_tri_order = tri_order;
   default_quad_order = quad_order;
@@ -190,6 +203,7 @@ void Space::set_default_order(int tri_order, int quad_order)
 
 void Space::copy_orders_recurrent(Element* e, int order)
 {
+  _F_
   if (e->active)
     edata[e->id].order = order;
   else
@@ -201,6 +215,7 @@ void Space::copy_orders_recurrent(Element* e, int order)
 
 void Space::copy_orders(Space* space, int inc)
 {
+  _F_
   Element* e;
   resize_tables();
   for_all_active_elements(e, space->get_mesh())
@@ -226,6 +241,7 @@ void Space::copy_orders(Space* space, int inc)
 
 int Space::get_edge_order(Element* e, int edge)
 {
+  _F_
   Node* en = e->en[edge];
   if (en->id >= nsize || edge >= (int)e->nvert) return 0;
 
@@ -238,6 +254,7 @@ int Space::get_edge_order(Element* e, int edge)
 
 int Space::get_edge_order_internal(Node* en)
 {
+  _F_
   assert(en->type == H2D_TYPE_EDGE);
   Element** e = en->elem;
   int o1 = 1000, o2 = 1000;
@@ -267,6 +284,7 @@ int Space::get_edge_order_internal(Node* en)
 
 void Space::set_mesh(Mesh* mesh)
 {
+  _F_
   if (this->mesh == mesh) return;
   free();
   this->mesh = mesh;
@@ -279,6 +297,7 @@ void Space::set_mesh(Mesh* mesh)
 
 void Space::propagate_zero_orders(Element* e)
 {
+  _F_
   warn_if(get_element_order(e->id) != 0, "zeroing order of an element ID:%d, original order (H:%d; V:%d)", e->id, H2D_GET_H_ORDER(get_element_order(e->id)), H2D_GET_V_ORDER(get_element_order(e->id)));
   set_element_order_internal(e->id, 0);
   if (!e->active)
@@ -290,6 +309,7 @@ void Space::propagate_zero_orders(Element* e)
 
 void Space::distribute_orders(Mesh* mesh, int* parents)
 {
+  _F_
   int num = mesh->get_max_element_id();
   AUTOLA_OR(int, orders, num+1);
   Element* e;
@@ -310,6 +330,7 @@ void Space::distribute_orders(Mesh* mesh, int* parents)
 
 int Space::assign_dofs(int first_dof, int stride)
 {
+  _F_
   if (first_dof < 0) error("Invalid first_dof.");
   if (stride < 1)    error("Invalid stride.");
 
@@ -353,7 +374,9 @@ int Space::assign_dofs(int first_dof, int stride)
   return this->ndof;
 }
 
-void Space::reset_dof_assignment() {
+void Space::reset_dof_assignment() 
+{
+  _F_
   // First assume that all vertex nodes are part of a natural BC. the member NodeData::n
   // is misused for this purpose, since it stores nothing at this point. Also assume
   // that all DOFs are unassigned.
@@ -394,6 +417,7 @@ void AsmList::enlarge()
 
 void Space::get_element_assembly_list(Element* e, AsmList* al)
 {
+  _F_
   // some checks
   if (e->id >= esize || edata[e->id].order < 0)
     error("Uninitialized element order (id = #%d).", e->id);
@@ -414,6 +438,7 @@ void Space::get_element_assembly_list(Element* e, AsmList* al)
 
 void Space::get_boundary_assembly_list(Element* e, int surf_num, AsmList* al)
 {
+  _F_
   al->clear();
   shapeset->set_mode(e->get_mode());
   get_vertex_assembly_list(e, surf_num, al);
@@ -424,6 +449,7 @@ void Space::get_boundary_assembly_list(Element* e, int surf_num, AsmList* al)
 
 void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 {
+  _F_
   ElementData* ed = &edata[e->id];
 
   if (!ed->n) return;
@@ -456,6 +482,7 @@ scalar default_bc_value_by_edge(SurfPos* surf_pos)
 
 void Space::set_bc_types(BCType (*bc_type_callback)(int))
 {
+  _F_
   if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
   this->bc_type_callback = bc_type_callback;
   seq++;
@@ -466,15 +493,15 @@ void Space::set_bc_types(BCType (*bc_type_callback)(int))
 
 void Space::set_bc_types_init(BCType (*bc_type_callback)(int))
 {
+  _F_
   if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
   this->bc_type_callback = bc_type_callback;
   seq++;
 }
 
-
-
 void Space::set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int, double, double))
 {
+  _F_
   if (bc_value_callback_by_coord == NULL) bc_value_callback_by_coord = default_bc_value_by_coord;
   this->bc_value_callback_by_coord = bc_value_callback_by_coord;
   seq++;
@@ -482,14 +509,15 @@ void Space::set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int, do
 
 void Space::set_essential_bc_values(scalar (*bc_value_callback_by_edge)(SurfPos*))
 {
+  _F_
   if (bc_value_callback_by_edge == NULL) bc_value_callback_by_edge = default_bc_value_by_edge;
   this->bc_value_callback_by_edge = bc_value_callback_by_edge;
   seq++;
 }
 
-
 void Space::copy_callbacks(const Space* space)
 {
+  _F_
   bc_type_callback = space->bc_type_callback;
   bc_value_callback_by_coord = space->bc_value_callback_by_coord;
   bc_value_callback_by_edge  = space->bc_value_callback_by_edge;
@@ -498,6 +526,7 @@ void Space::copy_callbacks(const Space* space)
 
 void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
 {
+  _F_
   int n = shapeset->get_max_order() + 1 - nv;
   mat = new_matrix<double>(n, n);
   int component = get_type() == 2 ? 1 : 0;
@@ -530,6 +559,7 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
 
 void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 {
+  _F_
   if (e->active)
   {
     Node* en = e->en[surf_pos->surf_num];
@@ -567,6 +597,7 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 
 void Space::update_essential_bc_values()
 {
+  _F_
   Element* e;
   for_all_base_elements(e, mesh)
   {
@@ -585,6 +616,7 @@ void Space::update_essential_bc_values()
 
 void Space::free_extra_data()
 {
+  _F_
   for (unsigned int i = 0; i < extra_data.size(); i++)
     delete [] (scalar*) extra_data[i];
   extra_data.clear();
@@ -618,6 +650,7 @@ void Space::free_extra_data()
 // This is identical to H3D.
 H2D_API int assign_dofs(Tuple<Space*> spaces) 
 {
+  _F_
   int n = spaces.size();
   // assigning dofs to each space
   int ndof = 0;  

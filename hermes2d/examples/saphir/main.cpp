@@ -122,11 +122,11 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form_1, bilinear_form_ord, H2D_SYM, 1);
-  wf.add_matrix_form(bilinear_form_2, bilinear_form_ord, H2D_SYM, 2);
-  wf.add_matrix_form(bilinear_form_3, bilinear_form_ord, H2D_SYM, 3);
-  wf.add_matrix_form(bilinear_form_4, bilinear_form_ord, H2D_SYM, 4);
-  wf.add_matrix_form(bilinear_form_5, bilinear_form_ord, H2D_SYM, 5);
+  wf.add_matrix_form(bilinear_form_1, bilinear_form_ord, HERMES_SYM, 1);
+  wf.add_matrix_form(bilinear_form_2, bilinear_form_ord, HERMES_SYM, 2);
+  wf.add_matrix_form(bilinear_form_3, bilinear_form_ord, HERMES_SYM, 3);
+  wf.add_matrix_form(bilinear_form_4, bilinear_form_ord, HERMES_SYM, 4);
+  wf.add_matrix_form(bilinear_form_5, bilinear_form_ord, HERMES_SYM, 5);
   wf.add_vector_form(linear_form_1, linear_form_ord, 1);
   wf.add_vector_form(linear_form_3, linear_form_ord, 3);
 
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
   Solution *sln = new Solution();
   Solution *ref_sln = new Solution();
   bool verbose = true;     // Print info during adaptivity.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
+  solve_linear_adapt(&space, &wf, NULL, matrix_solver, HERMES_H1_NORM, sln, ref_sln, 
                      sln_win_geom, mesh_win_geom, &selector, &apt, verbose);
 
   // Wait for all views to be closed.

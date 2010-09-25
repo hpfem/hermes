@@ -98,9 +98,9 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_iron), H2D_SYM, 3);
-  wf.add_matrix_form(callback(bilinear_form_wire), H2D_SYM, 2);
-  wf.add_matrix_form(callback(bilinear_form_air), H2D_SYM, 1);
+  wf.add_matrix_form(callback(bilinear_form_iron), HERMES_SYM, 3);
+  wf.add_matrix_form(callback(bilinear_form_wire), HERMES_SYM, 2);
+  wf.add_matrix_form(callback(bilinear_form_air), HERMES_SYM, 1);
   wf.add_vector_form(callback(linear_form_wire), 2);
 
   // Initialize coarse and reference mesh solution.
@@ -156,9 +156,9 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
-    Adapt* adaptivity = new Adapt(&space, H2D_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 

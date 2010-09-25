@@ -30,7 +30,7 @@
 #include "ref_selectors/selector.h"
 #include <map>
 
-typedef enum {H2D_L2_NORM, H2D_H1_NORM, H2D_HCURL_NORM, H2D_HDIV_NORM} ProjNormType;
+typedef enum {HERMES_L2_NORM, HERMES_H1_NORM, HERMES_HCURL_NORM, HERMES_HDIV_NORM} ProjNormType;
 
 class Space;
 class PrecalcShapeset;
@@ -40,8 +40,8 @@ class SparseMatrix;
 class Vector;
 class Solver;
 
-// Default H2D projection norm in H1 norm.
-extern int H2D_DEFAULT_PROJ_NORM;
+// Default HERMES projection norm is H1 norm.
+extern int HERMES_DEFAULT_PROJ_NORM;
 
 /// Instantiated template. It is used to create a clean Windows DLL interface.
 H2D_API_USED_TEMPLATE(Tuple<int>);
@@ -69,7 +69,7 @@ public:
   // Get pointer to n-th space.
   Space* get_space(int n) {  return this->spaces[n];  }
 
-  // This is different from H2D.
+  // This is different from H3D.
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   // Precalculate matrix sparse structure.

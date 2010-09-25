@@ -32,8 +32,8 @@
 using namespace std;
 
 /* Private constants */
-#define H2D_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_elem_errors() internally. \internal
-#define H2D_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_elem_errors() internally. \internal
+#define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_elem_errors() internally. \internal
+#define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_elem_errors() internally. \internal
 
 Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1), have_solutions(false), have_errors(false) 
 {
@@ -61,10 +61,10 @@ Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1),
   if (proj_norms.size() > 0) {
     for (int i = 0; i < this->neq; i++) {
       switch (proj_norms[i]) {
-        case H2D_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i]  = l2_form<Ord, Ord>; break;
-        case H2D_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
-        case H2D_HCURL_NORM: form[i][i] = hcurl_form<double, scalar>; ord[i][i]  = hcurl_form<Ord, Ord>; break;
-        case H2D_HDIV_NORM: form[i][i] = hdiv_form<double, scalar>; ord[i][i]  = hdiv_form<Ord, Ord>; break;
+        case HERMES_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i]  = l2_form<Ord, Ord>; break;
+        case HERMES_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
+        case HERMES_HCURL_NORM: form[i][i] = hcurl_form<double, scalar>; ord[i][i]  = hcurl_form<Ord, Ord>; break;
+        case HERMES_HDIV_NORM: form[i][i] = hdiv_form<double, scalar>; ord[i][i]  = hdiv_form<Ord, Ord>; break;
         default: error("Unknown projection type in Adapt::Adapt().");
       }
     }
@@ -703,7 +703,7 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
   }
 
   // Make the error relative.
-  if ((error_flags & H2D_ELEMENT_ERROR_MASK) == H2D_ELEMENT_ERROR_REL) {
+  if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) {
     errors_squared_sum = 0.0;
     for (int i = 0; i < this->neq; i++) {
       double norm_squared = norms_squared[i];
@@ -715,11 +715,11 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
       }
     }
   }
-  else if ((error_flags & H2D_ELEMENT_ERROR_MASK) == H2D_ELEMENT_ERROR_ABS) {
+  else if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_ABS) {
     errors_squared_sum = errors_squared_abs_sum;
   }
   else
-    error("Unknown element error type (0x%x).", error_flags & H2D_ELEMENT_ERROR_MASK);
+    error("Unknown element error type (0x%x).", error_flags & HERMES_ELEMENT_ERROR_MASK);
 
   // Prepare an ordered list of elements according to an error.
   fill_regular_queue(meshes, ref_meshes);
@@ -731,12 +731,12 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
 
   // Return error value.
   have_errors = true;
-  if ((error_flags & H2D_TOTAL_ERROR_MASK) == H2D_TOTAL_ERROR_ABS)
+  if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
     return sqrt(errors_squared_abs_sum);
-  else if ((error_flags & H2D_TOTAL_ERROR_MASK) == H2D_TOTAL_ERROR_REL)
+  else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
     return sqrt(errors_squared_abs_sum / norms_squared_sum);
   else {
-    error("Unknown total error type (0x%x).", error_flags & H2D_TOTAL_ERROR_MASK);
+    error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
     return -1.0;
   }
 }
@@ -828,7 +828,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
       sprintf(title, "Initial mesh, step %d", as);
       ordview->set_title(title);
       ordview->show(space);
-      //View::wait(H2DV_WAIT_KEYPRESS);
+      //View::wait(HERMES_WAIT_KEYPRESS);
     }
 
     as++;

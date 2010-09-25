@@ -1,4 +1,0 @@
-rm *~  
-./complex-adapt-long
-python plot_graph.py &
-

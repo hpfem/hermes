@@ -68,14 +68,15 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  int ndof = get_num_dofs(space);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
 
-  _Matrix* mat = new UMFPackMatrix(ndof, ndof);
-  _Vector* coeff_vec = new UMFPackVector(ndof);
+  Matrix* mat = new UMFPackMatrix(ndof, ndof);
+  Vector* coeff_vec = new UMFPackVector(ndof);
   coeff_vec->zero();
   Solver* solver = new UMFPackLinearSolver(mat, coeff_vec);
 

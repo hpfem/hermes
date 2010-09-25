@@ -35,8 +35,8 @@
 
 /// Wait events.
 enum ViewWaitEvent {
-  H2DV_WAIT_CLOSE, ///< Wait for all windows to close.
-  H2DV_WAIT_KEYPRESS, ///< Wait for any unprocessed keypress to happen.
+  HERMES_WAIT_CLOSE, ///< Wait for all windows to close.
+  HERMES_WAIT_KEYPRESS, ///< Wait for any unprocessed keypress to happen.
 };
 
 struct WinGeom {
@@ -117,7 +117,7 @@ public:
   void wait_for_draw();
 
   static void wait(const char* text); ///< Closes all views at once.
-  static void wait(ViewWaitEvent wait_event = H2DV_WAIT_CLOSE, const char* text = NULL); ///< Waits for an event.
+  static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL); ///< Waits for an event.
 
 protected: //FPS measurement
 #define FPS_FRAME_SIZE 5
@@ -261,7 +261,7 @@ public:
   void wait_for_close() {}
   void wait_for_draw() {}
   static void wait(const char* text) {}
-  static void wait(ViewWaitEvent wait_event = H2DV_WAIT_CLOSE, const char* text = NULL) {}
+  static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL) {}
 };
 
 #endif // NOGLUT

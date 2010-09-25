@@ -57,10 +57,10 @@ public:
   ScalarView(char* title, WinGeom* wg = NULL);
   virtual ~ScalarView();
 
-  void show(MeshFunction* sln, double eps = H2D_EPS_NORMAL, int item = H2D_FN_VAL_0,
+  void show(MeshFunction* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
             MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL, double dmult = 1.0);
 
-  void show_linearizer_data(double eps = H2D_EPS_NORMAL, int item = H2D_FN_VAL_0);
+  void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
 
   void show_mesh(bool show = true) { show_edges = show; refresh(); }
   void show_bounding_box(bool show = true) { show_aabb = show; refresh(); }
@@ -253,7 +253,7 @@ class H2D_API ScalarView : public View
 public:
   ScalarView(const char* title = "ScalarView", DEFAULT_WINDOW_POS) {}
   virtual ~ScalarView() {}
-  void show(MeshFunction* sln, double eps = H2D_EPS_NORMAL, int item = H2D_FN_VAL_0,
+  void show(MeshFunction* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
             MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL, double dmult = 1.0)
      { verbose("ScalarView: Hermes2D compiled without OpenGL support, skipping visualization."); }
   void show_mesh(bool show = true) {}

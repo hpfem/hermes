@@ -213,29 +213,29 @@ int main(int argc, char* argv[])
 
   // Calculating initial vector for Newton.
   info("Projecting initial condition to obtain coefficient vector for Newton on coarse mesh.");
-  project_global(&space, H2D_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
+  project_global(&space, HERMES_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
 
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, H2D_UNSYM, H2D_ANY, 
+    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_euler, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_euler, jac_form_surf_4_ord, BDY_4);
     wf.add_matrix_form_surf(jac_form_surf_6_euler, jac_form_surf_6_ord, BDY_6);
-    wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, H2D_ANY, 
+    wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_vector_form_surf(res_form_surf_1_euler, res_form_surf_1_ord, BDY_1); 
     wf.add_vector_form_surf(res_form_surf_4_euler, res_form_surf_4_ord, BDY_4);
     wf.add_vector_form_surf(res_form_surf_6_euler, res_form_surf_6_ord, BDY_6);
   }
   else {
-    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, H2D_UNSYM, H2D_ANY, 
+    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_cranic, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_cranic, jac_form_surf_4_ord, BDY_4);
     wf.add_matrix_form_surf(jac_form_surf_6_cranic, jac_form_surf_6_ord, BDY_6); 
-    wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, H2D_ANY, 
+    wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_vector_form_surf(res_form_surf_1_cranic, res_form_surf_1_ord, BDY_1, 
 			    &sln_prev_time);
@@ -269,12 +269,12 @@ int main(int argc, char* argv[])
 
     // Update the coefficient vector and sln_prev_time.
     info("Projecting to obtain coefficient vector on coarse mesh.");
-    project_global(&space, H2D_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
+    project_global(&space, HERMES_H1_NORM, &sln_prev_time, Tuple<Solution*>(), coeff_vec);
 
     bool verbose = true;     // Print info during adaptivity.
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
     // The NULL pointers mean that we are not interested in visualization during the Newton's loop.
-    solve_newton_adapt(&space, &wf, coeff_vec, matrix_solver, H2D_H1_NORM, &sln, &ref_sln,
+    solve_newton_adapt(&space, &wf, coeff_vec, matrix_solver, HERMES_H1_NORM, &sln, &ref_sln,
                        NULL, NULL, &selector, &apt,
                        NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
 

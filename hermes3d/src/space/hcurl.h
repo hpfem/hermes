@@ -27,7 +27,9 @@
 ///
 class HcurlSpace : public Space {
 public:
-	HcurlSpace(Mesh *mesh, Shapeset *ss);
+	HcurlSpace(Mesh *mesh, BCType (*bc_type_callback)(int) = NULL, 
+		   scalar (*bc_value_callback_by_coord)(int, double, double, double) = NULL, Ord3 p_init = Ord3(1,1,1),
+                Shapeset* shapeset = NULL);
 	virtual ~HcurlSpace();
 
 	virtual Space *dup(Mesh *mesh) const;

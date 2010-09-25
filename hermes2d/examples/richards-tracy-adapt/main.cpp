@@ -163,19 +163,19 @@ int main(int argc, char* argv[])
 
   // Adapt mesh to represent initial condition with given accuracy.
   bool verbose = true;         // Report results.
-  adapt_to_exact_function(space, H2D_H1_NORM, init_cond, &selector, THRESHOLD, STRATEGY, 
+  adapt_to_exact_function(space, HERMES_H1_NORM, init_cond, &selector, THRESHOLD, STRATEGY, 
                           MESH_REGULARITY, ERR_STOP, NDOF_STOP, 
                           verbose, &u_prev_time);
 
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, H2D_UNSYM, H2D_ANY, &u_prev_time);
-    wf.add_vector_form(res_euler, res_ord, H2D_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, H2D_UNSYM, H2D_ANY, &u_prev_time);
-    wf.add_vector_form(res_cranic, res_ord, H2D_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
   }
 
   // Initialize matrix solver.
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   Solution* sln_tmp = new Solution(&mesh, init_cond);
   // The NULL means that we do not want the result as a Solution.
-  project_global(space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
+  project_global(space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
   delete sln_tmp;
 
   // Initialize views.
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
       info("---- Time step %d:", ts);
       info("Projecting fine mesh solution on globally derefined mesh.");
       // The NULL means that we do not want the coefficient vector.
-      project_global(space, H2D_H1_NORM, &ref_sln, &sln, NULL);
+      project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
     }
 
     // Adaptivity loop (in space):
@@ -251,12 +251,12 @@ int main(int argc, char* argv[])
       if (as == 1 && ts == 1) {
         info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
         // The NULL means that we do not want the result as a Solution.
-        project_global(ref_space, H2D_H1_NORM, &sln, NULL, coeff_vec);
+        project_global(ref_space, HERMES_H1_NORM, &sln, NULL, coeff_vec);
       }
       else {
         info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
         // The NULL means that we do not want the result as a Solution.
-        project_global(ref_space, H2D_H1_NORM, &ref_sln, NULL, coeff_vec);
+        project_global(ref_space, HERMES_H1_NORM, &ref_sln, NULL, coeff_vec);
       }
 
       // Newton's method on fine mesh
@@ -269,15 +269,15 @@ int main(int argc, char* argv[])
 
       // Calculate error estimate wrt. fine mesh solution.
       info("Calculating error (est).");
-      Adapt hp(space, H2D_H1_NORM);
+      Adapt hp(space, HERMES_H1_NORM);
       hp.set_solutions(&sln, &ref_sln);
-      double space_err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+      double space_err_est_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Calculate error wrt. exact solution.
       info("Calculating error (exact).");
       ExactSolution exact(&mesh, exact_sol);
-      double err_exact_abs = calc_abs_error(&sln, &exact, H2D_H1_NORM);
-      double norm_exact = calc_norm(&exact, H2D_H1_NORM);
+      double err_exact_abs = calc_abs_error(&sln, &exact, HERMES_H1_NORM);
+      double norm_exact = calc_norm(&exact, HERMES_H1_NORM);
       space_err_exact_rel = err_exact_abs / norm_exact * 100;    
 
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%, space_err_exact_rel: %g%%", 
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
         // Project the fine mesh solution on the new coarse mesh.
         info("Projecting fine mesh solution on coarse mesh for error calculation.");
         // The NULL means that we do not want the coefficient vector.
-        project_global(space, H2D_H1_NORM, &ref_sln, &sln, NULL);
+        project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
 
         as++;
       }

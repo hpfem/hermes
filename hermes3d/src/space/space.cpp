@@ -112,21 +112,22 @@ void Space::ElementData::dump(int id) {
 	printf("\n");
 }
 
-Space::Space(Mesh *mesh, Shapeset *shapeset) :
-	mesh(mesh), shapeset(shapeset)
+Space::Space(Mesh *mesh, Shapeset *shapeset, BCType (*bc_type_callback)(int), 
+             scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init)
+     : mesh(mesh), shapeset(shapeset)
 {
-	_F_
-	set_bc_types(NULL);
-	set_essential_bc_values((scalar(*)(int, double, double, double)) NULL);
-	set_essential_bc_values((scalar3 &(*)(int, double, double, double)) NULL);
-	mesh_seq = -1;
-	seq = 0;
-	this->was_assigned = false;
-        this->ndof = 0;
+  _F_
+  if (mesh == NULL) error("Space must be initialized with an existing mesh.");
+  this->set_bc_types_init(bc_type_callback);
+  this->set_essential_bc_values(bc_value_callback_by_coord);
+  //this->set_essential_bc_values((scalar3 &(*)(int, double, double, double)) NULL);
+  this->mesh_seq = -1;
+  this->seq = 0;
+  this->was_assigned = false;
+  this->ndof = 0;
 
-	init_data_tables();
+  init_data_tables();
 }
-
 
 Space::~Space() {
 	_F_
@@ -194,16 +195,27 @@ Ord3 Space::get_element_order(Word_t eid) const {
 	return elm_data[eid]->order;
 }
 
-void Space::set_uniform_order(Ord3 order) {
-	_F_
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		assert(elm_data.exists(eid));
-		assert(elm_data[eid] != NULL);
-		assert(mesh->elements[eid]->get_mode() == order.type);
-		elm_data[eid]->order = order;
-	}
-	seq++;
+void Space::set_uniform_order_internal(Ord3 order, int marker) {
+  _F_
+  FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
+    assert(elm_data.exists(eid));
+    assert(elm_data[eid] != NULL);
+    assert(mesh->elements[eid]->get_mode() == order.type);
+    if (marker == HERMES_ANY) elm_data[eid]->order = order;
+    else {
+      if (elm_data[eid]->marker == marker) elm_data[eid]->order = order;
+    }
+  }
+  seq++;
 }
+
+void Space::set_uniform_order(Ord3 order, int marker) {
+  _F_
+  this->set_uniform_order_internal(order, marker);
+  this->assign_dofs();  
+}
+
+
 
 void Space::set_order_recurrent(Word_t eid, Ord3 order) {
 	_F_
@@ -2320,40 +2332,60 @@ static scalar default_bc_value_by_coord(int ess_bdy_marker, double x, double y, 
 	return 0.0;
 }
 
-static scalar3 &default_bc_vec_value_by_coord(int ess_bdy_marker, double x, double y, double z) {
-	static scalar3 val = { 0.0, 0.0, 0.0 };
-	return val;
+static scalar3 &default_bc_vec_value_by_coord(int ess_bdy_marker, double x, double y, double z) 
+{
+  _F_
+  static scalar3 val = { 0.0, 0.0, 0.0 };
+  return val;
 }
 
-void Space::set_bc_types(BCType(*bc_type_callback)(int)) {
-	_F_
-	if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
-	this->bc_type_callback = bc_type_callback;
-	seq++;
+void Space::set_bc_types(BCType(*bc_type_callback)(int)) 
+{
+  _F_
+  if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
+  this->bc_type_callback = bc_type_callback;
+  seq++;
+
+  // since space changed, enumerate basis functions
+  this->assign_dofs();
 }
 
-void Space::set_essential_bc_values(scalar(*bc_value_callback_by_coord)(int, double, double, double)) {
-	_F_
-	if (bc_value_callback_by_coord == NULL) bc_value_callback_by_coord = default_bc_value_by_coord;
-	this->bc_value_callback_by_coord = bc_value_callback_by_coord;
-	seq++;
+void Space::set_bc_types_init(BCType (*bc_type_callback)(int))
+{
+  _F_
+  if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
+  this->bc_type_callback = bc_type_callback;
+  seq++;
 }
 
-void Space::set_essential_bc_values(scalar3 &(*bc_vec_value_callback_by_coord)(int ess_bdy_marker, double x, double y, double z)) {
-	_F_
-	if (bc_vec_value_callback_by_coord == NULL) bc_vec_value_callback_by_coord = default_bc_vec_value_by_coord;
-	this->bc_vec_value_callback_by_coord = bc_vec_value_callback_by_coord;
-	seq++;
+void Space::set_essential_bc_values(scalar(*bc_value_callback_by_coord)(int, double, double, double)) 
+{
+  _F_
+  if (bc_value_callback_by_coord == NULL) bc_value_callback_by_coord = default_bc_value_by_coord;
+  this->bc_value_callback_by_coord = bc_value_callback_by_coord;
+  seq++;
 }
 
-void Space::copy_callbacks(const Space *space) {
-	_F_
-	bc_type_callback = space->bc_type_callback;
-	bc_value_callback_by_coord = space->bc_value_callback_by_coord;
-	bc_vec_value_callback_by_coord = space->bc_vec_value_callback_by_coord;
+/*
+void Space::set_essential_bc_values(scalar3 &(*bc_vec_value_callback_by_coord)(int ess_bdy_marker, 
+                                    double x, double y, double z)) {
+  _F_
+  if (bc_vec_value_callback_by_coord == NULL) bc_vec_value_callback_by_coord = default_bc_vec_value_by_coord;
+  this->bc_vec_value_callback_by_coord = bc_vec_value_callback_by_coord;
+  seq++;
+}
+*/
+
+void Space::copy_callbacks(const Space *space) 
+{
+  _F_
+  bc_type_callback = space->bc_type_callback;
+  bc_value_callback_by_coord = space->bc_value_callback_by_coord;
+  bc_vec_value_callback_by_coord = space->bc_vec_value_callback_by_coord;
 }
 
-void Space::calc_boundary_projections() {
+void Space::calc_boundary_projections() 
+{
 	_F_
 	FOR_ALL_ACTIVE_ELEMENTS(elm_idx, mesh) {
 		Element *e = mesh->elements[elm_idx];
@@ -2403,6 +2435,7 @@ void Space::dump() {
 // This is identical to H2D.
 int assign_dofs(Tuple<Space*> spaces) 
 {
+  _F_
   int n = spaces.size();
   // assigning dofs to each space
   int ndof = 0;  
