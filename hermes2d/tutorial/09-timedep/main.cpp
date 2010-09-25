@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_solver(matrix_solver, matrix, rhs);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));

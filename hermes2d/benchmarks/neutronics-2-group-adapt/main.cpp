@@ -388,7 +388,7 @@ int main(int argc, char* argv[])
     FeProblem* fep = new FeProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     fep->assemble(matrix, rhs);
     
     // Time measurement.
