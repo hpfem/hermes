@@ -620,10 +620,22 @@ double Adapt::eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Adapt::calc_elem_errors(unsigned int error_flags) {
+double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
+{
   error_if(!have_solutions, "A (coarse) solution and a reference solutions are not set, see set_solutions()");
 
-  // prepare multi-mesh traversal and error arrays
+  // If calculating for different refined solutions than this->sln, 
+  // we will have to reset to this->sln after the computation.
+  Solution* temp_sln[10];
+  if (solutions != Tuple<Solution *>())
+  {
+    for(int i = 0; i < 10; i++)
+      temp_sln[i] = this->sln[i];
+    for(int i = 0; i < solutions.size(); i++)
+      this->sln[i] = solutions[i];
+  }
+
+  // Prepare multi-mesh traversal and error arrays.
   AUTOLA_OR(Mesh*, meshes, 2*this->neq);
   Mesh** ref_meshes = meshes + this->neq;
   AUTOLA_OR(Transformable*, tr, 2*this->neq);
@@ -646,12 +658,13 @@ double Adapt::calc_elem_errors(unsigned int error_flags) {
     memset(errors_squared[i], 0, sizeof(double) * max_element_id);
   }
 
-  //prepare space for norms
+  // Prepare space for norms.
   double norms_squared_sum = 0.0;
   std::vector<double> norms_squared(this->neq, 0.0);
+  std::vector<double> errors_squared_abs(this->neq, 0.0);
   double errors_squared_abs_sum = 0.0;
 
-  //calculate error
+  // Calculate error.
   Element** ee;
   trav.begin(2*this->neq, meshes, tr);
   while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
@@ -672,6 +685,7 @@ double Adapt::calc_elem_errors(unsigned int error_flags) {
 
           norms_squared[i] += norm_squared;
           norms_squared_sum += norm_squared;
+          errors_squared_abs[i] += error_squared;
           errors_squared_abs_sum += error_squared;
           errors_squared[i][ee[i]->id] += error_squared;
         }
@@ -679,8 +693,16 @@ double Adapt::calc_elem_errors(unsigned int error_flags) {
     }
   }
   trav.finish();
+  
+  // Store the calculation for each solution component separately.
+  if(err_rel != NULL)
+  {
+    err_rel->clear();
+    for (int i = 0; i < this->neq; i++)
+        err_rel->push_back(sqrt(errors_squared_abs[i]/norms_squared[i]));
+  }
 
-  //make the error relative
+  // Make the error relative.
   if ((error_flags & H2D_ELEMENT_ERROR_MASK) == H2D_ELEMENT_ERROR_REL) {
     errors_squared_sum = 0.0;
     for (int i = 0; i < this->neq; i++) {
@@ -699,10 +721,15 @@ double Adapt::calc_elem_errors(unsigned int error_flags) {
   else
     error("Unknown element error type (0x%x).", error_flags & H2D_ELEMENT_ERROR_MASK);
 
-  //prepare an ordered list of elements according to an error
+  // Prepare an ordered list of elements according to an error.
   fill_regular_queue(meshes, ref_meshes);
+  
+  // Restoring the original sln.
+  if (solutions != Tuple<Solution *>())
+    for(int i = 0; i < solutions.size(); i++)
+      this->sln[i] = temp_sln[i];
 
-  //return error value
+  // Return error value.
   have_errors = true;
   if ((error_flags & H2D_TOTAL_ERROR_MASK) == H2D_TOTAL_ERROR_ABS)
     return sqrt(errors_squared_abs_sum);

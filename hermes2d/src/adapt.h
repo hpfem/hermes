@@ -156,7 +156,7 @@ public:
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::H2D_TOTAL_ERROR_REL, ::H2D_TOTAL_ERROR_ABS, ::H2D_ELEMENT_ERROR_REL, ::H2D_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-  virtual double calc_elem_errors(unsigned int error_flags = H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS);
+  virtual double calc_elem_errors(Tuple<double>* err_rel = new Tuple<double>(), unsigned int error_flags = H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS, Tuple<Solution *> solutions = Tuple<Solution *>());
 
   /// Refines elements based on results from calc_elem_errors().
   /** The behavior of adaptivity can be controlled through methods should_ignore_element()

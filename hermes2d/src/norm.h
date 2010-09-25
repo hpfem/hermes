@@ -19,12 +19,15 @@
 #include "solution.h"
 #include "refmap.h"
 
+// DEPRECATED
 // main functions used for error calculation in Hermes
 extern H2D_API double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type); // Note: coarse mesh sln has to be first, then 
-                                                                                             // ref_sln.
+// DEPRECATED                                                                                             // ref_sln.
 extern H2D_API double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type);
+// DEPRECATED
 extern H2D_API double calc_norm(MeshFunction* sln, int norm_type);
 
+// DEPRECATED
 // function calculating errors between solutions in right and left vectors, returning all necessary parameters
 // returns correct parameters only if the return value is true
 // coarse mesh sln has to be first, then ref_sln
@@ -32,7 +35,9 @@ H2D_API bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<
       double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<int> norms = Tuple<int>());
 
 // helper functions
+// DEPRECATED
 extern H2D_API double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), MeshFunction* sln1, MeshFunction* sln2);
+// DEPRECATED
 extern H2D_API double calc_norm(double (*fn)(MeshFunction*, RefMap*), MeshFunction* sln);
 
 extern H2D_API double error_fn_l2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv);

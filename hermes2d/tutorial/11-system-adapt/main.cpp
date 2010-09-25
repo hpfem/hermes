@@ -190,47 +190,39 @@ int main(int argc, char* argv[])
     s_view_1.show(&v_sln); 
     o_view_1.show(&v_space);
 
-    // Calculate element errors and total error estimate.
+    // Calculate element errors.
     info("Calculating error."); 
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
     adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
-    double err_est = adaptivity->calc_elem_errors() * 100;
+    
+    // Calculate error estimate for each solution component and in total.
+    Tuple<double>* err_est_rel = new Tuple<double>;
+    double err_est = adaptivity->calc_elem_errors(err_est_rel, H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;
+
+    // Calculate exact error for each solution component and in total.
+    Tuple<double>* err_exact_rel = new Tuple<double>;
+    double err_exact_rel_total = adaptivity->calc_elem_errors(err_exact_rel, H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
 
     // Time measurement.
     cpu_time.tick();
 
-    // Calculate error estimate and exact error for each solution component.
-    Tuple<double> err_est_abs, err_exact_abs;
-    Tuple<double> norm_est_vals, norm_exact_vals;
-    double err_est_abs_total, err_exact_abs_total;
-    double norm_est_total, norm_exact_total;
-    double err_est_rel_total, err_exact_rel_total;
-
-    if (!calc_errors(Tuple<Solution* >(&u_sln, &v_sln), Tuple<Solution *> (&u_ref_sln, &v_ref_sln), 
-         err_est_abs, norm_est_vals, err_est_abs_total, norm_est_total, err_est_rel_total))
-      error("Error in calc_errors.");
-
-    if(!calc_errors(Tuple<Solution* >(&u_sln, &v_sln), Tuple<Solution *> (&u_exact, &v_exact), 
-         err_exact_abs, norm_exact_vals, err_exact_abs_total, norm_exact_total, err_exact_rel_total))
-      error("Error in calc_errors.");
-
     // Report results.
     info("ndof[0]: %d, ref_ndof[0]: %d, err_est_rel[0]: %g%%",
          u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(),
-         err_est_abs[0]/norm_est_vals[0]*100);
-    info("err_exact_rel[0]: %g%%", err_exact_abs[0]/norm_exact_vals[0]*100);
+         (*err_est_rel)[0]*100);
+    info("err_exact_rel[0]: %g%%", (*err_exact_rel)[0]*100);
     info("ndof[1]: %d, ref_ndof[1]: %d, err_est_rel[1]: %g%%",
          v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs(),
-         err_est_abs[1]/norm_est_vals[1]*100);
-    info("err_exact_rel[1]: %g%%", err_exact_abs[1]/norm_exact_vals[1]*100);
+         (*err_est_rel)[1]*100);
+    info("err_exact_rel[1]: %g%%", (*err_exact_rel)[1]*100);
     info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%",
          get_num_dofs(Tuple<Space *>(&u_space, &v_space)),
-         get_num_dofs(*ref_spaces), err_est_rel_total);
+         get_num_dofs(*ref_spaces), err_est);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est);
     graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est);
     graph_cpu_est.save("conv_cpu_est.dat");
     graph_dof_exact.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
