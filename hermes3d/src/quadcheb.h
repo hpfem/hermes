@@ -26,7 +26,7 @@
 /// points on the reference brick. It is used for expressing
 /// the solution on an element as a linear combination of monomials.
 ///
-class QuadChebTetra : public Quad3D {
+class H3D_API QuadChebTetra : public Quad3D {
 public:
 	QuadChebTetra();
 	~QuadChebTetra();
@@ -37,7 +37,7 @@ public:
 /// points on the reference brick. It is used for expressing
 /// the solution on an element as a linear combination of monomials.
 ///
-class QuadChebHex : public Quad3D {
+class H3D_API QuadChebHex : public Quad3D {
 public:
 	QuadChebHex();
 	~QuadChebHex();

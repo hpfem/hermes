@@ -26,7 +26,7 @@
 // Represents a shape function on a ref. domain
 //
 //
-class ShapeFunction : public RealFunction {
+class H3D_API ShapeFunction : public RealFunction {
 public:
 	/// Constructs a standard precalculated shapeset class.
 	/// @param shapeset [in] Pointer to the shapeset to be precalculated.

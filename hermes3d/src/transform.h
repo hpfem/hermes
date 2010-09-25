@@ -30,7 +30,10 @@ struct Trf {
 	double3 t;			/// translation vector (3 components - x, y, z)
 };
 
+extern H3D_IMPORT Trf hex_trf[];
+extern H3D_IMPORT Trf tetra_trf[];
 
+	
 /// Transformable is a base class for all classes that perform some kind of precalculation of
 /// function values on elements. These classes (ShapeFunction, Solution, RefMap) inherit
 /// from Transformable the ability to transform integration points to the sub-elements
@@ -38,7 +41,7 @@ struct Trf {
 ///
 /// The purpose of this class to transform elements to sub-elements (multi-mesh)
 ///
-class Transformable {
+class H3D_API Transformable {
 public:
 	Transformable();
 	virtual ~Transformable() {}
@@ -90,9 +93,6 @@ protected:
 
 	Trf stack[H3D_STACK_SIZE];					/// transformation matrix stack
 	int top;       					/// stack top
-
-	static Trf hex_trf[];
-	static Trf tetra_trf[];
 
 	friend class Projection;
 };

@@ -21,7 +21,7 @@
 #define _ERROR_H_
 
 #include "compat-util.h"
-
+#include "common.h"
 //
 // Error handling
 //
@@ -42,14 +42,14 @@
 #else
 #define EXIT(...) h_exit(__LINE__, __PRETTY_FUNCTION__, __FILE__, ## __VA_ARGS__)
 #endif
-void h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
+void H3D_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
 
 /// Report unrecoverable error (no call stack or location dumped)
-void error(char const *fmt, ...) NORETURN;
+void H3D_API error(char const *fmt, ...) NORETURN;
 
 /// Notify the user about warning (the execution continues), neither location or call stack
 /// is dumped
-void warning(const char *warn, ...);
+void H3D_API warning(const char *warn, ...);
 
 /// Check that memory allocation was ok, it not, report an error (also dump call stack) and
 /// terminate
@@ -58,6 +58,6 @@ void warning(const char *warn, ...);
 #else
 #define MEM_CHECK(var) h_mem_check(__LINE__, __PRETTY_FUNCTION__, __FILE__, var)
 #endif
-void h_mem_check(int line, const char *func, const char *file, void *var);
+void H3D_API h_mem_check(int line, const char *func, const char *file, void *var);
 
 #endif

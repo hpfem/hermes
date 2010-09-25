@@ -147,7 +147,7 @@ inline void mask_to_comp_val(int mask, int &a, int &b) {
 
 
 template<typename TYPE>
-class Function : public Transformable {
+class H3D_API Function : public Transformable {
 public:
 	/// Default constructor.
 	Function();

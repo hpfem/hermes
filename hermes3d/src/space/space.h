@@ -77,7 +77,7 @@ enum BCType
 /// by 'mesh', consisting of basis functions constructed using 'shapeset'.
 ///
 /// @ingroup spaces
-class Space {
+class H3D_API Space {
 public:
 	Space(Mesh *mesh, Shapeset *shapeset);
 	virtual ~Space();

@@ -32,6 +32,17 @@
 #include <vector>
 #include <set>
 
+// Compatibility.
+//Windows DLL export/import definitions
+#if defined(WIN32) || defined(_WINDOWS)
+# define H3D_API __declspec(dllexport)
+# define H3D_IMPORT __declspec(dllimport)
+#else
+# define H3D_API
+# define H3D_IMPORT
+#endif
+
+
 // error codes
 #define H3D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
 #define H3D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
@@ -154,15 +165,15 @@ enum ESpaceType {
 };
 
 // points
-struct Point1D {
+struct H3D_API Point1D {
 	double x;			// coordinates of a point
 };
 
-struct Point2D {
+struct H3D_API Point2D {
 	double x, y;		// coordinates of a point
 };
 
-struct Point3D {
+struct H3D_API Point3D {
 	double x, y, z;		// coordinates of a point
 };
 

@@ -29,7 +29,7 @@
 ///
 ///
 /// @ingroup hp-adaptivity
-class H1Adapt {
+class H3D_API H1Adapt {
 public:
 	/// Initializes the class. 'num' is the number of mesh-space pairs to be adapted.
 	/// After 'num', exactly that many space pointers must follow.

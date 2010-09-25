@@ -27,7 +27,7 @@
 /// Abstract class for mesh loaders
 ///
 /// @ingroup meshloaders
-class MeshLoader {
+class H3D_API MeshLoader {
 public:
 	virtual ~MeshLoader() { }
 

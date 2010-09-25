@@ -44,7 +44,7 @@ namespace Gmsh {
 /// Common ancestor for output quadratures. Extends the interface of Quad3D
 ///
 /// @ingroup visualization
-class OutputQuad : public Quad3D {
+class H3D_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
@@ -92,7 +92,7 @@ protected:
 /// Quadrature for visualizing the solution on tetrahedron
 ///
 /// @ingroup visualization
-class OutputQuadTetra : public OutputQuad {
+class H3D_API OutputQuadTetra : public OutputQuad {
 public:
 	OutputQuadTetra();
 	virtual ~OutputQuadTetra();
@@ -199,7 +199,7 @@ int get_principal_order(Ord3 order) {
 /// Quadrature for visualizing the solution on hexahedron
 ///
 /// @ingroup visualization
-class OutputQuadHex : public OutputQuad {
+class H3D_API OutputQuadHex : public OutputQuad {
 public:
 	OutputQuadHex();
 	virtual ~OutputQuadHex();

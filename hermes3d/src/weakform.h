@@ -54,7 +54,7 @@ typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
 ///
 ///
 /// @ingroup assembling
-class WeakForm {
+class H3D_API WeakForm {
 
 public:
 	WeakForm(int neq = 1, bool mat_free = false);

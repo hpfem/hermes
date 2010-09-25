@@ -211,7 +211,7 @@ Trf *Projection::get_trf(int trf)
 	_F_
 	static Trf none = { { 1, 1, 1 }, { 0, 0, 0 } };
 	if (trf == -1) return &none;
-	else return Transformable::hex_trf + trf;			// FIXME: HEX-specific
+	else return hex_trf + trf;			// FIXME: HEX-specific
 }
 
 Projection::Projection(Solution *afn, Element *e, Shapeset *ss)

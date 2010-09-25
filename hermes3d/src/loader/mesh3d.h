@@ -25,7 +25,7 @@
 /// Mesh loader from Mesh3D format
 ///
 /// @ingroup meshloaders
-class Mesh3DReader : public MeshLoader {
+class H3D_API Mesh3DReader : public MeshLoader {
 public:
 	Mesh3DReader();
 	virtual ~Mesh3DReader();

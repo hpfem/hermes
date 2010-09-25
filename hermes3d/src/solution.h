@@ -46,7 +46,7 @@ typedef
 /// (This is an abstract class and cannot be instantiated.)
 ///
 /// @ingroup solutions
-class MeshFunction : public ScalarFunction {
+class H3D_API MeshFunction : public ScalarFunction {
 public:
 	MeshFunction(Mesh *mesh);
 	virtual ~MeshFunction();
@@ -87,7 +87,7 @@ public:
 /// element and integration points.
 ///
 /// @ingroup solutions
-class Solution : public MeshFunction {
+class H3D_API Solution : public MeshFunction {
 public:
 	Solution(Mesh *mesh);
 	virtual ~Solution();
@@ -166,7 +166,7 @@ protected:
 /// compare an approximate solution with an exact solution (see DiffFilter).
 ///
 /// @ingroup solutions
-class ExactSolution : public Solution {
+class H3D_API ExactSolution : public Solution {
 public:
 	ExactSolution(Mesh *mesh, exact_fn_t fn) : Solution(mesh) { set_exact(fn); }
 	ExactSolution(Mesh *mesh, exact_vec_fn_t fn) : Solution(mesh) { set_exact(fn); }

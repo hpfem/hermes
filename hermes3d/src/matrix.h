@@ -148,7 +148,7 @@ enum EMatrixDumpFormat {
 	DF_NATIVE					// native format for the linear solver
 };
 
-class Matrix {
+class H3D_API Matrix {
 public:
 	virtual ~Matrix() { }
 
@@ -192,7 +192,7 @@ public:
 	virtual int get_matrix_size() const = 0;
 };
 
-class SparseMatrix : public Matrix {
+class H3D_API SparseMatrix : public Matrix {
 public:
 	SparseMatrix();
 	virtual ~SparseMatrix();
@@ -266,7 +266,7 @@ protected:
 	int mem_size;
 };
 
-class Vector {
+class H3D_API Vector {
 public:
 	virtual ~Vector() { }
 

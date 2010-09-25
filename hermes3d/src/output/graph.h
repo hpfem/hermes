@@ -32,7 +32,7 @@
 ///  Please note that this is a base class that cannot be instantiated.
 ///  Use MatlabGraph or GnuplotGraph instead.
 ///
-class Graph {
+class H3D_API Graph {
 public:
 	Graph(const char *title = NULL, const char *x_axis_name = NULL, const char *y_axis_name = NULL);
 	virtual ~Graph() { }
@@ -78,7 +78,7 @@ protected:
 
 ///  Outputs a MATLAB graph.
 ///
-class MatlabGraph : public Graph {
+class H3D_API MatlabGraph : public Graph {
 public:
 	MatlabGraph(const char *title = NULL, const char *x_axis_name = NULL, const char *y_axis_name = NULL) :
 		Graph(title, x_axis_name, y_axis_name) {
@@ -89,7 +89,7 @@ public:
 
 ///  Outputs a GNUPLOT graph.
 ///
-class GnuplotGraph : public Graph {
+class H3D_API GnuplotGraph : public Graph {
 public:
 	enum Type {
 		Line,

@@ -26,7 +26,7 @@
 // 1D domains
 //
 
-const Point1D RefLine::vertices[] = {
+Point1D RefLine_vertices[] = {
 	{ -1.0 },
 	{  1.0 }
 };
@@ -39,25 +39,25 @@ const Point1D RefLine::vertices[] = {
 
 // Triangle ///////////////////////////////////////////////////////////////////
 
-const Point2D RefTri::vertices[] = {
+Point2D RefTri_vertices[] = {
 	{ -1.0, -1.0 },
 	{  1.0, -1.0 },
 	{ -1.0,  1.0 }
 };
 
-const int2 RefTri::edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+int2 RefTri_edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
 
 
 // Quad ///////////////////////////////////////////////////////////////////////
 
-const Point2D RefQuad::vertices[] = {
+Point2D RefQuad_vertices[] = {
 	{ -1.0, -1.0 },
 	{  1.0, -1.0 },
 	{  1.0,  1.0 },
 	{ -1.0,  1.0 }
 };
 
-const int2 RefQuad::edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 } };
+int2 RefQuad_edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 } };
 
 
 //
@@ -67,33 +67,33 @@ const int2 RefQuad::edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 } };
 
 // Tetra //////////////////////////////////////////////////////////////////////
 
-const Point3D RefTetra::vertices[] = {
+Point3D RefTetra_vertices[] = {
 	{ -1.0, -1.0, -1.0 },
 	{  1.0, -1.0, -1.0 },
 	{ -1.0,  1.0, -1.0 },
 	{ -1.0, -1.0,  1.0 }
 };
 
-const int2 RefTetra::edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 0 }, { 0, 3 }, { 1, 3 }, { 2, 3 } };
-static int tet_face_vtcs_0[] = { 0, 1, 3 };
-static int tet_face_vtcs_1[] = { 1, 2, 3 };
-static int tet_face_vtcs_2[] = { 2, 0, 3 };
-static int tet_face_vtcs_3[] = { 0, 2, 1 };
-const int *RefTetra::face_vtcs[] = { tet_face_vtcs_0, tet_face_vtcs_1, tet_face_vtcs_2, tet_face_vtcs_3 };
-const int RefTetra::face_nvtcs[] = { 3, 3, 3, 3 };
-static int tet_face_edges_0[] = { 0, 4, 3 };
-static int tet_face_edges_1[] = { 1, 5, 4 };
-static int tet_face_edges_2[] = { 2, 3, 5 };
-static int tet_face_edges_3[] = { 0, 2, 1 };
-const int *RefTetra::face_edges[] = { tet_face_edges_0, tet_face_edges_1, tet_face_edges_2, tet_face_edges_3 };
-const int RefTetra::face_nedges[] = { 3, 3, 3, 3 };
-const EMode2D RefTetra::face_mode[] = { MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE };
-const int RefTetra::face_orientations[] = { 6, 6, 6, 6 };
-const Point3D RefTetra::face_normal[] = { { 0, -1, 0 }, { 1.0 / sqrt(3.0), 1.0 / sqrt(3.0), 1.0 / sqrt(3.0) }, { -1, 0, 0 }, { 0, 0, -1 } };
+int2 RefTetra_edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 0 }, { 0, 3 }, { 1, 3 }, { 2, 3 } };
+int tet_face_vtcs_0[] = { 0, 1, 3 };
+int tet_face_vtcs_1[] = { 1, 2, 3 };
+int tet_face_vtcs_2[] = { 2, 0, 3 };
+int tet_face_vtcs_3[] = { 0, 2, 1 };
+int *RefTetra_face_vtcs[] = { tet_face_vtcs_0, tet_face_vtcs_1, tet_face_vtcs_2, tet_face_vtcs_3 };
+int RefTetra_face_nvtcs[] = { 3, 3, 3, 3 };
+int tet_face_edges_0[] = { 0, 4, 3 };
+int tet_face_edges_1[] = { 1, 5, 4 };
+int tet_face_edges_2[] = { 2, 3, 5 };
+int tet_face_edges_3[] = { 0, 2, 1 };
+int *RefTetra_face_edges[] = { tet_face_edges_0, tet_face_edges_1, tet_face_edges_2, tet_face_edges_3 };
+int RefTetra_face_nedges[] = { 3, 3, 3, 3 };
+EMode2D RefTetra_face_mode[] = { MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE };
+int RefTetra_face_orientations[] = { 6, 6, 6, 6 };
+Point3D RefTetra_face_normal[] = { { 0, -1, 0 }, { 1.0 / sqrt(3.0), 1.0 / sqrt(3.0), 1.0 / sqrt(3.0) }, { -1, 0, 0 }, { 0, 0, -1 } };
 
 // Hex ////////////////////////////////////////////////////////////////////////
 
-const Point3D RefHex::vertices[] = {
+Point3D RefHex_vertices[] = {
 	{ -1.0, -1.0, -1.0 },
 	{  1.0, -1.0, -1.0 },
 	{  1.0,  1.0, -1.0 },
@@ -104,35 +104,35 @@ const Point3D RefHex::vertices[] = {
 	{ -1.0,  1.0,  1.0 }
 };
 
-const int2 RefHex::edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 3, 2 }, { 0, 3 }, { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 5 }, { 5, 6 }, { 7, 6 }, { 4, 7 } };
+int2 RefHex_edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 3, 2 }, { 0, 3 }, { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 5 }, { 5, 6 }, { 7, 6 }, { 4, 7 } };
 
-static int hex_face_vtcs_0[] = { 0, 3, 7, 4 };
-static int hex_face_vtcs_1[] = { 1, 2, 6, 5 };
-static int hex_face_vtcs_2[] = { 0, 1, 5, 4 };
-static int hex_face_vtcs_3[] = { 3, 2, 6, 7 };
-static int hex_face_vtcs_4[] = { 0, 1, 2, 3 };
-static int hex_face_vtcs_5[] = { 4, 5, 6, 7 };
-const int *RefHex::face_vtcs[] = { hex_face_vtcs_0, hex_face_vtcs_1, hex_face_vtcs_2, hex_face_vtcs_3, hex_face_vtcs_4, hex_face_vtcs_5 };
-const int RefHex::face_nvtcs[] = { 4, 4, 4, 4, 4, 4 };
+int hex_face_vtcs_0[] = { 0, 3, 7, 4 };
+int hex_face_vtcs_1[] = { 1, 2, 6, 5 };
+int hex_face_vtcs_2[] = { 0, 1, 5, 4 };
+int hex_face_vtcs_3[] = { 3, 2, 6, 7 };
+int hex_face_vtcs_4[] = { 0, 1, 2, 3 };
+int hex_face_vtcs_5[] = { 4, 5, 6, 7 };
+int *RefHex_face_vtcs[] = { hex_face_vtcs_0, hex_face_vtcs_1, hex_face_vtcs_2, hex_face_vtcs_3, hex_face_vtcs_4, hex_face_vtcs_5 };
+int RefHex_face_nvtcs[] = { 4, 4, 4, 4, 4, 4 };
 
-static int hex_face_edges_0[] = { 3, 7, 11, 4 };
-static int hex_face_edges_1[] = { 1, 6, 9, 5 };
-static int hex_face_edges_2[] = { 0, 5, 8, 4 };
-static int hex_face_edges_3[] = { 2, 6, 10, 7 };
-static int hex_face_edges_4[] = { 0, 1, 2, 3 };
-static int hex_face_edges_5[] = { 8, 9, 10, 11 };
-const int *RefHex::face_edges[] = { hex_face_edges_0, hex_face_edges_1, hex_face_edges_2, hex_face_edges_3, hex_face_edges_4, hex_face_edges_5 };
-const int RefHex::face_nedges[] = { 4, 4, 4, 4, 4, 4 };
-const EMode2D RefHex::face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD };
-const int RefHex::face_orientations[] = { 8, 8, 8, 8, 8, 8 };
-const int RefHex::face_edge_ori[8][2] = { { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 }, { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
-const int RefHex::edge_tangent[12] = { 0, 1, 0, 1, 2, 2, 2, 2, 0, 1, 0, 1 };
-const int RefHex::face_tangent[6][2] = { { 1, 2 }, { 1, 2 }, { 0, 2 }, { 0, 2 }, { 0, 1 }, { 0, 1 } };
+int hex_face_edges_0[] = { 3, 7, 11, 4 };
+int hex_face_edges_1[] = { 1, 6, 9, 5 };
+int hex_face_edges_2[] = { 0, 5, 8, 4 };
+int hex_face_edges_3[] = { 2, 6, 10, 7 };
+int hex_face_edges_4[] = { 0, 1, 2, 3 };
+int hex_face_edges_5[] = { 8, 9, 10, 11 };
+int *RefHex_face_edges[] = { hex_face_edges_0, hex_face_edges_1, hex_face_edges_2, hex_face_edges_3, hex_face_edges_4, hex_face_edges_5 };
+int RefHex_face_nedges[] = { 4, 4, 4, 4, 4, 4 };
+EMode2D RefHex_face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD };
+int RefHex_face_orientations[] = { 8, 8, 8, 8, 8, 8 };
+int RefHex_face_edge_ori[8][2] = { { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 }, { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
+int RefHex_edge_tangent[12] = { 0, 1, 0, 1, 2, 2, 2, 2, 0, 1, 0, 1 };
+int RefHex_face_tangent[6][2] = { { 1, 2 }, { 1, 2 }, { 0, 2 }, { 0, 2 }, { 0, 1 }, { 0, 1 } };
 
 
 // Prism //////////////////////////////////////////////////////////////////////
 
-const Point3D RefPrism::vertices[] = {
+Point3D RefPrism_vertices[] = {
 	{ -1.0, -1.0, -1.0 },
 	{  1.0, -1.0, -1.0 },
 	{ -1.0,  1.0, -1.0 },
@@ -141,21 +141,21 @@ const Point3D RefPrism::vertices[] = {
 	{ -1.0,  1.0,  1.0 }
 };
 
-const int2 RefPrism::edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 0 }, { 0, 3}, { 1, 4 }, { 2, 5 }, { 3, 4 }, { 4, 5 }, { 5, 3 } };
-static int std_3d_prism_face_vtcs_0[] = { 0, 1, 4, 3 };
-static int std_3d_prism_face_vtcs_1[] = { 1, 2, 5, 4 };
-static int std_3d_prism_face_vtcs_2[] = { 2, 0, 3, 5 };
-static int std_3d_prism_face_vtcs_3[] = { 0, 2, 1 };
-static int std_3d_prism_face_vtcs_4[] = { 3, 4, 5 };
-const int *RefPrism::face_vtcs[] = { std_3d_prism_face_vtcs_0, std_3d_prism_face_vtcs_1, std_3d_prism_face_vtcs_2, std_3d_prism_face_vtcs_3, std_3d_prism_face_vtcs_4 };
-const int RefPrism::face_nvtcs[] = { 4, 4, 4, 3, 3 };
-static int std_3d_prism_face_edges_0[] = { 0, 4, 6, 3 };
-static int std_3d_prism_face_edges_1[] = { 1, 5, 7, 4 };
-static int std_3d_prism_face_edges_2[] = { 2, 3, 8, 5 };
-static int std_3d_prism_face_edges_3[] = { 0, 2, 1 };
-static int std_3d_prism_face_edges_4[] = { 6, 7, 8 };
-const int *RefPrism::face_edges[] = { std_3d_prism_face_edges_0, std_3d_prism_face_edges_1, std_3d_prism_face_edges_2, std_3d_prism_face_edges_3, std_3d_prism_face_edges_4 };
-const int RefPrism::face_nedges[] = { 4, 4, 4, 3, 3 };
-const EMode2D RefPrism::face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_TRIANGLE, MODE_TRIANGLE };
-const int RefPrism::face_orientations[] = { 8, 8, 8, 6, 6 };
+int2 RefPrism_edge_vtcs[] = { { 0, 1 }, { 1, 2 }, { 2, 0 }, { 0, 3}, { 1, 4 }, { 2, 5 }, { 3, 4 }, { 4, 5 }, { 5, 3 } };
+int std_3d_prism_face_vtcs_0[] = { 0, 1, 4, 3 };
+int std_3d_prism_face_vtcs_1[] = { 1, 2, 5, 4 };
+int std_3d_prism_face_vtcs_2[] = { 2, 0, 3, 5 };
+int std_3d_prism_face_vtcs_3[] = { 0, 2, 1 };
+int std_3d_prism_face_vtcs_4[] = { 3, 4, 5 };
+int *RefPrism_face_vtcs[] = { std_3d_prism_face_vtcs_0, std_3d_prism_face_vtcs_1, std_3d_prism_face_vtcs_2, std_3d_prism_face_vtcs_3, std_3d_prism_face_vtcs_4 };
+int RefPrism_face_nvtcs[] = { 4, 4, 4, 3, 3 };
+int std_3d_prism_face_edges_0[] = { 0, 4, 6, 3 };
+int std_3d_prism_face_edges_1[] = { 1, 5, 7, 4 };
+int std_3d_prism_face_edges_2[] = { 2, 3, 8, 5 };
+int std_3d_prism_face_edges_3[] = { 0, 2, 1 };
+int std_3d_prism_face_edges_4[] = { 6, 7, 8 };
+int *RefPrism_face_edges[] = { std_3d_prism_face_edges_0, std_3d_prism_face_edges_1, std_3d_prism_face_edges_2, std_3d_prism_face_edges_3, std_3d_prism_face_edges_4 };
+int RefPrism_face_nedges[] = { 4, 4, 4, 3, 3 };
+EMode2D RefPrism_face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_TRIANGLE, MODE_TRIANGLE };
+int RefPrism_face_orientations[] = { 8, 8, 8, 6, 6 };
 

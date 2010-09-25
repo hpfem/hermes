@@ -163,8 +163,7 @@ macro(MAKE_PATH PATH_OUT PATH_IN)
 endmacro(MAKE_PATH)
 
 macro(BUILD_LIB_ALL LIB FLAGS)
-	set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME "${LIB}-debug")
-	set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB})
+	set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME "${LIB}")
 	install(TARGETS ${LIB}
 		RUNTIME DESTINATION bin
 		ARCHIVE DESTINATION lib

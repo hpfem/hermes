@@ -21,6 +21,7 @@
 #define _REFDOMAIN_H_
 
 #include "mesh.h"
+#include "common.h"
 
 /// @defgroup ref_domains Reference domains
 ///
@@ -37,12 +38,50 @@
 /// FIXME: name
 ///
 /// @ingroup ref_domains
-class RefLine {
-public:
-	static const Point1D *get_vertices() { return vertices; }
+extern H3D_IMPORT Point1D RefLine_vertices[];
+	
+extern H3D_IMPORT Point2D RefTri_vertices[];
+extern H3D_IMPORT int2 RefTri_edge_vtcs[];
 
-protected:
-	static const Point1D vertices[];
+extern H3D_IMPORT Point2D RefQuad_vertices[];
+extern H3D_IMPORT int2 RefQuad_edge_vtcs[];
+
+
+extern H3D_IMPORT Point3D RefTetra_vertices[];
+extern H3D_IMPORT int2 RefTetra_edge_vtcs[];
+extern H3D_IMPORT int *RefTetra_face_vtcs[];
+extern H3D_IMPORT int *RefTetra_face_edges[];
+extern H3D_IMPORT int RefTetra_face_nvtcs[];
+extern H3D_IMPORT int RefTetra_face_nedges[];
+extern H3D_IMPORT EMode2D RefTetra_face_mode[];
+extern H3D_IMPORT int RefTetra_face_orientations[];
+extern H3D_IMPORT Point3D RefTetra_face_normal[];
+
+
+extern H3D_IMPORT Point3D RefHex_vertices[];
+extern H3D_IMPORT int2 RefHex_edge_vtcs[];
+extern H3D_IMPORT int *RefHex_face_vtcs[];
+extern H3D_IMPORT int *RefHex_face_edges[];
+extern H3D_IMPORT int RefHex_face_nvtcs[];
+extern H3D_IMPORT int RefHex_face_nedges[];
+extern H3D_IMPORT EMode2D RefHex_face_mode[];
+extern H3D_IMPORT int RefHex_face_orientations[];
+extern H3D_IMPORT int RefHex_face_edge_ori[8][2];
+extern H3D_IMPORT int RefHex_edge_tangent[];
+extern H3D_IMPORT int2 RefHex_face_tangent[];
+
+extern H3D_IMPORT Point3D RefPrism_vertices[];
+extern H3D_IMPORT int2 RefPrism_edge_vtcs[];
+extern H3D_IMPORT int *RefPrism_face_vtcs[];
+extern H3D_IMPORT int *RefPrism_face_edges[];
+extern H3D_IMPORT int RefPrism_face_nvtcs[];
+extern H3D_IMPORT int RefPrism_face_nedges[];
+extern H3D_IMPORT EMode2D RefPrism_face_mode[];
+extern H3D_IMPORT int RefPrism_face_orientations[];
+
+class H3D_API RefLine {
+public:
+	static const Point1D *get_vertices() { return RefLine_vertices; }
 };
 
 
@@ -53,30 +92,22 @@ protected:
 /// Reference domain for triangle (2D)
 ///
 /// @ingroup ref_domains
-class RefTri {
+class H3D_API RefTri {
 public:
-	static const Point2D *get_vertices() { return vertices; }
+	static const Point2D *get_vertices() { return RefTri_vertices; }
 
-	static const int *get_edge_vertices(int edge) { return edge_vtcs[edge]; }
-
-protected:
-	static const Point2D vertices[];
-	static const int2 edge_vtcs[];
+	static const int *get_edge_vertices(int edge) { return RefTri_edge_vtcs[edge]; }
 };
 
 
 /// Reference domain for quadrilateral (2D)
 ///
 /// @ingroup ref_domains
-class RefQuad {
+class H3D_API RefQuad {
 public:
-	static const Point2D *get_vertices() { return vertices; }
+	static const Point2D *get_vertices() { return RefQuad_vertices; }
 
-	static const int *get_edge_vertices(int edge) { return edge_vtcs[edge]; }
-
-protected:
-	static const Point2D vertices[];
-	static const int2 edge_vtcs[];
+	static const int *get_edge_vertices(int edge) { return RefQuad_edge_vtcs[edge]; }
 };
 
 
@@ -87,101 +118,66 @@ protected:
 /// Reference domain for tetrahedron (3D)
 ///
 /// @ingroup ref_domains
-class RefTetra {
+class H3D_API RefTetra {
 public:
-	static const Point3D *get_vertices() { return vertices; }
+	static const Point3D *get_vertices() { return RefTetra_vertices; }
 
-	static const int *get_edge_vertices(int edge) { return edge_vtcs[edge]; }
+	static const int *get_edge_vertices(int edge) { return RefTetra_edge_vtcs[edge]; }
 	static int get_edge_orientations() { return 2; }		// two orientations of an edge
 
-	static int get_num_face_vertices(int face) { return face_nvtcs[face]; }
-	static int get_num_face_edges(int face) { return face_nedges[face]; }
-	static const int *get_face_vertices(int face) { return face_vtcs[face]; }
-	static const int *get_face_edges(int face) { return face_edges[face]; }
-	static EMode2D get_face_mode(int face) { return face_mode[face]; }
-	static int get_face_orientations(int face) { return face_orientations[face]; }
+	static int get_num_face_vertices(int face) { return RefTetra_face_nvtcs[face]; }
+	static int get_num_face_edges(int face) { return RefTetra_face_nedges[face]; }
+	static const int *get_face_vertices(int face) { return RefTetra_face_vtcs[face]; }
+	static const int *get_face_edges(int face) { return RefTetra_face_edges[face]; }
+	static EMode2D get_face_mode(int face) { return RefTetra_face_mode[face]; }
+	static int get_face_orientations(int face) { return RefTetra_face_orientations[face]; }
 
-	static const Point3D get_face_normal(int iface) { return face_normal[iface]; }
-
-protected:
-	static const Point3D vertices[];
-	static const int2 edge_vtcs[];
-	static const int *face_vtcs[];
-	static const int *face_edges[];
-	static const int face_nvtcs[];
-	static const int face_nedges[];
-	static const EMode2D face_mode[];
-	static const int face_orientations[];
-
-	static const Point3D face_normal[];
+	static const Point3D get_face_normal(int iface) { return RefTetra_face_normal[iface]; }
 };
 
 
 /// Reference domain for hexahedron (3D)
 ///
 /// @ingroup ref_domains
-class RefHex {
+class H3D_API RefHex {
 public:
-	static const Point3D *get_vertices() { return vertices; }
+	static const Point3D *get_vertices() { return RefHex_vertices; }
 
-	static const int *get_edge_vertices(int edge) { return edge_vtcs[edge]; }
+	static const int *get_edge_vertices(int edge) { return RefHex_edge_vtcs[edge]; }
 	static int get_edge_orientations() { return 2; }		// two orientations of an edge
 
-	static int get_num_face_vertices(int face) { return face_nvtcs[face]; }
-	static int get_num_face_edges(int face) { return face_nedges[face]; }
-	static const int *get_face_vertices(int face) { return face_vtcs[face]; }
-	static const int *get_face_edges(int face) { return face_edges[face]; }
-	static EMode2D get_face_mode(int face) { return face_mode[face]; }
-	static int get_face_orientations(int face) { return face_orientations[face]; }
+	static int get_num_face_vertices(int face) { return RefHex_face_nvtcs[face]; }
+	static int get_num_face_edges(int face) { return RefHex_face_nedges[face]; }
+	static const int *get_face_vertices(int face) { return RefHex_face_vtcs[face]; }
+	static const int *get_face_edges(int face) { return RefHex_face_edges[face]; }
+	static EMode2D get_face_mode(int face) { return RefHex_face_mode[face]; }
+	static int get_face_orientations(int face) { return RefHex_face_orientations[face]; }
 	/// @param[in] ori - face orientation
 	/// @return orientations of edges on a face
 	/// 	all edges are oriented the same way on all faces, so we do not have to care about face number
-	static const int *get_face_edge_orientation(int ori) { return face_edge_ori[ori]; }
+	static const int *get_face_edge_orientation(int ori) { return RefHex_face_edge_ori[ori]; }
 
-	static int get_edge_tangent_direction(int edge) { return edge_tangent[edge]; }
-	static int get_face_tangent_direction(int face, int which) { return face_tangent[face][which]; }
-
-protected:
-	static const Point3D vertices[];
-	static const int2 edge_vtcs[];
-	static const int *face_vtcs[];
-	static const int *face_edges[];
-	static const int face_nvtcs[];
-	static const int face_nedges[];
-	static const EMode2D face_mode[];
-	static const int face_orientations[];
-	static const int face_edge_ori[8][2];
-	static const int edge_tangent[];
-	static const int2 face_tangent[];
+	static int get_edge_tangent_direction(int edge) { return RefHex_edge_tangent[edge]; }
+	static int get_face_tangent_direction(int face, int which) { return RefHex_face_tangent[face][which]; }
 };
 
 
 /// Reference domain for prism (3D)
 ///
 /// @ingroup ref_domains
-class RefPrism {
+class H3D_API RefPrism {
 public:
-	static const Point3D *get_vertices() { return vertices; }
+	static const Point3D *get_vertices() { return RefPrism_vertices; }
 
-	static const int *get_edge_vertices(int edge) { return edge_vtcs[edge]; }
+	static const int *get_edge_vertices(int edge) { return RefPrism_edge_vtcs[edge]; }
 	static int get_edge_orientations() { return 2; }		// two orientations of an edge
 
-	static int get_num_face_vertices(int face) { return face_nvtcs[face]; }
-	static int get_num_face_edges(int face) { return face_nedges[face]; }
-	static const int *get_face_vertices(int face) { return face_vtcs[face]; }
-	static const int *get_face_edges(int face) { return face_edges[face]; }
-	static EMode2D get_face_mode(int face) { return face_mode[face]; }
-	static int get_face_orientations(int face) { return face_orientations[face]; }
-
-protected:
-	static const Point3D vertices[];
-	static const int2 edge_vtcs[];
-	static const int *face_vtcs[];
-	static const int *face_edges[];
-	static const int face_nvtcs[];
-	static const int face_nedges[];
-	static const EMode2D face_mode[];
-	static const int face_orientations[];
+	static int get_num_face_vertices(int face) { return RefPrism_face_nvtcs[face]; }
+	static int get_num_face_edges(int face) { return RefPrism_face_nedges[face]; }
+	static const int *get_face_vertices(int face) { return RefPrism_face_vtcs[face]; }
+	static const int *get_face_edges(int face) { return RefPrism_face_edges[face]; }
+	static EMode2D get_face_mode(int face) { return RefPrism_face_mode[face]; }
+	static int get_face_orientations(int face) { return RefPrism_face_orientations[face]; }
 };
 
 #endif

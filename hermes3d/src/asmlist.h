@@ -29,7 +29,7 @@
 /// automatically by the class.
 ///
 /// @ingroup assembling
-class AsmList {
+class H3D_API AsmList {
 public:
 	long int *idx;
 	int *dof;

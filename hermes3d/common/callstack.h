@@ -19,17 +19,12 @@
 
 #ifndef _CALLSTACK_H_
 #define _CALLSTACK_H_
-
 #include <stdio.h>
-#ifdef _WIN32 //Win32
-#define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
-#else
-#define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
-#endif
+#include "common.h"
 
 /// Holds data for one call stack object
 ///
-struct CallStackObj {
+struct H3D_API CallStackObj {
 	CallStackObj(int ln, const char *func, const char *file);
 	~CallStackObj();
 
@@ -40,7 +35,7 @@ struct CallStackObj {
 
 /// Call stack object
 ///
-class CallStack {
+class H3D_API CallStack {
 public:
 	CallStack(int max_size = 32);
 	~CallStack();
@@ -56,7 +51,13 @@ protected:
 	friend class CallStackObj;
 };
 
-CallStack &get_callstack();
+H3D_API CallStack &get_callstack();
 
+
+#ifdef _WIN32 //Win32
+#define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
+#else
+#define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
+#endif
 
 #endif

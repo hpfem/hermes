@@ -29,7 +29,7 @@
 /// TODO: binary file format
 ///
 /// @ingroup visualization
-class VtkOutputEngine : public OutputEngine {
+class H3D_API VtkOutputEngine : public OutputEngine {
 public:
 	VtkOutputEngine(FILE *file, int outprec = 1);
 	virtual ~VtkOutputEngine();

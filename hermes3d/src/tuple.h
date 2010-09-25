@@ -16,6 +16,8 @@
 #ifndef __HERMES_COMMON_TUPLE_H
 #define __HERMES_COMMON_TUPLE_H
 
+#include <vector>
+
 /// A vector of values.
 /** This class is used to pass a variable number of parameters in a type-safe fashion.
  *  \par Suggested Use
@@ -24,7 +26,7 @@
  *  - 2 up to 10 parameters: foo(Tuple<double>(&sln1, &sln2, &sln3));
  *  - more than 10 parameters: Fill the instance similar to STL vector (std::vector). */
 template<typename T>
-class Tuple: public std::vector<T> {
+class H3D_API Tuple: public std::vector<T> {
 public:
   /// A default constructor. Creates an empty vector.
   explicit Tuple() {};

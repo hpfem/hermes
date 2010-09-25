@@ -36,7 +36,7 @@ class SurfPos;
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class DiscreteProblem {
+class H3D_API DiscreteProblem {
 public:
         DiscreteProblem(WeakForm *wf, Tuple<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
@@ -131,9 +131,9 @@ protected:
 
 int get_num_dofs(Tuple<Space *> spaces);
 
-Vector* create_vector(MatrixSolverType matrix_solver);
-SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
-Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+H3D_API Vector*  create_vector(MatrixSolverType matrix_solver);
+H3D_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
+H3D_API Solver*  create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
 void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec);
 void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, 

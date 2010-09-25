@@ -114,7 +114,7 @@ class MeshLoader;
 /// Represents a vertex in 3D
 ///
 ///
-class Vertex {
+class H3D_API Vertex {
 public:
 	static const int NUM_COORDS = 3;
 
@@ -135,7 +135,7 @@ public:
 /// Represents an edge in 3D
 ///
 ///
-class Edge {
+class H3D_API Edge {
 public:
 	// geometry
 	static const int NUM_VERTICES = 2;
@@ -156,7 +156,7 @@ public:
 /// Represents a triangle in 3D
 ///
 ///
-class Tri {
+class H3D_API Tri {
 public:
 	static const int NUM_VERTICES = 3;
 	static const int NUM_EDGES = 3;
@@ -166,7 +166,7 @@ public:
 /// Represents a quadrilateral in 3D
 ///
 ///
-class Quad {
+class H3D_API Quad {
 public:
 	static const int NUM_VERTICES = 4;
 	static const int NUM_EDGES = 4;
@@ -176,7 +176,7 @@ public:
 /// Stores information about neighboring elements
 ///
 ///
-class Facet {
+class H3D_API Facet {
 public:
 	static const int MAX_SONS = 4;		/// Maximum number of sons on a facet
 
@@ -297,7 +297,7 @@ protected:
 /// Represents hexahedron in 3D
 ///
 ///
-class Hex : public Element {
+class H3D_API Hex : public Element {
 public:
 	// geometry
 	static const int NUM_VERTICES = 8;
@@ -363,7 +363,7 @@ protected:
 /// Represents tetrahedron in 3D
 ///
 ///
-class Tetra : public Element {
+class H3D_API Tetra : public Element {
 public:
 	static const int NUM_VERTICES = 4;
 	static const int NUM_FACES = 4;
@@ -418,7 +418,7 @@ protected:
 /// Represents prism in 3D
 ///
 /// currrently not used
-class Prism : public Element {
+class H3D_API Prism : public Element {
 public:
 	// geometry
 	static const int NUM_VERTICES = 6;
@@ -475,7 +475,7 @@ protected:
 /// Base class for boundaries of all types
 ///
 ///
-class Boundary {
+class H3D_API Boundary {
 public:
 	Boundary(int marker);
 	Boundary(const Boundary &o);
@@ -494,7 +494,7 @@ public:
 /// Triangular boundary
 ///
 ///
-class BoundaryTri : public Boundary {
+class H3D_API BoundaryTri : public Boundary {
 public:
 	static const int NUM_VERTICES = 3;
 	static const int NUM_EDGES = 3;
@@ -509,7 +509,7 @@ public:
 
 /// Quadrilateral boundary
 ///
-class BoundaryQuad : public Boundary {
+class H3D_API BoundaryQuad : public Boundary {
 public:
 	static const int NUM_VERTICES = 4;
 	static const int NUM_EDGES = 4;
@@ -525,7 +525,7 @@ public:
 /// Represents the geometry of a mesh
 ///
 ///
-class Mesh {
+class H3D_API Mesh {
 //	Mesh(const Mesh &o);
 public:
 	Mesh();
@@ -635,7 +635,7 @@ public:
 	void ugh();
 
 	// data
-	Array<Vertex *>   vertices;
+  Array<Vertex *>   vertices;
 	MapOrd<Edge>      edges;
 	Array<Element *>  elements;
 	Array<Boundary *> boundaries;

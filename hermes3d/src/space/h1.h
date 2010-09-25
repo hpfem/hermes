@@ -25,7 +25,7 @@
 /// H1 space
 ///
 /// @ingroup spaces
-class H1Space : public Space {
+class H3D_API H1Space : public Space {
 public:
 	H1Space(Mesh *mesh, Shapeset *ss);
 	virtual ~H1Space();

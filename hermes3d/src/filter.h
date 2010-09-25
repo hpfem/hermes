@@ -38,7 +38,7 @@ struct UniData;
 /// (This class cannot be instantiated.)
 ///
 /// @ingroup filters
-class Filter : public MeshFunction {
+class H3D_API Filter : public MeshFunction {
 public:
 	Filter(MeshFunction *sln1);
 	Filter(MeshFunction *sln1, MeshFunction *sln2);
@@ -86,7 +86,7 @@ protected:
 /// Otherwise it is scalar-valued.
 ///
 /// @ingroup filters
-class SimpleFilter : public Filter {
+class H3D_API SimpleFilter : public Filter {
 public:
 	SimpleFilter(void (*filter_fn)(int n, scalar *val1, scalar *result), MeshFunction *sln1, int item1 = FN_VAL);
     SimpleFilter(void (*filter_fn)(int n, scalar *val1, scalar *val2, scalar *result), MeshFunction *sln1, MeshFunction *sln2, int item1 = FN_VAL, int item2 = FN_VAL);
@@ -111,7 +111,7 @@ protected:
 /// calculates the vector magnitude, sqrt(x^2 + y^2 + z^2).
 ///
 /// @ingroup filters
-class MagFilter : public SimpleFilter {
+class H3D_API MagFilter : public SimpleFilter {
 public:
 	MagFilter(MeshFunction *sln1, MeshFunction *sln2, MeshFunction *sln3, int item1 = FN_VAL, int item2 = FN_VAL, int item3 = FN_VAL);
 	MagFilter(MeshFunction *sln1, int item1 = FN_VAL); // for vector-valued sln1
@@ -121,7 +121,7 @@ public:
 /// Calculates the difference of two functions.
 ///
 /// @ingroup filters
-class DiffFilter : public SimpleFilter {
+class H3D_API DiffFilter : public SimpleFilter {
 public:
 	DiffFilter(MeshFunction *sln1, MeshFunction *sln2, int item1 = FN_VAL, int item2 = FN_VAL);
 };
@@ -130,7 +130,7 @@ public:
 /// Calculates the sum of two functions.
 ///
 /// @ingroup filters
-class SumFilter : public SimpleFilter {
+class H3D_API SumFilter : public SimpleFilter {
 public:
 	SumFilter(MeshFunction* sln1, MeshFunction* sln2, int item1 = FN_VAL, int item2 = FN_VAL);
 };
@@ -139,7 +139,7 @@ public:
 /// Calculates the square of a function.
 ///
 /// @ingroup filters
-class SquareFilter : public SimpleFilter {
+class H3D_API SquareFilter : public SimpleFilter {
 public:
 	SquareFilter(MeshFunction *sln1, int item1 = FN_VAL);
 };
@@ -147,7 +147,7 @@ public:
 /// Calculates the real part of a complex function.
 ///
 /// @ingroup filters
-class RealPartFilter : public SimpleFilter {
+class H3D_API RealPartFilter : public SimpleFilter {
 public:
 	RealPartFilter(MeshFunction *sln1, int item1 = FN_VAL);
 };
@@ -155,7 +155,7 @@ public:
 /// Calculates the imaginar part of a complex function.
 ///
 /// @ingroup filters
-class ImagPartFilter : public SimpleFilter {
+class H3D_API ImagPartFilter : public SimpleFilter {
 public:
 	ImagPartFilter(MeshFunction *sln1, int item1 = FN_VAL);
 };
@@ -170,7 +170,7 @@ public:
 /// FIXME: port to 3D
 ///
 /// @ingroup filters
-class VonMisesFilter : public Filter {
+class H3D_API VonMisesFilter : public Filter {
 public:
 	// TODO: cylindrical coordinates
     VonMisesFilter(MeshFunction *sln1, MeshFunction *sln2, double lambda, double mu, int cyl = 0, int item1 = FN_VAL, int item2 = FN_VAL);

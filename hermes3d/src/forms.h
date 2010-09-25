@@ -34,7 +34,7 @@
 // We defined a special arithmetics with this type to be able to analyze forms
 // and determine the necessary integration order.  This works for forms, but it also
 // works for user-defined functions.
-class Ord {
+class H3D_API Ord {
 public:
 	Ord() { order = 0; }
 	Ord(scalar d) { order = 0; }
@@ -85,7 +85,7 @@ inline Ord cos(const Ord &a) { return Ord(a.get_max_order()); }
 
 // Function
 template<typename T>
-class Func {
+class H3D_API Func {
 public:
 	int nc;							// number of components
 	T *val;							// function values
@@ -114,7 +114,7 @@ typedef Func<scalar> mFunc;				// used for transformed mesh functions
 
 // Geometry of the element
 template<typename T>
-class Geom {
+class H3D_API Geom {
 public:
 	int marker;					// element/boundary marker
 	T *x, *y, *z;				// coordinates
@@ -161,7 +161,7 @@ void free_fn(mFunc *f);
 /// User defined data that can go to the bilin and lin forms. It also holds arbitraty number of functions, that user can use.
 /// Typically, these functions are solutions from the previous time levels.
 template<typename T>
-class ExtData {
+class H3D_API ExtData {
 public:
 	int nf;					// number of functions in 'fn' array
 	Func<T> *fn;				// array of pointers to functions

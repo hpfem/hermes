@@ -115,7 +115,7 @@ struct QuadPt3D {
 /// Numerical quadrature in 1D
 ///
 /// @ingroup quadratures
-class Quad1D {
+class H3D_API Quad1D {
 public:
 	QuadPt1D *get_points(int order) const { return tables[order]; }
 	inline int get_num_points(int order) const { return np[order]; };
@@ -141,7 +141,7 @@ protected:
 /// Numerical quadratures in 2D
 ///
 /// @ingroup quadratures
-class Quad2D {
+class H3D_API Quad2D {
 public:
 	QuadPt2D *get_points(int order) const { return tables[order]; }
 	inline int get_num_points(int order) const { return np[order]; };
@@ -177,7 +177,7 @@ protected:
 /// Numerical quadratures in 3D
 ///
 /// @ingroup quadratures
-class Quad3D {
+class H3D_API Quad3D {
 public:
 	virtual ~Quad3D() { }
 
