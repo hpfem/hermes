@@ -166,7 +166,7 @@ H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* targ
 /// Selects the appropriate linear solver.
 H2D_API Vector* create_vector(MatrixSolverType matrix_solver);
 H2D_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
-H2D_API Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+H2D_API Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
 /// Basic Newton's loop. Takes a coefficient vector, delivers a coefficient vector (in the 
 /// same variable "init_coeff_vector").
