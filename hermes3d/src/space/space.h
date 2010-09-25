@@ -269,7 +269,7 @@ protected:
 	};
 
 	struct ElementData {
-		Ord3 order;	      /// Polynomial degree associated to the element node (interior).
+		Ord3 order;	      /// Polynomial degree associated with the element node (interior).
 		int dof;	      /// The number of the first degree of freedom belonging to the node.
 		int n;		      /// Total number of degrees of freedom belonging to the node.
 	        int marker;           /// Material marker.  

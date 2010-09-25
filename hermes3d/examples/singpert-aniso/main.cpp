@@ -15,9 +15,11 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 3;			  // Number of initial uniform mesh refinements.
-const int P_INIT = 1;				  // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;			  // Error threshold for element refinement of the adapt(...) function 
+const int INIT_REF_NUM = 3;		          // Number of initial uniform mesh refinements.
+const int P_INIT_X = 1, 
+          P_INIT_Y = 1, 
+          P_INIT_Z = 1;                           // Initial polynomial degree of all mesh elements.
+const double THRESHOLD = 0.3;		          // Error threshold for element refinement of the adapt(...) function 
 						  // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
 						  // times total error is processed. If more elements have similar errors, 
 						  // refine all to keep the mesh symmetric.
@@ -32,7 +34,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem constants
-const double K_squared = 1e4;			// Equation parameter.
+const double K_squared = 1e4;		 	  // Equation parameter.
 
 // Boundary condition types. 
 BCType bc_types(int marker)
@@ -47,17 +49,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 }
 
 // Weak forms. 
-template<typename real, typename scalar>
-scalar biform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e, ExtData<scalar> *ext)
-{
-  return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e) + K_squared * int_u_v<real, scalar>(n, wt, u, v, e);
-}
-
-template<typename real, typename scalar>
-scalar liform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Geom<real> *e, ExtData<scalar> *ext)
-{
-  return K_squared * int_u<real, scalar>(n, wt, u, e);
-}
+#include "forms.cpp"
 
 // Output the element order.
 void out_orders(Space *space, const char *name, int iter)
@@ -112,7 +104,7 @@ int main(int argc, char **args) {
   graph.add_row("Total error", "k", "-", "O");
 
   // Create H1 space to setup the problem.
-  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT, P_INIT, P_INIT));
+  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
   // Initialize the weak formulation.
   WeakForm wf;

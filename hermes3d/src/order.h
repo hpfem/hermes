@@ -25,11 +25,11 @@
 
 
 // maximal order of quadratures for 1D
-#define H3D_MAX_QUAD_ORDER								24
+#define H3D_MAX_QUAD_ORDER		         24
 // maximal order of quadratures for triangle
-#define H3D_MAX_QUAD_ORDER_TRI							20
+#define H3D_MAX_QUAD_ORDER_TRI			 20
 // maximal order of quadratures for tetra
-#define H3D_MAX_QUAD_ORDER_TETRA						20
+#define H3D_MAX_QUAD_ORDER_TETRA		 20
 
 
 inline int limit_tri_ord(int x) { return (x > H3D_MAX_QUAD_ORDER_TRI) ? H3D_MAX_QUAD_ORDER_TRI : x; }
