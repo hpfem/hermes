@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     
     // Project the fine mesh solution onto the coarse mesh.
-    info("Projecting reference solution on the coarse mesh.");
+    info("Projecting reference solution on coarse mesh.");
     project_global(&space, &ref_sln, &sln, matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
@@ -107,27 +107,29 @@ int main(int argc, char* argv[])
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error."); 
+    info("Calculating exact error."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    // NULL on the following line means that we do not need the error for each solution component separately as there is only one.
-    double err_est = adaptivity->calc_elem_errors(NULL, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    // NULL on the following line means that we do not need the error 
+    // for each solution component separately as there is only one.
+    double err_exact_rel = adaptivity->calc_errors(NULL, 
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est);
+    info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 
+      get_num_dofs(&space), get_num_dofs(ref_space), err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est);
+    graph_dof.add_values(get_num_dofs(&space), err_exact_rel);
     graph_dof.save("conv_dof.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu.add_values(cpu_time.accumulated(), err_exact_rel);
     graph_cpu.save("conv_cpu.dat");
 
-    // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) done = true;
+    // If err_exact_rel too large, adapt the mesh.
+    if (err_exact_rel < ERR_STOP) done = true;
     else 
     {
       info("Adapting coarse mesh.");

@@ -32,8 +32,8 @@
 using namespace std;
 
 /* Private constants */
-#define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_elem_errors() internally. \internal
-#define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_elem_errors() internally. \internal
+#define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors() internally. \internal
+#define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors() internally. \internal
 
 Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1), have_solutions(false), have_errors(false) 
 {
@@ -82,7 +82,7 @@ Adapt::~Adapt()
 bool Adapt::adapt(Tuple<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat, 
             int regularize, double to_be_processed)
 {
-  error_if(!have_errors, "element errors have to be calculated first, call calc_elem_errors().");
+  error_if(!have_errors, "element errors have to be calculated first, call calc_errors().");
   error_if(refinement_selectors == Tuple<RefinementSelectors::Selector *>(), "selector not provided");
   if (spaces.size() != refinement_selectors.size()) error("Wrong number of refinement selectors.");
   TimePeriod cpu_time;
@@ -376,7 +376,7 @@ void Adapt::apply_refinement(const ElementToRefine& elem_ref) {
 void Adapt::unrefine(double thr)
 {
   if (!have_errors)
-    error("Element errors have to be calculated first, see calc_elem_errors().");
+    error("Element errors have to be calculated first, see calc_errors().");
   if (this->neq > 2) error("Unrefine implemented for two spaces only.");
 
   Mesh* mesh[2];
@@ -620,7 +620,7 @@ double Adapt::eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
+double Adapt::calc_errors(Tuple<double>* err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
 {
   error_if(!have_solutions, "A (coarse) solution and a reference solutions are not set, see set_solutions()");
 
@@ -808,7 +808,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
     // Calculate element errors and total error estimate.
     Adapt hp(space, proj_norm);
     hp.set_solutions(sln_coarse, sln_fine);
-    double err_est = hp.calc_elem_errors() * 100;
+    double err_est = hp.calc_errors() * 100;
     if (verbose == true) info("Step %d, ndof %d, proj_error %g%%",
                  as, space->get_num_dofs(), err_est);
 

@@ -171,7 +171,6 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     
     // Solve the linear system of the reference problem. If successful, obtain the solutions.
-    info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
                                             Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     else error ("Matrix solver failed.\n");
@@ -180,7 +179,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Project the fine mesh solution onto the coarse mesh.
-    info("Projecting reference solution on the coarse mesh.");
+    info("Projecting reference solution on coarse mesh.");
     project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
                    Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
@@ -191,39 +190,38 @@ int main(int argc, char* argv[])
     o_view_1.show(&v_space);
 
     // Calculate element errors.
-    info("Calculating error."); 
+    info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
     adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     
     // Calculate error estimate for each solution component and the total error.
     Tuple<double>* err_est_rel = new Tuple<double>;
-    double err_est = adaptivity->calc_elem_errors(err_est_rel, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+    double err_est_rel_total = adaptivity->calc_errors(err_est_rel, 
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
     // Calculate exact error for each solution component and the total error.
     Tuple<double>* err_exact_rel = new Tuple<double>;
-    double err_exact_rel_total = adaptivity->calc_elem_errors(err_exact_rel, 
+    double err_exact_rel_total = adaptivity->calc_errors(err_exact_rel, 
       HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
 
     // Time measurement.
     cpu_time.tick();
 
     // Report results.
-    info("ndof[0]: %d, ref_ndof[0]: %d, err_est_rel[0]: %g%%",
-         u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(),
-         (*err_est_rel)[0]*100);
-    info("err_exact_rel[0]: %g%%", (*err_exact_rel)[0]*100);
-    info("ndof[1]: %d, ref_ndof[1]: %d, err_est_rel[1]: %g%%",
-         v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs(),
-         (*err_est_rel)[1]*100);
-    info("err_exact_rel[1]: %g%%", (*err_exact_rel)[1]*100);
-    info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%",
-         get_num_dofs(Tuple<Space *>(&u_space, &v_space)),
-         get_num_dofs(*ref_spaces), err_est);
+    info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
+         u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs());
+    info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", (*err_est_rel)[0]*100, (*err_exact_rel)[0]*100);
+    info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
+         v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs());
+    info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", (*err_est_rel)[1]*100, (*err_exact_rel)[1]*100);
+    info("ndof_coarse_total: %d, ndof_fine_total: %d",
+         get_num_dofs(Tuple<Space *>(&u_space, &v_space)), get_num_dofs(*ref_spaces));
+    info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est);
+    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
     graph_dof_exact.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
@@ -231,12 +229,13 @@ int main(int argc, char* argv[])
     graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) 
+    if (err_est_rel_total < ERR_STOP) 
       done = true;
     else 
     {
       info("Adapting coarse mesh.");
-      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+                               THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
     if (get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
 
