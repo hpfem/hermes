@@ -1138,7 +1138,7 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 }
 
 // This function is identical in H2D and H3D.
-Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
+Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
   _F_
   switch (matrix_solver) 
@@ -1389,7 +1389,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, M
 
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_solver(matrix_solver, matrix, rhs);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   fep->assemble(matrix, rhs, false);
 

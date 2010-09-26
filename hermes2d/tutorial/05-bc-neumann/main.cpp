@@ -17,7 +17,7 @@
 
 int P_INIT = 4;                                   // Initial polynomial degree in all elements.
 int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_solver(matrix_solver, matrix, rhs);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the solution.
   Solution sln;

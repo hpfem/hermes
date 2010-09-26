@@ -67,7 +67,7 @@ const int ADAPTIVITY_NORM = 2;             // Specifies the norm used by H1Adapt
                                            // ADAPTIVITY_NORM = 0 ... H1 norm.
                                            // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
                                            // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
     FeProblem* fep = new FeProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     fep->assemble(matrix, rhs);
     
     // Time measurement.

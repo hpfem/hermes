@@ -58,7 +58,7 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     fep->assemble(matrix, rhs);
 
     // Time measurement.
@@ -145,22 +145,26 @@ int main(int argc, char* argv[])
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
 
-    // Time measurement.
-    cpu_time.tick();
-
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh.");
     project_global(&space, &ref_sln, &sln, matrix_solver); 
+
+    // Time measurement.
+    cpu_time.tick();
    
     // View the coarse mesh solution and polynomial orders.
     sview.show(&sln);
     oview.show(&space);
 
+    // Skip visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
     // Calculate element errors and total error estimate.
     info("Calculating error."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    // NULL on the following line means that we do not need the error for each solution component separately as there is only one.
+    double err_est = adaptivity->calc_elem_errors(NULL, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 

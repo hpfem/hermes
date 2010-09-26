@@ -19,7 +19,7 @@
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform refinements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 const int BDY_VERTICAL = 2;
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_solver(matrix_solver, matrix, rhs);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the solution.
   Solution sln;
