@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  sview.show_mesh(false);
   OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
   // DOF and CPU convergence graphs.
@@ -151,15 +152,13 @@ int main(int argc, char* argv[])
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate.");
+    info("Calculating error estimate and exact error.");
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-    // Calculate exact error for each solution component.   
-    double err_exact_abs = calc_abs_error(&sln, &exact, HERMES_H1_NORM);
-    double norm_exact = calc_norm(&exact, HERMES_H1_NORM);
-    double err_exact_rel = err_exact_abs / norm_exact * 100.;
+    // Calculate exact error,
+    double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", get_num_dofs(&space), get_num_dofs(ref_space));

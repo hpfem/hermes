@@ -101,8 +101,10 @@ int main(int argc, char* argv[])
   ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  ScalarView sview("Solution", new WinGeom(0, 0, 450, 350));
+  sview.show_mesh(false);
+  sview.fix_scale_width(60);
+  OrderView  oview("Polynomial orders", new WinGeom(460, 0, 410, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -135,7 +137,6 @@ int main(int argc, char* argv[])
 
     // Solve the linear system of the reference problem. If successful, obtain the solution.
     Solution ref_sln;
-    info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
 
@@ -144,7 +145,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
-    info("Projecting reference solution on the coarse mesh.");
+    info("Projecting reference solution on coarse mesh.");
     project_global(&space, &ref_sln, &sln, matrix_solver);
 
     // View the coarse mesh solution and polynomial orders.
@@ -152,20 +153,17 @@ int main(int argc, char* argv[])
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error.");
+    info("Calculating error estimate and exact error.");
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-    // Calculate exact error for each solution component.   
-    double err_exact_abs = calc_abs_error(&sln, &exact, HERMES_H1_NORM);
-    double norm_exact = calc_norm(&exact, HERMES_H1_NORM);
-    double err_exact_rel = err_exact_abs / norm_exact * 100.;
+    // Calculate exact error,
+    double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
-    info("err_exact_rel: %g%%", err_exact_rel);
+    info("ndof_coarse: %d, ndof_fine: %d, ", get_num_dofs(&space), get_num_dofs(ref_space));
+    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();

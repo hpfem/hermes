@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

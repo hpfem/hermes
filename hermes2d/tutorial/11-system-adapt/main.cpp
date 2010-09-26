@@ -194,15 +194,15 @@ int main(int argc, char* argv[])
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
     adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     
-    // Calculate error estimate for each solution component and the total error.
+    // Calculate error estimate for each solution component and the total error estimate.
     Tuple<double> err_est_rel;
-    double err_est_rel_total = adaptivity->calc_errors(err_est_rel, 
+    double err_est_rel_total = adaptivity->calc_err_est(err_est_rel, 
                                HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
-    // Calculate exact error for each solution component and the total error.
+    // Calculate exact error for each solution component and the total exact error.
     Tuple<double> err_exact_rel;
-    double err_exact_rel_total = adaptivity->calc_errors(err_exact_rel, 
-      HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
+    double err_exact_rel_total = adaptivity->calc_err_exact(err_exact_rel, 
+      HERMES_TOTAL_ERROR_REL, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
 
     // Time measurement.
     cpu_time.tick();

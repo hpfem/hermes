@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   wf.add_matrix_form_surf(callback(bilinear_form_surf));
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord);
 
-  // Initialize coarse and reference mesh solution.
+  // Initialize coarse and reference mesh solutions.
   Solution sln, ref_sln;
 
   // Initialize exact solution.
@@ -166,19 +166,15 @@ int main(int argc, char* argv[])
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-    // Calculate error estimate for each solution component and the total error.
-    //Tuple<double>* err_est_rel = new Tuple<double>;
-    double err_est_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
-
-     // Calculate exact error for each solution component and the total error.
-    //Tuple<double>* err_exact_rel = new Tuple<double>;
-    double err_exact_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &sln_exact) * 100;
+    // Calculate exact error,
+    double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &sln_exact) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", 
       get_num_dofs(&space), get_num_dofs(ref_space));
-    info("err_est: %g%%, err_exact: %g%%", err_est_rel, err_exact_rel);
+    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();

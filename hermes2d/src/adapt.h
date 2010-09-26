@@ -52,18 +52,18 @@ H2D_API_USED_TEMPLATE(Tuple<Solution*>); ///< Instantiated template. It is used 
 // Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                    ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
-                                   ///  \note Used by Adapt::calc_errors().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
+                                   ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
 #define HERMES_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                    ///  The total error is absolute, i.e., it is an integral over squares of differencies.
-                                   ///  \note Used by Adapt::calc_errors(). This flag is mutually exclusive with ::H2D_TOTAL_ERROR_REL.
+                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_TOTAL_ERROR_REL.
 #define HERMES_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
                                    ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
                                    ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
                                    ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
-                                   ///  \note Used by Adapt::calc_errors(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
+                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
 #define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
                                    ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
-                                   ///  \note Used by Adapt::calc_errors(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_REL.
+                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_REL.
 
 // Matrix forms for error calculation.
   typedef scalar (*matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[], 
@@ -157,13 +157,18 @@ public:
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
 
-  virtual double calc_errors(Tuple<double>& err_rel, unsigned int error_flags = 
-                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *> solutions = Tuple<Solution *>());
+  virtual double calc_errors_internal(Tuple<double>& err_rel, unsigned int error_flags,
+			     Tuple<Solution *> solutions);
+  virtual double calc_err_est(Tuple<double>& err_rel, unsigned int error_flags = 
+                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS);
+  virtual double calc_err_exact(Tuple<double>& err_rel, unsigned int error_flags,
+                 Tuple<Solution *> solutions);
 
-  /// Overloaded function for one pair of solutions.
-  virtual double calc_errors(unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Solution* solution = NULL);
+  /// One component version.
+  virtual double calc_err_est(unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS);
+  virtual double calc_err_exact(unsigned int error_flags, Solution* solution);
 
-  /// Refines elements based on results from calc_errors().
+  /// Refines elements based on results from calc_err_est().
   /** The behavior of adaptivity can be controlled through methods should_ignore_element()
    *  and can_refine_element() which are inteteded to be overriden if neccessary.
    *  \param[in] refinement_selector A point to a selector which will select a refinement.
@@ -191,8 +196,8 @@ public:
   /// Returns a squared error of an element.
   /** \param[in] A component index.
    *  \param[in] An element index.
-   *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors(). */
-  double get_element_error_squared(int component, int id) const { error_if(!have_errors, "Element errors have to be calculated first, call calc_errors()."); return errors_squared[component][id]; };
+   *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
+  double get_element_error_squared(int component, int id) const { error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est()."); return errors_squared[component][id]; };
 
   /// Returns regular queue of elements
   /** \return A regular queue. */
@@ -263,7 +268,7 @@ protected: // spaces & solutions
   Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions. 
 
 protected: // element error arrays
-  double* errors_squared[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the method calc_errors() was calls. Initialized in the method calc_errors().
+  double* errors_squared[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
   double  errors_squared_sum; ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
 
 protected: //forms and error evaluation

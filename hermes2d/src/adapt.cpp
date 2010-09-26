@@ -32,8 +32,8 @@
 using namespace std;
 
 /* Private constants */
-#define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors() internally. \internal
-#define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors() internally. \internal
+#define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
+#define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
 Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1), have_solutions(false), have_errors(false) 
 {
@@ -82,7 +82,7 @@ Adapt::~Adapt()
 bool Adapt::adapt(Tuple<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat, 
             int regularize, double to_be_processed)
 {
-  error_if(!have_errors, "element errors have to be calculated first, call calc_errors().");
+  error_if(!have_errors, "element errors have to be calculated first, call Adapt::calc_err_est().");
   error_if(refinement_selectors == Tuple<RefinementSelectors::Selector *>(), "selector not provided");
   if (spaces.size() != refinement_selectors.size()) error("Wrong number of refinement selectors.");
   TimePeriod cpu_time;
@@ -376,7 +376,7 @@ void Adapt::apply_refinement(const ElementToRefine& elem_ref) {
 void Adapt::unrefine(double thr)
 {
   if (!have_errors)
-    error("Element errors have to be calculated first, see calc_errors().");
+    error("Element errors have to be calculated first, see Adapt::calc_err_est().");
   if (this->neq > 2) error("Unrefine implemented for two spaces only.");
 
   Mesh* mesh[2];
@@ -620,7 +620,17 @@ double Adapt::eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Adapt::calc_errors(Tuple<double>& err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
+double Adapt::calc_err_est(Tuple<double>& err_rel, unsigned int error_flags) 
+{
+  return this->calc_errors_internal(err_rel, error_flags, Tuple<Solution *>());
+}
+
+double Adapt::calc_err_exact(Tuple<double>& err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
+{
+  return this->calc_errors_internal(err_rel, error_flags, solutions);
+}
+
+double Adapt::calc_errors_internal(Tuple<double>& err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
 {
   error_if(!have_solutions, "A (coarse) solution and a reference solutions are not set, see set_solutions()");
 
@@ -739,16 +749,19 @@ double Adapt::calc_errors(Tuple<double>& err_rel, unsigned int error_flags, Tupl
   }
 }
 
-
-double Adapt::calc_errors(unsigned int error_flags, Solution* solution)
+// Single component version.
+double Adapt::calc_err_exact(unsigned int error_flags, Solution* solution)
 {
   Tuple<double> empty_tuple = Tuple<double>();
-  if(solution == NULL)
-    return this->calc_errors(empty_tuple, error_flags);
-  else
-    return this->calc_errors(empty_tuple, error_flags, Tuple<Solution *>(solution));
+  return this->calc_errors_internal(empty_tuple, error_flags, Tuple<Solution *>(solution));
 }
 
+// Single component version.
+double Adapt::calc_err_est(unsigned int error_flags)
+{
+  Tuple<double> empty_tuple = Tuple<double>();
+  return this->calc_errors_internal(empty_tuple, error_flags, Tuple<Solution *>());
+}
 
 void Adapt::fill_regular_queue(Mesh** meshes, Mesh** ref_meshes) {
   assert_msg(num_act_elems > 0, "Number of active elements (%d) is invalid.", num_act_elems);
@@ -817,12 +830,12 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
     // Calculate element errors and total error estimate.
     Adapt hp(space, proj_norm);
     hp.set_solutions(sln_coarse, sln_fine);
-    double err_est = hp.calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = hp.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     if (verbose == true) info("Step %d, ndof %d, proj_error %g%%",
-                 as, space->get_num_dofs(), err_est);
+                 as, space->get_num_dofs(), err_est_rel);
 
-    // If err_est too large, adapt the mesh.
-    if (err_est < err_stop) done = true;
+    // If err_est_rel too large, adapt the mesh.
+    if (err_est_rel < err_stop) done = true;
     else {
       double to_be_processed = 0;
       done = hp.adapt(selector, threshold, strategy, mesh_regularity, to_be_processed);
