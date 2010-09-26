@@ -195,13 +195,12 @@ int main(int argc, char* argv[])
     adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     
     // Calculate error estimate for each solution component and the total error.
-    Tuple<double>* err_est_rel = new Tuple<double>;
-    double err_est_rel_total = adaptivity->calc_errors(err_est_rel, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+    Tuple<double> err_est_rel;
+    double err_est = adaptivity->calc_elem_errors(err_est_rel, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
     // Calculate exact error for each solution component and the total error.
-    Tuple<double>* err_exact_rel = new Tuple<double>;
-    double err_exact_rel_total = adaptivity->calc_errors(err_exact_rel, 
+    Tuple<double> err_exact_rel;
+    double err_exact_rel_total = adaptivity->calc_elem_errors(err_exact_rel, 
       HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
 
     // Time measurement.

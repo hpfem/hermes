@@ -110,6 +110,9 @@ int main(int argc, char* argv[])
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
 
+  // Initialize exact solution.
+  ExactSolution sln_exact(&mesh, exact);
+
   // Initialize refinement selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
@@ -118,8 +121,9 @@ int main(int argc, char* argv[])
   v_view.set_min_max_range(0, 1.5);
   OrderView  o_view("Polynomial orders", new WinGeom(470, 0, 400, 350));
   
-  // DOF and CPU convergence graphs initialization.
-  SimpleGraph graph_dof, graph_cpu;
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est, 
+              graph_dof_exact, graph_cpu_exact;
   
   // Adaptivity loop:
   int as = 1; 
@@ -162,23 +166,32 @@ int main(int argc, char* argv[])
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    // NULL on the following line means that we do not need the error 
-    // for each solution component separately as there is only one.
-    double err_est_rel = adaptivity->calc_errors(NULL, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+    // Calculate error estimate for each solution component and the total error.
+    //Tuple<double>* err_est_rel = new Tuple<double>;
+    double err_est_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+
+     // Calculate exact error for each solution component and the total error.
+    //Tuple<double>* err_exact_rel = new Tuple<double>;
+    double err_exact_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &sln_exact) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
+    info("ndof_coarse: %d, ndof_fine: %d", 
+      get_num_dofs(&space), get_num_dofs(ref_space));
+    info("err_est: %g%%, err_exact: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
-    graph_dof.save("conv_dof.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu.save("conv_cpu.dat");
+    graph_dof_est.add_values(get_num_dofs(&space), err_est);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu_est.save("conv_cpu_est.dat");
+    graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.save("conv_dof_exact.dat");
+    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+    graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;

@@ -156,7 +156,12 @@ public:
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-  virtual double calc_errors(Tuple<double>* err_rel = NULL, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *> solutions = Tuple<Solution *>());
+
+  virtual double calc_elem_errors(Tuple<double> & err_rel, unsigned int error_flags = 
+                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *> solutions = Tuple<Solution *>());
+
+  /// Overloaded function for one pair of solutions.
+  virtual double calc_elem_errors(unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Solution* solution = NULL);
 
   /// Refines elements based on results from calc_errors().
   /** The behavior of adaptivity can be controlled through methods should_ignore_element()
