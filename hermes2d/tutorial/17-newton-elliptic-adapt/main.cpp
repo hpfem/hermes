@@ -179,7 +179,6 @@ int main(int argc, char* argv[])
     if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
 
     // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
     if(solver_coarse->solve())
       vector_to_solution(solver_coarse->get_solution(), &space, &sln);
     else
@@ -250,12 +249,11 @@ int main(int argc, char* argv[])
       // Info for user.
       info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(ref_space), res_l2_norm);
 
-      // If l2 norm of the residual vector is in tolerance, or the maximum number 
-      // of iteration has been hit, then quit.
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
       if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
 
       // Solve the linear system and if successful, obtain the solution.
-      info("Solving the matrix problem.");
       if(solver->solve())
         vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
       else
@@ -274,26 +272,26 @@ int main(int argc, char* argv[])
     vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error."); 
+    info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%", 
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est);
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(&space), err_est);
+    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
 
-    // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) done = true;
+    // If err_est_rel too large, adapt the mesh.
+    if (err_est_rel < ERR_STOP) done = true;
     else 
     {
         info("Adapting the coarse mesh.");

@@ -139,12 +139,11 @@ int main(int argc, char* argv[])
     // Info for user.
     info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
 
-    // If l2 norm of the residual vector is in tolerance, or the maximum number 
-    // of iteration has been hit, then quit.
+    // If l2 norm of the residual vector is within tolerance, or the maximum number 
+    // of iteration has been reached, then quit.
     if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
 
     // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
     if(solver->solve())
       vector_to_solution(solver->get_solution(), &space, &sln);
     else
