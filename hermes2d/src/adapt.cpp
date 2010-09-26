@@ -620,7 +620,7 @@ double Adapt::eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
+double Adapt::calc_elem_errors(Tuple<double> & err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
 {
   error_if(!have_solutions, "A (coarse) solution and a reference solutions are not set, see set_solutions()");
 
@@ -630,9 +630,9 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
   if (solutions != Tuple<Solution *>())
   {
     for(int i = 0; i < 10; i++)
-      temp_sln[i] = this->sln[i];
+      temp_sln[i] = this->rsln[i];
     for(int i = 0; i < solutions.size(); i++)
-      this->sln[i] = solutions[i];
+      this->rsln[i] = solutions[i];
   }
 
   // Prepare multi-mesh traversal and error arrays.
@@ -695,12 +695,9 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
   trav.finish();
   
   // Store the calculation for each solution component separately.
-  if(err_rel != NULL)
-  {
-    err_rel->clear();
-    for (int i = 0; i < this->neq; i++)
-        err_rel->push_back(sqrt(errors_squared_abs[i]/norms_squared[i]));
-  }
+  err_rel.clear();
+  for (int i = 0; i < this->neq; i++)
+      err_rel.push_back(sqrt(errors_squared_abs[i]/norms_squared[i]));
 
   // Make the error relative.
   if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) {
@@ -727,8 +724,9 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
   // Restoring the original sln.
   if (solutions != Tuple<Solution *>())
     for(int i = 0; i < solutions.size(); i++)
-      this->sln[i] = temp_sln[i];
+      this->rsln[i] = temp_sln[i];
 
+  
   // Return error value.
   have_errors = true;
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
@@ -740,6 +738,16 @@ double Adapt::calc_elem_errors(Tuple<double>* err_rel, unsigned int error_flags,
     return -1.0;
   }
 }
+
+
+double Adapt::calc_elem_errors(unsigned int error_flags, Solution* solution)
+{
+  if(solution == NULL)
+    return this->calc_elem_errors(Tuple<double>(), error_flags);
+  else
+    return this->calc_elem_errors(Tuple<double>(), error_flags, Tuple<Solution *>(solution));
+}
+
 
 void Adapt::fill_regular_queue(Mesh** meshes, Mesh** ref_meshes) {
   assert_msg(num_act_elems > 0, "Number of active elements (%d) is invalid.", num_act_elems);
