@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 600, 350));
+  sview.show_mesh(false);
   OrderView  oview("Polynomial orders", new WinGeom(610, 0, 520, 350));
   
   // DOF and CPU convergence graphs initialization.
@@ -157,7 +158,7 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
@@ -200,7 +201,6 @@ int main(int argc, char* argv[])
 
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
-  sview.show_mesh(false);
   sview.show(&ref_sln);
 
   // Wait for all views to be closed.

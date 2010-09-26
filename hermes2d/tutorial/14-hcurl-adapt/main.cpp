@@ -169,11 +169,11 @@ int main(int argc, char* argv[])
 
     // Calculate error estimate for each solution component and the total error.
     //Tuple<double>* err_est_rel = new Tuple<double>;
-    double err_est_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+    double err_est_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
      // Calculate exact error for each solution component and the total error.
     //Tuple<double>* err_exact_rel = new Tuple<double>;
-    double err_exact_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &sln_exact) * 100;
+    double err_exact_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &sln_exact) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", 
@@ -184,9 +184,9 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(&space), err_est);
+    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est);
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
     graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");

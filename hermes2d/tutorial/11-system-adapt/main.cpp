@@ -196,11 +196,12 @@ int main(int argc, char* argv[])
     
     // Calculate error estimate for each solution component and the total error.
     Tuple<double> err_est_rel;
-    double err_est = adaptivity->calc_elem_errors(err_est_rel, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+    double err_est_rel_total = adaptivity->calc_errors(err_est_rel, 
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
     // Calculate exact error for each solution component and the total error.
     Tuple<double> err_exact_rel;
-    double err_exact_rel_total = adaptivity->calc_elem_errors(err_exact_rel, 
+    double err_exact_rel_total = adaptivity->calc_errors(err_exact_rel, 
       HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
 
     // Time measurement.
@@ -209,10 +210,10 @@ int main(int argc, char* argv[])
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
          u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs());
-    info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", (*err_est_rel)[0]*100, (*err_exact_rel)[0]*100);
+    info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
          v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs());
-    info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", (*err_est_rel)[1]*100, (*err_exact_rel)[1]*100);
+    info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          get_num_dofs(Tuple<Space *>(&u_space, &v_space)), get_num_dofs(*ref_spaces));
     info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
@@ -258,10 +259,8 @@ int main(int argc, char* argv[])
 
   // Show the reference solution - the final result.
   s_view_0.set_title("Fine mesh Solution[0]");
-  s_view_0.show_mesh(false);
   s_view_0.show(&u_ref_sln);
   s_view_1.set_title("Fine mesh Solution[1]");
-  s_view_1.show_mesh(false);
   s_view_1.show(&v_ref_sln);
 
   // Wait for all views to be closed.

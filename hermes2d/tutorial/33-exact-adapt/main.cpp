@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   ScalarView sview("Scalar potential Phi", new WinGeom(0, 0, 600, 300));
+  sview.show_mesh(false);
   OrderView  oview("Mesh", new WinGeom(620, 0, 600, 300));
 
   // DOF and CPU convergence graphs.
@@ -110,7 +111,7 @@ int main(int argc, char* argv[])
     info("Calculating exact error."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_exact_rel = adaptivity->calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = adaptivity->calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 
@@ -149,7 +150,6 @@ int main(int argc, char* argv[])
 
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
-  sview.show_mesh(false);
   sview.show(&ref_sln);
 
   // Wait for all views to be closed.

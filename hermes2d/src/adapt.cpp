@@ -620,7 +620,7 @@ double Adapt::eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Adapt::calc_elem_errors(Tuple<double> & err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
+double Adapt::calc_errors(Tuple<double>& err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
 {
   error_if(!have_solutions, "A (coarse) solution and a reference solutions are not set, see set_solutions()");
 
@@ -740,12 +740,13 @@ double Adapt::calc_elem_errors(Tuple<double> & err_rel, unsigned int error_flags
 }
 
 
-double Adapt::calc_elem_errors(unsigned int error_flags, Solution* solution)
+double Adapt::calc_errors(unsigned int error_flags, Solution* solution)
 {
+  Tuple<double> empty_tuple = Tuple<double>();
   if(solution == NULL)
-    return this->calc_elem_errors(Tuple<double>(), error_flags);
+    return this->calc_errors(empty_tuple, error_flags);
   else
-    return this->calc_elem_errors(Tuple<double>(), error_flags, Tuple<Solution *>(solution));
+    return this->calc_errors(empty_tuple, error_flags, Tuple<Solution *>(solution));
 }
 
 
@@ -816,7 +817,7 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
     // Calculate element errors and total error estimate.
     Adapt hp(space, proj_norm);
     hp.set_solutions(sln_coarse, sln_fine);
-    double err_est = hp.calc_errors() * 100;
+    double err_est = hp.calc_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     if (verbose == true) info("Step %d, ndof %d, proj_error %g%%",
                  as, space->get_num_dofs(), err_est);
 
