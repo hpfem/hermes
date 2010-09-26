@@ -92,39 +92,88 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation
   WeakForm wf;
   wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
   wf.add_vector_form(callback(res), HERMES_ANY);
 
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Initialize the solution.
+  Solution sln;
+
   // Project the initial condition on the FE space to obtain initial 
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
-  // The NULL means that we do not want the resulting Solution, just the vector.
-  Vector* coeff_vec = new AVector();
-  Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec); 
-  delete sln_tmp;
+  scalar* coeff_vec = new scalar[get_num_dofs(&space)] ;
+  Solution* init_sln = new Solution(&mesh, init_cond);
+  project_global(&space, init_sln, coeff_vec); 
+  delete init_sln;
 
   // Perform Newton's iteration.
-  info("Performing Newton's iteration.");
-  bool verbose = true;
-  if (!solve_newton(space, &wf, coeff_vec, matrix_solver, 
-		    NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
-    error("Newton's method did not converge.");
-  };
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = get_num_dofs(&space);
 
-  // Translate the resulting coefficient vector into a Solution.
-  Solution* sln = new Solution(space, coeff_vec);
+    // Assemble the Jacobian matrix and residual vector.
+    fep.assemble(coeff_vec, matrix, rhs, false);
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+
+    // If l2 norm of the residual vector is in tolerance, or the maximum number 
+    // of iteration has been hit, then quit.
+    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      vector_to_solution(solver->get_solution(), &space, &sln);
+    else
+      error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+    
+    if (it >= NEWTON_MAX_ITER)
+      error ("Newton method did not converge.");
+
+    it++;
+  }
+
+  // Translate the resulting coefficient vector into the Solution sln.
+  vector_to_solution(coeff_vec, &space, &sln);
+
+  // Cleanup.
+  delete []coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   // Visualise the solution and mesh.
   ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));
   s_view.show_mesh(false);
-  s_view.show(sln);
+  s_view.show(&sln);
   OrderView o_view("Mesh", new WinGeom(450, 0, 400, 350));
-  o_view.show(space);
+  o_view.show(&space);
 
   // Wait for all views to be closed.
   View::wait();

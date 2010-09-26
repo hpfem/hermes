@@ -185,6 +185,8 @@ H2D_API void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::S
 // Create globally refined space.
 H2D_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
 H2D_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
+
+H2D_API double get_l2_norm(Vector* vec); 
 #endif
 
 
