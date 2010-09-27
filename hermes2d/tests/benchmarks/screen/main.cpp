@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), H2D_SYM);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
 
   // Initialize refinement selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -149,7 +149,6 @@ int main(int argc, char* argv[])
 
     // Solve the linear system of the reference problem. If successful, obtain the solution.
     Solution ref_sln;
-    info("Solving the matrix problem.");
     if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
 
@@ -158,24 +157,21 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
-    info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, &ref_sln, &sln, matrix_solver, H2D_HCURL_NORM);
+    info("Projecting reference solution on coarse mesh.");
+    project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error.");
-    Adapt* adaptivity = new Adapt(&space, H2D_HCURL_NORM);
+    info("Calculating error estimate and exact error.");
+    Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
     adaptivity->set_solutions(&sln, &ref_sln);
-    double err_est_rel = adaptivity->calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-    // Calculate exact error for each solution component.   
-    double err_exact_abs = calc_abs_error(&sln, &exact_sln, H2D_HCURL_NORM);
-    double norm_exact = calc_norm(&exact_sln, H2D_HCURL_NORM);
-    double err_exact_rel = err_exact_abs / norm_exact * 100.;
+    // Calculate exact error.   
+    double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact_sln) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
-    info("err_exact_rel: %g%%", err_exact_rel);
+    info("ndof_coarse: %d, ndof_fine: %d", get_num_dofs(&space), get_num_dofs(ref_space));
+    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
@@ -220,7 +216,7 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_allowed = 1400;
+  int n_dof_allowed = 1650;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

@@ -164,20 +164,19 @@ int main(int argc, char* argv[])
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, jac_TT, jac_TT_ord);
   wf.add_matrix_form(0, 1, jac_Tphi, jac_Tphi_ord);
-  wf.add_vector_form(0, res_T, res_T_ord, H2D_ANY, &T_prev_time);
+  wf.add_vector_form(0, res_T, res_T_ord, HERMES_ANY, &T_prev_time);
   wf.add_matrix_form(1, 0, jac_phiT, jac_phiT_ord);
   wf.add_matrix_form(1, 1, jac_phiphi, jac_phiphi_ord);
-  wf.add_vector_form(1, res_phi, res_phi_ord, H2D_ANY, &phi_prev_time);
+  wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
   
   // Initialize the nonlinear system.
-  Tuple<int> proj_norms(H2D_H1_NORM, H2D_H1_NORM);
+  Tuple<int> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
 
   // Set initial conditions.
   T_prev_time.set_exact(&mesh, T_exact);
   phi_prev_time.set_exact(&mesh, phi_exact);
 
   // Time stepping.
-  Vector* coeff_vec = new AVector();
   int t_step = 1;
   do {
     TIME += TAU;
@@ -185,7 +184,9 @@ int main(int argc, char* argv[])
     info("---- Time step %d, t = %g s:", t_step, TIME); t_step++;
     info("Projecting to obtain initial vector for the Newton's method.");
 
-    project_global(spaces, proj_norms, time_iterates, newton_iterates, coeff_vec);
+    scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
+//    project_global(spaces, time_iterates, newton_iterates, coeff_vec);
+    project_global(spaces, time_iterates, coeff_vec, matrix_solver, proj_norms);
 
     // Newton's method.
     info("Newton's iteration...");
@@ -205,8 +206,8 @@ int main(int argc, char* argv[])
 
     // Calculate exact error.
     info("Calculating error (exact).");
-    T_error = calc_rel_error(&T_prev_newton, &T_exact_solution, H2D_H1_NORM) * 100;
-    phi_error = calc_rel_error(&phi_prev_newton, &phi_exact_solution, H2D_H1_NORM) * 100;
+    T_error = calc_rel_error(&T_prev_newton, &T_exact_solution, HERMES_H1_NORM) * 100;
+    phi_error = calc_rel_error(&phi_prev_newton, &phi_exact_solution, HERMES_H1_NORM) * 100;
     error = std::max(T_error, phi_error);
     info("Exact solution error for T (H1 norm): %g %%", T_error);
     info("Exact solution error for phi (H1 norm): %g %%", phi_error);
@@ -217,8 +218,6 @@ int main(int argc, char* argv[])
     phi_prev_time.copy(&phi_prev_newton);
   }
   while (t_step <= TIME_MAX_ITER);
-
-  delete coeff_vec;
   
   info("Coordinate (  0,  0) T value = %lf", T_prev_time.get_pt_value(0.0, 0.0));
   info("Coordinate ( 25, 25) T value = %lf", T_prev_time.get_pt_value(25.0, 25.0));

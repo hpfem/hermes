@@ -193,10 +193,10 @@ int main(int argc, char* argv[])
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, jac_TT, jac_TT_ord);
   wf.add_matrix_form(0, 1, jac_Tphi, jac_Tphi_ord);
-  wf.add_vector_form(0, res_T, res_T_ord, H2D_ANY, &T_prev_time);
+  wf.add_vector_form(0, res_T, res_T_ord, HERMES_ANY, &T_prev_time);
   wf.add_matrix_form(1, 0, jac_phiT, jac_phiT_ord);
   wf.add_matrix_form(1, 1, jac_phiphi, jac_phiphi_ord);
-  wf.add_vector_form(1, res_phi, res_phi_ord, H2D_ANY, &phi_prev_time);
+  wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
 
   // Exact solutions for error evaluation.
   ExactSolution T_exact_solution(&mesh_T, T_exact);
@@ -206,8 +206,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize the nonlinear system.
-  DiscreteProblem dp(&wf, spaces);
-  Tuple<int> proj_norms(H2D_H1_NORM, H2D_H1_NORM);
+  FeProblem dp(&wf, spaces);
+  Tuple<int> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
   
   // Set initial conditions.
   T_prev_time.set_exact(&mesh_T, T_exact);
@@ -215,8 +215,12 @@ int main(int argc, char* argv[])
   
   // Newton's loop on the initial coarse meshes.
   info("Solving on coarse meshes.");
-  Vector* coeff_vec = new AVector();
-  project_global(spaces, proj_norms, prev_time_meshfns, coarse_mesh_solutions, coeff_vec);
+  scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
+//  project_global(spaces, prev_time_meshfns, coarse_mesh_solutions, coeff_vec, matrix_solver, proj_norms);
+//  project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), coeff_vec, matrix_solver, proj_norms);
+  project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), coeff_vec, matrix_solver, proj_norms);
+
+
   bool verbose = true; // Default is false.
   bool did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver, 
                                    NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose); 
@@ -255,7 +259,11 @@ int main(int argc, char* argv[])
         if (SOLVE_ON_COARSE_MESH) {
           // Newton's loop on the globally derefined meshes.
           info("Solving on globally derefined meshes, starting from the latest fine mesh solutions.");
-          project_global(spaces, proj_norms, fine_mesh_meshfns, Tuple<Solution*>(), coeff_vec);
+//          project_global(spaces, proj_norms, fine_mesh_meshfns, Tuple<Solution*>(), coeff_vec);
+
+//          project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), coeff_vec, matrix_solver, proj_norms);
+          project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), coeff_vec, matrix_solver, proj_norms);
+
           did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver, 
                                       NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose); 
           if (!did_converge)
@@ -268,7 +276,9 @@ int main(int argc, char* argv[])
         } else {
           // Projection onto the globally derefined meshes.
           info("Projecting the latest fine mesh solution onto globally derefined meshes.");
-          project_global(spaces, proj_norms, fine_mesh_meshfns, coarse_mesh_solutions); 
+          project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms);
+
+//          project_global(spaces, proj_norms, fine_mesh_meshfns, coarse_mesh_solutions); 
         }
       }
     }
@@ -300,10 +310,10 @@ int main(int argc, char* argv[])
       // Newton's loop on the refined meshes.
       if (as == 1) {
         info("Solving on fine meshes, starting from previous coarse mesh solutions.");
-        project_global(ref_spaces, proj_norms, coarse_mesh_meshfns, Tuple<Solution*>(), coeff_vec);
+        project_global(ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), coeff_vec, matrix_solver, proj_norms);
       } else {
         info("Solving on fine meshes, starting from previous fine mesh solutions.");
-        project_global(ref_spaces, proj_norms, fine_mesh_meshfns, Tuple<Solution*>(), coeff_vec);
+        project_global(ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), coeff_vec, matrix_solver, proj_norms);
       }
       if ( !solve_newton(ref_spaces, &wf,coeff_vec, matrix_solver, 
                          NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose) )
@@ -315,10 +325,10 @@ int main(int argc, char* argv[])
       
       // Calculate error estimates and exact errors.
       info("Calculating errors.");
-      double T_err_est = calc_rel_error(&T_coarse, &T_fine, H2D_H1_NORM) * 100;
-      double phi_err_est = calc_rel_error(&phi_coarse, &phi_fine, H2D_H1_NORM) * 100;
-      double T_err_exact = calc_rel_error(&T_coarse, &T_exact_solution, H2D_H1_NORM) * 100;
-      double phi_err_exact = calc_rel_error(&phi_coarse, &phi_exact_solution, H2D_H1_NORM) * 100;
+      double T_err_est = calc_rel_error(&T_coarse, &T_fine, HERMES_HCURL_NORM) * 100;
+      double phi_err_est = calc_rel_error(&phi_coarse, &phi_fine, HERMES_HCURL_NORM) * 100;
+      double T_err_exact = calc_rel_error(&T_coarse, &T_exact_solution, HERMES_HCURL_NORM) * 100;
+      double phi_err_exact = calc_rel_error(&phi_coarse, &phi_exact_solution, HERMES_HCURL_NORM) * 100;
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
             space_T.get_num_dofs(), ref_spaces[0]->get_num_dofs(), T_err_est, T_err_exact);
       info("phi: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
@@ -327,7 +337,8 @@ int main(int argc, char* argv[])
       // Calculate element errors and total error estimate for adaptivity.      
       Adapt hp(spaces, proj_norms);
       hp.set_solutions(coarse_mesh_solutions, fine_mesh_solutions);
-      hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;
+//      hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel_total = hp.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       double err_est = 0.0, norm_est = 0.0;
       for (int i = 0; i < num_fields; i++) {
@@ -349,7 +360,7 @@ int main(int argc, char* argv[])
           if (SOLVE_ON_COARSE_MESH) {
             // Newton's loop on the new coarse meshes.
             info("Solving on coarse meshes, starting from the latest fine mesh solutions.");
-            project_global(spaces, proj_norms, fine_mesh_meshfns, Tuple<Solution*>(), coeff_vec);
+            project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), coeff_vec, matrix_solver, proj_norms);
             did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver, 
                                         NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose); 
             if (!did_converge)
@@ -362,7 +373,7 @@ int main(int argc, char* argv[])
           } else {
             // Projection onto the new coarse meshes.
             info("Projecting the latest fine mesh solution onto the coarse meshes.");
-            project_global(spaces, proj_norms, fine_mesh_meshfns, coarse_mesh_solutions, NULL); 
+            project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms);            
           }
         }
       }
@@ -374,8 +385,8 @@ int main(int argc, char* argv[])
     phi_prev_time.copy(&phi_fine);
     
     // Compute exact error.
-    double T_error = calc_rel_error(&T_prev_time, &T_exact_solution, H2D_H1_NORM) * 100;
-    double phi_error = calc_rel_error(&phi_prev_time, &phi_exact_solution, H2D_H1_NORM) * 100;
+    double T_error = calc_rel_error(&T_prev_time, &T_exact_solution, HERMES_H1_NORM) * 100;
+    double phi_error = calc_rel_error(&phi_prev_time, &phi_exact_solution, HERMES_H1_NORM) * 100;
     info("Exact solution error for T (H1 norm): %g %%", T_error);
     info("Exact solution error for phi (H1 norm): %g %%", phi_error);
   }

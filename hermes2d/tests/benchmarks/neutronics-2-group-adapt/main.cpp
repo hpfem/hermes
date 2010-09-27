@@ -262,14 +262,14 @@ int main(int argc, char* argv[])
   H1Space space1(&mesh1, bc_types, essential_bc_values_1, P_INIT[0]);
   H1Space space2(&mesh2, bc_types, essential_bc_values_2, P_INIT[1]);
   Tuple<Space*> spaces(&space1, &space2);
-  Tuple<int> norms(H2D_H1_NORM, H2D_H1_NORM);
+  Tuple<int> norms(HERMES_H1_NORM, HERMES_H1_NORM);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(biform_0_0), H2D_SYM);
+  wf.add_matrix_form(0, 0, callback(biform_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(biform_0_1));
   wf.add_matrix_form(1, 0, callback(biform_1_0));
-  wf.add_matrix_form(1, 1, callback(biform_1_1), H2D_SYM);
+  wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
   wf.add_vector_form(0, liform_0, liform_0_ord);
   wf.add_vector_form(1, liform_1, liform_1_ord);
   wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_gamma);
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
     adaptivity.set_solutions(slns, ref_slns);
-    double err_est = adaptivity.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est = adaptivity.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
 
     // Report results.
@@ -369,8 +369,8 @@ int main(int argc, char* argv[])
     DiffFilter err_distrib_1(Tuple<MeshFunction*>(&ex1, &sln1));
     DiffFilter err_distrib_2(Tuple<MeshFunction*>(&ex2, &sln2));
 
-    double err_exact_h1_1 = calc_rel_error(&ex1, &sln1, H2D_H1_NORM) * 100;
-    double err_exact_h1_2 = calc_rel_error(&ex2, &sln2, H2D_H1_NORM) * 100;
+    double err_exact_h1_1 = calc_rel_error(&ex1, &sln1, HERMES_H1_NORM) * 100;
+    double err_exact_h1_2 = calc_rel_error(&ex2, &sln2, HERMES_H1_NORM) * 100;
 
     Tuple<Solution*> exslns(&ex1, &ex2);
     error_h1 = error_total(error_fn_h1, norm_fn_h1, slns, exslns) * 100;
