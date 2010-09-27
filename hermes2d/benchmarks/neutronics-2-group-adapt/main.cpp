@@ -384,6 +384,7 @@ int main(int argc, char* argv[])
     if (ref_ndof >= NDOF_STOP) break;
 
     // Assemble the reference problem.
+    info("Solving on reference mesh.");
     bool is_linear = true;
     FeProblem* fep = new FeProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -395,7 +396,6 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Solve the linear system associated with the reference problem.
-    info("Solving the matrix problem.");
     if(solver->solve()) 
       vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
     else error ("Matrix solver failed.\n");
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
         
     // Project the fine mesh solution onto the coarse mesh.
-    info("Projecting reference solution on the coarse mesh; NDOF=%d ----", ndof);
+    info("Projecting reference solution on coarse mesh.");
     project_global(Tuple<Space*>(&space1, &space2), ref_slns, slns);
     
     // View the distribution of polynomial orders on the coarse meshes.
@@ -417,7 +417,7 @@ int main(int argc, char* argv[])
     oview2.show(&space2);                   
     
     // Calculate element errors and total error estimate.
-    info("Calculating error.");
+    info("Calculating error estimate and exact error.");
     Adapt adaptivity(Tuple<Space*>(&space1, &space2), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
     if (ADAPTIVITY_NORM == 2) {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
@@ -429,8 +429,8 @@ int main(int argc, char* argv[])
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
     adaptivity.set_solutions(slns, ref_slns);
-    double err_est = adaptivity.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-    double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
+    double err_est_energ_total = adaptivity.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_h1_total = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
 
     // Report results.
     cpu_time.tick(); 
@@ -448,8 +448,8 @@ int main(int argc, char* argv[])
 
     info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1_1, err_exact_h1_2);
     info("Total error wrt. exact solution (H1 norm): %g%%", error_h1);
-    info("Total error wrt. ref. solution  (H1 norm): %g%%", err_est_h1);
-    info("Total error wrt. ref. solution  (E norm):  %g%%", err_est);
+    info("Total error wrt. ref. solution  (H1 norm): %g%%", err_est_h1_total);
+    info("Total error wrt. ref. solution  (E norm):  %g%%", err_est_energ_total);
 
     view1.show(&sln1);
     view2.show(&sln2);
@@ -459,19 +459,19 @@ int main(int argc, char* argv[])
     if (ndof > 100) {
       // Add entry to DOF convergence graphs.
       graph_dof.add_values(ERR_PLOT, ndof, error_h1);
-      graph_dof.add_values(ERR_EST_PLOT, ndof, err_est_h1);
+      graph_dof.add_values(ERR_EST_PLOT, ndof, err_est_h1_total);
       // Add entry to DOF evolution graphs.
       graph_dof_evol.add_values(GROUP_1, as, get_num_dofs(&space1));
       graph_dof_evol.add_values(GROUP_2, as, get_num_dofs(&space2));
       // Add entry to CPU convergence graphs.
       graph_cpu.add_values(ERR_PLOT, cpu_time.accumulated(), error_h1);
-      graph_cpu.add_values(ERR_EST_PLOT, cpu_time.accumulated(), err_est_h1);
+      graph_cpu.add_values(ERR_EST_PLOT, cpu_time.accumulated(), err_est_h1_total);
     }
 
     cpu_time.tick(HERMES_SKIP);
     
-    // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) done = true;
+    // If err_est_energ_total too large, adapt the mesh.
+    if (err_est_energ_total < ERR_STOP) done = true;
     else 
     {
       info("Adapting coarse mesh.");

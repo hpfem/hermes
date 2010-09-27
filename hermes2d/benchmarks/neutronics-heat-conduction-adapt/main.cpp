@@ -421,15 +421,7 @@ int main(int argc, char* argv[])
       // Calculate element errors and total error estimate for adaptivity.      
       Adapt hp(spaces, proj_norms);
       hp.set_solutions(coarse_mesh_solutions, fine_mesh_solutions);
-      hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
-
-      double err_est = 0.0, norm_est = 0.0;
-      for (int i = 0; i < num_fields; i++) {
-        double cur_field_err_est = calc_abs_error( coarse_mesh_solutions[i], fine_mesh_solutions[i], proj_norms[i] );
-        double cur_field_norm_est = calc_norm( fine_mesh_solutions[i], proj_norms[i] );
-        err_est += sqr(cur_field_err_est);
-        norm_est += sqr(cur_field_norm_est);
-      }
+      double err_est_rel_total = hp.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
 /*
       if (ts==1) {
@@ -454,11 +446,9 @@ int main(int argc, char* argv[])
 	graph_cpu_est_phi.save("conv_cpu_est_phi.dat");
       }
 */
-
-      err_est = sqrt(err_est/norm_est) * 100.;  // Get the percentual relative error estimate.
       
       // If err_est too large, adapt the mesh.
-      if (err_est < ERR_STOP) done = true;
+      if (err_est_rel_total < ERR_STOP) done = true;
       else {
         info("Adapting the coarse meshes.");
         done = hp.adapt(Tuple<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
