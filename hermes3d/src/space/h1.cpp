@@ -20,6 +20,7 @@
 #include "../h3dconfig.h"
 #include "h1.h"
 #include "../shapeset/h1lobattohex.h"
+#include "../shapeset/h1lobattotetra.h"
 #include "../matrix.h"
 #include "../refmap.h"
 #include <common/bitarray.h>
@@ -33,13 +34,19 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
                  Shapeset* shapeset)
        : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-  _F_
-  // FIXME: this will fail if the mesh contains tetrahedra. 
-  if (shapeset == NULL) this->shapeset = new H1ShapesetLobattoHex;
+  _F_ 
+  if (shapeset == NULL) {
+    switch (p_init.type) {
+      case MODE_TETRAHEDRON: this->shapeset = new H1ShapesetLobattoTetra; break;
+      case MODE_HEXAHEDRON:  this->shapeset = new H1ShapesetLobattoHex; break;
+      //case MODE_PRISM: this->shapeset = new H1ShapesetLobattoPrism; break;
+      default: error("Unknown element type in H1Space::H1Space().");
+    }
+  }
   this->type = H1;
 
   // set uniform poly order in elements
-  if (p_init.x < 1 || p_init.y < 1 || p_init.x < 1) error("P_INIT must be >= 1 in all directions in an H1 space.");
+  if (p_init.x < 1 || p_init.y < 1 || p_init.z < 1) error("P_INIT must be >= 1 in all directions in an H1 space.");
   else this->set_uniform_order_internal(p_init);
 
   // enumerate basis functions
@@ -50,11 +57,16 @@ H1Space::~H1Space() {
   _F_
 }
 
-Space *H1Space::dup(Mesh *mesh) const 
+Space *H1Space::dup(Mesh *mesh_ext) const 
 {
   _F_
-  H1Space *space = new H1Space(this->mesh, NULL, NULL, -1, this->shapeset);
+  // FIXME; this only works for hexahedra.
+  H1Space *space = new H1Space(mesh_ext, NULL, NULL, Ord3(1, 1, 1), this->shapeset);
   space->copy_callbacks(this);
+  
+  // enumerate basis functions
+  space->assign_dofs();
+
   return space;
 }
 

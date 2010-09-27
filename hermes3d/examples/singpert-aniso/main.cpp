@@ -25,7 +25,7 @@ const double THRESHOLD = 0.3;		          // Error threshold for element refineme
 						  // refine all to keep the mesh symmetric.
 						  // STRATEGY = 1 ... refine all elements whose error is larger
 						  // than THRESHOLD times maximum element error.
-const double ERR_STOP  = 1;			  // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;			  // Stopping criterion for adaptivity (rel. error tolerance between the
 						  // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;			  // Adaptivity process stops when the number of degrees of freedom grows
 						  // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -81,9 +81,9 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
     warning("Could not open file '%s' for writing.", fname);
 }
 
-/***********************************************************************************
- * main program                                                                    *
- ***********************************************************************************/
+/****************
+ * main program *
+ ****************/
 int main(int argc, char **args) {
 
   // Load the inital mesh.
@@ -132,7 +132,7 @@ int main(int argc, char **args) {
     Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
     // Assemble stiffness matrix and rhs.
-    printf("  - Assembling... "); fflush(stdout);
+    printf("  - Assembling...\n"); fflush(stdout);
     dp.assemble(matrix, rhs);
     
     // Solve the system.
@@ -174,14 +174,13 @@ int main(int argc, char **args) {
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* rmatrix = create_matrix(matrix_solver);
     Vector* rrhs = create_vector(matrix_solver);
-    Solver* rsolver = create_solver(matrix_solver, matrix, rhs);
+    Solver* rsolver = create_solver(matrix_solver, rmatrix, rrhs);
 
     // Assemble stiffness matric and rhs.
-    printf("  - Assembling... "); fflush(stdout);
+    printf("  - Assembling...\n"); fflush(stdout);
     rdp.assemble(rmatrix, rrhs);
 
     // Solve the system.
-    printf("  - Solving... "); fflush(stdout);
     bool rsolved = rsolver->solve();
     if (rsolved) printf("done in %lf secs\n", rsolver->get_time());
     else printf("failed\n");
@@ -190,26 +189,21 @@ int main(int argc, char **args) {
     Solution rsln(&rmesh);
     rsln.set_coeff_vector(rspace, rsolver->get_solution());
 
-    // Compare coarse and fine mesh.
-    // Calculate the error estimate wrt. refined mesh solution.
-    double err = h1_error(&sln, &rsln);
-    printf("  - H1 error: % lf\n", err * 100);
-
-    // Save it to the graph.
-    graph.add_value(0, ndof, err * 100);
-    if (do_output)
-      graph.save("conv.gp");
-
     // Calculate error estimates for hp-adaptivity.
     printf("Adaptivity\n");
     printf("  - calculating error: "); fflush(stdout);
     H1Adapt hp(&space);
     hp.set_aniso(true);							// anisotropic adaptivity.
-    double err_est = hp.calc_error(&sln, &rsln) * 100;
-    printf("% lf %%\n", err_est);
+    double err_est_rel = hp.calc_error(&sln, &rsln) * 100;
+    printf("% lf %%\n", err_est_rel);
+
+    // Save it to the graph.
+    graph.add_value(0, ndof, err_est_rel);
+    if (do_output) graph.save("conv.gp");
+
 
     // If error is too large, adapt the mesh. 
-    if (err_est < ERR_STOP) 
+    if (err_est_rel < ERR_STOP) 
     {
       printf("\nDone\n");
       break;

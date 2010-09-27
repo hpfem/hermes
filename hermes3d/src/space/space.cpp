@@ -28,7 +28,7 @@
 #define PRINTF(...)
 //#define PRINTF printf
 
-#define H3D_INVALID_EDGE_ORDER						-1
+#define H3D_INVALID_EDGE_ORDER	    -1
 
 #define CHECK_ELEMENT_ID(id) \
 	if ((id) < 1 || (id) > mesh->elements.count())\
@@ -187,12 +187,13 @@ void Space::set_element_order(Word_t eid, Ord3 order) {
 	seq++;
 }
 
-Ord3 Space::get_element_order(Word_t eid) const {
-	_F_
-	CHECK_ELEMENT_ID(eid);
-	assert(elm_data.exists(eid));
-	assert(elm_data[eid] != NULL);
-	return elm_data[eid]->order;
+Ord3 Space::get_element_order(Word_t eid) const 
+{
+  _F_
+  CHECK_ELEMENT_ID(eid);
+  assert(elm_data.exists(eid));
+  assert(elm_data[eid] != NULL);
+  return elm_data[eid]->order;
 }
 
 void Space::set_uniform_order_internal(Ord3 order, int marker) {
@@ -259,6 +260,9 @@ void Space::copy_orders(const Space &space, int inc) {
 		set_order_recurrent(eid, order);
 	}
 	seq++;
+
+        // enumerate basis functions
+        this->assign_dofs();
 }
 
 void Space::enforce_minimum_rule() {
