@@ -109,6 +109,10 @@ scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+
+  cpu_time.tick();
   // Load the mesh.
   Mesh basemesh, T_mesh, M_mesh;
   H2DReader mloader;
@@ -144,15 +148,6 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Initialize adaptivity parameters.
-  double to_be_processed = 0;
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
-  apt.set_error_form(0, 0, callback(bilinear_form_sym_0_0));
-  apt.set_error_form(0, 1, callback(bilinear_form_sym_0_1));
-  apt.set_error_form(1, 0, callback(bilinear_form_sym_1_0));
-  apt.set_error_form(1, 1, callback(bilinear_form_sym_1_1));
 
   // Solutions.
   Solution T_coarse, M_coarse, T_fine, M_fine;
@@ -194,29 +189,103 @@ int main(int argc, char* argv[])
       M_space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop.
-    solve_linear_adapt(Tuple<Space *>(&T_space, &M_space), &wf, NULL, matrix_solver,
-                       Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
-                       Tuple<Solution *>(&T_coarse, &M_coarse),
-                       Tuple<Solution *>(&T_fine, &M_fine),
-                       Tuple<WinGeom *>(), Tuple<WinGeom *>(),// Do not show solutions or meshes.
-                       Tuple<RefinementSelectors::Selector *> (&selector, &selector), &apt,
-                       verbose);
+    // Adaptivity loop:
+    int as = 1; 
+    bool done = false;
+    do
+    {
+      info("---- Adaptivity step %d:", as);
+
+      // Construct globally refined reference mesh and setup reference space.
+      Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&T_space, &M_space));
+
+      // Assemble the reference problem.
+      info("Solving on reference mesh.");
+      bool is_linear = true;
+      FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+      fep->assemble(matrix, rhs);
+
+      // Time measurement.
+      cpu_time.tick();
+      
+      // Solve the linear system of the reference problem. If successful, obtain the solutions.
+      if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                              Tuple<Solution *>(&T_fine, &M_fine));
+      else error ("Matrix solver failed.\n");
+    
+      // Time measurement.
+      cpu_time.tick();
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      project_global(Tuple<Space *>(&T_space, &M_space), Tuple<Solution *>(&T_fine, &M_fine), 
+                     Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
+
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate and exact error."); 
+      Adapt* adaptivity = new Adapt(Tuple<Space *>(&T_space, &M_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
+      adaptivity->set_solutions(Tuple<Solution *>(&T_coarse, &M_coarse), Tuple<Solution *>(&T_fine, &M_fine));
+      adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
+      adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
+      adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
+      adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
+      double err_est_rel_total = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+
+      // Time measurement.
+      cpu_time.tick();
+
+      // Report results.
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+        get_num_dofs(Tuple<Space *>(&T_space, &M_space)), get_num_dofs(*ref_spaces), err_est_rel_total);
+      
+      // If err_est too large, adapt the mesh.
+      if (err_est_rel_total < ERR_STOP) 
+        done = true;
+      else 
+      {
+        info("Adapting coarse mesh.");
+        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+                                 THRESHOLD, STRATEGY, MESH_REGULARITY);
+        if (get_num_dofs(Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
+          done = true;
+        else
+          // Increase the counter of performed adaptivity steps.
+          as++;
+      }
+
+      // Show new coarse meshes and solutions.
+      char title[100];
+      sprintf(title, "Temperature, t = %g days", CURRENT_TIME/3600./24);
+      T_sln_view.set_title(title);
+      T_sln_view.show(&T_coarse);
+      sprintf(title, "Moisture, t = %g days", CURRENT_TIME/3600./24);
+      M_sln_view.set_title(title);
+      M_sln_view.show(&M_coarse);
+      T_order_view.show(&T_space);
+      M_order_view.show(&M_space);
+
+      // Clean up.
+      delete solver;
+      delete matrix;
+      delete rhs;
+      delete adaptivity;
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i]->mesh;
+      delete ref_spaces;
+      delete fep;
+      
+      // Increase counter.
+      as++;
+    }
+    while (done == false);
 
     // Update time.
     CURRENT_TIME += TAU;
 
-    // Show new coarse meshes and solutions.
-    char title[100];
-    sprintf(title, "Temperature, t = %g days", CURRENT_TIME/3600./24);
-    T_sln_view.set_title(title);
-    T_sln_view.show(&T_coarse);
-    sprintf(title, "Moisture, t = %g days", CURRENT_TIME/3600./24);
-    M_sln_view.set_title(title);
-    M_sln_view.show(&M_coarse);
-    T_order_view.show(&T_space);
-    M_order_view.show(&M_space);
-
+    
     // Save fine mesh solutions for the next time step.
     T_prev.copy(&T_fine);
     M_prev.copy(&M_fine);

@@ -179,9 +179,7 @@ int main(int argc, char* argv[])
     if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
 
     // Solve the linear system and if successful, obtain the solution.
-    if(solver_coarse->solve())
-      vector_to_solution(solver_coarse->get_solution(), &space, &sln);
-    else
+    if(!solver_coarse->solve())
       error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
@@ -200,6 +198,7 @@ int main(int argc, char* argv[])
   delete matrix_coarse;
   delete rhs_coarse;
   delete solver_coarse;
+  delete [] coeff_vec_coarse;
 
   // Adaptivity loop:
   int as = 1; 
