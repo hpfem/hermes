@@ -24,18 +24,22 @@
 #include "../matrix.h"
 
 #ifdef WITH_MUMPS
-extern "C" {
-	#include <mumps_c_types.h>
-#ifndef H2D_COMPLEX
-	#include <dmumps_c.h>
+  extern "C" {
+	  #include <mumps_c_types.h>
+  #ifndef H2D_COMPLEX
+	  #include <dmumps_c.h>
+  #else
+	  #include <zmumps_c.h>
+  #endif
+  }
+  
+  #ifdef WITH_MPI
+    #include <mpi.h>
+  #endif
 #else
-	#include <zmumps_c.h>
-#endif
-}
-#else
-struct ZMUMPS_COMPLEX {
-	double r, i;
-};
+  struct ZMUMPS_COMPLEX {
+	  double r, i;
+  };
 #endif
 
 

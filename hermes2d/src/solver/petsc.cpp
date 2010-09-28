@@ -25,6 +25,7 @@
 
 #define H2D_PETSC_NOT_COMPILED    "hermes2d was not built with PETSc support."
 
+// TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
 PetscMatrix::PetscMatrix() {
 	_F_
@@ -111,7 +112,7 @@ void PetscMatrix::zero() {
 void PetscMatrix::add(int m, int n, scalar v) {
 	_F_
 #ifdef WITH_PETSC
-	if (v != 0.0 && m >= 0 && n >/ 0)		// ignore "dirichlet DOF"
+	if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
 		MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
 #endif
 }

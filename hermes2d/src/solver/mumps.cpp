@@ -34,6 +34,8 @@
 	#define MUMPS_STRUCT	ZMUMPS_STRUC_C
 #endif
 
+#define USE_COMM_WORLD -987654
+
 #ifdef WITH_MUMPS
 
 extern "C" {
@@ -398,8 +400,10 @@ bool MumpsSolver::solve()
 
 	// Initialize a MUMPS instance
 	id.job = JOB_INIT;
-	id.par = 1;
+	id.par = 1; // host also performs calculations
 	id.sym = 0; // 0 = unsymmetric
+  id.comm_fortran=USE_COMM_WORLD;
+  
 	MUMPS(&id);
 	check_status(&id);
 
@@ -427,11 +431,10 @@ bool MumpsSolver::solve()
 
 	id.ICNTL(20) = 0; // centralized dense RHS
 	id.ICNTL(21) = 0; // centralized dense solution
-
-	// Call the MUMPS package. Note that no MPI communicator is passed in
-	// "id.comm_fortran", in that case MPI_COMM_WORLD is assumed by MUMPS.
+  
 	id.job = 6; // 6 means Analysis + factorization + solve (FIXME: remove magic constant - see MUMPS docs)
 	MUMPS(&id);
+  
 	ret = check_status(&id);
 
 	if (ret) {
