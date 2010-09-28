@@ -49,8 +49,8 @@ AztecOOSolver::~AztecOOSolver()
 {
 	_F_
 #ifdef HAVE_AZTECOO
-	if (m != NULL) delete m;
-	if (rhs != NULL) delete rhs;
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 

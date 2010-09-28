@@ -355,10 +355,8 @@ MumpsSolver::~MumpsSolver()
 {
 	_F_
 #ifdef WITH_MUMPS
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 

@@ -258,10 +258,8 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
 PetscLinearSolver::~PetscLinearSolver() {
 	_F_
 #ifdef WITH_PETSC
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 

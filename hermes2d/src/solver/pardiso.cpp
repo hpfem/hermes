@@ -295,11 +295,9 @@ PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
 
 PardisoLinearSolver::~PardisoLinearSolver() {
 	_F_
-#ifdef WITH_PARDISO
-	if (lp != NULL) {
-		delete m;
-		delete rhs;
-	}
+#ifdef WITH_PARDISO  
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 

@@ -309,6 +309,10 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
 	_F_
+#ifdef WITH_UMFPACK  
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
+#endif
 }
 
 #ifdef WITH_UMFPACK
