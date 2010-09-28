@@ -80,7 +80,8 @@ void AztecOOSolver::set_precond(const char *name)
 	else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;
 	else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
 	else az_precond = AZ_none;
-
+  
+  precond_yes = (az_precond != AZ_none);
 	aztec.SetAztecOption(AZ_precond, az_precond);
 #endif
 }
@@ -121,7 +122,12 @@ bool AztecOOSolver::solve()
 	Epetra_Vector x(*rhs->std_map);
 	aztec.SetLHS(&x);
 
-	if (pc != NULL) {
+#ifdef HAVE_TEUCHOS
+	if (!pc.is_null())
+#else
+  if (pc != NULL)
+#endif
+  {
 		Epetra_Operator *op = pc->get_obj();
 		assert(op != NULL);		// can work only with Epetra_Operators
 		aztec.SetPrecOperator(op);

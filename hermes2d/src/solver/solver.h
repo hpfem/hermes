@@ -22,6 +22,11 @@
 
 #include "../common.h"  // Also includes preprocessor definitions for the various 
                         // solver libraries via config.h.
+#include "precond.h"
+                        
+#ifdef HAVE_TEUCHOS
+  #include <Teuchos_RefCountPtr.hpp>
+#endif
 
 /// @defgroup solvers Solvers
 ///
@@ -60,8 +65,8 @@ protected:
 /// @ingroup solvers
 class LinearSolver : public Solver 
 {
-public:
-	LinearSolver() : Solver() {}
+  public:
+    LinearSolver() : Solver() {}
 };
 
 /// Abstract class for defining interface for LinearSolvers
@@ -69,20 +74,41 @@ public:
 ///
 /// @ingroup solvers
 class NonlinearSolver : public Solver {
-public:
-	NonlinearSolver() : Solver() { fp = NULL; }
-	NonlinearSolver(FeProblem *fp) : Solver() { this->fp = fp; }
-
-protected:
-	FeProblem *fp;        // FE problem being solved (not NULL in case of using
-	                      // NonlinearProblem(DiscreteProblem *) ctor
+  public:
+    NonlinearSolver() : Solver() { fp = NULL; }
+    NonlinearSolver(FeProblem *fp) : Solver() { this->fp = fp; }
+    
+  protected:
+    FeProblem *fp;        // FE problem being solved (not NULL in case of using
+    // NonlinearProblem(DiscreteProblem *) ctor
 };
 
 class IterSolver : public Solver
 {
-public:
-  IterSolver() { sln = NULL; }
-  int get_error() { return error; }
+  public:
+    IterSolver() : Solver(), max_iters(1e4), tolerance(1e-8), precond_yes(false) {};
+    
+    virtual int get_num_iters() = 0;
+    virtual double get_residual() = 0;
+    
+    /// Set the convergence tolerance
+    /// @param[in] tol - the tolerance to set
+    void set_tolerance(double tol) { this->tolerance = tol; }
+    /// Set maximum number of iterations to perform
+    /// @param[in] iters - number of iterations
+    void set_max_iters(int iters) { this->max_iters = iters; }
+    
+    virtual void set_precond(const char *name) = 0;
+    #ifdef HAVE_TEUCHOS
+      virtual void set_precond(Teuchos::RCP<Precond> &pc) = 0;
+    #else
+      virtual void set_precond(Precond *pc) = 0;
+    #endif            
+      
+  protected:    
+    int max_iters;          ///< Maximum number of iterations.
+    double tolerance;       ///< Convergence tolerance.
+    bool precond_yes;
 };
 
 #endif

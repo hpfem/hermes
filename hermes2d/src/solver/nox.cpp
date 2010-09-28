@@ -63,7 +63,7 @@ public:
 
 	EpetraVector init_sln;		// initial solution
 	EpetraMatrix jacobian;		// jacobian (optional)
-    Teuchos::RCP<Precond> precond;		// preconditiner (optional)
+  Teuchos::RCP<Precond> precond;		// preconditiner (optional)
 
 	void prealloc_jacobian();
 };
@@ -162,7 +162,7 @@ bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_O
 
 // NOX solver //////////////////////////////////////////////////////////////////////////////////////
 
-NoxSolver::NoxSolver(FeProblem* problem)
+NoxSolver::NoxSolver(FeProblem* problem) : IterSolver()
 {
 #ifdef HAVE_NOX
   // default values
@@ -173,7 +173,6 @@ NoxSolver::NoxSolver(FeProblem* problem)
   ls_max_iters = 800;
   ls_tolerance = 1e-8;
   ls_sizeof_krylov_subspace = 50;
-  precond_yes = false;
   precond_type = "None";
   // convergence test
   conv.max_iters = 10;
@@ -209,13 +208,13 @@ NoxSolver::~NoxSolver()
 }
 
 #ifdef HAVE_TEUCHOS
-void NoxSolver::set_precond(Teuchos::RCP<Precond> &pc)
-{
-#ifdef HAVE_NOX
-  precond_yes = true;
-  interface->set_precond(pc);
-#endif
-}
+  void NoxSolver::set_precond(Teuchos::RCP<Precond> &pc)
+  {
+  #ifdef HAVE_NOX
+    precond_yes = true;
+    interface->set_precond(pc);
+  #endif
+  }
 #endif
 
 void NoxSolver::set_precond(const char *pc)
