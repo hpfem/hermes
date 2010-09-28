@@ -17,16 +17,16 @@
 // along with Hermes; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-//#include "../h3dconfig.h"
+
+#include "umfpack_solver.h"
 
 #ifdef WITH_UMFPACK
 extern "C" {
-#include <umfpack.h>
-//#include "/usr/include/suitesparse/umfpack.h"
+  #include <umfpack.h>
+  //#include "/usr/include/suitesparse/umfpack.h"
 }
 #endif
 
-#include "umfpack_solver.h"
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/utils.h"

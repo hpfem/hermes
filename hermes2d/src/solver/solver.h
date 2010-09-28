@@ -20,8 +20,8 @@
 #ifndef _SOLVER_H_
 #define _SOLVER_H_
 
-#include "../common.h"
-
+#include "../common.h"  // Also includes preprocessor definitions for the various 
+                        // solver libraries via config.h.
 
 /// @defgroup solvers Solvers
 ///
