@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition to obtain initial vector on the coarse mesh.");
   scalar* coeff_vec_coarse = new scalar[get_num_dofs(&space)] ;
   Solution* init_sln = new Solution(&mesh, init_cond);
-  project_global(&space, init_sln, coeff_vec_coarse); 
+  project_global(&space, init_sln, coeff_vec_coarse, matrix_solver); 
   delete init_sln;
 
   // Newton's loop on the coarse mesh.
@@ -220,12 +220,12 @@ int main(int argc, char* argv[])
     if (as == 1) 
     {
       info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
-      project_global(ref_space, &sln, coeff_vec);
+      project_global(ref_space, &sln, coeff_vec, matrix_solver);
     }
     else 
     {
       info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
-      project_global(ref_space, &ref_sln, coeff_vec);
+      project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
     }
 
     // Newton's loop on the fine mesh.
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
       // Project last fine mesh solution on the new coarse mesh
       // to obtain new coars emesh solution.
       info("Projecting reference solution on new coarse mesh for error calculation.");
-      project_global(&space, &ref_sln, &sln, matrix_solver); 
+      project_global(&space, &ref_sln, &sln, matrix_solver, matrix_solver); 
       // View the coarse mesh solution.
       sview.show(&sln);
       oview.show(&space);

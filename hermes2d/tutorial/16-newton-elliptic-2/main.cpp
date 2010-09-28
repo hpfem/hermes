@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   info("Projecting to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[get_num_dofs(&space)] ;
   Solution* init_sln = new Solution(&mesh, init_cond);
-  project_global(&space, init_sln, coeff_vec); 
+  project_global(&space, init_sln, coeff_vec, matrix_solver); 
   delete init_sln;
 
   // Perform Newton's iteration.
