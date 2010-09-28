@@ -84,6 +84,10 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Load the mesh.
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
@@ -107,46 +111,129 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_TOP);
 
+  // Initialize coarse and reference mesh solutions.
+  Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
+
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize adaptivity parameters.
-  double to_be_processed = 0;
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, 
-                          MULTI ? THRESHOLD_MULTI : THRESHOLD_SINGLE, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
-  apt.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
-  apt.set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
-  apt.set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
-  apt.set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
+  // Initialize views.
+  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 900, 300));
+  s_view_0.show_mesh(false);
+  ScalarView s_view_1("Solution[1]", new WinGeom(910, 0, 900, 300));
+  s_view_1.show_mesh(false);
+  OrderView  o_view_0("Mesh[0]", new WinGeom(0, 355, 900, 300));
+  OrderView  o_view_1("Mesh[1]", new WinGeom(910, 355, 900, 300));
 
-  // Geometry and position of visualization windows.
-  WinGeom* u_sln_win_geom = new WinGeom(0, 0, 900, 300);
-  WinGeom* u_mesh_win_geom = new WinGeom(0, 355, 900, 300);
-  WinGeom* v_sln_win_geom = new WinGeom(910, 0, 900, 300);
-  WinGeom* v_mesh_win_geom = new WinGeom(910, 355, 900, 300);
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est;
 
-  // Adaptivity loop.
-  Solution *u_sln = new Solution();
-  Solution *v_sln = new Solution();
-  Solution *ref_u_sln = new Solution();
-  Solution *ref_v_sln = new Solution();
-  bool verbose = true;  // Print info during adaptivity.
-  solve_linear_adapt(Tuple<Space *>(&u_space, &v_space), &wf, NULL, matrix_solver,
-                     Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
-                     Tuple<Solution *>(u_sln, v_sln), Tuple<Solution *>(ref_u_sln, ref_v_sln),
-                     Tuple<WinGeom *>(u_sln_win_geom, v_sln_win_geom),
-                     Tuple<WinGeom *>(u_mesh_win_geom, v_mesh_win_geom), 
-                     Tuple<RefinementSelectors::Selector *> (&selector, &selector), 
-                     &apt, verbose);
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
 
-  // Show the Von Mises stress on the reference mesh.
-  WinGeom* stress_win_geom = new WinGeom(950, 0, 900, 300);
-  ScalarView sview("Von Mises stress [Pa]", stress_win_geom);
-  VonMisesFilter ref_stress(Tuple<MeshFunction*>(ref_u_sln, ref_v_sln), lambda, mu);
-  sview.set_min_max_range(0, 2e5);
-  sview.show_mesh(false);
-  sview.show(&ref_stress);
+    // Construct globally refined reference mesh and setup reference space.
+    Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&u_space, &v_space));
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
+
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Solve the linear system of the reference problem. If successful, obtain the solutions.
+    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                            Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
+    else error ("Matrix solver failed.\n");
+  
+    // Time measurement.
+    cpu_time.tick();
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
+                   Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+   
+    // View the coarse mesh solution and polynomial orders.
+    s_view_0.show(&u_sln); 
+    o_view_0.show(&u_space);
+    s_view_1.show(&v_sln); 
+    o_view_1.show(&v_space);
+
+    // Calculate element errors.
+    info("Calculating error estimate and exact error."); 
+    Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
+    adaptivity->set_solutions(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
+    adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
+    adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
+    adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
+    adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>); 
+   
+    // Calculate error estimate for each solution component and the total error estimate.
+    Tuple<double> err_est_rel;
+    double err_est_rel_total = adaptivity->calc_err_est(err_est_rel, 
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Report results.
+    info("ndof_coarse[0]: %d, ndof_fine[0]: %d, err_est_rel[0]: %g%%", 
+         u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(), err_est_rel[0]*100);
+    info("ndof_coarse[1]: %d, ndof_fine[1]: %d, err_est_rel[1]: %g%%",
+         v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs(), err_est_rel[1]*100);
+    info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel_total: %g%%",
+         get_num_dofs(Tuple<Space *>(&u_space, &v_space)), get_num_dofs(*ref_spaces), err_est_rel_total);
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
+    graph_cpu_est.save("conv_cpu_est.dat");
+
+    // If err_est too large, adapt the mesh.
+    if (err_est_rel_total < ERR_STOP) 
+      done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+                               MULTI ? THRESHOLD_MULTI:THRESHOLD_SINGLE, STRATEGY, MESH_REGULARITY);
+    }
+    if (get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
+
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    if(done == false)
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i]->mesh;
+    delete ref_spaces;
+    delete fep;
+    
+    // Increase counter.
+    as++;
+  }
+  while (done == false);
+
+  verbose("Total running time: %g s", cpu_time.accumulated());
+
+  // Show the reference solution - the final result.
+  s_view_0.set_title("Fine mesh Solution[0]");
+  s_view_0.show(&u_ref_sln);
+  s_view_1.set_title("Fine mesh Solution[1]");
+  s_view_1.show(&v_ref_sln);
 
   // Wait for all views to be closed.
   View::wait();

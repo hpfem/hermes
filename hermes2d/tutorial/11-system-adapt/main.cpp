@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
     // Calculate exact error for each solution component and the total exact error.
     Tuple<double> err_exact_rel;
     double err_exact_rel_total = adaptivity->calc_err_exact(err_exact_rel, 
-      HERMES_TOTAL_ERROR_REL, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
+                                 HERMES_TOTAL_ERROR_REL, Tuple<Solution *>(&u_exact, &v_exact)) * 100;
 
     // Time measurement.
     cpu_time.tick();
