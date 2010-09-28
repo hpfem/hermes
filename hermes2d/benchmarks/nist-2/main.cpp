@@ -6,24 +6,33 @@
 
 using namespace RefinementSelectors;
 
-//  This is the first in the series of NIST benchmarks with known exact solutions.
+//  This is the second in the series of NIST benchmarks with known exact solutions. This benchmark
+//  has four different versions, use the global variable PROB_PARAM below to switch among them.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
 //
-//  PDE: -Laplace u = f.
+//  PDE: -Laplace u = 0
 //
-//  Known exact solution; pow(2, 4*p) * pow(x, p) * pow(1-x, p) * pow(y, p) * pow(1-y, p).
+//  Known exact solution: (pow(sqrt(x*x + y*y), ALPHA) * sin(ALPHA * atan2(y,x))).
 //  See functions fn() and fndd() in "exact_solution.cpp".
 //
-//  Domain: unit square (0, 1)x(0, 1), see the file square.mesh.
+//  Domain: square (-1, 1)^2, with a section removed from the clockwise side of the positive x-axis.
 //
 //  BC:  Dirichlet, given by exact solution.
 //
 //  The following parameters can be changed:
 
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+int PROB_PARAM = 1;    // PROB_PARAM determines which parameter values you wish to use for the strength of the singularity in
+                       // the current (nist-2)  Reentrant Corner problem.
+                       //       strength      OMEGA             ALPHA
+                       // 0:    1             5*Pi/4            4/5
+                       // 1:    2             3*Pi/2            2/3
+                       // 2:    3             7*Pi/4            4/7
+                       // 3:    4             2*Pi              1/2
+
+const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -35,7 +44,7 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO_H;        // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
@@ -45,18 +54,21 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
-const double CONV_EXP = 0.5;                      // Default value is 1.0. This parameter influences the selection of
+const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
+                                                  // SOLVER_MUMPS, and more are coming.
 
 // Problem parameters.
-double EXACT_SOL_P = 10;                          // The exact solution is a polynomial of degree 2*EXACT_SOL_P in the x-direction
-                                                  // as well as in the y-direction. 
+double OMEGA;        // OMEGA determines the angle of the reentrant corner, and consequently ALPHA and the strength 
+double ALPHA;        // of the singularity.  Varying OMEGA can be used to study the effect of the strength of the
+                     // singularity on adaptive algorithms.
+
+
 // Exact solution.
 #include "exact_solution.cpp"
 
@@ -74,8 +86,14 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh);     // quadrilaterals
-  // mloader.load("square_tri.mesh", &mesh);   // triangles
+
+  switch (PROB_PARAM) {
+    case 0: mloader.load("geom0.mesh", &mesh); break;
+    case 1: mloader.load("geom1.mesh", &mesh); break;
+    case 2: mloader.load("geom2.mesh", &mesh); break;
+    case 3: mloader.load("geom3.mesh", &mesh); break;
+    default: error("Admissible values of PROB_PARAM are 0, 1, 2, 3.");
+  }
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -86,7 +104,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form));
+  //wf.add_vector_form(callback(linear_form));
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-//  This is the nineth in the series of NIST benchmarks with known exact solutions. This benchmark
+//  This is the ninth in the series of NIST benchmarks with known exact solutions. This benchmark
 //  has four different versions, use the global variable PROB_PARAM below to switch among them.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
