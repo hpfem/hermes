@@ -81,13 +81,15 @@ NoxProblemInterface::NoxProblemInterface(FeProblem* problem)
 
 NoxProblemInterface::~NoxProblemInterface()
 {
+  init_sln.free();
+  if (!fep->is_matrix_free()) jacobian.free();
 }
 
 void NoxProblemInterface::prealloc_jacobian()
 {
   // preallocate jacobian structure
   fep->create(&jacobian);
-  jacobian.finish();
+  // jacobian.finish();
 }
 
 void NoxProblemInterface::set_precond(Teuchos::RCP<Precond> &pc)
@@ -110,11 +112,12 @@ bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, Fil
   EpetraVector rhs(f);
 
   rhs.zero();
-  // The first NULL is for the global matrix.
-  scalar* coeff_vec;
+  
+  scalar* coeff_vec = new scalar[xx.length()];
   xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, NULL, &rhs);
-
+  fep->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
+  delete [] coeff_vec;
+  
   return true;
 }
 
@@ -127,11 +130,12 @@ bool NoxProblemInterface::computeJacobian(const Epetra_Vector &x, Epetra_Operato
   EpetraMatrix jacobian(*jac);
 
   jacobian.zero();
-  // The first NULL is for the right-hand side.
-  scalar* coeff_vec;
+  
+  scalar* coeff_vec = new scalar[xx.length()];
   xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, &jacobian, NULL);
-  jacobian.finish();
+  fep->assemble(coeff_vec, &jacobian, NULL); // NULL is for the right-hand side.
+  delete [] coeff_vec;
+  //jacobian.finish();
 
   return true;
 }
@@ -145,11 +149,12 @@ bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_O
   EpetraVector xx(x);			// wrap our structures around core Epetra objects
 
   jacobian.zero();
-  // The first NULL is for the right-hand side.
-  scalar* coeff_vec;
+  
+  scalar* coeff_vec = new scalar[xx.length()];
   xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, &jacobian, NULL);
-  jacobian.finish();
+  fep->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
+  delete [] coeff_vec;
+  //jacobian.finish();
 
   precond->create(&jacobian);
   precond->compute();

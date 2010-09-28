@@ -140,66 +140,75 @@ bool FeProblem::is_up_to_date()
 void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
   _F_
-  assert(mat != NULL);
 
   if (is_up_to_date())
   {
-    verbose("Reusing matrix sparse structure.");
-    if (!rhsonly)
+    if (!rhsonly && mat != NULL) 
+    {
+      verbose("Reusing matrix sparse structure.");
       mat->zero();
-    rhs->zero();
+    }
+    if (rhs != NULL) rhs->zero();
     return;
   }
-
-  // spaces have changed: create the matrix from scratch
-  mat->free();
-
+  
   int ndof = get_num_dofs();
-  mat->prealloc(ndof);
-
-  AUTOLA_CL(AsmList, al, wf->neq);
-  AUTOLA_OR(Mesh*, meshes, wf->neq);
-  bool **blocks = wf->get_blocks();
-
-  // Init multi-mesh traversal.
-  for (int i = 0; i < wf->neq; i++)
-    meshes[i] = spaces[i]->get_mesh();
-
-  Traverse trav;
-  trav.begin(wf->neq, meshes);
-
-  // Loop through all elements.
-  Element **e;
-  while ((e = trav.get_next_state(NULL, NULL)) != NULL)
+  
+  if (mat != NULL)  // mat may be NULL when assembling the rhs for NOX
   {
-    // obtain assembly lists for the element at all spaces
+    // spaces have changed: create the matrix from scratch
+    mat->free();
+    mat->prealloc(ndof);
+
+    AUTOLA_CL(AsmList, al, wf->neq);
+    AUTOLA_OR(Mesh*, meshes, wf->neq);
+    bool **blocks = wf->get_blocks();
+
+    // Init multi-mesh traversal.
     for (int i = 0; i < wf->neq; i++)
-      // TODO: do not get the assembly list again if the element was not changed
-      if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
+      meshes[i] = spaces[i]->get_mesh();
 
-    // go through all equation-blocks of the local stiffness matrix
-    for (int m = 0; m < wf->neq; m++)
-      for (int n = 0; n < wf->neq; n++)
-        if (blocks[m][n] && e[m] != NULL && e[n] != NULL)
-        {
-          AsmList *am = al + m;
-          AsmList *an = al + n;
+    Traverse trav;
+    trav.begin(wf->neq, meshes);
 
-          // pretend assembling of the element stiffness matrix
-          // register nonzero elements
-          for (int i = 0; i < am->cnt; i++)
-            if (am->dof[i] >= 0)
-              for (int j = 0; j < an->cnt; j++)
-                if (an->dof[j] >= 0)
-                  mat->pre_add_ij(am->dof[i], an->dof[j]);
-        }
+    // Loop through all elements.
+    Element **e;
+    while ((e = trav.get_next_state(NULL, NULL)) != NULL)
+    {
+      // obtain assembly lists for the element at all spaces
+      for (int i = 0; i < wf->neq; i++)
+        // TODO: do not get the assembly list again if the element was not changed
+        if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
+
+      // go through all equation-blocks of the local stiffness matrix
+      for (int m = 0; m < wf->neq; m++)
+        for (int n = 0; n < wf->neq; n++)
+          if (blocks[m][n] && e[m] != NULL && e[n] != NULL)
+          {
+            AsmList *am = al + m;
+            AsmList *an = al + n;
+
+            // pretend assembling of the element stiffness matrix
+            // register nonzero elements
+            for (int i = 0; i < am->cnt; i++)
+              if (am->dof[i] >= 0)
+                for (int j = 0; j < an->cnt; j++)
+                  if (an->dof[j] >= 0)
+                    mat->pre_add_ij(am->dof[i], an->dof[j]);
+          }
+    }
+
+    trav.finish();
+    delete [] blocks;
+
+    mat->alloc();
   }
-
-  trav.finish();
-  delete [] blocks;
-
-  mat->alloc();
-  if (rhs != NULL) rhs->alloc(ndof);
+  
+  if (rhs != NULL) 
+  {
+    rhs->free();
+    rhs->alloc(ndof);
+  }
 
   // save space seq numbers and weakform seq number, so we can detect their changes
   for (int i = 0; i < wf->neq; i++)
@@ -273,7 +282,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
   // initialize matrix buffer
   matrix_buffer = NULL;
   matrix_buffer_dim = 0;
-  get_matrix_buffer(9);
+  if (mat != NULL) get_matrix_buffer(9);
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
@@ -568,7 +577,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
   for (int i = 0; i < wf->neq; i++) delete spss[i];  // This is different from H3D.
 
   // Cleaning up.
-  delete [] matrix_buffer;
+  if (matrix_buffer != NULL) delete [] matrix_buffer;
   matrix_buffer = NULL;
   matrix_buffer_dim = 0;
 
