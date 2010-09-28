@@ -89,8 +89,6 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  //selector.set_error_weights(2.0, 1.0, sqrt(2.0));  // Default (do not have to be set).
-  selector.set_error_weights(1.0, 1.0, 1.0);
 
   // Set exact solution.
   ExactSolution exact(&mesh, fndd);
