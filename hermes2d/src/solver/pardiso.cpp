@@ -23,6 +23,7 @@
 #include "../../common/error.h"
 #include "../../common/utils.h"
 #include "../../common/callstack.h"
+#include "../common_time_period.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -344,9 +345,7 @@ bool PardisoLinearSolver::solve() {
 		for (int i = 0; i < n + 1; i++) m->Ap[i] += 1;
 		for (int i = 0; i < nnz; i++) m->Ai[i] += 1;
 
-		Timer tmr;
-		tmr.start();
-
+		TimePeriod tmr;
 		// Setup Pardiso control parameters.
 		PARDISOINIT(pt, &mtype, iparm);
 
@@ -381,8 +380,8 @@ bool PardisoLinearSolver::solve() {
 			throw ERR_FAILURE;
 		}
 
-		tmr.stop();
-		time = tmr.get_seconds();
+		tmr.tick();
+		time = tmr.accumulated();
 
 		//  Convert matrix back to 0-based C-notation.
 		for (int i = 0; i < n + 1; i++) m->Ap[i] -= 1;

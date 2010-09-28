@@ -20,7 +20,7 @@
 #include "aztecoo.h"
 #include "../feproblem.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 #ifdef HAVE_KOMPLEX
 #include <Komplex_LinearProblem.h>
 #endif
@@ -29,15 +29,15 @@
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
+
 AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
-	: LinearSolver(), m(m), rhs(rhs)
+	: IterSolver(), m(m), rhs(rhs)
 {
 	_F_
 #ifdef HAVE_AZTECOO
-	// set default values
-	max_iters = 10000;
-	tolerance = 10e-8;
-	pc = NULL;
+  #ifndef HAVE_TEUCHOS
+    pc = NULL;
+  #endif
 #else
 	warning(H2D_AZTECOO_NOT_COMPILED);
 	exit(128);
@@ -109,8 +109,7 @@ bool AztecOOSolver::solve()
 	assert(rhs != NULL);
 	assert(m->size == rhs->size);
 
-	Timer tmr;
-	tmr.start();
+	TimePeriod tmr;
 
 	// no output
 	aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
@@ -131,8 +130,8 @@ bool AztecOOSolver::solve()
 	// solve it
 	aztec.Iterate(max_iters, tolerance);
 
-	tmr.stop();
-	time = tmr.get_seconds();
+  tmr.tick();
+	time = tmr.accumulated();
 
 	delete [] sln;
 	sln = new scalar[m->size];

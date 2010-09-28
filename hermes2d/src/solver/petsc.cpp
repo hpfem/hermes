@@ -21,7 +21,7 @@
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 
 #define H2D_PETSC_NOT_COMPILED    "hermes2d was not built with PETSc support."
 
@@ -275,8 +275,7 @@ bool PetscLinearSolver::solve() {
 	KSP ksp;
 	Vec x;
 
-	Timer tmr;
-	tmr.start();
+	TimePeriod tmr;
 
 	KSPCreate(PETSC_COMM_WORLD, &ksp);
 
@@ -287,8 +286,8 @@ bool PetscLinearSolver::solve() {
 	ec = KSPSolve(ksp, rhs->vec, x);
 	if (ec) return false;
 
-	tmr.stop();
-	time = tmr.get_seconds();
+	tmr.tick();
+	time = tmr.accumulated();
 
 	// allocate memory for solution vector
 	delete [] sln;

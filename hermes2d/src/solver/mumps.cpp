@@ -22,7 +22,7 @@
 #include "../../common/error.h"
 #include "../../common/utils.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 
 #define H2D_ERR_MUMPS_NOT_COMPILED    "Hermes2D was not compiled with MUMPS support"
 
@@ -394,8 +394,7 @@ bool MumpsSolver::solve()
 	assert(m != NULL);
 	assert(rhs != NULL);
 
-	Timer tmr;
-	tmr.start();
+	TimePeriod tmr;
 
 	MUMPS_STRUCT id;
 
@@ -453,8 +452,8 @@ bool MumpsSolver::solve()
 	id.job = JOB_END;
 	MUMPS(&id);
 
-	tmr.stop();
-	time = tmr.get_seconds();
+	tmr.tick();
+	time = tmr.accumulated();
 
 	delete [] id.rhs;
 

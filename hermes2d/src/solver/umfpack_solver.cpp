@@ -31,7 +31,7 @@ extern "C" {
 #include "../../common/error.h"
 #include "../../common/utils.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 
 UMFPackMatrix::UMFPackMatrix() {
 	_F_
@@ -341,8 +341,7 @@ bool UMFPackLinearSolver::solve() {
 
 	assert(m->size == rhs->size);
 
-	Timer tmr;
-	tmr.start();
+	TimePeriod tmr;
 
 	void *symbolic, *numeric;
 	int status;
@@ -372,8 +371,8 @@ bool UMFPackLinearSolver::solve() {
 		return false;
 	}
 
-	tmr.stop();
-	time = tmr.get_seconds();
+	tmr.tick();
+	time = tmr.accumulated();
 
 	umfpack_free_symbolic(&symbolic);
 	umfpack_free_numeric(&numeric);
