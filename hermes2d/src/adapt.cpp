@@ -728,15 +728,14 @@ double Adapt::calc_errors_internal(Tuple<double>& err_rel, unsigned int error_fl
   else
     error("Unknown element error type (0x%x).", error_flags & HERMES_ELEMENT_ERROR_MASK);
 
-  // Prepare an ordered list of elements according to an error.
-  fill_regular_queue(meshes, ref_meshes);
-  
   // Restoring the original sln.
   if (solutions != Tuple<Solution *>())
     for(int i = 0; i < solutions.size(); i++)
       this->rsln[i] = temp_sln[i];
+  else
+    // Prepare an ordered list of elements according to an error.
+    fill_regular_queue(meshes, ref_meshes);
 
-  
   // Return error value.
   have_errors = true;
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)

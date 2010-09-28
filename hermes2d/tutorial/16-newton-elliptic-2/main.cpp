@@ -143,10 +143,8 @@ int main(int argc, char* argv[])
     // of iteration has been reached, then quit.
     if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
 
-    // Solve the linear system and if successful, obtain the solution.
-    if(solver->solve())
-      vector_to_solution(solver->get_solution(), &space, &sln);
-    else
+    // Solve the linear system.
+    if(!solver->solve())
       error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
