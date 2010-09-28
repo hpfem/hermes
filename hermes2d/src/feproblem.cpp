@@ -20,18 +20,19 @@
 #include "space/space.h"
 #include "precalc.h"
 #include "matrix.h"
-#include "solver/solver.h"
-#include "solver/umfpack_solver.h"
 #include "refmap.h"
 #include "solution.h"
 #include "config.h"
 
 //  Solvers
+#include "solver/solver.h"
+#include "solver/umfpack_solver.h"
 #include "solver/amesos.h"
 #include "solver/pardiso.h"
 #include "solver/petsc.h"
 #include "solver/mumps.h"
 #include "solver/nox.h"
+#include "solver/aztecoo.h"
 
 
 FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
@@ -559,6 +560,8 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
       delete_cache();   // This is different in H3D.
     }
 
+    if (mat != NULL) mat->finish();
+    if (rhs != NULL) rhs->finish();
     trav.finish();
   }
 
@@ -1072,6 +1075,7 @@ Vector* create_vector(MatrixSolverType matrix_solver)
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
+    case SOLVER_AZTECOO:
       {
         return new EpetraVector;
         break;
@@ -1101,6 +1105,50 @@ Vector* create_vector(MatrixSolverType matrix_solver)
   }
 }
 
+bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[])
+{
+  int ierr, myid;
+  
+  switch (matrix_solver) 
+  {
+    case SOLVER_PETSC:
+#ifdef WITH_PETSC      
+      ierr = PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL); CHKERRQ(ierr);
+#endif      
+      break;
+    case SOLVER_MUMPS:
+#ifdef WITH_MPI      
+      ierr = MPI_Init(&argc, &argv);
+      return (ierr == MPI_SUCCESS);
+#endif
+      break;
+  }
+  
+  return true;
+}
+
+bool finalize_solution_environment(MatrixSolverType matrix_solver)
+{
+  int ierr;
+  
+  switch (matrix_solver) 
+  {
+    case SOLVER_PETSC:
+#ifdef WITH_PETSC      
+      ierr = PetscFinalize(); CHKERRQ(ierr);
+#endif   
+      break;
+    case SOLVER_MUMPS:
+#ifdef WITH_MPI      
+      ierr = MPI_Finalize();
+      return (ierr == MPI_SUCCESS);
+#endif
+      break;
+  }
+  
+  return true;
+}
+
 // This function is identical in H2D and H3D.
 SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {
@@ -1108,6 +1156,7 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
+    case SOLVER_AZTECOO:
       {
         return new EpetraMatrix;
         break;
@@ -1143,6 +1192,12 @@ Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vec
   _F_
   switch (matrix_solver) 
   {
+    case SOLVER_AZTECOO:
+      {
+        return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        info("Using AztecOO."); 
+        break;
+      }
     case SOLVER_AMESOS:
       {
         return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));

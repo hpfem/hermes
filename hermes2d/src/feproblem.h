@@ -163,6 +163,11 @@ H2D_API void project_global(Space *space,
 
 H2D_API void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
+
+/// Calls the required (de)initialization routines of the selected matrix solver.
+H2D_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
+H2D_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
+
 /// Selects the appropriate linear solver.
 H2D_API Vector* create_vector(MatrixSolverType matrix_solver);
 H2D_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);

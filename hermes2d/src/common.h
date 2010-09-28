@@ -92,18 +92,30 @@ inline void blas_copy(int n, complex *x, int incx, complex *y, int incy) { zcopy
 // Matrix solvers
 enum MatrixSolverType 
 {
-   SOLVER_UMFPACK, 
+   SOLVER_UMFPACK = 0, 
    SOLVER_PETSC, 
    SOLVER_MUMPS,
    SOLVER_PARDISO,
    SOLVER_NOX,
-   SOLVER_AMESOS
+   SOLVER_AMESOS,
+   SOLVER_AZTECOO
+};
+
+// Should be in the same order as MatrixSolverTypes above, so that the
+// names may be accessed by the same enumeration variable.
+const std::string MatrixSolverNames[7] = {
+  "UMFPACK",
+  "PETSc",
+  "MUMPS",
+  "Pardiso",
+  "Trilinos/NOX",
+  "Trilinos/Amesos",
+  "Trilinos/AztecOO"
 };
 
 // STL stuff
 #include <algorithm>
 #include <vector>
-#include <string>
 #include <map>
 #include <set>
 #include <queue>

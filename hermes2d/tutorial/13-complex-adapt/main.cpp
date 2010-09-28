@@ -49,8 +49,15 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers).
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
 
 
 // Problem parameters.
@@ -117,6 +124,8 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
+  initialize_solution_environment(matrix_solver, argc, argv);
+  
   // Adaptivity loop:
   int as = 1; 
   bool done = false;
@@ -131,9 +140,17 @@ int main(int argc, char* argv[])
     info("Solving on reference mesh.");
     bool is_linear = true;
     FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
+    
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    
+    if (matrix_solver == SOLVER_AZTECOO) {
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
+    }
+    
     fep->assemble(matrix, rhs);
 
     // Time measurement.
@@ -198,7 +215,9 @@ int main(int argc, char* argv[])
   while (done == false);
   
   verbose("Total running time: %g s", cpu_time.accumulated());
-
+  
+  finalize_solution_environment(matrix_solver);
+  
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
   sview.show(&ref_sln);

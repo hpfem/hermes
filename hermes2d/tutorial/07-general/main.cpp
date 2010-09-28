@@ -1,4 +1,5 @@
 #define H2D_REPORT_INFO
+#define H2D_REPORT_VERBOSE
 #define H2D_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -19,9 +20,15 @@
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform refinements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
+MatrixSolverType matrix_solver = SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
 const int BDY_VERTICAL = 2;
 
 // Problem parameters.
@@ -111,15 +118,23 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   bool is_linear = true;
   FeProblem fep(&wf, &space, is_linear);
-
-  // Set up the solver, matrix, and rhs according to the solver selection.
+ 
+  initialize_solution_environment(matrix_solver, argc, argv);
+  
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
+    
   // Initialize the solution.
   Solution sln;
-
+  
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
   fep.assemble(matrix, rhs);
@@ -130,9 +145,16 @@ int main(int argc, char* argv[])
     vector_to_solution(solver->get_solution(), &space, &sln);
   else
     error ("Matrix solver failed.\n");
-
+  
   // Time measurement.
   cpu_time.tick();
+  
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
+  
+  finalize_solution_environment(matrix_solver);
 
   // View the solution and mesh.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
@@ -148,11 +170,6 @@ int main(int argc, char* argv[])
 
   // Wait for all views to be closed.
   View::wait();
-
-  // Clean up.
-  delete solver;
-  delete matrix;
-  delete rhs;
-
+  
   return 0;
 }
