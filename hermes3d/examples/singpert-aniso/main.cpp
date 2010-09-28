@@ -2,18 +2,18 @@
 #include <getopt.h>
 #include <hermes3d.h>
 
-//  With large K, this is a singularly perturbed problem that exhibits an extremely
-//  thin and steep boundary layer. Singularly perturbed problems are considered to
-//  be very difficult, but you'll see that Hermes can solve them easily even for large
-//  values of K.
+// With large K, this is a singularly perturbed problem that exhibits an extremely
+// thin and steep boundary layer. Singularly perturbed problems are considered to
+// be very difficult, but you'll see that Hermes can solve them easily even for large
+// values of K.
 //
-//  PDE: -Laplace u + K*K*u = K*K.
+// PDE: -Laplace u + K*K*u = K*K.
 //
-//  Domain: cube (0, 1) x (0, 1) x (0, 1), see the file singpert-aniso.mesh3d.
+// Domain: cube (0, 1) x (0, 1) x (0, 1), see the file singpert-aniso.mesh3d.
 //
-//  BC:  Homogeneous Dirichlet.
+// BC:  Homogeneous Dirichlet.
 //
-//  The following parameters can be changed:
+// The following parameters can be changed:
 
 const int INIT_REF_NUM = 3;		          // Number of initial uniform mesh refinements.
 const int P_INIT_X = 1, 
@@ -29,11 +29,11 @@ const double ERR_STOP = 1.0;			  // Stopping criterion for adaptivity (rel. erro
 						  // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;			  // Adaptivity process stops when the number of degrees of freedom grows
 						  // over this limit. This is to prevent h-adaptivity to go on forever.
-bool do_output = true;				  // generate output files (if true)
+bool do_output = true;				  // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-// Problem constants
+// Problem constants.
 const double K_squared = 1e4;		 	  // Equation parameter.
 
 // Boundary condition types. 
@@ -51,7 +51,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 // Weak forms. 
 #include "forms.cpp"
 
-// Output the element order.
+// Mesh output.
 void out_orders(Space *space, const char *name, int iter)
 {
   char fname[1024];
@@ -66,7 +66,7 @@ void out_orders(Space *space, const char *name, int iter)
     warning("Could not open file '%s' for writing.", fname);
 }
 
-// Output the solutions.
+// Solution output.
 void out_fn(MeshFunction *fn, const char *name, int iter)
 {
   char fname[1024];
@@ -77,19 +77,16 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
     vtk.out(fn, name);
     fclose(f);
   }
-  else
-    warning("Could not open file '%s' for writing.", fname);
+  else warning("Could not open file '%s' for writing.", fname);
 }
 
-/****************
- * main program *
- ****************/
 int main(int argc, char **args) {
 
   // Load the inital mesh.
   Mesh mesh;
   Mesh3DReader mesh_loader;
-  mesh_loader.load("singpert-aniso.mesh3d", &mesh);
+  if(!mesh_loader.load("singpert-aniso.mesh3d", &mesh))
+    error("Loading mesh file '%s'\n", "cylinder2.e");
 
   // Perform initial mesh refinements.
   printf("Performing %d initial mesh refinements.\n", INIT_REF_NUM);
@@ -99,11 +96,11 @@ int main(int argc, char **args) {
 
   // Graphs of DOF convergence.
   GnuplotGraph graph;
-  graph.set_captions("", "Degrees of Freedom", "Error [%]");
+  graph.set_captions("", "Degrees of freedom", "Error [%]");
   graph.set_log_y();
   graph.add_row("Total error", "k", "-", "O");
 
-  // Create H1 space to setup the problem.
+  // Create H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
   // Initialize the weak formulation.
@@ -135,21 +132,21 @@ int main(int argc, char **args) {
     printf("  - Assembling...\n"); fflush(stdout);
     dp.assemble(matrix, rhs);
     
-    // Solve the system.
+    // Solve the matrix problem.
     printf("  - Solving... "); fflush(stdout);
     bool solved = solver->solve();
     if (solved) printf("done in %lf secs\n", solver->get_time());
-    else printf("Failed\n");
-
+    else error("Failed\n");
+    
     // Construct a solution.
     Solution sln(&mesh);
     sln.set_coeff_vector(&space, solver->get_solution());
 
-    // Output the orders and the solution.
+    // Output solution and mesh.
     if (do_output) 
     {
-      out_orders(&space, "order", as);
       out_fn(&sln, "sln", as);
+      out_orders(&space, "order", as);
     }
 
     // Solving the fine mesh problem.
