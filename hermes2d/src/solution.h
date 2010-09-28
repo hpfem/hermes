@@ -161,6 +161,9 @@ public:
   /// Multiplies the function represented by this class by the given coefficient.
   void multiply(scalar coef);
 
+  /// Returns the solution type.
+  int get_type() const { return type; };
+
 
 public:
 
@@ -172,10 +175,12 @@ public:
   /// Internal.
   virtual void set_active_element(Element* e);
 
+  typedef enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } solution_type;
+
 
 protected:
 
-  enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } type;
+  solution_type type;
 
   bool own_mesh;
   bool transform;

@@ -533,7 +533,15 @@ double Adapt::eval_elem_error_squared(matrix_form_val_t bi_fn, matrix_form_ord_t
   Ord o = bi_ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
   int order = rrv1->get_inv_ref_order();
   order += o.get_order();
-  limit_order(order);
+  if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
+  {
+    if(static_cast<Solution *>(rsln1)->get_type() == Solution::HERMES_EXACT)
+    { limit_order_nowarn(order); }
+    else
+      limit_order(order);
+  }
+  else  
+    limit_order(order);
 
   ou->free_ord(); delete ou;
   ov->free_ord(); delete ov;
@@ -586,7 +594,15 @@ double Adapt::eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t 
   Ord o = bi_ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
   int order = rrv1->get_inv_ref_order();
   order += o.get_order();
-  limit_order(order);
+  if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
+  {
+    if(static_cast<Solution *>(rsln1)->get_type() == Solution::HERMES_EXACT)
+    { limit_order_nowarn(order);  }
+    else
+      limit_order(order);
+  }
+  else  
+    limit_order(order);
 
   ou->free_ord(); delete ou;
   ov->free_ord(); delete ov;
