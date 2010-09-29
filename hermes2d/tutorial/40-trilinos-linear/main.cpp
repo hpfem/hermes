@@ -26,10 +26,18 @@ const int INIT_REF_NUM = 1;      // Number of initial uniform mesh refinements.
 const int P_INIT = 2;            // Initial polynomial degree of all mesh elements.
 const bool JFNK = false;         // true = Jacobian-free method (for NOX),
                                  // false = Newton (for NOX).
-const bool PRECOND = true;       // Preconditioning by jacobian in case of JFNK (for NOX),
+const bool PRECOND = true;      // Preconditioning by jacobian in case of JFNK (for NOX),
                                  // default ML preconditioner in case of Newton.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+                                 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers).
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
 
 // Boundary condition types.
 BCType bc_types(int marker)
@@ -69,19 +77,19 @@ int main(int argc, char **argv)
   cpu_time.tick();
 
   // Load the mesh.
-  Mesh* mesh = new Mesh();
+  Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", mesh);
+  mloader.load("square.mesh", &mesh);
 
   // Perform initial mesh refinemets.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh->refine_all_elements();
+  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
  
   // Create an H1 space with default shapeset.
-  H1Space space(mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = get_num_dofs(&space);
   info("ndof: %d", ndof);
 
-  info("---- Assembling by LinearProblem, solving by UMFpack:");
+  info("---- Assembling by FeProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -91,125 +99,152 @@ int main(int argc, char **argv)
   wf1.add_matrix_form(callback(bilinear_form));
   wf1.add_vector_form(callback(linear_form));
 
-  /* LINEAR PROBLEM CLASS WAS DELETED
+  // Initialize the solution.
+  Solution sln1;
+  
+  // Initialize the linear FE problem.
+  bool is_linear = true;
+  FeProblem fep1(&wf1, &space, is_linear);
+  
+  initialize_solution_environment(matrix_solver, argc, argv);
+  
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
+  
+  // Assemble the stiffness matrix and right-hand side vector.
+  info("Assembling the stiffness matrix and right-hand side vector.");
+  fep1.assemble(matrix, rhs);
+  
+  // Solve the linear system and if successful, obtain the solution.
+  info("Solving the matrix problem.");
+  if(solver->solve())
+    vector_to_solution(solver->get_solution(), &space, &sln1);
+  else
+    error ("Matrix solver failed.\n");
 
-  // Initialize the linear problem.
-  LinearProblem lp(&wf1, &space);
-
-  // Select matrix solver.
-  Matrix* mat; Vector* coeff_vec; CommonSolver* common_solver;
-  init_matrix_solver(matrix_solver, ndof, mat, coeff_vec, common_solver);
-
-  // Assemble stiffness matrix and rhs.
-  lp.assemble(mat, coeff_vec);
-
-  // Solve the matrix problem.
-  if (!common_solver->solve(mat, coeff_vec)) error ("Matrix solver failed.\n");
-
-  // Show the UMFpack solution.
-  Solution sln_hermes(&space, coeff_vec);
-  ScalarView sv("Solution", 0, 0, 440, 350);
-  sv.show(&sln_hermes);
-
+  delete(matrix);
+  delete(rhs);
+  delete(solver);
+  
+  finalize_solution_environment(matrix_solver);
+  
   // CPU time needed by UMFpack.
-  double umf_time = cpu_time.tick().last();
+  double time1 = cpu_time.tick().last();
 
-  */
-
+  // View the solution and mesh.
+  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  sview.show(&sln1);
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  oview.show(&space);
+  
   // TRILINOS PART:
 
   info("---- Assembling by FeProblem, solving by NOX:");
 
-  // Time measurement.
-  cpu_time.tick(HERMES_SKIP);
-
-  // Set initial vector for NOX to zero. Alternatively, you can obtain 
-  // an initial vector by projecting init_cond() on the FE space, see below.
-  EpetraVector* coeff_vec = new EpetraVector();
-  coeff_vec->alloc(ndof);
-  coeff_vec->zero();
-
-  /* // Alternatively: Generate an initial vector for NOX by projecting init_cond().
-  // Project the initial condition on the FE space. 
-  info("Projecting initial solution on the FE mesh.");
-  // The NULL pointer means that we do not want the projection result as a Solution.
-  Solution* sln_tmp = new Solution(mesh, init_cond);
-  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
-  delete sln_tmp;
-  */
-
-  // Measure the projection time.
-  double proj_time = cpu_time.tick().last();
-  
   // Initialize the weak formulation for Trilinos.
   WeakForm wf2(1, JFNK ? true : false);
   wf2.add_matrix_form(callback(jacobian_form), HERMES_SYM);
   wf2.add_vector_form(callback(residual_form));
-
+  
   // Initialize FeProblem.
-  FeProblem* fep = new FeProblem(&wf2, &space);
+  FeProblem fep2(&wf2, &space);
+  
+  // Time measurement.
+  cpu_time.tick(HERMES_SKIP);
 
+  // Set initial vector for NOX.
+  bool projected_ic;    
+  // Set the initial vector to zero. Alternatively, you can obtain 
+  // an initial vector by projecting init_cond() on the FE space, see below.
+  /* 
+  EpetraVector* coeff_vec = new EpetraVector();
+  coeff_vec->alloc(ndof);
+  coeff_vec->zero();
+  projected_ic = false;
+  */
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the NOX solver.
+  
+  info("Projecting to obtain initial vector for the Newton's method.");
+  projected_ic = true;
+  scalar* coeff_vec = new scalar[ndof] ;
+  Solution* init_sln = new ExactSolution(&mesh, init_cond);
+  project_global(&space, init_sln, coeff_vec);
+  delete init_sln;
+  
+  // Measure the projection time.
+  double proj_time = cpu_time.tick().last();
+  
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver* nox_solver = new NoxSolver(fep);
-  nox_solver->set_init_sln(coeff_vec);
-
-  printf("HERE\n");
+  NoxSolver nox_solver(&fep2);
+  nox_solver.set_init_sln(coeff_vec);
+  
+  if (!projected_ic)  delete  coeff_vec;
+  else  delete [] coeff_vec;
 
   // Choose preconditioning.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {
-    if (JFNK) nox_solver->set_precond(pc);
-    else nox_solver->set_precond("ML");
+    if (JFNK) nox_solver.set_precond(pc);
+    else nox_solver.set_precond("ML");
   }
 
   // Assemble and solve using NOX.
-  bool solved = nox_solver->solve();
+  bool solved = nox_solver.solve();
 
-  printf("HERE 2\n");
-
-  Solution sln_nox;
+  Solution sln2;
   if (solved)
   {
-    scalar *coeffs = nox_solver->get_solution_vector();
+    scalar *coeffs = nox_solver.get_solution();
 
     // debug
+    /*
     int ndof = space.get_num_dofs();
     printf("nox vector: ");
     for (int i=0; i<ndof; i++) printf("%g ", coeffs[i]);
     printf("\n");
-
-    sln_nox.set_coeff_vector(&space, coeffs);
+    */
+    
+    vector_to_solution(coeffs, &space, &sln2);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
-      nox_solver->get_num_iters(), nox_solver->get_residual());
+      nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
-      nox_solver->get_num_lin_iters(), nox_solver->get_achieved_tol());
+      nox_solver.get_num_lin_iters(), nox_solver.get_achieved_tol());
   }
   else error("NOX failed");
 
   // CPU time needed by NOX.
-  double nox_time = cpu_time.tick().last();
+  double time2 = cpu_time.tick().last();
 
   // Show the NOX solution.
   ScalarView view2("Solution 2", 450, 0, 440, 350);
   //view2.set_min_max_range(0, 2);
-  view2.show(&sln_nox);
+  view2.show(&sln2);
 
   // Calculate errors.
   Solution ex;
-  ex.set_exact(mesh, &exact);
-  Adapt hp(&space, HERMES_H1_NORM);
-  //hp.set_solutions(&sln_hermes, &ex);
-  //double err_est_rel_1 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  //info("Solution 1 (LinearProblem - UMFpack): exact H1 error: %g (time %g s)", err_est_rel_1, umf_time);
-  hp.set_solutions(&sln_nox, &ex);
-  double err_est_rel_2 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  info("Solution 2 (FeProblem - NOX):  exact H1 error: %g (time %g + %g s)", 
-    err_est_rel_2, proj_time, nox_time);
+  ex.set_exact(&mesh, &exact);
+  Adapt adaptivity(&space, HERMES_H1_NORM);
+  adaptivity.set_approximate_solution(&sln1);
+  double rel_err_1 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
+  adaptivity.set_approximate_solution(&sln2);
+  double rel_err_2 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Wait for all views to be closed.
   View::wait();
-  delete nox_solver;
+  
   return 0;
 }
