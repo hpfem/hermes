@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
   }
 
   // Translate the resulting coefficient vector into the Solution sln.
-  vector_to_solution(coeff_vec_coarse, &space, &sln);
+  Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
 
   // Cleanup after the Newton loop on the coarse mesh.
   delete matrix_coarse;

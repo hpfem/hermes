@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     
     // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
   
     // Time measurement.

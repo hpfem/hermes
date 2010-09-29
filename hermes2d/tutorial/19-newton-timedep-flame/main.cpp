@@ -161,8 +161,7 @@ int main(int argc, char* argv[])
         error ("Newton method did not converge.");
      
       // Set current solutions to the latest Newton iterate and reinitialize filters of these solutions.
-      t_prev_newton.set_coeff_vector(&tspace, coeff_vec);
-      c_prev_newton.set_coeff_vector(&cspace, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();

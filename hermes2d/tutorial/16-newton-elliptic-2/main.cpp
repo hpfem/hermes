@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
   }
 
   // Translate the resulting coefficient vector into the Solution sln.
-  vector_to_solution(coeff_vec, &space, &sln);
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Cleanup.
   delete []coeff_vec;

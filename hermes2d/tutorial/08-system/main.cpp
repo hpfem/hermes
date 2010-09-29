@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   // Solve the linear system and if successful, obtain the solutions.
   info("Solving the matrix problem.");
   if(solver->solve())
-    vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_sln, &v_sln));
+    Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_sln, &v_sln));
   else
     error ("Matrix solver failed.\n");
   

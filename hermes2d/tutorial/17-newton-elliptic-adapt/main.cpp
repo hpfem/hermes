@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
   }
 
   // Translate the resulting coefficient vector into the Solution sln.
-  vector_to_solution(coeff_vec_coarse, &space, &sln);
+  Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
 
   // Cleanup after the Newton loop on the coarse mesh.
   delete matrix_coarse;
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
     }
 
     // Translate the resulting coefficient vector into the Solution ref_sln.
-    vector_to_solution(coeff_vec, ref_space, &ref_sln);
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
