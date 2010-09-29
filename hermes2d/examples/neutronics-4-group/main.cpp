@@ -41,14 +41,21 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                               // Number of initial uniform mesh refinements.
-const int P_INIT_1 = 2,                                   // Initial polynomial degree for approximation of group 1 fluxes.
-          P_INIT_2 = 3,                                   // Initial polynomial degree for approximation of group 2 fluxes.
-          P_INIT_3 = 3,                                   // Initial polynomial degree for approximation of group 3 fluxes.
-          P_INIT_4 = 4;                                   // Initial polynomial degree for approximation of group 4 fluxes.
-const double ERROR_STOP = 1e-5;                           // Tolerance for the eigenvalue.
-const MatrixSolverType matrix_solver = SOLVER_UMFPACK;    // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                          // SOLVER_MUMPS, and more are coming.
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
+const int P_INIT_1 = 4,                           // Initial polynomial degree for approximation of group 1 fluxes.
+          P_INIT_2 = 4,                           // Initial polynomial degree for approximation of group 2 fluxes.
+          P_INIT_3 = 4,                           // Initial polynomial degree for approximation of group 3 fluxes.
+          P_INIT_4 = 4;                           // Initial polynomial degree for approximation of group 4 fluxes.
+const double ERROR_STOP = 1e-5;                   // Tolerance for the eigenvalue.
+MatrixSolverType matrix_solver = SOLVER_PARDISO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";              // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
 
 // Initial eigenvalue approximation.
 double k_eff = 1.0;         
@@ -134,6 +141,7 @@ int main(int argc, char* argv[])
   // Solution variables.
   Solution sln1, sln2, sln3, sln4;
   Solution iter1, iter2, iter3, iter4;
+  Tuple<Solution*> solutions(&sln1, &sln2, &sln3, &sln4);
 
   // Define initial conditions.
   info("Setting initial conditions.");
@@ -147,6 +155,7 @@ int main(int argc, char* argv[])
   H1Space space2(&mesh, bc_types, essential_bc_values, P_INIT_2);
   H1Space space3(&mesh, bc_types, essential_bc_values, P_INIT_3);
   H1Space space4(&mesh, bc_types, essential_bc_values, P_INIT_4);
+  Tuple<Space*> spaces(&space1, &space2, &space3, &space4);
   
   int ndof = get_num_dofs(Tuple<Space*>(&space1, &space2, &space3, &space4));
   info("ndof = %d.", ndof);
@@ -165,12 +174,12 @@ int main(int argc, char* argv[])
   
   // Initialize the weak formulation.
   WeakForm wf(4);
-  wf.add_matrix_form(0, 0, callback(biform_0_0), H2D_SYM);
-  wf.add_matrix_form(1, 1, callback(biform_1_1), H2D_SYM);
+  wf.add_matrix_form(0, 0, callback(biform_0_0), HERMES_SYM);
+  wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
   wf.add_matrix_form(1, 0, callback(biform_1_0));
-  wf.add_matrix_form(2, 2, callback(biform_2_2), H2D_SYM);
+  wf.add_matrix_form(2, 2, callback(biform_2_2), HERMES_SYM);
   wf.add_matrix_form(2, 1, callback(biform_2_1));
-  wf.add_matrix_form(3, 3, callback(biform_3_3), H2D_SYM);
+  wf.add_matrix_form(3, 3, callback(biform_3_3), HERMES_SYM);
   wf.add_matrix_form(3, 2, callback(biform_3_2));
   wf.add_vector_form(0, callback(liform_0), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
   wf.add_vector_form(1, callback(liform_1), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
@@ -181,67 +190,108 @@ int main(int argc, char* argv[])
   wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
   wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), bc_vacuum);
 
-  // Initialize the linear problem.
-  LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2, &space3, &space4));
+  // Initialize the FE problem.
+  bool is_linear = true;
+  FeProblem fep(&wf, spaces, is_linear);
+ 
+  initialize_solution_environment(matrix_solver, argc, argv);
   
-  // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
+  
+  // Time measurement.
+  TimePeriod cpu_time, solver_time;
   
   // Main power iteration loop:
-  int iter = 0; bool done = false; 
+  int iter = 1; bool done = false;
   bool rhs_only = false;
   do
   {
-    info("------------ Power iteration %d:", iter);
+    info("\n------------ Power iteration %d:", iter);
 
-    // Assemble stiffness matrix and rhs.
-    lp.assemble(mat, rhs, rhs_only);
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    fep.assemble(matrix, rhs, rhs_only);
     
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
+    solver_time.tick(HERMES_SKIP);  
+    bool solved = solver->solve();  
+    solver_time.tick();
+    
+    if(solved)
+      vector_to_solutions(solver->get_solution(), spaces, solutions);
+    else
+      error ("Matrix solver failed.\n");
 
-    // Convert coefficient vector into Solutions.
-    sln1.set_coeff_vector(&space1, rhs);
-    sln2.set_coeff_vector(&space2, rhs);
-    sln3.set_coeff_vector(&space3, rhs);
-    sln4.set_coeff_vector(&space4, rhs);
-
-    // Show solutions.
-    view1.show(&sln1);    
-    view2.show(&sln2);
-    view3.show(&sln3);    
-    view4.show(&sln4);
+    // Show intermediate solutions.
+    // view1.show(&sln1);    
+    // view2.show(&sln2);
+    // view3.show(&sln3);    
+    // view4.show(&sln4);
 
     SimpleFilter source(source_fn, Tuple<MeshFunction*>(&sln1, &sln2, &sln3, &sln4));
     SimpleFilter source_prev(source_fn, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
 
     // Compute eigenvalue.
     double k_new = k_eff * (integrate(&source, marker_core) / integrate(&source_prev, marker_core));
-    info("Largest eigenvalue: %.8g, rel. difference from previous it.: %g", k_eff, fabs((k_eff - k_new) / k_new));
-
+    info("Largest eigenvalue: %.8g, rel. difference from previous it.: %g", k_new, fabs((k_eff - k_new) / k_new));
+    
     // Stopping criterion.
     if (fabs((k_eff - k_new) / k_new) < ERROR_STOP) done = true;
-
-    // Save solutions for the next iteration.
-    iter1.copy(&sln1);    
-    iter2.copy(&sln2);
-    iter3.copy(&sln3);    
-    iter4.copy(&sln4);
 
     // Update eigenvalue.
     k_eff = k_new;
     
-    // Don't need to reassemble the system matrix in further iterations,
-    // only the rhs changes to reflect the progressively updated source.
-    rhs_only = true;
+    if (!done)
+    {
+      // Save solutions for the next iteration.
+      iter1.copy(&sln1);    
+      iter2.copy(&sln2);
+      iter3.copy(&sln3);    
+      iter4.copy(&sln4);
+      
+      // Don't need to reassemble the system matrix in further iterations,
+      // only the rhs changes to reflect the progressively updated source.
+      rhs_only = true;
 
-    iter++;
+      iter++;
+    }
   }
   while (!done);
   
-  delete mat; delete rhs; delete solver;
+  // Time measurement.
+  cpu_time.tick();
+  solver_time.tick(HERMES_SKIP);
+  
+  // Print timing information.
+  verbose("Average solver time for one power iteration: %g s", solver_time.accumulated() / iter);
+  
+  // Clean up.
+  delete matrix;
+  delete rhs;
+  delete solver;
+  
+  finalize_solution_environment(matrix_solver);
 
+  // Show solutions.
+  view1.show(&sln1);
+  view2.show(&sln2);
+  view3.show(&sln3);    
+  view4.show(&sln4);
+  
+  // Skip visualization time.
+  cpu_time.tick(HERMES_SKIP);
+
+  // Print timing information.
+  verbose("Total running time: %g s", cpu_time.accumulated());
+    
   // Wait for all views to be closed.
   View::wait();
   return 0;
