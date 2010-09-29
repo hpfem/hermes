@@ -169,6 +169,9 @@ int main(int argc, char* argv[])
     s_view_1.show(&v_sln); 
     o_view_1.show(&v_space);
 
+    // Skip visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
