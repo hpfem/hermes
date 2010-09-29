@@ -55,8 +55,8 @@ const double ERR_STOP = 3.0;               // Stopping criterion for adaptivity 
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Newton's method
 const double NEWTON_TOL_COARSE = 0.01;     // Stopping criterion for Newton on fine mesh.
@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
       ref_sln.set_coeff_vector(ref_space, coeff_vec);
 
       // Calculate element errors and total error estimate.
-      info("Calculating error (est).");
+      info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
       adaptivity->set_solutions(&sln, &ref_sln);
       double err_est_rel_total = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;

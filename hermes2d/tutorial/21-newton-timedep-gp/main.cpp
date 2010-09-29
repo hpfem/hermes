@@ -21,7 +21,7 @@ using namespace RefinementSelectors;
 //
 //  Domain: square (-1, 1)^2.
 //
-//  BC:  homogeneous Dirichlet everywhere on the boundary
+//  BC:  homogeneous Dirichlet everywhere on the boundary.
 
 const int INIT_REF_NUM = 2;      // Number of initial uniform refinements.
 const int P_INIT = 4;            // Initial polynomial degree.
@@ -30,8 +30,8 @@ const double T_FINAL = 2;        // Time interval length.
 const int TIME_DISCR = 2;        // 1 for implicit Euler, 2 for Crank-Nicolson.
 const double NEWTON_TOL = 1e-5;  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100; // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem constants
 const double H = 1;              // Planck constant 6.626068e-34.
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Create an H1 space.
+  // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = get_num_dofs(&space);
   info("ndof = %d.", ndof);
@@ -119,9 +119,6 @@ int main(int argc, char* argv[])
 
     // Newton's method.
     info("Performing Newton's method.");
-    bool verbose = true; // Default is false.
-    
-    // Perform Newton's iteration.
     int it = 1;
     while (1)
     {
@@ -145,7 +142,7 @@ int main(int argc, char* argv[])
       if(!solver->solve())
         error ("Matrix solver failed.\n");
 
-        // Add \deltaY^{n+1} to Y^n.
+      // Add \deltaY^{n+1} to Y^n.
       for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
       
       if (it >= NEWTON_MAX_ITER)
@@ -155,7 +152,7 @@ int main(int argc, char* argv[])
     };
     
     // Update previous time level solution.
-    psi_prev_time.set_coeff_vector(&space, coeff_vec);
+    vector_to_solution(coeff_vec, &space, &psi_prev_time);
 
     // Show the new time level solution.
     char title[100];

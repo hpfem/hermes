@@ -48,11 +48,11 @@ const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (r
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;            // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Time step and simulation time.
-const double TAU = 5.*24*60*60;                 // time step: 120 hours
+const double TAU = 5.*24*60*60;                  // time step: 120 hours
 const double SIMULATION_TIME = 100*TAU + 0.001;  // (seconds) physical time
 
 // Equation parameters.
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
                      Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Calculate element errors and total error estimate.
-      info("Calculating error estimate and exact error."); 
+      info("Calculating error estimate."); 
       Adapt* adaptivity = new Adapt(Tuple<Space *>(&T_space, &M_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_solutions(Tuple<Solution *>(&T_coarse, &M_coarse), Tuple<Solution *>(&T_fine, &M_fine));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));

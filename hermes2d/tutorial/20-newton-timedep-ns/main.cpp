@@ -57,8 +57,8 @@ const double NEWTON_TOL = 1e-3;      // Stopping criterion for the Newton's meth
 const int NEWTON_MAX_ITER = 10;      // Maximum allowed number of Newton iterations.
 const double H = 5;                  // Domain height (necessary to define the parabolic
                                      // velocity profile at inlet).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary markers.
 int bdy_bottom = 1;
