@@ -41,13 +41,13 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT_1 = 4,                           // Initial polynomial degree for approximation of group 1 fluxes.
           P_INIT_2 = 4,                           // Initial polynomial degree for approximation of group 2 fluxes.
           P_INIT_3 = 4,                           // Initial polynomial degree for approximation of group 3 fluxes.
           P_INIT_4 = 4;                           // Initial polynomial degree for approximation of group 4 fluxes.
 const double ERROR_STOP = 1e-5;                   // Tolerance for the eigenvalue.
-MatrixSolverType matrix_solver = SOLVER_PARDISO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
   bool rhs_only = false;
   do
   {
-    info("\n------------ Power iteration %d:", iter);
+    info("------------ Power iteration %d:", iter);
 
     info("Assembling the stiffness matrix and right-hand side vector.");
     fep.assemble(matrix, rhs, rhs_only);
