@@ -1,0 +1,2 @@
+test -e CMakeCache.txt && rm CMakeCache.txt
+CXX=mpicxx CC=mpicc FC=mpif90 cmake .
