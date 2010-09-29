@@ -165,12 +165,12 @@ int main(int argc, char* argv[])
   
   // Initialize the weak formulation.
   WeakForm wf(4);
-  wf.add_matrix_form(0, 0, callback(biform_0_0), H2D_SYM);
-  wf.add_matrix_form(1, 1, callback(biform_1_1), H2D_SYM);
+  wf.add_matrix_form(0, 0, callback(biform_0_0), HERMES_SYM);
+  wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
   wf.add_matrix_form(1, 0, callback(biform_1_0));
-  wf.add_matrix_form(2, 2, callback(biform_2_2), H2D_SYM);
+  wf.add_matrix_form(2, 2, callback(biform_2_2), HERMES_SYM);
   wf.add_matrix_form(2, 1, callback(biform_2_1));
-  wf.add_matrix_form(3, 3, callback(biform_3_3), H2D_SYM);
+  wf.add_matrix_form(3, 3, callback(biform_3_3), HERMES_SYM);
   wf.add_matrix_form(3, 2, callback(biform_3_2));
   wf.add_vector_form(0, callback(liform_0), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
   wf.add_vector_form(1, callback(liform_1), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
@@ -181,12 +181,9 @@ int main(int argc, char* argv[])
   wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
   wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), bc_vacuum);
 
-  // Initialize the linear problem.
-  LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2, &space3, &space4));
-  
-  // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
   
   // Main power iteration loop:
   int iter = 0; bool done = false; 
@@ -195,11 +192,26 @@ int main(int argc, char* argv[])
   {
     info("------------ Power iteration %d:", iter);
 
-    // Assemble stiffness matrix and rhs.
-    lp.assemble(mat, rhs, rhs_only);
+    // Construct globally refined reference mesh and setup reference space.
+    Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&space1, &space2, &space3, &space4));
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem* lp = new FeProblem(&wf, *ref_spaces, is_linear);
+    SparseMatrix* mat = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+    lp->assemble(mat, rhs, rhs_only);
+
+    // Time measurement.
+    cpu_time.tick();
     
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    // Solve the linear system of the reference problem. 
+    // If successful, obtain the solution.
+    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                           Tuple<Solution *>(&iter1, &iter2, &iter3, &iter4));
+    else error ("Matrix solver failed.\n");
 
     // Convert coefficient vector into Solutions.
     sln1.set_coeff_vector(&space1, rhs);
@@ -235,12 +247,14 @@ int main(int argc, char* argv[])
     // Don't need to reassemble the system matrix in further iterations,
     // only the rhs changes to reflect the progressively updated source.
     rhs_only = true;
+  
+    delete mat; delete rhs; delete solver;
 
     iter++;
   }
   while (!done);
   
-  delete mat; delete rhs; delete solver;
+//  delete mat; delete rhs; delete solver;
 
   // Wait for all views to be closed.
   View::wait();
