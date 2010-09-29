@@ -1,4 +1,0 @@
-rm *~ 
-./crack-long
-python plot_graph.py &
-
