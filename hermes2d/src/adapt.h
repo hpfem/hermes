@@ -144,12 +144,22 @@ public:
   void set_error_form(matrix_form_val_t bi_form, matrix_form_ord_t bi_ord);   // i = j = 0
 
   /// Sets solutions and reference solutions.
-  /** \param[in] solutions Coarse solutions. The number of solutions has to match a number of components.
-   *  \param[in] ref_solutions Reference solutions. The number of reference solutions has to match a number of components. */
+  /** \param[in] solutions Coarse solutions. The number of solutions has to match the number of components.
+   *  \param[in] ref_solutions Reference solutions. The number of reference solutions has to match the number of components. */
   void set_solutions(Tuple<Solution*> solutions, Tuple<Solution*> ref_solutions);
   void set_solutions(Solution* solution, Solution* ref_solution) 
   {
     set_solutions(Tuple<Solution*>(solution), Tuple<Solution*>(ref_solution));
+  }
+  
+  /// Sets solutions.
+  /** Setting just the approximate solution comes in handy when we are interested only in the error between this solution
+   *  and the exact one (using calc_err_exact).
+   *   \param[in] solutions Computed solutions. The number of solutions has to match the number of components.  */
+  void set_approximate_solutions(Tuple<Solution*> solutions);
+  void set_approximate_solution(Solution* solution) 
+  {
+    set_approximate_solutions(Tuple<Solution*>(solution));
   }
 
   /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
@@ -259,7 +269,8 @@ protected: //adaptivity
 
 protected: //object state
   bool have_errors; ///< True if errors of elements were calculated.
-  bool have_solutions; ///< True if solutions were set.
+  bool have_coarse_solutions; ///< True if the coarse solutions were set.
+  bool have_reference_solutions; ///< True if the reference solutions were set.
 
 protected: // spaces & solutions
   int neq;                              ///< Number of solution components (as in wf->neq).

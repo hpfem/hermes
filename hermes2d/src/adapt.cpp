@@ -35,7 +35,8 @@ using namespace std;
 #define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
-Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1), have_solutions(false), have_errors(false) 
+Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1), 
+                                                              have_coarse_solutions(false), have_reference_solutions(false), have_errors(false) 
 {
   // sanity check
   if (proj_norms.size() > 0 && spaces_.size() != proj_norms.size()) 
@@ -516,7 +517,21 @@ void Adapt::set_solutions(Tuple<Solution*> solutions, Tuple<Solution*> ref_solut
     rsln[i]->set_quad_2d(&g_quad_2d_std);
   }
 
-  have_solutions = true;
+  have_coarse_solutions = true;
+  have_reference_solutions = true;
+}
+
+void Adapt::set_approximate_solutions(Tuple<Solution*> solutions) {
+  error_if(solutions.size() != this->neq, "Wrong number of solutions (%d), expected %d.", solutions.size(), this->neq);
+  
+  // obtain solutions
+  for (int i = 0; i < this->neq; i++) {
+    sln[i] = solutions[i];
+    error_if(sln[i] == NULL, "A solution for a component %d is NULL.", i);
+    sln[i]->set_quad_2d(&g_quad_2d_std);
+  }
+  
+  have_coarse_solutions = true;
 }
 
 double Adapt::eval_elem_error_squared(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
@@ -648,15 +663,21 @@ double Adapt::calc_err_exact(Tuple<double>& err_rel, unsigned int error_flags, T
 
 double Adapt::calc_errors_internal(Tuple<double>& err_rel, unsigned int error_flags, Tuple<Solution *> solutions) 
 {
-  error_if(!have_solutions, "A (coarse) solution and a reference solutions are not set, see set_solutions()");
+  error_if(!have_coarse_solutions, 
+           "(Coarse) solutions are not set, see set_solutions()");
+  error_if(solutions == Tuple<Solution *>() && !have_reference_solutions, 
+           "Reference solutions are not set, see set_solutions()");
 
-  // If calculating for different refined solutions than this->sln, 
-  // we will have to reset to this->sln after the computation.
+  // If reference solutions have been set via set_solutions() and we want to calculate the errors with respect to
+  // different refined solutions than this->rsln (e.g. known exact solutions), we will have to reset this->rsln 
+  // after the computation.
   Solution* temp_sln[10];
   if (solutions != Tuple<Solution *>())
   {
-    for(int i = 0; i < 10; i++)
-      temp_sln[i] = this->rsln[i];
+    if (have_reference_solutions)
+      for(int i = 0; i < 10; i++)
+        temp_sln[i] = this->rsln[i];
+      
     for(int i = 0; i < solutions.size(); i++)
       this->rsln[i] = solutions[i];
   }
@@ -745,7 +766,7 @@ double Adapt::calc_errors_internal(Tuple<double>& err_rel, unsigned int error_fl
     error("Unknown element error type (0x%x).", error_flags & HERMES_ELEMENT_ERROR_MASK);
 
   // Restoring the original sln.
-  if (solutions != Tuple<Solution *>())
+  if (solutions != Tuple<Solution *>() && have_reference_solutions)
     for(int i = 0; i < solutions.size(); i++)
       this->rsln[i] = temp_sln[i];
   else
