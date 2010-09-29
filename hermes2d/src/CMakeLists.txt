@@ -83,19 +83,6 @@ set(SRC
        compat/c99_functions.cpp
        )
 
-#include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
-include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-find_package(PTHREAD REQUIRED)
-find_package(JUDY REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
-if(WITH_GLUT)
-    find_package(GLUT REQUIRED)
-    find_package(GLEW REQUIRED)
-endif(WITH_GLUT)
-if(WITH_VIEWER_GUI)
-	find_package(ANTTWEAKBAR REQUIRED)
-endif(WITH_VIEWER_GUI)
-
 # Makes Win32 path from Unix-style patch which is used by CMAKE. Used when a path is provided to an OS utility.
 macro(MAKE_PATH PATH_OUT PATH_IN)
 	if(WIN32)
@@ -105,40 +92,35 @@ macro(MAKE_PATH PATH_OUT PATH_IN)
 	endif(WIN32)
 endmacro(MAKE_PATH)
 
-# Sets linker settings
+include(PickRealOrCplxLibs)
+    
+# Sets linker settings.
 macro(LIBRARY_SETTINGS BIN)
-    target_link_libraries(${BIN} ${JUDY_LIBRARY} ${PTHREAD_LIBRARY})
 #    target_link_libraries(${BIN} hermes_common)
 
-    if(NOT MSVC)
-        IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-            target_link_libraries(${BIN} "rt")
-        ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    endif(NOT MSVC)
-
-    if(WITH_GLUT)
-        target_link_libraries(${BIN} ${GLUT_LIBRARY})
-        target_link_libraries(${BIN} ${GLEW_LIBRARY})
-    endif(WITH_GLUT)
-
-    if(WITH_TRILINOS)
-      include_directories(${TRILINOS_INCLUDE_DIR})
-      target_link_libraries(${BIN} ${TRILINOS_LIBRARIES})
-    endif(WITH_TRILINOS)
-
-    if(WITH_EXODUSII)
-        include_directories(${EXODUSII_INCLUDE_DIR})
-        target_link_libraries(${BIN} ${EXODUSII_LIBRARIES})
-    endif(WITH_EXODUSII)
-
-    if(WITH_VIEWER_GUI)
-        include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
-        target_link_libraries(${BIN} ${ANTTWEAKBAR_LIBRARY})	
-    endif(WITH_VIEWER_GUI)
-    if(WITH_UMFPACK)
-	target_link_libraries(${BIN} ${UMFPACK_LIBRARY})
-	target_link_libraries(${BIN} ${AMD_LIBRARY})
-    endif(WITH_UMFPACK)
+  if(NOT MSVC)
+      IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+          target_link_libraries(${BIN} "rt")
+      ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  endif(NOT MSVC)
+  
+  # Link with all third party libraries corresponding to selected configuration options.
+  # The respective variables will be empty for unselected TPL's.
+  PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
+  target_link_libraries(  ${BIN} 
+      ${JUDY_LIBRARY}
+      ${GLUT_LIBRARY} ${GLEW_LIBRARY}
+      ${EXODUSII_LIBRARIES}
+      ${ANTTWEAKBAR_LIBRARY}
+      ${UMFPACK_LIBRARY} ${AMD_LIBRARY}
+      ${PARDISO_LIBRARY}
+      ${TRILINOS_LIBRARIES}
+      ${PETSC_LIBRARIES}
+      ${MUMPS_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
+      ${ADDITIONAL_LIBS}        
+  )
 endmacro(LIBRARY_SETTINGS)
 
 macro(BUILD_REPORT_FLAGS FLAGS)
@@ -178,14 +160,7 @@ set(${FLAGS} "${REPORT_FLAGS}")
 endmacro(BUILD_REPORT_FLAGS)
 
 macro(BUILD_LIB LIB FLAGS)
-	if(WITH_UMFPACK)
-	    add_definitions(-DWITH_UMFPACK)
-	    find_package(UMFPACK REQUIRED)
-	    include_directories(${UMFPACK_INCLUDE_DIR})
-	    include_directories(${AMD_INCLUDE_DIR})
-	endif(WITH_UMFPACK)
-
-        BUILD_REPORT_FLAGS(REPORT_FLAGS)
+  BUILD_REPORT_FLAGS(REPORT_FLAGS)
 	set(BUILD_FLAGS "${FLAGS} ${REPORT_FLAGS}")
 	if(WITH_VIEWER_GUI)
 		set(BUILD_FLAGS "${BUILD_FLAGS} -DENABLE_VIEWER_GUI")
@@ -202,12 +177,6 @@ macro(BUILD_LIB LIB FLAGS)
 endmacro(BUILD_LIB)
 
 macro(BUILD_LIB_ALL LIB FLAGS)
-	if(WITH_UMFPACK)
-	    add_definitions(-DWITH_UMFPACK)
-	    find_package(UMFPACK REQUIRED)
-	    include_directories(${UMFPACK_INCLUDE_DIR})
-	    include_directories(${AMD_INCLUDE_DIR})
-	endif(WITH_UMFPACK)
 	BUILD_REPORT_FLAGS(REPORT_FLAGS)
 	set(BUILD_FLAGS "${FLAGS} ${REPORT_FLAGS}")
 	if(WITH_VIEWER_GUI)
@@ -225,7 +194,7 @@ macro(BUILD_LIB_ALL LIB FLAGS)
 		ARCHIVE DESTINATION lib
 		LIBRARY DESTINATION lib)
 		
-	#copy target to a place which is accessible by the system. This is crucial for successful debugging using MSVC.
+	# Copy target to a place which is accessible by the system. This is crucial for successful debugging using MSVC.
 	if(MSVC)
 		MAKE_PATH(TARGET_DIR "${TARGET_ROOT}/bin")
 		get_target_property(SOURCE_DEBUG_FILE ${LIB} LOCATION_Debug)
@@ -245,10 +214,11 @@ INCLUDE (CheckFunctionExists)
 set(CMAKE_REQUIRED_LIBRARIES m)
 CHECK_FUNCTION_EXISTS(fmemopen HAVE_FMEMOPEN)
 CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
-
+# Create a file with preprocessor definitions (mainly to determine which TPL's 
+# are present on the system during compilation):
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+                ${CMAKE_CURRENT_SOURCE_DIR}/config.h  )
 
 
 # build MSVC version:

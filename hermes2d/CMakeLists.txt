@@ -5,68 +5,111 @@ cmake_minimum_required(VERSION 2.6)
 
 #---------------------------------------------------------
 # begin of configuration section
+#
 # The values below are sane defaults to produce a build on all platforms,
 # if you want to override them, set them in CMake.vars
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-# build with debugging symbols
-set(DEBUG YES)
-set(RELEASE NO)
+# Build with debugging symbols:
+set(DEBUG                   YES)
+set(RELEASE                 NO)
 
-# real/complex version of the library (you can build either of both)
-set(H2D_REAL     YES)
-set(H2D_COMPLEX  YES)
+# Real/complex version of the library (you can build either one or both):
+set(H2D_REAL                YES)
+set(H2D_COMPLEX             YES)
 
-# optional functionality
-set(WITH_PYTHON     NO)
-set(WITH_EXAMPLES   YES)
-set(WITH_BENCHMARKS YES)
-set(WITH_TUTORIAL   YES)
-set(WITH_TESTS      YES)
-set(WITH_GLUT       YES)
-set(WITH_VIEWER_GUI NO)
-set(WITH_UTIL       YES)
-set(WITH_UMFPACK    YES)
-set(WITH_PETSC      NO)
-set(WITH_PARDISO    NO)
-set(WITH_MUMPS      NO)
-set(WITH_TRILINOS   NO)
+# Optional parts of the library:
+set(WITH_EXAMPLES           YES)
+set(WITH_BENCHMARKS         YES)
+set(WITH_TUTORIAL           YES)
+set(WITH_TESTS              YES)
 
-set(WITH_EXODUSII   NO)
-set(WITH_HDF5       NO)
+# Optional functionality:
+set(WITH_PYTHON             NO)
+set(WITH_GLUT               YES)
+set(WITH_VIEWER_GUI         NO)
+set(WITH_UTIL               YES)
 
-# reporting and logging
-set(REPORT_WITH_LOGO YES) #logo will be shown
-set(REPORT_TO_FILE  YES) #reports will be mirrored to a file
-set(REPORT_RUNTIME_CONTROL NO) #reporting will be controlled by preprocessor directives. The runtime control is inteded just for Python wrappers.
-set(REPORT_ALL     NO) #do not report all events, just selected ones
-set(REPORT_WARNING YES) #warnings will be reported
-set(REPORT_INTR_WARNING NO) #warnings about itegration points will NOT be reported
-set(REPORT_INFO     YES) #info will not be reported
-set(REPORT_VERBOSE  NO) #info details will not be reported
-set(REPORT_TRACE    NO) #code execution tracing will not be reported
-set(REPORT_TIME     NO) #time will not be measured and time measurement will not be reported
-#set(REPORT_DEBUG    NO) #debug events will depend on version which is compiled
+#
+# Select which solvers will be available:
+#
+set(WITH_UMFPACK            YES)
+set(WITH_TRILINOS           NO)
 
-# allow to override the default values in CMake.vars
+# If PETSc is enabled, PETSC_ROOT and PETSC_ARCH must be set as well;
+# if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
+#
+set(WITH_PETSC              NO)
+set(PETSC_ROOT              /opt/petsc/petsc-3.1-p4)
+set(PETSC_ARCH              petsc-arch-without-scalar-type)
+
+# Sequential version of MUMPS may be enabled by setting YES on the following line
+# and pointing to the package installation directory with MUMPS_ROOT. To enable the 
+# parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
+# problems arise, it may be that the automatically found SCALAPACK libraries (reported
+# during the CMake configuration phase) do not match those used when compiling MUMPS.
+# In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
+#
+set(WITH_MUMPS              NO)
+# set(MUMPS_ROOT            root/dir/of/mumps/)
+# set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
+
+# If PARDISO is enabled, WITH_OPENMP must be set as well (and perhaps some other libraries
+# added to ADDITIONAL_LIBS according to PARDISO user guide).
+#
+set(WITH_PARDISO            NO)
+set(PARDISO_LIB             /opt/pardiso/libpardiso400_GNU430_AMD_IA64.so)
+
+#
+# Parallel execution (tells the linker to use parallel versions of the selected solvers, if available):
+#
+# Enable OpenMP for shared memory processing. Note that this is required when PARDISO is enabled.
+#  
+set(WITH_OPENMP             NO)
+
+# If MPI is enabled, the MPI library installed on the system should be found by 
+# CMake automatically. If the found library doesn't match the one used to compile the
+# particular MPI-dependent package, the other two options should be used to specify it.
+#
+set(WITH_MPI                NO)
+# set(MPI_LIBRARIES         -lmpi)
+# set(MPI_INCLUDE_PATH      /usr/include/openmpi
+
+
+# Additional data formats:
+set(WITH_EXODUSII           NO)
+set(WITH_HDF5               NO)
+
+# Additional libraries required by some of the above:
+# set(ADDITIONAL_LIBS       -lgfortran -lm)
+
+# Reporting and logging:
+set(REPORT_WITH_LOGO        YES)  #logo will be shown
+set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is inteded just for Python wrappers.
+set(REPORT_ALL              NO)   #do not report all events, just selected ones
+set(REPORT_WARNING          YES)  #warnings will be reported
+set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+set(REPORT_INFO             YES)  #info will be reported
+set(REPORT_VERBOSE          NO)   #info details will not be reported
+set(REPORT_TRACE            NO)   #code execution tracing will not be reported
+set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
+
+# Allow to override the default values in CMake.vars:
 if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 	include(CMake.vars)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 
-# set overrides
+# Set overrides:
 if(WITH_PYTHON)
 	set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
 endif(WITH_PYTHON)
 
+#
 # end of configuration section
 #---------------------------------------------------------
-
-if(WITH_TRILINOS)
-  enable_language(Fortran)
-  find_package(LAPACK REQUIRED)     # trilinos needs LAPACK
-  find_package(TRILINOS REQUIRED)
-endif(WITH_TRILINOS)
 
 if(H2D_REAL)
     list(APPEND VERS "real")
@@ -102,60 +145,103 @@ else(MSVC)
 	endif(RELEASE)
 endif(MSVC)
 
-if(NOT WITH_GLUT)
-    add_definitions(-DNOGLUT)
-endif(NOT WITH_GLUT)
-
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+find_package(PTHREAD REQUIRED)
+find_package(JUDY REQUIRED)
+include_directories(${JUDY_INCLUDE_DIR})
+
+#include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
+
+if(WITH_GLUT)
+  find_package(GLUT REQUIRED)
+  find_package(GLEW REQUIRED)
+else(WITH_GLUT)
+  add_definitions(-DNOGLUT)
+endif(WITH_GLUT)
+
+if(WITH_VIEWER_GUI)
+	find_package(ANTTWEAKBAR REQUIRED)
+  include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
+endif(WITH_VIEWER_GUI)
+
 if(WITH_EXODUSII)
-    find_package(EXODUSII REQUIRED)
+  find_package(EXODUSII REQUIRED)
+  include_directories(${EXODUSII_INCLUDE_DIR})
 endif(WITH_EXODUSII)
 
-# If using PETSc or UMFPack, we need to enable Fortran support and look for BLAS and LAPACK
-if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
-	if(NOT MSVC)
-	        enable_language(Fortran)
-	        find_package(LAPACK REQUIRED)
-	endif(NOT MSVC)
-endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS)
+# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC)
+if(WITH_MPI)
+  if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
+    find_package(MPI REQUIRED)
+  else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+    if(NOT EXISTS MPI_INCLUDE_PATH)
+      message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
+    endif(NOT EXISTS MPI_INCLUDE_PATH)
+  endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+  include_directories(MPI_INCLUDE_PATH)	  
+endif(WITH_MPI)
 
-# solvers
-if(WITH_PETSC)
-	find_package(PETSC REQUIRED)
-endif(WITH_PETSC)
+if(WITH_OPENMP)
+  find_package(OpenMP REQUIRED)
+  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
+endif(WITH_OPENMP)
 
+if(NOT MSVC)
+  # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
+  # FindLAPACK is Fortran-only so Fortran must be enabled as well.
+  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS)
+    enable_language(Fortran)
+    find_package(LAPACK REQUIRED)
+  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS)
+endif(NOT MSVC)  
+ 
+# Solvers:
 if(WITH_UMFPACK)
 	find_package(UMFPACK REQUIRED)
+  include_directories(${UMFPACK_INCLUDE_DIR})
+  include_directories(${AMD_INCLUDE_DIR})
 endif(WITH_UMFPACK)
 
-if(WITH_PARDISO)
-	find_package(PARDISO REQUIRED)
-endif(WITH_PARDISO)
+if(WITH_TRILINOS)
+	find_package(TRILINOS REQUIRED)
+	include_directories(${TRILINOS_INCLUDE_DIR})
+endif(WITH_TRILINOS)
 
 if(WITH_MUMPS)
-    find_package(Threads REQUIRED)			# needs pthread
-    find_package(MUMPS REQUIRED)
+	find_package(MUMPS REQUIRED)
+	if(WITH_MPI)
+		find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
+  endif(WITH_MPI)
+  include_directories(${MUMPS_INCLUDE_DIR})
 endif(WITH_MUMPS)
 
-if(WITH_TRILINOS)
-	find_package(LAPACK REQUIRED)			# trilinos needs LAPACK
-	find_package(TRILINOS REQUIRED)
-endif(WITH_TRILINOS)
+if(WITH_PETSC)
+	find_package(PETSC REQUIRED)
+	# For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
+	# different directories), so we can't globally set the architecture-specific include directory here, but 
+	# rather on a per-target basis.
+	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
+endif(WITH_PETSC)
+
+if(WITH_PARDISO)
+	find_package(PARDISO REQUIRED) 
+endif(WITH_PARDISO)
 
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
 
-find_package(PythonLibs REQUIRED)
-find_package(NumPy REQUIRED)
-
 if(WITH_TESTS)
-    enable_testing()
+  enable_testing()
 	add_subdirectory(tests)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
 	add_subdirectory(python)
+	find_package(PythonLibs REQUIRED)
+  find_package(NumPy REQUIRED)
+  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
@@ -174,12 +260,8 @@ if(WITH_UTIL)
 	add_subdirectory(util)
 endif(WITH_UTIL)
 
-add_custom_target(test
-    COMMAND ctest
-    )
-add_custom_target(test-quick
-    COMMAND ctest -LE slow -j9
-    )
+add_custom_target(test COMMAND ctest)
+add_custom_target(test-quick COMMAND ctest -LE slow -j9)
 
 # Documentation
 # This doesn't work yet:
@@ -216,6 +298,8 @@ message("Build with PETSC: ${WITH_PETSC}")
 message("Build with PARDISO: ${WITH_PARDISO}")
 message("Build with MUMPS: ${WITH_MUMPS}")
 message("Build with TRILINOS: ${WITH_TRILINOS}")
+message("Build with MPI: ${WITH_MPI}")
+message("Build with OPENMP: ${WITH_OPENMP}")
 message("---------------------")
 message("Hermes2D logo: ${REPORT_WITH_LOGO}")
 message("Mirror reports to a log file: ${REPORT_TO_FILE}")
@@ -238,9 +322,5 @@ else(REPORT_ALL)
   message("Report program execution: ${REPORT_TRACE}")
   message("Report internal time measurements: ${REPORT_TIME}")
 endif(REPORT_ALL)
-
-
-
-
 
 message("\n")
