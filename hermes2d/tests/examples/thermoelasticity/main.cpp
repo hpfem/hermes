@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf(3);
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);
+  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
   wf.add_matrix_form(0, 2, callback(bilinear_form_0_2));
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));
   wf.add_matrix_form(1, 2, callback(bilinear_form_1_2));
@@ -116,38 +116,116 @@ int main(int argc, char* argv[])
   wf.add_vector_form(2, callback(linear_form_2));
   wf.add_vector_form_surf(2, callback(linear_form_surf_2));
 
+  // Initialize coarse and reference mesh solutions.
+  Solution xdisp_sln, ydisp_sln, temp_sln, ref_xdisp_sln, ref_ydisp_sln, ref_temp_sln;
+
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize adaptivity parameters.
-  double to_be_processed = 0;
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, H2D_TOTAL_ERROR_REL, H2D_ELEMENT_ERROR_REL);
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est;
 
-  apt.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
-  apt.set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
-  apt.set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
-  apt.set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
-  apt.set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
-  apt.set_error_form(1, 2, bilinear_form_1_2<scalar, scalar>, bilinear_form_1_2<Ord, Ord>);
-  apt.set_error_form(2, 2, bilinear_form_2_2<scalar, scalar>, bilinear_form_2_2<Ord, Ord>);
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
 
-  // Adaptivity loop.
-  Solution *xdisp_sln = new Solution();
-  Solution *ydisp_sln = new Solution();
-  Solution *temp_sln = new Solution();
-  Solution *ref_xdisp_sln = new Solution();
-  Solution *ref_ydisp_sln = new Solution();
-  Solution *ref_temp_sln = new Solution();
-  bool verbose = true;  // Print info during adaptivity.
-  solve_linear_adapt(Tuple<Space *>(&xdisp, &ydisp, &temp), &wf, NULL, matrix_solver,
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM, H2D_H1_NORM),
-                     Tuple<Solution *>(xdisp_sln, ydisp_sln, temp_sln),
-                     Tuple<Solution *>(ref_xdisp_sln, ref_ydisp_sln, ref_temp_sln),
-                     Tuple<WinGeom *> (),
-                     Tuple<WinGeom *> (),
-                     Tuple<RefinementSelectors::Selector *> (&selector, &selector, &selector),
-                     &apt, verbose);
+    // Construct globally refined reference mesh and setup reference space.
+    Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&xdisp, &ydisp, &temp));
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
+
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Solve the linear system of the reference problem. If successful, obtain the solutions.
+    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                            Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln));
+    else error ("Matrix solver failed.\n");
+  
+    // Time measurement.
+    cpu_time.tick();
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    project_global(Tuple<Space *>(&xdisp, &ydisp, &temp), Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln), 
+                   Tuple<Solution *>(&xdisp_sln, &ydisp_sln, &temp_sln), matrix_solver); 
+
+    // Calculate element errors.
+    info("Calculating error estimate and exact error."); 
+    Adapt* adaptivity = new Adapt(Tuple<Space *>(&xdisp, &ydisp, &temp), 
+                                  Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
+    adaptivity->set_solutions(Tuple<Solution *>(&xdisp_sln, &ydisp_sln, &temp_sln), 
+                              Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln));
+    adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
+    adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
+    adaptivity->set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
+    adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
+    adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
+    adaptivity->set_error_form(1, 2, bilinear_form_1_2<scalar, scalar>, bilinear_form_1_2<Ord, Ord>);
+    adaptivity->set_error_form(2, 2, bilinear_form_2_2<scalar, scalar>, bilinear_form_2_2<Ord, Ord>);
+
+    // Calculate error estimate for each solution component and the total error estimate.
+    Tuple<double> err_est_rel;
+    double err_est_rel_total = adaptivity->calc_err_est(err_est_rel, 
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Report results.
+    info("ndof_coarse[xdisp]: %d, ndof_fine[xdisp]: %d, err_est_rel[xdisp]: %g%%", 
+         xdisp.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(), err_est_rel[0]*100);
+    info("ndof_coarse[ydisp]: %d, ndof_fine[ydisp]: %d, err_est_rel[ydisp]: %g%%",
+         ydisp.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs(), err_est_rel[1]*100);
+    info("ndof_coarse[temp]: %d, ndof_fine[temp]: %d, err_est_rel[temp]: %g%%",
+         temp.get_num_dofs(), (*ref_spaces)[2]->get_num_dofs(), err_est_rel[2]*100);
+    info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel_total: %g%%",
+         get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &temp)), get_num_dofs(*ref_spaces), err_est_rel_total);
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &temp)), err_est_rel_total);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
+    graph_cpu_est.save("conv_cpu_est.dat");
+
+    // If err_est too large, adapt the mesh.
+    if (err_est_rel_total < ERR_STOP) 
+      done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), 
+                               THRESHOLD, STRATEGY, MESH_REGULARITY);
+    }
+    if (get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &temp)) >= NDOF_STOP) done = true;
+
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    if(done == false)
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i]->mesh;
+    delete ref_spaces;
+    delete fep;
+    
+    // Increase counter.
+    as++;
+  }
+  while (done == false);
+
+  verbose("Total running time: %g s", cpu_time.accumulated());
 
   int ndof = get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &temp));
 
