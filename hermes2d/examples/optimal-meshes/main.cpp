@@ -89,33 +89,34 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(callback(linear_form_surf_right), 2);
   wf.add_vector_form_surf(callback(linear_form_surf_left), 2);
 
+  Solution sln; 
 
   // NON-ADAPTIVE VERSION
   
   // Initialize the linear problem.
-  LinearProblem lp(&wf, &space);
+  bool is_linear = true;
+  FeProblem* fep = new FeProblem(&wf, &space, is_linear);
 
   // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Assemble stiffness matrix and rhs.
-  lp.assemble(mat, rhs);
-
-  // Solve the matrix problem.
-  if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-  // Convert coefficient vector into a Solution.
-  Solution* sln = new Solution(&space, rhs);
+  fep->assemble(matrix, rhs);
+ 
+  // Solve the linear system of the reference problem. If successful, obtain the solutions.
+  if(solver->solve()) vector_to_solution(solver->get_solution(), &space, &sln);
+  else error ("Matrix solver failed.\n");
 
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
-  view.show(sln);
+  view.show(&sln);
 
   // Calculate error wrt. exact solution.
   Solution sln_exact;
   sln_exact.set_exact(&mesh, exact);
-  double err = calc_abs_error(sln, &sln_exact, HERMES_H1_NORM);
+  double err = calc_abs_error(&sln, &sln_exact, HERMES_H1_NORM);
   printf("err = %g, err_squared = %g\n\n", err, err*err);
  
 
