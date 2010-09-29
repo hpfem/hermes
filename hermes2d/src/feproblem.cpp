@@ -204,11 +204,9 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
     mat->alloc();
   }
   
-  if (rhs != NULL) 
-  {
-    rhs->free();
-    rhs->alloc(ndof);
-  }
+  // WARNING: unlike Matrix::alloc(), Vector::alloc(ndof) frees the memory occupied 
+  // by previous vector before allocating
+  if (rhs != NULL) rhs->alloc(ndof);    
 
   // save space seq numbers and weakform seq number, so we can detect their changes
   for (int i = 0; i < wf->neq; i++)
