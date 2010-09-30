@@ -6,8 +6,16 @@
 
 const int P_INIT = 2;             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;       // Number of initial uniform refinements
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
+const int BDY_VERTICAL = 2;
 
 // Problem parameters
 double a_11(double x, double y) {
@@ -137,13 +145,13 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Create an H1 space.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form, bilinear_form_ord, H2D_SYM);
+  wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
-  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, 2);
+  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
@@ -152,23 +160,47 @@ int main(int argc, char* argv[])
   for (int p_init = 1; p_init <= 10; p_init++) {
 
     printf("********* p_init = %d *********\n", p_init);
-    space->set_uniform_order(p_init);
+    space.set_uniform_order(p_init);
 
-    // Initialize the linear problem.
-    LinearProblem lp(&wf, space);
+    // Initialize the FE problem.
+    bool is_linear = true;
+    FeProblem fep(&wf, &space, is_linear);
+ 
+    initialize_solution_environment(matrix_solver, argc, argv);
+  
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Select matrix solver.
-    Matrix* mat; Vector* rhs; CommonSolver* solver;
-    init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver);
+    if (matrix_solver == SOLVER_AZTECOO) 
+    {
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
+    }
+    
+    // Initialize the solution.
+    Solution sln;
+  
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    fep.assemble(matrix, rhs);
 
-    // Assemble stiffness matrix and rhs.
-    bool rhsonly = false;
-    lp.assemble(mat, rhs, rhsonly);
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    else
+      error ("Matrix solver failed.\n");
+  
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+  
+    finalize_solution_environment(matrix_solver);
 
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-    int ndof = get_num_dofs(space);
+    int ndof = get_num_dofs(&space);
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += rhs->get(i);

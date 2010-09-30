@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Create an H1 space.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -73,23 +73,33 @@ int main(int argc, char* argv[])
   for (int p_init = 1; p_init <= 10; p_init++) {
 
     printf("********* p_init = %d *********\n", p_init);
-    space->set_uniform_order(p_init);
+    space.set_uniform_order(p_init);
 
-    // Initialize the linear problem.
-    LinearProblem lp(&wf, space);
+    // Initialize the FE problem.
+    bool is_linear = true;
+    FeProblem fep(&wf, &space, is_linear);
 
-    // Select matrix solver.
-    Matrix* mat; Vector* rhs; CommonSolver* solver;
-    init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver);
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble stiffness matrix and rhs.
+    // Initialize the solution.
+    Solution sln;
+
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
     bool rhsonly = false;
-    lp.assemble(mat, rhs, rhsonly);
+    fep.assemble(matrix, rhs, rhsonly);
 
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    else
+      error ("Matrix solver failed.\n");
 
-    int ndof = get_num_dofs(space);
+    int ndof = get_num_dofs(&space);
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += rhs->get(i);

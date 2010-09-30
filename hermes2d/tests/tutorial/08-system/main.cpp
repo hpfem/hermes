@@ -74,15 +74,16 @@ int main(int argc, char* argv[])
   mloader.load("sample.mesh", &mesh);
 
 
-  // Create the x- and y-displacement spaces.
-  H1Space* u_space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  H1Space* v_space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  // Create x- and y- displacement space using the default H1 shapeset.
+  H1Space u_space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space v_space(&mesh, bc_types, essential_bc_values, P_INIT);
+  info("ndof = %d.", get_num_dofs(Tuple<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), H2D_SYM);  // Note that only one symmetric part is
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);  // added in the case of symmetric bilinear
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), H2D_SYM);  // forms.
+  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // Note that only one symmetric part is
+  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
+  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms.
   wf.add_vector_form_surf(0, callback(linear_form_surf_0), GAMMA_3_BDY);
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), GAMMA_3_BDY);
 
@@ -92,24 +93,33 @@ int main(int argc, char* argv[])
   Solution xsln, ysln;
   for (int p_init = 1; p_init <= 10; p_init++) {
     printf("********* p_init = %d *********\n", p_init);
-    u_space->set_uniform_order(p_init);
-    v_space->set_uniform_order(p_init);
+    u_space.set_uniform_order(p_init);
+    v_space.set_uniform_order(p_init);
 
-    // Initialize the linear problem.
-    LinearProblem lp(&wf, Tuple<Space *>(u_space, v_space));
+    // Initialize the FE problem.
+    bool is_linear = true;
+    FeProblem fep(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
 
-    // Select matrix solver.
-    Matrix* mat; Vector* rhs; CommonSolver* solver;
-    init_matrix_solver(matrix_solver, get_num_dofs(Tuple<Space *>(u_space, v_space)), mat, rhs, solver);
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble stiffness matrix and rhs.
-    bool rhsonly = false;
-    lp.assemble(mat, rhs, rhsonly);
+    // Initialize the solutions.
+    Solution u_sln, v_sln;
 
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    fep.assemble(matrix, rhs);
 
-    int ndof = get_num_dofs(Tuple<Space *>(u_space, v_space));
+    // Solve the linear system and if successful, obtain the solutions.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_sln, &v_sln));
+    else
+      error ("Matrix solver failed.\n");
+
+    int ndof = get_num_dofs(Tuple<Space *>(&u_space, &v_space));
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += rhs->get(i);
