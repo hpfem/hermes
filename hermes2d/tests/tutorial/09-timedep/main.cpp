@@ -1,3 +1,5 @@
+#define H2D_REPORT_INFO
+#define H2D_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 // This test makes sure that example 09-timedep works correctly.
@@ -27,13 +29,13 @@ double temp_ext(double t) {
 }
 
 // Boundary markers.
-int marker_ground = 1;
-int marker_air = 2;
+int bdy_ground = 1;
+int bdy_air = 2;
 
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-  if (marker == marker_ground) return BC_ESSENTIAL;
+  if (marker == bdy_ground) return BC_ESSENTIAL;
   else return BC_NATURAL;
 }
 
@@ -84,45 +86,53 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(2, 5);
 
-  // Initialize an H1 space.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(space);
-  printf("ndof = %d\n", ndof);
-
-  // Set initial condition.
+  // Initialize an H1 space with default shepeset.
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  int ndof = get_num_dofs(&space);
+  info("ndof = %d.", ndof);
+ 
+  // Initialize the solution.
   Solution tsln;
+
+  // Set the initial condition.
   tsln.set_const(&mesh, T_INIT);
 
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, marker_air);
-  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, H2D_ANY, &tsln);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, marker_air);
+  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
+  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
+  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
-  // Initialize linear system.
-  LinearProblem lp(&wf, space);
+  // Initialize the FE problem.
+  bool is_linear = true;
+  FeProblem fep(&wf, &space, is_linear);
 
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;  
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // time stepping
+  // Time stepping:
   int nsteps = (int)(FINAL_TIME/TAU + 0.5);
-  bool rhsonly = false;
-  for(int n = 1; n <= nsteps; n++)
+  bool rhs_only = false;
+  for(int ts = 1; ts <= nsteps; ts++)
   {
     info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
 
-    // Assemble stiffness matrix and rhs.
-    lp.assemble(mat, rhs, rhsonly);
-    rhsonly = true;
+    // First time assemble both the stiffness matrix and right-hand side vector,
+    // then just the right-hand side vector.
+    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+    else info("Assembling the right-hand side vector (only).");
+    fep.assemble(matrix, rhs, rhs_only);
+    rhs_only = true;
 
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-    // Update tsln.
-    tsln.set_coeff_vector(space, rhs);
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
+    else 
+      error ("Matrix solver failed.\n");
 
     // Update the time variable.
     TIME += TAU;

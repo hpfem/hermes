@@ -67,85 +67,106 @@ int main(int argc, char* argv[])
   mloader.load("motor.mesh", &mesh);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(biform1), H2D_SYM, OMEGA_1);
-  wf.add_matrix_form(callback(biform2), H2D_SYM, OMEGA_2);
+  wf.add_matrix_form(callback(biform1), HERMES_SYM, OMEGA_1);
+  wf.add_matrix_form(callback(biform2), HERMES_SYM, OMEGA_2);
 
+  // Initialize coarse and reference mesh solution.
+  Solution sln, ref_sln;
+  
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
+  
+  // DOF and CPU convergence graphs initialization.
+  SimpleGraph graph_dof, graph_cpu;
+  
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;  
-  init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver);
-
-  // Adaptivity loop.
-  Solution *sln = new Solution();
-  Solution *ref_sln = new Solution();
-  int as = 1; bool done = false;
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
+
+    // Assemble the reference problem.
     info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    fep->assemble(matrix, rhs);
 
-    // Construct globally refined reference mesh
-    // and setup reference space.
-    Mesh *ref_mesh = new Mesh();
-    ref_mesh->copy(space->get_mesh());
-    ref_mesh->refine_all_elements();
-    Space* ref_space = space->dup(ref_mesh);
-    int order_increase = 1;
-    ref_space->copy_orders(space, order_increase);
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Solve the linear system of the reference problem. 
+    // If successful, obtain the solution.
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else error ("Matrix solver failed.\n");
 
-    // Solve the reference problem.
-    solve_linear(ref_space, &wf, matrix_solver, ref_sln);
-
-    // Project the reference solution on the coarse mesh.
+    // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    // NULL means that we do not want to know the resulting coefficient vector.
-    project_global(space, H2D_H1_NORM, ref_sln, sln, NULL); 
+    project_global(&space, &ref_sln, &sln, matrix_solver); 
 
     // Time measurement.
     cpu_time.tick();
 
-    // Skip visualization time.
-    cpu_time.tick(HERMES_SKIP);
-
-    // Calculate element errors.
-    info("Calculating error (est).");
-    Adapt hp(space, H2D_H1_NORM);
-    hp.set_solutions(sln, ref_sln);
-    hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL);
- 
-    // Calculate error estimate for each solution component.
-    double err_est_abs = calc_abs_error(sln, ref_sln, H2D_H1_NORM);
-    double norm_est = calc_norm(ref_sln, H2D_H1_NORM);
-    double err_est_rel = err_est_abs / norm_est * 100.;
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    adaptivity->set_solutions(&sln, &ref_sln);
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
-    info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%", 
-         get_num_dofs(space), get_num_dofs(ref_space), err_est_rel);
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof.save("conv_dof_est.dat");
+    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu.save("conv_cpu_est.dat");
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else {
-      info("Adapting the coarse mesh.");
-      done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-
-      if (get_num_dofs(space) >= NDOF_STOP) done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
     }
+    if (get_num_dofs(&space) >= NDOF_STOP) done = true;
 
-    as++;
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    if(done == false) delete ref_space->mesh;
+    delete ref_space;
+    delete fep;
+    
   }
   while (done == false);
+  
+  verbose("Total running time: %g s", cpu_time.accumulated());
 
-  int ndof = get_num_dofs(space);
+  int ndof = get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

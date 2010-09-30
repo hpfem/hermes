@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
   fep->assemble(matrix, rhs);
  
   // Solve the linear system of the reference problem. If successful, obtain the solutions.
-  if(solver->solve()) vector_to_solution(solver->get_solution(), &space, &sln);
+  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
   // Visualize the solution.
