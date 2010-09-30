@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
     if(solver->solve())
-      vector_to_solution(solver->get_solution(), &space, &tsln);
+      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
     else 
       error ("Matrix solver failed.\n");
 

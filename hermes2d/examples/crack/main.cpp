@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     
     // Solve the linear system of the reference problem. If successful, obtain the solutions.
-    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
                                             Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     else error ("Matrix solver failed.\n");
   

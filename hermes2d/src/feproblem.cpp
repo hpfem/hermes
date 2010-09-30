@@ -249,7 +249,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
     if (this->is_linear == false)
     {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      u_ext[i]->set_coeff_vector(this->spaces[i], coeff_vec);
+      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
     }
     else
       u_ext.push_back(NULL);
@@ -1526,7 +1526,7 @@ void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Sol
   project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
   
   for (int i = 0; i < sols_src.size(); i++)
-      sols_dest[i]->set_coeff_vector(spaces[i], target_vec);
+    Solution::vector_to_solution(target_vec, spaces[i], sols_dest[i]);
   
   delete [] target_vec;
 }

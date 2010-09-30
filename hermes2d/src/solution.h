@@ -166,19 +166,25 @@ public:
 
 
 public:
-
-  /// Converts a coefficient vector into a Solution.
-  virtual void set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift = true);
-  virtual void set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, bool add_dir_lift = true);
-  virtual void set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift = true);
-
   /// Internal.
   virtual void set_active_element(Element* e);
 
   typedef enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } solution_type;
 
+  /// Passes solution components calculated from solution vector as Solutions.
+  static void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<bool> add_dir_lift = Tuple<bool>());
+  static void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, bool add_dir_lift = true);
+  static void Solution::vector_to_solutions(Vector* vec, Tuple<Space *> spaces, Tuple<Solution*> solutions, Tuple<bool> add_dir_lift = Tuple<bool>());
+  static void Solution::vector_to_solution(Vector* vec, Space* space, Solution* solution, bool add_dir_lift = true);
+  static void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<PrecalcShapeset *> pss, Tuple<bool> add_dir_lift = Tuple<bool>());
+  static void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, PrecalcShapeset* pss, bool add_dir_lift = true);
 
 protected:
+
+  /// Converts a coefficient vector into a Solution.
+  virtual void set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift);
+  virtual void set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, bool add_dir_lift);
+  virtual void set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift);
 
   solution_type type;
 
@@ -215,10 +221,6 @@ protected:
   Element* e_last; ///< last visited element when getting solution values at specific points
 
 };
-
-/// Passes solution components calculated from solution vector as Solutions.
-void H2D_API vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions);
-void H2D_API vector_to_solution(scalar* solution_vector, Space* space, Solution* solution);
 
 
 /// \brief Represents an exact solution of a PDE.

@@ -84,11 +84,11 @@ void BaseView::update_solution()
   if (base_index >= 0)
   {
     if (base_index < ndof) coeffs[base_index] = 1.0;
-    sln->set_coeff_vector(space, pss, coeffs, 0.0);
+    Solution::vector_to_solution(coeffs, space, sln, pss, false);
   }
   else
   {
-    sln->set_coeff_vector(space, pss, coeffs, 1.0);
+    Solution::vector_to_solution(coeffs, space, sln, pss, true);
   }
 
   ScalarView::show(sln, eps, item);

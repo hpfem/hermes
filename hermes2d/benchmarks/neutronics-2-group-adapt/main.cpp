@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 
     // Solve the linear system associated with the reference problem.
     if(solver->solve()) 
-      vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
+      Solution::vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
     else error ("Matrix solver failed.\n");
     
     delete fep;

@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
       info("Assembling and solving linear problem.");
       fep.assemble(matrix, rhs, false);
       if(solver->solve()) 
-        vector_to_solutions(solver->get_solution(), Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+        Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       else 
         error ("Matrix solver failed.\n");
     }

@@ -200,7 +200,7 @@ Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh())
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
-  this->set_coeff_vector(s, coeff_vec);
+  Solution::vector_to_solution(coeff_vec, s, this);
 }
 
 Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh()) 
@@ -208,7 +208,7 @@ Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh())
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
-  this->set_coeff_vector(s, coeff_vec);
+  Solution::vector_to_solution(coeff_vec, s, this);
 }
 
 void Solution::assign(Solution* sln)
@@ -575,18 +575,54 @@ void Solution::set_zero_2(Mesh* mesh)
   set_const(mesh, 0.0, 0.0);
 }
 
-void vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions)
+void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions, Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(int i = 0; i < solutions.size(); i++)
-    solutions[i]->set_coeff_vector(spaces[i], solution_vector);
+    if(add_dir_lift == Tuple<bool>())
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
+    else
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i]);
   return;
 }
 
-void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution)
+void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, bool add_dir_lift)
 {
-  vector_to_solutions(solution_vector, Tuple<Space*>(space), Tuple<Solution*>(solution));
+  Solution::vector_to_solutions(solution_vector, Tuple<Space*>(space), Tuple<Solution*>(solution), Tuple<bool>(add_dir_lift));
 }
+
+void Solution::vector_to_solutions(Vector* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions, Tuple<bool> add_dir_lift)
+{
+  assert(spaces.size() == solutions.size());
+  for(int i = 0; i < solutions.size(); i++)
+    if(add_dir_lift == Tuple<bool>())
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
+    else
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i]);
+  return;
+}
+
+void Solution::vector_to_solution(Vector* solution_vector, Space* space, Solution* solution, bool add_dir_lift)
+{
+  Solution::vector_to_solutions(solution_vector, Tuple<Space*>(space), Tuple<Solution*>(solution), Tuple<bool>(add_dir_lift));
+}
+
+void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions, Tuple<PrecalcShapeset *> pss, Tuple<bool> add_dir_lift)
+{
+  assert(spaces.size() == solutions.size());
+  for(int i = 0; i < solutions.size(); i++)
+    if(add_dir_lift == Tuple<bool>())
+      solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, true);
+    else
+      solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift[i]);
+  return;
+}
+
+void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, PrecalcShapeset* pss, bool add_dir_lift)
+{
+  Solution::vector_to_solutions(solution_vector, Tuple<Space*>(space), Tuple<Solution*>(solution), Tuple<PrecalcShapeset *>(pss), Tuple<bool>(add_dir_lift));
+}
+
 
 void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
 {
