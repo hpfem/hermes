@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
     }
 
     // Update previous time level solution.
-    u_prev_time.set_coeff_vector(&space, coeff_vec);
+    Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
     // Update time.
     current_time += TAU;

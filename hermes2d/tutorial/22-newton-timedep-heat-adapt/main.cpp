@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
       }
 
       // Store the result in ref_sln.
-      ref_sln.set_coeff_vector(ref_space, coeff_vec);
+      Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
