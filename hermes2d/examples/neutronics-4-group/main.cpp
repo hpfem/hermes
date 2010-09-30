@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
     solver_time.tick();
     
     if(solved)
-      vector_to_solutions(solver->get_solution(), spaces, solutions);
+      Solution::vector_to_solutions(solver->get_solution(), spaces, solutions);
     else
       error ("Matrix solver failed.\n");
 

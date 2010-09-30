@@ -148,8 +148,9 @@ int main(int argc, char* argv[])
     cpu_time.tick();
     
     // Solve the linear system of the reference problem. If successful, obtain the solutions.
-    if(solver->solve()) vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                            Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln));
+    if(solver->solve()) 
+      Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                    Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln));
     else error ("Matrix solver failed.\n");
   
     // Time measurement.
