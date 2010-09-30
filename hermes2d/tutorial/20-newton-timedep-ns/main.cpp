@@ -253,9 +253,7 @@ int main(int argc, char* argv[])
       }
   
       // Update previous time level solutions.
-      xvel_prev_time.set_coeff_vector(&xvel_space, coeff_vec);
-      yvel_prev_time.set_coeff_vector(&yvel_space, coeff_vec);
-      p_prev_time.set_coeff_vector(&p_space, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
     else {
       // Linear solve.
