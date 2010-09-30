@@ -1,0 +1,26 @@
+TOL = 1e-5, 48 iterations required in all cases
+
+
+  solver                 avg. solver time | total run. time  |  resulting k_eff
+--------------------------------------------------------------------------------
+
+NDOF = 24844
+
+  UMFPACK                     3.12395           167.977            1.1407074
+  AMESOS                      0.57084           46.0335            1.1407074
+  AZTECOO-BICGSTAB            4.36201           209.428            1.1406336
+  AZTECOO-BICGSTAB-JACOBI     0.83270           55.4619            1.1406629 
+  PETSC                       0.45992           147.385*           1.1407068    
+  MUMPS                       0.97865           65.1014            1.1407074
+  PARDISO-OMP1                1.23616           79.0056            1.1407074
+  PARDISO-OMP2                1.2646            80.9847            1.1407074
+
+NDOF = 74884
+
+  PARDISO-OMP1                5.15363           304.04             1.1407476
+  PARDISO-OMP2                3.97896           250.694            1.1407476
+         
+--------------------------------------------------------------------------------
+
+  
+*) Assembling took most of the time
