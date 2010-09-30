@@ -153,8 +153,8 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(callback(linear_form_surf));
 
   // Initialize views.
-  VectorView eview("Electric field", 0, 0, 580, 400);
-  OrderView ord("Order", 590, 0, 550, 400);
+  VectorView eview("Electric field", new WinGeom(0, 0, 580, 400));
+  OrderView ord("Order", new WinGeom(590, 0, 550, 400));
 
   /*
   // View the basis functions.

@@ -194,8 +194,8 @@ int main(int argc, char* argv[])
   delete sln_tmp;
 
   // Initialize views.
-  ScalarView view("Projection of initial condition", 0, 0, 410, 300);
-  OrderView ordview("Initial mesh", 420, 0, 350, 300);
+  ScalarView view("Projection of initial condition", new WinGeom(0, 0, 410, 300));
+  OrderView ordview("Initial mesh", new WinGeom(420, 0, 350, 300));
   view.fix_scale_width(80);
 
   // Newton's loop on the coarse mesh.

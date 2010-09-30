@@ -134,8 +134,8 @@ int main(int argc, char* argv[])
 	SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 	SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
-	VectorView vview("Velocity", 0, 0, 600, 300);
-	ScalarView sview("Pressure", 700, 0, 600, 300);
+	VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
+	ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
 
 	// Iteration number.
 	int iteration = 0;

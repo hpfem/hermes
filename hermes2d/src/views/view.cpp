@@ -63,15 +63,6 @@ void View::init() {
   memset(rendering_frames, 0, FPS_FRAME_SIZE * sizeof(double));
 }
 
-View::View(const char* title, int x, int y, int width, int height)
-  : gl_pallete_tex_id(0)
-  , title(title), output_id(-1), output_x(x), output_y(y), output_width(width), output_height(height)
-  , vertices_min_x(0), vertices_max_x(0), vertices_min_y(0), vertices_max_y(0)
-  , view_not_reset(true)
-{
-  init();
-}
-
 View::View(const char* title, WinGeom* wg)
   : gl_pallete_tex_id(0),
     title(title), output_id(-1), vertices_min_x(0), vertices_max_x(0), vertices_min_y(0), vertices_max_y(0),

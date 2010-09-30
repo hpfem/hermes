@@ -123,8 +123,8 @@ int main(int argc, char* argv[])
   delete sln_tmp;
 
   // Initialize views.
-  ScalarView sview("Solution", 0, 0, 500, 400);
-  OrderView oview("Mesh", 520, 0, 450, 400);
+  ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
+  OrderView oview("Mesh", new WinGeom(520, 0, 450, 400));
   oview.show(&space);
   sview.show(&u_prev_time);
   //View::wait(H2DV_WAIT_KEYPRESS);

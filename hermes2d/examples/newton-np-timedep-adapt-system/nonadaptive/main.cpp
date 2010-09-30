@@ -187,9 +187,9 @@ int main (int argc, char* argv[]) {
 
 
   
-  //VectorView vview("electric field [V/m]", 0, 0, 600, 600);
-  ScalarView Cview("Concentration [mol/m3]", 0, 0, 800, 800);
-  ScalarView phiview("Voltage [V]", 650, 0, 600, 600);
+  //VectorView vview("electric field [V/m]", new WinGeom(0, 0, 600, 600));
+  ScalarView Cview("Concentration [mol/m3]", new WinGeom(0, 0, 800, 800));
+  ScalarView phiview("Voltage [V]", new WinGeom(650, 0, 600, 600));
   phiview.show(&phi_prev_time);
   Cview.show(&C_prev_time);
   char title[100];

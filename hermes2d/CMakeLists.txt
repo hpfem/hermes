@@ -19,7 +19,7 @@ set(H2D_REAL     YES)
 set(H2D_COMPLEX  YES)
 
 # optional functionality
-set(WITH_PYTHON     YES)
+set(WITH_PYTHON     NO)
 set(WITH_EXAMPLES   YES)
 set(WITH_BENCHMARKS YES)
 set(WITH_TUTORIAL   YES)

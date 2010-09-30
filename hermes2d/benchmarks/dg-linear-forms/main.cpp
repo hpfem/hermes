@@ -111,9 +111,9 @@ int main(int argc, char* argv[])
   space.set_bc_types(bc_types);
 
   // display the mesh
-  OrderView oview("info_neighbor", 100, 100, 500, 500);
+  OrderView oview("info_neighbor", new WinGeom(100, 100, 500, 500));
   oview.show(&space);
-  BaseView bview("info_neighbor", 100, 100, 500, 500);
+  BaseView bview("info_neighbor", new WinGeom(100, 100, 500, 500));
   bview.show(&space);
   
   Solution sln;
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   solve_linear(&space, &wf, matrix_solver, &sln);
 
   // visualize the solution
-  ScalarView view1("Solution", 600, 100, 500, 500);
+  ScalarView view1("Solution", new WinGeom(600, 100, 500, 500));
   view1.show(&sln);
 
   // wait for keyboard or mouse input

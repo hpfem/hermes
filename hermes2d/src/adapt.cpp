@@ -752,9 +752,9 @@ void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
   // Initialize views.
   char title[200];
   sprintf(title, "Projection of initial condition");
-  ScalarView* view = new ScalarView(title, 0, 0, 410, 300);
+  ScalarView* view = new ScalarView(title, new WinGeom(0, 0, 410, 300));
   sprintf(title, "Initial mesh");
-  OrderView* ordview = new OrderView(title, 420, 0, 350, 300);
+  OrderView* ordview = new OrderView(title, new WinGeom(420, 0, 350, 300));
   view->fix_scale_width(80);
 
   // Adaptivity loop:

@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   L2Space space(&mesh, P_INIT);
 
   // View basis functions.
-  BaseView bview("BaseView", 0, 0, 600, 500);
+  BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
   bview.show(&space);
   View::wait(H2DV_WAIT_KEYPRESS);
 
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
   delete sln_tmp;
 
   // Visualize the solution.
-  ScalarView view1("Projection", 610, 0, 600, 500);
+  ScalarView view1("Projection", new WinGeom(610, 0, 600, 500));
   view1.show(&sln);
 
   // Wait for all views to be closed.

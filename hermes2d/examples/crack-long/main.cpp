@@ -108,9 +108,9 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_TOP);
 
   // Initialize views.
-  ScalarView sview("Von Mises stress [Pa]", 0, 355, 900, 300);
-  OrderView  xoview("X polynomial orders", 0, 0, 900, 300);
-  OrderView  yoview("Y polynomial orders", 910, 0, 900, 300);
+  ScalarView sview("Von Mises stress [Pa]", new WinGeom(0, 355, 900, 300));
+  OrderView  xoview("X polynomial orders", new WinGeom(0, 0, 900, 300));
+  OrderView  yoview("Y polynomial orders", new WinGeom(910, 0, 900, 300));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu;

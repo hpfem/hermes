@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, callback(liform_euler_1), H2D_ANY, &psi_prev_time);
 
   // Initialize views.
-  ScalarView view("Psi", 0, 0, 600, 500);
+  ScalarView view("Psi", new WinGeom(0, 0, 600, 500));
   view.fix_scale_width(80);
 
   // Time stepping loop:

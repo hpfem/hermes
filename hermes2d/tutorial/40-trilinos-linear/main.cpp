@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 
   // Show the UMFpack solution.
   Solution sln_hermes(&space, coeff_vec);
-  ScalarView sv("Solution", 0, 0, 440, 350);
+  ScalarView sv("Solution", new WinGeom(0, 0, 440, 350));
   sv.show(&sln_hermes);
 
   // CPU time needed by UMFpack.
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
   double nox_time = cpu_time.tick().last();
 
   // Show the NOX solution.
-  ScalarView view2("Solution 2", 450, 0, 440, 350);
+  ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
   //view2.set_min_max_range(0, 2);
   view2.show(&sln_nox);
 

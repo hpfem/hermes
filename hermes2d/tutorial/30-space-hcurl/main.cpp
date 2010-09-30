@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   HcurlSpace space(&mesh, NULL, NULL, P_INIT);
 
   // Visualize FE basis.
-  VectorBaseView bview("VectorBaseView", 0, 0, 700, 600);
+  VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));
   bview.show(&space);
 
   // Wait for all views to be closed.
