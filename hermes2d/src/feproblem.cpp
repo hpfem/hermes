@@ -421,7 +421,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
             transpose(local_stiffness_matrix, am->cnt, an->cnt);
             
             if (rhsonly == false) 
-              mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+              mat->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
   	       
             // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
             if (rhs != NULL && this->is_linear) 
@@ -533,7 +533,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
               }
             }
             if (rhsonly == false) 
-              mat->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
+              mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
           }
         }
 
