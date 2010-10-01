@@ -22,8 +22,8 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements (the original mesh is just one element).
-const int INIT_REF_NUM_BDY = 3;                   // Number of initial mesh refinements towards the boundary.
+const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements (the original mesh is just one element).
+const int INIT_REF_NUM_BDY = 5;                   // Number of initial mesh refinements towards the boundary.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:

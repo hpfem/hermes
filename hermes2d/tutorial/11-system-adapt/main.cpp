@@ -38,8 +38,8 @@ using namespace RefinementSelectors;
 // single-mesh using the MULTI parameter.
 
 const int P_INIT_U = 2;                           // Initial polynomial degree for u.
-const int P_INIT_V = 2;                           // Initial polynomial degree for v.
-const int INIT_REF_BDY = 3;                       // Number of initial boundary refinements
+const int P_INIT_V = 1;                           // Initial polynomial degree for v.
+const int INIT_REF_BDY = 5;                       // Number of initial boundary refinements
 const bool MULTI = true;                          // MULTI = true  ... use multi-mesh,
                                                   // MULTI = false ... use single-mesh.
                                                   // Note: In the single mesh option, the meshes are
@@ -68,7 +68,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -137,12 +137,12 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 400, 300));
+  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 440, 350));
   s_view_0.show_mesh(false);
-  ScalarView s_view_1("Solution[1]", new WinGeom(780, 0, 400, 300));
+  OrderView  o_view_0("Mesh[0]", new WinGeom(450, 0, 420, 350));
+  ScalarView s_view_1("Solution[1]", new WinGeom(880, 0, 440, 350));
   s_view_1.show_mesh(false);
-  OrderView  o_view_0("Mesh[0]", new WinGeom(410, 0, 360, 300));
-  OrderView  o_view_1("Mesh[1]", new WinGeom(1190, 0, 400, 300));
+  OrderView  o_view_1("Mesh[1]", new WinGeom(1330, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 
