@@ -453,7 +453,7 @@ int main(int argc, char* argv[])
 */
   bool verbose = true; 
   solve_linear_adapt(Tuple<Space *>(&xvel, &yvel, &press, &lset), &wf, NULL, matrix_solver,
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM, H2D_H1_NORM, H2D_H1_NORM),
+                     Tuple<ProjNormType>(HERMS_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM),
                      Tuple<Solution *>(&u1, &u2, &u3, &u4),
                      Tuple<Solution *>(&r1, &r2, &r3, &r4),
                      Tuple<WinGeom *>(), Tuple<WinGeom *>(),// Do not show solutions or meshes.

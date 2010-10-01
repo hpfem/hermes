@@ -418,7 +418,7 @@ int main(int argc, char* argv[])
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt adaptivity(Tuple<Space*>(&space1, &space2), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt adaptivity(Tuple<Space*>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
     if (ADAPTIVITY_NORM == 2) {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(0, 1, callback(biform_0_1));

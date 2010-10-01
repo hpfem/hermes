@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
   
   // Initialize the nonlinear system.
-  Tuple<int> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
+  Tuple<ProjNormType> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
 
   // Set initial conditions.
   T_prev_time.set_exact(&mesh, T_exact);

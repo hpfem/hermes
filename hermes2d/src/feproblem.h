@@ -39,7 +39,7 @@ class Vector;
 class Solver;
 
 /// Instantiated template. It is used to create a clean Windows DLL interface.
-H2D_API_USED_TEMPLATE(Tuple<int>);
+H2D_API_USED_TEMPLATE(Tuple<ProjNormType>);
 H2D_API_USED_TEMPLATE(Tuple<Space*>);
 H2D_API_USED_TEMPLATE(Tuple<MeshFunction*>);
 H2D_API_USED_TEMPLATE(Tuple<Solution*>);
@@ -49,7 +49,6 @@ H2D_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
 /// in tuples of following types
 typedef Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> > matrix_forms_tuple_t;
 typedef Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > vector_forms_tuple_t;
-
 
 /// Discrete problem class
 ///
@@ -143,9 +142,12 @@ H2D_API int get_num_dofs(Tuple<Space *> spaces);
 void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
 H2D_API void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
-                    scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<int> proj_norms = Tuple<int>());
+                            scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
 
-H2D_API void project_global(Tuple<Space *> spaces, Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<int> proj_norms = Tuple<int>());
+H2D_API void project_global(Tuple<Space *> spaces, 
+                            Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, 
+                            MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
+                            Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
 
 H2D_API void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
                     vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
@@ -180,7 +182,7 @@ H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType 
                           Tuple<Solution *> solutions, scalar*coeff_vec = NULL);
 
 // Do initial checks for the adaptivity process.
-H2D_API void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<int> proj_norms, TimePeriod * cpu_time);
+H2D_API void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<ProjNormType> proj_norms, TimePeriod * cpu_time);
 
 // Create globally refined space.
 H2D_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);

@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
   bool verbose = true;  // Print info during adaptivity.
   // The NULL pointer means that we do not want the resulting coefficient vector.
   solve_linear_adapt(Tuple<Space *>(&u_space, &v_space), &wf, NULL, matrix_solver,
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+                     Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM), 
                      Tuple<Solution *>(u_sln, v_sln), 
                      Tuple<Solution *>(ref_u_sln, ref_v_sln), 
                      Tuple<WinGeom *>(), 

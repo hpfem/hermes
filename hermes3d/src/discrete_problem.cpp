@@ -1286,7 +1286,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
 }
 
 // global orthogonal projection
-void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
+void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<MeshFunction*> source_meshfns, 
                     scalar* target_vec)
 {
   _F_
@@ -1299,7 +1299,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   for (int i = 0; i < n; i++) 
   {
     int norm;
-    if (proj_norms == Tuple<int>()) norm = 1;
+    if (proj_norms == Tuple<ProjNormType>()) norm = HERMES_DEFAULT_PROJ_NORM;
     else norm = proj_norms[i];
     if (norm == HERMES_L2_NORM) 
     {
@@ -1342,7 +1342,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   project_internal(spaces, proj_wf, target_vec);
 }
 
-void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest)
+void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest)
 {
   _F_
   scalar* target_vec = new scalar[get_num_dofs(spaces)];

@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   // Projecting initial conditions to obtain initial vector for the Newton's method.
   info("Projecting initial conditions to obtain initial vector for the Newton's method.");
   Vector* coeff_vec = new AVector(); 
-  project_global(Tuple<Space *>(tspace, cspace), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+  project_global(Tuple<Space *>(tspace, cspace), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM),
   Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton),Tuple<Solution*>(&t_prev_newton, &c_prev_newton), coeff_vec);
 
   // Filters for the reaction rate omega and its derivatives.

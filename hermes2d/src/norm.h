@@ -32,7 +32,7 @@ extern H2D_API double calc_norm(MeshFunction* sln, int norm_type);
 // returns correct parameters only if the return value is true
 // coarse mesh sln has to be first, then ref_sln
 H2D_API bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<double> & err_abs, Tuple<double> & norm_vals, 
-      double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<int> norms = Tuple<int>());
+      double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<ProjNormType> norms = Tuple<ProjNormType>());
 
 // helper functions
 // DEPRECATED

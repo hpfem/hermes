@@ -180,11 +180,11 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Define projection norms.
-  int vel_proj_norm = HERMES_H1_NORM;
+  ProjNormType vel_proj_norm = HERMES_H1_NORM;
 #ifdef PRESSURE_IN_L2
-  int p_proj_norm = HERMES_L2_NORM;
+  ProjNormType p_proj_norm = HERMES_L2_NORM;
 #else
-  int p_proj_norm = HERMES_H1_NORM;
+  ProjNormType p_proj_norm = HERMES_H1_NORM;
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
     // Update the coefficient vector and u_prev_time.
     info("Projecting to obtain coefficient vector on coarse mesh.");
     project_global(Tuple<Space *>(xvel_space, yvel_space, p_space),
-                   Tuple<int>(vel_proj_norm, vel_proj_norm, p_proj_norm),
+                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm),
                    Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
                    Tuple<Solution*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
                    coeff_vec);
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
     // The NULL pointers mean that we are not interested in visualization during the Newton's loop.
     solve_newton_adapt(Tuple<Space *>(xvel_space, yvel_space, p_space), &wf, coeff_vec, matrix_solver, 
-                       Tuple<int>(vel_proj_norm, vel_proj_norm, p_proj_norm), 
+                       Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm), 
                        Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln),
                        Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln),
                        Tuple<WinGeom *>(), Tuple<WinGeom *>(), 

@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 
   // Initialize the nonlinear system.
   FeProblem dp(&wf, spaces);
-  Tuple<int> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
+  Tuple<ProjNormType> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
   
   // Set initial conditions.
   T_prev_time.set_exact(&mesh_T, T_exact);

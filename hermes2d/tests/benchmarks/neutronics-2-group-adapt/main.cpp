@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
   H1Space space1(&mesh1, bc_types, essential_bc_values_1, P_INIT[0]);
   H1Space space2(&mesh2, bc_types, essential_bc_values_2, P_INIT[1]);
   Tuple<Space*> spaces(&space1, &space2);
-  Tuple<int> norms(HERMES_H1_NORM, HERMES_H1_NORM);
+  Tuple<ProjNormType> norms(HERMES_H1_NORM, HERMES_H1_NORM);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
