@@ -64,6 +64,7 @@ Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1),
       switch (proj_norms[i]) {
         case HERMES_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i]  = l2_form<Ord, Ord>; break;
         case HERMES_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
+        case HERMES_H1_SEMINORM: form[i][i] = h1_semi_form<double, scalar>; ord[i][i]  = h1_semi_form<Ord, Ord>; break;
         case HERMES_HCURL_NORM: form[i][i] = hcurl_form<double, scalar>; ord[i][i]  = hcurl_form<Ord, Ord>; break;
         case HERMES_HDIV_NORM: form[i][i] = hdiv_form<double, scalar>; ord[i][i]  = hdiv_form<Ord, Ord>; break;
         default: error("Unknown projection type in Adapt::Adapt().");

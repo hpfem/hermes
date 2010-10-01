@@ -30,8 +30,6 @@
 #include "ref_selectors/selector.h"
 #include <map>
 
-typedef enum {HERMES_L2_NORM, HERMES_H1_NORM, HERMES_HCURL_NORM, HERMES_HDIV_NORM} ProjNormType;
-
 class Space;
 class PrecalcShapeset;
 class WeakForm;
@@ -39,9 +37,6 @@ class Matrix;
 class SparseMatrix;
 class Vector;
 class Solver;
-
-// Default HERMES projection norm is H1 norm.
-extern int HERMES_DEFAULT_PROJ_NORM;
 
 /// Instantiated template. It is used to create a clean Windows DLL interface.
 H2D_API_USED_TEMPLATE(Tuple<int>);

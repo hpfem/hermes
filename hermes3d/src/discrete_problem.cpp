@@ -1144,7 +1144,10 @@ Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> 
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+    result += wt[i] * (u->val[i] * v->val[i] + 
+                       u->dx[i] * v->dx[i] + 
+                       u->dy[i] * v->dy[i] +
+                       u->dz[i] * v->dz[i]);
   return result;
 }
 
@@ -1153,7 +1156,32 @@ Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> 
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (ext->fn[0].val[i] * v->val[i] + ext->fn[0].dx[i] * v->dx[i] + ext->fn[0].dy[i] * v->dy[i]);
+    result += wt[i] * (ext->fn[0].val[i] * v->val[i] + 
+                       ext->fn[0].dx[i] * v->dx[i] + 
+                       ext->fn[0].dy[i] * v->dy[i] + 
+                       ext->fn[0].dz[i] * v->dz[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (u->dx[i] * v->dx[i] + 
+                       u->dy[i] * v->dy[i] + 
+                       u->dz[i] * v->dz[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (ext->fn[0].dx[i] * v->dx[i] + 
+                       ext->fn[0].dy[i] * v->dy[i] + 
+                       ext->fn[0].dz[i] * v->dz[i]);
   return result;
 }
 
@@ -1268,32 +1296,45 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   WeakForm* proj_wf = new WeakForm(n);
   int found[100];
   for (int i = 0; i < 100; i++) found[i] = 0;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) 
+  {
     int norm;
     if (proj_norms == Tuple<int>()) norm = 1;
     else norm = proj_norms[i];
-    if (norm == 0) {
+    if (norm == HERMES_L2_NORM) 
+    {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
-                     HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY, source_meshfns[i]);
     }
-    if (norm == 1) {
+    if (norm == HERMES_H1_NORM) 
+    {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
-                     HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY, source_meshfns[i]);
     }
-    if (norm == 2) {
+    if (norm == HERMES_H1_SEMINORM) 
+    {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, H1_semi_projection_biform<double, scalar>, H1_semi_projection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, H1_semi_projection_liform<double, scalar>, H1_semi_projection_liform<Ord, Ord>,
+                               HERMES_ANY, source_meshfns[i]);
+    }
+    if (norm == HERMES_HCURL_NORM) 
+    {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
-                     HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY, source_meshfns[i]);
     }
   }
-  for (int i=0; i < n; i++) {
-    if (found[i] == 0) {
-      printf("index of component: %d\n", i);
+  for (int i=0; i < n; i++) 
+  {
+    if (found[i] == 0) 
+    {
+      warn("index of component: %d\n", i);
       error("Wrong projection norm in project_global().");
     }
   }

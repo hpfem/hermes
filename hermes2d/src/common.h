@@ -89,7 +89,7 @@ inline void blas_copy(int n, complex *x, int incx, complex *y, int incy) { zcopy
 
 #endif
 
-// Matrix solvers
+// Matrix solvers:
 enum MatrixSolverType 
 {
    SOLVER_UMFPACK = 0, 
@@ -112,6 +112,19 @@ const std::string MatrixSolverNames[7] = {
   "Trilinos/Amesos",
   "Trilinos/AztecOO"
 };
+
+// Projection norms:
+enum ProjNormType
+{
+  HERMES_L2_NORM, 
+  HERMES_H1_NORM, 
+  HERMES_H1_SEMINORM, 
+  HERMES_HCURL_NORM, 
+  HERMES_HDIV_NORM
+};
+
+// Default HERMES projection norm is the H1 norm.
+const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
 // STL stuff
 #include <algorithm>
@@ -148,12 +161,6 @@ enum ElementMode { // element modes
   H2D_MODE_TRIANGLE = 0,
   H2D_MODE_QUAD = 1
 };
-
-// default projection norm is H1 norm
-// FIXME: this global variable should be declared here but 
-// doing so leads to compilation problems. That's why it 
-// is temporarily in linsystem.cpp.
-//const int H2D_DEFAULT_PROJ_NORM = 1;
 
 const int HERMES_ANY = -1234;
 

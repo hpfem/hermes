@@ -64,6 +64,19 @@ enum MatrixSolverType
    SOLVER_AMESOS
 };
 
+// Projection norms:
+enum ProjNormType
+{
+  HERMES_L2_NORM, 
+  HERMES_H1_NORM, 
+  HERMES_H1_SEMINORM, 
+  HERMES_HCURL_NORM, 
+  HERMES_HDIV_NORM
+};
+
+// Default HERMES projection norm is the H1 norm.
+const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
+
 #ifdef H3D_COMPLEX
 
 #include <complex>

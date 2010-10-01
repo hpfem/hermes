@@ -150,6 +150,15 @@ Scalar h1_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<S
 }
 
 template<typename Real, typename Scalar>
+Scalar h1_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
+  return result;
+}
+
+template<typename Real, typename Scalar>
 Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
