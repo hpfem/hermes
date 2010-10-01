@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
   }
 
   double sum = 0;
-  for (int i=0; i < ndof; i++) sum += rhs->get(i);
+  for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
   printf("coefficient sum = %g\n", sum);
 
   // Actual test. The value of 'sum' depend on the

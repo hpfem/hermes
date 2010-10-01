@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     int ndof = get_num_dofs(Tuple<Space *>(&u_space, &v_space));
     printf("ndof = %d\n", ndof);
     double sum = 0;
-    for (int i=0; i < ndof; i++) sum += rhs->get(i);
+    for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
     printf("coefficient sum = %g\n", sum);
 
     // Actual test. The values of 'sum' depend on the
