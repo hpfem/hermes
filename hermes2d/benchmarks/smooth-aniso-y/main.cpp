@@ -65,10 +65,13 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
+int bdy_top = 3;
+int bdy_bottom = 1;
+
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-  if (marker == 1)
+  if (marker == bdy_bottom)
     return BC_ESSENTIAL;
   else
     return BC_NATURAL;
@@ -88,23 +91,16 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh);
-
-  // Avoid zero ndof situation.
-  if (P_INIT == 1) {
-    if (is_hp(CAND_LIST)) P_INIT++;
-    else mesh.refine_element(0, 1);
-  }
+  mloader.load("domain.mesh", &mesh);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  if (is_p_aniso(CAND_LIST))
-    space.set_element_order(0, H2D_MAKE_QUAD_ORDER(1, P_INIT));
 
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_vector_form(callback(linear_form));
+  wf.add_vector_form_surf(callback(linear_form_surf), bdy_top);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

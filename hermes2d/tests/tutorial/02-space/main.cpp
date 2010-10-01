@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
   // sample element refinement, to see more basis functions
   //mesh.refine_all_elements();
 
-  // create an H1 space
-  H1Space space(&mesh);
+  // create an H1 space with default shapeset
+  H1Space space(&mesh, NULL, NULL, 1);
 
   // new code for the test
 #define ERROR_SUCCESS                               0
