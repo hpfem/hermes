@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
   Solution sln, ref_sln, sln_prev_time;
 
   // Adapt mesh to represent initial condition with given accuracy.
-  int proj_norm = 1;  // H1 norm.
+  ProjNormType proj_norm = HERMES_H1_NORM;
   bool verbose = true; 
   double err_stop_init_cond = 0.1 * ERR_STOP; 
   adapt_to_exact_function(&space, proj_norm, init_cond, &selector, THRESHOLD, STRATEGY, 

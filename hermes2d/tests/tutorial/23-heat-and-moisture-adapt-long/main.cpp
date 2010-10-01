@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
       info("Projecting reference solution on coarse mesh.");
       // NULL means that we do not want to know the resulting coefficient vector.
       project_global(Tuple<Space *>(&T_space, &M_space),
-                     Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+                     Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM),
                      Tuple<MeshFunction *>(&T_fine, &M_fine),
                      Tuple<Solution *>(&T_coarse, &M_coarse), NULL);
 
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
       // Initialize the adaptivity module, set the coarse and fine mesh 
       // solutions, and set the error form.
       Adapt hp(Tuple<Space *>(&T_space, &M_space),
-               Tuple<int>(H2D_H1_NORM, H2D_H1_NORM));
+               Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       hp.set_solutions(Tuple<Solution *>(&T_coarse, &M_coarse),
                        Tuple<Solution *>(&T_fine, &M_fine));
       hp.set_error_form(0, 0, callback(bilinear_form_sym_0_0));

@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
   Vector* coeff_vec = new AVector(ndof);
-  project_global(Tuple<Space *>(t_space, c_space), Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
+  project_global(Tuple<Space *>(t_space, c_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM), 
                  Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1), 
                  Tuple<Solution*>(&t_prev_time_1, &c_prev_time_1),
                  coeff_vec);

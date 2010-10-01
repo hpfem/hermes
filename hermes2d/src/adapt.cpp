@@ -35,8 +35,8 @@ using namespace std;
 #define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
-Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1), 
-                                                              have_coarse_solutions(false), have_reference_solutions(false), have_errors(false) 
+Adapt::Adapt(Tuple< Space* > spaces_, Tuple<ProjNormType> proj_norms) : num_act_elems(-1), 
+                                                                        have_coarse_solutions(false), have_reference_solutions(false), have_errors(false) 
 {
   // sanity check
   if (proj_norms.size() > 0 && spaces_.size() != proj_norms.size()) 
@@ -64,6 +64,7 @@ Adapt::Adapt(Tuple<Space *> spaces_, Tuple<int> proj_norms) : num_act_elems(-1),
       switch (proj_norms[i]) {
         case HERMES_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i]  = l2_form<Ord, Ord>; break;
         case HERMES_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
+        case HERMES_H1_SEMINORM: form[i][i] = h1_semi_form<double, scalar>; ord[i][i]  = h1_semi_form<Ord, Ord>; break;
         case HERMES_HCURL_NORM: form[i][i] = hcurl_form<double, scalar>; ord[i][i]  = hcurl_form<Ord, Ord>; break;
         case HERMES_HDIV_NORM: form[i][i] = hdiv_form<double, scalar>; ord[i][i]  = hdiv_form<Ord, Ord>; break;
         default: error("Unknown projection type in Adapt::Adapt().");
@@ -823,7 +824,7 @@ void Adapt::fill_regular_queue(Mesh** meshes, Mesh** ref_meshes) {
 
 // Mesh is adapted to represent a given function with given accuracy
 // in a given projection norm.
-void adapt_to_exact_function(Space *space, int proj_norm, ExactFunction exactfn,
+void adapt_to_exact_function(Space *space, ProjNormType proj_norm, ExactFunction exactfn,
                     RefinementSelectors::Selector* selector, double threshold, int strategy,
                     int mesh_regularity, double err_stop, int ndof_stop, bool verbose,
                     Solution* sln, MatrixSolverType matrix_solver)

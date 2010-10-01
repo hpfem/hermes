@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&xdisp, &ydisp, &temp), 
-                                  Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
+                                  Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
     adaptivity->set_solutions(Tuple<Solution *>(&xdisp_sln, &ydisp_sln, &temp_sln), 
                               Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln));
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);

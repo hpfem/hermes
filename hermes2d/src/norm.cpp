@@ -69,13 +69,13 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
 }
 
 bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<double> & err_abs, Tuple<double> & norm_vals, 
-      double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<int> norms)
+                 double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<ProjNormType> norms)
 {
   bool default_norms = false;
   // Checks.
   if(left.size() != right.size())
     return false;
-  if (norms != Tuple<int>())
+  if (norms != Tuple<ProjNormType>())
   {
     if(left.size() != norms.size())
       return false;

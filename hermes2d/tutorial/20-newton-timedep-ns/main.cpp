@@ -130,11 +130,11 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Define projection norms.
-  int vel_proj_norm = HERMES_H1_NORM;
+  ProjNormType vel_proj_norm = HERMES_H1_NORM;
 #ifdef PRESSURE_IN_L2
-  int p_proj_norm = HERMES_L2_NORM;
+  ProjNormType p_proj_norm = HERMES_L2_NORM;
 #else
-  int p_proj_norm = HERMES_H1_NORM;
+  ProjNormType p_proj_norm = HERMES_H1_NORM;
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
@@ -199,7 +199,11 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), coeff_vec, matrix_solver, Tuple<int>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                   Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+                   coeff_vec, 
+                   matrix_solver, 
+                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:

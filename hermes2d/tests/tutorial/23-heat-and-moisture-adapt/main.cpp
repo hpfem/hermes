@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 
     // Adaptivity loop.
     solve_linear_adapt(Tuple<Space *>(&T_space, &M_space), &wf, NULL, matrix_solver,
-                       Tuple<int>(H2D_H1_NORM, H2D_H1_NORM),
+                       Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM),
                        Tuple<Solution *>(&T_coarse, &M_coarse),
                        Tuple<Solution *>(&T_fine, &M_fine),
                        Tuple<WinGeom *>(), Tuple<WinGeom *>(),// Do not show solutions or meshes.

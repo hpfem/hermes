@@ -1253,12 +1253,32 @@ Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> 
 }
 
 template<typename Real, typename Scalar>
+Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  _F_
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
 Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   _F_
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (ext->fn[0]->val[i] * v->val[i] + ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar H1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  _F_
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
   return result;
 }
 
@@ -1473,7 +1493,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, M
 
 // global orthogonal projection
 void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec, MatrixSolverType matrix_solver, Tuple<int> proj_norms)
+                    scalar* target_vec, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
 {
   _F_
   int n = spaces.size();  
@@ -1482,31 +1502,44 @@ void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns,
   WeakForm* proj_wf = new WeakForm(n);
   int found[100];
   for (int i = 0; i < 100; i++) found[i] = 0;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) 
+  {
     int norm;
-    if (proj_norms == Tuple<int>()) norm = 1;
+    if (proj_norms == Tuple<ProjNormType>()) norm = HERMES_DEFAULT_PROJ_NORM;
     else norm = proj_norms[i];
-    if (norm == 0) {
+    if (norm == HERMES_L2_NORM) 
+    {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
                      HERMES_ANY, source_meshfns[i]);
     }
-    if (norm == 1) {
+    if (norm == HERMES_H1_NORM) 
+    {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
                      HERMES_ANY, source_meshfns[i]);
     }
-    if (norm == 2) {
+    if (norm == HERMES_H1_SEMINORM) 
+    {
+      found[i] = 1;
+      proj_wf->add_matrix_form(i, i, H1_semi_projection_biform<double, scalar>, H1_semi_projection_biform<Ord, Ord>);
+      proj_wf->add_vector_form(i, H1_semi_projection_liform<double, scalar>, H1_semi_projection_liform<Ord, Ord>,
+                               HERMES_ANY, source_meshfns[i]);
+    }
+    if (norm == HERMES_HCURL_NORM) 
+    {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
       proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
                      HERMES_ANY, source_meshfns[i]);
     }
   }
-  for (int i=0; i < n; i++) {
-    if (found[i] == 0) {
+  for (int i=0; i < n; i++) 
+  {
+    if (found[i] == 0) 
+    {
       warn("index of component: %d\n", i);
       error("Wrong projection norm in project_global().");
     }
@@ -1515,7 +1548,7 @@ void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns,
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, Tuple<int> proj_norms)
+void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
 {
   _F_
   scalar* target_vec = new scalar[get_num_dofs(spaces)];
@@ -1539,7 +1572,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
   int n = spaces.size();
   matrix_forms_tuple_t::size_type n_biforms = proj_biforms.size();
   if (n_biforms == 0)
-    error("Please use the simpler version of project_global with the argument Tuple<int> proj_norms if you do not provide your own projection norm.");
+    error("Please use the simpler version of project_global with the argument Tuple<ProjNormType> proj_norms if you do not provide your own projection norm.");
   if (n_biforms != proj_liforms.size())
     error("Mismatched numbers of projection forms in project_global().");
   if (n != n_biforms)
@@ -1564,7 +1597,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
 void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
-  int proj_norm = 2; // Hcurl
+  ProjNormType proj_norm = HERMES_HCURL_NORM;
   Mesh *mesh = space->get_mesh();
   if (mesh == NULL) error("Mesh is NULL in project_global().");
   Solution source_sln;
@@ -1581,7 +1614,7 @@ void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* m
   /// TODO
 }
 
-void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<int> proj_norms, TimePeriod * cpu_time)
+void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<ProjNormType> proj_norms, TimePeriod * cpu_time)
 {
   _F_
   if (spaces.size() != selectors.size()) 

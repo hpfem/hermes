@@ -257,7 +257,7 @@ int main (int argc, char* argv[]) {
     }
 
     // Update the coefficient vector and u_prev_time.
-    project_global(Tuple<Space*>(&C, &phi), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
+    project_global(Tuple<Space*>(&C, &phi), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM),
                    Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time),
                    Tuple<Solution*>(&C_prev_time, &phi_prev_time), coeff_vec);
 
@@ -266,7 +266,7 @@ int main (int argc, char* argv[]) {
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
     // The NULL pointers mean that we are not interested in visualization during the Newton's loop.
     solve_newton_adapt(Tuple<Space*>(&C, &phi), &wf, coeff_vec, matrix_solver,
-                       Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM),
+                       Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM),
                        Tuple<Solution*>(&C_sln, &phi_sln),
                        Tuple<Solution*>(&C_ref_sln, &phi_ref_sln),
                        NULL, NULL, 

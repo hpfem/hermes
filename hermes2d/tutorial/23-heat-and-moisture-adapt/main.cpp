@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate."); 
-      Adapt* adaptivity = new Adapt(Tuple<Space *>(&T_space, &M_space), Tuple<int>(HERMES_H1_NORM, HERMES_H1_NORM));
+      Adapt* adaptivity = new Adapt(Tuple<Space *>(&T_space, &M_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_solutions(Tuple<Solution *>(&T_coarse, &M_coarse), Tuple<Solution *>(&T_fine, &M_fine));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));

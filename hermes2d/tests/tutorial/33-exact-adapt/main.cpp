@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Adapt mesh to represent the exact function f(x, y) with given accuracy.
-  int proj_norm = 1;               // H1 norm.
+  ProjNormType proj_norm = HERMES_H1_NORM;   
   bool verbose = false;             // Report results. 
   Solution *sln = new Solution();
   adapt_to_exact_function(&space, proj_norm, f, &selector, THRESHOLD, STRATEGY,
