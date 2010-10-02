@@ -6,7 +6,7 @@
 
 const int P_INIT = 2;             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;       // Number of initial uniform refinements
-MatrixSolverType matrix_solver = SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;//SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -165,26 +165,19 @@ int main(int argc, char* argv[])
     // Initialize the FE problem.
     bool is_linear = true;
     FeProblem fep(&wf, &space, is_linear);
- 
-    initialize_solution_environment(matrix_solver, argc, argv);
-  
+
+    // Set up the solver, matrix, and rhs according to the solver selection. 
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-    if (matrix_solver == SOLVER_AZTECOO) 
-    {
-      ((AztecOOSolver*) solver)->set_solver(iterative_method);
-      ((AztecOOSolver*) solver)->set_precond(preconditioner);
-      // Using default iteration parameters (see solver/aztecoo.h).
-    }
     
     // Initialize the solution.
     Solution sln;
-  
-    // Assemble the stiffness matrix and right-hand side vector.
+
+    // Assemble the stiffness matrix and right-hand side vector.  
     info("Assembling the stiffness matrix and right-hand side vector.");
-    fep.assemble(matrix, rhs);
+    bool rhsonly = false;
+    fep.assemble(matrix, rhs, rhsonly);
 
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
@@ -193,13 +186,6 @@ int main(int argc, char* argv[])
     else
       error ("Matrix solver failed.\n");
   
-    // Clean up.
-    delete solver;
-    delete matrix;
-    delete rhs;
-  
-    finalize_solution_environment(matrix_solver);
-
     int ndof = get_num_dofs(&space);
     printf("ndof = %d\n", ndof);
     double sum = 0;
