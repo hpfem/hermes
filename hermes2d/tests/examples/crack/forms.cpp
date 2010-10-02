@@ -31,3 +31,8 @@ Scalar linear_form_surf_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *
 {
   return -f * int_v<Real, Scalar>(n, wt, v);
 }
+
+Ord linear_form_surf_1_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+{
+  return Ord(30);
+}

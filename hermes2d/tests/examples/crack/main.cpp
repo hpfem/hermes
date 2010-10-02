@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
-  wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_TOP);
+  wf.add_vector_form_surf(1, linear_form_surf_1, linear_form_surf_1_ord, BDY_TOP);
 
   // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
   int ndof_allowed = 650;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
-  if (ndof <= ndof_allowed) {      // ndofs was 626 at the time this test was created
+  if (ndof <= ndof_allowed) {      // ndofs was 636 at the time this test was created
     printf("Success!\n");
     return ERROR_SUCCESS;
   }
