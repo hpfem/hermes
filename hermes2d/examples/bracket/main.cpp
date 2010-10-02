@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // note that only one symmetric part is
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms
-  wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_TOP);
+  wf.add_vector_form_surf(1, linear_form_surf_1, linear_form_surf_1_ord, BDY_TOP);
 
   // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
