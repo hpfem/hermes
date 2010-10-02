@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form), 1);
+  wf.add_vector_form(linear_form, linear_form_ord);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_allowed = 4350;
+  int n_dof_allowed = 3230;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

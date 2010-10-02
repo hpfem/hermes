@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form), 1);
+  wf.add_vector_form(linear_form, linear_form_ord);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
