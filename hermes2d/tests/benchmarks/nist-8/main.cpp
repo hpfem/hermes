@@ -18,13 +18,13 @@ using namespace RefinementSelectors;
  *   - CAND_LIST=H2D_H_ANISO
  *   - MESH_REGULARITY=-1
  *   - CONV_EXP=1.0
- *   - ERR_STOP=1e-3
+ *   - ERR_STOP=0.1
  *   - NDOF_STOP=100000
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *  \section s_res Results
- *   - DOFs: 1241
- *   - Adaptivity steps: 33 
+ *   - DOFs: 1061
+ *   - Adaptivity steps: 26 
  */
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
@@ -52,7 +52,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1e-3;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_allowed = 3230;
+  int n_dof_allowed = 1100;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

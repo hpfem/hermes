@@ -24,8 +24,8 @@ using namespace RefinementSelectors;
  *   - EXACT_SOL_P = 10
  *
  *  \section s_res Results
- *   - DOFs: 5085
- *   - Adaptivity steps: 25
+ *   - DOFs: 511
+ *   - Adaptivity steps: 18
  */
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_allowed = 1240;
+  int n_dof_allowed = 520;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
