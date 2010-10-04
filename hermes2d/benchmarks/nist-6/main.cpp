@@ -102,9 +102,10 @@ int main(int argc, char* argv[])
   ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  ScalarView sview("Solution", new WinGeom(0, 0, 460, 350));
   sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  sview.fix_scale_width(70);
+  OrderView  oview("Polynomial orders", new WinGeom(470, 0, 410, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
