@@ -189,7 +189,8 @@ void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext,
   }
 }
 
-/// Finds an assembling stage with the same set of meshes as [m1, m2, ext]. If no such
+
+/// Finds an assembling stage with the same set of meshes as [m1, m2, ext, u_ext]. If no such
 /// stage can be found, a new one is created and returned.
 /// This function is the same in H2D and H3D.
 ///

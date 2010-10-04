@@ -211,7 +211,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       // find a non-NULL e[i]
       Element *e0;
       for (unsigned int i = 0; i < s->idx.size(); i++)
-	if ((e0 = e[i]) != NULL) break;
+        if ((e0 = e[i]) != NULL) break;
       if (e0 == NULL) continue;
 
       // H2D has here:
@@ -234,13 +234,9 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         test_fn[j].set_active_element(e[i]);
         test_fn[j].set_transform(base_fn + j);
 
-        // This is missing in H2D.
-	//u_ext[j]->set_active_element(e[i]);
-	//u_ext[j]->force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
-
         // This is different in H2D (PrecalcShapeset is used).
-	refmap[j].set_active_element(e[i]);
-	refmap[j].force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
+        refmap[j].set_active_element(e[i]);
+        refmap[j].force_transform(base_fn[j].get_transform(), base_fn[j].get_ctm());
       }
       int marker = e0->marker;
 

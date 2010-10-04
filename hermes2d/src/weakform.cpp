@@ -18,8 +18,7 @@
 #include "common.h"
 #include "weakform.h"
 #include "matrix.h"
-#include "solution.h"
-#include "forms.h"
+
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
