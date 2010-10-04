@@ -427,10 +427,9 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                 } 
               }
             }
-            if (rhsonly == false) {
-              mat->add(am->cnt, an->cnt, local_stiffness_matrix, an->dof, am->dof);
-            }
-	  }
+            if (rhsonly == false) 
+              mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
+          }
         }
 
         // assemble surface vector forms /////////////////////////////////////
