@@ -33,15 +33,19 @@ Amesos AmesosSolver::factory;
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////
 
 AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs)
-	: LinearSolver(), m(m), rhs(rhs)
+  : LinearSolver(), m(m), rhs(rhs)
 {
-	_F_
+  _F_
 #ifdef HAVE_AMESOS
-	solver = factory.Create(solver_type, problem);
-	assert(solver != NULL);
+  solver = factory.Create(solver_type, problem); 
+  assert(solver != NULL);
+  // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver, 
+  //          so don't forget to delete it!
+  //          ( Amesos.cpp, line 88, called from factory.Create(): 
+  //            return new Amesos_Klu(LinearProblem); )
 #else
-	warning("hermes2d was not built with AMESOS support.");
-	exit(128);
+  warning("hermes2d was not built with AMESOS support.");
+  exit(128);
 #endif
 }
 
@@ -49,6 +53,7 @@ AmesosSolver::~AmesosSolver()
 {
 	_F_
 #ifdef HAVE_AMESOS
+  delete solver;
   //if (m != NULL) delete m;
   //if (rhs != NULL) delete rhs;
 #endif
