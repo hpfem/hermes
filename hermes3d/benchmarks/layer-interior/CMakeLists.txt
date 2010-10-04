@@ -1,4 +1,4 @@
-project(singpert-aniso)
+project(layer-interior)
 
 include(CMake.vars OPTIONAL)
 

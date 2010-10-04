@@ -1175,7 +1175,7 @@ Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<
 }
 
 template<typename Real, typename Scalar>
-Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar H1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -1334,7 +1334,7 @@ void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple
   {
     if (found[i] == 0) 
     {
-      warn("index of component: %d\n", i);
+      printf("index of component: %d\n", i);
       error("Wrong projection norm in project_global().");
     }
   }

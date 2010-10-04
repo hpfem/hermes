@@ -1,4 +1,4 @@
-project(layer)
+project(layer-boundary)
 
 include(CMake.vars OPTIONAL)
 
