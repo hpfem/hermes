@@ -105,6 +105,9 @@ int main(int argc, char* argv[])
   sview.show_mesh(false);
   OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -165,7 +168,6 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Add entries to DOF and CPU convergence graphs.
-    SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
     graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
