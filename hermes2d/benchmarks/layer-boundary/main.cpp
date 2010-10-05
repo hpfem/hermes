@@ -105,9 +105,6 @@ int main(int argc, char* argv[])
   sview.show_mesh(false);
   OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
-  // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
-
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -167,17 +164,18 @@ int main(int argc, char* argv[])
     // Time measurement.
     cpu_time.tick();
 
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
-    graph_dof.save("conv_dof_est.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu.save("conv_cpu_est.dat");
+    // Add entries to DOF and CPU convergence graphs.
+    SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
+    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu_est.save("conv_cpu_est.dat");
     graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
     graph_cpu_exact.save("conv_cpu_exact.dat");
 
-    // If err_est too large, adapt the mesh.
+    // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else
     {

@@ -13,21 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "common.h"
-#include "solution.h"
-#include "discrete_problem.h"
-#include "refmap.h"
-#include "shapeset_h1_all.h"
-#include "quad_all.h"
-#include "integrals_h1.h"
-#include "matrix_old.h"
+#include "../common.h"
+#include "../solution.h"
+#include "../discrete_problem.h"
+#include "../refmap.h"
+#include "../shapeset_h1_all.h"
+#include "../quad_all.h"
+#include "../integrals_h1.h"
+#include "../matrix_old.h"
 #include "adapt_h1.h"
 #include "adapt_ortho_h1.h"
-#include "traverse.h"
-#include "norm.h"
-#include "element_to_refine.h"
-#include "ref_selectors/selector.h"
-#include "ref_selectors/h1_uniform_hp.h"
+#include "../traverse.h"
+#include "../norm.h"
+#include "../element_to_refine.h"
+#include "../ref_selectors/selector.h"
+#include "../ref_selectors/h1_uniform_hp.h"
 
 using namespace std;
 
