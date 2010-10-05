@@ -61,24 +61,36 @@ void Graph::set_row_style(int row, const char *color, const char *line, const ch
 	rows[row].marker = marker;
 }
 
-void Graph::add_value(int row, double x, double y) {
+void Graph::add_values(int row, double x, double y) {
 	_F_
 	if (!rows.size()) add_row(NULL);
+        if (fabs(x) < 1e-12) return;  // this is to avoid problems with plotting in log-log scale
+                                      // (sometimes the CPU time was zero and plotting crashed)
 	if (row < 0 || row >= (int) rows.size()) warning("Invalid row number.");
 	Values xy = { x, y };
 	rows[row].data.push_back(xy);
 }
 
+void Graph::add_values(double x, double y)
+{
+  int row = 0;
+  if (!rows.size()) add_row(NULL);
+  if (fabs(x) < 1e-12 ) return;  // this is to avoid problems with plotting in log-log scale
+                                 // (sometimes the CPU time was zero and plotting crashed)
+  Values xy = { x, y };
+  rows[row].data.push_back(xy);
+}
+
 void Graph::add_values(int row, int n, double *x, double *y) {
 	_F_
 	for (int i = 0; i < n; i++)
-		add_value(row, x[i], y[i]);
+		add_values(row, x[i], y[i]);
 }
 
 void Graph::add_values(int row, int n, double2 *xy) {
 	_F_
 	for (int i = 0; i < n; i++)
-		add_value(row, xy[i][0], xy[i][1]);
+		add_values(row, xy[i][0], xy[i][1]);
 }
 
 void Graph::save_numbered(const char *filename, int number) {
@@ -86,6 +98,27 @@ void Graph::save_numbered(const char *filename, int number) {
 	char buffer[1000];
 	sprintf(buffer, filename, number);
 	save(buffer);
+}
+
+//// SimpleGraph //////////////////////////////////////////////////////////////////////////////////
+
+void SimpleGraph::save(const char* filename)
+{
+  if (!rows.size()) error("No data rows defined.");
+
+  FILE* f = fopen(filename, "w");
+  if (f == NULL) error("Error writing to %s.", filename);
+
+  for (int i = 0; i < rows.size(); i++)
+  {
+    int rsize = rows[i].data.size();
+    for (int j = 0; j < rsize; j++)
+      fprintf(f, "%.14g  %.14g\n", rows[i].data[j].x, rows[i].data[j].y);
+  }
+
+  fclose(f);
+
+  printf("Graph saved to file '%s'.\n", filename);
 }
 
 //// MatlabGraph ///////////////////////////////////////////////////////////////////////////////////

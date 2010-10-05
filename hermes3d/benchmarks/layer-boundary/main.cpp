@@ -82,7 +82,7 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
 
 int main(int argc, char **args) {
 
-  // Load the inital mesh.
+  // Load the mesh.
   Mesh mesh;
   Mesh3DReader mesh_loader;
   if(!mesh_loader.load("singpert-aniso.mesh3d", &mesh))
@@ -95,10 +95,7 @@ int main(int argc, char **args) {
   printf("New number of elements is %d.\n", (int) nelem);
 
   // Graphs of DOF convergence.
-  GnuplotGraph graph;
-  graph.set_captions("", "Degrees of freedom", "Error [%]");
-  graph.set_log_y();
-  graph.add_row("Total error", "k", "-", "O");
+  SimpleGraph graph;
 
   // Create H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
@@ -195,9 +192,8 @@ int main(int argc, char **args) {
     printf("% lf %%\n", err_est_rel);
 
     // Save it to the graph.
-    graph.add_value(0, ndof, err_est_rel);
+    graph.add_values(ndof, err_est_rel);
     if (do_output) graph.save("conv.gp");
-
 
     // If error is too large, adapt the mesh. 
     if (err_est_rel < ERR_STOP) 

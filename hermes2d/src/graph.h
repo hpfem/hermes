@@ -22,7 +22,7 @@
 ///  to a file by calling save().
 ///
 ///  Please note that this is a base class that cannot be instantiated.
-///  Use MatlabGraph or GnuplotGraph instead.
+///  Use MatlabGraph, GnuplotGraph or SimpleGraph instead.
 ///
 class H2D_API Graph
 {
