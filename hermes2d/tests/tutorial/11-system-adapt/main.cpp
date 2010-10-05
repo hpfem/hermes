@@ -39,8 +39,7 @@ const int MESH_REGULARITY = -1;  // Maximum allowed level of hanging nodes:
                                  // their notoriously bad performance.
 const double CONV_EXP = 1;       // Default value is 1.0. This parameter influences the selection of
                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const int MAX_ORDER = 10;        // Maximum allowed element degree
-const double ERR_STOP = 0.5;     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;     // Stopping criterion for adaptivity (rel. error tolerance between the
                                  // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;     // Adaptivity process stops when the number of degrees of freedom grows over
                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -104,17 +103,13 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize views.
-  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 440, 350));
-  s_view_0.show_mesh(false);
-  OrderView  o_view_0("Mesh[0]", new WinGeom(450, 0, 420, 350));
-  ScalarView s_view_1("Solution[1]", new WinGeom(880, 0, 440, 350));
-  s_view_1.show_mesh(false);
-  OrderView  o_view_1("Mesh[1]", new WinGeom(1330, 0, 420, 350));
-
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 
               graph_dof_exact, graph_cpu_exact;
+
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
 
   // Adaptivity loop:
   int as = 1; 
@@ -151,12 +146,6 @@ int main(int argc, char* argv[])
     project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
                    Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
-    // View the coarse mesh solution and polynomial orders.
-    s_view_0.show(&u_sln); 
-    o_view_0.show(&u_space);
-    s_view_1.show(&v_sln); 
-    o_view_1.show(&v_space);
-
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
@@ -229,9 +218,9 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 1200);
+  printf("ndof allowed = %d\n", 1040);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 1200) {      // ndofs was 1158 at the time this test was created
+  if (ndof < 1040) {      // ndofs was 1030 at the time this test was created
     printf("Success!\n");
     return ERROR_SUCCESS;
   }

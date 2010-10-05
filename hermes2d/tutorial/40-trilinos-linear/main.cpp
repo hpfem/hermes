@@ -127,7 +127,7 @@ int main(int argc, char **argv)
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
   if(solver->solve())
-    vector_to_solution(solver->get_solution(), &space, &sln1);
+    Solution::vector_to_solution(solver->get_solution(), &space, &sln1);
   else
     error ("Matrix solver failed.\n");
 
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
     printf("\n");
     */
     
-    vector_to_solution(coeffs, &space, &sln2);
+    Solution::vector_to_solution(coeffs, &space, &sln2);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
       nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 

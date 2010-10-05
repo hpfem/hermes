@@ -105,34 +105,209 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
 
-  // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY);
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep_coarse(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
+  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+  Vector* rhs_coarse = create_vector(matrix_solver);
+  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Projecting to obtain initial coefficient vector for the Newton's method.
-  // The NULL pointer means that we do not want the projection result as a Solution.
-  Vector *coeff_vec = new AVector();
-  Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
-  delete sln_tmp;
+  // Initialize coarse and reference mesh solution.
+  Solution sln, ref_sln;
 
-  // Adaptivity loop.
-  WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
-  WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
-  bool verbose = true;     // Print info during adaptivity.
-  // The empty Tuples mean that we do not want the resulting coarse and fine mesh solutions.
-  solve_newton_adapt(&space, &wf, coeff_vec, matrix_solver, H2D_H1_NORM, Tuple<Solution *>(), 
-                     Tuple<Solution *> (), NULL, NULL, &selector, &apt,  
-                     NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est;
+
+  // Project the initial condition on the FE space to obtain initial 
+  // coefficient vector for the Newton's method.
+  info("Projecting initial condition to obtain initial vector on the coarse mesh.");
+  scalar* coeff_vec_coarse = new scalar[get_num_dofs(&space)] ;
+  Solution* init_sln = new Solution(&mesh, init_cond);
+  project_global(&space, init_sln, coeff_vec_coarse, matrix_solver); 
+  delete init_sln;
+
+  // Newton's loop on the coarse mesh.
+  info("Solving on coarse mesh:");
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = get_num_dofs(&space);
+
+    // Assemble the Jacobian matrix and residual vector.
+    fep_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs_coarse);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+
+    // If l2 norm of the residual vector is in tolerance, or the maximum number 
+    // of iteration has been hit, then quit.
+    if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
+
+    // Solve the linear system and if successful, obtain the solution.
+    if(!solver_coarse->solve())
+      error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
+    
+    if (it >= NEWTON_MAX_ITER)
+      error ("Newton method did not converge.");
+
+    it++;
+  }
+
+  // Translate the resulting coefficient vector into the Solution sln.
+  Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
+
+  // Cleanup after the Newton loop on the coarse mesh.
+  delete matrix_coarse;
+  delete rhs_coarse;
+  delete solver_coarse;
+  delete [] coeff_vec_coarse;
+
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
+
+    scalar* coeff_vec = new scalar[get_num_dofs(ref_space)];
+    FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    if (as == 1) 
+    {
+      info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
+      project_global(ref_space, &sln, coeff_vec, matrix_solver);
+    }
+    else 
+    {
+      info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
+      project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
+    }
+
+    // Newton's loop on the fine mesh.
+    info("Solving on fine mesh:");
+    int it = 1;
+    while (1)
+    {
+      // Obtain the number of degrees of freedom.
+      int ndof = get_num_dofs(ref_space);
+
+      // Assemble the Jacobian matrix and residual vector.
+      fep->assemble(coeff_vec, matrix, rhs, false);
+
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
+
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(ref_space), res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
+      if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
+
+      // Solve the linear system.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+      if (it >= NEWTON_MAX_ITER)
+        error ("Newton method did not converge.");
+
+      it++;
+    }
+
+    // Translate the resulting coefficient vector into the Solution ref_sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    adaptivity->set_solutions(&sln, &ref_sln);
+    double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu_est.save("conv_cpu_est.dat");
+
+    // If err_est_rel too large, adapt the mesh.
+    if (err_est_rel < ERR_STOP) done = true;
+    else 
+    {
+        info("Adapting the coarse mesh.");
+        done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+      if (get_num_dofs(&space) >= NDOF_STOP) 
+      {
+        done = true;
+        break;
+      }
+      
+      // Project last fine mesh solution on the new coarse mesh
+      // to obtain new coars emesh solution.
+      info("Projecting reference solution on new coarse mesh for error calculation.");
+      project_global(&space, &ref_sln, &sln, matrix_solver); 
+    }
+
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    if(done == false)
+      delete ref_space->mesh;
+    delete ref_space;
+    delete fep;
+
+    as++;
+  }
+  while (done == false);
+
+  verbose("Total running time: %g s", cpu_time.accumulated());
   
   int ndof = get_num_dofs(&space);
-  delete coeff_vec;
 
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1

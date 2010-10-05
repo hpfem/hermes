@@ -82,29 +82,79 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
+
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Initialize the solution.
+  Solution sln;
 
   // Project the initial condition on the FE space to obtain initial 
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
-  Vector* init_coeff_vec = new AVector();
-  // The NULL means that we do not want the resulting Solution, just the vector.
-  Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(space, H2D_H1_NORM, sln_tmp, NULL, init_coeff_vec); 
-  delete sln_tmp;
+  scalar* coeff_vec = new scalar[get_num_dofs(&space)] ;
+  Solution* init_sln = new Solution(&mesh, init_cond);
+  project_global(&space, init_sln, coeff_vec, matrix_solver); 
+  delete init_sln;
 
   // Perform Newton's iteration.
-  info("Performing Newton's iteration.");
-  bool verbose = true;
-  bool success = solve_newton(space, &wf, init_coeff_vec, matrix_solver, 
-		              NEWTON_TOL, NEWTON_MAX_ITER, verbose);
+  int it = 1;
+  bool success = false;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = get_num_dofs(&space);
 
-  delete init_coeff_vec;
+    // Assemble the Jacobian matrix and residual vector.
+    fep.assemble(coeff_vec, matrix, rhs, false);
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+
+    // If l2 norm of the residual vector is within tolerance, or the maximum number 
+    // of iteration has been reached, then quit.
+    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+    // Solve the linear system.
+    if(!(success = solver->solve()))
+      error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+    
+    if (it >= NEWTON_MAX_ITER)
+      error ("Newton method did not converge.");
+
+    it++;
+  }
+
+  // Translate the resulting coefficient vector into the Solution sln.
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
+
+  // Cleanup.
+  delete []coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
   
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

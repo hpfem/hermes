@@ -73,9 +73,9 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Create an H1 space.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(space);
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  int ndof = get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Previous time level solution.
@@ -84,40 +84,77 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if(TIME_DISCR == 1) {
-    wf.add_matrix_form(callback(J_euler), H2D_UNSYM, H2D_ANY);
-    wf.add_vector_form(callback(F_euler), H2D_ANY, &psi_prev_time);
+    wf.add_matrix_form(callback(J_euler), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(F_euler), HERMES_ANY, &psi_prev_time);
   }
   else {
-    wf.add_matrix_form(callback(J_cranic), H2D_UNSYM, H2D_ANY);
-    wf.add_vector_form(callback(F_cranic), H2D_ANY, &psi_prev_time);
+    wf.add_matrix_form(callback(J_cranic), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(F_cranic), HERMES_ANY, &psi_prev_time);
   }
 
-  // Project the initial condition on the FE space
-  // to obtain initial coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  bool is_complex = true;
-  Vector* coeff_vec = new AVector(0, is_complex); 
-  project_global(space, H2D_H1_NORM, &psi_prev_time, Tuple<Solution*>(), coeff_vec, is_complex);
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep(&wf, &space, is_linear);
 
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  scalar* coeff_vec = new scalar[ndof];
+  project_global(&space, &psi_prev_time, coeff_vec, matrix_solver);
+  
   // Time stepping loop:
   int nstep = (int)(T_FINAL/TAU + 0.5);
   for(int ts = 1; ts <= nstep; ts++)
   {
-
     info("Time step %d:", ts);
 
     // Newton's method.
     info("Performing Newton's method.");
-    bool verbose = true; // Default is false.
-    if (!solve_newton(space, &wf, coeff_vec, matrix_solver, 
-		      NEWTON_TOL, NEWTON_MAX_ITER, verbose, is_complex))
-      error("Newton's method did not converge.");
+    int it = 1;
+    while (1)
+    {
+      fep.assemble(coeff_vec, matrix, rhs, false);
+      
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
 
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, ndof, res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
+      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+      // Solve the linear system and if successful, obtain the solutions.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+      if (it >= NEWTON_MAX_ITER)
+        error ("Newton method did not converge.");
+     
+      it++;
+    };
+    
     // Update previous time level solution.
-    psi_prev_time.set_coeff_vector(space, coeff_vec);
+    Solution::vector_to_solution(coeff_vec, &space, &psi_prev_time);
   }
 
   delete coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   AbsFilter mag2(&psi_prev_time);
 #define ERROR_SUCCESS                                0

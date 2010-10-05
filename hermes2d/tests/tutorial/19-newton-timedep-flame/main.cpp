@@ -58,9 +58,9 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Create H1 spaces with default shapesets.
-  H1Space* tspace = new H1Space(&mesh, bc_types, essential_bc_values_t, P_INIT);
-  H1Space* cspace = new H1Space(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = get_num_dofs(Tuple<Space *>(tspace, cspace));
+  H1Space tspace(&mesh, bc_types, essential_bc_values_t, P_INIT);
+  H1Space cspace(&mesh, bc_types, essential_bc_values_c, P_INIT);
+  int ndof = get_num_dofs(Tuple<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 
   // Previous time level solutions.
@@ -70,13 +70,7 @@ int main(int argc, char* argv[])
   // And their initial exact setting.
   t_prev_time_1.set_exact(&mesh, temp_ic); c_prev_time_1.set_exact(&mesh, conc_ic);
   t_prev_time_2.set_exact(&mesh, temp_ic); c_prev_time_2.set_exact(&mesh, conc_ic);
-  t_prev_newton.set_exact(&mesh, temp_ic);  c_prev_newton.set_exact(&mesh, conc_ic);
-
-  // Projecting initial conditions to obtain initial vector for the Newton's method.
-  info("Projecting initial conditions to obtain initial vector for the Newton's method.");
-  Vector* coeff_vec = new AVector(); 
-  project_global(Tuple<Space *>(tspace, cspace), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM),
-  Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton),Tuple<Solution*>(&t_prev_newton, &c_prev_newton), coeff_vec);
+  t_prev_newton.set_exact(&mesh, temp_ic); c_prev_newton.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
   DXDYFilter omega(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
@@ -85,14 +79,34 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), H2D_UNSYM, H2D_ANY, &omega_dt);
+  wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
   wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), 3);
-  wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), H2D_UNSYM, H2D_ANY, &omega_dc);
-  wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), H2D_UNSYM, H2D_ANY, &omega_dt);
-  wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), H2D_UNSYM, H2D_ANY, &omega_dc);
-  wf.add_vector_form(0, callback(newton_linear_form_0), H2D_ANY, Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+  wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+  wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
+  wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+  wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
-  wf.add_vector_form(1, callback(newton_linear_form_1), H2D_ANY, Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+  wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep(&wf, Tuple<Space *>(&tspace, &cspace), is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  scalar* coeff_vec = new scalar[ndof];
+  project_global(Tuple<Space *>(&tspace, &cspace), Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), coeff_vec, matrix_solver);
+
+  // Initialize views.
+  ScalarView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
@@ -100,70 +114,52 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, t = %g s.", ts, current_time);
 
-    // Newton's method.
-    info("Performing Newton's method.");
-   
-    bool verbose = true; // Default is false.
-
-    int ndof = get_num_dofs(Tuple<Space *>(tspace, cspace));
-    int n_mesh_fns = 3;
-
-    // Initialize the discrete problem.
-    DiscreteProblem dp(&wf, Tuple<Space *>(tspace, cspace));
-    //info("ndof = %d", dp.get_num_dofs());
-
-    // Select matrix solver.
-    Matrix* mat; Vector* rhs; CommonSolver* solver;
-		
-    init_matrix_solver(matrix_solver, ndof, mat, rhs, solver, false);
-		
-    // Newton's loop.
+    // Perform Newton's iteration.
     int it = 1;
-    for (; it <= NEWTON_MAX_ITER; it++)
+    while (1)
     {
-      // Reinitialize filters and previous Newton solutions these filters use.
-      t_prev_newton.set_coeff_vector(tspace, coeff_vec);
-      c_prev_newton.set_coeff_vector(cspace, coeff_vec);
+      fep.assemble(coeff_vec, matrix, rhs, false);
+      
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
+
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
+      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+      // Solve the linear system and if successful, obtain the solutions.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+      if (it >= NEWTON_MAX_ITER)
+        error ("Newton method did not converge.");
+     
+      // Set current solutions to the latest Newton iterate and reinitialize filters of these solutions.
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();
 
-      // Assemble the Jacobian matrix and residual vector.
-      bool rhsonly = false;
-
-      // The NULL stands for the dir vector which is not needed here.
-      dp.assemble(coeff_vec, mat, NULL, rhs, rhsonly, false);
-			
-      // Multiply the residual vector with -1 since the matrix 
-      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-			
-      // Calculate the l2-norm of residual vector.
-      double res_l2_norm = 0;
-      for (int i = 0; i < ndof; i++) res_l2_norm += rhs->get(i)*rhs->get(i);
-      res_l2_norm = sqrt(res_l2_norm);
-
-      if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, ndof, res_l2_norm);
-
-      // If l2 norm of the residual vector is in tolerance, quit.
-      if (res_l2_norm < NEWTON_TOL) 
-        break;
-
-      // Solve the matrix problem.
-      if (!solver->solve(mat, rhs)) 
-        error ("Matrix solver failed.\n");
-
-      // Add \deltaY^{n+1} to Y^n.
-      for (int i = 0; i < ndof; i++) coeff_vec->add(i, rhs->get(i));
+      it++;
     };
 
-    delete rhs;
-    delete mat;
-    delete solver;
-
-    // If we have not reached the desired tolerance.
-    if(it == NEWTON_MAX_ITER)
-       error("Newton's method did not converge.");
+    // Visualization.
+    DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    rview.set_min_max_range(0.0,2.0);
+    char title[100];
+    sprintf(title, "Reaction rate, t = %g", current_time);
+    rview.set_title(title);
+    rview.show(&omega_view);
 
     // Update current time.
     current_time += TAU;
@@ -171,14 +167,19 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-    t_prev_time_1.set_coeff_vector(tspace, coeff_vec);
-    c_prev_time_1.set_coeff_vector(cspace, coeff_vec);
+//    t_prev_time_1.set_coeff_vector(&tspace, coeff_vec);
+//    c_prev_time_1.set_coeff_vector(&cspace, coeff_vec);
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
     ts++;
   } 
   while (current_time <= T_FINAL);
-  
-  delete coeff_vec;
+
+  // Cleanup.
+  delete [] coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   info("Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
   info("Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));

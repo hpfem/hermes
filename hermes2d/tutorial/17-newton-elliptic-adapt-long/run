@@ -1,3 +1,0 @@
-rm *~ 
-./newton-elliptic-adapt-long
-python plot_graph.py &

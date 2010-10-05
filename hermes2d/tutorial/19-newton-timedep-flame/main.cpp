@@ -183,8 +183,9 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-    t_prev_time_1.set_coeff_vector(&tspace, coeff_vec);
-    c_prev_time_1.set_coeff_vector(&cspace, coeff_vec);
+//    t_prev_time_1.set_coeff_vector(&tspace, coeff_vec);
+//    c_prev_time_1.set_coeff_vector(&cspace, coeff_vec);
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
     ts++;
   } 
