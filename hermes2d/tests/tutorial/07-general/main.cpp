@@ -96,12 +96,11 @@ Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 }
 
 // Integration order for the bilinear form
-template<typename Real, typename Scalar>
-Scalar bilinear_form_ord(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Ord bilinear_form_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return u->val[0] * v->val[0] * e->x[0] * e->x[0]; // returning the sum of the degrees of the basis
-                                                    // and test function plus two
+  return Ord(u->val[0] * v->val[0] * e->x[0] * e->x[0]); // returning the sum of the degrees of the basis
+                                                         // and test function plus two
 }
 
 // Surface linear form (natural boundary conditions)
@@ -113,11 +112,10 @@ Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 }
 
 // Integration order for surface linear form
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_ord(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Ord linear_form_surf_ord(int n, double *wt, Func<Ord> *u_ext[], 
+Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
+  return Ord(v->val[0] * e->x[0] * e->x[0]);  // returning the polynomial degree of the test function plus two
 }
 
 // Volumetric linear form (right-hand side)
