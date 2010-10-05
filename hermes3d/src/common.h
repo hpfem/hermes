@@ -31,6 +31,8 @@
 #include <algorithm>			// std::min, std::max
 #include <vector>
 #include <set>
+#include "common_time_period.h"
+
 
 // Compatibility.
 //Windows DLL export/import definitions

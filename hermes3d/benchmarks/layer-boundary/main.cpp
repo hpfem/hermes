@@ -80,22 +80,19 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
   else warning("Could not open file '%s' for writing.", fname);
 }
 
-int main(int argc, char **args) {
-
+int main(int argc, char **args) 
+{
   // Load the mesh.
   Mesh mesh;
-  Mesh3DReader mesh_loader;
-  if(!mesh_loader.load("singpert-aniso.mesh3d", &mesh))
+  H3DReader mloader;
+  if(!mloader.load("singpert-aniso.mesh3d", &mesh))
     error("Loading mesh file '%s'\n", "cylinder2.e");
 
-  // Perform initial mesh refinements.
+  // Perform initial mesh refinement.
   printf("Performing %d initial mesh refinements.\n", INIT_REF_NUM);
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
   Word_t (nelem) = mesh.get_num_elements();
   printf("New number of elements is %d.\n", (int) nelem);
-
-  // Graphs of DOF convergence.
-  SimpleGraph graph;
 
   // Create H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
@@ -105,12 +102,13 @@ int main(int argc, char **args) {
   wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
   wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
 
-  // Initialize the coarse mesh problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
 
   // Adaptivity loop.
-  int as = 0; bool done = false;
+  int as = 1; 
+  bool done = false;
   do {
     printf("\n---- Adaptivity step %d:\n", as);
     printf("\nSolving on coarse mesh:\n");
@@ -125,10 +123,20 @@ int main(int argc, char **args) {
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_solver(matrix_solver, matrix, rhs);
 
+    // Initialize the coarse mesh problem.
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, &space, is_linear);
+
+    // Time measurement.
+    cpu_time.tick();
+
     // Assemble stiffness matrix and rhs.
     printf("  - Assembling...\n"); fflush(stdout);
     dp.assemble(matrix, rhs);
     
+    // Time measurement.
+    cpu_time.tick();
+
     // Solve the matrix problem.
     printf("  - Solving... "); fflush(stdout);
     bool solved = solver->solve();
@@ -139,6 +147,9 @@ int main(int argc, char **args) {
     Solution sln(&mesh);
     sln.set_coeff_vector(&space, solver->get_solution());
 
+    // Time measurement.
+    cpu_time.tick();
+
     // Output solution and mesh.
     if (do_output) 
     {
@@ -146,8 +157,11 @@ int main(int argc, char **args) {
       out_orders(&space, "order", as);
     }
 
+    // Skip the visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
     // Solving the fine mesh problem.
-    printf("Solving on fine mesh:\n");
+    printf("Solving on reference mesh:\n");
 
     // Construct the refined mesh for reference(refined) solution. 
     Mesh rmesh;
@@ -185,15 +199,16 @@ int main(int argc, char **args) {
 
     // Calculate error estimates for hp-adaptivity.
     printf("Adaptivity\n");
-    printf("  - calculating error: "); fflush(stdout);
+    printf("  - calculating error estimate: "); fflush(stdout);
     H1Adapt hp(&space);
-    hp.set_aniso(true);							// anisotropic adaptivity.
-    double err_est_rel = hp.calc_error(&sln, &rsln) * 100;
+    hp.set_aniso(true);							// Anisotropic adaptivity.
+    double err_est_rel = hp.calc_err_est(&sln, &rsln) * 100;
     printf("% lf %%\n", err_est_rel);
 
     // Save it to the graph.
-    graph.add_values(ndof, err_est_rel);
-    if (do_output) graph.save("conv.gp");
+    SimpleGraph graph_dof;
+    graph_dof.add_values(ndof, err_est_rel);
+    if (do_output) graph_dof.save("conv_dof_est.dat");
 
     // If error is too large, adapt the mesh. 
     if (err_est_rel < ERR_STOP) 
@@ -202,7 +217,7 @@ int main(int argc, char **args) {
       break;
     }
     printf("  - adapting... "); fflush(stdout);
-    hp.adapt(THRESHOLD);						// run the adaptivity algorithm
+    hp.adapt(THRESHOLD);						// Run the adaptivity algorithm.
     printf("done in %lf secs (refined %d element(s))\n", hp.get_adapt_time(), hp.get_num_refined_elements());
 
     if (rndof >= NDOF_STOP)

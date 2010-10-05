@@ -596,7 +596,7 @@ void H1Adapt::adapt(double thr)
 {
 	_F_
 	if (!have_errors)
-		EXIT("Element errors have to be calculated first, see calc_error().");
+		EXIT("Element errors have to be calculated first, see calc_err_est().");
 
 	Timer tmr;
 	tmr.start();

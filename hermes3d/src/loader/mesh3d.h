@@ -25,10 +25,10 @@
 /// Mesh loader from Mesh3D format
 ///
 /// @ingroup meshloaders
-class H3D_API Mesh3DReader : public MeshLoader {
+class H3D_API H3DReader : public MeshLoader {
 public:
-	Mesh3DReader();
-	virtual ~Mesh3DReader();
+	H3DReader();
+	virtual ~H3DReader();
 
 	virtual bool load(const char *file_name, Mesh *mesh);
 	virtual bool save(const char *file_name, Mesh *mesh);

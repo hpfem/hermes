@@ -46,7 +46,7 @@ public:
 		                      Geom<Ord> *e, ExtData<Ord> *);
 
 	/// Type-safe version of calc_error_n() for one solution.
-	double calc_error(Solution *sln, Solution *rsln)
+	double calc_err_est(Solution *sln, Solution *rsln)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
 		return calc_error_n(Tuple<Solution *> (sln), Tuple<Solution *> (rsln));
@@ -57,7 +57,7 @@ public:
 	/// pointers are passed, followed by n fine solution pointers.
 	double calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns);
 
-	/// Selects elements to refine (based on results from calc_error() or calc_energy_error())
+	/// Selects elements to refine (based on results from calc_err_est() or calc_energy_error())
 	/// and performs their optimal hp-refinement.
 	void adapt(double thr);
 

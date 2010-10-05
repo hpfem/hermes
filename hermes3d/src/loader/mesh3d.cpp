@@ -37,11 +37,11 @@
 // number of markers on mesd3d file
 #define MARKERS								1
 
-Mesh3DReader::Mesh3DReader() {
+H3DReader::H3DReader() {
 	_F_
 }
 
-Mesh3DReader::~Mesh3DReader() {
+H3DReader::~H3DReader() {
 	_F_
 }
 
@@ -95,7 +95,7 @@ static bool range_check(Word_t max_index, Word_t *vs, int num_vs) {
 	return true;
 }
 
-bool Mesh3DReader::load(const char *file_name, Mesh *mesh) {
+bool H3DReader::load(const char *file_name, Mesh *mesh) {
 	_F_
 	assert(mesh != NULL);
 
@@ -323,7 +323,7 @@ bool Mesh3DReader::load(const char *file_name, Mesh *mesh) {
 	return true;
 }
 
-bool Mesh3DReader::save(const char *file_name, Mesh *mesh) {
+bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	_F_
 	assert(mesh != NULL);
 
