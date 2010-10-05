@@ -91,16 +91,16 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(bdy_bottom, 4, true);  // 'true' stands for anisotropic refinements.
 
   // Spaces for velocity components and pressure.
-  H1Space* xvel_space = new H1Space(&mesh, xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space* yvel_space = new H1Space(&mesh, yvel_bc_type, NULL, P_INIT_VEL);
+  H1Space xvel_space(&mesh, xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
+  H1Space yvel_space(&mesh, yvel_bc_type, NULL, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space* p_space = new L2Space(&mesh, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space* p_space = new H1Space(&mesh, NULL, NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, NULL, NULL, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
+  int ndof = get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -121,46 +121,55 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm wf(3);
   if (NEWTON) {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), H2D_ANTISYM);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), H2D_UNSYM, H2D_ANY);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
-    wf.add_vector_form(0, callback(newton_F_0), H2D_ANY, 
+    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
+    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
+    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
+    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
+    wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
                        Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(1, callback(newton_F_1), H2D_ANY, 
+    wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
                        Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(2, callback(newton_F_2), H2D_ANY);
+    wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
   }
   else {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
+    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), H2D_SYM);
+                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), H2D_ANTISYM);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
-    wf.add_vector_form(0, callback(simple_linear_form), H2D_ANY, &xvel_prev_time);
-    wf.add_vector_form(1, callback(simple_linear_form), H2D_ANY, &yvel_prev_time);
+                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
+    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
+    wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
+    wf.add_vector_form(1, callback(simple_linear_form), HERMES_ANY, &yvel_prev_time);
   }
 
-  // Project initial conditions on FE spaces to obtain initial coefficient 
-  // vector for the Newton's method.
-  Vector* coeff_vec;
+  // Initialize the FE problem.
+  bool is_linear;
+  if (NEWTON) is_linear = false;
+  else is_linear = true;
+  FeProblem fep(&wf, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  scalar* coeff_vec = new scalar[get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
-    info("Projecting initial conditions to obtain initial vector for the Newton's method.");
-    coeff_vec = new AVector(); 
-    project_global(Tuple<Space *>(xvel_space, yvel_space, p_space), 
-                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm),
-                   Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   Tuple<Solution*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   coeff_vec);  
+    info("Projecting initial condition to obtain initial vector for the Newton's method.");
+    project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                   Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+                   coeff_vec, 
+                   matrix_solver, 
+                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
-  else coeff_vec = NULL;
 
   // Time-stepping loop:
   char title[100];
@@ -173,31 +182,63 @@ int main(int argc, char* argv[])
     // Update time-dependent essential BC are used.
     if (TIME <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Tuple<Space *>(xvel_space, yvel_space, p_space));
+      update_essential_bc_values(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
     }
 
-    if (NEWTON) {
-      // Newton's method.
-      info("Performing Newton's method.");
-      bool verbose = true; // Default is false.
-      if (!solve_newton(Tuple<Space *>(xvel_space, yvel_space, p_space), &wf, coeff_vec, 
-          matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-        error("Newton's method did not converge.");
+    if (NEWTON) 
+    {
+      // Perform Newton's iteration.
+      int it = 1;
+      while (1)
+      {
+        // Assemble the Jacobian matrix and residual vector.
+        fep.assemble(coeff_vec, matrix, rhs, false);
+
+        // Multiply the residual vector with -1 since the matrix 
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        
+        // Calculate the l2-norm of residual vector.
+        double res_l2_norm = get_l2_norm(rhs);
+
+        // Info for user.
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
+
+        // If l2 norm of the residual vector is within tolerance, or the maximum number 
+        // of iteration has been reached, then quit.
+        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+        // Solve the linear system.
+        if(!solver->solve())
+          error ("Matrix solver failed.\n");
+
+          // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+        
+        if (it >= NEWTON_MAX_ITER)
+          error ("Newton method did not converge.");
+
+        it++;
+      }
   
       // Update previous time level solutions.
-      xvel_prev_time.set_coeff_vector(xvel_space, coeff_vec);
-      yvel_prev_time.set_coeff_vector(yvel_space, coeff_vec);
-      p_prev_time.set_coeff_vector(p_space, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
     else {
-      // Linear solve.  
+      // Linear solve.
       info("Assembling and solving linear problem.");
-      solve_linear(Tuple<Space *>(xvel_space, yvel_space, p_space), &wf, matrix_solver,
-                   Tuple<Solution*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      fep.assemble(matrix, rhs, false);
+      if(solver->solve()) 
+        Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      else 
+        error ("Matrix solver failed.\n");
     }
-  }
-  
-  if (NEWTON) delete coeff_vec;
+ }
+
+  delete [] coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   info("Coordinate (   0, 2.5) xvel value = %lf", xvel_prev_time.get_pt_value(0.0, 2.5));
   info("Coordinate (   5, 2.5) xvel value = %lf", xvel_prev_time.get_pt_value(5.0, 2.5));

@@ -82,49 +82,91 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(space);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  int ndof = get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
-  // Solutions for the time stepping and the Newton's method.
-  Solution u_prev_time;
+  // Previous time level solution (initialized by the initial condition).
+  Solution u_prev_time(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY);
-  wf.add_vector_form(callback(res), H2D_ANY, &u_prev_time);
+  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
-  // Project the initial condition on the FE space
-  // to obtain initial coefficient vector for the Newton's method. 
-  info("Projecting initial condition to obtain initial vector for the Newton'w method.");
-  Vector* coeff_vec = new AVector();
-  Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(space, H2D_H1_NORM, sln_tmp, &u_prev_time, coeff_vec);
-  delete sln_tmp;
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  scalar* coeff_vec = new scalar[ndof];
+  project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
+
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Time stepping loop:
-  double current_time = 0.0;
-  int ts = 1;
-  do {
+  double current_time = 0.0; int ts = 1;
+  do 
+  {
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
-    // Newton's method.
-    info("Performing Newton's method.");
-    bool verbose = true; // Default is false.
-    if (!solve_newton(space, &wf, coeff_vec, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-      error("Newton's method did not converge.");
+    // Perform Newton's iteration.
+    int it = 1;
+    while (1)
+    {
+      // Obtain the number of degrees of freedom.
+      int ndof = get_num_dofs(&space);
+
+      // Assemble the Jacobian matrix and residual vector.
+      fep.assemble(coeff_vec, matrix, rhs, false);
+
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
+
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
+      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+      // Solve the linear system.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+      if (it >= NEWTON_MAX_ITER)
+        error ("Newton method did not converge.");
+
+      it++;
+    }
 
     // Update previous time level solution.
-    u_prev_time.set_coeff_vector(space, coeff_vec);
+    Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
     // Update time.
     current_time += TAU;
+  } 
+  while (current_time < T_FINAL);
 
-  } while (current_time < T_FINAL);
-
-  delete coeff_vec;
+  // Cleanup.
+  delete [] coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
   
-  ndof = get_num_dofs(space);
+  ndof = get_num_dofs(&space);
   info("Coordinate (-10, -10) value = %lf", u_prev_time.get_pt_value(-10.0, -10.0));
   info("Coordinate ( -6,  -6) value = %lf", u_prev_time.get_pt_value(-6.0, -6.0));
   info("Coordinate ( -2,  -2) value = %lf", u_prev_time.get_pt_value(-2.0, -2.0));
