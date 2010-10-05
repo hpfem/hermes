@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     };
     
     // Update previous time level solution.
-    vector_to_solution(coeff_vec, &space, &psi_prev_time);
+    Solution::vector_to_solution(coeff_vec, &space, &psi_prev_time);
 
     // Show the new time level solution.
     char title[100];

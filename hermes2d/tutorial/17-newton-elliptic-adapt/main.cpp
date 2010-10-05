@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
       // Project last fine mesh solution on the new coarse mesh
       // to obtain new coars emesh solution.
       info("Projecting reference solution on new coarse mesh for error calculation.");
-      project_global(&space, &ref_sln, &sln, matrix_solver, matrix_solver); 
+      project_global(&space, &ref_sln, &sln, matrix_solver); 
       // View the coarse mesh solution.
       sview.show(&sln);
       oview.show(&space);

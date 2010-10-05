@@ -111,8 +111,8 @@ int main(int argc, char* argv[])
 {
   // Time measurement.
   TimePeriod cpu_time;
-
   cpu_time.tick();
+
   // Load the mesh.
   Mesh basemesh, T_mesh, M_mesh;
   H2DReader mloader;
