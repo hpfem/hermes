@@ -293,9 +293,8 @@ int main(int argc, char* argv[])
     error("Newton's method did not converge.");
 
   // Translate the resulting coefficient vector into the actual solutions. 
-  T_coarse.set_coeff_vector(&space_T, coeff_vec);
-  phi_coarse.set_coeff_vector(&space_phi, coeff_vec);
-  
+  Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
+                                Tuple<Solution*>(&T_coarse, &phi_coarse));  
   
   // Time stepping loop:
   int nstep = (int)(T_FINAL/TAU + 0.5);
@@ -337,9 +336,8 @@ int main(int argc, char* argv[])
             error("Newton's method did not converge.");
           
           // Translate the resulting coefficient vector into the actual solutions. 
-          T_coarse.set_coeff_vector(&space_T, coeff_vec);
-          phi_coarse.set_coeff_vector(&space_phi, coeff_vec);
-          
+          Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
+                                        Tuple<Solution*>(&T_coarse, &phi_coarse));            
         } else {
           // Projection onto the globally derefined meshes.
           info("Projecting the latest fine mesh solution onto globally derefined meshes.");
@@ -404,8 +402,8 @@ int main(int argc, char* argv[])
         error("Newton's method did not converge."); 
       
       // Translate the resulting coefficient vector into the actual solutions. 
-      T_fine.set_coeff_vector(ref_spaces[0], coeff_vec);
-      phi_fine.set_coeff_vector(ref_spaces[1], coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(ref_spaces[0], ref_spaces[1]), 
+                                    Tuple<Solution*>(&T_fine, &phi_fine));
 
       // Calculate error estimates and exact errors.
       info("Calculating errors.");
@@ -466,8 +464,8 @@ int main(int argc, char* argv[])
               error("Newton's method did not converge.");
             
             // Translate the resulting coefficient vector into the actual solutions. 
-            T_coarse.set_coeff_vector(&space_T, coeff_vec);
-            phi_coarse.set_coeff_vector(&space_phi, coeff_vec);
+            Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(ref_spaces[0], ref_spaces[1]), 
+                                          Tuple<Solution*>(&T_coarse, &phi_coarse));
           } else {
             // Projection onto the new coarse meshes.
             info("Projecting the latest fine mesh solution onto new coarse meshes.");
