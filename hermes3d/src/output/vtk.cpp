@@ -518,7 +518,6 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 				break;
 		} // switch
 
-    delete [] vtx_pt;
 		fn->precalculate(np, pt, item);
 		int a = 0, b = 0;
 		mask_to_comp_val(item, a, b);
@@ -536,6 +535,7 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 #endif
 		}
 
+    delete [] vtx_pt;
 		delete [] x;
 		delete [] y;
 		delete [] z;
