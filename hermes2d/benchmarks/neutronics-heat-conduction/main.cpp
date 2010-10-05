@@ -214,8 +214,8 @@ int main(int argc, char* argv[])
 
     scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
     project_global(spaces, time_iterates, coeff_vec, matrix_solver, proj_norms);
-    T_prev_newton.set_coeff_vector(&space_T, coeff_vec);
-    phi_prev_newton.set_coeff_vector(&space_phi, coeff_vec);
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
+                                  Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
 
     // Newton's method.
     info("Newton's iteration...");
@@ -226,8 +226,8 @@ int main(int argc, char* argv[])
       error("Newton's method did not converge.");
     
     // Translate the resulting coefficient vector into the actual solutions. 
-    T_prev_newton.set_coeff_vector(&space_T, coeff_vec);
-    phi_prev_newton.set_coeff_vector(&space_phi, coeff_vec);
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
+                                  Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
     
     // Show the new time level solution.
     sprintf(title, "Approx. solution for T, t = %g s", TIME);
