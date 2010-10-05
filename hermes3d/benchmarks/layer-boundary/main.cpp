@@ -29,12 +29,15 @@ const double ERR_STOP = 1.0;			  // Stopping criterion for adaptivity (rel. erro
 						  // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;			  // Adaptivity process stops when the number of degrees of freedom grows
 						  // over this limit. This is to prevent h-adaptivity to go on forever.
-bool do_output = true;				  // Generate output files (if true).
+bool solution_output = true;			  // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem constants.
-const double K_squared = 1e4;		 	  // Equation parameter.
+const double K = 1e2;		 	          // Equation parameter.
+
+// Exact solution
+#include "exact_solution.cpp"
 
 // Boundary condition types. 
 BCType bc_types(int marker)
@@ -102,6 +105,12 @@ int main(int argc, char **args)
   wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
   wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
 
+  // Set exact solution.
+  ExactSolution exact(&mesh, sol_exact);
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -151,7 +160,7 @@ int main(int argc, char **args)
     cpu_time.tick();
 
     // Output solution and mesh.
-    if (do_output) 
+    if (solution_output) 
     {
       out_fn(&sln, "sln", as);
       out_orders(&space, "order", as);
@@ -200,25 +209,35 @@ int main(int argc, char **args)
     // Calculate error estimates for hp-adaptivity.
     printf("Adaptivity\n");
     printf("  - calculating error estimate: "); fflush(stdout);
-    H1Adapt hp(&space);
-    hp.set_aniso(true);							// Anisotropic adaptivity.
-    double err_est_rel = hp.calc_err_est(&sln, &rsln) * 100;
+    H1Adapt *adaptivity = new H1Adapt(&space);
+    adaptivity->set_aniso(true);							// Anisotropic adaptivity.
+    double err_est_rel = adaptivity->calc_err_est(&sln, &rsln) * 100;
     printf("% lf %%\n", err_est_rel);
 
-    // Save it to the graph.
-    SimpleGraph graph_dof;
-    graph_dof.add_values(ndof, err_est_rel);
-    if (do_output) graph_dof.save("conv_dof_est.dat");
+    // Calculate exact error,
+    // TO BE IMPLEMENTED.
+    double err_exact_rel = 0; // = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
 
-    // If error is too large, adapt the mesh. 
+    // Add entry to DOF and CPU convergence graphs.
+    SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
+    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu_est.save("conv_cpu_est.dat");
+    graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.save("conv_dof_exact.dat");
+    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+    graph_cpu_exact.save("conv_cpu_exact.dat");
+
+    // If err_est_rel is too large, adapt the mesh. 
     if (err_est_rel < ERR_STOP) 
     {
       printf("\nDone\n");
       break;
     }
     printf("  - adapting... "); fflush(stdout);
-    hp.adapt(THRESHOLD);						// Run the adaptivity algorithm.
-    printf("done in %lf secs (refined %d element(s))\n", hp.get_adapt_time(), hp.get_num_refined_elements());
+    adaptivity->adapt(THRESHOLD);						// Run the adaptivity algorithm.
+    printf("done in %lf secs (refined %d element(s))\n", adaptivity->get_adapt_time(), adaptivity->get_num_refined_elements());
 
     if (rndof >= NDOF_STOP)
     {
