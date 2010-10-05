@@ -55,6 +55,7 @@ set(SRC
 	adapt/projipol.cpp
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
+	common_time_period.cpp
 	${HERMES_COMMON_DIR}/callstack.cpp
 	${HERMES_COMMON_DIR}/trace.cpp
 	${HERMES_COMMON_DIR}/error.cpp
@@ -65,6 +66,12 @@ set(SRC
 macro(LIBRARY_SETTINGS BIN)
 	target_link_libraries(${BIN} ${JUDY_LIBRARY})
 	target_link_libraries(${BIN} ${BLAS_LIBRARIES})
+	if(NOT MSVC)
+		IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(${BIN} "rt")
+		ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	endif(NOT MSVC)
+
 	if(WITH_PETSC)
 		include_directories(${PETSC_INCLUDE_DIR})
 		target_link_libraries(${BIN} ${PETSC_LIBRARIES})
