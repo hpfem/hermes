@@ -185,25 +185,26 @@ int main(int argc, char* argv[])
     info("Projecting to obtain initial vector for the Newton's method.");
 
     scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
-//    project_global(spaces, time_iterates, newton_iterates, coeff_vec);
     project_global(spaces, time_iterates, coeff_vec, matrix_solver, proj_norms);
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
+                                  Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
 
     // Newton's method.
     info("Newton's iteration...");
     bool verbose = true; // Default is false.
-    bool did_converge = solve_newton( spaces, &wf, coeff_vec, matrix_solver,
-                                      NEWTON_TOL, NEWTON_MAX_ITER, verbose); 
+    bool did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver,
+                                     NEWTON_TOL, NEWTON_MAX_ITER, verbose); 
     if (!did_converge)
       error("Newton's method did not converge.");
     
     // Translate the resulting coefficient vector into the actual solutions. 
-    T_prev_newton.set_coeff_vector(&space_T, coeff_vec);
-    phi_prev_newton.set_coeff_vector(&space_phi, coeff_vec);
-    
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
+                                  Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
+
     // Exact solution for comparison with computational results.
     T_exact_solution.update(&mesh, T_exact);
     phi_exact_solution.update(&mesh, phi_exact);
-
+    
     // Calculate exact error.
     info("Calculating error (exact).");
     T_error = calc_rel_error(&T_prev_newton, &T_exact_solution, HERMES_H1_NORM) * 100;
