@@ -53,26 +53,87 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, NULL, NULL, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(Tuple<Space *>(&space)));
+  info("ndof = %d.", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation.
   WeakForm wf;
   //wf.add_matrix_form(callback(biform1), H2D_SYM, OMEGA_1);
   //wf.add_matrix_form(callback(biform2), H2D_SYM, OMEGA_2);
 
+  // Initialize coarse and reference mesh solution.
+  Solution sln, ref_sln;
+
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Adapt mesh to represent the exact function f(x, y) with given accuracy.
-  ProjNormType proj_norm = HERMES_H1_NORM;   
-  bool verbose = false;             // Report results. 
-  Solution *sln = new Solution();
-  adapt_to_exact_function(&space, proj_norm, f, &selector, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, ERR_STOP, NDOF_STOP, verbose, sln);
-  int ndof = Space::get_num_dofs(&space);
-  info("Final mesh: ndof = %d", ndof);
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof, graph_cpu;
 
-  ndof = Space::get_num_dofs(&space);
+  // Adaptivity loop:
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    ref_sln.set_exact(ref_space->get_mesh(), f);
+
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    project_global(&space, &ref_sln, &sln, matrix_solver); 
+
+    // Calculate element errors and total error estimate.
+    info("Calculating exact error."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    adaptivity->set_solutions(&sln, &ref_sln);
+    // Note: the error estimate is now equal to the exact error.
+    double err_exact_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 
+	 Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_exact_rel);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(Space::get_num_dofs(&space), err_exact_rel);
+    graph_dof.save("conv_dof.dat");
+    graph_cpu.add_values(cpu_time.accumulated(), err_exact_rel);
+    graph_cpu.save("conv_cpu.dat");
+
+    // If err_exact_rel too large, adapt the mesh.
+    if (err_exact_rel < ERR_STOP) done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
+    }
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
+
+    // Clean up.
+    delete adaptivity;
+    if (done == false)
+      delete ref_space->mesh;
+    delete ref_space;
+  }
+  while (done == false);
+  
+  verbose("Total running time: %g s", cpu_time.accumulated());
+
+  int ndof = Space::get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

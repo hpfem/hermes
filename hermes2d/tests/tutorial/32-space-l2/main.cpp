@@ -33,11 +33,12 @@ int main(int argc, char* argv[])
 
   // Assemble and solve the finite element problem.
   WeakForm wf_dummy;
-  LinearProblem ls(&wf_dummy, &space);
-  Solution* sln_tmp = new Solution(&mesh, F);
+
+  // Initialize the exact and projected solution.
   Solution sln;
-  project_global(&space, H2D_L2_NORM, sln_tmp, &sln);
-  delete sln_tmp;
+  Solution sln_exact(&mesh, F);
+
+  project_global(&space, &sln_exact, &sln, matrix_solver, HERMES_L2_NORM);
 
   // Visualize the solution.
   ScalarView view1("Projection", 610, 0, 600, 500);

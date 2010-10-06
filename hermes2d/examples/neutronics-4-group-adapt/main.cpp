@@ -220,12 +220,19 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     error("Number of Solutions and corresponding MeshFunctions supplied to power_iteration does not match."); 
   
   // Initialize the linear problem.
-  LinearProblem lp(wf, spaces);
+  bool is_linear = true;
+  FeProblem lp(wf, spaces, is_linear);
   int ndof = Space::get_num_dofs(spaces);
   
   // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+//  Matrix* mat; Vector* rhs; CommonSolver* solver;
+//  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+
+//  initialize_solution_environment(matrix_solver, argc, argv);
+
+  SparseMatrix* mat = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
   
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
@@ -243,11 +250,14 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     lp.assemble(mat, rhs, it == 0 ? false : true);
         
     // Solve the matrix problem to get a new approximation of the eigenvector.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    if (!solver->solve()) error ("Matrix solver failed.\n");
     
     // Convert coefficients vector into a set of Solution pointers.
-    for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
-    
+//    for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
+   
+    Solution::vector_to_solutions(rhs, *spaces, Tuple<Solution *>(slptr_new_solution, mfptr_new_solution));
+
+ 
     // Update fission sources.
     SimpleFilter new_source(source_fn, mfptr_new_solution);
     SimpleFilter old_source(source_fn, mfptr_solution);
