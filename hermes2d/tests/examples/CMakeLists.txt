@@ -16,11 +16,11 @@ add_subdirectory(neutronics-4-group-adapt)
 
 # timedep adapt examples
 add_subdirectory(newton-np-timedep-adapt-system)
-#add_subdirectory(newton-np-timedep-adapt-system/nonadaptive)
-add_subdirectory(ns-timedep-adapt)
 add_subdirectory(ns-bearing)
+add_subdirectory(ns-timedep-adapt)
 add_subdirectory(ns-two-phase)
 add_subdirectory(quantum-billiard)
 add_subdirectory(richards)
 add_subdirectory(richards-tracy-adapt)
 add_subdirectory(richards-seepage-adapt)
+#add_subdirectory(newton-np-timedep-adapt-system/nonadaptive)

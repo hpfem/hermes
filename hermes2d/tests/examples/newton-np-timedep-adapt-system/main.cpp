@@ -145,7 +145,7 @@ int main (int argc, char* argv[]) {
   // Spaces for concentration and the voltage.
   H1Space C(&Cmesh, C_bc_types, C_essential_bc_values, P_INIT);
   H1Space phi(MULTIMESH ? &phimesh : &Cmesh, phi_bc_types, phi_essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(Tuple<Space*>(&C, &phi));
+  int ndof = Space::get_num_dofs(Tuple<Space*>(&C, &phi));
 
   Solution C_sln, C_ref_sln;
   Solution phi_sln, phi_ref_sln; 
@@ -191,7 +191,7 @@ int main (int argc, char* argv[]) {
   while (1)
   {
     // Obtain the number of degrees of freedom.
-    int ndof = get_num_dofs(Tuple<Space *>(&C, &phi));
+    int ndof = Space::get_num_dofs(Tuple<Space *>(&C, &phi));
 
     // Assemble the Jacobian matrix and residual vector.
     fep_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
@@ -204,7 +204,7 @@ int main (int argc, char* argv[]) {
     double res_l2_norm = get_l2_norm(rhs_coarse);
 
     // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(Tuple<Space *>(&C, &phi)), res_l2_norm);
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&C, &phi)), res_l2_norm);
 
     // If l2 norm of the residual vector is in tolerance, or the maximum number 
     // of iteration has been hit, then quit.
@@ -263,7 +263,7 @@ int main (int argc, char* argv[]) {
       // and setup reference space.
       Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&C, &phi));
 
-      scalar* coeff_vec = new scalar[get_num_dofs(*ref_spaces)];
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
@@ -285,7 +285,7 @@ int main (int argc, char* argv[]) {
       while (1)
       {
         // Obtain the number of degrees of freedom.
-        int ndof = get_num_dofs(*ref_spaces);
+        int ndof = Space::get_num_dofs(*ref_spaces);
 
         // Assemble the Jacobian matrix and residual vector.
         fep->assemble(coeff_vec, matrix, rhs, false);
@@ -298,7 +298,7 @@ int main (int argc, char* argv[]) {
         double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(*ref_spaces), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, or the maximum number 
         // of iteration has been reached, then quit.
@@ -339,7 +339,7 @@ int main (int argc, char* argv[]) {
       info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
       // Report results.
       info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel: %g%%", 
-           get_num_dofs(Tuple<Space *>(&C, &phi)), get_num_dofs(*ref_spaces), err_est_rel_total);
+           Space::get_num_dofs(Tuple<Space *>(&C, &phi)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
@@ -348,7 +348,7 @@ int main (int argc, char* argv[]) {
         info("Adapting the coarse mesh.");
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-        if (get_num_dofs(Tuple<Space *>(&C, &phi)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Tuple<Space *>(&C, &phi)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.
