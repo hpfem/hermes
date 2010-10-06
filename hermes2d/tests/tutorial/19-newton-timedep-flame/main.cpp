@@ -105,9 +105,6 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[ndof];
   project_global(Tuple<Space *>(&tspace, &cspace), Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), coeff_vec, matrix_solver);
 
-  // Initialize views.
-  ScalarView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
-
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
   do 
@@ -155,11 +152,6 @@ int main(int argc, char* argv[])
 
     // Visualization.
     DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-    rview.set_min_max_range(0.0,2.0);
-    char title[100];
-    sprintf(title, "Reaction rate, t = %g", current_time);
-    rview.set_title(title);
-    rview.show(&omega_view);
 
     // Update current time.
     current_time += TAU;
@@ -167,8 +159,6 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-//    t_prev_time_1.set_coeff_vector(&tspace, coeff_vec);
-//    c_prev_time_1.set_coeff_vector(&cspace, coeff_vec);
     Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
     ts++;

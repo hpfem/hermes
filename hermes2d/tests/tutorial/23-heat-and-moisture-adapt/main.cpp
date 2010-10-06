@@ -272,29 +272,29 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
-  if (fabs(T_prev.get_pt_value(5.0, 4.0) - 294.128000) > eps) {
+  if (fabs(T_prev.get_pt_value(5.0, 4.0) - 294.127903) > eps) {
     success = 0;
   }
-  if (fabs(T_prev.get_pt_value(12.0, 4.0) - 293.091307) > eps) {
+  if (fabs(T_prev.get_pt_value(12.0, 4.0) - 293.091431) > eps) {
     success = 0;
   }
-  if (fabs(T_prev.get_pt_value(12.0, 17.0) - 297.046535) > eps) {
+  if (fabs(T_prev.get_pt_value(12.0, 17.0) - 297.046520) > eps) {
     success = 0;
   }
-  if (fabs(T_prev.get_pt_value(12.0, 29.0) - 293.666772) > eps) {
+  if (fabs(T_prev.get_pt_value(12.0, 29.0) - 293.667172) > eps) {
     success = 0;
   }
   if (fabs(T_prev.get_pt_value(5.0, 29.0) - 308.780420) > eps) {
     success = 0;
   }
 
-  if (fabs(M_prev.get_pt_value(5.0, 4.0) - 0.900089) > eps) {
+  if (fabs(M_prev.get_pt_value(5.0, 4.0) - 0.900090) > eps) {
     success = 0;
   }
-  if (fabs(M_prev.get_pt_value(12.0, 4.0) - 0.899224) > eps) {
+  if (fabs(M_prev.get_pt_value(12.0, 4.0) - 0.899229) > eps) {
     success = 0;
   }
-  if (fabs(M_prev.get_pt_value(12.0, 17.0) - 0.899553) > eps) {
+  if (fabs(M_prev.get_pt_value(12.0, 17.0) - 0.898690) > eps) {
     success = 0;
   }
   if (fabs(M_prev.get_pt_value(12.0, 29.0) - 0.899292) > eps) {
