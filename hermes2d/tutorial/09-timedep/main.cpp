@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
   // Initialize an H1 space with default shepeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  
   // Initialize the solution.

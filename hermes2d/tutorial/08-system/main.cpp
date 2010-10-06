@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u_space(&mesh, bc_types, essential_bc_values, P_INIT);
   H1Space v_space(&mesh, bc_types, essential_bc_values, P_INIT);
-  info("ndof = %d.", get_num_dofs(Tuple<Space *>(&u_space, &v_space)));
+  info("ndof = %d.", Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
   WeakForm wf(2);

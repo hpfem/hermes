@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
   double error_h1;
   do
   {
-    int ndof = get_num_dofs(Tuple<Space *>(&space1, &space2));
+    int ndof = Space::get_num_dofs(Tuple<Space *>(&space1, &space2));
     if (ndof >= NDOF_STOP) break;
 
     info("!---- Adaptivity step %d ---------------------------------------------", as);
@@ -314,7 +314,7 @@ int main(int argc, char* argv[])
     ref_space1->copy_orders(&space1, order_increase);
     ref_space2->copy_orders(&space2, order_increase);
 
-    int ref_ndof = get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
+    int ref_ndof = Space::get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
 
     // Assemble the reference problem.
@@ -408,12 +408,12 @@ int main(int argc, char* argv[])
   verbose("Total running time: %g s", cpu_time.accumulated());
   
   info("Number of iterations: %d", as);
-  info("NDOF: %d, %d", space1.get_num_dofs(), space2.get_num_dofs());
+  info("NDOF: %d, %d", space1.Space::get_num_dofs(), space2.Space::get_num_dofs());
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_1 = space1.get_num_dofs(), 
-      n_dof_2 = space2.get_num_dofs();
+  int n_dof_1 = space1.Space::get_num_dofs(), 
+      n_dof_2 = space2.Space::get_num_dofs();
   int n_dof_1_allowed = 500, 
       n_dof_2_allowed = 2800;
       

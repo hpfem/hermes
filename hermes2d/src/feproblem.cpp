@@ -104,7 +104,7 @@ int FeProblem::get_num_dofs()
   _F_
   ndof = 0;
   for (int i = 0; i < wf->neq; i++)
-    ndof += spaces[i]->get_num_dofs();
+    ndof += Space::get_num_dofs(spaces[i]);
   return ndof;
 }
 
@@ -1348,7 +1348,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
                   int newton_max_iter, bool verbose) 
 {
   _F_
-  int ndof = get_num_dofs(spaces);
+    int ndof = Space::get_num_dofs(spaces);
   
   // sanity checks
   if (coeff_vec == NULL) error("coeff_vec == NULL in solve_newton().");
@@ -1414,7 +1414,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
     double res_l2_norm; 
     res_l2_norm = get_l2_norm(vec);
     if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", 
-                        it, get_num_dofs(spaces), res_l2_norm);
+      it, Space::get_num_dofs(spaces), res_l2_norm);
 
     // If l2 norm of the residual vector is in tolerance, quit.
     if (res_l2_norm < newton_tol|| it > newton_max_iter) break;
@@ -1437,15 +1437,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
   return true;
 }
 
-int get_num_dofs(Tuple<Space *> spaces)
-{
-  _F_
-  int ndof = 0;
-  for (int i=0; i<spaces.size(); i++) {
-    ndof += spaces[i]->get_num_dofs();
-  }
-  return ndof;
-}
+
 
 // Underlying function for global orthogonal projection.
 // Not intended for the user. NOTE: the weak form here must be 
@@ -1551,7 +1543,8 @@ void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns,
 void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
 {
   _F_
-  scalar* target_vec = new scalar[get_num_dofs(spaces)];
+  
+  scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
   Tuple<MeshFunction *> ref_slns_mf;
   for (int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
@@ -1612,18 +1605,6 @@ void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* m
 {
   _F_
   /// TODO
-}
-
-void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<ProjNormType> proj_norms, TimePeriod * cpu_time)
-{
-  _F_
-  if (spaces.size() != selectors.size()) 
-    error("There must be a refinement selector for each solution component in solve_linear_adapt().");
-  if (spaces.size() != proj_norms.size()) 
-    error("There must be a projection norm for each solution component in solve_linear_adapt().");
-
-  // Time measurement.
-  cpu_time->tick();
 }
 
 // Performs uniform global refinement of a FE space. 

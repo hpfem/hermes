@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
+  int ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
     pview.show(&p_prev_time);
   }
 
-  ndof = get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
+  ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
   info("ndof = %d", ndof);
 
   // Wait for all views to be closed.

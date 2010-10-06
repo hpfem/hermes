@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Previous time level solution (initialized by the initial condition).
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     while (1)
     {
       // Obtain the number of degrees of freedom.
-      int ndof = get_num_dofs(&space);
+      int ndof = Space::get_num_dofs(&space);
 
       // Assemble the Jacobian matrix and residual vector.
       fep.assemble(coeff_vec, matrix, rhs, false);
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
       double res_l2_norm = get_l2_norm(rhs);
 
       // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.

@@ -396,7 +396,7 @@ void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
-    int ndof = space->get_num_dofs();
+    int ndof = Space::get_num_dofs(space);
 
     // initialize precalc shapeset using the space's shapeset
     Shapeset *shapeset = space->get_shapeset();
@@ -421,7 +421,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
     error("Provided 'space' is not up to date.");
   if (space->get_shapeset() != pss->get_shapeset())
     error("Provided 'space' and 'pss' must have the same shapesets.");
-  int ndof = space->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
 
   space_type = space->get_type();
 
@@ -429,7 +429,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 
   num_components = pss->get_num_components();
   type = HERMES_SLN;
-  num_dofs = space->get_num_dofs();
+  num_dofs = Space::get_num_dofs(space);
 
   // copy the mesh   TODO: share meshes between solutions
   mesh = new Mesh;
@@ -626,7 +626,7 @@ void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solutio
 
 void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
 {
-  int ndof = space->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
   scalar *temp = new scalar[ndof];
   memset(temp, 0, sizeof(scalar)*ndof);
   this->set_coeff_vector(space, pss, temp, true);

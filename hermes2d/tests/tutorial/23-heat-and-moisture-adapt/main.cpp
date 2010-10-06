@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        get_num_dofs(Tuple<Space *>(&T_space, &M_space)), get_num_dofs(*ref_spaces), err_est_rel_total);
+        Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
       
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (get_num_dofs(Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.

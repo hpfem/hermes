@@ -357,10 +357,10 @@ int main(int argc, char* argv[])
   H1Space yvel(&mesh1, yvel_bc_types, NULL, P_INIT_YVEL);
   H1Space press(&mesh1, press_bc_types, NULL, P_INIT_PRESS);
   H1Space lset(&mesh2, xvel_bc_types, essential_bc_values_lset, P_INIT_LSET);
-  int ndof_1 = xvel.get_num_dofs();
-  int ndof_2 = yvel.get_num_dofs();
-  int ndof_3 = press.get_num_dofs();
-  int ndof_4 = lset.get_num_dofs();
+  int ndof_1 = xvel.Space::get_num_dofs();
+  int ndof_2 = yvel.Space::get_num_dofs();
+  int ndof_3 = press.Space::get_num_dofs();
+  int ndof_4 = lset.Space::get_num_dofs();
   info("ndof = %d (xvel), %d (yvel), %d (press), %d (lset)", ndof_1, ndof_2, ndof_3, ndof_4);
 
   // Zero initial xprev and yprev values.

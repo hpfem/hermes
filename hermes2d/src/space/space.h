@@ -191,6 +191,9 @@ public:
   /// essnetial boundary conditions.
   void update_essential_bc_values();
 
+  /// \brief Returns the number of basis functions contained in the spaces.
+  static int get_num_dofs(Tuple<Space *> spaces);
+
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.

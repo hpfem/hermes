@@ -647,6 +647,16 @@ void Space::free_extra_data()
   }
 }*/
 
+int Space::get_num_dofs(Tuple<Space *> spaces)
+{
+  _F_
+  int ndof = 0;
+  for (int i=0; i<spaces.size(); i++) {
+    ndof += spaces[i]->get_num_dofs();
+  }
+  return ndof;
+}
+
 // This is identical to H3D.
 H2D_API int assign_dofs(Tuple<Space*> spaces) 
 {

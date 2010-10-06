@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
+  int ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
     p_prev_time.set_coeff_vector(p_space, coeff_vec);
   }
 
-  ndof = get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
+  ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
   info("ndof = %d", ndof);
 
   // Waiting for tests.

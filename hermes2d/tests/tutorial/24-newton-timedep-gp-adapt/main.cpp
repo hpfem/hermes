@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space* space  =new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(space);
+  int ndof = Space::get_num_dofs(space);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
-           get_num_dofs(space), get_num_dofs(ref_space), err_est_rel_total);
+           Space::get_num_dofs(space), Space::get_num_dofs(ref_space), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
         if (verbose) info("Adapting the coarse mesh.");
         done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-        if (get_num_dofs(space) >= NDOF_STOP) {
+        if (Space::get_num_dofs(space) >= NDOF_STOP) {
           done = true;
           break;
         }

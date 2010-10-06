@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
     project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
         double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, or the maximum number 
         // of iteration has been reached, then quit.

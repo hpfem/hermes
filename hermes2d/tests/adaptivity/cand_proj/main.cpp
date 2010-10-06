@@ -322,7 +322,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 
   // Initialize matrix solver.
   Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver);
+  init_matrix_solver(matrix_solver, Space::get_num_dofs(space), mat, rhs, solver);
 
   // Process cases.
   do {

@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
   
   // Newton's loop on the initial coarse meshes.
   info("Solving on coarse meshes.");
-  scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
 //  project_global(spaces, prev_time_meshfns, coarse_mesh_solutions, coeff_vec, matrix_solver, proj_norms);
 //  project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), coeff_vec, matrix_solver, proj_norms);
   project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), coeff_vec, matrix_solver, proj_norms);
@@ -330,9 +330,9 @@ int main(int argc, char* argv[])
       double T_err_exact = calc_rel_error(&T_coarse, &T_exact_solution, HERMES_HCURL_NORM) * 100;
       double phi_err_exact = calc_rel_error(&phi_coarse, &phi_exact_solution, HERMES_HCURL_NORM) * 100;
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
-            space_T.get_num_dofs(), ref_spaces[0]->get_num_dofs(), T_err_est, T_err_exact);
+            space_T.Space::get_num_dofs(), ref_spaces[0]->Space::get_num_dofs(), T_err_est, T_err_exact);
       info("phi: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
-            space_phi.get_num_dofs(), ref_spaces[1]->get_num_dofs(), phi_err_est, phi_err_exact);
+            space_phi.Space::get_num_dofs(), ref_spaces[1]->Space::get_num_dofs(), phi_err_est, phi_err_exact);
  
       // Calculate element errors and total error estimate for adaptivity.      
       Adapt hp(spaces, proj_norms);
@@ -354,7 +354,7 @@ int main(int argc, char* argv[])
       else {
         info("Adapting the coarse meshes.");
         done = hp.adapt(Tuple<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (get_num_dofs(spaces) >= NDOF_STOP) done = true; 
+        if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true; 
         
         if (!done) {
           if (SOLVE_ON_COARSE_MESH) {
@@ -407,8 +407,8 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   int ndof_allowed_T = 130;
   int ndof_allowed_phi = 300;
-  int ndof_T = get_num_dofs(&space_T);
-  int ndof_phi = get_num_dofs(&space_phi);
+  int ndof_T = Space::get_num_dofs(&space_T);
+  int ndof_phi = Space::get_num_dofs(&space_phi);
   printf("ndof_actual_T = %d\n", ndof_T);
   printf("ndof_actual_phi = %d\n", ndof_phi);
   printf("ndof_allowed_T = %d\n", ndof_allowed_T);

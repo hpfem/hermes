@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, NULL, NULL, P_INIT);
-  info("ndof = %d.", get_num_dofs(Tuple<Space *>(&space)));
+  info("ndof = %d.", Space::get_num_dofs(Tuple<Space *>(&space)));
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -69,10 +69,10 @@ int main(int argc, char* argv[])
   Solution *sln = new Solution();
   adapt_to_exact_function(&space, proj_norm, f, &selector, THRESHOLD, STRATEGY,
                           MESH_REGULARITY, ERR_STOP, NDOF_STOP, verbose, sln);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("Final mesh: ndof = %d", ndof);
 
-  ndof = get_num_dofs(&space);
+  ndof = Space::get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

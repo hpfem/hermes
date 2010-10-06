@@ -179,13 +179,13 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
+      Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
     graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu.save("conv_cpu_est.dat");
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete solver;

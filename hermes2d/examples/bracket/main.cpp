@@ -191,14 +191,14 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d, err_est_rel[0]: %g%%", 
-         u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(), err_est_rel[0]*100);
+         u_space.Space::get_num_dofs(), (*ref_spaces)[0]->Space::get_num_dofs(), err_est_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d, err_est_rel[1]: %g%%",
-         v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs(), err_est_rel[1]*100);
+         v_space.Space::get_num_dofs(), (*ref_spaces)[1]->Space::get_num_dofs(), err_est_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel_total: %g%%",
-         get_num_dofs(Tuple<Space *>(&u_space, &v_space)), get_num_dofs(*ref_spaces), err_est_rel_total);
+         Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.add_values(Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
       done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
                                THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete solver;
