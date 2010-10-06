@@ -35,6 +35,8 @@ const double CONV_EXP = 1.0;      // Default value is 1.0. This parameter influe
                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;      // Adaptivity process stops when the number of degrees of freedom grows
                                   // over this limit. This is to prevent h-adaptivity to go on forever.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // This function can be modified.
 scalar f(double x, double y, double& dx, double& dy)
@@ -46,6 +48,10 @@ scalar f(double x, double y, double& dx, double& dy)
 
 int main(int argc, char* argv[])
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
