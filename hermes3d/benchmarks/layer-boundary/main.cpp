@@ -109,7 +109,7 @@ int main(int argc, char **args)
   ExactSolution exact(&mesh, sol_exact);
 
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -219,7 +219,6 @@ int main(int argc, char **args)
     double err_exact_rel = 0; // = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
 
     // Add entry to DOF and CPU convergence graphs.
-    SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
     graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
