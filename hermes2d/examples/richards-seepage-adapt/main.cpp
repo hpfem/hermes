@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Create a selector which will select optimal candidate.
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
                           verbose, &sln_prev_time);
 
   // Assign initial condition to mesh.
-  ndof = get_num_dofs(&space);
+  ndof = Space::get_num_dofs(&space);
   Vector *coeff_vec = new AVector(ndof);
 
   // Calculating initial vector for Newton.

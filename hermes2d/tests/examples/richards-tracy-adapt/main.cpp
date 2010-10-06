@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(space);
+  int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
   // Initialize refinement selector.
@@ -259,14 +259,14 @@ int main(int argc, char* argv[])
       space_err_exact_rel = err_exact_abs / norm_exact * 100;    
 
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%, space_err_exact_rel: %g%%", 
-	   get_num_dofs(space), get_num_dofs(ref_space), space_err_est_rel, space_err_exact_rel);
+	   Space::get_num_dofs(space), Space::get_num_dofs(ref_space), space_err_est_rel, space_err_exact_rel);
 
       // If space_err_est too large, adapt the mesh.
       if (space_err_est_rel < ERR_STOP) done = true;
       else {
         info("Adapting coarse mesh.");
         done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (get_num_dofs(space) >= NDOF_STOP) {
+        if (Space::get_num_dofs(space) >= NDOF_STOP) {
           done = true;
           break;
         }
@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
     graph_time_err_est.save("time_error_est.dat");
     graph_time_err_exact.add_values(ts*TAU, space_err_exact_rel);
     graph_time_err_exact.save("time_error_exact.dat");
-    graph_time_dof.add_values(ts*TAU, get_num_dofs(space));
+    graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(space));
     graph_time_dof.save("time_dof.dat");
     graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
     graph_time_cpu.save("time_cpu.dat");
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
     // Copy new time level solution into u_prev_time.
     u_prev_time.copy(&ref_sln);
   }
-  ndof = get_num_dofs(Tuple<Space *>(space));
+  ndof = Space::get_num_dofs(Tuple<Space *>(space));
 
 #define ERROR_SUCCESS       0
 #define ERROR_FAILURE      -1

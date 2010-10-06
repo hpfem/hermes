@@ -859,7 +859,7 @@ void adapt_to_exact_function(Space *space, ProjNormType proj_norm, ExactFunction
     sln_fine->set_exact(&rmesh, exactfn);
 
     // Project the function f() on the coarse mesh.
-    scalar* coeff_vec = new scalar[rspace->get_num_dofs()];
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(space)];
     project_global(space, sln_fine, coeff_vec, matrix_solver, proj_norm);
     Solution::vector_to_solution(coeff_vec, space, sln_coarse);
     delete [] coeff_vec;
@@ -869,7 +869,7 @@ void adapt_to_exact_function(Space *space, ProjNormType proj_norm, ExactFunction
     hp.set_solutions(sln_coarse, sln_fine);
     double err_est_rel = hp.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     if (verbose == true) info("Step %d, ndof %d, proj_error %g%%",
-                 as, space->get_num_dofs(), err_est_rel);
+                 as, Space::get_num_dofs(space), err_est_rel);
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < err_stop) done = true;
@@ -877,7 +877,7 @@ void adapt_to_exact_function(Space *space, ProjNormType proj_norm, ExactFunction
       double to_be_processed = 0;
       done = hp.adapt(selector, threshold, strategy, mesh_regularity, to_be_processed);
 
-      if (space->get_num_dofs() >= ndof_stop) done = true;
+      if (Space::get_num_dofs(space) >= ndof_stop) done = true;
     }
 
     // View the approximation of the exact function.

@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u_space(&mesh, bc_types, essential_bc_values, P_INIT);
   H1Space v_space(&mesh, bc_types, essential_bc_values, P_INIT);
-  info("ndof = %d.", get_num_dofs(Tuple<Space *>(&u_space, &v_space)));
+  info("ndof = %d.", Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     else
       error ("Matrix solver failed.\n");
 
-    int ndof = get_num_dofs(Tuple<Space *>(&u_space, &v_space));
+    int ndof = Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space));
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];

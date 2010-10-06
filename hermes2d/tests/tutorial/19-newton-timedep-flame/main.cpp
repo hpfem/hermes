@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets.
   H1Space tspace(&mesh, bc_types, essential_bc_values_t, P_INIT);
   H1Space cspace(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = get_num_dofs(Tuple<Space *>(&tspace, &cspace));
+  int ndof = Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 
   // Previous time level solutions.
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
       double res_l2_norm = get_l2_norm(rhs);
 
       // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.

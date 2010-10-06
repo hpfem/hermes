@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     info("---- Time step %d, t = %g s:", t_step, TIME); t_step++;
     info("Projecting to obtain initial vector for the Newton's method.");
 
-    scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
     project_global(spaces, time_iterates, coeff_vec, matrix_solver, proj_norms);
     Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
                                   Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));

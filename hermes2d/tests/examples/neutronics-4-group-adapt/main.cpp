@@ -162,7 +162,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   
   // Initialize the linear problem.
   LinearProblem lp(wf, spaces);
-  int ndof = get_num_dofs(spaces);
+  int ndof = Space::get_num_dofs(spaces);
   
   // Select matrix solver.
   Matrix* mat; Vector* rhs; CommonSolver* solver;
@@ -493,7 +493,7 @@ int main(int argc, char* argv[])
     else {
       info("Adapting the coarse mesh.");
       done = hp.adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      if (get_num_dofs(spaces) >= NDOF_STOP) done = true;
+      if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true;
     }
     
     // Free reference meshes and spaces.
@@ -517,7 +517,7 @@ int main(int argc, char* argv[])
   
   int ndofs[N_GROUPS];
   for_each_group(g) {
-    ndofs[g] = spaces[g]->get_num_dofs();
+    ndofs[g] = spaces[g]->Space::get_num_dofs();
     info("Number of DOFs for group %d: %d.", g+1, ndofs[g]);
   }
     
@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
   const int expected_ndofs[N_GROUPS] = {
     1204, 884, 792, 1104
   };
-  for_each_group(g) ndof.test_overshoot(spaces[g]->get_num_dofs(), expected_ndofs[g]);
+  for_each_group(g) ndof.test_overshoot(spaces[g]->Space::get_num_dofs(), expected_ndofs[g]);
 
   TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
   const Extremum expected_maxima[N_GROUPS] = {

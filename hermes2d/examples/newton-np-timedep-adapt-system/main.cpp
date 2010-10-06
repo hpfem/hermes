@@ -186,7 +186,7 @@ int main (int argc, char* argv[]) {
   // Spaces for concentration and the voltage.
   H1Space C(&Cmesh, C_bc_types, C_essential_bc_values, P_INIT);
   H1Space phi(MULTIMESH ? &phimesh : &Cmesh, phi_bc_types, phi_essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(Tuple<Space*>(&C, &phi));
+  int ndof = Space::get_num_dofs(Tuple<Space*>(&C, &phi));
 
   Solution C_sln, C_ref_sln;
   Solution phi_sln, phi_ref_sln; 

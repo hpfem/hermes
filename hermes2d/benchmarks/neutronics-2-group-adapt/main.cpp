@@ -357,7 +357,7 @@ int main(int argc, char* argv[])
   bool done = false;
   do
   {
-    int ndof = get_num_dofs(Tuple<Space *>(&space1, &space2));
+    int ndof = Space::get_num_dofs(Tuple<Space *>(&space1, &space2));
 
     info("!---- Adaptivity step %d ---------------------------------------------", as);
 
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
     ref_space1->copy_orders(&space1, order_increase);
     ref_space2->copy_orders(&space2, order_increase);
 
-    int ref_ndof = get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
+    int ref_ndof = Space::get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
                             
     if (ref_ndof >= NDOF_STOP) break;
@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
     project_global(Tuple<Space*>(&space1, &space2), ref_slns, slns);
     
     // View the distribution of polynomial orders on the coarse meshes.
-    info("flux1_dof=%d, flux2_dof=%d", get_num_dofs(&space1), get_num_dofs(&space2));
+    info("flux1_dof=%d, flux2_dof=%d", Space::get_num_dofs(&space1), Space::get_num_dofs(&space2));
     oview1.show(&space1);
     oview2.show(&space2);                   
     
@@ -461,8 +461,8 @@ int main(int argc, char* argv[])
       graph_dof.add_values(ERR_PLOT, ndof, error_h1);
       graph_dof.add_values(ERR_EST_PLOT, ndof, err_est_h1_total);
       // Add entry to DOF evolution graphs.
-      graph_dof_evol.add_values(GROUP_1, as, get_num_dofs(&space1));
-      graph_dof_evol.add_values(GROUP_2, as, get_num_dofs(&space2));
+      graph_dof_evol.add_values(GROUP_1, as, Space::get_num_dofs(&space1));
+      graph_dof_evol.add_values(GROUP_2, as, Space::get_num_dofs(&space2));
       // Add entry to CPU convergence graphs.
       graph_cpu.add_values(ERR_PLOT, cpu_time.accumulated(), error_h1);
       graph_cpu.add_values(ERR_EST_PLOT, cpu_time.accumulated(), err_est_h1_total);

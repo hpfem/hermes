@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
   H1Space space4(&mesh, bc_types, essential_bc_values, P_INIT_4);
   Tuple<Space*> spaces(&space1, &space2, &space3, &space4);
   
-  int ndof = get_num_dofs(Tuple<Space*>(&space1, &space2, &space3, &space4));
+  int ndof = Space::get_num_dofs(Tuple<Space*>(&space1, &space2, &space3, &space4));
   info("ndof = %d.", ndof);
   
   // Initialize the weak formulation.

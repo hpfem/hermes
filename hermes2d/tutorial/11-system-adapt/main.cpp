@@ -209,21 +209,21 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
-         u_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs());
+         u_space.Space::get_num_dofs(), (*ref_spaces)[0]->Space::get_num_dofs());
     info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
-         v_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs());
+         v_space.Space::get_num_dofs(), (*ref_spaces)[1]->Space::get_num_dofs());
     info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
-         get_num_dofs(Tuple<Space *>(&u_space, &v_space)), get_num_dofs(*ref_spaces));
+         Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
     info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.add_values(Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
+    graph_dof_exact.add_values(Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
     graph_cpu_exact.save("conv_cpu_exact.dat");
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
       done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
                                THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete solver;

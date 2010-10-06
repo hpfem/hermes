@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     else
       error ("Matrix solver failed.\n");
   
-    int ndof = get_num_dofs(&space);
+    int ndof = Space::get_num_dofs(&space);
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];

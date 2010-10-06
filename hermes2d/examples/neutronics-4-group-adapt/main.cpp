@@ -222,8 +222,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   // Initialize the linear problem.
   bool is_linear = true;
   FeProblem lp(wf, spaces, is_linear);
-//  LinearProblem lp(wf, spaces);
-  int ndof = get_num_dofs(spaces);
+  int ndof = Space::get_num_dofs(spaces);
   
   // Select matrix solver.
 //  Matrix* mat; Vector* rhs; CommonSolver* solver;
@@ -293,8 +292,8 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
 
 
 // Macros for simpler reporting (four group case).
-#define report_num_dofs(spaces) spaces[0]->get_num_dofs(), spaces[1]->get_num_dofs(),\
-                                spaces[2]->get_num_dofs(), spaces[3]->get_num_dofs(), get_num_dofs(spaces)
+#define report_num_dofs(spaces) spaces[0]->Space::get_num_dofs(), spaces[1]->Space::get_num_dofs(),\
+                                spaces[2]->Space::get_num_dofs(), spaces[3]->Space::get_num_dofs(), Space::get_num_dofs(spaces)
 #define report_errors(errors) errors[0],errors[1],errors[2],errors[3]
 
 int main(int argc, char* argv[])
@@ -545,7 +544,7 @@ int main(int argc, char* argv[])
   	info("k_eff err: %g milli-percent", keff_err);
 
     // Add entry to DOF convergence graph.
-    int ndof_coarse = get_num_dofs(spaces);
+    int ndof_coarse = Space::get_num_dofs(spaces);
     graph_dof.add_values(0, ndof_coarse, h1_err_est);
     graph_dof.add_values(1, ndof_coarse, l2_err_est);
     graph_dof.add_values(2, ndof_coarse, keff_err);
@@ -556,7 +555,7 @@ int main(int argc, char* argv[])
     graph_cpu.add_values(2, cta, keff_err);
 
     for_each_group(g)
-      graph_dof_evol.add_values(g, as, spaces[g]->get_num_dofs());
+      graph_dof_evol.add_values(g, as, spaces[g]->Space::get_num_dofs());
 
     cpu_time.tick(HERMES_SKIP);
 
@@ -565,7 +564,7 @@ int main(int argc, char* argv[])
     else {
       info("Adapting the coarse mesh.");
       done = hp.adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      if (get_num_dofs(spaces) >= NDOF_STOP) done = true;
+      if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true;
     }
 
     // Free reference meshes and spaces.

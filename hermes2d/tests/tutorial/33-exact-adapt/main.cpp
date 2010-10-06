@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, NULL, NULL, P_INIT);
-  info("ndof = %d.", get_num_dofs(Tuple<Space *>(&space)));
+  info("ndof = %d.", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -100,13 +100,13 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 
-      get_num_dofs(&space), get_num_dofs(ref_space), err_exact_rel);
+	 Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_exact_rel);
+    graph_dof.add_values(Space::get_num_dofs(&space), err_exact_rel);
     graph_dof.save("conv_dof.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_exact_rel);
     graph_cpu.save("conv_cpu.dat");
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
-    if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete adaptivity;
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
   
   verbose("Total running time: %g s", cpu_time.accumulated());
 
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

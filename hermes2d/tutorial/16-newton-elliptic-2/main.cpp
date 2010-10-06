@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial 
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[get_num_dofs(&space)] ;
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
   Solution* init_sln = new Solution(&mesh, init_cond);
   project_global(&space, init_sln, coeff_vec, matrix_solver); 
   delete init_sln;
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
   while (1)
   {
     // Obtain the number of degrees of freedom.
-    int ndof = get_num_dofs(&space);
+    int ndof = Space::get_num_dofs(&space);
 
     // Assemble the Jacobian matrix and residual vector.
     fep.assemble(coeff_vec, matrix, rhs, false);
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     double res_l2_norm = get_l2_norm(rhs);
 
     // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
 
     // If l2 norm of the residual vector is within tolerance, or the maximum number 
     // of iteration has been reached, then quit.

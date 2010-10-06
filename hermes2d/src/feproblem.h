@@ -132,7 +132,6 @@ protected:
 
 };
 
-H2D_API int get_num_dofs(Tuple<Space *> spaces);
 
 // Underlying function for global orthogonal projection.
 // Not intended for the user. NOTE: the weak form here must be 
@@ -180,9 +179,6 @@ H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec
 // Feel free to adjust this function for more advanced applications.
 H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
                           Tuple<Solution *> solutions, scalar*coeff_vec = NULL);
-
-// Do initial checks for the adaptivity process.
-H2D_API void lin_adapt_begin(Tuple<Space *> spaces, Tuple<RefinementSelectors::Selector *> selectors, Tuple<ProjNormType> proj_norms, TimePeriod * cpu_time);
 
 // Create globally refined space.
 H2D_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);

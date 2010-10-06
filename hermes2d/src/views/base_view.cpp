@@ -61,7 +61,7 @@ void BaseView::show(Space* space, double eps, int item)
   // todo: copy space
   pss = new PrecalcShapeset(space->get_shapeset());
   sln = new Solution();
-  ndof = space->get_num_dofs();
+  ndof = Space::get_num_dofs(space);
   base_index = 0;
   this->space = space;
   this->eps = eps;

@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
   H1Space space_T(&mesh_T, bc_types_T, essential_bc_values_T, P_INIT);
   H1Space space_phi(&mesh_phi, bc_types_phi, essential_bc_values_phi, P_INIT);
   Tuple<Space*> spaces(&space_T, &space_phi);
-  int ndof = get_num_dofs(spaces); 
+  int ndof = Space::get_num_dofs(spaces); 
  
   // Solutions in the previous time step (converging within the time stepping loop).
   Solution T_prev_time, phi_prev_time;
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
   
   // Newton's loop on the initial coarse meshes.
   info("Solving on coarse meshes.");
-  scalar* coeff_vec = new scalar[get_num_dofs(spaces)];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
   project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
                  coeff_vec, matrix_solver, proj_norms);
   bool verbose = true; // Default is false.
@@ -412,9 +412,9 @@ int main(int argc, char* argv[])
       double T_err_exact = calc_rel_error(&T_coarse, &T_exact_solution, HERMES_H1_NORM) * 100;
       double phi_err_exact = calc_rel_error(&phi_coarse, &phi_exact_solution, HERMES_H1_NORM) * 100;
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
-            space_T.get_num_dofs(), ref_spaces[0]->get_num_dofs(), T_err_est, T_err_exact);
+            space_T.Space::get_num_dofs(), ref_spaces[0]->Space::get_num_dofs(), T_err_est, T_err_exact);
       info("phi: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
-            space_phi.get_num_dofs(), ref_spaces[1]->get_num_dofs(), phi_err_est, phi_err_exact);
+            space_phi.Space::get_num_dofs(), ref_spaces[1]->Space::get_num_dofs(), phi_err_est, phi_err_exact);
  
       // Calculate element errors and total error estimate for adaptivity.      
       Adapt hp(spaces, proj_norms);
@@ -424,13 +424,13 @@ int main(int argc, char* argv[])
 /*
       if (ts==1) {
 	// Add entries to DOF convergence graph.
-	graph_dof_exact_T.add_values(space_T.get_num_dofs(), T_err_exact);
+	graph_dof_exact_T.add_values(space_T.Space::get_num_dofs(), T_err_exact);
 	graph_dof_exact_T.save("conv_dof_exact_T.dat");
-	graph_dof_est_T.add_values(space_T.get_num_dofs(), T_err_est);
+	graph_dof_est_T.add_values(space_T.Space::get_num_dofs(), T_err_est);
 	graph_dof_est_T.save("conv_dof_est_T.dat");
-	graph_dof_exact_phi.add_values(space_phi.get_num_dofs(), phi_err_exact);
+	graph_dof_exact_phi.add_values(space_phi.Space::get_num_dofs(), phi_err_exact);
 	graph_dof_exact_phi.save("conv_dof_exact_phi.dat");
-	graph_dof_est_phi.add_values(space_phi.get_num_dofs(), phi_err_est);
+	graph_dof_est_phi.add_values(space_phi.Space::get_num_dofs(), phi_err_est);
 	graph_dof_est_phi.save("conv_dof_est_phi.dat");
 
 	// Add entries to CPU convergence graph.
@@ -450,7 +450,7 @@ int main(int argc, char* argv[])
       else {
         info("Adapting the coarse meshes.");
         done = hp.adapt(Tuple<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (get_num_dofs(spaces) >= NDOF_STOP) done = true; 
+        if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true; 
         
         if (!done) {
           if (SOLVE_ON_COARSE_MESH) {        

@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
   while (1)
   {
     // Obtain the number of degrees of freedom.
-    int ndof = get_num_dofs(&space);
+    int ndof = Space::get_num_dofs(&space);
 
     // Assemble the Jacobian matrix and residual vector.
     fep_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
     double res_l2_norm = get_l2_norm(rhs_coarse);
 
     // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(&space), res_l2_norm);
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
 
     // If l2 norm of the residual vector is in tolerance, or the maximum number 
     // of iteration has been hit, then quit.
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
       // and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
-      scalar* coeff_vec = new scalar[get_num_dofs(ref_space)];
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
       FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
       while (1)
       {
         // Obtain the number of degrees of freedom.
-        int ndof = get_num_dofs(ref_space);
+        int ndof = Space::get_num_dofs(ref_space);
 
         // Assemble the Jacobian matrix and residual vector.
         fep->assemble(coeff_vec, matrix, rhs, false);
@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
         double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, get_num_dofs(ref_space), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, or the maximum number 
         // of iteration has been reached, then quit.
@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
-           get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel_total);
+           Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
         info("Adapting the coarse mesh.");
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-        if (get_num_dofs(&space) >= NDOF_STOP) 
+        if (Space::get_num_dofs(&space) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
     sln_prev_time.copy(&ref_sln);
   }
 
-  ndof = get_num_dofs(&space);
+  ndof = Space::get_num_dofs(&space);
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
