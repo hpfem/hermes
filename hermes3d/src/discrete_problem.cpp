@@ -162,7 +162,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     if (this->is_linear == false)
     {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      u_ext[i]->set_coeff_vector(this->spaces[i], coeff_vec);
+      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
     }
     else
       u_ext.push_back(NULL);
@@ -1199,224 +1199,31 @@ Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rh
       error("Unknown matrix solver requested.");
   }
 }
-////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename Real, typename Scalar>
-Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * v->val[i] + 
-                       u->dx[i] * v->dx[i] + 
-                       u->dy[i] * v->dy[i] +
-                       u->dz[i] * v->dz[i]);
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (ext->fn[0].val[i] * v->val[i] + 
-                       ext->fn[0].dx[i] * v->dx[i] + 
-                       ext->fn[0].dy[i] * v->dy[i] + 
-                       ext->fn[0].dz[i] * v->dz[i]);
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->dx[i] * v->dx[i] + 
-                       u->dy[i] * v->dy[i] + 
-                       u->dz[i] * v->dz[i]);
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar H1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (ext->fn[0].dx[i] * v->dx[i] + 
-                       ext->fn[0].dy[i] * v->dy[i] + 
-                       ext->fn[0].dz[i] * v->dz[i]);
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * v->val[i]);
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (ext->fn[0].val[i] * v->val[i]);
-  return result;
-}
-
-// Hcurl projections
-template<typename Real, typename Scalar>
-Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++) {
-    result = result + wt[i] * (u->curl0[i] * CONJ(v->curl0[i]) + u->curl1[i] * CONJ(v->curl1[i]) + u->curl2[i] * CONJ(v->curl2[i]));
-    result = result + wt[i] * (u->val0[i] * CONJ(v->val0[i]) + u->val1[i] * CONJ(v->val1[i]));
-  }
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                              Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++) {
-    result = result + wt[i] * (ext->fn[0].curl0[i] * CONJ(v->curl0[i]) + ext->fn[0].curl1[i] * CONJ(v->curl1[i]) + ext->fn[0].curl2[i] * CONJ(v->curl2[i]));
-    result = result + wt[i] * (ext->fn[0].val0[i] * CONJ(v->val0[i]) + ext->fn[0].val1[i] * CONJ(v->val1[i]));
-  }
-
-  return result;
-}
-
-/*
-double get_l2_norm(Vector* vec) 
-{
-  scalar val = 0;
-  for (int i = 0; i < vec->length(); i++) {
-    scalar inc = vec->get(i);
-    val = val + inc*conj(inc);
-  }
-  return sqrt(std::abs(val));
-}
-*/
-
-// Underlying function for global orthogonal projection.
-// Not intended for the user. NOTE: the weak form here must be 
-// a special projection weak form, which is different from 
-// the weak form of the PDE. If you supply a weak form of the 
-// PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
+// Performs uniform global refinement of a FE space. 
+Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement)
 {
   _F_
-  int n = spaces.size();
-
-  // sanity checks
-  if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
-  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
-  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
-
-  // this is needed since spaces may have their DOFs enumerated only locally.
-  int ndof = Space::assign_dofs(spaces);
-
-  // Initialize FeProblem.
-  bool is_linear = true;
-  DiscreteProblem* dp = new DiscreteProblem(wf, spaces, is_linear);
-
-  SparseMatrix* matrix = create_matrix(SOLVER_UMFPACK);
-  Vector* rhs = create_vector(SOLVER_UMFPACK);
-  Solver* solver = create_solver(SOLVER_UMFPACK, matrix, rhs);
-
-  dp->assemble(matrix, rhs);
-
-  // Calculate the coefficient vector.
-  bool solved = solver->solve();
-  scalar* coeffs;
-  if (solved) 
-    coeffs = solver->get_solution();
-
-  if (target_vec != NULL) 
-    for (int i=0; i<ndof; i++) target_vec[i] = coeffs[i];
-    
-  delete solver;
-  delete matrix;
-  delete rhs;
-  delete dp;
-  delete wf;
-}
-
-// global orthogonal projection
-void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec)
-{
-  _F_
-  int n = spaces.size();  
-
-  // define temporary projection weak form
-  WeakForm* proj_wf = new WeakForm(n);
-  int found[100];
-  for (int i = 0; i < 100; i++) found[i] = 0;
-  for (int i = 0; i < n; i++) 
+  Tuple<Space *> * ref_spaces = new Tuple<Space *>;
+  for (int i = 0; i < coarse.size(); i++) 
   {
-    int norm;
-    if (proj_norms == Tuple<ProjNormType>()) norm = HERMES_DEFAULT_PROJ_NORM;
-    else norm = proj_norms[i];
-    if (norm == HERMES_L2_NORM) 
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_H1_NORM) 
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_H1_SEMINORM) 
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, H1_semi_projection_biform<double, scalar>, H1_semi_projection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, H1_semi_projection_liform<double, scalar>, H1_semi_projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_HCURL_NORM) 
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
+    Mesh* ref_mesh = new Mesh;
+    ref_mesh->copy(*coarse[i]->get_mesh());
+    ref_mesh->refine_all_elements(refinement);
+    ref_spaces->push_back(coarse[i]->dup(ref_mesh));
+    (*ref_spaces)[i]->copy_orders(*coarse[i], order_increase);
   }
-  for (int i=0; i < n; i++) 
-  {
-    if (found[i] == 0) 
-    {
-      printf("index of component: %d\n", i);
-      error("Wrong projection norm in project_global().");
-    }
-  }
-
-  project_internal(spaces, proj_wf, target_vec);
+  return ref_spaces;
 }
 
-void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest)
+// Light version for a single space.
+Space* construct_refined_space(Space* coarse, int order_increase, int refinement)
 {
   _F_
-  scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
-  Tuple<MeshFunction *> ref_slns_mf;
-  for (int i = 0; i < sols_src.size(); i++) 
-    ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
-  
-  project_global(spaces, proj_norms, ref_slns_mf, target_vec);
-  
-  for (int i = 0; i < sols_src.size(); i++)
-      sols_dest[i]->set_coeff_vector(spaces[i], target_vec);
-  
-  delete [] target_vec;
+  Mesh* ref_mesh = new Mesh;
+  ref_mesh->copy(*coarse->get_mesh());
+  ref_mesh->refine_all_elements(refinement);
+  Space* ref_space = coarse->dup(ref_mesh);
+  ref_space->copy_orders(*coarse, order_increase);
+  return ref_space;
 }
-

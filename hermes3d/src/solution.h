@@ -106,7 +106,6 @@ public:
 	void set_zero();
 	void set_zero_3(); // three-component zero
 
-	virtual void set_coeff_vector(Space *space, scalar *vec, double dir = 1.0);
 
 	virtual void set_active_element(Element *e);
 
@@ -126,7 +125,12 @@ public:
 
 	virtual Ord3 get_order();
 
+  static void vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<double> dir = Tuple<double>());
+  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, double dir = 1.0);
+  
 protected:
+	
+  virtual void set_coeff_vector(Space *space, scalar *vec, double dir = 1.0);
 	static const int NUM_ELEMENTS = 4;
 
         enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } type;

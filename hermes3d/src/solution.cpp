@@ -581,6 +581,24 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 }
 
 // sets all elements of y[] to num
+
+void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces, Tuple<Solution*> solutions, Tuple<double> dir)
+{
+  assert(spaces.size() == solutions.size());
+  for(int i = 0; i < solutions.size(); i++)
+    if(dir == Tuple<double>())
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector);
+    else
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector, dir[i]);
+  return;
+}
+
+void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, double dir)
+{
+  Solution::vector_to_solutions(solution_vector, Tuple<Space*>(space), Tuple<Solution*>(solution), Tuple<double>(dir));
+}
+
+
 static inline void set_vec_num(int n, scalar *y, scalar num) {
 	for (int i = 0; i < n; i++)
 		y[i] = num;

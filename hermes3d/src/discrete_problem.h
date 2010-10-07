@@ -134,10 +134,7 @@ H3D_API Vector*  create_vector(MatrixSolverType matrix_solver);
 H3D_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
 H3D_API Solver*  create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
-void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec);
-void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<Solution *> sols_src, 
-                    Tuple<Solution *> sols_dest);
-void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<MeshFunction*> source_meshfns, 
-                    scalar* target_vec);
+H3D_API Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement);
+H3D_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
 
 #endif /* _DISCRETE_PROBLEM_H_ */

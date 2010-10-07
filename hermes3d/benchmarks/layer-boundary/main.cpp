@@ -1,5 +1,5 @@
 #include "config.h"
-#include <getopt.h>
+//#include <getopt.h>
 #include <hermes3d.h>
 
 // With large K, this is a singularly perturbed problem that exhibits an extremely
@@ -120,41 +120,33 @@ int main(int argc, char **args)
   bool done = false;
   do {
     printf("\n---- Adaptivity step %d:\n", as);
-    printf("\nSolving on coarse mesh:\n");
 
-    // Procedures for coarse mesh problem.
-    // Assign DOF.
-    int ndof = space.assign_dofs();
-    printf("  - Number of DOF: %d\n", ndof);
-
-    // Set up the solver, matrix, and rhs according to the solver selection.
+    Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
+    
+    // Assemble the reference problem.
+    printf("Solving on reference mesh, ndof : %d.\n", Space::get_num_dofs(ref_space)); fflush(stdout);
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_solver(matrix_solver, matrix, rhs);
-
-    // Initialize the coarse mesh problem.
-    bool is_linear = true;
-    DiscreteProblem dp(&wf, &space, is_linear);
-
-    // Time measurement.
-    cpu_time.tick();
-
-    // Assemble stiffness matrix and rhs.
-    printf("  - Assembling...\n"); fflush(stdout);
     dp.assemble(matrix, rhs);
     
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the matrix problem.
-    printf("  - Solving... "); fflush(stdout);
-    bool solved = solver->solve();
-    if (solved) printf("done in %lf secs\n", solver->get_time());
-    else error("Failed\n");
+    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    Solution ref_sln(ref_space->get_mesh());
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else error ("Matrix solver failed.\n");
     
-    // Construct a solution.
-    Solution sln(&mesh);
-    sln.set_coeff_vector(&space, solver->get_solution());
+    // Time measurement.
+    cpu_time.tick();
+
+    // Project the fine mesh solution onto the coarse mesh.
+    Solution sln(space.get_mesh());
+    printf("Projecting reference solution on coarse mesh.\n"); fflush(stdout);
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
     // Time measurement.
     cpu_time.tick();
@@ -169,49 +161,11 @@ int main(int argc, char **args)
     // Skip the visualization time.
     cpu_time.tick(HERMES_SKIP);
 
-    // Solving the fine mesh problem.
-    printf("Solving on reference mesh:\n");
-
-    // Construct the refined mesh for reference(refined) solution. 
-    Mesh rmesh;
-    rmesh.copy(mesh);
-    rmesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-
-    // Setup space for the reference solution.
-    Space *rspace = space.dup(&rmesh);
-    rspace->copy_orders(space, 1);
-
-    // Initialize the mesh problem for reference solution.
-    DiscreteProblem rdp(&wf, rspace, is_linear);
-
-    // Assign DOF.
-    int rndof = rspace->assign_dofs();
-    printf("  - Number of DOF: %d\n", rndof);
-
-    // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix* rmatrix = create_matrix(matrix_solver);
-    Vector* rrhs = create_vector(matrix_solver);
-    Solver* rsolver = create_solver(matrix_solver, rmatrix, rrhs);
-
-    // Assemble stiffness matric and rhs.
-    printf("  - Assembling...\n"); fflush(stdout);
-    rdp.assemble(rmatrix, rrhs);
-
-    // Solve the system.
-    bool rsolved = rsolver->solve();
-    if (rsolved) printf("done in %lf secs\n", rsolver->get_time());
-    else printf("failed\n");
-
-    // Construct the reference solution.
-    Solution rsln(&rmesh);
-    rsln.set_coeff_vector(rspace, rsolver->get_solution());
-
-    // Calculate error estimates for hp-adaptivity.
-    printf("Adaptivity\n");
-    printf("  - calculating error estimate: "); fflush(stdout);
+    // Calculate element errors and total error estimate.
+    printf("Calculating error estimate and exact error."); fflush(stdout);
     Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_aniso(true);							// Anisotropic adaptivity.
-    double err_est_rel = adaptivity->calc_err_est(&sln, &rsln) * 100;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
     printf("% lf %%\n", err_est_rel);
 
     // Calculate exact error,
@@ -238,19 +192,19 @@ int main(int argc, char **args)
     adaptivity->adapt(THRESHOLD);						// Run the adaptivity algorithm.
     printf("done in %lf secs (refined %d element(s))\n", adaptivity->get_adapt_time(), adaptivity->get_num_refined_elements());
 
-    if (rndof >= NDOF_STOP)
+    if (Space::get_num_dofs(ref_space) >= NDOF_STOP)
     {
       printf("\nDone.\n");
       break;
     }
 
     // Clean up.
-    delete rspace;
+    delete ref_space->get_mesh();
+    delete ref_space;
     delete matrix;
     delete rhs;
-    delete rmatrix;
-    delete rrhs;
-
+    delete solver;
+    delete adaptivity;
     // Next iteration.
     as++;
 
