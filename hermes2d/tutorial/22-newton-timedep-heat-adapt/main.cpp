@@ -23,7 +23,8 @@ using namespace RefinementSelectors;
 const int INIT_REF_NUM = 2;                // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements.
 const int TIME_DISCR = 2;                  // 1 for implicit Euler, 2 for Crank-Nicolson.
-const double TAU = 0.5;                    // Time step.
+const double TAU = 
+  TIME_DISCR == 1 ? 0.5 : 0.1;             // Time step (0.5 for implicit Euler, 0.1 for Crank-Nicolson).
 const double T_FINAL = 5.0;                // Time interval length.
 
 // Adaptivity
