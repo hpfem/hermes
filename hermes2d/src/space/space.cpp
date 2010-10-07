@@ -658,7 +658,7 @@ int Space::get_num_dofs(Tuple<Space *> spaces)
 }
 
 // This is identical to H3D.
-H2D_API int assign_dofs(Tuple<Space*> spaces) 
+int Space::assign_dofs(Tuple<Space*> spaces) 
 {
   _F_
   int n = spaces.size();

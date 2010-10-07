@@ -248,7 +248,7 @@ bool Adapt::adapt(Tuple<RefinementSelectors::Selector *> refinement_selectors, d
     have_errors = true; // space without changes
 
   // since space changed, assign dofs:
-  assign_dofs(this->spaces);
+  Space::assign_dofs(this->spaces);
 
   return done;
 }

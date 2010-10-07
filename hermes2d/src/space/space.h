@@ -194,6 +194,9 @@ public:
   /// \brief Returns the number of basis functions contained in the spaces.
   static int get_num_dofs(Tuple<Space *> spaces);
 
+  /// \brief Assings the degrees of freedom to all Spaces in the Tuple.
+  static int assign_dofs(Tuple<Space*> spaces);
+
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
@@ -308,9 +311,6 @@ public:
   /// Internal. Return type of this space (H1 = 0, Hcurl = 1, Hdiv = 2, L2 = 3)
   virtual int get_type() const = 0;
 };
-
-// This is the same in H2D and H3D.
-extern H2D_API int assign_dofs(Tuple<Space*> spaces);
 
 // updating time-dependent essential (Dirichlet) boundary conditions
 extern H2D_API void update_essential_bc_values(Tuple<Space*> spaces);  // multiple spaces

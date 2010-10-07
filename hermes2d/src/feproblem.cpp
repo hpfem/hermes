@@ -80,7 +80,7 @@ FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
   }  
 
   // Create global enumeration of dof and fill the ndof variable
-  this->ndof = assign_dofs(this->spaces);
+  this->ndof = Space::assign_dofs(this->spaces);
 }
 
 FeProblem::~FeProblem()
@@ -1448,7 +1448,7 @@ void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar*
   if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
-  int ndof = assign_dofs(spaces);
+  int ndof = Space::assign_dofs(spaces);
 
   // Initialize FeProblem.
   bool is_linear = true;
@@ -1565,7 +1565,7 @@ void OGProjection::project_global(Tuple<Space *> spaces, Tuple< std::pair<WeakFo
 
   // This is needed since spaces may have their DOFs enumerated only locally
   // when they come here.
-  int ndof = assign_dofs(spaces);
+  int ndof = Space::assign_dofs(spaces);
 
   // Define projection weak form.
   WeakForm* proj_wf = new WeakForm(n);
