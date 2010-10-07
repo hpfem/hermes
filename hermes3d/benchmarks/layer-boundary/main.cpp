@@ -209,7 +209,7 @@ int main(int argc, char **args)
     // Calculate error estimates for hp-adaptivity.
     printf("Adaptivity\n");
     printf("  - calculating error estimate: "); fflush(stdout);
-    H1Adapt *adaptivity = new H1Adapt(&space);
+    Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
     adaptivity->set_aniso(true);							// Anisotropic adaptivity.
     double err_est_rel = adaptivity->calc_err_est(&sln, &rsln) * 100;
     printf("% lf %%\n", err_est_rel);

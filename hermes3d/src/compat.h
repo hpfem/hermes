@@ -18,19 +18,19 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 //Windows DLL export/import definitions
 #if defined(WIN32) || defined(_WINDOWS)
 # if defined(_HERMESDLL)
-#   define H2D_API __declspec(dllexport)
-#   define H2D_API_USED_TEMPLATE(__implementation) template class H2D_API __implementation
-#   define H2D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
+#   define H3D_API __declspec(dllexport)
+#   define H3D_API_USED_TEMPLATE(__implementation) template class H2D_API __implementation
+#   define H3D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
 # else
-#   define H2D_API __declspec(dllimport)
-#   define H2D_API_USED_TEMPLATE(__implementation)
-//#   define H2D_API_USED_TEMPLATE(__implementation) extern template class H2D_API __implementation
-#   define H2D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
+#   define H3D_API __declspec(dllexport)
+#   define H3D_API_USED_TEMPLATE(__implementation)
+//#   define H3D_API_USED_TEMPLATE(__implementation) extern template class H2D_API __implementation
+#   define H3D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
 # endif
 #else
-# define H2D_API
-# define H2D_API_USED_TEMPLATE(__implementation)
-# define H2D_API_USED_STL_VECTOR(__type)
+# define H3D_API
+# define H3D_API_USED_TEMPLATE(__implementation)
+# define H3D_API_USED_STL_VECTOR(__type)
 #endif
 
 //C99 functions

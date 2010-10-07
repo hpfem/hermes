@@ -50,7 +50,7 @@ set(SRC
 	solver/mumps.cpp
 	solver/precond_ifpack.cpp
 	solver/precond_ml.cpp
-	adapt/h1.cpp
+	adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
 	adapt/h1proj.cpp

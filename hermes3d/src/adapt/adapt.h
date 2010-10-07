@@ -17,26 +17,27 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _ADAPT_H1_H_
-#define _ADAPT_H1_H_
+#ifndef _ADAPT_H_
+#define _ADAPT_H_
 
 #include "../tuple.h"
 #include "../weakform.h"
 
-/// hp-Adaptivity module for H1 space
+/// hp-Adaptivity module
 ///
 /// TODO
 ///
 ///
 /// @ingroup hp-adaptivity
-class H3D_API H1Adapt {
+class H3D_API Adapt {
 public:
-	/// Initializes the class. 'num' is the number of mesh-space pairs to be adapted.
-	/// After 'num', exactly that many space pointers must follow.
-        H1Adapt(Tuple<Space *> sp) {this->init(sp);};
-        H1Adapt(Space* sp) {this->init(Tuple<Space *> (sp));};
-	void init(Tuple<Space *> sp);
-	~H1Adapt();
+	/// Initializes the class.
+  /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 
+  /// Hdiv). If proj_norms are not specified, they are expected to be set later by set_error_form.
+  Adapt(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>()) {this->init(sp, proj_norms);};
+  Adapt(Space* sp, ProjNormType proj_norm = HERMES_H1_NORM) {this->init(Tuple<Space *> (sp), Tuple<ProjNormType> (proj_norm));};
+	void init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms);
+	~Adapt();
 
 	typedef
 		scalar (*biform_val_t)(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v,

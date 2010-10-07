@@ -26,7 +26,7 @@
 #include "../traverse.h"
 #include "../norm.h"
 #include "../forms.h"
-#include "h1.h"
+#include "adapt.h"
 #include "h1projipol.h"
 #include <common/timer.h>
 #include <common/callstack.h>
@@ -49,7 +49,7 @@ res_t h1_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<res_
 
 // H1 adapt ///////////////////////////////////////////////////////////////////////////////////////
 
-void H1Adapt::init(Tuple<Space *> sp)
+void Adapt::init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms)
 {
 	_F_
 	this->num = sp.size();
@@ -72,9 +72,11 @@ void H1Adapt::init(Tuple<Space *> sp)
 	ord = new_matrix<biform_ord_t>(num, num);
 	for (int i = 0; i < num; i++)
 		for (int j = 0; j < num; j++) {
-			if (i == j) {
-				form[i][j] = h1_form<double, scalar>;
-				ord[i][j]  = h1_form<Ord, Ord>;
+			if (i == j && proj_norms.size() > 0) {
+				switch (proj_norms[i]) {
+        case HERMES_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
+        default: error("Unknown projection type in Adapt::Adapt().");
+        }  
 			}
 			else {
 				form[i][j] = NULL;
@@ -95,7 +97,7 @@ void H1Adapt::init(Tuple<Space *> sp)
 	log_file = NULL;
 }
 
-H1Adapt::~H1Adapt()
+Adapt::~Adapt()
 {
 	_F_
 	for (int i = 0; i < num; i++)
@@ -111,7 +113,7 @@ H1Adapt::~H1Adapt()
 	delete [] esort;
 }
 
-void H1Adapt::set_error_form(int i, int j, biform_val_t bi_form, biform_ord_t bi_ord)
+void Adapt::set_error_form(int i, int j, biform_val_t bi_form, biform_ord_t bi_ord)
 {
 	if (i < 0 || i >= num || j < 0 || j >= num)
 		error("Invalid equation number.");
@@ -120,7 +122,7 @@ void H1Adapt::set_error_form(int i, int j, biform_val_t bi_form, biform_ord_t bi
 	ord[i][j] = bi_ord;
 }
 
-double H1Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &order, Solution *rsln,
+double Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &order, Solution *rsln,
                                      Shapeset *ss)
 {
 	_F_
@@ -179,7 +181,7 @@ static inline int ndofs_edge(int edge, const Ord3 &o1, const Ord3 &o2, const Ord
 		) - 1;
 }
 
-int H1Adapt::get_dof_count(int split, Ord3 order[])
+int Adapt::get_dof_count(int split, Ord3 order[])
 {
 	_F_
 	int dofs = 0;
@@ -295,7 +297,7 @@ int H1Adapt::get_dof_count(int split, Ord3 order[])
 	return dofs;
 }
 
-void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, Solution *rsln,
+void Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, Solution *rsln,
                                      Shapeset *ss, int &split, Ord3 p[8])
 {
 	_F_
@@ -592,7 +594,7 @@ void H1Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, 
 
 //// adapt /////////////////////////////////////////////////////////////////////////////////////////
 
-void H1Adapt::adapt(double thr)
+void Adapt::adapt(double thr)
 {
 	_F_
 	if (!have_errors)
@@ -718,7 +720,7 @@ static int compare(const void* p1, const void* p2)
 	return cmp_err[(*e1)[1]][(*e1)[0] - 1] < cmp_err[(*e2)[1]][(*e2)[0] - 1] ? 1 : -1;
 }
 
-Ord3 H1Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMap *ru,
+Ord3 Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMap *ru,
                                  matrix_form_ord_t mf_ord)
 {
 	_F_
@@ -742,7 +744,7 @@ Ord3 H1Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, Ref
 	return order;
 }
 
-scalar H1Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, MeshFunction *sln1,
+scalar Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, MeshFunction *sln1,
                            MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2)
 {
 	_F_
@@ -791,7 +793,7 @@ scalar H1Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, 
 }
 
 
-scalar H1Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, MeshFunction *rsln1,
+scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, MeshFunction *rsln1,
                           MeshFunction *rsln2)
 {
 	_F_
@@ -822,7 +824,7 @@ scalar H1Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, M
 	return res;
 }
 
-double H1Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
+double Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 {
 	_F_
 	int i, j, k;

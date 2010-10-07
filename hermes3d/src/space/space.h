@@ -105,8 +105,9 @@ public:
 
 	virtual void enforce_minimum_rule();
 	virtual int assign_dofs(int first_dof = 0, int stride = 1);
-        /// \brief Returns the number of basis functions contained in the space.
-        int get_num_dofs() { return ndof; }
+
+  /// \brief Returns the number of basis functions contained in the space.
+  int get_num_dofs() { return ndof; }
 
 	int get_dof_count() const { return (next_dof - first_dof) / stride; }
         /// \brief Returns the DOF number of the last basis function.

@@ -97,7 +97,7 @@
 #include "solver/precond_ml.h"
 
 // adapt
-#include "adapt/h1.h"
+#include "adapt/adapt.h"
 #include "adapt/h1proj.h"
 #include "adapt/h1projipol.h"
 
