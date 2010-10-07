@@ -1437,14 +1437,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec,
   return true;
 }
 
-
-
-// Underlying function for global orthogonal projection.
-// Not intended for the user. NOTE: the weak form here must be 
-// a special projection weak form, which is different from 
-// the weak form of the PDE. If you supply a weak form of the 
-// PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, MatrixSolverType matrix_solver)
+void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int n = spaces.size();
@@ -1483,8 +1476,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, M
   delete wf;
 }
 
-// global orthogonal projection
-void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns, 
+void OGProjection::project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns, 
                     scalar* target_vec, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
 {
   _F_
@@ -1540,7 +1532,7 @@ void project_global(Tuple<Space *> spaces, Tuple<MeshFunction*> source_meshfns,
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
+void OGProjection::project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
 {
   _F_
   
@@ -1549,7 +1541,7 @@ void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Sol
   for (int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
-  project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
+  OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
   
   for (int i = 0; i < sols_src.size(); i++)
     Solution::vector_to_solution(target_vec, spaces[i], sols_dest[i]);
@@ -1557,13 +1549,13 @@ void project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_src, Tuple<Sol
   delete [] target_vec;
 }
 
-void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
-                    vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
+void OGProjection::project_global(Tuple<Space *> spaces, Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> > proj_biforms, 
+                      Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms, Tuple<MeshFunction*> source_meshfns, 
                     scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int n = spaces.size();
-  matrix_forms_tuple_t::size_type n_biforms = proj_biforms.size();
+  int n_biforms = proj_biforms.size();
   if (n_biforms == 0)
     error("Please use the simpler version of project_global with the argument Tuple<ProjNormType> proj_norms if you do not provide your own projection norm.");
   if (n_biforms != proj_liforms.size())
@@ -1586,8 +1578,7 @@ void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms,
   project_internal(spaces, proj_wf, target_vec);
 }
 
-/// Global orthogonal projection of one vector-valued ExactFunction.
-void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver)
+void OGProjection::project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   ProjNormType proj_norm = HERMES_HCURL_NORM;
@@ -1598,9 +1589,7 @@ void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, 
   project_global(space, (MeshFunction*)&source_sln, target_vec, matrix_solver, proj_norm);
 };
 
-/// Projection-based interpolation of an exact function. This is faster than the
-/// global projection since no global matrix problem is solved.
-void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
+void OGProjection::project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
                    scalar* target_vec)
 {
   _F_

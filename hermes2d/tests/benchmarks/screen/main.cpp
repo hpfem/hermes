@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
     info("Projecting reference solution on coarse mesh.");
-    project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM);
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");

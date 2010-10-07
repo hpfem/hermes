@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      project_global(Tuple<Space *>(&T_space, &M_space), Tuple<Solution *>(&T_fine, &M_fine), 
+      OGProjection::project_global(Tuple<Space *>(&T_space, &M_space), Tuple<Solution *>(&T_fine, &M_fine), 
                      Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Calculate element errors and total error estimate.

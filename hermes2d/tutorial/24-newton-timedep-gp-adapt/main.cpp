@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec_coarse = new scalar[ndof];
-  project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
+  OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
 
   // Show the projection of the initial condition.
   char title[100];
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      project_global(&space, &ref_sln, &sln);
+      OGProjection::project_global(&space, &ref_sln, &sln);
     }
 
     // Adaptivity loop:
@@ -245,11 +245,11 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        project_global(ref_space, &sln, coeff_vec);
+        OGProjection::project_global(ref_space, &sln, coeff_vec);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        project_global(ref_space, &ref_sln, coeff_vec);
+        OGProjection::project_global(ref_space, &ref_sln, coeff_vec);
       }
 
       // Newton's loop on the fine mesh.
@@ -318,7 +318,7 @@ int main(int argc, char* argv[])
       }
       
       info("Projecting fine mesh solution on new coarse mesh.");
-        project_global(&space, &ref_sln, &sln);
+        OGProjection::project_global(&space, &ref_sln, &sln);
 
       // Clean up.
       delete solver;

@@ -860,7 +860,7 @@ void adapt_to_exact_function(Space *space, ProjNormType proj_norm, ExactFunction
 
     // Project the function f() on the coarse mesh.
     scalar* coeff_vec = new scalar[Space::get_num_dofs(space)];
-    project_global(space, sln_fine, coeff_vec, matrix_solver, proj_norm);
+    OGProjection::project_global(space, sln_fine, coeff_vec, matrix_solver, proj_norm);
     Solution::vector_to_solution(coeff_vec, space, sln_coarse);
     delete [] coeff_vec;
 

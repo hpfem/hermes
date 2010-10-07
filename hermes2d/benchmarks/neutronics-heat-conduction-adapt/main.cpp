@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
   // Newton's loop on the initial coarse meshes.
   info("Solving on coarse meshes.");
   scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
-  project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
+  OGProjection::project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
                  coeff_vec, matrix_solver, proj_norms);
   bool verbose = true; // Default is false.
   bool did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver, 
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
         if (SOLVE_ON_COARSE_MESH) {
           // Newton's loop on the globally derefined meshes.
           info("Solving on globally derefined meshes, starting from the latest fine mesh solutions.");
-          project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+          OGProjection::project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                          coeff_vec, matrix_solver, proj_norms);
           did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver, 
                                       NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose); 
@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
         } else {
           // Projection onto the globally derefined meshes.
           info("Projecting the latest fine mesh solution onto globally derefined meshes.");
-          project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
+          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
         }
       } 
     }
@@ -390,11 +390,11 @@ int main(int argc, char* argv[])
       // Newton's loop on the refined meshes.
       if (as == 1) {
         info("Solving on fine meshes, starting from previous coarse mesh solutions.");
-        project_global(ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
+        OGProjection::project_global(ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
                        coeff_vec, matrix_solver, proj_norms);
       } else {
         info("Solving on fine meshes, starting from previous fine mesh solutions.");
-        project_global(ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+        OGProjection::project_global(ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                        coeff_vec, matrix_solver, proj_norms);
       }
       if( !solve_newton(ref_spaces, &wf, coeff_vec, matrix_solver, 
@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
           if (SOLVE_ON_COARSE_MESH) {        
             // Newton's loop on the new coarse meshes.
             info("Solving on coarse meshes, starting from the latest fine mesh solutions.");
-            project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+            OGProjection::project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                            coeff_vec, matrix_solver, proj_norms);
             did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver, 
                                         NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose); 
@@ -469,7 +469,7 @@ int main(int argc, char* argv[])
           } else {
             // Projection onto the new coarse meshes.
             info("Projecting the latest fine mesh solution onto new coarse meshes.");
-            project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
+            OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
           }
         }
       }

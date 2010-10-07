@@ -222,7 +222,7 @@ int main (int argc, char* argv[]) {
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec_coarse = new scalar[ndof];
-  project_global(Tuple<Space *>(&C, &phi), Tuple<MeshFunction *>(&C_prev_time, &phi_prev_time), coeff_vec_coarse, matrix_solver);
+  OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<MeshFunction *>(&C_prev_time, &phi_prev_time), coeff_vec_coarse, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -313,7 +313,7 @@ int main (int argc, char* argv[]) {
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
+      OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
     }
 
     // Adaptivity loop:
@@ -335,11 +335,11 @@ int main (int argc, char* argv[]) {
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        project_global(*ref_spaces, Tuple<MeshFunction *>(&C_sln, &phi_sln), coeff_vec);
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_sln, &phi_sln), coeff_vec);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        project_global(*ref_spaces, Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), coeff_vec);
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), coeff_vec);
       }
 
       // Newton's loop on the fine mesh.
@@ -419,7 +419,7 @@ int main (int argc, char* argv[]) {
       }
       
       info("Projecting fine mesh solution on new coarse mesh.");
-        project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
+        OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
 
       // Clean up.
       delete solver;

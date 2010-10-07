@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
     info("Projecting reference solution on the coarse mesh.");
-    project_global(&space, &ref_sln, &sln, matrix_solver);
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
     // View the coarse mesh solution and polynomial orders.
     sview.show(&sln);

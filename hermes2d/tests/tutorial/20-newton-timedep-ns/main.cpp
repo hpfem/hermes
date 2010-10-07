@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+    OGProjection::project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
                    Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
                    coeff_vec, 
                    matrix_solver, 

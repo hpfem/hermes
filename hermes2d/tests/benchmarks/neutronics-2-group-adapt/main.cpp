@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
         
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on the coarse mesh; NDOF=%d ----", ndof);
-    project_global(spaces, ref_slns, slns);                
+    OGProjection::project_global(spaces, ref_slns, slns);                
     
     // Calculate element errors and total error estimate.
     info("Calculating error.");

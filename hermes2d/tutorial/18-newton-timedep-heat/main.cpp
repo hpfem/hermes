@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[ndof];
-  project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
+  OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;

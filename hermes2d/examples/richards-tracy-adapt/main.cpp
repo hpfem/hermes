@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   Solution* sln_tmp = new Solution(&mesh, init_cond);
   // The NULL means that we do not want the result as a Solution.
-  project_global(space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
+  OGProjection::project_global(space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
   delete sln_tmp;
 
   // Initialize views.
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
       info("---- Time step %d:", ts);
       info("Projecting fine mesh solution on globally derefined mesh.");
       // The NULL means that we do not want the coefficient vector.
-      project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
+      OGProjection::project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
     }
 
     // Adaptivity loop (in space):
@@ -251,12 +251,12 @@ int main(int argc, char* argv[])
       if (as == 1 && ts == 1) {
         info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
         // The NULL means that we do not want the result as a Solution.
-        project_global(ref_space, HERMES_H1_NORM, &sln, NULL, coeff_vec);
+        OGProjection::project_global(ref_space, HERMES_H1_NORM, &sln, NULL, coeff_vec);
       }
       else {
         info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
         // The NULL means that we do not want the result as a Solution.
-        project_global(ref_space, HERMES_H1_NORM, &ref_sln, NULL, coeff_vec);
+        OGProjection::project_global(ref_space, HERMES_H1_NORM, &ref_sln, NULL, coeff_vec);
       }
 
       // Newton's method on fine mesh
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
         // Project the fine mesh solution on the new coarse mesh.
         info("Projecting fine mesh solution on coarse mesh for error calculation.");
         // The NULL means that we do not want the coefficient vector.
-        project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
+        OGProjection::project_global(space, HERMES_H1_NORM, &ref_sln, &sln, NULL);
 
         as++;
       }

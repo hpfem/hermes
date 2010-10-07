@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
   // to obtain initial coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, HERMES_H1_NORM, sln_tmp, &u_prev_time, coeff_vec);
+  OGProjection::project_global(&space, HERMES_H1_NORM, sln_tmp, &u_prev_time, coeff_vec);
   delete sln_tmp;
 
   // Initialize views.

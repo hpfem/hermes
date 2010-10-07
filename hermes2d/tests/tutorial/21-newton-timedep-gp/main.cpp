@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[ndof];
-  project_global(&space, &psi_prev_time, coeff_vec, matrix_solver);
+  OGProjection::project_global(&space, &psi_prev_time, coeff_vec, matrix_solver);
   
   // Time stepping loop:
   int nstep = (int)(T_FINAL/TAU + 0.5);

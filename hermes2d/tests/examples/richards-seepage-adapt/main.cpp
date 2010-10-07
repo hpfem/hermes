@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 
   // Calculating initial vector for Newton.
   info("Projecting initial condition to obtain coefficient vector for Newton on coarse mesh.");
-  project_global(&space, H2D_H1_NORM, &u_prev_time, &u_prev_time, coeff_vec);
+  OGProjection::project_global(&space, H2D_H1_NORM, &u_prev_time, &u_prev_time, coeff_vec);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 
     // Update the coefficient vector and u_prev_time.
     info("Projecting to obtain coefficient vector on coarse mesh.");
-    project_global(&space, H2D_H1_NORM, &u_prev_time, &u_prev_time, coeff_vec);
+    OGProjection::project_global(&space, H2D_H1_NORM, &u_prev_time, &u_prev_time, coeff_vec);
 
     bool verbose = false;     // Print info during adaptivity.
     info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");

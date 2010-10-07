@@ -409,7 +409,7 @@ int main(int argc, char* argv[])
         
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    project_global(Tuple<Space*>(&space1, &space2), ref_slns, slns);
+    OGProjection::project_global(Tuple<Space*>(&space1, &space2), ref_slns, slns);
     
     // View the distribution of polynomial orders on the coarse meshes.
     info("flux1_dof=%d, flux2_dof=%d", Space::get_num_dofs(&space1), Space::get_num_dofs(&space2));

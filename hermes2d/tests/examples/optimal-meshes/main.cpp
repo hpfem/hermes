@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   // Perform orthogonal projection in the H1 norm.
   Solution sln_approx;
   ExactSolution sln_exact(&mesh, init_cond);
-  project_global(&space, &sln_exact, &sln_approx);
+  OGProjection::project_global(&space, &sln_exact, &sln_approx);
 
   // Calculate the error.
   double err = calc_abs_error(&sln_approx, &sln_exact, HERMES_H1_NORM);

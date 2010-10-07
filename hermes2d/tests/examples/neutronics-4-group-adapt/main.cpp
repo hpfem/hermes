@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
   
   // Create pointers to solutions on coarse and fine meshes and from the latest power iteration, respectively.
   Tuple<Solution*> slptr_coarse_slns, slptr_fine_slns, slptr_pow_iter_slns;
-  // We will need to pass the power iteration solutions to methods like project_global,
+  // We will need to pass the power iteration solutions to methods like OGProjection::project_global,
   // which expect MeshFunction* pointers instead of just Solution*:
   Tuple<MeshFunction*> mfptr_pow_iter_slns;
   // Initialize all the new solution variables.
@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
     // a starting point for the fine mesh power iteration.
     if (as == 1) {
       info("Projecting initial coarse mesh solutions on fine meshes.");
-      project_global(spaces, 
+      OGProjection::project_global(spaces, 
                       matrix_forms_tuple_t(callback_pairs(projection_biform)), 
                       vector_forms_tuple_t(callback_pairs(projection_liform)),
                       mfptr_pow_iter_slns, slptr_pow_iter_slns);
@@ -441,7 +441,7 @@ int main(int argc, char* argv[])
     }
     else {
       info("Projecting fine mesh solutions on coarse meshes.");
-      project_global(spaces, 
+      OGProjection::project_global(spaces, 
                       matrix_forms_tuple_t(callback_pairs(projection_biform)), 
                       vector_forms_tuple_t(callback_pairs(projection_liform)),
                       mfptr_pow_iter_slns, slptr_coarse_slns);
