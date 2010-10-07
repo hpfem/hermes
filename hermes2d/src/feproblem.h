@@ -158,13 +158,6 @@ H2D_API double get_l2_norm(Vector* vec);
 class H2D_API OGProjection
 {
 public:
-  // Underlying function for global orthogonal projection.
-  // Not intended for the user. NOTE: the weak form here must be 
-  // a special projection weak form, which is different from 
-  // the weak form of the PDE. If you supply a weak form of the 
-  // PDE, the PDE will just be solved. 
-  static void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-
   static void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
                               scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
 
@@ -190,6 +183,15 @@ public:
   static void OGProjection::project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
                    scalar* target_vec);
 
+  // Underlying function for global orthogonal projection.
+  // Not intended for the user. NOTE: the weak form here must be 
+  // a special projection weak form, which is different from 
+  // the weak form of the PDE. If you supply a weak form of the 
+  // PDE, the PDE will just be solved. 
+protected:
+  static void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
+
+ 
 };
 
 
