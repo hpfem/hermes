@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../hermes2d.h"
 #include "../common.h"
 #include "../limit_order.h"
 #include "../solution.h"

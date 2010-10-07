@@ -154,50 +154,6 @@ H2D_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
 H2D_API double get_l2_norm(Vector* vec); 
 
-
-class H2D_API OGProjection
-{
-public:
-  static void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
-                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
-
-  static void project_global(Tuple<Space *> spaces, 
-                              Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, 
-                              MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
-                              Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
-
-  static void project_global(Tuple<Space *> spaces, Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> > proj_biforms, 
-                      Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms, Tuple<MeshFunction*> source_meshfns, 
-                      scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-
-  static void project_global(Space *space, 
-                      std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> proj_biform,
-                      std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
-                      ExactFunction source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-
-  /// Global orthogonal projection of one vector-valued ExactFunction.
-  static void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-  
-  /// Projection-based interpolation of an exact function. This is faster than the
-  /// global projection since no global matrix problem is solved.
-  static void OGProjection::project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
-                   scalar* target_vec);
-
-  // Underlying function for global orthogonal projection.
-  // Not intended for the user. NOTE: the weak form here must be 
-  // a special projection weak form, which is different from 
-  // the weak form of the PDE. If you supply a weak form of the 
-  // PDE, the PDE will just be solved. 
-protected:
-  static void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-
- 
-};
-
-
-
-
-
 #endif
 
 

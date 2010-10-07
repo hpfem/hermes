@@ -97,6 +97,8 @@
 
 #include "adapt/adapt.h"
 
+#include "ogprojection.h"
+
 /**
 
 \mainpage

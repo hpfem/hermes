@@ -41,6 +41,7 @@ set(SRC
        shapeset/shapeset_l2_legendre.cpp
        qsort.cpp norm.cpp
        trans.cpp
+       ogprojection.cpp
        adapt/adapt.cpp
        refinement_type.cpp 
        element_to_refine.cpp
