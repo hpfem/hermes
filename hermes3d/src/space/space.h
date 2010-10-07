@@ -124,11 +124,14 @@ public:
 	/// Returns true if the space is ready for computation, false otherwise.
 	bool is_up_to_date() const { return was_assigned && mesh_seq == mesh->get_seq(); }
 
-        /// Number of degrees of freedom (dimension of the space)
-        int ndof;
+  /// Number of degrees of freedom (dimension of the space)
+  int ndof;
 
-        /// FE mesh
-	Mesh *mesh;
+  /// FE mesh
+  Mesh *mesh;
+
+  static int get_num_dofs(Tuple<Space *> spaces);
+  static int assign_dofs(Tuple<Space*> spaces) ;
 
 protected:
 	Shapeset *shapeset;
@@ -412,8 +415,5 @@ protected:
 	friend class DiscreteProblem;
 	friend class LinearProblem;
 };
-
-// This is the same in H2D and H3D.
-extern int assign_dofs(Tuple<Space*> spaces);
 
 #endif

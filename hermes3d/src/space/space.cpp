@@ -2437,7 +2437,7 @@ void Space::dump() {
 }
 
 // This is identical to H2D.
-int assign_dofs(Tuple<Space*> spaces) 
+int Space::assign_dofs(Tuple<Space*> spaces) 
 {
   _F_
   int n = spaces.size();
@@ -2450,5 +2450,14 @@ int assign_dofs(Tuple<Space*> spaces)
   return ndof;
 }
 
+int Space::get_num_dofs(Tuple<Space *> spaces)
+{
+  _F_
+  int ndof = 0;
+  for (int i=0; i<spaces.size(); i++) {
+    ndof += spaces[i]->get_num_dofs();
+  }
+  return ndof;
+}
 
 

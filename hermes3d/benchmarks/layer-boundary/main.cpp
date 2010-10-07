@@ -219,11 +219,11 @@ int main(int argc, char **args)
     double err_exact_rel = 0; // = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.add_values(Space::get_num_dofs(&space), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
     graph_cpu_exact.save("conv_cpu_exact.dat");

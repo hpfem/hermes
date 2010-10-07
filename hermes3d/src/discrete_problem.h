@@ -129,7 +129,6 @@ protected:
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
-H3D_API int get_num_dofs(Tuple<Space *> spaces);
 
 H3D_API Vector*  create_vector(MatrixSolverType matrix_solver);
 H3D_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);

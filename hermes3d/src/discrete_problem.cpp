@@ -90,7 +90,7 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf, Tuple<Space *> spaces, bool is_li
   // H2D is initializing precalc shapesets here.
 
   // Create global enumeration of dof and fill the ndof variable
-  this->ndof = assign_dofs(this->spaces);
+  this->ndof = Space::assign_dofs(this->spaces);
 }
 
 DiscreteProblem::~DiscreteProblem()
@@ -1319,7 +1319,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec)
   if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
-  int ndof = assign_dofs(spaces);
+  int ndof = Space::assign_dofs(spaces);
 
   // Initialize FeProblem.
   bool is_linear = true;
@@ -1407,7 +1407,7 @@ void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple
 void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple<Solution *> sols_src, Tuple<Solution *> sols_dest)
 {
   _F_
-  scalar* target_vec = new scalar[get_num_dofs(spaces)];
+  scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
   Tuple<MeshFunction *> ref_slns_mf;
   for (int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
@@ -1420,12 +1420,3 @@ void project_global(Tuple<Space *> spaces, Tuple<ProjNormType> proj_norms, Tuple
   delete [] target_vec;
 }
 
-int get_num_dofs(Tuple<Space *> spaces)
-{
-  _F_
-  int ndof = 0;
-  for (int i=0; i<spaces.size(); i++) {
-    ndof += spaces[i]->get_num_dofs();
-  }
-  return ndof;
-}
