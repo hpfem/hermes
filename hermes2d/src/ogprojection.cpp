@@ -106,8 +106,7 @@ void OGProjection::project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_
   
   OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
   
-  for (int i = 0; i < sols_src.size(); i++)
-    Solution::vector_to_solution(target_vec, spaces[i], sols_dest[i]);
+  Solution::vector_to_solutions(target_vec, spaces, sols_dest);
   
   delete [] target_vec;
 }
