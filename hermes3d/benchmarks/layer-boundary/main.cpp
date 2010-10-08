@@ -18,8 +18,8 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 3;             // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 3;         // Number of initial mesh refinements towards the boundary.
+const int INIT_REF_NUM = 0;             // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 4;         // Number of initial mesh refinements towards the boundary.
 const int P_INIT_X = 1,
           P_INIT_Y = 1,
           P_INIT_Z = 1;                 // Initial polynomial degree of all mesh elements.
@@ -104,7 +104,6 @@ int main(int argc, char **args)
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
-  //wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
   wf.add_vector_form(linear_form, linear_form_ord, HERMES_ANY);
 
   // Set exact solution.
@@ -128,7 +127,7 @@ int main(int argc, char **args)
     Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
     
     // Assemble the reference problem.
-    info("Solving on reference mesh.");
+    info("Solving on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
     bool is_linear = true;
     DiscreteProblem dp(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
