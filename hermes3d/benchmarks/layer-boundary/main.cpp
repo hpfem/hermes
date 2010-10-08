@@ -168,10 +168,12 @@ int main(int argc, char **args)
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt) * 100;
 
     // Calculate exact error.
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, false) * 100;
+    solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
     printf("ndof_coarse: %d, ndof_fine: %d\n", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
