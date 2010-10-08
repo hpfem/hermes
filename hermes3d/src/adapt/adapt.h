@@ -124,14 +124,14 @@ public:
 	double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_est(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags, Tuple<double>());
+		return calc_err_est(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
 	}
 
 	/// Calculates the error of the solution. 'n' must be the same
 	/// as 'num' in the constructor. After that, n coarse solution
 	/// pointers are passed, followed by n fine solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_est(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double> & component_errors = Tuple<double>())
+	double calc_err_est(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double>* component_errors = NULL)
   {
     return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
   }
@@ -141,14 +141,14 @@ public:
 	double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_exact(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags, Tuple<double>());
+		return calc_err_exact(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
 	}
 
 	/// Calculates the error of the solution. 'n' must be the same
 	/// as 'num' in the constructor. After that, n coarse solution
 	/// pointers are passed, followed by n exact solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_exact(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double> & component_errors = Tuple<double>())
+	double calc_err_exact(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double>* component_errors = NULL)
   {
     return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
   }
@@ -158,7 +158,7 @@ protected:
   /// Internal, calculates the error of the solution. 'n' must be the same
 	/// as 'num' in the constructor. After that, first n solution
 	/// pointers are passed, followed by second n solution pointers.
-	double calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double> & component_errors, bool solutions_for_adapt);
+	double calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double>* component_errors, bool solutions_for_adapt);
 
 	// parameters
 	bool h_only;
