@@ -76,8 +76,10 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
-  // Set initial condition.
+  // Initialize the solution.
   Solution tsln;
+
+  // Set the initial condition.
   tsln.set_const(&mesh, T_INIT);
 
   // Initialize weak formulation.
@@ -87,29 +89,43 @@ int main(int argc, char* argv[])
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
   wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
-  // Initialize the linear problem.
-  LinearProblem lp(&wf, &space);
+  // Initialize the FE problem.
+  bool is_linear = true;
+  FeProblem fep(&wf, &space, is_linear);
 
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;  
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Initialize views.
+  ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
+  char title[100];
+  sprintf(title, "Time %3.5f, exterior temperature %3.5f", TIME, temp_ext(TIME));
+  Tview.set_min_max_range(0,20);
+  Tview.set_title(title);
+  Tview.fix_scale_width(3);
 
   // Time stepping:
   int nsteps = (int)(FINAL_TIME/TAU + 0.5);
-  bool rhsonly = false;
+  bool rhs_only = false;
   for(int ts = 1; ts <= nsteps; ts++)
   {
     info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
 
-    // Assemble stiffness matrix and rhs.
-    lp.assemble(mat, rhs, rhsonly);
-    rhsonly = true;
+    // First time assemble both the stiffness matrix and right-hand side vector,
+    // then just the right-hand side vector.
+    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+    else info("Assembling the right-hand side vector (only).");
+    fep.assemble(matrix, rhs, rhs_only);
+    rhs_only = true;
 
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-    // Update tsln.
-    tsln.set_coeff_vector(&space, rhs);
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
+    else 
+      error ("Matrix solver failed.\n");
 
     if (ts % OUTPUT_FREQUENCY == 0) {
       Linearizer lin;
@@ -168,6 +184,11 @@ int main(int argc, char* argv[])
   WinGeom* win_geom_3 = new WinGeom(920, 0, 450, 600);
   OrderView oview("Saved Solution -> Space", win_geom_3);
   oview.show(&space_from_file);
+
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
 
   // Wait for the view to be closed.
   View::wait();
