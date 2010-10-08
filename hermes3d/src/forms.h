@@ -26,8 +26,8 @@
 #include "solution.h"
 #include "refmap.h"
 
-// TODO: better name?
-#define FORM_CB(a)	a<double, scalar>, a<Ord, Ord>
+#define callback(a)	a<double, scalar>, a<Ord, Ord>
+//#define FORM_CB(a)	a<double, scalar>, a<Ord, Ord>
 
 // Base type for orders of functions
 //

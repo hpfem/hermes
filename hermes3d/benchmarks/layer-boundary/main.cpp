@@ -98,8 +98,9 @@ int main(int argc, char **args)
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
-  wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
+  //wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
+  wf.add_vector_form(linear_form, linear_form_ord, HERMES_ANY);
 
   // Set exact solution.
   ExactSolution exact(&mesh, sol_exact);
