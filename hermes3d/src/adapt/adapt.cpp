@@ -824,7 +824,7 @@ scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Mes
 	return res;
 }
 
-double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double> & component_errors, bool solutions_for_adapt)
+double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double>* component_errors, bool solutions_for_adapt)
 {
 	_F_
 	int i, j, k;
@@ -911,17 +911,20 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	trav.finish();
 
   // Store the calculation for each solution component separately.
-  component_errors.clear();
-  for (int i = 0; i < num; i++)
+  if(component_errors != NULL)
   {
-    if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-      component_errors.push_back(sqrt(errors_components[i]));
-    else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-      component_errors.push_back(sqrt(errors_components[i]/norms[i]));
-    else
+    component_errors->clear();
+    for (int i = 0; i < num; i++)
     {
-      error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
-      return -1.0;
+      if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
+        component_errors->push_back(sqrt(errors_components[i]));
+      else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+        component_errors->push_back(sqrt(errors_components[i]/norms[i]));
+      else
+      {
+        error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+        return -1.0;
+      }
     }
   }
 
