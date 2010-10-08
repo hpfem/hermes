@@ -123,14 +123,14 @@ static bool write_console(const char code, const bool emphasize, const char* tex
   int console_attrs = 0;
   bool console_bold = false;
   switch(code) {
-    case h3d_EC_ERROR:
-    case h3d_EC_ASSERT: console_attrs |= FOREGROUND_RED; break;
-    case h3d_EC_WARNING: console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN; break;
-    case h3d_EC_INFO: console_bold = true;
-    case h3d_EC_VERBOSE: console_attrs |= FOREGROUND_BLUE; break;
-    case h3d_EC_TRACE: console_attrs |= FOREGROUND_BLUE; break;
-    case h3d_EC_TIME: console_attrs |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-    case h3d_EC_DEBUG: console_attrs |= FOREGROUND_RED | FOREGROUND_BLUE; break;
+    case H3D_EC_ERROR:
+    case H3D_EC_ASSERT: console_attrs |= FOREGROUND_RED; break;
+    case H3D_EC_WARNING: console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN; break;
+    case H3D_EC_INFO: console_bold = true;
+    case H3D_EC_VERBOSE: console_attrs |= FOREGROUND_BLUE; break;
+    case H3D_EC_TRACE: console_attrs |= FOREGROUND_BLUE; break;
+    case H3D_EC_TIME: console_attrs |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
+    case H3D_EC_DEBUG: console_attrs |= FOREGROUND_RED | FOREGROUND_BLUE; break;
     default: error("Unknown error code: '%c'", code); break;
   }
   printf("\033[%dm", console_attrs + 30);
