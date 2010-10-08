@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
+#include <pthread.h>
 #include <string>
 #include <assert.h>
 #include <math.h>
@@ -32,9 +34,10 @@
 #include <algorithm>			// std::min, std::max
 #include <vector>
 #include <set>
+#include <map>
 #include "common_time_period.h"
 
-
+using namespace std;
 // Compatibility.
 //Windows DLL export/import definitions
 #if defined(WIN32) || defined(_WINDOWS)
@@ -305,5 +308,169 @@ inline double sqr(complex x) { return std::norm(x); }
 #define H3D_EC_TIME 'T' ///< An event code: time measurements. \internal
 #define H3D_REPORT_TIME
 #define report_time(...)
+
+
+
+
+
+
+
+/* basic logging functions */
+/// Info about a log record. Used for output log function. \internal
+struct H3D_API Hermes3DLogEventInfo {
+  const char code; ///< An event code character. For defails see event characters, e.g., ::H3D_EC_ERROR
+  const char* log_file; ///< Log file name.
+  const char* src_function; ///< A name of a function/method at which the event was generated.
+  const char* src_file; ///< A source file at which the event was generated.
+  const int src_line; ///< A line in the source file at which the event was generated.
+  Hermes3DLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
+    : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line) {};
+};
+
+/// Builds info about an event. \internal
+#define H3D_BUILD_LOG_INFO(__event) Hermes3DLogEventInfo(__event, H3D_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__)
+
+
+/// Exits the application if the condition is true. \internal
+/** Used by macros error() and error_if().
+ *  \param[in] cond True if the function should exit.
+ *  \param[in] code Exit code returned by the application throught exit(). */
+void H3D_API hermes3d_exit_if(bool cond, int code = -1);
+
+
+/// Logs an event if the condition is true. \internal
+/** Used by all even logging macros. Since this function returns a copy of the parameter cond,
+ *  it can be used to call a function hermes2d_exit_if() or a function(). Thanks to that, the macro
+ *  behaves as a function rather than a block of code. Also, this allows a debugger to a particular
+ *  code.
+ *  \param[in] cond True if the event should be logged.
+ *  \param[in] info Info about the event.
+ *  \param[in] msg A message or prinf-like formatting string.
+ *  \return A value of the parameter cond. */
+bool H3D_API hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info, const char* msg, ...);
+
+
+/* log file */
+#undef H3D_LOG_FILE
+#ifdef H3D_REPORT_NO_FILE
+#  define H3D_LOG_FILE NULL
+#else
+# ifdef H3D_REPORT_FILE
+#  define H3D_LOG_FILE H3D_REPORT_FILE
+# else
+#  ifndef H3D_TEST
+#    define H3D_LOG_FILE "hermes3d.log" // default filename for a library
+#  else
+#    define H3D_LOG_FILE "test.log" // default filename for a library test
+#  endif
+# endif
+#endif
+
+/* function name */
+/** \def __CURRENT_FUNCTION
+ *  \brief A platform-dependent string defining a current function. \internal */
+#ifdef _WIN32 //Win32
+# ifdef __MINGW32__ //MinGW
+#   define __CURRENT_FUNCTION __func__
+# else //MSVC and other compilers
+#   define __CURRENT_FUNCTION __FUNCTION__
+# endif
+#else //Linux and Mac
+# define __CURRENT_FUNCTION __PRETTY_FUNCTION__
+#endif
+
+
+
+/* event codes */
+#define H3D_EC_ERROR 'E' ///< An event code: errors. \internal
+#define H3D_EC_ASSERT 'X' ///< An event code: asserts. \internal
+#define H3D_EC_WARNING 'W' ///< An event code: warnings. \internal
+#define H3D_EC_INFO 'I' ///< An event code: info about results. \internal
+#define H3D_EC_VERBOSE 'V' ///< An event code: more details about details. \internal
+#define H3D_EC_TRACE 'R' ///< An event code: execution tracing. \internal
+#define H3D_EC_TIME 'T' ///< An event code: time measurements. \internal
+#define H3D_EC_DEBUG 'D' ///< An event code: general debugging messages. \internal
+
+/* error and assert macros */
+#define error(...) hermes3d_exit_if(hermes3d_log_message_if(true, H3D_BUILD_LOG_INFO(H3D_EC_ERROR), __VA_ARGS__))
+#define error_if(__cond, ...) hermes3d_exit_if(hermes3d_log_message_if(__cond, H3D_BUILD_LOG_INFO(H3D_EC_ERROR), __VA_ARGS__))
+#ifndef NDEBUG
+# define assert_msg(__cond, ...) assert(!hermes3d_log_message_if(!(__cond), H3D_BUILD_LOG_INFO(H3D_EC_ASSERT), __VA_ARGS__))
+#else
+# define assert_msg(__cond, ...)
+#endif
+
+/* reporting macros */
+#ifdef H3D_REPORT_ALL
+# undef H3D_REPORT_WARNING
+# define H3D_REPORT_WARNING
+# undef HERMED2D_REPORT_NO_INTR_WARNING
+# undef H3D_REPORT_INFO
+# define H3D_REPORT_INFO
+# undef H3D_REPORT_VERBOSE
+# define H3D_REPORT_VERBOSE
+# undef H3D_REPORT_TRACE
+# define H3D_REPORT_TRACE
+# undef H3D_REPORT_TIME
+# define H3D_REPORT_TIME
+#endif
+/** \def H3D_RCTR(__var)
+ *  \brief Defines a condition that can control whether logging of a given event is enabled. \internal
+ *  An argument \a __var spefies a variable which can control a logging of a given event during
+ *  runtime if runtime control is enabled through a preprocessor directive ::H3D_REPORT_RUNTIME_CONTROL. */
+#ifdef H3D_REPORT_RUNTIME_CONTROL
+# define H3D_RCTR(__var) __var /* reports will be controled also by runtime report control variables */
+extern H3D_API bool __H3D_report_warn;
+extern H3D_API bool __H3D_report_warn_intr;
+extern H3D_API bool __H3D_report_info;
+extern H3D_API bool __H3D_report_verbose;
+extern H3D_API bool __H3D_report_trace;
+extern H3D_API bool __H3D_report_time;
+extern H3D_API bool __H3D_report_debug;
+#else
+# define H3D_RCTR(__var) true /* reports will be controled strictly by preprocessor directives */
+#endif
+
+#if defined(H3D_REPORT_WARNING) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define warn(...) hermes3d_log_message_if(true && H3D_RCTR(__H3D_report_warn), H3D_BUILD_LOG_INFO(H3D_EC_WARNING), __VA_ARGS__)
+# define warn_if(__cond, ...) hermes3d_log_message_if((__cond) && H3D_RCTR(__H3D_report_warn), H3D_BUILD_LOG_INFO(H3D_EC_WARNING), __VA_ARGS__)
+#else
+# define warn(...)
+# define warn_if(__cond, ...)
+#endif
+#if defined(H3D_REPORT_INTR_WARNING) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define warn_intr(...) hermes3d_log_message_if(H3D_RCTR(__H3D_report_warn_intr), H3D_BUILD_LOG_INFO(H3D_EC_WARNING), __VA_ARGS__)
+#else
+# define warn_intr(...)
+#endif
+#if defined(H3D_REPORT_INFO) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define info(...) hermes3d_log_message_if(true  && H3D_RCTR(__H3D_report_info), H3D_BUILD_LOG_INFO(H3D_EC_INFO), __VA_ARGS__)
+# define info_if(__cond, ...) hermes3d_log_message_if((__cond) && H3D_RCTR(__H3D_report_warn), H3D_BUILD_LOG_INFO(H3D_EC_INFO), __VA_ARGS__)
+#else
+# define info(...)
+# define info_if(__cond, ...)
+#endif
+#if defined(H3D_REPORT_VERBOSE) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define verbose(...) hermes3d_log_message_if(true && H3D_RCTR(__H3D_report_verbose), H3D_BUILD_LOG_INFO(H3D_EC_VERBOSE), __VA_ARGS__)
+#else
+# define verbose(...)
+#endif
+#if defined(H3D_REPORT_TRACE) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define trace(...) hermes3d_log_message_if(true && H3D_RCTR(__H3D_report_trace), H3D_BUILD_LOG_INFO(H3D_EC_TRACE), __VA_ARGS__)
+#else
+# define trace(...)
+#endif
+#if defined(H3D_REPORT_TIME) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define report_time(...) hermes3d_log_message_if(true && H3D_RCTR(__H3D_report_time), H3D_BUILD_LOG_INFO(H3D_EC_TIME), __VA_ARGS__)
+#else
+# define report_time(...)
+#endif
+#if defined(_DEBUG) || !defined(NDEBUG) || defined(H3D_REPORT_RUNTIME_CONTROL)
+# define debug_log(...) hermes3d_log_message_if(true && H3D_RCTR(__H3D_report_debug), H3D_BUILD_LOG_INFO(H3D_EC_DEBUG), __VA_ARGS__)
+#else
+# define debug_log(...)
+#endif
+
+
 
 #endif

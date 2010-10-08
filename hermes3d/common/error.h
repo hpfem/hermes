@@ -21,7 +21,7 @@
 #define _ERROR_H_
 
 #include "compat-util.h"
-#include "common.h"
+#include "compat.h"
 //
 // Error handling
 //
@@ -42,10 +42,11 @@
 #else
 #define EXIT(...) h_exit(__LINE__, __PRETTY_FUNCTION__, __FILE__, ## __VA_ARGS__)
 #endif
+
 void H3D_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
 
 /// Report unrecoverable error (no call stack or location dumped)
-void H3D_API error(char const *fmt, ...) NORETURN;
+//void H3D_API error(char const *fmt, ...) NORETURN;
 
 /// Notify the user about warning (the execution continues), neither location or call stack
 /// is dumped

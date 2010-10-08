@@ -29,6 +29,31 @@
 ///
 ///
 /// @ingroup hp-adaptivity
+
+// Constants used by Adapt::calc_error().
+#define HERMES_TOTAL_ERROR_REL  0x00  
+                                ///< A flag which defines interpretation of the total error. \ingroup g_adapt
+                                ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
+                                ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
+#define HERMES_TOTAL_ERROR_ABS  0x01  
+                                ///< A flag which defines interpretation of the total error. \ingroup g_adapt
+                                ///  The total error is absolute, i.e., it is an integral over squares of differencies.
+                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_TOTAL_ERROR_REL.
+#define HERMES_ELEMENT_ERROR_REL 0x00 
+                                ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
+                                ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
+                                ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
+                                ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
+                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
+#define HERMES_ELEMENT_ERROR_ABS 0x10 
+                                ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
+                                ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
+                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_REL.
+#define HERMES_TOTAL_ERROR_MASK 0x0F 
+                                ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
+#define HERMES_ELEMENT_ERROR_MASK 0xF0 
+                                ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
+
 class H3D_API Adapt {
 public:
 	/// Initializes the class.
@@ -46,17 +71,7 @@ public:
 		Ord (*biform_ord_t)(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
 		                      Geom<Ord> *e, ExtData<Ord> *);
 
-	/// Type-safe version of calc_error_n() for one solution.
-	double calc_err_est(Solution *sln, Solution *rsln)
-	{
-		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_error_n(Tuple<Solution *> (sln), Tuple<Solution *> (rsln));
-	}
-
-	/// Calculates the error of the solution. 'n' must be the same
-	/// as 'num' in the constructor. After that, n coarse solution
-	/// pointers are passed, followed by n fine solution pointers.
-	double calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns);
+	
 
 	/// Selects elements to refine (based on results from calc_err_est() or calc_energy_error())
 	/// and performs their optimal hp-refinement.
@@ -104,7 +119,47 @@ public:
 		else error("Cannot set order greater than max elem. order (%d)", H3D_MAX_ELEMENT_ORDER);
 	}
 
+  /// Type-safe version of calc_err_est() for one solution.
+  /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
+	double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
+	{
+		if (num != 1) EXIT("Wrong number of solutions.");
+		return calc_err_est(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags, Tuple<double>());
+	}
+
+	/// Calculates the error of the solution. 'n' must be the same
+	/// as 'num' in the constructor. After that, n coarse solution
+	/// pointers are passed, followed by n fine solution pointers.
+  /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
+	double calc_err_est(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double> & component_errors = Tuple<double>())
+  {
+    return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
+  }
+
+  /// Type-safe version of calc_err_exact() for one solution.
+  /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
+	double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
+	{
+		if (num != 1) EXIT("Wrong number of solutions.");
+		return calc_err_exact(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags, Tuple<double>());
+	}
+
+	/// Calculates the error of the solution. 'n' must be the same
+	/// as 'num' in the constructor. After that, n coarse solution
+	/// pointers are passed, followed by n exact solution pointers.
+  /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
+	double calc_err_exact(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double> & component_errors = Tuple<double>())
+  {
+    return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
+  }
+
 protected:
+
+  /// Internal, calculates the error of the solution. 'n' must be the same
+	/// as 'num' in the constructor. After that, first n solution
+	/// pointers are passed, followed by second n solution pointers.
+	double calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double> & component_errors, bool solutions_for_adapt);
+
 	// parameters
 	bool h_only;
 	int strategy;

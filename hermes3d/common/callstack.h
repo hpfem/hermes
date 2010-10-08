@@ -20,14 +20,14 @@
 #ifndef _CALLSTACK_H_
 #define _CALLSTACK_H_
 #include <stdio.h>
-#include "common.h"
 
+#include "compat.h"
 /// Holds data for one call stack object
 ///
-struct H3D_API CallStackObj {
-	CallStackObj(int ln, const char *func, const char *file);
+class H3D_API CallStackObj {
+public:
+  CallStackObj(int ln, const char *func, const char *file);
 	~CallStackObj();
-
 	int line;					// line number in the file
 	const char *file;			// file
 	const char *func;			// function name
