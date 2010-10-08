@@ -110,9 +110,6 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(bilinear_form_iron, bilinear_form_ord, HERMES_SYM, IRON);
   wf.add_vector_form(linear_form_source, linear_form_ord, WATER_1);
 
-  // Initialize coarse and reference mesh solution.
-  Solution sln, ref_sln;
-  
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
@@ -130,6 +127,7 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Adaptivity loop:
+  Solution ref_sln;
   int as = 1; 
   bool done = false;
   do
@@ -157,8 +155,9 @@ int main(int argc, char* argv[])
     else error ("Matrix solver failed.\n");
 
     // Project the fine mesh solution onto the coarse mesh.
+    Solution sln;
     info("Projecting reference solution on coarse mesh.");
-    project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
     // Time measurement.
     cpu_time.tick();
@@ -178,13 +177,13 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-      get_num_dofs(&space), get_num_dofs(ref_space), err_est_rel);
+	 Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(get_num_dofs(&space), err_est_rel);
+    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
     graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu.save("conv_cpu_est.dat");
@@ -199,7 +198,7 @@ int main(int argc, char* argv[])
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
-    if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete solver;

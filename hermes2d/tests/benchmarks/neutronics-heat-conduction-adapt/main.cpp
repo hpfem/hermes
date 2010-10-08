@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
   H1Space space_T(&mesh_T, bc_types_T, essential_bc_values_T, P_INIT);
   H1Space space_phi(&mesh_phi, bc_types_phi, essential_bc_values_phi, P_INIT);
   Tuple<Space*> spaces(&space_T, &space_phi);
-  int ndof = get_num_dofs(spaces); 
+  int ndof = Space::get_num_dofs(spaces); 
  
   // Solutions in the previous time step (converging within the time stepping loop).
   Solution T_prev_time, phi_prev_time;
