@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
-      if (done == false)  as++;
+      if (done == false) as++;
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 

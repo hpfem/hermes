@@ -62,8 +62,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 	char title[MAX_LINE_LENGTH + 1];
 	err = ex_get_init(exoid, title, &n_dims, &n_nodes, &n_elems, &n_eblocks, &n_nodesets, &n_sidesets);
 	if (n_dims != 3) {
-		warning("File '%s' does not contain 3D mesh", file_name);
-		return false;
+		error("File '%s' does not contain 3D mesh.", file_name);
 	}
 
 	// load coordinates

@@ -100,7 +100,7 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 	assert(mesh != NULL);
 
 	FILE *file = fopen(file_name, "r");
-	if (file == NULL) return false;
+	if (file == NULL) error("Could not open the mesh file %s", file_name);
 
 	try {
 		line_nr = 0;

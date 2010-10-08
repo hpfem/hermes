@@ -33,8 +33,8 @@ bool solution_output = true;			  // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-// Problem constants.
-const double K = 1e2;		 	          // Equation parameter.
+// Problem parameters.
+const double K = 1e2;
 
 // Exact solution
 #include "exact_solution.cpp"
@@ -88,16 +88,12 @@ int main(int argc, char **args)
   // Load the mesh.
   Mesh mesh;
   H3DReader mloader;
-  if(!mloader.load("singpert-aniso.mesh3d", &mesh))
-    error("Loading mesh file '%s'\n", "cylinder2.e");
+  mloader.load("singpert-aniso.mesh3d", &mesh);
 
   // Perform initial mesh refinement.
-  printf("Performing %d initial mesh refinements.\n", INIT_REF_NUM);
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-  Word_t (nelem) = mesh.get_num_elements();
-  printf("New number of elements is %d.\n", (int) nelem);
 
-  // Create H1 space with default shapeset.
+  // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
   // Initialize the weak formulation.
@@ -118,13 +114,16 @@ int main(int argc, char **args)
   // Adaptivity loop.
   int as = 1; 
   bool done = false;
-  do {
-    printf("\n---- Adaptivity step %d:\n", as);
+  do 
+  {
+    printf("---- Adaptivity step %d:\n", as);
 
+    // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
     
     // Assemble the reference problem.
-    printf("Solving on reference mesh, ndof : %d.\n", Space::get_num_dofs(ref_space)); fflush(stdout);
+    printf("Solving on reference mesh (ndof: %d).\n", 
+           Space::get_num_dofs(ref_space)); fflush(stdout);
     bool is_linear = true;
     DiscreteProblem dp(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -162,15 +161,18 @@ int main(int argc, char **args)
     cpu_time.tick(HERMES_SKIP);
 
     // Calculate element errors and total error estimate.
-    printf("Calculating error estimate and exact error."); fflush(stdout);
+    printf("Calculating error estimate and exact error.\n");
     Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    adaptivity->set_aniso(true);							// Anisotropic adaptivity.
+    adaptivity->set_aniso(true);   // Anisotropic adaptivity.
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
-    printf("% lf %%\n", err_est_rel);
 
     // Calculate exact error,
     // TO BE IMPLEMENTED.
     double err_exact_rel = 0; // = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
+
+    // Report results.
+    printf("ndof_coarse: %d, ndof_fine: %d\n", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    printf("err_est_rel: %g%%, err_exact_rel: %g%%\n", err_est_rel, err_exact_rel);
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
@@ -183,20 +185,13 @@ int main(int argc, char **args)
     graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est_rel is too large, adapt the mesh. 
-    if (err_est_rel < ERR_STOP) 
+    if (err_est_rel < ERR_STOP) done = true;
+    else
     {
-      printf("\nDone\n");
-      break;
+      printf("Adapting coarse mesh.\n");
+      adaptivity->adapt(THRESHOLD);
     }
-    printf("  - adapting... "); fflush(stdout);
-    adaptivity->adapt(THRESHOLD);						// Run the adaptivity algorithm.
-    printf("done in %lf secs (refined %d element(s))\n", adaptivity->get_adapt_time(), adaptivity->get_num_refined_elements());
-
-    if (Space::get_num_dofs(ref_space) >= NDOF_STOP)
-    {
-      printf("\nDone.\n");
-      break;
-    }
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete ref_space->get_mesh();
@@ -205,7 +200,8 @@ int main(int argc, char **args)
     delete rhs;
     delete solver;
     delete adaptivity;
-    // Next iteration.
+
+    // Increase the counter of performed adaptivity steps.
     as++;
 
   } while (!done);

@@ -44,7 +44,7 @@ public:
   
   /// Projection-based interpolation of an exact function. This is faster than the
   /// global projection since no global matrix problem is solved.
-  static void OGProjection::project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
+  static void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
                    scalar* target_vec);
 
   // Underlying function for global orthogonal projection.

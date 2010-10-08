@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
   ExactSolution exact_sln(&mesh, exact);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
-  sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  VectorView v_view("Solution", new WinGeom(0, 0, 440, 350));
+  v_view.set_min_max_range(0.0, 10.0);
+  OrderView  o_view("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -165,8 +165,8 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM);
 
     // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
-    oview.show(&space);
+    v_view.show(&sln);
+    o_view.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");

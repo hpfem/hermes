@@ -264,7 +264,7 @@ class Hermes2DLogoMessage {
 public:
   Hermes2DLogoMessage() {
     printf("\n-------------------------------------------------\n");
-    printf("          This application uses Hermes2D\n");
+    printf("         This application uses Hermes2D.\n");
     printf("       Hermes2D is a C++ library for rapid \n");
     printf("  development of adaptive FEM and hp-FEM solvers\n");
     printf("      developed by the hp-FEM group at UNR\n");

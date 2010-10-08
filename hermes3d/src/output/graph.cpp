@@ -118,7 +118,8 @@ void SimpleGraph::save(const char* filename)
 
   fclose(f);
 
-  printf("Graph saved to file '%s'.\n", filename);
+  // FIXME: this should be verbose("Graph saved to file '%s'.\n", filename); as in H2D.
+  //printf("Graph saved to file '%s'.\n", filename);
 }
 
 //// MatlabGraph ///////////////////////////////////////////////////////////////////////////////////
