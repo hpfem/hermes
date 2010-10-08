@@ -1,7 +1,7 @@
 r1 = 0.6          # Inner radius
 r2 = 1            # Outer radius
 da = pi/4.        # Angular increment 
-eps = 0.3	  # Relative eccentricity in 0..1
+eps = 0.6	  # Relative eccentricity in 0..1
 
 ee = eps*(r2-r1)  # Absolute eccentricity, shifts outer center in x-direction
 
