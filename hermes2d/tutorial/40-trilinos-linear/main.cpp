@@ -86,7 +86,7 @@ int main(int argc, char **argv)
  
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
   info("---- Assembling by FeProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
   projected_ic = true;
   scalar* coeff_vec = new scalar[ndof] ;
   Solution* init_sln = new ExactSolution(&mesh, init_cond);
-  project_global(&space, init_sln, coeff_vec);
+  OGProjection::project_global(&space, init_sln, coeff_vec);
   delete init_sln;
   
   // Measure the projection time.

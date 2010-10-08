@@ -36,6 +36,13 @@ const int PRECOND = 2;            // Preconditioning by jacobian (1) or approxim
                                   // Default ML proconditioner in case of Newton.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers).
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
 
 // Boundary condition types.
 BCType bc_types(int marker)
@@ -73,7 +80,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, NULL, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
   info("Assembling by DiscreteProblem, solving by Umfpack:");
@@ -86,35 +93,84 @@ int main(int argc, char* argv[])
   wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_UNSYM, HERMES_ANY);
   wf1.add_vector_form(callback(residual_form_hermes), HERMES_ANY);
 
-  // Initialize NonlinSystem,
-  DiscreteProblem dp(&wf1, &space);
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep1(&wf1, &space, is_linear);
+  
+  initialize_solution_environment(matrix_solver, argc, argv);
 
-  // Select matrix solver.
-  Matrix* mat; Vector* coeff_vec; CommonSolver* common_solver;
-  init_matrix_solver(matrix_solver, ndof, mat, coeff_vec, common_solver);
+  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Project the initial condition on the FE space.
-  info("Projecting initial condition on the FE space.");
-  // The NULL pointer means that we do not want the projection result as a Solution.
+  // Initialize the solution.
+  Solution sln_hermes;
+
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  info("Projecting to obtain initial vector for the Newton's method.");
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
   Solution* sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
+  OGProjection::project_global(&space, sln_tmp, coeff_vec, matrix_solver);
   delete sln_tmp;
 
-  // Perform Newton's iteration,
-  info("Performing Newton's method.");
-  bool verbose = true;
-  if (!solve_newton(&space, &wf1, coeff_vec, matrix_solver, 
-		    NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
-    error("Newton's method did not converge.");
-  };
+  // Perform Newton's iteration.
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(&space);
 
-  // Store the solution in "sln_hermes".
-  Solution sln_hermes(&space, coeff_vec);
+    // Assemble the Jacobian matrix and residual vector.
+    fep1.assemble(coeff_vec, matrix, rhs, false);
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
+
+    // If l2 norm of the residual vector is within tolerance, or the maximum number 
+    // of iteration has been reached, then quit.
+    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+    
+    if (it >= NEWTON_MAX_ITER)
+      error ("Newton method did not converge.");
+
+    it++;
+  }
+
+  // Translate the resulting coefficient vector into the Solution sln_hermes.
+  Solution::vector_to_solution(coeff_vec, &space, &sln_hermes);
+
+  // Cleanup.
+  delete(matrix);
+  delete(rhs);
+  delete(solver);
+  
+  finalize_solution_environment(matrix_solver);
 
   // CPU time needed by UMFpack
   double umf_time = cpu_time.tick().last();
-
-  info("Assembling by FeProblem, solving by NOX:");
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -125,7 +181,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition on the FE space.");
   // The NULL pointer means that we do not want the projection result as a Solution.
   sln_tmp = new Solution(&mesh, init_cond);
-  project_global(&space, HERMES_H1_NORM, sln_tmp, NULL, coeff_vec);
+  OGProjection::project_global(&space, sln_tmp, coeff_vec, matrix_solver);
   delete sln_tmp;
 
   // Measure the projection time.
@@ -138,12 +194,12 @@ int main(int argc, char* argv[])
   wf2.add_vector_form(callback(residual_form_nox));
 
   // Initialize FeProblem.
-  FeProblem fep(&wf2, &space);
+  FeProblem fep2(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&fep);
-  nox_solver.set_init_sln(coeff_vec->get_c_array());
+  NoxSolver nox_solver(&fep2);
+  nox_solver.set_init_sln(coeff_vec);
 
   // Choose preconditioning.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -159,9 +215,8 @@ int main(int argc, char* argv[])
   Solution sln_nox;
   if (solved)
   {
-    double *coeffs = nox_solver.get_solution_vector();
-    sln_nox.set_coeff_vector(&space, coeffs);
-
+    double *coeffs = nox_solver.get_solution();
+    Solution::vector_to_solution(coeffs, &space, &sln_nox);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
          nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -173,16 +228,16 @@ int main(int argc, char* argv[])
   // CPU time needed by NOX.
   double nox_time = cpu_time.tick().last();
 
-  // Calculate exact errors.
+  // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  Adapt hp(&space, HERMES_H1_NORM);
-  hp.set_solutions(&sln_hermes, &ex);
-  double err_est_rel_1 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  hp.set_solutions(&sln_nox, &ex);
-  double err_est_rel_2 = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  info("Solution 1 (DiscreteProblem + UMFpack): exact H1 error: %g (time %g s)", err_est_rel_1, umf_time);
-  info("Solution 2 (FeProblem + NOX):  exact H1 error: %g (time %g + %g s)", err_est_rel_2, proj_time, nox_time);
+  Adapt adaptivity(&space, HERMES_H1_NORM);
+  adaptivity.set_approximate_solution(&sln_hermes);
+  double err_est_rel_1 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  info("Solution 1 (FeProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
+  adaptivity.set_approximate_solution(&sln_nox);
+  double err_est_rel_2 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  info("Solution 2 (FeProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   // Show both solutions.
   ScalarView view1("Solution 1", 0, 0, 500, 400);
