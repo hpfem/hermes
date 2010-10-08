@@ -5,6 +5,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})		# for config.h
 # source files for the hermes3d library
 set(SRC
 	hermes3d.cpp
+	common.cpp
 	filter.cpp
 	forms.cpp
 	function.cpp
@@ -66,6 +67,7 @@ set(SRC
 
 macro(LIBRARY_SETTINGS BIN)
 	target_link_libraries(${BIN} ${JUDY_LIBRARY})
+	target_link_libraries(${BIN} ${PTHREAD_LIBRARY})
 	target_link_libraries(${BIN} ${BLAS_LIBRARIES})
 	if(NOT MSVC)
 		IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

@@ -1,3 +1,6 @@
+#define H3D_REPORT_WARN
+#define H3D_REPORT_INFO
+#define H3D_REPORT_VERBOSE
 #include "config.h"
 //#include <getopt.h>
 #include <hermes3d.h>
@@ -15,21 +18,22 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 3;		          // Number of initial uniform mesh refinements.
-const int P_INIT_X = 1, 
-          P_INIT_Y = 1, 
-          P_INIT_Z = 1;                           // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;		          // Error threshold for element refinement of the adapt(...) function 
-						  // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
-						  // times total error is processed. If more elements have similar errors, 
-						  // refine all to keep the mesh symmetric.
-						  // STRATEGY = 1 ... refine all elements whose error is larger
-						  // than THRESHOLD times maximum element error.
-const double ERR_STOP = 1.0;			  // Stopping criterion for adaptivity (rel. error tolerance between the
-						  // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;			  // Adaptivity process stops when the number of degrees of freedom grows
-						  // over this limit. This is to prevent h-adaptivity to go on forever.
-bool solution_output = true;			  // Generate output files (if true).
+const int INIT_REF_NUM = 3;             // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 3;         // Number of initial mesh refinements towards the boundary.
+const int P_INIT_X = 1,
+          P_INIT_Y = 1,
+          P_INIT_Z = 1;                 // Initial polynomial degree of all mesh elements.
+const double THRESHOLD = 0.3;           // Error threshold for element refinement of the adapt(...) function 
+                                        // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
+                                        // times total error is processed. If more elements have similar errors, 
+                                        // refine all to keep the mesh symmetric.
+                                        // STRATEGY = 1 ... refine all elements whose error is larger
+                                        // than THRESHOLD times maximum element error.
+const double ERR_STOP = 1.0;            // Stopping criterion for adaptivity (rel. error tolerance between the
+                                        // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;           // Adaptivity process stops when the number of degrees of freedom grows
+                                        // over this limit. This is to prevent h-adaptivity to go on forever.
+bool solution_output = true;            // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
@@ -92,6 +96,7 @@ int main(int argc, char **args)
 
   // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
+  mesh.refine_towards_boundary(1, INIT_REF_NUM_BDY);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
@@ -117,14 +122,13 @@ int main(int argc, char **args)
   bool done = false;
   do 
   {
-    printf("---- Adaptivity step %d:\n", as);
+    info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
     
     // Assemble the reference problem.
-    printf("Solving on reference mesh (ndof: %d).\n", 
-           Space::get_num_dofs(ref_space)); fflush(stdout);
+    info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem dp(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -145,7 +149,7 @@ int main(int argc, char **args)
 
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln(space.get_mesh());
-    printf("Projecting reference solution on coarse mesh.\n"); fflush(stdout);
+    info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
     // Time measurement.
@@ -162,14 +166,12 @@ int main(int argc, char **args)
     cpu_time.tick(HERMES_SKIP);
 
     // Calculate element errors and total error estimate.
-    printf("Calculating error estimate and exact error.\n");
+    info("Calculating error estimate and exact error.");
     Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    adaptivity->set_aniso(true);   // Anisotropic adaptivity.
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
-    // Calculate exact error,
-    // TO BE IMPLEMENTED.
-    double err_exact_rel = 0; // = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
+    // Calculate exact error.
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, false) * 100;
 
     // Report results.
     printf("ndof_coarse: %d, ndof_fine: %d\n", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
@@ -189,7 +191,7 @@ int main(int argc, char **args)
     if (err_est_rel < ERR_STOP) done = true;
     else
     {
-      printf("Adapting coarse mesh.\n");
+      info("Adapting coarse mesh.");
       adaptivity->adapt(THRESHOLD);
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;

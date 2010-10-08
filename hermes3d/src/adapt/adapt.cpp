@@ -91,7 +91,7 @@ void Adapt::init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms)
 	h_only = false;
 	strategy = 0;
 	max_order = H3D_MAX_ELEMENT_ORDER;
-	aniso = false;			// FIXME: when implementing aniso, change this to true
+	aniso = true;
 	exponent = 1.0 / 3.0;
 
 	log_file = NULL;
@@ -824,7 +824,7 @@ scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Mes
 	return res;
 }
 
-double Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
+double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double> & component_errors, bool solutions_for_adapt)
 {
 	_F_
 	int i, j, k;
@@ -858,17 +858,25 @@ double Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 		nact += sln[i]->get_mesh()->get_num_active_elements();
 
 		int max = meshes[i]->get_max_element_id();
-		if (errors[i] != NULL) delete [] errors[i];
-		errors[i] = new double[max];
-		memset(errors[i], 0, sizeof(double) * max);
+		if(solutions_for_adapt)
+    {
+      if (errors[i] != NULL) delete [] errors[i];
+		  errors[i] = new double[max];
+		  memset(errors[i], 0, sizeof(double) * max);
+    }
 	}
 
 	double total_norm = 0.0;
 	double *norms = new double[num];
 	memset(norms, 0, num * sizeof(double));
-	double total_error = 0.0;
-	if (esort != NULL) delete [] esort;
-	esort = new int2[nact];
+	double *errors_components = new double[num];
+	memset(errors_components, 0, num * sizeof(double));
+  double total_error = 0.0;
+  if(solutions_for_adapt)
+  {
+    if (esort != NULL) delete [] esort;
+  	esort = new int2[nact];
+  }
 
 	Element **ee;
 	trav.begin(2 * num, meshes, tr);
@@ -891,8 +899,10 @@ double Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 #endif
 					norms[i] += nrm;
 					total_norm  += nrm;
+          errors_components[i] += err;
 					total_error += err;
-					errors[i][ee[i]->id - 1] += err;
+          if(solutions_for_adapt)
+					  errors[i][ee[i]->id - 1] += err;
 				}
 
 			}
@@ -900,25 +910,40 @@ double Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 	}
 	trav.finish();
 
-	k = 0;
-	for (i = 0; i < num; i++)
-		FOR_ALL_ACTIVE_ELEMENTS(eid, meshes[i]) {
-			Element *e = meshes[i]->elements[eid];
-			esort[k][0] = e->id;
-			esort[k++][1] = i;
-			// FIXME: when norms of 2 components are very different it can help (microwave heating)
-			// navier-stokes on different meshes work only without it
-			errors[i][e->id - 1] /= norms[i];
-		}
+  // Store the calculation for each solution component separately.
+  component_errors.clear();
+  for (int i = 0; i < num; i++)
+  {
+    if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
+      component_errors.push_back(sqrt(errors_components[i]));
+    else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+      component_errors.push_back(sqrt(errors_components[i]/norms[i]));
+    else
+    {
+      error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+      return -1.0;
+    }
+  }
 
-	assert(k == nact);
-	cmp_err = errors;
-	qsort(esort, nact, sizeof(int2), compare);
+  if(solutions_for_adapt)
+  {
+    k = 0;
+    for (i = 0; i < num; i++)
+	    FOR_ALL_ACTIVE_ELEMENTS(eid, meshes[i]) {
+		    Element *e = meshes[i]->elements[eid];
+		    esort[k][0] = e->id;
+		    esort[k++][1] = i;
+		    if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+          errors[i][e->id - 1] /= norms[i];
+	    }
 
-	have_errors = true;
+    assert(k == nact);
+    cmp_err = errors;
+    qsort(esort, nact, sizeof(int2), compare);
 
-	total_err = total_error / total_norm;		// FIXME: comment out the denominator when
-												// commenting out the above fixme
+    have_errors = true;
+  }
+    
 	tmr.stop();
 	error_time = tmr.get_seconds();
 
@@ -929,10 +954,18 @@ double Adapt::calc_error_n(Tuple<Solution *> slns, Tuple<Solution *> rslns)
 	}
 #endif
   
-  
   delete [] meshes;
   delete [] tr;
   delete [] norms;
+  delete [] errors_components;
 
-	return sqrt(total_error / total_norm);
+  // Return error value.
+  if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
+    return sqrt(total_error);
+  else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+    return sqrt(total_error / total_norm);
+  else {
+    error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+    return -1.0;
+  }
 }

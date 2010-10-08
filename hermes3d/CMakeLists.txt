@@ -116,6 +116,9 @@ endif(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
 
 # find necessary packages
 find_package(JUDY REQUIRED)
+
+find_package(PTHREAD REQUIRED)
+
 if(NOT MSVC)
 	enable_language(Fortran)		# need a fortran compiler for checking BLAS
 	find_package(BLAS REQUIRED)
