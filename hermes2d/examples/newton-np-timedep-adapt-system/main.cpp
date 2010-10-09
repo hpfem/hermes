@@ -386,12 +386,10 @@ int main (int argc, char* argv[]) {
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(Tuple<Space *>(&C, &phi), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
-
-      adaptivity->set_solutions(Tuple<Solution *>(&C_sln, &phi_sln), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
-
+      bool solutions_for_adapt = true;
       Tuple<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(err_est_rel, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&C_sln, &phi_sln), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
       // Report results.
       info("ndof_coarse[0]: %d, ndof_fine[0]: %d",

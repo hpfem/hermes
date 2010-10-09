@@ -536,17 +536,18 @@ int main(int argc, char* argv[])
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
       Adapt* adaptivity = new Adapt(spaces, proj_norms);
-      adaptivity->set_solutions(coarse_mesh_solutions, fine_mesh_solutions);
-        
+
       // Calculate error estimate for each solution component and the total error estimate.
+      bool solutions_for_adapt = true;
       Tuple<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(err_est_rel, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel_total = adaptivity->calc_err_est(coarse_mesh_solutions, fine_mesh_solutions, solutions_for_adapt, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, err_est_rel) * 100;
 
       // Calculate exact error for each solution component and the total exact error.
+      solutions_for_adapt = false;
       Tuple<double> err_exact_rel;
-      double err_exact_rel_total = adaptivity->calc_err_exact(err_exact_rel, 
-                                   HERMES_TOTAL_ERROR_REL, Tuple<Solution *>(&T_exact_solution, &phi_exact_solution)) * 100;
+      double err_exact_rel_total = adaptivity->calc_err_exact(coarse_mesh_solutions, Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, err_exact_rel) * 100;
 
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
             space_T.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(), err_est_rel[0]*100, err_exact_rel[0]*100);

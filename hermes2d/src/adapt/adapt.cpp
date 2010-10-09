@@ -504,38 +504,6 @@ void Adapt::set_error_form(matrix_form_val_t bi_form, matrix_form_ord_t bi_ord)
   ord[i][j] = bi_ord;
 }
 
-
-void Adapt::set_solutions(Tuple<Solution*> solutions, Tuple<Solution*> ref_solutions) {
-  error_if(solutions.size() != ref_solutions.size(), "Number of solutions (%d) and a number of reference solutions (%d) is not the same.", solutions.size(), ref_solutions.size());
-  error_if(solutions.size() != this->num, "Wrong number of solutions (%d), expected %d.", solutions.size(), this->num);
-
-  // obtain solutions
-  for (int i = 0; i < this->num; i++) {
-    sln[i] = solutions[i];
-    error_if(sln[i] == NULL, "A solution for a component %d is NULL.", i);
-    sln[i]->set_quad_2d(&g_quad_2d_std);
-    rsln[i] = ref_solutions[i];
-    error_if(rsln[i] == NULL, "A reference solution for a component %d is NULL.", i);
-    rsln[i]->set_quad_2d(&g_quad_2d_std);
-  }
-
-  have_coarse_solutions = true;
-  have_reference_solutions = true;
-}
-
-void Adapt::set_approximate_solutions(Tuple<Solution*> solutions) {
-  error_if(solutions.size() != this->num, "Wrong number of solutions (%d), expected %d.", solutions.size(), this->num);
-  
-  // obtain solutions
-  for (int i = 0; i < this->num; i++) {
-    sln[i] = solutions[i];
-    error_if(sln[i] == NULL, "A solution for a component %d is NULL.", i);
-    sln[i]->set_quad_2d(&g_quad_2d_std);
-  }
-  
-  have_coarse_solutions = true;
-}
-
 double Adapt::eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
                                  MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2)
 {
@@ -708,7 +676,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   memset(norms, 0, num * sizeof(double));
   double *errors_components = new double[num];
   memset(errors_components, 0, num * sizeof(double));
-  double total_error = 0.0;
+  this->errors_squared_sum = 0.0;
 
   // Calculate error.
   Element **ee;
@@ -725,11 +693,10 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 		      norms[i] += nrm;
 		      total_norm  += nrm;
           errors_components[i] += err;
-		      total_error += err;
+		      errors_squared_sum += err;
           if(solutions_for_adapt)
 		        errors[i][ee[i]->id] += err;
 	      }
-
       }
     }
   }
@@ -774,9 +741,9 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 
   // Return error value.
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-    return sqrt(total_error);
+    return sqrt(errors_squared_sum);
   else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-    return sqrt(total_error / total_norm);
+    return sqrt(errors_squared_sum / total_norm);
   else {
     error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
     return -1.0;

@@ -253,10 +253,8 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     if (!solver->solve()) error ("Matrix solver failed.\n");
     
     // Convert coefficients vector into a set of Solution pointers.
-//    for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
-   
-    Solution::vector_to_solutions(rhs, *spaces, Tuple<Solution *>(slptr_new_solution, mfptr_new_solution));
-
+    // for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
+    Solution::vector_to_solutions(rhs, spaces, slptr_new_solution);
  
     // Update fission sources.
     SimpleFilter new_source(source_fn, mfptr_new_solution);
@@ -282,8 +280,8 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   
   // Free memory.
   for_each_group(g) delete slptr_new_solution[g];
-  mat->free_data();
-  rhs->free_data();
+  delete mat;
+  delete rhs;
   //solver->free_data();  // FIXME: to be implemented. Default destructor is used now.
   delete solver;
 
@@ -342,12 +340,12 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(N_GROUPS);
-  wf.add_matrix_form(0, 0, callback(biform_0_0), H2D_SYM);
-  wf.add_matrix_form(1, 1, callback(biform_1_1), H2D_SYM);
+  wf.add_matrix_form(0, 0, callback(biform_0_0), HERMES_SYM);
+  wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
   wf.add_matrix_form(1, 0, callback(biform_1_0));
-  wf.add_matrix_form(2, 2, callback(biform_2_2), H2D_SYM);
+  wf.add_matrix_form(2, 2, callback(biform_2_2), HERMES_SYM);
   wf.add_matrix_form(2, 1, callback(biform_2_1));
-  wf.add_matrix_form(3, 3, callback(biform_3_3), H2D_SYM);
+  wf.add_matrix_form(3, 3, callback(biform_3_3), HERMES_SYM);
   wf.add_matrix_form(3, 2, callback(biform_3_2));
   wf.add_vector_form(0, callback(liform_0), marker_core, mfptr_pow_iter_slns);
   wf.add_vector_form(1, callback(liform_1), marker_core, mfptr_pow_iter_slns);
@@ -451,13 +449,16 @@ int main(int argc, char* argv[])
 
     // For the first time, project coarse mesh solutions on fine meshes to obtain 
     // a starting point for the fine mesh power iteration.
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
     if (as == 1) {
       info("Projecting initial coarse mesh solutions on fine meshes.");
       OGProjection::project_global(spaces, 
-                     matrix_forms_tuple_t(callback_pairs(projection_biform)), 
-                     vector_forms_tuple_t(callback_pairs(projection_liform)),
-                     mfptr_pow_iter_slns, slptr_pow_iter_slns);
+                     Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
+                     Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
+                     mfptr_pow_iter_slns, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, spaces, slptr_pow_iter_slns);
     }
+    delete coeff_vec;
 
     // Solve the fine mesh problem.
     info("Fine mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(ref_spaces));
@@ -476,11 +477,13 @@ int main(int argc, char* argv[])
       }
     }
     else {
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
       info("Projecting fine mesh solutions on coarse meshes.");
-      OGProjection::project_global(spaces, 
-                     matrix_forms_tuple_t(callback_pairs(projection_biform)), 
-                     vector_forms_tuple_t(callback_pairs(projection_liform)),
-                     mfptr_pow_iter_slns, slptr_coarse_slns);
+      OGProjection::project_global(spaces,Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
+                     Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
+                     mfptr_pow_iter_slns, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, spaces, slptr_coarse_slns);
+      delete coeff_vec;
     }
 
     // Time measurement.
@@ -512,9 +515,8 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and error estimate for adaptivity.
     info("Calculating error.");
-    hp.set_solutions(slptr_coarse_slns, slptr_fine_slns);
-
-    double energy_err_est = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = true;
+    double energy_err_est = hp.calc_err_est(slptr_coarse_slns, slptr_fine_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     double h1_err_est = error_total(error_fn_h1_axisym, norm_fn_h1_axisym, slptr_coarse_slns, slptr_fine_slns);
     double l2_err_est = error_total(error_fn_l2_axisym, norm_fn_l2_axisym, slptr_coarse_slns, slptr_fine_slns);
 

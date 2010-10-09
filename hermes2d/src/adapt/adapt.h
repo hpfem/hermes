@@ -55,7 +55,7 @@ H2D_API_USED_TEMPLATE(Tuple<Solution*>); ///< Instantiated template. It is used 
                                    ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
 #define HERMES_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                    ///  The total error is absolute, i.e., it is an integral over squares of differencies.
-                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_TOTAL_ERROR_REL.
+                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_TOTAL_ERROR_REL.
 #define HERMES_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
                                    ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
                                    ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
@@ -63,7 +63,7 @@ H2D_API_USED_TEMPLATE(Tuple<Solution*>); ///< Instantiated template. It is used 
                                    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
 #define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
                                    ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
-                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_REL.
+                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
 
 // Matrix forms for error calculation.
   typedef scalar (*matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[], 
@@ -142,25 +142,6 @@ public:
    *  \param[in] bi_ord A bilinear form which calculates order. */
   void set_error_form(int i, int j, matrix_form_val_t bi_form, matrix_form_ord_t bi_ord);
   void set_error_form(matrix_form_val_t bi_form, matrix_form_ord_t bi_ord);   // i = j = 0
-
-  /// Sets solutions and reference solutions.
-  /** \param[in] solutions Coarse solutions. The number of solutions has to match the number of components.
-   *  \param[in] ref_solutions Reference solutions. The number of reference solutions has to match the number of components. */
-  void set_solutions(Tuple<Solution*> solutions, Tuple<Solution*> ref_solutions);
-  void set_solutions(Solution* solution, Solution* ref_solution) 
-  {
-    set_solutions(Tuple<Solution*>(solution), Tuple<Solution*>(ref_solution));
-  }
-  
-  /// Sets solutions.
-  /** Setting just the approximate solution comes in handy when we are interested only in the error between this solution
-   *  and the exact one (using calc_err_exact).
-   *   \param[in] solutions Computed solutions. The number of solutions has to match the number of components.  */
-  void set_approximate_solutions(Tuple<Solution*> solutions);
-  void set_approximate_solution(Solution* solution) 
-  {
-    set_approximate_solutions(Tuple<Solution*>(solution));
-  }
 
   /// Type-safe version of calc_err_est() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().

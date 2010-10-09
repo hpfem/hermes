@@ -196,8 +196,6 @@ int main(int argc, char* argv[])
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Tuple<Space *>(&xdisp, &ydisp, &temp), 
                                   Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
-    adaptivity->set_solutions(Tuple<Solution *>(&xdisp_sln, &ydisp_sln, &temp_sln), 
-                              Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln));
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     adaptivity->set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
@@ -208,8 +206,10 @@ int main(int argc, char* argv[])
 
     // Calculate error estimate for each solution component and the total error estimate.
     Tuple<double> err_est_rel;
-    double err_est_rel_total = adaptivity->calc_err_est(err_est_rel, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+    bool solutions_for_adapt = true;
+    double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&xdisp_sln, &ydisp_sln, &temp_sln), 
+                              Tuple<Solution *>(&ref_xdisp_sln, &ref_ydisp_sln, &ref_temp_sln), solutions_for_adapt, 
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
     // Time measurement.
     cpu_time.tick();

@@ -428,8 +428,8 @@ int main(int argc, char* argv[])
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
-    adaptivity.set_solutions(slns, ref_slns);
-    double err_est_energ_total = adaptivity.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = true;
+    double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     double err_est_h1_total = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
 
     // Report results.
