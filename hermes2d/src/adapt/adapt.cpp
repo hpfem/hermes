@@ -638,11 +638,16 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	Timer tmr;
 	tmr.start();
 
+  Solution* rslns_original[10];
+  Solution* slns_original[10];
+
 	for (i = 0; i < n; i++) {
+    slns_original[i] = this->sln[i];
 	  this->sln[i] = slns[i];
 	  sln[i]->set_quad_2d(&g_quad_2d_std);
 	}
 	for (i = 0; i < n; i++) {
+    rslns_original[i] = this->rsln[i];
 	  this->rsln[i] = rslns[i];
 	  rsln[i]->set_quad_2d(&g_quad_2d_std);
 	}
@@ -703,17 +708,14 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   trav.finish();
 
   // Store the calculation for each solution component separately.
-  if(component_errors != NULL)
-  {
+  if(component_errors != NULL) {
     component_errors->clear();
-    for (int i = 0; i < num; i++)
-    {
+    for (int i = 0; i < num; i++) {
       if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
         component_errors->push_back(sqrt(errors_components[i]));
       else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
         component_errors->push_back(sqrt(errors_components[i]/norms[i]));
-      else
-      {
+      else {
         error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
@@ -733,11 +735,16 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   }
 
   // Prepare an ordered list of elements according to an error.
-  if(solutions_for_adapt)
-  {
+  if(solutions_for_adapt) {
     fill_regular_queue(meshes);
     have_errors = true;
   }
+  else {
+    for (i = 0; i < n; i++) {
+      this->sln[i] = slns_original[i];
+      this->rsln[i] = rslns_original[i];
+    }
+	}
 
   // Return error value.
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)

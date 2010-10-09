@@ -186,8 +186,8 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     Adapt adaptivity(&space, HERMES_H1_NORM);
-    adaptivity.set_solutions(&u_prev_time, &ref_sln);
-    double err_est_rel = adaptivity.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity.calc_err_est(&u_prev_time, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     info("Step %d, ndof %d, proj_error %g%%", as, Space::get_num_dofs(&space), err_est_rel);
 
@@ -390,14 +390,15 @@ int main(int argc, char* argv[])
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-      adaptivity->set_solutions(&sln, &ref_sln);
+      bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Calculate error wrt. exact solution.
       ExactSolution exact(&mesh, exact_sol);
-      double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
+      solutions_for_adapt = false;
+      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%, space_err_exact_rel: %g%%", 
