@@ -82,8 +82,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 1, callback(biform_euler_0_1));
   wf.add_matrix_form(1, 0, callback(biform_euler_1_0));
   wf.add_matrix_form(1, 1, callback(biform_euler_1_1));
-  wf.add_vector_form(0, callback(liform_euler_0), H2D_ANY, &phi_prev_time);
-  wf.add_vector_form(1, callback(liform_euler_1), H2D_ANY, &psi_prev_time);
+  wf.add_vector_form(0, callback(liform_euler_0), HERMES_ANY, &phi_prev_time);
+  wf.add_vector_form(1, callback(liform_euler_1), HERMES_ANY, &psi_prev_time);
 
   // Time stepping loop:
   int nstep = T_FINAL;

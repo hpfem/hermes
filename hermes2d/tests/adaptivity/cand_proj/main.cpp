@@ -154,8 +154,8 @@ bool init_h1(bool tri) {
 
     // Weakform.
     weakform = new WeakForm();
-    weakform->add_matrix_form(callback(h1_biform), H2D_SYM);
-    weakform->add_vector_form(h1_liform, h1_liform, H2D_ANY);
+    weakform->add_matrix_form(callback(h1_biform), HERMES_SYM);
+    weakform->add_vector_form(h1_liform, h1_liform, HERMES_ANY);
 
     // Prepare selector.
     selector = new H1ProjBasedSelector(H2D_HP_ANISO, 1.0, H2DRS_DEFAULT_ORDER, h1_shapeset);
@@ -181,8 +181,8 @@ bool init_l2(bool tri) {
 
     // Weakform.
     weakform = new WeakForm();
-    weakform->add_matrix_form(callback(l2_biform), H2D_SYM);
-    weakform->add_vector_form(l2_liform, l2_liform, H2D_ANY);
+    weakform->add_matrix_form(callback(l2_biform), HERMES_SYM);
+    weakform->add_vector_form(l2_liform, l2_liform, HERMES_ANY);
 
     // Prepare selector.
     selector = new L2ProjBasedSelector(H2D_HP_ANISO, 1.0, H2DRS_DEFAULT_ORDER, l2_shapeset);

@@ -148,12 +148,12 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, H2D_UNSYM, H2D_ANY, &u_prev_time);
-    wf.add_vector_form(res_euler, res_ord, H2D_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, H2D_UNSYM, H2D_ANY, &u_prev_time);
-    wf.add_vector_form(res_cranic, res_ord, H2D_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
   }
 
   // Initialize matrix solver.
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
       info("Calculating error (est).");
       Adapt hp(space, H2D_H1_NORM);
       hp.set_solutions(&sln, &ref_sln);
-      double space_err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+      double space_err_est_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Calculate error wrt. exact solution.
       info("Calculating error (exact).");

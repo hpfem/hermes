@@ -63,8 +63,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  //wf.add_matrix_form(callback(biform1), H2D_SYM, OMEGA_1);
-  //wf.add_matrix_form(callback(biform2), H2D_SYM, OMEGA_2);
+  //wf.add_matrix_form(callback(biform1), HERMES_SYM, OMEGA_1);
+  //wf.add_matrix_form(callback(biform2), HERMES_SYM, OMEGA_2);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
