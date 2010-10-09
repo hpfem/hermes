@@ -299,6 +299,11 @@ int main(int argc, char* argv[])
       
       // Translate the resulting coefficient vector into the actual solutions. 
       Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+
+      // Cleanup.
+      delete matrix;
+      delete rhs;
+      delete solver;
     }
     else {
       // Linear solve.  
@@ -329,6 +334,8 @@ int main(int argc, char* argv[])
     pview.set_title(title);
     pview.show(&p_prev_time);
  }
+
+  delete coeff_vec;
 
   // Wait for all views to be closed.
   View::wait();

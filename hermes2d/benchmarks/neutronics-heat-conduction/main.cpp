@@ -197,9 +197,6 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 1, jac_phiphi, jac_phiphi_ord);
   wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
   
-  // Initialize the nonlinear system.
-  Tuple<ProjNormType> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
-
   // Set initial conditions.
   T_prev_time.set_exact(&mesh, T_exact);
   phi_prev_time.set_exact(&mesh, phi_exact);
@@ -213,21 +210,69 @@ int main(int argc, char* argv[])
     info("Projecting to obtain initial vector for the Newton's method.");
 
     scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
-    OGProjection::project_global(spaces, time_iterates, coeff_vec, matrix_solver, proj_norms);
+    OGProjection::project_global(spaces, time_iterates, coeff_vec, matrix_solver);
     Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
                                   Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
 
     // Newton's method.
     info("Newton's iteration...");
     bool verbose = true; // Default is false.
-    bool did_converge = solve_newton(spaces, &wf, coeff_vec, matrix_solver,
-                                     NEWTON_TOL, NEWTON_MAX_ITER, verbose); 
-    if (!did_converge)
-      error("Newton's method did not converge.");
-    
-    // Translate the resulting coefficient vector into the actual solutions. 
-    Solution::vector_to_solutions(coeff_vec, Tuple<Space*>(&space_T, &space_phi), 
-                                  Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
+
+
+    // Initialize the FE problem.
+    bool is_linear = false;
+    FeProblem fep(&wf, spaces, is_linear);
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Perform Newton's iteration.
+    int it = 1;
+    while (1)
+    {
+      // Obtain the number of degrees of freedom.
+      int ndof = Space::get_num_dofs(spaces);
+
+      // Assemble the Jacobian matrix and residual vector.
+      fep.assemble(coeff_vec, matrix, rhs, false);
+
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
+
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
+      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+      // Solve the linear system.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+      if (it >= NEWTON_MAX_ITER)
+        error ("Newton method did not converge.");
+
+      it++;
+    }
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solutions(coeff_vec, spaces, newton_iterates);
+
+    // Cleanup.
+    delete [] coeff_vec;
+    delete matrix;
+    delete rhs;
+    delete solver;
     
     // Show the new time level solution.
     sprintf(title, "Approx. solution for T, t = %g s", TIME);

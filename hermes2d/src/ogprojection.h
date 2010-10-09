@@ -41,7 +41,10 @@ public:
 
   /// Global orthogonal projection of one vector-valued ExactFunction.
   static void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-  
+
+  /// Global orthogonal projection of one scalar-valued ExactFunction.
+  static void project_global(Space *space, ExactFunction source_fn, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
+
   /// Projection-based interpolation of an exact function. This is faster than the
   /// global projection since no global matrix problem is solved.
   static void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,

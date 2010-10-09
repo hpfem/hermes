@@ -151,6 +151,17 @@ void OGProjection::project_global(Space *space, ExactFunction2 source_fn, scalar
   project_global(space, (MeshFunction*)&source_sln, target_vec, matrix_solver, proj_norm);
 };
 
+void OGProjection::project_global(Space *space, ExactFunction source_fn, scalar* target_vec, MatrixSolverType matrix_solver)
+{
+  _F_
+  ProjNormType proj_norm = HERMES_H1_NORM;
+  Mesh *mesh = space->get_mesh();
+  if (mesh == NULL) error("Mesh is NULL in project_global().");
+  Solution source_sln;
+  source_sln.set_exact(mesh, source_fn);
+  project_global(space, (MeshFunction*)&source_sln, target_vec, matrix_solver, proj_norm);
+};
+
 void OGProjection::project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,
                    scalar* target_vec)
 {
