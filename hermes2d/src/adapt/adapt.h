@@ -162,21 +162,39 @@ public:
     set_approximate_solutions(Tuple<Solution*>(solution));
   }
 
-  /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
-  /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
-   *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
-   *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
+  /// Type-safe version of calc_err_est() for one solution.
+  /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
+	double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
+	{
+		if (num != 1) EXIT("Wrong number of solutions.");
+		return calc_err_est(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
+	}
 
-  virtual double calc_errors_internal(Tuple<double>& err_rel, unsigned int error_flags,
-			     Tuple<Solution *> solutions);
-  virtual double calc_err_est(Tuple<double>& err_rel, unsigned int error_flags = 
-                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS);
-  virtual double calc_err_exact(Tuple<double>& err_rel, unsigned int error_flags,
-                 Tuple<Solution *> solutions);
+	/// Calculates the error of the solution. 'n' must be the same
+	/// as 'num' in the constructor. After that, n coarse solution
+	/// pointers are passed, followed by n fine solution pointers.
+  /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
+	double calc_err_est(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double>* component_errors = NULL)
+  {
+    return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
+  }
 
-  /// One component version.
-  virtual double calc_err_est(unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS);
-  virtual double calc_err_exact(unsigned int error_flags, Solution* solution);
+  /// Type-safe version of calc_err_exact() for one solution.
+  /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
+	double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
+	{
+		if (num != 1) EXIT("Wrong number of solutions.");
+		return calc_err_exact(Tuple<Solution *> (sln), Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
+	}
+
+	/// Calculates the error of the solution. 'n' must be the same
+	/// as 'num' in the constructor. After that, n coarse solution
+	/// pointers are passed, followed by n exact solution pointers.
+  /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
+	double calc_err_exact(Tuple<Solution *> slns, Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Tuple<double>* component_errors = NULL)
+  {
+    return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
+  }
 
   /// Refines elements based on results from calc_err_est().
   /** The behavior of adaptivity can be controlled through methods should_ignore_element()
@@ -207,7 +225,7 @@ public:
   /** \param[in] A component index.
    *  \param[in] An element index.
    *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
-  double get_element_error_squared(int component, int id) const { error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est()."); return errors_squared[component][id]; };
+  double get_element_error_squared(int component, int id) const { error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est()."); return errors[component][id]; };
 
   /// Returns regular queue of elements
   /** \return A regular queue. */
@@ -273,18 +291,26 @@ protected: //object state
   bool have_reference_solutions; ///< True if the reference solutions were set.
 
 protected: // spaces & solutions
-  int neq;                              ///< Number of solution components (as in wf->neq).
+  int num;                              ///< Number of solution components (as in wf->neq).
   Tuple<Space*> spaces;                 ///< Spaces. 
   Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution. 
   Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions. 
 
 protected: // element error arrays
-  double* errors_squared[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
+  double* errors[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
   double  errors_squared_sum; ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
+
+  double error_time;			// time needed to calculate error
 
 protected: //forms and error evaluation
   matrix_form_val_t form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
   matrix_form_ord_t ord[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS];  ///< Bilinear forms to calculate error
+
+  /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
+  /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
+   *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
+   *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
+  virtual double calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double>* component_errors, bool solutions_for_adapt);
 
   /// Evaluates a square of an absolute error of an active element among a given pair of components.
   /** The method uses a bilinear forms to calculate the error. This is done by supplying a differences (f1 - v1) and (f2 - v2) at integration points to the bilinear form,
@@ -301,9 +327,8 @@ protected: //forms and error evaluation
    *  \param[in] rrv1 A reference map of a reference solution rsln1.
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of an absolute error. */
-  virtual double eval_elem_error_squared(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                    MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2,
-                    RefMap *rv1,        RefMap *rv2,        RefMap *rrv1,        RefMap *rrv2);
+  virtual double eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
+                    MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2);
 
   /// Evaluates a square of a norm of an active element in the reference solution among a given pair of components.
   /** The method uses a bilinear forms to calculate the norm. This is done by supplying a v1 and v2 at integration points to the bilinear form,
@@ -315,8 +340,8 @@ protected: //forms and error evaluation
    *  \param[in] rrv1 A reference map of a reference solution rsln1.
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of a norm. */
-  virtual double eval_elem_norm_squared(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                   MeshFunction *rsln1, MeshFunction *rsln2, RefMap *rrv1, RefMap *rrv2);
+  virtual double eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
+                   MeshFunction *rsln1, MeshFunction *rsln2);
 
   /// Builds an ordered queue of elements that are be examined.
   /** The method fills Adapt::standard_queue by elements sorted accordin to their error descending.
@@ -324,21 +349,21 @@ protected: //forms and error evaluation
    *  If a special order of elements is requested, this method has to be overriden.
    *  /param[in] meshes An array of pointers to meshes of a (coarse) solution. An index into the array is an index of a component.
    *  /param[in] meshes An array of pointers to meshes of a reference solution. An index into the array is an index of a component. */
-  virtual void fill_regular_queue(Mesh** meshes, Mesh** ref_meshes);
+  virtual void fill_regular_queue(Mesh** meshes);
 
 private: 
   /// A functor that compares elements accoring to their error. Used by std::sort().
   class CompareElements {
   private:
-    double** errors_squared; ///< A 2D array of squared errors: the first index is an index of component, the second index is an element ID.
+    double** errors; ///< A 2D array of squared errors: the first index is an index of component, the second index is an element ID.
   public:
-    CompareElements(double** errors_squared): errors_squared(errors_squared) {}; ///< Constructor.
+    CompareElements(double** errors): errors(errors) {}; ///< Constructor.
     /// Compares two elements.
     /** \param[in] e1 A reference to the first element.
      *  \param[in] e1 A reference to the second element.
      *  \return True if a squared error of the first element is greater than a squared error of the second element. */
     bool operator ()(const ElementReference& e1,const ElementReference& e2) const {
-      return errors_squared[e1.comp][e1.id] > errors_squared[e2.comp][e2.id];
+      return errors[e1.comp][e1.id] > errors[e2.comp][e2.id];
     };
   };
 };
