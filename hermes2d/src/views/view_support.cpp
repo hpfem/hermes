@@ -57,8 +57,6 @@ ViewMonitor::~ViewMonitor() {
 static bool glut_initialized = false; ///< True if GLUT is initialized
 static bool glew_initialized = false; ///< True if GLEW is initialized
 
-bool init_glut();
-bool shutdown_glut();
 void on_display_stub(void);
 void on_reshape_stub(int width, int height);
 void on_mouse_move_stub(int x, int y);

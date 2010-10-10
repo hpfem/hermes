@@ -210,10 +210,10 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
-         u_space.Space::get_num_dofs(), (*ref_spaces)[0]->Space::get_num_dofs());
+         u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
     info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
-         v_space.Space::get_num_dofs(), (*ref_spaces)[1]->Space::get_num_dofs());
+         v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
     info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
@@ -245,9 +245,8 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    if(done == false)
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->mesh;
+    for(int i = 0; i < ref_spaces->size(); i++)
+      delete (*ref_spaces)[i]->mesh;
     delete ref_spaces;
     delete fep;
     

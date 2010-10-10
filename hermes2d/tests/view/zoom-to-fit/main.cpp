@@ -1,6 +1,7 @@
 #include "hermes2d.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include "views/view_support.h"
 
 // This test makes sure that automatic zooming capability of ScalarView works correctly.
 // It also tests displaying constant functions and bounding boxes.
@@ -36,8 +37,6 @@
 
 #define ERROR_SUCCESS       0
 #define ERROR_FAILURE       -1
-
-extern void init_glut();
 
 int main(int argc, char* argv[])
 {

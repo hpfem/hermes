@@ -254,11 +254,11 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &sln, coeff_vec);
+        OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, coeff_vec);
+        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
 
       // Newton's loop on the fine mesh.
@@ -301,6 +301,10 @@ int main(int argc, char* argv[])
 
       // Store the result in ref_sln.
       Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");

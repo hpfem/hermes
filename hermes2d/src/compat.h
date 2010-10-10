@@ -9,6 +9,7 @@
 #ifndef __H2D_COMPAT_H
 #define __H2D_COMPAT_H
 
+#include <stdio.h>
 
 #ifndef HAVE_FMEMOPEN
 /// Implementation of GNU fmemopen. Intended to be used if the current platform does not support it.

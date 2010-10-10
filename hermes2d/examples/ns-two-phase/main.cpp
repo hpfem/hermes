@@ -107,7 +107,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
   int i, j;
   
   int ne = mesh->get_max_element_id() + 1;
-  double elem_error[ne];
+  double* elem_error = new double[ne];
   memset(elem_error, 0, sizeof(double) * ne);
   
   double error;
@@ -167,171 +167,10 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
   }    
 
   delete [] elist;
+  delete [] elem_error;
  
   return false;
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-bool adapt_solution(H1OrthoHP* h1hp, Mesh* mesh, Mesh* rmesh, Solution* sln, Solution* rsln, Space* space)
-{
-  int i, j;
-  
-  int ne = mesh->get_max_element_id() + 1;
-  double elem_error[ne];
-  memset(elem_error, 0, sizeof(double) * ne);
-  
-  double error;
-
-  int num = mesh->get_num_active_elements();
-  ElemList* elist = new ElemList[num]; 
-
-  Quad2D* quad = &g_quad_2d_std;
-  sln->set_quad_2d(quad);
-  rsln->set_quad_2d(quad);
-    
-  Mesh* meshes[2] = { mesh, rmesh };
-  Transformable* tr[2] = { sln, rsln };
-  Traverse trav;
-  trav.begin(2, meshes, tr);
-
-  Element** ee;
-  while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
-  {
-    RefMap* ru = sln->get_refmap();
-    RefMap* rr = rsln->get_refmap();
-    elem_error[ee[0]->id] += int_l2_error(sln, rsln, ru, rr);
-    
-  }
-  trav.finish();
-
-  Element* e;     
-  double total_err = 0.0;
-  int n = 0;
-  for_all_active_elements(e, mesh)
-  {
-    elist[n].id = e->id;
-    elist[n].error = elem_error[e->id];
-    total_err += elem_error[e->id];
-    n++;
-  }
- 
-  // sort elements by their error
-  qsort(elist, n, sizeof(ElemList), compare_error);
-  
-   // refine worst elements
-  double processed_error = 0.0;
-  double err = 1000.0;
-
-  for (i = 0; i < n; i++)
-  {
-    if ((processed_error > 0.5 * (total_err)) && (fabs((elist[i].error - err)/err) > 1e-3))
-      break;
-    err = elist[i].error;
-
-    e = mesh->get_element(elist[i].id);
-
-    int split = 0;
-    int p[4];
-    int current = space->get_element_order(elist[i].id);
-    rsln->set_quad_2d(&g_quad_2d_std);   
-    rsln->enable_transform(false);
-    h1hp->get_optimal_refinement(e, current, rsln, split, p);
-    rsln->enable_transform(true);
-
-    if (split == -1)
-      space->set_element_order(elist[i].id, p[0]);
-    else if (split == 0){
-      mesh->refine_element(elist[i].id);
-      for (j = 0; j < 4; j++)
-        space->set_element_order(e->sons[j]->id, p[j]);
-    }
-    else {
-      mesh->refine_element(elist[i].id, split);
-      for (j = 0; j < 2; j++)
-        space->set_element_order(e->sons[ (split == 1) ? j : j+2 ]->id, p[j]);
-    }    
-
-    processed_error += elist[i].error;  
-  }    
-
-  delete [] elist;
- 
-  return false;
-}
-*/
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*void refine_interface(Mesh* mesh, Solution* l)
-{
-  Element* e;
-  int ne = mesh->get_max_element_id() + 1;
-  int list[ne];
-  int k = 0;
-  for_all_active_elements(e, mesh)
-  {
-    l->set_active_element(e);
-    Quad2D* quad = l->get_quad_2d();
-    int o = 10;
-    l->set_quad_order(o, FN_VAL);
-
-    scalar* lval = l->get_fn_values();
-    int np = quad->get_num_points(o);
-    bool found = false;
-    bool sign = (lval[0] < 0.0) ? false : true;
-    for (int i = 1; i < np; i++)
-    {
-      bool lsign = (lval[i] < 0.0) ? false : true;
-      if (lsign != sign) { found = true; break; }
-    }
-    if (found)
-      list[k++] = e->id;
-  }
-  for (int i = 0; i < k; i++)
-    mesh->refine_element(list[i]);
-  
-
-}
-*/
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-static void init_mesh(Mesh* mesh, Space* space)
-{
-  Mesh old_mesh;
-  old_mesh.copy(mesh);
-  mesh->unrefine_all_elements(); 
-
-  int ne = old_mesh.get_max_element_id() + 1;
-  int orders[ne];  
-
-  Element* e;
-  for_all_active_elements(e, mesh)
-  {
-    Element* p = old_mesh.get_element(e->id);
-    int o;
-    if (p->active)
-    {
-      o = get_h_order(space->get_element_order(p->id));
-    }
-    else
-    {
-      o = 10;
-      for (int i = 0; i < 4; i++)
-        if (p->sons[i] != NULL)
-          o = std::min(o, get_h_order(space->get_element_order(p->sons[i]->id)));
-    }
-    orders[e->id] = o;
-  }
-  for_all_active_elements(e, mesh)
-  {
-    space->set_element_order(e->id, std::max(1, orders[e->id]-1));
-  }
-}
-*/
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 int main(int argc, char* argv[])
 {
@@ -416,14 +255,7 @@ int main(int argc, char* argv[])
 
   // Initialize adaptivity parameters.
   double to_be_processed = 0;
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY,
-                          MESH_REGULARITY, to_be_processed, HERMES_TOTAL_ERROR_REL, HERMES_ELEMENT_ERROR_REL);
-  apt.set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
-  apt.set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
-  apt.set_error_form(1, 2, bilinear_form_1_2<scalar, scalar>, bilinear_form_1_2<Ord, Ord>);
-  apt.set_error_form(2, 0, bilinear_form_2_0<scalar, scalar>, bilinear_form_2_0<Ord, Ord>);
-  apt.set_error_form(2, 1, bilinear_form_2_1<scalar, scalar>, bilinear_form_2_1<Ord, Ord>);
-  apt.set_error_form(3, 3, bilinear_form_3_3<scalar, scalar>, bilinear_form_3_3<Ord, Ord>);
+  
 
   // Geometry and position of visualization windows.
   WinGeom* u1_sln_win_geom = new WinGeom(0, 0, 300, 450);
@@ -445,23 +277,119 @@ int main(int argc, char* argv[])
   OrderView u3_order_view("[3]", u3_mesh_win_geom);
   OrderView u4_order_view("[4]", u4_mesh_win_geom);
 
-  bool verbose = true; 
-  solve_linear_adapt(Tuple<Space *>(&xvel, &yvel, &press, &lset), &wf, NULL, matrix_solver,
-                     Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM),
-                     Tuple<Solution *>(&u1, &u2, &u3, &u4),
-                     Tuple<Solution *>(&r1, &r2, &r3, &r4),
-                     Tuple<WinGeom *>(), Tuple<WinGeom *>(),// Do not show solutions or meshes.
-                     Tuple<RefinementSelectors::Selector *> (&selector, &selector, &selector, &selector), 
-                     &apt, verbose);
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
 
-  u1_sln_view.show(&u1);
-  u2_sln_view.show(&u2);
-  u3_sln_view.show(&u3);
-  u4_sln_view.show(&u4);
-  u1_order_view.show(&xvel);
-  u2_order_view.show(&yvel);
-  u3_order_view.show(&press);
-  u4_order_view.show(&lset);
+  // Time measurement.
+  cpu_time.tick();
+
+  int as = 1; bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+    Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&xvel, &yvel, &press, &lset));
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    FeProblem fep(&wf, *ref_spaces, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    fep.assemble(matrix, rhs);
+
+    // Time measurement.
+    cpu_time.tick();
+    
+    // Solve the linear system of the reference problem. 
+    // If successful, obtain the solution.
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, Tuple<Solution *>(&r1, &r2, &r3, &r4));
+    else error ("Matrix solver failed.\n");
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    OGProjection::project_global(Tuple<Space *>(&xvel, &yvel, &press, &lset), Tuple<Solution *>(&r1, &r2, &r3, &r4), Tuple<Solution *>(&u1, &u2, &u3, &u4), matrix_solver); 
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // View the coarse mesh solution(s).
+    u1_sln_view.show(&u1);
+    u2_sln_view.show(&u2);
+    u3_sln_view.show(&u3);
+    u4_sln_view.show(&u4);
+    u1_order_view.show(&xvel);
+    u2_order_view.show(&yvel);
+    u3_order_view.show(&press);
+    u4_order_view.show(&lset);
+
+    // Skip visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate."); 
+    Adapt* adaptivity = new Adapt(Tuple<Space *>(&xvel, &yvel, &press, &lset), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
+    /*
+    adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
+    adaptivity->set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
+    adaptivity->set_error_form(1, 2, bilinear_form_1_2<scalar, scalar>, bilinear_form_1_2<Ord, Ord>);
+    adaptivity->set_error_form(2, 0, bilinear_form_2_0<scalar, scalar>, bilinear_form_2_0<Ord, Ord>);
+    adaptivity->set_error_form(2, 1, bilinear_form_2_1<scalar, scalar>, bilinear_form_2_1<Ord, Ord>);
+    adaptivity->set_error_form(3, 3, bilinear_form_3_3<scalar, scalar>, bilinear_form_3_3<Ord, Ord>);
+    */
+    Tuple<double> err_est_rel;
+    bool solutions_for_adapt = true;
+    double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&u1, &u2, &u3, &u4), Tuple<Solution *>(&r1, &r2, &r3, &r4), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+
+    // Report results.
+    info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
+         Space::get_num_dofs(&xvel), Space::get_num_dofs((*ref_spaces)[0]));
+    info("err_est_rel[0]: %g%%", err_est_rel[0]*100);
+
+    info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
+         Space::get_num_dofs(&yvel), Space::get_num_dofs((*ref_spaces)[1]));
+    info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
+
+    info("ndof_coarse[2]: %d, ndof_fine[2]: %d",
+         Space::get_num_dofs(&press), Space::get_num_dofs((*ref_spaces)[2]));
+    info("err_est_rel[2]: %g%%", err_est_rel[2]*100);
+
+    info("ndof_coarse[3]: %d, ndof_fine[3]: %d",
+         Space::get_num_dofs(&lset), Space::get_num_dofs((*ref_spaces)[3]));
+    info("err_est_rel[3]: %g%%", err_est_rel[3]*100);
+
+
+    info("ndof_coarse_total: %d, ndof_fine_total: %d",
+         Space::get_num_dofs(Tuple<Space *>(&xvel, &yvel, &press, &lset)), Space::get_num_dofs(*ref_spaces));
+    info("err_est_rel_total: %g%%", err_est_rel_total);
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(Space::get_num_dofs(Tuple<Space *>(&xvel, &yvel, &press, &lset)), err_est_rel_total);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
+    graph_cpu_est.save("conv_cpu_est.dat");
+
+    // If err_est too large, adapt the mesh.
+    if (err_est_rel_total < ERR_STOP) done = true;
+    else {
+      info("Adapting the coarse mesh.");
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *> (&selector, &selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY, to_be_processed);
+
+      if (Space::get_num_dofs(Tuple<Space *>(&xvel, &yvel, &press, &lset)) >= NDOF_STOP) done = true;
+    }
+
+    delete matrix;
+    delete rhs;
+    delete solver;
+    delete adaptivity;
+    as++;
+  }
+  while (done == false);
+
+  info("Total running time: %g s", cpu_time.accumulated());
 
   // Wait for all views to be closed.
   View::wait();

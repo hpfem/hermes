@@ -191,9 +191,9 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d, err_est_rel[0]: %g%%", 
-         u_space.Space::get_num_dofs(), (*ref_spaces)[0]->Space::get_num_dofs(), err_est_rel[0]*100);
+         u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]), err_est_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d, err_est_rel[1]: %g%%",
-         v_space.Space::get_num_dofs(), (*ref_spaces)[1]->Space::get_num_dofs(), err_est_rel[1]*100);
+         v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]), err_est_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel_total: %g%%",
          Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 

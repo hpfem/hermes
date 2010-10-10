@@ -293,6 +293,10 @@ int main(int argc, char* argv[])
       // Store the result in ref_sln.
       Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);

@@ -68,7 +68,7 @@ const double CONV_EXP = 1.0;               // Default value is 1.0. This paramet
                                            // candidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 0.1;               // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
-const double ERR_STOP_INIT = 3.1;               // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP_INIT = 3.1;          // Stopping criterion for the initial mesh adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space
   // to obtain initial coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  info("Projecting initial condition to obtain coefficient vector for Newton on coarse mesh.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(&space)];
   OGProjection::project_global(&space, init_cond, coeff_vec_coarse, matrix_solver);
 
@@ -446,8 +446,6 @@ int main(int argc, char* argv[])
     sprintf(title, "Mesh, time level %d", ts);
     ordview.set_title(title);
     ordview.show(&space);
-
-    
 
     // Copy new time level solution into u_prev_time.
     u_prev_time.copy(&ref_sln);

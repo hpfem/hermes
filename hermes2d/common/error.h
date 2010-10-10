@@ -21,6 +21,7 @@
 #define _ERROR_H_
 
 #include "compat-util.h"
+#include "../src/compat.h"
 
 //
 // Error handling
@@ -46,7 +47,7 @@
 
 
 
-void h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
+void H2D_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
 
 /// Report unrecoverable error (no call stack or location dumped)
 //void error(char const *fmt, ...) NORETURN;
@@ -64,6 +65,6 @@ void warning(const char *warn, ...);
 #define MEM_CHECK(var) h_mem_check(__LINE__, __PRETTY_FUNCTION__, __FILE__, var)
 #endif
 
-void h_mem_check(int line, const char *func, const char *file, void *var);
+void H2D_API h_mem_check(int line, const char *func, const char *file, void *var);
 
 #endif

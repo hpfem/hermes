@@ -137,17 +137,6 @@ H2D_API Vector* create_vector(MatrixSolverType matrix_solver);
 H2D_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
 H2D_API Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
-/// Basic Newton's loop. Takes a coefficient vector, delivers a coefficient vector (in the 
-/// same variable "init_coeff_vector").
-H2D_API bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, scalar* coeff_vec, 
-                          MatrixSolverType matrix_solver, double newton_tol, 
-                          int newton_max_iter, bool verbose);
-
-// Solve a typical linear problem (without automatic adaptivity).
-// Feel free to adjust this function for more advanced applications.
-H2D_API bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
-                          Tuple<Solution *> solutions, scalar*coeff_vec = NULL);
-
 // Create globally refined space.
 H2D_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
 H2D_API Space* construct_refined_space(Space* coarse, int order_increase = 1);

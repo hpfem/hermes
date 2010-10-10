@@ -56,8 +56,8 @@ extern ViewMonitor view_sync; ///< synchronization between all views. Used to ac
 
 /* exported functions */
 class View;
-extern bool init_glut(); ///Initialize GLUT.
-extern bool shutdown_glut(); ///Shutdown GLUT.
+bool H2D_API init_glut(); ///Initialize GLUT.
+bool H2D_API shutdown_glut(); ///Shutdown GLUT.
 extern int add_view(View* view, int x, int y, int width, int height, const char* title); ///< Adds a view.
 extern void set_view_title(int view_id, const char* title); ///< Sets title of a view.
 extern void refresh_view(int view_id); ///< Forces redisplay of a view.

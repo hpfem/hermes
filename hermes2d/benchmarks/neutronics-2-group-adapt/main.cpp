@@ -430,23 +430,24 @@ int main(int argc, char* argv[])
     }
     bool solutions_for_adapt = true;
     double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-    double err_est_h1_total = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
+    
+    Adapt adaptivity_proj(Tuple<Space*>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
 
+    double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns) * 100;
+
+    Tuple<double> err_exact_h1;
+    ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
+    Tuple<Solution*> exslns(&ex1, &ex2);
+    double error_h1 = adaptivity_proj.calc_err_est(slns, exslns, true, HERMES_TOTAL_ERROR_REL, &err_exact_h1) * 100;
+    
     // Report results.
     cpu_time.tick(); 
 
     // Error w.r.t. the exact solution.
-    ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
     DiffFilter err_distrib_1(Tuple<MeshFunction*>(&ex1, &sln1));
     DiffFilter err_distrib_2(Tuple<MeshFunction*>(&ex2, &sln2));
 
-    double err_exact_h1_1 = calc_rel_error(&ex1, &sln1, HERMES_H1_NORM) * 100;
-    double err_exact_h1_2 = calc_rel_error(&ex2, &sln2, HERMES_H1_NORM) * 100;
-
-    Tuple<Solution*> exslns(&ex1, &ex2);
-    double error_h1 = error_total(error_fn_h1, norm_fn_h1, slns, exslns) * 100;
-
-    info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1_1, err_exact_h1_2);
+    info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1[0] * 100, err_exact_h1[1] * 100);
     info("Total error wrt. exact solution (H1 norm): %g%%", error_h1);
     info("Total error wrt. ref. solution  (H1 norm): %g%%", err_est_h1_total);
     info("Total error wrt. ref. solution  (E norm):  %g%%", err_est_energ_total);

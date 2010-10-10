@@ -170,9 +170,6 @@ int main(int argc, char* argv[])
   ExactSolution T_exact_solution(&mesh, T_exact),
                 phi_exact_solution(&mesh, phi_exact);
 
-  // Exact errors.
-  double T_error, phi_error, error;
-
   // Initialize solution views (their titles will be2 updated in each time step).
   ScalarView sview_T("", 0, 0, 500, 400);
   ScalarView sview_phi("", 0, 500, 500, 400);
@@ -298,11 +295,14 @@ int main(int argc, char* argv[])
     
     // Calculate exact error.
     info("Calculating error (exact).");
-    T_error = calc_rel_error(&T_prev_newton, &T_exact_solution, HERMES_H1_NORM) * 100;
-    phi_error = calc_rel_error(&phi_prev_newton, &phi_exact_solution, HERMES_H1_NORM) * 100;
-    error = std::max(T_error, phi_error);
-    info("Exact solution error for T (H1 norm): %g %%", T_error);
-    info("Exact solution error for phi (H1 norm): %g %%", phi_error);
+    Tuple<double> exact_errors;
+    Adapt adaptivity_exact(spaces, Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    bool solutions_for_adapt = true;
+    adaptivity_exact.calc_err_exact(Tuple<Solution *>(&T_prev_newton, &phi_prev_newton), Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &exact_errors);
+    
+    double error = std::max(exact_errors[0], exact_errors[1]);
+    info("Exact solution error for T (H1 norm): %g %%", exact_errors[0]);
+    info("Exact solution error for phi (H1 norm): %g %%", exact_errors[1]);
     info("Exact solution error (maximum): %g %%", error);
     
     // Prepare previous time level solution for the next time step.

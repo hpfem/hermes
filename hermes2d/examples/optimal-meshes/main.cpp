@@ -119,29 +119,6 @@ int main(int argc, char* argv[])
   double err = calc_abs_error(&sln, &sln_exact, HERMES_H1_NORM);
   printf("err = %g, err_squared = %g\n\n", err, err*err);
  
-
-  /*
-  // ADAPTIVE VERSION
-
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY);
-
-  // Adaptivity loop.
-  Solution *sln = new Solution();
-  Solution *ref_sln = new Solution();
-  ExactSolution exact_sln(&mesh, exact);
-  WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
-  WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
-  bool verbose = true;     // Print info during adaptivity.
-  // The NULL pointer means that we do not want the resulting coefficient vector.
-  solve_linear_adapt(&space, &wf, NULL, matrix_solver, HERMES_H1_NORM, sln, ref_sln, 
-                     sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln);
-  */
-
   // Wait for all views to be closed.
   View::wait();
   return 0;
