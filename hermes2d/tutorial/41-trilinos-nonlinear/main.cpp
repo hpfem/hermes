@@ -211,12 +211,10 @@ int main(int argc, char* argv[])
 
   // Solve the matrix problem using NOX.
   info("Assembling by FeProblem, solving by NOX.");
-  bool solved = nox_solver.solve();
   Solution sln_nox;
-  if (solved)
+  if (nox_solver.solve())
   {
-    double *coeffs = nox_solver.get_solution();
-    Solution::vector_to_solution(coeffs, &space, &sln_nox);
+    Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln_nox);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
          nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -232,11 +230,10 @@ int main(int argc, char* argv[])
   Solution ex;
   ex.set_exact(&mesh, &exact);
   Adapt adaptivity(&space, HERMES_H1_NORM);
-  adaptivity.set_approximate_solution(&sln_hermes);
-  double err_est_rel_1 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  bool solutions_for_adapt = false;
+  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 1 (FeProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
-  adaptivity.set_approximate_solution(&sln_nox);
-  double err_est_rel_2 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 2 (FeProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   // Show both solutions.

@@ -168,13 +168,11 @@ int main(int argc, char* argv[])
     }
 
     // Assemble on coarse mesh and solve the matrix problem using NOX.
-    int ndof = get_num_dofs(&space);
+    int ndof = Space::get_num_dofs(&space);
     info("Coarse mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
-    bool solved = solver.solve();
-    if (solved)
+    if (solver.solve())
     {
-      double* coeffs = solver.get_solution_vector();
-      sln.set_coeff_vector(&space, coeffs);
+      Solution::vector_to_solution(solver.get_solution(), &space, &sln);
 
       info("Coarse Solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)", 
@@ -215,13 +213,11 @@ int main(int argc, char* argv[])
     }
 
     // Assemble on fine mesh and solve the matrix problem using NOX.
-    ndof = get_num_dofs(&rspace);
+    ndof = Space::get_num_dofs(&rspace);
     info("Fine mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
-    solved = ref_solver.solve();
-    if (solved)
+    if (ref_solver.solve())
     {
-      double* coeffs = ref_solver.get_solution_vector();
-      ref_sln.set_coeff_vector(&rspace, coeffs);
+      Solution::vector_to_solution(ref_solver.get_solution(), &rspace, &ref_sln);
 
       info("Reference solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)",
@@ -235,16 +231,17 @@ int main(int argc, char* argv[])
     // Calculate element errors.
     info("Calculating error (est).");
     Adapt hp(&space, HERMES_H1_NORM);
-    hp.set_solutions(&sln, &ref_sln);
-    double err_est_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = true;
+    double err_est_rel = hp.calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
  
     // Calculate exact error.
     Solution* exact = new Solution(&mesh, fndd);
-    double err_exact_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    solutions_for_adapt = false;
+    double err_exact_rel = hp.calc_err_exact(&sln, exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%, err_exact: %g%%", 
-	 get_num_dofs(&space), get_num_dofs(&rspace), err_est_rel, err_exact_rel);
+      Space::get_num_dofs(&space), Space::get_num_dofs(&rspace), err_est_rel, err_exact_rel);
 
     // Add entries to DOF convergence graphs.
     graph_dof_exact.add_values(space.get_num_dofs(), err_exact_rel);
@@ -258,7 +255,7 @@ int main(int argc, char* argv[])
       info("Adapting the coarse mesh.");
       done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+      if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
     }
 
     as++;

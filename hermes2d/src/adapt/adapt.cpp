@@ -726,13 +726,15 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   error_time = tmr.get_seconds();
 
   // Make the error relative if needed.
-  if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) {
-    for (int i = 0; i < this->num; i++) {
-      Element* e;
-      for_all_active_elements(e, meshes[i])
-        errors[i][e->id] /= norms[i];
+  if(solutions_for_adapt)
+    if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) {
+      for (int i = 0; i < this->num; i++) {
+        Element* e;
+        for_all_active_elements(e, meshes[i])
+          errors[i][e->id] /= norms[i];
+      }
     }
-  }
+
 
   // Prepare an ordered list of elements according to an error.
   if(solutions_for_adapt) {

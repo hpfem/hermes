@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, bc_types, essential_bc_values_t, P_INIT);
   H1Space* c_space = new H1Space(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = get_num_dofs(Tuple<Space *>(t_space, c_space));
+  int ndof = Space::get_num_dofs(Tuple<Space *>(t_space, c_space));
   info("ndof = %d.", ndof);
 
   // Define initial conditions.
@@ -122,11 +122,9 @@ int main(int argc, char* argv[])
   // Project the functions "t_iter" and "c_iter" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
-  Vector* coeff_vec = new AVector(ndof);
-  project_global(Tuple<Space *>(t_space, c_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM), 
-                 Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1), 
-                 Tuple<Solution*>(&t_prev_time_1, &c_prev_time_1),
-                 coeff_vec);
+  scalar* coeff_vec = new scalar[ndof];
+  OGProjection::project_global(Tuple<Space *>(t_space, c_space), Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
+    coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
@@ -155,13 +153,10 @@ int main(int argc, char* argv[])
     info("---- Time step %d, t = %g s", ts, total_time + TAU);
 
     cpu_time.tick(HERMES_SKIP);
-    solver.set_init_sln(coeff_vec->get_c_array());
-    bool solved = solver.solve();
-    if (solved)
+    solver.set_init_sln(coeff_vec);
+    if (solver.solve())
     {
-      double* coeffs = solver.get_solution_vector();
-      t_prev_newton.set_coeff_vector(t_space, coeffs);
-      c_prev_newton.set_coeff_vector(c_space, coeffs);
+      Solution::vector_to_solutions(solver.get_solution(), Tuple<Space *>(t_space, c_space), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",

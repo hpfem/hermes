@@ -201,13 +201,9 @@ int main(int argc, char **argv)
   }
 
   // Assemble and solve using NOX.
-  bool solved = nox_solver.solve();
-
   Solution sln2;
-  if (solved)
+  if (nox_solver.solve())
   {
-    scalar *coeffs = nox_solver.get_solution();
-
     // debug
     /*
     int ndof = space.get_num_dofs();
@@ -215,8 +211,8 @@ int main(int argc, char **argv)
     for (int i=0; i<ndof; i++) printf("%g ", coeffs[i]);
     printf("\n");
     */
-    
-    Solution::vector_to_solution(coeffs, &space, &sln2);
+    Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln2);
+
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
       nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -236,11 +232,10 @@ int main(int argc, char **argv)
   Solution ex;
   ex.set_exact(&mesh, &exact);
   Adapt adaptivity(&space, HERMES_H1_NORM);
-  adaptivity.set_approximate_solution(&sln1);
-  double rel_err_1 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  bool solutions_for_adapt = false;
+  double rel_err_1 = adaptivity.calc_err_exact(&sln1, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  adaptivity.set_approximate_solution(&sln2);
-  double rel_err_2 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  double rel_err_2 = adaptivity.calc_err_exact(&sln2, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Wait for all views to be closed.
