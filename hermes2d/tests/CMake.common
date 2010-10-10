@@ -23,26 +23,24 @@ if(H2D_COMPLEX)
   endif(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
 endif(H2D_COMPLEX)
 
-#find_package(JUDY REQUIRED)
-#include_directories(${JUDY_INCLUDE_DIR})
-#include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${hermes2d_SOURCE_DIR}/src)
 #include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
-#include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-#include_directories(${TRILINOS_INCLUDE_DIR})
 
 include(PickRealOrCplxLibs)
 PICK_REAL_OR_CPLX_LIBS(${HERMES} ${PROJECT_NAME})
 
+# Do we need JUDY and GLUT libraries here?
 target_link_libraries(  ${PROJECT_NAME} 
   ${HERMES}
   ${PYTHON_LIBRARIES}
   ${PETSC_LIBRARIES}
-  ${UMFPACK_LIBRARY} ${AMD_LIBRARY}
+  ${UMFPACK_LIBRARIES}
   ${PARDISO_LIBRARY}
   ${MUMPS_LIBRARIES}
   ${TRILINOS_LIBRARIES}
   ${LAPACK_LIBRARIES} 
+  ${EXODUSII_LIBRARY} 
+  ${HDF5_LIBRARY}
 )
 add_dependencies(${PROJECT_NAME} ${HERMES})

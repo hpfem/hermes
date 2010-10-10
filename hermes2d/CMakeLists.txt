@@ -170,6 +170,11 @@ if(WITH_EXODUSII)
   include_directories(${EXODUSII_INCLUDE_DIR})
 endif(WITH_EXODUSII)
 
+if(WITH_HDF5)
+	find_package(HDF5 REQUIRED)
+	include_directories(${HDF5_INCLUDE_DIR})
+endif(WITH_HDF5)
+
 # If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC)
 if(WITH_MPI)
   if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
@@ -200,8 +205,7 @@ endif(NOT MSVC)
 # Solvers:
 if(WITH_UMFPACK)
   find_package(UMFPACK REQUIRED)
-  include_directories(${UMFPACK_INCLUDE_DIR})
-  include_directories(${AMD_INCLUDE_DIR})
+  include_directories(${UMFPACK_INCLUDE_DIRS})
 endif(WITH_UMFPACK)
 
 if(WITH_TRILINOS)

@@ -36,73 +36,35 @@ SET(BASIC_PETSC_ARCH ${PETSC_ARCH})
 IF(H2D_REAL) # Search for the real version of the library.
 
   SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-real)
-  
-  # Probe PETSc 2.0
-  SET(PETSC_DIR ${PETSC_ROOT}/lib/${PETSC_ARCH})
-  IF(EXISTS ${PETSC_DIR} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH}) 
-    
-    # We first search in the arch-specific path - if the user compiled both real and 
-    # complex versions of the library, the corresponding files will be in the respective
-    # arch-specific directories, while only the last built version (complex) will be on 
-    # the system path. 
-    FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR} NO_DEFAULT_PATH)
-    
-    # If the library is not found in the arch-specific directory, default system paths
-    # specified by CMake are searched. This should happen only when only one of either 
-    # the real or complex libraries has been built and manually deleted from the
-    # arch-specific directory (e.g. to save some disk space). 
-    FIND_LIBRARY(PETSC_LIB petsc) # This step is automatically skipped when PETSC_LIB has 
-                                  # already been found by the previous command.
-    
-    IF(COMMON_PETSC_INCLUDE_DIRS)
-	    SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_ROOT}/bmake/${PETSC_ARCH})
-	  ENDIF(COMMON_PETSC_INCLUDE_DIRS)
-	  
-	  IF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
-      SET(PETSC_FOUND TRUE)
-      
- 	    # Set the real v2.0 libraries (have to be in this order).
-	    FOREACH(L petscts petscsnes petscksp petscdm petscmat petscvec petsc)
-		    SET(PETSC_REAL_LIBRARIES ${PETSC_REAL_LIBRARIES} ${PETSC_DIR}/lib/lib${L}.so)
-	    ENDFOREACH(L)
-	    
-	    IF(NOT WITH_MPI)
-        SET(PETSC_REAL_LIBRARIES ${PETSC_REAL_LIBRARIES} ${PETSC_DIR}/lib/libmpiuni.so)
-      ENDIF(NOT WITH_MPI)
-    ENDIF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
-    
-  ELSE(EXISTS ${PETSC_DIR} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH}) 
 
-    # Probe PETSc 3.1    
-    SET(PETSC_DIR ${PETSC_ROOT}/${PETSC_ARCH})
-    IF(EXISTS ${PETSC_DIR})
-      
-      FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
-      FIND_LIBRARY(PETSC_LIB petsc)
-            
-      IF(COMMON_PETSC_INCLUDE_DIRS)
-        # Add arch-specific include directory.
-        SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_DIR}/include)
-      ELSE(COMMON_PETSC_INCLUDE_DIRS)
-        # petsc.h has not been found in the root include directory, search in the arch-specific one.
-        FIND_PATH(PETSC_REAL_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
-      ENDIF(COMMON_PETSC_INCLUDE_DIRS)
-     	  
-      IF(PETSC_REAL_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
-        # Add arch-specific path for mpiuni.
-        SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_REAL_INCLUDE_DIRS} ${PETSC_DIR}/include/mpiuni)
-      ENDIF(PETSC_REAL_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
-      
-      IF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
-        SET(PETSC_FOUND TRUE)        
-        # Set the real version of the library (PETSc 3.1 is contained in a single libfile).
-        SET(PETSC_REAL_LIBRARIES ${PETSC_LIB})
-      ENDIF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
+  # PETSc 3.1    
+  SET(PETSC_DIR ${PETSC_ROOT}/${PETSC_ARCH})
+  IF(EXISTS ${PETSC_DIR})
     
-    ENDIF(EXISTS ${PETSC_DIR})  
+    FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
+    FIND_LIBRARY(PETSC_LIB petsc)
+          
+    IF(COMMON_PETSC_INCLUDE_DIRS)
+      # Add arch-specific include directory.
+      SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_DIR}/include)
+    ELSE(COMMON_PETSC_INCLUDE_DIRS)
+      # petsc.h has not been found in the root include directory, search in the arch-specific one.
+      FIND_PATH(PETSC_REAL_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
+    ENDIF(COMMON_PETSC_INCLUDE_DIRS)
+   	  
+    IF(PETSC_REAL_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
+      # Add arch-specific path for mpiuni.
+      SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_REAL_INCLUDE_DIRS} ${PETSC_DIR}/include/mpiuni)
+    ENDIF(PETSC_REAL_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
     
-  ENDIF(EXISTS ${PETSC_DIR} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH})
+    IF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
+      SET(PETSC_FOUND TRUE)        
+      # Set the real version of the library (PETSc 3.1 is contained in a single libfile).
+      SET(PETSC_REAL_LIBRARIES ${PETSC_LIB})
+    ENDIF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
   
+  ENDIF(EXISTS ${PETSC_DIR})  
+      
   IF (PETSC_FOUND)    
     IF (NOT PETSC_FIND_QUIETLY)
 		  MESSAGE(STATUS "Found real version of PETSc: ${PETSC_DIR}")
@@ -116,70 +78,41 @@ IF(H2D_REAL) # Search for the real version of the library.
   # linux specific (?)
   SET(PETSC_REAL_LIBRARIES ${PETSC_REAL_LIBRARIES} dl)     
 ENDIF(H2D_REAL)
- 
-# Reset the search flags.
-SET(PETSC_FOUND FALSE)
-SET(PETSC_LIB PETSC_LIB-NOTFOUND)
- 
+  
 IF(H2D_COMPLEX)  # Search for the complex version of the library.  
+  # Reset the search flags.
+  SET(PETSC_FOUND FALSE)
+  SET(PETSC_LIB PETSC_LIB-NOTFOUND)
 
   SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-complex)
   
-  # Probe PETSc 2.0
-  SET(PETSC_DIR ${PETSC_ROOT}/lib/${PETSC_ARCH})
-  IF(EXISTS ${PETSC_DIR} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH}) 
+  # PETSc 3.1    
+  SET(PETSC_DIR ${PETSC_ROOT}/${PETSC_ARCH})
+  IF(EXISTS ${PETSC_DIR})
     
-    FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR} NO_DEFAULT_PATH)
+    FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
     FIND_LIBRARY(PETSC_LIB petsc)
-    
+          
     IF(COMMON_PETSC_INCLUDE_DIRS)
-	    SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_ROOT}/bmake/${PETSC_ARCH})
-	  ENDIF(COMMON_PETSC_INCLUDE_DIRS)
-	  
-	  IF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
-      SET(PETSC_FOUND TRUE)
-      
- 	    # Set the complex v2.0 libraries (have to be in this order).
-	    FOREACH(L petscts petscsnes petscksp petscdm petscmat petscvec petsc)
-		    SET(PETSC_CPLX_LIBRARIES ${PETSC_CPLX_LIBRARIES} ${PETSC_DIR}/lib/lib${L}.so)
-	    ENDFOREACH(L)
-	    
-      IF(NOT WITH_MPI)
-        SET(PETSC_CPLX_LIBRARIES ${PETSC_CPLX_LIBRARIES} ${PETSC_DIR}/lib/libmpiuni.so)
-      ENDIF(NOT WITH_MPI)
-    ENDIF (SPEC_PETSC_INCLUDE_DIRS AND PETSC_LIB)
+      # Add arch-specific include directory.
+      SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_DIR}/include)
+    ELSE(COMMON_PETSC_INCLUDE_DIRS)
+      # petsc.h has not been found in the root include directory, search in the arch-specific one.
+      FIND_PATH(PETSC_CPLX_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
+    ENDIF(COMMON_PETSC_INCLUDE_DIRS)
+   	  
+    IF(PETSC_CPLX_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
+      # Add arch-specific path for mpiuni.
+      SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_CPLX_INCLUDE_DIRS} ${PETSC_DIR}/include/mpiuni)
+    ENDIF(PETSC_CPLX_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
+         		  
+    IF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
+      SET(PETSC_FOUND TRUE)        
+      # Set the complex version of the library (PETSc 3.1 is contained in a single libfile).
+      SET(PETSC_CPLX_LIBRARIES ${PETSC_LIB})
+    ENDIF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
     
-  ELSE(EXISTS ${PETSC_DIR} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH}) 
-
-    # Probe PETSc 3.1    
-    SET(PETSC_DIR ${PETSC_ROOT}/${PETSC_ARCH})
-    IF(EXISTS ${PETSC_DIR})
-      
-      FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
-      FIND_LIBRARY(PETSC_LIB petsc)
-            
-      IF(COMMON_PETSC_INCLUDE_DIRS)
-        # Add arch-specific include directory.
-        SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_DIR}/include)
-      ELSE(COMMON_PETSC_INCLUDE_DIRS)
-        # petsc.h has not been found in the root include directory, search in the arch-specific one.
-        FIND_PATH(PETSC_CPLX_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
-      ENDIF(COMMON_PETSC_INCLUDE_DIRS)
-     	  
-      IF(PETSC_CPLX_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
-        # Add arch-specific path for mpiuni.
-        SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_CPLX_INCLUDE_DIRS} ${PETSC_DIR}/include/mpiuni)
-      ENDIF(PETSC_CPLX_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_DIR}/include/mpiuni)
-           		  
-      IF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
-        SET(PETSC_FOUND TRUE)        
-        # Set the complex version of the library (PETSc 3.1 is contained in a single libfile).
-        SET(PETSC_CPLX_LIBRARIES ${PETSC_LIB})
-      ENDIF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
-    
-    ENDIF(EXISTS ${PETSC_DIR})  
-    
-  ENDIF(EXISTS ${PETSC_DIR} AND EXISTS ${PETSC_ROOT}/bmake/${PETSC_ARCH})
+  ENDIF(EXISTS ${PETSC_DIR})
   
   IF (PETSC_FOUND)    
     IF (NOT PETSC_FIND_QUIETLY)
