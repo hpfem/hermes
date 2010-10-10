@@ -2,7 +2,7 @@
 # PARDISO
 #
 # set WITH_PARDISO to YES to enable pardiso support
-# set PARDISO_LIB to the point to your pardiso library to use (use full path specification)
+# set PARDISO_LIB to point to your pardiso library to use (use full path specification)
 #
 # If you are using parallel version of PARDISO, you need to say: set(WITH_OPENMP YES) in global
 # CMake.vars. Depending on your configuration, you might need to link some additional libraries
