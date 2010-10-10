@@ -143,8 +143,8 @@ int main(int argc, char **argv)
   // View the solution and mesh.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show(&sln1);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
-  oview.show(&space);
+  //OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  //oview.show(&space);
   
   // TRILINOS PART:
 
