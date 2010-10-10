@@ -408,12 +408,12 @@ int main(int argc, char* argv[])
   verbose("Total running time: %g s", cpu_time.accumulated());
   
   info("Number of iterations: %d", as);
-  info("NDOF: %d, %d", space1.Space::get_num_dofs(), space2.Space::get_num_dofs());
+  info("NDOF: %d, %d", Space::get_num_dofs(&space1), Space::get_num_dofs(&space2));
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_1 = space1.Space::get_num_dofs(), 
-      n_dof_2 = space2.Space::get_num_dofs();
+  int n_dof_1 = Space::get_num_dofs(&space1), 
+      n_dof_2 = Space::get_num_dofs(&space2);
   int n_dof_1_allowed = 500, 
       n_dof_2_allowed = 2800;
       

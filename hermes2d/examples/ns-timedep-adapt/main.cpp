@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
       delete rhs;
       delete adaptivity;
       for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->mesh;
+        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
     }
     while (done == false);

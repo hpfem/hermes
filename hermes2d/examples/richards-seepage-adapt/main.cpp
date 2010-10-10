@@ -430,7 +430,7 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
-      delete ref_space->mesh;
+      delete ref_space->get_mesh();
       delete ref_space;
     }
     while (!done);

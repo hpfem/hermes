@@ -175,9 +175,6 @@ public:
 
 public:
 
-  /// FE mesh
-  Mesh* mesh;
-
   /// Number of degrees of freedom (dimension of the space)
   int ndof;
 
@@ -202,6 +199,9 @@ protected:
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
 
   Shapeset* shapeset;
+
+  /// FE mesh
+  Mesh* mesh;
 
   int default_tri_order, default_quad_order;
   int first_dof, next_dof;
