@@ -20,6 +20,7 @@ add_subdirectory(nist-8)
 add_subdirectory(nist-9)   
 add_subdirectory(nist-10)
 add_subdirectory(nist-11)
+add_subdirectory(nist-12)
 
 #if(NOT WITH_TRILINOS)
   add_subdirectory(screen)
