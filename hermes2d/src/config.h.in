@@ -2,6 +2,10 @@
 #cmakedefine HAVE_LOG2
 #cmakedefine EXTREME_QUAD
 
+#cmakedefine HAVE_TEUCHOS_LINK
+#cmakedefine HAVE_TEUCHOS_BFD
+
+
 #cmakedefine WITH_UMFPACK
 #cmakedefine WITH_PARDISO
 #cmakedefine WITH_MUMPS

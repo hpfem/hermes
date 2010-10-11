@@ -34,7 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \brief Functions for returning stacktrace info (GCC only initially).
 */
 
-#include "Teuchos_ConfigDefs.hpp"
+// This is commented out, as we don't want to depend on Trilinos
+//#include "Teuchos_ConfigDefs.hpp"
+// Instead include the needed header files directly
+#include <string>
 
 namespace Teuchos {
 

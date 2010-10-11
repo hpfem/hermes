@@ -104,6 +104,10 @@ macro(LIBRARY_SETTINGS BIN)
       IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
           target_link_libraries(${BIN} "rt")
       ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      if(HAVE_TEUCHOS_BFD)
+          # stacktrace code needs binutils:
+          target_link_libraries(${BIN} bfd iberty)
+      endif(HAVE_TEUCHOS_BFD)
   endif(NOT MSVC)
   
   # Link with all third party libraries corresponding to selected configuration options.

@@ -229,6 +229,15 @@ if(WITH_PARDISO)
 	find_package(PARDISO REQUIRED) 
 endif(WITH_PARDISO)
 
+include(CheckIncludeFile)
+CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
+CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
+
+IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(HAVE_TEUCHOS_STACKTRACE yes)
+ENDIF()
+
+
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
 
@@ -303,6 +312,11 @@ message("Build with OPENMP: ${WITH_OPENMP}")
 message("---------------------")
 message("Hermes2D logo: ${REPORT_WITH_LOGO}")
 message("Mirror reports to a log file: ${REPORT_TO_FILE}")
+if(HAVE_TEUCHOS_STACKTRACE)
+    message("Print Teuchos stacktrace on segfault: YES")
+else(HAVE_TEUCHOS_STACKTRACE)
+    message("Print Teuchos stacktrace on segfault: NO")
+endif(HAVE_TEUCHOS_STACKTRACE)
 if(REPORT_RUNTIME_CONTROL)
   if(WITH_PYTHON)
     message("Report controlled by: RUNTIME and PREP. DIRECTIVES (enforced by Python)")

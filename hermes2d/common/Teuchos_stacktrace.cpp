@@ -49,6 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // backtrace() function for retrieving the stacktrace
 #include <execinfo.h>
 
+// For the HAVE_TEUCHOS_LINK and HAVE_TEUCHOS_BFD defines
+#include "../src/config.h"
+
 #ifdef HAVE_TEUCHOS_LINK
 // For dl_iterate_phdr() functionality
 #include <link.h>
