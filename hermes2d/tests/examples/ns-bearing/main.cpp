@@ -166,11 +166,11 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), HERMES_UNSYM, HERMES_ANY);
     wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), HERMES_UNSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), H2D_ANTISYM);
+    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
     wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_UNSYM, HERMES_ANY);
     wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_UNSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
+    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
     wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
                        Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
@@ -184,25 +184,21 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
                   HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), H2D_ANTISYM);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
+    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
+    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
     wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
     wf.add_vector_form(1, callback(simple_linear_form), HERMES_ANY, &yvel_prev_time);
   }
 
   // Project initial conditions on FE spaces to obtain initial coefficient 
   // vector for the Newton's method.
-  Vector* coeff_vec;
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space))];
   if (NEWTON) {
     info("Projecting initial conditions to obtain initial vector for the Newton's method.");
-    coeff_vec = new AVector(ndof);
     OGProjection::project_global(Tuple<Space *>(xvel_space, yvel_space, p_space),
-                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm),
                    Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   Tuple<Solution*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   coeff_vec);
+                   coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
-  else coeff_vec = NULL;
 
   // Time-stepping loop:
   char title[100];
@@ -221,23 +217,83 @@ int main(int argc, char* argv[])
     if (NEWTON) {
       // Newton's method.
       info("Performing Newton's method.");
-      bool verbose = true; // Default is false.
-      if (!solve_newton(Tuple<Space *>(xvel_space, yvel_space, p_space), &wf, coeff_vec,
-          matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-        error("Newton's method did not converge.");
+      // Initialize the FE problem.
+      bool is_linear = false;
+      FeProblem fep(&wf, Tuple<Space *>(xvel_space, yvel_space, p_space), is_linear);
 
-      // Update previous time level solutions.
-      xvel_prev_time.set_coeff_vector(xvel_space, coeff_vec);
-      yvel_prev_time.set_coeff_vector(yvel_space, coeff_vec);
-      p_prev_time.set_coeff_vector(p_space, coeff_vec);
+      // Set up the solver, matrix, and rhs according to the solver selection.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+      // Perform Newton's iteration.
+      int it = 1;
+      while (1)
+      {
+        // Obtain the number of degrees of freedom.
+        int ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
+
+        // Assemble the Jacobian matrix and residual vector.
+        fep.assemble(coeff_vec, matrix, rhs, false);
+
+        // Multiply the residual vector with -1 since the matrix 
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        
+        // Calculate the l2-norm of residual vector.
+        double res_l2_norm = get_l2_norm(rhs);
+
+        // Info for user.
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space)), res_l2_norm);
+
+        // If l2 norm of the residual vector is within tolerance, or the maximum number 
+        // of iteration has been reached, then quit.
+        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+        // Solve the linear system.
+        if(!solver->solve())
+          error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+        
+        if (it >= NEWTON_MAX_ITER)
+          error ("Newton method did not converge.");
+
+        it++;
+      }
+      
+      // Translate the resulting coefficient vector into the actual solutions. 
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+
+      // Cleanup.
+      delete matrix;
+      delete rhs;
+      delete solver;
     }
     else {
       // Linear solve.  
       info("Assembling and solving linear problem.");
-      solve_linear(Tuple<Space *>(xvel_space, yvel_space, p_space), &wf, matrix_solver,
-                   Tuple<Solution*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      bool is_linear = true;
+      FeProblem fep(&wf, Tuple<Space *>(xvel_space, yvel_space, p_space), is_linear);
+
+      // Set up the solver, matrix, and rhs according to the solver selection.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+      fep.assemble(matrix, rhs);
+
+      // Solve the linear system and if successful, obtain the solution.
+      info("Solving the matrix problem.");
+      if(solver->solve())
+        Solution::vector_to_solutions(solver->get_solution(),  Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      else
+        error ("Matrix solver failed.\n");
     }
  }
+
+  delete coeff_vec;
   info("Coordinate ( 0.1, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.1, 0.0));
   info("Coordinate ( 0.5, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.5, 0.0));
   info("Coordinate ( 0.9, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.9, 0.0));

@@ -177,6 +177,10 @@ int main(int argc, char* argv[])
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
 
+  xvel_sln.copy(&xvel_prev_time);
+  yvel_sln.copy(&yvel_prev_time);
+  p_sln.copy(&p_prev_time);
+
   // Initialize the weak formulation.
   WeakForm wf(3);
   wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
@@ -186,17 +190,13 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_UNSYM, HERMES_ANY);
   wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
   wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_UNSYM, HERMES_ANY);
-  wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), H2D_ANTISYM);
+  wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
   wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
   wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
   wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
 
-  // Initialize adaptivity parameters.
-  AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, MESH_REGULARITY);
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  // Assign initial condition to mesh.
-  Vector *coeff_vec = new AVector(ndof);
 
   // Time-stepping loop:
   char title[100];
@@ -214,30 +214,118 @@ int main(int argc, char* argv[])
       p_space->set_uniform_order(P_INIT_PRESSURE);
     }
 
-    // Update the coefficient vector and u_prev_time.
-    info("Projecting to obtain coefficient vector on coarse mesh.");
-    OGProjection::project_global(Tuple<Space *>(xvel_space, yvel_space, p_space),
-                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm),
-                   Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   Tuple<Solution*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   coeff_vec);
+    // Adaptivity loop:
+    bool done = false; int as = 1;
+    double err_est;
+    do {
+      info("Time step %d, adaptivity step %d:", ts, as);
 
-    // Adaptivity loop (in space):
-    bool verbose = true;     // Print info during adaptivity.
-    info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
-    // The NULL pointers mean that we are not interested in visualization during the Newton's loop.
-    solve_newton_adapt(Tuple<Space *>(xvel_space, yvel_space, p_space), &wf, coeff_vec, matrix_solver, 
-                       Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm), 
-                       Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln),
-                       Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln),
-                       Tuple<WinGeom *>(), Tuple<WinGeom *>(), 
-                       Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), &apt,
-                       NEWTON_TOL_COARSE, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose);
+      // Construct globally refined reference mesh
+      // and setup reference space.
+      Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(xvel_space, yvel_space, p_space));
+
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
+
+      bool is_linear = false;
+      FeProblem fep(&wf, *ref_spaces, is_linear);
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+      // Calculate initial coefficient vector for Newton on the fine mesh.
+      if (as == 1) {
+        info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_sln, &yvel_sln, &p_sln), coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+      }
+      else {
+        info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+      }
+
+      // Newton's loop on the fine mesh.
+      info("Solving on fine mesh:");
+      int it = 1;
+      while (1)
+      {
+        // Obtain the number of degrees of freedom.
+        int ndof = Space::get_num_dofs(*ref_spaces);
+
+        // Assemble the Jacobian matrix and residual vector.
+        fep.assemble(coeff_vec, matrix, rhs, false);
+
+        // Multiply the residual vector with -1 since the matrix 
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        
+        // Calculate the l2-norm of residual vector.
+        double res_l2_norm = get_l2_norm(rhs);
+
+        // Info for user.
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
+
+        // If l2 norm of the residual vector is within tolerance, or the maximum number 
+        // of iteration has been reached, then quit.
+        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
+
+        // Solve the linear system.
+        if(!solver->solve())
+          error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+        
+        if (it >= NEWTON_MAX_ITER)
+          error ("Newton method did not converge.");
+
+        it++;
+      }
+
+      // Store the result in ref_sln.
+      Solution::vector_to_solutions(coeff_vec, *ref_spaces, Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln));
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver); 
+
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate.");
+      Adapt* adaptivity = new Adapt(Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+      bool solutions_for_adapt = true;
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
+
+      // Report results.
+      info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
+           Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+
+      // If err_est too large, adapt the mesh.
+      if (err_est_rel_total < ERR_STOP) done = true;
+      else 
+      {
+        info("Adapting the coarse mesh.");
+        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+        if (Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space)) >= NDOF_STOP) 
+          done = true;
+        else
+          // Increase the counter of performed adaptivity steps.
+          as++;
+      }
+
+      // Clean up.
+      delete solver;
+      delete matrix;
+      delete rhs;
+      delete adaptivity;
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i]->get_mesh();
+      delete ref_spaces;
+    }
+    while (done == false);
 
     // Copy new time level reference solution into prev_time.
-    xvel_prev_time.set_coeff_vector(xvel_space, coeff_vec);
-    yvel_prev_time.set_coeff_vector(yvel_space, coeff_vec);
-    p_prev_time.set_coeff_vector(p_space, coeff_vec);
+    xvel_prev_time.copy(&xvel_ref_sln);
+    yvel_prev_time.copy(&yvel_ref_sln);
+    p_prev_time.copy(&p_ref_sln);
   }
 
   ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
