@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
   system(call_cmd);
 
   // Initializing solution vector, solution and ScalarView.
-  double* coeff_vec = new double(ndof);
+  double* coeff_vec = new double[ndof];
   Solution sln;
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
