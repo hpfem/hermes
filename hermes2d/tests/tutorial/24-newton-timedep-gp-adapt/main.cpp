@@ -6,24 +6,7 @@
 
 using namespace RefinementSelectors;
 
-//  This example shows how to combine automatic adaptivity with the Newton's
-//  method for a nonlinear complex-valued time-dependent PDE (the Gross-Pitaevski
-//  equation describing the behavior of Einstein-Bose quantum gases)
-//  discretized implicitly in time (via implicit Euler or Crank-Nicolson).
-//
-//  PDE: non-stationary complex Gross-Pitaevski equation
-//  describing resonances in Bose-Einstein condensates.
-//
-//  ih \partial \psi/\partial t = -h^2/(2m) \Delta \psi +
-//  g \psi |\psi|^2 + 1/2 m \omega^2 (x^2 + y^2) \psi.
-//
-//  Domain: square (-1, 1)^2.
-//
-//  BC:  homogeneous Dirichlet everywhere on the boundary.
-//
-//  Time-stepping: either implicit Euler or Crank-Nicolson.
-//
-//  The following parameters can be changed:
+// This test makes sure that example 24-newton-timedep-gp-adapt works correctly.
 
 const int INIT_REF_NUM = 2;                // Number of initial uniform refinements.
 const int P_INIT = 2;                      // Initial polynomial degree.
@@ -286,7 +269,8 @@ int main(int argc, char* argv[])
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-      double err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
+      bool solutions_for_adapt = true;
+      double err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 

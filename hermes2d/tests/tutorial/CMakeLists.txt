@@ -39,3 +39,5 @@ if(WITH_TRILINOS)
   add_subdirectory(43-trilinos-adapt)
   add_subdirectory(44-trilinos-coupled)
 endif(WITH_TRILINOS)
+
+add_subdirectory(50-eigenvalue)

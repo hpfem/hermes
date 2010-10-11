@@ -216,11 +216,10 @@ int main(int argc, char* argv[])
   Solution ex;
   ex.set_exact(&mesh, &exact);
   Adapt adaptivity(&space, HERMES_H1_NORM);
-  adaptivity.set_approximate_solution(&sln_hermes);
-  double err_est_rel_1 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  bool solutions_for_adapt = false;
+  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 1 (FeProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
-  adaptivity.set_approximate_solution(&sln_nox);
-  double err_est_rel_2 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 2 (FeProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   info("Coordinate ( 0.6,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.6,  0.6));

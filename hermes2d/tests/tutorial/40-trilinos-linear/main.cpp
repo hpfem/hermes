@@ -194,11 +194,10 @@ int main(int argc, char **argv)
   Solution ex;
   ex.set_exact(&mesh, &exact);
   Adapt adaptivity(&space, HERMES_H1_NORM);
-  adaptivity.set_approximate_solution(&sln1);
-  double rel_err_1 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  bool solutions_for_adapt = false;
+  double rel_err_1 = adaptivity.calc_err_exact(&sln1, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  adaptivity.set_approximate_solution(&sln2);
-  double rel_err_2 = adaptivity.calc_err_exact(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &ex) * 100;
+  double rel_err_2 = adaptivity.calc_err_exact(&sln2, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   info("Coordinate (-0.6, -0.6) hermes value = %lf", sln1.get_pt_value(-0.6, -0.6));
