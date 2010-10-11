@@ -21,6 +21,7 @@ set(SRC
        ../common/error.cpp
        ../common/timer.cpp
        ../common/utils.cpp
+       ../common/Teuchos_stacktrace.cpp
        space/space.cpp 
        space/space_h1.cpp 
        space/space_hcurl.cpp 
