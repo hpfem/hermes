@@ -92,17 +92,25 @@ int main(int argc, char* argv[])
 
     info("Time step %d:", ts);
 
-    // Newton's method.
     info("Solving linear system.");
-    Solution phi, psi; 
-    bool is_complex = true;
-    if (!solve_linear(Tuple<Space *>(phi_space, psi_space), &wf, matrix_solver,
-                      Tuple<Solution *>(&phi, &psi), NULL, is_complex))
-      error("Linear solve failed.");
+    // Initialize the FE problem.
+    bool is_linear = true;
+    FeProblem fep(&wf, Tuple<Space *>(phi_space, psi_space), is_linear);
+   
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Update previous time level solution.
-    phi_prev_time.copy(&phi);
-    psi_prev_time.copy(&psi);
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    fep.assemble(matrix, rhs);
+
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(phi_space, psi_space), Tuple<Solution *>(&phi_prev_time, &psi_prev_time));
+    else
+      error ("Matrix solver failed.\n");
   }
 
   AbsFilter mag2(&psi_prev_time);

@@ -38,8 +38,8 @@ double jac_form_vol_euler(int n, double *wt, Func<double> *u_ext[], Func<double>
   }
 
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++)
     result += wt[i] * (
 		         C(h_prev_newton->val[i]) * u->val[i] * v->val[i] / TAU
@@ -94,8 +94,8 @@ double jac_form_vol_cranic(int n, double *wt, Func<double> *u_ext[], Func<double
   }
 
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++)
     result += wt[i] * 0.5 * ( // implicit Euler part:
 		         C(h_prev_newton->val[i]) * u->val[i] * v->val[i] / TAU
@@ -125,7 +125,7 @@ double jac_form_surf_1_euler(int n, double *wt, Func<double> *u_ext[], Func<doub
                        Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * dKdh(h_prev_newton->val[i]) * u->val[i] * v->val[i];
   }
@@ -138,7 +138,7 @@ double jac_form_surf_1_cranic(int n, double *wt, Func<double> *u_ext[], Func<dou
                        Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     // Just the implicit Euler contributes:
     result += wt[i] * 0.5 * dKdh(h_prev_newton->val[i]) * u->val[i] * v->val[i];
@@ -159,7 +159,7 @@ double jac_form_surf_4_euler(int n, double *wt, Func<double> *u_ext[], Func<doub
                        Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     result -= wt[i] * dKdh(h_prev_newton->val[i]) * u->val[i] * v->val[i];
   }
@@ -172,7 +172,7 @@ double jac_form_surf_4_cranic(int n, double *wt, Func<double> *u_ext[], Func<dou
                        Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     // Just the implicit Euler contributes:
     result -= wt[i] * 0.5 * dKdh(h_prev_newton->val[i]) * u->val[i] * v->val[i];
@@ -193,7 +193,7 @@ double jac_form_surf_6_euler(int n, double *wt, Func<double> *u_ext[], Func<doub
                        Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * dKdh(h_prev_newton->val[i]) * u->val[i] * v->val[i];
   }
@@ -206,7 +206,7 @@ double jac_form_surf_6_cranic(int n, double *wt, Func<double> *u_ext[], Func<dou
                        Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   // Just the implicit Euler contributes:
   for (int i = 0; i < n; i++) {
     result += wt[i] * 0.5 * dKdh(h_prev_newton->val[i]) * u->val[i] * v->val[i];
@@ -227,8 +227,8 @@ double res_form_vol_euler(int n, double *wt, Func<double> *u_ext[], Func<double>
                     Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * (
 		       C(h_prev_newton->val[i]) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / TAU
@@ -244,8 +244,8 @@ double res_form_vol_cranic(int n, double *wt, Func<double> *u_ext[], Func<double
                     Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * 0.5 * ( // implicit Euler part
 		       C(h_prev_newton->val[i]) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / TAU
@@ -273,7 +273,7 @@ double res_form_surf_1_euler(int n, double *wt, Func<double> *u_ext[], Func<doub
                        Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * K(h_prev_newton->val[i]) * v->val[i];
   }
@@ -285,8 +285,8 @@ double res_form_surf_1_cranic(int n, double *wt, Func<double> *u_ext[], Func<dou
                        Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * 0.5 * (K(h_prev_newton->val[i]) + K(h_prev_time->val[i])) * v->val[i];
   }
@@ -305,7 +305,7 @@ double res_form_surf_4_euler(int n, double *wt, Func<double> *u_ext[], Func<doub
                        Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     result -= wt[i] * K(h_prev_newton->val[i]) * v->val[i];
   }
@@ -317,8 +317,8 @@ double res_form_surf_4_cranic(int n, double *wt, Func<double> *u_ext[], Func<dou
                        Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result -= wt[i] * 0.5 * (K(h_prev_newton->val[i]) + K(h_prev_time->val[i]))* v->val[i];
   }
@@ -337,7 +337,7 @@ double res_form_surf_6_euler(int n, double *wt, Func<double> *u_ext[], Func<doub
                        Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
+  Func<double>* h_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * (q_function() + K(h_prev_newton->val[i])) * v->val[i];
   }
@@ -349,8 +349,8 @@ double res_form_surf_6_cranic(int n, double *wt, Func<double> *u_ext[], Func<dou
                        Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  Func<double>* h_prev_newton = ext->fn[0];
-  Func<double>* h_prev_time = ext->fn[1];
+  Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * (q_function() + 0.5 * (K(h_prev_newton->val[i]) + K(h_prev_time->val[i]))) * v->val[i];
   }
