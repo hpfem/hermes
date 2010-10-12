@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   OrderView  oview("Polynomial orders", new WinGeom(460, 0, 410, 350));
 
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -163,17 +163,17 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, ", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    info("ndof_coarse: %d, ndof_fine: %d.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
-    graph_dof.save("conv_dof_est.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu.save("conv_cpu_est.dat");
+    graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu_est.save("conv_cpu_est.dat");
     graph_dof_exact.add_values(Space::get_num_dofs(&space), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
@@ -199,7 +199,6 @@ int main(int argc, char* argv[])
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
     delete fep;
-
   }
   while (done == false);
 
