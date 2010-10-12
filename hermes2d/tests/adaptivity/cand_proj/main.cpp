@@ -320,10 +320,15 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
     for(int k = 0; k <= end_order_h; k++)
       fail_matrix[i][k] = H2D_TEST_NOT_DONE;
 
-  // Initialize matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, Space::get_num_dofs(space), mat, rhs, solver);
+  // Initialize the FE problem.
+/*  bool is_linear = true;
+  FeProblem fep(&weakform, &ref_space, is_linear);
 
+  // Initialize matrix solver.
+  SparseMatrix* mat = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+*/
   // Process cases.
   do {
     int test_result = H2D_TEST_SUCCESS;
@@ -335,6 +340,10 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 
     // Process.
     space->set_element_order(H2D_TEST_ELEM_ID, test_case.start_quad_order());
+  
+    // Assemble the stiffness matrix and right-hand side vector.
+  //  info("Assembling the stiffness matrix and right-hand side vector.");
+  //  fep.assemble(mat, rhs);
 
     // Create and solve the reference system.
     Solution rsln;
@@ -349,7 +358,28 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
     ref_space->copy_orders(space, order_increase);
 
     // Solve the reference problem.
-    solve_linear(ref_space, weakform, matrix_solver, &rsln);
+//    solve_linear(ref_space, weakform, matrix_solver, &rsln);
+
+    // Initialize the FE problem.
+    bool is_linear = true;
+    FeProblem fep(weakform, ref_space, is_linear);
+
+    // Initialize matrix solver.
+    SparseMatrix* mat = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    fep.assemble(mat, rhs);
+
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solution(solver->get_solution(), ref_space, &rsln);
+    else
+      error ("Matrix solver failed.\n");
+
+
 
     // Check projected functions.
     if (test_ref_solution(rsln))

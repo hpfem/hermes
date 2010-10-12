@@ -2,10 +2,12 @@
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
 
-int P_INIT = 10;
-double EPS = 10e-14;
 // This test makes sure the Lobatto shape 
 // functions are linearly independent.
+int P_INIT = 10;
+double EPS = 10e-14;
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 int main(int argc, char* argv[])
 {
@@ -57,9 +59,8 @@ int main(int argc, char* argv[])
   }
   
   info("Assembling matrix ...");
-  CooMatrix mat(n);
-  Vector* rhs = new AVector(n);
-  CommonSolverSciPyUmfpack solver;
+  SparseMatrix* mat = new UMFPackMatrix();
+  Vector* rhs = new UMFPackVector();
 
   info("ndof = %d", n);
   for (int i = 0; i < n; i++)
@@ -69,7 +70,7 @@ int main(int argc, char* argv[])
       double x1 = -1 + (2.0/order)*j;
       double y1 = -1;
       double value = space.get_shapeset()->get_fn_value(fn_idx[i], x1, y1, 0);
-      mat.add(i, j, value);
+      mat->add(i, j, value);
       printf("get fn[%d] value = %f  ", i, value); 
       printf("x1 = %f, y1 = %f\n", x1, y1);
     }
@@ -78,7 +79,7 @@ int main(int argc, char* argv[])
       double y2 = -1 + (2.0/order)*j;;
       double x2 = 1;
       double value = space.get_shapeset()->get_fn_value(fn_idx[i], x2, y2, 0);
-      mat.add(i, j+order, value);
+      mat->add(i, j+order, value);
       printf("get fn[%d] value = %f  ", i, value); 
       printf("x2 = %f, y2 = %f\n", x2, y2);
     }
@@ -87,7 +88,7 @@ int main(int argc, char* argv[])
       double x3 = 1 + (-1.0)*(2.0/order)*j;
       double y3 = 1;
       double value = space.get_shapeset()->get_fn_value(fn_idx[i], x3, y3, 0);
-      mat.add(i, j+2*order, value);
+      mat->add(i, j+2*order, value);
       printf("get fn[%d] value = %f  ", i, value); 
       printf("x3 = %f, y3 = %f\n", x3, y3);
     }
@@ -96,7 +97,7 @@ int main(int argc, char* argv[])
       double x4 = -1;
       double y4 = 1 + (-1.0)*(2.0/order)*j;
       double value = space.get_shapeset()->get_fn_value(fn_idx[i], x4, y4, 0);
-      mat.add(i, j+3*order, value);
+      mat->add(i, j+3*order, value);
       printf("get fn[%d] value = %f  ", i, value); 
       printf("x4 = %f, y4 = %f\n", x4, y4);
     }
@@ -108,7 +109,7 @@ int main(int argc, char* argv[])
       double x = 0.0 + (1.0/number_bubble)*bubble;
       double y = 0.0 + (1.0/number_bubble)*bubble;
       double value = space.get_shapeset()->get_fn_value(fn_idx[i], x, y, 0);
-      mat.add(i, i, value);
+      mat->add(i, i, value);
       printf("get fn[%d] value = %f  ", i, value); 
       printf("x = %f, y = %f\n", x, y);
       bubble++;
@@ -122,8 +123,15 @@ int main(int argc, char* argv[])
     rhs->add(i, 0.0);
   }
 
+  // Initialize the solution.
+  Solution sln;
+   
   info("Solution ...");
-  solver.solve(&mat, rhs);
+  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+  if(solver->solve())
+    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  else
+    error ("Matrix solver failed.\n");
 
   for (int i = 0; i < n; i++)
   {
@@ -136,6 +144,9 @@ int main(int argc, char* argv[])
   }
   printf("Success!\n");
  
+  // Clean up.
+  delete solver;
+  delete mat;
   delete rhs;
   delete [] fn_idx;
   return ERROR_SUCCESS;
