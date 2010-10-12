@@ -7,7 +7,6 @@
 
 using namespace RefinementSelectors;
 
-// TODO : header
 // This test makes sure that the example "neutronics-4-group-adapt" works correctly.
 
 
@@ -17,42 +16,43 @@ using namespace RefinementSelectors;
 const int N_GROUPS = 4;
 #define for_each_group(g) for (int g = 0; g < N_GROUPS; g++)
 
-const bool SOLVE_ON_COARSE_MESH = false;  // If true, coarse mesh FE problem is solved in every adaptivity step.
-                                          // If false, projection of the fine mesh solution on the coarse mesh is used.
-const int INIT_REF_NUM[N_GROUPS] = {      // Initial uniform mesh refinement for the individual solution components.
+const bool SOLVE_ON_COARSE_MESH = false; // If true, coarse mesh FE problem is solved in every adaptivity step.
+                                         // If false, projection of the fine mesh solution on the coarse mesh is used.
+const int INIT_REF_NUM[N_GROUPS] = {     // Initial uniform mesh refinement for the individual solution components.
   1, 1, 1, 1                             
 };
-const int P_INIT[N_GROUPS] = {            // Initial polynomial orders for the individual solution components. 
+const int P_INIT[N_GROUPS] = {           // Initial polynomial orders for the individual solution components. 
   1, 1, 1, 1                              
 };      
-const double THRESHOLD = 0.3;             // This is a quantitative parameter of the adapt(...) function and
-                                          // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 1;                   // Adaptive strategy:
-                                          // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                          //   error is processed. If more elements have similar errors, refine
-                                          //   all to keep the mesh symmetric.
-                                          // STRATEGY = 1 ... refine all elements whose error is larger
-                                          //   than THRESHOLD times maximum element error.
-                                          // STRATEGY = 2 ... refine all elements whose error is larger
-                                          //   than THRESHOLD..
-const CandList CAND_LIST = H2D_HP_ANISO;  // Predefined list of element refinement candidates. Possible values are
-                                          // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                          // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                          // See User Documentation for details.
-const int MESH_REGULARITY = -1;           // Maximum allowed level of hanging nodes:
-                                          // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                          // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                          // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                          // Note that regular meshes are not supported, this is due to
-                                          // their notoriously bad performance.
-const double CONV_EXP = 1.0;              // Default value is 1.0. This parameter influences the selection of
-                                          // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;              // Stopping criterion for adaptivity (rel. error tolerance between the
-                                          // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;              // Adaptivity process stops when the number of degrees of freedom grows over
-                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
-const int MAX_ADAPT_NUM = 30;             // Adaptivity process stops when the number of adaptation steps grows over
-                                          // this limit.
+const double THRESHOLD = 0.3;            // This is a quantitative parameter of the adapt(...) function and
+                                         // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 1;                  // Adaptive strategy:
+                                         // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                         //   error is processed. If more elements have similar errors, refine
+                                         //   all to keep the mesh symmetric.
+                                         // STRATEGY = 1 ... refine all elements whose error is larger
+                                         //   than THRESHOLD times maximum element error.
+                                         // STRATEGY = 2 ... refine all elements whose error is larger
+                                         //   than THRESHOLD.
+                                         // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_HP_ANISO; // Predefined list of element refinement candidates. Possible values are
+                                         // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                         // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                         // See User Documentation for details.
+const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nodes:
+                                         // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                         // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                         // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                         // Note that regular meshes are not supported, this is due to
+                                         // their notoriously bad performance.
+const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
+                                         // candidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (rel. error tolerance between the
+                                         // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows over
+                                         // this limit. This is mainly to prevent h-adaptivity to go on forever.
+const int MAX_ADAPT_NUM = 30;            // Adaptivity process stops when the number of adaptation steps grows over
+                                         // this limit.
 
 // Macros for simpler definition of tuples used in projections.
 #define callback_pairs(a)      std::make_pair(callback(a)), std::make_pair(callback(a)), std::make_pair(callback(a)), std::make_pair(callback(a))
@@ -90,8 +90,6 @@ double TOL_PIT_RM = 1e-6;   // Tolerance for eigenvalue convergence when solving
 // Norms in the axisymmetric coordinate system.
 #include "norms.cpp"
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /// Fission source function.
 inline void source_fn(int n, Tuple<scalar*> values, scalar* out)
 {
@@ -102,16 +100,16 @@ inline void source_fn(int n, Tuple<scalar*> values, scalar* out)
   }
 }
 
-/// Integral over the active core.
+// Integral over the active core.
 double integrate(MeshFunction* sln, int marker)
 {
   Quad2D* quad = &g_quad_2d_std;
   sln->set_quad_2d(quad);
-  
+
   double integral = 0.0;
   Element* e;
   Mesh* mesh = sln->get_mesh();
-  
+
   for_all_active_elements(e, mesh)
   {
     if (e->marker == marker)
@@ -129,25 +127,54 @@ double integrate(MeshFunction* sln, int marker)
       integral += result;
     }
   }
-  
+
   return 2.0 * M_PI * integral;
 }
 
-/** \brief Power iteration. 
- *
- * Starts from an initial guess stored in the argument 'solutions' and updates it by the final result after the iteration
- * has converged, also updating the global eigenvalue 'k_eff'.
- *
- * \param[in]  spaces        Pointers to spaces on which the solutions are defined (one space for each energy group).
- * \param[in]  wf            Pointer to the weak form of the problem.
- * \param[in,out] slptr_solution   A set of Solution* pointers to solution components (neutron fluxes in each group). 
- *                                 Initial guess for the iteration on input, converged result on output.
- * \param[in,out] mfptr_solution   The same as above, only the type of the pointers is MeshFunction*.
- *                                 This is needed for the fission source filter, which accepts this type instead of Solution*.
- * \param[in]  tol           Relative difference between two successive eigenvalue approximations that stops the iteration.
- * \param[in]  matrix_solver Solver for the resulting matrix problem (one of the available types enumerated in common.h).
- * \return  number of iterations needed for convergence within the specified tolerance.
-**/
+/// Calculate number of negative solution values.
+int get_num_of_neg(MeshFunction *sln)
+{
+	Quad2D* quad = &g_quad_2d_std;
+  sln->set_quad_2d(quad);
+  Element* e;
+  Mesh* mesh = sln->get_mesh();
+
+  int n = 0;
+
+  for_all_active_elements(e, mesh)
+  {
+    update_limit_table(e->get_mode());
+    sln->set_active_element(e);
+    RefMap* ru = sln->get_refmap();
+    int o = sln->get_fn_order() + ru->get_inv_ref_order();
+    limit_order(o);
+    sln->set_quad_order(o, H2D_FN_VAL);
+    scalar *uval = sln->get_fn_values();
+    int np = quad->get_num_points(o);
+
+		for (int i = 0; i < np; i++)
+			if (uval[i] < -1e-12)
+				n++;
+  }
+
+  return n;
+} 
+
+/// \brief Power iteration. 
+///
+/// Starts from an initial guess stored in the argument 'solutions' and updates it by the final result after the iteration
+/// has converged, also updating the global eigenvalue 'k_eff'.
+///
+/// \param[in]  spaces        Pointers to spaces on which the solutions are defined (one space for each energy group).
+/// \param[in]  wf            Pointer to the weak form of the problem.
+/// \param[in,out] slptr_solution   A set of Solution* pointers to solution components (neutron fluxes in each group). 
+///                                 Initial guess for the iteration on input, converged result on output.
+/// \param[in,out] mfptr_solution   The same as above, only the type of the pointers is MeshFunction*.
+///                                 This is needed for the fission source filter, which accepts this type instead of Solution*.
+/// \param[in]  tol           Relative difference between two successive eigenvalue approximations that stops the iteration.
+/// \param[in]  matrix_solver Solver for the resulting matrix problem (one of the available types enumerated in common.h).
+/// \return  number of iterations needed for convergence within the specified tolerance.
+///
 int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
                     Tuple<Solution *>& slptr_solution, Tuple<MeshFunction *>& mfptr_solution,
                     double tol, MatrixSolverType matrix_solver = SOLVER_UMFPACK)
@@ -161,12 +188,19 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     error("Number of Solutions and corresponding MeshFunctions supplied to power_iteration does not match."); 
   
   // Initialize the linear problem.
-  LinearProblem lp(wf, spaces);
+  bool is_linear = true;
+  FeProblem lp(wf, spaces, is_linear);
   int ndof = Space::get_num_dofs(spaces);
   
   // Select matrix solver.
-  Matrix* mat; Vector* rhs; CommonSolver* solver;
-  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+//  Matrix* mat; Vector* rhs; CommonSolver* solver;
+//  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+
+//  initialize_solution_environment(matrix_solver, argc, argv);
+
+  SparseMatrix* mat = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
   
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
@@ -182,28 +216,29 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   do {
     // Assemble the system matrix and rhs for the first time, then just update the rhs using the updated eigenpair.
     lp.assemble(mat, rhs, it == 0 ? false : true);
-    
+        
     // Solve the matrix problem to get a new approximation of the eigenvector.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
+    if (!solver->solve()) error ("Matrix solver failed.\n");
     
     // Convert coefficients vector into a set of Solution pointers.
-    for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
-    
+    // for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
+    Solution::vector_to_solutions(rhs, spaces, slptr_new_solution);
+ 
     // Update fission sources.
     SimpleFilter new_source(source_fn, mfptr_new_solution);
     SimpleFilter old_source(source_fn, mfptr_solution);
-    
+
     // Compute the eigenvalue for current iteration.
     double k_new = k_eff * (integrate(&new_source, marker_core) / integrate(&old_source, marker_core));
-    
+
     info("      dominant eigenvalue (est): %g, rel error: %g", k_new, fabs((k_eff - k_new) / k_new));
-    
+
     // Stopping criterion.
     if (fabs((k_eff - k_new) / k_new) < tol) eigen_done = true;
-    
+
     // Update the final eigenvalue.
     k_eff = k_new;
-    
+
     it++;
     
     // Store the new eigenvector approximation in the result.
@@ -213,15 +248,13 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   
   // Free memory.
   for_each_group(g) delete slptr_new_solution[g];
-  mat->free_data();
-  rhs->free_data();
+  delete mat;
+  delete rhs;
   //solver->free_data();  // FIXME: to be implemented. Default destructor is used now.
   delete solver;
-  
+
   return it;
 }
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** General testing class. It can test
@@ -316,13 +349,16 @@ Extremum get_peak(MeshFunction *sln)
   return Extremum(peak, pos_x, pos_y);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Macros for simpler reporting (four group case).
+#define report_num_dofs(spaces) spaces[0]->Space::get_num_dofs(), spaces[1]->Space::get_num_dofs(),\
+                                spaces[2]->Space::get_num_dofs(), spaces[3]->Space::get_num_dofs(), Space::get_num_dofs(spaces)
+#define report_errors(errors) errors[0],errors[1],errors[2],errors[3]
 
 int main(int argc, char* argv[])
 {
   // Time measurement.
   TimePeriod cpu_time;
-  cpu_time.tick();  
+  cpu_time.tick();
 
   // Use multimesh, i.e. create one mesh for each energy group.
   
@@ -332,7 +368,7 @@ int main(int argc, char* argv[])
   // Load the mesh for the 1st group.
   H2DReader mloader;
   mloader.load("reactor.mesh", meshes[0]);
-
+ 
   for (int g = 1; g < N_GROUPS; g++) {
     // Obtain meshes for the 2nd to 4th group by cloning the mesh loaded for the 1st group.
     meshes[g]->copy(meshes[0]);
@@ -379,8 +415,9 @@ int main(int argc, char* argv[])
   wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_vacuum);
   wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
   wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), bc_vacuum);
-  
+
   // Initialize and solve coarse mesh problem.
+  info("Coarse mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(spaces));
   power_iteration(spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_CM);
   // If SOLVE_ON_COARSE_MESH == true, we will store the results as the first coarse mesh solution;
   // otherwise, we will obtain this solution later by projecting the reference solution on the coarse mesh.
@@ -388,16 +425,42 @@ int main(int argc, char* argv[])
     for_each_group(g) 
       slptr_coarse_slns[g]->copy(slptr_pow_iter_slns[g]);
 
+  // DOF and CPU convergence graphs
+  GnuplotGraph graph_dof("Error convergence", "NDOF", "log(error [%])");
+  graph_dof.add_row("H1 error est.", "r", "-", "o");
+  graph_dof.add_row("L2 error est.", "g", "-", "s");
+  graph_dof.add_row("Keff error est.", "b", "-", "d");
+  graph_dof.set_log_y();
+  graph_dof.show_legend();
+  graph_dof.show_grid();
+
+  GnuplotGraph graph_dof_evol("Evolution of NDOF", "Adaptation step", "NDOF");
+  graph_dof_evol.add_row("group 1", "r", "-", "o");
+  graph_dof_evol.add_row("group 2", "g", "-", "x");
+  graph_dof_evol.add_row("group 3", "b", "-", "+");
+  graph_dof_evol.add_row("group 4", "m", "-", "*");
+  graph_dof_evol.set_log_y();
+  graph_dof_evol.set_legend_pos("bottom right");
+  graph_dof_evol.show_grid();
+
+  GnuplotGraph graph_cpu("Error convergence", "CPU time [s]", "log(error [%])");
+  graph_cpu.add_row("H1 error est.", "r", "-", "o");
+  graph_cpu.add_row("L2 error est.", "g", "-", "s");
+  graph_cpu.add_row("Keff error est.", "b", "-", "d");
+  graph_cpu.set_log_y();
+  graph_cpu.show_legend();
+  graph_cpu.show_grid();
+
   // Initialize the refinement selectors.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
   Tuple<RefinementSelectors::Selector*> selectors;
   for_each_group(g) selectors.push_back(&selector);
-  
+
   // Adaptivity loop:
   int as = 1; bool done = false;
-  double h1_err_est;
+  double energy_err_est = 0.0;
   do {
-    
+
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined meshes and setup reference spaces on them.
@@ -417,41 +480,50 @@ int main(int argc, char* argv[])
 
     // For the first time, project coarse mesh solutions on fine meshes to obtain 
     // a starting point for the fine mesh power iteration.
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
     if (as == 1) {
       info("Projecting initial coarse mesh solutions on fine meshes.");
       OGProjection::project_global(spaces, 
-                      matrix_forms_tuple_t(callback_pairs(projection_biform)), 
-                      vector_forms_tuple_t(callback_pairs(projection_liform)),
-                      mfptr_pow_iter_slns, slptr_pow_iter_slns);
+                     Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
+                     Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
+                     mfptr_pow_iter_slns, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, spaces, slptr_pow_iter_slns);
     }
-    
+    delete coeff_vec;
+
     // Solve the fine mesh problem.
+    info("Fine mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(ref_spaces));
     power_iteration(ref_spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_RM);
     
     // Store the results.
     for_each_group(g) slptr_fine_slns[g]->copy(slptr_pow_iter_slns[g]);
-    
+
     // Either solve on coarse mesh or project the fine mesh solution on the coarse mesh.
     if (SOLVE_ON_COARSE_MESH) {
       if (as > 1) {
+        info("Coarse mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(spaces));
         power_iteration(spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_CM);
         // Store the results.
         for_each_group(g) slptr_coarse_slns[g]->copy(slptr_pow_iter_slns[g]);
       }
     }
     else {
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
       info("Projecting fine mesh solutions on coarse meshes.");
-      OGProjection::project_global(spaces, 
-                      matrix_forms_tuple_t(callback_pairs(projection_biform)), 
-                      vector_forms_tuple_t(callback_pairs(projection_liform)),
-                      mfptr_pow_iter_slns, slptr_coarse_slns);
+      OGProjection::project_global(spaces,Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
+                     Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
+                     mfptr_pow_iter_slns, coeff_vec);
+      Solution::vector_to_solutions(coeff_vec, spaces, slptr_coarse_slns);
+      delete coeff_vec;
     }
-    
+
     // Time measurement.
     cpu_time.tick();
-    
-    // Skip visualization time.
-    cpu_time.tick(HERMES_SKIP);
+
+    // Report the number of negative eigenfunction values.
+    info("Num. of negative values: %d, %d, %d, %d",
+         get_num_of_neg(slptr_coarse_slns[0]), get_num_of_neg(slptr_coarse_slns[1]),
+         get_num_of_neg(slptr_coarse_slns[2]), get_num_of_neg(slptr_coarse_slns[3]));
 
     // Calculate element errors and total error estimate.
     Adapt hp(spaces);
@@ -462,19 +534,18 @@ int main(int argc, char* argv[])
     hp.set_error_form(2, 1, callback(biform_2_1));
     hp.set_error_form(3, 3, callback(biform_3_3));
     hp.set_error_form(3, 2, callback(biform_3_2));
-    
+
     // Calculate element errors and error estimate for adaptivity.
     info("Calculating error.");
-    hp.set_solutions(slptr_coarse_slns, slptr_fine_slns);
-    
-    double energy_err_est = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-    h1_err_est = error_total(error_fn_h1_axisym, norm_fn_h1_axisym, slptr_coarse_slns, slptr_fine_slns);
+    bool solutions_for_adapt = true;
+    energy_err_est = hp.calc_err_est(slptr_coarse_slns, slptr_fine_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double h1_err_est = error_total(error_fn_h1_axisym, norm_fn_h1_axisym, slptr_coarse_slns, slptr_fine_slns);
     double l2_err_est = error_total(error_fn_l2_axisym, norm_fn_l2_axisym, slptr_coarse_slns, slptr_fine_slns);
-    
+
     // Time measurement.
     cpu_time.tick();
     double cta = cpu_time.accumulated();
-    
+
     // Calculate H1 and L2 error estimates.
     std::vector<double> h1_errors, l2_errors;
     for_each_group(g) 
@@ -483,11 +554,35 @@ int main(int argc, char* argv[])
       h1_errors.push_back( 100*h1_error_axisym(slptr_coarse_slns[g], slptr_fine_slns[g]) );
     }
     
+    // Report results.
+    info("ndof_coarse: %d + %d + %d + %d = %d", report_num_dofs(spaces));
+
     // Millipercent eigenvalue error w.r.t. the reference value (see physical_parameters.cpp). 
-    double keff_err = 1e5*fabs(k_eff - REF_K_EFF)/REF_K_EFF;
-    
+  	double keff_err = 1e5*fabs(k_eff - REF_K_EFF)/REF_K_EFF;
+
+  	info("per-group err_est_coarse (H1): %g%%, %g%%, %g%%, %g%%", report_errors(h1_errors));
+  	info("per-group err_est_coarse (L2): %g%%, %g%%, %g%%, %g%%", report_errors(l2_errors));
+  	info("total err_est_coarse (energy): %g%%", energy_err_est);
+  	info("total err_est_coarse (H1): %g%%", h1_err_est);
+  	info("total err_est_coarse (L2): %g%%", l2_err_est);
+  	info("k_eff err: %g milli-percent", keff_err);
+
+    // Add entry to DOF convergence graph.
+    int ndof_coarse = Space::get_num_dofs(spaces);
+    graph_dof.add_values(0, ndof_coarse, h1_err_est);
+    graph_dof.add_values(1, ndof_coarse, l2_err_est);
+    graph_dof.add_values(2, ndof_coarse, keff_err);
+
+    // Add entry to CPU convergence graph.
+    graph_cpu.add_values(0, cta, h1_err_est);
+    graph_cpu.add_values(1, cta, l2_err_est);
+    graph_cpu.add_values(2, cta, keff_err);
+
+    for_each_group(g)
+      graph_dof_evol.add_values(g, as, spaces[g]->Space::get_num_dofs());
+
     cpu_time.tick(HERMES_SKIP);
-    
+
     // If err_est too large, adapt the mesh.
     if (energy_err_est < ERR_STOP) break;
     else {
@@ -495,29 +590,23 @@ int main(int argc, char* argv[])
       done = hp.adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);
       if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true;
     }
-    
+
     // Free reference meshes and spaces.
     for_each_group(g) 
     {
       delete ref_spaces[g];
       delete ref_meshes[g];
     }
-    
+
     as++;
     if (as >= MAX_ADAPT_NUM) done = true;
   }
   while(done == false);
   verbose("Total running time: %g s", cpu_time.accumulated());
   
-  // Display the results.
-  
-  info("Number of iterations: %d", as);
-  info("Core eigenvalue: %lf.", k_eff);
-  info("H1 error estimate: %lf.", h1_err_est);
-  
   int ndofs[N_GROUPS];
   for_each_group(g) {
-    ndofs[g] = spaces[g]->Space::get_num_dofs();
+    ndofs[g] = spaces[g]->get_num_dofs();
     info("Number of DOFs for group %d: %d.", g+1, ndofs[g]);
   }
     
@@ -545,13 +634,13 @@ int main(int argc, char* argv[])
   eigenvalue.test_equality(k_eff, 1.140910);
   
   TestSubject<double> error_estimate(1e-5);
-  error_estimate.test_overshoot(h1_err_est, 0.002081);
+  error_estimate.test_overshoot(energy_err_est, 0.002081);
 
   TestSubject<int> ndof(100);
   const int expected_ndofs[N_GROUPS] = {
     1204, 884, 792, 1104
   };
-  for_each_group(g) ndof.test_overshoot(spaces[g]->Space::get_num_dofs(), expected_ndofs[g]);
+  for_each_group(g) ndof.test_overshoot(spaces[g]->get_num_dofs(), expected_ndofs[g]);
 
   TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
   const Extremum expected_maxima[N_GROUPS] = {

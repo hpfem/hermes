@@ -43,10 +43,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -57,18 +53,18 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
   // Define constant initial condition. 
   Solution t_prev_time;
-  t_prev_time.set_const(&mesh, 20.0);
+  t_prev_time.set_const(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);
   wf.add_matrix_form(callback(jacobian));
   wf.add_matrix_form_surf(callback(jacobian_surf));
-  wf.add_vector_form(callback(residual), H2D_ANY, &t_prev_time);
+  wf.add_vector_form(callback(residual), HERMES_ANY, &t_prev_time);
   wf.add_vector_form_surf(callback(residual_surf));
 
   // Initialize the finite element problem.
@@ -77,11 +73,8 @@ int main(int argc, char* argv[])
   // Project the function "titer" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solution on the FE mesh.");
-  Vector* coeff_vec = new AVector(ndof);
-  project_global(&space, H2D_H1_NORM, &t_prev_time, &t_prev_time, coeff_vec);
-
-  // Measure the projection time.
-  double proj_time = cpu_time.tick().last();
+  scalar* coeff_vec = new scalar[ndof];
+  OGProjection::project_global(&space, &t_prev_time, coeff_vec);
 
   // Initialize NOX solver.
   NoxSolver solver(&fep);
@@ -96,19 +89,14 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double total_time = 0.0;
-  cpu_time.tick_reset();
   for (int ts = 1; total_time <= 2000.0; ts++)
   {
     info("---- Time step %d, t = %g s", ts, total_time += TAU);
 
     info("Assembling by FeProblem, solving by NOX.");
-    solver.set_init_sln(coeff_vec->get_c_array());
-    bool solved = solver.solve();
-    if (solved)
-    {
-      double *coeffs = solver.get_solution_vector();
-      t_prev_time.set_coeff_vector(&space, coeffs, ndof);
-    }
+    solver.set_init_sln(coeff_vec);
+    if (solver.solve())
+      Solution::vector_to_solution(solver.get_solution(), &space, &t_prev_time);
     else
       error("NOX failed.");
 
@@ -117,8 +105,6 @@ int main(int argc, char* argv[])
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
       solver.get_num_lin_iters(), solver.get_achieved_tol());
   }
-
-  info("Total running time: %g", cpu_time.accumulated());
 
   info("Coordinate ( 0.6,  0.6) t_prev_time value = %lf", t_prev_time.get_pt_value( 0.6,  0.6));
   info("Coordinate ( 0.4,  0.6) t_prev_time value = %lf", t_prev_time.get_pt_value( 0.4,  0.6));

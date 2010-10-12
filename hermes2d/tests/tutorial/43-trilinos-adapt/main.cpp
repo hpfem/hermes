@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);
-  if (PRECOND) wf.add_matrix_form(callback(precond_form), H2D_SYM);
+  if (PRECOND) wf.add_matrix_form(callback(precond_form), HERMES_SYM);
   wf.add_vector_form(callback(residual_form));
 
   // DOF convergence graphs.
@@ -151,14 +151,12 @@ int main(int argc, char* argv[])
       else solver.set_precond("ML");
     }
 
-    // Solve the matrix problem.
-    int ndof = get_num_dofs(&space);
+    // Assemble on coarse mesh and solve the matrix problem using NOX.
+    int ndof = Space::get_num_dofs(&space);
     info("Coarse mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
-    bool solved = solver.solve();
-    if (solved)
+    if (solver.solve())
     {
-      double* coeffs = solver.get_solution_vector();
-      sln.set_coeff_vector(&space, coeffs, ndof);
+      Solution::vector_to_solution(solver.get_solution(), &space, &sln);
 
       info("Coarse Solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)", 
@@ -166,14 +164,17 @@ int main(int argc, char* argv[])
       info(" Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
         solver.get_num_lin_iters(), solver.get_achieved_tol());
     }
+    else
+      error("NOX failed on coarse mesh.");
 
     // Create uniformly refined reference mesh.
     Mesh rmesh; rmesh.copy(&mesh); 
     rmesh.refine_all_elements();
     // Reference FE space.
-    H1Space rspace(&rmesh, bc_types, essential_bc_values, 1);
+    H1Space rspace(&rmesh, bc_types, essential_bc_values, P_INIT);
     int order_increase = 1;
     rspace.copy_orders(&space, order_increase); // increase orders by one
+
     // Initialize FE problem on reference mesh.
     FeProblem ref_fep(&wf, &rspace);
 
@@ -185,14 +186,12 @@ int main(int argc, char* argv[])
       else ref_solver.set_precond("ML");
     }
 
-    // Solve the matrix problem using NOX.
-    ndof = get_num_dofs(&rspace);
+    // Assemble on fine mesh and solve the matrix problem using NOX.
+    ndof = Space::get_num_dofs(&rspace);
     info("Fine mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
-    solved = ref_solver.solve();
-    if (solved)
+    if (ref_solver.solve())
     {
-      double* coeffs = ref_solver.get_solution_vector();
-      ref_sln.set_coeff_vector(&rspace, coeffs, ndof);
+      Solution::vector_to_solution(ref_solver.get_solution(), &rspace, &ref_sln);
 
       info("Reference solution info:");
       info(" Number of nonlin iterations: %d (norm of residual: %g)",
@@ -201,21 +200,22 @@ int main(int argc, char* argv[])
             ref_solver.get_num_lin_iters(), ref_solver.get_achieved_tol());
     }
     else
-      error("NOX failed.");
+      error("NOX failed on fine mesh.");
 
     // Calculate element errors.
     info("Calculating error (est).");
-    Adapt hp(&space, H2D_H1_NORM);
-    hp.set_solutions(&sln, &ref_sln);
-    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    Adapt hp(&space, HERMES_H1_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = hp.calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
  
     // Calculate exact error.
     Solution* exact = new Solution(&mesh, fndd);
-    double err_exact_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    solutions_for_adapt = false;
+    double err_exact_rel = hp.calc_err_exact(&sln, exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%, err_exact: %g%%", 
-	 get_num_dofs(&space), get_num_dofs(&rspace), err_est_rel, err_exact_rel);
+      Space::get_num_dofs(&space), Space::get_num_dofs(&rspace), err_est_rel, err_exact_rel);
 
     // Add entries to DOF convergence graphs.
     graph_dof_exact.add_values(space.get_num_dofs(), err_exact_rel);
@@ -229,14 +229,14 @@ int main(int argc, char* argv[])
       info("Adapting the coarse mesh.");
       done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+      if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
     }
 
     as++;
   }
   while (done == false);
 
-  int ndof = get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
   printf("ndof allowed = %d\n", 1200);
