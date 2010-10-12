@@ -1,7 +1,7 @@
 if(NOT H2D_COMPLEX)
     return()
 endif(NOT H2D_COMPLEX)
-project(24-newton-timedep-gp-adapt)
+project(tutorial-24-newton-timedep-gp-adapt)
 
 # use the complex version of the library:
 set(HERMES ${HERMES_CPLX_BIN})
