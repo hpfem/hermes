@@ -726,7 +726,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   error_time = tmr.get_seconds();
 
   // Make the error relative if needed.
-  if(solutions_for_adapt)
+  if(solutions_for_adapt) {
     if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) {
       for (int i = 0; i < this->num; i++) {
         Element* e;
@@ -734,7 +734,9 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
           errors[i][e->id] /= norms[i];
       }
     }
-
+    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) 
+      errors_squared_sum = errors_squared_sum / total_norm;
+  }
 
   // Prepare an ordered list of elements according to an error.
   if(solutions_for_adapt) {
@@ -752,7 +754,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
     return sqrt(errors_squared_sum);
   else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-    return sqrt(errors_squared_sum / total_norm);
+    return sqrt(errors_squared_sum);
   else {
     error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
     return -1.0;
