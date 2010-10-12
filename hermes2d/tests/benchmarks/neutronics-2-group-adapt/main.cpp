@@ -346,8 +346,8 @@ int main(int argc, char* argv[])
     OGProjection::project_global(spaces, ref_slns, slns);                
     
     // Calculate element errors and total error estimate.
-    info("Calculating error.");
-    Adapt adaptivity(spaces, norms);
+    info("Calculating error estimate and exact error.");
+    Adapt adaptivity(Tuple<Space*>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
     if (ADAPTIVITY_NORM == 2) {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(0, 1, callback(biform_0_1));
@@ -357,9 +357,12 @@ int main(int argc, char* argv[])
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
-    adaptivity.set_solutions(slns, ref_slns);
-    double err_est = adaptivity.calc_err_est(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-    double err_est_h1 = error_total(error_fn_h1, norm_fn_h1, slns, ref_slns) * 100;
+    bool solutions_for_adapt = true;
+    double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    
+    Adapt adaptivity_proj(Tuple<Space*>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+
+    double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns) * 100;
 
     // Report results.
     cpu_time.tick(); 
@@ -378,7 +381,7 @@ int main(int argc, char* argv[])
     info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1_1, err_exact_h1_2);
     info("Total error wrt. exact solution (H1 norm): %g%%", error_h1);
     info("Total error wrt. ref. solution  (H1 norm): %g%%", err_est_h1);
-    info("Total error wrt. ref. solution  (E norm):  %g%%", err_est);
+    info("Total error wrt. ref. solution  (E norm):  %g%%", err_est_energ_total);
     
     // Report the number of negative values.
     info("Num. of negative values: %d, %d", get_num_of_neg(&sln1), get_num_of_neg(&sln2));
@@ -386,7 +389,7 @@ int main(int argc, char* argv[])
     cpu_time.tick(HERMES_SKIP);
 
     // If err_est too large, adapt the mesh.
-    if (err_est < ERR_STOP) done = true;
+    if (err_est_energ_total < ERR_STOP) done = true;
     else 
     {
       info("Adapting coarse mesh.");

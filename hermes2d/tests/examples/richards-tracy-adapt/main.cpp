@@ -45,6 +45,8 @@ const double CONV_EXP = 1.0;               // Default value is 1.0. This paramet
                                            // candidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 0.1;               // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
+const double ERR_STOP_INIT = 3.1;          // Stopping criterion for the initial mesh adaptivity (rel. error tolerance between the
+                                           // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
 
@@ -128,22 +130,50 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(2, INIT_REF_NUM_BDY);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(space);
+  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Solutions for the time stepping and the Newton's method.
-  Solution u_prev_time;
+  // Solutions for the time stepping and adaptivity.
+  Solution u_prev_time, sln, ref_sln;
 
   // Adapt mesh to represent initial condition with given accuracy.
-  bool verbose = false;        // Report results.
-  double err_stop_temp = 6.0;  // 
-  adapt_to_exact_function(space, H2D_H1_NORM, init_cond, &selector, THRESHOLD, STRATEGY, 
-                          MESH_REGULARITY, err_stop_temp, NDOF_STOP, 
-                          verbose, &u_prev_time);
+  info("Mesh adaptivity to an exact function:");
+
+  int as = 1; bool done = false;
+  do
+  {
+    // Setup space for the reference solution.
+    Space *rspace = construct_refined_space(&space);
+
+    // Assign the function f() to the fine mesh.
+    ref_sln.set_exact(rspace->get_mesh(), init_cond);
+
+    // Project the function f() on the coarse mesh.
+    OGProjection::project_global(&space, &ref_sln, &u_prev_time, matrix_solver);
+
+    // Calculate element errors and total error estimate.
+    Adapt adaptivity(&space, HERMES_H1_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity.calc_err_est(&u_prev_time, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+    info("Step %d, ndof %d, proj_error %g%%", as, Space::get_num_dofs(&space), err_est_rel);
+
+    // If err_est_rel too large, adapt the mesh.
+    if (err_est_rel < ERR_STOP_INIT) done = true;
+    else {
+      double to_be_processed = 0;
+      done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY, to_be_processed);
+
+      if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
+
+    }
+    as++;
+  }
+  while (done == false);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -156,34 +186,70 @@ int main(int argc, char* argv[])
     wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
   }
 
-  // Initialize matrix solver.
-  Matrix* mat; Vector* coeff_vec; CommonSolver* solver;  
-  init_matrix_solver(matrix_solver, ndof, mat, coeff_vec, solver);
-
   // Error estimate and discrete problem size as a function of physical time.
   SimpleGraph graph_time_err_est, graph_time_err_exact, graph_time_dof, graph_time_cpu;
 
   // Project the initial condition on the FE space
   // to obtain initial coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  // The NULL means that we do not want the result as a Solution.
-  Solution* sln_tmp = new Solution(&mesh, init_cond);
-  OGProjection::project_global(space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
-  delete sln_tmp;
+  info("Projecting initial condition to obtain coefficient vector for Newton on coarse mesh.");
+  scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(&space)];
+  OGProjection::project_global(&space, init_cond, coeff_vec_coarse, matrix_solver);
 
-/*  // Initialize views.
-  ScalarView view("Projection of initial condition", 0, 0, 410, 300);
-  OrderView ordview("Initial mesh", 420, 0, 350, 300);
-  view.fix_scale_width(80);
-*/
   // Newton's loop on the coarse mesh.
   info("Solving on coarse mesh.");
-  if (!solve_newton(space, &wf, coeff_vec, matrix_solver, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose))
-    error("Newton's method did not converge.");
 
-  // Store the result in sln.
-  Solution sln, ref_sln;
-  sln.set_coeff_vector(space, coeff_vec);
+  // Initialize the FE problem.
+  bool is_linear = false;
+  FeProblem fep_coarse(&wf, &space, is_linear);
+
+  // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
+  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+  Vector* rhs_coarse = create_vector(matrix_solver);
+  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+
+  // Perform Newton's iteration.
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(&space);
+
+    // Assemble the Jacobian matrix_coarse and residual vector.
+    fep_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
+
+    // Multiply the residual vector with -1 since the matrix_coarse 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs_coarse);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
+
+    // If l2 norm of the residual vector is within tolerance, or the maximum number 
+    // of iteration has been reached, then quit.
+    if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
+
+    // Solve the linear system.
+    if(!solver_coarse->solve())
+      error ("matrix_coarse solver_coarse failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
+    
+    if (it >= NEWTON_MAX_ITER)
+      error ("Newton method did not converge.");
+
+    it++;
+  }
+
+  // Translate the resulting coefficient vector into the actual solutions. 
+  Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
+  delete [] coeff_vec_coarse;
+  delete rhs_coarse;
+  delete matrix_coarse;
+  delete solver_coarse;
 
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
@@ -194,23 +260,21 @@ int main(int argc, char* argv[])
 
     // Updating current time.
     TIME = ts*TAU;
+    info("---- Time step %d:", ts);
 
     // Periodic global derefinements.
     if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
       mesh.copy(&basemesh);
-      space->set_uniform_order(P_INIT);
+      space.set_uniform_order(P_INIT);
 
       // Project fine mesh solution on the globally derefined mesh.
-      info("---- Time step %d:", ts);
       info("Projecting fine mesh solution on globally derefined mesh.");
-      // The NULL means that we do not want the coefficient vector.
-      OGProjection::project_global(space, H2D_H1_NORM, &ref_sln, &sln, NULL);
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
     }
 
     // Adaptivity loop (in space):
     bool done = false;
-    double space_err_est_rel, space_err_exact_rel;
     int as = 1;
     do
     {
@@ -218,83 +282,128 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Mesh *ref_mesh = new Mesh();
-      ref_mesh->copy(space->get_mesh());
-      ref_mesh->refine_all_elements();
-      Space* ref_space = space->dup(ref_mesh);
-      int order_increase = 1;
-      ref_space->copy_orders(space, order_increase);
+      Space* ref_space = construct_refined_space(&space);
 
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
+     
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1 && ts == 1) {
         info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
-        // The NULL means that we do not want the result as a Solution.
-        OGProjection::project_global(ref_space, H2D_H1_NORM, &sln, NULL, coeff_vec);
+        OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
       }
       else {
         info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
-        // The NULL means that we do not want the result as a Solution.
-        OGProjection::project_global(ref_space, H2D_H1_NORM, &ref_sln, NULL, coeff_vec);
+        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
 
-      // Newton's method on fine mesh
-      info("Solving on fine mesh.");
-      if (!solve_newton(ref_space, &wf, coeff_vec, matrix_solver, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose))
-        error("Newton's method did not converge.");
+      // Initialize the FE problem.
+      bool is_linear = false;
+      FeProblem fep(&wf, ref_space, is_linear);
 
-      // Store the result in ref_sln.
-      ref_sln.set_coeff_vector(ref_space, coeff_vec);
+      // Set up the solver, matrix, and rhs according to the solver selection.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
+      // Perform Newton's iteration.
+      int it = 1;
+      while (1)
+      {
+        // Obtain the number of degrees of freedom.
+        int ndof = Space::get_num_dofs(ref_space);
+
+        // Assemble the Jacobian matrix and residual vector.
+        fep.assemble(coeff_vec, matrix, rhs, false);
+
+        // Multiply the residual vector with -1 since the matrix 
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        
+        // Calculate the l2-norm of residual vector.
+        double res_l2_norm = get_l2_norm(rhs);
+
+        // Info for user.
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
+
+        // If l2 norm of the residual vector is within tolerance, or the maximum number 
+        // of iteration has been reached, then quit.
+        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
+
+        // Solve the linear system.
+        if(!solver->solve())
+          error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+        
+        if (it >= NEWTON_MAX_ITER)
+          error ("Newton method did not converge.");
+
+        it++;
+      }
+      
+      // Translate the resulting coefficient vector into the actual solutions. 
+      Solution::vector_to_solutions(coeff_vec, ref_space, &ref_sln);
+
+      // Project the fine mesh solution on the coarse mesh.
+      info("Projecting fine mesh solution on coarse mesh for error calculation.");
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
+
+      // Calculate element errors.
+      info("Calculating error estimate and exact error."); 
+      Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+      bool solutions_for_adapt = true;
+      
       // Calculate error estimate wrt. fine mesh solution.
-      info("Calculating error (est).");
-      Adapt hp(space, H2D_H1_NORM);
-      hp.set_solutions(&sln, &ref_sln);
-      double space_err_est_rel = hp.calc_elem_errors(HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Calculate error wrt. exact solution.
-      info("Calculating error (exact).");
       ExactSolution exact(&mesh, exact_sol);
-      double err_exact_abs = calc_abs_error(&sln, &exact, H2D_H1_NORM);
-      double norm_exact = calc_norm(&exact, H2D_H1_NORM);
-      space_err_exact_rel = err_exact_abs / norm_exact * 100;    
+      solutions_for_adapt = false;
+      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
+      // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%, space_err_exact_rel: %g%%", 
-	   Space::get_num_dofs(space), Space::get_num_dofs(ref_space), space_err_est_rel, space_err_exact_rel);
+	    Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel, err_exact_rel);
+
+      // Add entries to convergence graphs.
+      graph_time_err_est.add_values(ts*TAU, err_est_rel);
+      graph_time_err_est.save("time_error_est.dat");
+      graph_time_err_exact.add_values(ts*TAU, err_exact_rel);
+      graph_time_err_exact.save("time_error_exact.dat");
+      graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
+      graph_time_dof.save("time_dof.dat");
+      graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
+      graph_time_cpu.save("time_cpu.dat");
 
       // If space_err_est too large, adapt the mesh.
-      if (space_err_est_rel < ERR_STOP) done = true;
+      if (err_est_rel < ERR_STOP) done = true;
       else {
         info("Adapting coarse mesh.");
-        done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (Space::get_num_dofs(space) >= NDOF_STOP) {
+        done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+        if (Space::get_num_dofs(&space) >= NDOF_STOP) {
           done = true;
           break;
         }
 
-        // Project the fine mesh solution on the new coarse mesh.
-        info("Projecting fine mesh solution on coarse mesh for error calculation.");
-        // The NULL means that we do not want the coefficient vector.
-        OGProjection::project_global(space, H2D_H1_NORM, &ref_sln, &sln, NULL);
-
         as++;
       }
+
+      // Cleanup.
+      delete [] coeff_vec;
+      delete solver;
+      delete matrix;
+      delete rhs;
+      delete adaptivity;
+      delete ref_space->get_mesh();
+      delete ref_space;
     }
     while (!done);
-
-    // Add entries to convergence graphs.
-    graph_time_err_est.add_values(ts*TAU, space_err_est_rel);
-    graph_time_err_est.save("time_error_est.dat");
-    graph_time_err_exact.add_values(ts*TAU, space_err_exact_rel);
-    graph_time_err_exact.save("time_error_exact.dat");
-    graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(space));
-    graph_time_dof.save("time_dof.dat");
-    graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
-    graph_time_cpu.save("time_cpu.dat");
 
     // Copy new time level solution into u_prev_time.
     u_prev_time.copy(&ref_sln);
   }
-  ndof = Space::get_num_dofs(Tuple<Space *>(space));
+  ndof = Space::get_num_dofs(Tuple<Space *>(&space));
 
 #define ERROR_SUCCESS       0
 #define ERROR_FAILURE      -1
