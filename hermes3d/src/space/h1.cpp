@@ -17,7 +17,6 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../h3dconfig.h"
 #include "h1.h"
 #include "../shapeset/h1lobattohex.h"
 #include "../shapeset/h1lobattotetra.h"

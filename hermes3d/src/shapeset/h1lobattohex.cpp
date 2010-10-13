@@ -21,7 +21,6 @@
 // h1lobbatohex.cc
 //
 
-#include "../h3dconfig.h"
 #include "lobatto.h"
 #include "h1lobattohex.h"
 #include <common/error.h>

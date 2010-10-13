@@ -18,7 +18,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "../shapeset/hcurllobattohex.h"
-#include "../h3dconfig.h"
 #include "hcurl.h"
 #include "../matrix.h"
 #include "../refmap.h"

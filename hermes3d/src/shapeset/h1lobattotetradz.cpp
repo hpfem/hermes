@@ -22,7 +22,6 @@
 //
 //
 
-#include "../h3dconfig.h"
 #include "common.h"
 #include "lobatto.h"
 

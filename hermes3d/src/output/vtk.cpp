@@ -22,7 +22,6 @@
 //
 //
 
-#include "../h3dconfig.h"
 #include "vtk.h"
 #include "../refdomain.h"
 #include "../quadstd.h"

@@ -23,7 +23,6 @@
 // Loading mesh from HDF5 format
 //
 
-#include "../h3dconfig.h"
 #ifdef WITH_HDF5
 extern "C" {
 #include <hdf5.h>
