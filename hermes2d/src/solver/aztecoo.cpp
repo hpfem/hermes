@@ -29,7 +29,6 @@
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
-
 AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
   : IterSolver(), m(m), rhs(rhs)
 {

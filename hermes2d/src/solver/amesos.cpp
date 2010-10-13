@@ -37,7 +37,7 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 {
   _F_
 #ifdef HAVE_AMESOS
-  solver = factory.Create(solver_type, problem); 
+  solver = factory.Create(solver_type, problem);
   assert(solver != NULL);
   // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver, 
   //          so don't forget to delete it!

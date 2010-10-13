@@ -26,7 +26,7 @@ static Epetra_SerialComm seq_comm;
 /// A helper for NOX solver
 ///
 /// @ingroup solvers
-class NoxProblemInterface :
+class H2D_API NoxProblemInterface :
   public NOX::Epetra::Interface::Required,
   public NOX::Epetra::Interface::Jacobian,
   public NOX::Epetra::Interface::Preconditioner
@@ -59,11 +59,11 @@ public:
     Teuchos::RCP<Precond> get_precond() { return precond; }
   void set_precond(Teuchos::RCP<Precond> &pc);
 
-  FeProblem* fep;			// finite element problem being solved
+  FeProblem* fep;                 // finite element problem being solved
 
-  EpetraVector init_sln;		// initial solution
-  EpetraMatrix jacobian;		// jacobian (optional)
-  Teuchos::RCP<Precond> precond;		// preconditiner (optional)
+  EpetraVector init_sln;          // initial solution
+  EpetraMatrix jacobian;          // jacobian (optional)
+  Teuchos::RCP<Precond> precond;  // preconditiner (optional)
 
   void prealloc_jacobian();
 };
