@@ -2,25 +2,10 @@ project(quadrature)
 
 if(H3D_REAL)
 
-include(CMake.vars OPTIONAL)
+add_executable(${PROJECT_NAME}	main.cpp)
 
-add_executable(${PROJECT_NAME}
-	main.cpp
-	${HERMES_COMMON_DIR}/trace.cpp
-	${HERMES_COMMON_DIR}/error.cpp
-)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${TESTS_INCLUDE_DIRS})
-include_directories(${hermes3d_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME} ${TESTS_LIBRARIES}) 
-target_link_libraries(${PROJECT_NAME} ${HERMES_REAL_BIN})
-
-configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h
-)
+include (${hermes3d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME} ${HERMES_REAL_BIN})
 
 # Tests
 

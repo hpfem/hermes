@@ -2,15 +2,10 @@ project(output)
 
 if(H3D_REAL)
 
-include(CMake.vars OPTIONAL)
-
 set(BIN_GMSH ${PROJECT_NAME}-gmsh)
 set(BIN_VTK  ${PROJECT_NAME}-vtk)
 
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${TESTS_INCLUDE_DIRS})
-include_directories(${hermes3d_SOURCE_DIR})
+include (${hermes3d_SOURCE_DIR}/CMake.common)
 
 # GMSH ####
 
@@ -18,13 +13,12 @@ add_executable(${BIN_GMSH}
 	main.cpp
 )
 
+set_common_target_properties(${BIN_GMSH})
+
 set_target_properties(${BIN_GMSH}
     PROPERTIES
 	COMPILE_FLAGS -DGMSH)
 
-
-target_link_libraries(${BIN_GMSH} ${TESTS_LIBRARIES}) 
-target_link_libraries(${BIN_GMSH} ${HERMES_REAL_BIN})
 
 # VTK ####
 
@@ -32,18 +26,11 @@ add_executable(${BIN_VTK}
 	main.cpp
 )
 
+set_common_target_properties(${BIN_VTK})
+
 set_target_properties(${BIN_VTK}
     PROPERTIES
 	COMPILE_FLAGS -DVTK)
-
-target_link_libraries(${BIN_VTK} ${TESTS_LIBRARIES}) 
-target_link_libraries(${BIN_VTK} ${HERMES_REAL_BIN})
-
-
-configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h
-)
 
 # Tests
 

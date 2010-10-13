@@ -2,8 +2,6 @@
 # CMake for examples
 #
 
-include (../tests/common.cmake)
-
 # HEX
 if(WITH_HEX)
     # H1
