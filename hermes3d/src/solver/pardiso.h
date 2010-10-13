@@ -75,7 +75,7 @@ protected:
 /// Encapsulation of PARDISO linear solver
 ///
 /// @ingroup solvers
-class PardisoLinearSolver : public LinearSolver {
+class H3D_API PardisoLinearSolver : public LinearSolver {
 public:
   PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
   virtual ~PardisoLinearSolver();

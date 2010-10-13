@@ -23,16 +23,17 @@
 #include "../../common/error.h"
 #include "../../common/utils.h"
 #include "../../common/callstack.h"
+#include "../common_time_period.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern int pardisoinit_(void *, int *, int *);
+extern int pardisoinit_(void *, int *, int *, int*, double *, int *);
 
 extern int
     pardiso_(void *, int *, int *, int *, int *, int *,
-             scalar *, int *, int *, int *, int *, int *, int *, scalar *, scalar *, int *);
+             scalar *, int *, int *, int *, int *, int *, int *, scalar *, scalar *, int *, double *);
 
 #define PARDISOINIT pardisoinit_
 #define PARDISO pardiso_
@@ -287,18 +288,16 @@ PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
   _F_
 #ifdef WITH_PARDISO
 #else
-  warning("hermes2d was not built with Pardiso support.");
+  warning("hermes3d was not built with Pardiso support.");
   exit(128);
 #endif
 }
 
 PardisoLinearSolver::~PardisoLinearSolver() {
   _F_
-#ifdef WITH_PARDISO
-  if (lp != NULL) {
-    delete m;
-    delete rhs;
-  }
+#ifdef WITH_PARDISO  
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 
@@ -318,7 +317,12 @@ bool PardisoLinearSolver::solve() {
     if (var != NULL) sscanf(var, "%d", &num_procs);
     else num_procs = 1;
 
-    int mtype = 11;		// Real unsymmetric matrix
+#ifdef H3D_COMPLEX
+    int mtype = 13;		// Complex unsymmetric matrix
+#else    
+    int mtype = 11;   // Real unsymmetric matrix
+#endif
+
     int nrhs = 1;		// Number of right hand sides
     int nnz = m->Ap[n];	// The number of nonzero elements
 
@@ -326,14 +330,19 @@ bool PardisoLinearSolver::solve() {
     // 32-bit: int pt[64]; 64-bit: long int pt[64]
     // or void *pt[64] should be OK on both architectures
     void *pt[64];
-    // Pardiso control parameters.
+    // Pardiso control parameters. Consult Pardiso manual for interpretation.
     int iparm[64];
+    double dparm[64];
     int maxfct, mnum, phase, err, msglvl;
     // Auxiliary variables.
     scalar ddum; // Double dummy
     int idum; // Integer dummy.
 
-    iparm[2] = num_procs;
+    iparm[2] = num_procs; // Number of SMP threads. Remaining entries in iparm
+                          // will be filled by default values by PARDISOINIT.
+                          
+    int solver = 0;   // Sparse direct solver. Set solver = 1 for multi-recursive
+                      // iterative solver.
 
     maxfct = 1;		// Maximum number of numerical factorizations.
     mnum = 1;		// Which factorization to use.
@@ -344,16 +353,15 @@ bool PardisoLinearSolver::solve() {
     for (int i = 0; i < n + 1; i++) m->Ap[i] += 1;
     for (int i = 0; i < nnz; i++) m->Ai[i] += 1;
 
-    Timer tmr;
-    tmr.start();
-
+    TimePeriod tmr;
+    
     // Setup Pardiso control parameters.
-    PARDISOINIT(pt, &mtype, iparm);
+    PARDISOINIT(pt, &mtype, &solver, iparm, dparm, &err);
 
     // .. Reordering and Symbolic Factorization. This step also allocates
     // all memory that is necessary for the factorization.
     phase = 11;
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err);
+    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
     if (err != 0) {
       // ERROR during symbolic factorization: err
       throw ERR_FAILURE;
@@ -361,7 +369,7 @@ bool PardisoLinearSolver::solve() {
 
     // .. Numerical factorization.
     phase = 22;
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err);
+    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
     if (err != 0) {
       // ERROR during numerical factorization: err
       throw ERR_FAILURE;
@@ -375,14 +383,14 @@ bool PardisoLinearSolver::solve() {
 
     phase = 33;
     iparm[7] = 1; // Max numbers of iterative refinement steps.
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, rhs->v, sln, &err);
+    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, rhs->v, sln, &err, dparm);
     if (err != 0) {
       // ERROR during solution: err
       throw ERR_FAILURE;
     }
 
-    tmr.stop();
-    time = tmr.get_seconds();
+    tmr.tick();
+    time = tmr.accumulated();
 
     //  Convert matrix back to 0-based C-notation.
     for (int i = 0; i < n + 1; i++) m->Ap[i] -= 1;
@@ -390,7 +398,7 @@ bool PardisoLinearSolver::solve() {
 
     // .. Termination and release of memory.
     phase = -1; // Release internal memory.
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err);
+    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
   }
   catch (int e) {
     error = e;

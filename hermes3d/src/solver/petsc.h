@@ -24,10 +24,10 @@
 #include "solver.h"
 
 #ifdef WITH_PETSC
-#include <petsc.h>
-#include <petscmat.h>
-#include <petscvec.h>
-#include <petscksp.h>
+  #include <petsc.h>
+  #include <petscmat.h>
+  #include <petscvec.h>
+  #include <petscksp.h>
 #endif
 
 /// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
@@ -87,7 +87,7 @@ protected:
 /// Encapsulation of PETSc linear solver
 ///
 /// @ingroup solvers
-class PetscLinearSolver : public LinearSolver {
+class H3D_API PetscLinearSolver : public LinearSolver {
 public:
   PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
   virtual ~PetscLinearSolver();

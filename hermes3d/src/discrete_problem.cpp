@@ -25,12 +25,14 @@
 #include <common/callstack.h>
 
 //  Solvers
+#include "solver/solver.h"
+#include "solver/umfpack_solver.h"
 #include "solver/amesos.h"
 #include "solver/pardiso.h"
 #include "solver/petsc.h"
 #include "solver/mumps.h"
 #include "solver/nox.h"
-#include "solver/umfpack_solver.h"
+#include "solver/aztecoo.h"
 
 DiscreteProblem::FnCache::~FnCache()
 {
@@ -130,6 +132,123 @@ scalar **DiscreteProblem::get_matrix_buffer(int n)
   return (matrix_buffer = new_matrix<scalar>(n, n));
 }
 
+//// matrix structure precalculation ///////////////////////////////////////////////////////////////
+
+// This functions is identical in H2D and H3D.
+bool DiscreteProblem::is_up_to_date()
+{
+  _F_
+  // check if we can reuse the matrix structure
+  bool up_to_date = true;
+  if (!have_matrix) up_to_date = false;
+  
+  for (int i = 0; i < wf->neq; i++)
+  {
+    if (spaces[i]->get_seq() != sp_seq[i])
+    { 
+      up_to_date = false; 
+      break; 
+    }
+  }
+  
+  if (wf->get_seq() != wf_seq)
+    up_to_date = false;
+
+  return up_to_date;
+}
+
+//// matrix creation ///////////////////////////////////////////////////////////////////////////////
+
+// This functions is identical in H2D and H3D.
+void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
+{
+  _F_
+
+  if (is_up_to_date())
+  {
+    if (!rhsonly && mat != NULL) 
+    {
+      verbose("Reusing matrix sparse structure.");
+      mat->zero();
+    }
+    if (rhs != NULL) rhs->zero();
+    return;
+  }
+  
+  int ndof = get_num_dofs();
+  
+  if (mat != NULL)  // mat may be NULL when assembling the rhs for NOX
+  {
+    // spaces have changed: create the matrix from scratch
+    mat->free();
+    mat->prealloc(ndof);
+
+    AsmList *al = new AsmList[wf->neq];
+    Mesh **meshes = new Mesh*[wf->neq];
+    bool **blocks = wf->get_blocks();
+
+    // Init multi-mesh traversal.
+    for (int i = 0; i < wf->neq; i++)
+    meshes[i] = spaces[i]->get_mesh();
+
+    Traverse trav;
+    trav.begin(wf->neq, meshes);
+
+    // Loop through all elements.
+    Element **e;
+    while ((e = trav.get_next_state(NULL, NULL)) != NULL)
+    {
+      // obtain assembly lists for the element at all spaces
+      for (int i = 0; i < wf->neq; i++)
+      {
+        // TODO: do not get the assembly list again if the element was not changed
+        if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
+      }
+
+      // go through all equation-blocks of the local stiffness matrix
+      for (int m = 0; m < wf->neq; m++)
+      {
+        for (int n = 0; n < wf->neq; n++)
+        {
+          if (blocks[m][n] && e[m] != NULL && e[n] != NULL) 
+          {
+            AsmList *am = al + m;
+            AsmList *an = al + n;
+
+            // pretend assembling of the element stiffness matrix
+            // register nonzero elements
+            for (int i = 0; i < am->cnt; i++)
+              if (am->dof[i] >= 0)
+                for (int j = 0; j < an->cnt; j++)
+                  if (an->dof[j] >= 0)
+                    mat->pre_add_ij(am->dof[i], an->dof[j]);
+          }
+        }
+      }
+    }
+
+    trav.finish();
+    delete [] al;
+    delete [] meshes;
+    delete [] blocks;
+
+    mat->alloc();
+  }
+  
+  // WARNING: unlike Matrix::alloc(), Vector::alloc(ndof) frees the memory occupied 
+  // by previous vector before allocating
+  if (rhs != NULL) rhs->alloc(ndof);    
+
+  // save space seq numbers and weakform seq number, so we can detect their changes
+  for (int i = 0; i < wf->neq; i++)
+    sp_seq[i] = spaces[i]->get_seq();
+  
+  wf_seq = wf->get_seq();
+
+  struct_changed = true;
+  have_matrix = true;
+}
+
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
 // Light version for linear problems.
@@ -151,7 +270,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
-  
  
   this->create(mat, rhs, rhsonly);
 
@@ -191,7 +309,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // initialize matrix buffer
   matrix_buffer = NULL;
   matrix_buffer_dim = 0;
-  get_matrix_buffer(10);
+  if (mat != NULL) get_matrix_buffer(10);
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
@@ -203,7 +321,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // traverses through the union mesh. On the other hand, if you don't use multi-mesh
   // at all, there will always be only one stage in which all forms are assembled as usual.
   Traverse trav;
-  for (unsigned ss = 0; ss < stages.size(); ss++) 
+  for (unsigned ss = 0; ss < stages.size(); ss++)
   {
     WeakForm::Stage *s = &stages[ss];
     for (unsigned i = 0; i < s->idx.size(); i++) s->fns[i] = &base_fn[s->idx[i]];
@@ -227,7 +345,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in 
       // trav.get_next_state(...).
       memset(isempty, 0, sizeof(bool) * wf->neq);
-      for (unsigned i = 0; i < s->idx.size(); i++) 
+      for (unsigned int i = 0; i < s->idx.size(); i++)
       {
         int j = s->idx[i];
         if (e[i] == NULL) 
@@ -268,13 +386,13 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
           // assemble the local stiffness matrix for the form mfv
           scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
-          for (int i = 0; i < am->cnt; i++) 
+          for (int i = 0; i < am->cnt; i++)
           {
             if (!tra && am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
 
             if (!sym) // unsymmetric block
-            { 
+            {
               for (int j = 0; j < an->cnt; j++) 
               {
                 fu->set_active_shape(an->idx[j]);
@@ -313,7 +431,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                 {
                   scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
-                } 
+                }
               }
             }
           }
@@ -323,7 +441,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
 
           // insert also the off-diagonal (anti-)symmetric block, if required
-          if (tra) 
+          if (tra)
           {
             if (mfv->sym < 0) 
               chsgn(local_stiffness_matrix, am->cnt, an->cnt);
@@ -359,9 +477,9 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
          is only one line of difference that is highlighted below */
 
       //// assemble volume vector forms ////////////////////////////////////////
-      if (rhs != NULL) 
+      if (rhs != NULL)
       {
-        for (unsigned int ww = 0; ww < s->vfvol.size(); ww++) 
+        for (unsigned int ww = 0; ww < s->vfvol.size(); ww++)
         {
           WeakForm::VectorFormVol* vfv = s->vfvol[ww];
           if (isempty[vfv->i]) continue;
@@ -370,7 +488,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           fv = test_fn + m;      // H2D uses fv = spss[m]
           am = al + m;
 
-          for (int i = 0; i < am->cnt; i++) 
+          for (int i = 0; i < am->cnt; i++)
           {
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
@@ -381,7 +499,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       }
 
       // assemble surface integrals now: loop through surfaces of the element
-      for (unsigned int isurf = 0; isurf < e0->get_num_surf(); isurf++) 
+      for (unsigned int isurf = 0; isurf < e0->get_num_surf(); isurf++)
       {
         fn_cache.free();  // This is not in H2D.
 
@@ -395,15 +513,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           if (e[i] == NULL) continue;
           int j = s->idx[i];
           if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
-             spaces[j]->get_boundary_assembly_list(e[i], isurf, al + j);
+            spaces[j]->get_boundary_assembly_list(e[i], isurf, al + j);
         }
 
         // assemble surface matrix forms ///////////////////////////////////
-        if (mat != NULL) 
+        if (mat != NULL)
         {
-          for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++) 
+          for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
           {
-            WeakForm::MatrixFormSurf *mfs = s->mfsurf[ww];
+            WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
             if (isempty[mfs->i] || isempty[mfs->j]) continue;
             if (mfs->area != HERMES_ANY && !wf->is_in_area(marker, mfs->area)) continue;
             int m = mfs->i; 
@@ -419,11 +537,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             surf_pos[isurf].space_u = spaces[n];
 
             scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
-            for (int i = 0; i < am->cnt; i++) 
+            for (int i = 0; i < am->cnt; i++)
             {
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
-              for (int j = 0; j < an->cnt; j++) 
+              for (int j = 0; j < an->cnt; j++)
               {
                 fu->set_active_shape(an->idx[j]);
                 if (an->dof[j] < 0) 
@@ -450,9 +568,9 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         }
 
         // assemble surface vector forms /////////////////////////////////////
-        if (rhs != NULL) 
+        if (rhs != NULL)
         {
-          for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++) 
+          for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
           {
             WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
             if (isempty[vfs->i]) continue;
@@ -465,7 +583,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             surf_pos[isurf].base = trav.get_base();
             surf_pos[isurf].space_v = spaces[m];
 
-            for (int i = 0; i < am->cnt; i++) 
+            for (int i = 0; i < am->cnt; i++)
             {
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
@@ -478,11 +596,14 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   
       // H2D is deleting cache here.
     }
-    trav.finish(); 
+
+    if (mat != NULL) mat->finish();
+    if (rhs != NULL) rhs->finish();
+    trav.finish();
   }
  
   // Cleaning up.
-  delete [] matrix_buffer;
+  if (matrix_buffer != NULL) delete [] matrix_buffer;
   matrix_buffer = NULL;
   matrix_buffer_dim = 0;
 
@@ -505,115 +626,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   delete [] refmap;
 }
 
-//// matrix structure precalculation ///////////////////////////////////////////////////////////////
-
-// This functions is identical in H2D and H3D.
-bool DiscreteProblem::is_up_to_date()
-{
-  _F_
-  // check if we can reuse the matrix structure
-  bool up_to_date = true;
-  if (!have_matrix) up_to_date = false;
-  
-  for (int i = 0; i < wf->neq; i++)
-  {
-    if (spaces[i]->get_seq() != sp_seq[i])
-    { 
-      up_to_date = false; 
-      break; 
-    }
-  }
-  
-  if (wf->get_seq() != wf_seq)
-    up_to_date = false;
-
-  return up_to_date;
-}
-
-//// matrix creation ///////////////////////////////////////////////////////////////////////////////
-
-// This function is identical to H2D.
-void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
-{
-  _F_
-  assert(mat != NULL);
-
-  if (is_up_to_date())
-  {
-    printf("Reusing matrix sparse structure.\n");
-    if (!rhsonly)
-      mat->zero();
-    rhs->zero();
-    return;
-  }
-
-  // spaces have changed: create the matrix from scratch
-  mat->free();
-
-  int ndof = get_num_dofs();
-  mat->prealloc(this->ndof);
-
-  AsmList *al = new AsmList[wf->neq];
-  Mesh **meshes = new Mesh*[wf->neq];
-  bool **blocks = wf->get_blocks();
-
-  // init multi-mesh traversal.
-  for (int i = 0; i < wf->neq; i++)
-    meshes[i] = spaces[i]->get_mesh();
-
-  Traverse trav;
-  trav.begin(wf->neq, meshes);
-
-  // Loop through all elements.
-  Element **e;
-  while ((e = trav.get_next_state(NULL, NULL)) != NULL) 
-  {
-    // obtain assembly lists for the element at all spaces
-    for (int i = 0; i < wf->neq; i++)
-    {
-      // TODO: do not get the assembly list again if the element was not changed
-      if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
-    }
-
-    // go through all equation-blocks of the local stiffness matrix
-    for (int m = 0; m < wf->neq; m++)
-    {
-      for (int n = 0; n < wf->neq; n++)
-      {
-        if (blocks[m][n] && e[m] != NULL && e[n] != NULL) 
-        {
-          AsmList *am = al + m;
-          AsmList *an = al + n;
-
-          // pretend assembling of the element stiffness matrix
-          // register nonzero elements
-          for (int i = 0; i < am->cnt; i++)
-            if (am->dof[i] >= 0)
-              for (int j = 0; j < an->cnt; j++)
-                if (an->dof[j] >= 0)
-                  mat->pre_add_ij(am->dof[i], an->dof[j]);
-        }
-      }
-    }
-  }
-
-  trav.finish();
-  delete [] al;
-  delete [] meshes;
-  delete [] blocks;
-
-  mat->alloc();
-  if (rhs != NULL) rhs->alloc(ndof);
-
-  // save space seq numbers and weakform seq number, so we can detect their changes
-  for (int i = 0; i < wf->neq; i++)
-    sp_seq[i] = spaces[i]->get_seq();
-  
-  wf_seq = wf->get_seq();
-
-  struct_changed = true;
-  have_matrix = true;
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void DiscreteProblem::init_ext_fns(ExtData<scalar> &ext_data, std::vector<MeshFunction *> &ext, int order,
                              RefMap *rm, const int np, const QuadPt3D *pt)
@@ -1093,9 +1106,11 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 // This function is identical in H2D and H3D.
 Vector* create_vector(MatrixSolverType matrix_solver)
 {
+  _F_
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
+    case SOLVER_AZTECOO:
       {
         return new EpetraVector;
         break;
@@ -1125,12 +1140,58 @@ Vector* create_vector(MatrixSolverType matrix_solver)
   }
 }
 
+bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[])
+{
+  int ierr, myid;
+  
+  switch (matrix_solver) 
+  {
+    case SOLVER_PETSC:
+#ifdef WITH_PETSC      
+      ierr = PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL); CHKERRQ(ierr);
+#endif      
+      break;
+    case SOLVER_MUMPS:
+#ifdef WITH_MPI      
+      ierr = MPI_Init(&argc, &argv);
+      return (ierr == MPI_SUCCESS);
+#endif
+      break;
+  }
+  
+  return true;
+}
+
+bool finalize_solution_environment(MatrixSolverType matrix_solver)
+{
+  int ierr;
+  
+  switch (matrix_solver) 
+  {
+    case SOLVER_PETSC:
+#ifdef WITH_PETSC      
+      ierr = PetscFinalize(); CHKERRQ(ierr);
+#endif   
+      break;
+    case SOLVER_MUMPS:
+#ifdef WITH_MPI      
+      ierr = MPI_Finalize();
+      return (ierr == MPI_SUCCESS);
+#endif
+      break;
+  }
+  
+  return true;
+}
+
 // This function is identical in H2D and H3D.
 SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {
+  _F_
   switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
+    case SOLVER_AZTECOO:
       {
         return new EpetraMatrix;
         break;
@@ -1161,38 +1222,45 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 }
 
 // This function is identical in H2D and H3D.
-Solver* create_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
+Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
+  _F_
   switch (matrix_solver) 
   {
+    case SOLVER_AZTECOO:
+      {
+        return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        info("Using AztecOO."); 
+        break;
+      }
     case SOLVER_AMESOS:
       {
         return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
-        printf("Using Amesos.\n"); 
+        info("Using Amesos."); 
         break;
       }
     case SOLVER_MUMPS: 
       {
         return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
-        printf("Using Mumps.\n"); 
+        info("Using Mumps."); 
         break;
       }
     case SOLVER_PARDISO: 
       {
         return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
-        printf("Using Pardiso.\n"); 
+        info("Using Pardiso."); 
         break;
       }
     case SOLVER_PETSC: 
       {
         return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
-        printf("Using PETSc.\n");
+        info("Using PETSc.");
         break;
       }
     case SOLVER_UMFPACK: 
       {
         return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
-        printf("Using UMFPack.\n"); 
+        info("Using UMFPack."); 
         break;
       }
     default: 

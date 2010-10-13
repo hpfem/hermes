@@ -31,7 +31,7 @@ class NoxProblemInterface;
 /// Encapsulation of NOX nonlinear solver
 ///
 /// @ingroup solvers
- class NoxSolver : public IterSolver
+ class H3D_API NoxSolver : public IterSolver
 {
 public:
   NoxSolver(DiscreteProblem *problem);
@@ -41,14 +41,14 @@ public:
   bool set_init_sln(EpetraVector *ic);
   virtual bool solve();
 
-  int get_num_iters() { return num_iters; }
-        double get_residual()  { return residual;}
-        int get_num_lin_iters() { return num_lin_iters; }
-        double get_achieved_tol()  { return achieved_tol;}
+  virtual int get_num_iters() { return num_iters; }
+  virtual double get_residual()  { return residual; }
+  int get_num_lin_iters() { return num_lin_iters; }
+  double get_achieved_tol()  { return achieved_tol; }
 
   // settings for the solver
   void set_nl_method(const char *par);
-        void set_output_flags(int flags) { output_flags = flags; }
+  void set_output_flags(int flags) { output_flags = flags; }
 
   // linear solver setters
   void set_ls_type(const char *type) { ls_type = type; }
@@ -70,29 +70,34 @@ public:
     conv.wrms_rtol = rtol;
     conv.wrms_atol = atol;
   }
-#ifdef HAVE_TEUCHOS
-  void set_precond(Teuchos::RCP<Precond> &pc);
-#endif      
-  void set_precond(const char *pc);
+  
+  #ifdef HAVE_TEUCHOS
+    virtual void set_precond(Teuchos::RCP<Precond> &pc);
+  #else
+    virtual void set_precond(Precond* pc) { 
+      warning("Teuchos is currently required to use IFPACK/ML preconditioners. No preconditioning will be performed.");  
+    }
+  #endif
+  virtual void set_precond(const char *pc);
 
 protected:
 #ifdef HAVE_NOX
   Teuchos::RCP<NoxProblemInterface> interface;
 #endif
   int num_iters;
-        double residual;
-        int num_lin_iters;
-        double achieved_tol;
-
+  double residual;
+  int num_lin_iters;
+  double achieved_tol;  
   const char *nl_dir;
 
-        int output_flags;
+  int output_flags;
   const char *ls_type;
   int ls_max_iters;
   double ls_tolerance;
   int ls_sizeof_krylov_subspace;
-        bool precond_yes;
-        const char* precond_type;
+  
+  const char* precond_type;
+  
   // convergence params
   struct conv_t {
     int max_iters;

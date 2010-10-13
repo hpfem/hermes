@@ -39,6 +39,87 @@ T **new_matrix(int m, int n = 0) {
 	return vec;
 }
 
+/// Copies a matrix. Both matrices has to be equal to or larger than provideded sizes.
+/// Size compatibility check is not done.
+template<typename T>
+void copy_matrix(T** dest, T** src, int m, int n = 0) {
+  if (n == 0) n = m;
+  for(int i = 0; i < m; i++) {
+    memcpy(dest[i], src[i], n*sizeof(T));
+  }
+}
+
+/// \brief Saves a dense matrix to a octave file format.
+/// \param[in] matrix_name A name of a matrix in Octave. It can be used to create an output filename.
+/// \param[in] matrix A pointer to an array of pointers to a rows of the matrix. Such a structure can be generated using new_matrix() or it can be a pointer to an 1D C-array.
+/// \param[in] m A number of rows of the matrix. Set to 1 if the matrix is a pointer to a 1D C-array.
+/// \param[in] n A number of columns of the matrix. If zero, it is assumed to be equal to m.
+/// \param[in] filename An output filename. If not specified, matrix_name will be used by concatenating it with a suffix '.mat'.
+template<typename T>
+void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n = 0, const std::string& filename = std::string()) {
+  if (n == 0) n = m;
+
+  //create filename
+  std::string fname = filename;
+  if (fname.empty())
+    fname = matrix_name + ".mat";
+
+  //open file
+  std::ofstream fout(fname.c_str());
+  if (!fout.is_open()) {
+    error("Unable to save a matrix to a file \"%s\"", fname.c_str());
+    return;
+  }
+
+  //write header
+  fout << std::string("# name: ") << matrix_name << std::endl;
+  fout << std::string("# type: matrix") << std::endl;
+  fout << std::string("# rows: ") << m << std::endl;
+  fout << std::string("# columns: ") << n << std::endl;
+
+  //write contents
+  for(int i = 0; i < m; i++) {
+    for(int k = 0; k < n; k++)
+      fout << ' ' << matrix[i][k];
+    fout << std::endl;
+  }
+
+  //finish
+  fout.close();
+}
+
+/// Saves MxM sparse matrix to a octave file format.
+template<typename T>
+void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, const int* Ap, const int* Ai, int m, const std::string& filename = std::string()) {
+
+  //create filename
+  std::string fname = filename;
+  if (fname.empty())
+    fname = matrix_name + ".mat";
+
+  //open file
+  std::ofstream fout(fname.c_str());
+  if (!fout.is_open()) {
+    error("Unable to save a matrix to a file \"%s\"", fname.c_str());
+    return;
+  }
+
+  //write header
+  fout << std::string("# name: ") << matrix_name << std::endl;
+  fout << std::string("# type: sparse matrix") << std::endl;
+  fout << std::string("# nnz: ") << Ap[m] << std::endl;
+  fout << std::string("# rows: ") << m << std::endl;
+  fout << std::string("# columns: ") << m << std::endl;
+
+  //write contents
+  for (int j = 0; j < m; j++)
+    for (int i = Ap[j]; i < Ap[j+1]; i++)
+      fout << j+1 << " " << Ai[i]+1 << " " << Ax[i] << std::endl;
+
+  //finish
+  fout.close();
+}
+
 /// Transposes an m by n matrix. If m != n, the array matrix in fact has to be
 /// a square matrix of the size max(m, n) in order for the transpose to fit inside it.
 template<typename T>
@@ -151,6 +232,8 @@ enum EMatrixDumpFormat {
 class H3D_API Matrix {
 public:
 	virtual ~Matrix() { }
+	Matrix() {this->size = 0;}
+	Matrix(int size) {this->size = size;}
 
 	/// allocate the memory for stiffness matrix and right-hand side
 	virtual void alloc() = 0;
@@ -164,7 +247,7 @@ public:
 	/// @param[in] n - the number of column
 	virtual scalar get(int m, int n) = 0;
 
-	virtual int get_size() = 0;
+	virtual int get_size() {return this->size;};
 
 	/// Zero the matrix
 	virtual void zero() = 0;
@@ -190,11 +273,16 @@ public:
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
 
 	virtual int get_matrix_size() const = 0;
+
+ protected:
+
+    int size;  // matrix size
 };
 
 class H3D_API SparseMatrix : public Matrix {
 public:
 	SparseMatrix();
+    SparseMatrix(int size);
 	virtual ~SparseMatrix();
 
 	/// prepare memory
@@ -310,8 +398,8 @@ public:
 	/// @param[in] y   - values
 	virtual void add(int n, int *idx, scalar *y) = 0;
 
-        /// get vector size
-        int length() {return this->size;}
+  /// get vector size
+  int length() {return this->size;}
 
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
 

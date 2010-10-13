@@ -17,11 +17,10 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-
 #include "amesos.h"
 #include "../discrete_problem.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 
 #ifdef HAVE_AMESOS
 #include <Amesos_ConfigDefs.h>
@@ -40,6 +39,10 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 #ifdef HAVE_AMESOS
   solver = factory.Create(solver_type, problem);
   assert(solver != NULL);
+  // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver, 
+  //          so don't forget to delete it!
+  //          ( Amesos.cpp, line 88, called from factory.Create(): 
+  //            return new Amesos_Klu(LinearProblem); )
 #else
   warning("hermes3d was not built with AMESOS support.");
   exit(128);
@@ -50,8 +53,9 @@ AmesosSolver::~AmesosSolver()
 {
   _F_
 #ifdef HAVE_AMESOS
-  if (m != NULL) delete m;
-  if (rhs != NULL) delete rhs;
+  delete solver;
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 
@@ -90,8 +94,7 @@ bool AmesosSolver::solve()
   assert(m != NULL);
   assert(rhs != NULL);
   
-  Timer tmr;
-  tmr.start();
+  TimePeriod tmr;
 
   Epetra_Vector x(*rhs->std_map);
 
@@ -103,8 +106,8 @@ bool AmesosSolver::solve()
   if ((error = solver->NumericFactorization()) != 0) return false;
   if ((error = solver->Solve()) != 0) return false;
 
-  tmr.stop();
-  time = tmr.get_seconds();
+  tmr.tick();
+  time = tmr.accumulated();
 
   delete [] sln;
   sln = new scalar[m->size]; MEM_CHECK(sln);

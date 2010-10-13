@@ -108,7 +108,7 @@ protected:
 /// Encapsulation of MUMPS linear solver
 ///
 /// @ingroup solvers
-class MumpsSolver : public LinearSolver {
+class H3D_API MumpsSolver : public LinearSolver {
 public:
   MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
   virtual ~MumpsSolver();

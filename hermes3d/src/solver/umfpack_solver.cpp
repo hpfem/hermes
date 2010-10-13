@@ -18,19 +18,20 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
+#include "umfpack_solver.h"
+
 #ifdef WITH_UMFPACK
 extern "C" {
-#include <umfpack.h>
-//#include "/usr/include/suitesparse/umfpack.h"
+  #include <umfpack.h>
+  //#include "/usr/include/suitesparse/umfpack.h"
 }
 #endif
 
-#include "umfpack_solver.h"
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/utils.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 
 UMFPackMatrix::UMFPackMatrix() {
   _F_
@@ -308,6 +309,10 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
+#ifdef WITH_UMFPACK  
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
+#endif
 }
 
 #ifdef WITH_UMFPACK
@@ -340,8 +345,7 @@ bool UMFPackLinearSolver::solve() {
 
   assert(m->size == rhs->size);
 
-  Timer tmr;
-  tmr.start();
+  TimePeriod tmr;
 
   void *symbolic, *numeric;
   int status;
@@ -371,8 +375,8 @@ bool UMFPackLinearSolver::solve() {
     return false;
   }
 
-  tmr.stop();
-  time = tmr.get_seconds();
+  tmr.tick();
+  time = tmr.accumulated();
 
   umfpack_free_symbolic(&symbolic);
   umfpack_free_numeric(&numeric);

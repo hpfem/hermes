@@ -21,10 +21,11 @@
 #include "../../common/trace.h"
 #include "../../common/error.h"
 #include "../../common/callstack.h"
-#include "../../common/timer.h"
+#include "../common_time_period.h"
 
 #define H3D_PETSC_NOT_COMPILED    "hermes3d was not built with PETSc support."
 
+// TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
 PetscMatrix::PetscMatrix() {
   _F_
@@ -111,7 +112,7 @@ void PetscMatrix::zero() {
 void PetscMatrix::add(int m, int n, scalar v) {
   _F_
 #ifdef WITH_PETSC
-  if (v != 0.0 && m >= 0 && n >/ 0)		// ignore "dirichlet DOF"
+  if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
     MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
 #endif
 }
@@ -273,8 +274,7 @@ bool PetscLinearSolver::solve() {
   KSP ksp;
   Vec x;
 
-  Timer tmr;
-  tmr.start();
+  TimePeriod tmr;
 
   KSPCreate(PETSC_COMM_WORLD, &ksp);
 
@@ -285,8 +285,8 @@ bool PetscLinearSolver::solve() {
   ec = KSPSolve(ksp, rhs->vec, x);
   if (ec) return false;
 
-  tmr.stop();
-  time = tmr.get_seconds();
+  tmr.tick();
+  time = tmr.accumulated();
 
   // allocate memory for solution vector
   delete [] sln;

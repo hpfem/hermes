@@ -14,7 +14,6 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "precond_ifpack.h"
-#include <string.h>
 
 #ifdef HAVE_IFPACK
 #include <Ifpack_PointRelaxation.h>
