@@ -37,20 +37,20 @@ class FeProblem;
 /// @ingroup solvers
 class Solver {
 public:
-	Solver() { sln = NULL; time = -1.0; }
-	virtual ~Solver() { if (sln != NULL) delete [] sln; }
+  Solver() { sln = NULL; time = -1.0; }
+  virtual ~Solver() { if (sln != NULL) delete [] sln; }
 
-	virtual bool solve() = 0;
-	scalar *get_solution() { return sln; }
+  virtual bool solve() = 0;
+  scalar *get_solution() { return sln; }
 
-	int get_error() { return error; }
-	double get_time() { return time; }
+  int get_error() { return error; }
+  double get_time() { return time; }
         
 
 protected:
-	scalar *sln;
-	int error;
-	double time;			/// time spent on solving (in secs)
+  scalar *sln;
+  int error;
+  double time;			/// time spent on solving (in secs)
 };
 
 
@@ -61,7 +61,7 @@ protected:
 class LinearSolver : public Solver 
 {
 public:
-	LinearSolver() : Solver() {}
+  LinearSolver() : Solver() {}
 };
 
 /// Abstract class for defining interface for LinearSolvers
@@ -70,12 +70,12 @@ public:
 /// @ingroup solvers
 class NonlinearSolver : public Solver {
 public:
-	NonlinearSolver() : Solver() { fp = NULL; }
-	NonlinearSolver(FeProblem *fp) : Solver() { this->fp = fp; }
+  NonlinearSolver() : Solver() { fp = NULL; }
+  NonlinearSolver(FeProblem *fp) : Solver() { this->fp = fp; }
 
 protected:
-	FeProblem *fp;        // FE problem being solved (not NULL in case of using
-	                      // NonlinearProblem(DiscreteProblem *) ctor
+  FeProblem *fp;        // FE problem being solved (not NULL in case of using
+                        // NonlinearProblem(DiscreteProblem *) ctor
 };
 
 class IterSolver : public Solver

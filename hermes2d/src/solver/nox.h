@@ -34,42 +34,42 @@ class NoxProblemInterface;
  class H2D_API NoxSolver : public IterSolver
 {
 public:
-	NoxSolver(FeProblem *problem);
-	virtual ~NoxSolver();
+  NoxSolver(FeProblem *problem);
+  virtual ~NoxSolver();
 
-	bool set_init_sln(double *ic);
-	bool set_init_sln(EpetraVector *ic);
-	virtual bool solve();
+  bool set_init_sln(double *ic);
+  bool set_init_sln(EpetraVector *ic);
+  virtual bool solve();
 
   virtual int get_num_iters() { return num_iters; }
   virtual double get_residual()  { return residual; }
   int get_num_lin_iters() { return num_lin_iters; }
   double get_achieved_tol()  { return achieved_tol; }
 
-	// settings for the solver
-	void set_nl_method(const char *par);
+  // settings for the solver
+  void set_nl_method(const char *par);
   void set_output_flags(int flags) { output_flags = flags; }
 
-	// linear solver setters
-	void set_ls_type(const char *type) { ls_type = type; }
-	void set_ls_max_iters(int iters) { ls_max_iters = iters; }
-	void set_ls_tolerance(double tolerance) { ls_tolerance = tolerance; }
-	void set_ls_sizeof_krylov_subspace(int size) { ls_sizeof_krylov_subspace = size; }
+  // linear solver setters
+  void set_ls_type(const char *type) { ls_type = type; }
+  void set_ls_max_iters(int iters) { ls_max_iters = iters; }
+  void set_ls_tolerance(double tolerance) { ls_tolerance = tolerance; }
+  void set_ls_sizeof_krylov_subspace(int size) { ls_sizeof_krylov_subspace = size; }
 
-	// convergence params
+  // convergence params
 #ifdef HAVE_NOX
         void set_norm_type(NOX::Abstract::Vector::NormType type)  { conv.norm_type = type; }
         void set_scale_type(NOX::StatusTest::NormF::ScaleType type)  { conv.stype = type; }
 #endif
         void set_conv_iters(int iters)        { conv.max_iters = iters; }
-	void set_conv_abs_resid(double resid) { conv_flag.absresid = 1; conv.abs_resid = resid; }
-	void set_conv_rel_resid(double resid) { conv_flag.relresid = 1; conv.rel_resid = resid; }
-	void set_conv_update(double update)   { conv_flag.update = 1; conv.update = update; }
-	void set_conv_wrms(double rtol, double atol) {
-		conv_flag.wrms = 1;
-		conv.wrms_rtol = rtol;
-		conv.wrms_atol = atol;
-	}
+  void set_conv_abs_resid(double resid) { conv_flag.absresid = 1; conv.abs_resid = resid; }
+  void set_conv_rel_resid(double resid) { conv_flag.relresid = 1; conv.rel_resid = resid; }
+  void set_conv_update(double update)   { conv_flag.update = 1; conv.update = update; }
+  void set_conv_wrms(double rtol, double atol) {
+    conv_flag.wrms = 1;
+    conv.wrms_rtol = rtol;
+    conv.wrms_atol = atol;
+  }
   
   #ifdef HAVE_TEUCHOS
     virtual void set_precond(Teuchos::RCP<Precond> &pc);

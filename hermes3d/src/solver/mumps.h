@@ -25,79 +25,79 @@
 
 #ifdef WITH_MUMPS
 extern "C" {
-	#include <mumps_c_types.h>
+  #include <mumps_c_types.h>
 #ifndef H2D_COMPLEX
-	#include <dmumps_c.h>
+  #include <dmumps_c.h>
 #else
-	#include <zmumps_c.h>
+  #include <zmumps_c.h>
 #endif
 }
 #else
 struct ZMUMPS_COMPLEX {
-	double r, i;
+  double r, i;
 };
 #endif
 
 
 class MumpsMatrix : public SparseMatrix {
 public:
-	MumpsMatrix();
-	virtual ~MumpsMatrix();
+  MumpsMatrix();
+  virtual ~MumpsMatrix();
 
-	virtual void alloc();
-	virtual void free();
-	virtual scalar get(int m, int n);
-	virtual void zero();
-	virtual void add(int m, int n, scalar v);
-	virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-	virtual int get_matrix_size() const;
-	virtual double get_fill_in() const;
+  virtual void alloc();
+  virtual void free();
+  virtual scalar get(int m, int n);
+  virtual void zero();
+  virtual void add(int m, int n, scalar v);
+  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual int get_matrix_size() const;
+  virtual double get_fill_in() const;
 
 protected:
-	// MUMPS specific data structures for storing matrix, rhs
-	int nnz;				// number of non-zero elements
-	int *irn;				// row indices
-	int *jcn;				// column indices
+  // MUMPS specific data structures for storing matrix, rhs
+  int nnz;				// number of non-zero elements
+  int *irn;				// row indices
+  int *jcn;				// column indices
 #ifndef H2D_COMPLEX
-	scalar *a;				// matrix entries
+  scalar *a;				// matrix entries
 #else
-	ZMUMPS_COMPLEX *a;
+  ZMUMPS_COMPLEX *a;
 #endif
-	int *ap;
-	int *ai;
+  int *ap;
+  int *ai;
 
-	friend class MumpsSolver;
+  friend class MumpsSolver;
 };
 
 
 class MumpsVector : public Vector {
 public:
-	MumpsVector();
-	virtual ~MumpsVector();
+  MumpsVector();
+  virtual ~MumpsVector();
 
-	virtual void alloc(int ndofs);
-	virtual void free();
+  virtual void alloc(int ndofs);
+  virtual void free();
 #ifndef H2D_COMPLEX
-	virtual scalar get(int idx) { return v[idx]; }
+  virtual scalar get(int idx) { return v[idx]; }
 #else
-	virtual scalar get(int idx) { return std::complex<double>(v[idx].r, v[idx].i); }
+  virtual scalar get(int idx) { return std::complex<double>(v[idx].r, v[idx].i); }
 #endif
-	virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
-	virtual void zero();
-	virtual void set(int idx, scalar y);
-	virtual void add(int idx, scalar y);
-	virtual void add(int n, int *idx, scalar *y);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
+  virtual void zero();
+  virtual void set(int idx, scalar y);
+  virtual void add(int idx, scalar y);
+  virtual void add(int n, int *idx, scalar *y);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
 #ifndef H2D_COMPLEX
-	scalar *v;
+  scalar *v;
 #else
-	ZMUMPS_COMPLEX *v;
+  ZMUMPS_COMPLEX *v;
 #endif
 
-	friend class MumpsSolver;
+  friend class MumpsSolver;
 };
 
 
@@ -106,14 +106,14 @@ protected:
 /// @ingroup solvers
 class MumpsSolver : public LinearSolver {
 public:
-	MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
-	virtual ~MumpsSolver();
+  MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
+  virtual ~MumpsSolver();
 
-	virtual bool solve();
+  virtual bool solve();
 
 protected:
-	MumpsMatrix *m;
-	MumpsVector *rhs;
+  MumpsMatrix *m;
+  MumpsVector *rhs;
 };
 
 #endif

@@ -42,20 +42,20 @@ class FeProblem;
 /// @ingroup solvers
 class Solver {
 public:
-	Solver() { sln = NULL; time = -1.0; }
-	virtual ~Solver() { if (sln != NULL) delete [] sln; }
+  Solver() { sln = NULL; time = -1.0; }
+  virtual ~Solver() { if (sln != NULL) delete [] sln; }
 
-	virtual bool solve() = 0;
-	scalar *get_solution() { return sln; }
+  virtual bool solve() = 0;
+  scalar *get_solution() { return sln; }
 
-	int get_error() { return error; }
-	double get_time() { return time; }
+  int get_error() { return error; }
+  double get_time() { return time; }
         
 
 protected:
-	scalar *sln;
-	int error;
-	double time;			/// time spent on solving (in secs)
+  scalar *sln;
+  int error;
+  double time;			/// time spent on solving (in secs)
 };
 
 

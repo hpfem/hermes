@@ -27,51 +27,51 @@ class FeProblem;
 
 class UMFPackMatrix : public SparseMatrix {
 public:
-	UMFPackMatrix();
-	UMFPackMatrix(int size);
-	virtual ~UMFPackMatrix();
+  UMFPackMatrix();
+  UMFPackMatrix(int size);
+  virtual ~UMFPackMatrix();
 
-	virtual void alloc();
-	virtual void free();
-	virtual scalar get(int m, int n);
-	virtual void zero();
-	virtual void add(int m, int n, scalar v);
-	virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-	virtual int get_matrix_size() const;
-	virtual double get_fill_in() const;
+  virtual void alloc();
+  virtual void free();
+  virtual scalar get(int m, int n);
+  virtual void zero();
+  virtual void add(int m, int n, scalar v);
+  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual int get_matrix_size() const;
+  virtual double get_fill_in() const;
 
 protected:
-	// UMFPack specific data structures for storing matrix, rhs
-	int *Ap;
-	int *Ai;
-	scalar *Ax;
+  // UMFPack specific data structures for storing matrix, rhs
+  int *Ap;
+  int *Ai;
+  scalar *Ax;
 
-	static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
+  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
 
-	friend class UMFPackLinearSolver;
+  friend class UMFPackLinearSolver;
 };
 
 class UMFPackVector : public Vector {
 public:
-	UMFPackVector();
-	UMFPackVector(int size);
-	virtual ~UMFPackVector();
+  UMFPackVector();
+  UMFPackVector(int size);
+  virtual ~UMFPackVector();
 
-	virtual void alloc(int ndofs);
-	virtual void free();
-	virtual scalar get(int idx) { return v[idx]; }
-	virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
-	virtual void zero();
-	virtual void set(int idx, scalar y);
-	virtual void add(int idx, scalar y);
-	virtual void add(int n, int *idx, scalar *y);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual void alloc(int ndofs);
+  virtual void free();
+  virtual scalar get(int idx) { return v[idx]; }
+  virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
+  virtual void zero();
+  virtual void set(int idx, scalar y);
+  virtual void add(int idx, scalar y);
+  virtual void add(int n, int *idx, scalar *y);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-	scalar *v;
+  scalar *v;
 
-	friend class UMFPackLinearSolver;
+  friend class UMFPackLinearSolver;
 };
 
 
@@ -80,14 +80,14 @@ protected:
 /// @ingroup solvers
 class H2D_API UMFPackLinearSolver : public LinearSolver {
 public:
-	UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs);
-	virtual ~UMFPackLinearSolver();
+  UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs);
+  virtual ~UMFPackLinearSolver();
 
-	virtual bool solve();
+  virtual bool solve();
 
 protected:
-	UMFPackMatrix *m;
-	UMFPackVector *rhs;
+  UMFPackMatrix *m;
+  UMFPackVector *rhs;
 };
 
 #endif

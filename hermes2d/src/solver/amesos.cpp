@@ -51,7 +51,7 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 
 AmesosSolver::~AmesosSolver()
 {
-	_F_
+  _F_
 #ifdef HAVE_AMESOS
   delete solver;
   //if (m != NULL) delete m;
@@ -61,62 +61,62 @@ AmesosSolver::~AmesosSolver()
 
 bool AmesosSolver::is_available(const char *name)
 {
-	_F_
+  _F_
 #ifdef HAVE_AMESOS
-	return factory.Query(name);
+  return factory.Query(name);
 #else
-	return false;
+  return false;
 #endif
 }
 
 void AmesosSolver::set_use_transpose(bool use_transpose)
 {
-	_F_
+  _F_
 #ifdef HAVE_AMESOS
-	solver->SetUseTranspose(use_transpose);
+  solver->SetUseTranspose(use_transpose);
 #endif
 }
 
 bool AmesosSolver::use_transpose()
 {
-	_F_
+  _F_
 #ifdef HAVE_AMESOS
-	return solver->UseTranspose();
+  return solver->UseTranspose();
 #else
-	return false;
+  return false;
 #endif
 }
 
 bool AmesosSolver::solve()
 {
-	_F_
+  _F_
 #ifdef HAVE_AMESOS
-	assert(m != NULL);
-	assert(rhs != NULL);
+  assert(m != NULL);
+  assert(rhs != NULL);
   
-	TimePeriod tmr;
+  TimePeriod tmr;
 
-	Epetra_Vector x(*rhs->std_map);
+  Epetra_Vector x(*rhs->std_map);
 
-	problem.SetOperator(m->mat);
-	problem.SetRHS(rhs->vec);
-	problem.SetLHS(&x);
+  problem.SetOperator(m->mat);
+  problem.SetRHS(rhs->vec);
+  problem.SetLHS(&x);
 
-	if ((error = solver->SymbolicFactorization()) != 0) return false;
-	if ((error = solver->NumericFactorization()) != 0) return false;
-	if ((error = solver->Solve()) != 0) return false;
+  if ((error = solver->SymbolicFactorization()) != 0) return false;
+  if ((error = solver->NumericFactorization()) != 0) return false;
+  if ((error = solver->Solve()) != 0) return false;
 
-	tmr.tick();
-	time = tmr.accumulated();
+  tmr.tick();
+  time = tmr.accumulated();
 
-	delete [] sln;
-	sln = new scalar[m->size]; MEM_CHECK(sln);
-	// copy the solution into sln vector
-	memset(sln, 0, m->size * sizeof(scalar));
-	for (int i = 0; i < m->size; i++) sln[i] = x[i];
+  delete [] sln;
+  sln = new scalar[m->size]; MEM_CHECK(sln);
+  // copy the solution into sln vector
+  memset(sln, 0, m->size * sizeof(scalar));
+  for (int i = 0; i < m->size; i++) sln[i] = x[i];
 
-	return true;
+  return true;
 #else
-	return false;
+  return false;
 #endif
 }
