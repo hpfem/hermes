@@ -16,6 +16,7 @@
 #ifndef __H2D_PRECOND_H_
 #define __H2D_PRECOND_H_
 
+#include "../config.h"
 #include "../matrix.h"
 #include "../weakform.h"
 

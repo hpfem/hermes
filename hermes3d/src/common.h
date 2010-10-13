@@ -20,6 +20,8 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#include "config.h"
+
 // common headers
 #include <stdio.h>
 #include <stdlib.h>
