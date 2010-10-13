@@ -681,7 +681,9 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   memset(norms, 0, num * sizeof(double));
   double *errors_components = new double[num];
   memset(errors_components, 0, num * sizeof(double));
-  this->errors_squared_sum = 0.0;
+  if(solutions_for_adapt)
+    this->errors_squared_sum = 0.0;
+  double total_error = 0.0;
 
   // Calculate error.
   Element **ee;
@@ -697,10 +699,14 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 
 		      norms[i] += nrm;
 		      total_norm  += nrm;
+          total_error += err;
           errors_components[i] += err;
-		      errors_squared_sum += err;
           if(solutions_for_adapt)
-		        errors[i][ee[i]->id] += err;
+          {
+            this->errors[i][ee[i]->id] += err;
+		        this->errors_squared_sum += err;
+          }
+
 	      }
       }
     }
@@ -752,9 +758,9 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 
   // Return error value.
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-    return sqrt(errors_squared_sum);
+    return sqrt(total_error);
   else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-    return sqrt(errors_squared_sum);
+    return sqrt(total_error / total_norm);
   else {
     error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
     return -1.0;
