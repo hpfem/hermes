@@ -26,7 +26,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+#ifndef _WIN32
+// Microsoft C libraries do not have backtrace() functionality
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -479,3 +480,6 @@ void Teuchos::print_stack_on_segfault()
     signal(SIGSEGV, loc_segfault_callback_print_stack);
     signal(SIGABRT, loc_abort_callback_print_stack);
 }
+#else
+#define backtrace (params)
+#endif

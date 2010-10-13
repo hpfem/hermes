@@ -62,8 +62,10 @@ void sighandler(int signo) {
 }
 
 // Comment this out stop using Teuchos stacktrace (in that case the stacktrace
-// code originally in h3d will be used).
-#define HERMES_USE_TEUCHOS_STACKTRACE
+// code originally in h3d will be used). Teuchos stacktrace not used for WIN32 (execinfo.h and cxxabi.h absent).
+#ifndef _WIN32
+  #define HERMES_USE_TEUCHOS_STACKTRACE
+#endif
 
 void callstack_initialize() {
 	// install our signal handlers
