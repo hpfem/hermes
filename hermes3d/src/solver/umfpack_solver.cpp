@@ -301,8 +301,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
   _F_
 #ifdef WITH_UMFPACK
 #else
-  printf("hermes2d was not built with UMFPACK support.\n");
-        exit(0);
+  error("hermes3d was not built with UMFPACK support.");
 #endif
 }
 

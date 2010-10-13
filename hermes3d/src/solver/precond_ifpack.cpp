@@ -28,7 +28,7 @@
 #include <Ifpack_Graph_Epetra_CrsGraph.h>
 #endif
 
-#define IFPACK_NOT_COMPILED "hermes2d was not built with Ifpack support."
+#define IFPACK_NOT_COMPILED "hermes3d was not built with Ifpack support."
 
 IfpackPrecond::IfpackPrecond(const char *cls, const char *type)
 {

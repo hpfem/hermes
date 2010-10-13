@@ -23,7 +23,7 @@
 #include "../../common/callstack.h"
 #include "../../common/timer.h"
 
-#define H2D_PETSC_NOT_COMPILED    "hermes2d was not built with PETSc support."
+#define H3D_PETSC_NOT_COMPILED    "hermes3d was not built with PETSc support."
 
 
 PetscMatrix::PetscMatrix() {
@@ -31,7 +31,7 @@ PetscMatrix::PetscMatrix() {
 #ifdef WITH_PETSC
   inited = false;
 #else
-  error(H2D_PETSC_NOT_COMPILED);
+  error(H3D_PETSC_NOT_COMPILED);
 #endif
 }
 
@@ -151,7 +151,7 @@ PetscVector::PetscVector() {
 #ifdef WITH_PETSC
   inited = false;
 #else
-  error(H2D_PETSC_NOT_COMPILED);
+  error(H3D_PETSC_NOT_COMPILED);
 #endif
 }
 
@@ -250,7 +250,7 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
   _F_
 #ifdef WITH_PETSC
 #else
-  warning(H2D_PETSC_NOT_COMPILED);
+  warning(H3D_PETSC_NOT_COMPILED);
   exit(128);
 #endif
 }
@@ -258,10 +258,8 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
 PetscLinearSolver::~PetscLinearSolver() {
   _F_
 #ifdef WITH_PETSC
-  if (lp != NULL) {
-    delete m;
-    delete rhs;
-  }
+  //if (m != NULL) delete m;
+  //if (rhs != NULL) delete rhs;
 #endif
 }
 

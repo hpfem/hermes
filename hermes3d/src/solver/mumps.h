@@ -24,18 +24,22 @@
 #include "../matrix.h"
 
 #ifdef WITH_MUMPS
-extern "C" {
-  #include <mumps_c_types.h>
-#ifndef H2D_COMPLEX
-  #include <dmumps_c.h>
+  extern "C" {
+    #include <mumps_c_types.h>
+  #ifndef H3D_COMPLEX
+    #include <dmumps_c.h>
+  #else
+    #include <zmumps_c.h>
+  #endif
+  }
+  
+  #ifdef WITH_MPI
+    #include <mpi.h>
+  #endif
 #else
-  #include <zmumps_c.h>
-#endif
-}
-#else
-struct ZMUMPS_COMPLEX {
-  double r, i;
-};
+  struct ZMUMPS_COMPLEX {
+    double r, i;
+  };
 #endif
 
 
@@ -59,7 +63,7 @@ protected:
   int nnz;				// number of non-zero elements
   int *irn;				// row indices
   int *jcn;				// column indices
-#ifndef H2D_COMPLEX
+#ifndef H3D_COMPLEX
   scalar *a;				// matrix entries
 #else
   ZMUMPS_COMPLEX *a;
@@ -78,7 +82,7 @@ public:
 
   virtual void alloc(int ndofs);
   virtual void free();
-#ifndef H2D_COMPLEX
+#ifndef H3D_COMPLEX
   virtual scalar get(int idx) { return v[idx]; }
 #else
   virtual scalar get(int idx) { return std::complex<double>(v[idx].r, v[idx].i); }
@@ -91,7 +95,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifndef H2D_COMPLEX
+#ifndef H3D_COMPLEX
   scalar *v;
 #else
   ZMUMPS_COMPLEX *v;
