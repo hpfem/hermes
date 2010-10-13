@@ -99,12 +99,12 @@ set(REPORT_TIME             NO)   #time will not be measured and time measuremen
 
 # Allow to override the default values in CMake.vars:
 if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
-	include(CMake.vars)
+  include(CMake.vars)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 
 # Set overrides:
 if(WITH_PYTHON)
-	set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
+  set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
 endif(WITH_PYTHON)
 
 #
@@ -126,23 +126,23 @@ if(MSVC)
         set(HERMES_CPLX_BIN hermes2d-cplx)
     endif(H2D_COMPLEX)
 else(MSVC)
-	if(DEBUG)
-		if(H2D_REAL)
-			set(HERMES_REAL_BIN hermes2d-real-debug)
-		endif(H2D_REAL)
-		if(H2D_COMPLEX)
-			set(HERMES_CPLX_BIN hermes2d-cplx-debug)
-		endif(H2D_COMPLEX)
-	endif(DEBUG)
+  if(DEBUG)
+    if(H2D_REAL)
+      set(HERMES_REAL_BIN hermes2d-real-debug)
+    endif(H2D_REAL)
+    if(H2D_COMPLEX)
+      set(HERMES_CPLX_BIN hermes2d-cplx-debug)
+    endif(H2D_COMPLEX)
+  endif(DEBUG)
 
-	if(RELEASE)
-		if(H2D_REAL)
-			set(HERMES_REAL_BIN hermes2d-real)
-		endif(H2D_REAL)
-		if(H2D_COMPLEX)
-			set(HERMES_CPLX_BIN hermes2d-cplx)
-		endif(H2D_COMPLEX)
-	endif(RELEASE)
+  if(RELEASE)
+    if(H2D_REAL)
+      set(HERMES_REAL_BIN hermes2d-real)
+    endif(H2D_REAL)
+    if(H2D_COMPLEX)
+      set(HERMES_CPLX_BIN hermes2d-cplx)
+    endif(H2D_COMPLEX)
+  endif(RELEASE)
 endif(MSVC)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -161,7 +161,7 @@ else(WITH_GLUT)
 endif(WITH_GLUT)
 
 if(WITH_VIEWER_GUI)
-	find_package(ANTTWEAKBAR REQUIRED)
+  find_package(ANTTWEAKBAR REQUIRED)
   include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
 endif(WITH_VIEWER_GUI)
 
@@ -199,34 +199,34 @@ endif(NOT MSVC)
  
 # Solvers:
 if(WITH_UMFPACK)
-	find_package(UMFPACK REQUIRED)
+  find_package(UMFPACK REQUIRED)
   include_directories(${UMFPACK_INCLUDE_DIR})
   include_directories(${AMD_INCLUDE_DIR})
 endif(WITH_UMFPACK)
 
 if(WITH_TRILINOS)
-	find_package(TRILINOS REQUIRED)
-	include_directories(${TRILINOS_INCLUDE_DIR})
+  find_package(TRILINOS REQUIRED)
+  include_directories(${TRILINOS_INCLUDE_DIR})
 endif(WITH_TRILINOS)
 
 if(WITH_MUMPS)
-	find_package(MUMPS REQUIRED)
-	if(WITH_MPI)
-		find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
+  find_package(MUMPS REQUIRED)
+  if(WITH_MPI)
+    find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
   endif(WITH_MPI)
   include_directories(${MUMPS_INCLUDE_DIR})
 endif(WITH_MUMPS)
 
 if(WITH_PETSC)
-	find_package(PETSC REQUIRED)
-	# For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
-	# different directories), so we can't globally set the architecture-specific include directory here, but 
-	# rather on a per-target basis.
-	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
+  find_package(PETSC REQUIRED)
+  # For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
+  # different directories), so we can't globally set the architecture-specific include directory here, but 
+  # rather on a per-target basis.
+  include_directories(${COMMON_PETSC_INCLUDE_DIRS})
 endif(WITH_PETSC)
 
 if(WITH_PARDISO)
-	find_package(PARDISO REQUIRED) 
+  find_package(PARDISO REQUIRED) 
 endif(WITH_PARDISO)
 
 include(CheckIncludeFile)
@@ -243,30 +243,30 @@ add_subdirectory(src)
 
 if(WITH_TESTS)
   enable_testing()
-	add_subdirectory(tests)
+  add_subdirectory(tests)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
-	add_subdirectory(python)
-	find_package(PythonLibs REQUIRED)
+  add_subdirectory(python)
+  find_package(PythonLibs REQUIRED)
   find_package(NumPy REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
-	add_subdirectory(examples)
+  add_subdirectory(examples)
 endif(WITH_EXAMPLES)
 
 if(WITH_BENCHMARKS)
-	add_subdirectory(benchmarks)
+  add_subdirectory(benchmarks)
 endif(WITH_BENCHMARKS)
 
 if(WITH_TUTORIAL)
-	add_subdirectory(tutorial)
+  add_subdirectory(tutorial)
 endif(WITH_TUTORIAL)
 
 if(WITH_UTIL)
-	add_subdirectory(util)
+  add_subdirectory(util)
 endif(WITH_UTIL)
 
 add_custom_target(test COMMAND ctest)

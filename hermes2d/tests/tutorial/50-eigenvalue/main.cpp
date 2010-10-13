@@ -122,14 +122,10 @@ int main(int argc, char* argv[])
 
     // Convert coefficient vector into a Solution.
     Solution::vector_to_solution(coeff_vec, &space, &sln);
-
-    // Wait for keypress.
-    View::wait(HERMES_WAIT_KEYPRESS);
   }  
   fclose(file);
 
   delete [] coeff_vec;
-
-  return 0; 
+  // wait for test functions. 
 };
 
