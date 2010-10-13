@@ -508,9 +508,9 @@ double Adapt::eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
                                  MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2)
 {
   RefMap *rv1 = sln1->get_refmap();
-	RefMap *rv2 = sln1->get_refmap();
-	RefMap *rrv1 = rsln1->get_refmap();
-	RefMap *rrv2 = rsln1->get_refmap();
+  RefMap *rv2 = sln1->get_refmap();
+  RefMap *rrv1 = rsln1->get_refmap();
+  RefMap *rrv2 = rsln1->get_refmap();
 
   // determine the integration order
   int inc = (rsln1->get_num_components() == 2) ? 1 : 0;
@@ -574,7 +574,7 @@ double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
                                 MeshFunction *rsln1, MeshFunction *rsln2)
 {
   RefMap *rrv1 = rsln1->get_refmap();
-	RefMap *rrv2 = rsln1->get_refmap();
+  RefMap *rrv2 = rsln1->get_refmap();
 
   // determine the integration order
   int inc = (rsln1->get_num_components() == 2) ? 1 : 0;
@@ -630,59 +630,58 @@ double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
 double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double>* component_errors, bool solutions_for_adapt)
 {
   _F_
-	int i, j, k;
+  int i, j, k;
 
-	int n = slns.size();
-	if (n != this->num) EXIT("Wrong number of solutions.");
+  int n = slns.size();
+  if (n != this->num) EXIT("Wrong number of solutions.");
 
-	Timer tmr;
-	tmr.start();
+  Timer tmr;
+  tmr.start();
 
   Solution* rslns_original[10];
   Solution* slns_original[10];
 
-	for (i = 0; i < n; i++) {
+  for (i = 0; i < n; i++) {
     slns_original[i] = this->sln[i];
-	  this->sln[i] = slns[i];
-	  sln[i]->set_quad_2d(&g_quad_2d_std);
-	}
-	for (i = 0; i < n; i++) {
+    this->sln[i] = slns[i];
+    sln[i]->set_quad_2d(&g_quad_2d_std);
+  }
+  for (i = 0; i < n; i++) {
     rslns_original[i] = this->rsln[i];
-	  this->rsln[i] = rslns[i];
-	  rsln[i]->set_quad_2d(&g_quad_2d_std);
-	}
+    this->rsln[i] = rslns[i];
+    rsln[i]->set_quad_2d(&g_quad_2d_std);
+  }
 
   have_coarse_solutions = true;
   have_reference_solutions = true;
 
   // Prepare multi-mesh traversal and error arrays.
   Mesh **meshes = new Mesh *[2 * num];
-	Transformable **tr = new Transformable *[2 * num];
-	Traverse trav;
-	num_act_elems = 0;
-	for (i = 0; i < num; i++) {
-		meshes[i] = sln[i]->get_mesh();
-		meshes[i + num] = rsln[i]->get_mesh();
-		tr[i] = sln[i];
-		tr[i + num] = rsln[i];
+  Transformable **tr = new Transformable *[2 * num];
+  Traverse trav;
+  num_act_elems = 0;
+  for (i = 0; i < num; i++) {
+    meshes[i] = sln[i]->get_mesh();
+    meshes[i + num] = rsln[i]->get_mesh();
+    tr[i] = sln[i];
+    tr[i + num] = rsln[i];
 
-		num_act_elems += sln[i]->get_mesh()->get_num_active_elements();
+    num_act_elems += sln[i]->get_mesh()->get_num_active_elements();
 
-		int max = meshes[i]->get_max_element_id();
-		  if(solutions_for_adapt) {
-        if (errors[i] != NULL) delete [] errors[i];
-		    errors[i] = new double[max];
-		    memset(errors[i], 0, sizeof(double) * max);
-      }
-	 }
+    int max = meshes[i]->get_max_element_id();
+    if(solutions_for_adapt) {
+      if (errors[i] != NULL) delete [] errors[i];
+      errors[i] = new double[max];
+      memset(errors[i], 0, sizeof(double) * max);
+    }
+  }
 
   double total_norm = 0.0;
   double *norms = new double[num];
   memset(norms, 0, num * sizeof(double));
   double *errors_components = new double[num];
   memset(errors_components, 0, num * sizeof(double));
-  if(solutions_for_adapt)
-    this->errors_squared_sum = 0.0;
+  if(solutions_for_adapt) this->errors_squared_sum = 0.0;
   double total_error = 0.0;
 
   // Calculate error.
@@ -691,23 +690,22 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   while ((ee = trav.get_next_state(NULL, NULL)) != NULL) {
     for (i = 0; i < num; i++) {
       for (j = 0; j < num; j++) {
-	      if (form[i][j] != NULL) {
-		      double err, nrm;
+	if (form[i][j] != NULL) {
+	  double err, nrm;
 					
           err = fabs(eval_error(form[i][j], ord[i][j], sln[i], sln[j], rsln[i], rsln[j]));
-		      nrm = fabs(eval_norm(form[i][j], ord[i][j], rsln[i], rsln[j]));
+	  nrm = fabs(eval_norm(form[i][j], ord[i][j], rsln[i], rsln[j]));
 
-		      norms[i] += nrm;
-		      total_norm  += nrm;
+	  norms[i] += nrm;
+	  total_norm  += nrm;
           total_error += err;
           errors_components[i] += err;
           if(solutions_for_adapt)
           {
             this->errors[i][ee[i]->id] += err;
-		        this->errors_squared_sum += err;
+	    this->errors_squared_sum += err;
           }
-
-	      }
+	}
       }
     }
   }
@@ -754,7 +752,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
       this->sln[i] = slns_original[i];
       this->rsln[i] = rslns_original[i];
     }
-	}
+  }
 
   // Return error value.
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
