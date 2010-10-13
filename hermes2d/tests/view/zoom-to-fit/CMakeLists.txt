@@ -1,3 +1,6 @@
+if(NOT H2D_REAL)
+    return()
+endif(NOT H2D_REAL)
 project(zoom-to-fit)
 
 add_executable(${PROJECT_NAME} main.cpp)
