@@ -41,3 +41,4 @@ if(WITH_TRILINOS)
 endif(WITH_TRILINOS)
 
 add_subdirectory(50-eigenvalue)
+add_subdirectory(51-eigenvalue-adapt)
