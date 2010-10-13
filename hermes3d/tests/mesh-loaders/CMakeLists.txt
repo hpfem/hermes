@@ -1,6 +1,6 @@
 project(mesh-loader)
 
-include(${hermes3d_SOURCE_DIR}/CMake.common}
+include(${hermes3d_SOURCE_DIR}/CMake.common)
 
 if(H3D_REAL)
 
