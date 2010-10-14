@@ -702,6 +702,10 @@ void Adapt::adapt(double thr)
 
 	tmr.stop();
 	adapt_time = tmr.get_seconds();
+  
+  for (int j = 0; j < num; j++)
+    spaces[j]->assign_dofs();
+  
   delete [] mesh;
 }
 
@@ -834,11 +838,16 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	Timer tmr;
 	tmr.start();
 
+  Solution* rslns_original[10];
+  Solution* slns_original[10];
+
 	for (i = 0; i < n; i++) {
+    slns_original[i] = this->sln[i];
 	  this->sln[i] = slns[i];
 	  this->sln[i]->enable_transform(true);
 	}
 	for (i = 0; i < n; i++) {
+    rslns_original[i] = this->rsln[i];
 	  this->rsln[i] = rslns[i];
 	  this->rsln[i]->enable_transform(true);
 	}
@@ -857,8 +866,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 		nact += sln[i]->get_mesh()->get_num_active_elements();
 
 		int max = meshes[i]->get_max_element_id();
-		if(solutions_for_adapt)
-    {
+    if(solutions_for_adapt) {
       if (errors[i] != NULL) delete [] errors[i];
 		  errors[i] = new double[max];
 		  memset(errors[i], 0, sizeof(double) * max);
@@ -870,6 +878,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	memset(norms, 0, num * sizeof(double));
 	double *errors_components = new double[num];
 	memset(errors_components, 0, num * sizeof(double));
+  if(solutions_for_adapt) this->total_err = 0.0;
   double total_error = 0.0;
   if(solutions_for_adapt)
   {
@@ -901,7 +910,10 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
           errors_components[i] += err;
 					total_error += err;
           if(solutions_for_adapt)
-					  errors[i][ee[i]->id - 1] += err;
+          {
+            this->errors[i][ee[i]->id - 1] += err;
+	          this->total_err += err;
+          }
 				}
 
 			}
@@ -910,22 +922,22 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	trav.finish();
 
   // Store the calculation for each solution component separately.
-  if(component_errors != NULL)
-  {
+  if(component_errors != NULL) {
     component_errors->clear();
-    for (int i = 0; i < num; i++)
-    {
+    for (int i = 0; i < num; i++) {
       if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
         component_errors->push_back(sqrt(errors_components[i]));
       else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
         component_errors->push_back(sqrt(errors_components[i]/norms[i]));
-      else
-      {
+      else {
         error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
     }
   }
+
+  tmr.stop();
+  error_time = tmr.get_seconds();
 
   if(solutions_for_adapt)
   {
@@ -942,20 +954,17 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
     assert(k == nact);
     cmp_err = errors;
     qsort(esort, nact, sizeof(int2), compare);
+    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) 
+      total_err = total_err / total_norm;
 
     have_errors = true;
   }
-    
-	tmr.stop();
-	error_time = tmr.get_seconds();
-
-#ifdef DEBUG_PRINT
-	printf("\n");
-	for (int i = 0; i < std::min(10, nact); i++) {
-		printf("  - element error #%d = % e\n", esort[i][0], errors[0][esort[i][0] - 1]);
-	}
-#endif
-  
+  else {
+    for (i = 0; i < n; i++) {
+      this->sln[i] = slns_original[i];
+      this->rsln[i] = rslns_original[i];
+    }
+  }  
   delete [] meshes;
   delete [] tr;
   delete [] norms;

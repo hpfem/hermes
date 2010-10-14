@@ -33,6 +33,9 @@ public:
                               Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
   static void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
                               scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());  
+  static void project_global(Space* space, 
+                              Solution* sol_src, Solution* sol_dest, 
+                              MatrixSolverType matrix_solver, ProjNormType proj_norm);
 protected:
 
   // Underlying function for global orthogonal projection.
@@ -113,8 +116,8 @@ protected:
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++) {
-      result = result + wt[i] * (u->curl0[i] * CONJ(v->curl0[i]) + u->curl1[i] * CONJ(v->curl1[i]) + u->curl2[i] * CONJ(v->curl2[i]));
-      result = result + wt[i] * (u->val0[i] * CONJ(v->val0[i]) + u->val1[i] * CONJ(v->val1[i]));
+      result += wt[i] * (u->curl0[i] * CONJ(v->curl0[i]) + u->curl1[i] * CONJ(v->curl1[i]) + u->curl2[i] * CONJ(v->curl2[i]));
+      result += wt[i] * (u->val0[i] * CONJ(v->val0[i]) + u->val1[i] * CONJ(v->val1[i]));
     }
     return result;
   }
@@ -125,10 +128,9 @@ protected:
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++) {
-      result = result + wt[i] * (ext->fn[0].curl0[i] * CONJ(v->curl0[i]) + ext->fn[0].curl1[i] * CONJ(v->curl1[i]) + ext->fn[0].curl2[i] * CONJ(v->curl2[i]));
-      result = result + wt[i] * (ext->fn[0].val0[i] * CONJ(v->val0[i]) + ext->fn[0].val1[i] * CONJ(v->val1[i]));
+      result += wt[i] * (ext->fn[0].curl0[i] * CONJ(v->curl0[i]) + ext->fn[0].curl1[i] * CONJ(v->curl1[i]) + ext->fn[0].curl2[i] * CONJ(v->curl2[i]));
+      result += wt[i] * (ext->fn[0].val0[i] * CONJ(v->val0[i]) + ext->fn[0].val1[i] * CONJ(v->val1[i]));
     }
-
     return result;
   }
 };

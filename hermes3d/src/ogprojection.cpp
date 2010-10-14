@@ -113,3 +113,10 @@ void OGProjection::project_global(Tuple<Space *> spaces,
   
   delete [] target_vec;
 }
+
+void OGProjection::project_global(Space* space, 
+                              Solution* sol_src, Solution* sol_dest, 
+                              MatrixSolverType matrix_solver, ProjNormType proj_norm)
+{
+  project_global(Tuple<Space *>(space), Tuple<Solution *>(sol_src), Tuple<Solution *>(sol_dest), matrix_solver, Tuple<ProjNormType>(proj_norm));
+}

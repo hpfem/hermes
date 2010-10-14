@@ -1,5 +1,5 @@
 template<typename real, typename scalar>
-scalar biform(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<real> *u, fn_t<real> *v, geom_t<real> *e, user_data_t<scalar> *data)
+scalar biform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e, ExtData<scalar> *data)
 {
   return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
 }
@@ -17,7 +17,7 @@ real rhs(real x, real y, real z)
 }
 
 template<typename real, typename scalar>
-scalar liform(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<real> *v, geom_t<real> *e, user_data_t<scalar> *data)
+scalar liform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v, Geom<real> *e, ExtData<scalar> *data)
 {
   return -int_F_v<real, scalar>(n, wt, rhs, v, e);
 }
