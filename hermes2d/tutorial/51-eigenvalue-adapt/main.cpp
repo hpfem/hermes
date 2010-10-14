@@ -20,7 +20,7 @@ using namespace RefinementSelectors;
 const int NUMBER_OF_EIGENVALUES = 6;              // Desired number of eigenvalues.
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
-double TARGET_VALUE = 2.0;                       // PySparse parameter: Eigenvalues in the vicinity of 
+double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of 
                                                   // this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(ref_coeff_vec, ref_space, &(ref_sln[ieig]));
 
       // Project the fine mesh solution onto the coarse mesh.
-      info("Projecting reference solution on coarse mesh.");
+      info("Projecting reference solution %d on coarse mesh.", ieig);
       OGProjection::project_global(&space, &(ref_sln[ieig]), &(sln[ieig]), matrix_solver);
     }  
     fclose(file);
@@ -213,11 +213,13 @@ int main(int argc, char* argv[])
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    info("Calculating error estimate.");
+    Adapt* adaptivity = new Adapt(Tuple<Space *>(&space, &space, &space, &space, &space, &space), 
+      Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
     bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&(sln[NUMBER_OF_EIGENVALUES-1]), 
-                         &(ref_sln[NUMBER_OF_EIGENVALUES-1]), solutions_for_adapt, 
+    Tuple<Solution *> slns(&(sln[0]), &(sln[1]), &(sln[2]), &(sln[3]), &(sln[4]), &(sln[5]));
+    Tuple<Solution *> ref_slns(&(ref_sln[0]), &(ref_sln[1]), &(ref_sln[2]), &(ref_sln[3]), &(ref_sln[4]), &(ref_sln[5]));
+    double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
@@ -238,7 +240,7 @@ int main(int argc, char* argv[])
     else
     {
       info("Adapting coarse mesh.");
-      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
