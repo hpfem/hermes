@@ -117,8 +117,9 @@ macro(LIBRARY_SETTINGS BIN)
       ${JUDY_LIBRARY}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
+      ${HDF5_LIBRARY}
       ${ANTTWEAKBAR_LIBRARY}
-      ${UMFPACK_LIBRARY} ${AMD_LIBRARY}
+      ${UMFPACK_LIBRARIES}
       ${PARDISO_LIBRARY}
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
@@ -223,7 +224,7 @@ CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)
 
 # Create a file with preprocessor definitions (mainly to determine which TPL's 
 # are present on the system during compilation):
-CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
                 ${CMAKE_CURRENT_SOURCE_DIR}/config.h  )
 
 

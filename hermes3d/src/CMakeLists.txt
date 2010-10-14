@@ -1,6 +1,9 @@
-project(hermes3d)
+# Enabling multiprocessor build on MSVC
+if(MSVC)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif(MSVC)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})		# for config.h
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # source files for the hermes3d library
 set(SRC
@@ -65,54 +68,38 @@ set(SRC
 	${HERMES_COMMON_DIR}/timer.cpp
 )
 
+include_directories(${HERMES_COMMON_DIR})
+
+include(PickRealOrCplxLibs)
+    
+# Sets linker settings.
 macro(LIBRARY_SETTINGS BIN)
-	target_link_libraries(${BIN} ${JUDY_LIBRARY})
-	target_link_libraries(${BIN} ${PTHREAD_LIBRARY})
-	target_link_libraries(${BIN} ${BLAS_LIBRARIES})
-	if(NOT MSVC)
-		IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(${BIN} "rt")
-		ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	endif(NOT MSVC)
+#    target_link_libraries(${BIN} hermes_common)
 
-	if(WITH_PETSC)
-		include_directories(${PETSC_INCLUDE_DIR})
-		target_link_libraries(${BIN} ${PETSC_LIBRARIES})
-		target_link_libraries(${BIN} ${PETSC_LIBS})
-		target_link_libraries(${BIN} ${LAPACK_LIBRARIES})
-	endif(WITH_PETSC)
-
-	if(WITH_UMFPACK)
-		include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
-		target_link_libraries(${BIN} ${UMFPACK_LIBRARY} ${AMD_LIBRARY})
-		target_link_libraries(${BIN} ${LAPACK_LIBRARIES})
-	endif(WITH_UMFPACK)
-
-	if(WITH_PARDISO)
-		target_link_libraries(${BIN} ${PARDISO_LIBRARY})
-		target_link_libraries(${BIN} ${LAPACK_LIBRARIES})
-	endif(WITH_PARDISO)
-
-	if(WITH_MUMPS)
-		include_directories(${MUMPS_INCLUDE_DIR})
-		target_link_libraries(${BIN} ${MUMPS_LIBRARIES})
-		target_link_libraries(${BIN} ${LAPACK_LIBRARIES})
-	endif(WITH_MUMPS)
-
-	if(WITH_TRILINOS)
-		include_directories(${TRILINOS_INCLUDE_DIR})
-		target_link_libraries(${BIN} ${TRILINOS_LIBRARIES})
-	endif(WITH_TRILINOS)
-
-	if(WITH_HDF5)
-	endif(WITH_HDF5)
-
-	if(WITH_EXODUSII)
-		include_directories(${EXODUSII_INCLUDE_DIR})
-		target_link_libraries(${BIN} ${EXODUSII_LIBRARIES})
-	endif(WITH_EXODUSII)
-
-	target_link_libraries(${BIN} ${ADDITIONAL_LIBS})
+  if(NOT MSVC)
+      IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+          target_link_libraries(${BIN} "rt")
+      ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  endif(NOT MSVC)
+  
+  # Link with all third party libraries corresponding to selected configuration options.
+  # The respective variables will be empty for unselected TPL's.
+  PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
+  target_link_libraries(  ${BIN} 
+      ${JUDY_LIBRARY}
+      ${GLUT_LIBRARY} ${GLEW_LIBRARY}
+      ${EXODUSII_LIBRARIES}
+      ${HDF5_LIBRARY}
+      ${METIS_LIBRARY}
+      ${UMFPACK_LIBRARIES}
+      ${PARDISO_LIBRARY}
+      ${TRILINOS_LIBRARIES}
+      ${PETSC_LIBRARIES}
+      ${MUMPS_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
+      ${ADDITIONAL_LIBS}        
+  )
 endmacro(LIBRARY_SETTINGS)
 
 # real version
@@ -132,7 +119,7 @@ endif(H3D_COMPLEX)
 #
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-	${CMAKE_CURRENT_SOURCE_DIR}/h3dconfig.h
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h
 )
 
 
@@ -203,7 +190,7 @@ endif(H3D_REAL)
 if(H3D_COMPLEX)
 	if(MSVC)
 		set(MSVC_DLL_DEFINES "-D_HERMESDLL")
-		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "${MSVC_DLL_DEFINES} -DH2D_COMPLEX")	
+		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "${MSVC_DLL_DEFINES} -DH3D_COMPLEX")	
 	else(MSVC)
 		install(TARGETS ${HERMES_CPLX_BIN} LIBRARY DESTINATION lib)
 	endif(MSVC)

@@ -20,84 +20,83 @@
 #ifndef _PETSC_SOLVER_H_
 #define _PETSC_SOLVER_H_
 
-#include "../h3dconfig.h"
 #include "../matrix.h"
 #include "solver.h"
 
 #ifdef WITH_PETSC
-#include <petsc.h>
-#include <petscmat.h>
-#include <petscvec.h>
-#include <petscksp.h>
+  #include <petsc.h>
+  #include <petscmat.h>
+  #include <petscvec.h>
+  #include <petscksp.h>
 #endif
 
 /// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
 ///
 class PetscMatrix : public SparseMatrix {
 public:
-	PetscMatrix();
-	virtual ~PetscMatrix();
+  PetscMatrix();
+  virtual ~PetscMatrix();
 
-	virtual void alloc();
-	virtual void free();
-	virtual void finish();
-	virtual scalar get(int m, int n);
-	virtual void zero();
-	virtual void add(int m, int n, scalar v);
-	virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-	virtual int get_matrix_size() const;
-	virtual double get_fill_in() const;
+  virtual void alloc();
+  virtual void free();
+  virtual void finish();
+  virtual scalar get(int m, int n);
+  virtual void zero();
+  virtual void add(int m, int n, scalar v);
+  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual int get_matrix_size() const;
+  virtual double get_fill_in() const;
 
 protected:
 #ifdef WITH_PETSC
-	Mat matrix;
+  Mat matrix;
 #endif
-	bool inited;
+  bool inited;
 
-	friend class PetscLinearSolver;
+  friend class PetscLinearSolver;
 };
 
 /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
 ///
 class PetscVector : public Vector {
 public:
-	PetscVector();
-	virtual ~PetscVector();
+  PetscVector();
+  virtual ~PetscVector();
 
-	virtual void alloc(int ndofs);
-	virtual void free();
-	virtual void finish();
-	virtual scalar get(int idx);
-	virtual void extract(scalar *v) const;
-	virtual void zero();
-	virtual void set(int idx, scalar y);
-	virtual void add(int idx, scalar y);
-	virtual void add(int n, int *idx, scalar *y);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual void alloc(int ndofs);
+  virtual void free();
+  virtual void finish();
+  virtual scalar get(int idx);
+  virtual void extract(scalar *v) const;
+  virtual void zero();
+  virtual void set(int idx, scalar y);
+  virtual void add(int idx, scalar y);
+  virtual void add(int n, int *idx, scalar *y);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
 #ifdef WITH_PETSC
-	Vec vec;
+  Vec vec;
 #endif
-	bool inited;
+  bool inited;
 
-	friend class PetscLinearSolver;
+  friend class PetscLinearSolver;
 };
 
 /// Encapsulation of PETSc linear solver
 ///
 /// @ingroup solvers
-class PetscLinearSolver : public LinearSolver {
+class H3D_API PetscLinearSolver : public LinearSolver {
 public:
-	PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
-	virtual ~PetscLinearSolver();
+  PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
+  virtual ~PetscLinearSolver();
 
-	virtual bool solve();
+  virtual bool solve();
 
 protected:
-	PetscMatrix *m;
-	PetscVector *rhs;
+  PetscMatrix *m;
+  PetscVector *rhs;
 };
 
 #endif

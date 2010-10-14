@@ -26,65 +26,65 @@
 
 class PardisoMatrix : public SparseMatrix {
 public:
-	PardisoMatrix();
-	virtual ~PardisoMatrix();
+  PardisoMatrix();
+  virtual ~PardisoMatrix();
 
-	virtual void pre_add_ij(int row, int col);
-	virtual void alloc();
-	virtual void free();
-	virtual scalar get(int m, int n);
-	virtual void zero();
-	virtual void add(int m, int n, scalar v);
-	virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-	virtual int get_matrix_size() const;
-	virtual double get_fill_in() const;
+  virtual void pre_add_ij(int row, int col);
+  virtual void alloc();
+  virtual void free();
+  virtual scalar get(int m, int n);
+  virtual void zero();
+  virtual void add(int m, int n, scalar v);
+  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual int get_matrix_size() const;
+  virtual double get_fill_in() const;
 
 protected:
-	// PARDISO specific data structures for storing matrix, rhs
-	int *Ap;
-	int *Ai;
-	scalar *Ax;
+  // PARDISO specific data structures for storing matrix, rhs
+  int *Ap;
+  int *Ai;
+  scalar *Ax;
 
-	static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
+  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
 
-	friend class PardisoLinearSolver;
+  friend class PardisoLinearSolver;
 };
 
 class PardisoVector : public Vector {
 public:
-	PardisoVector();
-	virtual ~PardisoVector();
+  PardisoVector();
+  virtual ~PardisoVector();
 
-	virtual void alloc(int ndofs);
-	virtual void free();
-	virtual scalar get(int idx) { return v[idx]; }
-	virtual void zero();
-	virtual void set(int idx, scalar y);
-	virtual void add(int idx, scalar y);
+  virtual void alloc(int ndofs);
+  virtual void free();
+  virtual scalar get(int idx) { return v[idx]; }
+  virtual void zero();
+  virtual void set(int idx, scalar y);
+  virtual void add(int idx, scalar y);
   virtual void extract(scalar *v) const;
-	virtual void add(int n, int *idx, scalar *y);
-	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+  virtual void add(int n, int *idx, scalar *y);
+  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-	scalar *v;
+  scalar *v;
 
-	friend class PardisoLinearSolver;
+  friend class PardisoLinearSolver;
 };
 
 /// Encapsulation of PARDISO linear solver
 ///
 /// @ingroup solvers
-class PardisoLinearSolver : public LinearSolver {
+class H3D_API PardisoLinearSolver : public LinearSolver {
 public:
-	PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
-	virtual ~PardisoLinearSolver();
+  PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
+  virtual ~PardisoLinearSolver();
 
-	virtual bool solve();
+  virtual bool solve();
 
 protected:
-	PardisoMatrix *m;
-	PardisoVector *rhs;
+  PardisoMatrix *m;
+  PardisoVector *rhs;
 };
 
 #endif /* _PARDISO_SOLVER_H_*/

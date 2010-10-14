@@ -34,21 +34,21 @@
 #define HERMES_TOTAL_ERROR_REL  0x00  
                                 ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                 ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
-                                ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
+                                ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H3D_TOTAL_ERROR_ABS.
 #define HERMES_TOTAL_ERROR_ABS  0x01  
                                 ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                 ///  The total error is absolute, i.e., it is an integral over squares of differencies.
-                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_TOTAL_ERROR_REL.
+                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H3D_TOTAL_ERROR_REL.
 #define HERMES_ELEMENT_ERROR_REL 0x00 
                                 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
                                 ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
                                 ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
-                                ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
-                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
+                                ///  Navier-stokes on different meshes work only when absolute error (see ::H3D_ELEMENT_ERROR_ABS) is used.
+                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H3D_ELEMENT_ERROR_ABS.
 #define HERMES_ELEMENT_ERROR_ABS 0x10 
                                 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
                                 ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
-                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_REL.
+                                ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H3D_ELEMENT_ERROR_REL.
 #define HERMES_TOTAL_ERROR_MASK 0x0F 
                                 ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 

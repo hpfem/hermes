@@ -32,6 +32,24 @@
 #include <float.h>
 #include <cmath>
 
+// STL stuff
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <sstream>
+#include <fstream>
+
+// platform compatibility stuff
+#include "compat.h"
+
+// others
+#include <Judy.h>
+#include "auto_local_array.h"
+#include "common_time_period.h"
+#include "tuple.h"
+
 // error codes
 #define H2D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
 #define H2D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
@@ -125,24 +143,6 @@ enum ProjNormType
 
 // Default HERMES projection norm is the H1 norm.
 const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
-
-// STL stuff
-#include <algorithm>
-#include <vector>
-#include <map>
-#include <set>
-#include <queue>
-#include <sstream>
-#include <fstream>
-
-// platform compatibility stuff
-#include "compat.h"
-
-// others
-#include <Judy.h>
-#include "auto_local_array.h"
-#include "common_time_period.h"
-#include "tuple.h"
 
 // Enabling second derivatives in weak forms. Turned off by default. Second
 // derivatives are employed, among others, by stabilization methods for

@@ -17,7 +17,6 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "h3dconfig.h"
 #include "common.h"
 #include "matrix.h"
 
@@ -115,6 +114,16 @@ SparseMatrix::SparseMatrix()
 {
 	_F_
 	size = 0;
+	pages = NULL;
+
+	row_storage = false;
+	col_storage = false;
+}
+
+SparseMatrix::SparseMatrix(int size)
+{
+	_F_
+	this->size = size;
 	pages = NULL;
 
 	row_storage = false;

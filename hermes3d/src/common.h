@@ -20,6 +20,8 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#include "config.h"
+
 // common headers
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,10 +33,16 @@
 #include <math.h>
 #include <errno.h>
 #include <cstdarg>
-#include <algorithm>			// std::min, std::max
+
+// STL stuff
+#include <algorithm>
 #include <vector>
-#include <set>
 #include <map>
+#include <set>
+#include <queue>
+#include <sstream>
+#include <fstream>
+
 #include "common_time_period.h"
 
 using namespace std;
@@ -59,15 +67,28 @@ using namespace std;
 #define H3D_ERR_PRISM_NOT_COMPILED              "hermes3d was not built with prism elements."
 #define H3D_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
 
-// Matrix solvers
+// Matrix solvers:
 enum MatrixSolverType 
 {
-   SOLVER_UMFPACK, 
+   SOLVER_UMFPACK = 0, 
    SOLVER_PETSC, 
    SOLVER_MUMPS,
    SOLVER_PARDISO,
    SOLVER_NOX,
-   SOLVER_AMESOS
+   SOLVER_AMESOS,
+   SOLVER_AZTECOO
+};
+
+// Should be in the same order as MatrixSolverTypes above, so that the
+// names may be accessed by the same enumeration variable.
+const std::string MatrixSolverNames[7] = {
+  "UMFPACK",
+  "PETSc",
+  "MUMPS",
+  "Pardiso",
+  "Trilinos/NOX",
+  "Trilinos/Amesos",
+  "Trilinos/AztecOO"
 };
 
 // Projection norms:

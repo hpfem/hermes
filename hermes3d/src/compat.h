@@ -6,8 +6,8 @@
    src/compat directory.
 */
 
-#ifndef __H2D_COMPAT_H
-#define __H2D_COMPAT_H
+#ifndef __H3D_COMPAT_H
+#define __H3D_COMPAT_H
 #include <stdio.h>
 
 #ifndef HAVE_FMEMOPEN
@@ -19,13 +19,13 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #if defined(WIN32) || defined(_WINDOWS)
 # if defined(_HERMESDLL)
 #   define H3D_API __declspec(dllexport)
-#   define H3D_API_USED_TEMPLATE(__implementation) template class H2D_API __implementation
-#   define H3D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
+#   define H3D_API_USED_TEMPLATE(__implementation) template class H3D_API __implementation
+#   define H3D_API_USED_STL_VECTOR(__type) H3D_API_USED_TEMPLATE(std::allocator<__type>); H3D_API_USED_TEMPLATE(std::vector<__type>)
 # else
 #   define H3D_API __declspec(dllexport)
 #   define H3D_API_USED_TEMPLATE(__implementation)
-//#   define H3D_API_USED_TEMPLATE(__implementation) extern template class H2D_API __implementation
-#   define H3D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
+//#   define H3D_API_USED_TEMPLATE(__implementation) extern template class H3D_API __implementation
+#   define H3D_API_USED_STL_VECTOR(__type) H3D_API_USED_TEMPLATE(std::allocator<__type>); H3D_API_USED_TEMPLATE(std::vector<__type>)
 # endif
 #else
 # define H3D_API

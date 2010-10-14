@@ -29,7 +29,6 @@
 //
 
 #include <common/error.h>
-#include "h3dconfig.h"
 #include "common.h"
 #include "transform.h"
 #include <common/callstack.h>

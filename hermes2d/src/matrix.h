@@ -229,11 +229,11 @@ enum EMatrixDumpFormat {
 	DF_NATIVE					// native format for the linear solver
 };
 
-class Matrix {
+class H2D_API Matrix {
 public:
 	virtual ~Matrix() { }
-	Matrix() {this->size = 0;};
-	Matrix(int size) {this->size = size;};
+	Matrix() {this->size = 0;}
+	Matrix(int size) {this->size = size;}
 
 	/// allocate the memory for stiffness matrix and right-hand side
 	virtual void alloc() = 0;
@@ -276,13 +276,13 @@ public:
 
  protected:
 
-        int size;							// matrix size
+    int size;  // matrix size
 };
 
-class SparseMatrix : public Matrix {
+class H2D_API SparseMatrix : public Matrix {
 public:
 	SparseMatrix();
-        SparseMatrix(int size);
+    SparseMatrix(int size);
 	virtual ~SparseMatrix();
 
 	/// prepare memory
@@ -353,7 +353,7 @@ protected:
 	int mem_size;
 };
 
-class Vector {
+class H2D_API Vector {
 public:
 	virtual ~Vector() { }
 

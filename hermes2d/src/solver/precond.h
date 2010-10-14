@@ -33,28 +33,28 @@
 /// @ingroup preconds
 class Precond
 #ifdef HAVE_EPETRA
-	: public Epetra_Operator
+  : public Epetra_Operator
 #endif
 {
 public:
-	virtual void create(Matrix *mat) = 0;
-	virtual void destroy() = 0;
-	virtual void compute() = 0;
+  virtual void create(Matrix *mat) = 0;
+  virtual void destroy() = 0;
+  virtual void compute() = 0;
 
 #ifdef HAVE_EPETRA
-	virtual Epetra_Operator *get_obj() = 0;
+  virtual Epetra_Operator *get_obj() = 0;
 
-	// Epetra_Operator interface
-	virtual int SetUseTranspose(bool UseTranspose) { return 0; }
-	virtual int Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const { return 0; }
-	virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const { return 0; }
-	virtual double NormInf() const { return 0.0; }
-	virtual const char *Label() const { return NULL; }
-	virtual bool UseTranspose() const { return false; }
-	virtual bool HasNormInf() const { return false; }
-	virtual const Epetra_Comm &Comm() const = 0;
-	virtual const Epetra_Map &OperatorDomainMap() const = 0;
-	virtual const Epetra_Map &OperatorRangeMap() const = 0;
+  // Epetra_Operator interface
+  virtual int SetUseTranspose(bool UseTranspose) { return 0; }
+  virtual int Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const { return 0; }
+  virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const { return 0; }
+  virtual double NormInf() const { return 0.0; }
+  virtual const char *Label() const { return NULL; }
+  virtual bool UseTranspose() const { return false; }
+  virtual bool HasNormInf() const { return false; }
+  virtual const Epetra_Comm &Comm() const = 0;
+  virtual const Epetra_Map &OperatorDomainMap() const = 0;
+  virtual const Epetra_Map &OperatorRangeMap() const = 0;
 #endif
 };
 

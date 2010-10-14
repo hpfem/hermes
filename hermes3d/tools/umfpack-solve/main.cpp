@@ -60,7 +60,7 @@ int readFromBinaryFile(const char *file) {
 
 	// matrix
 	fread(buf, sizeof(char), 8, fin);
-	if (strncmp(buf, "H2DX", 4) != 0) {
+	if (strncmp(buf, "H3DX", 4) != 0) {
 		printf("Matrix file corrupted.\n");
 		return -1;
 	}
@@ -79,7 +79,7 @@ int readFromBinaryFile(const char *file) {
 
 	// rhs
 	fread(buf, sizeof(char), 8, fin);
-	if (strncmp(buf, "H2DR", 4) != 0) {
+	if (strncmp(buf, "H3DR", 4) != 0) {
 		printf("Matrix file corrupted.\n");
 		return -1;
 	}
@@ -102,7 +102,7 @@ void dump_rhs(const char *file_name) {
 		return;
 	}
 
-	fwrite("H2DR\001\000\000\000", 1, 8, file);
+	fwrite("H3DR\001\000\000\000", 1, 8, file);
 	int ssize = sizeof(double);
 	fwrite(&ssize, sizeof(int), 1, file);
 	fwrite(&ndofs, sizeof(int), 1, file);

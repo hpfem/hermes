@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../config.h"
 #include "precond_ml.h"
 
 #define ML_NOT_COMPILED "hermes3d was not built with ML support."
@@ -21,86 +20,86 @@
 MlPrecond::MlPrecond(const char *type)
 {
 #ifdef HAVE_ML
-	this->prec = NULL;
-	this->owner = true;
-	this->mat = NULL;
+  this->prec = NULL;
+  this->owner = true;
+  this->mat = NULL;
 
-	if (strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
-	else if (strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
+  if (strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
+  else if (strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
 #else
-	error(ML_NOT_COMPILED);
+  error(ML_NOT_COMPILED);
 #endif
 }
 
 #ifdef HAVE_ML
 MlPrecond::MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc)
 {
-	this->prec = mpc;
-	this->owner = false;
-	this->mat = NULL;			// FIXME: get the matrix from mpc
+  this->prec = mpc;
+  this->owner = false;
+  this->mat = NULL;			// FIXME: get the matrix from mpc
 }
 #endif
 
 MlPrecond::~MlPrecond()
 {
 #ifdef HAVE_ML
-	if (owner) delete prec;
+  if (owner) delete prec;
 #endif
 }
 
 void MlPrecond::set_param(const char *name, const char *value)
 {
 #ifdef HAVE_ML
-	mlist.set(name, value);
+  mlist.set(name, value);
 #endif
 }
 
 void MlPrecond::set_param(const char *name, int value)
 {
 #ifdef HAVE_ML
-	mlist.set(name, value);
+  mlist.set(name, value);
 #endif
 }
 
 void MlPrecond::set_param(const char *name, double value)
 {
 #ifdef HAVE_ML
-	mlist.set(name, value);
+  mlist.set(name, value);
 #endif
 }
 
 void MlPrecond::create(Matrix *m)
 {
 #ifdef HAVE_ML
-	EpetraMatrix *mt = dynamic_cast<EpetraMatrix *>(m);
-	assert(mt != NULL);
-	mat = mt;
-	delete prec;
-	prec = new ML_Epetra::MultiLevelPreconditioner(*mat->mat, mlist, false);
+  EpetraMatrix *mt = dynamic_cast<EpetraMatrix *>(m);
+  assert(mt != NULL);
+  mat = mt;
+  delete prec;
+  prec = new ML_Epetra::MultiLevelPreconditioner(*mat->mat, mlist, false);
 #endif
 }
 
 void MlPrecond::destroy()
 {
 #ifdef HAVE_ML
-	assert(prec != NULL);
-	prec->DestroyPreconditioner();
+  assert(prec != NULL);
+  prec->DestroyPreconditioner();
 #endif
 }
 
 void MlPrecond::compute()
 {
 #ifdef HAVE_ML
-	assert(prec != NULL);
-	prec->ComputePreconditioner();
+  assert(prec != NULL);
+  prec->ComputePreconditioner();
 #endif
 }
 
 void MlPrecond::print_unused()
 {
 #ifdef HAVE_ML
-	assert(prec != NULL);
-	prec->PrintUnused();
+  assert(prec != NULL);
+  prec->PrintUnused();
 #endif
 }
 
@@ -108,23 +107,23 @@ void MlPrecond::print_unused()
 
 int MlPrecond::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
 {
-	assert(prec != NULL);
-	return prec->ApplyInverse(r, z);
+  assert(prec != NULL);
+  return prec->ApplyInverse(r, z);
 }
 
 const Epetra_Comm &MlPrecond::Comm() const
 {
-	return mat->mat->Comm();
+  return mat->mat->Comm();
 }
 
 const Epetra_Map &MlPrecond::OperatorDomainMap() const
 {
-	return mat->mat->OperatorDomainMap();
+  return mat->mat->OperatorDomainMap();
 }
 
 const Epetra_Map &MlPrecond::OperatorRangeMap() const
 {
-	return mat->mat->OperatorRangeMap();
+  return mat->mat->OperatorRangeMap();
 }
 
 #endif

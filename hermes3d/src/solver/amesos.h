@@ -31,27 +31,27 @@
 /// Encapsulation of Amesos linear solver
 ///
 /// @ingroup solvers
-class AmesosSolver : public LinearSolver {
+class H3D_API AmesosSolver : public LinearSolver {
 public:
-	AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs);
-	virtual ~AmesosSolver();
+  AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs);
+  virtual ~AmesosSolver();
 
-	static bool is_available(const char *name);
+  static bool is_available(const char *name);
 
-	/// Returns the current UseTranspose setting.
-	bool use_transpose();
-	/// If set true, X will be set to the solution of A^T X = B (not A X = B).
-	void set_use_transpose(bool use_transpose);
-	virtual bool solve();
+  /// Returns the current UseTranspose setting.
+  bool use_transpose();
+  /// If set true, X will be set to the solution of A^T X = B (not A X = B).
+  void set_use_transpose(bool use_transpose);
+  virtual bool solve();
 
 protected:
 #ifdef HAVE_AMESOS
-	static Amesos factory;
-	Amesos_BaseSolver *solver;
-	Epetra_LinearProblem problem;
+  static Amesos factory;
+  Amesos_BaseSolver *solver;
+  Epetra_LinearProblem problem;
 #endif
-	EpetraMatrix *m;
-	EpetraVector *rhs;
+  EpetraMatrix *m;
+  EpetraVector *rhs;
 };
 
 #endif

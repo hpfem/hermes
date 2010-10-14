@@ -14,8 +14,8 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef __H2D_PRECOND_ML_H_
-#define __H2D_PRECOND_ML_H_
+#ifndef __H3D_PRECOND_ML_H_
+#define __H3D_PRECOND_ML_H_
 
 #include "precond.h"
 #include "epetra.h"
@@ -28,50 +28,50 @@
 /// @ingroup preconds
 class MlPrecond : public Precond {
 public:
-	/// @param[in] type - type of the preconditioner [ sa | dd ]
-	/// - sa = smooth aggregation
-	/// - dd = domain decomposition
-	MlPrecond(const char *type);
+  /// @param[in] type - type of the preconditioner [ sa | dd ]
+  /// - sa = smooth aggregation
+  /// - dd = domain decomposition
+  MlPrecond(const char *type);
 #ifdef HAVE_ML
-	/// Wrap ML object
-	MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
+  /// Wrap ML object
+  MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
 #endif
-	virtual ~MlPrecond();
+  virtual ~MlPrecond();
 
 #ifdef HAVE_ML
-	virtual Epetra_Operator *get_obj() { return prec; }
+  virtual Epetra_Operator *get_obj() { return prec; }
 #endif
 
-	/// @param[in] a
-	virtual void create(Matrix *mat);
-	/// Destroy the preconditioner object
-	virtual void destroy();
-	/// Compute the preconditioner
-	virtual void compute();
+  /// @param[in] a
+  virtual void create(Matrix *mat);
+  /// Destroy the preconditioner object
+  virtual void destroy();
+  /// Compute the preconditioner
+  virtual void compute();
 
-	void set_param(const char *name, const char *value);
-	void set_param(const char *name, int value);
-	void set_param(const char *name, double value);
+  void set_param(const char *name, const char *value);
+  void set_param(const char *name, int value);
+  void set_param(const char *name, double value);
 
-	void print_unused();
+  void print_unused();
 
 #ifdef HAVE_ML
-	// Epetra_Operator interface
-	virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
-	virtual const Epetra_Comm &Comm() const;
-	virtual const Epetra_Map &OperatorDomainMap() const;
-	virtual const Epetra_Map &OperatorRangeMap() const;
+  // Epetra_Operator interface
+  virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
+  virtual const Epetra_Comm &Comm() const;
+  virtual const Epetra_Map &OperatorDomainMap() const;
+  virtual const Epetra_Map &OperatorRangeMap() const;
 #endif
 
 protected:
 #ifdef HAVE_ML
-	ML_Epetra::MultiLevelPreconditioner *prec;
-	Teuchos::ParameterList mlist;
-	EpetraMatrix *mat;
+  ML_Epetra::MultiLevelPreconditioner *prec;
+  Teuchos::ParameterList mlist;
+  EpetraMatrix *mat;
 #endif
-	unsigned owner:1;
+  unsigned owner:1;
 
-	friend class AztecOOSolver;
+  friend class AztecOOSolver;
 };
 
 #endif /* _PRECOND_ML_H_ */

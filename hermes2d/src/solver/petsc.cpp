@@ -28,236 +28,236 @@
 // TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
 PetscMatrix::PetscMatrix() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	inited = false;
+  inited = false;
 #else
-	error(H2D_PETSC_NOT_COMPILED);
+  error(H2D_PETSC_NOT_COMPILED);
 #endif
 }
 
 PetscMatrix::~PetscMatrix() {
-	_F_
-	free();
+  _F_
+  free();
 }
 
 void PetscMatrix::alloc() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	assert(pages != NULL);
+  assert(pages != NULL);
 
-	// calc nnz
-	int *nnz = new int[size];
-	MEM_CHECK(nnz);
+  // calc nnz
+  int *nnz = new int[size];
+  MEM_CHECK(nnz);
 
-	// fill in nnz
-	int aisize = get_num_indices();
-	int *ai = new int[aisize];
-	MEM_CHECK(ai);
+  // fill in nnz
+  int aisize = get_num_indices();
+  int *ai = new int[aisize];
+  MEM_CHECK(ai);
 
-	// sort the indices and remove duplicities, insert into ai
-	int pos = 0;
-	for (int i = 0; i < size; i++) {
-		nnz[i] = sort_and_store_indices(pages[i], ai + pos, ai + aisize);
-		pos += nnz[i];
-	}
-	delete [] pages; pages = NULL;
-	delete [] ai;
+  // sort the indices and remove duplicities, insert into ai
+  int pos = 0;
+  for (int i = 0; i < size; i++) {
+    nnz[i] = sort_and_store_indices(pages[i], ai + pos, ai + aisize);
+    pos += nnz[i];
+  }
+  delete [] pages; pages = NULL;
+  delete [] ai;
 
-	//
-	MatCreateSeqAIJ(PETSC_COMM_SELF, size, size, 0, nnz, &matrix);
+  //
+  MatCreateSeqAIJ(PETSC_COMM_SELF, size, size, 0, nnz, &matrix);
 //	MatSetOption(matrix, MAT_ROW_ORIENTED);
 //	MatSetOption(matrix, MAT_ROWS_SORTED);
 
-	delete [] nnz;
+  delete [] nnz;
 
-	inited = true;
+  inited = true;
 #endif
 }
 
 void PetscMatrix::free() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	if (inited) MatDestroy(matrix);
-	inited = false;
+  if (inited) MatDestroy(matrix);
+  inited = false;
 #endif
 }
 
 void PetscMatrix::finish()
 {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY);
-	MatAssemblyEnd(matrix, MAT_FINAL_ASSEMBLY);
+  MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY);
+  MatAssemblyEnd(matrix, MAT_FINAL_ASSEMBLY);
 #endif
 }
 
 scalar PetscMatrix::get(int m, int n)
 {
-	_F_
-	scalar v = 0.0;
+  _F_
+  scalar v = 0.0;
 #ifdef WITH_PETSC
-	MatGetValues(matrix, 1, &m, 1, &n, &v);
+  MatGetValues(matrix, 1, &m, 1, &n, &v);
 #endif
-	return v;
+  return v;
 }
 
 void PetscMatrix::zero() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	MatZeroEntries(matrix);
+  MatZeroEntries(matrix);
 #endif
 }
 
 void PetscMatrix::add(int m, int n, scalar v) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
-		MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
+  if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
+    MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
 #endif
 }
 
 void PetscMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	// TODO: pass in just the block of the matrix without H3D_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
-	// row and cols for -1)
-	for (int i = 0; i < m; i++)				// rows
-		for (int j = 0; j < n; j++)			// cols
-			add(rows[i], cols[j], mat[i][j]);
+  // TODO: pass in just the block of the matrix without H3D_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
+  // row and cols for -1)
+  for (int i = 0; i < m; i++)				// rows
+    for (int j = 0; j < n; j++)			// cols
+      add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 
 bool PetscMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
 #endif
-	return false;
+  return false;
 }
 
 int PetscMatrix::get_matrix_size() const {
-	_F_
-	return 0;
+  _F_
+  return 0;
 }
 
 double PetscMatrix::get_fill_in() const {
-	_F_
-	return 0;
+  _F_
+  return 0;
 }
 
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PetscVector::PetscVector() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	inited = false;
+  inited = false;
 #else
-	error(H2D_PETSC_NOT_COMPILED);
+  error(H2D_PETSC_NOT_COMPILED);
 #endif
 }
 
 PetscVector::~PetscVector() {
-	_F_
-	free();
+  _F_
+  free();
 }
 
 void PetscVector::alloc(int n) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	free();
-	size = n;
-	VecCreateSeq(PETSC_COMM_SELF, size, &vec);
-	inited = true;
+  free();
+  size = n;
+  VecCreateSeq(PETSC_COMM_SELF, size, &vec);
+  inited = true;
 #endif
 }
 
 void PetscVector::free() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	if (inited) VecDestroy(vec);
-	inited = false;
+  if (inited) VecDestroy(vec);
+  inited = false;
 #endif
 }
 
 void PetscVector::finish()
 {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	VecAssemblyBegin(vec);
-	VecAssemblyEnd(vec);
+  VecAssemblyBegin(vec);
+  VecAssemblyEnd(vec);
 #endif
 }
 
 scalar PetscVector::get(int idx) {
-	_F_
-	scalar y = 0;
+  _F_
+  scalar y = 0;
 #ifdef WITH_PETSC
-	VecGetValues(vec, 1, &idx, &y);
+  VecGetValues(vec, 1, &idx, &y);
 #endif
-	return y;
+  return y;
 }
 
 void PetscVector::extract(scalar *v) const {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	int *idx = new int [size];
-	for (int i = 0; i < size; i++) idx[i] = i;
-	VecGetValues(vec, size, idx, (PetscScalar *) v);
-	delete [] idx;
+  int *idx = new int [size];
+  for (int i = 0; i < size; i++) idx[i] = i;
+  VecGetValues(vec, size, idx, (PetscScalar *) v);
+  delete [] idx;
 #endif
 }
 
 void PetscVector::zero() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	VecZeroEntries(vec);
+  VecZeroEntries(vec);
 #endif
 }
 
 void PetscVector::set(int idx, scalar y) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
+  if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
 #endif
 }
 
 void PetscVector::add(int idx, scalar y) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, ADD_VALUES);
+  if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, ADD_VALUES);
 #endif
 }
 
 void PetscVector::add(int n, int *idx, scalar *y) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	for (int i = 0; i < n; i++)
-		if (idx[i] >= 0) VecSetValue(vec, idx[i], (PetscScalar) y[i], ADD_VALUES);
+  for (int i = 0; i < n; i++)
+    if (idx[i] >= 0) VecSetValue(vec, idx[i], (PetscScalar) y[i], ADD_VALUES);
 #endif
 }
 
 bool PetscVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
-	_F_
+  _F_
 #ifdef WITH_PETSC
 #endif
-	return false;
+  return false;
 }
 
 // PETSc linear solver ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
-	: LinearSolver(), m(mat), rhs(rhs)
+  : LinearSolver(), m(mat), rhs(rhs)
 {
-	_F_
+  _F_
 #ifdef WITH_PETSC
 #else
-	warning(H2D_PETSC_NOT_COMPILED);
-	exit(128);
+  warning(H2D_PETSC_NOT_COMPILED);
+  exit(128);
 #endif
 }
 
 PetscLinearSolver::~PetscLinearSolver() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
   //if (m != NULL) delete m;
   //if (rhs != NULL) delete rhs;
@@ -265,49 +265,49 @@ PetscLinearSolver::~PetscLinearSolver() {
 }
 
 bool PetscLinearSolver::solve() {
-	_F_
+  _F_
 #ifdef WITH_PETSC
-	assert(m != NULL);
-	assert(rhs != NULL);
+  assert(m != NULL);
+  assert(rhs != NULL);
 
-	PetscErrorCode ec;
-	KSP ksp;
-	Vec x;
+  PetscErrorCode ec;
+  KSP ksp;
+  Vec x;
 
-	TimePeriod tmr;
+  TimePeriod tmr;
 
-	KSPCreate(PETSC_COMM_WORLD, &ksp);
+  KSPCreate(PETSC_COMM_WORLD, &ksp);
 
-	KSPSetOperators(ksp, m->matrix, m->matrix, DIFFERENT_NONZERO_PATTERN);
-	KSPSetFromOptions(ksp);
-	VecDuplicate(rhs->vec, &x);
+  KSPSetOperators(ksp, m->matrix, m->matrix, DIFFERENT_NONZERO_PATTERN);
+  KSPSetFromOptions(ksp);
+  VecDuplicate(rhs->vec, &x);
 
-	ec = KSPSolve(ksp, rhs->vec, x);
-	if (ec) return false;
+  ec = KSPSolve(ksp, rhs->vec, x);
+  if (ec) return false;
 
-	tmr.tick();
-	time = tmr.accumulated();
+  tmr.tick();
+  time = tmr.accumulated();
 
-	// allocate memory for solution vector
-	delete [] sln;
-	sln = new scalar [m->size];
-	MEM_CHECK(sln);
-	memset(sln, 0, m->size * sizeof(scalar));
+  // allocate memory for solution vector
+  delete [] sln;
+  sln = new scalar [m->size];
+  MEM_CHECK(sln);
+  memset(sln, 0, m->size * sizeof(scalar));
 
-	// index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
-	int *idx = new int [m->size];
-	MEM_CHECK(idx);
-	for (int i = 0; i < m->size; i++) idx[i] = i;
+  // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
+  int *idx = new int [m->size];
+  MEM_CHECK(idx);
+  for (int i = 0; i < m->size; i++) idx[i] = i;
 
-	// copy solution to the output solution vector
-	VecGetValues(x, m->size, idx, (PetscScalar *) sln);
-	delete [] idx;
+  // copy solution to the output solution vector
+  VecGetValues(x, m->size, idx, (PetscScalar *) sln);
+  delete [] idx;
 
-	KSPDestroy(ksp);
-	VecDestroy(x);
+  KSPDestroy(ksp);
+  VecDestroy(x);
 
-	return true;
+  return true;
 #else
-	return false;
+  return false;
 #endif
 }

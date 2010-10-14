@@ -1,4 +1,5 @@
-project(h3d)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cxx_flag_overrides.cmake) # this is in H2D
+project(hermes3d)
 
 cmake_minimum_required(VERSION 2.6)
 
@@ -86,6 +87,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/common)
 set(MESHES_DIR ${PROJECT_SOURCE_DIR}/meshes)
 
+include_directories(${PROJECT_SOURCE_DIR})
+
 # internals regarding build type
 if(DEBUG)
 	if(H3D_REAL)
@@ -105,32 +108,29 @@ else(DEBUG)
 	set(CMAKE_BUILD_TYPE Release)
 endif(DEBUG)
 
-# If using PETSc or UMFPack, we need to enable Fortran support and look for BLAS and LAPACK
-if(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
-	if(NOT MSVC)
-	enable_language(Fortran)
-	find_package(LAPACK REQUIRED)
-	endif(NOT MSVC)
-endif(WITH_PETSC OR WITH_UMFPACK OR WITH_PARDISO OR WITH_MUMPS)
-
 
 # find necessary packages
 find_package(JUDY REQUIRED)
-
 find_package(PTHREAD REQUIRED)
+include_directories(${JUDY_INCLUDE_DIR})
 
 if(NOT MSVC)
-	enable_language(Fortran)		# need a fortran compiler for checking BLAS
-	find_package(BLAS REQUIRED)
+	enable_language(Fortran)		  # need a fortran compiler for checking BLAS
+	find_package(LAPACK REQUIRED) # also searches for BLAS
 endif(NOT MSVC)
 
 # solvers
 if(WITH_PETSC)
 	find_package(PETSC REQUIRED)
+	# For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
+	# different directories), so we can't globally set the architecture-specific include directory here, but 
+	# rather on a per-target basis.
+	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
 endif(WITH_PETSC)
 
 if(WITH_UMFPACK)
 	find_package(UMFPACK REQUIRED)
+  include_directories(${UMFPACK_INCLUDE_DIRS})
 endif(WITH_UMFPACK)
 
 if(WITH_PARDISO)
@@ -138,13 +138,16 @@ if(WITH_PARDISO)
 endif(WITH_PARDISO)
 
 if(WITH_MUMPS)
-    find_package(Threads REQUIRED)			# needs pthread
-    find_package(MUMPS REQUIRED)
+	find_package(MUMPS REQUIRED)
+	if(WITH_MPI)
+		find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
+  endif(WITH_MPI)
+  include_directories(${MUMPS_INCLUDE_DIR})
 endif(WITH_MUMPS)
 
 if(WITH_TRILINOS)
-	find_package(LAPACK REQUIRED)			# trilinos needs LAPACK
 	find_package(TRILINOS REQUIRED)
+	include_directories(${TRILINOS_INCLUDE_DIR})
 endif(WITH_TRILINOS)
 
 # SMP
@@ -164,21 +167,32 @@ endif(WITH_METIS)
 
 if(WITH_HDF5)
 	find_package(HDF5 REQUIRED)
+	include_directories(${HDF5_INCLUDE_DIR})
 endif(WITH_HDF5)
 
 if(WITH_EXODUSII)
 	find_package(EXODUSII REQUIRED)
+	include_directories(${EXODUSII_INCLUDE_DIR})
 endif(WITH_EXODUSII)
 
+# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC)
 if(WITH_MPI)
-	find_package(MPI REQUIRED)
+  if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
+    find_package(MPI REQUIRED)
+  else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+    if(NOT EXISTS MPI_INCLUDE_PATH)
+      message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
+    endif(NOT EXISTS MPI_INCLUDE_PATH)
+  endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+  include_directories(MPI_INCLUDE_PATH)	  
 endif(WITH_MPI)
 
 if(WITH_GLUT)
-	find_package(GLUT REQUIRED)
+  find_package(GLUT REQUIRED)
+  find_package(GLEW REQUIRED)
+else(WITH_GLUT)
+  add_definitions(-DNOGLUT)
 endif(WITH_GLUT)
-
-include_directories(${PROJECT_SOURCE_DIR})
 
 #
 add_subdirectory(src)
@@ -195,6 +209,7 @@ if(WITH_PYTHON)
 	find_package(Cython REQUIRED)
 	add_subdirectory(python)
 	message(STATUS "Compiling with python support")
+	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
 
 # examples

@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
                 // Set up the solver, matrix, and rhs according to the solver selection.
                 SparseMatrix* matrix = create_matrix(matrix_solver);
                 Vector* rhs = create_vector(matrix_solver);
-                Solver* solver = create_solver(matrix_solver, matrix, rhs);
+                Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
 		int ndof = space.assign_dofs();
 		printf("  - Number of DOF: %d\n", ndof);
@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
                 // Set up the solver, matrix, and rhs according to the solver selection.
                 SparseMatrix* rmatrix = create_matrix(matrix_solver);
                 Vector* rrhs = create_vector(matrix_solver);
-                Solver* rsolver = create_solver(matrix_solver, matrix, rhs);
+                Solver* rsolver = create_linear_solver(matrix_solver, matrix, rhs);
 
 		printf("  - Assembling... "); fflush(stdout);
 		assemble_timer.reset();

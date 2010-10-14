@@ -1,20 +1,12 @@
 project(multi-mesh)
 
-include(CMake.vars OPTIONAL)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${TESTS_INCLUDE_DIRS})
-include_directories(${hermes3d_SOURCE_DIR})
+include (${hermes3d_SOURCE_DIR}/CMake.common)
 
 set(BINARIES)
 
 macro(ADD_BIN BIN DEFINE)
-	add_executable(${BIN}
-		multi-mesh.cpp
-		${HERMES_COMMON_DIR}/timer.cpp
-		${HERMES_COMMON_DIR}/error.cpp
-		${HERMES_COMMON_DIR}/utils.cpp
-	)
+	add_executable(${BIN}		multi-mesh.cpp)
+	set_common_target_properties(${BIN})
 
 	set_target_properties(${BIN} PROPERTIES COMPILE_FLAGS -D${DEFINE})
 
@@ -26,11 +18,6 @@ endmacro(ADD_BIN)
 
 ADD_BIN(${PROJECT_NAME}-rhs2 RHS2)
 ADD_BIN(${PROJECT_NAME}-sys3 SYS3)
-
-configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-	${CMAKE_CURRENT_SOURCE_DIR}/config.h
-)
 
 # Tests
 

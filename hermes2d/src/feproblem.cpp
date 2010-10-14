@@ -113,7 +113,8 @@ scalar** FeProblem::get_matrix_buffer(int n)
   _F_
   if (n <= matrix_buffer_dim) return matrix_buffer;
   if (matrix_buffer != NULL) delete [] matrix_buffer;
-  return (matrix_buffer = new_matrix<scalar>(matrix_buffer_dim = n));
+  matrix_buffer_dim = n;
+  return (matrix_buffer = new_matrix<scalar>(n, n));
 }
 
 //// matrix structure precalculation ///////////////////////////////////////////////////////////////
@@ -125,9 +126,16 @@ bool FeProblem::is_up_to_date()
   // check if we can reuse the matrix structure
   bool up_to_date = true;
   if (!have_matrix) up_to_date = false;
+  
   for (int i = 0; i < wf->neq; i++)
+  {
     if (spaces[i]->get_seq() != sp_seq[i])
-      { up_to_date = false; break; }
+    { 
+      up_to_date = false; 
+      break; 
+    }
+  }
+  
   if (wf->get_seq() != wf_seq)
     up_to_date = false;
 
@@ -177,13 +185,17 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
     {
       // obtain assembly lists for the element at all spaces
       for (int i = 0; i < wf->neq; i++)
+      {
         // TODO: do not get the assembly list again if the element was not changed
         if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
+      }
 
       // go through all equation-blocks of the local stiffness matrix
       for (int m = 0; m < wf->neq; m++)
+      {
         for (int n = 0; n < wf->neq; n++)
-          if (blocks[m][n] && e[m] != NULL && e[n] != NULL)
+        {
+          if (blocks[m][n] && e[m] != NULL && e[n] != NULL) 
           {
             AsmList *am = al + m;
             AsmList *an = al + n;
@@ -196,6 +208,8 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
                   if (an->dof[j] >= 0)
                     mat->pre_add_ij(am->dof[i], an->dof[j]);
           }
+        }
+      }
     }
 
     trav.finish();
@@ -211,6 +225,7 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   // save space seq numbers and weakform seq number, so we can detect their changes
   for (int i = 0; i < wf->neq; i++)
     sp_seq[i] = spaces[i]->get_seq();
+  
   wf_seq = wf->get_seq();
 
   struct_changed = true;
@@ -236,7 +251,8 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
   // Sanity checks.
   if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
   if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
-  for (int i=0; i<this->wf->neq; i++) {
+  for (int i=0; i<this->wf->neq; i++)
+  {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
@@ -322,9 +338,13 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
       for (unsigned int i = 0; i < s->idx.size(); i++)
       {
         int j = s->idx[i];
-        if (e[i] == NULL) { isempty[j] = true; continue; }
+        if (e[i] == NULL) 
+        { 
+          isempty[j] = true; 
+          continue; 
+        }
 
-        // TODO: do not obtain again if the element was not changed
+        // TODO: do not obtain again if the element was not changed.
         spaces[j]->get_element_assembly_list(e[i], al + j);
 
         // This is different in H3D (PrecalcShapeset is not used)
@@ -417,12 +437,14 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
           // insert also the off-diagonal (anti-)symmetric block, if required
           if (tra)
           {
-            if (mfv->sym < 0) chsgn(local_stiffness_matrix, am->cnt, an->cnt);
-            transpose(local_stiffness_matrix, am->cnt, an->cnt);
+            if (mfv->sym < 0) 
+              chsgn(local_stiffness_matrix, am->cnt, an->cnt);
             
+            transpose(local_stiffness_matrix, am->cnt, an->cnt);
+
             if (rhsonly == false) 
               mat->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
-  	       
+
             // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
             if (rhs != NULL && this->is_linear) 
             {
@@ -476,6 +498,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
         // H3D is freeing a fn_cache at this point
 
         if (!bnd[isurf]) continue;
+        
         int marker = surf_pos[isurf].marker;
 
         // obtain the list of shape functions which are nonzero on this surface
@@ -515,7 +538,8 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
               for (int j = 0; j < an->cnt; j++)
               {
                 fu->set_active_shape(an->idx[j]);
-                if (an->dof[j] < 0) {
+                if (an->dof[j] < 0) 
+                {
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {

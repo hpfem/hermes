@@ -34,8 +34,15 @@ const double ERR_STOP = 1.0;            // Stopping criterion for adaptivity (re
 const int NDOF_STOP = 100000;           // Adaptivity process stops when the number of degrees of freedom grows
                                         // over this limit. This is to prevent h-adaptivity to go on forever.
 bool solution_output = true;            // Generate output files (if true).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_AZTECOO;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
 
 // Problem parameters.
 const double K = 1e2;
@@ -115,6 +122,8 @@ int main(int argc, char **args)
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
+  
+  initialize_solution_environment(matrix_solver, argc, args);
 
   // Adaptivity loop.
   int as = 1; 
@@ -127,18 +136,27 @@ int main(int argc, char **args)
     Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
     
     // Assemble the reference problem.
-    info("Solving on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
+    info("Assembling on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
     bool is_linear = true;
     DiscreteProblem dp(&wf, ref_space, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_solver(matrix_solver, matrix, rhs);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    
+    if (matrix_solver == SOLVER_AZTECOO) 
+    {
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
+    }
+  
     dp.assemble(matrix, rhs);
     
     // Time measurement.
     cpu_time.tick();
 
     // Solve the linear system of the reference problem. If successful, obtain the solution.
+    info("Solving on reference mesh.");
     Solution ref_sln(ref_space->get_mesh());
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
@@ -210,5 +228,7 @@ int main(int argc, char **args)
 
   } while (!done);
 
+  finalize_solution_environment(matrix_solver);
+  
   return 1;
 }
