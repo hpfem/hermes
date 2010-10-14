@@ -189,7 +189,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   
   // Initialize the linear problem.
   bool is_linear = true;
-  FeProblem lp(wf, spaces, is_linear);
+  DiscreteProblem dp(wf, spaces, is_linear);
   int ndof = Space::get_num_dofs(spaces);
   
   // Select matrix solver.
@@ -215,7 +215,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   bool eigen_done = false; int it = 0;
   do {
     // Assemble the system matrix and rhs for the first time, then just update the rhs using the updated eigenpair.
-    lp.assemble(mat, rhs, it == 0 ? false : true);
+    dp.assemble(mat, rhs, it == 0 ? false : true);
         
     // Solve the matrix problem to get a new approximation of the eigenvector.
     if (!solver->solve()) error ("Matrix solver failed.\n");

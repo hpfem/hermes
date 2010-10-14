@@ -83,9 +83,9 @@ int main(int argc, char* argv[])
 
   // Assemble the matrices.
   bool is_linear = true;
-  FeProblem dp_left(&wf_left, &space, is_linear);
+  DiscreteProblem dp_left(&wf_left, &space, is_linear);
   dp_left.assemble(matrix_left, eivec);
-  FeProblem dp_right(&wf_right, &space, is_linear);
+  DiscreteProblem dp_right(&wf_right, &space, is_linear);
   dp_right.assemble(matrix_right, eivec);
 
   // Write matrix_left in MatrixMarket format.

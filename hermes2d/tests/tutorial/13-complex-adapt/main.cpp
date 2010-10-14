@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
     
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
       // Using default iteration parameters (see solver/aztecoo.h).
     }
     
-    fep->assemble(matrix, rhs);
+    dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
     if (done == false)
       delete ref_space->get_mesh();
     delete ref_space;
-    delete fep;
+    delete dp;
     
     // Increase counter.
     as++;

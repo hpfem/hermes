@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(callback(residual_surf));
 
   // Initialize the finite element problem.
-  FeProblem fep(&wf, &space);
+  DiscreteProblem dp(&wf, &space);
 
   // Project the function "titer" on the FE space 
   // in order to obtain initial vector for NOX. 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   OGProjection::project_global(&space, &t_prev_time, coeff_vec);
 
   // Initialize NOX solver.
-  NoxSolver solver(&fep);
+  NoxSolver solver(&dp);
 
   // Select preconditioner.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, t = %g s", ts, total_time += TAU);
 
-    info("Assembling by FeProblem, solving by NOX.");
+    info("Assembling by DiscreteProblem, solving by NOX.");
     solver.set_init_sln(coeff_vec);
     if (solver.solve())
       Solution::vector_to_solution(solver.get_solution(), &space, &t_prev_time);

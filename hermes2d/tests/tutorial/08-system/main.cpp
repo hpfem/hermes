@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
     // Initialize the FE problem.
     bool is_linear = true;
-    FeProblem fep(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
+    DiscreteProblem dp(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
     // Assemble the stiffness matrix and right-hand side vector.
     info("Assembling the stiffness matrix and right-hand side vector.");
-    fep.assemble(matrix, rhs);
+    dp.assemble(matrix, rhs);
 
     // Solve the linear system and if successful, obtain the solutions.
     info("Solving the matrix problem.");

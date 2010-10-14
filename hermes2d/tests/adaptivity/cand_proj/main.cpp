@@ -328,7 +328,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 
   // Initialize the FE problem.
 /*  bool is_linear = true;
-  FeProblem fep(&weakform, &ref_space, is_linear);
+  DiscreteProblem dp(&weakform, &ref_space, is_linear);
 
   // Initialize matrix solver.
   SparseMatrix* mat = create_matrix(matrix_solver);
@@ -349,7 +349,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
   
     // Assemble the stiffness matrix and right-hand side vector.
   //  info("Assembling the stiffness matrix and right-hand side vector.");
-  //  fep.assemble(mat, rhs);
+  //  dp.assemble(mat, rhs);
 
     // Create and solve the reference system.
     Solution rsln;
@@ -368,7 +368,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 
     // Initialize the FE problem.
     bool is_linear = true;
-    FeProblem fep(weakform, ref_space, is_linear);
+    DiscreteProblem dp(weakform, ref_space, is_linear);
 
     // Initialize matrix solver.
     SparseMatrix* mat = create_matrix(matrix_solver);
@@ -377,7 +377,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 
     // Assemble the stiffness matrix and right-hand side vector.
     info("Assembling the stiffness matrix and right-hand side vector.");
-    fep.assemble(mat, rhs);
+    dp.assemble(mat, rhs);
 
     info("Solving the matrix problem.");
     if(solver->solve())

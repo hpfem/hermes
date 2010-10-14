@@ -294,12 +294,12 @@ int main(int argc, char* argv[])
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    FeProblem fep(&wf, *ref_spaces, is_linear);
+    DiscreteProblem dp(&wf, *ref_spaces, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    fep.assemble(matrix, rhs);
+    dp.assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();

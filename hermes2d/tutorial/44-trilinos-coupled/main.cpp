@@ -130,10 +130,10 @@ int main(int argc, char* argv[])
   double proj_time = cpu_time.tick().last();
 
   // Initialize finite element problem.
-  FeProblem fep(&wf, Tuple<Space*>(t_space, c_space));
+  DiscreteProblem dp(&wf, Tuple<Space*>(t_space, c_space));
 
   // Initialize NOX solver and preconditioner.
-  NoxSolver solver(&fep);
+  NoxSolver solver(&dp);
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {

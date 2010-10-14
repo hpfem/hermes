@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = false;
-  FeProblem fep(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space, is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     int it = 1;
     while (1)
     {
-      fep.assemble(coeff_vec, matrix, rhs, false);
+      dp.assemble(coeff_vec, matrix, rhs, false);
       
       // Multiply the residual vector with -1 since the matrix 
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).

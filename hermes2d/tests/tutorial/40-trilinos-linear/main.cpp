@@ -74,7 +74,7 @@ int main(int argc, char **argv)
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
-  info("---- Assembling by FeProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
+  info("---- Assembling by DiscreteProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   
   // Initialize the linear FE problem.
   bool is_linear = true;
-  FeProblem fep1(&wf1, &space, is_linear);
+  DiscreteProblem dp1(&wf1, &space, is_linear);
   
   initialize_solution_environment(matrix_solver, argc, argv);
   
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
   
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
-  fep1.assemble(matrix, rhs);
+  dp1.assemble(matrix, rhs);
   
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
@@ -126,15 +126,15 @@ int main(int argc, char **argv)
   double time1 = cpu_time.tick().last();
   
   // TRILINOS PART:
-  info("---- Assembling by FeProblem, solving by NOX:");
+  info("---- Assembling by DiscreteProblem, solving by NOX:");
 
   // Initialize the weak formulation for Trilinos.
   WeakForm wf2(1, JFNK ? true : false);
   wf2.add_matrix_form(callback(jacobian_form), HERMES_SYM);
   wf2.add_vector_form(callback(residual_form));
   
-  // Initialize FeProblem.
-  FeProblem fep2(&wf2, &space);
+  // Initialize DiscreteProblem.
+  DiscreteProblem dp2(&wf2, &space);
   
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
   
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&fep2);
+  NoxSolver nox_solver(&dp2);
   nox_solver.set_init_sln(coeff_vec);
   
   if (!projected_ic)  delete  coeff_vec;

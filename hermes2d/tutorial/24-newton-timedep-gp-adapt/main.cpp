@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = false;
-  FeProblem fep_coarse(&wf, &space, is_linear);
+  DiscreteProblem dp_coarse(&wf, &space, is_linear);
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     int ndof = Space::get_num_dofs(&space);
 
     // Assemble the Jacobian matrix and residual vector.
-    fep_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
+    dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
       Space* ref_space = construct_refined_space(&space);
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
-      FeProblem* fep = new FeProblem(&wf, ref_space, is_linear);
+      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
         int ndof = Space::get_num_dofs(ref_space);
 
         // Assemble the Jacobian matrix and residual vector.
-        fep->assemble(coeff_vec, matrix, rhs, false);
+        dp->assemble(coeff_vec, matrix, rhs, false);
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
       delete adaptivity;
       delete ref_space->get_mesh();
       delete ref_space;
-      delete fep;
+      delete dp;
 
       // Visualize the solution and mesh.
       char title[100];

@@ -161,11 +161,11 @@ int main(int argc, char* argv[])
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    fep->assemble(matrix, rhs);
+    dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
     for(int i = 0; i < ref_spaces->size(); i++)
       delete (*ref_spaces)[i]->get_mesh();
     delete ref_spaces;
-    delete fep;
+    delete dp;
     
     // Increase counter.
     as++;

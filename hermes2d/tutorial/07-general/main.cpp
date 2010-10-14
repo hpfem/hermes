@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = true;
-  FeProblem fep(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space, is_linear);
  
   initialize_solution_environment(matrix_solver, argc, argv);
   
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
-  fep.assemble(matrix, rhs);
+  dp.assemble(matrix, rhs);
 
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");

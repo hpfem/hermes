@@ -151,9 +151,9 @@ int main(int argc, char* argv[])
 
     // Assemble the matrices on reference mesh.
     bool is_linear = true;
-    FeProblem* dp_left = new FeProblem(&wf_left, ref_space, is_linear);
+    DiscreteProblem* dp_left = new DiscreteProblem(&wf_left, ref_space, is_linear);
     dp_left->assemble(matrix_left, eivec);
-    FeProblem* dp_right = new FeProblem(&wf_right, ref_space, is_linear);
+    DiscreteProblem* dp_right = new DiscreteProblem(&wf_right, ref_space, is_linear);
     dp_right->assemble(matrix_right, eivec);
 
     // Time measurement.

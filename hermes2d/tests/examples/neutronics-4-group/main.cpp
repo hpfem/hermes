@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = true;
-  FeProblem fep(&wf, spaces, is_linear);
+  DiscreteProblem dp(&wf, spaces, is_linear);
  
   initialize_solution_environment(matrix_solver, argc, argv);
   
@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
     info("------------ Power iteration %d:", iter);
 
     info("Assembling the stiffness matrix and right-hand side vector.");
-    fep.assemble(matrix, rhs, rhs_only);
+    dp.assemble(matrix, rhs, rhs_only);
     
     info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
     solver_time.tick(HERMES_SKIP);  

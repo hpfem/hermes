@@ -319,11 +319,11 @@ int main(int argc, char* argv[])
 
     // Assemble the reference problem.
     bool is_linear = true;
-    FeProblem* fep = new FeProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    fep->assemble(matrix, rhs);
+    dp->assemble(matrix, rhs);
     
     // Time measurement.
     cpu_time.tick();
@@ -334,7 +334,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
     else error ("Matrix solver failed.\n");
     
-    delete fep;
+    delete dp;
     delete ref_space1;
     delete ref_space2;
     

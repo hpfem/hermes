@@ -175,7 +175,7 @@ int main (int argc, char* argv[]) {
 
   // Initialize the FE problem.
   bool is_linear = false;
-  FeProblem fep_coarse(&wf, Tuple<Space *>(&C, &phi), is_linear);
+  DiscreteProblem dp_coarse(&wf, Tuple<Space *>(&C, &phi), is_linear);
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
@@ -194,7 +194,7 @@ int main (int argc, char* argv[]) {
     int ndof = Space::get_num_dofs(Tuple<Space *>(&C, &phi));
 
     // Assemble the Jacobian matrix and residual vector.
-    fep_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
+    dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -264,7 +264,7 @@ int main (int argc, char* argv[]) {
       Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&C, &phi));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
-      FeProblem* fep = new FeProblem(&wf, *ref_spaces, is_linear);
+      DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -288,7 +288,7 @@ int main (int argc, char* argv[]) {
         int ndof = Space::get_num_dofs(*ref_spaces);
 
         // Assemble the Jacobian matrix and residual vector.
-        fep->assemble(coeff_vec, matrix, rhs, false);
+        dp->assemble(coeff_vec, matrix, rhs, false);
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -365,7 +365,7 @@ int main (int argc, char* argv[]) {
       for(int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
-      delete fep;
+      delete dp;
 
     }
     while (done == false);

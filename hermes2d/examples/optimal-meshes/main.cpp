@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   
   // Initialize the linear problem.
   bool is_linear = true;
-  FeProblem* fep = new FeProblem(&wf, &space, is_linear);
+  DiscreteProblem* dp = new DiscreteProblem(&wf, &space, is_linear);
 
   // Select matrix solver.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Assemble stiffness matrix and rhs.
-  fep->assemble(matrix, rhs);
+  dp->assemble(matrix, rhs);
  
   // Solve the linear system of the reference problem. If successful, obtain the solutions.
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);

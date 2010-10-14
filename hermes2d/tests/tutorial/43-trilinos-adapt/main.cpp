@@ -138,10 +138,10 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
    
     // Initialize finite element problem.
-    FeProblem fep(&wf, &space);
+    DiscreteProblem dp(&wf, &space);
 
     // Initialize NOX solver.
-    NoxSolver solver(&fep);
+    NoxSolver solver(&dp);
 
     // Choose preconditioner.
     RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 
     // Assemble on coarse mesh and solve the matrix problem using NOX.
     int ndof = Space::get_num_dofs(&space);
-    info("Coarse mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
+    info("Coarse mesh problem (ndof: %d): Assembling by DiscreteProblem, solving by NOX.", ndof);
     if (solver.solve())
     {
       Solution::vector_to_solution(solver.get_solution(), &space, &sln);
@@ -176,10 +176,10 @@ int main(int argc, char* argv[])
     rspace.copy_orders(&space, order_increase); // increase orders by one
 
     // Initialize FE problem on reference mesh.
-    FeProblem ref_fep(&wf, &rspace);
+    DiscreteProblem ref_dp(&wf, &rspace);
 
     // Initialize NOX solver.
-    NoxSolver ref_solver(&ref_fep);
+    NoxSolver ref_solver(&ref_dp);
     if (PRECOND)
     {
       if (JFNK) ref_solver.set_precond(pc);
@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 
     // Assemble on fine mesh and solve the matrix problem using NOX.
     ndof = Space::get_num_dofs(&rspace);
-    info("Fine mesh problem (ndof: %d): Assembling by FeProblem, solving by NOX.", ndof);
+    info("Fine mesh problem (ndof: %d): Assembling by DiscreteProblem, solving by NOX.", ndof);
     if (ref_solver.solve())
     {
       Solution::vector_to_solution(ref_solver.get_solution(), &rspace, &ref_sln);

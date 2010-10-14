@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
 
       bool is_linear = false;
-      FeProblem fep(&wf, *ref_spaces, is_linear);
+      DiscreteProblem dp(&wf, *ref_spaces, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
         int ndof = Space::get_num_dofs(*ref_spaces);
 
         // Assemble the Jacobian matrix and residual vector.
-        fep.assemble(coeff_vec, matrix, rhs, false);
+        dp.assemble(coeff_vec, matrix, rhs, false);
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).

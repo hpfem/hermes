@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
       info("Performing Newton's method.");
       // Initialize the FE problem.
       bool is_linear = false;
-      FeProblem fep(&wf, Tuple<Space *>(xvel_space, yvel_space, p_space), is_linear);
+      DiscreteProblem dp(&wf, Tuple<Space *>(xvel_space, yvel_space, p_space), is_linear);
 
       // Set up the solver, matrix, and rhs according to the solver selection.
       SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
         int ndof = Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space));
 
         // Assemble the Jacobian matrix and residual vector.
-        fep.assemble(coeff_vec, matrix, rhs, false);
+        dp.assemble(coeff_vec, matrix, rhs, false);
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -309,14 +309,14 @@ int main(int argc, char* argv[])
       // Linear solve.  
       info("Assembling and solving linear problem.");
       bool is_linear = true;
-      FeProblem fep(&wf, Tuple<Space *>(xvel_space, yvel_space, p_space), is_linear);
+      DiscreteProblem dp(&wf, Tuple<Space *>(xvel_space, yvel_space, p_space), is_linear);
 
       // Set up the solver, matrix, and rhs according to the solver selection.
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-      fep.assemble(matrix, rhs);
+      dp.assemble(matrix, rhs);
 
       // Solve the linear system and if successful, obtain the solution.
       info("Solving the matrix problem.");

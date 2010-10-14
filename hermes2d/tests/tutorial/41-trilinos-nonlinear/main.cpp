@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = false;
-  FeProblem fep1(&wf1, &space, is_linear);
+  DiscreteProblem dp1(&wf1, &space, is_linear);
   
   initialize_solution_environment(matrix_solver, argc, argv);
 
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     int ndof = Space::get_num_dofs(&space);
 
     // Assemble the Jacobian matrix and residual vector.
-    fep1.assemble(coeff_vec, matrix, rhs, false);
+    dp1.assemble(coeff_vec, matrix, rhs, false);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -177,12 +177,12 @@ int main(int argc, char* argv[])
   if (JFNK && PRECOND == 2) wf2.add_matrix_form(callback(precond_form_nox), HERMES_SYM);
   wf2.add_vector_form(callback(residual_form_nox));
 
-  // Initialize FeProblem.
-  FeProblem fep2(&wf2, &space);
+  // Initialize DiscreteProblem.
+  DiscreteProblem dp2(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&fep2);
+  NoxSolver nox_solver(&dp2);
   nox_solver.set_init_sln(coeff_vec);
 
   // Choose preconditioning.
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
   }
 
   // Solve the matrix problem using NOX.
-  info("Assembling by FeProblem, solving by NOX.");
+  info("Assembling by DiscreteProblem, solving by NOX.");
   bool solved = nox_solver.solve();
   Solution sln_nox;
   if (solved)
@@ -218,9 +218,9 @@ int main(int argc, char* argv[])
   Adapt adaptivity(&space, HERMES_H1_NORM);
   bool solutions_for_adapt = false;
   double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  info("Solution 1 (FeProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
+  info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
   double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  info("Solution 2 (FeProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
+  info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   info("Coordinate ( 0.6,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.6,  0.6));
   info("Coordinate ( 0.4,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.4,  0.6));
