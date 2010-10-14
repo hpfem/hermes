@@ -73,10 +73,11 @@ void warning(const char *warn, ...)
 
 void h_mem_check(int line, const char *func, const char *file, void *var)
 {
-	va_list params;
+        //va_list params;
 
 	if (var == NULL) {
-		report_w_loc("FATAL: ", file, line, func, "Out of memory.", params);
+	  //report_w_loc("FATAL: ", file, line, func, "Out of memory.", params);
+	  report_w_loc("FATAL: ", file, line, func, "Out of memory.", NULL);
 		get_callstack().dump();
 		exit(EXIT_FAILURE);
 	}

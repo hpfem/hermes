@@ -82,7 +82,6 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
 }
 #endif
 
-
 // Timer //////////////////////////////////////////////////////////////////////
 
 Timer::Timer() {

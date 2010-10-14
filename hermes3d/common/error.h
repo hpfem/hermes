@@ -21,7 +21,8 @@
 #define _ERROR_H_
 
 #include "compat-util.h"
-#include "compat.h"
+#include "../src/compat.h"
+
 //
 // Error handling
 //
@@ -59,6 +60,7 @@ void H3D_API warning(const char *warn, ...);
 #else
 #define MEM_CHECK(var) h_mem_check(__LINE__, __PRETTY_FUNCTION__, __FILE__, var)
 #endif
+
 void H3D_API h_mem_check(int line, const char *func, const char *file, void *var);
 
 #endif

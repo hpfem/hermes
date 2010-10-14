@@ -19,15 +19,23 @@
 
 #ifndef _CALLSTACK_H_
 #define _CALLSTACK_H_
+
 #include <stdio.h>
 
-#include "compat.h"
+// __PRETTY_FUNCTION__ missing on MSVC
+#ifdef _MSC_VER
+#define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
+#else
+#define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
+#endif
+
 /// Holds data for one call stack object
 ///
-class H3D_API CallStackObj {
-public:
-  CallStackObj(int ln, const char *func, const char *file);
+class H3D_API CallStackObj 
+{
+	CallStackObj(int ln, const char *func, const char *file);
 	~CallStackObj();
+
 	int line;					// line number in the file
 	const char *file;			// file
 	const char *func;			// function name
@@ -35,7 +43,8 @@ public:
 
 /// Call stack object
 ///
-class H3D_API CallStack {
+class H3D_API CallStack 
+{
 public:
 	CallStack(int max_size = 32);
 	~CallStack();
@@ -53,11 +62,5 @@ protected:
 
 H3D_API CallStack &get_callstack();
 
-
-#ifdef _WIN32 //Win32
-#define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
-#else
-#define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
-#endif
 
 #endif

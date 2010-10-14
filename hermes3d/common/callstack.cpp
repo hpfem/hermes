@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-
 #include "callstack.h"
+#include "Teuchos_stacktrace.hpp"
 #include <signal.h>
 #include <stdlib.h>
 
@@ -61,10 +61,20 @@ void sighandler(int signo) {
 	exit(EXIT_FAILURE);
 }
 
+// Comment this out stop using Teuchos stacktrace (in that case the stacktrace
+// code originally in h3d will be used). Teuchos stacktrace not used for WIN32 (execinfo.h and cxxabi.h absent).
+#ifndef _WIN32
+  #define HERMES_USE_TEUCHOS_STACKTRACE
+#endif
+
 void callstack_initialize() {
 	// install our signal handlers
+#ifdef HERMES_USE_TEUCHOS_STACKTRACE
+    Teuchos::print_stack_on_segfault();
+#else
 	signal(SIGSEGV, sighandler);
 	signal(SIGABRT, sighandler);
+#endif
 }
 
 void callstack_finalize() {
