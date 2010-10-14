@@ -13,15 +13,15 @@ void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar*
   // this is needed since spaces may have their DOFs enumerated only locally.
   int ndof = Space::assign_dofs(spaces);
 
-  // Initialize FeProblem.
+  // Initialize DiscreteProblem.
   bool is_linear = true;
-  FeProblem* fep = new FeProblem(wf, spaces, is_linear);
+  DiscreteProblem* dp = new DiscreteProblem(wf, spaces, is_linear);
 
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  fep->assemble(matrix, rhs, false);
+  dp->assemble(matrix, rhs, false);
 
   // Calculate the coefficient vector.
   bool solved = solver->solve();
@@ -35,7 +35,7 @@ void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar*
   delete solver;
   delete matrix;
   delete rhs;
-  delete fep;
+  delete dp;
   delete wf;
 }
 

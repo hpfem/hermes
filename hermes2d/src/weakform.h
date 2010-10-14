@@ -21,7 +21,7 @@
 #include "solution.h"
 
 class RefMap;
-class FeProblem;
+class DiscreteProblem;
 class Space;
 class MeshFunction;
 struct EdgePos;
@@ -148,10 +148,10 @@ protected:
 
   bool is_sym() const { return false; /* not impl. yet */ }
 
-  friend class DiscreteProblem;
-  friend class RefDiscreteProblem;
+//  friend class DiscreteProblem;
+//  friend class RefDiscreteProblem;
   friend class LinearProblem;
-  friend class FeProblem;
+  friend class DiscreteProblem;
   friend class Precond;
 
 

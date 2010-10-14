@@ -32,7 +32,7 @@
 ///
 /// TODO: description
 
-class FeProblem;
+class DiscreteProblem;
 
 /// Abstract class for defining solver interface
 ///
@@ -75,11 +75,11 @@ class LinearSolver : public Solver
 /// @ingroup solvers
 class NonlinearSolver : public Solver {
   public:
-    NonlinearSolver() : Solver() { fp = NULL; }
-    NonlinearSolver(FeProblem *fp) : Solver() { this->fp = fp; }
+    NonlinearSolver() : Solver() { dp = NULL; }
+    NonlinearSolver(DiscreteProblem* dp) : Solver() { this->dp = dp; }
     
   protected:
-    FeProblem *fp;        // FE problem being solved (not NULL in case of using
+    DiscreteProblem* dp;        // FE problem being solved (not NULL in case of using
     // NonlinearProblem(DiscreteProblem *) ctor
 };
 

@@ -35,12 +35,12 @@
 #include "solver/aztecoo.h"
 
 
-FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
 {
   _F_
   // sanity checks
   int n = spaces.size();
-  if (n != wf->neq) error("Bad number of spaces in FeProblem.");
+  if (n != wf->neq) error("Bad number of spaces in DiscreteProblem.");
 
   this->wf = wf;
   this->spaces = spaces;
@@ -83,7 +83,7 @@ FeProblem::FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
   this->ndof = Space::assign_dofs(this->spaces);
 }
 
-FeProblem::~FeProblem()
+DiscreteProblem::~DiscreteProblem()
 {
   _F_
   free();
@@ -91,7 +91,7 @@ FeProblem::~FeProblem()
   if (pss != NULL) delete [] pss;
 }
 
-void FeProblem::free()
+void DiscreteProblem::free()
 {
   _F_
   struct_changed = values_changed = true;
@@ -99,7 +99,7 @@ void FeProblem::free()
   wf_seq = -1;
 }
 
-int FeProblem::get_num_dofs()
+int DiscreteProblem::get_num_dofs()
 {
   _F_
   ndof = 0;
@@ -108,7 +108,7 @@ int FeProblem::get_num_dofs()
   return ndof;
 }
 
-scalar** FeProblem::get_matrix_buffer(int n)
+scalar** DiscreteProblem::get_matrix_buffer(int n)
 {
   _F_
   if (n <= matrix_buffer_dim) return matrix_buffer;
@@ -120,7 +120,7 @@ scalar** FeProblem::get_matrix_buffer(int n)
 //// matrix structure precalculation ///////////////////////////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
-bool FeProblem::is_up_to_date()
+bool DiscreteProblem::is_up_to_date()
 {
   _F_
   // check if we can reuse the matrix structure
@@ -145,7 +145,7 @@ bool FeProblem::is_up_to_date()
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
-void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
+void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
   _F_
 
@@ -235,7 +235,7 @@ void FeProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
 // Light version for linear problems.
-void FeProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly) 
+void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly) 
 {
   _F_
   assemble(NULL, mat, rhs, rhsonly);
@@ -243,14 +243,14 @@ void FeProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 
 // General assembling function for nonlinear problem. For linear problems use the 
 // light version above.
-void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
 {
   /* BEGIN IDENTICAL CODE WITH H3D */
 
 	_F_
   // Sanity checks.
-  if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
-  if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
+  if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in DiscreteProblem::assemble().");
+  if (!have_spaces) error("You have to call DiscreteProblem::set_spaces() before calling assemble().");
   for (int i=0; i<this->wf->neq; i++)
   {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
@@ -617,7 +617,7 @@ void FeProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Initialize integration order for external functions
-ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -631,7 +631,7 @@ ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext)
 }
 
 // Initialize external functions (obtain values, derivatives,...)
-ExtData<scalar>* FeProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order)
+ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order)
 {
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
@@ -648,7 +648,7 @@ ExtData<scalar>* FeProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMa
 }
 
 // Initialize integration order on a given edge for external functions
-ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -662,7 +662,7 @@ ExtData<Ord>* FeProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int 
 }
 
 // Initialize shape function values and derivatives (fill in the cache)
-Func<double>* FeProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
+Func<double>* DiscreteProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
   _F_
   PrecalcShapeset::Key key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
@@ -673,7 +673,7 @@ Func<double>* FeProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order
 }
 
 // Caching transformed values
-void FeProblem::init_cache()
+void DiscreteProblem::init_cache()
 {
   _F_
   for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
@@ -683,7 +683,7 @@ void FeProblem::init_cache()
   }
 }
 
-void FeProblem::delete_cache()
+void DiscreteProblem::delete_cache()
 {
   _F_
   for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
@@ -704,7 +704,7 @@ void FeProblem::delete_cache()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Actual evaluation of volume matrix form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   _F_
@@ -801,7 +801,7 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ex
 }
 
 // Actual evaluation of volume vector form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
   // Determine the integration order.
@@ -895,7 +895,7 @@ scalar FeProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ex
 }
 
 // Actual evaluation of surface matrix forms (calculates integral)
-scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -1000,7 +1000,7 @@ scalar FeProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_e
 }
 
 // Actual evaluation of surface vector form (calculates integral)
-scalar FeProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
   _F_

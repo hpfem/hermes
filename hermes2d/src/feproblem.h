@@ -50,10 +50,10 @@ H2D_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class H2D_API FeProblem {
+class H2D_API DiscreteProblem {
 public:
-  FeProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear = false);
-  virtual ~FeProblem();
+  DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear = false);
+  virtual ~DiscreteProblem();
   void free();
 
   // Get pointer to n-th space.

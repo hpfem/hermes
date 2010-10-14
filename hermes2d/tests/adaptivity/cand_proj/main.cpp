@@ -1,4 +1,10 @@
-#include <hermes2d.h>
+#define H2D_REPORT_WARN
+#define H2D_REPORT_INFO
+#define H2D_REPORT_VERBOSE
+#define H2D_REPORT_FILE "application.log"
+#include "hermes2d.h"
+
+//#include <hermes2d.h>
 
 using namespace RefinementSelectors;
 

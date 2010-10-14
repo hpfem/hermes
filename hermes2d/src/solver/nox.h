@@ -34,7 +34,7 @@ class NoxProblemInterface;
  class H2D_API NoxSolver : public IterSolver
 {
 public:
-  NoxSolver(FeProblem *problem);
+  NoxSolver(DiscreteProblem* problem);
   virtual ~NoxSolver();
 
   bool set_init_sln(double *ic);

@@ -32,7 +32,7 @@ class H2D_API NoxProblemInterface :
   public NOX::Epetra::Interface::Preconditioner
 {
 public:
-  NoxProblemInterface(FeProblem* problem);
+  NoxProblemInterface(DiscreteProblem* problem);
   virtual ~NoxProblemInterface();
 
   /// Compute and return F
@@ -59,7 +59,7 @@ public:
     Teuchos::RCP<Precond> get_precond() { return precond; }
   void set_precond(Teuchos::RCP<Precond> &pc);
 
-  FeProblem* fep;                 // finite element problem being solved
+  DiscreteProblem* fep;                 // finite element problem being solved
 
   EpetraVector init_sln;          // initial solution
   EpetraMatrix jacobian;          // jacobian (optional)
@@ -68,7 +68,7 @@ public:
   void prealloc_jacobian();
 };
 
-NoxProblemInterface::NoxProblemInterface(FeProblem* problem)
+NoxProblemInterface::NoxProblemInterface(DiscreteProblem* problem)
 {
   fep = problem;
   int ndof = fep->get_num_dofs();
@@ -167,7 +167,7 @@ bool NoxProblemInterface::computePreconditioner(const Epetra_Vector &x, Epetra_O
 
 // NOX solver //////////////////////////////////////////////////////////////////////////////////////
 
-NoxSolver::NoxSolver(FeProblem* problem) : IterSolver()
+NoxSolver::NoxSolver(DiscreteProblem* problem) : IterSolver()
 {
 #ifdef HAVE_NOX
   // default values
