@@ -34,7 +34,7 @@
 /// Reference mapping (for evaluating integrals on a physical domain)
 ///
 /// @ingroup refmap
-class H3D_API RefMap : public Transformable {
+class HERMES_API RefMap : public Transformable {
 public:
 	/// NOTE: Use this constructor only if constructing an array of RefMaps, then call set_mesh immediately!
 	RefMap();

@@ -25,7 +25,7 @@
 /// H1 space
 ///
 /// @ingroup spaces
-class H3D_API H1Space : public Space {
+class HERMES_API H1Space : public Space {
 public:
 	H1Space(Mesh *mesh, BCType (*bc_type_callback)(int) = NULL, 
 		scalar (*bc_value_callback_by_coord)(int, double, double, double) = NULL, Ord3 p_init = Ord3(1,1,1),

@@ -54,7 +54,7 @@
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 
                                 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
-class H3D_API Adapt {
+class HERMES_API Adapt {
 public:
 	/// Initializes the class.
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 

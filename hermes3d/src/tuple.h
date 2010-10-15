@@ -26,7 +26,7 @@
  *  - 2 up to 10 parameters: foo(Tuple<double>(&sln1, &sln2, &sln3));
  *  - more than 10 parameters: Fill the instance similar to STL vector (std::vector). */
 template<typename T>
-class H3D_API Tuple: public std::vector<T> {
+class HERMES_API Tuple: public std::vector<T> {
 public:
   /// A default constructor. Creates an empty vector.
   explicit Tuple() {};

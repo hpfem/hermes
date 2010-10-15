@@ -29,7 +29,7 @@
 /// H1 shapeset for hexahedra
 ///
 /// @ingroup shapesets
-class H3D_API H1ShapesetLobattoHex : public Shapeset {
+class HERMES_API H1ShapesetLobattoHex : public Shapeset {
 public:
 	H1ShapesetLobattoHex();
 	virtual ~H1ShapesetLobattoHex();

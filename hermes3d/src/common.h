@@ -49,10 +49,10 @@
 // Compatibility.
 //Windows DLL export/import definitions
 #if defined(WIN32) || defined(_WINDOWS)
-# define H3D_API __declspec(dllexport)
+# define HERMES_API __declspec(dllexport)
 # define H3D_IMPORT __declspec(dllimport)
 #else
-# define H3D_API
+# define HERMES_API
 # define H3D_IMPORT
 #endif
 
@@ -206,15 +206,15 @@ enum ESpaceType {
 };
 
 // points
-struct H3D_API Point1D {
+struct HERMES_API Point1D {
 	double x;			// coordinates of a point
 };
 
-struct H3D_API Point2D {
+struct HERMES_API Point2D {
 	double x, y;		// coordinates of a point
 };
 
-struct H3D_API Point3D {
+struct HERMES_API Point3D {
 	double x, y, z;		// coordinates of a point
 };
 
@@ -333,7 +333,7 @@ inline double sqr(complex x) { return std::norm(x); }
 
 /* basic logging functions */
 /// Info about a log record. Used for output log function. \internal
-struct H3D_API Hermes3DLogEventInfo {
+struct HERMES_API Hermes3DLogEventInfo {
   const char code; ///< An event code character. For defails see event characters, e.g., ::H3D_EC_ERROR
   const char* log_file; ///< Log file name.
   const char* src_function; ///< A name of a function/method at which the event was generated.
@@ -351,7 +351,7 @@ struct H3D_API Hermes3DLogEventInfo {
 /** Used by macros error() and error_if().
  *  \param[in] cond True if the function should exit.
  *  \param[in] code Exit code returned by the application throught exit(). */
-void H3D_API hermes3d_exit_if(bool cond, int code = -1);
+void HERMES_API hermes3d_exit_if(bool cond, int code = -1);
 
 
 /// Logs an event if the condition is true. \internal
@@ -363,7 +363,7 @@ void H3D_API hermes3d_exit_if(bool cond, int code = -1);
  *  \param[in] info Info about the event.
  *  \param[in] msg A message or prinf-like formatting string.
  *  \return A value of the parameter cond. */
-bool H3D_API hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info, const char* msg, ...);
+bool HERMES_API hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info, const char* msg, ...);
 
 
 /* log file */
@@ -436,13 +436,13 @@ bool H3D_API hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info
  *  runtime if runtime control is enabled through a preprocessor directive ::H3D_REPORT_RUNTIME_CONTROL. */
 #ifdef H3D_REPORT_RUNTIME_CONTROL
 # define H3D_RCTR(__var) __var /* reports will be controled also by runtime report control variables */
-extern H3D_API bool __H3D_report_warn;
-extern H3D_API bool __H3D_report_warn_intr;
-extern H3D_API bool __H3D_report_info;
-extern H3D_API bool __H3D_report_verbose;
-extern H3D_API bool __H3D_report_trace;
-extern H3D_API bool __H3D_report_time;
-extern H3D_API bool __H3D_report_debug;
+extern HERMES_API bool __H3D_report_warn;
+extern HERMES_API bool __H3D_report_warn_intr;
+extern HERMES_API bool __H3D_report_info;
+extern HERMES_API bool __H3D_report_verbose;
+extern HERMES_API bool __H3D_report_trace;
+extern HERMES_API bool __H3D_report_time;
+extern HERMES_API bool __H3D_report_debug;
 #else
 # define H3D_RCTR(__var) true /* reports will be controled strictly by preprocessor directives */
 #endif

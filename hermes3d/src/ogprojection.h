@@ -22,7 +22,7 @@
 
 #include "discrete_problem.h"
 
-class H3D_API OGProjection
+class HERMES_API OGProjection
 {
 public:
   

@@ -38,7 +38,7 @@ struct SurfPos
 };
 
 struct Mesh;
-class H3D_API  Transformable;
+class HERMES_API  Transformable;
 struct State;
 struct Box;
 
@@ -53,7 +53,7 @@ struct UniData {
 /// same base mesh it walks through all (pseudo-)elements of the union of all
 /// the N meshes.
 ///
-class H3D_API Traverse {
+class HERMES_API Traverse {
 public:
 	void begin(int n, Mesh **meshes, Transformable **fn = NULL);
 	void finish();

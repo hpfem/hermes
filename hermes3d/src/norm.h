@@ -26,17 +26,17 @@
 ///
 /// @{
 
-double H3D_API h1_error(MeshFunction *sln1, MeshFunction *sln2);
-double H3D_API h1_norm(MeshFunction *sln);
+double HERMES_API h1_error(MeshFunction *sln1, MeshFunction *sln2);
+double HERMES_API h1_norm(MeshFunction *sln);
 
-double H3D_API l2_error(MeshFunction *sln1, MeshFunction *sln2);
-double H3D_API l2_norm(MeshFunction *sln);
+double HERMES_API l2_error(MeshFunction *sln1, MeshFunction *sln2);
+double HERMES_API l2_norm(MeshFunction *sln);
 
-double H3D_API hcurl_error(MeshFunction *sln1, MeshFunction *sln2);
-double H3D_API hcurl_norm(MeshFunction *sln);
+double HERMES_API hcurl_error(MeshFunction *sln1, MeshFunction *sln2);
+double HERMES_API hcurl_norm(MeshFunction *sln);
 
-double H3D_API l2_error_hcurl(MeshFunction *sln1, MeshFunction *sln2);
-double H3D_API l2_norm_hcurl(MeshFunction *sln);
+double HERMES_API l2_error_hcurl(MeshFunction *sln1, MeshFunction *sln2);
+double HERMES_API l2_norm_hcurl(MeshFunction *sln);
 
 /// @}
 

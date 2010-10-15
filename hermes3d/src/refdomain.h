@@ -79,7 +79,7 @@ extern H3D_IMPORT int RefPrism_face_nedges[];
 extern H3D_IMPORT EMode2D RefPrism_face_mode[];
 extern H3D_IMPORT int RefPrism_face_orientations[];
 
-class H3D_API RefLine {
+class HERMES_API RefLine {
 public:
 	static const Point1D *get_vertices() { return RefLine_vertices; }
 };
@@ -92,7 +92,7 @@ public:
 /// Reference domain for triangle (2D)
 ///
 /// @ingroup ref_domains
-class H3D_API RefTri {
+class HERMES_API RefTri {
 public:
 	static const Point2D *get_vertices() { return RefTri_vertices; }
 
@@ -103,7 +103,7 @@ public:
 /// Reference domain for quadrilateral (2D)
 ///
 /// @ingroup ref_domains
-class H3D_API RefQuad {
+class HERMES_API RefQuad {
 public:
 	static const Point2D *get_vertices() { return RefQuad_vertices; }
 
@@ -118,7 +118,7 @@ public:
 /// Reference domain for tetrahedron (3D)
 ///
 /// @ingroup ref_domains
-class H3D_API RefTetra {
+class HERMES_API RefTetra {
 public:
 	static const Point3D *get_vertices() { return RefTetra_vertices; }
 
@@ -139,7 +139,7 @@ public:
 /// Reference domain for hexahedron (3D)
 ///
 /// @ingroup ref_domains
-class H3D_API RefHex {
+class HERMES_API RefHex {
 public:
 	static const Point3D *get_vertices() { return RefHex_vertices; }
 
@@ -165,7 +165,7 @@ public:
 /// Reference domain for prism (3D)
 ///
 /// @ingroup ref_domains
-class H3D_API RefPrism {
+class HERMES_API RefPrism {
 public:
 	static const Point3D *get_vertices() { return RefPrism_vertices; }
 

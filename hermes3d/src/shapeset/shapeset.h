@@ -129,7 +129,7 @@ struct CEDComb {
 /// Base class for all shapesets
 ///
 /// @ingroup shapesets
-class H3D_API Shapeset {
+class HERMES_API Shapeset {
 public:
 	Shapeset(int id);
 	virtual ~Shapeset();

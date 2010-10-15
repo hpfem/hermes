@@ -22,7 +22,7 @@ enum TimerPeriodTickType {
 /// A named time period measurement with accumulation.
 /** An instance of the timer should not be used across threads. The class is not thread-safe.
  *  \todo Measure time that CPU spent on the task instead of a global time. */
-class H3D_API TimePeriod {
+class HERMES_API TimePeriod {
 public:
   TimePeriod(const char *name = NULL); ///< Constructs internal structures and starts measuring.
 

@@ -25,7 +25,7 @@
 /// Numeric quadrature for 1D (Gauss points)
 ///
 /// @ingroup quadrature
-class H3D_API QuadStd1D : public Quad1D {
+class HERMES_API QuadStd1D : public Quad1D {
 public:
 	QuadStd1D();
 	~QuadStd1D();
@@ -35,7 +35,7 @@ public:
 /// Numeric quadrature for 2D triangle
 ///
 /// @ingroup quadrature
-class H3D_API QuadStdTri : public Quad2D {
+class HERMES_API QuadStdTri : public Quad2D {
 public:
 	QuadStdTri();
 	~QuadStdTri();
@@ -45,7 +45,7 @@ public:
 /// Numerical quadrature for 3D hexahedron
 ///
 /// @ingroup quadrature
-class H3D_API QuadStdHex : public Quad3D {
+class HERMES_API QuadStdHex : public Quad3D {
 public:
 	QuadStdHex();
 	~QuadStdHex();
@@ -72,7 +72,7 @@ protected:
 /// Numerical quadrature for 3D tetrahedron
 ///
 /// @ingroup quadrature
-class H3D_API QuadStdTetra : public Quad3D {
+class HERMES_API QuadStdTetra : public Quad3D {
 public:
 	QuadStdTetra();
 	~QuadStdTetra();
@@ -82,7 +82,7 @@ public:
 /// Numerical quadrature for 3D prisms
 ///
 /// @ingroup quadrature
-class H3D_API QuadStdPrism : public Quad3D {
+class HERMES_API QuadStdPrism : public Quad3D {
 public:
 	QuadStdPrism();
 	~QuadStdPrism();

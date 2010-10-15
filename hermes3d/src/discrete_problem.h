@@ -36,7 +36,7 @@ class SurfPos;
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class H3D_API DiscreteProblem {
+class HERMES_API DiscreteProblem {
 public:
         DiscreteProblem(WeakForm *wf, Tuple<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
@@ -130,14 +130,14 @@ protected:
 };
 
 /// Calls the required (de)initialization routines of the selected matrix solver.
-H3D_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
-H3D_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
+HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
+HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
 
-H3D_API Vector*  create_vector(MatrixSolverType matrix_solver);
-H3D_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
-H3D_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+HERMES_API Vector*  create_vector(MatrixSolverType matrix_solver);
+HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
+HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
-H3D_API Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement);
-H3D_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
+HERMES_API Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement);
+HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
 
 #endif /* _DISCRETE_PROBLEM_H_ */

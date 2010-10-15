@@ -41,7 +41,7 @@ extern H3D_IMPORT Trf tetra_trf[];
 ///
 /// The purpose of this class to transform elements to sub-elements (multi-mesh)
 ///
-class H3D_API Transformable {
+class HERMES_API Transformable {
 public:
 	Transformable();
 	virtual ~Transformable() {}

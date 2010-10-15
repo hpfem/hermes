@@ -57,7 +57,7 @@ namespace Vtk {
 /// Common ancestor for output quadratures. Extends the interface of Quad3D
 ///
 /// @ingroup visualization
-class H3D_API OutputQuad : public Quad3D {
+class HERMES_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
@@ -80,7 +80,7 @@ protected:
 /// Quadrature for visualizing the solution on tetrahedron
 ///
 /// @ingroup visualization
-class H3D_API OutputQuadTetra : public OutputQuad {
+class HERMES_API OutputQuadTetra : public OutputQuad {
 public:
 	OutputQuadTetra();
 	virtual ~OutputQuadTetra();
@@ -129,7 +129,7 @@ void OutputQuadTetra::calculate_view_points(Ord3 order)
 /// Quadrature for visualizing the solution on hexahedron
 ///
 /// @ingroup visualization
-class H3D_API OutputQuadHex : public OutputQuad {
+class HERMES_API OutputQuadHex : public OutputQuad {
 public:
 	OutputQuadHex();
 	virtual ~OutputQuadHex();
@@ -193,7 +193,7 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 /// NOTE: Not really a linearizer, so far it just stores vertices, elements and values
 /// It is in Vtk namespace so that it does not interfere with the rest of the code, but
 /// when a true linearizer is implemented this class will move from this namespace.
-class H3D_API Linearizer {
+class HERMES_API Linearizer {
 public:
 	Linearizer() { }
 	virtual ~Linearizer();
@@ -276,7 +276,7 @@ int Linearizer::add_cell(Linearizer::Cell::EType type, int n, int *vtcs)
 ///
 /// This class taker a Linearizer class, reads the info stored in there and produces a VTK
 /// legacy file.
-class H3D_API FileFormatter {
+class HERMES_API FileFormatter {
 public:
 	FileFormatter(Linearizer *l) {
 		lin = l;

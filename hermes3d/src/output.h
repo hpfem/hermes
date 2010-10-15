@@ -29,7 +29,7 @@
 /// Abstract class for deriving classes which format the data for visualization
 ///
 /// @ingroup visualization
-class H3D_API OutputEngine {
+class HERMES_API OutputEngine {
 public:
 	virtual ~OutputEngine() { }
 

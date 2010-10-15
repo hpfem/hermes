@@ -77,7 +77,7 @@ enum BCType
 /// by 'mesh', consisting of basis functions constructed using 'shapeset'.
 ///
 /// @ingroup spaces
-class H3D_API Space {
+class HERMES_API Space {
 public:
   Space(Mesh *mesh, Shapeset *shapeset, BCType (*bc_type_callback)(int), 
         scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init = Ord3(1,1,1));
