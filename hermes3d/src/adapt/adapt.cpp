@@ -39,10 +39,10 @@ res_t h1_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<res_
 	res_t result = 0;
 	for (int i = 0; i < n; i++)
 		result += wt[i] * (
-				u->val[i] * CONJ(v->val[i]) +
-				u->dx[i] * CONJ(v->dx[i]) +
-				u->dy[i] * CONJ(v->dy[i]) +
-				u->dz[i] * CONJ(v->dz[i]));
+				u->val[i] * conj(v->val[i]) +
+				u->dx[i] * conj(v->dx[i]) +
+				u->dy[i] * conj(v->dy[i]) +
+				u->dz[i] * conj(v->dz[i]));
 	return result;
 }
 

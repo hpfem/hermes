@@ -104,6 +104,8 @@ enum ProjNormType
 // Default HERMES projection norm is the H1 norm.
 const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
+inline double conj(double a) {  return a; }
+
 #ifdef H3D_COMPLEX
 
 #include <complex>
@@ -117,7 +119,7 @@ typedef complex complex2[2];
 #define ABS(a)				(std::abs(a))
 #define SCALAR_FMT			"(%lf, %lf)"
 #define SCALAR(a)			std::real(a), std::imag(a)
-
+inline complex conj(complex a) { return std::conj(a); }
 // BLAS-related function
 
 #ifdef __cplusplus
