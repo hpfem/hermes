@@ -17,7 +17,7 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int NUMBER_OF_EIGENVALUES = 6;              // Desired number of eigenvalues.
+const int NUMBER_OF_EIGENVALUES = 6;              // Desired number of eigenvalues. Maximum is 6.
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of 
@@ -96,6 +96,7 @@ void write_matrix_mm(const char* filename, Matrix* mat)
 
 int main(int argc, char* argv[])
 {
+  if (NUMBER_OF_EIGENVALUES > 6) error("Maximum number of eigenvalues is 6.");
   info("Desired number of eigenvalues: %d.", NUMBER_OF_EIGENVALUES);
 
   // Load the mesh.
@@ -118,10 +119,25 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 450, 350));
-  sview.show_mesh(false);
-  sview.fix_scale_width(60);
-  OrderView  oview("Polynomial orders", new WinGeom(460, 0, 410, 350));
+  ScalarView sview_1("Eigen 1", new WinGeom(0, 0, 350, 250));
+  sview_1.show_mesh(false);
+  sview_1.fix_scale_width(60);
+  ScalarView sview_2("Eigen 2", new WinGeom(360, 0, 350, 250));
+  sview_2.show_mesh(false);
+  sview_2.fix_scale_width(60);
+  ScalarView sview_3("Eigen 3", new WinGeom(720, 0, 350, 250));
+  sview_3.show_mesh(false);
+  sview_3.fix_scale_width(60);
+  ScalarView sview_4("Eigen 4", new WinGeom(0, 305, 350, 250));
+  sview_4.show_mesh(false);
+  sview_4.fix_scale_width(60);
+  ScalarView sview_5("Eigen 5", new WinGeom(360, 305, 350, 250));
+  sview_5.show_mesh(false);
+  sview_5.fix_scale_width(60);
+  ScalarView sview_6("Eigen 6", new WinGeom(720, 305, 350, 250));
+  sview_6.show_mesh(false);
+  sview_6.fix_scale_width(60);
+  OrderView  oview("Polynomial orders", new WinGeom(1080, 0, 410, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
@@ -209,7 +225,12 @@ int main(int argc, char* argv[])
     // this needs to be changed to take into account all eigenvectors.
 
     // View the coarse mesh solution and polynomial orders.
-    sview.show(&(sln[NUMBER_OF_EIGENVALUES-1]));
+    if (NUMBER_OF_EIGENVALUES > 0) sview_1.show(&(sln[0]));
+    if (NUMBER_OF_EIGENVALUES > 1) sview_2.show(&(sln[1]));
+    if (NUMBER_OF_EIGENVALUES > 2) sview_3.show(&(sln[2]));
+    if (NUMBER_OF_EIGENVALUES > 3) sview_4.show(&(sln[3]));
+    if (NUMBER_OF_EIGENVALUES > 4) sview_5.show(&(sln[4]));
+    if (NUMBER_OF_EIGENVALUES > 5) sview_6.show(&(sln[5]));
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
@@ -242,7 +263,8 @@ int main(int argc, char* argv[])
     else
     {
       info("Adapting coarse mesh.");
-      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, 
+             &selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;

@@ -17,7 +17,7 @@ M = mat_right.to_sss()
 k_conv, lmbd, Q, it, itall = jdsym.jdsym(A, M, K, eigenval_num, target_value, jdtol, max_iter, itsolvers.minres)
 NEIG = len(lmbd)
 for lam in lmbd:
-    print lam, lam - int(lam)
+    print "value:", lam, " error:", lam - int(lam)
 eivecfile = open("eivecs.dat", "w")
 N = len(Q[:,0])
 print >> eivecfile, N
