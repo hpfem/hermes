@@ -38,46 +38,46 @@
 /// FIXME: name
 ///
 /// @ingroup ref_domains
-extern H3D_IMPORT Point1D RefLine_vertices[];
+extern HERMES_API Point1D RefLine_vertices[];
 	
-extern H3D_IMPORT Point2D RefTri_vertices[];
-extern H3D_IMPORT int2 RefTri_edge_vtcs[];
+extern HERMES_API Point2D RefTri_vertices[];
+extern HERMES_API int2 RefTri_edge_vtcs[];
 
-extern H3D_IMPORT Point2D RefQuad_vertices[];
-extern H3D_IMPORT int2 RefQuad_edge_vtcs[];
-
-
-extern H3D_IMPORT Point3D RefTetra_vertices[];
-extern H3D_IMPORT int2 RefTetra_edge_vtcs[];
-extern H3D_IMPORT int *RefTetra_face_vtcs[];
-extern H3D_IMPORT int *RefTetra_face_edges[];
-extern H3D_IMPORT int RefTetra_face_nvtcs[];
-extern H3D_IMPORT int RefTetra_face_nedges[];
-extern H3D_IMPORT EMode2D RefTetra_face_mode[];
-extern H3D_IMPORT int RefTetra_face_orientations[];
-extern H3D_IMPORT Point3D RefTetra_face_normal[];
+extern HERMES_API Point2D RefQuad_vertices[];
+extern HERMES_API int2 RefQuad_edge_vtcs[];
 
 
-extern H3D_IMPORT Point3D RefHex_vertices[];
-extern H3D_IMPORT int2 RefHex_edge_vtcs[];
-extern H3D_IMPORT int *RefHex_face_vtcs[];
-extern H3D_IMPORT int *RefHex_face_edges[];
-extern H3D_IMPORT int RefHex_face_nvtcs[];
-extern H3D_IMPORT int RefHex_face_nedges[];
-extern H3D_IMPORT EMode2D RefHex_face_mode[];
-extern H3D_IMPORT int RefHex_face_orientations[];
-extern H3D_IMPORT int RefHex_face_edge_ori[8][2];
-extern H3D_IMPORT int RefHex_edge_tangent[];
-extern H3D_IMPORT int2 RefHex_face_tangent[];
+extern HERMES_API Point3D RefTetra_vertices[];
+extern HERMES_API int2 RefTetra_edge_vtcs[];
+extern HERMES_API int *RefTetra_face_vtcs[];
+extern HERMES_API int *RefTetra_face_edges[];
+extern HERMES_API int RefTetra_face_nvtcs[];
+extern HERMES_API int RefTetra_face_nedges[];
+extern HERMES_API EMode2D RefTetra_face_mode[];
+extern HERMES_API int RefTetra_face_orientations[];
+extern HERMES_API Point3D RefTetra_face_normal[];
 
-extern H3D_IMPORT Point3D RefPrism_vertices[];
-extern H3D_IMPORT int2 RefPrism_edge_vtcs[];
-extern H3D_IMPORT int *RefPrism_face_vtcs[];
-extern H3D_IMPORT int *RefPrism_face_edges[];
-extern H3D_IMPORT int RefPrism_face_nvtcs[];
-extern H3D_IMPORT int RefPrism_face_nedges[];
-extern H3D_IMPORT EMode2D RefPrism_face_mode[];
-extern H3D_IMPORT int RefPrism_face_orientations[];
+
+extern HERMES_API Point3D RefHex_vertices[];
+extern HERMES_API int2 RefHex_edge_vtcs[];
+extern HERMES_API int *RefHex_face_vtcs[];
+extern HERMES_API int *RefHex_face_edges[];
+extern HERMES_API int RefHex_face_nvtcs[];
+extern HERMES_API int RefHex_face_nedges[];
+extern HERMES_API EMode2D RefHex_face_mode[];
+extern HERMES_API int RefHex_face_orientations[];
+extern HERMES_API int RefHex_face_edge_ori[8][2];
+extern HERMES_API int RefHex_edge_tangent[];
+extern HERMES_API int2 RefHex_face_tangent[];
+
+extern HERMES_API Point3D RefPrism_vertices[];
+extern HERMES_API int2 RefPrism_edge_vtcs[];
+extern HERMES_API int *RefPrism_face_vtcs[];
+extern HERMES_API int *RefPrism_face_edges[];
+extern HERMES_API int RefPrism_face_nvtcs[];
+extern HERMES_API int RefPrism_face_nedges[];
+extern HERMES_API EMode2D RefPrism_face_mode[];
+extern HERMES_API int RefPrism_face_orientations[];
 
 class HERMES_API RefLine {
 public:

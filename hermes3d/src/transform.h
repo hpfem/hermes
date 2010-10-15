@@ -30,8 +30,8 @@ struct Trf {
 	double3 t;			/// translation vector (3 components - x, y, z)
 };
 
-extern H3D_IMPORT Trf hex_trf[];
-extern H3D_IMPORT Trf tetra_trf[];
+extern HERMES_API Trf hex_trf[];
+extern HERMES_API Trf tetra_trf[];
 
 	
 /// Transformable is a base class for all classes that perform some kind of precalculation of
