@@ -2,7 +2,7 @@
 #include "../common.h"
 #include "c99_functions.h"
 
-#ifdef IMPLELENT_C99
+#ifdef IMPLEMENT_C99
 
 /* constants */
 const unsigned long long _NAN = 0x7fffffffffffffffL; //NAN according to IEEE specification
