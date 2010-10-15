@@ -17,7 +17,7 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int NUMBER_OF_EIGENVALUES = 6;              // Desired number of eigenvalues. Maximum is 6.
+const int NUMBER_OF_EIGENVALUES = 5;              // Desired number of eigenvalues. Maximum is 6.
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of 
@@ -235,20 +235,43 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
-    Adapt* adaptivity = new Adapt(Tuple<Space *>(&space, &space, &space, &space, &space, &space), 
-      Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
+    Tuple<Space *> spaces;
+    for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
+        spaces.push_back(&space);
+    Tuple<ProjNormType> proj_norms;
+    for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
+        proj_norms.push_back(HERMES_H1_NORM);
+    Adapt* adaptivity = new Adapt(spaces, proj_norms);
     bool solutions_for_adapt = true;
-    Tuple<Solution *> slns(&(sln[0]), &(sln[1]), &(sln[2]), &(sln[3]), &(sln[4]), &(sln[5]));
-    Tuple<Solution *> ref_slns(&(ref_sln[0]), &(ref_sln[1]), &(ref_sln[2]), &(ref_sln[3]), &(ref_sln[4]), &(ref_sln[5]));
+    
+    Tuple<Solution *> slns;
+    if (NUMBER_OF_EIGENVALUES > 0) slns.push_back(&sln[0]);
+    if (NUMBER_OF_EIGENVALUES > 1) slns.push_back(&sln[1]);
+    if (NUMBER_OF_EIGENVALUES > 2) slns.push_back(&sln[2]);
+    if (NUMBER_OF_EIGENVALUES > 3) slns.push_back(&sln[3]);
+    if (NUMBER_OF_EIGENVALUES > 4) slns.push_back(&sln[4]);
+    if (NUMBER_OF_EIGENVALUES > 5) slns.push_back(&sln[5]);
+    
+    Tuple<Solution *> ref_slns;
+    if (NUMBER_OF_EIGENVALUES > 0) ref_slns.push_back(&ref_sln[0]);
+    if (NUMBER_OF_EIGENVALUES > 1) ref_slns.push_back(&ref_sln[1]);
+    if (NUMBER_OF_EIGENVALUES > 2) ref_slns.push_back(&ref_sln[2]);
+    if (NUMBER_OF_EIGENVALUES > 3) ref_slns.push_back(&ref_sln[3]);
+    if (NUMBER_OF_EIGENVALUES > 4) ref_slns.push_back(&ref_sln[4]);
+    if (NUMBER_OF_EIGENVALUES > 5) ref_slns.push_back(&ref_sln[5]);
     Tuple<double> component_errors;
     double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &component_errors) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d\n err_est_rel[0]: %g%%\n err_est_rel[1]: %g%%\n err_est_rel[2]: %g%%\n err_est_rel[3]: %g%%\n err_est_rel[4]: %g%%\n err_est_rel[5]: %g%%\n err_est_rel_total: %g%%", 
-         Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), component_errors[0] * 100, component_errors[1] * 100, 
-         component_errors[2] * 100, component_errors[3] * 100, component_errors[4] * 100, component_errors[5] * 100, err_est_rel);
-
+    info("ndof_coarse: %d, ndof_fine: %d\n.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    if (NUMBER_OF_EIGENVALUES > 0) info("err_est_rel[0]: %g%%\n", component_errors[0] * 100);
+    if (NUMBER_OF_EIGENVALUES > 1) info("err_est_rel[1]: %g%%\n", component_errors[1] * 100);
+    if (NUMBER_OF_EIGENVALUES > 2) info("err_est_rel[2]: %g%%\n", component_errors[2] * 100);
+    if (NUMBER_OF_EIGENVALUES > 3) info("err_est_rel[3]: %g%%\n", component_errors[3] * 100);
+    if (NUMBER_OF_EIGENVALUES > 4) info("err_est_rel[4]: %g%%\n", component_errors[4] * 100);
+    if (NUMBER_OF_EIGENVALUES > 5) info("err_est_rel[5]: %g%%\n", component_errors[5] * 100);
+   
     // Time measurement.
     cpu_time.tick();
 
@@ -263,8 +286,10 @@ int main(int argc, char* argv[])
     else
     {
       info("Adapting coarse mesh.");
-      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, 
-             &selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+      Tuple<RefinementSelectors::Selector *> selectors;
+      for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
+        selectors.push_back(&selector);
+      done = adaptivity->adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
