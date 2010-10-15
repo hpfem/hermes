@@ -20,6 +20,8 @@
 #ifndef _HERMES_3D_
 #define _HERMES_3D_
 
+#include <conio.h>
+
 #include "common/array.h"
 #include "common/bitarray.h"
 #include "common/map.h"

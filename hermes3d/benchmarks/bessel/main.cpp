@@ -91,6 +91,10 @@ void out_fn(MeshFunction *fn, const char *name)
 
 int main(int argc, char **args) 
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Load the mesh. 
   Mesh mesh;
   H3DReader mloader;
@@ -138,6 +142,12 @@ int main(int argc, char **args)
     out_fn(&sln, "sln");
     out_orders(&space, "order");
   }
+  
+  // Time measurement.
+  cpu_time.tick();
+
+  // Print timing information.
+  info("Total running time: %g s", cpu_time.accumulated());
 
   // Clean up.
   delete matrix;
@@ -145,5 +155,7 @@ int main(int argc, char **args)
   delete solver;
   finalize_solution_environment(matrix_solver);
 
+  printf("Press any key...");
+  getch();
   return 0;
 }
