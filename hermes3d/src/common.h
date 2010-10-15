@@ -45,16 +45,6 @@
 
 #include "common_time_period.h"
 
-//using namespace std;
-// Compatibility.
-//Windows DLL export/import definitions
-#if defined(WIN32) || defined(_WINDOWS)
-# define HERMES_API __declspec(dllexport)
-# define H3D_IMPORT __declspec(dllimport)
-#else
-# define HERMES_API
-# define H3D_IMPORT
-#endif
 
 // error codes
 #define H3D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
