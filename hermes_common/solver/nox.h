@@ -31,7 +31,7 @@ class NoxProblemInterface;
 /// Encapsulation of NOX nonlinear solver
 ///
 /// @ingroup solvers
- class H3D_API NoxSolver : public IterSolver
+ class HERMES_API NoxSolver : public IterSolver
 {
 public:
   NoxSolver(DiscreteProblem *problem);

@@ -17,21 +17,29 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#ifndef _PETSC_SOLVER_H_
+#define _PETSC_SOLVER_H_
 
-#ifndef _PARDISO_SOLVER_H_
-#define _PARDISO_SOLVER_H_
-
-#include "solver.h"
 #include "../matrix.h"
+#include "solver.h"
 
-class PardisoMatrix : public SparseMatrix {
+#ifdef WITH_PETSC
+  #include <petsc.h>
+  #include <petscmat.h>
+  #include <petscvec.h>
+  #include <petscksp.h>
+#endif
+
+/// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
+///
+class PetscMatrix : public SparseMatrix {
 public:
-  PardisoMatrix();
-  virtual ~PardisoMatrix();
+  PetscMatrix();
+  virtual ~PetscMatrix();
 
-  virtual void pre_add_ij(int row, int col);
   virtual void alloc();
   virtual void free();
+  virtual void finish();
   virtual scalar get(int m, int n);
   virtual void zero();
   virtual void add(int m, int n, scalar v);
@@ -41,50 +49,54 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // PARDISO specific data structures for storing matrix, rhs
-  int *Ap;
-  int *Ai;
-  scalar *Ax;
+#ifdef WITH_PETSC
+  Mat matrix;
+#endif
+  bool inited;
 
-  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
-
-  friend class PardisoLinearSolver;
+  friend class PetscLinearSolver;
 };
 
-class PardisoVector : public Vector {
+/// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
+///
+class PetscVector : public Vector {
 public:
-  PardisoVector();
-  virtual ~PardisoVector();
+  PetscVector();
+  virtual ~PetscVector();
 
   virtual void alloc(int ndofs);
   virtual void free();
-  virtual scalar get(int idx) { return v[idx]; }
+  virtual void finish();
+  virtual scalar get(int idx);
+  virtual void extract(scalar *v) const;
   virtual void zero();
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
-  virtual void extract(scalar *v) const;
   virtual void add(int n, int *idx, scalar *y);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-  scalar *v;
+#ifdef WITH_PETSC
+  Vec vec;
+#endif
+  bool inited;
 
-  friend class PardisoLinearSolver;
+  friend class PetscLinearSolver;
 };
 
-/// Encapsulation of PARDISO linear solver
+/// Encapsulation of PETSc linear solver
 ///
 /// @ingroup solvers
-class H2D_API PardisoLinearSolver : public LinearSolver {
+class HERMES_API PetscLinearSolver : public LinearSolver {
 public:
-  PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
-  virtual ~PardisoLinearSolver();
+  PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
+  virtual ~PetscLinearSolver();
 
   virtual bool solve();
 
 protected:
-  PardisoMatrix *m;
-  PardisoVector *rhs;
+  PetscMatrix *m;
+  PetscVector *rhs;
 };
 
-#endif /* _PARDISO_SOLVER_H_*/
+#endif

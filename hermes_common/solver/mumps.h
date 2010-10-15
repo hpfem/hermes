@@ -17,38 +17,40 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _SOLVER_EPETRA_H_
-#define _SOLVER_EPETRA_H_
+#ifndef _MUMPS_SOLVER_H_
+#define _MUMPS_SOLVER_H_
 
 #include "solver.h"
 #include "../matrix.h"
 
-#ifdef HAVE_EPETRA
-#include <Epetra_SerialComm.h>
-#include <Epetra_Map.h>
-#include <Epetra_Vector.h>
-#include <Epetra_CrsGraph.h>
-#include <Epetra_CrsMatrix.h>
+#ifdef WITH_MUMPS
+  extern "C" {
+    #include <mumps_c_types.h>
+  #ifndef H3D_COMPLEX
+    #include <dmumps_c.h>
+  #else
+    #include <zmumps_c.h>
+  #endif
+  }
+  
+  #ifdef WITH_MPI
+    #include <mpi.h>
+  #endif
+#else
+  struct ZMUMPS_COMPLEX {
+    double r, i;
+  };
 #endif
 
 
-class EpetraMatrix : public SparseMatrix {
+class MumpsMatrix : public SparseMatrix {
 public:
-  EpetraMatrix();
-#ifdef HAVE_EPETRA
-  EpetraMatrix(Epetra_RowMatrix &mat);
-#endif
-  virtual ~EpetraMatrix();
-
-  virtual void prealloc(int n);
-  virtual void pre_add_ij(int row, int col);
-  virtual void finish();
+  MumpsMatrix();
+  virtual ~MumpsMatrix();
 
   virtual void alloc();
   virtual void free();
   virtual scalar get(int m, int n);
-  virtual int get_num_row_entries(int row);
-  virtual void extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs);
   virtual void zero();
   virtual void add(int m, int n, scalar v);
   virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
@@ -57,45 +59,35 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-#ifdef HAVE_EPETRA
-  Epetra_BlockMap *std_map;
-  Epetra_CrsGraph *grph;
-  Epetra_CrsMatrix *mat;
-#ifdef H2D_COMPLEX
-  Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
+  // MUMPS specific data structures for storing matrix, rhs
+  int nnz;				// number of non-zero elements
+  int *irn;				// row indices
+  int *jcn;				// column indices
+#ifndef H3D_COMPLEX
+  scalar *a;				// matrix entries
+#else
+  ZMUMPS_COMPLEX *a;
 #endif
-  bool owner;
-#endif
+  int *ap;
+  int *ai;
 
-  friend class AmesosSolver;
-  friend class AztecOOSolver;
-  friend class NoxSolver;
-  friend class IfpackPrecond;
-  friend class MlPrecond;
+  friend class MumpsSolver;
 };
 
 
-class EpetraVector : public Vector {
+class MumpsVector : public Vector {
 public:
-  EpetraVector();
-#ifdef HAVE_EPETRA
-  EpetraVector(const Epetra_Vector &v);
-#endif
-  virtual ~EpetraVector();
+  MumpsVector();
+  virtual ~MumpsVector();
 
   virtual void alloc(int ndofs);
   virtual void free();
-#ifdef HAVE_EPETRA
-  virtual scalar get(int idx) { return (*vec)[idx]; }
-#ifndef H2D_COMPLEX
-  virtual void extract(double *v) const { vec->ExtractCopy(v); }
+#ifndef H3D_COMPLEX
+  virtual scalar get(int idx) { return v[idx]; }
 #else
-  virtual void extract(scalar *v) const { }
+  virtual scalar get(int idx) { return std::complex<double>(v[idx].r, v[idx].i); }
 #endif
-#else
-  virtual scalar get(int idx) { return 0.0; }
-  virtual void extract(scalar *v) const { }
-#endif
+  virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
   virtual void zero();
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
@@ -103,18 +95,29 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifdef HAVE_EPETRA
-  Epetra_BlockMap *std_map;
-  Epetra_Vector *vec;
-#ifdef H2D_COMPLEX
-  Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
-#endif
-  bool owner;
+#ifndef H3D_COMPLEX
+  scalar *v;
+#else
+  ZMUMPS_COMPLEX *v;
 #endif
 
-  friend class AmesosSolver;
-  friend class AztecOOSolver;
-  friend class NoxSolver;
+  friend class MumpsSolver;
+};
+
+
+/// Encapsulation of MUMPS linear solver
+///
+/// @ingroup solvers
+class HERMES_API MumpsSolver : public LinearSolver {
+public:
+  MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
+  virtual ~MumpsSolver();
+
+  virtual bool solve();
+
+protected:
+  MumpsMatrix *m;
+  MumpsVector *rhs;
 };
 
 #endif

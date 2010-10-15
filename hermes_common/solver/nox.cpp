@@ -26,7 +26,7 @@ static Epetra_SerialComm seq_comm;
 /// A helper for NOX solver
 ///
 /// @ingroup solvers
-class H3D_API NoxProblemInterface :
+class HERMES_API NoxProblemInterface :
   public NOX::Epetra::Interface::Required,
   public NOX::Epetra::Interface::Jacobian,
   public NOX::Epetra::Interface::Preconditioner

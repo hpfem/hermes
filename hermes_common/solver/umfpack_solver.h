@@ -17,36 +17,19 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _MUMPS_SOLVER_H_
-#define _MUMPS_SOLVER_H_
+#ifndef _UMFPACK_SOLVER_H_
+#define _UMFPACK_SOLVER_H_
 
 #include "solver.h"
 #include "../matrix.h"
 
-#ifdef WITH_MUMPS
-  extern "C" {
-    #include <mumps_c_types.h>
-  #ifndef H3D_COMPLEX
-    #include <dmumps_c.h>
-  #else
-    #include <zmumps_c.h>
-  #endif
-  }
-  
-  #ifdef WITH_MPI
-    #include <mpi.h>
-  #endif
-#else
-  struct ZMUMPS_COMPLEX {
-    double r, i;
-  };
-#endif
+class DiscreteProblem;
 
-
-class MumpsMatrix : public SparseMatrix {
+class UMFPackMatrix : public SparseMatrix {
 public:
-  MumpsMatrix();
-  virtual ~MumpsMatrix();
+  UMFPackMatrix();
+  UMFPackMatrix(int size);
+  virtual ~UMFPackMatrix();
 
   virtual void alloc();
   virtual void free();
@@ -59,34 +42,25 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // MUMPS specific data structures for storing matrix, rhs
-  int nnz;				// number of non-zero elements
-  int *irn;				// row indices
-  int *jcn;				// column indices
-#ifndef H3D_COMPLEX
-  scalar *a;				// matrix entries
-#else
-  ZMUMPS_COMPLEX *a;
-#endif
-  int *ap;
-  int *ai;
+  // UMFPack specific data structures for storing matrix, rhs
+  int *Ap;
+  int *Ai;
+  scalar *Ax;
 
-  friend class MumpsSolver;
+  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
+
+  friend class UMFPackLinearSolver;
 };
 
-
-class MumpsVector : public Vector {
+class UMFPackVector : public Vector {
 public:
-  MumpsVector();
-  virtual ~MumpsVector();
+  UMFPackVector();
+  UMFPackVector(int size);
+  virtual ~UMFPackVector();
 
   virtual void alloc(int ndofs);
   virtual void free();
-#ifndef H3D_COMPLEX
   virtual scalar get(int idx) { return v[idx]; }
-#else
-  virtual scalar get(int idx) { return std::complex<double>(v[idx].r, v[idx].i); }
-#endif
   virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
   virtual void zero();
   virtual void set(int idx, scalar y);
@@ -95,29 +69,25 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifndef H3D_COMPLEX
   scalar *v;
-#else
-  ZMUMPS_COMPLEX *v;
-#endif
 
-  friend class MumpsSolver;
+  friend class UMFPackLinearSolver;
 };
 
 
-/// Encapsulation of MUMPS linear solver
+/// Encapsulation of UMFPACK linear solver
 ///
 /// @ingroup solvers
-class H3D_API MumpsSolver : public LinearSolver {
+class HERMES_API UMFPackLinearSolver : public LinearSolver {
 public:
-  MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
-  virtual ~MumpsSolver();
+  UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs);
+  virtual ~UMFPackLinearSolver();
 
   virtual bool solve();
 
 protected:
-  MumpsMatrix *m;
-  MumpsVector *rhs;
+  UMFPackMatrix *m;
+  UMFPackVector *rhs;
 };
 
 #endif
