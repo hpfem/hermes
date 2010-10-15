@@ -19,7 +19,7 @@
 
 #include "feproblem.h"
 
-class H2D_API OGProjection
+class HERMES_API OGProjection
 {
 public:
   static void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 

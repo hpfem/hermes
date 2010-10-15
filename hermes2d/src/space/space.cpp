@@ -679,14 +679,14 @@ int Space::assign_dofs(Tuple<Space*> spaces)
 }
 
 // updating time-dependent essential BC
-H2D_API void update_essential_bc_values(Tuple<Space*> spaces) {
+HERMES_API void update_essential_bc_values(Tuple<Space*> spaces) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->update_essential_bc_values();
   }
 }
 
-H2D_API void update_essential_bc_values(Space *s) {
+HERMES_API void update_essential_bc_values(Space *s) {
   return update_essential_bc_values(Tuple<Space*>(s));
 }
 

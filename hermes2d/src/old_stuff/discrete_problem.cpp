@@ -1474,7 +1474,7 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
 // mesh, and finally solves the fine mesh problem using Newton.
 // So, this is not suitable for time-dependent problems.
 // Feel free to adjust this function for more advanced applications.
-H2D_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *coeff_vec, 
+HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *coeff_vec, 
                         MatrixSolverType matrix_solver, Tuple<int>proj_norms, 
                         Tuple<Solution *> target_slns, Tuple<Solution *> target_ref_slns, 
                         Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 

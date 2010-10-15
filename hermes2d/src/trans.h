@@ -23,7 +23,7 @@
 #include "quad.h"
 #include "quad_all.h"
 
-extern H2D_API double2 *transform(Element *e);
-extern H2D_API void element_polygonal_boundary(Element *e, double2 **tp, int *n);
+extern HERMES_API double2 *transform(Element *e);
+extern HERMES_API void element_polygonal_boundary(Element *e, double2 **tp, int *n);
 
 #endif

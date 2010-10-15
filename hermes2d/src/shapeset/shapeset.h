@@ -69,7 +69,7 @@ enum FunctionExpansionIndex {
 ///
 /// Shape functions are always real-valued.
 ///
-class H2D_API Shapeset
+class HERMES_API Shapeset
 {
 public:
 

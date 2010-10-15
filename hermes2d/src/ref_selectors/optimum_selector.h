@@ -55,22 +55,22 @@ namespace RefinementSelectors {
   /** Used for debugging and output purposes.
    *  \param cand_list A predefined list of candidates.
    *  \return A string representation of the enum value. */
-  extern H2D_API const char* get_cand_list_str(const CandList cand_list);
+  extern HERMES_API const char* get_cand_list_str(const CandList cand_list);
 
   /// Returns true if a predefined candidate list may contain candidates that are HP. \ingroup g_selectors
   /** \param cand_list A predefined list of candidates.
    *  \return True if a predefined candidate list may contain candidates that are HP. */
-  extern H2D_API bool is_hp(const CandList cand_list);
+  extern HERMES_API bool is_hp(const CandList cand_list);
 
   /// Returns true if a predefined candidate list may contain candidates with an anisotropic change of orders. \ingroup g_selectors
   /** \param cand_list A predefined list of candidates.
    *  \return True if a predefined candidate list may contain candidates with an anisotropic change of orders. */
-  extern H2D_API bool is_p_aniso(const CandList cand_list);
+  extern HERMES_API bool is_p_aniso(const CandList cand_list);
 
   /// A selector that chooses an optimal candidates based on a score. \ingroup g_selectors
   /** This is a base class for all selectors that chooses an candidate based on some
    *  evaluated criteria. Currently, the criteria is based on an error change per DOF. */
-  class H2D_API OptimumSelector : public Selector {
+  class HERMES_API OptimumSelector : public Selector {
   protected: //options
     bool opt_symmetric_mesh; ///< True if ::H2D_PREFER_SYMMETRIC_MESH is set. True by default.
     bool opt_apply_exp_dof; ///< True if ::H2D_APPLY_CONV_EXP_DOF is set. False by default.
@@ -134,7 +134,7 @@ namespace RefinementSelectors {
         }
       }
 
-      friend H2D_API std::ostream& operator<<(std::ostream& stream, const Cand& cand);
+      friend HERMES_API std::ostream& operator<<(std::ostream& stream, const Cand& cand);
     };
 
     /// Returns a vector of the last generated candidates.
@@ -338,7 +338,7 @@ namespace RefinementSelectors {
   };
 
   /// Operator. Flushes contents of a candidate to a string stream. Useful for debug messages. \ingroup g_selectors
-  extern H2D_API std::ostream& operator<<(std::ostream& stream, const OptimumSelector::Cand& cand);
+  extern HERMES_API std::ostream& operator<<(std::ostream& stream, const OptimumSelector::Cand& cand);
 }
 
 #endif

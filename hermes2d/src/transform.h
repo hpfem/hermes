@@ -30,8 +30,8 @@ struct Trf
 #define H2D_TRF_NUM (H2D_TRF_QUAD_NUM + 1) ///< A total number of transformations.
 #define H2D_TRF_IDENTITY H2D_TRF_QUAD_NUM ///< An index of identity transformation.
 
-extern H2D_API Trf tri_trf[H2D_TRF_NUM];  ///< A table of triangle sub-subdomain transforms. Only first ::H2D_TRF_TRI_NUM transformations are valid, the rest are identity transformation.
-extern H2D_API Trf quad_trf[H2D_TRF_NUM]; ///< A table of quad sub-subdomain transforms. Only first ::H2D_TRF_QUAD_NUM transformations are valid, the rest are identity transformation.
+extern HERMES_API Trf tri_trf[H2D_TRF_NUM];  ///< A table of triangle sub-subdomain transforms. Only first ::H2D_TRF_TRI_NUM transformations are valid, the rest are identity transformation.
+extern HERMES_API Trf quad_trf[H2D_TRF_NUM]; ///< A table of quad sub-subdomain transforms. Only first ::H2D_TRF_QUAD_NUM transformations are valid, the rest are identity transformation.
 
 
 /// Transformable is a base class for all classes that perform some kind of precalculation of
@@ -39,7 +39,7 @@ extern H2D_API Trf quad_trf[H2D_TRF_NUM]; ///< A table of quad sub-subdomain tra
 /// from Transformable the ability to transform integration points to the sub-elements
 /// of an element.
 ///
-class H2D_API Transformable
+class HERMES_API Transformable
 {
 public:
 

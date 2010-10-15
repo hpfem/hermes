@@ -52,7 +52,7 @@ enum SymFlag
 ///
 ///
 
-class H2D_API WeakForm
+class HERMES_API WeakForm
 {
 public:
 
@@ -101,9 +101,9 @@ protected:
 
   struct Area  {  /*std::string name;*/  std::vector<int> markers;  };
 
-  H2D_API_USED_STL_VECTOR(Area);
+  HERMES_API_USED_STL_VECTOR(Area);
   std::vector<Area> areas;
-  H2D_API_USED_STL_VECTOR(MeshFunction*);
+  HERMES_API_USED_STL_VECTOR(MeshFunction*);
 
   public:
     scalar evaluate_fn(int point_cnt, double *weights, Func<double> *values_v, Geom<double> *geometry, ExtData<scalar> *values_ext_fnc, Element* element, Shapeset* shape_set, int shape_inx); ///< Evaluate value of the user defined function.

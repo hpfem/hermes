@@ -27,7 +27,7 @@
 // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
-class H2D_API VectorBaseView : public VectorView
+class HERMES_API VectorBaseView : public VectorView
 {
 public:
 
@@ -74,7 +74,7 @@ protected:
 
 #else // NOGLUT
 
-class H2D_API VectorBaseView : public VectorView
+class HERMES_API VectorBaseView : public VectorView
 {
 public:
   VectorBaseView(char* title = "BaseView", DEFAULT_WINDOW_POS) {}

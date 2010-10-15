@@ -23,7 +23,7 @@
 /// mesh edges.
 ///
 ///
-class H2D_API L2Space : public Space
+class HERMES_API L2Space : public Space
 {
 public:
 

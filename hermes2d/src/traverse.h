@@ -50,7 +50,7 @@ struct UniData
 /// same base mesh it walks through all (pseudo-)elements of the union of all
 /// the N meshes.
 ///
-class H2D_API Traverse
+class HERMES_API Traverse
 {
 public:
 

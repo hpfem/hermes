@@ -24,7 +24,7 @@
 ///
 ///
 ///
-class H2D_API HcurlSpace : public Space
+class HERMES_API HcurlSpace : public Space
 {
 public:
   // For backward compatibility.

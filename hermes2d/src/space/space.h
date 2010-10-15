@@ -102,7 +102,7 @@ enum BCType
 ///
 class Ord2;
 
-class H2D_API Space
+class HERMES_API Space
 {
 public:
   Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
@@ -295,7 +295,7 @@ protected: //debugging support
   /// the DOFs have been assigned.
   virtual void post_assign() {}
 
-  H2D_API_USED_STL_VECTOR(void*);
+  HERMES_API_USED_STL_VECTOR(void*);
   std::vector<void*> extra_data;
   void free_extra_data();
 
@@ -316,8 +316,8 @@ public:
 };
 
 // updating time-dependent essential (Dirichlet) boundary conditions
-extern H2D_API void update_essential_bc_values(Tuple<Space*> spaces);  // multiple spaces
-extern H2D_API void update_essential_bc_values(Space *s);    // one space
+extern HERMES_API void update_essential_bc_values(Tuple<Space*> spaces);  // multiple spaces
+extern HERMES_API void update_essential_bc_values(Space *s);    // one space
 
 class Ord2
   {

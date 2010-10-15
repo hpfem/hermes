@@ -21,7 +21,7 @@
 /// A refinement record. \ingroup g_adapt
 /** Except the attribute ElementToRefine::q, the class is able to dump its content to a stringstream
  *  in a human readable form, see operator<<(std::ostream& stream, const ElementToRefine& elem_ref). */
-class H2D_API ElementToRefine {
+class HERMES_API ElementToRefine {
 public:
   int id; ///< An ID of the element. -1 if invalid.
   int comp; ///< An index of the component. -1 if invalid.
@@ -62,7 +62,7 @@ public:
 
 /// Dumps contents of the structure to a stream in a text form. \ingroup g_adapt
 /** Used for debugging purposes to dump the structure to a stringstream. */
-extern H2D_API std::ostream& operator<<(std::ostream& stream, const ElementToRefine& elem_ref);
+extern HERMES_API std::ostream& operator<<(std::ostream& stream, const ElementToRefine& elem_ref);
 
 /// Checks whether the input contains a given tag. Throws an std::runtime_error if the tag is not found.
 /** \section s_use Suggested Use
@@ -71,7 +71,7 @@ extern H2D_API std::ostream& operator<<(std::ostream& stream, const ElementToRef
     std::ifstream fin("my_file.txt");
     fin >> TagChecker("TAG");
  *  \endcode */
-class H2D_API TagChecker {
+class HERMES_API TagChecker {
   const std::string& tag; ///< A tag.
 public:
   /// Constructor.
@@ -84,7 +84,7 @@ public:
 };
 
 /// Peformes a check for a tag. Throws exception otherwise. \sa TagChecker.
-extern H2D_API std::istream& operator>>(std::istream& stream, const TagChecker& checker);
+extern HERMES_API std::istream& operator>>(std::istream& stream, const TagChecker& checker);
 
 /// Refinement stream capable of input and output. \ingroup g_adapt
 /** This class allows to store a vector of refinements to a file.
@@ -169,7 +169,7 @@ extern H2D_API std::istream& operator>>(std::istream& stream, const TagChecker& 
                                 is zero in a case of a triangle.
     ------------------------------------------------------------------\endverbatim
  */
-class H2D_API ElementToRefineStream {
+class HERMES_API ElementToRefineStream {
 private:
   static const char* H2DER_START_TAG; ///< A tag which start file.
   static const char* H2DER_BIN_TAG; ///< A tag which defines uncompressed binary contents.
@@ -241,14 +241,14 @@ public:
   /// Closes the stream.
   void close() { stream.close(); };
 
-  friend H2D_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs);
-  friend H2D_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs);
+  friend HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs);
+  friend HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs);
 };
 
 /// Operator. Stores a vector of refinements to a stream. \ingroup g_adapt
-extern H2D_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs);
+extern HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs);
 
 /// Operator. Reads a vector of refinemens. It erases the contents of the vector that it is reading to. \ingroup g_adapt
-extern H2D_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs);
+extern HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs);
 
 #endif

@@ -29,17 +29,17 @@ enum RefinementType {
 /// Retuns true if a given refinement is an ANISO-refinement.
 /** \param[in] refin_type A refinement type. Possible values are defined in the enum RefinementType.
  *  \return True of a given refinement is an ANISO-refinement. */
-extern H2D_API bool is_refin_aniso(const int refin_type);
+extern HERMES_API bool is_refin_aniso(const int refin_type);
 
 /// Returns a maximum number of sons that will be generated if a given refinement is applied.
 /** \param[in] refin_type A refinement type. Possible values are defined in the enum RefinementType.
  *  \return A number of possible sons. In a case of P-refinement, the function returns 1 even thought this refinement yields just a change in orders. */
-extern H2D_API int get_refin_sons(const int refin_type);
+extern HERMES_API int get_refin_sons(const int refin_type);
 
 /// Returns a string representation of the refinement.
 /** Used for debugging and event logging purposes.
  *  \param[in] refin_type A refinement type. Possible values are defined in the enum RefinementType.
  *  \return A string representation of a given refinement. */
-extern H2D_API const std::string get_refin_str(const int refin_type);
+extern HERMES_API const std::string get_refin_str(const int refin_type);
 
 #endif

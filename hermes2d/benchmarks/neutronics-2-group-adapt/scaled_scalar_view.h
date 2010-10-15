@@ -1,6 +1,6 @@
 #include "hermes2d.h"
 
-class H2D_API ScaledScalarView : public ScalarView
+class HERMES_API ScaledScalarView : public ScalarView
 {
 public:
     ScaledScalarView(const char* title = "ScaledScalarView",

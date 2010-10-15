@@ -39,18 +39,18 @@ class Vector;
 class Solver;
 
 /// Instantiated template. It is used to create a clean Windows DLL interface.
-H2D_API_USED_TEMPLATE(Tuple<ProjNormType>);
-H2D_API_USED_TEMPLATE(Tuple<Space*>);
-H2D_API_USED_TEMPLATE(Tuple<MeshFunction*>);
-H2D_API_USED_TEMPLATE(Tuple<Solution*>);
-H2D_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
+HERMES_API_USED_TEMPLATE(Tuple<ProjNormType>);
+HERMES_API_USED_TEMPLATE(Tuple<Space*>);
+HERMES_API_USED_TEMPLATE(Tuple<MeshFunction*>);
+HERMES_API_USED_TEMPLATE(Tuple<Solution*>);
+HERMES_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
 
 
 /// Discrete problem class
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class H2D_API DiscreteProblem {
+class HERMES_API FeProblem {
 public:
   DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear = false);
   virtual ~DiscreteProblem();
@@ -129,19 +129,19 @@ protected:
 };
 
 /// Calls the required (de)initialization routines of the selected matrix solver.
-H2D_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
-H2D_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
+HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
+HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
 
 /// Selects the appropriate linear solver.
-H2D_API Vector* create_vector(MatrixSolverType matrix_solver);
-H2D_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
-H2D_API Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
+HERMES_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
+HERMES_API Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
 // Create globally refined space.
-H2D_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
-H2D_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
+HERMES_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
+HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
-H2D_API double get_l2_norm(Vector* vec); 
+HERMES_API double get_l2_norm(Vector* vec); 
 
 #endif
 

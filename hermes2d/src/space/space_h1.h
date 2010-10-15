@@ -23,7 +23,7 @@
 ///
 ///
 ///
-class H2D_API H1Space : public Space
+class HERMES_API H1Space : public Space
 {
 public:
 
@@ -89,7 +89,7 @@ protected:
     scalar value;
   };
 
-  H2D_API_USED_STL_VECTOR(FixedVertex);
+  HERMES_API_USED_STL_VECTOR(FixedVertex);
   std::vector<FixedVertex> fixed_vertices;
 
   inline bool is_fixed_vertex(int id) const;

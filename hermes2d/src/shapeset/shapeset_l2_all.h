@@ -22,7 +22,7 @@
 
 
 /// L2 shapeset - products of legendre polynomials
-class H2D_API L2ShapesetLegendre : public Shapeset
+class HERMES_API L2ShapesetLegendre : public Shapeset
 {
   public: L2ShapesetLegendre();
   virtual int get_id() const { return 30; }

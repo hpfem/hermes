@@ -26,13 +26,13 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
   // when using DLL, client project may define this macro for greater efficiency 
     #define HERMES_API __declspec(dllimport)
     #define HERMES_API_USED_TEMPLATE(__implementation)
-    //#define H2D_API_USED_TEMPLATE(__implementation) extern template class HERMES_API __implementation
+    //#define HERMES_API_USED_TEMPLATE(__implementation) extern template class HERMES_API __implementation
   #else 
   // when building or using target static library; or when using DLL and client project does not define IMPORT_HERMES_DLL
     #define HERMES_API
     #define HERMES_API_USED_TEMPLATE(__implementation)
   #endif
-  #define H2D_API_USED_STL_VECTOR(__type) H2D_API_USED_TEMPLATE(std::allocator<__type>); H2D_API_USED_TEMPLATE(std::vector<__type>)
+  #define HERMES_API_USED_STL_VECTOR(__type) HERMES_API_USED_TEMPLATE(std::allocator<__type>); HERMES_API_USED_TEMPLATE(std::vector<__type>)
   
 #else 
 

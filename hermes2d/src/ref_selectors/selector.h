@@ -63,7 +63,7 @@ namespace RefinementSelectors {
    *  The interface of the class provides methods for:
    *  - selecting a refinement based on a reference soution,
    *  - updating orders of a mesh shared among components. */
-  class H2D_API Selector {
+  class HERMES_API Selector {
   public:
     const int max_order; ///< A maximum allowed order.
   public:
@@ -92,7 +92,7 @@ namespace RefinementSelectors {
   };
 
   /// A selector that selects H-refinements only. \ingroup g_selectors
-  class H2D_API HOnlySelector : public Selector {
+  class HERMES_API HOnlySelector : public Selector {
   public:
     /// Constructor.
     HOnlySelector() : Selector() {};
@@ -108,7 +108,7 @@ namespace RefinementSelectors {
   };
 
   /// A selector that increases order (i.e., it selects P-refinements only). \ingroup g_selectors
-  class H2D_API POnlySelector : public Selector {
+  class HERMES_API POnlySelector : public Selector {
     const int order_h_inc; ///< Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
     const int order_v_inc; ///< Increase along the vertical direction in a quadrilateral.
   public:

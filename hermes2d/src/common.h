@@ -173,9 +173,9 @@ const int H2D_DEFAULT_PROJ_TYPE = 1;
 #define H2D_MAKE_QUAD_ORDER(h_order, v_order) (((v_order) << H2D_ORDER_BITS) + (h_order))
 #define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
 #define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
-extern H2D_API const std::string get_quad_order_str(const int quad_order); ///< Returns string representation of the quad order: used for debugging purposses.
+extern HERMES_API const std::string get_quad_order_str(const int quad_order); ///< Returns string representation of the quad order: used for debugging purposses.
 
-extern H2D_API int make_edge_order(int edge, int encoded_order, int mode); ///< Returns the correct axial order for given edge.
+extern HERMES_API int make_edge_order(int edge, int encoded_order, int mode); ///< Returns the correct axial order for given edge.
 
 #include "scalar.h"
 
@@ -287,7 +287,7 @@ inline cplx conj(cplx a) { return std::conj(a); }
 
 /* basic logging functions */
 /// Info about a log record. Used for output log function. \internal
-struct H2D_API Hermes2DLogEventInfo {
+struct HERMES_API Hermes2DLogEventInfo {
   const char code; ///< An event code character. For defails see event characters, e.g., ::H2D_EC_ERROR
   const char* log_file; ///< Log file name.
   const char* src_function; ///< A name of a function/method at which the event was generated.
@@ -303,7 +303,7 @@ struct H2D_API Hermes2DLogEventInfo {
 /** Used by macros error() and error_if().
  *  \param[in] cond True if the function should exit.
  *  \param[in] code Exit code returned by the application throught exit(). */
-extern H2D_API void hermes2d_exit_if(bool cond, int code = -1);
+extern HERMES_API void hermes2d_exit_if(bool cond, int code = -1);
 
 /// Logs an event if the condition is true. \internal
 /** Used by all even logging macros. Since this function returns a copy of the parameter cond,
@@ -314,7 +314,7 @@ extern H2D_API void hermes2d_exit_if(bool cond, int code = -1);
  *  \param[in] info Info about the event.
  *  \param[in] msg A message or prinf-like formatting string.
  *  \return A value of the parameter cond. */
-extern H2D_API bool hermes2d_log_message_if(bool cond, const Hermes2DLogEventInfo& info, const char* msg, ...);
+extern HERMES_API bool hermes2d_log_message_if(bool cond, const Hermes2DLogEventInfo& info, const char* msg, ...);
 
 /* log file */
 #undef H2D_LOG_FILE
@@ -384,13 +384,13 @@ extern H2D_API bool hermes2d_log_message_if(bool cond, const Hermes2DLogEventInf
  *  runtime if runtime control is enabled through a preprocessor directive ::H2D_REPORT_RUNTIME_CONTROL. */
 #ifdef H2D_REPORT_RUNTIME_CONTROL
 # define H2D_RCTR(__var) __var /* reports will be controled also by runtime report control variables */
-extern H2D_API bool __h2d_report_warn;
-extern H2D_API bool __h2d_report_warn_intr;
-extern H2D_API bool __h2d_report_info;
-extern H2D_API bool __h2d_report_verbose;
-extern H2D_API bool __h2d_report_trace;
-extern H2D_API bool __h2d_report_time;
-extern H2D_API bool __h2d_report_debug;
+extern HERMES_API bool __h2d_report_warn;
+extern HERMES_API bool __h2d_report_warn_intr;
+extern HERMES_API bool __h2d_report_info;
+extern HERMES_API bool __h2d_report_verbose;
+extern HERMES_API bool __h2d_report_trace;
+extern HERMES_API bool __h2d_report_time;
+extern HERMES_API bool __h2d_report_debug;
 #else
 # define H2D_RCTR(__var) true /* reports will be controled strictly by preprocessor directives */
 #endif
@@ -521,7 +521,7 @@ void __hermes2d_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const
 /* python support */
 /// Throws an exception std::runtime_error. Used by Python wrappers.
 /** \param[in] text A text (a cause) of the exception. */
-extern H2D_API void throw_exception(char *text);
+extern HERMES_API void throw_exception(char *text);
 
 /* Uncomment this line to disable internal mesh compatibility 
    tests in Traverse:begin(). */ 

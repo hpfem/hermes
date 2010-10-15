@@ -27,7 +27,7 @@ namespace RefinementSelectors {
    *  Since an initialization of the class may take a long time,
    *  it is suggested to create the instance outside the adaptivity
    *  loop. */
-  class H2D_API HcurlProjBasedSelector : public ProjBasedSelector {
+  class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector {
   public: //API
     /// Constructor.
     /** \param[in] cand_list A predefined list of candidates.

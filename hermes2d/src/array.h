@@ -31,9 +31,9 @@ template<class T>
 class Array
 {
 protected:
-  H2D_API_USED_STL_VECTOR(T*);
+  HERMES_API_USED_STL_VECTOR(T*);
   std::vector<T*>  pages; // todo: standard array for maximum access speed
-  H2D_API_USED_STL_VECTOR(int);
+  HERMES_API_USED_STL_VECTOR(int);
   std::vector<int> unused;
   int  size, nitems;
   bool append_only;

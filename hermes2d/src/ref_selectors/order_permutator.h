@@ -27,7 +27,7 @@ namespace RefinementSelectors {
         int order_h = order_perm.get_order_h();
       } while (order_perm.next());
    *  \endcode */
-  class H2D_API OrderPermutator {
+  class HERMES_API OrderPermutator {
   protected:
     int order_h; ///< The current horizontal order.
     int order_v; ///< The current verical order.

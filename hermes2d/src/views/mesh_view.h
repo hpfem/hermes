@@ -32,7 +32,7 @@
 /// MeshView is a debugging tool for displaying meshes together with its element
 /// id numbers, boundary markers etc.
 ///
-class H2D_API MeshView : public View
+class HERMES_API MeshView : public View
 {
 public:
 
@@ -72,7 +72,7 @@ protected:
 
 #else // NOGLUT
 
-class H2D_API MeshView : public View
+class HERMES_API MeshView : public View
 {
 public:
   MeshView(const char* title = "MeshView", DEFAULT_WINDOW_POS) {}

@@ -20,13 +20,13 @@ using namespace std;
 /// A size of a delimiter in a log file. \internal \ingroup g_logging
 #define H2D_LOG_FILE_DELIM_SIZE 80
 
-H2D_API const std::string get_quad_order_str(const int quad_order) {
+HERMES_API const std::string get_quad_order_str(const int quad_order) {
   std::stringstream str;
   str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
   return str.str();
 }
 
-H2D_API int make_edge_order(int mode, int edge, int encoded_order)
+HERMES_API int make_edge_order(int mode, int edge, int encoded_order)
 {
   assert(edge < 4);
   
@@ -36,7 +36,7 @@ H2D_API int make_edge_order(int mode, int edge, int encoded_order)
     return H2D_GET_V_ORDER(encoded_order);
 }
 
-H2D_API void hermes2d_exit_if(bool cond, int code) {
+HERMES_API void hermes2d_exit_if(bool cond, int code) {
   if (cond)
     exit(code);
 }
@@ -156,7 +156,7 @@ static bool write_console(const char code, const bool emphasize, const char* tex
 #endif
 }
 
-H2D_API bool hermes2d_log_message_if(bool cond, const Hermes2DLogEventInfo& info, const char* msg, ...) {
+HERMES_API bool hermes2d_log_message_if(bool cond, const Hermes2DLogEventInfo& info, const char* msg, ...) {
   if (cond) {
     logger_monitor.enter();
 
@@ -314,16 +314,16 @@ Hermes2DLogoMessage hermes2d_logo_message;
 # define __H2D_REP_DEBG false
 #endif
 
-H2D_API bool __h2d_report_warn = __H2D_REP_WARN;
-H2D_API bool __h2d_report_warn_intr = __H2D_REP_WARN_INTR;
-H2D_API bool __h2d_report_info = __H2D_REP_INFO;
-H2D_API bool __h2d_report_verbose = __H2D_REP_VERB;
-H2D_API bool __h2d_report_trace = __H2D_REP_TRAC;
-H2D_API bool __h2d_report_time = __H2D_REP_TIME;
-H2D_API bool __h2d_report_debug = __H2D_REP_DEBG;
+HERMES_API bool __h2d_report_warn = __H2D_REP_WARN;
+HERMES_API bool __h2d_report_warn_intr = __H2D_REP_WARN_INTR;
+HERMES_API bool __h2d_report_info = __H2D_REP_INFO;
+HERMES_API bool __h2d_report_verbose = __H2D_REP_VERB;
+HERMES_API bool __h2d_report_trace = __H2D_REP_TRAC;
+HERMES_API bool __h2d_report_time = __H2D_REP_TIME;
+HERMES_API bool __h2d_report_debug = __H2D_REP_DEBG;
 
 //// python support //////////////////////////////////////////////////////////////////////////////////
-H2D_API void throw_exception(char *text)
+HERMES_API void throw_exception(char *text)
 {
   throw std::runtime_error(text);
 }

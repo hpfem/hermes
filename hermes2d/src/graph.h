@@ -24,7 +24,7 @@
 ///  Please note that this is a base class that cannot be instantiated.
 ///  Use MatlabGraph, GnuplotGraph or SimpleGraph instead.
 ///
-class H2D_API Graph
+class HERMES_API Graph
 {
 public:
 
@@ -67,7 +67,7 @@ protected:
     std::vector<Values> data;
   };
 
-  H2D_API_USED_STL_VECTOR(Row);
+  HERMES_API_USED_STL_VECTOR(Row);
   std::vector<Row> rows;
 
 };
@@ -75,7 +75,7 @@ protected:
 
 ///  Outputs just two numbers per row.
 ///
-class H2D_API SimpleGraph : public Graph
+class HERMES_API SimpleGraph : public Graph
 {
 public:
 
@@ -89,7 +89,7 @@ public:
 
 ///  Outputs a MATLAB graph.
 ///
-class H2D_API MatlabGraph : public Graph
+class HERMES_API MatlabGraph : public Graph
 {
 public:
 
@@ -106,7 +106,7 @@ public:
 
 static const char* default_terminal = "set terminal postscript eps enhanced\n";
 
-class H2D_API GnuplotGraph : public Graph
+class HERMES_API GnuplotGraph : public Graph
 {
 public:
  
@@ -137,7 +137,7 @@ protected:
 
 ///  Outputs a graph into a .PNG file via GNUPLOT.
 ///
-class H2D_API PNGGraph : public GnuplotGraph
+class HERMES_API PNGGraph : public GnuplotGraph
 {
 public:
     

@@ -13,7 +13,7 @@ ElementToRefine& ElementToRefine::operator=(const ElementToRefine& orig) {
   return *this;
 }
 
-H2D_API std::ostream& operator<<(std::ostream& stream, const ElementToRefine& elem_ref) {
+HERMES_API std::ostream& operator<<(std::ostream& stream, const ElementToRefine& elem_ref) {
   stream << "id:" << elem_ref.id << ";comp:" << elem_ref.comp << "; split:" << get_refin_str(elem_ref.split) << "; orders:[";
   int num_sons = elem_ref.get_num_sons();
   for(int i = 0; i < num_sons; i++) {
@@ -25,7 +25,7 @@ H2D_API std::ostream& operator<<(std::ostream& stream, const ElementToRefine& el
   return stream;
 }
 
-H2D_API std::istream& operator>>(std::istream& stream, const TagChecker& checker) {
+HERMES_API std::istream& operator>>(std::istream& stream, const TagChecker& checker) {
   stringstream tag;
   for(unsigned i = 0; i < checker.get_tag().size(); i++) {
     char tag_char;
@@ -165,7 +165,7 @@ int ElementToRefineStream::read_bytes(int num_bytes) {
   return result;
 }
 
-H2D_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs) {
+HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs) {
   //calculate range of values
   Range<int> range_id, range_comp, range_order;
   vector<ElementToRefine>::const_iterator elem_ref = elem_refs.begin();
@@ -230,7 +230,7 @@ H2D_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const s
   return stream;
 }
 
-H2D_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs) {
+HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs) {
   int pos = (int)stream.stream.tellg();
   //read tag
   try { stream.stream >> TagChecker(ElementToRefineStream::H2DER_VECTOR_TAG); }

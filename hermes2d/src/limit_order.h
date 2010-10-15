@@ -17,12 +17,12 @@
 #define __H2D_LIMIT_ORDER_H
 
 // can be called to set a custom order limiting table
-extern H2D_API void set_order_limit_table(int* tri_table, int* quad_table, int n);
+extern HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n);
 
 // limit_order is used in integrals
-extern H2D_API int  g_safe_max_order;
-extern H2D_API int  g_max_order;
-extern H2D_API int* g_order_table;
+extern HERMES_API int  g_safe_max_order;
+extern HERMES_API int  g_max_order;
+extern HERMES_API int* g_order_table;
 
 #ifndef DEBUG_ORDER
   #define limit_order(o) \
@@ -39,9 +39,9 @@ extern H2D_API int* g_order_table;
     o = g_safe_max_order;
 #endif
 
-extern H2D_API void reset_warn_order(); ///< Resets warn order flag.
-extern H2D_API void warn_order(); ///< Warns about integration order iff ward order flags it not set. Sets warn order flag.
-extern H2D_API void update_limit_table(int mode);
+extern HERMES_API void reset_warn_order(); ///< Resets warn order flag.
+extern HERMES_API void warn_order(); ///< Warns about integration order iff ward order flags it not set. Sets warn order flag.
+extern HERMES_API void update_limit_table(int mode);
 
 #endif
 

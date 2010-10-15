@@ -46,8 +46,8 @@
 
 #define H2D_MAX_COMPONENTS 10 ///< A maximum number of components.
 
-H2D_API_USED_TEMPLATE(Tuple<Space*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
-H2D_API_USED_TEMPLATE(Tuple<Solution*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
+HERMES_API_USED_TEMPLATE(Tuple<Space*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
+HERMES_API_USED_TEMPLATE(Tuple<Solution*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
 
 // Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
@@ -125,7 +125,7 @@ struct AdaptivityParamType {
  *  and it acts as a container for the calculated errors.
  *  The class has to be inherited in order to be used.
  */
-class H2D_API Adapt
+class HERMES_API Adapt
 {
 public:
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 

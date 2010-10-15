@@ -27,7 +27,7 @@ struct UniData;
 ///
 /// (This class cannot be instantiated.)
 ///
-class H2D_API Filter : public MeshFunction
+class HERMES_API Filter : public MeshFunction
 {
 public:
 
@@ -78,7 +78,7 @@ protected:
 /// both components are specified in 'item', e.g., item1 = H2D_FN_DX (which is H2D_FN_DX_0 | H2D_FN_DX_1).
 /// Otherwise it is scalar-valued.
 ///
-class H2D_API SimpleFilter : public Filter
+class HERMES_API SimpleFilter : public Filter
 {
 public:
 
@@ -107,7 +107,7 @@ protected:
 /// result. The user-supplied combining function has a different format: it takes and must
 /// return also the DX and DY values.
 ///
-class H2D_API DXDYFilter : public Filter
+class HERMES_API DXDYFilter : public Filter
 {
 public:
 
@@ -135,7 +135,7 @@ protected:
 /// MagFilter takes two functions representing the components of a vector function and
 /// calculates the vector magnitude, sqrt(x^2 + y^2).
 /// \brief Calculates the magnitude of a vector function.
-class H2D_API MagFilter : public SimpleFilter
+class HERMES_API MagFilter : public SimpleFilter
 {
   public: 
 		MagFilter() {};
@@ -145,28 +145,28 @@ class H2D_API MagFilter : public SimpleFilter
 
 
 /// Calculates the difference of two functions.
-class H2D_API DiffFilter : public SimpleFilter
+class HERMES_API DiffFilter : public SimpleFilter
 {
   public: DiffFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
 
 
 /// Calculates the sum of two functions.
-class H2D_API SumFilter : public SimpleFilter
+class HERMES_API SumFilter : public SimpleFilter
 {
   public: SumFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
 
 
 /// Calculates the square of a function.
-class H2D_API SquareFilter : public SimpleFilter
+class HERMES_API SquareFilter : public SimpleFilter
 {
   public: SquareFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
 
 
 /// Removes the imaginary part from a function.
-class H2D_API RealFilter : public SimpleFilter
+class HERMES_API RealFilter : public SimpleFilter
 {
   public: RealFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
@@ -174,20 +174,20 @@ class H2D_API RealFilter : public SimpleFilter
 
 /// ImagFilter puts the imaginary part of the input function to the real part of the
 /// output, allowing it to be visualized.
-class H2D_API ImagFilter : public SimpleFilter
+class HERMES_API ImagFilter : public SimpleFilter
 {
   public: ImagFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
 
 
 /// Computes the absolute value of a complex solution.
-class H2D_API AbsFilter : public SimpleFilter
+class HERMES_API AbsFilter : public SimpleFilter
 {
   public: AbsFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
 
 /// Computes the angle of a complex solution.
-class H2D_API AngleFilter : public SimpleFilter
+class HERMES_API AngleFilter : public SimpleFilter
 {
   public: AngleFilter(Tuple<MeshFunction*> solutions, Tuple<int> items = *(new Tuple<int>));
 };
@@ -197,7 +197,7 @@ class H2D_API AngleFilter : public SimpleFilter
 /// It calculates the stress tensor and applies the Von Mises equivalent stress formula
 /// to obtain the resulting stress measure.
 /// \brief Calculates the Von Mises stress.
-class H2D_API VonMisesFilter : public Filter
+class HERMES_API VonMisesFilter : public Filter
 {
 public: // TODO: cylindrical coordinates
 
@@ -220,7 +220,7 @@ protected:
 /// Linearization filter for use in nonlinear problems. From one or two previous
 /// solution values it extrapolates an estimate of the new one.
 /// With adaptive time step: tau_frac = tau_new / tau_old
-class H2D_API LinearFilter : public Filter
+class HERMES_API LinearFilter : public Filter
 {
   public: LinearFilter(MeshFunction* old);
           LinearFilter(MeshFunction* older, MeshFunction* old, double tau_frac = 1);

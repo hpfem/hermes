@@ -33,7 +33,7 @@ class PrecalcShapeset;
 ///
 /// (This is an abstract class and cannot be instantiated.)
 ///
-class H2D_API MeshFunction : public ScalarFunction
+class HERMES_API MeshFunction : public ScalarFunction
 {
 public:
 
@@ -84,7 +84,7 @@ public:
 ///
 /// TODO: write how to obtain solution values, maybe include inherited methods from Function as comments.
 ///
-class H2D_API Solution : public MeshFunction
+class HERMES_API Solution : public MeshFunction
 {
 public:
 
@@ -232,7 +232,7 @@ protected:
 /// Please note that the same functionality can be obtained by using Solution::set_exact().
 /// This class is provided merely for convenience.
 ///
-class H2D_API ExactSolution : public Solution
+class HERMES_API ExactSolution : public Solution
 {
 public:
 

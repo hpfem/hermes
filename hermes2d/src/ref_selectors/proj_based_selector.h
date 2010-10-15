@@ -45,7 +45,7 @@ namespace RefinementSelectors {
    *  - evaluate_rhs_subdomain()
    *  - evaluate_error_squared_subdomain()
    */
-  class H2D_API ProjBasedSelector : public OptimumSelector {
+  class HERMES_API ProjBasedSelector : public OptimumSelector {
   public: //API
     /// Destructor
     virtual ~ProjBasedSelector();

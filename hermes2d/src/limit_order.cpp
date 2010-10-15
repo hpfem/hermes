@@ -37,11 +37,11 @@ static int* g_order_table_quad = default_order_table_quad;
 static int* g_order_table_tri  = default_order_table_tri;
 static bool warned_order = false;
 
-H2D_API int  g_max_order;
-H2D_API int  g_safe_max_order;
-H2D_API int* g_order_table = NULL;
+HERMES_API int  g_max_order;
+HERMES_API int  g_safe_max_order;
+HERMES_API int* g_order_table = NULL;
 
-H2D_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
+HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
 {
   if (n < 24) error("Order limit tables must have at least 24 entries.");
   g_order_table_tri  = tri_table;
@@ -49,7 +49,7 @@ H2D_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
 }
 
 
-H2D_API void update_limit_table(int mode)
+HERMES_API void update_limit_table(int mode)
 {
   g_quad_2d_std.set_mode(mode);
   g_max_order = g_quad_2d_std.get_max_order();
@@ -57,11 +57,11 @@ H2D_API void update_limit_table(int mode)
   g_order_table = (mode == H2D_MODE_TRIANGLE) ? g_order_table_tri : g_order_table_quad;
 }
 
-H2D_API void reset_warn_order() {
+HERMES_API void reset_warn_order() {
   warned_order = false;
 }
 
-H2D_API void warn_order()
+HERMES_API void warn_order()
 {
   if (!warned_order)
   {

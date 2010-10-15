@@ -40,7 +40,7 @@ enum GIP2DIndices {
 
 /// Quad1D is a base class for all 1D quadrature points.
 ///
-class H2D_API Quad1D
+class HERMES_API Quad1D
 {
 public:
 
@@ -65,7 +65,7 @@ protected:
 
 /// Quad2D is a base class for all 2D quadrature points on triangles and quads.
 ///
-class H2D_API Quad2D
+class HERMES_API Quad2D
 {
 public:
 

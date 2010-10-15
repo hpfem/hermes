@@ -24,7 +24,7 @@
 ///
 ///
 ///
-class H2D_API HdivSpace : public Space
+class HERMES_API HdivSpace : public Space
 {
 public:
   // For backward compatibility.
