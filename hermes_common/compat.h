@@ -19,18 +19,14 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #if defined(WIN32) || defined(_WINDOWS)
 
   #if defined(EXPORT_HERMES_DLL)
-  // when building DLL, target project defines this macro
+  // when building DLL (target project defines this macro)
     #define HERMES_API __declspec(dllexport)
     #define HERMES_API_USED_TEMPLATE(__implementation) template class HERMES_API __implementation
-  #elif defined(IMPORT_HERMES_DLL)  
-  // when using DLL, client project may define this macro for greater efficiency 
+  #else  
+  // when using the DLL by a client project
     #define HERMES_API __declspec(dllimport)
     #define HERMES_API_USED_TEMPLATE(__implementation)
     //#define HERMES_API_USED_TEMPLATE(__implementation) extern template class HERMES_API __implementation
-  #else 
-  // when building or using target static library; or when using DLL and client project does not define IMPORT_HERMES_DLL
-    #define HERMES_API
-    #define HERMES_API_USED_TEMPLATE(__implementation)
   #endif
   #define HERMES_API_USED_STL_VECTOR(__type) HERMES_API_USED_TEMPLATE(std::allocator<__type>); HERMES_API_USED_TEMPLATE(std::vector<__type>)
   
