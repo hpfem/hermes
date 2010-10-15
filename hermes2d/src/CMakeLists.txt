@@ -256,7 +256,7 @@ install(FILES ${INC_SOLVER}    DESTINATION include/hermes_common/solver)
 
 # build and install MSVC version:
 if(MSVC)
-	set(MSVC_DLL_DEFINES "-D_HERMESDLL")
+	set(MSVC_DLL_DEFINES "-DEXPORT_HERMES_DLL")
 	if(H2D_REAL)
 		BUILD_LIB_ALL(${HERMES_REAL_BIN} "${MSVC_DLL_DEFINES}")
 	endif(H2D_REAL)
