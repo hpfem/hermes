@@ -1,13 +1,10 @@
+#define H3D_REPORT_WARN
+#define H3D_REPORT_INFO
+#define H3D_REPORT_VERBOSE
 #include "config.h"
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
+//#include <getopt.h>
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/timer.h>
-#include <common/error.h>
-#include <float.h>
-#include <getopt.h>
+
 
 //  This example comes with an exact solution, and it describes the diffraction
 //  of an electromagnetic wave from a re-entrant corner. Convergence graphs saved
@@ -25,12 +22,20 @@
 //      impedance boundary condition on rest of boundary (natural BC)
 //
 //  The following parameters can be changed:
-const int P_INIT = 1;				// Initial polynomial degree. NOTE: The meaning is different from
-						// standard continuous elements in the space H1. Here, P_INIT refers
-						// to the maximum poly order of the tangential component, and polynomials
-						// of degree P_INIT + 1 are present in element interiors. P_INIT = 0
-						// is for Whitney elements.
-bool do_output = true;				// generate output files (if true)
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT_X = 2,
+          P_INIT_Y = 2,
+          P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
+bool solution_output = true;                      // Generate output files (if true).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
 
 // Problem parameters.
 const double mu_r   = 1.0;
@@ -49,143 +54,96 @@ BCType bc_types(int marker)
     return BC_NATURAL; // impedance
 }
 
-// Helper function to output Mesh. 
-void out_mesh(Mesh *mesh, const char *name)
+// Essential (Dirichlet) boundary condition values. 
+scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
+{
+  return 0;
+}
+
+// Mesh output.
+void out_orders(Space *space, const char *name)
 {
   char fname[1024];
   sprintf(fname, "%s.vtk", name);
   FILE *f = fopen(fname, "w");
   if (f != NULL) {
     VtkOutputEngine vtk(f);
-    vtk.out(mesh);
+    vtk.out_orders(space, name);
     fclose(f);
   }
   else
     warning("Could not open file '%s' for writing.", fname);
 }
 
-// Helper function to output solution. 
+// Solution output.
 void out_fn(MeshFunction *fn, const char *name)
 {
-  char of_name[1024];
-  FILE *ofile;
-  // mesh out
-  sprintf(of_name, "%s.vtk", name);
-  ofile = fopen(of_name, "w");
-  if (ofile != NULL) {
-    VtkOutputEngine output(ofile);
-    output.out(fn, name);
-    fclose(ofile);
+  char fname[1024];
+  sprintf(fname, "%s.vtk", name);
+  FILE *f = fopen(fname, "w");
+  if (f != NULL) {
+    VtkOutputEngine vtk(f);
+    vtk.out(fn, name);
+    fclose(f);
   }
-  else 
-    warning("Can not not open '%s' for writing.", of_name);
+  else warning("Could not open file '%s' for writing.", fname);
 }
 
-/***********************************************************************************
- * main program                                                                    *
- ***********************************************************************************/
-int main(int argc, char **argv)
+int main(int argc, char **args) 
 {
-
-#ifdef WITH_PETSC
-  PetscInitialize(NULL, NULL, (char *) PETSC_NULL, PETSC_NULL);
-  PetscPushErrorHandler(PetscIgnoreErrorHandler, PETSC_NULL);           // disable PETSc error handler
-#endif
-
   // Load the mesh. 
   Mesh mesh;
-  Mesh3DReader mloader;
+  H3DReader mloader;
   mloader.load("lshape_hex.mesh3d", &mesh);			// hexahedron
+  // Perform initial mesh refinement.
+  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
-  // Perform initial mesh refinements. 
-  mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-  mesh.refine_all_elements(H3D_H3D_REFT_HEX_XY);
-  mesh.refine_all_elements(H3D_H3D_REFT_HEX_XY);
-  mesh.refine_all_elements(H3D_H3D_REFT_HEX_XY);
-
-  // Matrix solver. 
-#if defined WITH_UMFPACK
-  UMFPackMatrix mat;
-  UMFPackVector rhs;
-  UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-  PardisoMatrix mat;
-  PardisoVector rhs;
-  PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-  PetscMatrix mat;
-  PetscVector rhs;
-  PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-  MumpsMatrix mat;
-  MumpsVector rhs;
-  MumpsSolver solver(&mat, &rhs);
-#endif
-
-  // Create an Hcurl space with detault shapeset.
-  HcurlShapesetLobattoHex shapeset;
-
-  // Create Hcurl space to setup the problem.
-  HcurlSpace sp(&mesh, &shapeset);
-  sp.set_bc_types(bc_types);
-  sp.set_uniform_order(order3_t(P_INIT, P_INIT, P_INIT));
-
-  // Assign DOF. 
-  int ndof = sp.assign_dofs();
-  printf("  - Number of DOFs: %d\n", ndof);
+  // Create an Hcurl space with default shapeset.
+  HcurlSpace space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
   //  Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(biform<double, scalar>, biform<ord_t, ord_t>, SYM);
+  wf.add_matrix_form(biform<double, scalar>, biform<Ord, Ord>, HERMES_SYM);
   wf.add_matrix_form_surf(biform_surf, biform_surf_ord);
   wf.add_vector_form_surf(liform_surf, liform_surf_ord);
 
-  // Initialize the coarse mesh problem. 
-  LinProblem lp(&wf);
-  lp.set_space(&sp);
+  initialize_solution_environment(matrix_solver, argc, args);
 
-  // Assemble stiffness matrix.
-  printf("  - assembling... "); fflush(stdout);
-  Timer tmr_assemble;
-  tmr_assemble.start();
-  lp.assemble(&mat, &rhs);
-  tmr_assemble.stop();
-  printf("done in %s (%lf secs)\n", tmr_assemble.get_human_time(), tmr_assemble.get_seconds());
+  // Assemble the linear problem.
+  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, &space, is_linear);
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Solve the stiffness matrix.
-  printf("  - solving... "); fflush(stdout);
-  Timer tmr_solve;
-  tmr_solve.start();
-  bool solved = solver.solve();
-  tmr_solve.stop();
-
-  // Print solving time. 
-  if (solved) {
-    printf("done in %s (%lf secs)\n", tmr_solve.get_human_time(), tmr_solve.get_seconds());
-  }
-  else {
-    printf("failed\n");
-    return -1;
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
   }
 
-  // Construct the solution.
-  std::complex<double> *s = solver.get_solution();
-  Solution sln(&mesh);
-  sln.set_coeff_vector(&sp, s);
+  dp.assemble(matrix, rhs);
 
-  // Output the solution.
-  if (do_output) {
-    printf("  - output... "); fflush(stdout);
-    out_fn(&sln, "solution");
-    out_mesh(&mesh, "mesh");
-    printf("done\n");
+  // Solve the linear system of the reference problem. If successful, obtain the solution.
+  info("Solving the linear problem.");
+  Solution sln(space.get_mesh());
+  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  else error ("Matrix solver failed.\n");
+
+  // Output solution and mesh.
+  if (solution_output) 
+  {
+    out_fn(&sln, "sln");
+    out_orders(&space, "order");
   }
 
-#ifdef WITH_PETSC
-  mat.free();
-  rhs.free();
-  PetscFinalize();
-#endif
+  // Clean up.
+  delete matrix;
+  delete rhs;
+  delete solver;
+  finalize_solution_environment(matrix_solver);
 
   return 0;
 }

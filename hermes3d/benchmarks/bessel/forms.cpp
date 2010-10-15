@@ -73,29 +73,29 @@ scalar3 &exact(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &
 
 // Weak forms.
 template<typename real, typename scalar>
-scalar biform(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<real> *u, fn_t<real> *v, geom_t<real> *e, user_data_t<scalar> *ext)
+scalar biform(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e, ExtData<scalar> *ext)
 {
   return 1.0/mu_r * hcurl_int_curl_u_curl_v<real, scalar>(n, wt, u, v, e)
     - sqr(kappa) * hcurl_int_u_v<real, scalar>(n, wt, u, v, e);
 }
 
-ord_t biform_surf_ord(int n, double *wt, fn_t<ord_t> *u_ext[], fn_t<ord_t> *u, fn_t<ord_t> *v, geom_t<ord_t> *e, user_data_t<ord_t> *ext)
+Ord biform_surf_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return ord_t(v->fn[0].get_max_order());
+  return Ord(v->val[0].get_max_order());
 }
 
-scalar biform_surf(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *u, fn_t<double> *v, geom_t<double> *e, user_data_t<scalar> *ext)
+scalar biform_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
 {
   // j * kappa * E_T * F_T
   // E_T = nu x E x nu  (nu is outer normal)
   std::complex<double> ii = std::complex<double>(0.0, 1.0);
   scalar result = 0;
   for (int i = 0; i < n; i++) {
-    scalar uu[3] = { u->fn0[i], u->fn1[i], u->fn2[i] };
+    scalar uu[3] = { u->val0[i], u->val1[i], u->val2[i] };
     scalar tpu[3];
     calc_tan_proj(e->nx[i], e->ny[i], e->nz[i], uu, tpu);
 
-    scalar vv[3] = { v->fn0[i], v->fn1[i], v->fn2[i] };
+    scalar vv[3] = { v->val0[i], v->val1[i], v->val2[i] };
     scalar tpv[3];
     calc_tan_proj(e->nx[i], e->ny[i], e->nz[i], vv, tpv);
 
@@ -105,13 +105,16 @@ scalar biform_surf(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *u, fn
   return ii * (-kappa) * result;
 }
 
-scalar liform_surf(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *v, geom_t<double> *e, user_data_t<scalar> *ext)
+scalar liform_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
 {
   std::complex<double> ii = std::complex<double>(0.0, 1.0);
   scalar result = 0;
   for (int i = 0; i < n; i++) {
     scalar dx[3], dy[3], dz[3];
-    scalar3 ev = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz);
+    scalar3 ev;
+    ev[0] = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz)[0];
+    ev[1] = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz)[0];
+    ev[2] = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz)[0];
 
     scalar curl_e[3];
     calc_curl(dx, dy, dz, curl_e);
@@ -125,7 +128,7 @@ scalar liform_surf(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *v, ge
     };
 
     // tpv is tangencial projection of v (test function)
-    scalar vv[3] = { v->fn0[i], v->fn1[i], v->fn2[i] };
+    scalar vv[3] = { v->val0[i], v->val1[i], v->val2[i] };
     scalar tpv[3];
     calc_tan_proj(e->nx[i], e->ny[i], e->nz[i], vv, tpv);
 
@@ -136,7 +139,7 @@ scalar liform_surf(int n, double *wt, fn_t<scalar> *u_ext[], fn_t<double> *v, ge
 }
 
 // Maximal polynomial order to integrate surface linear form.
-ord_t liform_surf_ord(int n, double *wt, fn_t<ord_t> *u_ext[], fn_t<ord_t> *v, geom_t<ord_t> *e, user_data_t<ord_t> *ext)
+Ord liform_surf_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return ord_t(v->fn[0].get_max_order());
+  return Ord(v->val[0].get_max_order());
 }

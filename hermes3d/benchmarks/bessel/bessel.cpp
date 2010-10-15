@@ -2352,7 +2352,13 @@ extern double frexp ( double, int * );
 extern double j0 ( double );
 extern double j1 ( double );
 extern double sqrt ( double );
+#ifdef WIN32 
+double cbrt (double x) {
+  return std::pow(x, 0.333333333);
+};
+#else
 extern double cbrt ( double );
+#endif
 extern double exp ( double );
 extern double log ( double );
 extern double sin ( double );
