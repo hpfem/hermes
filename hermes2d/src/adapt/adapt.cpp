@@ -29,6 +29,9 @@
 #include "../views/scalar_view.h"
 #include "../views/order_view.h"
 
+// Include from hermes_common
+#include <callstack.h> 
+#include <common_time_period.h> 
 
 using namespace std;
 
@@ -635,8 +638,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
   int n = slns.size();
   if (n != this->num) EXIT("Wrong number of solutions.");
 
-  Timer tmr;
-  tmr.start();
+  TimePeriod tmr;
 
   Solution* rslns_original[10];
   Solution* slns_original[10];
@@ -726,8 +728,8 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
     }
   }
 
-  tmr.stop();
-  error_time = tmr.get_seconds();
+  tmr.tick();
+  error_time = tmr.accumulated();
 
   // Make the error relative if needed.
   if(solutions_for_adapt) {

@@ -27,8 +27,7 @@
 #include "../forms.h"
 #include "adapt.h"
 #include "h1projipol.h"
-#include <common/timer.h>
-#include <common/callstack.h>
+#include <callstack.h>  // in hermes_common
 
 //#define DEBUG_PRINT
 
@@ -599,8 +598,7 @@ void Adapt::adapt(double thr)
 	if (!have_errors)
 		EXIT("Element errors have to be calculated first, see calc_err_est().");
 
-	Timer tmr;
-	tmr.start();
+  TimePeriod tmr;
 
 	Mesh ** mesh = new Mesh*[num];
 	for (int j = 0; j < num; j++) {
@@ -700,12 +698,12 @@ void Adapt::adapt(double thr)
 
 	reft_elems = i;
 
-	tmr.stop();
-	adapt_time = tmr.get_seconds();
-  
+  tmr.tick();
+  adapt_time = tmr.accumulated();
+
   for (int j = 0; j < num; j++)
     spaces[j]->assign_dofs();
-  
+
   delete [] mesh;
 }
 
@@ -835,8 +833,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	int n = slns.size();
 	if (n != this->num) EXIT("Wrong number of solutions.");
 
-	Timer tmr;
-	tmr.start();
+	TimePeriod tmr;
 
   Solution* rslns_original[10];
   Solution* slns_original[10];
@@ -936,8 +933,8 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
     }
   }
 
-  tmr.stop();
-  error_time = tmr.get_seconds();
+  tmr.tick();
+  error_time = tmr.accumulated();
 
   if(solutions_for_adapt)
   {
