@@ -95,7 +95,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 		int ic = 0;
 		for (int j = 0; j < n_elems_in_blk; j++) {
 			// convert connectivity ints into Word_t
-			Word_t vtcs[n_elem_nodes];
+			Word_t *vtcs = new Word_t[n_elem_nodes];
 			for (int k = 0; k < n_elem_nodes; k++, ic++) vtcs[k] = connect[ic];
 
 			if (n_elem_nodes == Tetra::NUM_VERTICES) {
@@ -108,6 +108,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 			}
 			else
 				error("Unknown type of element.");
+      delete [] vtcs;
 		}
 		delete [] connect;
 	}
@@ -135,7 +136,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 			Element *elem = mesh->elements[elem_list[j]];
 			int iface = face_num[side_list[j] - 1];
 			int nv = elem->get_num_face_vertices(iface);
-			Word_t vtcs[nv];
+			Word_t *vtcs = new Word_t[nv];
 			elem->get_face_vertices(iface, vtcs);
 
 			switch (elem->get_face_mode(iface)) {
@@ -143,6 +144,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 				case MODE_QUAD: mesh->add_quad_boundary(vtcs, sid); break;
 				default: warning("Unknown type of face"); break;
 			}
+      delete [] vtcs;
 		}
 
 		delete [] elem_list;

@@ -219,12 +219,14 @@ int main(int argc, char* argv[])
     bool solutions_for_adapt = true;
     Tuple<Solution *> slns(&(sln[0]), &(sln[1]), &(sln[2]), &(sln[3]), &(sln[4]), &(sln[5]));
     Tuple<Solution *> ref_slns(&(ref_sln[0]), &(ref_sln[1]), &(ref_sln[2]), &(ref_sln[3]), &(ref_sln[4]), &(ref_sln[5]));
+    Tuple<double> component_errors;
     double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &component_errors) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-         Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
+    info("ndof_coarse: %d, ndof_fine: %d\n err_est_rel[0]: %g%%\n err_est_rel[1]: %g%%\n err_est_rel[2]: %g%%\n err_est_rel[3]: %g%%\n err_est_rel[4]: %g%%\n err_est_rel[5]: %g%%\n err_est_rel_total: %g%%", 
+         Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), component_errors[0] * 100, component_errors[1] * 100, 
+         component_errors[2] * 100, component_errors[3] * 100, component_errors[4] * 100, component_errors[5] * 100, err_est_rel);
 
     // Time measurement.
     cpu_time.tick();

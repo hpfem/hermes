@@ -754,6 +754,12 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
     }
   }
 
+  delete [] meshes;
+  delete [] tr;
+  delete [] norms;
+  delete [] errors_components;
+
+
   // Return error value.
   if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
     return sqrt(total_error);

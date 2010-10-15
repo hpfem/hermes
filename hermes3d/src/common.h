@@ -45,7 +45,7 @@
 
 #include "common_time_period.h"
 
-using namespace std;
+//using namespace std;
 // Compatibility.
 //Windows DLL export/import definitions
 #if defined(WIN32) || defined(_WINDOWS)

@@ -1,11 +1,8 @@
+#define H3D_REPORT_WARN
+#define H3D_REPORT_INFO
+#define H3D_REPORT_VERBOSE
 #include "config.h"
-#ifdef USE_PETSC
-#include <petsc.h>
-#endif
-#ifdef USE_UMFPACK
-#include <umfpack.h>
-#endif
-#include <getopt.h>
+//#include <getopt.h>
 #include <hermes3d.h>
 
 //  This benchmark solves the Poisson equation and it comes with an exact solution that 
@@ -24,25 +21,36 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;          // Number of initial uniform mesh refinements.
-const int P_INIT = 2;		     // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;	     // Error threshold for element refinement of the adapt(...) function 
-				     // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
-				     // times total error is processed. If more elements have similar errors, 
-				     // refine all to keep the mesh symmetric.
-				     // STRATEGY = 1 ... refine all elements whose error is larger
-				     // than THRESHOLD times maximum element error.
-const double ERR_STOP  = 1;	     // Stopping criterion for adaptivity (rel. error tolerance between the
-				     // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;	     // Adaptivity process stops when the number of degrees of freedom grows
-				     // over this limit. This is to prevent h-adaptivity to go on forever.
-bool do_output = true;		     // Generate output files (if true).
+const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
+const int P_INIT_X = 2,
+          P_INIT_Y = 2,
+          P_INIT_Z = 2;             // Initial polynomial degree of all mesh elements.
+const double THRESHOLD = 0.3;       // Error threshold for element refinement of the adapt(...) function 
+                                    // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
+                                    // times total error is processed. If more elements have similar errors, 
+                                    // refine all to keep the mesh symmetric.
+                                    // STRATEGY = 1 ... refine all elements whose error is larger
+                                    // than THRESHOLD times maximum element error.
+const double ERR_STOP = 1.0;        // Stopping criterion for adaptivity (rel. error tolerance between the
+                                    // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;       // Adaptivity process stops when the number of degrees of freedom grows
+                                    // over this limit. This is to prevent h-adaptivity to go on forever.
+bool solution_output = true;        // Generate output files (if true).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
 
 // Problem parameters.
-double SLOPE = 200.0;                // Slope of the layer.
+double SLOPE = 200.0;                             // Slope of the layer.
 
 
-// Exact solution.
+// Exact solution
 #include "exact_solution.cpp"
 
 // Boundary condition types.
@@ -60,7 +68,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 // Weak forms.
 #include "forms.cpp"
 
-// Output element orders.
+// Mesh output.
 void out_orders(Space *space, const char *name, int iter)
 {
   char fname[1024];
@@ -75,7 +83,7 @@ void out_orders(Space *space, const char *name, int iter)
     warning("Could not open file '%s' for writing.", fname);
 }
 
-// Output the solution.
+// Solution output.
 void out_fn(MeshFunction *fn, const char *name, int iter)
 {
   char fname[1024];
@@ -89,203 +97,140 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
   else warning("Could not open file '%s' for writing.", fname);
 }
 
-/***********************************************************************************
- * main program                                                                    *
-************************************************************************************/
 int main(int argc, char **args) 
 {
-
-#ifdef WITH_PETSC
-  PetscInitialize(NULL, NULL, PETSC_NULL, PETSC_NULL);
-  PetscPushErrorHandler(PetscIgnoreErrorHandler, PETSC_NULL);		// Disable PETSc error handler.
-#endif
-
-  // Load the inital mesh.
+  // Load the mesh.
   Mesh mesh;
-  Mesh3DReader mesh_loader;
+  H3DReader mesh_loader;
   mesh_loader.load("hexahedron.mesh3d", &mesh);
 
-  // Initial uniform  mesh refinements.
-  printf("Performing %d initial mesh refinements.\n", INIT_REF_NUM);
+  // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-  Word_t (nelem) = mesh.get_num_elements();
-  printf("New number of elements is %d.\n", (int)nelem);
 
-  //Initialize the shapeset and the cache.
-  H1ShapesetLobattoHex shapeset;
-
-  //Matrix solver.
-#if defined WITH_UMFPACK
-  UMFPackMatrix mat;
-  UMFPackVector rhs;
-  UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-  PetscMatrix mat;
-  PetscVector rhs;
-  PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-  MumpsMatrix mat;
-  MumpsVector rhs;
-  MumpsSolver solver(&mat, &rhs);
-#endif
-
-  // Graphs of DOF convergence.
-  GnuplotGraph graph;
-  graph.set_captions("", "Degrees of Freedom", "Error [%]");
-  graph.set_log_y();
-  graph.add_row("Total error", "k", "-", "O");
-
-  // Create H1 space to setup the problem.
-  H1Space space(&mesh, &shapeset);
-  space.set_bc_types(bc_types);
-  space.set_essential_bc_values(essential_bc_values);
-  space.set_uniform_order(order3_t(P_INIT, P_INIT, P_INIT));
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
   // Initialize the weak formulation. 
   WeakForm wf;
-  wf.add_matrix_form(biform<double, double>, biform<ord_t, ord_t>, SYM, ANY);
-  wf.add_vector_form(liform<double, double>, liform<ord_t, ord_t>, ANY);
+  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
+  wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
 
-  // Initialize the coarse mesh problem.
-  LinearProblem lp(&wf, &space);
+  // Set exact solution.
+  ExactSolution exact(&mesh, fndd);
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
+
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
+  initialize_solution_environment(matrix_solver, argc, args);
 
   // Adaptivity loop.
-  int as = 0;  bool done = false;
-  do {
-    printf("\n---- Adaptivity step %d:\n", as);
+  int as = 1; 
+  bool done = false;
+  do 
+  {
+    info("---- Adaptivity step %d:", as);
 
-    printf("\nSolving on coarse mesh:\n");
-
-    // Procedures for coarse mesh problem.
-    // Assign DOF.
-    int ndof = space.assign_dofs();
-    printf("  - Number of DOF: %d\n", ndof);
-
-    // Assemble stiffness matrix and rhs.
-    printf("  - Assembling... "); fflush(stdout);
-    if (lp.assemble(&mat, &rhs))
-      printf("done in %lf secs.\n", lp.get_time());
-    else
-      error("failed!");
-
-    // Solve the system.
-    printf("  - Solving... "); fflush(stdout);
-    bool solved = solver.solve();
-    if (solved)
-      printf("done in %lf secs.\n", solver.get_time());
-    else 
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
+    
+    // Assemble the reference problem.
+    info("Assembling on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, ref_space, is_linear);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    
+    if (matrix_solver == SOLVER_AZTECOO) 
     {
-      printf("Failed.\n");
-      break;
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
     }
+  
+    dp.assemble(matrix, rhs);
+    
+    // Time measurement.
+    cpu_time.tick();
 
-    // Construct a solution.
-    Solution sln(&mesh);
-    sln.set_coeff_vector(&space, solver.get_solution());
+    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    info("Solving on reference mesh.");
+    Solution ref_sln(ref_space->get_mesh());
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else error ("Matrix solver failed.\n");
+    
+    // Time measurement.
+    cpu_time.tick();
 
-    // Output the orders and the solution.
-    if (do_output) 
+    // Project the fine mesh solution onto the coarse mesh.
+    Solution sln(space.get_mesh());
+    info("Projecting reference solution on coarse mesh.");
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Output solution and mesh.
+    if (solution_output) 
     {
-      out_orders(&space, "order", as);
       out_fn(&sln, "sln", as);
+      out_orders(&space, "order", as);
     }
 
-    // Solving fine mesh problem.
-    printf("Solving on fine mesh:\n");
+    // Skip the visualization time.
+    cpu_time.tick(HERMES_SKIP);
 
-    // Matrix solver.
-#if defined WITH_UMFPACK
-    UMFPackLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_PETSC
-    PetscLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_MUMPS
-    MumpsSolver rsolver(&mat, &rhs);
-#endif
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate and exact error.");
+    Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt) * 100;
 
-    // Construct the refined mesh for reference(refined) solution.
-    Mesh rmesh;
-    rmesh.copy(mesh);
-    rmesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
+    // Calculate exact error.
+    solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
-    // Setup space for the reference (globally refined) solution.
-    Space *rspace = space.dup(&rmesh);
-    rspace->copy_orders(space, 1);
+    // Report results.
+    printf("ndof_coarse: %d, ndof_fine: %d\n", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    printf("err_est_rel: %g%%, err_exact_rel: %g%%\n", err_est_rel, err_exact_rel);
 
-    // Initialize the mesh problem for reference solution.
-    LinearProblem rlp(&wf, rspace);
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
+    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu_est.save("conv_cpu_est.dat");
+    graph_dof_exact.add_values(Space::get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.save("conv_dof_exact.dat");
+    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+    graph_cpu_exact.save("conv_cpu_exact.dat");
 
-    // Assign DOF.
-    int rndof = rspace->assign_dofs();
-    printf("  - Number of DOF: %d\n", rndof);
-
-    // Assemble stiffness matric and rhs.
-    printf("  - Assembling... "); fflush(stdout);
-    if (rlp.assemble(&mat, &rhs))
-      printf("done in %lf secs.\n", rlp.get_time());
-    else
-      error("failed!");
-
-    // Solve the system.
-    printf("  - Solving... "); fflush(stdout);
-    bool rsolved = rsolver.solve();
-    if (rsolved)
-      printf("done in %lf secs.\n", rsolver.get_time());
+    // If err_est_rel is too large, adapt the mesh. 
+    if (err_est_rel < ERR_STOP) done = true;
     else 
     {
-      printf("failed.\n");
-      break;
+      info("Adapting coarse mesh.");
+      adaptivity->adapt(THRESHOLD);
     }
-
-    // Construct the reference(refined) solution.
-    Solution rsln(&rmesh);
-    rsln.set_coeff_vector(rspace, rsolver.get_solution());
-
-    // Compare coarse and fine mesh. 
-    // Calculate the error estimate wrt. refined mesh solution. 
-    double err = h1_error(&sln, &rsln);
-    printf("  - H1 error: % lf\n", err * 100);
-
-    // Save it to the graph.
-    graph.add_value(0, ndof, err * 100);
-    if (do_output)
-      graph.save("conv.gp");
-
-    // Calculate error estimates for adaptivity.
-    printf("Adaptivity\n");
-    printf("  - calculating error: "); fflush(stdout);
-    H1Adapt hp(&space);
-    double err_est = hp.calc_error(&sln, &rsln) * 100;	
-    printf("% lf %%\n", err_est);
-
-    // If error is too large, adapt the mesh.
-    if (err_est < ERR_STOP) 
-    {
-      printf("\nDone\n");
-      break;
-    }
-    printf("  - adapting... "); fflush(stdout);
-    hp.adapt(THRESHOLD);				
-    printf("done in %lf secs (refined %d element(s)).\n", hp.get_adapt_time(), hp.get_num_refined_elements());
-
-    if (rndof >= NDOF_STOP) 
-    {
-      printf("\nDone.\n");
-      break;
-    }
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
-    delete rspace;
+    delete ref_space->get_mesh();
+    delete ref_space;
+    delete matrix;
+    delete rhs;
+    delete solver;
+    delete adaptivity;
 
-    // Next adaptivity step.
+    // Increase the counter of performed adaptivity steps.
     as++;
 
-    mat.free();
-    rhs.free();
   } while (!done);
 
-#ifdef WITH_PETSC
-  PetscFinalize();
-#endif
-
+  finalize_solution_environment(matrix_solver);
+  
   return 1;
 }
