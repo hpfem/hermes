@@ -45,30 +45,27 @@ set(SRC
 	transform.cpp
 	traverse.cpp
 	weakform.cpp
-	solver/pardiso.cpp
-	solver/petsc.cpp
-	solver/umfpack_solver.cpp
-	solver/epetra.cpp
-	solver/amesos.cpp
-	solver/aztecoo.cpp
-	solver/nox.cpp
-	solver/mumps.cpp
-	solver/precond_ifpack.cpp
-	solver/precond_ml.cpp
-	adapt/adapt.cpp
+  adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
-	common_time_period.cpp
+	${HERMES_COMMON_DIR}/solver/pardiso.cpp
+	${HERMES_COMMON_DIR}/solver/petsc.cpp
+	${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
+	${HERMES_COMMON_DIR}/solver/epetra.cpp
+	${HERMES_COMMON_DIR}/solver/amesos.cpp
+	${HERMES_COMMON_DIR}/solver/aztecoo.cpp
+	${HERMES_COMMON_DIR}/solver/nox.cpp
+	${HERMES_COMMON_DIR}/solver/mumps.cpp
+	${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp
+	${HERMES_COMMON_DIR}/solver/precond_ml.cpp
+	${HERMES_COMMON_DIR}/common_time_period.cpp
 	${HERMES_COMMON_DIR}/callstack.cpp
 	${HERMES_COMMON_DIR}/trace.cpp
 	${HERMES_COMMON_DIR}/error.cpp
 	${HERMES_COMMON_DIR}/utils.cpp
-	${HERMES_COMMON_DIR}/timer.cpp
 )
-
-include_directories(${HERMES_COMMON_DIR})
 
 include(PickRealOrCplxLibs)
     
@@ -122,31 +119,30 @@ configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/config.h
 )
 
-
 #
 # INSTALL
 #
 
 # install header files
 file(GLOB INC           "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
 file(GLOB INC_SPACE     "${CMAKE_CURRENT_SOURCE_DIR}/space/*.h")
 file(GLOB INC_SHAPESET  "${CMAKE_CURRENT_SOURCE_DIR}/shapeset/*.h")
 file(GLOB INC_LOADER    "${CMAKE_CURRENT_SOURCE_DIR}/loader/*.h")
-file(GLOB INC_SOLVER    "${CMAKE_CURRENT_SOURCE_DIR}/solver/*.h")
 file(GLOB INC_OUTPUT    "${CMAKE_CURRENT_SOURCE_DIR}/output/*.h")
 file(GLOB INC_INTEGRALS "${CMAKE_CURRENT_SOURCE_DIR}/integrals/*.h")
 file(GLOB INC_ADAPT     "${CMAKE_CURRENT_SOURCE_DIR}/adapt/*.h")
+file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
+file(GLOB INC_SOLVER    "${HERMES_COMMON_DIR}/solver/*.h")
 
 install(FILES ${INC}           DESTINATION include/)
-install(FILES ${INC_COMMON}    DESTINATION include/common)
 install(FILES ${INC_SPACE}     DESTINATION include/space)
 install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)
 install(FILES ${INC_LOADER}    DESTINATION include/loader)
-install(FILES ${INC_SOLVER}    DESTINATION include/solver)
 install(FILES ${INC_OUTPUT}    DESTINATION include/output)
 install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
 install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
+install(FILES ${INC_COMMON}    DESTINATION include/common)
+install(FILES ${INC_SOLVER}    DESTINATION include/common/solver)
 
 # MSVC (Win) helper macros
 

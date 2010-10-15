@@ -83,11 +83,9 @@ else(ELEMTYPES_LEN GREATER 0)
 endif(ELEMTYPES_LEN GREATER 0)
 
 # set internal library-wide variables
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/common)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
+set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 set(MESHES_DIR ${PROJECT_SOURCE_DIR}/meshes)
-
-include_directories(${PROJECT_SOURCE_DIR})
 
 # internals regarding build type
 if(DEBUG)
@@ -107,7 +105,6 @@ else(DEBUG)
 	endif(H3D_COMPLEX)
 	set(CMAKE_BUILD_TYPE Release)
 endif(DEBUG)
-
 
 # find necessary packages
 find_package(JUDY REQUIRED)
@@ -211,6 +208,17 @@ if(WITH_PYTHON)
 	message(STATUS "Compiling with python support")
 	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
+
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${HERMES_COMMON_DIR})
+
+include(CheckIncludeFile)
+CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
+CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
+
+IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(HAVE_TEUCHOS_STACKTRACE yes)
+ENDIF()
 
 # examples
 add_subdirectory(examples EXCLUDE_FROM_ALL)

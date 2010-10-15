@@ -9,7 +9,8 @@ cmake_minimum_required(VERSION 2.6)
 # The values below are sane defaults to produce a build on all platforms,
 # if you want to override them, set them in CMake.vars
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
+set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 
 # Build with debugging symbols:
 set(DEBUG                   YES)
@@ -145,13 +146,9 @@ else(MSVC)
   endif(RELEASE)
 endif(MSVC)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
 find_package(PTHREAD REQUIRED)
 find_package(JUDY REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
-
-#include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
 
 if(WITH_GLUT)
   find_package(GLUT REQUIRED)
@@ -233,6 +230,8 @@ if(WITH_PARDISO)
   find_package(PARDISO REQUIRED) 
 endif(WITH_PARDISO)
 
+include_directories(${HERMES_COMMON_DIR})
+
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
 CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
@@ -240,7 +239,6 @@ CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
 IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(HAVE_TEUCHOS_STACKTRACE yes)
 ENDIF()
-
 
 #add_subdirectory(hermes_common)
 add_subdirectory(src)

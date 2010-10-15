@@ -16,12 +16,6 @@ set(SRC
        precalc.cpp 
        solution.cpp 
        filter.cpp
-       common_time_period.cpp
-       ../common/callstack.cpp
-       ../common/error.cpp
-       ../common/timer.cpp
-       ../common/utils.cpp
-       ../common/Teuchos_stacktrace.cpp
        space/space.cpp 
        space/space_h1.cpp 
        space/space_hcurl.cpp 
@@ -56,17 +50,7 @@ set(SRC
        common.cpp 
        matrix.cpp 
        weakform.cpp 
-       feproblem.cpp 
-       solver/nox.cpp 
-       solver/epetra.cpp 
-       solver/aztecoo.cpp 
-       solver/amesos.cpp
-       solver/mumps.cpp 
-       solver/pardiso.cpp 
-       solver/petsc.cpp 
-       solver/umfpack_solver.cpp
-       solver/precond_ml.cpp 
-       solver/precond_ifpack.cpp 
+       feproblem.cpp
        forms.cpp
        mesh_parser.cpp mesh_lexer.cpp
        exodusii.cpp 
@@ -81,18 +65,24 @@ set(SRC
        views/view.cpp 
        views/view_data.cpp 
        views/view_support.cpp
-       compat/fmemopen.cpp 
-       compat/c99_functions.cpp
+       ${HERMES_COMMON_DIR}/common_time_period.cpp
+       ${HERMES_COMMON_DIR}/callstack.cpp
+       ${HERMES_COMMON_DIR}/error.cpp
+       ${HERMES_COMMON_DIR}/utils.cpp
+       ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
+       ${HERMES_COMMON_DIR}/solver/nox.cpp 
+       ${HERMES_COMMON_DIR}/solver/epetra.cpp 
+       ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
+       ${HERMES_COMMON_DIR}/solver/amesos.cpp
+       ${HERMES_COMMON_DIR}/solver/mumps.cpp 
+       ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
+       ${HERMES_COMMON_DIR}/solver/petsc.cpp 
+       ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
+       ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
+       ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
+       ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
+       ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
        )
-
-# Makes Win32 path from Unix-style patch which is used by CMAKE. Used when a path is provided to an OS utility.
-macro(MAKE_PATH PATH_OUT PATH_IN)
-	if(WIN32)
-		string(REPLACE "/" "\\" ${PATH_OUT} ${PATH_IN})
-	else(WIN32)
-		set(${PATH_OUT} ${PATH_IN})
-	endif(WIN32)
-endmacro(MAKE_PATH)
 
 include(PickRealOrCplxLibs)
     
@@ -166,6 +156,15 @@ endif(REPORT_ALL)
 set(${FLAGS} "${REPORT_FLAGS}")
 endmacro(BUILD_REPORT_FLAGS)
 
+# Makes Win32 path from Unix-style patch which is used by CMAKE. Used when a path is provided to an OS utility.
+macro(MAKE_PATH PATH_OUT PATH_IN)
+	if(WIN32)
+		string(REPLACE "/" "\\" ${PATH_OUT} ${PATH_IN})
+	else(WIN32)
+		set(${PATH_OUT} ${PATH_IN})
+	endif(WIN32)
+endmacro(MAKE_PATH)
+
 macro(BUILD_LIB LIB FLAGS)
   BUILD_REPORT_FLAGS(REPORT_FLAGS)
 	set(BUILD_FLAGS "${FLAGS} ${REPORT_FLAGS}")
@@ -222,13 +221,40 @@ set(CMAKE_REQUIRED_LIBRARIES m)
 CHECK_FUNCTION_EXISTS(fmemopen HAVE_FMEMOPEN)
 CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)
 
-# Create a file with preprocessor definitions (mainly to determine which TPL's 
-# are present on the system during compilation):
-CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-                ${CMAKE_CURRENT_SOURCE_DIR}/config.h  )
+# Create file with preprocessor definitions exposing the build settings to the source code.
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h
+)
 
 
-# build MSVC version:
+#
+# INSTALL
+#
+
+# install header files
+
+file(GLOB INC           "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+file(GLOB INC_SPACE     "${CMAKE_CURRENT_SOURCE_DIR}/space/*.h")
+file(GLOB INC_SHAPESET  "${CMAKE_CURRENT_SOURCE_DIR}/shapeset/*.h")
+file(GLOB INC_INTEGRALS "${CMAKE_CURRENT_SOURCE_DIR}/integrals/*.h")
+file(GLOB INC_ADAPT     "${CMAKE_CURRENT_SOURCE_DIR}/adapt/*.h")
+file(GLOB INC_REF_SEL   "${CMAKE_CURRENT_SOURCE_DIR}/ref_selectors/*.h")
+file(GLOB INC_VIEWS     "${CMAKE_CURRENT_SOURCE_DIR}/views/*.h")
+file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
+file(GLOB INC_SOLVER    "${HERMES_COMMON_DIR}/solver/*.h")
+
+install(FILES ${INC}           DESTINATION include/)
+install(FILES ${INC_SPACE}     DESTINATION include/space)
+install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)
+install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
+install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
+install(FILES ${INC_REF_SEL}   DESTINATION include/ref_selectors)
+install(FILES ${INC_VIEWS}     DESTINATION include/views)
+install(FILES ${INC_COMMON}    DESTINATION include/hermes_common)
+install(FILES ${INC_SOLVER}    DESTINATION include/hermes_common/solver)
+
+# build and install MSVC version:
 if(MSVC)
 	set(MSVC_DLL_DEFINES "-D_HERMESDLL")
 	if(H2D_REAL)
@@ -241,7 +267,7 @@ if(MSVC)
 else(MSVC)
 	set(CXX_OTHER_FLAGS "-Wuninitialized")
 
-	# build real version:
+	# build and install real version:
 	if(H2D_REAL)
 		if(DEBUG)
 			BUILD_LIB(hermes2d-real-debug "${CMAKE_CXX_FLAGS_DEBUG} ${CXX_OTHER_FLAGS}")
@@ -251,7 +277,7 @@ else(MSVC)
 		endif(RELEASE)
 	endif(H2D_REAL)
 
-	# build complex version:
+	# build and install complex version:
 	if(H2D_COMPLEX)
 		if(DEBUG)
 			BUILD_LIB(hermes2d-cplx-debug "${CMAKE_CXX_FLAGS_DEBUG} -DH2D_COMPLEX ${CXX_OTHER_FLAGS}")
@@ -275,12 +301,3 @@ else(MSVC)
 			hermes2d-cplx)
 	endif(RELEASE)
 endif(MSVC)
-
-file(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-install(FILES ${header_files} DESTINATION include/hermes2d)
-file(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/compat/*.h")
-install(FILES ${header_files} DESTINATION include/hermes2d/compat)
-file(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/views/*.h")
-install(FILES ${header_files} DESTINATION include/hermes2d/views)
-file(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/ref_selectors/*.h")
-install(FILES ${header_files} DESTINATION include/hermes2d/ref_selectors)
