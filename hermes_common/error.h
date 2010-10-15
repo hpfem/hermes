@@ -21,7 +21,7 @@
 #define _ERROR_H_
 
 #include "compat-util.h"
-#include "../src/compat.h"
+#include "compat.h"
 
 //
 // Error handling
@@ -38,29 +38,29 @@
 
 /// Report unrecoverable errors where you need to report the location of the error
 /// It also reports call stack
-#ifdef _WIN32 //Win32
+#ifdef _MSC_VER		// __PRETTY_FUNCTION__ missing on MSVC; #ifdef _WIN32 was here in H3D
 #define EXIT(...) h_exit(__LINE__, __FUNCTION__, __FILE__, ## __VA_ARGS__)
 #else
 #define EXIT(...) h_exit(__LINE__, __PRETTY_FUNCTION__, __FILE__, ## __VA_ARGS__)
 #endif
 
-void H3D_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
+void HERMES_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
 
 /// Report unrecoverable error (no call stack or location dumped)
-//void H3D_API error(char const *fmt, ...) NORETURN;
+//void error(char const *fmt, ...) NORETURN;
 
 /// Notify the user about warning (the execution continues), neither location or call stack
 /// is dumped
-void H3D_API warning(const char *warn, ...);
+void warning(const char *warn, ...);
 
 /// Check that memory allocation was ok, it not, report an error (also dump call stack) and
 /// terminate
-#ifdef _WIN32 //Win32
+#ifdef _MSC_VER		// __PRETTY_FUNCTION__ missing on MSVC; #ifdef _WIN32 was here in H3D
 #define MEM_CHECK(var) h_mem_check(__LINE__, __FUNCTION__, __FILE__, var)
 #else
 #define MEM_CHECK(var) h_mem_check(__LINE__, __PRETTY_FUNCTION__, __FILE__, var)
 #endif
 
-void H3D_API h_mem_check(int line, const char *func, const char *file, void *var);
+void HERMES_API h_mem_check(int line, const char *func, const char *file, void *var);
 
 #endif

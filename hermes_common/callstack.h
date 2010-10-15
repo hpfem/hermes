@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 // __PRETTY_FUNCTION__ missing on MSVC
-#ifdef _MSC_VER
+#ifdef _MSC_VER		// #ifdef _WIN32 was here in H3D
 #define _F_ CallStackObj __call_stack_obj(__LINE__, __FUNCTION__, __FILE__);
 #else
 #define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
@@ -31,7 +31,7 @@
 
 /// Holds data for one call stack object
 ///
-class H3D_API CallStackObj 
+struct HERMES_API CallStackObj 
 {
 	CallStackObj(int ln, const char *func, const char *file);
 	~CallStackObj();
@@ -43,7 +43,7 @@ class H3D_API CallStackObj
 
 /// Call stack object
 ///
-class H3D_API CallStack 
+class HERMES_API CallStack 
 {
 public:
 	CallStack(int max_size = 32);
@@ -60,7 +60,7 @@ protected:
 	friend class CallStackObj;
 };
 
-H3D_API CallStack &get_callstack();
+HERMES_API CallStack &get_callstack();
 
 
 #endif
