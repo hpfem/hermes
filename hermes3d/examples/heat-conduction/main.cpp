@@ -101,6 +101,7 @@ int main(int argc, char **args)
   wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY, &sln_prev);
 
   // Initialize discrete problem.
+  initialize_solution_environment(matrix_solver, argc, args);
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 

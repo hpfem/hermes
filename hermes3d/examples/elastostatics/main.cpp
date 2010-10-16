@@ -113,6 +113,8 @@ int main(int argc, char **args)
   wf.add_vector_form_surf(2, callback(surf_linear_form_2), 5);
 
   // Initialize discrete problem.
+  initialize_solution_environment(matrix_solver, argc, args);
+
   bool is_linear = true;
   DiscreteProblem dp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp), is_linear);
 
