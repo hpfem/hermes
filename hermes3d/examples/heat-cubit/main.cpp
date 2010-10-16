@@ -82,7 +82,7 @@ int main(int argc, char **args)
   Mesh mesh;
   ExodusIIReader mesh_loader;
   if (!mesh_loader.load("cylinder2.e", &mesh))
-    error("Loading mesh file '%s'\n", "cylinder2.e");
+    error("Loading mesh file '%s' failed.\n", "cylinder2.e");
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
