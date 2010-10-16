@@ -44,7 +44,7 @@ const char* iterative_method = "bicgstab";        // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Problem parameters.
 double SLOPE = 200.0;                             // Slope of the layer.
@@ -110,7 +110,7 @@ int main(int argc, char **args)
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
-  // Initialize the weak formulation. 
+  // Initialize weak formulation. 
   WeakForm wf;
   wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
   wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
@@ -125,6 +125,7 @@ int main(int argc, char **args)
   TimePeriod cpu_time;
   cpu_time.tick();
 
+  // WHAT IS THIS FUNCTION DOING?
   initialize_solution_environment(matrix_solver, argc, args);
 
   // Adaptivity loop.
@@ -137,10 +138,11 @@ int main(int argc, char **args)
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
     
-    // Assemble the reference problem.
-    info("Assembling on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
+    // Initialize discrete problem.
     bool is_linear = true;
     DiscreteProblem dp(&wf, ref_space, is_linear);
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -152,12 +154,14 @@ int main(int argc, char **args)
       // Using default iteration parameters (see solver/aztecoo.h).
     }
   
+    // Assemble the reference problem.
+    info("Assembling on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
     dp.assemble(matrix, rhs);
     
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    // Solve the linear system on reference mesh. If successful, obtain the solution.
     info("Solving on reference mesh.");
     Solution ref_sln(ref_space->get_mesh());
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
@@ -195,8 +199,8 @@ int main(int argc, char **args)
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
-    printf("ndof_coarse: %d, ndof_fine: %d\n", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
-    printf("err_est_rel: %g%%, err_exact_rel: %g%%\n", err_est_rel, err_exact_rel);
+    info("ndof_coarse: %d, ndof_fine: %d.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    info("err_est_rel: %g%%, err_exact_rel: %g%%.", err_est_rel, err_exact_rel);
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
