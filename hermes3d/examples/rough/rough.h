@@ -17,7 +17,7 @@ public:
 	void setFilneName(std::string fName) ;
 	int loadSurface(void) ;
 	double interpolate(double x, double y) ;
-	int findMinMax() ;
+	void findMinMax() ;
 private:
 	void holdThreshold(double &max, double &min, double in) ; // expands the range of a min and a max variable according to new input
 	void compare(double &a, double &b) ; // swap two numbers such that the former is greater
@@ -58,7 +58,7 @@ int roughSurface::loadSurface(void)
   myReadFile.open(this->fileName.c_str());
   if (!myReadFile) 
   {
-    std::cout << "\nCannot read input surface file " << this->fileName << std::endl ;
+    error("\nCannot read input surface file %s.", this->fileName.c_str());
   }
   else
   {
@@ -103,7 +103,7 @@ double roughSurface::interpolate(double x, double y)
   return xi1*xi2*Z[j00+shiftY][i00+shiftX] + xi1*(1-xi2)*Z[j00][i00+shiftX] + (1-xi1)*xi2*Z[j00+shiftY][i00] + (1-xi1)*(1-xi2)*Z[j00][i00] ;
 }
 
-int roughSurface::findMinMax()
+void roughSurface::findMinMax()
 {
 	minZ=+std::numeric_limits<double>::max() ;
 	maxZ=-std::numeric_limits<double>::max() ; 

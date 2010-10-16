@@ -1,18 +1,9 @@
+#define H3D_REPORT_WARN
+#define H3D_REPORT_INFO
+#define H3D_REPORT_VERBOSE
 #include "config.h"
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
+//#include <getopt.h>
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/timer.h>
-#include <common/error.h>
-#include <float.h>
-#include <getopt.h>
-#include <list>
-#include <set>
-#include <map>
-#include <vector>
-#include <iostream>
 #include "rough.h"
 
 
@@ -30,8 +21,7 @@ void out_mesh(Mesh *mesh, const char *name)
     vtk.out(mesh);
     fclose(f);
   }
-  else
-    warning("Could not open file '%s' for writing.", fname);
+  else warning("Could not open file '%s' for writing.", fname);
 }
 
 
@@ -126,7 +116,6 @@ int corner::operator<(const corner &rhs) const
 	if( this->y == rhs.y && this->x < rhs.x ) return true ;
 	return false ;
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // we define a map from corners (what identifies columns) to sets of elements associated with them
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,21 +152,19 @@ typedef std::map< corner, column > columnList ;
 std::ostream &operator<<(std::ostream &output, const std::set<Word_t> &aaa)
 {
 	output <<  aaa.size() << " : " ;
-	for(std::set<Word_t>::iterator i=aaa.begin() ; i != aaa.end() ; i++) output << *i << " " ;
+	for(std::set<Word_t>::const_iterator i = aaa.begin() ; i != aaa.end() ; i++) output << *i << " " ;
 	return output;
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// main
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int main(int argc, char **argv)
+int main(int argc, char **args)
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
 
-	// Load the mesh. 
-	Mesh mesh;
-	Mesh3DReader mloader;
+  // Load the mesh. 
+  Mesh mesh;
+  H3DReader mloader;
 	mloader.load("lshape_hex.mesh3d", &mesh);
 
 	// rough surface handler
@@ -273,12 +260,6 @@ int main(int argc, char **argv)
 				//mesh.refine_element(idx, H3D_H3D_H3D_REFT_HEX_XYZ) ;
 			}
 		}
-
-//mesh.refine_element(172, H3D_REFT_HEX_Z);
-//mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-//mesh.refine_all_elements(H3D_REFT_HEX_Z);
-//mesh.refine_element(4,H3D_H3D_H3D_REFT_HEX_XYZ);
- 
 
 	out_mesh(&mesh, "mesh");
 	return 0;
