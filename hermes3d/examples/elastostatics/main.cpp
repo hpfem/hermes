@@ -98,7 +98,7 @@ int main(int argc, char **args)
   // Create H1 space with default shapeset for z-displacement component. 
   H1Space zdisp(&mesh, bc_types_z, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
   
-  // Initialize the weak formulation.
+  // Initialize weak formulation.
   WeakForm wf(3);
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
@@ -113,7 +113,6 @@ int main(int argc, char **args)
   wf.add_vector_form_surf(2, callback(surf_linear_form_2), 5);
 
   // Initialize discrete problem.
-  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &zdisp)));
   bool is_linear = true;
   DiscreteProblem dp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp), is_linear);
 
@@ -130,6 +129,7 @@ int main(int argc, char **args)
   }
 
   // Assemble stiffness matrix and load vector.
+  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &zdisp)));
   dp.assemble(matrix, rhs);
 
   // Solve the linear system. If successful, obtain the solution.
