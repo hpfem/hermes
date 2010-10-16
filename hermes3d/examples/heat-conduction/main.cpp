@@ -1,11 +1,8 @@
+#define H3D_REPORT_WARN
+#define H3D_REPORT_INFO
+#define H3D_REPORT_VERBOSE
 #include "config.h"
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
-#ifdef WITH_UMFPACK
-#include <umfpack.h>
-#endif
-#include <getopt.h>
+//#include <getopt.h>
 #include <hermes3d.h>
 //  This example shows how to solve a time-dependent PDE discretized
 //  in time via the implicit Euler method on a fixed mesh. 
@@ -26,13 +23,24 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;					// Number of initial uniform mesh refinements.
-const int P_INIT = 4;						// Initial polynomial degree of all mesh elements.
-const double TAU = 0.05;					// Time step in seconds. 
-bool do_output = true;						// Generate output files (if true).
+const int INIT_REF_NUM = 2;					              // Number of initial uniform mesh refinements.
+const int P_INIT_X = 2,
+          P_INIT_Y = 2,
+          P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
+const double TAU = 0.05;					                // Time step in seconds. 
+bool solution_output = true;                      // Generate output files (if true).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
 
 // Problem parameters. 
-const double FINAL_TIME = 2 * M_PI;				// Length of time inveral in seconds. 
+const double FINAL_TIME = 2 * M_PI;				        // Length of time inveral in seconds. 
 
 // Global time variable. 
 double TIME = TAU;
@@ -45,8 +53,11 @@ BCType bc_types(int marker) {
   return BC_ESSENTIAL;
 }
 
-// Weak forms. 
-#include "forms.cpp"
+// Essential (Dirichlet) boundary condition values. 
+scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
+{
+  return 0;
+}
 
 // Output the solutions. 
 void out_fn(MeshFunction *fn, const char *name, int iter) 
@@ -59,59 +70,29 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
     vtk.out(fn, name);
     fclose(f);
   }
-  else 
-    warning("Can not open '%s' for writing.", fname);
+  else warning("Could not open file '%s' for writing.", fname);
 }
 
-/***********************************************************************************
- * main program                                                                    *
- ***********************************************************************************/
-int main(int argc, char **argv) {
-#ifdef WITH_PETSC
-  PetscInitialize(NULL, NULL, (char *) PETSC_NULL, PETSC_NULL);
-  PetscPushErrorHandler(PetscIgnoreErrorHandler, PETSC_NULL);			// Disable PETSc error handler.
-#endif
+#include "forms.cpp"
+
+int main(int argc, char **args) 
+{
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
 
   // Load the initial mesh. 
   Mesh mesh;
-  Mesh3DReader mesh_loader;
+  H3DReader mesh_loader;
   mesh_loader.load("hexahedron.mesh3d", &mesh);
 
-  // Initial uniform mesh refinements. 
-  printf("Performing %d initial mesh refinements.\n", INIT_REF_NUM);
+  // Perform initial mesh refinement. 
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-  Word_t (nelem) = mesh.get_num_elements();
-  printf("New number of elements is %d.\n", (int) nelem);
 
-  // Initialize the shapeset and the cache. 
-  H1ShapesetLobattoHex shapeset;
+  // Create H1 space. 
+  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
+  
 
-#if defined WITH_UMFPACK
-  UMFPackMatrix mat;
-  UMFPackVector rhs;
-  UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-  PardisoMatrix mat;
-  PardisoVector rhs;
-  PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-  PetscMatrix mat;
-  PetscVector rhs;
-  PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-  MumpsMatrix mat;
-  MumpsVector rhs;
-  MumpsSolver solver(&mat, &rhs);
-#endif
-
-  // Create H1 space to setup the problem. 
-  H1Space space(&mesh, &shapeset);
-  space.set_bc_types(bc_types);
-  space.set_uniform_order(order3_t(P_INIT, P_INIT, P_INIT));
-
-  // Assign DOF.
-  int ndof = space.assign_dofs();
-  printf("  - Number of DOFs: %d\n", ndof);
 
   // Construct initial solution and set zero.
   Solution sln_prev(&mesh);
@@ -119,49 +100,44 @@ int main(int argc, char **argv) {
 
   // Initialize the weak formulation. 
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-  wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, ANY, &sln_prev);
+  wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
+  wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY, &sln_prev);
 
-  // Initialize the coarse mesh problem. 
-  LinearProblem lp(&wf, &space);
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
 
   // Time stepping. 
   int nsteps = (int) (FINAL_TIME/TAU + 0.5);
   for (int ts = 0; ts < nsteps;  ts++)
   {
     printf("\n---- Time step %d, time %3.5f\n", ts, TIME);
+   
+    // Assemble the linear problem.
+    info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
 
-    // Assemble stiffness matrix and rhs. 
-    printf("  - Assembling... "); fflush(stdout);
-    Timer tmr_assemble;
-    tmr_assemble.start();
-    bool assembled = lp.assemble(&mat, &rhs);
-    tmr_assemble.stop();
-    if (assembled)
-      printf("done in %s (%lf secs)\n", tmr_assemble.get_human_time(), tmr_assemble.get_seconds());
-    else
-      error("failed!");
+    bool rhsonly = (ts > 0);
+    dp.assemble(matrix, rhs, rhsonly);
 
-    // Solve the stiffness matrix. 
-    printf("  - Solving... "); fflush(stdout);
-    Timer tmr_solve;
-    tmr_solve.start();
-    bool solved = solver.solve();
-    tmr_solve.stop();
-
-    if (solved) 
-      printf("done in %s (%lf secs)\n", tmr_solve.get_human_time(), tmr_solve.get_seconds());
-    else {
-      error("failed\n");
-      break;
-    }
-
-    // Construct a solution. 
-    Solution sln(&mesh);
-    sln.set_coeff_vector(&space, solver.get_solution());
+    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    info("Solving the linear problem.");
+    Solution sln(space.get_mesh());
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    else error ("Matrix solver failed.\n");
 
     // Output the solution. 
-    if (do_output)
+    if (solution_output)
     {
       out_fn(&sln, "sln", ts);
     }
@@ -170,18 +146,25 @@ int main(int argc, char **argv) {
     printf("  - Calculating exact error ...\n"); fflush(stdout);
     ExactSolution esln(&mesh, fndd);
     double err_exact = h1_error(&sln, &esln) * 100; 
-    printf("  - err. exact: %le\n", err_exact);
+    printf("  - err. exact: %g%%\n", err_exact);
 
     // next step
     sln_prev = sln;
     TIME += TAU;
   }
 
-#ifdef WITH_PETSC
-  mat.free();
-  rhs.free();
-  PetscFinalize();
-#endif
+  // Time measurement.
+  cpu_time.tick();
 
-  return 1;
+  // Print timing information.
+  info("Solutions saved. Total running time: %g s", cpu_time.accumulated());
+
+  // Clean up.
+  delete matrix;
+  delete rhs;
+  delete solver;
+
+  finalize_solution_environment(matrix_solver);
+
+  return 0;
 }
