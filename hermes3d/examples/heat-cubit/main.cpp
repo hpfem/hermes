@@ -24,8 +24,7 @@ const char* iterative_method = "bicgstab";        // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
-
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary condition types. 
 BCType bc_types(int marker)
@@ -84,14 +83,14 @@ int main(int argc, char **args)
   if (!mesh_loader.load("cylinder2.e", &mesh))
     error("Loading mesh file '%s' failed.\n", "cylinder2.e");
 
-  // Perform initial mesh refinements.
+  // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
   
   // Create H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
-  printf("Number of DOF: %d.\n", space.get_num_dofs());
+  info("Number of DOF: %d.", Space::get_num_dofs(&space));
 
-  // Initialize the weak formulation.
+  // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form1), HERMES_SYM, 1);
   wf.add_matrix_form(callback(bilinear_form2), HERMES_SYM, 2);
@@ -99,10 +98,11 @@ int main(int argc, char **args)
 
   initialize_solution_environment(matrix_solver, argc, args);
 
-  // Assemble the linear problem.
-  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
+  // Initialize discrete problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.  
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -114,9 +114,11 @@ int main(int argc, char **args)
     // Using default iteration parameters (see solver/aztecoo.h).
   }
 
+  // Assemble stiffness amtrix and load vector.
+  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
   dp.assemble(matrix, rhs);
 	
-  // Solve the linear system of the reference problem. If successful, obtain the solution.
+  // Solve the linear system. If successful, obtain the solution.
   info("Solving the linear problem.");
   Solution sln(space.get_mesh());
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);

@@ -5,10 +5,7 @@
 //#include <getopt.h>
 #include <hermes3d.h>
 
-// This example shows how to solve linear elasticity problem on a 
-// L-shape beam. Since we are dealing with only the isotropic 
-// homogeneous case, displacement components in x-, y- and z-direction 
-// have similar qualitative behavior. 
+// This example shows how to solve linear elasticity problem on an L-shape beam. 
 //
 // PDE: Lame equations of linear elasticity.
 //
@@ -17,6 +14,7 @@
 //     du_x/dn = du_y/dn = du_z/dn = 0 elsewhere
 //
 // The following parameters can be changed:
+
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
@@ -30,7 +28,7 @@ const char* iterative_method = "bicgstab";        // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Problem parameters. 
 const double E  = 200e9; 		// Young modulus for steel: 200 GPa.
@@ -91,16 +89,16 @@ int main(int argc, char **args)
   // Perform initial mesh refinement. 
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
-  // Create H1 spaces x-displacement component. 
+  // Create H1 space with default shapeset for x-displacement component. 
   H1Space xdisp(&mesh, bc_types_x, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
   
-  // Create H1 spaces y-displacement component. 
+  // Create H1 space with default shapeset for y-displacement component. 
   H1Space ydisp(&mesh, bc_types_y, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
   
-  // Create H1 spaces z-displacement component. 
+  // Create H1 space with default shapeset for z-displacement component. 
   H1Space zdisp(&mesh, bc_types_z, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
   
-  // Initialized the Weak formulation.
+  // Initialize the weak formulation.
   WeakForm wf(3);
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
@@ -114,7 +112,7 @@ int main(int argc, char **args)
   wf.add_matrix_form(2, 2, callback(bilinear_form_2_2), HERMES_SYM);
   wf.add_vector_form_surf(2, callback(surf_linear_form_2), 5);
 
-  // Assemble the linear problem.
+  // Initialize discrete problem.
   info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &zdisp)));
   bool is_linear = true;
   DiscreteProblem dp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp), is_linear);
@@ -131,25 +129,26 @@ int main(int argc, char **args)
     // Using default iteration parameters (see solver/aztecoo.h).
   }
 
+  // Assemble stiffness matrix and load vector.
   dp.assemble(matrix, rhs);
 
-  // Solve the linear system of the reference problem. If successful, obtain the solution.
+  // Solve the linear system. If successful, obtain the solution.
   info("Solving the linear problem.");
   Solution xsln(xdisp.get_mesh());
   Solution ysln(ydisp.get_mesh());
   Solution zsln(zdisp.get_mesh());
-  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&xdisp, &ydisp, &zdisp), Tuple<Solution *>(&xsln, &ysln, &zsln));
+  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), 
+                      Tuple<Space *>(&xdisp, &ydisp, &zdisp), Tuple<Solution *>(&xsln, &ysln, &zsln));
   else error ("Matrix solver failed.\n");
 
   // Output solution and mesh.
-  if (solution_output) 
-    out_fn(&xsln, &ysln, &zsln, "sln");
+  if (solution_output) out_fn(&xsln, &ysln, &zsln, "sln");
   
   // Time measurement.
   cpu_time.tick();
 
   // Print timing information.
-  info("Solutions saved. Total running time: %g s", cpu_time.accumulated());
+  info("Solutions saved. Total running time: %g s.", cpu_time.accumulated());
 
   // Clean up.
   delete matrix;

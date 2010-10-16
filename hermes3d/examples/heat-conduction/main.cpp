@@ -2,12 +2,11 @@
 #define H3D_REPORT_INFO
 #define H3D_REPORT_VERBOSE
 #include "config.h"
-//#include <getopt.h>
 #include <hermes3d.h>
+
 //  This example shows how to solve a time-dependent PDE discretized
 //  in time via the implicit Euler method on a fixed mesh. 
-//  You will also learn how to use the
-//  solution calculated in the previous time step.
+//  You will see how to use the solution from previous time step.
 //
 //  PDE: stationary heat transfer equation
 //  dT/dt - Laplace T = f.
@@ -23,11 +22,11 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;					              // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;			  // Number of initial uniform mesh refinements.
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
-const double TAU = 0.05;					                // Time step in seconds. 
+const double TAU = 0.05;			  // Time step in seconds. 
 bool solution_output = true;                      // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
@@ -37,10 +36,10 @@ const char* iterative_method = "bicgstab";        // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)                                                  
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h)                                                  
 
 // Problem parameters. 
-const double FINAL_TIME = 2 * M_PI;				        // Length of time inveral in seconds. 
+const double FINAL_TIME = 2 * M_PI;		  // Length of time interval in seconds. 
 
 // Global time variable. 
 double TIME = TAU;
@@ -89,20 +88,19 @@ int main(int argc, char **args)
   // Perform initial mesh refinement. 
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
-  // Create H1 space. 
+  // Create H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
-  
 
-
-  // Construct initial solution and set zero.
+  // Construct initial solution and set it to zero.
   Solution sln_prev(&mesh);
   sln_prev.set_zero();
 
-  // Initialize the weak formulation. 
+  // Initialize weak formulation. 
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
   wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY, &sln_prev);
 
+  // Initialize discrete problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 
@@ -122,7 +120,7 @@ int main(int argc, char **args)
   int nsteps = (int) (FINAL_TIME/TAU + 0.5);
   for (int ts = 0; ts < nsteps;  ts++)
   {
-    printf("\n---- Time step %d, time %3.5f\n", ts, TIME);
+    info("---- Time step %d, time %3.5f.", ts, TIME);
    
     // Assemble the linear problem.
     info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
@@ -130,7 +128,7 @@ int main(int argc, char **args)
     bool rhsonly = (ts > 0);
     dp.assemble(matrix, rhs, rhsonly);
 
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    // Solve the linear system. If successful, obtain the solution.
     info("Solving the linear problem.");
     Solution sln(space.get_mesh());
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
@@ -143,12 +141,12 @@ int main(int argc, char **args)
     }
 
     // Calculate error wrt. exact solution. 
-    printf("  - Calculating exact error ...\n"); fflush(stdout);
+    info("Calculating exact error.");
     ExactSolution esln(&mesh, fndd);
     double err_exact = h1_error(&sln, &esln) * 100; 
-    printf("  - err. exact: %g%%\n", err_exact);
+    info("Err. exact: %g%%.", err_exact);
 
-    // next step
+    // Next time step.
     sln_prev = sln;
     TIME += TAU;
   }
@@ -163,7 +161,6 @@ int main(int argc, char **args)
   delete matrix;
   delete rhs;
   delete solver;
-
   finalize_solution_environment(matrix_solver);
 
   return 0;

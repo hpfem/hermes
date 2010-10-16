@@ -2,7 +2,6 @@
 #define H3D_REPORT_INFO
 #define H3D_REPORT_VERBOSE
 #include "config.h"
-//#include <getopt.h>
 #include <hermes3d.h>
 #include "rough.h"
 
