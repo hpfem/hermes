@@ -147,7 +147,7 @@ int main(int argc, char **args)
   cpu_time.tick();
 
   // Print timing information.
-  info("Total running time: %g s", cpu_time.accumulated());
+  info("Solution saved. Total running time: %g s", cpu_time.accumulated());
 
   // Clean up.
   delete matrix;
@@ -155,7 +155,5 @@ int main(int argc, char **args)
   delete solver;
   finalize_solution_environment(matrix_solver);
 
-  printf("Press any key...");
-  getch();
   return 0;
 }
