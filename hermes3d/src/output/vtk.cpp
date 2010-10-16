@@ -642,7 +642,7 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 				EXIT(H3D_ERR_UNKNOWN_MODE);
 				break;
 		} // switch
-    delete []vtx_pt;
+    
 		for (int i = 0; i < COMPONENTS; i++)
 			fn[i]->precalculate(np, pt, item);
 
@@ -659,7 +659,8 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 			l.set_point_data(vtx_pt[i], REAL(val[0][i]), REAL(val[1][i]), REAL(val[2][i]));
 #endif
 		}
-
+    
+    delete []vtx_pt;
 		delete [] x;
 		delete [] y;
 		delete [] z;
