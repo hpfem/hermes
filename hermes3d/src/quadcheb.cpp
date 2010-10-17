@@ -62,7 +62,7 @@ QuadChebTetra::QuadChebTetra() {
 QuadChebTetra::~QuadChebTetra() {
 	_F_
 #ifdef WITH_TETRA
-	for (Word_t idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
+	for (unsigned int idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
 		delete [] tables[idx];
 #endif
 }
@@ -91,7 +91,7 @@ QuadChebHex::QuadChebHex() {
 QuadChebHex::~QuadChebHex() {
 	_F_
 #ifdef WITH_HEX
-	for (Word_t idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
+	for (unsigned int idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
 		delete [] tables[idx];
 #endif
 }

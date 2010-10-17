@@ -116,7 +116,7 @@ void H1Space::assign_dofs_internal() {
 		Element *e = mesh->elements[idx];
 		// vertex dofs
 		for (int ivtx = 0; ivtx < e->get_num_vertices(); ivtx++) {
-			Word_t vid = e->get_vertex(ivtx);
+			unsigned int vid = e->get_vertex(ivtx);
 			VertexData *vd = vn_data[vid];
 			assert(vd != NULL);
 			if (!init_vertices.is_set(vid) && !vd->ced) {
@@ -130,7 +130,7 @@ void H1Space::assign_dofs_internal() {
 		Element *e = mesh->elements[idx];
 		// edge dofs
 		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			Word_t eid = mesh->get_edge_id(e, iedge);
+			unsigned int eid = mesh->get_edge_id(e, iedge);
 			EdgeData *ed = en_data[eid];
 			assert(ed != NULL);
 			if (!init_edges.is_set(eid) && !ed->ced) {
@@ -144,7 +144,7 @@ void H1Space::assign_dofs_internal() {
 		Element *e = mesh->elements[idx];
 		// face dofs
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			Word_t fid = mesh->get_facet_id(e, iface);
+			unsigned int fid = mesh->get_facet_id(e, iface);
 			FaceData *fd = fn_data[fid];
 			assert(fd != NULL);
 			if (!init_faces.is_set(fid) && !fd->ced) {
@@ -185,7 +185,7 @@ void H1Space::get_boundary_assembly_list(Element *e, int face, AsmList *al) {
 
 void H1Space::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 	_F_
-	Word_t vtx = elem->get_vertex(ivertex);
+	unsigned int vtx = elem->get_vertex(ivertex);
 	VertexData *vnode = vn_data[vtx];
 	Vertex *v = mesh->vertices[vtx];
 	if (vnode->bc_type == BC_ESSENTIAL)
@@ -194,7 +194,7 @@ void H1Space::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 
 void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
-	Word_t edge_id = mesh->get_edge_id(elem, iedge);
+	unsigned int edge_id = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge_id];
 	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
@@ -202,7 +202,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 	int num_fns;
 	if (enode->ced) {
 		assert(enode->edge_ncomponents > 0);
-		Word_t edge_id = enode->edge_baselist[0].edge_id;
+		unsigned int edge_id = enode->edge_baselist[0].edge_id;
 		num_fns = en_data[edge_id]->n;
 	}
 	else {
@@ -223,7 +223,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 	// local edge vertex numbers
 	const int *local_edge_vtx = elem->get_edge_vertices(iedge);
 	// edge vertices (global indices)
-	Word_t edge_vtx[2] = { elem->get_vertex(local_edge_vtx[0]), elem->get_vertex(local_edge_vtx[1]) };
+	unsigned int edge_vtx[2] = { elem->get_vertex(local_edge_vtx[0]), elem->get_vertex(local_edge_vtx[1]) };
 
 	int vtx_fn_idx[] = { shapeset->get_vertex_index(local_edge_vtx[0]), shapeset->get_vertex_index(local_edge_vtx[1]) };
 	// function values at vertices
@@ -312,7 +312,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	_F_
-	Word_t facet_idx = mesh->get_facet_id(elem, iface);
+	unsigned int facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
 	if (fnode->bc_type != BC_ESSENTIAL) return;
@@ -336,11 +336,11 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	// get total number of vertex + edge functions
 	int num_fns = elem->get_num_face_vertices(iface);
 	for (int edge = 0; edge < elem->get_num_face_edges(iface); edge++) {
-		Word_t edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
+		unsigned int edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
 		EdgeData *enode = en_data[edge_idx];
 		if (enode->ced && enode->edge_ncomponents > 0 && enode->edge_baselist != NULL) {
 			assert(enode->edge_ncomponents > 0);
-			Word_t eid = enode->edge_baselist[0].edge_id;
+			unsigned int eid = enode->edge_baselist[0].edge_id;
 			num_fns += en_data[eid]->n;
 		}
 		else
@@ -361,7 +361,7 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	}
 	// edge projection coefficients
 	for (int edge = 0; edge < elem->get_num_face_edges(iface); edge++) {
-		Word_t edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
+		unsigned int edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
 		EdgeData *enode = en_data[edge_idx];
 
 		if (enode->ced && enode->edge_ncomponents > 0 && enode->edge_baselist != NULL) {

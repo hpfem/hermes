@@ -116,10 +116,10 @@ OutputQuadTetra::OutputQuadTetra() {
 OutputQuadTetra::~OutputQuadTetra() {
 	_F_
 #ifdef WITH_TETRA
-	for (Word_t i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 
-	for (Word_t i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
+	for (int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
 		delete[] subdiv_modes[i];
 #endif
 }
@@ -222,10 +222,10 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (Word_t i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 
-	for (Word_t i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
+	for (int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
 		delete[] subdiv_modes[i];
 #endif
 }
@@ -619,7 +619,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		n_edges += element->get_num_edges();
 		n_faces += element->get_num_faces();
 
-		Word_t *vtcs = new Word_t[element->get_num_vertices()];
+		unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
 		element->get_vertices(vtcs);
 
 		switch (element->get_mode()) {
@@ -651,7 +651,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 	fprintf(this->out_file, "%d\n", n_edges);
 	FOR_ALL_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
-		Word_t vtcs[Edge::NUM_VERTICES];
+		unsigned int vtcs[Edge::NUM_VERTICES];
 		for (int iedge = 0; iedge < element->get_num_edges(); iedge++) {
 			element->get_edge_vertices(iedge, vtcs);
 			fprintf(this->out_file, "%ld 1 0 %ld %ld\n", mesh->get_edge_id(vtcs[0], vtcs[1]), vtcs[0], vtcs[1]);
@@ -667,7 +667,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		Element *element = mesh->elements[idx];
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
 			int nv = element->get_num_face_vertices(iface);
-			Word_t *vtcs = new Word_t[nv];
+			unsigned int *vtcs = new unsigned int[nv];
 			element->get_face_vertices(iface, vtcs);
 			switch (element->get_face_mode(iface)) {
 				case MODE_TRIANGLE:
@@ -692,7 +692,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			Word_t fid = mesh->get_facet_id(element, iface);
+			unsigned int fid = mesh->get_facet_id(element, iface);
 			Facet *facet = mesh->facets[fid];
 			if (facet->type == Facet::OUTER) fc++;
 		}
@@ -721,9 +721,9 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
 			int nv = element->get_num_face_vertices(iface);
-			Word_t *vtcs = new Word_t[nv];
+			unsigned int *vtcs = new unsigned int[nv];
 			element->get_face_vertices(iface, vtcs);
-			Word_t fid = mesh->get_facet_id(element, iface);
+			unsigned int fid = mesh->get_facet_id(element, iface);
 			Facet *facet = mesh->facets[fid];
 			if (facet->type == Facet::INNER) continue;
 
@@ -753,7 +753,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			Word_t fid = mesh->get_facet_id(element, iface);
+			unsigned int fid = mesh->get_facet_id(element, iface);
 			Facet *facet = mesh->facets[fid];
 			if (facet->type == Facet::INNER) continue;
 
@@ -796,39 +796,39 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
 		int nv = Hex::NUM_VERTICES;
-		Word_t *vtcs = new Word_t[nv];
+		unsigned int *vtcs = new unsigned int[nv];
 		element->get_vertices(vtcs);
 
 		for (int i = 0; i < nv; i++) {
 			Vertex *v = mesh->vertices[vtcs[i]];
-			Word_t idx = out_vtcs.add(new Vertex(*v));
+			unsigned int idx = out_vtcs.add(new Vertex(*v));
 			vtx_pt[vtcs[i]] = idx;
 		}
 
 		for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-			Word_t *fvtcs = new Word_t[Quad::NUM_VERTICES];
+			unsigned int *fvtcs = new unsigned int[Quad::NUM_VERTICES];
 			element->get_face_vertices(iface, fvtcs);
 
-			Word_t k[] = { fvtcs[0], fvtcs[1], fvtcs[2], fvtcs[3] };
-			Word_t idx = INVALID_IDX;
+			unsigned int k[] = { fvtcs[0], fvtcs[1], fvtcs[2], fvtcs[3] };
+			unsigned int idx = INVALID_IDX;
 			if (!face_pts.lookup(k, Quad::NUM_VERTICES, idx)) {
 				// create new vertex
 				Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]], mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
 				Vertex *fcenter = new Vertex((v[0]->x + v[2]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[2]->z) / 2.0);
-				Word_t idx = out_vtcs.add(fcenter);
+				unsigned int idx = out_vtcs.add(fcenter);
 				face_pts.set(k, Quad::NUM_VERTICES, idx);
 			}
       delete [] fvtcs;
 		}
 
 
-		Word_t c[] = { vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7] };
-		Word_t idx = INVALID_IDX;
+		unsigned int c[] = { vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7] };
+		unsigned int idx = INVALID_IDX;
 		if (!ctr_pts.lookup(c, Hex::NUM_VERTICES, idx)) {
 			// create new vertex
 			Vertex *v[4] = { mesh->vertices[vtcs[0]], mesh->vertices[vtcs[1]], mesh->vertices[vtcs[3]], mesh->vertices[vtcs[4]] };
 			Vertex *center = new Vertex((v[0]->x + v[1]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[3]->z) / 2.0);
-			Word_t idx = out_vtcs.add(center);
+			unsigned int idx = out_vtcs.add(center);
 			ctr_pts.set(c, Hex::NUM_VERTICES, idx);
 		}
     delete [] vtcs;
@@ -836,7 +836,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 
 	fprintf(this->out_file, "$Nodes\n");
 	fprintf(this->out_file, "%ld\n", out_vtcs.count());
-	for (Word_t i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
+	for (int i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
 		Vertex *v = out_vtcs[i];
 		fprintf(this->out_file, "%ld %lf %lf %lf\n", i + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
 		delete v;																		// we no longer need the vertex data
@@ -854,21 +854,21 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	fprintf(this->out_file, "%ld\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
-		Word_t *vtcs = new Word_t[element->get_num_vertices()];
+		unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
 		element->get_vertices(vtcs);
 
 		for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-			Word_t fvtcs[2][Quad::NUM_VERTICES];
+			unsigned int fvtcs[2][Quad::NUM_VERTICES];
 			element->get_face_vertices(eface[iedge][0], fvtcs[0]);
 			element->get_face_vertices(eface[iedge][1], fvtcs[1]);
 
-			Word_t fidx[2] = { INVALID_IDX, INVALID_IDX };
+			unsigned int fidx[2] = { INVALID_IDX, INVALID_IDX };
 			face_pts.lookup(fvtcs[0], Quad::NUM_VERTICES, fidx[0]);
 			face_pts.lookup(fvtcs[1], Quad::NUM_VERTICES, fidx[1]);
 
-			Word_t evtcs[2];
+			unsigned int evtcs[2];
 			element->get_edge_vertices(iedge, evtcs);
-			Word_t v[4] = { vtx_pt[evtcs[0]] + 1, fidx[0] + 1, vtx_pt[evtcs[1]] + 1, fidx[1] + 1 };
+			unsigned int v[4] = { vtx_pt[evtcs[0]] + 1, fidx[0] + 1, vtx_pt[evtcs[1]] + 1, fidx[1] + 1 };
 			fprintf(this->out_file, "%d 3 0 %ld %ld %ld %ld\n", id++, v[0], v[1], v[2], v[3]);
 		}
     delete [] vtcs;

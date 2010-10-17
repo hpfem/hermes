@@ -136,7 +136,7 @@ Facet *Facet::copy_base() {
 	return copy;
 }
 
-bool Facet::ced(Word_t idx, int iface)
+bool Facet::ced(unsigned int idx, int iface)
 {
 	return type == Facet::INNER &&
 		((lactive && !ractive) ||
@@ -203,7 +203,7 @@ Hex::Hex() {
 #endif
 }
 
-Hex::Hex(Word_t v[]) {
+Hex::Hex(unsigned int v[]) {
 	_F_
 #ifdef WITH_HEX
 	for (int i = 0; i < NUM_VERTICES; i++)
@@ -216,7 +216,7 @@ Hex::Hex(Word_t v[]) {
 #endif
 }
 
-Hex::Hex(Word_t v1, Word_t v2, Word_t v3, Word_t v4, Word_t v5, Word_t v6, Word_t v7, Word_t v8) {
+Hex::Hex(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4, unsigned int v5, unsigned int v6, unsigned int v7, unsigned int v8) {
 	_F_
 #ifdef WITH_HEX
 	vtcs[0] = v1;
@@ -251,7 +251,7 @@ Hex::~Hex() {
 	_F_
 }
 
-int Hex::get_edge_vertices(int edge_num, Word_t *vtcs) const {
+int Hex::get_edge_vertices(int edge_num, unsigned int *vtcs) const {
 	_F_
 	assert((edge_num >= 0) && (edge_num < NUM_EDGES));
 	const int *local_vetrex = RefHex::get_edge_vertices(edge_num);
@@ -266,7 +266,7 @@ const int *Hex::get_edge_vertices(int edge_num) const {
 	return RefHex::get_edge_vertices(edge_num);
 }
 
-int Hex::get_face_vertices(int face_num, Word_t *vtcs) const {
+int Hex::get_face_vertices(int face_num, unsigned int *vtcs) const {
 	_F_
 	assert(face_num >= 0 && face_num < NUM_FACES);
 	const int *local_numbers = RefHex::get_face_vertices(face_num);
@@ -302,10 +302,10 @@ int Hex::get_edge_orientation(int edge_num) const {
 int Hex::get_face_orientation(int face_num) const {
 	_F_
 	assert(face_num >= 0 && face_num < NUM_FACES);
-	Word_t v[4];
+	unsigned int v[4];
 	get_face_vertices(face_num, v);
 
-	Word_t minval = 1000;
+	unsigned int minval = 1000;
 	int min = 0;
 	for (int i = 0; i < 4; i++) {
 		if (v[i] < minval) {
@@ -367,7 +367,7 @@ Tetra::Tetra() {
 #endif
 }
 
-Tetra::Tetra(Word_t v[]) {
+Tetra::Tetra(unsigned int v[]) {
 	_F_
 #ifdef WITH_TETRA
 	for (int i = 0; i < NUM_VERTICES; i++)
@@ -377,7 +377,7 @@ Tetra::Tetra(Word_t v[]) {
 #endif
 }
 
-Tetra::Tetra(Word_t v1, Word_t v2, Word_t v3, Word_t v4) {
+Tetra::Tetra(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4) {
 	_F_
 #ifdef WITH_TETRA
 	vtcs[0] = v1;
@@ -405,7 +405,7 @@ Tetra::~Tetra() {
 	_F_
 }
 
-int Tetra::get_edge_vertices(int edge_num, Word_t *vtcs) const {
+int Tetra::get_edge_vertices(int edge_num, unsigned int *vtcs) const {
 	_F_
 	assert((edge_num >= 0) && (edge_num < NUM_EDGES));
 	vtcs[0] = this->vtcs[RefTetra::get_edge_vertices(edge_num)[0]];
@@ -419,7 +419,7 @@ const int *Tetra::get_edge_vertices(int edge_num) const {
 	return RefTetra::get_edge_vertices(edge_num);
 }
 
-int Tetra::get_face_vertices(int face_num, Word_t *vtcs) const {
+int Tetra::get_face_vertices(int face_num, unsigned int *vtcs) const {
 	_F_
 	assert(face_num >= 0 && face_num < NUM_FACES);
 	const int *local_numbers = RefTetra::get_face_vertices(face_num);
@@ -458,9 +458,9 @@ int Tetra::get_face_orientation(int face_num) const {
 	assert(face_num >= 0 && face_num < NUM_FACES);
 	static int map[4][3] = { { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 }, { 0, 1, 2 } };
 
-	Word_t v0 = vtcs[map[face_num][0]];
-	Word_t v1 = vtcs[map[face_num][1]];
-	Word_t v2 = vtcs[map[face_num][2]];
+	unsigned int v0 = vtcs[map[face_num][0]];
+	unsigned int v1 = vtcs[map[face_num][1]];
+	unsigned int v2 = vtcs[map[face_num][2]];
 
 	if (v0 < v1 && v1 < v2) return 0;
 	else if (v1 < v2 && v2 < v0) return 1;
@@ -511,7 +511,7 @@ Prism::Prism() {
 #endif
 }
 
-Prism::Prism(Word_t v[]) {
+Prism::Prism(unsigned int v[]) {
 	_F_
 #ifdef WITH_PRISM
 	for (int i = 0; i < NUM_VERTICES; i++)
@@ -521,7 +521,7 @@ Prism::Prism(Word_t v[]) {
 #endif
 }
 
-Prism::Prism(Word_t v1, Word_t v2, Word_t v3, Word_t v4, Word_t v5, Word_t v6) {
+Prism::Prism(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4, unsigned int v5, unsigned int v6) {
 	_F_
 #ifdef WITH_PRISM
 	vtcs[0] = v1;
@@ -550,7 +550,7 @@ Prism::Prism(const Prism &o) :
 Prism::~Prism() {
 }
 
-int Prism::get_edge_vertices(int edge_num, Word_t *vtcs) const {
+int Prism::get_edge_vertices(int edge_num, unsigned int *vtcs) const {
 	_F_
 	assert((edge_num >= 0) && (edge_num < NUM_EDGES));
 	vtcs[0] = this->vtcs[RefPrism::get_edge_vertices(edge_num)[0]];
@@ -582,7 +582,7 @@ int Prism::get_num_face_edges(int face_num) const {
 	return RefPrism::get_num_face_edges(face_num);
 }
 
-int Prism::get_face_vertices(int face_num, Word_t *vtcs) const {
+int Prism::get_face_vertices(int face_num, unsigned int *vtcs) const {
 	_F_
 	assert((face_num >= 0) && (face_num < NUM_FACES));
 	int nvert = RefPrism::get_num_face_vertices(face_num);
@@ -731,19 +731,19 @@ Mesh::~Mesh() {
 
 void Mesh::free() {
 	_F_
-	for (Word_t i = vertices.first(); i != INVALID_IDX; i = vertices.next(i))
+	for (int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i))
 		delete vertices[i];
 	vertices.remove_all();
 
-	for (Word_t i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i))
+	for (int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i))
 		delete boundaries[i];
 	boundaries.remove_all();
 
-	for (Word_t i = elements.first(); i != INVALID_IDX; i = elements.next(i))
+	for (int i = elements.first(); i != INVALID_IDX; i = elements.next(i))
 		delete elements[i];
 	elements.remove_all();
 
-	for (Word_t i = facets.first(); i != INVALID_IDX; i = facets.next(i))
+	for (int i = facets.first(); i != INVALID_IDX; i = facets.next(i))
 		delete facets.get(i);
 	facets.remove_all();
 
@@ -757,22 +757,22 @@ void Mesh::copy(const Mesh &mesh) {
 	free();
 
 	// copy vertices
-	for (Word_t i = mesh.vertices.first(); i != INVALID_IDX; i = mesh.vertices.next(i))
+	for (int i = mesh.vertices.first(); i != INVALID_IDX; i = mesh.vertices.next(i))
 		this->vertices.set(i, mesh.vertices[i]->copy());
 
 	// copy boundaries
-	for (Word_t i = mesh.boundaries.first(); i != INVALID_IDX; i = mesh.boundaries.next(i))
+	for (int i = mesh.boundaries.first(); i != INVALID_IDX; i = mesh.boundaries.next(i))
 		this->boundaries.set(i, mesh.boundaries[i]->copy());
 
 	// copy elements, facets and edges
-	for (Word_t i = mesh.elements.first(); i != INVALID_IDX; i = mesh.elements.next(i)) {
+	for (int i = mesh.elements.first(); i != INVALID_IDX; i = mesh.elements.next(i)) {
 		Element *e = mesh.elements[i];
 		this->elements.set(i, e->copy());
 
 		// copy mid points on edges and edges
-		Word_t *emp = new Word_t[e->get_num_edges()];
+		unsigned int *emp = new unsigned int[e->get_num_edges()];
 		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			Word_t *edge_vtx = new Word_t[Edge::NUM_VERTICES];
+			unsigned int *edge_vtx = new unsigned int[Edge::NUM_VERTICES];
 			e->get_edge_vertices(iedge, edge_vtx);
 			emp[iedge] = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
 			if (emp[iedge] != INVALID_IDX)
@@ -792,17 +792,17 @@ void Mesh::copy(const Mesh &mesh) {
 				case MODE_HEXAHEDRON:
 					// horz
 					if (emp[edge[1]] != INVALID_IDX && emp[edge[3]] != INVALID_IDX) {
-						Word_t edge_vtx[Edge::NUM_VERTICES] = { emp[edge[1]], emp[edge[3]] };
+						unsigned int edge_vtx[Edge::NUM_VERTICES] = { emp[edge[1]], emp[edge[3]] };
 
-						Word_t fmp = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
+						unsigned int fmp = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
 						if (fmp != INVALID_IDX)
 							set_midpoint(edge_vtx[0], edge_vtx[1], fmp);
 					}
 					// vert
 					if (emp[edge[0]] != INVALID_IDX && emp[edge[2]] != INVALID_IDX) {
-						Word_t edge_vtx[Edge::NUM_VERTICES] = { emp[edge[0]], emp[edge[2]] };
+						unsigned int edge_vtx[Edge::NUM_VERTICES] = { emp[edge[0]], emp[edge[2]] };
 
-						Word_t fmp = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
+						unsigned int fmp = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
 						if (fmp != INVALID_IDX)
 							set_midpoint(edge_vtx[0], edge_vtx[1], fmp);
 					}
@@ -817,10 +817,10 @@ void Mesh::copy(const Mesh &mesh) {
 	}
 
 	// facets
-	for (Word_t fid = mesh.facets.first(); fid != INVALID_IDX; fid = mesh.facets.next(fid)) {
+	for (unsigned int fid = mesh.facets.first(); fid != INVALID_IDX; fid = mesh.facets.next(fid)) {
 		Facet *facet = mesh.facets[fid];
 
-		Word_t *face_idxs = new Word_t[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
+		unsigned int *face_idxs = new unsigned int[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
 		if (facet->left != INVALID_IDX) {
 			Element *left_e = mesh.elements[facet->left];
 			int nvtcs = left_e->get_face_vertices(facet->left_face_num, face_idxs);
@@ -848,19 +848,19 @@ void Mesh::copy_base(const Mesh &mesh) {
 
 	free();
 	// copy elements, facets and edges
-	for (Word_t eid = mesh.elements.first(); eid <= mesh.nbase; eid = mesh.elements.next(eid)) {
+	for (unsigned int eid = mesh.elements.first(); eid <= mesh.nbase; eid = mesh.elements.next(eid)) {
 		Element *e = mesh.elements[eid];
 
 		// vertices
 		for (int iv = 0; iv < e->get_num_vertices(); iv++) {
-			Word_t vtx = e->get_vertex(iv);
+			unsigned int vtx = e->get_vertex(iv);
 			if (!this->vertices.exists(vtx))
 				this->vertices.set(vtx, mesh.vertices[vtx]->copy());
 		}
 
 		// edges
 		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			Word_t vtx[Edge::NUM_VERTICES];
+			unsigned int vtx[Edge::NUM_VERTICES];
 			e->get_edge_vertices(iedge, vtx);
 
 			Edge edge;
@@ -870,7 +870,7 @@ void Mesh::copy_base(const Mesh &mesh) {
 
 		// facets
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			Word_t face_idxs[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
+			unsigned int face_idxs[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
 
 			int nvts = e->get_face_vertices(iface, face_idxs);
 			Facet *facet = NULL;
@@ -883,7 +883,7 @@ void Mesh::copy_base(const Mesh &mesh) {
 
 					// boundaries
 					if (facet->type == Facet::OUTER) {
-						Word_t bnd_id = facet->right;
+						unsigned int bnd_id = facet->right;
 						if (!this->boundaries.exists(bnd_id)) this->boundaries.set(bnd_id, mesh.boundaries[bnd_id]->copy());
 					}
 				}
@@ -901,18 +901,18 @@ void Mesh::copy_base(const Mesh &mesh) {
 	this->seq = g_mesh_seq++;
 }
 
-Word_t Mesh::get_facet_id(Element *e, int face_num) const {
+unsigned int Mesh::get_facet_id(Element *e, int face_num) const {
 	_F_
 	assert(e != NULL);
-	Word_t facet_idxs[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
+	unsigned int facet_idxs[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
 	int nvts = e->get_face_vertices(face_num, facet_idxs);
 	return facets.get_idx(facet_idxs + 0, nvts);
 }
 
-Word_t Mesh::get_edge_id(Element *e, int edge_num) const {
+unsigned int Mesh::get_edge_id(Element *e, int edge_num) const {
 	_F_
 	assert(e != NULL);
-	Word_t edge_idxs[Edge::NUM_VERTICES];
+	unsigned int edge_idxs[Edge::NUM_VERTICES];
 	int nvtcs = e->get_edge_vertices(edge_num, edge_idxs);
 	return edges.get_idx(edge_idxs + 0, nvtcs);
 }
@@ -920,46 +920,46 @@ Word_t Mesh::get_edge_id(Element *e, int edge_num) const {
 void Mesh::dump() {
 	_F_
 	printf("Vertices (count = %ld)\n", vertices.count());
-	for (Word_t i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
+	for (int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
 		Vertex *v = vertices[i];
 		printf("  id = %ld, ", i);
 		v->dump();
 	}
 
 	printf("Elements (count = %ld)\n", elements.count());
-	for (Word_t i = elements.first(); i != INVALID_IDX; i = elements.next(i)) {
+	for (int i = elements.first(); i != INVALID_IDX; i = elements.next(i)) {
 		Element *e = elements[i];
 		printf("  ");
 		e->dump();
 	}
 
 	printf("Boundaries (count = %ld)\n", boundaries.count());
-	for (Word_t i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i)) {
+	for (int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i)) {
 		Boundary *b = boundaries[i];
 		printf("  ");
 		b->dump();
 	}
 
 	printf("Facets (count = %ld)\n", facets.count());
-	for (Word_t i = facets.first(); i != INVALID_IDX; i = facets.next(i)) {
+	for (int i = facets.first(); i != INVALID_IDX; i = facets.next(i)) {
 		Facet *f = facets.get(i);
 		printf("  id = %ld, ", i);
 		f->dump();
 	}
 }
 
-Word_t Mesh::add_vertex(double x, double y, double z) {
+unsigned int Mesh::add_vertex(double x, double y, double z) {
 	_F_
-	Word_t idx = vertices.count() + 1;
+	unsigned int idx = vertices.count() + 1;
 	vertices.set(idx, new Vertex(x, y, z));
 	return idx;
 }
 
-Tetra *Mesh::create_tetra(Word_t vtcs[]) {
+Tetra *Mesh::create_tetra(unsigned int vtcs[]) {
 	_F_
 	Tetra *tetra = new Tetra(vtcs);
 	MEM_CHECK(tetra);
-	Word_t id = elements.count() + 1;
+	unsigned int id = elements.count() + 1;
 	elements.set(id, tetra);
 	tetra->id = id;
 
@@ -968,7 +968,7 @@ Tetra *Mesh::create_tetra(Word_t vtcs[]) {
 	return tetra;
 }
 
-Tetra *Mesh::add_tetra(Word_t vtcs[]) {
+Tetra *Mesh::add_tetra(unsigned int vtcs[]) {
 	_F_
 	Tetra *tetra = create_tetra(vtcs);
 
@@ -977,7 +977,7 @@ Tetra *Mesh::add_tetra(Word_t vtcs[]) {
 
 	// facets
 	for (int i = 0; i < Tetra::NUM_FACES; i++) {
-		Word_t facet_idxs[Tri::NUM_VERTICES];
+		unsigned int facet_idxs[Tri::NUM_VERTICES];
 		int nvtcs = tetra->get_face_vertices(i, facet_idxs);
 		Facet *facet = NULL;
 		if (facets.lookup(facet_idxs + 0, nvtcs, facet)) {
@@ -994,12 +994,12 @@ Tetra *Mesh::add_tetra(Word_t vtcs[]) {
 	return tetra;
 }
 
-Hex *Mesh::create_hex(Word_t vtcs[]) {
+Hex *Mesh::create_hex(unsigned int vtcs[]) {
 	_F_
 	// build up the element
 	Hex *hex = new Hex(vtcs);
 	MEM_CHECK(hex);
-	Word_t id = elements.count() + 1;
+	unsigned int id = elements.count() + 1;
 	elements.set(id, hex);
 	hex->id = id;
 
@@ -1008,7 +1008,7 @@ Hex *Mesh::create_hex(Word_t vtcs[]) {
 	return hex;
 }
 
-Hex *Mesh::add_hex(Word_t vtcs[]) {
+Hex *Mesh::add_hex(unsigned int vtcs[]) {
 	_F_
 	Hex *hex = create_hex(vtcs);
 
@@ -1017,7 +1017,7 @@ Hex *Mesh::add_hex(Word_t vtcs[]) {
 
 	// facets
 	for (int i = 0; i < Hex::NUM_FACES; i++) {
-		Word_t facet_idxs[Quad::NUM_VERTICES];
+		unsigned int facet_idxs[Quad::NUM_VERTICES];
 		int nvtcs = hex->get_face_vertices(i, facet_idxs);
 		Facet *facet = NULL;
 		if (facets.lookup(facet_idxs + 0, nvtcs, facet)) {
@@ -1035,11 +1035,11 @@ Hex *Mesh::add_hex(Word_t vtcs[]) {
 	return hex;
 }
 
-Prism *Mesh::create_prism(Word_t vtcs[]) {
+Prism *Mesh::create_prism(unsigned int vtcs[]) {
 	_F_
 	Prism *prism = new Prism(vtcs);
 	MEM_CHECK(prism);
-	Word_t id = elements.count() + 1;
+	unsigned int id = elements.count() + 1;
 	elements.set(id, prism);
 	prism->id = id;
 
@@ -1048,7 +1048,7 @@ Prism *Mesh::create_prism(Word_t vtcs[]) {
 	return prism;
 }
 
-Prism *Mesh::add_prism(Word_t vtcs[]) {
+Prism *Mesh::add_prism(unsigned int vtcs[]) {
 	_F_
 	Prism *prism = create_prism(vtcs);
 
@@ -1057,7 +1057,7 @@ Prism *Mesh::add_prism(Word_t vtcs[]) {
 
 	// facets
 	for (int i = 0; i < Prism::NUM_FACES; i++) {
-		Word_t facet_idxs[Quad::NUM_VERTICES];
+		unsigned int facet_idxs[Quad::NUM_VERTICES];
 		int nvtcs = prism->get_face_vertices(i, facet_idxs);
 		Facet *facet = NULL;
 		if (facets.lookup(facet_idxs + 0, nvtcs, facet)) {
@@ -1075,13 +1075,13 @@ Prism *Mesh::add_prism(Word_t vtcs[]) {
 	return prism;
 }
 
-Boundary *Mesh::add_tri_boundary(Word_t vtcs[], int marker) {
+Boundary *Mesh::add_tri_boundary(unsigned int vtcs[], int marker) {
 	_F_
 	Facet *facet = NULL;
 	if (facets.lookup(vtcs + 0, Tri::NUM_VERTICES, facet)) {
 		Boundary *bdr = new BoundaryTri(marker);
 		MEM_CHECK(bdr);
-		Word_t pos = boundaries.count() + 1;
+		unsigned int pos = boundaries.count() + 1;
 		boundaries.set(pos, bdr);
 		bdr->id = pos;
 
@@ -1094,13 +1094,13 @@ Boundary *Mesh::add_tri_boundary(Word_t vtcs[], int marker) {
 		return NULL;
 }
 
-Boundary *Mesh::add_quad_boundary(Word_t vtcs[], int marker) {
+Boundary *Mesh::add_quad_boundary(unsigned int vtcs[], int marker) {
 	_F_
 	Facet *facet = NULL;
 	if (facets.lookup(vtcs + 0, Quad::NUM_VERTICES, facet)) {
 		Boundary *bdr = new BoundaryQuad(marker);
 		MEM_CHECK(bdr);
-		Word_t pos = boundaries.count() + 1;
+		unsigned int pos = boundaries.count() + 1;
 		boundaries.set(pos, bdr);
 		bdr->id = pos;
 
@@ -1126,7 +1126,7 @@ void Mesh::ugh()
 			Element *elem = elements[facet->left];
 			const int *face_edge = elem->get_face_edges(facet->left_face_num);
 			for (int iedge = 0; iedge < elem->get_num_face_edges(facet->left_face_num); iedge++) {
-				Word_t vtx[Edge::NUM_VERTICES];
+				unsigned int vtx[Edge::NUM_VERTICES];
 				elem->get_edge_vertices(face_edge[iedge], vtx);
 
 				Edge edge;
@@ -1149,7 +1149,7 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 		// applying BOTH or NONE is also no problem
 		if (reft == H3D_REFT_QUAD_BOTH || reft == H3D_REFT_FACE_NONE) return true;
 
-		Word_t eid;
+		unsigned int eid;
 		int face_num;
 		if (facet->ractive) {
 			eid = facet->left;
@@ -1169,11 +1169,11 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 
 		Element *e = elements[eid];
 		int nv = e->get_num_face_vertices(face_num);
-		Word_t *face_vtx = new Word_t[nv];
+		unsigned int *face_vtx = new unsigned int[nv];
 		e->get_face_vertices(face_num, face_vtx);
 
 		// check if the vertices are there, if so => compatible refinement
-		Word_t emp[2] = { INVALID_IDX, INVALID_IDX };
+		unsigned int emp[2] = { INVALID_IDX, INVALID_IDX };
 		if (reft == H3D_REFT_QUAD_HORZ) {
 			emp[0] = peek_midpoint(face_vtx[0], face_vtx[3]);
 			emp[1] = peek_midpoint(face_vtx[1], face_vtx[2]);
@@ -1192,7 +1192,7 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 	}
 }
 
-bool Mesh::can_refine_element(Word_t eid, int reft) const {
+bool Mesh::can_refine_element(unsigned int eid, int reft) const {
 	_F_
 	bool can_refine = false;
 
@@ -1294,7 +1294,7 @@ bool Mesh::can_refine_hex(Hex *elem, int refinement) const {
 
 	bool can_refine = true;
 	for (int i = 0; i < nf; i++) {
-		Word_t fid = get_facet_id(elem, iface[i]);
+		unsigned int fid = get_facet_id(elem, iface[i]);
 		Facet *facet = facets.get(fid);
 		assert(facet != NULL);
 		can_refine &= is_compatible_quad_refinement(facet, face_reft[i]);
@@ -1304,7 +1304,7 @@ bool Mesh::can_refine_hex(Hex *elem, int refinement) const {
 
 }
 
-bool Mesh::refine_element(Word_t id, int refinement) {
+bool Mesh::refine_element(unsigned int id, int refinement) {
 	_F_
 	bool refined = false;
 	Element *elem = elements.get(id);
@@ -1372,10 +1372,10 @@ bool Mesh::refine_hex_2(Hex *parent, int refinement) {
 	_F_
 	bool refined = true;
 
-	Word_t vtx[Hex::NUM_VERTICES]; // vertices of parent element
+	unsigned int vtx[Hex::NUM_VERTICES]; // vertices of parent element
 	parent->get_vertices(vtx);
 
-	Word_t mp[4] = { 0 }; // four midpoints shared when refining to two elements
+	unsigned int mp[4] = { 0 }; // four midpoints shared when refining to two elements
 	const int *left, *right; // vertex indices for "left" and "right" face
 	switch (refinement) {
 		case H3D_REFT_HEX_X:
@@ -1399,7 +1399,7 @@ bool Mesh::refine_hex_2(Hex *parent, int refinement) {
 		mp[i] = get_midpoint(vtx[left[i]], vtx[right[i]]);
 
 	// create sons (child elements keep the orientation of the parent element)
-	Word_t son[2][Hex::NUM_VERTICES]; // two hex elements
+	unsigned int son[2][Hex::NUM_VERTICES]; // two hex elements
 	for (int i = 0; i < 4; i++) {
 		son[0][left[i]] = vtx[left[i]];
 		son[0][right[i]] = son[1][left[i]] = mp[i];
@@ -1467,7 +1467,7 @@ bool Mesh::refine_hex_4(Hex *parent, int refinement) {
 	_F_
 	bool refined = true;
 
-	Word_t vtx[Hex::NUM_VERTICES]; // vertices of parent element
+	unsigned int vtx[Hex::NUM_VERTICES]; // vertices of parent element
 	parent->get_vertices(vtx);
 
 	const int *left, *right; // vertex indices for "left" and "right" face
@@ -1488,29 +1488,29 @@ bool Mesh::refine_hex_4(Hex *parent, int refinement) {
 			break;
 	}
 
-	Word_t vp[2][4]; // vertex points on two facing faces ;)
+	unsigned int vp[2][4]; // vertex points on two facing faces ;)
 	for (int i = 0; i < 4; i++) {
 		vp[0][i] = vtx[left[i]];
 		vp[1][i] = vtx[right[i]];
 	}
 
-	Word_t emp[2][4]; // four edge midpoints on both facing faces
+	unsigned int emp[2][4]; // four edge midpoints on both facing faces
 	for (int face = 0; face < 2; face++) {
 		for (int i = 0; i < 4; i++)
 			emp[face][i] = get_midpoint(vp[face][i], vp[face][(i + 1) % 4]);
 	}
 
-	Word_t fmp[2]; // one midpoint on two facing faces
+	unsigned int fmp[2]; // one midpoint on two facing faces
 	for (int face = 0; face < 2; face++) {
 		fmp[face] = get_midpoint(emp[face][0], emp[face][2]);
 		set_midpoint(emp[face][1], emp[face][3], fmp[face]);
 	}
 
 	// sons (child elements keep the orientation of the parent element)
-	Word_t son[4][Hex::NUM_VERTICES]; // four hex elements
+	unsigned int son[4][Hex::NUM_VERTICES]; // four hex elements
 	switch (refinement) {
 		case H3D_H3D_REFT_HEX_XY: {
-			Word_t s[4][Hex::NUM_VERTICES] = {
+			unsigned int s[4][Hex::NUM_VERTICES] = {
 				{ vp[0][0], emp[0][0], fmp[0], emp[0][3], vp[1][0], emp[1][0], fmp[1], emp[1][3] },
 				{ emp[0][0], vp[0][1], emp[0][1], fmp[0], emp[1][0], vp[1][1], emp[1][1], fmp[1] },
 				{ fmp[0], emp[0][1], vp[0][2], emp[0][2], fmp[1], emp[1][1], vp[1][2], emp[1][2] },
@@ -1520,7 +1520,7 @@ bool Mesh::refine_hex_4(Hex *parent, int refinement) {
 			} break;
 
 		case H3D_H3D_REFT_HEX_YZ: {
-			Word_t s[4][Hex::NUM_VERTICES] = {
+			unsigned int s[4][Hex::NUM_VERTICES] = {
 				{ vp[0][0], vp[1][0], emp[1][0], emp[0][0], emp[0][3], emp[1][3], fmp[1], fmp[0] },
 				{ emp[0][0], emp[1][0], vp[1][1], vp[0][1], fmp[0], fmp[1], emp[1][1], emp[0][1] },
 				{ fmp[0], fmp[1], emp[1][1], emp[0][1], emp[0][2], emp[1][2], vp[1][2], vp[0][2] },
@@ -1530,7 +1530,7 @@ bool Mesh::refine_hex_4(Hex *parent, int refinement) {
 			} break;
 
 		case H3D_H3D_REFT_HEX_XZ: {
-			Word_t s[4][Hex::NUM_VERTICES] = {
+			unsigned int s[4][Hex::NUM_VERTICES] = {
 				{ vp[0][0], emp[0][0], emp[1][0], vp[1][0], emp[0][3], fmp[0], fmp[1], emp[1][3] },
 				{ emp[0][0], vp[0][1], vp[1][1], emp[1][0], fmp[0], emp[0][1], emp[1][1], fmp[1] },
 				{ fmp[0], emp[0][1], emp[1][1], fmp[1], emp[0][2], vp[0][2], vp[1][2], emp[1][2] },
@@ -1605,28 +1605,28 @@ bool Mesh::refine_hex_8(Hex *parent, int refinement) {
 	_F_
 	bool refined = true;
 
-	Word_t vtx[Hex::NUM_VERTICES]; // vertices of parent element
+	unsigned int vtx[Hex::NUM_VERTICES]; // vertices of parent element
 	parent->get_vertices(vtx);
 
-	Word_t emp[12]; // 12 midpoints on edges
+	unsigned int emp[12]; // 12 midpoints on edges
 	for (int edge = 0; edge < Hex::NUM_EDGES; edge++) {
 		const int *edge_vtx_idx = RefHex::get_edge_vertices(edge);
 		emp[edge] = get_midpoint(vtx[edge_vtx_idx[0]], vtx[edge_vtx_idx[1]]);
 	}
 
-	Word_t fmp[6]; // 6 midpoints on faces
+	unsigned int fmp[6]; // 6 midpoints on faces
 	for (int face = 0; face < Hex::NUM_FACES; face++) {
 		const int *face_edge_idx = RefHex::get_face_edges(face);
 		fmp[face] = get_midpoint(emp[face_edge_idx[0]], emp[face_edge_idx[2]]);
 		set_midpoint(emp[face_edge_idx[1]], emp[face_edge_idx[3]], fmp[face]);
 	}
 
-	Word_t ctr = get_midpoint(fmp[0], fmp[1]); // midpoint in the center
+	unsigned int ctr = get_midpoint(fmp[0], fmp[1]); // midpoint in the center
 	set_midpoint(fmp[2], fmp[3], ctr);
 	set_midpoint(fmp[4], fmp[5], ctr);
 
 	// sons (child elements keep the orientation of the parent element)
-	Word_t son[8][Hex::NUM_VERTICES] = { // eight hex elements
+	unsigned int son[8][Hex::NUM_VERTICES] = { // eight hex elements
 	    { vtx[0], emp[0], fmp[4], emp[3], emp[4], fmp[2], ctr, fmp[0] },
 	    { emp[0], vtx[1], emp[1], fmp[4], fmp[2], emp[5], fmp[1], ctr },
 	    { fmp[4], emp[1], vtx[2], emp[2], ctr, fmp[1], emp[6], fmp[3] },
@@ -1639,7 +1639,7 @@ bool Mesh::refine_hex_8(Hex *parent, int refinement) {
 
 	// deactivate edges on parent element
 	for (int i = 0; i < Hex::NUM_EDGES; i++) {
-		Word_t edge_vtx[Edge::NUM_VERTICES];
+		unsigned int edge_vtx[Edge::NUM_VERTICES];
 		parent->get_edge_vertices(i, edge_vtx);
 	}
 
@@ -1682,11 +1682,11 @@ bool Mesh::refine_hex_8(Hex *parent, int refinement) {
 	return refined;
 }
 
-bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refinement, Word_t eid) {
+bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refinement, unsigned int eid) {
 	_F_
 	assert(face_refinement == H3D_REFT_FACE_NONE);
 
-	Word_t fid = get_facet_id(parent_elem, iface);
+	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
 	assert(facet->mode == MODE_QUAD);
 
@@ -1698,11 +1698,11 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 	return true;
 }
 
-bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refinement, Word_t eid0, Word_t eid1) {
+bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refinement, unsigned int eid0, unsigned int eid1) {
 	_F_
 	assert(face_refinement == H3D_REFT_QUAD_HORZ || face_refinement == H3D_REFT_QUAD_VERT);
 
-	Word_t fid = get_facet_id(parent_elem, iface);
+	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
 	assert(facet->mode == MODE_QUAD);
 	if (facet->type == Facet::INNER && facet->left == parent_elem->id) {
@@ -1735,14 +1735,14 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			upper_facet->ref_mask = H3D_REFT_QUAD_VERT;
 			upper_facet->sons[2] = facet->sons[3];
 			upper_facet->sons[3] = facet->sons[2];
-			Word_t upper_id = get_facet_id(elements[eid1], facet->left_face_num);
+			unsigned int upper_id = get_facet_id(elements[eid1], facet->left_face_num);
 
 			lower_facet->parent = fid;
 			lower_facet->ractive = false;
 			lower_facet->ref_mask = H3D_REFT_QUAD_VERT;
 			lower_facet->sons[2] = facet->sons[0];
 			lower_facet->sons[3] = facet->sons[1];
-			Word_t lower_id = get_facet_id(elements[eid0], facet->left_face_num);
+			unsigned int lower_id = get_facet_id(elements[eid0], facet->left_face_num);
 
 			facets.get(facet->sons[0])->parent = facets.get(facet->sons[1])->parent = lower_id;
 			facets.get(facet->sons[3])->parent = facets.get(facet->sons[2])->parent = upper_id;
@@ -1762,14 +1762,14 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			upper_facet->ref_mask = H3D_REFT_QUAD_HORZ;
 			upper_facet->sons[1] = facet->sons[2];
 			upper_facet->sons[0] = facet->sons[1];
-			Word_t upper_id = get_facet_id(elements[eid1], facet->left_face_num);
+			unsigned int upper_id = get_facet_id(elements[eid1], facet->left_face_num);
 
 			lower_facet->parent = fid;
 			lower_facet->ractive = false;
 			lower_facet->ref_mask = H3D_REFT_QUAD_HORZ;
 			lower_facet->sons[1] = facet->sons[3];
 			lower_facet->sons[0] = facet->sons[0];
-			Word_t lower_id = get_facet_id(elements[eid0], facet->left_face_num);
+			unsigned int lower_id = get_facet_id(elements[eid0], facet->left_face_num);
 
 			facets.get(facet->sons[1])->parent = facets.get(facet->sons[2])->parent = upper_id;
 			facets.get(facet->sons[0])->parent = facets.get(facet->sons[3])->parent = lower_id;
@@ -1813,14 +1813,14 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			upper_facet->ref_mask = H3D_REFT_QUAD_VERT;
 			upper_facet->sons[2] = facet->sons[3];
 			upper_facet->sons[3] = facet->sons[2];
-			Word_t upper_id = get_facet_id(elements[eid1], facet->right_face_num);
+			unsigned int upper_id = get_facet_id(elements[eid1], facet->right_face_num);
 
 			lower_facet->parent = fid;
 			lower_facet->lactive = false;
 			lower_facet->ref_mask = H3D_REFT_QUAD_VERT;
 			lower_facet->sons[2] = facet->sons[0];
 			lower_facet->sons[3] = facet->sons[1];
-			Word_t lower_id = get_facet_id(elements[eid0], facet->right_face_num);
+			unsigned int lower_id = get_facet_id(elements[eid0], facet->right_face_num);
 
 			facets.get(facet->sons[0])->parent = facets.get(facet->sons[1])->parent = lower_id;
 			facets.get(facet->sons[3])->parent = facets.get(facet->sons[2])->parent = upper_id;
@@ -1840,14 +1840,14 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			upper_facet->ref_mask = H3D_REFT_QUAD_HORZ;
 			upper_facet->sons[1] = facet->sons[2];
 			upper_facet->sons[0] = facet->sons[1];
-			Word_t upper_id = get_facet_id(elements[eid1], facet->right_face_num);
+			unsigned int upper_id = get_facet_id(elements[eid1], facet->right_face_num);
 
 			lower_facet->parent = fid;
 			lower_facet->lactive = false;
 			lower_facet->ref_mask = H3D_REFT_QUAD_HORZ;
 			lower_facet->sons[1] = facet->sons[3];
 			lower_facet->sons[0] = facet->sons[0];
-			Word_t lower_id = get_facet_id(elements[eid0], facet->right_face_num);
+			unsigned int lower_id = get_facet_id(elements[eid0], facet->right_face_num);
 
 			facets.get(facet->sons[1])->parent = facets.get(facet->sons[2])->parent = upper_id;
 			facets.get(facet->sons[0])->parent = facets.get(facet->sons[3])->parent = lower_id;
@@ -1890,11 +1890,11 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 	return true;
 }
 
-bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refinement, Word_t eid0, Word_t eid1, Word_t eid2, Word_t eid3) {
+bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refinement, unsigned int eid0, unsigned int eid1, unsigned int eid2, unsigned int eid3) {
 	_F_
 	assert(face_refinement == H3D_REFT_QUAD_BOTH);
 
-	Word_t fid = get_facet_id(parent_elem, iface);
+	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
 	assert(facet->mode == MODE_QUAD);
 
@@ -1907,7 +1907,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			facet->lactive = false;
 			facet->ref_mask = H3D_REFT_QUAD_BOTH;
 
-			Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+			unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 			for (int i = 0; i < 4; i++) {
 				Facet *child_facet = add_quad_facet(Facet::INNER, ei[i], facet->left_face_num, INVALID_IDX, -1);
 				child_facet->parent = fid;
@@ -1917,7 +1917,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		else if (facet->ref_mask == H3D_REFT_QUAD_HORZ) { // FIXME: ignoring the orientation
 			facet->lactive = false;
 
-			Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+			unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 			Facet *child_facets[4];
 			for (int i = 0; i < 4; i++)
 				child_facets[i] = add_quad_facet(Facet::INNER, ei[i], facet->left_face_num, INVALID_IDX, -1);
@@ -1937,7 +1937,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		else if (facet->ref_mask == H3D_REFT_QUAD_VERT) { // FIXME: ignoring the orientation
 			facet->lactive = false;
 
-			Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+			unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 			Facet *child_facets[4];
 			for (int i = 0; i < 4; i++)
 				child_facets[i] = add_quad_facet(Facet::INNER, ei[i], facet->left_face_num, INVALID_IDX, -1);
@@ -1963,7 +1963,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			facet->ractive = false;
 			facet->ref_mask = H3D_REFT_QUAD_BOTH;
 
-			Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+			unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 			for (int i = 0; i < 4; i++) {
 				Facet *child_facet = add_quad_facet(Facet::INNER, INVALID_IDX, -1, ei[i], facet->right_face_num);
 				child_facet->parent = fid;
@@ -1974,7 +1974,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		else if (facet->ref_mask == H3D_REFT_QUAD_HORZ) { // FIXME: ignoring the orientation
 			facet->ractive = false;
 
-			Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+			unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 			Facet *child_facets[4];
 			for (int i = 0; i < 4; i++)
 				child_facets[i] = add_quad_facet(Facet::INNER, INVALID_IDX, -1, ei[i], facet->right_face_num);
@@ -1994,7 +1994,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		else if (facet->ref_mask == H3D_REFT_QUAD_VERT) { // FIXME: ignoring the orientation
 			facet->ractive = false;
 
-			Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+			unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 			Facet *child_facets[4];
 			for (int i = 0; i < 4; i++)
 				child_facets[i] = add_quad_facet(Facet::INNER, INVALID_IDX, -1, ei[i], facet->right_face_num);
@@ -2018,7 +2018,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		facet->ractive = false;
 		facet->ref_mask = H3D_REFT_QUAD_BOTH;
 
-		Word_t ei[4] = { eid0, eid1, eid2, eid3 };
+		unsigned int ei[4] = { eid0, eid1, eid2, eid3 };
 		for (int i = 0; i < 4; i++) {
 			Facet *child_facet = add_quad_facet(Facet::OUTER, ei[i], facet->left_face_num, facet->right, facet->right_face_num);
 			child_facet->parent = fid;
@@ -2033,9 +2033,9 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 	return true;
 }
 
-Facet *Mesh::add_quad_facet(Facet::Type type, Word_t left_elem, int left_iface, Word_t right_elem, int right_iface) {
+Facet *Mesh::add_quad_facet(Facet::Type type, unsigned int left_elem, int left_iface, unsigned int right_elem, int right_iface) {
 	_F_
-	Word_t elem_id;
+	unsigned int elem_id;
 	int iface;
 	if (left_elem != INVALID_IDX) {
 		elem_id = left_elem;
@@ -2048,7 +2048,7 @@ Facet *Mesh::add_quad_facet(Facet::Type type, Word_t left_elem, int left_iface, 
 	else
 		assert(false);
 
-	Word_t fidx = get_facet_id(elements[elem_id], iface);
+	unsigned int fidx = get_facet_id(elements[elem_id], iface);
 	Facet *facet = NULL;
 	if (fidx != INVALID_IDX) {
 		// update info on existing facet
@@ -2065,7 +2065,7 @@ Facet *Mesh::add_quad_facet(Facet::Type type, Word_t left_elem, int left_iface, 
 		facet->set_right_info(right_elem, right_iface);
 	}
 
-	Word_t facet_idxs[Quad::NUM_VERTICES];
+	unsigned int facet_idxs[Quad::NUM_VERTICES];
 	Element *e;
 	if (left_elem != INVALID_IDX) {
 		e = elements[left_elem];
@@ -2080,7 +2080,7 @@ Facet *Mesh::add_quad_facet(Facet::Type type, Word_t left_elem, int left_iface, 
 	// update bnd mark for boundary edges
 	if (facet->type == Facet::OUTER) {
 		for (int i = 0; i < Quad::NUM_EDGES; i++) {
-			Word_t vtx[Edge::NUM_VERTICES] = { facet_idxs[i % Quad::NUM_EDGES], facet_idxs[(i + 1) % Quad::NUM_EDGES] };
+			unsigned int vtx[Edge::NUM_VERTICES] = { facet_idxs[i % Quad::NUM_EDGES], facet_idxs[(i + 1) % Quad::NUM_EDGES] };
 
 			Edge edge;
 			edges.lookup(vtx + 0, Edge::NUM_VERTICES, edge);
@@ -2105,7 +2105,7 @@ void Mesh::refine_by_criterion(int(*criterion)(Element* e), int depth) {
 	// TODO: implement me
 }
 
-void Mesh::unrefine_element(Word_t id) {
+void Mesh::unrefine_element(unsigned int id) {
 	// TODO: implement me
 }
 
@@ -2113,7 +2113,7 @@ void Mesh::unrefine_all_elements() {
 	// TODO: implement me
 }
 
-Word_t Mesh::create_midpoint(Word_t a, Word_t b) {
+unsigned int Mesh::create_midpoint(unsigned int a, unsigned int b) {
 	_F_
 	// get vertices
 	Vertex *v1 = vertices.get(a);
@@ -2122,34 +2122,34 @@ Word_t Mesh::create_midpoint(Word_t a, Word_t b) {
 	return add_vertex((v1->x + v2->x) / 2.0, (v1->y + v2->y) / 2.0, (v1->z + v2->z) / 2.0);
 }
 
-Word_t Mesh::get_midpoint(Word_t a, Word_t b) {
+unsigned int Mesh::get_midpoint(unsigned int a, unsigned int b) {
 	_F_
-	Word_t idx = peek_midpoint(a, b);
+	unsigned int idx = peek_midpoint(a, b);
 	if (idx == INVALID_IDX) {
 		idx = create_midpoint(a, b);
-		Word_t pt[] = { a, b };
+		unsigned int pt[] = { a, b };
 		midpoints.set(pt, Edge::NUM_VERTICES, idx);
 	}
 	return idx;
 }
 
-Word_t Mesh::peek_midpoint(Word_t a, Word_t b) const {
+unsigned int Mesh::peek_midpoint(unsigned int a, unsigned int b) const {
 	_F_
-	Word_t pt[] = { a, b };
-	Word_t idx = INVALID_IDX;
+	unsigned int pt[] = { a, b };
+	unsigned int idx = INVALID_IDX;
 	midpoints.lookup(pt, Edge::NUM_VERTICES, idx);
 	return idx;
 }
 
-void Mesh::set_midpoint(Word_t a, Word_t b, Word_t idx) {
+void Mesh::set_midpoint(unsigned int a, unsigned int b, unsigned int idx) {
 	_F_
-	Word_t pt[] = { a, b };
+	unsigned int pt[] = { a, b };
 	midpoints.set(pt, Edge::NUM_VERTICES, idx);
 }
 
-Word_t Mesh::get_edge_id(Word_t a, Word_t b) const {
+unsigned int Mesh::get_edge_id(unsigned int a, unsigned int b) const {
 	_F_
-	Word_t pt[] = { a, b };
+	unsigned int pt[] = { a, b };
 	return edges.get_idx(pt + 0, Edge::NUM_VERTICES);
 }
 
@@ -2159,7 +2159,7 @@ void Mesh::ref_edges(Element *e) {
 	assert(e != NULL);
 
 	for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-		Word_t vtx[Edge::NUM_VERTICES];
+		unsigned int vtx[Edge::NUM_VERTICES];
 		e->get_edge_vertices(iedge, vtx);
 
 		Edge edge;
@@ -2179,7 +2179,7 @@ void Mesh::unref_edges(Element *e) {
 	assert(e != NULL);
 
 	for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-		Word_t vtx[Edge::NUM_VERTICES];
+		unsigned int vtx[Edge::NUM_VERTICES];
 		e->get_edge_vertices(iedge, vtx);
 
 		Edge edge;
@@ -2191,7 +2191,7 @@ void Mesh::unref_edges(Element *e) {
 	}
 }
 
-Word_t Mesh::get_facing_facet(Word_t fid, Word_t elem_id) {
+unsigned int Mesh::get_facing_facet(unsigned int fid, unsigned int elem_id) {
 	_F_
 	Facet *facet = facets[fid];
 
@@ -2217,17 +2217,17 @@ Word_t Mesh::get_facing_facet(Word_t fid, Word_t elem_id) {
 		return INVALID_IDX;
 }
 
-Word_t Mesh::get_facet_id(int nv, ...) const {
+unsigned int Mesh::get_facet_id(int nv, ...) const {
 	_F_
-	Word_t *k = new Word_t[nv];
+	unsigned int *k = new unsigned int[nv];
 
 	va_list ap;
 	va_start(ap, nv);
 	for (int i = 0; i < nv; i++)
-		k[i] = va_arg(ap, Word_t);
+		k[i] = va_arg(ap, unsigned int);
 	va_end(ap);
 
-  Word_t k_returned = facets.get_idx(k + 0, nv);
+  unsigned int k_returned = facets.get_idx(k + 0, nv);
   delete [] k;
   return k_returned;
 }
@@ -2245,7 +2245,7 @@ void Mesh::regularize() {
 	FOR_ALL_ACTIVE_ELEMENTS(eid, this) {
 		Element *elem = elements[eid];
 		for (int iface = 0; iface < elem->get_num_faces(); iface++) {
-			Word_t fid = get_facet_id(elem, iface);
+			unsigned int fid = get_facet_id(elem, iface);
 			Facet *facet = facets[fid];
 			assert(facet != NULL);
 			if (facet->lactive && !facet->ractive) {
@@ -2300,7 +2300,7 @@ void Mesh::refine_towards_boundary(int marker, int depth) {
 
 		int split = H3D_SPLIT_NONE;
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			Word_t fid = get_facet_id(e, iface);
+			unsigned int fid = get_facet_id(e, iface);
 			Facet *facet = facets[fid];
 
 			if (facet->type == Facet::OUTER) {

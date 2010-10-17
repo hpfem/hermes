@@ -102,7 +102,7 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 	for (int i = 0; i < int_ns[split]; i++) {
 		Trf *tr = get_trf(int_trf[split][i]);
 
-		Word_t son_idx = base_elem->get_son(int_son[son + 1][i]);
+		unsigned int son_idx = base_elem->get_son(int_son[son + 1][i]);
 		sln->set_active_element(mesh->elements[son_idx]);
 		sln->precalculate(np, pt, FN_DEFAULT);
 		scalar *rval = sln->get_fn_values();
@@ -238,7 +238,7 @@ void H1Projection::calc_projection(int split, int son, const Ord3 &order)
 
 	// rhs
 	for (int e = 0; e < int_ns[split]; e++) {
-		Word_t son_idx = base_elem->get_son(int_son[son][e]);
+		unsigned int son_idx = base_elem->get_son(int_son[son][e]);
 		sln->set_active_element(mesh->elements[son_idx]);
 
 		Trf *tr = get_trf(int_trf[split][e]);

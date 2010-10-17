@@ -64,7 +64,7 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 	for (int i = 0; i < int_ns[split]; i++) {
 		Trf *tr = get_trf(int_trf[split][i]);
 
-		Word_t son_idx = base_elem->get_son(int_son[son + 1][i]);
+		unsigned int son_idx = base_elem->get_son(int_son[son + 1][i]);
 		sln->set_active_element(mesh->elements[son_idx]);
 		sln->precalculate(np, pt, FN_DEFAULT);
 		scalar *rval = sln->get_fn_values();
@@ -145,7 +145,7 @@ void H1ProjectionIpol::calc_vertex_proj(int split, int son)
 	// FIXME: hex specific
 	const Point3D *vtx_pt = RefHex::get_vertices();
 	for (int ivtx = 0; ivtx < nv; ivtx++) {
-		Word_t son_idx = base_elem->get_son(vtx_son[son][ivtx]);
+		unsigned int son_idx = base_elem->get_son(vtx_son[son][ivtx]);
 		sln->set_active_element(mesh->elements[son_idx]);
 		QuadPt3D pt(vtx_pt[ivtx].x, vtx_pt[ivtx].y, vtx_pt[ivtx].z, 1.0);
 		sln->precalculate(1, &pt, FN_VAL);
@@ -199,7 +199,7 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 
 	for (int e = 0; e < edge_ns[split][iedge]; e++) {
 		edge_fn_idx = ss->get_edge_indices(iedge, 0, edge_order);	// indices of edge functions
 
-		Word_t son_idx = base_elem->get_son(edge_son[son][iedge][e]);
+		unsigned int son_idx = base_elem->get_son(edge_son[son][iedge][e]);
 		sln->set_active_element(mesh->elements[son_idx]);
 
 		Trf *tr = get_trf(edge_trf[split][iedge][e]);
@@ -386,7 +386,7 @@ void H1ProjectionIpol::calc_face_proj(int iface, int split, int son, const Ord3 
 	}
 
 	for (int e = 0; e < face_ns[split][iface]; e++) {
-		Word_t son_idx = base_elem->get_son(face_son[son][iface][e]);
+		unsigned int son_idx = base_elem->get_son(face_son[son][iface][e]);
 		sln->set_active_element(mesh->elements[son_idx]);
 
 		Trf *tr = get_trf(face_trf[split][iface][e]);
@@ -574,7 +574,7 @@ void H1ProjectionIpol::calc_bubble_proj(int split, int son, const Ord3 &order) {
 	}
 
 	for (int e = 0; e < int_ns[split]; e++) {
-		Word_t son_idx = base_elem->get_son(int_son[son][e]);
+		unsigned int son_idx = base_elem->get_son(int_son[son][e]);
 		sln->set_active_element(mesh->elements[son_idx]);
 
 		Trf *tr = get_trf(int_trf[split][e]);

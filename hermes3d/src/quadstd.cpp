@@ -4173,7 +4173,7 @@ QuadStdTetra::QuadStdTetra() {
 
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER_TETRA; i++) {
 		Ord3 o(i);
-		Word_t oi = o.get_idx();
+		unsigned int oi = o.get_idx();
 		tables[oi] = std_tables_3d_tet[i];
 		np[oi] = std_np_3d_tet[i];
 	}
@@ -4189,7 +4189,7 @@ QuadStdTetra::QuadStdTetra() {
 
 		for (int order = 0; order <= H3D_MAX_QUAD_ORDER; order++) {
 			Ord3 o(order);
-			Word_t oi = o.get_idx();
+			unsigned int oi = o.get_idx();
 			int num = std_np_1d[oi];
 			np_edge[oi] = num;
 			edge_tables[iedge][oi] = new QuadPt3D[num];
@@ -4211,7 +4211,7 @@ QuadStdTetra::QuadStdTetra() {
 	face_tables = new Array<QuadPt3D *>[Tetra::NUM_FACES];
 	for (int order = 0; order <= quad_std_tri.get_max_order(); order++) {
 		Ord3 o(order);
-		Word_t oi = o.get_idx();
+		unsigned int oi = o.get_idx();
 		int num = quad_std_tri.get_num_points(order);
 		np_face[oi] = num;
 
@@ -4272,13 +4272,13 @@ QuadStdTetra::~QuadStdTetra() {
 #ifdef WITH_TETRA
 	// face
 	for (int iface = 0; iface < Tetra::NUM_FACES; iface++) {
-		for (Word_t idx = face_tables[iface].first(); idx != INVALID_IDX; idx = face_tables[iface].next(idx))
+		for (unsigned int idx = face_tables[iface].first(); idx != INVALID_IDX; idx = face_tables[iface].next(idx))
 			delete [] face_tables[iface][idx];
 	}
 	delete [] face_tables;
 	// edge
 	for (int iedge = 0; iedge < Tetra::NUM_EDGES; iedge++) {
-		for (Word_t idx = edge_tables[iedge].first(); idx != INVALID_IDX; idx = edge_tables[iedge].next(idx))
+		for (unsigned int idx = edge_tables[iedge].first(); idx != INVALID_IDX; idx = edge_tables[iedge].next(idx))
 			delete [] edge_tables[iedge][idx];
 	}
 	delete [] edge_tables;
@@ -4358,17 +4358,17 @@ QuadStdHex::~QuadStdHex() {
 	_F_
 #ifdef WITH_HEX
 	// element
-	for (Word_t idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
+	for (unsigned int idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
 		delete [] tables[idx];
 	// face
 	for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-		for (Word_t idx = face_tables[iface].first(); idx != INVALID_IDX; idx = face_tables[iface].next(idx))
+		for (unsigned int idx = face_tables[iface].first(); idx != INVALID_IDX; idx = face_tables[iface].next(idx))
 			delete [] face_tables[iface][idx];
 	}
 	delete [] face_tables;
 	// edge
 	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-		for (Word_t idx = edge_tables[iedge].first(); idx != INVALID_IDX; idx = edge_tables[iedge].next(idx))
+		for (unsigned int idx = edge_tables[iedge].first(); idx != INVALID_IDX; idx = edge_tables[iedge].next(idx))
 			delete [] edge_tables[iedge][idx];
 	}
 	delete [] edge_tables;

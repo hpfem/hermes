@@ -35,28 +35,28 @@ class MeshLoader;
 /// @param idx  Vertex hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_VERTICES(idx, mesh) \
-	for (Word_t (idx) = (mesh)->vertices.first(); (idx) != INVALID_IDX; (idx) = (mesh)->vertices.next((idx)))
+	for (unsigned int (idx) = (mesh)->vertices.first(); (idx) != INVALID_IDX; (idx) = (mesh)->vertices.next((idx)))
 
 /// Iterates over all mesh edge indices.
 ///
 /// @param idx  Edge hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_EDGES(idx, mesh) \
-	for (Word_t (idx) = (mesh)->edges.first(); (idx) != INVALID_IDX; (idx) = (mesh)->edges.next((idx)))
+	for (unsigned int (idx) = (mesh)->edges.first(); (idx) != INVALID_IDX; (idx) = (mesh)->edges.next((idx)))
 
 /// Iterates over all mesh face indices.
 ///
 /// @param idx  Face hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_FACETS(idx, mesh) \
-	for (Word_t (idx) = (mesh)->facets.first(); (idx) != INVALID_IDX; (idx) = (mesh)->facets.next((idx)))
+	for (unsigned int (idx) = (mesh)->facets.first(); (idx) != INVALID_IDX; (idx) = (mesh)->facets.next((idx)))
 
 /// Iterates over all mesh element indices.
 ///
 /// @param idx  Element hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_ELEMENTS(idx, mesh) \
-	for (Word_t (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
+	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
 		if ((mesh)->elements[idx]->used)
 
 /// Iterates over all active mesh element indices.
@@ -64,7 +64,7 @@ class MeshLoader;
 /// @param idx  Element hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) \
-	for (Word_t (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
+	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
 		if ((mesh)->elements[idx]->used) \
 			if ((mesh)->elements[idx]->active)
 
@@ -73,7 +73,7 @@ class MeshLoader;
 /// @param idx  Element hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_INACTIVE_ELEMENTS(idx, mesh) \
-	for (Word_t (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
+	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
 		if ((mesh)->elements[idx]->used) \
 			if (!(mesh)->elements[idx]->active)
 
@@ -81,7 +81,7 @@ class MeshLoader;
 /// @param idx  Element hash table index.
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_BASE_ELEMENTS(idx, mesh) \
-	for (Word_t (idx) = (mesh)->elements.first(); (idx) <= mesh->get_num_base_elements(); (idx) = (mesh)->elements.next((idx))) \
+	for (unsigned int (idx) = (mesh)->elements.first(); (idx) <= mesh->get_num_base_elements(); (idx) = (mesh)->elements.next((idx))) \
 		if ((mesh)->elements[idx]->used)
 
 
@@ -192,13 +192,13 @@ public:
 	virtual Facet *copy();
 	virtual Facet *copy_base();
 
-	void set_left_info(Word_t elem_id, int face_num = -1) {
+	void set_left_info(unsigned int elem_id, int face_num = -1) {
 		this->left = elem_id;
 		this->left_face_num = face_num;
 		this->lactive = elem_id != INVALID_IDX;
 	}
 
-	void set_right_info(Word_t elem_id, int face_num = -1) {
+	void set_right_info(unsigned int elem_id, int face_num = -1) {
 		this->right = elem_id;
 		this->right_face_num = face_num;
 		this->ractive = elem_id != INVALID_IDX;
@@ -207,7 +207,7 @@ public:
 	/// @return TRUE if we have a constraint on the face
 	/// @param idx[in] - element ID
 	/// @param iface[in] - local face number on the element 'idx'
-	bool ced(Word_t idx, int iface);
+	bool ced(unsigned int idx, int iface);
 
 	// for debugging
 	virtual void dump();
@@ -215,8 +215,8 @@ public:
 public:
 	Type type;					/// type of the facet
 	EMode2D mode;				/// mode of the facet (TRI, QUAD)
-	Word_t left;				/// ID of an element on the "left"
-	Word_t right;				/// ID of an element or a boundary on the "right" (depending on the type of the facet)
+	unsigned int left;				/// ID of an element on the "left"
+	unsigned int right;				/// ID of an element or a boundary on the "right" (depending on the type of the facet)
 
 	signed left_face_num:4;		/// local facet number with respect to left element facet numbering (-1 = not set).
 	signed right_face_num:4;	/// local facet number with respect to right element facet numbering (-1 = not set). Only for INNER facets.
@@ -224,8 +224,8 @@ public:
 	unsigned ractive:1;			/// information for the right is active; 1 - active; 0 - inactive
 	unsigned ref_mask:2;		/// how is the facet divided (0 - not divived, 1 - horz, 2 - vert, 3 - both)
 
-	Word_t parent;				/// ID of the parent facet
-	Word_t sons[MAX_SONS];		/// ID of child facets (interpretation depend on ref_mask)
+	unsigned int parent;				/// ID of the parent facet
+	unsigned int sons[MAX_SONS];		/// ID of child facets (interpretation depend on ref_mask)
 };
 
 
@@ -244,11 +244,11 @@ public:
 	virtual int get_num_faces() const = 0;
 	virtual int get_num_surf() const = 0;
 
-	virtual Word_t get_vertex(int vertex_num) const = 0;
-	virtual void get_vertices(Word_t *vtcs) const = 0;
+	virtual unsigned int get_vertex(int vertex_num) const = 0;
+	virtual void get_vertices(unsigned int *vtcs) const = 0;
 
 	// these 2 should not be overloaded
-	virtual int get_edge_vertices(int edge_num, Word_t *vtcs) const = 0;
+	virtual int get_edge_vertices(int edge_num, unsigned int *vtcs) const = 0;
 	virtual const int *get_edge_vertices(int edge_num) const = 0;
 
 	virtual int get_edge_orientation(int edge_num) const = 0;
@@ -258,7 +258,7 @@ public:
 	virtual int get_num_face_edges(int face_num) const = 0;
 
 	// these 2 should not be overloaded
-	virtual int get_face_vertices(int face_num, Word_t *vtcs) const = 0;
+	virtual int get_face_vertices(int face_num, unsigned int *vtcs) const = 0;
 	virtual const int *get_face_vertices(int face_num) const = 0;
 
 	virtual const int *get_face_edges(int face_num) const = 0;
@@ -275,11 +275,11 @@ public:
 	virtual void unref_all_nodes() = 0;
 
 	//
-	virtual Word_t get_son(int son_idx) { return INVALID_IDX; }
+	virtual unsigned int get_son(int son_idx) { return INVALID_IDX; }
 	virtual int get_num_sons() { return -1; }
 
 public:
-	Word_t id;							// id of an element
+	unsigned int id;							// id of an element
 	int marker;
 
 	unsigned active:1;					// 0 = not active (refined, has sons); 1 = active (no sons)
@@ -307,8 +307,8 @@ public:
 	static const int NUM_SONS = 8;
 
 	Hex();
-	Hex(Word_t v[]);
-	Hex(Word_t v1, Word_t v2, Word_t v3, Word_t v4, Word_t v5, Word_t v6, Word_t v7, Word_t v8);
+	Hex(unsigned int v[]);
+	Hex(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4, unsigned int v5, unsigned int v6, unsigned int v7, unsigned int v8);
 	Hex(const Hex &o);
 	virtual ~Hex();
 
@@ -319,11 +319,11 @@ public:
 	virtual int get_num_faces() const { return NUM_FACES; }
 	virtual int get_num_surf() const { return NUM_FACES; }
 
-	virtual Word_t get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
-	virtual void get_vertices(Word_t *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
+	virtual unsigned int get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
+	virtual void get_vertices(unsigned int *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
 
 	// FIXME
-	virtual int get_edge_vertices(int edge_num, Word_t *vtcs) const;
+	virtual int get_edge_vertices(int edge_num, unsigned int *vtcs) const;
 	virtual const int *get_edge_vertices(int edge_num) const;
 
 	virtual int get_edge_orientation(int edge_num) const;
@@ -333,7 +333,7 @@ public:
 	virtual int get_num_face_edges(int face_num) const { return Quad::NUM_EDGES; }
 
 	// FIXME
-	virtual int get_face_vertices(int face_num, Word_t *vtcs) const;
+	virtual int get_face_vertices(int face_num, unsigned int *vtcs) const;
 	virtual const int *get_face_vertices(int face_num) const;
 
 	virtual const int *get_face_edges(int face_num) const;
@@ -346,15 +346,15 @@ public:
 	virtual void unref_all_nodes();
 
 	// adaptivity
-	virtual Word_t get_son(int son_idx) { assert(son_idx >= 0 && son_idx < NUM_SONS); return sons[son_idx]; }
+	virtual unsigned int get_son(int son_idx) { assert(son_idx >= 0 && son_idx < NUM_SONS); return sons[son_idx]; }
 	virtual int get_num_sons() { return NUM_SONS; }
 
 	// for debugging
 	virtual void dump();
 
 protected:
-	Word_t vtcs[NUM_VERTICES];					// array of vertex indices that build up the hexahedron
-	Word_t sons[NUM_SONS];						// indices of son elements
+	unsigned int vtcs[NUM_VERTICES];					// array of vertex indices that build up the hexahedron
+	unsigned int sons[NUM_SONS];						// indices of son elements
 
 	friend class Mesh;
 };
@@ -370,8 +370,8 @@ public:
 	static const int NUM_EDGES = 6;
 
 	Tetra();
-	Tetra(Word_t v[]);
-	Tetra(Word_t v1, Word_t v2, Word_t v3, Word_t v4);
+	Tetra(unsigned int v[]);
+	Tetra(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4);
 	Tetra(const Tetra &o);
 	virtual ~Tetra();
 
@@ -382,11 +382,11 @@ public:
 	virtual int get_num_faces() const { return NUM_FACES; }
 	virtual int get_num_surf() const { return NUM_FACES; }
 
-	virtual Word_t get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
-	virtual void get_vertices(Word_t *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
+	virtual unsigned int get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
+	virtual void get_vertices(unsigned int *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
 
 	// FIXME
-	virtual int get_edge_vertices(int edge_num, Word_t *vtcs) const;
+	virtual int get_edge_vertices(int edge_num, unsigned int *vtcs) const;
 	virtual const int *get_edge_vertices(int edge_num) const;
 
 	virtual int get_edge_orientation(int edge_num) const;
@@ -395,7 +395,7 @@ public:
 	virtual int get_num_face_vertices(int face_num) const  { return Tri::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Tri::NUM_EDGES; }
 	// FIXME
-	virtual int get_face_vertices(int face_num, Word_t *vtcs) const;
+	virtual int get_face_vertices(int face_num, unsigned int *vtcs) const;
 	virtual const int *get_face_vertices(int face_num) const;
 
 	virtual const int *get_face_edges(int face_num) const;
@@ -411,7 +411,7 @@ public:
 	virtual void dump();
 
 protected:
-	Word_t vtcs[NUM_VERTICES];					// array of vertex indices that build up the tetrahedron
+	unsigned int vtcs[NUM_VERTICES];					// array of vertex indices that build up the tetrahedron
 };
 
 
@@ -427,8 +427,8 @@ public:
 	// adaptivity
 
 	Prism();
-	Prism(Word_t v[]);
-	Prism(Word_t v1, Word_t v2, Word_t v3, Word_t v4, Word_t v5, Word_t v6);
+	Prism(unsigned int v[]);
+	Prism(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4, unsigned int v5, unsigned int v6);
 	Prism(const Prism &o);
 	virtual ~Prism();
 
@@ -439,11 +439,11 @@ public:
 	virtual int get_num_faces() const { return NUM_FACES; }
 	virtual int get_num_surf() const { return NUM_FACES; }
 
-	virtual Word_t get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
-	virtual void get_vertices(Word_t *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
+	virtual unsigned int get_vertex(int vertex_num) const { return vtcs[vertex_num]; }
+	virtual void get_vertices(unsigned int *vtcs) const { memcpy(vtcs, this->vtcs, sizeof(this->vtcs)); }
 
 	// FIXME
-	virtual int get_edge_vertices(int edge_num, Word_t *vtcs) const;
+	virtual int get_edge_vertices(int edge_num, unsigned int *vtcs) const;
 	virtual const int *get_edge_vertices(int edge_num) const;
 
 	virtual int get_edge_orientation(int edge_num) const;
@@ -452,7 +452,7 @@ public:
 	virtual int get_num_face_vertices(int face_num) const;
 	virtual int get_num_face_edges(int face_num) const;
 	// FIXME
-	virtual int get_face_vertices(int face_num, Word_t *vtcs) const;
+	virtual int get_face_vertices(int face_num, unsigned int *vtcs) const;
 	virtual const int *get_face_vertices(int face_num) const;
 
 	virtual const int *get_face_edges(int face_num) const;
@@ -468,7 +468,7 @@ public:
 	virtual void dump();
 
 protected:
-	Word_t vtcs[NUM_VERTICES];					// array of vertex indices that build up the hexahedron
+	unsigned int vtcs[NUM_VERTICES];					// array of vertex indices that build up the hexahedron
 };
 
 
@@ -486,7 +486,7 @@ public:
 	// for debugging
 	virtual void dump();
 
-	Word_t id;										// boundary id
+	unsigned int id;										// boundary id
 	int marker;
 };
 
@@ -540,24 +540,24 @@ public:
 
 
 	/// Returns the total number of elements stored.
-	Word_t get_num_elements() const { return elements.count(); }
+	unsigned int get_num_elements() const { return elements.count(); }
 	/// Returns the number of coarse mesh elements.
-	Word_t get_num_base_elements() const { return nbase; }
+	unsigned int get_num_base_elements() const { return nbase; }
 	/// Returns the current number of active elements in the mesh.
-	Word_t get_num_active_elements() const { return nactive; }
+	unsigned int get_num_active_elements() const { return nactive; }
 	/// Returns the maximum node id number plus one.
-	Word_t get_max_element_id() const { return elements.last(); }
+	unsigned int get_max_element_id() const { return elements.last(); }
 
 	/// Checks wether it is possible to refine an element.
 	/// @return true if it posible to apply the refinement, otherwise false
 	/// @param[in] eid Element id number.
 	/// @param[in] refinement The refinement that is going to be applied
-	bool can_refine_element(Word_t eid, int reft) const;
+	bool can_refine_element(unsigned int eid, int reft) const;
 
 	/// Refines an element.
 	/// @param[in] id Element id number.
 	/// @param[in] refinement Refinement to apply
-	bool refine_element(Word_t id, int refinement);
+	bool refine_element(unsigned int id, int refinement);
 
 	/// Refines all elements.
 	/// @param refinement [in] Same meaning as in refine_element().
@@ -577,7 +577,7 @@ public:
 	void refine_towards_boundary(int marker, int depth);
 
 	/// Recursively removes all son elements of the given element and makes it active.
-	void unrefine_element(Word_t id);
+	void unrefine_element(unsigned int id);
 
 	/// Unrefines all elements with immediate active sons. In effect, this
 	/// shaves off one layer of refinements from the mesh. If done immediately
@@ -590,20 +590,20 @@ public:
 	void regularize();
 
 	//
-	Word_t get_facet_id(Element *e, int face_num) const;
+	unsigned int get_facet_id(Element *e, int face_num) const;
 
-	Word_t get_facet_id(int nv, ...) const;
+	unsigned int get_facet_id(int nv, ...) const;
 
 	/// Get ID of the edge
 	/// @param e Element
 	/// @param edge_num Local number of an edge on element e
 	/// @return ID of the edge on the element
-	Word_t get_edge_id(Element *e, int edge_num) const;
+	unsigned int get_edge_id(Element *e, int edge_num) const;
 	/// Get ID of the edge between a and b
 	/// @param[in] a Index (ID) of the first vertex
 	/// @param[in] b Index (ID) of the second vertex
 	/// @return ID of the edge, INVALID_IDX is edge does not exist
-	Word_t get_edge_id(Word_t a, Word_t b) const;
+	unsigned int get_edge_id(unsigned int a, unsigned int b) const;
 	/// Get state of an edge
 	/// @param eidx ID of an edge
 	/// @return true is edge is active, otherwise false
@@ -614,23 +614,23 @@ public:
 	/// @param[in] a index of the first vertex
 	/// @param[in] b index of the second vertex
 	/// @return index of the midpoint
-	Word_t peek_midpoint(Word_t a, Word_t b) const;
+	unsigned int peek_midpoint(unsigned int a, unsigned int b) const;
 
 	/// Adds an vertex
-	Word_t add_vertex(double x, double y, double z);
+	unsigned int add_vertex(double x, double y, double z);
 	/// Adds an element
 	/// @param[in] e An element to add
-	Tetra *add_tetra(Word_t vtcs[]);
-	Hex *add_hex(Word_t vtcs[]);
-	Prism *add_prism(Word_t vtcs[]);
+	Tetra *add_tetra(unsigned int vtcs[]);
+	Hex *add_hex(unsigned int vtcs[]);
+	Prism *add_prism(unsigned int vtcs[]);
 
 	/// Get the facing facet
 	/// @param[in] fid ID of the facet
 	/// @param[in] elem_id ID of the element
-	Word_t get_facing_facet(Word_t fid, Word_t elem_id);
+	unsigned int get_facing_facet(unsigned int fid, unsigned int elem_id);
 
-	Boundary *add_tri_boundary(Word_t vtcs[], int marker);
-	Boundary *add_quad_boundary(Word_t vtcs[], int marker);
+	Boundary *add_tri_boundary(unsigned int vtcs[], int marker);
+	Boundary *add_quad_boundary(unsigned int vtcs[], int marker);
 
 	void ugh();
 
@@ -642,12 +642,12 @@ public:
 	MapOrd<Facet *>   facets;
 
 protected:
-	Word_t nbase;							/// number of base elements
-	Word_t nactive;						/// number of active elements
+	unsigned int nbase;							/// number of base elements
+	unsigned int nactive;						/// number of active elements
 
-	Tetra *create_tetra(Word_t vtcs[]);
-	Hex *create_hex(Word_t vtcs[]);
-	Prism *create_prism(Word_t vtcs[]);
+	Tetra *create_tetra(unsigned int vtcs[]);
+	Hex *create_hex(unsigned int vtcs[]);
+	Prism *create_prism(unsigned int vtcs[]);
 
 	bool can_refine_hex(Hex *elem, int refinement) const;
 
@@ -665,11 +665,11 @@ protected:
 	/// @param[in] iface Local number of a face whose facet will be refined
 	/// @param[in] face_refinement How to refine the face (see REFT_QUAD_XXX for possible values)
 	/// @param[in] eid ID of son element
-	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid);
-	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid0, 
-                               Word_t eid1);
-	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, Word_t eid0, 
-                               Word_t eid1, Word_t eid2, Word_t eid3);
+	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, unsigned int eid);
+	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, unsigned int eid0, 
+                               unsigned int eid1);
+	bool refine_quad_facet(Hex *parent, int iface, unsigned int face_refinement, unsigned int eid0, 
+                               unsigned int eid1, unsigned int eid2, unsigned int eid3);
 
 	/// @return true if we can refine the face, otherwise false
 	/// @param[in] facet - facet to refine
@@ -683,7 +683,7 @@ protected:
 	/// @param[in] right_elem ID of the element on the right
 	/// @param[in] right_iface Local face number on the element on the right
 	/// @return Pointer to the newly created facet
-	Facet *add_quad_facet(Facet::Type type, Word_t left_elem, int left_iface, Word_t right_elem, int right_iface);
+	Facet *add_quad_facet(Facet::Type type, unsigned int left_elem, int left_iface, unsigned int right_elem, int right_iface);
 
 	// midpoints
 	MapHSOrd midpoints;
@@ -692,17 +692,17 @@ protected:
 	/// @param[in] a index of the first vertex
 	/// @param[in] b index of the second vertex
 	/// @return index of the newly created vertex
-	Word_t create_midpoint(Word_t a, Word_t b);
+	unsigned int create_midpoint(unsigned int a, unsigned int b);
 	/// Gets an index of a midpoint between a and b. If midpoint does not exists, it is created
 	/// @param[in] a index of the first vertex
 	/// @param[in] b index of the second vertex
 	/// @return index of the midpoint
 	/// FIXME: better name
-	Word_t get_midpoint(Word_t a, Word_t b);
+	unsigned int get_midpoint(unsigned int a, unsigned int b);
 	/// Sets the midpoints index for a midpoint
 	/// @param[in] a index of the first vertex
 	/// @param[in] b index of the second vertex
-	void set_midpoint(Word_t a, Word_t b, Word_t idx);
+	void set_midpoint(unsigned int a, unsigned int b, unsigned int idx);
 
 	/// referencing edges
 	void ref_edges(Element *e);

@@ -100,7 +100,7 @@ void HcurlSpace::assign_dofs_internal() {
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *e = mesh->elements[idx];
 		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			Word_t eid = mesh->get_edge_id(e, iedge);
+			unsigned int eid = mesh->get_edge_id(e, iedge);
 			EdgeData *ed = en_data[eid];
 			assert(ed != NULL);
 			if (!init_edges.is_set(eid) && !ed->ced) {
@@ -111,7 +111,7 @@ void HcurlSpace::assign_dofs_internal() {
 
 		// face dofs
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			Word_t fid = mesh->get_facet_id(e, iface);
+			unsigned int fid = mesh->get_facet_id(e, iface);
 			FaceData *fd = fn_data[fid];
 			assert(fd != NULL);
 			if (!init_faces.is_set(fid) && !fd->ced) {
@@ -149,7 +149,7 @@ void HcurlSpace::get_boundary_assembly_list(Element *e, int face, AsmList *al) {
 
 void HcurlSpace::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 	_F_
-	Word_t vtx = elem->get_vertex(ivertex);
+	unsigned int vtx = elem->get_vertex(ivertex);
 	VertexData *vnode = vn_data[vtx];
 	Vertex *v = mesh->vertices[vtx];
 	if (vnode->bc_type == BC_ESSENTIAL) {
@@ -161,7 +161,7 @@ void HcurlSpace::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 
 void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
-	Word_t edge = mesh->get_edge_id(elem, iedge);
+	unsigned int edge = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge];
 	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
@@ -169,7 +169,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	int num_fns;
 	if (enode->ced) {
 		assert(enode->edge_ncomponents > 0);
-		Word_t edge_id = enode->edge_baselist[0].edge_id;
+		unsigned int edge_id = enode->edge_baselist[0].edge_id;
 		num_fns = en_data[edge_id]->n;
 	}
 	else
@@ -208,7 +208,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 void HcurlSpace::calc_face_boundary_projection(Element *elem, int iface) {
 	_F_
-	Word_t facet_idx = mesh->get_facet_id(elem, iface);
+	unsigned int facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
 	if (fnode->bc_type != BC_ESSENTIAL) return;

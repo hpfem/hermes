@@ -410,7 +410,7 @@ public:
 
 	~mono_lu_init() {
 		for (int m = 0; m <= 2; m++)
-			for (Word_t i = mat[m].first(); i != INVALID_IDX; i = mat[m].next(i)) {
+			for (int i = mat[m].first(); i != INVALID_IDX; i = mat[m].next(i)) {
 					delete [] mat[m][i];
 					delete [] perm[m][i];
 				}

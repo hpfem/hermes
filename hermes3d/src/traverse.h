@@ -71,13 +71,13 @@ private:
 	State *stack;
 	int top, size;
 
-	Word_t id;
+	unsigned int id;
 	Element *base;
 	int (*sons)[8];
 	uint64 *subs;
 
 	UniData **unidata;
-	Word_t udsize;
+	unsigned int udsize;
 
 	State *push_state();
 	void set_boundary_info(State *s, bool *bnd, SurfPos *ep);

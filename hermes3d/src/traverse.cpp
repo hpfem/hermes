@@ -408,7 +408,7 @@ void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 
 	for (int iface = 0; iface < e->get_num_faces(); iface++) {
 		if (bnd[iface]) {
-			Word_t fid = m->get_facet_id(e, iface);
+			unsigned int fid = m->get_facet_id(e, iface);
 			Facet *facet = m->facets[fid];
 			Boundary *b = m->boundaries[facet->right];
 
@@ -460,7 +460,7 @@ void Traverse::hex_push_son_states(State *s) {
 						ns->trans[i] = son + 1;
 					}
 					else {
-						Word_t eid = s->e[i]->get_son(trans_to_son_idx(sons[i][j]));
+						unsigned int eid = s->e[i]->get_son(trans_to_son_idx(sons[i][j]));
 						ns->e[i] = meshes[i]->elements[eid];
 						hex_move_to_son(ns->er + i, s->er + i, sons[i][j]);
 						if (ns->e[i]->active) ns->trans[i] = -1;
@@ -480,7 +480,7 @@ void Traverse::hex_push_son_states(State *s) {
 						ns->trans[i] = son + 1;
 					}
 					else {
-						Word_t eid = s->e[i]->get_son(trans_to_son_idx(sons[i][son]));
+						unsigned int eid = s->e[i]->get_son(trans_to_son_idx(sons[i][son]));
 						ns->e[i] = meshes[i]->elements[eid];
 						hex_move_to_son(ns->er + i, s->er + i, sons[i][son]);
 						if (ns->e[i]->active) ns->trans[i] = -1;
@@ -498,7 +498,7 @@ void Traverse::hex_push_son_states(State *s) {
 					ns->e[i] = s->e[i];
 				}
 				else {
-					Word_t eid = s->e[i]->get_son(trans_to_son_idx(sons[i][0]));
+					unsigned int eid = s->e[i]->get_son(trans_to_son_idx(sons[i][0]));
 					ns->e[i] = meshes[i]->elements[eid];						// CHECK ME
 					hex_move_to_son(ns->er + i, s->er + i, sons[i][0]);
 					if (ns->e[i]->active) ns->trans[i] = -1;
@@ -714,13 +714,13 @@ void Traverse::hex_union_rec(Box *cr, Element **e, Box *er, uint64 *idx, Element
 						idx_new[i] = next_idx(idx[i], son);
 					}
 					else {
-						Word_t eid = e[i]->get_son(trans_to_son_idx(sons[i][j]));
+						unsigned int eid = e[i]->get_son(trans_to_son_idx(sons[i][j]));
 						e_new[i] = meshes[i]->elements[eid];
 						hex_move_to_son(er_new + i, er + i, sons[i][j]);
 						if (e_new[i]->active) idx_new[i] = hex_init_idx(&cr_new, er_new + i);
 					}
 				}
-				Word_t eid = uni->get_son(trans_to_son_idx(son));
+				unsigned int eid = uni->get_son(trans_to_son_idx(son));
 				union_recurrent(&cr_new, e_new, er_new, idx_new, unimesh->elements[eid]);
 			}
 			break;
@@ -736,14 +736,14 @@ void Traverse::hex_union_rec(Box *cr, Element **e, Box *er, uint64 *idx, Element
 						idx_new[i] = next_idx(idx[i], son);
 					}
 					else {
-						Word_t eid = e[i]->get_son(trans_to_son_idx(sons[i][son]));
+						unsigned int eid = e[i]->get_son(trans_to_son_idx(sons[i][son]));
 						e_new[i] = meshes[i]->elements[eid];
 						hex_move_to_son(er_new + i, er + i, sons[i][son]);
 						if (e_new[i]->active) idx_new[i] = hex_init_idx(&cr_new, er_new + i);
 					}
 				}
 
-				Word_t eid = uni->get_son(trans_to_son_idx(son));
+				unsigned int eid = uni->get_son(trans_to_son_idx(son));
 				union_recurrent(&cr_new, e_new, er_new, idx_new, unimesh->elements[eid]);
 			}
 			break;
@@ -755,7 +755,7 @@ void Traverse::hex_union_rec(Box *cr, Element **e, Box *er, uint64 *idx, Element
 				if (e[i]->active)
 					e_new[i] = e[i];
 				else {
-					Word_t eid = e[i]->get_son(trans_to_son_idx(sons[i][0]));
+					unsigned int eid = e[i]->get_son(trans_to_son_idx(sons[i][0]));
 					e_new[i] = meshes[i]->elements[eid];
 					hex_move_to_son(er_new + i, er + i, sons[i][0]);
 					if (e_new[i]->active) idx_new[i] = hex_init_idx(&cr_new, er_new + i);

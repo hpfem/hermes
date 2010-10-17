@@ -245,15 +245,15 @@ H1ShapesetLobattoHex::~H1ShapesetLobattoHex() {
 #ifdef WITH_HEX
 	for (int edge = 0; edge < Hex::NUM_EDGES; edge++)
 		for (int ori = 0; ori < NUM_EDGE_ORIS; ori++)
-			for (Word_t idx = edge_indices[edge][ori].first(); idx != INVALID_IDX; idx = edge_indices[edge][ori].next(idx))
+			for (unsigned int idx = edge_indices[edge][ori].first(); idx != INVALID_IDX; idx = edge_indices[edge][ori].next(idx))
 				delete [] edge_indices[edge][ori][idx];
 
 	for (int face = 0; face < Hex::NUM_FACES; face++)
 		for (int ori = 0; ori < NUM_FACE_ORIS; ori++)
-			for (Word_t idx = face_indices[face][ori].first(); idx != INVALID_IDX; idx = face_indices[face][ori].next(idx))
+			for (unsigned int idx = face_indices[face][ori].first(); idx != INVALID_IDX; idx = face_indices[face][ori].next(idx))
 				delete [] face_indices[face][ori][idx];
 
-	for (Word_t idx = bubble_indices.first(); idx != INVALID_IDX; idx = bubble_indices.next(idx))
+	for (unsigned int idx = bubble_indices.first(); idx != INVALID_IDX; idx = bubble_indices.next(idx))
 		delete [] bubble_indices[idx];
 #endif
 }
@@ -394,7 +394,7 @@ void H1ShapesetLobattoHex::compute_bubble_indices(Ord3 order) {
 	MEM_CHECK(indices);
 
 	int idx = 0;
-	for (unsigned int i = 2; i <= order.x; i++)
+	for (int i = 2; i <= order.x; i++)
 		for (unsigned int j = 2; j <= order.y; j++)
 			for (unsigned int k = 2; k <= order.z; k++)
 				indices[idx++] = h1_hex_index_t(SHFN_BUBBLE, 0, i, j, k, 0);

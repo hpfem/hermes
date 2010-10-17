@@ -102,7 +102,7 @@ OutputQuadTetra::~OutputQuadTetra()
 {
 	_F_
 #ifdef WITH_HEX
-	for (Word_t i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 #endif
 }
@@ -150,7 +150,7 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (Word_t i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 #endif
 }
@@ -235,9 +235,9 @@ public:
 Linearizer::~Linearizer()
 {
 	_F_
-	for (Word_t i = points.first(); i != INVALID_IDX; i = points.next(i))
+	for (int i = points.first(); i != INVALID_IDX; i = points.next(i))
 		delete points[i];
-	for (Word_t i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		delete [] cells[i]->idx;
 		delete cells[i];
 	}
@@ -302,7 +302,7 @@ void FileFormatter::write(FILE *file, const char *name)
 	Array<Vertex *> &points = lin->get_points();
 	Array<Linearizer::Cell *> &cells = lin->get_cells();
 	int sz_cells = 0;
-	for (Word_t i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
 		switch (cell->type) {
 			case Linearizer::Cell::Hex: sz_cells += Hex::NUM_VERTICES; break;
@@ -321,14 +321,14 @@ void FileFormatter::write(FILE *file, const char *name)
 	fprintf(file, "\n");
 	fprintf(file, "DATASET UNSTRUCTURED_GRID\n");
 	fprintf(file, "POINTS %ld %s\n", points.count(), "float");
-	for (Word_t i = points.first(); i != INVALID_IDX; i = points.next(i)) {
+	for (int i = points.first(); i != INVALID_IDX; i = points.next(i)) {
 		Vertex *v = points[i];
 		fprintf(file, "%e %e %e\n", v->x, v->y, v->z);
 	}
 
 	fprintf(file, "\n");
 	fprintf(file, "CELLS %ld %d\n", cells.count(), sz_cells);
-	for (Word_t i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
 
 		fprintf(file, "%d", cell->n);
@@ -339,7 +339,7 @@ void FileFormatter::write(FILE *file, const char *name)
 
 	fprintf(file, "\n");
 	fprintf(file, "CELL_TYPES %ld\n", cells.count());
-	for (Word_t i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
 
 		int vtk_type = 0;
@@ -359,7 +359,7 @@ void FileFormatter::write(FILE *file, const char *name)
 			// point data
 			fprintf(file, "POINT_DATA %ld\n", pt_data0.count());
 			fprintf(file, "VECTORS %s %s\n", name, "float");
-			for (Word_t i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
+			for (int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
 				fprintf(file, "%e %e %e\n", pt_data0[i], pt_data1[i], pt_data2[i]);
 		}
 		else {
@@ -367,7 +367,7 @@ void FileFormatter::write(FILE *file, const char *name)
 			fprintf(file, "POINT_DATA %ld\n", pt_data0.count());
 			fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 			fprintf(file, "LOOKUP_TABLE %s\n", "default");
-			for (Word_t i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
+			for (int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
 				fprintf(file, "%e\n", pt_data0[i]);
 		}
 	}
@@ -376,7 +376,7 @@ void FileFormatter::write(FILE *file, const char *name)
 		fprintf(file, "CELL_DATA %ld\n", cell_data.count());
 		fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 		fprintf(file, "LOOKUP_TABLE %s\n", "default");
-		for (Word_t i = cell_data.first(); i != INVALID_IDX; i = cell_data.next(i))
+		for (int i = cell_data.first(); i != INVALID_IDX; i = cell_data.next(i))
 			fprintf(file, "%e\n", cell_data[i]);
 	}
 }
@@ -681,7 +681,7 @@ void VtkOutputEngine::out(Mesh *mesh)
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();
-		Word_t *vtcs = new Word_t[nv];
+		unsigned int *vtcs = new unsigned int[nv];
 		element->get_vertices(vtcs);
 
 		int *vtx_pt = new int[nv];
@@ -724,12 +724,12 @@ void VtkOutputEngine::out_bc(Mesh *mesh, const char *name)
 		Element *element = mesh->elements[idx];
 
 		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			Word_t fid = mesh->get_facet_id(element, iface);
+			unsigned int fid = mesh->get_facet_id(element, iface);
 			Facet *facet = mesh->facets[fid];
 			if (facet->type == Facet::INNER) continue;
 
 			int nv = element->get_num_face_vertices(iface);
-			Word_t *vtcs = new Word_t[nv];
+			unsigned int *vtcs = new unsigned int[nv];
 			element->get_face_vertices(iface, vtcs);
 
 			int *vtx_pt = new int[nv];		// indices of the vertices for current element
@@ -773,7 +773,7 @@ void VtkOutputEngine::out_orders(Space *space, const char *name)
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();
-		Word_t *vtcs = new Word_t[nv];
+		unsigned int *vtcs = new unsigned int[nv];
 		element->get_vertices(vtcs);
 
 		int *vtx_pt = new int[nv];
@@ -787,7 +787,7 @@ void VtkOutputEngine::out_orders(Space *space, const char *name)
 		switch (element->get_mode()) {
 			case MODE_HEXAHEDRON:
 				for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-					Word_t fvtcs[Quad::NUM_VERTICES];
+					unsigned int fvtcs[Quad::NUM_VERTICES];
 					element->get_face_vertices(iface, fvtcs);
 
 					Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]],
@@ -843,7 +843,7 @@ void VtkOutputEngine::out_elem_markers(Mesh *mesh, const char *name)
 		Element *element = mesh->elements[idx];
 
 		int nv = element->get_num_vertices();
-		Word_t *vtcs = new Word_t[nv];
+		unsigned int *vtcs = new unsigned int[nv];
 		element->get_vertices(vtcs);
 
 		int *vtx_pt = new int[nv];		// indices of the vertices for current element

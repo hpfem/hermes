@@ -43,19 +43,19 @@ DiscreteProblem::FnCache::~FnCache()
 void DiscreteProblem::FnCache::free()
 {
   _F_
-  for (Word_t i = jwt.first(); i != INVALID_IDX; i = jwt.next(i))
+  for (int i = jwt.first(); i != INVALID_IDX; i = jwt.next(i))
     delete [] jwt[i];
   jwt.remove_all();
-  for (Word_t i = e.first(); i != INVALID_IDX; i = e.next(i))
+  for (int i = e.first(); i != INVALID_IDX; i = e.next(i))
     free_geom(&e[i]);
   e.remove_all();
-  for (Word_t i = fn.first(); i != INVALID_IDX; i = fn.next(i))
+  for (int i = fn.first(); i != INVALID_IDX; i = fn.next(i))
     free_fn(fn[i]);
   fn.remove_all();
-  for (Word_t i = ext.first(); i != INVALID_IDX; i = ext.next(i))
+  for (int i = ext.first(); i != INVALID_IDX; i = ext.next(i))
     delete ext[i];
   ext.remove_all();
-  for (Word_t i = sln.first(); i != INVALID_IDX; i = sln.next(i))
+  for (int i = sln.first(); i != INVALID_IDX; i = sln.next(i))
     free_fn(sln[i]);
   sln.remove_all();
 }
@@ -333,7 +333,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     {
       // find a non-NULL e[i]
       Element *e0;
-      for (unsigned int i = 0; i < s->idx.size(); i++)
+      for (int i = 0; i < s->idx.size(); i++)
         if ((e0 = e[i]) != NULL) break;
       if (e0 == NULL) continue;
 
@@ -345,7 +345,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in 
       // trav.get_next_state(...).
       memset(isempty, 0, sizeof(bool) * wf->neq);
-      for (unsigned int i = 0; i < s->idx.size(); i++)
+      for (int i = 0; i < s->idx.size(); i++)
       {
         int j = s->idx[i];
         if (e[i] == NULL) 
@@ -508,7 +508,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         int marker = surf_pos[isurf].marker;
 
         // obtain the list of shape functions which are nonzero on this surface
-        for (unsigned int i = 0; i < s->idx.size(); i++) 
+        for (int i = 0; i < s->idx.size(); i++) 
         {
           if (e[i] == NULL) continue;
           int j = s->idx[i];

@@ -27,7 +27,7 @@
 #include <Judy.h>
 
 #ifndef INVALID_IDX
-#define INVALID_IDX					((Word_t) -1)
+#define INVALID_IDX					((unsigned int) -1)
 #endif
 
 /// Implementation of a dynamic array, using an array-of-bytes of Length as an Index and a word as a Value.
@@ -52,7 +52,7 @@ public:
 	/// \return
 	/// 	\li true if the key exists, item then contains the value,
 	/// 	\li false otherwise
-	bool lookup(uint8_t *key, int length, Word_t &item) const {
+	bool lookup(uint8_t *key, int length, unsigned int &item) const {
 		void *pval;
 		// check if the key exists
 		JHSG(pval, judy, key, length);
@@ -60,7 +60,7 @@ public:
 			return false;
 		}
 		else {
-			item = *(Word_t *) pval;
+			item = *(unsigned int *) pval;
 			return true;
 		}
 	}
@@ -69,7 +69,7 @@ public:
 	/// \param[in] key Pointer to the array-of-bytes.
 	/// \param[in] length Size of \c key.
 	/// \param[in] item Item to insert
-	bool set(uint8_t *key, int length, Word_t item) {
+	bool set(uint8_t *key, int length, unsigned int item) {
 		void *pval;
 		JHSG(pval, judy, key, item);
 		if (pval == NULL) {
@@ -77,7 +77,7 @@ public:
 			JHSI(pval, judy, key, length);
 			if (pval == NULL) return false;
 		}
-		*(Word_t *) pval = item;
+		*(unsigned int *) pval = item;
 		return true;
 	}
 

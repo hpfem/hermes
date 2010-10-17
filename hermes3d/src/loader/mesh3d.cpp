@@ -70,7 +70,7 @@ static int read_n_nums(char *row, int n, double values[]) {
 	return i;
 }
 
-static int read_n_nums(char *row, int n, Word_t values[]) {
+static int read_n_nums(char *row, int n, unsigned int values[]) {
 	_F_
 	int i = 0;
 	char delims[] = " \t\n\r";
@@ -86,7 +86,7 @@ static int read_n_nums(char *row, int n, Word_t values[]) {
 	return i;
 }
 
-static bool range_check(Word_t max_index, Word_t *vs, int num_vs) {
+static bool range_check(unsigned int max_index, unsigned int *vs, int num_vs) {
 	_F_
 	for (int i = 0; i < num_vs; i++) {
 		if (vs[i] <= 0 || vs[i] > max_index) return false;
@@ -126,7 +126,7 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 		int tri_count = 0;
 		int quad_count = 0;
 		double buffer[10];
-		Word_t vs[10];
+		unsigned int vs[10];
 		int n;
 
 		int max_vertex_index = 0;
@@ -257,7 +257,7 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 							throw E_READ_ERROR;
 						}
 
-						Word_t facet_idxs[Tri::NUM_VERTICES] = { vs[0], vs[1], vs[2] };
+						unsigned int facet_idxs[Tri::NUM_VERTICES] = { vs[0], vs[1], vs[2] };
 						mesh->add_tri_boundary(facet_idxs, vs[Tri::NUM_VERTICES]);
 						tri_count--;
 						if (tri_count == 0) state = STATE_QUADS_NUM;
@@ -284,7 +284,7 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 							throw E_READ_ERROR;
 						}
 
-						Word_t facet_idxs[Quad::NUM_VERTICES] = { vs[0], vs[1], vs[2], vs[3] };
+						unsigned int facet_idxs[Quad::NUM_VERTICES] = { vs[0], vs[1], vs[2], vs[3] };
 						mesh->add_quad_boundary(facet_idxs, vs[Quad::NUM_VERTICES]);
 						quad_count--;
 						if (quad_count == 0) state = STATE_OK;
@@ -301,7 +301,7 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 		}
 
 		// check if all "outer" faces have defined boundary condition
-		for (Word_t i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
+		for (int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
 			Facet *facet = mesh->facets.get(i);
 
 			if ((facet->left == INVALID_IDX) || (facet->right == INVALID_IDX)) {
@@ -332,7 +332,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save vertices
 	fprintf(file, "# vertices\n");
 	fprintf(file, "%ld\n", mesh->vertices.count());
-	for (Word_t i = mesh->vertices.first(); i != INVALID_IDX; i = mesh->vertices.next(i)) {
+	for (int i = mesh->vertices.first(); i != INVALID_IDX; i = mesh->vertices.next(i)) {
 		Vertex *v = mesh->vertices[i];
 		fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
 	}
@@ -340,7 +340,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// elements
 	Array<Element *> tet, hex, pri;
-	for (Word_t i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
+	for (int i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
 		Element *elem = mesh->elements[i];
 		if (elem->active) {
 			switch (elem->get_mode()) {
@@ -354,8 +354,8 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save tetras
 	fprintf(file, "# tetras\n");
 	fprintf(file, "%ld\n", tet.count());
-	for (Word_t i = tet.first(); i != INVALID_IDX; i = tet.next(i)) {
-		Word_t vtcs[Tetra::NUM_VERTICES];
+	for (int i = tet.first(); i != INVALID_IDX; i = tet.next(i)) {
+		unsigned int vtcs[Tetra::NUM_VERTICES];
 		tet[i]->get_vertices(vtcs);
 		fprintf(file, "%ld %ld %ld %ld\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 	}
@@ -364,8 +364,8 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save hexes
 	fprintf(file, "# hexes\n");
 	fprintf(file, "%ld\n", hex.count());
-	for (Word_t i = hex.first(); i != INVALID_IDX; i = hex.next(i)) {
-		Word_t vtcs[Hex::NUM_VERTICES];
+	for (int i = hex.first(); i != INVALID_IDX; i = hex.next(i)) {
+		unsigned int vtcs[Hex::NUM_VERTICES];
 		hex[i]->get_vertices(vtcs);
 		fprintf(file, "%ld %ld %ld %ld %ld %ld %ld %ld\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
 	}
@@ -374,8 +374,8 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save prisms
 	fprintf(file, "# prisms\n");
 	fprintf(file, "%ld\n", pri.count());
-	for (Word_t i = pri.first(); i != INVALID_IDX; i = pri.next(i)) {
-		Word_t vtcs[Prism::NUM_VERTICES];
+	for (int i = pri.first(); i != INVALID_IDX; i = pri.next(i)) {
+		unsigned int vtcs[Prism::NUM_VERTICES];
 		pri[i]->get_vertices(vtcs);
 		fprintf(file, "%ld %ld %ld %ld %ld %ld\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
 	}
@@ -383,7 +383,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// boundaries
 	Array<Facet *> tri_facets, quad_facets;
-	for (Word_t i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
+	for (int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
 		Facet *facet = mesh->facets.get(i);
 		if (facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
 			switch (facet->type) {
@@ -396,12 +396,12 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// tris
 	fprintf(file, "# tris\n");
 	fprintf(file, "%ld\n", tri_facets.count());
-	for (Word_t i = tri_facets.first(); i != INVALID_IDX; i = tri_facets.next(i)) {
+	for (int i = tri_facets.first(); i != INVALID_IDX; i = tri_facets.next(i)) {
 		Facet *facet = tri_facets[i];
 		Boundary *bnd = mesh->boundaries[facet->right];
 		Element *elem = mesh->elements[facet->left];
 
-		Word_t vtcs[Tri::NUM_VERTICES];
+		unsigned int vtcs[Tri::NUM_VERTICES];
 		elem->get_face_vertices(facet->left_face_num, vtcs);
 
 		fprintf(file, "%ld %ld %ld     %d\n", vtcs[0], vtcs[1], vtcs[2], bnd->marker);
@@ -411,12 +411,12 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// quads
 	fprintf(file, "# quads\n");
 	fprintf(file, "%ld\n", quad_facets.count());
-	for (Word_t i = quad_facets.first(); i != INVALID_IDX; i = quad_facets.next(i)) {
+	for (int i = quad_facets.first(); i != INVALID_IDX; i = quad_facets.next(i)) {
 		Facet *facet = quad_facets[i];
 		Boundary *bnd = mesh->boundaries[facet->right];
 		Element *elem = mesh->elements[facet->left];
 
-		Word_t vtcs[Quad::NUM_VERTICES];
+		unsigned int vtcs[Quad::NUM_VERTICES];
 		elem->get_face_vertices(facet->left_face_num, vtcs);
 
 		fprintf(file, "%ld %ld %ld %ld     %d\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], bnd->marker);

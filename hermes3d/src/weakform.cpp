@@ -234,9 +234,9 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
   }
 
   // update and return the stage
-  for (unsigned int i = 0; i < ext.size(); i++)
+  for (int i = 0; i < ext.size(); i++)
     s->ext_set.insert(ext[i]);
-  for (unsigned int i = 0; i < u_ext.size(); i++)
+  for (int i = 0; i < u_ext.size(); i++)
     if (u_ext[i] != NULL)
       s->ext_set.insert(u_ext[i]);
   

@@ -219,7 +219,7 @@ int test_quadrature_3d() {
 			TC3D(fn_3d_4, 184.0/15.0, 4, 2, 3, "x^4 + y^2 + z^3 + x*y*z + x + y + z + 1")
 		};
 
-		for (unsigned int i = 0; i < countof(fn_hex); i++) {
+		for (int i = 0; i < countof(fn_hex); i++) {
 			if ((ret = test_quadrature_3d_hex(fn_hex[i].fn, fn_hex[i].exact, fn_hex[i].min_h_order, fn_hex[i].min_v_order, fn_hex[i].min_u_order, fn_hex[i].fn_name)) != ERROR_SUCCESS)
 				return ret;
 		}
@@ -231,7 +231,7 @@ int test_quadrature_3d() {
 			TC3D(fn_3d_1, 64.0, 2, 2, 2, "x^2 + y^2 + z^2 + x*y*z + x + y + z + 1")
 		};
 
-		for (unsigned int i = 0; i < countof(fn_hex_surf); i++) {
+		for (int i = 0; i < countof(fn_hex_surf); i++) {
 			if ((ret = test_quadrature_3d_hex_surf(fn_hex_surf[i].fn, fn_hex_surf[i].exact, fn_hex_surf[i].min_h_order, fn_hex_surf[i].min_v_order, fn_hex_surf[i].min_u_order, fn_hex_surf[i].fn_name)) != ERROR_SUCCESS)
 				return ret;
 		}
@@ -246,7 +246,7 @@ int test_quadrature_3d() {
 			TC3D(fn_3d_1, 8.0/9.0, 3, 0, 0, "x^2 + y^2 + z^2 + x*y*z + x + y + z + 1")
 		};
 
-		for (unsigned int i = 0; i < countof(fn_tetra); i++) {
+		for (int i = 0; i < countof(fn_tetra); i++) {
 			if ((ret = test_quadrature_3d_tetra(fn_tetra[i].fn, fn_tetra[i].exact, fn_tetra[i].min_h_order, fn_tetra[i].fn_name)) != ERROR_SUCCESS)
 				return ret;
 		}

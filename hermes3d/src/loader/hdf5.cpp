@@ -113,7 +113,7 @@ static bool read_vertices(hid_t id, Mesh *mesh) {
 	// read the number of vertices
 	unsigned int count;
 	if (read_attr(group_id, "count", count)) {
-		for (unsigned int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			// open data set
 			char name[16] = { 0 };
 			sprintf(name, "%d", i);
@@ -150,13 +150,13 @@ static bool read_hexes(hid_t id, Mesh *mesh) {
 	// read the number of vertices
 	unsigned int count;
 	if (read_attr(group_id, "count", count)) {
-		for (unsigned int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			// open data set
 			char name[16] = { 0 };
 			sprintf(name, "%d", i);
 			hid_t dataset_id = H5Dopen(group_id, name);
 			if (dataset_id >= 0) {
-				Word_t vtcs[Hex::NUM_VERTICES] = { 0 };
+				unsigned int vtcs[Hex::NUM_VERTICES] = { 0 };
 				if (H5Dread(dataset_id, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, vtcs) >= 0) {
 					mesh->add_hex(vtcs);
 				}
@@ -186,13 +186,13 @@ static bool read_tetras(hid_t id, Mesh *mesh) {
 	// read the number of vertices
 	unsigned int count;
 	if (read_attr(group_id, "count", count)) {
-		for (unsigned int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			// open data set
 			char name[16] = { 0 };
 			sprintf(name, "%d", i);
 			hid_t dataset_id = H5Dopen(group_id, name);
 			if (dataset_id >= 0) {
-				Word_t vtcs[Tetra::NUM_VERTICES] = { 0 };
+				unsigned int vtcs[Tetra::NUM_VERTICES] = { 0 };
 				if (H5Dread(dataset_id, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, vtcs) >= 0) {
 					mesh->add_tetra(vtcs);
 				}
@@ -222,13 +222,13 @@ static bool read_prisms(hid_t id, Mesh *mesh) {
 	// read the number of vertices
 	unsigned int count;
 	if (read_attr(group_id, "count", count)) {
-		for (unsigned int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			// open data set
 			char name[16] = { 0 };
 			sprintf(name, "%d", i);
 			hid_t dataset_id = H5Dopen(group_id, name);
 			if (dataset_id >= 0) {
-				Word_t vtcs[Prism::NUM_VERTICES] = { 0 };
+				unsigned int vtcs[Prism::NUM_VERTICES] = { 0 };
 				if (H5Dread(dataset_id, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, vtcs) >= 0) {
 					mesh->add_prism(vtcs);
 				}
@@ -275,13 +275,13 @@ static bool read_tris(hid_t id, Mesh *mesh) {
 	// read the number of vertices
 	unsigned int count;
 	if (read_attr(group_id, "count", count)) {
-		for (unsigned int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			// open data set
 			char name[16] = { 0 };
 			sprintf(name, "%d", i);
 			hid_t dataset_id = H5Dopen(group_id, name);
 			if (dataset_id >= 0) {
-				Word_t vtcs[Tri::NUM_VERTICES] = { 0 };
+				unsigned int vtcs[Tri::NUM_VERTICES] = { 0 };
 				unsigned int marker = 0;
 				if (H5Dread(dataset_id, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, vtcs) >= 0 && read_attr(dataset_id, "marker", marker)) {
 					mesh->add_tri_boundary(vtcs, marker);
@@ -312,13 +312,13 @@ static bool read_quads(hid_t id, Mesh *mesh) {
 	// read the number of vertices
 	unsigned int count;
 	if (read_attr(group_id, "count", count)) {
-		for (unsigned int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			// open data set
 			char name[16] = { 0 };
 			sprintf(name, "%d", i);
 			hid_t dataset_id = H5Dopen(group_id, name);
 			if (dataset_id >= 0) {
-				Word_t vtcs[Quad::NUM_VERTICES] = { 0 };
+				unsigned int vtcs[Quad::NUM_VERTICES] = { 0 };
 				unsigned int marker = 0;
 				if (H5Dread(dataset_id, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, vtcs) >= 0 && read_attr(dataset_id, "marker", marker)) {
 					mesh->add_quad_boundary(vtcs, marker);
@@ -593,7 +593,7 @@ static bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 
 // BC ////
 
-static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, Array<Word_t> &bcs) {
+static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, Array<unsigned int> &bcs) {
 	_F_
 	herr_t status;
 
@@ -613,7 +613,7 @@ static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, Array<Word_t> &bcs) {
 		char name[256];
 		sprintf(name, "%d", i);
 
-		Word_t fid = bcs[i];
+		unsigned int fid = bcs[i];
 		Facet *facet = mesh->facets.get(fid);
 		Element *elem = mesh->elements[facet->left];
 		Boundary *bnd = mesh->boundaries[facet->right];
@@ -637,7 +637,7 @@ static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, Array<Word_t> &bcs) {
 	return true;
 }
 
-static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, Array<Word_t> &bcs) {
+static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, Array<unsigned int> &bcs) {
 	_F_
 	herr_t status;
 
@@ -657,7 +657,7 @@ static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, Array<Word_t> &bcs) 
 		char name[256];
 		sprintf(name, "%d", i);
 
-		Word_t fid = bcs[i];
+		unsigned int fid = bcs[i];
 		Facet *facet = mesh->facets.get(fid);
 		Element *elem = mesh->elements[facet->left];
 		Boundary *bnd = mesh->boundaries[facet->right];
@@ -694,7 +694,7 @@ static bool save_bc(hid_t parent_group_id, Mesh *mesh) {
 	write_attr(group_id, "count", count);
 
 	// sort out boundaries that are triangular and quadrilateral
-	Array<Word_t> tri, quad;
+	Array<unsigned int> tri, quad;
 	FOR_ALL_FACETS(fid, mesh) {
 		Facet *facet = mesh->facets.get(fid);
 		if (facet->type == Facet::OUTER) {

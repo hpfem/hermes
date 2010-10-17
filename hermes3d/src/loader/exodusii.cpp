@@ -94,8 +94,8 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 		// load into mesh
 		int ic = 0;
 		for (int j = 0; j < n_elems_in_blk; j++) {
-			// convert connectivity ints into Word_t
-			Word_t *vtcs = new Word_t[n_elem_nodes];
+			// convert connectivity ints into unsigned int
+			unsigned int *vtcs = new unsigned int[n_elem_nodes];
 			for (int k = 0; k < n_elem_nodes; k++, ic++) vtcs[k] = connect[ic];
 
 			if (n_elem_nodes == Tetra::NUM_VERTICES) {
@@ -136,7 +136,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 			Element *elem = mesh->elements[elem_list[j]];
 			int iface = face_num[side_list[j] - 1];
 			int nv = elem->get_num_face_vertices(iface);
-			Word_t *vtcs = new Word_t[nv];
+			unsigned int *vtcs = new unsigned int[nv];
 			elem->get_face_vertices(iface, vtcs);
 
 			switch (elem->get_face_mode(iface)) {
