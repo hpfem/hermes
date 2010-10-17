@@ -8,22 +8,6 @@
 
 double thresh = 10.e-12;
 
-
-// Helper function to output Mesh. 
-void out_mesh(Mesh *mesh, const char *name)
-{
-  char fname[1024];
-  sprintf(fname, "%s.vtk", name);
-  FILE *f = fopen(fname, "w");
-  if (f != NULL) {
-    VtkOutputEngine vtk(f);
-    vtk.out(mesh);
-    fclose(f);
-  }
-  else warning("Could not open file '%s' for writing.", fname);
-}
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // dbl: a tampered double for which equality and other binary operators are defined up to a threshold
 /////////////////////////////////////////////////////////////////////////////////////////////////////

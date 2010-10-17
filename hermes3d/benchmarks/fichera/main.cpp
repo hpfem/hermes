@@ -65,35 +65,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 // Weak forms.
 #include "forms.cpp"
 
-// Mesh output.
-void out_orders(Space *space, const char *name, int iter) 
-{
-  char fname[1024];
-  sprintf(fname, "iter-%s-%d.vtk", name, iter);
-  FILE *f = fopen(fname, "w");
-  if (f != NULL) {
-    VtkOutputEngine vtk(f);
-    vtk.out_orders(space, name);
-    fclose(f);
-  }
-  else
-    warning("Could not open file '%s' for writing.", fname);
-}
-
-// Solution output.
-void out_fn(MeshFunction *fn, const char *name, int iter) 
-{
-  char fname[1024];
-  sprintf(fname, "iter-%s-%d.vtk", name, iter);
-  FILE *f = fopen(fname, "w");
-  if (f != NULL) {
-    VtkOutputEngine vtk(f);
-    vtk.out(fn, name);
-    fclose(f);
-  }
-  else warning("Could not open file '%s' for writing.", fname);
-}
-
 int main(int argc, char **args) 
 {
   // Load the mesh.

@@ -56,7 +56,6 @@
 # define H3D_IMPORT
 #endif
 
-
 // error codes
 #define H3D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
 #define H3D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."

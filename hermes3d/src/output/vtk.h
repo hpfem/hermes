@@ -57,4 +57,16 @@ protected:
 	int out_prec;
 };
 
+/// Functions facilitating output in the format displayable by e.g. Paraview.
+// Space (polynomial orders) output.
+void H3D_API out_orders(Space *space, const char *name, int iter = -1);
+// Solution output for one solution component.
+void H3D_API out_fn(MeshFunction *fn, const char *name, int iter = -1);
+// Solution output for three solution components.
+void H3D_API out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name, int iter = -1);
+// Boundary conditions output.
+void H3D_API out_bc(Mesh *mesh, const char *name, int iter = -1);
+// Mesh output.
+void H3D_API out_mesh(Mesh *mesh, const char *name, int iter = -1);
+
 #endif

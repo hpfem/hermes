@@ -42,35 +42,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 // Weak forms.
 #include "forms.cpp"
 
-// Solution output.
-void out_fn(MeshFunction *fn, const char *name)
-{
-  char fname[1024];
-  sprintf(fname, "%s.vtk", name);
-  FILE *f = fopen(fname, "w");
-  if (f != NULL) {
-    VtkOutputEngine vtk(f);
-    vtk.out(fn, name);
-    fclose(f);
-  }
-  else warning("Could not open file '%s' for writing.", fname);
-}
-
-// Boundary conditions output.
-void out_bc(Mesh *mesh, const char *name)
-{
-  char of_name[1024];
-  FILE *ofile;
-  sprintf(of_name, "%s.vtk", name);
-  ofile = fopen(of_name, "w");
-  if (ofile != NULL) {
-    VtkOutputEngine output(ofile);
-    output.out_bc(mesh, name);
-    fclose(ofile);
-  }
-  else warning("Can not open '%s' for writing.", of_name);
-}
-
 int main(int argc, char **args)
 {
   // Time measurement.

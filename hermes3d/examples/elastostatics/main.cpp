@@ -59,20 +59,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
   return 0;
 }
 
-// Output the solutions.
-void out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name) 
-{
-  char fname[1024];
-  sprintf(fname, "%s.vtk", name);
-  FILE *f = fopen(fname, "w");
-  if (f != NULL) {
-    VtkOutputEngine vtk(f);
-    vtk.out(x, y, z, name);
-    fclose(f);
-  }
-  else warning("Could not open file '%s' for writing.", fname);
-}
-
 #include "forms.cpp"
 
 int main(int argc, char **args) 

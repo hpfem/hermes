@@ -957,3 +957,93 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 		}
 	}
 }
+
+
+/// Functions facilitating output in the format displayable by e.g. Paraview.
+// Space (polynomial orders) output.
+void out_orders(Space *space, const char *name, int iter)
+{
+  char fname[1024];
+  if(iter == -1)
+    sprintf(fname, "%s.vtk", name);
+  else
+    sprintf(fname, "iter-%s-%d.vtk", name, iter);
+  FILE *f = fopen(fname, "w");
+  if (f != NULL) {
+    VtkOutputEngine vtk(f);
+    vtk.out_orders(space, name);
+    fclose(f);
+  }
+  else
+    warning("Could not open file '%s' for writing.", fname);
+};
+
+// Solution output for one solution component.
+void out_fn(MeshFunction *fn, const char *name, int iter)
+{
+  char fname[1024];
+  if(iter == -1)
+    sprintf(fname, "%s.vtk", name);
+  else
+    sprintf(fname, "iter-%s-%d.vtk", name, iter);
+  FILE *f = fopen(fname, "w");
+  if (f != NULL) {
+    VtkOutputEngine vtk(f);
+    vtk.out(fn, name);
+    fclose(f);
+  }
+  else warning("Could not open file '%s' for writing.", fname);
+};
+
+// Solution output for three solution components.
+void out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name, int iter) 
+{
+  char fname[1024];
+  if(iter == -1)
+    sprintf(fname, "%s.vtk", name);
+  else
+    sprintf(fname, "iter-%s-%d.vtk", name, iter);
+  FILE *f = fopen(fname, "w");
+  if (f != NULL) {
+    VtkOutputEngine vtk(f);
+    vtk.out(x, y, z, name);
+    fclose(f);
+  }
+  else warning("Could not open file '%s' for writing.", fname);
+};
+
+// Boundary conditions output.
+void out_bc(Mesh *mesh, const char *name, int iter)
+{
+  char of_name[1024];
+  FILE *ofile;
+  if(iter == -1)
+    sprintf(of_name, "%s.vtk", name);
+  else
+    sprintf(of_name, "iter-%s-%d.vtk", name, iter);
+  ofile = fopen(of_name, "w");
+  if (ofile != NULL) {
+    VtkOutputEngine output(ofile);
+    output.out_bc(mesh, name);
+    fclose(ofile);
+  }
+  else warning("Can not open '%s' for writing.", of_name);
+};
+
+// Mesh output.
+void out_mesh(Mesh *mesh, const char *name, int iter)
+{
+  char fname[1024];
+  if(iter == -1)
+    sprintf(fname, "%s.vtk", name);
+  else
+    sprintf(fname, "iter-%s-%d.vtk", name, iter);
+  FILE *f = fopen(fname, "w");
+  if (f != NULL) {
+    VtkOutputEngine vtk(f);
+    vtk.out(mesh);
+    fclose(f);
+  }
+  else warning("Could not open file '%s' for writing.", fname);
+};
+
