@@ -1,10 +1,14 @@
+#define H2D_REPORT_WARN
+#define H2D_REPORT_INFO
+#define H2D_REPORT_VERBOSE
 #include "hermes2d.h"
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
 
 // This test makes sure the Lobatto shape 
 // functions are linearly independent.
-int P_INIT = 10;
+const int P_INIT = 10;
+const int FNS_NUM = (P_INIT + 1)* (P_INIT + 1);
 double EPS = 10e-14;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
@@ -22,11 +26,11 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, NULL, NULL, P_INIT);
   // The type of element, mesh_mode = 4 means a rectangle element.
   int mesh_mode = 4;
-  int n = Space::get_num_dofs(&space);
+  int ndof = Space::get_num_dofs(&space);
+  printf("ndof = %d\n", ndof);
+  if(ndof > FNS_NUM) error("Max number of shape functions exceeded.");
 
-  printf("\n.........................\n");
-
-  int *fn_idx = new int [n];
+  int *fn_idx = new int [FNS_NUM];
   int m = 0;
   int order = P_INIT;
 
@@ -58,12 +62,13 @@ int main(int argc, char* argv[])
     printf("m = %d, get_bubble_index(m) = %d\n", m, fn_idx[m]);
   }
   
-  info("Assembling matrix ...");
-  SparseMatrix* mat = new UMFPackMatrix();
-  Vector* rhs = new UMFPackVector();
+  // Initialize the matrix solver.
+  SparseMatrix* mat = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
 
-  info("ndof = %d", n);
-  for (int i = 0; i < n; i++)
+  info("Assembling matrix ...");
+  for (int i = 0; i < ndof; i++)
   {
     for (int j = 0; j < order; j++)
     {
@@ -104,7 +109,7 @@ int main(int argc, char* argv[])
   }
 
   int bubble = 0;
-  for (int i = order*4; i < n; i++)
+  for (int i = order*4; i < ndof; i++)
   {
       double x = 0.0 + (1.0/number_bubble)*bubble;
       double y = 0.0 + (1.0/number_bubble)*bubble;
@@ -115,10 +120,8 @@ int main(int argc, char* argv[])
       bubble++;
   }
 
-  info("ndof = %d", n);
-
   printf("Adding the rhs\n");
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < ndof; i++)
   {
     rhs->add(i, 0.0);
   }
@@ -127,13 +130,12 @@ int main(int argc, char* argv[])
   Solution sln;
    
   info("Solution ...");
-  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
   if(solver->solve())
     Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else
     error ("Matrix solver failed.\n");
 
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < ndof; i++)
   {
     // Get the value of the matrix solution by calling Vertex::get().
     if (rhs->get(i) >= EPS)
