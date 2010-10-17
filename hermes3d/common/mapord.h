@@ -304,7 +304,7 @@ void MapOrd<TYPE>::remove_all() {
 	JLF(pval, judy_l, idx);
 	for (; idx != INVALID_IDX && pval != NULL; ) {
 		free_item(idx);
-		JLN(pval, judy_l, (Word_t)idx);
+		JLN(pval, judy_l, idx);
 	}
 
 	int val;

@@ -27,10 +27,14 @@
 class H2D_API HdivSpace : public Space
 {
 public:
-
-  HdivSpace(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
-                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, int p_init = 1, 
+  // For backward compatibility.
+  HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset = NULL);
+  HdivSpace(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
+                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1), 
+                 Shapeset* shapeset = NULL);
+  
   virtual ~HdivSpace();
 
   virtual Space* dup(Mesh* mesh) const;

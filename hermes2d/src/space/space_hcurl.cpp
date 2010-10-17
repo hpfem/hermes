@@ -25,7 +25,30 @@ double*  HcurlSpace::hcurl_chol_p   = NULL;
 int      HcurlSpace::hcurl_proj_ref = 0;
 
 HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
-		       scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
+{
+  if (shapeset == NULL) this->shapeset = new HcurlShapeset;
+  if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
+
+  if (!hcurl_proj_ref++)
+  {
+    precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
+  }
+
+  proj_mat = hcurl_proj_mat;
+  chol_p   = hcurl_chol_p;
+
+  // set uniform poly order in elements
+  if (p_init < 0) error("P_INIT must be >= 0 in an Hcurl space.");
+  else this->set_uniform_order_internal(Ord2(p_init, p_init));
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
+HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
+		       scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init,
                        Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
@@ -41,13 +64,12 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
   chol_p   = hcurl_chol_p;
 
   // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an Hcurl space.");
+  if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an Hcurl space.");
   else this->set_uniform_order_internal(p_init);
 
   // enumerate basis functions
   this->assign_dofs();
 }
-
 
 HcurlSpace::~HcurlSpace()
 {
@@ -61,7 +83,7 @@ HcurlSpace::~HcurlSpace()
 
 Space* HcurlSpace::dup(Mesh* mesh) const
 {
-  HcurlSpace* space = new HcurlSpace(mesh, bc_type_callback, bc_value_callback_by_coord, 0, shapeset);
+  HcurlSpace* space = new HcurlSpace(mesh, bc_type_callback, bc_value_callback_by_coord, Ord2(0,0), shapeset);
   space->copy_callbacks(this);
   return space;
 }

@@ -24,9 +24,31 @@ double** HdivSpace::hdiv_proj_mat = NULL;
 double*  HdivSpace::hdiv_chol_p   = NULL;
 int      HdivSpace::hdiv_proj_ref = 0;
 
-
 HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
+{
+  if (shapeset == NULL) this->shapeset = new HdivShapeset;
+  if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
+
+  if (!hdiv_proj_ref++)
+  {
+    precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
+  }
+
+  proj_mat = hdiv_proj_mat;
+  chol_p   = hdiv_chol_p;
+
+  // set uniform poly order in elements
+  if (p_init < 0) error("P_INIT must be >= 0 in an Hdiv space.");
+  else this->set_uniform_order_internal(Ord2(p_init, p_init));
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
+                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, 
                  Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
@@ -42,13 +64,12 @@ HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
   chol_p   = hdiv_chol_p;
 
   // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an Hdiv space.");
+  if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an Hdiv space.");
   else this->set_uniform_order_internal(p_init);
 
   // enumerate basis functions
   this->assign_dofs();
 }
-
 
 HdivSpace::~HdivSpace()
 {
@@ -62,7 +83,7 @@ HdivSpace::~HdivSpace()
 
 Space* HdivSpace::dup(Mesh* mesh) const
 {
-  HdivSpace* space = new HdivSpace(mesh, bc_type_callback, bc_value_callback_by_coord, 0, shapeset);
+  HdivSpace* space = new HdivSpace(mesh, bc_type_callback, bc_value_callback_by_coord, Ord2(0,0), shapeset);
   space->copy_callbacks(this);
   return space;
 }
