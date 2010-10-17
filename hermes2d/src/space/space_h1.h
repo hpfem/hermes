@@ -27,9 +27,14 @@ class H2D_API H1Space : public Space
 {
 public:
 
+  // For backward compatibility.
+  H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
+	  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
+    Shapeset* shapeset = NULL);
   H1Space(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
-	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, int p_init = 1,
+	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
           Shapeset* shapeset = NULL);
+
   virtual ~H1Space();
 
   virtual void set_shapeset(Shapeset* shapeset);

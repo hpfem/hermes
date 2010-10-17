@@ -20,8 +20,8 @@
 #include "../auto_local_array.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
-             scalar (*bc_value_callback_by_coord)(int, double, double), int p_init)
-     : mesh(mesh), shapeset(shapeset)
+        scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
+        : mesh(mesh), shapeset(shapeset)
 {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
@@ -39,6 +39,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
   this->set_bc_types_init(bc_type_callback);
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
+
 }
 
 Space::~Space()
@@ -145,18 +146,21 @@ int Space::get_element_order(int id) const
 void Space::set_uniform_order(int order, int marker)
 {
   _F_
-  set_uniform_order_internal(order, marker);
+  set_uniform_order_internal(Ord2(order,order), marker);
 
   // since space changed, enumerate basis functions
   this->assign_dofs();
 }
   
-void Space::set_uniform_order_internal(int order, int marker)
+void Space::set_uniform_order_internal(Ord2 order, int marker)
 {
   _F_
   resize_tables();
-  H2D_CHECK_ORDER(order);
-  int quad_order = H2D_MAKE_QUAD_ORDER(order, order);
+  if (order.order_h < 0 || order.order_v < 0)
+    error("Order cannot be negative.");
+  if (order.order_h > 10 || order.order_v > 10)
+    error("Order = %d x %d, maximum is 10.", order.order_h, order.order_v);
+  int quad_order = H2D_MAKE_QUAD_ORDER(order.order_h, order.order_v);
 
   Element* e;
   for_all_active_elements(e, mesh)
@@ -165,7 +169,10 @@ void Space::set_uniform_order_internal(int order, int marker)
     {
       ElementData* ed = &edata[e->id];
       if (e->is_triangle())
-        ed->order = order;
+        if(order.order_h != order.order_v)
+          error("Orders do not match and triangles are present in the mesh.");
+        else
+          ed->order = order.order_h;
       else
         ed->order = quad_order;
     }

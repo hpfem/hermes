@@ -19,7 +19,22 @@
 #include "../quad_all.h"
 #include "../shapeset/shapeset_l2_all.h"
 
-L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+
+L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset): Space(mesh, shapeset, NULL, NULL, Ord2(p_init, p_init))
+{
+  if (shapeset == NULL) this->shapeset = new L2Shapeset;
+  ldata = NULL;
+  lsize = 0;
+
+  // set uniform poly order in elements
+  if (p_init < 0) error("P_INIT must be >= 0 in an L2 space.");
+  else this->set_uniform_order_internal(Ord2(p_init, p_init));
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
+L2Space::L2Space(Mesh* mesh, Ord2 p_init, Shapeset* shapeset)
   : Space(mesh, shapeset, NULL, NULL, p_init)
 {
   if (shapeset == NULL) this->shapeset = new L2Shapeset;
@@ -27,13 +42,12 @@ L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
   lsize = 0;
 
   // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an Hcurl space.");
+  if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an L2 space.");
   else this->set_uniform_order_internal(p_init);
 
   // enumerate basis functions
   this->assign_dofs();
 }
-
 
 L2Space::~L2Space()
 {
@@ -43,7 +57,7 @@ L2Space::~L2Space()
 
 Space* L2Space::dup(Mesh* mesh) const
 {
-  L2Space* space = new L2Space(mesh, 0, shapeset);
+  L2Space* space = new L2Space(mesh, Ord2(0,0), shapeset);
   space->copy_callbacks(this);
   return space;
 }

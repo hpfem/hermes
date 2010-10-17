@@ -100,12 +100,14 @@ enum BCType
 ///
 /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.
 ///
+class Ord2;
+
 class H2D_API Space
 {
 public:
-
   Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
-        scalar (*bc_value_callback_by_coord)(int, double, double), int p_init);
+        scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
+  
   virtual ~Space();
   virtual void free();
 
@@ -119,7 +121,6 @@ public:
   void set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y));
   /// Sets the BC values callback function, which takes parametric edge position.
   void set_essential_bc_values(scalar (*bc_value_callback_by_edge)(SurfPos* surf_pos)); // for SurfPos, see traverse.h
-
   /// Sets element polynomial order. Can be called by the user. Should not be called  
   /// for many elements at once, since assign_dofs() is called at the end of this function.
   virtual void set_element_order(int id, int order);
@@ -135,7 +136,7 @@ public:
   void set_uniform_order(int order, int marker = HERMES_ANY);
   /// Sets the same polynomial order for all elements in the mesh. Does not 
   /// call assign_dofs(). For internal use.
-  void set_uniform_order_internal(int order, int marker = HERMES_ANY);
+  void set_uniform_order_internal(Ord2 order, int marker = HERMES_ANY);
   /// Sets the order automatically assigned to all newly created elements.
   /// (The order of these is normally undefined and has to be set explicitly.)
   void set_default_order(int tri_order, int quad_order = -1);
@@ -195,6 +196,7 @@ public:
   /// \brief Assings the degrees of freedom to all Spaces in the Tuple.
   static int assign_dofs(Tuple<Space*> spaces);
 
+  
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
@@ -317,4 +319,13 @@ public:
 extern H2D_API void update_essential_bc_values(Tuple<Space*> spaces);  // multiple spaces
 extern H2D_API void update_essential_bc_values(Space *s);    // one space
 
+class Ord2
+  {
+  public:
+    Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
+    int order_h;
+    int order_v;
+  };
+
+  
 #endif
