@@ -66,6 +66,14 @@ Space* HcurlSpace::dup(Mesh* mesh) const
   return space;
 }
 
+void HcurlSpace::set_shapeset(Shapeset *shapeset)
+{
+  if(shapeset->get_id() < 20 && shapeset->get_id() > 9)
+    this->shapeset = shapeset;
+  else
+    error("Wrong shapeset type in HcurlSpace::set_shapeset()");
+}
+
 // Sets element order and updates enumeration of dofs. Intended for 
 // the user.
 void HcurlSpace::set_element_order(int id, int order)

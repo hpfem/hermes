@@ -69,6 +69,14 @@ Space *H1Space::dup(Mesh *mesh_ext) const
   return space;
 }
 
+void H1Space::set_shapeset(Shapeset *shapeset)
+{
+  if(shapeset->get_id() < 10)
+    this->shapeset = shapeset;
+  else
+    error("Wrong shapeset type in H1Space::set_shapeset()");
+}
+
 // ndofs ////
 
 int H1Space::get_vertex_ndofs() 

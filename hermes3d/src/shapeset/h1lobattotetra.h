@@ -33,6 +33,8 @@ public:
 	H1ShapesetLobattoTetra();
 	virtual ~H1ShapesetLobattoTetra();
 
+  virtual int get_id() const { return 2; };
+
 	virtual int get_vertex_index(int vertex) const {
 		CHECK_VERTEX(vertex);
 		return vertex_indices[vertex];

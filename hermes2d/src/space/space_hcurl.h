@@ -37,6 +37,8 @@ public:
 
   virtual int get_type() const { return 1; }
 
+  virtual void set_shapeset(Shapeset* shapeset);
+
   /// Sets element polynomial order and calls assign_dofs(). Intended for the user.
   virtual void set_element_order(int id, int order);
 

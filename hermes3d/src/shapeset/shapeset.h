@@ -134,6 +134,9 @@ public:
 	Shapeset(int id);
 	virtual ~Shapeset();
 
+  /// Returns shapeset identifier. Internal.
+  virtual int get_id() const = 0;
+
 	ESpaceType get_type() { return type; }
 	int get_mode() const { return mode; }
 	int get_num_components() const { return num_components; }

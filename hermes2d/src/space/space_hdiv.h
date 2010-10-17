@@ -35,6 +35,8 @@ public:
 
   virtual Space* dup(Mesh* mesh) const;
 
+  virtual void set_shapeset(Shapeset* shapeset);
+
   virtual int get_type() const { return 2; }
 
 protected:

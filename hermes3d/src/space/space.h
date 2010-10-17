@@ -93,14 +93,17 @@ public:
 	// TODO: different callback: void (*bc_vec_value_callback_by_coord)(int marker, double x, double y, double z, scalar3 &result)
 	void set_essential_bc_values(scalar3 &(*bc_vec_value_callback_by_coord)(int ess_bdy_marker, double x, double y, double z));
 
+  /// Sets the shapeset.
+  virtual void set_shapeset(Shapeset* shapeset) = 0;
 	void set_element_order(Word_t eid, Ord3 order);
 	Ord3 get_element_order(Word_t eid) const;
-        /// Sets the same polynomial order for all elements in the mesh. Intended for 
-        /// the user and thus assign_dofs() is called at the end of this function.
+  /// Sets the same polynomial order for all elements in the mesh. Intended for 
+  /// the user and thus assign_dofs() is called at the end of this function.
 	void set_uniform_order(Ord3 order, int marker = HERMES_ANY);
-        /// Sets the same polynomial order for all elements in the mesh. Does not 
-        /// call assign_dofs(). For internal use.
-        void set_uniform_order_internal(Ord3 order, int marker = HERMES_ANY);
+  /// Sets the same polynomial order for all elements in the mesh. Does not 
+  /// call assign_dofs(). For internal use.
+  void set_uniform_order_internal(Ord3 order, int marker = HERMES_ANY);
+
 	void copy_orders(const Space &space, int inc = 0);
 
 	virtual void enforce_minimum_rule();
@@ -110,7 +113,7 @@ public:
   int get_num_dofs() { return ndof; }
 
 	int get_dof_count() const { return (next_dof - first_dof) / stride; }
-        /// \brief Returns the DOF number of the last basis function.
+  /// \brief Returns the DOF number of the last basis function.
 	int get_max_dof() const { return next_dof - stride; }
 
 	Shapeset *get_shapeset() const { return shapeset; }

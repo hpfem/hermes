@@ -27,6 +27,8 @@ class RefMapShapesetTetra : public Shapeset {
 public:
 	RefMapShapesetTetra();
 	virtual ~RefMapShapesetTetra();
+  
+  virtual int get_id() const { return 100; };
 
 	// @return index of a vertex shape function for a vertex
 	// @param [in] vertex - index of the vertex
@@ -115,6 +117,8 @@ class RefMapShapesetHex : public Shapeset {
 public:
 	RefMapShapesetHex();
 	virtual ~RefMapShapesetHex();
+
+  virtual int get_id() const { return 200; };
 
 	// @return index of a vertex shape function for a vertex
 	// @param [in] vertex - index of the vertex

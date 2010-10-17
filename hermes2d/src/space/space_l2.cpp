@@ -48,6 +48,13 @@ Space* L2Space::dup(Mesh* mesh) const
   return space;
 }
 
+void L2Space::set_shapeset(Shapeset *shapeset)
+{
+  if(shapeset->get_id() < 40 && shapeset->get_id() > 29)
+    this->shapeset = shapeset;
+  else
+    error("Wrong shapeset type in L2Space::set_shapeset()");
+}
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
 

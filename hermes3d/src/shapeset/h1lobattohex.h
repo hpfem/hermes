@@ -34,6 +34,8 @@ public:
 	H1ShapesetLobattoHex();
 	virtual ~H1ShapesetLobattoHex();
 
+  virtual int get_id() const { return 1; };
+
 	virtual int get_vertex_index(int vertex) const {
 		CHECK_VERTEX(vertex);
 		return vertex_indices[vertex];

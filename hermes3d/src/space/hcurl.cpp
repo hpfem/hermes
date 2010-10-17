@@ -55,6 +55,14 @@ Space *HcurlSpace::dup(Mesh *mesh) const {
 	return space;
 }
 
+void HcurlSpace::set_shapeset(Shapeset *shapeset)
+{
+  if(shapeset->get_id() < 20 && shapeset->get_id() > 9)
+    this->shapeset = shapeset;
+  else
+    error("Wrong shapeset type in HcurlSpace::set_shapeset()");
+}
+
 // ndofs ////
 
 int HcurlSpace::get_vertex_ndofs() {

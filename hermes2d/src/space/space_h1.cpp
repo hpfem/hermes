@@ -59,6 +59,14 @@ H1Space::~H1Space()
   }
 }
 
+void H1Space::set_shapeset(Shapeset *shapeset)
+{
+  if(shapeset->get_id() < 10)
+    this->shapeset = shapeset;
+  else
+    error("Wrong shapeset type in H1Space::set_shapeset()");
+}
+
 Space* H1Space::dup(Mesh* mesh) const
 {
   _F_

@@ -34,6 +34,8 @@ public:
 
 	virtual Space *dup(Mesh *mesh) const;
 
+  virtual void set_shapeset(Shapeset* shapeset);
+
    	virtual void get_element_assembly_list(Element *e, AsmList *al);
 	virtual void get_boundary_assembly_list(Element *e, int face, AsmList *al);
 

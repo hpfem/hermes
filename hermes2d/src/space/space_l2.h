@@ -37,6 +37,8 @@ public:
     return make_edge_order( e->get_mode(), edge, edata[e->id].order ); 
   }
 
+  virtual void set_shapeset(Shapeset* shapeset);
+
   virtual int get_type() const { return 3; }
 
   virtual void get_element_assembly_list(Element* e, AsmList* al);

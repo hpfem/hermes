@@ -32,6 +32,8 @@ public:
           Shapeset* shapeset = NULL);
   virtual ~H1Space();
 
+  virtual void set_shapeset(Shapeset* shapeset);
+
   /// Removes the degree of freedom from a vertex node with the given id (i.e., its number
   /// in the mesh file) and makes it part of the Dirichlet lift with the given value.
   /// This is a special-purpose function which normally should not be needed.

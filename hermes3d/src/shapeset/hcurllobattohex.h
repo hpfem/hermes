@@ -33,6 +33,8 @@ public:
 	HcurlShapesetLobattoHex();
 	virtual ~HcurlShapesetLobattoHex();
 
+  virtual int get_id() const { return 10; };
+
 	virtual int get_vertex_index(int vertex) const {
 		EXIT("Hcurl shapeset do not have vertex functions");
     return -1;

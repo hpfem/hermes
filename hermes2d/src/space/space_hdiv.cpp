@@ -67,7 +67,13 @@ Space* HdivSpace::dup(Mesh* mesh) const
   return space;
 }
 
-
+void HdivSpace::set_shapeset(Shapeset *shapeset)
+{
+  if(shapeset->get_id() < 30 && shapeset->get_id() > 19)
+    this->shapeset = shapeset;
+  else
+    error("Wrong shapeset type in HdivSpace::set_shapeset()");
+}
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
 
