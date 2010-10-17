@@ -42,4 +42,13 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 //C99 functions
 #include "compat/c99_functions.h"
 
+#ifdef __GNUC__
+#define NORETURN __attribute__((noreturn))
+#else
+#define NORETURN
+#ifndef __attribute__
+#define __attribute__(x)
+#endif
+#endif
+
 #endif

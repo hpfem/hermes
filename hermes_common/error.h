@@ -20,7 +20,6 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#include "compat-util.h"
 #include "compat.h"
 
 //
