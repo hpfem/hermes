@@ -98,8 +98,8 @@ int main(int argc, char **args)
   // Output solution and mesh.
   if (solution_output) 
   {
-    out_fn(&sln, "sln");
-    out_bc(&mesh, "bc");
+    out_fn_vtk(&sln, "sln");
+    out_bc_vtk(&mesh, "bc");
   }
 
   // Time measurement.

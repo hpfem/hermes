@@ -715,7 +715,7 @@ void VtkOutputEngine::out(Mesh *mesh)
 }
 
 
-void VtkOutputEngine::out_bc(Mesh *mesh, const char *name)
+void VtkOutputEngine::out_bc_vtk(Mesh *mesh, const char *name)
 {
 	_F_
 	Vtk::Linearizer l;
@@ -763,7 +763,7 @@ void VtkOutputEngine::out_bc(Mesh *mesh, const char *name)
 	fmt.write(out_file, name);
 }
 
-void VtkOutputEngine::out_orders(Space *space, const char *name)
+void VtkOutputEngine::out_orders_vtk(Space *space, const char *name)
 {
 	_F_
 	Vtk::Linearizer l;
@@ -961,7 +961,7 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 
 /// Functions facilitating output in the format displayable by e.g. Paraview.
 // Space (polynomial orders) output.
-void out_orders(Space *space, const char *name, int iter)
+void out_orders_vtk(Space *space, const char *name, int iter)
 {
   char fname[1024];
   if(iter == -1)
@@ -971,7 +971,7 @@ void out_orders(Space *space, const char *name, int iter)
   FILE *f = fopen(fname, "w");
   if (f != NULL) {
     VtkOutputEngine vtk(f);
-    vtk.out_orders(space, name);
+    vtk.out_orders_vtk(space, name);
     fclose(f);
   }
   else
@@ -979,7 +979,7 @@ void out_orders(Space *space, const char *name, int iter)
 };
 
 // Solution output for one solution component.
-void out_fn(MeshFunction *fn, const char *name, int iter)
+void out_fn_vtk(MeshFunction *fn, const char *name, int iter)
 {
   char fname[1024];
   if(iter == -1)
@@ -996,7 +996,7 @@ void out_fn(MeshFunction *fn, const char *name, int iter)
 };
 
 // Solution output for three solution components.
-void out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name, int iter) 
+void out_fn_vtk(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name, int iter) 
 {
   char fname[1024];
   if(iter == -1)
@@ -1013,7 +1013,7 @@ void out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name,
 };
 
 // Boundary conditions output.
-void out_bc(Mesh *mesh, const char *name, int iter)
+void out_bc_vtk(Mesh *mesh, const char *name, int iter)
 {
   char of_name[1024];
   FILE *ofile;
@@ -1024,14 +1024,14 @@ void out_bc(Mesh *mesh, const char *name, int iter)
   ofile = fopen(of_name, "w");
   if (ofile != NULL) {
     VtkOutputEngine output(ofile);
-    output.out_bc(mesh, name);
+    output.out_bc_vtk(mesh, name);
     fclose(ofile);
   }
   else warning("Can not open '%s' for writing.", of_name);
 };
 
 // Mesh output.
-void out_mesh(Mesh *mesh, const char *name, int iter)
+void out_mesh_vtk(Mesh *mesh, const char *name, int iter)
 {
   char fname[1024];
   if(iter == -1)

@@ -384,7 +384,7 @@ res_t biform_3_3(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t
 
 #endif
 
-void out_fn(Solution *sln, const char *name)
+void out_fn_vtk(Solution *sln, const char *name)
 {
 #ifdef OUTPUT_DIR
 	char of_name[512];
@@ -618,11 +618,11 @@ int main(int argc, char **args)
 #endif
 
 #ifdef RHS2
-		out_fn(&sln, "solution");
+		out_fn_vtk(&sln, "solution");
 #elif defined SYS3
-		out_fn(&sln1, "sln1");
-		out_fn(&sln2, "sln2");
-		out_fn(&sln3, "sln3");
+		out_fn_vtk(&sln1, "sln1");
+		out_fn_vtk(&sln2, "sln2");
+		out_fn_vtk(&sln3, "sln3");
 #endif
 	}
 	else

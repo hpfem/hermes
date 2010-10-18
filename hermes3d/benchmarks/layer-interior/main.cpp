@@ -152,8 +152,8 @@ int main(int argc, char **args)
     // Output solution and mesh.
     if (solution_output) 
     {
-      out_fn(&sln, "sln", as);
-      out_orders(&space, "order", as);
+      out_fn_vtk(&sln, "sln", as);
+      out_orders_vtk(&space, "order", as);
     }
 
     // Skip the visualization time.

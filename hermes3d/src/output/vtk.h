@@ -42,9 +42,9 @@ public:
 	virtual void out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn3, const char *name,
 	                 int item = FN_VAL_0);
 	virtual void out(Mesh *mesh);
-	virtual void out_bc(Mesh *mesh, const char *name = "BCs");
+	virtual void out_bc_vtk(Mesh *mesh, const char *name = "BCs");
 
-	virtual void out_orders(Space *space, const char *name = "orders");
+	virtual void out_orders_vtk(Space *space, const char *name = "orders");
 	virtual void out_elem_markers(Mesh *mesh, const char *name = "elem-markers");
 
 	virtual void out(Matrix *mat, bool structure = true);
@@ -59,14 +59,14 @@ protected:
 
 /// Functions facilitating output in the format displayable by e.g. Paraview.
 // Space (polynomial orders) output.
-void H3D_API out_orders(Space *space, const char *name, int iter = -1);
+void H3D_API out_orders_vtk(Space *space, const char *name, int iter = -1);
 // Solution output for one solution component.
-void H3D_API out_fn(MeshFunction *fn, const char *name, int iter = -1);
+void H3D_API out_fn_vtk(MeshFunction *fn, const char *name, int iter = -1);
 // Solution output for three solution components.
-void H3D_API out_fn(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name, int iter = -1);
+void H3D_API out_fn_vtk(MeshFunction *x, MeshFunction *y, MeshFunction *z, const char *name, int iter = -1);
 // Boundary conditions output.
-void H3D_API out_bc(Mesh *mesh, const char *name, int iter = -1);
+void H3D_API out_bc_vtk(Mesh *mesh, const char *name, int iter = -1);
 // Mesh output.
-void H3D_API out_mesh(Mesh *mesh, const char *name, int iter = -1);
+void H3D_API out_mesh_vtk(Mesh *mesh, const char *name, int iter = -1);
 
 #endif

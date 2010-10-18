@@ -124,7 +124,7 @@ int main(int argc, char **args)
     // Output the solution. 
     if (solution_output)
     {
-      out_fn(&sln, "sln", ts);
+      out_fn_vtk(&sln, "sln", ts);
     }
 
     // Calculate error wrt. exact solution. 

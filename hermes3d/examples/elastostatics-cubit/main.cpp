@@ -136,7 +136,7 @@ int main(int argc, char **args)
   else error ("Matrix solver failed.\n");
 
   // Output solution and mesh.
-  if (solution_output) out_fn(&xsln, &ysln, &zsln, "sln");
+  if (solution_output) out_fn_vtk(&xsln, &ysln, &zsln, "sln");
   
   // Time measurement.
   cpu_time.tick();

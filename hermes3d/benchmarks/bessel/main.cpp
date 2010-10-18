@@ -114,8 +114,8 @@ int main(int argc, char **args)
   // Output solution and mesh.
   if (solution_output) 
   {
-    out_fn(&sln, "sln");
-    out_orders(&space, "order");
+    out_fn_vtk(&sln, "sln");
+    out_orders_vtk(&space, "order");
   }
   
   // Time measurement.

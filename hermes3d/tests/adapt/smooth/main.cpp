@@ -203,7 +203,7 @@ res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<
 	return -int_F_v<f_t, res_t>(n, wt, rhs, u, e);
 }
 
-void out_fn(MeshFunction *x, const char *name, int i) {
+void out_fn_vtk(MeshFunction *x, const char *name, int i) {
 #ifdef OUTPUT_DIR
 	char of_name[1024];
 	FILE *ofile;

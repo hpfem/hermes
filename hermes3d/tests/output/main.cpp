@@ -241,10 +241,10 @@ int main(int argc, char **args)
 			error(H3D_ERR_NOT_IMPLEMENTED);
 		space.set_uniform_order(order);
 
-		output.out_orders(&space, "orders");
+		output.out_orders_vtk(&space, "orders");
 	}
 	else if (strcmp(type, "bc") == 0) {
-		output.out_bc(&mesh);
+		output.out_bc_vtk(&mesh);
 	}
 	else if (strcmp(type, "mat") == 0) {
 		StiffMatrix mat;

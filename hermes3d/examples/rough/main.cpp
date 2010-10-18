@@ -244,6 +244,6 @@ int main(int argc, char **args)
 			}
 		}
 
-	out_mesh(&mesh, "mesh");
+	out_mesh_vtk(&mesh, "mesh");
 	return 0;
 }
