@@ -93,7 +93,7 @@ int main(int argc, char **args)
   TimePeriod cpu_time;
   cpu_time.tick();
 
-  // WHAT IS THIS FUNCTION DOING?
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   initialize_solution_environment(matrix_solver, argc, args);
 
   // Adaptivity loop. 
@@ -115,6 +115,7 @@ int main(int argc, char **args)
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     
+    // Initialize the preconditioner in the case of SOLVER_AZTECOO.
     if (matrix_solver == SOLVER_AZTECOO) 
     {
       ((AztecOOSolver*) solver)->set_solver(iterative_method);
@@ -146,7 +147,7 @@ int main(int argc, char **args)
     // Time measurement.
     cpu_time.tick();
 
-    // Output solution and mesh.
+    // Output solution and mesh with polynomial orders.
     if (solution_output) 
     {
       out_fn_vtk(&sln, "sln", as);
@@ -201,6 +202,7 @@ int main(int argc, char **args)
     as++;
   } while (!done);
 
+  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   finalize_solution_environment(matrix_solver);
 
   return 1;

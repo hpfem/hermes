@@ -67,17 +67,19 @@ int main(int argc, char **args)
   wf.add_matrix_form(callback(bilinear_form2), HERMES_SYM, 2);
   wf.add_vector_form(callback(linear_form), HERMES_ANY);
 
-  initialize_solution_environment(matrix_solver, argc, args);
-
   // Initialize discrete problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
+
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
 
   // Set up the solver, matrix, and rhs according to the solver selection.  
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
+  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
   if (matrix_solver == SOLVER_AZTECOO) 
   {
     ((AztecOOSolver*) solver)->set_solver(iterative_method);
@@ -95,7 +97,7 @@ int main(int argc, char **args)
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
-  // Output solution and mesh.
+  // Output solution and the boundary condition.
   if (solution_output) 
   {
     out_fn_vtk(&sln, "sln");
@@ -106,12 +108,14 @@ int main(int argc, char **args)
   cpu_time.tick();
 
   // Print timing information.
-  info("Solution saved. Total running time: %g s", cpu_time.accumulated());
+  info("Solution and the boundary condition saved. Total running time: %g s", cpu_time.accumulated());
 
   // Clean up.
   delete matrix;
   delete rhs;
   delete solver;
+
+  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   finalize_solution_environment(matrix_solver);
 
   return 0;
