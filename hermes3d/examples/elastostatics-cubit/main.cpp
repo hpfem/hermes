@@ -15,7 +15,7 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
@@ -33,24 +33,30 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // Problem parameters. 
 const double E  = 200e9; 		// Young modulus for steel: 200 GPa.
 const double nu = 0.3;			// Poisson ratio. 
-const double f  = 1e4;   		// Load force (N). 
+const double f_x  = 0;   		// x-direction load force (N). 
+const double f_y  = 1e4;   		// y-direction load force (N). 
+const double f_z  = 0;   		// z-direction load force (N). 
 const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
 const double mu = E / (2*(1 + nu));
+
+// Boundary markers.
+int bdy_fixed = 1;
+int bdy_force = 2;
 
 // Boundary condition types. 
 BCType bc_types_x(int marker) 
 {
-  return BC_NATURAL;
+  return (marker == bdy_fixed) ? BC_ESSENTIAL : BC_NATURAL;
 }
 
 BCType bc_types_y(int marker) 
 {
-  return BC_NATURAL;
+  return (marker == bdy_fixed) ? BC_ESSENTIAL : BC_NATURAL;
 }
 
 BCType bc_types_z(int marker) 
 {
-  return (marker == 3) ? BC_ESSENTIAL : BC_NATURAL;
+  return (marker == bdy_fixed) ? BC_ESSENTIAL : BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values. 
@@ -69,8 +75,8 @@ int main(int argc, char **args)
 
   // Load the mesh. 
   Mesh mesh;
-  H3DReader mloader;
-  mloader.load("l-beam.mesh3d", &mesh);
+  ExodusIIReader mloader;
+  mloader.load("brick_with_hole.e", &mesh);
 
   // Perform initial mesh refinement. 
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
@@ -89,14 +95,14 @@ int main(int argc, char **args)
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
   wf.add_matrix_form(0, 2, callback(bilinear_form_0_2), HERMES_SYM);
-  wf.add_vector_form_surf(0, callback(surf_linear_form_0));
+  wf.add_vector_form_surf(0, callback(surf_linear_form_x), bdy_force);
 
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
   wf.add_matrix_form(1, 2, callback(bilinear_form_1_2), HERMES_SYM);
-  wf.add_vector_form_surf(1, callback(surf_linear_form_1));
+  wf.add_vector_form_surf(1, callback(surf_linear_form_y), bdy_force);
 
   wf.add_matrix_form(2, 2, callback(bilinear_form_2_2), HERMES_SYM);
-  wf.add_vector_form_surf(2, callback(surf_linear_form_2), 5);
+  wf.add_vector_form_surf(2, callback(surf_linear_form_z), bdy_force);
 
   // Initialize discrete problem.
   initialize_solution_environment(matrix_solver, argc, args);

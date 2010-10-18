@@ -55,9 +55,12 @@ Scalar bilinear_form_0_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 }
 
 template<typename Real, typename Scalar>
-Scalar surf_linear_form_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) 
+Scalar surf_linear_form_x(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) 
 {
-  return 0.0;
+  Scalar res = 0.0;
+  for (int i = 0; i < n; i++)
+    res += wt[i] * (f_x * v->val[i]);
+  return res;
 }
 
 // 2. equation
@@ -74,9 +77,12 @@ Scalar bilinear_form_1_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 }
 
 template<typename Real, typename Scalar>
-Scalar surf_linear_form_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) 
+Scalar surf_linear_form_y(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) 
 {
-  return 0.0;
+  Scalar res = 0.0;
+  for (int i = 0; i < n; i++)
+    res += wt[i] * (f_y * v->val[i]);
+  return res;
 }
 
 // 3. equation
@@ -87,10 +93,10 @@ Scalar bilinear_form_2_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 }
 
 template<typename Real, typename Scalar>
-Scalar surf_linear_form_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) 
+Scalar surf_linear_form_z(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) 
 {
   Scalar res = 0.0;
   for (int i = 0; i < n; i++)
-    res += wt[i] * (f * v->val[i]);
+    res += wt[i] * (f_z * v->val[i]);
   return res;
 }
