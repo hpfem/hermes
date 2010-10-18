@@ -149,11 +149,11 @@ void Facet::dump() {
 	const char *s_type[] = { "INNER", "OUTER" };
 	const char *s_mode[] = { "TRI", "QUAD" };
 
-	printf("type = %s (%s), [%d, %d], left (elem = %ld, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
-	if (type == INNER) printf(" right (elem = %ld, face = %d)", right, right_face_num);
-	else printf(" right (bdr = %ld)", right);
-	printf(", ref_mask = %d, sons = [%ld, %ld, %ld, %ld], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
-	if (parent != INVALID_IDX) printf("parent = %ld", parent);
+	printf("type = %s (%s), [%d, %d], left (elem = %lu, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
+	if (type == INNER) printf(" right (elem = %lu, face = %d)", right, right_face_num);
+	else printf(" right (bdr = %lu)", right);
+	printf(", ref_mask = %u, sons = [%lu, %lu, %lu, %lu], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
+	if (parent != INVALID_IDX) printf("parent = %lu", parent);
 	else printf("no parent");
 	printf("\n");
 }
@@ -188,7 +188,7 @@ Element::~Element() {
 
 void Element::dump() {
 	_F_
-	printf("id = %ld\n", id);
+	printf("id = %lu\n", id);
 }
 
 // Hex ////////////////////////////////////////////////////////////////////////
@@ -350,9 +350,9 @@ void Hex::unref_all_nodes() {
 // for debugging
 void Hex::dump() {
 	_F_
-	printf("id = %ld (%d, %d, %d), vertices(%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld), ", id, active, used, reft,
+	printf("id = %lu (%u, %u, %d), vertices(%u, %u, %u, %u, %u, %u, %u, %u), ", id, active, used, reft,
 		vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
-	printf("sons(%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld), ",
+	printf("sons(%u, %u, %u, %u, %u, %u, %u, %u), ",
 		sons[0], sons[1], sons[2], sons[3], sons[4], sons[5], sons[6], sons[7]);
 	printf("marker = %d\n", marker);
 }
@@ -497,7 +497,7 @@ void Tetra::unref_all_nodes() {
 
 // for debugging
 void Tetra::dump() {
-	printf("id = %ld, vertices(%ld, %ld, %ld, %ld), ", id, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+	printf("id = %u, vertices(%u, %u, %u, %u), ", id, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 	printf("marker = %d\n", marker);
 }
 
@@ -644,7 +644,7 @@ void Prism::unref_all_nodes() {
 
 // for debugging
 void Prism::dump() {
-	printf("id = %ld, vertices(%ld, %ld, %ld, %ld, %ld, %ld), ", id,
+	printf("id = %u, vertices(%u, %u, %u, %u, %u, %u), ", id,
 		vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
 	printf("marker = %d\n", marker);
 }
@@ -666,7 +666,7 @@ Boundary::~Boundary() {
 
 // for debugging
 void Boundary::dump() {
-	printf("id = %ld, marker = %d\n", id, marker);
+	printf("id = %u, marker = %d\n", id, marker);
 }
 
 // BoundaryTri ////////////////////////////////////////////////////////////////
@@ -919,28 +919,28 @@ unsigned int Mesh::get_edge_id(Element *e, int edge_num) const {
 
 void Mesh::dump() {
 	_F_
-	printf("Vertices (count = %ld)\n", vertices.count());
+	printf("Vertices (count = %lu)\n", vertices.count());
 	for (int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
 		Vertex *v = vertices[i];
 		printf("  id = %ld, ", i);
 		v->dump();
 	}
 
-	printf("Elements (count = %ld)\n", elements.count());
+	printf("Elements (count = %lu)\n", elements.count());
 	for (int i = elements.first(); i != INVALID_IDX; i = elements.next(i)) {
 		Element *e = elements[i];
 		printf("  ");
 		e->dump();
 	}
 
-	printf("Boundaries (count = %ld)\n", boundaries.count());
+	printf("Boundaries (count = %lu)\n", boundaries.count());
 	for (int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i)) {
 		Boundary *b = boundaries[i];
 		printf("  ");
 		b->dump();
 	}
 
-	printf("Facets (count = %ld)\n", facets.count());
+	printf("Facets (count = %lu)\n", facets.count());
 	for (int i = facets.first(); i != INVALID_IDX; i = facets.next(i)) {
 		Facet *f = facets.get(i);
 		printf("  id = %ld, ", i);
