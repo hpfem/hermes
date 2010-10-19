@@ -38,8 +38,8 @@ enum // node types
 
 // 2D element modes
 enum ElementMode2D {
-	MODE_TRIANGLE = 0,
-	MODE_QUAD = 1
+	H2D_MODE_TRIANGLE = 0,
+	H2D_MODE_QUAD = 1
 };
 
 // how many bits the order number takes
