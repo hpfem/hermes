@@ -46,7 +46,7 @@ void Space::VertexData::dump(int id) {
 	}
 	else {
 		printf("dof = %d, n = %d", dof, n);
-		if (dof == H3D_DIRICHLET_DOF) printf(", bc_proj = " SCALAR_FMT, SCALAR(bc_proj));
+		if (dof == HERMES_DIRICHLET_DOF) printf(", bc_proj = " SCALAR_FMT, SCALAR(bc_proj));
 	}
 	printf("\n");
 }
@@ -339,7 +339,7 @@ void Space::assign_vertex_dofs(unsigned int vid) {
 	VertexData *node = vn_data[vid];
 	int ndofs = get_vertex_ndofs();
 	if (node->bc_type == BC_ESSENTIAL) {
-		node->dof = H3D_DIRICHLET_DOF;
+		node->dof = HERMES_DIRICHLET_DOF;
 	}
 	else {
 		node->dof = next_dof;
@@ -353,7 +353,7 @@ void Space::assign_edge_dofs(unsigned int idx) {
 	EdgeData *node = en_data[idx];
 	int ndofs = get_edge_ndofs(node->order);
 	if (node->bc_type == BC_ESSENTIAL) {
-		node->dof = H3D_DIRICHLET_DOF;
+		node->dof = HERMES_DIRICHLET_DOF;
 	}
 	else {
 		node->dof = next_dof;
@@ -367,7 +367,7 @@ void Space::assign_face_dofs(unsigned int idx) {
 	FaceData *node = fn_data[idx];
 	int ndofs = get_face_ndofs(node->order);
 	if (node->bc_type == BC_ESSENTIAL) {
-		node->dof = H3D_DIRICHLET_DOF;
+		node->dof = HERMES_DIRICHLET_DOF;
 	}
 	else {
 		node->dof = next_dof;
@@ -396,13 +396,13 @@ void Space::get_vertex_assembly_list(Element *e, int ivertex, AsmList *al) {
 	if (vnode->ced) {
 		for (int i = 0; i < vnode->ncomponents; i++) {
 			int dof = vnode->baselist[i].dof;
-			assert(dof == H3D_DIRICHLET_DOF || (dof >= first_dof && dof < next_dof));
+			assert(dof == HERMES_DIRICHLET_DOF || (dof >= first_dof && dof < next_dof));
 			al->add(index, dof, vnode->baselist[i].coef);
 		}
 	}
 	else {
 		scalar coef = vnode->dof >= 0 ? 1.0 : vnode->bc_proj;
-		assert(vnode->dof == H3D_DIRICHLET_DOF || (vnode->dof >= first_dof && vnode->dof < next_dof));
+		assert(vnode->dof == HERMES_DIRICHLET_DOF || (vnode->dof >= first_dof && vnode->dof < next_dof));
 		al->add(index, vnode->dof, coef);
 	}
 }
@@ -434,7 +434,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 					for (int j = 0; j < cng_enode->n; j++) {
 						Ord1 order = shapeset->get_order(indices[j]).get_edge_order(iedge);
 						int idx = shapeset->get_constrained_edge_index(iedge, ecomp->ori, order, ecomp->part);
-						al->add(idx, H3D_DIRICHLET_DOF, ecomp->coef * cng_enode->bc_proj[j]);
+						al->add(idx, HERMES_DIRICHLET_DOF, ecomp->coef * cng_enode->bc_proj[j]);
 					}
 				}
 			}
@@ -459,7 +459,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 					for (int j = 0; j < cng_fnode->n; j++) {
 						Ord2 order = shapeset->get_order(indices[j]).get_face_order(fcomp->iface);
 						int idx = shapeset->get_constrained_edge_face_index(iedge, fcomp->ori, order, fcomp->part, fcomp->dir, shapeset->get_face_fn_variant(indices[j]));
-						al->add(idx, H3D_DIRICHLET_DOF, fcomp->coef * cng_fnode->bc_proj[j]);
+						al->add(idx, HERMES_DIRICHLET_DOF, fcomp->coef * cng_fnode->bc_proj[j]);
 					}
 				}
 			}
@@ -477,7 +477,7 @@ void Space::get_edge_assembly_list(Element *elem, int iedge, AsmList *al) {
 			else if (enode->bc_proj != NULL) {
 				for (int j = 0; j < enode->n; j++) {
 					scalar coef = enode->bc_proj[j];
-					al->add(indices[j], H3D_DIRICHLET_DOF, coef);
+					al->add(indices[j], HERMES_DIRICHLET_DOF, coef);
 				}
 			}
 		}
@@ -499,7 +499,7 @@ void Space::get_face_assembly_list(Element *elem, int iface, AsmList *al) {
 					for (int j = 0, dof = cng_fnode->dof; j < cng_fnode->n; j++, dof += stride) {
 						Ord2 order = shapeset->get_order(indices[j]).get_face_order(iface);
 						int idx = shapeset->get_constrained_face_index(iface, fnode->ori, order, fnode->part, shapeset->get_face_fn_variant(indices[j]));
-						assert(dof == H3D_DIRICHLET_DOF || (dof >= first_dof && dof < next_dof));
+						assert(dof == HERMES_DIRICHLET_DOF || (dof >= first_dof && dof < next_dof));
 						al->add(idx, dof, 1.0);
 					}
 				}
@@ -523,7 +523,7 @@ void Space::get_face_assembly_list(Element *elem, int iface, AsmList *al) {
 			else if (fnode->bc_proj != NULL) {
 				for (int j = 0; j < fnode->n; j++) {
 					scalar coef = fnode->bc_proj[j];
-					al->add(indices[j], H3D_DIRICHLET_DOF, coef);
+					al->add(indices[j], HERMES_DIRICHLET_DOF, coef);
 				}
 			}
 		}
@@ -1308,7 +1308,7 @@ void Space::calc_vertex_edge_ced(unsigned int vtx, unsigned int eid, int ori, in
 					int idx = shapeset->get_constrained_edge_index(0, ecomp->ori, order, ecomp->part);
 					baselist[nci].dof = dof;
 					baselist[nci].coef = (ecomp->coef) * shapeset->get_fn_value(idx, 0, -1.0, -1.0, 0);
-					if (cng_enode->dof == H3D_DIRICHLET_DOF) baselist[nci].coef *= cng_enode->bc_proj[j];
+					if (cng_enode->dof == HERMES_DIRICHLET_DOF) baselist[nci].coef *= cng_enode->bc_proj[j];
 					else dof += stride;
 				}
 			}
@@ -1327,7 +1327,7 @@ void Space::calc_vertex_edge_ced(unsigned int vtx, unsigned int eid, int ori, in
 
 					baselist[nci].dof = dof;
 					baselist[nci].coef = (fcomp->coef) * shapeset->get_fn_value(idx, 0.0, -1.0, -1.0, 0);
-					if (cng_fnode->dof == H3D_DIRICHLET_DOF) baselist[nci].coef *= cng_fnode->bc_proj[j];
+					if (cng_fnode->dof == HERMES_DIRICHLET_DOF) baselist[nci].coef *= cng_fnode->bc_proj[j];
 					else dof += stride;
 				}
 			}
@@ -1350,7 +1350,7 @@ void Space::calc_vertex_edge_ced(unsigned int vtx, unsigned int eid, int ori, in
 			for (int j = 0, dof = ed->dof; j < ed->n; j++) {
 				baselist[j].dof = dof;
 				baselist[j].coef = shapeset->get_fn_value(indices[j], mid, -1.0, -1.0, 0);
-				if (ed->dof == H3D_DIRICHLET_DOF) baselist[j].coef *= ed->bc_proj[j];
+				if (ed->dof == HERMES_DIRICHLET_DOF) baselist[j].coef *= ed->bc_proj[j];
 				else dof += stride;
 			}
 		}
@@ -1455,7 +1455,7 @@ void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, unsigne
 				int idx = shapeset->get_constrained_edge_index(0, ecomp->ori, order, ecomp->part);
 				baselist[nci].dof = dof;
 				baselist[nci].coef = ecomp->coef * shapeset->get_fn_value(idx, 0, -1.0, -1.0, 0);
-				if (cng_enode->dof == H3D_DIRICHLET_DOF) baselist[nci].coef *= cng_enode->bc_proj[j];
+				if (cng_enode->dof == HERMES_DIRICHLET_DOF) baselist[nci].coef *= cng_enode->bc_proj[j];
 				else dof += stride;
 			}
 		}
@@ -1476,7 +1476,7 @@ void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, unsigne
 
 				baselist[nci].dof = dof;
 				baselist[nci].coef = fcomp->coef * shapeset->get_fn_value(idx, 0.0, -1.0, -1.0, 0);
-				if (cng_fnode->dof == H3D_DIRICHLET_DOF) baselist[nci].coef *= cng_fnode->bc_proj[j];
+				if (cng_fnode->dof == HERMES_DIRICHLET_DOF) baselist[nci].coef *= cng_fnode->bc_proj[j];
 				else dof += stride;
 			}
 		}
@@ -1564,7 +1564,7 @@ void Space::calc_vertex_face_ced(unsigned int vtx, unsigned int fid, int ori, in
 
 				baselist[j].dof = dof;
 				baselist[j].coef = shapeset->get_fn_value(idx, 0.0, -1.0, 0.0,  0);
-				if (fd->dof == H3D_DIRICHLET_DOF) baselist[j].coef *= fd->bc_proj[j];
+				if (fd->dof == HERMES_DIRICHLET_DOF) baselist[j].coef *= fd->bc_proj[j];
 				else dof += stride;
 				PRINTF(" - [%d]: dof = %d, coef = %lf\n", j, baselist[j].dof, baselist[j].coef);
 			}

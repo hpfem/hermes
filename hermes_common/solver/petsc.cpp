@@ -117,7 +117,7 @@ void PetscMatrix::add(int m, int n, scalar v) {
 void PetscMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_
 #ifdef WITH_PETSC
-  // TODO: pass in just the block of the matrix without H3D_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
+  // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
   // row and cols for -1)
   for (int i = 0; i < m; i++)				// rows
     for (int j = 0; j < n; j++)			// cols

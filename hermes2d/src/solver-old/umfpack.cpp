@@ -104,7 +104,7 @@ void UMFPackMatrix::zero() {
 
 void UMFPackMatrix::add(int m, int n, scalar v) {
 	_F_
-	if (v != 0.0 && m != H3D_DIRICHLET_DOF && n != H3D_DIRICHLET_DOF)		// ignore dirichlet DOFs
+	if (v != 0.0 && m != HERMES_DIRICHLET_DOF && n != HERMES_DIRICHLET_DOF)		// ignore dirichlet DOFs
 		insert_value(Ai + Ap[n], Ax + Ap[n], Ap[n + 1] - Ap[n], m, v);
 }
 
