@@ -604,7 +604,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 	fprintf(this->out_file, "%ld\n", mesh->vertices.count());
 	FOR_ALL_VERTICES(idx, mesh) {
 		Vertex *v = mesh->vertices[idx];
-		fprintf(this->out_file, "%ld %lf %lf %lf\n", idx, v->x, v->y, v->z);
+		fprintf(this->out_file, "%u %lf %lf %lf\n", idx, v->x, v->y, v->z);
 	}
 	fprintf(this->out_file, "$EndNodes\n");
 
@@ -612,7 +612,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 	int n_faces = 0;
 	// elements
 	fprintf(this->out_file, "$Elements\n");
-	fprintf(this->out_file, "%ld\n", mesh->get_num_active_elements());
+	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements());
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
 
@@ -624,12 +624,12 @@ void GmshOutputEngine::out(Mesh *mesh) {
 
 		switch (element->get_mode()) {
 			case MODE_TETRAHEDRON:
-				fprintf(this->out_file, "%ld 4 0 %ld %ld %ld %ld\n",
+				fprintf(this->out_file, "%u 4 0 %u %u %u %u\n",
 					element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 				break;
 
 			case MODE_HEXAHEDRON:
-				fprintf(this->out_file, "%ld 5 0 %ld %ld %ld %ld %ld %ld %ld %ld\n",
+				fprintf(this->out_file, "%u 5 0 %u %u %u %u %u %u %u %u\n",
 					element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
 				break;
 
@@ -654,7 +654,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		unsigned int vtcs[Edge::NUM_VERTICES];
 		for (int iedge = 0; iedge < element->get_num_edges(); iedge++) {
 			element->get_edge_vertices(iedge, vtcs);
-			fprintf(this->out_file, "%ld 1 0 %ld %ld\n", mesh->get_edge_id(vtcs[0], vtcs[1]), vtcs[0], vtcs[1]);
+			fprintf(this->out_file, "%u 1 0 %u %u\n", mesh->get_edge_id(vtcs[0], vtcs[1]), vtcs[0], vtcs[1]);
 		}
 	}
 	fprintf(this->out_file, "$EndElements\n");
@@ -671,11 +671,11 @@ void GmshOutputEngine::out(Mesh *mesh) {
 			element->get_face_vertices(iface, vtcs);
 			switch (element->get_face_mode(iface)) {
 				case MODE_TRIANGLE:
-					fprintf(this->out_file, "%ld 2 0 %ld %ld %ld\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
+					fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
 					break;
 
 				case MODE_QUAD:
-					fprintf(this->out_file, "%ld 3 0 %ld %ld %ld %ld\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+					fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					break;
 			}
       delete [] vtcs;
@@ -709,7 +709,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 	fprintf(this->out_file, "%ld\n", mesh->vertices.count());
 	FOR_ALL_VERTICES(idx, mesh) {
 		Vertex *v = mesh->vertices[idx];
-		fprintf(this->out_file, "%ld %lf %lf %lf\n", idx, v->x, v->y, v->z);
+		fprintf(this->out_file, "%u %lf %lf %lf\n", idx, v->x, v->y, v->z);
 	}
 	fprintf(this->out_file, "$EndNodes\n");
 
@@ -729,11 +729,11 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 
 			switch (facet->mode) {
 				case MODE_TRIANGLE:
-					fprintf(this->out_file, "%ld 2 0 %ld %ld %ld\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
+					fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
 					break;
 
 				case MODE_QUAD:
-					fprintf(this->out_file, "%ld 3 0 %ld %ld %ld %ld\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+					fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					break;
 
 				default:
@@ -761,11 +761,11 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 			int marker = bnd->marker;
 			switch (facet->mode) {
 				case MODE_TRIANGLE:
-					fprintf(this->out_file, "%ld 3 %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker);
+					fprintf(this->out_file, "%u 3 %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker);
 					break;
 
 				case MODE_QUAD:
-					fprintf(this->out_file, "%ld 4 %d %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker, marker);
+					fprintf(this->out_file, "%u 4 %d %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker, marker);
 					break;
 
 				default:
@@ -838,7 +838,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	fprintf(this->out_file, "%ld\n", out_vtcs.count());
 	for (int i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
 		Vertex *v = out_vtcs[i];
-		fprintf(this->out_file, "%ld %lf %lf %lf\n", i + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
+		fprintf(this->out_file, "%d %lf %lf %lf\n", i + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
 		delete v;																		// we no longer need the vertex data
 	}
 	fprintf(this->out_file, "$EndNodes\n");
@@ -851,7 +851,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	};
 	int id = 1;
 	fprintf(this->out_file, "$Elements\n");
-	fprintf(this->out_file, "%ld\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
+	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *element = mesh->elements[idx];
 		unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
@@ -869,7 +869,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 			unsigned int evtcs[2];
 			element->get_edge_vertices(iedge, evtcs);
 			unsigned int v[4] = { vtx_pt[evtcs[0]] + 1, fidx[0] + 1, vtx_pt[evtcs[1]] + 1, fidx[1] + 1 };
-			fprintf(this->out_file, "%d 3 0 %ld %ld %ld %ld\n", id++, v[0], v[1], v[2], v[3]);
+			fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", id++, v[0], v[1], v[2], v[3]);
 		}
     delete [] vtcs;
 	}
@@ -883,7 +883,7 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 	fprintf(this->out_file, "%d\n", 3);
 	fprintf(this->out_file, "0\n"); // time step (not used, but has to be there)
 	fprintf(this->out_file, "1\n"); // 1 value per node
-	fprintf(this->out_file, "%ld\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
+	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
 	id = 1;
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		assert(mesh->elements[idx]->get_mode() == MODE_HEXAHEDRON);			// HEX-specific
