@@ -86,7 +86,7 @@ int tet_face_edges_2[] = { 2, 3, 5 };
 int tet_face_edges_3[] = { 0, 2, 1 };
 int *RefTetra_face_edges[] = { tet_face_edges_0, tet_face_edges_1, tet_face_edges_2, tet_face_edges_3 };
 int RefTetra_face_nedges[] = { 3, 3, 3, 3 };
-EMode2D RefTetra_face_mode[] = { MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE };
+ElementMode2D RefTetra_face_mode[] = { MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE, MODE_TRIANGLE };
 int RefTetra_face_orientations[] = { 6, 6, 6, 6 };
 Point3D RefTetra_face_normal[] = { { 0, -1, 0 }, { 1.0 / sqrt(3.0), 1.0 / sqrt(3.0), 1.0 / sqrt(3.0) }, { -1, 0, 0 }, { 0, 0, -1 } };
 
@@ -122,7 +122,7 @@ int hex_face_edges_4[] = { 0, 1, 2, 3 };
 int hex_face_edges_5[] = { 8, 9, 10, 11 };
 int *RefHex_face_edges[] = { hex_face_edges_0, hex_face_edges_1, hex_face_edges_2, hex_face_edges_3, hex_face_edges_4, hex_face_edges_5 };
 int RefHex_face_nedges[] = { 4, 4, 4, 4, 4, 4 };
-EMode2D RefHex_face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD };
+ElementMode2D RefHex_face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_QUAD };
 int RefHex_face_orientations[] = { 8, 8, 8, 8, 8, 8 };
 int RefHex_face_edge_ori[8][2] = { { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 }, { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } };
 int RefHex_edge_tangent[12] = { 0, 1, 0, 1, 2, 2, 2, 2, 0, 1, 0, 1 };
@@ -155,6 +155,6 @@ int std_3d_prism_face_edges_3[] = { 0, 2, 1 };
 int std_3d_prism_face_edges_4[] = { 6, 7, 8 };
 int *RefPrism_face_edges[] = { std_3d_prism_face_edges_0, std_3d_prism_face_edges_1, std_3d_prism_face_edges_2, std_3d_prism_face_edges_3, std_3d_prism_face_edges_4 };
 int RefPrism_face_nedges[] = { 4, 4, 4, 3, 3 };
-EMode2D RefPrism_face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_TRIANGLE, MODE_TRIANGLE };
+ElementMode2D RefPrism_face_mode[] = { MODE_QUAD, MODE_QUAD, MODE_QUAD, MODE_TRIANGLE, MODE_TRIANGLE };
 int RefPrism_face_orientations[] = { 8, 8, 8, 6, 6 };
 

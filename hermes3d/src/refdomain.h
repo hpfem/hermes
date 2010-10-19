@@ -53,7 +53,7 @@ extern HERMES_API int *RefTetra_face_vtcs[];
 extern HERMES_API int *RefTetra_face_edges[];
 extern HERMES_API int RefTetra_face_nvtcs[];
 extern HERMES_API int RefTetra_face_nedges[];
-extern HERMES_API EMode2D RefTetra_face_mode[];
+extern HERMES_API ElementMode2D RefTetra_face_mode[];
 extern HERMES_API int RefTetra_face_orientations[];
 extern HERMES_API Point3D RefTetra_face_normal[];
 
@@ -64,7 +64,7 @@ extern HERMES_API int *RefHex_face_vtcs[];
 extern HERMES_API int *RefHex_face_edges[];
 extern HERMES_API int RefHex_face_nvtcs[];
 extern HERMES_API int RefHex_face_nedges[];
-extern HERMES_API EMode2D RefHex_face_mode[];
+extern HERMES_API ElementMode2D RefHex_face_mode[];
 extern HERMES_API int RefHex_face_orientations[];
 extern HERMES_API int RefHex_face_edge_ori[8][2];
 extern HERMES_API int RefHex_edge_tangent[];
@@ -76,7 +76,7 @@ extern HERMES_API int *RefPrism_face_vtcs[];
 extern HERMES_API int *RefPrism_face_edges[];
 extern HERMES_API int RefPrism_face_nvtcs[];
 extern HERMES_API int RefPrism_face_nedges[];
-extern HERMES_API EMode2D RefPrism_face_mode[];
+extern HERMES_API ElementMode2D RefPrism_face_mode[];
 extern HERMES_API int RefPrism_face_orientations[];
 
 class HERMES_API RefLine {
@@ -129,7 +129,7 @@ public:
 	static int get_num_face_edges(int face) { return RefTetra_face_nedges[face]; }
 	static const int *get_face_vertices(int face) { return RefTetra_face_vtcs[face]; }
 	static const int *get_face_edges(int face) { return RefTetra_face_edges[face]; }
-	static EMode2D get_face_mode(int face) { return RefTetra_face_mode[face]; }
+	static ElementMode2D get_face_mode(int face) { return RefTetra_face_mode[face]; }
 	static int get_face_orientations(int face) { return RefTetra_face_orientations[face]; }
 
 	static const Point3D get_face_normal(int iface) { return RefTetra_face_normal[iface]; }
@@ -150,7 +150,7 @@ public:
 	static int get_num_face_edges(int face) { return RefHex_face_nedges[face]; }
 	static const int *get_face_vertices(int face) { return RefHex_face_vtcs[face]; }
 	static const int *get_face_edges(int face) { return RefHex_face_edges[face]; }
-	static EMode2D get_face_mode(int face) { return RefHex_face_mode[face]; }
+	static ElementMode2D get_face_mode(int face) { return RefHex_face_mode[face]; }
 	static int get_face_orientations(int face) { return RefHex_face_orientations[face]; }
 	/// @param[in] ori - face orientation
 	/// @return orientations of edges on a face
@@ -176,7 +176,7 @@ public:
 	static int get_num_face_edges(int face) { return RefPrism_face_nedges[face]; }
 	static const int *get_face_vertices(int face) { return RefPrism_face_vtcs[face]; }
 	static const int *get_face_edges(int face) { return RefPrism_face_edges[face]; }
-	static EMode2D get_face_mode(int face) { return RefPrism_face_mode[face]; }
+	static ElementMode2D get_face_mode(int face) { return RefPrism_face_mode[face]; }
 	static int get_face_orientations(int face) { return RefPrism_face_orientations[face]; }
 };
 

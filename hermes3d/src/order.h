@@ -49,7 +49,7 @@ struct Ord2 {
 	Ord2(int order) { type = MODE_TRIANGLE; this->order = order; }
 	Ord2(int x, int y) { type = MODE_QUAD; this->x = x; this->y = y; }
 
-	unsigned type:2;		// EMode2D
+	unsigned type:2;		// ElementMode2D
 	union {
 		// tri
 		struct {
@@ -216,7 +216,7 @@ struct Ord3 {
 		this->z = limit_quad_ord(z);
 	}
 
-	signed type:3;		// EMode3D
+	signed type:3;		// ElementMode3D
 	union {
 		// tetra
 		struct {

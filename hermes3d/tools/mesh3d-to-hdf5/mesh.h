@@ -29,13 +29,13 @@ typedef
 
 
 // 2D element modes
-enum EMode2D {
+enum ElementMode2D {
 	MODE_TRIANGLE = 0,
 	MODE_QUAD = 1
 };
 
 // 3D element modes
-enum EMode3D {
+enum ElementMode3D {
 	MODE_TETRAHEDRON = 0,
 	MODE_HEXAHEDRON = 1,
 	MODE_PRISM = 2
@@ -69,7 +69,7 @@ public:
 class Element {
 public:
 	int id;
-	virtual EMode3D get_mode() const = 0;
+	virtual ElementMode3D get_mode() const = 0;
 	virtual uint *get_vertices() = 0;
 };
 
@@ -83,7 +83,7 @@ public:
 
 	uint vtcs[NUM_VERTICES];
 
-	virtual EMode3D get_mode() const { return MODE_TETRAHEDRON; }
+	virtual ElementMode3D get_mode() const { return MODE_TETRAHEDRON; }
 	virtual uint *get_vertices() { return vtcs; }
 };
 
@@ -97,7 +97,7 @@ public:
 
 	uint vtcs[NUM_VERTICES];
 
-	virtual EMode3D get_mode() const { return MODE_HEXAHEDRON; }
+	virtual ElementMode3D get_mode() const { return MODE_HEXAHEDRON; }
 	virtual uint *get_vertices() { return vtcs; }
 };
 
@@ -111,7 +111,7 @@ public:
 
 	uint vtcs[NUM_VERTICES];
 
-	virtual EMode3D get_mode() const { return MODE_PRISM; }
+	virtual ElementMode3D get_mode() const { return MODE_PRISM; }
 	virtual uint *get_vertices() { return vtcs; }
 };
 
@@ -139,7 +139,7 @@ public:
 
 	virtual int get_marker() const { return marker; }
 
-	virtual EMode2D get_mode() const = 0;
+	virtual ElementMode2D get_mode() const = 0;
 	virtual uint *get_vertices() = 0;
 
 	virtual Boundary *copy() = 0;
@@ -164,7 +164,7 @@ public:
 	virtual ~BoundaryTri();
 
 	virtual Boundary *copy();
-	virtual EMode2D get_mode() const { return MODE_TRIANGLE; }
+	virtual ElementMode2D get_mode() const { return MODE_TRIANGLE; }
 	virtual uint *get_vertices() { return vtcs; }
 
 protected:
@@ -184,7 +184,7 @@ public:
 	virtual ~BoundaryQuad();
 
 	virtual Boundary *copy();
-	virtual EMode2D get_mode() const { return MODE_QUAD; }
+	virtual ElementMode2D get_mode() const { return MODE_QUAD; }
 	virtual uint *get_vertices() { return vtcs; }
 
 protected:

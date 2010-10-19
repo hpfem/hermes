@@ -150,11 +150,11 @@ public:
 
 	int get_max_order() const { return max_order; }
 
-	EMode2D get_mode() const { return mode; }
+	ElementMode2D get_mode() const { return mode; }
 
 protected:
 	/// mode of quadratures (MODE_TRIANGLE, MODE_QUAD)
-	EMode2D mode;
+	ElementMode2D mode;
 	/// maximal order for integration (interpretation depened on the mode)
 	int max_order;
 	/// number of integration points
@@ -197,11 +197,11 @@ public:
 	Ord2 get_face_max_order(int face) const { return max_face_order; }
 	Ord3 get_max_order() const { return max_order; }
 
-	EMode3D get_mode() const { return mode; }
+	ElementMode3D get_mode() const { return mode; }
 
 protected:
 	/// mode of quadratures (MODE_TETRAHEDRON, MODE_HEXAHEDRON, MODE_PRISM)
-	EMode3D mode;
+	ElementMode3D mode;
 	/// maximal order for integration (interpretation depends on the mode)
 	Ord1 max_edge_order;
 	Ord2 max_face_order;
@@ -221,7 +221,7 @@ protected:
 // interface for getting quadratures - library wide ////////////////////////////////////////////////
 
 Quad1D *get_quadrature_1d();
-Quad3D *get_quadrature(EMode3D mode);
+Quad3D *get_quadrature(ElementMode3D mode);
 
 
 #ifndef DEBUG_ORDER

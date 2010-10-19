@@ -4564,6 +4564,6 @@ QuadStdPrism::~QuadStdPrism() {
 
 Quad3D *g_quad_3d[] = { H3D_QUAD_STD_TETRA, H3D_QUAD_STD_HEX, H3D_QUAD_STD_PRISM };
 
-Quad3D *get_quadrature(EMode3D mode) { return g_quad_3d[mode]; }
+Quad3D *get_quadrature(ElementMode3D mode) { return g_quad_3d[mode]; }
 
 Quad1D *get_quadrature_1d() { return &g_quad_std_1d; }

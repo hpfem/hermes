@@ -185,7 +185,7 @@ public:
 		OUTER			// outer facet (left is element, right is boundary)
 	};
 
-	Facet(EMode2D mode);
+	Facet(ElementMode2D mode);
 	Facet(const Facet &o);
 	virtual ~Facet();
 
@@ -214,7 +214,7 @@ public:
 
 public:
 	Type type;					/// type of the facet
-	EMode2D mode;				/// mode of the facet (TRI, QUAD)
+	ElementMode2D mode;				/// mode of the facet (TRI, QUAD)
 	unsigned int left;				/// ID of an element on the "left"
 	unsigned int right;				/// ID of an element or a boundary on the "right" (depending on the type of the facet)
 
@@ -238,7 +238,7 @@ public:
 	Element(const Element &o);
 	virtual ~Element();
 
-	virtual EMode3D get_mode() const = 0;
+	virtual ElementMode3D get_mode() const = 0;
 	virtual int get_num_vertices() const = 0;
 	virtual int get_num_edges() const = 0;
 	virtual int get_num_faces() const = 0;
@@ -253,7 +253,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const = 0;
 
-	virtual EMode2D get_face_mode(int face_num) const = 0;
+	virtual ElementMode2D get_face_mode(int face_num) const = 0;
 	virtual int get_num_face_vertices(int face_num) const = 0;
 	virtual int get_num_face_edges(int face_num) const = 0;
 
@@ -313,7 +313,7 @@ public:
 	virtual ~Hex();
 
 	//
-	virtual EMode3D get_mode() const { return MODE_HEXAHEDRON; }
+	virtual ElementMode3D get_mode() const { return MODE_HEXAHEDRON; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -328,7 +328,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual EMode2D get_face_mode(int face_num) const { return MODE_QUAD; }
+	virtual ElementMode2D get_face_mode(int face_num) const { return MODE_QUAD; }
 	virtual int get_num_face_vertices(int face_num) const { return Quad::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Quad::NUM_EDGES; }
 
@@ -376,7 +376,7 @@ public:
 	virtual ~Tetra();
 
 	//
-	virtual EMode3D get_mode() const { return MODE_TETRAHEDRON; }
+	virtual ElementMode3D get_mode() const { return MODE_TETRAHEDRON; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -391,7 +391,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual EMode2D get_face_mode(int face_num) const { return MODE_TRIANGLE; }
+	virtual ElementMode2D get_face_mode(int face_num) const { return MODE_TRIANGLE; }
 	virtual int get_num_face_vertices(int face_num) const  { return Tri::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Tri::NUM_EDGES; }
 	// FIXME
@@ -433,7 +433,7 @@ public:
 	virtual ~Prism();
 
 	//
-	virtual EMode3D get_mode() const { return MODE_PRISM; }
+	virtual ElementMode3D get_mode() const { return MODE_PRISM; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -448,7 +448,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual EMode2D get_face_mode(int face_num) const;
+	virtual ElementMode2D get_face_mode(int face_num) const;
 	virtual int get_num_face_vertices(int face_num) const;
 	virtual int get_num_face_edges(int face_num) const;
 	// FIXME

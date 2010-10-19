@@ -343,7 +343,7 @@ protected:
       };
     };
 
-    FaceInfo(EMode2D mode, unsigned int elem_id, int face) {
+    FaceInfo(ElementMode2D mode, unsigned int elem_id, int face) {
       this->type = mode == MODE_QUAD;
       this->elem_id = elem_id;
       this->face = face;

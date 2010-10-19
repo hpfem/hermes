@@ -43,7 +43,7 @@ double calc_error(double (*fn)(MeshFunction*, MeshFunction*, int, QuadPt3D*), Me
 	double error = 0.0;
 	Element **ee;
 	while ((ee = trav.get_next_state(NULL, NULL)) != NULL) {
-		EMode3D mode = ee[0]->get_mode();
+		ElementMode3D mode = ee[0]->get_mode();
 
 		RefMap *ru = sln1->get_refmap();
 		Ord3 order = max(sln1->get_fn_order(), sln2->get_fn_order()) + ru->get_inv_ref_order();

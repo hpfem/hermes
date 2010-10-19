@@ -279,12 +279,12 @@ namespace RefinementSelectors {
 
     Shapeset *shapeset; ///< A shapeset used to calculate error.
 
-    std::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode).
-    int max_shape_inx[H2D_NUM_MODES]; ///< A maximum index of a shape function. The first index is a mode (ElementMode).
-    int next_order_shape[H2D_NUM_MODES][H2DRS_MAX_ORDER+1]; ///< An index to the array OptimumSelector::shape_indices of a shape function of the next uniform order. The first index is a mode (ElementMode), the second index is an order.
-    bool has_vertex_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains vertex functions. The index is a mode (ElementMode).
-    bool has_edge_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains edge functions. The index is a mode (ElementMode).
-    bool has_bubble_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains bubble functions. The index is a mode (ElementMode).
+    std::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).
+    int max_shape_inx[H2D_NUM_MODES]; ///< A maximum index of a shape function. The first index is a mode (ElementMode2D).
+    int next_order_shape[H2D_NUM_MODES][H2DRS_MAX_ORDER+1]; ///< An index to the array OptimumSelector::shape_indices of a shape function of the next uniform order. The first index is a mode (ElementMode2D), the second index is an order.
+    bool has_vertex_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains vertex functions. The index is a mode (ElementMode2D).
+    bool has_edge_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains edge functions. The index is a mode (ElementMode2D).
+    bool has_bubble_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains bubble functions. The index is a mode (ElementMode2D).
 
     /// Adds an index (or indices) of a bubble function of a given order if the shape index was not used yet.
     /** This function adds indices of bubble functions that were not added yet on a quadrilateral.
@@ -301,13 +301,13 @@ namespace RefinementSelectors {
     /// Builds shape index table OptimumSelector::shape_indices.
     /** The method fills the array OptimumSelector::shape_indices for a given mode.
      *  The method is called by the constructor.
-     *  \param[in] mode A mode (ElementMode).
+     *  \param[in] mode A mode (ElementMode2D).
      *  \param[in] vertex_order A range of orders in which to search for vertex functions.
      *  \param[in] edge_bubble_order A range of order in which to search for edge and bubble functions. */
     void build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order);
 
     /// Returns a number of shapes that may be contained in an element of a given order.
-    /** \param[in] mode A mode (ElementMode).
+    /** \param[in] mode A mode (ElementMode2D).
      *  \param[in] order_h A horizontal order of the element. If ::H2DRS_ORDER_ANY, any order is allowed.
      *  \param[in] order_v A horizontal order of the element. If ::H2DRS_ORDER_ANY, any order is allowed.
      *  \param[in] allowed_type_mask A combination of flags specifying which orders are allowed. Flags are defined in the enum ShapeType.

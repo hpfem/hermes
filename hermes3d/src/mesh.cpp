@@ -77,7 +77,7 @@ void Edge::dump() {
 
 // Facet //////////////////////////////////////////////////////////////////////
 
-Facet::Facet(EMode2D mode) {
+Facet::Facet(ElementMode2D mode) {
 	_F_
 	this->mode = mode;
 	this->type = INNER;
@@ -564,7 +564,7 @@ const int *Prism::get_edge_vertices(int edge_num) const {
 	return RefPrism::get_edge_vertices(edge_num);
 }
 
-EMode2D Prism::get_face_mode(int face_num) const {
+ElementMode2D Prism::get_face_mode(int face_num) const {
 	_F_
 	assert((face_num >= 0) && (face_num < NUM_FACES));
 	return RefPrism::get_face_mode(face_num);

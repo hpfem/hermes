@@ -77,7 +77,7 @@ void RefMap::set_active_element(Element *e) {
 	_F_
 	assert(e != NULL);
 
-	EMode3D mode = e->get_mode();
+	ElementMode3D mode = e->get_mode();
 
 	pss = ref_map_pss[mode];
 	pss->set_active_element(e);
