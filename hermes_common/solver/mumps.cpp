@@ -134,7 +134,7 @@ scalar MumpsMatrix::get(int m, int n)
 #ifndef H3D_COMPLEX
   return a[mid];
 #else
-  return complex(a[mid].r, a[mid].i);
+  return cplx(a[mid].r, a[mid].i);
 #endif
 }
 
@@ -442,7 +442,7 @@ bool MumpsSolver::solve()
       sln[i] = id.rhs[i];
 #else
     for (int i = 0; i < rhs->size; i++)
-      sln[i] = complex(id.rhs[i].r, id.rhs[i].i);
+      sln[i] = cplx(id.rhs[i].r, id.rhs[i].i);
 #endif
   }
 

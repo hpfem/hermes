@@ -42,7 +42,7 @@
 // error should be smaller than this epsilon
 #define EPS								10e-10F
 
-std::complex<double> img(0, 1);
+cplx img(0, 1);
 
 // general polynomial function
 

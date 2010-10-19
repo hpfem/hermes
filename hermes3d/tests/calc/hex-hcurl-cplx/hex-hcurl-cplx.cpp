@@ -35,8 +35,8 @@
 // error should be smaller than this epsilon
 #define EPS								10e-10F
 
-std::complex<double> img(0, -1);
-std::complex<double> alpha(-1, 1);
+cplx img(0, -1);
+cplx alpha(-1, 1);
 
 scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
 {

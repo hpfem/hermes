@@ -85,7 +85,7 @@ public:
 #ifndef H3D_COMPLEX
   virtual scalar get(int idx) { return v[idx]; }
 #else
-  virtual scalar get(int idx) { return std::complex<double>(v[idx].r, v[idx].i); }
+  virtual scalar get(int idx) { return cplx(v[idx].r, v[idx].i); }
 #endif
   virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
   virtual void zero();

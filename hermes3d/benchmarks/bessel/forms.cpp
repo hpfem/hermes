@@ -88,7 +88,7 @@ scalar biform_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Fu
 {
   // j * kappa * E_T * F_T
   // E_T = nu x E x nu  (nu is outer normal)
-  std::complex<double> ii = std::complex<double>(0.0, 1.0);
+  cplx ii = cplx(0.0, 1.0);
   scalar result = 0;
   for (int i = 0; i < n; i++) {
     scalar uu[3] = { u->val0[i], u->val1[i], u->val2[i] };
@@ -107,7 +107,7 @@ scalar biform_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Fu
 
 scalar liform_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
 {
-  std::complex<double> ii = std::complex<double>(0.0, 1.0);
+  cplx ii = cplx(0.0, 1.0);
   scalar result = 0;
   for (int i = 0; i < n; i++) {
     scalar dx[3], dy[3], dz[3];
