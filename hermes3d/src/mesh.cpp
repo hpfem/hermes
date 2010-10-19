@@ -149,11 +149,11 @@ void Facet::dump() {
 	const char *s_type[] = { "INNER", "OUTER" };
 	const char *s_mode[] = { "TRI", "QUAD" };
 
-	printf("type = %s (%s), [%d, %d], left (elem = %lu, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
-	if (type == INNER) printf(" right (elem = %lu, face = %d)", right, right_face_num);
-	else printf(" right (bdr = %lu)", right);
-	printf(", ref_mask = %u, sons = [%lu, %lu, %lu, %lu], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
-	if (parent != INVALID_IDX) printf("parent = %lu", parent);
+	printf("type = %s (%s), [%d, %d], left (elem = %u, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
+	if (type == INNER) printf(" right (elem = %u, face = %d)", right, right_face_num);
+	else printf(" right (bdr = %u)", right);
+	printf(", ref_mask = %u, sons = [%u, %u, %u, %u], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
+	if (parent != INVALID_IDX) printf("parent = %u", parent);
 	else printf("no parent");
 	printf("\n");
 }
@@ -188,7 +188,7 @@ Element::~Element() {
 
 void Element::dump() {
 	_F_
-	printf("id = %lu\n", id);
+	printf("id = %u\n", id);
 }
 
 // Hex ////////////////////////////////////////////////////////////////////////
@@ -350,7 +350,7 @@ void Hex::unref_all_nodes() {
 // for debugging
 void Hex::dump() {
 	_F_
-	printf("id = %lu (%u, %u, %d), vertices(%u, %u, %u, %u, %u, %u, %u, %u), ", id, active, used, reft,
+	printf("id = %u (%u, %u, %d), vertices(%u, %u, %u, %u, %u, %u, %u, %u), ", id, active, used, reft,
 		vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
 	printf("sons(%u, %u, %u, %u, %u, %u, %u, %u), ",
 		sons[0], sons[1], sons[2], sons[3], sons[4], sons[5], sons[6], sons[7]);
@@ -922,7 +922,7 @@ void Mesh::dump() {
 	printf("Vertices (count = %lu)\n", vertices.count());
 	for (int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
 		Vertex *v = vertices[i];
-		printf("  id = %ld, ", i);
+		printf("  id = %d, ", i);
 		v->dump();
 	}
 
@@ -940,10 +940,10 @@ void Mesh::dump() {
 		b->dump();
 	}
 
-	printf("Facets (count = %lu)\n", facets.count());
+	printf("Facets (count = %u)\n", facets.count());
 	for (int i = facets.first(); i != INVALID_IDX; i = facets.next(i)) {
 		Facet *f = facets.get(i);
-		printf("  id = %ld, ", i);
+		printf("  id = %d, ", i);
 		f->dump();
 	}
 }
