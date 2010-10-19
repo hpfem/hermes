@@ -101,7 +101,7 @@ void Transformable::push_transform(int son) {
 		case MODE_TETRAHEDRON: tr = tetra_trf + son; break;
 		case MODE_HEXAHEDRON:  tr = hex_trf + son; break;
 		case MODE_PRISM:       tr = prism_trf + son; break;
-		default: EXIT(H3D_ERR_UNKNOWN_MODE);
+		default: EXIT(HERMES_ERR_UNKNOWN_MODE);
 	}
 
 	// update transformation matrix

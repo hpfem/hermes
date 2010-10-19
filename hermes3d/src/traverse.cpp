@@ -219,7 +219,7 @@ static int get_hex_split_and_sons(Element *e, Box *cr, Box *er, int *sons) {
 			break;
 	}
 
-	EXIT(H3D_ERR_NOT_IMPLEMENTED);
+	EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 	return -1;
 }
 
@@ -323,7 +323,7 @@ static int trans_to_son_idx(int trans) {
 	else if (trans < 22) return trans & 1;
 	else if (trans < 24) return trans & 1;
 	else if (trans < 26) return trans & 1;
-	else EXIT(H3D_ERR_NOT_IMPLEMENTED);
+	else EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 }
 
 static void init_transforms(Transformable *fn, Box *cr, Box *er) {
@@ -398,11 +398,11 @@ void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 			break;
 
 		case MODE_PRISM:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 			break;
 
 		default:
-			EXIT(H3D_ERR_UNKNOWN_MODE);
+			EXIT(HERMES_ERR_UNKNOWN_MODE);
 			break;
 	}
 
@@ -588,11 +588,11 @@ Element **Traverse::get_next_state(bool *bnd, SurfPos *surf_pos) {
 
 			case MODE_TETRAHEDRON:
 			case MODE_PRISM:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		}
 	}
@@ -792,9 +792,9 @@ void Traverse::union_recurrent(Box *cr, Element **e, Box *er, uint64 *idx, Eleme
 	else {
 		switch (base->get_mode()) {
 			case MODE_HEXAHEDRON:  hex_union_rec(cr, e, er, idx, uni); break;
-			case MODE_TETRAHEDRON: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
- 			case MODE_PRISM:       EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+ 			case MODE_PRISM:       EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 	}
 }

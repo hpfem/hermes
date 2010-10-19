@@ -22,8 +22,6 @@
 #include "../error.h"
 #include "../callstack.h"
 
-#define H3D_PETSC_NOT_COMPILED    "hermes3d was not built with PETSc support."
-
 // TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
 PetscMatrix::PetscMatrix() {
@@ -31,7 +29,7 @@ PetscMatrix::PetscMatrix() {
 #ifdef WITH_PETSC
   inited = false;
 #else
-  error(H3D_PETSC_NOT_COMPILED);
+  error(PETSC_NOT_COMPILED);
 #endif
 }
 
@@ -151,7 +149,7 @@ PetscVector::PetscVector() {
 #ifdef WITH_PETSC
   inited = false;
 #else
-  error(H3D_PETSC_NOT_COMPILED);
+  error(PETSC_NOT_COMPILED);
 #endif
 }
 
@@ -250,8 +248,7 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
   _F_
 #ifdef WITH_PETSC
 #else
-  warning(H3D_PETSC_NOT_COMPILED);
-  exit(128);
+  error(PETSC_NOT_COMPILED);
 #endif
 }
 

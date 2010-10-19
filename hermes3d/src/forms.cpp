@@ -284,7 +284,7 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 		memcpy(u->dz2, f->get_dz_values(2), np * sizeof(scalar));
 	}
 	else {
-		EXIT(H3D_ERR_NOT_IMPLEMENTED);
+		EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 	}
 
 	return u;

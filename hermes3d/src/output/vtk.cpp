@@ -509,11 +509,11 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 				break;
 
 			case MODE_PRISM:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		} // switch
 
@@ -635,11 +635,11 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 				break;
 
 			case MODE_PRISM:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		} // switch
     
@@ -702,7 +702,7 @@ void VtkOutputEngine::out(Mesh *mesh)
 				break;
 
 			default:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 		}
     delete [] vtcs;
@@ -747,7 +747,7 @@ void VtkOutputEngine::out_bc_vtk(Mesh *mesh, const char *name)
 					id = l.add_cell(Vtk::Linearizer::Cell::Quad, Quad::NUM_VERTICES, vtx_pt);
 					break;
 				default:
-					EXIT(H3D_ERR_NOT_IMPLEMENTED);
+					EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 					break;
 			}
       
@@ -824,7 +824,7 @@ void VtkOutputEngine::out_orders_vtk(Space *space, const char *name)
 				break;
     
 			default:
-				error(H3D_ERR_NOT_IMPLEMENTED);
+				error(HERMES_ERR_NOT_IMPLEMENTED);
 		}
     delete [] vtcs;
     delete [] vtx_pt;
@@ -863,7 +863,7 @@ void VtkOutputEngine::out_elem_markers(Mesh *mesh, const char *name)
 				break;
 
 			default:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 		}
 		l.set_cell_data(id, element->marker);
@@ -898,7 +898,7 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 	SparseMatrix *m = dynamic_cast<SparseMatrix *>(mat);
 	if (m == NULL) {
 		// dense matrix
-		warning(H3D_ERR_NOT_IMPLEMENTED);
+		warning(HERMES_ERR_NOT_IMPLEMENTED);
 	}
 	else {
 		if (m->row_storage) {

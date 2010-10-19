@@ -15,8 +15,6 @@
 
 #include "nox.h"
 
-#define NOX_NOT_COMPILED "Hermes was not built with NOX support."
-
 #ifdef HAVE_NOX
 
 static Epetra_SerialComm seq_comm;

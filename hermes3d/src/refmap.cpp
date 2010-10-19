@@ -107,14 +107,14 @@ void RefMap::set_active_element(Element *e) {
 	switch (mode) {
 		case MODE_TETRAHEDRON: ref_order = Ord3(0); break;
 		case MODE_HEXAHEDRON:  ref_order = Ord3(1, 1, 1); break;
-		case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
+		case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 	}
 
 	// calculate the order of the inverse reference map
 	switch (mode) {
 		case MODE_TETRAHEDRON: inv_ref_order = Ord3(0); break;
 		case MODE_HEXAHEDRON:  inv_ref_order = Ord3(1, 1, 1); break;
-		case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
+		case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 	}
 
 	// constant inverse reference map
@@ -421,7 +421,7 @@ void RefMap::calc_face_normal(int iface, const int np, const QuadPt3D *pt, doubl
 			break;
 
 		case MODE_PRISM:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 	}
 
 	delete [] m;

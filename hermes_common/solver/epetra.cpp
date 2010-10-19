@@ -28,8 +28,6 @@
   static Epetra_SerialComm seq_comm;
 #endif
 
-#define H3D_EPETRA_NOT_COMPILED "hermes3d was not built with Epetra support."
-
 EpetraMatrix::EpetraMatrix()
 {
   _F_
@@ -45,7 +43,7 @@ EpetraMatrix::EpetraMatrix()
   this->row_storage = true;
   this->col_storage = false;
 #else
-  error(H3D_EPETRA_NOT_COMPILED);
+  error(EPETRA_NOT_COMPILED);
 #endif
 }
 

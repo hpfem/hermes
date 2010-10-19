@@ -71,7 +71,7 @@ public:
 
 	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) {
 		_F_
-		EXIT(H3D_ERR_NOT_IMPLEMENTED);
+		EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 		return NULL;
 	}
 
@@ -424,8 +424,8 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 		switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(1); break;
 			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
-			case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 
 		Gmsh::OutputQuad *quad = output_quad[mode];
@@ -453,8 +453,8 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 			switch (mode) {
 				case MODE_TETRAHEDRON: np = Tetra::NUM_VERTICES; break;
 				case MODE_HEXAHEDRON: np = Hex::NUM_VERTICES; break;
-				case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-				default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+				case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+				default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 			}
 
 			// small buffers to hold values for one sub-element
@@ -519,8 +519,8 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 		switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(1); break;
 			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
-			case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 
 		Gmsh::OutputQuad *quad = output_quad[mode];
@@ -556,8 +556,8 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 			switch (mode) {
 				case MODE_TETRAHEDRON: np = Tetra::NUM_VERTICES; break;
 				case MODE_HEXAHEDRON: np = Hex::NUM_VERTICES; break;
-				case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-				default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+				case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+				default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 			}
 
 			// small buffers to hold values for one sub-element
@@ -634,11 +634,11 @@ void GmshOutputEngine::out(Mesh *mesh) {
 				break;
 
 			case MODE_PRISM:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		}
     delete [] vtcs;
@@ -737,7 +737,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 					break;
 
 				default:
-					EXIT(H3D_ERR_NOT_IMPLEMENTED);
+					EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 					break;
 			}
       delete [] vtcs;
@@ -769,7 +769,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 					break;
 
 				default:
-					EXIT(H3D_ERR_NOT_IMPLEMENTED);
+					EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 					break;
 			}
 		}
@@ -906,5 +906,5 @@ void GmshOutputEngine::out_orders(Space *space, const char *name) {
 void GmshOutputEngine::out(Matrix *mat)
 {
 	_F_
-	error(H3D_ERR_NOT_IMPLEMENTED);
+	error(HERMES_ERR_NOT_IMPLEMENTED);
 }

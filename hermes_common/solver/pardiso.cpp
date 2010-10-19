@@ -157,7 +157,7 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(H3D_ERR_NOT_IMPLEMENTED);
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
       return false;
 
     default:
@@ -271,7 +271,7 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(H3D_ERR_NOT_IMPLEMENTED);
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
       return false;
 
     default:
@@ -287,8 +287,7 @@ PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
   _F_
 #ifdef WITH_PARDISO
 #else
-  warning("hermes3d was not built with Pardiso support.");
-  exit(128);
+  error(PARDISO_NOT_COMPILED);
 #endif
 }
 

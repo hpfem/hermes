@@ -606,14 +606,14 @@ const int *Prism::get_face_edges(int face_num) const {
 
 int Prism::get_edge_orientation(int edge_num) const {
 	_F_
-	EXIT(H3D_ERR_NOT_IMPLEMENTED);
+	EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 	// FIXME
 	return -1;
 }
 
 int Prism::get_face_orientation(int face_num) const {
 	_F_
-	EXIT(H3D_ERR_NOT_IMPLEMENTED);
+	EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 	// FIXME
 	return -1;
 }
@@ -1200,9 +1200,9 @@ bool Mesh::can_refine_element(unsigned int eid, int reft) const {
 	assert(elem != NULL);
 	switch (elem->get_mode()) {
 		case MODE_HEXAHEDRON: can_refine = can_refine_hex((Hex *) elem, reft); break;
-		case MODE_TETRAHEDRON: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-		case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-		default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+		case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 	}
 
 	return can_refine;
@@ -1288,7 +1288,7 @@ bool Mesh::can_refine_hex(Hex *elem, int refinement) const {
 
 		// WTF?
 		default:
-			EXIT(H3D_ERR_UNKNOWN_REFINEMENT_TYPE);
+			EXIT(HERMES_ERR_UNKNOWN_REFINEMENT_TYPE);
 			break;
 	}
 
@@ -1312,9 +1312,9 @@ bool Mesh::refine_element(unsigned int id, int refinement) {
 	if (can_refine_element(id, refinement)) {
 		switch (elem->get_mode()) {
 			case MODE_HEXAHEDRON: refined = refine_hex((Hex *) elem, refinement); break;
-			case MODE_TETRAHEDRON: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-			case MODE_PRISM: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 
 		seq = g_mesh_seq++;
@@ -1351,7 +1351,7 @@ bool Mesh::refine_hex(Hex *elem, int refinement) {
 			break;
 		// WTF?
 		default:
-			EXIT(H3D_ERR_UNKNOWN_REFINEMENT_TYPE);
+			EXIT(HERMES_ERR_UNKNOWN_REFINEMENT_TYPE);
 			break;
 	}
 
@@ -2334,7 +2334,7 @@ void Mesh::check_elem_oris()
 		Ord3 ord;
 		if (e->get_mode() == MODE_HEXAHEDRON) ord = Ord3(1, 1, 1);
 		else if (e->get_mode() == MODE_TETRAHEDRON) ord = Ord3(2);
-		else warning(H3D_ERR_NOT_IMPLEMENTED);
+		else warning(HERMES_ERR_NOT_IMPLEMENTED);
 		Quad3D *quad = get_quadrature(e->get_mode());
 		int np = quad->get_num_points(ord);
 		QuadPt3D *pt = quad->get_points(ord);

@@ -251,7 +251,7 @@ void Space::copy_orders(const Space &space, int inc) {
 		switch (cmesh->elements[eid]->get_mode()) {
 			case MODE_TETRAHEDRON: order = oo + Ord3(inc); break;
 			case MODE_HEXAHEDRON: order = oo + Ord3(inc, inc, inc); break;
-			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 		order.limit();
 
@@ -327,7 +327,7 @@ void Space::enforce_minimum_rule() {
 				break;
 
 			default:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 		}
 	}
 }
@@ -2165,11 +2165,11 @@ void Space::uc_element(unsigned int idx) {
 						break;
 
 					case MODE_TRIANGLE:
-						EXIT(H3D_ERR_NOT_IMPLEMENTED);
+						EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 						break;
 
 					default:
-						EXIT(H3D_ERR_UNKNOWN_MODE);
+						EXIT(HERMES_ERR_UNKNOWN_MODE);
 						break;
 				}
 			}

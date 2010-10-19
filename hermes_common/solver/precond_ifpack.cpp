@@ -16,8 +16,6 @@
 #include "precond_ifpack.h"
 
 #ifdef HAVE_IFPACK
-
-#define IFPACK_NOT_COMPILED "hermes3d was not built with Ifpack support."
   #include <Ifpack_PointRelaxation.h>
   #include <Ifpack_BlockRelaxation.h>
   #include <Ifpack_DenseContainer.h>

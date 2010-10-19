@@ -104,7 +104,7 @@ int H1Space::get_face_ndofs(Ord2 order)
   switch (order.type) {
     case MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
     case MODE_QUAD: return (order.x - 1) * (order.y - 1);
-    default: EXIT(H3D_ERR_UNKNOWN_MODE); return -1;
+    default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
   }
 }
 
@@ -112,7 +112,7 @@ int H1Space::get_element_ndofs(Ord3 order) {
   switch (order.type) {
     case MODE_TETRAHEDRON: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
     case MODE_HEXAHEDRON: return (order.x - 1) * (order.y - 1) * (order.z - 1);
-    default: EXIT(H3D_ERR_UNKNOWN_MODE); return -1;
+    default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
   }
 }
 

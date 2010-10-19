@@ -23,8 +23,6 @@
 #include "../utils.h"
 #include "../callstack.h"
 
-#define H3D_ERR_MUMPS_NOT_COMPILED    "Hermes3D was not compiled with MUMPS support"
-
 #ifndef H3D_COMPLEX
   #define MUMPS			dmumps_c
   #define MUMPS_STRUCT	DMUMPS_STRUC_C
@@ -195,7 +193,7 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 
     case DF_MATLAB_SPARSE: return false;
     case DF_HERMES_BIN: return false;
-    case DF_PLAIN_ASCII: EXIT(H3D_ERR_NOT_IMPLEMENTED); return false;
+    case DF_PLAIN_ASCII: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return false;
     default: return false;
   }
 }
@@ -332,7 +330,7 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(H3D_ERR_NOT_IMPLEMENTED);
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
       return false;
 
     default:
@@ -348,7 +346,7 @@ MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
   _F_
 #ifdef WITH_MUMPS
 #else
-  EXIT(H3D_ERR_MUMPS_NOT_COMPILED);
+  error(MUMPS_NOT_COMPILED);
 #endif
 }
 

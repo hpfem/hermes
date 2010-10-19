@@ -74,7 +74,7 @@ struct Ord2 {
 			case MODE_QUAD:
 				return Ord2(limit_quad_ord(this->x + o.x),
 				                limit_quad_ord(this->y + o.y));
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord2(-1);
 	}
@@ -87,7 +87,7 @@ struct Ord2 {
 				this->x = limit_quad_ord(this->x + o.x);
 				this->y = limit_quad_ord(this->y + o.y);
 				break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return *this;
 	}
@@ -98,7 +98,7 @@ struct Ord2 {
 			case MODE_QUAD:
 				return Ord2(limit_quad_ord(c * this->x),
 				                limit_quad_ord(c * this->y));
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord2(-1);
 	}
@@ -110,7 +110,7 @@ struct Ord2 {
 			case MODE_QUAD:
 				return Ord2(limit_quad_ord(this->x * o.x),
 				                limit_quad_ord(this->y * o.y));
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord2(-1);
 	}
@@ -122,7 +122,7 @@ struct Ord2 {
 				this->x = limit_quad_ord(this->x * c);
 				this->y = limit_quad_ord(this->y * c);
 				break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return *this;
 	}
@@ -135,7 +135,7 @@ struct Ord2 {
 				this->x = limit_quad_ord(this->x * o.x);
 				this->y = limit_quad_ord(this->x * o.y);
 				break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return *this;
 	}
@@ -146,7 +146,7 @@ struct Ord2 {
 		switch (this->type) {
 			case MODE_TRIANGLE: return this->order == o.order;
 			case MODE_QUAD: return (this->x == o.x) && (this->y == o.y);
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return false;
 	}
@@ -156,7 +156,7 @@ struct Ord2 {
 		switch (this->type) {
 			case MODE_TRIANGLE: return this->order != o.order;
 			case MODE_QUAD: return (this->x != o.x) || (this->y != o.y);
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return false;
 	}
@@ -166,7 +166,7 @@ struct Ord2 {
 		switch (type) {
 			case MODE_TRIANGLE: sprintf(s, "(%d)", this->order); break;
 			case MODE_QUAD: sprintf(s, "(%d, %d)", this->x, this->y); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return s;
 	}
@@ -175,7 +175,7 @@ struct Ord2 {
 		switch (type) {
 			case MODE_TRIANGLE: return (this->type << 10) | this->order;
 			case MODE_QUAD: return (((this->type << 5) | this->y) << 5) | this->x;
-			default: assert(false); EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: assert(false); EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return -1;
 	}
@@ -185,7 +185,7 @@ struct Ord2 {
 		switch (type) {
 			case MODE_TRIANGLE: return Ord2(o & 0x1F); break;
 			case MODE_QUAD: return Ord2(o & 0x1F, (o >> 5) & 0x1F); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord2(-1);
 	}
@@ -196,7 +196,7 @@ inline Ord2 max(Ord2 a, Ord2 b) {
 	switch (a.type) {
 		case MODE_TRIANGLE: return Ord2(std::max(a.order, b.order));
 		case MODE_QUAD: return Ord2(std::max(a.x, b.x), std::max(a.y, b.y));
-		default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+		default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 	}
 	return Ord2(-1);
 }
@@ -238,7 +238,7 @@ struct Ord3 {
 		switch (type) {
 			case MODE_TETRAHEDRON:	return order;
 			case MODE_HEXAHEDRON: return std::max(std::max(this->x, this->y), this->z);
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return -1;
 	}
@@ -253,7 +253,7 @@ struct Ord3 {
 				return Ord3(limit_quad_ord(this->x + o.x),
 				                limit_quad_ord(this->y + o.y),
 			                    limit_quad_ord(this->z + o.z));
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord3(-1);
 	}
@@ -267,7 +267,7 @@ struct Ord3 {
 				this->y = limit_quad_ord(this->y + o.y);
 				this->z = limit_quad_ord(this->z + o.z);
 				break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return *this;
 	}
@@ -279,7 +279,7 @@ struct Ord3 {
 				return Ord3(limit_quad_ord(c * this->x),
 				                limit_quad_ord(c * this->y),
 				                limit_quad_ord(c * this->z));
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord3(-1);
 	}
@@ -292,7 +292,7 @@ struct Ord3 {
 				return Ord3(limit_quad_ord(this->x * o.x),
 				                limit_quad_ord(this->y * o.y),
 				                limit_quad_ord(this->z * o.z));
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord3(-1);
 	}
@@ -305,7 +305,7 @@ struct Ord3 {
 				this->y = limit_quad_ord(this->y * c);
 				this->z = limit_quad_ord(this->z * c);
 				break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return *this;
 	}
@@ -319,7 +319,7 @@ struct Ord3 {
 				this->y = limit_quad_ord(this->y * o.y);
 				this->z = limit_quad_ord(this->z * o.z);
 				break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return *this;
 	}
@@ -330,7 +330,7 @@ struct Ord3 {
 		switch (this->type) {
 			case MODE_TETRAHEDRON: return this->order == o.order;
 			case MODE_HEXAHEDRON: return (this->x == o.x) && (this->y == o.y) && (this->z == o.z);
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return false;
 	}
@@ -340,7 +340,7 @@ struct Ord3 {
 		switch (this->type) {
 			case MODE_TETRAHEDRON: return this->order != o.order;
 			case MODE_HEXAHEDRON: return (this->x != o.x) || (this->y != o.y) || (this->z != o.z);
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return false;
 	}
@@ -350,7 +350,7 @@ struct Ord3 {
 		switch (type) {
 			case MODE_TETRAHEDRON: sprintf(s, "(%d)", this->order); break;
 			case MODE_HEXAHEDRON: sprintf(s, "(%d, %d, %d)", this->x, this->y, this->z); break;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return s;
 	}
@@ -361,7 +361,7 @@ struct Ord3 {
 			case MODE_TETRAHEDRON: return ((this->type) << 15) | this->order;
 			case MODE_HEXAHEDRON:
 				return (((((this->type << 5) | this->z) << 5) | this->y) << 5) | this->x;
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return -1;
 	}
@@ -371,7 +371,7 @@ struct Ord3 {
 		switch (type) {
 			case MODE_TETRAHEDRON: return Ord3(o & 0x7FFF);
 			case MODE_HEXAHEDRON: return Ord3(o & 0x1F, (o >> 5) & 0x1F, (o >> 10) & 0x1F);
-			default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 		return Ord3(-1);
 	}
@@ -385,7 +385,7 @@ struct Ord3 {
 				else if((edge == 4) || (edge == 5) || (edge == 6) || (edge == 7)) return this->z;
 				else EXIT(H3D_ERR_EDGE_INDEX_OUT_OF_RANGE);
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		}
 		return -1;
@@ -400,7 +400,7 @@ struct Ord3 {
 				else if ((face == 4) || (face == 5)) return Ord2(this->x, this->y);
 				else EXIT(H3D_ERR_FACE_INDEX_OUT_OF_RANGE);
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		}
 		return Ord2(-1);
@@ -423,7 +423,7 @@ struct Ord3 {
 				break;
 
 			default:
-				EXIT(H3D_ERR_UNKNOWN_MODE);
+				EXIT(HERMES_ERR_UNKNOWN_MODE);
 				break;
 		}
 	}
@@ -436,7 +436,7 @@ inline Ord3 operator*(const int c, const Ord3 &a) {
 			return Ord3(limit_quad_ord(c * a.x),
 			                limit_quad_ord(c * a.y),
 			                limit_quad_ord(c * a.z));
-		default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+		default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 	}
 	return Ord3(-1);
 }
@@ -450,7 +450,7 @@ inline Ord3 max(Ord3 a, Ord3 b) {
 		case MODE_TETRAHEDRON: return Ord3(std::max(a.order, b.order));
 		case MODE_HEXAHEDRON:
 			return Ord3(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
-		default: EXIT(H3D_ERR_UNKNOWN_MODE); break;
+		default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 	}
 	return Ord3(-1);
 }

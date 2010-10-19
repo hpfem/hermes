@@ -15,8 +15,6 @@
 
 #include "precond_ml.h"
 
-#define ML_NOT_COMPILED "hermes3d was not built with ML support."
-
 MlPrecond::MlPrecond(const char *type)
 {
 #ifdef HAVE_ML

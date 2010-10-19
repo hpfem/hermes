@@ -537,7 +537,7 @@ void Adapt::get_optimal_refinement(Mesh *mesh, Element *e, const Ord3 &order, So
 				break;
 
 			default:
-				EXIT(H3D_ERR_NOT_IMPLEMENTED);
+				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 		}
 		c->error = sqrt(c->error);

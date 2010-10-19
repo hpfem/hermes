@@ -238,7 +238,7 @@ int main(int argc, char **args)
 		else if (mesh.elements[1]->get_mode() == MODE_TETRAHEDRON)
 			order = order3_t(3);
 		else
-			error(H3D_ERR_NOT_IMPLEMENTED);
+			error(HERMES_ERR_NOT_IMPLEMENTED);
 		space.set_uniform_order(order);
 
 		output.out_orders_vtk(&space, "orders");

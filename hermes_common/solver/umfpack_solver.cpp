@@ -150,7 +150,7 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(H3D_ERR_NOT_IMPLEMENTED);
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
       return false;
 
     default:
@@ -265,7 +265,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(H3D_ERR_NOT_IMPLEMENTED);
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
       return false;
 
     default:
@@ -300,7 +300,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
   _F_
 #ifdef WITH_UMFPACK
 #else
-  error("hermes3d was not built with UMFPACK support.");
+  error(UMFPACK_NOT_COMPILED);
 #endif
 }
 

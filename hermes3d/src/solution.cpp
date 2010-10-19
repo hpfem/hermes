@@ -275,10 +275,10 @@ static void make_dx_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 			break;
 
 		case MODE_PRISM:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 
 		default:
-			EXIT(H3D_ERR_UNKNOWN_MODE);
+			EXIT(HERMES_ERR_UNKNOWN_MODE);
 	}
 
 }
@@ -311,10 +311,10 @@ static void make_dy_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 			break;
 
 		case MODE_PRISM:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 
 		default:
-			EXIT(H3D_ERR_UNKNOWN_MODE);
+			EXIT(HERMES_ERR_UNKNOWN_MODE);
 	}
 }
 
@@ -344,10 +344,10 @@ static void make_dz_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 			break;
 
 		case MODE_PRISM:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 
 		default:
-			EXIT(H3D_ERR_UNKNOWN_MODE);
+			EXIT(HERMES_ERR_UNKNOWN_MODE);
 	}
 }
 
@@ -369,7 +369,7 @@ void Solution::set_active_element(Element *e) {
 		switch (mode) {
 			case MODE_TETRAHEDRON: np = (order.order + 1) * (order.order + 2) * (order.order + 3) / 6; break;
 			case MODE_HEXAHEDRON: np = (order.x + 1) * (order.y + 1) * (order.z + 1); break;
-			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 
 		for (int i = 0, m = 0; i < num_components; i++) {
@@ -385,14 +385,14 @@ void Solution::set_active_element(Element *e) {
 		switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER_TETRA); break;
 			case MODE_HEXAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
-			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
 	else if (type == HERMES_CONST) {
     switch (mode) {
 			case MODE_TETRAHEDRON: order = Ord3(0); break;
 			case MODE_HEXAHEDRON: order = Ord3(0, 0, 0); break;
-			default: EXIT(H3D_ERR_NOT_IMPLEMENTED); break;
+			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
 	else
@@ -470,7 +470,7 @@ void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {
 			break;
 
 		default:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 			break;
 	}
 
@@ -890,7 +890,7 @@ Ord3 Solution::get_order()
 			break;
 
 		default:
-			EXIT(H3D_ERR_NOT_IMPLEMENTED);
+			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 			break;
 	}
 

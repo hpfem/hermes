@@ -23,8 +23,6 @@
   #include <Komplex_LinearProblem.h>
 #endif
 
-#define H3D_AZTECOO_NOT_COMPILED   "hermes3d was not built with AztecOO support."
-
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
 AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
@@ -36,8 +34,7 @@ AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
     pc = NULL;
   #endif
 #else
-  warning(H3D_AZTECOO_NOT_COMPILED);
-  exit(128);
+  error(AZTECOO_NOT_COMPILED);
 #endif
 }
 

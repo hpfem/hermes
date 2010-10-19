@@ -42,8 +42,7 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
   //          ( Amesos.cpp, line 88, called from factory.Create(): 
   //            return new Amesos_Klu(LinearProblem); )
 #else
-  warning("hermes3d was not built with AMESOS support.");
-  exit(128);
+  error(AMESOS_NOT_COMPILED);
 #endif
 }
 
