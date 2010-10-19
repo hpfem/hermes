@@ -8,7 +8,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # source files for the hermes3d library
 set(SRC
 	hermes3d.cpp
-	common.cpp
+	h3d_common.cpp
 	filter.cpp
 	forms.cpp
 	function.cpp
@@ -18,7 +18,6 @@ set(SRC
 	loader/exodusii.cpp
 	loader/mesh3d.cpp
 	loader/hdf5.cpp
-	matrix.cpp
 	norm.cpp
 	output/gmsh.cpp
 	output/vtk.cpp

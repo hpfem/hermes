@@ -17,7 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../common.h"
+#include "../h3d_common.h"
 #include "../solution.h"
 #include "../refmap.h"
 #include "../quad.h"
@@ -27,7 +27,6 @@
 #include "adapt.h"
 #include "h1projipol.h"
 #include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/callstack.h"
 
 //#define DEBUG_PRINT
 

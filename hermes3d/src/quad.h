@@ -20,7 +20,7 @@
 #ifndef _QUAD_H_
 #define _QUAD_H_
 
-#include "common.h"
+#include "h3d_common.h"
 #include "order.h"
 #include "../../hermes_common/array.h"
 #include "../../hermes_common/error.h"

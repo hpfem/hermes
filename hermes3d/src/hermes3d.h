@@ -46,7 +46,7 @@
 #include "../../hermes_common/solver/precond_ifpack.h"
 #include "../../hermes_common/solver/precond_ml.h"
 
-#include "common.h"
+#include "h3d_common.h"
 
 // mesh
 #include "mesh.h"

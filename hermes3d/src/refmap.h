@@ -20,7 +20,7 @@
 #ifndef _REFMAP_H_
 #define _REFMAP_H_
 
-#include "common.h"
+#include "h3d_common.h"
 #include "transform.h"
 #include "quad.h"
 #include "mesh.h"

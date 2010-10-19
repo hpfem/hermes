@@ -20,7 +20,7 @@
 #ifndef _FORMS_H_
 #define _FORMS_H_
 
-#include "common.h"
+#include "h3d_common.h"
 #include "quad.h"
 #include "function.h"
 #include "solution.h"

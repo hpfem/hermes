@@ -20,7 +20,7 @@
 #ifndef _SHAPESET_COMMON_H_
 #define _SHAPESET_COMMON_H_
 
-#include "../common.h"
+#include "../h3d_common.h"
 
 struct QuadPt3D;
 

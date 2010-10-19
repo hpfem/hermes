@@ -20,7 +20,7 @@
 #ifndef _FUNCTION_H_
 #define _FUNCTION_H_
 
-#include "common.h"
+#include "h3d_common.h"
 #include "mesh.h"
 #include "quad.h"
 #include "order.h"

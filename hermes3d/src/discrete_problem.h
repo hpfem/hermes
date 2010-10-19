@@ -20,7 +20,7 @@
 #ifndef _DISCRETE_PROBLEM_H_
 #define _DISCRETE_PROBLEM_H_
 
-#include "common.h"
+#include "h3d_common.h"
 #include "weakform.h"
 #include "tuple.h"
 #include "../../hermes_common/array.h"

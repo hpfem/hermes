@@ -28,7 +28,7 @@
 //   tables.
 //
 
-#include "common.h"
+#include "h3d_common.h"
 #include "transform.h"
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/callstack.h"

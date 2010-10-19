@@ -1,11 +1,11 @@
-// This file is part of Hermes3D
+// This file is part of Hermes3D.
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
 //
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
+// by the Free Software Foundation, either version 2 of the License,
 // or (at your option) any later version.
 //
 // Hermes3D is distributed in the hope that it will be useful,
@@ -14,175 +14,33 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with Hermes3D. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _COMMON_H_
-#define _COMMON_H_
+#ifndef __H3D_COMMON_H_
+#define __H3D_COMMON_H_
 
-#include "config.h"
+#include "../../hermes_common/common.h"
 
-// common headers
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sstream>
-#include <pthread.h>
-#include <string>
-#include <assert.h>
-#include <math.h>
-#include <errno.h>
-#include <cstdarg>
-
-// STL stuff
-#include <algorithm>
-#include <vector>
-#include <map>
-#include <set>
-#include <queue>
-#include <sstream>
-#include <fstream>
-
-#include "common_time_period.h"
-
-
-// error codes
-#define H3D_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
-#define H3D_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
+// H3D-specific error codes.
 #define H3D_ERR_FACE_INDEX_OUT_OF_RANGE         "Face index out of range."
 #define H3D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
 #define H3D_ERR_TETRA_NOT_COMPILED              "hermes3d was not built with tetra elements."
 #define H3D_ERR_HEX_NOT_COMPILED                "hermes3d was not built with hex elements."
 #define H3D_ERR_PRISM_NOT_COMPILED              "hermes3d was not built with prism elements."
-#define H3D_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
-
-// Matrix solvers:
-enum MatrixSolverType 
-{
-   SOLVER_UMFPACK = 0, 
-   SOLVER_PETSC, 
-   SOLVER_MUMPS,
-   SOLVER_PARDISO,
-   SOLVER_NOX,
-   SOLVER_AMESOS,
-   SOLVER_AZTECOO
-};
-
-// Should be in the same order as MatrixSolverTypes above, so that the
-// names may be accessed by the same enumeration variable.
-const std::string MatrixSolverNames[7] = {
-  "UMFPACK",
-  "PETSc",
-  "MUMPS",
-  "Pardiso",
-  "Trilinos/NOX",
-  "Trilinos/Amesos",
-  "Trilinos/AztecOO"
-};
-
-// Projection norms:
-enum ProjNormType
-{
-  HERMES_L2_NORM, 
-  HERMES_H1_NORM, 
-  HERMES_H1_SEMINORM, 
-  HERMES_HCURL_NORM, 
-  HERMES_HDIV_NORM
-};
-
-// Default HERMES projection norm is the H1 norm.
-const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
-
-inline double conj(double a) {  return a; }
-
-#ifdef H3D_COMPLEX
-
-#include <complex>
-
-typedef std::complex<double> complex;
-typedef complex scalar;
-typedef complex complex2[2];
-#define CONJ(a)				(std::conj(a))
-#define REAL(a)				(std::real(a))
-#define IMAG(a)				(std::imag(a))
-#define ABS(a)				(std::abs(a))
-#define SCALAR_FMT			"(%lf, %lf)"
-#define SCALAR(a)			std::real(a), std::imag(a)
-inline complex conj(complex a) { return std::conj(a); }
-// BLAS-related function
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern int zscal_(int *, complex *, complex *, int *);
-extern int zaxpy_(int *, complex *, complex *, int *, complex *, int *);
-extern int zcopy_(int *,            complex *, int *, complex *, int *);
-
-#ifdef __cplusplus
-}
-#endif
-
-/// x <- alpha * x
-inline void blas_scal(int n, complex alpha, complex *x, int incx) { zscal_(&n, &alpha, x, &incx); }
-/// y <- alpha * x + y
-inline void blas_axpy(int n, complex alpha, complex *x, int incx, complex *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
-/// y <- x
-inline void blas_copy(int n, complex *x, int incx, complex *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
-
-#else
-
-typedef double scalar;
-#define CONJ(a)				(a)
-#define REAL(a)				(a)
-#define IMAG(a)				(0)
-#define ABS(a)				(fabs(a))
-#define SCALAR_FMT			"%lf"
-#define SCALAR(a)			(a)
-
-#endif
-
-// BLAS-related function
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern int dscal_(int *, double *, double *, int *);
-extern int daxpy_(int *, double *, double *, int *, double *, int *);
-extern int dcopy_(int *,           double *, int *, double *, int *);
-
-#ifdef __cplusplus
-}
-#endif
-
-/// x <- alpha * x
-inline void blas_scal(int n, double alpha, double *x, int incx) { dscal_(&n, &alpha, x, &incx); }
-/// y <- alpha * x + y
-inline void blas_axpy(int n, double alpha, double *x, int incx, double *y, int incy) { daxpy_(&n, &alpha, x, &incx, y, &incy); }
-/// y <- x
-inline void blas_copy(int n, double *x, int incx, double *y, int incy) { dcopy_(&n, x, &incx, y, &incx); }
-
-const int HERMES_ANY = -1234;
-
-/// Pi.
-#ifndef M_PI
-#define M_PI           3.14159265358979323846
-#endif
 
 // 1D element modes
-enum EMode1D {
+enum ElementMode1D {
 	MODE_LINE = 0
 };
 
 // 2D element modes
-enum EMode2D {
+enum ElementMode2D {
 	MODE_TRIANGLE = 0,
 	MODE_QUAD = 1
 };
 
 // 3D element modes
-enum EMode3D {
+enum ElementMode3D {
 	MODE_TETRAHEDRON = 0,
 	MODE_HEXAHEDRON = 1,
 	MODE_PRISM = 2
@@ -289,33 +147,8 @@ struct Vector3D {
 	}
 };
 
-
-
-typedef double double2[2];
-typedef double double3[3];
-typedef double double4[4];
-typedef double double2x2[2][2];
-typedef double double3x3[3][3];
-typedef int int2[2];
-typedef scalar scalar3[3];
-typedef unsigned long long int uint64;
-
 // maximal polynomial order of elements
 #define H3D_MAX_ELEMENT_ORDER							10
-
-// Dirichlet lift is a special DOF with nubmer -1
-#define H3D_DIRICHLET_DOF								-1
-
-//
-
-inline int sqr(int x) { return x*x; }
-inline double sqr(double x) { return x*x; }
-
-#ifdef H3D_COMPLEX
-inline double sqr(complex x) { return std::norm(x); }
-#endif
-
-#define countof(a) (sizeof(a)/sizeof(a[0]))
 
 #define H3D_EC_TIME 'T' ///< An event code: time measurements. \internal
 #define H3D_REPORT_TIME

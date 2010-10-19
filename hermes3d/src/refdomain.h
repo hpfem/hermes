@@ -21,7 +21,7 @@
 #define _REFDOMAIN_H_
 
 #include "mesh.h"
-#include "common.h"
+#include "h3d_common.h"
 
 /// @defgroup ref_domains Reference domains
 ///

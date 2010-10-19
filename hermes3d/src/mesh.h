@@ -24,7 +24,7 @@ class Space;
 class MeshLoader;
 
 
-#include "common.h"
+#include "h3d_common.h"
 
 #include "../../hermes_common/array.h"
 #include "../../hermes_common/arrayptr.h"
