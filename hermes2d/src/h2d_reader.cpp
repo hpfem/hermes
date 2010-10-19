@@ -367,12 +367,12 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
 
   // read the end point indices
   MItem* edge = curve->list;
-  if (edge->n >= 0 || !H2D_IS_INT(edge->val))
+  if (edge->n >= 0 || !HERMES_IS_INT(edge->val))
     error("Curve #%d: invalid edge definition.", id);
   p1 = (int) edge->val;
   edge = edge->next;
 
-  if (edge->n >= 0 || !H2D_IS_INT(edge->val))
+  if (edge->n >= 0 || !HERMES_IS_INT(edge->val))
     error("Curve #%d: invalid edge definition.", id);
   p2 = (int) edge->val;
   edge = edge->next;
@@ -386,7 +386,7 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
   nurbs->degree = 2;
   if (!circle)
   {
-    if (deg == NULL || deg->n >= 0 || !H2D_IS_INT(deg->val) || deg->val < 0 || deg->val == 1)
+    if (deg == NULL || deg->n >= 0 || !HERMES_IS_INT(deg->val) || deg->val < 0 || deg->val == 1)
       error("Curve #%d: invalid degee.", id);
     nurbs->degree = (int) deg->val;
   }

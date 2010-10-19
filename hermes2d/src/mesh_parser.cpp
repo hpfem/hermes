@@ -465,7 +465,7 @@ bool mesh_parser_get_ints(MItem* list, int n, ...)
   MItem* it = list->list;
   va_list ap; va_start(ap, n);
   for (int i = 0; i < n; i++, it = it->next) {
-    if (it->n >= 0 || !H2D_IS_INT(it->val)) return false;
+    if (it->n >= 0 || !HERMES_IS_INT(it->val)) return false;
     *(va_arg(ap, int*)) = (int) it->val;
   }
   va_end(ap);
