@@ -3,7 +3,7 @@ if(MSVC)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif(MSVC)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # source files for the hermes3d library
 set(SRC
@@ -44,28 +44,28 @@ set(SRC
 	transform.cpp
 	traverse.cpp
 	weakform.cpp
-  adapt/adapt.cpp
+    adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
-	${HERMES_COMMON_DIR}/solver/pardiso.cpp
-	${HERMES_COMMON_DIR}/solver/petsc.cpp
-	${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
-	${HERMES_COMMON_DIR}/solver/epetra.cpp
-	${HERMES_COMMON_DIR}/solver/amesos.cpp
-	${HERMES_COMMON_DIR}/solver/aztecoo.cpp
-	${HERMES_COMMON_DIR}/solver/nox.cpp
-	${HERMES_COMMON_DIR}/solver/mumps.cpp
-	${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp
-	${HERMES_COMMON_DIR}/solver/precond_ml.cpp
 	${HERMES_COMMON_DIR}/common_time_period.cpp
+    ${HERMES_COMMON_DIR}/callstack.cpp
+    ${HERMES_COMMON_DIR}/error.cpp
+    ${HERMES_COMMON_DIR}/utils.cpp
+    ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
+    ${HERMES_COMMON_DIR}/solver/nox.cpp 
+    ${HERMES_COMMON_DIR}/solver/epetra.cpp 
+    ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
+    ${HERMES_COMMON_DIR}/solver/amesos.cpp
+    ${HERMES_COMMON_DIR}/solver/mumps.cpp 
+    ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
+    ${HERMES_COMMON_DIR}/solver/petsc.cpp 
+    ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
+    ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
+    ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
     ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
     ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
-	${HERMES_COMMON_DIR}/callstack.cpp
-	${HERMES_COMMON_DIR}/trace.cpp
-	${HERMES_COMMON_DIR}/error.cpp
-	${HERMES_COMMON_DIR}/utils.cpp
 )
 
 include(PickRealOrCplxLibs)
@@ -78,6 +78,10 @@ macro(LIBRARY_SETTINGS BIN)
       IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
           target_link_libraries(${BIN} "rt")
       ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      if(HAVE_TEUCHOS_BFD)
+          # stacktrace code needs binutils:
+          target_link_libraries(${BIN} bfd iberty)
+      endif(HAVE_TEUCHOS_BFD)
   endif(NOT MSVC)
   
   # Link with all third party libraries corresponding to selected configuration options.
@@ -109,12 +113,16 @@ endif(H3D_REAL)
 # complex version
 if(H3D_COMPLEX)
 	add_library(${HERMES_CPLX_BIN} SHARED ${SRC})
-	set_target_properties(${HERMES_CPLX_BIN} PROPERTIES COMPILE_FLAGS
--DH3D_COMPLEX)
+	set_target_properties(${HERMES_CPLX_BIN} PROPERTIES COMPILE_FLAGS -DH3D_COMPLEX)
 	LIBRARY_SETTINGS(${HERMES_CPLX_BIN})
 endif(H3D_COMPLEX)
 
-#
+INCLUDE (CheckFunctionExists)
+set(CMAKE_REQUIRED_LIBRARIES m)
+CHECK_FUNCTION_EXISTS(fmemopen HAVE_FMEMOPEN)
+CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)
+
+# Create file with preprocessor definitions exposing the build settings to the source code.
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 	${CMAKE_CURRENT_SOURCE_DIR}/config.h
@@ -136,16 +144,16 @@ file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
 file(GLOB INC_SOLVER    "${HERMES_COMMON_DIR}/solver/*.h")
 file(GLOB INC_COMPAT    "${HERMES_COMMON_DIR}/compat/*.h")
 
+install(FILES ${INC}           DESTINATION include/hermes3d/src)
+install(FILES ${INC_SPACE}     DESTINATION include/hermes3d/src/space)
+install(FILES ${INC_SHAPESET}  DESTINATION include/hermes3d/src/shapeset)
+install(FILES ${INC_LOADER}    DESTINATION include/hermes3d/src/loader)
+install(FILES ${INC_OUTPUT}    DESTINATION include/hermes3d/src/output)
+install(FILES ${INC_INTEGRALS} DESTINATION include/hermes3d/src/integrals)
+install(FILES ${INC_ADAPT}     DESTINATION include/hermes3d/src/adapt)
+install(FILES ${INC_COMMON}    DESTINATION include/hermes_common)
+install(FILES ${INC_SOLVER}    DESTINATION include/hermes_common/solver)
 install(FILES ${INC_COMPAT}    DESTINATION include/hermes_common/compat)
-install(FILES ${INC}           DESTINATION include/)
-install(FILES ${INC_SPACE}     DESTINATION include/space)
-install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)
-install(FILES ${INC_LOADER}    DESTINATION include/loader)
-install(FILES ${INC_OUTPUT}    DESTINATION include/output)
-install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
-install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
-install(FILES ${INC_COMMON}    DESTINATION include/common)
-install(FILES ${INC_SOLVER}    DESTINATION include/common/solver)
 
 # MSVC (Win) helper macros
 

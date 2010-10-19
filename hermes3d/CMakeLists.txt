@@ -114,6 +114,7 @@ include_directories(${JUDY_INCLUDE_DIR})
 if(NOT MSVC)
 	enable_language(Fortran)		  # need a fortran compiler for checking BLAS
 	find_package(LAPACK REQUIRED) # also searches for BLAS
+	add_definitions(-DWITH_BLAS)
 endif(NOT MSVC)
 
 # solvers

@@ -3,7 +3,9 @@ if(MSVC)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif(MSVC)
 
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+# source files for the hermes2d library
 set(SRC
        hash.cpp 
        mesh.cpp 
@@ -244,13 +246,13 @@ file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
 file(GLOB INC_SOLVER    "${HERMES_COMMON_DIR}/solver/*.h")
 file(GLOB INC_COMPAT    "${HERMES_COMMON_DIR}/compat/*.h")
 
-install(FILES ${INC}           DESTINATION include/)
-install(FILES ${INC_SPACE}     DESTINATION include/space)
-install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)
-install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
-install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
-install(FILES ${INC_REF_SEL}   DESTINATION include/ref_selectors)
-install(FILES ${INC_VIEWS}     DESTINATION include/views)
+install(FILES ${INC}           DESTINATION include/hermes2d/src/)
+install(FILES ${INC_SPACE}     DESTINATION include/hermes2d/src/space)
+install(FILES ${INC_SHAPESET}  DESTINATION include/hermes2d/src/shapeset)
+install(FILES ${INC_INTEGRALS} DESTINATION include/hermes2d/src/integrals)
+install(FILES ${INC_ADAPT}     DESTINATION include/hermes2d/src/adapt)
+install(FILES ${INC_REF_SEL}   DESTINATION include/hermes2d/src/ref_selectors)
+install(FILES ${INC_VIEWS}     DESTINATION include/hermes2d/src/views)
 install(FILES ${INC_COMMON}    DESTINATION include/hermes_common)
 install(FILES ${INC_SOLVER}    DESTINATION include/hermes_common/solver)
 install(FILES ${INC_COMPAT}    DESTINATION include/hermes_common/compat)
