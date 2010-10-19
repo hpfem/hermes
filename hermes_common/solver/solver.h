@@ -20,8 +20,6 @@
 #ifndef _SOLVER_H_
 #define _SOLVER_H_
 
-#include "../common.h"  // Also includes preprocessor definitions for the various 
-                        // solver libraries via config.h.
 #include "precond.h"
                         
 #ifdef HAVE_TEUCHOS

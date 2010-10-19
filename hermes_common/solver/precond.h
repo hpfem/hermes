@@ -16,12 +16,13 @@
 #ifndef __HERMES_PRECOND_H_
 #define __HERMES_PRECOND_H_
 
-#include "../config.h"
+#include "../common.h"  // Also includes preprocessor definitions for the various 
+                        // solver libraries via config.h.
+
 #include "../matrix.h"
-#include "../weakform.h"
 
 #ifdef HAVE_EPETRA
-#include <Epetra_Operator.h>
+  #include <Epetra_Operator.h>
 #endif
 
 /// @defgroup preconds Preconditioners

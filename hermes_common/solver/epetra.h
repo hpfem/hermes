@@ -20,7 +20,6 @@
 #ifndef _SOLVER_EPETRA_H_
 #define _SOLVER_EPETRA_H_
 
-#include "solver.h"
 #include "../matrix.h"
 
 #ifdef HAVE_EPETRA
@@ -31,6 +30,11 @@
   #include <Epetra_CrsMatrix.h>
 #endif
 
+class AmesosSolver;
+class AztecOOSolver;
+class NoxSolver;
+class IfpackPrecond;
+class MlPrecond;
 
 class EpetraMatrix : public SparseMatrix {
 public:
