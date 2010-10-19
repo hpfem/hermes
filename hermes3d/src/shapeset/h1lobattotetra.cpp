@@ -25,8 +25,8 @@
 #include "common.h"
 #include "h1lobattotetra.h"
 #include "lobatto.h"
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/callstack.h"
 
 #ifdef WITH_TETRA
 

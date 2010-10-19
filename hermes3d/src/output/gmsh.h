@@ -21,7 +21,7 @@
 #define _GMSH_OUTPUT_ENGINE_H_
 
 #include "../output.h"
-#include "../matrix.h"
+#include "../../../hermes_common/matrix.h"
 
 /// GMSH output engine.
 ///

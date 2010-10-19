@@ -19,7 +19,7 @@
 
 #include "common.h"
 #include "function.h"
-#include <common/callstack.h>
+#include "../../hermes_common/callstack.h"
 
 
 // the order of items must match values of EValueType

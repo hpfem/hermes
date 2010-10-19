@@ -22,7 +22,7 @@
 #include "quad.h"
 #include "refmap.h"
 #include "traverse.h"
-#include <common/callstack.h>
+#include "../../hermes_common/callstack.h"
 
 #define H3D_TINY			10e-15
 

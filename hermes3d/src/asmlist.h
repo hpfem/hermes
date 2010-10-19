@@ -20,8 +20,8 @@
 #ifndef _ASMLIST_H_
 #define _ASMLIST_H_
 
-#include <common/array.h>
-#include <common/error.h>
+#include "../../hermes_common/array.h"
+#include "../../hermes_common/error.h"
 
 /// AsmList is a simple container for the element assembly arrays idx, dof, coef. and ori
 /// These arrays are filled by Space::get_element_assembly_list() and used by the

@@ -17,12 +17,11 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-
-#include <string.h>
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/callstack.h>
 #include "mesh3d.h"
+#include <string.h>
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/callstack.h"
 #include "../mesh.h"
 #include "../refdomain.h"
 

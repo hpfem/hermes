@@ -19,10 +19,9 @@
 
 #include "common.h"
 #include "space.h"
-#include "matrix.h"
-#include <common/error.h>
-#include <common/timer.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/matrix.h"
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/callstack.h"
 
 #define PRINTF(...)
 //#define PRINTF printf

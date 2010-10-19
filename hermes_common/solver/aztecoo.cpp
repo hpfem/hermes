@@ -18,11 +18,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "aztecoo.h"
-#include "../discrete_problem.h"
-#include "../../common/callstack.h"
-#include "../common_time_period.h"
+#include "../callstack.h"
 #ifdef HAVE_KOMPLEX
-#include <Komplex_LinearProblem.h>
+  #include <Komplex_LinearProblem.h>
 #endif
 
 #define H3D_AZTECOO_NOT_COMPILED   "hermes3d was not built with AztecOO support."

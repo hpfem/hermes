@@ -18,14 +18,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "epetra.h"
-#include "../../common/error.h"
-#include "../../common/callstack.h"
+#include "../error.h"
+#include "../callstack.h"
 
 // EpetraMatrix ////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HAVE_EPETRA
-// A communicator for Epetra objects (serial version)
-static Epetra_SerialComm seq_comm;
+  // A communicator for Epetra objects (serial version)
+  static Epetra_SerialComm seq_comm;
 #endif
 
 #define H3D_EPETRA_NOT_COMPILED "hermes3d was not built with Epetra support."

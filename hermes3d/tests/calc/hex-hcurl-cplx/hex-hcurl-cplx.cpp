@@ -23,13 +23,13 @@
 #include <math.h>
 
 #include "config.h"
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/timer.h>
-#include <common/error.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/common_time_period.h"
+#include "../../../../hermes_common/error.h"
+#ifdef WITH_PETSC
+#include "../../../../hermes_common/solver/petsc.h"
+#endif
 
 
 // error should be smaller than this epsilon

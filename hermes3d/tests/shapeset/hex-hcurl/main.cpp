@@ -24,11 +24,12 @@
 
 #include "config.h"
 #ifdef WITH_PETSC
-#include <petsc.h>
+#include "../../../../hermes_common/solver/petsc.h"
 #endif
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/error.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/error.h"
+
 
 // forward declarations (simpler than defining a special header file for each module that exports just one function)
 bool test_lin_indep(Shapeset *shapeset);

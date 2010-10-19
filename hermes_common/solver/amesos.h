@@ -24,8 +24,8 @@
 #include "epetra.h"
 
 #ifdef HAVE_AMESOS
-#include <Amesos.h>
-#include <Amesos_BaseSolver.h>
+  #include <Amesos.h>
+  #include <Amesos_BaseSolver.h>
 #endif
 
 /// Encapsulation of Amesos linear solver

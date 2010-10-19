@@ -21,7 +21,7 @@
 #define _ORDER_H_
 
 #include "common.h"
-#include <common/error.h>
+#include "../../hermes_common/error.h"
 
 
 // maximal order of quadratures for 1D

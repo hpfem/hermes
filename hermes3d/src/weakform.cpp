@@ -22,10 +22,10 @@
 
 #include "common.h"
 #include "weakform.h"
-#include "matrix.h"
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../hermes_common/matrix.h"
+#include "../../hermes_common/error.h"
+#include "../../hermes_common/trace.h"
+#include "../../hermes_common/callstack.h"
 
 WeakForm::WeakForm(int neq, bool mat_free)
 {

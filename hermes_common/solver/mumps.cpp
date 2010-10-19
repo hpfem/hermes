@@ -18,11 +18,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "mumps.h"
-#include "../../common/trace.h"
-#include "../../common/error.h"
-#include "../../common/utils.h"
-#include "../../common/callstack.h"
-#include "../common_time_period.h"
+#include "../trace.h"
+#include "../error.h"
+#include "../utils.h"
+#include "../callstack.h"
 
 #define H3D_ERR_MUMPS_NOT_COMPILED    "Hermes3D was not compiled with MUMPS support"
 

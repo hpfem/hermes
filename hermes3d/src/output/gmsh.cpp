@@ -28,7 +28,7 @@
 #include "../common.h"
 #include <stdio.h>
 #include <errno.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/callstack.h"
 
 // size of the buffer that is used for copying files
 #define FORMAT							"%.17g"

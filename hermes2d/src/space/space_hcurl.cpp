@@ -15,7 +15,7 @@
 
 #include "../common.h"
 #include "space_hcurl.h"
-#include "../matrix.h"
+#include "../../../hermes_common/matrix.h"
 #include "../quad_all.h"
 #include "../shapeset/shapeset_hc_all.h"
 

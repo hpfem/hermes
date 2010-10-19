@@ -21,9 +21,9 @@
 #define _INTEGRALS_HCURL_H_
 
 #include "refmap.h"
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/callstack.h"
 
 /// Calculate curl of a vector
 ///

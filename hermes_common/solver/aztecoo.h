@@ -25,7 +25,7 @@
 #include "precond_ifpack.h"
 
 #ifdef HAVE_AZTECOO
-#include <AztecOO.h>
+  #include <AztecOO.h>
 #endif
 
 /// Encapsulation of AztecOO linear solver

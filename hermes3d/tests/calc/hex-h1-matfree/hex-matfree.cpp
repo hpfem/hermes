@@ -40,10 +40,10 @@
 #include "config.h"
 #include <math.h>
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/timer.h>
-#include <common/error.h>
-#include <common/utils.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/common_time_period.h"
+#include "../../../../hermes_common/error.h"
+#include "../../../../hermes_common/utils.h"
 
 // error should be smaller than this epsilon
 #define EPS								10e-10F

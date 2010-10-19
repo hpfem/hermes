@@ -17,15 +17,15 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../shapeset/hcurllobattohex.h"
 #include "hcurl.h"
-#include "../matrix.h"
+#include "../shapeset/hcurllobattohex.h"
 #include "../refmap.h"
 #include "../refdomain.h"
-#include <common/bitarray.h>
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/matrix.h"
+#include "../../../hermes_common/bitarray.h"
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/callstack.h"
 
 HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init, 

@@ -22,8 +22,8 @@
 
 #include "common.h"
 #include "order.h"
-#include <common/error.h>
-#include <common/array.h>
+#include "../../hermes_common/array.h"
+#include "../../hermes_common/error.h"
 
 /// @defgroup quadratures Numerical quadratures
 ///

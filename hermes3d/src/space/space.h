@@ -27,7 +27,7 @@
 #include "../quad.h"
 #include "../order.h"
 
-#include "../common/bitarray.h"
+#include "../../../hermes_common/bitarray.h"
 
 /// @defgroup spaces Spaces
 ///

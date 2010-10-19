@@ -25,7 +25,7 @@
 #include "quad.h"
 #include "order.h"
 #include "transform.h"
-#include <common/error.h>
+#include "../../hermes_common/error.h"
 
 // Plenty of checking stuff for the debug version
 #ifdef DEBUG

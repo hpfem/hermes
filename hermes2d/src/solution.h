@@ -19,7 +19,7 @@
 #include "function.h"
 #include "space/space.h"
 #include "refmap.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
 
 class PrecalcShapeset;
 

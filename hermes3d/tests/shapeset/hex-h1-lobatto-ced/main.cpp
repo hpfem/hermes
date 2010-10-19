@@ -25,11 +25,12 @@
 
 #include "config.h"
 #ifdef WITH_PETSC
-#include <petsc.h>
+#include "../../../../hermes_common/solver/petsc.h"
 #endif
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/error.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/error.h"
+
 
 #define EPS						10e-10
 

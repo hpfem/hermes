@@ -14,13 +14,13 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef __H3D_PRECOND_ML_H_
-#define __H3D_PRECOND_ML_H_
+#ifndef __HERMES_PRECOND_ML_H_
+#define __HERMES_PRECOND_ML_H_
 
 #include "precond.h"
 #include "epetra.h"
 #ifdef HAVE_ML
-#include <ml_MultiLevelPreconditioner.h>
+  #include <ml_MultiLevelPreconditioner.h>
 #endif
 
 /// Preconditioners built on ML

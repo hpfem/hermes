@@ -18,14 +18,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "h1.h"
+#include "../refmap.h"
 #include "../shapeset/h1lobattohex.h"
 #include "../shapeset/h1lobattotetra.h"
-#include "../matrix.h"
-#include "../refmap.h"
-#include <common/bitarray.h>
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/matrix.h"
+#include "../../../hermes_common/bitarray.h"
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/callstack.h"
 
 
 H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 

@@ -19,11 +19,10 @@
 
 #include "pardiso.h"
 
-#include "../../common/trace.h"
-#include "../../common/error.h"
-#include "../../common/utils.h"
-#include "../../common/callstack.h"
-#include "../common_time_period.h"
+#include "../trace.h"
+#include "../error.h"
+#include "../utils.h"
+#include "../callstack.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -24,8 +24,9 @@
 #include "config.h"
 #include "common.h"
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/error.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/error.h"
+
 
 // TODO: Mostly the same as for H1 => review the code
 

@@ -28,10 +28,10 @@
 //   tables.
 //
 
-#include <common/error.h>
 #include "common.h"
 #include "transform.h"
-#include <common/callstack.h>
+#include "../../hermes_common/error.h"
+#include "../../hermes_common/callstack.h"
 
 // TODO: Transformations for tetras
 Trf tetra_trf[] = {

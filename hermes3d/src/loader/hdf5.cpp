@@ -30,11 +30,11 @@ extern "C" {
 #endif
 
 #include "hdf5.h"
-#include "../mesh.h"
 #include <string.h>
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../mesh.h"
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/callstack.h"
 
 // exception error codes
 #define E_CANT_OPEN_FILE					-1

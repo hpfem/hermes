@@ -21,10 +21,10 @@
 #define _DISCRETE_PROBLEM_H_
 
 #include "common.h"
-#include <common/array.h>
 #include "weakform.h"
 #include "tuple.h"
-#include "solver/solver.h"
+#include "../../hermes_common/array.h"
+#include "../../hermes_common/solver/solver.h"
 
 class Space;
 class Matrix;

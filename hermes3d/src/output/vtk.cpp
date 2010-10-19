@@ -30,9 +30,9 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <common/utils.h>
-#include <common/callstack.h>
-#include <common/error.h>
+#include "../../../hermes_common/utils.h"
+#include "../../../hermes_common/callstack.h"
+#include "../../../hermes_common/error.h"
 
 // size of the buffer that is used for copying files
 #define BUFLEN							8192

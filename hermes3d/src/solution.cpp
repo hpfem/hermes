@@ -20,10 +20,10 @@
 #include "common.h"
 #include "solution.h"
 #include "function.cpp" // non-inline template members
-#include "matrix.h"
 #include "quadcheb.h"
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../hermes_common/error.h"
+#include "../../hermes_common/matrix.h"
+#include "../../hermes_common/callstack.h"
 
 //// MeshFunction //////////////////////////////////////////////////////////////////////////////////
 

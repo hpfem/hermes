@@ -20,7 +20,7 @@
 #include "../function.h"
 #include "../solution.h"
 #include "projipol.h"
-#include <common/callstack.h>
+#include "../../../hermes_common/callstack.h"
 
 ProjectionIpol::ProjectionIpol(Solution *afn, Element *e, Shapeset *ss) : Projection(afn, e, ss)
 {

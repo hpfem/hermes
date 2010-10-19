@@ -21,8 +21,8 @@
 // TODO: improve the way how to compare two meshes (compare outputs from dump() is not enough)
 
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/callstack.h>
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/callstack.h"
 
 #define ERROR_SUCCESS								0
 #define ERROR_FAILURE								-1

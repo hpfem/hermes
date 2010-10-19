@@ -26,10 +26,9 @@
 
 #include "config.h"
 #include <hermes3d.h>
-
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/timer.h>
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/common_time_period.h"
+#include "../../../hermes_common/error.h"
 #include <unistd.h>
 
 // helpers ////////////////////////////////////////////////////////////////////

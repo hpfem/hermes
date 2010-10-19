@@ -19,7 +19,7 @@
 
 #include "refdomain.h"
 #include "common.h"
-#include <common/error.h>
+#include "../../hermes_common/error.h"
 
 //
 // 1D domains

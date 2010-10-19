@@ -18,10 +18,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "petsc.h"
-#include "../../common/trace.h"
-#include "../../common/error.h"
-#include "../../common/callstack.h"
-#include "../common_time_period.h"
+#include "../trace.h"
+#include "../error.h"
+#include "../callstack.h"
 
 #define H3D_PETSC_NOT_COMPILED    "hermes3d was not built with PETSc support."
 

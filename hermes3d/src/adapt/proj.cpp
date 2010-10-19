@@ -20,7 +20,7 @@
 #include "../function.h"
 #include "../solution.h"
 #include "proj.h"
-#include <common/callstack.h>
+#include "../../../hermes_common/callstack.h"
 
 int Projection::vtx_son[27][8] = {
 	{ 0, 1, 2, 3, 4, 5, 6, 7 }, // NONE

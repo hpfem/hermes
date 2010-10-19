@@ -20,9 +20,9 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 
-#include <common/array.h>
-#include <common/arrayptr.h>
-#include <common/mapord.h>
+#include "../../../hermes_common/array.h"
+#include "../../../hermes_common/arrayptr.h"
+#include "../../../hermes_common/mapord.h"
 
 typedef
 	unsigned int uint;

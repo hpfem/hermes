@@ -27,12 +27,14 @@
 
 #include "config.h"
 #ifdef WITH_PETSC
-#include <petsc.h>
+  #include <petsc.h>
 #endif
+
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/array.h"
+#include "../../../hermes_common/error.h"
+
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/error.h>
-#include <common/array.h>
 
 // max row length in input file
 #define MAX_ROW_LEN									1024

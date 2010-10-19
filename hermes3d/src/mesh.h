@@ -26,9 +26,9 @@ class MeshLoader;
 
 #include "common.h"
 
-#include <common/array.h>
-#include <common/arrayptr.h>
-#include <common/mapord.h>
+#include "../../hermes_common/array.h"
+#include "../../hermes_common/arrayptr.h"
+#include "../../hermes_common/mapord.h"
 
 /// Iterates over all mesh vertex indices.
 ///

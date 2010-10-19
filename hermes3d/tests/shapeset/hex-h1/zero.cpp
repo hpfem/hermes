@@ -27,8 +27,8 @@
 #include "config.h"
 #include "common.h"
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/error.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/error.h"
 
 // check vertex functions
 bool test_zero_values_of_vertex_fns(Shapeset *shapeset) {

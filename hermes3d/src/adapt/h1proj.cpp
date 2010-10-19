@@ -20,13 +20,13 @@
 #include "../function.h"
 #include "../solution.h"
 #include "h1proj.h"
-#include "../matrix.h"
 #include "../quad.h"
 #include "../refdomain.h"
 #include "../transform.h"
 #include "../shapeset/common.h"
 #include "../shapeset/lobatto.h"
-#include <common/callstack.h>
+#include "../../../hermes_common/callstack.h"
+#include "../../../hermes_common/matrix.h"
 
 #ifdef DEBUG
 	#define PRINTF			printf

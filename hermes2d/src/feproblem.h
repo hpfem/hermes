@@ -17,9 +17,9 @@
 #ifndef __H2D_FEPROBLEM_H
 #define __H2D_FEPROBLEM_H
 
-#include "../common/callstack.h"
+#include "../../hermes_common/callstack.h"
+#include "../../hermes_common/matrix.h"
 #include "adapt/adapt.h"
-#include "matrix.h"
 #include "graph.h"
 #include "forms.h"
 #include "weakform.h"

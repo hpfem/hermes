@@ -15,10 +15,10 @@
 
 #include "../common.h"
 #include "space_h1.h"
-#include "../matrix.h"
 #include "../quad_all.h"
 #include "../shapeset/shapeset_h1_all.h"
-#include "../../common/callstack.h"
+#include "../../../hermes_common/callstack.h"
+#include "../../../hermes_common/matrix.h"
 
 double** H1Space::h1_proj_mat = NULL;
 double*  H1Space::h1_chol_p   = NULL;

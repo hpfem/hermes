@@ -20,10 +20,9 @@
 #include "common.h"
 #include "quadstd.h"
 #include "refdomain.h"
-
-#include <common/error.h>
-#include <common/trace.h>
-#include <common/callstack.h>
+#include "../../hermes_common/error.h"
+#include "../../hermes_common/trace.h"
+#include "../../hermes_common/callstack.h"
 
 //// 1D quadrature tables //////////////////////////////////////////////////////////////////////////
 

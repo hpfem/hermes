@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../common/callstack.h"
 #include "common.h"
 #include "shapeset/shapeset_h1_all.h"
 #include "shapeset/shapeset_common.h"
@@ -21,7 +20,8 @@
 #include "curved.h"
 #include "mesh.h"
 #include "quad_all.h"
-#include "matrix.h"
+#include "../../hermes_common/callstack.h"
+#include "../../hermes_common/matrix.h"
 
 // defined in refmap.cpp
 extern H1ShapesetJacobi ref_map_shapeset;

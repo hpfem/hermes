@@ -16,18 +16,18 @@
 #include "precond_ifpack.h"
 
 #ifdef HAVE_IFPACK
-#include <Ifpack_PointRelaxation.h>
-#include <Ifpack_BlockRelaxation.h>
-#include <Ifpack_DenseContainer.h>
-#include <Ifpack_AdditiveSchwarz.h>
-#include <Ifpack_ILU.h>
-#include <Ifpack_ILUT.h>
-#include <Ifpack_IC.h>
-#include <Ifpack_ICT.h>
-#include <Ifpack_Graph_Epetra_CrsGraph.h>
-#endif
 
 #define IFPACK_NOT_COMPILED "hermes3d was not built with Ifpack support."
+  #include <Ifpack_PointRelaxation.h>
+  #include <Ifpack_BlockRelaxation.h>
+  #include <Ifpack_DenseContainer.h>
+  #include <Ifpack_AdditiveSchwarz.h>
+  #include <Ifpack_ILU.h>
+  #include <Ifpack_ILUT.h>
+  #include <Ifpack_IC.h>
+  #include <Ifpack_ICT.h>
+  #include <Ifpack_Graph_Epetra_CrsGraph.h>
+#endif
 
 IfpackPrecond::IfpackPrecond(const char *cls, const char *type)
 {

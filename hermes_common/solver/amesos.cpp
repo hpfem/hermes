@@ -18,16 +18,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "amesos.h"
-#include "../discrete_problem.h"
-#include "../../common/callstack.h"
-#include "../common_time_period.h"
+#include "../callstack.h"
 
 #ifdef HAVE_AMESOS
-#include <Amesos_ConfigDefs.h>
+  #include <Amesos_ConfigDefs.h>
 #endif
 
 #ifdef HAVE_AMESOS
-Amesos AmesosSolver::factory;
+  Amesos AmesosSolver::factory;
 #endif
 
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////

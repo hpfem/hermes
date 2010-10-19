@@ -31,8 +31,8 @@
 
 #include "config.h"
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/error.h>
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/error.h"
 
 #define ERROR_SUCCESS								0
 #define ERROR_FAILURE								-1

@@ -20,14 +20,31 @@
 #ifndef _HERMES_3D_
 #define _HERMES_3D_
 
-#include "common/array.h"
-#include "common/bitarray.h"
-#include "common/map.h"
-#include "common/maphs.h"
-#include "common/mapord.h"
-#include "common/trace.h"
-#include "common/utils.h"
-#include "common/timer.h"
+// hermes_common
+//
+#include "../../hermes_common/array.h"
+#include "../../hermes_common/bitarray.h"
+#include "../../hermes_common/map.h"
+#include "../../hermes_common/maphs.h"
+#include "../../hermes_common/mapord.h"
+#include "../../hermes_common/trace.h"
+#include "../../hermes_common/utils.h"
+//
+// linear solvers
+#include "../../hermes_common/solver/solver.h"
+#include "../../hermes_common/solver/umfpack_solver.h"
+#include "../../hermes_common/solver/pardiso.h"
+#include "../../hermes_common/solver/petsc.h"
+#include "../../hermes_common/solver/epetra.h"
+#include "../../hermes_common/solver/amesos.h"
+#include "../../hermes_common/solver/aztecoo.h"
+#include "../../hermes_common/solver/nox.h"
+#include "../../hermes_common/solver/mumps.h"
+//
+// preconditioners
+#include "../../hermes_common/solver/precond.h"
+#include "../../hermes_common/solver/precond_ifpack.h"
+#include "../../hermes_common/solver/precond_ml.h"
 
 #include "common.h"
 
@@ -79,22 +96,6 @@
 #include "filter.h"
 #include "weakform.h"
 #include "discrete_problem.h"
-
-// linear solvers
-#include "solver/solver.h"
-#include "solver/umfpack_solver.h"
-#include "solver/pardiso.h"
-#include "solver/petsc.h"
-#include "solver/epetra.h"
-#include "solver/amesos.h"
-#include "solver/aztecoo.h"
-#include "solver/nox.h"
-#include "solver/mumps.h"
-
-// preconditioners
-#include "solver/precond.h"
-#include "solver/precond_ifpack.h"
-#include "solver/precond_ml.h"
 
 // adapt
 #include "adapt/adapt.h"

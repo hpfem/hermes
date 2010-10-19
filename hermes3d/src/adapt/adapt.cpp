@@ -21,13 +21,13 @@
 #include "../solution.h"
 #include "../refmap.h"
 #include "../quad.h"
-#include "../matrix.h"
 #include "../traverse.h"
 #include "../norm.h"
 #include "../forms.h"
 #include "adapt.h"
 #include "h1projipol.h"
-#include <callstack.h>  // in hermes_common
+#include "../../../hermes_common/matrix.h"
+#include "../../../hermes_common/callstack.h"
 
 //#define DEBUG_PRINT
 

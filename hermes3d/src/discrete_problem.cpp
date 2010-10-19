@@ -19,20 +19,20 @@
 
 #include "common.h"
 #include "discrete_problem.h"
-#include "matrix.h"
 #include "traverse.h"
-#include <common/error.h>
-#include <common/callstack.h>
+#include "../../hermes_common/matrix.h"
+#include "../../hermes_common/error.h"
+#include "../../hermes_common/callstack.h"
 
 //  Solvers
-#include "solver/solver.h"
-#include "solver/umfpack_solver.h"
-#include "solver/amesos.h"
-#include "solver/pardiso.h"
-#include "solver/petsc.h"
-#include "solver/mumps.h"
-#include "solver/nox.h"
-#include "solver/aztecoo.h"
+#include "../../hermes_common/solver/solver.h"
+#include "../../hermes_common/solver/umfpack_solver.h"
+#include "../../hermes_common/solver/amesos.h"
+#include "../../hermes_common/solver/pardiso.h"
+#include "../../hermes_common/solver/petsc.h"
+#include "../../hermes_common/solver/mumps.h"
+#include "../../hermes_common/solver/nox.h"
+#include "../../hermes_common/solver/aztecoo.h"
 
 DiscreteProblem::FnCache::~FnCache()
 {

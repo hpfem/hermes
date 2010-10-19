@@ -23,8 +23,6 @@
 #include "solver.h"
 #include "../matrix.h"
 
-class DiscreteProblem;
-
 class UMFPackMatrix : public SparseMatrix {
 public:
   UMFPackMatrix();

@@ -23,16 +23,14 @@
  * Testing templates of Judy arrays
  *
  */
-
-#include <common/trace.h>
 #include "config.h"
-
-#include <common/bitarray.h>
-#include <common/array.h>
-#include <common/arrayptr.h>
-#include <common/map.h>
-#include <common/maphs.h>
-#include <common/mapord.h>
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/bitarray.h"
+#include "../../../hermes_common/array.h"
+#include "../../../hermes_common/arrayptr.h"
+#include "../../../hermes_common/map.h"
+#include "../../../hermes_common/maphs.h"
+#include "../../../hermes_common/mapord.h"
 
 #define ERROR_SUCCESS								0
 #define ERROR_FAILURE								-1

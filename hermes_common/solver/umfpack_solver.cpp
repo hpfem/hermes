@@ -21,17 +21,15 @@
 #include "umfpack_solver.h"
 
 #ifdef WITH_UMFPACK
-extern "C" {
-  #include <umfpack.h>
-  //#include "/usr/include/suitesparse/umfpack.h"
-}
+  extern "C" {
+    #include <umfpack.h>
+  }
 #endif
 
-#include "../../common/trace.h"
-#include "../../common/error.h"
-#include "../../common/utils.h"
-#include "../../common/callstack.h"
-#include "../common_time_period.h"
+#include "../trace.h"
+#include "../error.h"
+#include "../utils.h"
+#include "../callstack.h"
 
 UMFPackMatrix::UMFPackMatrix() {
   _F_

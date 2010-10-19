@@ -15,7 +15,7 @@
 
 #include "../common.h"
 #include "shapeset.h"
-#include "../matrix.h"
+#include "../../../hermes_common/matrix.h"
 
 
 /*    numbering of edge intervals: (the variable 'part')

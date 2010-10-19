@@ -15,7 +15,7 @@
 
 #include "common.h"
 #include "solution.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
 #include "precalc.h"
 #include "refmap.h"
 #include "auto_local_array.h"

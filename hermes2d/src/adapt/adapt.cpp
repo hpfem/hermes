@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "adapt.h"
 #include "../hermes2d.h"
 #include "../common.h"
 #include "../limit_order.h"
@@ -20,18 +21,15 @@
 #include "../feproblem.h"
 #include "../refmap.h"
 #include "../quad_all.h"
-#include "../matrix.h"
 #include "../traverse.h"
 #include "../norm.h"
 #include "../element_to_refine.h"
 #include "../ref_selectors/selector.h"
-#include "adapt.h"
 #include "../views/scalar_view.h"
 #include "../views/order_view.h"
-
-// Include from hermes_common
-#include <callstack.h> 
-#include <common_time_period.h> 
+#include "../../../hermes_common/matrix.h"
+#include "../../../hermes_common/callstack.h"
+#include "../../../hermes_common/common_time_period.h"
 
 using namespace std;
 

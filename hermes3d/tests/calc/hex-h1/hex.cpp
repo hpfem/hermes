@@ -18,13 +18,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "config.h"
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
 #include <hermes3d.h>
-#include <common/trace.h>
-#include <common/timer.h>
-#include <common/error.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/common_time_period.h"
+#include "../../../../hermes_common/error.h"
+#ifdef WITH_PETSC
+#include "../../../../hermes_common/solver/petsc.h"
+#endif
 
 // first two Lobatto shape functions
 #define l0(x) ((1.0 - (x)) * 0.5)

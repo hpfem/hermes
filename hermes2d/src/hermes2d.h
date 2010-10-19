@@ -20,9 +20,8 @@
 
 #include "common.h"
 
-#include "common_time_period.h" 
-#include "../common/timer.h" 
-#include "../common/callstack.h" 
+#include "../../hermes_common/common_time_period.h"
+#include "../../hermes_common/callstack.h" 
 
 #include "range.h"
 #include "limit_order.h"
@@ -52,19 +51,19 @@
 #include "forms.h"
 
 // solvers
-#include "solver/amesos.h"
-#include "solver/aztecoo.h"
-#include "solver/epetra.h"
-#include "solver/mumps.h"
-#include "solver/nox.h"
-#include "solver/pardiso.h"
-#include "solver/petsc.h"
-#include "solver/umfpack_solver.h"
+#include "../hermes_common/solver/amesos.h"
+#include "../hermes_common/solver/aztecoo.h"
+#include "../hermes_common/solver/epetra.h"
+#include "../hermes_common/solver/mumps.h"
+#include "../hermes_common/solver/nox.h"
+#include "../hermes_common/solver/pardiso.h"
+#include "../hermes_common/solver/petsc.h"
+#include "../hermes_common/solver/umfpack_solver.h"
 
 // preconditioners
-#include "solver/precond.h"
-#include "solver/precond_ifpack.h"
-#include "solver/precond_ml.h"
+#include "../hermes_common/solver/precond.h"
+#include "../hermes_common/solver/precond_ifpack.h"
+#include "../hermes_common/solver/precond_ml.h"
 
 #include "integrals_h1.h"
 #include "integrals_hcurl.h"

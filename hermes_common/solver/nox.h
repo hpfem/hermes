@@ -17,13 +17,12 @@
 #define __H3D_SOLVER_NOX_H_
 
 #include "solver.h"
-#include "../discrete_problem.h"
 #include "precond.h"
 #include "epetra.h"
 
 #ifdef HAVE_NOX
-#include <NOX.H>
-#include <NOX_Epetra.H>
+  #include <NOX.H>
+  #include <NOX_Epetra.H>
 #endif
 
 class NoxProblemInterface;
