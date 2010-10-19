@@ -15,7 +15,7 @@
 
 #include "nox.h"
 
-#define NOX_NOT_COMPILED "hermes3d was not built with NOX support."
+#define NOX_NOT_COMPILED "Hermes was not built with NOX support."
 
 #ifdef HAVE_NOX
 
@@ -199,12 +199,7 @@ NoxSolver::NoxSolver(DiscreteProblem* problem) : IterSolver()
   // NOX_Epetra_Interface
   interface = Teuchos::rcp(new NoxProblemInterface(problem));
 #else
-  //FIXME: Why does not this work with MSVC (it does in H2D)
-#ifndef _MSC_VER
   error(NOX_NOT_COMPILED);
-#else
-  exit(1);
-#endif
 #endif
 }
 

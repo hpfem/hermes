@@ -31,7 +31,7 @@
 /// Encapsulation of AztecOO linear solver
 ///
 /// @ingroup solvers
-class H2D_API AztecOOSolver : public IterSolver {
+class HERMES_API AztecOOSolver : public IterSolver {
 public:
   AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs);
   virtual ~AztecOOSolver();
