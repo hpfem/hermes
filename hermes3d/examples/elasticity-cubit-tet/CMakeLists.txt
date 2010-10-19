@@ -1,4 +1,4 @@
-project(elastostatics-cubit)
+project(elasticity-cubit-tet)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)

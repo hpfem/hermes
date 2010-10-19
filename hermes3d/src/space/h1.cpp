@@ -45,8 +45,18 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
   this->type = H1;
 
   // set uniform poly order in elements
-  if (p_init.x < 1 || p_init.y < 1 || p_init.z < 1) error("P_INIT must be >= 1 in all directions in an H1 space.");
-  else this->set_uniform_order_internal(p_init);
+  switch (p_init.type) {
+    case MODE_HEXAHEDRON: 
+      if (p_init.x < 1 || p_init.y < 1 || p_init.z < 1) {
+        error("P_INIT must be >= 1 in all directions in an H1 space on hexahedra.");
+      }
+      else this->set_uniform_order_internal(p_init);
+      break;
+    case MODE_TETRAHEDRON: 
+      if (p_init.order < 1) error("P_INIT must be >= 1 in an H1 space on tetrahedra.");
+      break;
+    default: error("Unknown element type in H1Space::H1Space().");
+  }
 
   // enumerate basis functions
   this->assign_dofs();

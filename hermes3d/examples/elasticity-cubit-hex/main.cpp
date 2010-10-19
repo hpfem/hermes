@@ -2,10 +2,10 @@
 #define H3D_REPORT_INFO
 #define H3D_REPORT_VERBOSE
 #include "config.h"
-//#include <getopt.h>
 #include <hermes3d.h>
 
-// This example shows how to solve linear elasticity problem on an L-shape beam. 
+// This example shows how to solve a linear elasticity problem using
+// a hexahedral mesh in Exodus format.
 //
 // PDE: Lame equations of linear elasticity.
 //
@@ -76,7 +76,7 @@ int main(int argc, char **args)
   // Load the mesh. 
   Mesh mesh;
   ExodusIIReader mloader;
-  mloader.load("brick_with_hole.e", &mesh);
+  mloader.load("brick_with_hole_hex.e", &mesh);
 
   // Perform initial mesh refinement. 
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
