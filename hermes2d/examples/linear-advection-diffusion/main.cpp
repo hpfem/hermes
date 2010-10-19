@@ -8,7 +8,7 @@ using namespace RefinementSelectors;
 
 //  This example solves a linear advection diffusion problem using optional
 //  variational multiscale stabilization. To use the stabilization, you must
-//  uncomment the definition of H2D_SECOND_DERIVATIVES_ENABLED in common.h
+//  uncomment the definition of H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h
 //  and rebuild this example. Note that in our experience, the stabilization
 //  does only work for linear elements. Nevertheless, we were able to solve the
 //  problem without stabilization using adaptive hp-FEM.

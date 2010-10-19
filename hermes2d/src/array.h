@@ -16,7 +16,7 @@
 #ifndef __H2D_ARRAY_H
 #define __H2D_ARRAY_H
 
-#include "common.h"
+#include "h2d_common.h"
 #include <vector>
 
 /// \brief A generic, inflatable array.

@@ -16,7 +16,7 @@
 #ifndef __H2D_ASMLIST_H
 #define __H2D_ASMLIST_H
 
-#include "common.h"
+#include "h2d_common.h"
 
 
 /// AsmList is a simple container for the element assembly arrays idx, dof and coef.

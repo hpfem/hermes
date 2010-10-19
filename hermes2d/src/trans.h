@@ -16,7 +16,7 @@
 #ifndef __H2D_TRANS_H
 #define __H2D_TRANS_H
 
-#include "common.h"
+#include "h2d_common.h"
 #include "mesh.h"
 #include "shapeset/shapeset.h"
 #include "shapeset/shapeset_h1_all.h"

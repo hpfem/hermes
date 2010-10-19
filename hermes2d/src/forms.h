@@ -17,7 +17,7 @@
 #ifndef __H2D_FORMS_H
 #define __H2D_FORMS_H
 
-#include "common.h"
+#include "h2d_common.h"
 #include "quad.h"
 #include "function.h"
 #include "solution.h"
@@ -95,7 +95,7 @@ public:
   T *dx, *dy; 					// derivatives
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
   T *laplace;                                   // must be enabled by defining H2D_SECOND_DERIVATIVES_ENABLED
-                                                // in common.h. Default is NOT ENABLED.
+                                                // in h2d_common.h. Default is NOT ENABLED.
 #endif
   T *val0, *val1;				// components of function values
   T *dx0, *dx1;					// components of derivatives

@@ -16,7 +16,7 @@
 #ifndef __H2D_REFMAP_H
 #define __H2D_REFMAP_H
 
-#include "common.h"
+#include "h2d_common.h"
 #include "precalc.h"
 #include "quad_all.h"
 

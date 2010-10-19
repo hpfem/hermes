@@ -16,7 +16,7 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "../common.h"
+#include "../h2d_common.h"
 #include "stream_view.h"
 
 

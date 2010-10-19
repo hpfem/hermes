@@ -1,4 +1,4 @@
-#include "../common.h"
+#include "../h2d_common.h"
 #include "../solution.h"
 #include "../element_to_refine.h"
 #include "selector.h"

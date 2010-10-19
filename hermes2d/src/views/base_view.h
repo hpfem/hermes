@@ -22,7 +22,7 @@
 #ifndef __H2D_BASE_VIEW_H
 #define __H2D_BASE_VIEW_H
 
-#include "../common.h"
+#include "../h2d_common.h"
 #include "scalar_view.h"
 
 // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D

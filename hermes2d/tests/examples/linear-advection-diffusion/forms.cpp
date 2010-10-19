@@ -27,7 +27,7 @@ Scalar bilinear_form_stabilization(int n, double *wt, Func<Scalar> *u_ext[], Fun
   }
   return result;
 #else
-  error("Define H2D_SECOND_DERIVATIVES_ENABLED in common.h if you want to use second derivatives of shape functions in weak forms.");
+  error("Define H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h if you want to use second derivatives of shape functions in weak forms.");
 #endif
 }
 

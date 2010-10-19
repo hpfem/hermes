@@ -22,7 +22,7 @@
 # include <sys/time.h>
 #endif
 
-#include "../common.h"
+#include "../h2d_common.h"
 #include "view_support.h"
 #include "view.h"
 #include "../solution.h"

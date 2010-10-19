@@ -16,7 +16,7 @@
 #ifndef __H2D_MESH_H
 #define __H2D_MESH_H
 
-#include "common.h"
+#include "h2d_common.h"
 #include "curved.h"
 
 struct Element;

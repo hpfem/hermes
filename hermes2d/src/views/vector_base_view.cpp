@@ -22,7 +22,7 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "../common.h"
+#include "../h2d_common.h"
 #include "vector_base_view.h"
 
 void VectorBaseView::show(Space* space)

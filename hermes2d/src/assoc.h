@@ -5,7 +5,7 @@
 // Nothing of it is currently used.
 
 
-#include "common.h"
+#include "h2d_common.h"
 
 
 template<typename KeyType>

@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
   int i, j, k, l;
 
   printf("\n");
-  printf("#include \"common.h\"\n"
+  printf("#include \"h2d_common.h\"\n"
          "#include \"shapeset.h\"\n"
          "#include \"shapeset_common.h\"\n\n");
 

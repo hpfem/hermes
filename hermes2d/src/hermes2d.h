@@ -18,10 +18,7 @@
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
-#include "common.h"
-
-#include "../../hermes_common/common_time_period.h"
-#include "../../hermes_common/callstack.h" 
+#include "h2d_common.h"
 
 #include "range.h"
 #include "limit_order.h"

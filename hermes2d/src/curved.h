@@ -16,7 +16,7 @@
 #ifndef __H2D_CURVED_H
 #define __H2D_CURVED_H
 
-#include "common.h"
+#include "h2d_common.h"
 
 struct Element;
 

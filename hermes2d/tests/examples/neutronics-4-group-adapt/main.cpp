@@ -172,7 +172,7 @@ int get_num_of_neg(MeshFunction *sln)
 /// \param[in,out] mfptr_solution   The same as above, only the type of the pointers is MeshFunction*.
 ///                                 This is needed for the fission source filter, which accepts this type instead of Solution*.
 /// \param[in]  tol           Relative difference between two successive eigenvalue approximations that stops the iteration.
-/// \param[in]  matrix_solver Solver for the resulting matrix problem (one of the available types enumerated in common.h).
+/// \param[in]  matrix_solver Solver for the resulting matrix problem (one of the available types enumerated in hermes_common/common.h).
 /// \return  number of iterations needed for convergence within the specified tolerance.
 ///
 int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,

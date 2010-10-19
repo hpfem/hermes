@@ -15,7 +15,7 @@
 
 #include "adapt.h"
 #include "../hermes2d.h"
-#include "../common.h"
+#include "../h2d_common.h"
 #include "../limit_order.h"
 #include "../solution.h"
 #include "../feproblem.h"

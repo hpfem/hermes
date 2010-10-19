@@ -23,7 +23,7 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "../common.h"
+#include "../h2d_common.h"
 #include "base_view.h"
 
 BaseView::BaseView(const char* title, int x, int y, int width, int height)

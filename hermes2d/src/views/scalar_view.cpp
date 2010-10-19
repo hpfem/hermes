@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
-#include "../common.h"
+#include "../h2d_common.h"
 #include "scalar_view.h"
 
 #define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))

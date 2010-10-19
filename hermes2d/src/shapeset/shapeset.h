@@ -16,7 +16,7 @@
 #ifndef __H2D_SHAPESET_H
 #define __H2D_SHAPESET_H
 
-#include "../common.h"
+#include "../h2d_common.h"
 
 
 #define H2D_CHECK_MODE      assert(mode == H2D_MODE_TRIANGLE || mode == H2D_MODE_QUAD)
@@ -62,7 +62,7 @@ enum FunctionExpansionIndex {
 /// The polynomial degree (or 'order') is an integer typically in the range [1-10] for H1
 /// shapesets and [0-10] for H(curl) shapesets. Quadrilaterals are allowed to have different
 /// orders in the x and y directions (of the reference domain). The 'order' for quads thus
-/// has to be formed with the macro H2D_MAKE_QUAD_ORDER(), see common.h.
+/// has to be formed with the macro H2D_MAKE_QUAD_ORDER(), see h2d_common.h.
 ///
 /// Vertex shape functions in H1 shapesets are also regarded as edge functions of orders 0
 /// and 1. This simplifies constraint calculations and BC projections.

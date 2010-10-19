@@ -158,7 +158,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit12]
-FileName=src\common.h
+FileName=src\h2d_common.h
 CompileCpp=1
 Folder=hermes2d
 Compile=1

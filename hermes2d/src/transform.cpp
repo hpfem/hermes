@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "common.h"
+#include "h2d_common.h"
 #include "transform.h"
 
 #define H2D_IDENTIFY_TRF { 1.0,  1.0 }, { 0.0, 0.0 } ///< Identity transformation.

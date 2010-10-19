@@ -16,7 +16,7 @@
 #ifndef __H2D_FUNCTION_H
 #define __H2D_FUNCTION_H
 
-#include "common.h"
+#include "h2d_common.h"
 #include "transform.h"
 #include "quad_all.h"
 

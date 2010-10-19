@@ -47,8 +47,7 @@ set(SRC
        ref_selectors/l2_proj_based_selector.cpp 
        ref_selectors/h1_proj_based_selector.cpp 
        ref_selectors/hcurl_proj_based_selector.cpp
-       common.cpp 
-       matrix.cpp 
+       h2d_common.cpp  
        weakform.cpp 
        feproblem.cpp
        forms.cpp

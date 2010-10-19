@@ -23,7 +23,7 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "../common.h"
+#include "../h2d_common.h"
 #include "order_view.h"
 
 OrderView::OrderView(const char* title, int x, int y, int width, int height)

@@ -69,7 +69,7 @@ module.include.type=
 module.include.files=\
 	shapeset.h\
 	function.h\
-	common.h\
+	h2d_common.h\
 	hash.h\
 	mesh.h\
 	view.h\
