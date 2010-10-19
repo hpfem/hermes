@@ -1,5 +1,5 @@
-#ifndef __H3D_C99_FUNCTIONS_H
-#define __H3D_C99_FUNCTIONS_H
+#ifndef __HERMES_C99_FUNCTIONS_H
+#define __HERMES_C99_FUNCTIONS_H
 
 #ifdef IMPLEMENT_C99
 

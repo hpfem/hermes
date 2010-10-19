@@ -61,6 +61,8 @@ set(SRC
 	${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp
 	${HERMES_COMMON_DIR}/solver/precond_ml.cpp
 	${HERMES_COMMON_DIR}/common_time_period.cpp
+    ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
+    ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
 	${HERMES_COMMON_DIR}/callstack.cpp
 	${HERMES_COMMON_DIR}/trace.cpp
 	${HERMES_COMMON_DIR}/error.cpp
@@ -133,7 +135,9 @@ file(GLOB INC_INTEGRALS "${CMAKE_CURRENT_SOURCE_DIR}/integrals/*.h")
 file(GLOB INC_ADAPT     "${CMAKE_CURRENT_SOURCE_DIR}/adapt/*.h")
 file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
 file(GLOB INC_SOLVER    "${HERMES_COMMON_DIR}/solver/*.h")
+file(GLOB INC_COMPAT    "${HERMES_COMMON_DIR}/compat/*.h")
 
+install(FILES ${INC_COMPAT}    DESTINATION include/hermes_common/compat)
 install(FILES ${INC}           DESTINATION include/)
 install(FILES ${INC_SPACE}     DESTINATION include/space)
 install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)

@@ -243,6 +243,7 @@ file(GLOB INC_REF_SEL   "${CMAKE_CURRENT_SOURCE_DIR}/ref_selectors/*.h")
 file(GLOB INC_VIEWS     "${CMAKE_CURRENT_SOURCE_DIR}/views/*.h")
 file(GLOB INC_COMMON    "${HERMES_COMMON_DIR}/*.h")
 file(GLOB INC_SOLVER    "${HERMES_COMMON_DIR}/solver/*.h")
+file(GLOB INC_COMPAT    "${HERMES_COMMON_DIR}/compat/*.h")
 
 install(FILES ${INC}           DESTINATION include/)
 install(FILES ${INC_SPACE}     DESTINATION include/space)
@@ -253,6 +254,7 @@ install(FILES ${INC_REF_SEL}   DESTINATION include/ref_selectors)
 install(FILES ${INC_VIEWS}     DESTINATION include/views)
 install(FILES ${INC_COMMON}    DESTINATION include/hermes_common)
 install(FILES ${INC_SOLVER}    DESTINATION include/hermes_common/solver)
+install(FILES ${INC_COMPAT}    DESTINATION include/hermes_common/compat)
 
 # build and install MSVC version:
 if(MSVC)
