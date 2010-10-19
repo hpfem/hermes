@@ -165,7 +165,7 @@ int main(int argc, char **args)
 		for ( Word_t idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
 		if ( mesh.elements[idx]->used) if (mesh.elements[idx]->active)
 		{
-			std::vector<Word_t> vtcs(mesh.elements[idx]->get_num_vertices()) ;
+			std::vector<unsigned int> vtcs(mesh.elements[idx]->get_num_vertices()) ;
 			//Word_t vtcs[mesh.elements[idx]->get_num_vertices()] ;
 			mesh.elements[idx]->get_vertices(&vtcs[0]) ;
 			//mesh.vertices[vtcs[0]]->dump() ;
@@ -222,13 +222,13 @@ int main(int argc, char **args)
 	for ( Word_t idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
 		if ( mesh.elements[idx]->used) if (mesh.elements[idx]->active)
 		{
-			std::vector<Word_t> vtcs(mesh.elements[idx]->get_num_vertices()) ;
+			std::vector<unsigned int> vtcs(mesh.elements[idx]->get_num_vertices()) ;
 			mesh.elements[idx]->get_vertices(&vtcs[0]) ;
 			double minZ=+std::numeric_limits<double>::max() ;
 			double maxZ=-std::numeric_limits<double>::max() ;
 			double deltaZ=-std::numeric_limits<double>::max() ;
 
-			for(std::vector<Word_t>::iterator i=vtcs.begin() ; i!=vtcs.end() ; i++)
+			for(std::vector<unsigned int>::iterator i=vtcs.begin() ; i!=vtcs.end() ; i++)
 			{
 				double z = mesh.vertices[*i]->z ;
 				if(minZ > z) minZ = z ;
