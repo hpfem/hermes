@@ -26,7 +26,7 @@ const int STRATEGY = 0;                  // Adaptive strategy:
                                          // STRATEGY = 2 ... refine all elements whose error is larger
                                          //   than THRESHOLD.
                                          // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO; // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO_H; // Predefined list of element refinement candidates. Possible values are
                                          // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                          // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                          // See User Documentation for details.
@@ -36,7 +36,7 @@ const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nod
                                          // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                          // Note that regular meshes are not supported, this is due to
                                          // their notoriously bad performance.
-const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
+const double CONV_EXP = 0.5;             // Default value is 1.0. This parameter influences the selection of
                                          // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 1.0;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                          // fine mesh and coarse mesh solution in percent).
@@ -239,9 +239,9 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 1200);
+  printf("ndof allowed = %d\n", 1440);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 1200) {      // ndofs was 1187 at the time this test was created.
+  if (ndof < 1440) {      // ndofs was 1433 at the time this test was created.
     printf("Success!\n");
     return ERROR_SUCCESS;
   }
