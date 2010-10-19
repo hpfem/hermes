@@ -51,7 +51,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <execinfo.h>
 
 // For the HAVE_TEUCHOS_LINK and HAVE_TEUCHOS_BFD defines
-#include "config.h"
+#if defined(H1D_REAL) || defined(H1D_COMPLEX)
+  #ifndef CONFIG_H_INCLUDED
+    #include "../hermes1d/src/config.h"
+    #define CONFIG_H_INCLUDED
+  #endif
+#elif defined(H2D_REAL) || defined(H2D_COMPLEX)
+  #ifndef CONFIG_H_INCLUDED
+    #include "../hermes2d/src/config.h"
+    #define CONFIG_H_INCLUDED
+  #endif
+#elif defined(H3D_REAL) || defined(H3D_COMPLEX)
+  #ifndef CONFIG_H_INCLUDED
+    #include "../hermes2d/src/config.h"
+    #define CONFIG_H_INCLUDED
+  #endif
+#endif
 
 #ifdef HAVE_TEUCHOS_LINK
 // For dl_iterate_phdr() functionality

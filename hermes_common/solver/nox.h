@@ -13,11 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H3D_SOLVER_NOX_H_
-#define __H3D_SOLVER_NOX_H_
+#ifndef __NOX_SOLVER_H_
+#define __NOX_SOLVER_H_
 
 #include "solver.h"
-#include "precond.h"
 #include "epetra.h"
 
 #ifdef HAVE_NOX
@@ -30,7 +29,7 @@ class NoxProblemInterface;
 /// Encapsulation of NOX nonlinear solver
 ///
 /// @ingroup solvers
- class HERMES_API NoxSolver : public IterSolver
+class HERMES_API NoxSolver : public IterSolver
 {
 public:
   NoxSolver(DiscreteProblem *problem);
@@ -57,26 +56,28 @@ public:
 
   // convergence params
 #ifdef HAVE_NOX
-        void set_norm_type(NOX::Abstract::Vector::NormType type)  { conv.norm_type = type; }
-        void set_scale_type(NOX::StatusTest::NormF::ScaleType type)  { conv.stype = type; }
+  void set_norm_type(NOX::Abstract::Vector::NormType type)  { conv.norm_type = type; }
+  void set_scale_type(NOX::StatusTest::NormF::ScaleType type)  { conv.stype = type; }
 #endif
-        void set_conv_iters(int iters)        { conv.max_iters = iters; }
+  void set_conv_iters(int iters)        { conv.max_iters = iters; }
   void set_conv_abs_resid(double resid) { conv_flag.absresid = 1; conv.abs_resid = resid; }
   void set_conv_rel_resid(double resid) { conv_flag.relresid = 1; conv.rel_resid = resid; }
   void set_conv_update(double update)   { conv_flag.update = 1; conv.update = update; }
-  void set_conv_wrms(double rtol, double atol) {
+  void set_conv_wrms(double rtol, double atol) 
+  {
     conv_flag.wrms = 1;
     conv.wrms_rtol = rtol;
     conv.wrms_atol = atol;
   }
   
-  #ifdef HAVE_TEUCHOS
-    virtual void set_precond(Teuchos::RCP<Precond> &pc);
-  #else
-    virtual void set_precond(Precond* pc) { 
-      warning("Teuchos is currently required to use IFPACK/ML preconditioners. No preconditioning will be performed.");  
-    }
-  #endif
+#ifdef HAVE_TEUCHOS
+  virtual void set_precond(Teuchos::RCP<Precond> &pc);
+#else
+  virtual void set_precond(Precond* pc) 
+  { 
+    warning("Teuchos is currently required to use IFPACK/ML preconditioners. No preconditioning will be performed.");  
+  }
+#endif
   virtual void set_precond(const char *pc);
 
 protected:
