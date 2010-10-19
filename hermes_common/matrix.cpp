@@ -19,9 +19,8 @@
 
 #include "common.h"
 #include "matrix.h"
-
-#include <common/error.h>
-#include <common/callstack.h>
+#include "error.h"
+#include "callstack.h"
 
 
 #define H3D_TINY 1.0e-20

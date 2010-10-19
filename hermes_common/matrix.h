@@ -21,7 +21,7 @@
 #define __MATRIX_H
 
 #include "common.h"
-#include "../common/error.h"
+#include "error.h"
 
 
 /// Creates a new (full) matrix with m rows and n columns with entries of the type T.
