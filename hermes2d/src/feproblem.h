@@ -50,7 +50,8 @@ HERMES_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class HERMES_API FeProblem {
+class HERMES_API DiscreteProblem 
+{
 public:
   DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear = false);
   virtual ~DiscreteProblem();

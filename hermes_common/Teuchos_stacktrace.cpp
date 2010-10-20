@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #endif
 #elif defined(H3D_REAL) || defined(H3D_COMPLEX)
   #ifndef CONFIG_H_INCLUDED
-    #include "../hermes2d/src/config.h"
+    #include "../hermes3d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
 #endif

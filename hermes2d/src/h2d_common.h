@@ -19,7 +19,7 @@
 #include "../../hermes_common/common.h"
 
 // H2D-specific includes.
-//#include <Judy.h>
+#include <Judy.h>
 #include "auto_local_array.h"
 #include "tuple.h"
 
