@@ -290,7 +290,6 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 
   
       delete [] tmp;
       delete [] sctmp;
-      delete [] dg;
       delete [] tpt;
 
 			scalar value = 0.0;
@@ -299,7 +298,8 @@ void H1ProjectionIpol::calc_edge_proj(int iedge, int split, int son, const Ord3 
 			proj_rhs[i] += value * (1 / (double) edge_ns[split][iedge]);
     
       delete [] g;
-			if (edge_trf[split][iedge][e] != -1) fu->pop_transform();
+      delete [] dg;
+      if (edge_trf[split][iedge][e] != -1) fu->pop_transform();
 		}
 	}
 
