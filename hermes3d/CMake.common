@@ -15,18 +15,27 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
     set(HERMES ${ARGV1})
   endif(${ARGC} EQUAL 1) 
 
+  set(FLAGS)
+  
   # Should debugging information be included for the test?
   if(DEBUG)
-    set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS "-g")
+    set(FLAGS "${FLAGS} -g")
   endif(DEBUG)
 
-# If the complex version is being used, define 'H3D_COMPLEX'.
-# This is done already for the complex version of the library.
-#  if(H3D_COMPLEX)
-#    if(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
-#        add_definitions(-DH3D_COMPLEX)
-#    endif(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
-#  endif(H3D_COMPLEX)
+  # If the complex version is being used, define 'H3D_COMPLEX'.
+  if(H3D_COMPLEX)
+    if(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
+        set(FLAGS "${FLAGS} -DH3D_COMPLEX")
+    endif(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
+  endif(H3D_COMPLEX)
+  # If the real version is being used, define 'H3D_REAL'.
+  if(H3D_REAL)
+    if(${HERMES} STREQUAL ${HERMES_REAL_BIN})
+        set(FLAGS "${FLAGS} -DH3D_REAL")
+    endif(${HERMES} STREQUAL ${HERMES_REAL_BIN})
+  endif(H3D_REAL)
+  
+  set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS ${FLAGS})
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
   include_directories(${hermes3d_SOURCE_DIR}/src)
