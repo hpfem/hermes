@@ -27,7 +27,7 @@
 /// FIXME: hex specific
 ///
 /// @ingroup hp-adaptivity
-class H3D_API H1Projection : public Projection {
+class HERMES_API H1Projection : public Projection {
 public:
 	H1Projection(Solution *afn, Element *e, Shapeset *ss);
 

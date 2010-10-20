@@ -25,7 +25,7 @@
 /// Hcurl space
 ///
 ///
-class H3D_API HcurlSpace : public Space {
+class HERMES_API HcurlSpace : public Space {
 public:
 	HcurlSpace(Mesh *mesh, BCType (*bc_type_callback)(int) = NULL, 
 		   scalar (*bc_value_callback_by_coord)(int, double, double, double) = NULL, Ord3 p_init = Ord3(1,1,1),

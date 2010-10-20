@@ -30,7 +30,7 @@
 /// NOTE: hex-specific
 ///
 /// @ingroup hp-adapt
-class H3D_API Projection {
+class HERMES_API Projection {
 public:
 	Projection(Solution *afn, Element *e, Shapeset *ss);
 	virtual ~Projection();
