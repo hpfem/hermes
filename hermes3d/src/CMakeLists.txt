@@ -50,6 +50,7 @@ set(SRC
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
 	${HERMES_COMMON_DIR}/common_time_period.cpp
+  ${HERMES_COMMON_DIR}/matrix.cpp
     ${HERMES_COMMON_DIR}/callstack.cpp
     ${HERMES_COMMON_DIR}/error.cpp
     ${HERMES_COMMON_DIR}/utils.cpp
