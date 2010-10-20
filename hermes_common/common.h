@@ -155,20 +155,20 @@ inline double conj(double a) {  return a; }
     extern "C" {
     #endif
 
-    extern int zscal_(int *, complex *, complex *, int *);
-    extern int zaxpy_(int *, complex *, complex *, int *, complex *, int *);
-    extern int zcopy_(int *,            complex *, int *, complex *, int *);
+    extern int zscal_(int *, cplx *, cplx *, int *);
+    extern int zaxpy_(int *, cplx *, cplx *, int *, cplx *, int *);
+    extern int zcopy_(int *, cplx *, int *, cplx *, int *);
 
     #ifdef __cplusplus
     }
     #endif
 
     /// x <- alpha * x
-    inline void blas_scal(int n, complex alpha, complex *x, int incx) { zscal_(&n, &alpha, x, &incx); }
+    inline void blas_scal(int n, cplx alpha, cplx *x, int incx) { zscal_(&n, &alpha, x, &incx); }
     /// y <- alpha * x + y
-    inline void blas_axpy(int n, complex alpha, complex *x, int incx, complex *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
+    inline void blas_axpy(int n, cplx alpha, cplx *x, int incx, cplx *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
     /// y <- x
-    inline void blas_copy(int n, complex *x, int incx, complex *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
+    inline void blas_copy(int n, cplx *x, int incx, cplx *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
   #endif
 
 #else
