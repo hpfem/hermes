@@ -315,7 +315,7 @@ bool PardisoLinearSolver::solve() {
     if (var != NULL) sscanf(var, "%d", &num_procs);
     else num_procs = 1;
 
-#ifdef H3D_COMPLEX
+#if defined (H2D_COMPLEX) || defined (H3D_COMPLEX)
     int mtype = 13;		// Complex unsymmetric matrix
 #else    
     int mtype = 11;   // Real unsymmetric matrix

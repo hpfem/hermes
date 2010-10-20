@@ -26,7 +26,7 @@
 #ifdef WITH_MUMPS
   extern "C" {
     #include <mumps_c_types.h>
-  #ifndef H3D_COMPLEX
+  #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     #include <dmumps_c.h>
   #else
     #include <zmumps_c.h>
@@ -63,7 +63,7 @@ protected:
   int nnz;				// number of non-zero elements
   int *irn;				// row indices
   int *jcn;				// column indices
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   scalar *a;				// matrix entries
 #else
   ZMUMPS_COMPLEX *a;
@@ -82,7 +82,7 @@ public:
 
   virtual void alloc(int ndofs);
   virtual void free();
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   virtual scalar get(int idx) { return v[idx]; }
 #else
   virtual scalar get(int idx) { return cplx(v[idx].r, v[idx].i); }
@@ -95,7 +95,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   scalar *v;
 #else
   ZMUMPS_COMPLEX *v;

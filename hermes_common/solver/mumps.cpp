@@ -23,7 +23,7 @@
 #include "../utils.h"
 #include "../callstack.h"
 
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   #define MUMPS			dmumps_c
   #define MUMPS_STRUCT	DMUMPS_STRUC_C
 #else
@@ -102,7 +102,7 @@ void MumpsMatrix::alloc()
   pages = NULL;
 
   nnz = ap[size];
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   a = new scalar[nnz];
   memset(a, 0, sizeof(scalar) * nnz);
 #else
@@ -131,7 +131,7 @@ scalar MumpsMatrix::get(int m, int n)
 {
   _F_
   int mid = ap[n] + find_position(ai + ap[n], ap[n + 1] - ap[n], m);
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   return a[mid];
 #else
   return cplx(a[mid].r, a[mid].i);
@@ -141,7 +141,7 @@ scalar MumpsMatrix::get(int m, int n)
 void MumpsMatrix::zero()
 {
   _F_
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   memset(a, 0, sizeof(scalar) * ap[size]);
 #else
   memset(a, 0, sizeof(ZMUMPS_COMPLEX) * ap[size]);
@@ -153,7 +153,7 @@ void MumpsMatrix::add(int m, int n, scalar v)
   _F_
   if (m >= 0 && n >= 0) {		// ignore dirichlet DOFs
     int pos = ap[n] + find_position(ai + ap[n], ap[n + 1] - ap[n], m);
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     a[pos] += v;
 #else
     a[pos].r += v.real();
@@ -184,7 +184,7 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
       for (int i = 0; i < nnz; i++)
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
         fprintf(file, "%d %d %lf\n", irn[i], jcn[i], a[i]);
 #else
         fprintf(file, "%d %d (%lf,%lf)\n", irn[i], jcn[i], a[i].r, a[i].i);
@@ -230,7 +230,7 @@ void MumpsVector::alloc(int n)
   _F_
   free();
   size = n;
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   v = new scalar[n];
 #else
   v = new ZMUMPS_COMPLEX[n];
@@ -241,7 +241,7 @@ void MumpsVector::alloc(int n)
 void MumpsVector::zero()
 {
   _F_
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   memset(v, 0, size * sizeof(scalar));
 #else
   memset(v, 0, size * sizeof(ZMUMPS_COMPLEX));
@@ -259,7 +259,7 @@ void MumpsVector::free()
 void MumpsVector::set(int idx, scalar y)
 {
   _F_
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   if (idx >= 0) v[idx] = y;
 #else
   if (idx >= 0) {
@@ -272,7 +272,7 @@ void MumpsVector::set(int idx, scalar y)
 void MumpsVector::add(int idx, scalar y)
 {
   _F_
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   if (idx >= 0) v[idx] += y;
 #else
   if (idx >= 0) {
@@ -287,7 +287,7 @@ void MumpsVector::add(int n, int *idx, scalar *y)
   _F_
   for (int i = 0; i < n; i++)
     if (idx[i] >= 0) {
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
       v[idx[i]] += y[i];
 #else
       v[idx[i]].r += y[i].real();
@@ -302,7 +302,7 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   switch (fmt) {
     case DF_NATIVE:
       for (int i = 0; i < size; i++)
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
         fprintf(file, "%lf\n", v[i]);
 #else
         fprintf(file, "(%lf,%lf)\n", v[i].r, v[i].i);
@@ -312,7 +312,7 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (int i = 0; i < size; i++)
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
         fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
 #else
       fprintf(file, "(%lf, %lf)\n", v[i].r, v[i].i);
@@ -412,7 +412,7 @@ bool MumpsSolver::solve()
   id.a = m->a;
 
   // right-hand side
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   id.rhs = new double[m->size];
   memcpy(id.rhs, rhs->v, m->size * sizeof(double));
 #else
@@ -437,7 +437,7 @@ bool MumpsSolver::solve()
   if (ret) {
     delete [] sln;
     sln = new scalar[m->size];
-#ifndef H3D_COMPLEX
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     for (int i = 0; i < rhs->size; i++)
       sln[i] = id.rhs[i];
 #else
