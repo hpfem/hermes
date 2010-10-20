@@ -23,9 +23,10 @@
 #include <assert.h>
 
 #include <Judy.h>
+#include <climits>
 
 #ifndef INVALID_IDX
-#define INVALID_IDX					((unsigned int) -1)
+#define INVALID_IDX					((unsigned int) UINT_MAX) // ((unsigned int) -1) was here
 #endif
 
 #include "map.h"
@@ -343,14 +344,14 @@ template<class TYPE>
 unsigned int MapOrd<TYPE>::last() const {
 	void *pval;
 	unsigned int idx = -1;
-	JLL(pval, judy_l, idx);
+	JLL(pval, judy_l, (Word_t)idx);
 	return pval ? idx : INVALID_IDX;
 }
 
 template<class TYPE>
 unsigned int MapOrd<TYPE>::prev(unsigned int idx) const {
 	void *pval;
-	JLP(pval, judy_l, idx);
+	JLP(pval, judy_l, (Word_t)idx);
 	return pval ? idx : INVALID_IDX;
 }
 
