@@ -237,9 +237,9 @@ int main(int argc, char* argv[])
   info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   // Show both solutions.
-  ScalarView view1("Solution 1", new WinGeom(0, 0, 500, 400));
+  ScalarView view1("Solution 1", 0, 0, 500, 400);
   view1.show(&sln_hermes);
-  ScalarView view2("Solution 2", new WinGeom(510, 0, 500, 400));
+  ScalarView view2("Solution 2", 510, 0, 500, 400);
   view2.show(&sln_nox);
 
   // Wait for all views to be closed.

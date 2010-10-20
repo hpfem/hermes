@@ -50,6 +50,7 @@ class HERMES_API ScalarView : public View
 public:
 
   void init();
+  ScalarView(const char* title = "ScalarView", DEFAULT_WINDOW_POS);
 #ifndef _MSC_VER
 	ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL);
 #endif

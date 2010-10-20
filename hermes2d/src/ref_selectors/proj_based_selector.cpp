@@ -124,7 +124,6 @@ namespace RefinementSelectors {
       c.error = sqrt(error_squared);
 
       //apply weights
-      
       switch(c.split) {
       case H2D_REFINEMENT_H: c.error *= error_weight_h; break;
       case H2D_REFINEMENT_ANISO_H:
@@ -132,7 +131,7 @@ namespace RefinementSelectors {
       case H2D_REFINEMENT_P: c.error *= error_weight_p; break;
       default: error("Unknown split type \"%d\" at candidate %d", c.split, i);
       }
-      
+
       //calculate statistics
       if (i == 0 || c.error <= unrefined_c.error) {
         sum_err += log10(c.error);
@@ -211,8 +210,7 @@ namespace RefinementSelectors {
       Trf* p_trf_identity[1] = { &trfs[H2D_TRF_IDENTITY] };
       std::vector<TrfShapeExp>* p_trf_svals[1] = { &svals[H2D_TRF_IDENTITY] };
       std::vector<TrfShapeExp>* p_trf_ortho_svals[1] = { &ortho_svals[H2D_TRF_IDENTITY] };
-      for(int son = 0; son < H2D_MAX_ELEMENT_SONS; son++) 
-      {
+      for(int son = 0; son < H2D_MAX_ELEMENT_SONS; son++) {
         scalar **sub_rval[1] = { rval[son] };
         calc_error_cand_element(mode, gip_points, num_gip_points
           , 1, &base_element->sons[son], p_trf_identity, sub_rval

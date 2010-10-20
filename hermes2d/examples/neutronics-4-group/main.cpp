@@ -161,10 +161,10 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
   
   // Initialize views.
-  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 320, 600));
-  ScalarView view2("Neutron flux 2", new WinGeom(350, 0, 320, 600));
-  ScalarView view3("Neutron flux 3", new WinGeom(700, 0, 320, 600));
-  ScalarView view4("Neutron flux 4", new WinGeom(1050, 0, 320, 600));
+  ScalarView view1("Neutron flux 1", 0, 0, 320, 600);
+  ScalarView view2("Neutron flux 2", 350, 0, 320, 600);
+  ScalarView view3("Neutron flux 3", 700, 0, 320, 600);
+  ScalarView view4("Neutron flux 4", 1050, 0, 320, 600);
   
   // Do not show meshes.
   view1.show_mesh(false); view1.set_3d_mode(true);

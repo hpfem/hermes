@@ -92,7 +92,7 @@ public:
 
 protected:
 
-  int item[10];
+  int item[3];
 
   void (*filter_fn)(int n, Tuple<scalar*>, scalar*);
 

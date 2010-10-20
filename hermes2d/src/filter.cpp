@@ -178,7 +178,7 @@ void Filter::pop_transform()
 //// SimpleFilter //////////////////////////////////////////////////////////////////////////////////
 
 SimpleFilter::SimpleFilter(void (*filter_fn)(int n, Tuple<scalar*> values, scalar* result),
-		Tuple<MeshFunction*> solutions, Tuple<int> items)
+		Tuple<MeshFunction*> solutions, Tuple<int> items) : filter_fn(filter_fn)
 {
 	this->num = solutions.size();
 	if(num > 10)
@@ -197,7 +197,6 @@ SimpleFilter::SimpleFilter(void (*filter_fn)(int n, Tuple<scalar*> values, scala
 	}
 	this->init();
 	init_components();
-	this->filter_fn = filter_fn;
 }
 
 void SimpleFilter::init_components()

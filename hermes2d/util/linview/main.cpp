@@ -11,7 +11,7 @@ public:
 
   LinView(int width, int height, int n, char** names)
     : current(0), num(n), names(names),
-      Base("LinView", new WinGeom(0, 0, width, height)) {}
+      Base("LinView", 0, 0, width, height) {}
 
   void switch_to(int n)
   {

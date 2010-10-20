@@ -79,6 +79,7 @@ class HERMES_API View
 public:
 
   void init();
+  View(const char* title, int x, int y, int width, int height);
   View(const char* title, WinGeom* wg = NULL);
   View(char* title, WinGeom* wg = NULL);
   virtual ~View();
@@ -88,7 +89,7 @@ public:
   void refresh(); ///< Refreshes views
 
   /// Changes the window name (in its title-bar) to 'title'.
-  virtual void set_title(const char* title);
+  void set_title(const char* title);
 
   void set_min_max_range(double min, double max);
   void auto_min_max_range();

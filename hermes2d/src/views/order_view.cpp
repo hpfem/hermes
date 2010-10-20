@@ -26,6 +26,16 @@
 #include "../h2d_common.h"
 #include "order_view.h"
 
+OrderView::OrderView(const char* title, int x, int y, int width, int height)
+         : View(title, x, y, width, height)
+{
+  b_scale = true;
+  b_orders = false;
+  scale_width = 36;
+  scale_box_height = 25;
+  scale_box_skip = 9;
+}
+
 #ifndef _MSC_VER
 OrderView::OrderView(const char* title, WinGeom* wg)
          : View(title, wg)

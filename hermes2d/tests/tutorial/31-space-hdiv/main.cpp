@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
   HdivSpace space(&mesh, NULL, NULL, P_INIT);
 
   // Visualise the FE basis.
-  //VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));
+  VectorBaseView bview("VectorBaseView", 0, 0, 700, 600);
 
   bool success = true;
 

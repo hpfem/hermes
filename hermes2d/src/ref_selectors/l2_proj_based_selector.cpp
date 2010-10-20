@@ -11,7 +11,7 @@ namespace RefinementSelectors {
   const int L2ProjBasedSelector::H2DRS_MAX_L2_ORDER = H2DRS_MAX_ORDER;
 
   L2ProjBasedSelector::L2ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, L2Shapeset* user_shapeset)
-    : ProjBasedSelector(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1,1), Range<int>(0, H2DRS_MAX_L2_ORDER)) {}
+    : ProjBasedSelector(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1,1), Range<int>(2, H2DRS_MAX_L2_ORDER)) {}
 
   void L2ProjBasedSelector::set_current_order_range(Element* element) {
     current_max_order = this->max_order;
@@ -19,7 +19,7 @@ namespace RefinementSelectors {
       current_max_order = (20 - element->iro_cache)/2 - 2; // default
     else
       current_max_order = std::min(current_max_order, (20 - element->iro_cache)/2 - 2); // user specified
-    current_min_order = 0;
+    current_min_order = 1;
   }
 
   void L2ProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {

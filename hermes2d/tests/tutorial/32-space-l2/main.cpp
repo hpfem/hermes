@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   L2Space space(&mesh, P_INIT);
 
   // View basis functions.
-  //BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
+  BaseView bview("BaseView", 0, 0, 600, 500);
 
   // Assemble and solve the finite element problem.
   WeakForm wf_dummy;
@@ -39,6 +39,12 @@ int main(int argc, char* argv[])
   Solution sln_exact(&mesh, F);
 
   OGProjection::project_global(&space, &sln_exact, &sln, matrix_solver, HERMES_L2_NORM);
+
+  // Visualize the solution.
+  ScalarView view1("Projection", 610, 0, 600, 500);
+
+  // It will "Exception: SegFault" if we do not use View::wait() or View::close(). 
+  view1.close();
 
   bool success = true;
 
