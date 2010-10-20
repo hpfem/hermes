@@ -367,14 +367,14 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   /* for 1280x800 display */
-  ScalarView view1("Neutron flux 1", 0, 0, 320, 400);
-  ScalarView view2("Neutron flux 2", 330, 0, 320, 400);
-  ScalarView view3("Neutron flux 3", 660, 0, 320, 400);
-  ScalarView view4("Neutron flux 4", 990, 0, 320, 400);
-  OrderView oview1("Mesh for group 1", 0, 450, 320, 500);
-  OrderView oview2("Mesh for group 2", 330, 450, 320, 500);
-  OrderView oview3("Mesh for group 3", 660, 450, 320, 500);
-  OrderView oview4("Mesh for group 4", 990, 450, 320, 500);
+  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 320, 400));
+  ScalarView view2("Neutron flux 2", new WinGeom(330, 0, 320, 400));
+  ScalarView view3("Neutron flux 3", new WinGeom(660, 0, 320, 400));
+  ScalarView view4("Neutron flux 4", new WinGeom(990, 0, 320, 400));
+  OrderView oview1("Mesh for group 1", new WinGeom(0, 450, 320, 500));
+  OrderView oview2("Mesh for group 2", new WinGeom(330, 450, 320, 500));
+  OrderView oview3("Mesh for group 3", new WinGeom(660, 450, 320, 500));
+  OrderView oview4("Mesh for group 4", new WinGeom(990, 450, 320, 500));
 
   /* for adjacent 1280x800 and 1680x1050 displays
   ScalarView view1("Neutron flux 1", 0, 0, 640, 480);

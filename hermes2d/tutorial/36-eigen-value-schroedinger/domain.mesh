@@ -1,0 +1,35 @@
+# size of of the mesh
+a =  6.0
+vertices =
+{ 
+  { 0 , 0},     # vertex 0
+  { a, 0 },    # vertex 1
+  { 0, a },    # vertex 2
+  { -a, 0 },    # vertex3
+  {  0, -a }    # vertex 4
+}
+
+elements =
+{
+  { 0, 1, 2, 0},  # tri 0
+  { 0, 2, 3, 0},  # tri 0
+  { 0, 3, 4, 0},  # tri 0
+  { 0, 4, 1, 0}   # tri 0
+}
+
+boundaries =
+{
+  { 1, 2, 1},
+  { 2, 3 ,2},
+  { 3, 4 ,3},
+  { 4, 1, 4}
+}
+
+curves =
+
+{
+ {1, 2, 90},
+ {2, 3, 90},	
+ {3, 4, 90},	
+ {4, 1, 90}	
+}

@@ -24,7 +24,7 @@ const int ANY = -1234;
 
 // Up to 100 is currently implemented.
 // When you change this, run tests.
-const int MAX_P = 30;                  // max poly degree allowed in elements
+const int MAX_P = 50;                  // max poly degree allowed in elements
                                        // WARNING: projections taking place in 
                                        // transfer_solution()
 // Up to 200 is currently implemented:
@@ -66,5 +66,7 @@ void intro();
 #define MEM_CHECK(var) if (var == NULL) { printf("Out of memory."); exit(1); }
 #define verbose(msg)
 #define warn(msg)
+
+#undef _POSIX_C_SOURCE
 
 #endif

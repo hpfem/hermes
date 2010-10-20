@@ -1,3 +1,5 @@
+from math import sin, cos, log, pi, sqrt, e, log, exp
+
 from hermes1d.fekete.fekete import Mesh1D, Function
 
 def test1():
@@ -185,3 +187,142 @@ def test7():
     assert mesh3.restrict_to_interval(-3.5, 10) == Mesh1D((-3.5, 3, 10), (2, 1))
     assert mesh3.restrict_to_interval(3, 10) == Mesh1D((3, 10), (1,))
     assert mesh3.restrict_to_interval(3.5, 10) == Mesh1D((3.5, 10), (1,))
+
+def test8():
+    eps = 1e-12
+    func = lambda x: x**2
+    mesh1 = Mesh1D((-5, -4, 3, 10), (2, 5, 2))
+    mesh2 = Mesh1D((-5, -4, 3, 10), (2, 2, 2))
+    mesh3 = Mesh1D((-5, -4, 3, 10), (2, 2, 1))
+    mesh4 = Mesh1D((-5, 10), (2,))
+    mesh5 = Mesh1D((-5, 10), (3,))
+    mesh6 = Mesh1D((-5, 10), (1,))
+    f = Function(func, mesh1)
+    g = Function(func, mesh2)
+    h = Function(func, mesh3)
+    l = Function(func, mesh4)
+    zero = Function(lambda x: 0., Mesh1D((-5, 10), (1,)))
+    assert zero.l2_norm() < eps
+    assert Function(lambda x: 0., mesh1) == zero
+    assert Function(lambda x: 0., mesh2) == zero
+    assert Function(lambda x: 0., mesh3) == zero
+    assert Function(lambda x: 0., mesh4) == zero
+    assert Function(lambda x: 0., mesh5) == zero
+    assert Function(lambda x: 0., mesh6) == zero
+
+    assert f - g == zero
+    assert (f-g).l2_norm() < eps
+    assert g - f == zero
+    assert (g - f).l2_norm() < eps
+    assert f - l == zero
+    assert (f - l).l2_norm() < eps
+    assert g - l == zero
+    assert (g - l).l2_norm() < eps
+    assert f - h != zero
+    assert (f - h).l2_norm() > eps
+    assert h - f != zero
+    assert (h - f).l2_norm() > eps
+    assert g - h != zero
+    assert (g - h).l2_norm() > eps
+    assert h - g != zero
+    assert (h - g).l2_norm() > eps
+
+    assert f - Function(lambda x: x**2, mesh1) == zero
+    assert f - Function(lambda x: x**3, mesh1) != zero
+    assert f - Function(lambda x: x**2, mesh2) == zero
+    assert f - Function(lambda x: x**2, mesh4) == zero
+    assert f - Function(lambda x: x**2, mesh5) == zero
+    assert f - Function(lambda x: x**2, mesh6) != zero
+
+def test_l2_h1_1():
+    eps = 1e-12
+    eps_low = 1e-10
+    func = lambda x: sin(x)
+    mesh1 = Mesh1D((0, pi), (20,))
+    mesh2 = Mesh1D((0, pi/2, pi), (20, 20))
+    mesh3 = Mesh1D((0, pi/2), (20,))
+    f = Function(func, mesh1)
+    g = Function(func, mesh2)
+    h = Function(func, mesh3)
+    assert abs(f.l2_norm(method="Fekete")-sqrt(pi/2)) < eps
+    assert abs(g.l2_norm(method="Fekete")-sqrt(pi/2)) < eps
+    assert abs(h.l2_norm(method="Fekete")-sqrt(pi/4)) < eps
+
+    assert abs(f.l2_norm(method="FE")-sqrt(pi/2)) < eps
+    assert abs(g.l2_norm(method="FE")-sqrt(pi/2)) < eps
+    assert abs(h.l2_norm(method="FE")-sqrt(pi/4)) < eps
+
+    assert abs(f.h1_norm()-sqrt(pi)) < eps_low
+    assert abs(g.h1_norm()-sqrt(pi)) < eps_low
+    assert abs(h.h1_norm()-sqrt(pi/2)) < eps_low
+
+    func = lambda x: cos(x)
+    mesh1 = Mesh1D((0, pi/4, pi/2, 3*pi/4, pi), (20, 20, 20, 20))
+    f = Function(func, mesh1)
+    assert abs(f.l2_norm(method="Fekete")-sqrt(pi/2)) < eps
+    assert abs(f.l2_norm(method="FE")-sqrt(pi/2)) < eps
+
+    assert abs(f.h1_norm()-sqrt(pi)) < eps
+
+def test_l2_h1_2():
+    eps = 1e-9
+    func = lambda x: log(x)
+    mesh1 = Mesh1D((1, 1.5, 2, 2.5, e), (20, 20, 20, 20))
+    f = Function(func, mesh1)
+    l2_norm_exact = sqrt(e-2)
+    h1_norm_exact = sqrt(e-1-exp(-1))
+    assert abs(f.l2_norm(method="Fekete")-l2_norm_exact) < eps
+    assert abs(f.l2_norm(method="FE")-l2_norm_exact) < eps
+    assert abs(f.h1_norm()-h1_norm_exact) < eps
+
+def test_power():
+    eps = 1e-12
+    func = lambda x: x
+    mesh1 = Mesh1D((0, 1), (1,))
+    mesh2 = Mesh1D((0, 1), (2,))
+    mesh3 = Mesh1D((0, 1), (3,))
+    f = Function(func, mesh1)
+    assert abs(f.l2_norm() - sqrt(1./3)) < eps
+    assert f**2 != Function(lambda x: x**2, mesh1)
+    assert f**2 == Function(lambda x: x**2, mesh2)
+    assert f**2 == Function(lambda x: x**2, mesh3)
+
+    func = lambda x: x
+    mesh1 = Mesh1D((5, 6), (1,))
+    mesh2 = Mesh1D((5, 6), (2,))
+    mesh3 = Mesh1D((5, 6), (3,))
+    f = Function(func, mesh1)
+    assert f**2 != Function(lambda x: x**2, mesh1)
+    assert f**2 == Function(lambda x: x**2, mesh2)
+    assert f**2 == Function(lambda x: x**2, mesh3)
+
+    func = lambda x: x**3+x
+    mesh1 = Mesh1D((5, 6), (3,))
+    mesh2 = Mesh1D((5, 6), (5,))
+    mesh3 = Mesh1D((5, 6), (6,))
+    mesh4 = Mesh1D((5, 6), (9,))
+    f = Function(func, mesh1)
+    assert f**2 != Function(lambda x: x**6+2*x**4+x**2, mesh1)
+    assert f**2 != Function(lambda x: x**6+2*x**4+x**2, mesh2)
+    assert f**2 == Function(lambda x: x**6+2*x**4+x**2, mesh3)
+    assert f**3 == Function(lambda x: x**3 + 3*x**5 + 3*x**7 + x**9, mesh4)
+
+    func = lambda x: x**3+x
+    mesh1 = Mesh1D((5, 5.1, 6), (3, 3))
+    mesh2 = Mesh1D((5, 5.1, 6), (5, 5))
+    mesh3 = Mesh1D((5, 5.1, 6), (6, 6))
+    mesh4 = Mesh1D((5, 5.1, 6), (9, 9))
+    mesh5 = Mesh1D((5, 5.1, 6), (9, 7))
+    mesh6 = Mesh1D((5, 5.1, 6), (6, 5))
+    mesh7 = Mesh1D((5, 6), (6,))
+    mesh8 = Mesh1D((5, 6), (9,))
+    f = Function(func, mesh1)
+    assert f**2 != Function(lambda x: x**6+2*x**4+x**2, mesh1)
+    assert f**2 != Function(lambda x: x**6+2*x**4+x**2, mesh2)
+    assert f**2 != Function(lambda x: x**6+2*x**4+x**2, mesh6)
+    assert f**2 == Function(lambda x: x**6+2*x**4+x**2, mesh3)
+    assert f**3 == Function(lambda x: x**3 + 3*x**5 + 3*x**7 + x**9, mesh4)
+    assert f**3 != Function(lambda x: x**3 + 3*x**5 + 3*x**7 + x**9, mesh5)
+
+    assert f**2 == Function(lambda x: x**6+2*x**4+x**2, mesh7)
+    assert f**3 == Function(lambda x: x**3 + 3*x**5 + 3*x**7 + x**9, mesh8)

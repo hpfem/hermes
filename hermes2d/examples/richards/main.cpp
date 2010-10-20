@@ -119,8 +119,8 @@ int main(int argc, char* argv[])
   Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
   // Initialize views.
-  ScalarView sview("Solution", 0, 0, 500, 400);
-  OrderView oview("Mesh", 520, 0, 450, 400);
+  ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
+  OrderView oview("Mesh", new WinGeom(520, 0, 450, 400));
   oview.show(&space);
   sview.show(&u_prev_time);
   

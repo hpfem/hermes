@@ -7,6 +7,7 @@
 #include "matrix.h"
 #include "transforms.h"
 #include "linearizer.h"
+#include "adapt.h"
 
 // This is great help to debug automatic adaptivity. Generated are 
 // Gnuplot files for all refinement candidates, showing both the 
@@ -22,7 +23,12 @@ int PRINT_CANDIDATES = 0;
 // debug - prints element errors as they come to adapt()
 int PRINT_ELEM_ERRORS = 0;
 
-double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref) 
+// If 1, it will accept candidates, that decrease the number of DOFs. Sometimes
+// a better convergence curve is obtain if we don't allow it.
+int ALLOW_TO_DECREASE_DOFS = 0;
+
+double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref,
+        int sln) 
 {
   // create Gauss quadrature on 'e'
   int quad_order = 2*e_ref->p;
@@ -36,14 +42,14 @@ double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref)
   double phys_u[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
          phys_dudx[MAX_EQN_NUM][MAX_QUAD_PTS_NUM];
   // 0... in the whole interval (e->x1, e->x2)
-  e->get_solution_quad(0, quad_order, phys_u, phys_dudx); 
+  e->get_solution_quad(0, quad_order, phys_u, phys_dudx, sln); 
 
   // get fine mesh solution values and derivatives
   double phys_u_ref[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
          phys_dudx_ref[MAX_EQN_NUM][MAX_QUAD_PTS_NUM];
   // 0... in the whole interval (e->x1, e->x2)
   e_ref->get_solution_quad(0, quad_order, 
-                           phys_u_ref, phys_dudx_ref); 
+                           phys_u_ref, phys_dudx_ref, sln); 
 
   // integrate over 'e'
   double norm_squared[MAX_EQN_NUM];
@@ -68,7 +74,8 @@ double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref)
 }
 
 double calc_elem_est_error_squared_hp(int norm, Element *e, 
-				   Element *e_ref_left, Element *e_ref_right) 
+				   Element *e_ref_left, Element *e_ref_right,
+                   int sln) 
 {
   // create Gauss quadrature on 'e_ref_left'
   int order_left = 2*e_ref_left->p;
@@ -83,14 +90,14 @@ double calc_elem_est_error_squared_hp(int norm, Element *e,
   double phys_u_left[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
          phys_dudx_left[MAX_EQN_NUM][MAX_QUAD_PTS_NUM];
   // -1... left half of polynomials in (e_ref_left->x1, e_ref_left->x2)
-  e->get_solution_quad(-1, order_left, phys_u_left, phys_dudx_left); 
+  e->get_solution_quad(-1, order_left, phys_u_left, phys_dudx_left, sln); 
 
   // get fine mesh solution values and derivatives on 'e_ref_left'
   double phys_u_ref_left[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
          phys_dudx_ref_left[MAX_EQN_NUM][MAX_QUAD_PTS_NUM];
   // 0... in the whole interval (e_ref_left->x1, e_ref_left->x2)
   e_ref_left->get_solution_quad(0, order_left, 
-				phys_u_ref_left, phys_dudx_ref_left); 
+				phys_u_ref_left, phys_dudx_ref_left, sln); 
 
   // integrate over 'e_ref_left'
   double norm_squared_left[MAX_EQN_NUM];
@@ -121,14 +128,14 @@ double calc_elem_est_error_squared_hp(int norm, Element *e,
   double phys_u_right[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
          phys_dudx_right[MAX_EQN_NUM][MAX_QUAD_PTS_NUM];
   // 1... right half of polynomials in (e_ref_right->x1, e_ref_right->x2)
-  e->get_solution_quad(1, order_right, phys_u_right, phys_dudx_right); 
+  e->get_solution_quad(1, order_right, phys_u_right, phys_dudx_right, sln); 
 
   // get fine mesh solution values and derivatives on 'e_ref_right'
   double phys_u_ref_right[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
          phys_dudx_ref_right[MAX_EQN_NUM][MAX_QUAD_PTS_NUM];
   // 0... in the whole interval (e_ref_right->x1, e_ref_right->x2)
   e_ref_right->get_solution_quad(0, order_right, phys_u_ref_right, 
-                                 phys_dudx_ref_right); 
+                                 phys_dudx_ref_right, sln); 
 
   // integrate over 'e_ref_right'
   double norm_squared_right[MAX_EQN_NUM];
@@ -154,7 +161,7 @@ double calc_elem_est_error_squared_hp(int norm, Element *e,
 }
 
 double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
-			   double *err_array)
+			   double *err_array, int sln)
 {
   double err_total_squared = 0;
   Iterator *I = new Iterator(mesh);
@@ -168,13 +175,13 @@ double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
     double err_squared;
     if (e->level == e_ref->level) { // element 'e' was not refined in space
                                     // for reference solution
-      err_squared = calc_elem_est_error_squared_p(norm, e, e_ref);
+      err_squared = calc_elem_est_error_squared_p(norm, e, e_ref, sln);
     }
     else { // element 'e' was refined in space for reference solution
       Element* e_ref_left = e_ref;
       Element* e_ref_right = I_ref->next_active_element();
       err_squared = calc_elem_est_error_squared_hp(norm, e, 
-                    e_ref_left, e_ref_right);
+                    e_ref_left, e_ref_right, sln);
     }
     err_array[e->id] = err_squared;
     err_total_squared += err_squared;
@@ -1611,7 +1618,10 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
           printf("               dof_cand = %d, err_orig = %g, err_cand = %g (accepting)\n", 
                  dof_cand, err_orig, err_cand);
         }
-        return i;
+        if (ALLOW_TO_DECREASE_DOFS)
+            return i;
+        else
+            crit = 1e10;  // forget this candidate
       }
       else {
         if (PRINT_CANDIDATES) {
@@ -1630,7 +1640,7 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
     // improved
     if (dof_cand - dof_orig > 0) {
       // p-candidate (preferred - not penalized by the dof number)
-      if (cand_list[i][0] == 0) crit = (log(err_cand) - log(err_orig)) / sqrt(dof_cand - dof_orig); 
+      if (cand_list[i][0] == 0) crit = (log(err_cand) - log(err_orig));
       // hp-candidate
       else crit = (log(err_cand) - log(err_orig)) / sqrt(dof_cand - dof_orig); 
     } 

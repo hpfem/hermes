@@ -40,6 +40,14 @@ def get_motor_mesh():
     mesh = os.path.join(this_dir, "motor.mesh")
     return os.path.normpath(mesh)
 
+def get_GAMM_channel_mesh():
+    """
+    Returns an example mesh, that is distributed with hermes2d.
+    """
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    mesh = os.path.join(this_dir, "GAMM-channel.mesh")
+    return os.path.normpath(mesh)
+
 def get_07_mesh():
     """
     Returns an example mesh, that is distributed with hermes2d.

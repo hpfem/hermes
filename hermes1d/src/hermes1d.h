@@ -23,6 +23,7 @@
 #include "solution.h"
 #include "linearizer.h"
 #include "transforms.h"
+#include "projection.h"
 #include "adapt.h"
 #include "graph.h"
 

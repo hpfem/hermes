@@ -15,9 +15,11 @@ mesh file, etc.
 
 This document is under continuous development and certainly it is not perfect. 
 If you find bugs, typos, dead links or such, help us improve it by reporting them
-through one of the mailing lists for `Hermes1D <http://groups.google.com/group/hermes1d/>`_,
+through one of the mailing lists for 
+`Hermes1D <http://groups.google.com/group/hermes1d/>`_,
 `Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
-`Hermes3D <http://groups.google.com/group/hermes2d/>`_. Looking forward to your feedback!
+`Hermes3D <http://groups.google.com/group/hermes3d/>`_. 
+We are looking forward to your feedback!
 
 
 Finite Element Mesh (01)
@@ -26,13 +28,13 @@ Finite Element Mesh (01)
 **Git reference:** Tutorial example `01-mesh <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/01-mesh>`_. 
 
 Every finite element computation starts with partitioning the domain
-into a finite element mesh. Hermes uses triangles and quadrilaterals, and 
-can combine both element types in one mesh. While complicated meshes need 
-to be constructed using specialized mesh generation software, in many cases 
-we only need a simple initial mesh that can be created by hand. In Hermes, all you 
-need to do is partition the domain very coarsely into several large elements.
-Then you can use a number of elementary mesh refinement functions and/or
-let the automatic adaptivity algorithm take care of the rest. 
+into a finite element mesh. Hermes uses (possibly curvilinear) triangles and 
+quadrilaterals that can be combined together in one mesh. While non-adaptive
+or low-order finite element codes need fine initial meshes constructed using 
+specialized mesh generation software, in Hermes it usually suffices to
+create a simple initial mesh and use a variety of built-in functions for 
+a-priori mesh refinement. In most cases, automatic adaptivity will take 
+care of the rest. 
 
 .. image:: img/tutorial-01/simplemesh.png
    :align: center
@@ -221,15 +223,12 @@ parameters are optional). The class MeshView provides the method show() that dis
    :height: 400
    :alt: Image of the mesh created via the MeshView class.
 
-Every main.cpp file is finished with::
+To see the graphical output, the main.cpp file should be finished with::
 
     // Wait for the view to be closed.
     View::wait();
     return 0;
   }
-
-so that you have a chance to see the graphical output.
-
 
 Setting Up Finite Element Space (02)
 ------------------------------------
@@ -245,12 +244,14 @@ The following predefined spaces are currently available:
 * HdivSpace - space of vector-valued functions discontinuous along mesh edges, with continuous normal component on the edges $H(\mbox{div},\Omega) = \{ v \in [L^2(\Omega)^2; \nabla \cdot v \in L^2(\Omega)\}$,
 * L2Space - space of functions discontinuous along mesh edges, belonging to the space $L^2(\Omega)$.
 
-All these spaces allow for higher-order elements and meshes with arbitrary-level hanging nodes.
+All these spaces allow for higher-order elements, meshes with arbitrary-level hanging nodes,
+and automatic *hp*-adaptivity. 
 If you are not familiar with higher-order FEM, let us just say that the spaces can contain
 quadratic, cubic, etc., *edge functions* that generate higher-degree
 polynomials along mesh edges, and *bubble functions* that complete the higher-order
 approximation in element interiors. Edge functions are associated with mesh edges,
-and bubble functions with element interiors. The next figure shows a patch consisting of two triangular elements. An edge function is shown on the left, and a bubble function on one of the triangles on the right:
+and bubble functions with element interiors. The next figure shows a higher-order  
+edge function (left) and a higher-order bubble function (right). 
 
 .. image:: img/tutorial-02/basisfn.jpg
    :align: center
@@ -258,18 +259,16 @@ and bubble functions with element interiors. The next figure shows a patch consi
    :height: 200
    :alt: Fourth-order edge function  (left) and one of the fifth-order bubble functions (right).
 
-There are many possible ways of defining the
-higher-order basis functions. A particular set of polynomials is called
-*shapeset*. Using good shapeset is crucial for the
+Higher-order basis functions can be defined in many different ways. 
+A particular set of polynomials is called *shapeset*. Using a good shapeset is crucial for the
 performance of the *hp*-FEM. No shapeset can be optimal for all possible operators.
 Therefore, Hermes offers several shapesets from which
 you need to choose one when creating a FE space. The ones which perform best
 in most computations (according to our experience) are simply called
 H1Shapeset, HcurlShapeset, HdivShapeset and L2Shapeset.
-Others can be found in the files `src/shapeset* <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/src>`_ in the git repo.
-Any shapeset can be used for more than one space.
+Others can be found in the directory `src/shapeset/ <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/src/shapeset>`_. 
 
-We are now ready for an example. The following is (up to some comments) the complete
+We are now ready for an example. The following is (up to some omitted comments) the complete
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/02-space/main.cpp>`_ file
 of the example 02-space::
 
@@ -296,19 +295,14 @@ of the example 02-space::
 
 An instance of H1Space is initialized with four arguments: 
 
-* pointer to a mesh, 
-* function providing the type of boundary condition for various boundary markers 
+* Pointer to a mesh, 
+* function providing boundary condition types for all boundary markers 
   (NULL means natural boundary conditions on the entire boundary),
-* function providing values of essential boundary conditions (not relevant for natural BC),
+* function providing values of essential (i.e., Dirichlet) boundary conditions for all 
+  essential boundary markers (NULL here since all BC are natural),
 * uniform initial polynomial degree of all mesh elements.
 
-If only linear elements are used, then the initialization of the $H^1$ space is even simpler::
-
-    // Create an H1 space with default shapeset,
-    // natural BC, and linear elements.
-    H1Space space(&mesh);
-
-The polynomial degree of elements can also be set individually by calling 
+Polynomial degrees of elements can also be set individually by calling 
 the method Space::set_element_order() or for all elements at once using
 Space::set_uniform_order(). Note that element degrees
 are stored in Space, not in Mesh. The reason is that in Hermes one can
@@ -361,27 +355,46 @@ Find $u \in V$ such that
 
          \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} = CONST_F \int_\Omega v \;\mbox{d\bfx} \ \ \ \mbox{for all}\ v \in V.
 
-Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$ and thus in Hermes
-we need a way to define the bilinear form $a(u,v)$ and the linear form $l(v)$.
-This is done by implementing the following two functions:
-::
+Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$. The bilinear form $a(u,v)$ 
+and the linear form $l(v)$ are defined as follows::
 
+    // Return the value \int \nabla u \cdot \nabla v dx.
     template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext);
-
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++) result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+      return result;
+    }
+   
+    // Return the value CONST_F \int v dx.
     template<typename Real, typename Scalar>
-    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext);
+    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++) result += wt[i] * (v->val[i]);
+      return CONST_F * result;
+    }
 
-These functions are called for each element during the stiffness matrix
-assembly and must return the values of the bilinear and linear forms for the given arguments.
-RealFunction represents one of the basis functions restricted to the
-current element and RefMap represents the reference mapping of the current element.
-There are methods for extracting the values of the basis functions at integration points,
-which allows you to evaluate the integrals by yourself, but this is normally not needed,
-since many common weak forms have already been implemented.
-In this case, we can simply use the predefined functions
-int_grad_u_grad_v and int_v:
-::
+These functions are called for each element during the assembly and they must return the 
+values of the bilinear and linear forms for the given arguments. The arguments have the 
+following meaning:
+
+  * *n* ... the number of integration points (provided by Hermes automatically),
+  * *wt* ... array of integration weights for all integration points,
+  * *u_ext* ... solution values (for nonlinear problems only, to be discussed later),
+  * *u* ... basis function,
+  * *v* ... test function,
+  * *e* ... geometrical information such as physical positions of integration points, tangent and normal vectors to element edges, etc. (to be discussed later),
+  * *ext* ... external data to be passed into the weak forms (to be discussed later).
+
+The reader does not have to worry about the templates for now - they are used by Hermes to 
+automatically determine the number of integration points for each *u* and *v* pair (to be discussed
+later). The code also reveals how the function values and partial derivatives of the basis and 
+test functions are accessed.
+
+In many cases, such as in this one, one can replace the above code with simple predefined functions
+that can be found in the file `integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_::
 
     // Return the value \int \nabla u . \nabla v dx.
     template<typename Real, typename Scalar>
@@ -397,22 +410,23 @@ int_grad_u_grad_v and int_v:
       return CONST_F * int_v<Real, Scalar>(n, wt, v);
     }
 
-Later we will learn how to compose arbitrary integrals using function values and derivatives, and integration points and weights. The weak forms are registered as follows::
+Predefined functions like this also exist for the Hcurl, Hdiv and L2 spaces. The weak forms are registered as follows::
 
     // Initialize the weak formulation.
     WeakForm wf();
     wf.add_matrix_form(callback(bilinear_form));
     wf.add_vector_form(callback(linear_form));
 
-Later we will learn how to register Jacobian and residual forms for nonlinear problems. If the PDE is more complicated, we can add multiple matrix and vector forms.
-
-With the space and weak formulation in hand, the problem is solved via::
+The reader does not have to worry about the macro *callback()* for the moment, this is 
+related to automatic determination of integration order (to be discussed later).
+For more complicated PDE and PDE systems one can add multiple matrix and vector forms.
+With the space and weak formulation in hand, the problem can be solved simply via::
 
     // Solve the linear problem.
     Solution sln;
     solve_linear(&space, &wf, SOLVER_UMFPACK, &sln);
 
-The parameter SOLVER_UMFPACK indicates that we are using the direct sparse matrix solver UMFpack. Other options include SOLVER_PETSC, SOLVER_MUMPS, a variety of SciPy matrix solvers and others - the choice of matrix solvers will be discussed in more detail later. 
+The parameter SOLVER_UMFPACK indicates that we are using the direct sparse matrix solver UMFpack. Other options include SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO, a variety of SciPy matrix solvers and others (to be discussed later).
 
 The solution can be visualized via the ScalarView class::
 
@@ -446,7 +460,7 @@ This class is a descendant of a more general DiscreteProblem class that handles 
       Matrix* mat; Vector* rhs; CommonSolver* solver;
       init_matrix_solver(SOLVER_UMFPACK, ndof, mat, rhs, solver);
 
-Again, other matrix solvers besides SOLVER_UMFPACK can be used. The variable ndof stands for the number of degrees of greedom (unknowns in the discrete problem) that can be calculated after initializing a Space::
+Again, other matrix solvers besides SOLVER_UMFPACK can be used. The variable *ndof* stands for the number of degrees of greedom (unknowns in the discrete problem) that can be calculated after initializing a Space::
 
       int ndof = get_num_dofs(&space);
 

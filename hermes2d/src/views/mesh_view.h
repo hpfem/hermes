@@ -36,7 +36,6 @@ class HERMES_API MeshView : public View
 {
 public:
 
-  MeshView(const char* title = "MeshView", DEFAULT_WINDOW_POS);
 #ifndef _MSC_VER
 	MeshView(const char* title = "MeshView", WinGeom* wg = NULL);
 #endif

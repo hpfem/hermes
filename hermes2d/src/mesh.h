@@ -95,6 +95,9 @@ struct HERMES_API Element
   int marker;        ///< element marker
   int userdata;     ///< arbitrary user-defined data
   int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
+  Element* parent;   ///< pointer to the parent element for the current son
+  bool visited;      ///< true if the element has been visited during assembling
+
 
   Node* vn[4];   ///< vertex node pointers
   union
