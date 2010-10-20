@@ -1,0 +1,30 @@
+Hermes Common
+-------------
+
+Contains common code, that is used in all Hermes1D, Hermes2D and Hermes3D.
+
+Currently it includes the matrix support and Python wrappers.
+
+Installation
+------------
+
+$ cmake .
+$ make
+
+Tests
+-----
+
+C++ tests:
+
+$ make test
+
+Python tests:
+
+$ py.test
+
+Documentation
+-------------
+
+Read the tests in tests/*/main.cpp for lots of C++ examples.
+
+Read the tests in tests/test_* for lots of Python examples.
