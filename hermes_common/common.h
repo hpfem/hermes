@@ -46,6 +46,7 @@
 #include "common_time_period.h"   // timing utilities
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
+#include "error.h"
 //.
 
 // Decide which version of Hermes is being compiled and import
