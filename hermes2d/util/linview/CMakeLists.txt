@@ -9,27 +9,47 @@ endif(NOT H2D_REAL)
 
 macro(LINVIEW_SETTINGS VIEW)
     add_executable(${PROJECT_NAME} main.cpp)
+    
     include_directories(${hermes2d_SOURCE_DIR}/src)
-#    include_directories(${hermes2d_SOURCE_DIR}/hermes_common/)
     include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-    include_directories(${TRILINOS_INCLUDE_DIR})
-#    target_link_libraries(${PROJECT_NAME} hermes_common ${PYTHON_LIBRARIES} ${HERMES_REAL_BIN} ${LAPACK_LIBRARIES} ${TRILINOS_LIBRARIES})
-    target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES} ${HERMES_REAL_BIN} ${LAPACK_LIBRARIES} ${TRILINOS_LIBRARIES})
-    # if having Trilinos with UMFPACK support we need to link against UMFPACK
-    # if we do not have UMFPACK support at all, these variables are empty and cause no harm
-    target_link_libraries(${PROJECT_NAME} ${AMD_LIBRARY} ${UMFPACK_LIBRARY})
-	if(MSVC)
-		include_directories(${DEP_ROOT}/include)
-	endif(MSVC)
-    target_link_libraries(${PROJECT_NAME} ${HERMES_REAL_BIN})
-    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS
-        -DWHATVIEW=${VIEW})
+	  if(MSVC)
+		  include_directories(${DEP_ROOT}/include)
+	  endif(MSVC)
+	  
+	  PICK_REAL_OR_CPLX_LIBS(${HERMES_REAL_BIN} ${PROJECT_NAME})
+    get_property(FLAGS TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS)
+
+    # Should debugging information be included?
+    if(DEBUG)
+      set(FLAGS "${FLAGS} -g")
+    endif(DEBUG)
+
+    set(FLAGS "${FLAGS} -DWHATVIEW=${VIEW}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${FLAGS})
+        
+    # Do we need JUDY and GLUT libraries here?
+    target_link_libraries(  ${PROJECT_NAME} 
+      ${HERMES_REAL_BIN}
+      ${PYTHON_LIBRARIES}
+      ${PETSC_LIBRARIES}
+      ${UMFPACK_LIBRARIES}
+      ${PARDISO_LIBRARY}
+      ${MUMPS_LIBRARIES}
+      ${TRILINOS_LIBRARIES}
+      ${LAPACK_LIBRARIES} 
+      ${EXODUSII_LIBRARY} 
+      ${HDF5_LIBRARY}
+    )
+    add_dependencies(${PROJECT_NAME} ${HERMES_REAL_BIN})
 endmacro(LINVIEW_SETTINGS)
+
+add_definitions(-DH2D_REAL)
+
+include(PickRealOrCplxLibs)
 
 project(linview)
 LINVIEW_SETTINGS(ScalarView)
-set_target_properties(linview PROPERTIES
-    COMPILE_FLAGS "-DWHATVIEW=ScalarView -DCONTOURS")
+set_target_properties(linview PROPERTIES COMPILE_FLAGS "${FLAGS} -DCONTOURS")
 
 project(vecview)
 LINVIEW_SETTINGS(VectorView)
