@@ -22,6 +22,12 @@ if(H2D_COMPLEX)
       add_definitions(-DH2D_COMPLEX)
   endif(${HERMES} STREQUAL ${HERMES_CPLX_BIN})
 endif(H2D_COMPLEX)
+# If the real version is being used, define 'H2D_REAL'.
+if(H2D_REAL)
+  if(${HERMES} STREQUAL ${HERMES_REAL_BIN})
+      add_definitions(-DH2D_REAL)
+  endif(${HERMES} STREQUAL ${HERMES_REAL_BIN})
+endif(H2D_REAL)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${hermes2d_SOURCE_DIR}/src)
