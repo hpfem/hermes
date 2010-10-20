@@ -1,4 +1,4 @@
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cxx_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/../hermes_common/cmake/cxx_flag_overrides.cmake)
 project(hermes2d)
 
 cmake_minimum_required(VERSION 2.6)
