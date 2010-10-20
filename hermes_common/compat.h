@@ -6,8 +6,8 @@
    src/compat directory.
 */
 
-#ifndef __H3D_COMPAT_H
-#define __H3D_COMPAT_H
+#ifndef __HERMES_COMPAT_H
+#define __HERMES_COMPAT_H
 #include <stdio.h>
 
 #ifndef HAVE_FMEMOPEN
