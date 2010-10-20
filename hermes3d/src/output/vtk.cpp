@@ -25,13 +25,12 @@
 #include "vtk.h"
 #include "../refdomain.h"
 #include "../quadstd.h"
-#include "../common.h"
+#include "../h3d_common.h"
 #include "../traverse.h"
 
 #include <stdio.h>
 #include <errno.h>
 #include "../../../hermes_common/utils.h"
-#include "../../../hermes_common/callstack.h"
 #include "../../../hermes_common/error.h"
 
 // size of the buffer that is used for copying files

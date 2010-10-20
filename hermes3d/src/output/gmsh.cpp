@@ -25,10 +25,9 @@
 #include "gmsh.h"
 #include "../refdomain.h"
 #include "../quadstd.h"
-#include "../common.h"
+#include "../h3d_common.h"
 #include <stdio.h>
 #include <errno.h>
-#include "../../../hermes_common/callstack.h"
 
 // size of the buffer that is used for copying files
 #define FORMAT							"%.17g"

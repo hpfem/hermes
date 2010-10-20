@@ -22,10 +22,8 @@
 #include "../shapeset/h1lobattohex.h"
 #include "../shapeset/h1lobattotetra.h"
 #include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/bitarray.h"
 #include "../../../hermes_common/trace.h"
 #include "../../../hermes_common/error.h"
-#include "../../../hermes_common/callstack.h"
 
 
 H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 

@@ -16,10 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes3D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../h3d_common.h"
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/trace.h"
-#include "../../hermes_common/callstack.h"
-#include "../common.h"
 #include "graph.h"
 
 //// Graph /////////////////////////////////////////////////////////////////////////////////////////

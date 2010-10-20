@@ -22,10 +22,8 @@
 #include "../refmap.h"
 #include "../refdomain.h"
 #include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/bitarray.h"
 #include "../../../hermes_common/trace.h"
 #include "../../../hermes_common/error.h"
-#include "../../../hermes_common/callstack.h"
 
 HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double, double), Ord3 p_init, 
