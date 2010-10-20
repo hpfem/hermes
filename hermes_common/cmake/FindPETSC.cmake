@@ -16,7 +16,7 @@
 #     ./config/configure.py PETSC_ARCH=linux-cxx-complex --with-clanguage=cxx --with-scalar-type=complex
 #     make PETSC_DIR=/opt/petsc/petsc-3.1-p4 PETSC_ARCH=linux-mpicxx-complex all 
 #
-#   In hermes/hermes3d/CMake.vars:
+#   In hermes/hermes(2/3)d/CMake.vars:
 #     set(WITH_PETSC YES)
 #     set(PETSC_ROOT /opt/petsc/petsc-3.1-p4)
 #     set(PETSC_ARCH linux-cxx)
@@ -33,7 +33,7 @@ ENDIF(COMMON_PETSC_INCLUDE_DIRS AND NOT WITH_MPI AND EXISTS ${PETSC_ROOT}/includ
 
 SET(BASIC_PETSC_ARCH ${PETSC_ARCH})
 
-IF(H3D_REAL) # Search for the real version of the library.
+IF(H1D_REAL OR H2D_REAL OR H3D_REAL) # Search for the real version of the library.
 
   SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-real)
 
@@ -77,9 +77,9 @@ IF(H3D_REAL) # Search for the real version of the library.
   
   # linux specific (?)
   SET(PETSC_REAL_LIBRARIES ${PETSC_REAL_LIBRARIES} dl)     
-ENDIF(H3D_REAL)
+ENDIF(H1D_REAL OR H2D_REAL OR H3D_REAL)
   
-IF(H3D_COMPLEX)  # Search for the complex version of the library.  
+IF(H1D_COMPLEX OR H2D_COMPLEX OR H3D_COMPLEX)  # Search for the complex version of the library.  
   # Reset the search flags.
   SET(PETSC_FOUND FALSE)
   SET(PETSC_LIB PETSC_LIB-NOTFOUND)
@@ -126,7 +126,7 @@ IF(H3D_COMPLEX)  # Search for the complex version of the library.
   
   # linux specific (?)
   SET(PETSC_CPLX_LIBRARIES ${PETSC_CPLX_LIBRARIES} dl)          
-ENDIF(H3D_COMPLEX)
+ENDIF(H1D_COMPLEX OR H2D_COMPLEX OR H3D_COMPLEX)
 
 
 
