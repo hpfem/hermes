@@ -1,38 +1,14 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#include "logging.h"
 
-#include "h3d_common.h"
-
-using namespace std;
-
-/// A size of a delimiter in a log file. \internal \ingroup g_logging
-#define H3D_LOG_FILE_DELIM_SIZE 80
-
-void hermes3d_exit_if(bool cond, int code) {
+HERMES_API void hermes_exit_if(bool cond, int code) {
   if (cond)
     exit(code);
 }
 
-
 /// Logging output monitor. \internal \ingroup g_logging
 /** This class protects a logging function __h2d_log_message_if() in multithreded environment. */
-class LoggerMonitor {
+class LoggerMonitor 
+{
   pthread_mutexattr_t mutex_attr; ///< Mutext attributes.
   pthread_mutex_t mutex; ///< Mutex that protects monitor.
 
@@ -58,12 +34,10 @@ public:
 
 static LoggerMonitor logger_monitor; ///< A monitor that protects logging function. \internal \ingroup g_logging
 
-static map<string, bool> logger_written; ///< A list of all log files that were used to write a log. Used to write a log header to a log file. \internal \ingroup g_logging
-
-
+static std::map<std::string, bool> logger_written; ///< A list of all log files that were used to write a log. Used to write a log header to a log file. \internal \ingroup g_logging
 
 /// Writes a fancy formatted text to a console. \internal \ingroup g_logging
-/** \param[in] code An event code, e.g., ::h3d_EC_ERROR.
+/** \param[in] code An event code, e.g., ::HERMES_EC_ERROR.
  *  \param[in] emphasize True if the message should be emphasized.
  *  \param[in] text A message. A C-style string.
  *  \return True if the message was written. False if it failed due to some reasone. */
@@ -88,15 +62,15 @@ static bool write_console(const char code, const bool emphasize, const char* tex
   WORD console_attrs = 0;
   bool console_bold = false;
   switch(code) {
-    case H3D_EC_ERROR:
-    case H3D_EC_ASSERT: console_attrs |= console_attr_red; break;
-    case H3D_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
-    case H3D_EC_INFO: console_bold = true;
-    case H3D_EC_VERBOSE: console_attrs |= console_attr_red | console_attr_green | console_attr_blue; break;
-    case H3D_EC_TRACE: console_attrs |= console_attr_blue; break;
-    case H3D_EC_TIME: console_attrs |= console_attr_green | console_attr_blue; break;
-    case H3D_EC_DEBUG: console_attrs |= console_attr_red | console_attr_blue; break;
-    default: error("Unknown error code: '%c'", code); break;
+    case HERMES_EC_ERROR:
+    case HERMES_EC_ASSERT: console_attrs |= console_attr_red; break;
+    case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
+    case HERMES_EC_INFO: console_bold = true;
+    case HERMES_EC_VERBOSE: console_attrs |= console_attr_red | console_attr_green | console_attr_blue; break;
+    case HERMES_EC_TRACE: console_attrs |= console_attr_blue; break;
+    case HERMES_EC_TIME: console_attrs |= console_attr_green | console_attr_blue; break;
+    case HERMES_EC_DEBUG: console_attrs |= console_attr_red | console_attr_blue; break;
+    default: printf("Unknown error code: '%c'", code); exit(-1);
   }
   if (console_bold && !emphasize)
     console_attrs |= FOREGROUND_INTENSITY;
@@ -123,15 +97,15 @@ static bool write_console(const char code, const bool emphasize, const char* tex
   int console_attrs = 0;
   bool console_bold = false;
   switch(code) {
-    case H3D_EC_ERROR:
-    case H3D_EC_ASSERT: console_attrs |= FOREGROUND_RED; break;
-    case H3D_EC_WARNING: console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN; break;
-    case H3D_EC_INFO: console_bold = true;
-    case H3D_EC_VERBOSE: console_attrs |= FOREGROUND_BLUE; break;
-    case H3D_EC_TRACE: console_attrs |= FOREGROUND_BLUE; break;
-    case H3D_EC_TIME: console_attrs |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-    case H3D_EC_DEBUG: console_attrs |= FOREGROUND_RED | FOREGROUND_BLUE; break;
-    default: error("Unknown error code: '%c'", code); break;
+    case HERMES_EC_ERROR:
+    case HERMES_EC_ASSERT: console_attrs |= FOREGROUND_RED; break;
+    case HERMES_EC_WARNING: console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN; break;
+    case HERMES_EC_INFO: console_bold = true;
+    case HERMES_EC_VERBOSE: console_attrs |= FOREGROUND_BLUE; break;
+    case HERMES_EC_TRACE: console_attrs |= FOREGROUND_BLUE; break;
+    case HERMES_EC_TIME: console_attrs |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
+    case HERMES_EC_DEBUG: console_attrs |= FOREGROUND_RED | FOREGROUND_BLUE; break;
+    default: printf("Unknown error code: '%c'", code); exit(-1);
   }
   printf("\033[%dm", console_attrs + 30);
 
@@ -148,7 +122,7 @@ static bool write_console(const char code, const bool emphasize, const char* tex
 #endif
 }
 
-bool hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info, const char* msg, ...) {
+HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...) {
   if (cond) {
     logger_monitor.enter();
 
@@ -193,17 +167,17 @@ bool hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info, const 
       if (file != NULL)
       {
         //check whether log file was already written
-        map<string, bool>::const_iterator found = logger_written.find(info.log_file);
+        std::map<std::string, bool>::const_iterator found = logger_written.find(info.log_file);
         if (found == logger_written.end()) { //first write, write delimited to a file
           logger_written[info.log_file] = true;
           fprintf(file, "\n");
-          for(int i = 0; i < H3D_LOG_FILE_DELIM_SIZE; i++)
+          for(int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
             fprintf(file, "-");
           fprintf(file, "\n\n");
         }
 
         //build a long version of location
-        ostringstream location;
+        std::ostringstream location;
         location << '(';
         if (info.src_function != NULL) {
           location << info.src_function;
@@ -232,4 +206,19 @@ bool hermes3d_log_message_if(bool cond, const Hermes3DLogEventInfo& info, const 
     logger_monitor.leave();
   }
   return cond;
+}
+
+void __hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info)
+{
+  if (fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
+    hermes_exit_if(hermes_log_message_if(true, err_info, "Error writing to file: %s", strerror(ferror(stream))));
+}
+
+void __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info)
+{
+  size_t ret = fread(ptr, size, nitems, stream);
+  if (ret < nitems)
+    hermes_exit_if(hermes_log_message_if(true, err_info, "Premature end of file."));
+  else if (ferror(stream))
+    hermes_exit_if(hermes_log_message_if(true, err_info, "Error reading file: %s", strerror(ferror(stream))));
 }

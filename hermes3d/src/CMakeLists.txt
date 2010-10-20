@@ -8,7 +8,6 @@ endif(MSVC)
 # source files for the hermes3d library
 set(SRC
 	hermes3d.cpp
-	h3d_common.cpp
 	filter.cpp
 	forms.cpp
 	function.cpp
@@ -44,29 +43,30 @@ set(SRC
 	transform.cpp
 	traverse.cpp
 	weakform.cpp
-    adapt/adapt.cpp
+  adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
 	${HERMES_COMMON_DIR}/common_time_period.cpp
+  ${HERMES_COMMON_DIR}/callstack.cpp
+  ${HERMES_COMMON_DIR}/error.cpp
+  ${HERMES_COMMON_DIR}/utils.cpp
+  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
-    ${HERMES_COMMON_DIR}/callstack.cpp
-    ${HERMES_COMMON_DIR}/error.cpp
-    ${HERMES_COMMON_DIR}/utils.cpp
-    ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
-    ${HERMES_COMMON_DIR}/solver/nox.cpp 
-    ${HERMES_COMMON_DIR}/solver/epetra.cpp 
-    ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
-    ${HERMES_COMMON_DIR}/solver/amesos.cpp
-    ${HERMES_COMMON_DIR}/solver/mumps.cpp 
-    ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
-    ${HERMES_COMMON_DIR}/solver/petsc.cpp 
-    ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
-    ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
-    ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
-    ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
-    ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
+  ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
+  ${HERMES_COMMON_DIR}/solver/nox.cpp 
+  ${HERMES_COMMON_DIR}/solver/epetra.cpp 
+  ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
+  ${HERMES_COMMON_DIR}/solver/amesos.cpp
+  ${HERMES_COMMON_DIR}/solver/mumps.cpp 
+  ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
+  ${HERMES_COMMON_DIR}/solver/petsc.cpp 
+  ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
+  ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
+  ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
+  ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
+  ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
 )
 
 include(PickRealOrCplxLibs)

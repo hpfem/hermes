@@ -50,6 +50,7 @@ set(SRC
        ref_selectors/h1_proj_based_selector.cpp 
        ref_selectors/hcurl_proj_based_selector.cpp
        h2d_common.cpp  
+       h2d_logging.cpp
        weakform.cpp 
        feproblem.cpp
        forms.cpp
@@ -70,6 +71,7 @@ set(SRC
        ${HERMES_COMMON_DIR}/callstack.cpp
        ${HERMES_COMMON_DIR}/error.cpp
        ${HERMES_COMMON_DIR}/utils.cpp
+       ${HERMES_COMMON_DIR}/logging.cpp       
        ${HERMES_COMMON_DIR}/matrix.cpp
        ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
        ${HERMES_COMMON_DIR}/solver/nox.cpp 

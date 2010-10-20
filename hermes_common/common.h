@@ -16,28 +16,6 @@
 #ifndef __HERMES_COMMON_H
 #define __HERMES_COMMON_H
 
-// Decide which version of Hermes is being compiled and import
-// the build options from the corresponding config.h file.
-#if defined(H1D_REAL) || defined(H1D_COMPLEX)
-  #define HERMES  "Hermes1D"
-  #ifndef CONFIG_H_INCLUDED
-    #include "../hermes1d/src/config.h"
-    #define CONFIG_H_INCLUDED
-  #endif
-#elif defined(H2D_REAL) || defined(H2D_COMPLEX)
-  #define HERMES  "Hermes2D"
-  #ifndef CONFIG_H_INCLUDED
-    #include "../hermes2d/src/config.h"
-    #define CONFIG_H_INCLUDED
-  #endif
-#elif defined(H3D_REAL) || defined(H3D_COMPLEX)
-  #define HERMES  "Hermes3D"
-  #ifndef CONFIG_H_INCLUDED
-    #include "../hermes3d/src/config.h"
-    #define CONFIG_H_INCLUDED
-  #endif
-#endif
-
 // Include
 //
 // common headers
@@ -69,6 +47,31 @@
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
 //.
+
+// Decide which version of Hermes is being compiled and import
+// the build options from the corresponding config.h file.
+#if defined(H1D_REAL) || defined(H1D_COMPLEX)
+  #define HERMES  "Hermes1D"
+  #ifndef CONFIG_H_INCLUDED
+    #include "../hermes1d/src/config.h"
+    #define CONFIG_H_INCLUDED
+  #endif
+  #include "../hermes1d/src/h1d_logging.h"
+#elif defined(H2D_REAL) || defined(H2D_COMPLEX)
+  #define HERMES  "Hermes2D"
+  #ifndef CONFIG_H_INCLUDED
+    #include "../hermes2d/src/config.h"
+    #define CONFIG_H_INCLUDED
+  #endif
+  #include "../hermes2d/src/h2d_logging.h"  
+#elif defined(H3D_REAL) || defined(H3D_COMPLEX)
+  #define HERMES  "Hermes3D"
+  #ifndef CONFIG_H_INCLUDED
+    #include "../hermes3d/src/config.h"
+    #define CONFIG_H_INCLUDED
+  #endif
+  #include "../hermes3d/src/h3d_logging.h"  
+#endif
 
 // Error codes
 #define HERMES_ERR_NOT_IMPLEMENTED                 "Not yet implemened."
