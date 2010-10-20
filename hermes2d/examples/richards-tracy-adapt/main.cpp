@@ -31,15 +31,15 @@ using namespace RefinementSelectors;
 // Note: Exact solution makes sense for Gardner's relations only.
 //#define CONSTITUTIVE_GENUCHTEN
 
-const double TIME_INIT = 1e-3;             // Initial time.
-const int INIT_REF_NUM = 0;                // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 8;            // Number of initial mesh refinements towards the top edge.
-const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements.
-const double TAU = 0.001;                  // Time step.
-const double T_FINAL = 1.0;                // Time interval length.
-const int TIME_INTEGRATION = 1;            // 1... implicit Euler, 2... Crank-Nicolson.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+const double TIME_INIT = 1e-3;                    // Initial time.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 8;                   // Number of initial mesh refinements towards the top edge.
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const double TAU = 0.001;                         // Time step.
+const double T_FINAL = 1.0;                       // Time interval length.
+const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Adaptivity
 const int UNREF_FREQ = 1;                  // Every UNREF_FREQth time step the mesh is unrefined.
@@ -155,7 +155,6 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d.", ndof);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -163,8 +162,6 @@ int main(int argc, char* argv[])
   // Solutions for the time stepping and adaptivity.
   Solution u_prev_time, sln, ref_sln;
 
-  // Adapt mesh to represent initial condition with given accuracy.
-  info("Mesh adaptivity to an exact function:");
   // Initialize views.
   char title_init[200];
   sprintf(title_init, "Projection of initial condition");
@@ -172,6 +169,10 @@ int main(int argc, char* argv[])
   sprintf(title_init, "Initial mesh");
   OrderView* ordview_init = new OrderView(title_init, 420, 0, 350, 300);
   view_init->fix_scale_width(80);
+
+  /*
+  // Adapt mesh to represent initial condition with given accuracy.
+  info("Mesh adaptivity to an exact function:");
   int as = 1; bool done = false;
   do
   {
@@ -187,7 +188,8 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     Adapt adaptivity(&space, HERMES_H1_NORM);
     bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity.calc_err_est(&u_prev_time, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity.calc_err_est(&u_prev_time, &ref_sln, solutions_for_adapt, 
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     info("Step %d, ndof %d, proj_error %g%%", as, Space::get_num_dofs(&space), err_est_rel);
 
@@ -208,6 +210,11 @@ int main(int argc, char* argv[])
     as++;
   }
   while (done == false);
+  */
+
+  // Initialize u_prev_time.
+  // Note: only if adaptivity to initial condition is not done.
+  u_prev_time.set_exact(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -298,7 +305,6 @@ int main(int argc, char* argv[])
 
     // Updating current time.
     TIME = ts*TAU;
-    info("---- Time step %d:", ts);
 
     // Periodic global derefinements.
     if (ts > 1 && ts % UNREF_FREQ == 0) {
@@ -393,16 +399,20 @@ int main(int argc, char* argv[])
       bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Calculate error wrt. exact solution.
       ExactSolution exact(&mesh, exact_sol);
       solutions_for_adapt = false;
-      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, 
+                             HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Report results.
-      info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%, space_err_exact_rel: %g%%", 
-	    Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel, err_exact_rel);
+      info("ndof_coarse: %d, ndof_fine: %d", 
+	    Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+      info("space_err_est_rel: %g%%, space_err_exact_rel: %g%%", 
+	    err_est_rel, err_exact_rel);
 
       // Add entries to convergence graphs.
       graph_time_err_est.add_values(ts*TAU, err_est_rel);
