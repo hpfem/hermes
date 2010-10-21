@@ -192,6 +192,17 @@ else(WITH_GLUT)
   add_definitions(-DNOGLUT)
 endif(WITH_GLUT)
 
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${HERMES_COMMON_DIR})
+
+include(CheckIncludeFile)
+CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
+CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
+
+IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(HAVE_TEUCHOS_STACKTRACE yes)
+ENDIF()
+
 #
 add_subdirectory(src)
 if(WITH_TESTS)
@@ -210,16 +221,6 @@ if(WITH_PYTHON)
 	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
 
-include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${HERMES_COMMON_DIR})
-
-include(CheckIncludeFile)
-CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
-CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
-
-IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(HAVE_TEUCHOS_STACKTRACE yes)
-ENDIF()
 
 # examples
 add_subdirectory(examples EXCLUDE_FROM_ALL)
@@ -287,3 +288,9 @@ set(CPACK_SOURCE_IGNORE_FILES
 )
 
 include(CPack)
+
+if(HAVE_TEUCHOS_STACKTRACE)
+    message("Print Teuchos stacktrace on segfault: YES")
+else(HAVE_TEUCHOS_STACKTRACE)
+    message("Print Teuchos stacktrace on segfault: NO")
+endif(HAVE_TEUCHOS_STACKTRACE)
