@@ -135,7 +135,7 @@ int test_quadrature_3d_hex(fn3d_t fn, double exact, int min_h, int min_v, int mi
 	for (int horder = min_h; horder <= H3D_MAX_QUAD_ORDER; horder++) {
 		for (int vorder = min_v; vorder <= H3D_MAX_QUAD_ORDER; vorder++) {
 			for (int uorder = min_u; uorder <= H3D_MAX_QUAD_ORDER; uorder++) {
-				order3_t order(horder, vorder, uorder);
+				Ord3 order(horder, vorder, uorder);
 
 				int np = quad.get_num_points(order);
 				QuadPt3D *pt = quad.get_points(order);
@@ -242,12 +242,12 @@ int test_quadrature_3d() {
 		printf("\n");
 		printf("- Testing 3D quadrature (tetra) -----\n");
 
-		TC3D fn_tetra[] = {
+		TC3D Funcetra[] = {
 			TC3D(fn_3d_1, 8.0/9.0, 3, 0, 0, "x^2 + y^2 + z^2 + x*y*z + x + y + z + 1")
 		};
 
-		for (int i = 0; i < countof(fn_tetra); i++) {
-			if ((ret = test_quadrature_3d_tetra(fn_tetra[i].fn, fn_tetra[i].exact, fn_tetra[i].min_h_order, fn_tetra[i].fn_name)) != ERROR_SUCCESS)
+		for (int i = 0; i < countof(Funcetra); i++) {
+			if ((ret = test_quadrature_3d_tetra(Funcetra[i].fn, Funcetra[i].exact, Funcetra[i].min_h_order, Funcetra[i].fn_name)) != ERROR_SUCCESS)
 				return ret;
 		}
 	}

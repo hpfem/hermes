@@ -186,7 +186,7 @@ bool test_zero_values_of_bubble_fns(Shapeset *shapeset) {
 	_F_
 	Quad3D *quad = get_quadrature(MODE);
 
-	order3_t order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+	Ord3 order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 
 	int n_fns = shapeset->get_num_bubble_fns(order);
 	int *bubble_fn = shapeset->get_bubble_indices(order);

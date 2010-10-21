@@ -68,15 +68,15 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 }
 
 template<typename f_t, typename res_t>
-res_t jacobi_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *vi, fn_t<f_t> *vj, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t jacobi_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, vi, vj, e);
 }
 
 template<typename f_t, typename res_t>
-res_t resid_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *vi, geom_t<f_t> *e,
-                 user_data_t<res_t> *data)
+res_t resid_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *vi, Geom<f_t> *e,
+                 ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -119,8 +119,8 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 }
 
 template<typename f_t, typename res_t>
-res_t jacobi_form(int n, double *wt, fn_t<res_t> *itr[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t jacobi_form(int n, double *wt, Func<res_t> *itr[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -131,8 +131,8 @@ res_t jacobi_form(int n, double *wt, fn_t<res_t> *itr[], fn_t<f_t> *u, fn_t<f_t>
 }
 
 template<typename f_t, typename res_t>
-res_t resid_form(int n, double *wt, fn_t<res_t> *itr[], fn_t<f_t> *v, geom_t<f_t> *e,
-                 user_data_t<res_t> *data)
+res_t resid_form(int n, double *wt, Func<res_t> *itr[], Func<f_t> *v, Geom<f_t> *e,
+                 ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -188,8 +188,8 @@ inline T f(T x, T y, T z)
 
 
 template<typename f_t, typename res_t>
-res_t jacobi_form(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, fn_t<f_t> *vj, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t jacobi_form(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -199,8 +199,8 @@ res_t jacobi_form(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, fn_t<f_t> *v
 
 
 template<typename f_t, typename res_t>
-res_t resid_form(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
-                 user_data_t<res_t> *data)
+res_t resid_form(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Geom<f_t> *e,
+                 ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -211,8 +211,8 @@ res_t resid_form(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *
 // PROJ
 
 template<typename f_t, typename res_t>
-res_t biproj_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t biproj_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -221,7 +221,7 @@ res_t biproj_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_
 }
 
 template<typename f_t, typename res_t>
-res_t liproj_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data)
+res_t liproj_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	return res;
@@ -240,15 +240,15 @@ int main(int argc, char **argv)
 
 	printf("* Loading mesh '%s'\n", argv[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("loading mesh file '%s'\n", argv[1]);
 
 	H1ShapesetLobattoHex shapeset;
 
 #if defined NONLIN1
-	order3_t order(1, 1, 1);
+	Ord3 order(1, 1, 1);
 #else
-	order3_t order(2, 2, 2);
+	Ord3 order(2, 2, 2);
 #endif
 	printf("* Setting the space up\n");
 	H1Space space(&mesh, &shapeset);
@@ -264,8 +264,8 @@ int main(int argc, char **argv)
 #if defined NONLIN2
 	// do L2 projection of zero function
 	WeakForm proj_wf;
-	proj_wf.add_matrix_form(biproj_form<double, scalar>, biproj_form<ord_t, ord_t>, SYM);
-	proj_wf.add_vector_form(liproj_form<double, scalar>, liproj_form<ord_t, ord_t>);
+	proj_wf.add_matrix_form(biproj_form<double, scalar>, biproj_form<Ord, Ord>, SYM);
+	proj_wf.add_vector_form(liproj_form<double, scalar>, liproj_form<Ord, Ord>);
 
 	LinearProblem lp(&proj_wf, &space);
 
@@ -287,8 +287,8 @@ int main(int argc, char **argv)
 	printf("* Calculating a solution\n");
 
 	WeakForm wf(1);
-	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<ord_t, ord_t>, UNSYM);
-	wf.add_vector_form(0, resid_form<double, scalar>, resid_form<ord_t, ord_t>);
+	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<Ord, Ord>, UNSYM);
+	wf.add_vector_form(0, resid_form<double, scalar>, resid_form<Ord, Ord>);
 
 	DiscreteProblem dp(&wf, &space);
 

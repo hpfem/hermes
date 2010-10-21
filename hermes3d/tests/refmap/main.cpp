@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	if (argc < 2) error("Not enough parameters");
 
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
 
 	RefMap refmap(&mesh);
@@ -50,11 +50,11 @@ int main(int argc, char *argv[]) {
 	    refmap.set_active_element(e);
 
 	    // ref. order
-	    order3_t ref_ord = refmap.get_ref_order();
+	    Ord3 ref_ord = refmap.get_ref_order();
 	    printf(" - ref. order: %s\n", ref_ord.str());
 
 	    // inv. ref. order
-	    order3_t inv_ref_ord = refmap.get_inv_ref_order();
+	    Ord3 inv_ref_ord = refmap.get_inv_ref_order();
 	    printf(" - inv. ref. order: %s\n", inv_ref_ord.str());
 
 	    // const jacobian
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 	    	// TODO: implement me
 	    }
 	    else {
-	    	order3_t o3(2, 2, 2);
+	    	Ord3 o3(2, 2, 2);
 	    	int np = quad->get_num_points(o3);
 
 	    	double *jac = refmap.get_jacobian(o3);

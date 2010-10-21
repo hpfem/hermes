@@ -55,7 +55,7 @@ BCType bc_types(int marker) {
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *user_data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *user_data) {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
@@ -68,7 +68,7 @@ T dfnc(T x, T y, T z) {
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *user_data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *user_data) {
 	return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
 }
 
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
 	printf("* Loading mesh '%s'\n", argv[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
 
 	printf("* Setting the space up\n");

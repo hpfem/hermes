@@ -113,7 +113,7 @@ bool test_gradients_directly(Shapeset *ss) {
 		}
 	}
 
-	order3_t order3(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+	Ord3 order3(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 	indices = ss->get_bubble_indices(order3);
 	for (ii = 0; ii < ss->get_num_bubble_fns(order3); ii++) {
 		printf("."); fflush(stdout);

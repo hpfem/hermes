@@ -192,13 +192,13 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data)
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data)
 {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data)
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data)
 {
 	return -int_F_v<f_t, res_t>(n, wt, rhs, u, e);
 }
@@ -230,7 +230,7 @@ void parse_aniso_type(char *str)
 	aniso_type = type;
 }
 
-bool check_order(const order3_t &spord)
+bool check_order(const Ord3 &spord)
 {
 	switch (aniso_type)
 	{
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 
 	printf("* Loading mesh '%s'\n", argv[1]);
 	Mesh mesh;
-	Mesh3DReader mloader;
+	H3DReader mloader;
 	if (!mloader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
 
 	printf("* Setting the space up\n");
@@ -292,43 +292,43 @@ int main(int argc, char **argv)
 	space.set_bc_types(bc_types);
 	space.set_essential_bc_values(essential_bc_values);
 
-	order3_t order;
+	Ord3 order;
 	switch (aniso_type)
 	{
 		case ANISO_X:
-			order = order3_t(init_p, init_q, init_q);
+			order = Ord3(init_p, init_q, init_q);
 			break;
 
 		case ANISO_Y:
-			order = order3_t(init_q, init_p, init_q);
+			order = Ord3(init_q, init_p, init_q);
 			break;
 
 		case ANISO_Z:
-			order = order3_t(init_q, init_q, init_p);
+			order = Ord3(init_q, init_q, init_p);
 			break;
 
 		case ANISO_X | ANISO_Y:
-			order = order3_t(init_p, init_p, init_q);
+			order = Ord3(init_p, init_p, init_q);
 			break;
 
 		case ANISO_X | ANISO_Z:
-			order = order3_t(init_p, init_q, init_p);
+			order = Ord3(init_p, init_q, init_p);
 			break;
 
 		case ANISO_Y | ANISO_Z:
-			order = order3_t(init_q, init_p, init_p);
+			order = Ord3(init_q, init_p, init_p);
 			break;
 
 		case ANISO_X | ANISO_Y | ANISO_Z:
-			order = order3_t(init_p, init_p, init_p);
+			order = Ord3(init_p, init_p, init_p);
 			break;
 	}
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
 	space.set_uniform_order(order);
 
 	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM, ANY);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, ANY);
+	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM, ANY);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, ANY);
 
 	LinearProblem lp(&wf, &space);
 
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 
 		// check the we are doing all right
 		FOR_ALL_ACTIVE_ELEMENTS(eid, &mesh) {
-			order3_t spord = space.get_element_order(eid);
+			Ord3 spord = space.get_element_order(eid);
 			printf("#%ld: order = (%d, %d, %d)\n", eid, spord.x, spord.y, spord.z);
 		}
 
@@ -352,7 +352,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		order3_t spord = space.get_element_order(1);
+		Ord3 spord = space.get_element_order(1);
 		if (!check_order(spord)) {
 			res = ERR_FAILURE;
 			printf("failed\n");

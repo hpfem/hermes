@@ -50,7 +50,7 @@ int test_mesh3d_loader(char *file_name)
 {
 	_F_
 	Mesh mesh;
-	Mesh3DReader mloader;
+	H3DReader mloader;
 	if (mloader.load(file_name, &mesh)) {
 		mesh.dump();
 		return ERROR_SUCCESS;

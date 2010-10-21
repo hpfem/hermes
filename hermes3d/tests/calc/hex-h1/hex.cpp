@@ -50,7 +50,7 @@ BCType bc_types(int marker) {
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
@@ -64,7 +64,7 @@ T f(T x, T y, T z) {
 
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_F_v<f_t, res_t>(n, wt, f, u, e);
 }
 
@@ -84,7 +84,7 @@ int main(int argc, char **args) {
 
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
-	Mesh3DReader mloader;
+	H3DReader mloader;
 	if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	FOR_ALL_ELEMENTS(idx, &mesh) {
@@ -108,7 +108,7 @@ int main(int argc, char **args) {
 	else p = o;
 	if (argc > 4) sscanf(args[4], "%d", &q);
 	else q = o;
-	order3_t order(o, p, q);
+	Ord3 order(o, p, q);
 	printf("  - Setting uniform order to %s\n", order.str());
 	space.set_uniform_order(order);
 

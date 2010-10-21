@@ -121,22 +121,22 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int np, double *jwt, fn_t<res_t> *u_ext[], fn_t<f_t> *fu, fn_t<f_t> *fv, geom_t<f_t> *e, user_data_t<res_t> *ud) {
+res_t bilinear_form(int np, double *jwt, Func<res_t> *u_ext[], Func<f_t> *fu, Func<f_t> *fv, Geom<f_t> *e, ExtData<res_t> *ud) {
 	return int_grad_u_grad_v<f_t, res_t>(np, jwt, fu, fv, e);
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form_surf(int np, double *jwt, fn_t<res_t> *u_ext[], fn_t<f_t> *fu, fn_t<f_t> *fv, geom_t<f_t> *e, user_data_t<res_t> *ud) {
+res_t bilinear_form_surf(int np, double *jwt, Func<res_t> *u_ext[], Func<f_t> *fu, Func<f_t> *fv, Geom<f_t> *e, ExtData<res_t> *ud) {
 	return int_u_v<f_t, res_t>(np, jwt, fu, fv, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int np, double *jwt, fn_t<res_t> *u_ext[], fn_t<f_t> *fv, geom_t<f_t> *e, user_data_t<res_t> *ud) {
+res_t linear_form(int np, double *jwt, Func<res_t> *u_ext[], Func<f_t> *fv, Geom<f_t> *e, ExtData<res_t> *ud) {
 	return int_F_v<f_t, res_t>(np, jwt, dfnc, fv, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form_surf(int np, double *jwt, fn_t<res_t> *u_ext[], fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *ud) {
+res_t linear_form_surf(int np, double *jwt, Func<res_t> *u_ext[], Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *ud) {
 	res_t result = 0;
 #ifdef XM_YN_ZO
 	for (int i = 0; i < np; i++) {
@@ -357,7 +357,7 @@ int main(int argc, char **args) {
 	if (argc < 2) error("Not enough parameters");
 
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	// apply refinements
@@ -395,13 +395,13 @@ int main(int argc, char **args) {
 	space.set_essential_bc_values(essential_bc_values);
 
 #ifdef XM_YN_ZO
-	order3_t o(3, 3, 4);
+	Ord3 o(3, 3, 4);
 #elif defined XM_YN_ZO_2
-	order3_t o(2, 3, 4);
+	Ord3 o(2, 3, 4);
 #elif defined X2_Y2_Z2
-	order3_t o(2, 2, 2);
+	Ord3 o(2, 2, 2);
 #elif defined X3_Y3_Z3
-	order3_t o(3, 3, 3);
+	Ord3 o(3, 3, 3);
 #endif
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o.x, o.y, o.z);
 	space.set_uniform_order(o);
@@ -429,13 +429,13 @@ int main(int argc, char **args) {
 
 	WeakForm wf(1);
 #ifdef DIRICHLET
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<ord_t, ord_t>);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 #elif defined NEWTON
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-	wf.add_matrix_form_surf(0, 0, bilinear_form_surf<double, scalar>, bilinear_form_surf<ord_t, ord_t>);
-	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<ord_t, ord_t>);
-	wf.add_vector_form_surf(0, linear_form_surf<double, scalar>, linear_form_surf<ord_t, ord_t>);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_matrix_form_surf(0, 0, bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
+	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
+	wf.add_vector_form_surf(0, linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
 #endif
 
 	// assemble stiffness matrix

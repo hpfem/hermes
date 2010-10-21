@@ -78,12 +78,12 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
 }
 
@@ -105,7 +105,7 @@ int main(int argc, char **args) {
 
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 //	for (int it = 0; it < 8; it++) {
@@ -120,8 +120,8 @@ int main(int argc, char **args) {
 	space.set_essential_bc_values(essential_bc_values);
 
 	int mx = maxn(4, m, n, o, 4);
-	order3_t order(mx, mx, mx);
-//	order3_t order(3, 3, 4);
+	Ord3 order(mx, mx, mx);
+//	Ord3 order(3, 3, 4);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
 	space.set_uniform_order(order);
 
@@ -151,8 +151,8 @@ int main(int argc, char **args) {
 #endif
 
 	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>);
+	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
 
 	LinearProblem lp(&wf, &space);
 

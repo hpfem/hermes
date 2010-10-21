@@ -35,7 +35,7 @@ double l2_product(ShapeFunction *fu, ShapeFunction *fv) {
 	_F_
 	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);
 
-	order3_t o = fu->get_fn_order() + fv->get_fn_order() + order3_t(1, 1, 1);
+	Ord3 o = fu->get_fn_order() + fv->get_fn_order() + Ord3(1, 1, 1);
 
 	QuadPt3D *pt = quad->get_points(o);
 	int np = quad->get_num_points(o);
@@ -69,7 +69,7 @@ bool test_lin_indep(Shapeset *shapeset) {
 		Hex::NUM_VERTICES * 1 +			// 1 vertex fn
 		Hex::NUM_EDGES * shapeset->get_num_edge_fns(H3D_MAX_ELEMENT_ORDER) +
 		Hex::NUM_FACES * shapeset->get_num_face_fns(order2_t(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER)) +
-		shapeset->get_num_bubble_fns(order3_t(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER));
+		shapeset->get_num_bubble_fns(Ord3(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER));
 
 	printf("number of functions = %d\n", n);
 
@@ -93,7 +93,7 @@ bool test_lin_indep(Shapeset *shapeset) {
 			fn_idx[m] = face_idx[j];
 	}
 	// bubble
-	order3_t order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+	Ord3 order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 	int *bubble_idx = shapeset->get_bubble_indices(order);
 	for (int j = 0; j < shapeset->get_num_bubble_fns(order); j++, m++)
 		fn_idx[m] = bubble_idx[j];

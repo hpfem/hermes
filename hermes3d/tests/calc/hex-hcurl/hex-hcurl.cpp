@@ -98,14 +98,14 @@ BCType bc_types(int marker) {
 // definition of the forms
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return
 		hcurl_int_curl_u_curl_v<f_t, res_t>(n, wt, u, v, e) -
 		alpha * hcurl_int_u_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return hcurl_int_F_v<f_t, res_t>(n, wt, f<f_t, res_t>, u, e);
 }
 
@@ -125,7 +125,7 @@ int main(int argc, char **args) {
 
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	printf("* Setting the space up\n");
@@ -134,7 +134,7 @@ int main(int argc, char **args) {
 
 	int o;
 	sscanf(args[2], "%d", &o);
-	order3_t order(o, o, o);
+	Ord3 order(o, o, o);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o, o, o);
 	space.set_uniform_order(order);
 

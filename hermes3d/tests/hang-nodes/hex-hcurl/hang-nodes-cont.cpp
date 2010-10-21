@@ -158,14 +158,14 @@ BCType bc_types(int marker) {
 // definition of the forms
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return
 		hcurl_int_curl_u_curl_v<f_t, res_t>(n, wt, u, v, e) -
 		alpha * hcurl_int_u_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return hcurl_int_F_v<f_t, res_t>(n, wt, f<f_t, res_t>, u, e);
 }
 
@@ -356,7 +356,7 @@ int main(int argc, char **args) {
 	if (argc < 2) error("Not enough parameters");
 
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	// apply refinements
@@ -393,9 +393,9 @@ int main(int argc, char **args) {
 //	space.set_essential_bc_values(essential_bc_values);
 
 #if defined FN4
-	order3_t o(4, 4, 4);
+	Ord3 o(4, 4, 4);
 #elif defined X2_Y2_Z2
-	order3_t o(2, 2, 2);
+	Ord3 o(2, 2, 2);
 #endif
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o.x, o.y, o.z);
 	space.set_uniform_order(o);
@@ -424,8 +424,8 @@ int main(int argc, char **args) {
 #endif
 
 	WeakForm wf(1);
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<ord_t, ord_t>);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 
 	// assemble stiffness matrix
 	LinearProblem lp(&wf, &space);

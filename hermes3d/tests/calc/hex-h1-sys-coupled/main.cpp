@@ -71,22 +71,22 @@ BCType bc_types(int marker) {
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form_1_1(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form_1_1(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form_1_2(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form_1_2(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_u_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form_2_1(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form_2_1(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_u_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form_2_2(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form_2_2(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
@@ -100,7 +100,7 @@ T f1(T x, T y, T z) {
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form_1(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form_1(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_F_v<f_t, res_t>(n, wt, f1, u, e);
 }
 
@@ -114,7 +114,7 @@ T f2(T x, T y, T z) {
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form_2(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form_2(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_F_v<f_t, res_t>(n, wt, f2, u, e);
 }
 
@@ -134,14 +134,14 @@ int main(int argc, char **args) {
 
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	printf("* Setup space #1\n");
 	H1Space space1(&mesh, &shapeset);
 	space1.set_bc_types(bc_types);
 
-	order3_t o1(2, 2, 2);
+	Ord3 o1(2, 2, 2);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o1.x, o1.y, o1.z);
 	space1.set_uniform_order(o1);
 
@@ -149,7 +149,7 @@ int main(int argc, char **args) {
 	H1Space space2(&mesh, &shapeset);
 	space2.set_bc_types(bc_types);
 
-	order3_t o2(4, 4, 4);
+	Ord3 o2(4, 4, 4);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o2.x, o2.y, o2.z);
 	space2.set_uniform_order(o2);
 
@@ -179,13 +179,13 @@ int main(int argc, char **args) {
 #endif
 
 	WeakForm wf(2);
-	wf.add_matrix_form(0, 0, bilinear_form_1_1<double, scalar>, bilinear_form_1_1<ord_t, ord_t>, SYM);
-	wf.add_matrix_form(0, 1, bilinear_form_1_2<double, scalar>, bilinear_form_1_2<ord_t, ord_t>, SYM);
-	wf.add_vector_form(0, linear_form_1<double, scalar>, linear_form_1<ord_t, ord_t>);
+	wf.add_matrix_form(0, 0, bilinear_form_1_1<double, scalar>, bilinear_form_1_1<Ord, Ord>, SYM);
+	wf.add_matrix_form(0, 1, bilinear_form_1_2<double, scalar>, bilinear_form_1_2<Ord, Ord>, SYM);
+	wf.add_vector_form(0, linear_form_1<double, scalar>, linear_form_1<Ord, Ord>);
 
-//	wf.add_biform(1, 0, bilinear_form_2_1<sfn_t, scalar>, bilinear_form_2_1<fn_order_t, ord_t>, SYM);
-	wf.add_matrix_form(1, 1, bilinear_form_2_2<double, scalar>, bilinear_form_2_2<ord_t, ord_t>, SYM);
-	wf.add_vector_form(1, linear_form_2<double, scalar>, linear_form_2<ord_t, ord_t>);
+//	wf.add_biform(1, 0, bilinear_form_2_1<sFunc, scalar>, bilinear_form_2_1<fn_order_t, Ord>, SYM);
+	wf.add_matrix_form(1, 1, bilinear_form_2_2<double, scalar>, bilinear_form_2_2<Ord, Ord>, SYM);
+	wf.add_vector_form(1, linear_form_2<double, scalar>, linear_form_2<Ord, Ord>);
 
 	LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2));
 

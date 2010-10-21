@@ -294,22 +294,22 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t bilinear_form_surf(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, fn_t<f_t> *v, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t bilinear_form_surf(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_u_v<f_t, res_t>(n, wt, u, v, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
 }
 
 template<typename f_t, typename res_t>
-res_t linear_form_surf(int np, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *u, geom_t<f_t> *e, user_data_t<res_t> *data) {
+res_t linear_form_surf(int np, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
 	res_t result = 0;
 	for (int i = 0; i < np; i++) {
 #ifdef XM_YN_ZO
@@ -423,11 +423,11 @@ int main(int argc, char **args) {
 				space.set_essential_bc_values(essential_bc_values);
 
 #ifdef XM_YN_ZO
-				order3_t ord(4, 4, 4);
+				Ord3 ord(4, 4, 4);
 #elif defined XM_YN_ZO_2
-				order3_t ord(4, 4, 4);
+				Ord3 ord(4, 4, 4);
 #elif defined X2_Y2_Z2
-				order3_t ord(2, 2, 2);
+				Ord3 ord(2, 2, 2);
 #endif
 //				printf("  - Setting uniform order to (%d, %d, %d)\n", dir_x, dir_y, dir_z);
 				space.set_uniform_order(ord);
@@ -454,13 +454,13 @@ int main(int argc, char **args) {
 
 				WeakForm wf;
 #ifdef DIRICHLET
-				wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-				wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>);
+				wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+				wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
 #elif defined NEWTON
-				wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
-				wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<ord_t, ord_t>);
-				wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>);
-				wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<ord_t, ord_t>);
+				wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+				wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
+				wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
+				wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
 #endif
 
 				LinProblem lp(&wf);

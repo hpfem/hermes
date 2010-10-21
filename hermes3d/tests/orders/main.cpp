@@ -90,23 +90,23 @@ int test_order_quad() {
 int test_order_tetra() {
 	printf("test_order_tetra\n");
 
-	order3_t a(1), b(2);
+	Ord3 a(1), b(2);
 
 	// +
-	order3_t c = a + b;
+	Ord3 c = a + b;
 	if (c.order != 3) return ERR_FAILURE;
 
 	// +=
-	order3_t d = a;
+	Ord3 d = a;
 	d += b;
 	if (d.order != 3) return ERR_FAILURE;
 
 	// *
-	order3_t e = b * 6;
+	Ord3 e = b * 6;
 	if (e.order != 12) return ERR_FAILURE;
 
 	// max
-	order3_t m = max(b, e);
+	Ord3 m = max(b, e);
 	if (m.order != e.order) return ERR_FAILURE;
 
 
@@ -124,39 +124,39 @@ int test_order_tetra() {
 int test_order_hex() {
 	printf("test_order_hex\n");
 
-	order3_t a(1, 2, 3), b(3, 4, 2);
-	order3_t x;
+	Ord3 a(1, 2, 3), b(3, 4, 2);
+	Ord3 x;
 
 	// +
-	order3_t c = a + b;
+	Ord3 c = a + b;
 	if (c.x != 4 || c.y != 6 || c.z != 5) return ERR_FAILURE;
 
 	// +=
-	order3_t d = a;
+	Ord3 d = a;
 	d += b;
 	if (d.x != 4 || d.y != 6 || c.z != 5) return ERR_FAILURE;
 
 	// *
-	order3_t e = b * 6;
+	Ord3 e = b * 6;
 	if (e.x != 18 || e.y != 24 || e.z != 12) return ERR_FAILURE;
 
-	order3_t f = b * order3_t(2, 3, 4);
+	Ord3 f = b * Ord3(2, 3, 4);
 	if (f.x != 6 || f.y != 12 || f.z != 8) return ERR_FAILURE;
 
 	// max
-	order3_t m = max(b, e);
+	Ord3 m = max(b, e);
 	if (m.x != e.x || m.y != e.y || m.z != e.z) return ERR_FAILURE;
 
-	order3_t z(2, 1, 4);
+	Ord3 z(2, 1, 4);
 	x = a + b + z;
 	if (x.x != 6 || x.y != 7 || x.z != 9) return ERR_FAILURE;
 
 	// relation operators
 	// TODO: try tetrahedral orders
-	if (c == order3_t(4, 6, 5)) ;
+	if (c == Ord3(4, 6, 5)) ;
 	else return ERR_FAILURE;
 
-	if (c != order3_t(4, 6, 5)) return ERR_FAILURE;
+	if (c != Ord3(4, 6, 5)) return ERR_FAILURE;
 
 	// get_edge_order
 	order1_t edge_ref_order[] = { 3, 4, 3, 4, 2, 2, 2, 2, 3, 4, 3, 4 };

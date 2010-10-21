@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	if (argc < 1) error("Not enough parameters");
 
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
 
 	// apply refinements

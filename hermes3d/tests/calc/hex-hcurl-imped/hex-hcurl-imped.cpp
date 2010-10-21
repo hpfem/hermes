@@ -170,24 +170,24 @@ BCType bc_types(int marker) {
 /// definition of the forms
 
 template<typename ct, typename res_t>
-res_t bilinear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<ct> *u, fn_t<ct> *v, geom_t<ct> *e, user_data_t<res_t> *data) {
+res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<ct> *u, Func<ct> *v, Geom<ct> *e, ExtData<res_t> *data) {
 	return
 		hcurl_int_curl_u_curl_v<ct, res_t>(n, wt, u, v, e) -
 		hcurl_int_u_v<ct, res_t>(n, wt, u, v, e);
 }
 
 template<typename ct, typename res_t>
-res_t linear_form(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<ct> *v, geom_t<ct> *e, user_data_t<res_t> *data) {
+res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<ct> *v, Geom<ct> *e, ExtData<res_t> *data) {
 	return hcurl_int_F_v<ct, res_t>(n, wt, f, v, e);
 }
 
 template<typename ct, typename res_t>
-res_t bilinear_form_surf(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<ct> *u, fn_t<ct> *v, geom_t<ct> *e, user_data_t<res_t> *data) {
+res_t bilinear_form_surf(int n, double *wt, Func<res_t> *u_ext[], Func<ct> *u, Func<ct> *v, Geom<ct> *e, ExtData<res_t> *data) {
 	return -img * hcurl_int_u_v<ct, res_t>(n, wt, u, v, e);
 }
 
 template<typename ct, typename res_t>
-res_t linear_form_surf(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<ct> *v, geom_t<ct> *e, user_data_t<res_t> *data) {
+res_t linear_form_surf(int n, double *wt, Func<res_t> *u_ext[], Func<ct> *v, Geom<ct> *e, ExtData<res_t> *data) {
 	res_t result = 0.0;
 	for (int i = 0; i < n; i++) {
 		res_t ev[3], dx[3], dy[3], dz[3];
@@ -224,7 +224,7 @@ int main(int argc, char **args) {
 
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	printf("* Setting the space up\n");
@@ -235,7 +235,7 @@ int main(int argc, char **args) {
 	int order;
 	sscanf(args[2], "%d", &order);
 	int dir_x = order, dir_y = order, dir_z = order;
-	order3_t o(dir_x, dir_y, dir_z);
+	Ord3 o(dir_x, dir_y, dir_z);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", dir_x, dir_y, dir_z);
 	space.set_uniform_order(o);
 
@@ -263,10 +263,10 @@ int main(int argc, char **args) {
 #endif
 
 	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, UNSYM);
-	wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<ord_t, ord_t>);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>);
-	wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<ord_t, ord_t>);
+	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, UNSYM);
+	wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
+	wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
 //	wf.add_biform(bilinear_form, SYM);
 //	wf.add_biform_surf(bilinear_form_surf);
 //	wf.add_liform(linear_form);

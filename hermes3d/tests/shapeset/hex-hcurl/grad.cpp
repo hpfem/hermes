@@ -32,7 +32,7 @@ void hcurl_int_vol(RealFunction *fu, double3 result) {
 	_F_
 /*	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);
 
-	order3_t o = quad->get_max_order();
+	Ord3 o = quad->get_max_order();
 
 	QuadPt3D *pt = quad->get_points(o);
 	int np = quad->get_num_points(o);
@@ -138,7 +138,7 @@ bool test_gradients(Shapeset *shapeset) {
 
 	// bubble
 	printf("\n* Bubble functions\n");
-	order3_t order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+	Ord3 order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 	int *bubble_idx = shapeset->get_bubble_indices(order);
 	for (int j = 0; j < shapeset->get_num_bubble_fns(order); j++) {
 		if (!test_grad(bubble_idx[j], shapeset))

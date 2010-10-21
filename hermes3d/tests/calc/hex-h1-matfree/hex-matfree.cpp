@@ -89,8 +89,8 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 }
 
 template<typename f_t, typename res_t>
-res_t form_0(int n, double *wt, fn_t<res_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
-             user_data_t<res_t> *data)
+res_t form_0(int n, double *wt, Func<res_t> *u[], Func<f_t> *vi, Geom<f_t> *e,
+             ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -100,8 +100,8 @@ res_t form_0(int n, double *wt, fn_t<res_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
 
 // precond
 template<typename f_t, typename res_t>
-res_t precond_0_0(int n, double *wt, fn_t<f_t> *u[0], fn_t<f_t> *vi, fn_t<f_t> *vj, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t precond_0_0(int n, double *wt, Func<f_t> *u[0], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -129,8 +129,8 @@ BCType bc_types(int marker)
 }
 
 template<typename f_t, typename res_t>
-res_t form_0(int n, double *wt, fn_t<f_t> *u[0], fn_t<f_t> *vi, geom_t<f_t> *e,
-             user_data_t<res_t> *data)
+res_t form_0(int n, double *wt, Func<f_t> *u[0], Func<f_t> *vi, Geom<f_t> *e,
+             ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -141,8 +141,8 @@ res_t form_0(int n, double *wt, fn_t<f_t> *u[0], fn_t<f_t> *vi, geom_t<f_t> *e,
 }
 
 template<typename f_t, typename res_t>
-res_t form_0_surf(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t form_0_surf(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t result = 0;
 	for (int i = 0; i < n; i++) {
@@ -157,8 +157,8 @@ res_t form_0_surf(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> 
 
 // precond
 template<typename f_t, typename res_t>
-res_t precond_0_0(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, fn_t<f_t> *vj, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t precond_0_0(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -186,8 +186,8 @@ BCType bc_types(int marker)
 }
 
 template<typename f_t, typename res_t>
-res_t form_0(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
-             user_data_t<res_t> *data)
+res_t form_0(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Geom<f_t> *e,
+             ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -197,8 +197,8 @@ res_t form_0(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
 }
 
 template<typename f_t, typename res_t>
-res_t form_0_surf(int n, double *wt, fn_t<f_t> *u[], fn_t<f_t> *vi, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t form_0_surf(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0;
 	for (int i = 0; i < n; i++) {
@@ -234,8 +234,8 @@ inline T f(T x, T y, T z)
 
 
 template<typename f_t, typename res_t>
-res_t form_0(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *vi, geom_t<f_t> *e,
-             user_data_t<res_t> *data)
+res_t form_0(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *vi, Geom<f_t> *e,
+             ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -245,8 +245,8 @@ res_t form_0(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *vi, geom_t<f_t>
 
 // precond
 template<typename f_t, typename res_t>
-res_t precond_0_0(int n, double *wt, fn_t<res_t> *u_ext[], fn_t<f_t> *vi, fn_t<f_t> *vj, geom_t<f_t> *e,
-                  user_data_t<res_t> *data)
+res_t precond_0_0(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
+                  ExtData<res_t> *data)
 {
 	res_t res = 0.0;
 	for (int i = 0; i < n; i++)
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
 
 	printf("* Loading mesh '%s'\n", argv[1]);
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("loading mesh file '%s'\n", argv[1]);
 
 	H1ShapesetLobattoHex shapeset;
@@ -279,7 +279,7 @@ int main(int argc, char **argv) {
 #endif
 
 	int mx = 2;
-	order3_t order(mx, mx, mx);
+	Ord3 order(mx, mx, mx);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
 	space.set_uniform_order(order);
 
@@ -289,13 +289,13 @@ int main(int argc, char **argv) {
 	printf("* Calculating a solution\n");
 
 	WeakForm wf(true);
-	wf.add_vector_form(form_0<double, scalar>, form_0<ord_t, ord_t>);
+	wf.add_vector_form(form_0<double, scalar>, form_0<Ord, Ord>);
 #if defined LIN_NEUMANN || defined LIN_NEWTON
-	wf.add_vector_form_surf(form_0_surf<double, scalar>, form_0_surf<ord_t, ord_t>);
+	wf.add_vector_form_surf(form_0_surf<double, scalar>, form_0_surf<Ord, Ord>);
 #endif
 #if defined LIN_DIRICHLET || defined NLN_DIRICHLET
 	// preconditioner
-	wf.add_matrix_form(precond_0_0<double, scalar>, precond_0_0<ord_t, ord_t>, SYM);
+	wf.add_matrix_form(precond_0_0<double, scalar>, precond_0_0<Ord, Ord>, SYM);
 #endif
 
 	DiscreteProblem fep(&wf, &space);

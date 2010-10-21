@@ -78,7 +78,7 @@ int main(int argc, char **args) {
 	if (copy_type == CT_NONE) error("Unknown copy type (%s).\n", args[1]);
 
 	Mesh mesh;
-	Mesh3DReader mesh_loader;
+	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[2], &mesh)) error("Loading mesh file '%s'\n", args[2]);
 
 	// apply refinements
