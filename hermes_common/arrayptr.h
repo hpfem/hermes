@@ -27,7 +27,7 @@
 #include <Judy.h>
 
 #ifndef INVALID_IDX
-#define INVALID_IDX					((Word_t) -1)
+#define INVALID_IDX					((unsigned int) -1)
 #endif
 
 /// \class ArrayPtr
