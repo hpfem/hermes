@@ -4,7 +4,6 @@
 #define H2D_REPORT_FILE "application.log"
 
 #include "hermes2d.h"
-#include <string>
 
 using namespace RefinementSelectors;
 
@@ -71,17 +70,15 @@ const scalar C0 = 1200;	                    // [mol/m^3] Anion and counterion co
 
 /* For Neumann boundary */
 const double height = 180e-6;	            // [m] thickness of the domain.
-const double E_FIELD = VOLTAGE / height;    // Boundary condtion for positive voltage electrode
 
 
 /* Simulation parameters */
-const int NSTEP = 50;                 // Number of time steps.
+const double T_FINAL = 3.0;
 const double TAU = 0.1;               // Size of the time step.
 const int P_INIT = 3;       	      // Initial polynomial degree of all mesh elements.
-const int REF_INIT = 1;     	      // Number of initial refinements.
+const int REF_INIT = 3;     	      // Number of initial refinements.
 const bool MULTIMESH = false;	      // Multimesh?
 const int TIME_DISCR = 1;             // 1 for implicit Euler, 2 for Crank-Nicolson.
-const int VOLT_BOUNDARY = 1;          // 1 for Dirichlet, 2 for Neumann.
 
 /* Nonadaptive solution parameters */
 const double NEWTON_TOL = 1e-6;       // Stopping criterion for nonadaptive solution.
@@ -132,8 +129,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 
 // Poisson takes Dirichlet and Neumann boundaries
 BCType phi_bc_types(int marker) {
-  return (marker == SIDE_MARKER || (marker == TOP_MARKER && VOLT_BOUNDARY == 2)) 
-    ? BC_NATURAL : BC_ESSENTIAL;
+  return (marker == SIDE_MARKER ) ? BC_NATURAL : BC_ESSENTIAL;
 }
 
 // Nernst-Planck takes Neumann boundaries
@@ -151,10 +147,6 @@ scalar phi_essential_bc_values(int ess_bdy_marker, double x, double y) {
   return ess_bdy_marker == TOP_MARKER ? VOLTAGE : 0.0;
 }
 
-template<class Real, class Scalar>
-Scalar linear_form_surf_top(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-  return -E_FIELD * int_v<Real, Scalar>(n, wt, v);
-}
 
 scalar voltage_ic(double x, double y, double &dx, double &dy) {
   // y^2 function for the domain.
@@ -168,7 +160,6 @@ scalar concentration_ic(double x, double y, double &dx, double &dy) {
 
 int main (int argc, char* argv[]) {
 
-  bool adaptive = true;
 
   // Load the mesh file.
   Mesh Cmesh, phimesh, basemesh;
@@ -176,10 +167,8 @@ int main (int argc, char* argv[]) {
   mloader.load("small.mesh", &basemesh);
   
   // When nonadaptive solution, refine the mesh.
-  basemesh.refine_towards_boundary(TOP_MARKER,
-           adaptive ? REF_INIT : REF_INIT * 25);
-  basemesh.refine_towards_boundary(BOT_MARKER,
-           adaptive ? REF_INIT - 1 : (REF_INIT * 25) - 1);
+  basemesh.refine_towards_boundary(TOP_MARKER, REF_INIT);
+  basemesh.refine_towards_boundary(BOT_MARKER, REF_INIT - 1);
   Cmesh.copy(&basemesh);
   phimesh.copy(&basemesh);
 
@@ -212,10 +201,6 @@ int main (int argc, char* argv[]) {
     wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_UNSYM);
     wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY, Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
     wf.add_vector_form(1, callback(Fphi_cranic), HERMES_ANY);
-  }
-  // Neumann voltage boundary.
-  if (VOLT_BOUNDARY == 2) {
-    wf.add_vector_form_surf(1, callback(linear_form_surf_top), TOP_MARKER);
   }
 
   // Project the initial condition on the FE space to obtain initial
@@ -296,7 +281,7 @@ int main (int argc, char* argv[]) {
   delete [] coeff_vec_coarse;
   
   // Time stepping loop.
-  int num_time_steps = (int)(NEWTON_MAX_ITER/TAU + 0.5);
+  int num_time_steps = (int)(T_FINAL/TAU + 0.5);
   for(int ts = 1; ts <= num_time_steps; ts++)
   {
     // Periodic global derefinements.
