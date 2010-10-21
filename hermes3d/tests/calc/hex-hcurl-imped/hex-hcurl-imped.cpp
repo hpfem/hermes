@@ -227,17 +227,15 @@ int main(int argc, char **args) {
 	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
-	printf("* Setting the space up\n");
-	HcurlSpace space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-//	space.set_essential_bc_values(essential_bc_values);
 
 	int order;
 	sscanf(args[2], "%d", &order);
 	int dir_x = order, dir_y = order, dir_z = order;
 	Ord3 o(dir_x, dir_y, dir_z);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", dir_x, dir_y, dir_z);
-	space.set_uniform_order(o);
+
+	printf("* Setting the space up\n");
+	HcurlSpace space(&mesh, bc_types, NULL, o);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -272,13 +270,12 @@ int main(int argc, char **args) {
 //	wf.add_liform(linear_form);
 //	wf.add_liform_surf(linear_form_surf);
 
-	LinearProblem lp(&wf);
-	lp.set_space(&space);
+	DiscreteProblem dp(&wf, &space, true);
 
 	// assemble stiffness matrix
 	Timer assemble_timer("Assembling stiffness matrix");
 	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
 
 	// solve the stiffness matrix

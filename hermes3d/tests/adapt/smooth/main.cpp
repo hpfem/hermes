@@ -288,9 +288,6 @@ int main(int argc, char **argv)
 	if (!mloader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
 
 	printf("* Setting the space up\n");
-	H1Space space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
 
 	Ord3 order;
 	switch (aniso_type)
@@ -324,13 +321,14 @@ int main(int argc, char **argv)
 			break;
 	}
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
-	space.set_uniform_order(order);
+	H1Space space(&mesh, bc_types, essential_bc_values, order);
 
 	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM, ANY);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, ANY);
+	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM, HERMES_ANY);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
 
-	LinearProblem lp(&wf, &space);
+        bool is_linear = true;
+	DiscreteProblem lp(&wf, &space, is_linear);
 
 	bool done = false;
 	int iter = 0;
@@ -429,7 +427,7 @@ int main(int argc, char **argv)
 		Space *rspace = space.dup(&rmesh);
 		rspace->copy_orders(space, 1);
 
-		LinearProblem rlp(&wf);
+		DiscreteProblem rlp(&wf, rspace, is_linear);
 		rlp.set_space(rspace);
 
 		int rndofs = rspace->assign_dofs();

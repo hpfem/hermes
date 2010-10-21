@@ -89,15 +89,12 @@ int main(int argc, char **argv) {
 	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
 
-	printf("* Setting the space up\n");
-	H1ShapesetLobattoTetra ss;
-	H1Space space(&mesh, &ss);
-	space.set_bc_types(bc_types);
-
 	int o;
 	sscanf(argv[2], "%d", &o);
 	printf("  - Setting uniform order to %d\n", o);
-	space.set_uniform_order(o);
+
+	printf("* Setting the space up\n");
+	H1Space space(&mesh, bc_types, NULL, o);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -126,12 +123,12 @@ int main(int argc, char **argv) {
 	wf.add_matrix_form(FORM_CB(bilinear_form), SYM);
 	wf.add_vector_form(FORM_CB(linear_form));
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
 	// assemble stiffness matrix
 	Timer assemble_timer("Assembling stiffness matrix");
 	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
 
 	// solve the stiffness matrix

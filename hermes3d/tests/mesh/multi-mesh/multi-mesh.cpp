@@ -421,14 +421,12 @@ int main(int argc, char **args)
 
 	H1ShapesetLobattoHex shapeset;
 #if defined RHS2
-	printf("* Setting the space up\n");
-	H1Space space(&mesh1, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
 
 	Ord3 order(2, 2, 2);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
-	space.set_uniform_order(order);
+
+	printf("* Setting the space up\n");
+	H1Space space(&mesh1, bc_types, essential_bc_values, order);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -509,24 +507,24 @@ int main(int argc, char **args)
 
 #ifdef RHS2
 	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, ANY, &fsln);
+	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY, &fsln);
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem lp(&wf, &space, true);
 
 #elif defined SYS3
 	WeakForm wf(3);
-	wf.add_matrix_form(0, 0, biform_1_1<double, scalar>, biform_1_1<Ord, Ord>, SYM);
-	wf.add_matrix_form(0, 1, biform_1_2<double, scalar>, biform_1_2<Ord, Ord>, UNSYM);
+	wf.add_matrix_form(0, 0, biform_1_1<double, scalar>, biform_1_1<Ord, Ord>, HERMES_SYM);
+	wf.add_matrix_form(0, 1, biform_1_2<double, scalar>, biform_1_2<Ord, Ord>, HERMES_UNSYM);
 	wf.add_vector_form(0, liform_1<double, scalar>, liform_1<Ord, Ord>);
 
-	wf.add_matrix_form(1, 1, biform_2_2<double, scalar>, biform_2_2<Ord, Ord>, SYM);
-	wf.add_matrix_form(1, 2, biform_2_3<double, scalar>, biform_2_3<Ord, Ord>, UNSYM);
+	wf.add_matrix_form(1, 1, biform_2_2<double, scalar>, biform_2_2<Ord, Ord>, HERMES_SYM);
+	wf.add_matrix_form(1, 2, biform_2_3<double, scalar>, biform_2_3<Ord, Ord>, HERMES_UNSYM);
 	wf.add_vector_form(1, liform_2<double, scalar>, liform_2<Ord, Ord>);
 
-	wf.add_matrix_form(2, 2, biform_3_3<double, scalar>, biform_3_3<Ord, Ord>, SYM);
+	wf.add_matrix_form(2, 2, biform_3_3<double, scalar>, biform_3_3<Ord, Ord>, HERMES_SYM);
 
-	LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2, &space3));
+	DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2, &space3), true);
 
 #endif
 
@@ -534,7 +532,7 @@ int main(int argc, char **args)
 	printf("  - assembling... "); fflush(stdout);
 	Timer assemble_timer;
 	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
 	printf("%s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
 

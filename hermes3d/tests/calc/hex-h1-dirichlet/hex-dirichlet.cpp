@@ -113,17 +113,13 @@ int main(int argc, char **args) {
 //	mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 //	mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
-	H1ShapesetLobattoHex shapeset;
 //	printf("* Setting the space up\n");
-	H1Space space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
 
 	int mx = maxn(4, m, n, o, 4);
 	Ord3 order(mx, mx, mx);
 //	Ord3 order(3, 3, 4);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
-	space.set_uniform_order(order);
+	H1Space space(&mesh, bc_types, essential_bc_values, order);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -154,7 +150,7 @@ int main(int argc, char **args) {
 	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem lp(&wf, &space, true);
 
 	// assemble stiffness matrix
 	printf("  - assembling... "); fflush(stdout);

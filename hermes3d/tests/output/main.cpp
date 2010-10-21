@@ -167,10 +167,10 @@ void test_mat(Mesh *mesh, StiffMatrix &mat)
 	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
 	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
 	// assemble stiffness matrix
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	solver.solve();
 }
 
@@ -228,9 +228,6 @@ int main(int argc, char **args)
 	else if (strcmp(type, "ord") == 0) {
 		H1ShapesetLobattoHex shapeset;
 
-		H1Space space(&mesh, &shapeset);
-		space.set_bc_types(bc_types);
-		space.set_essential_bc_values(essential_bc_values);
 
 		Ord3 order;
 		if (mesh.elements[1]->get_mode() == MODE_HEXAHEDRON)
@@ -239,7 +236,8 @@ int main(int argc, char **args)
 			order = Ord3(3);
 		else
 			error(HERMES_ERR_NOT_IMPLEMENTED);
-		space.set_uniform_order(order);
+
+		H1Space space(&mesh, bc_types, essential_bc_values, order);
 
 		output.out_orders_vtk(&space, "orders");
 	}

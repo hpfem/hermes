@@ -121,22 +121,18 @@ int main(int argc, char **args) {
 
 	if (argc < 3) error("Not enough parameters");
 
-	HcurlShapesetLobattoHex shapeset;
-
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
 	H3DReader mesh_loader;
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
-	printf("* Setting the space up\n");
-	HcurlSpace space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-
 	int o;
 	sscanf(args[2], "%d", &o);
 	Ord3 order(o, o, o);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o, o, o);
-	space.set_uniform_order(order);
+
+	printf("* Setting the space up\n");
+	HcurlSpace space(&mesh, bc_types, NULL, order);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -165,12 +161,12 @@ int main(int argc, char **args) {
 	wf.add_matrix_form(FORM_CB(bilinear_form), SYM);
 	wf.add_vector_form(FORM_CB(linear_form));
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
 	// assemble stiffness matrix
 	Timer assemble_timer("Assembling stiffness matrix");
 	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
 
 	// solve the stiffness matrix

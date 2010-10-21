@@ -187,12 +187,12 @@ int main(int argc, char **args) {
 	wf.add_matrix_form(1, 1, bilinear_form_2_2<double, scalar>, bilinear_form_2_2<Ord, Ord>, SYM);
 	wf.add_vector_form(1, linear_form_2<double, scalar>, linear_form_2<Ord, Ord>);
 
-	LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2));
+	DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2), true);
 
 	// assemble stiffness matrix
 	Timer assemble_timer("Assembling stiffness matrix");
 	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
 
 	// solve the stiffness matrix

@@ -125,15 +125,13 @@ int main(int argc, char **args) {
 
 	H1ShapesetLobattoHex shapeset;
 	printf("* Setting the space up\n");
-	H1Space space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
 
 	int mx = maxn(4, m, n, o, 4);
 	Ord3 order(mx, mx, mx);
 //	Ord3 order(1, 1, 1);
 //	Ord3 order(m, n, o);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", mx, mx, mx);
-	space.set_uniform_order(order);
+	H1Space space(&mesh, bc_types, NULL, order);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -163,13 +161,13 @@ int main(int argc, char **args) {
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
 	wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
 	// assemble stiffness matrix
 	printf("  - assembling...\n"); fflush(stdout);
 	Timer assemble_timer;
 	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
 	printf("%s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
 

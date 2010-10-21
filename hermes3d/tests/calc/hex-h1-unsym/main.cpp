@@ -110,21 +110,15 @@ int main(int argc, char **argv)
 
 	if (argc < 2) error("Not enough parameters.");
 
-	H1ShapesetLobattoHex shapeset;
-
 	printf("* Loading mesh '%s'\n", argv[1]);
 	Mesh mesh;
 	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("loading mesh file '%s' failed.", argv[1]);
 
 	printf("* Setup space\n");
-	H1Space space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
-
 	Ord3 o(4, 4, 4);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o.x, o.y, o.z);
-	space.set_uniform_order(o);
+	H1Space space(&mesh, bc_types, essential_bc_values, o);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -153,13 +147,13 @@ int main(int argc, char **argv)
 	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, UNSYM);
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
 
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
 	// assemble stiffness matrix
 	printf("  - assembling... "); fflush(stdout);
 	Timer tmr_assemble("");
 	tmr_assemble.start();
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 	tmr_assemble.stop();
 	printf("done in %s (%lf secs)\n", tmr_assemble.get_human_time(), tmr_assemble.get_seconds());
 

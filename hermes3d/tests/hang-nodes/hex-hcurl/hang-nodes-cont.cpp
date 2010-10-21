@@ -385,20 +385,15 @@ int main(int argc, char **args) {
 	END_BLOCK
 #endif
 
-	HcurlShapesetLobattoHex shapeset;
-
-	printf("* Setting the space up\n");
-	HcurlSpace space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-//	space.set_essential_bc_values(essential_bc_values);
-
 #if defined FN4
 	Ord3 o(4, 4, 4);
 #elif defined X2_Y2_Z2
 	Ord3 o(2, 2, 2);
 #endif
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o.x, o.y, o.z);
-	space.set_uniform_order(o);
+
+	printf("* Setting the space up\n");
+	HcurlSpace space(&mesh, bc_types, NULL, o);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -428,9 +423,9 @@ int main(int argc, char **args) {
 	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 
 	// assemble stiffness matrix
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 
 #if 0 //def OUTPUT_DIR
 	{

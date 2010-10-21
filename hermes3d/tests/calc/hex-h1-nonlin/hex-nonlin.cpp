@@ -243,17 +243,13 @@ int main(int argc, char **argv)
 	H3DReader mesh_loader;
 	if (!mesh_loader.load(argv[1], &mesh)) error("loading mesh file '%s'\n", argv[1]);
 
-	H1ShapesetLobattoHex shapeset;
-
 #if defined NONLIN1
 	Ord3 order(1, 1, 1);
 #else
 	Ord3 order(2, 2, 2);
 #endif
 	printf("* Setting the space up\n");
-	H1Space space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
+	H1Space space(&mesh, bc_types, essential_bc_values, order);
 
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
 	space.set_uniform_order(order);
@@ -267,7 +263,7 @@ int main(int argc, char **argv)
 	proj_wf.add_matrix_form(biproj_form<double, scalar>, biproj_form<Ord, Ord>, SYM);
 	proj_wf.add_vector_form(liproj_form<double, scalar>, liproj_form<Ord, Ord>);
 
-	LinearProblem lp(&proj_wf, &space);
+	DiscreteProblem lp(&proj_wf, &space, true);
 
 #ifdef WITH_UMFPACK
 	UMFPackMatrix m;
@@ -290,7 +286,7 @@ int main(int argc, char **argv)
 	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<Ord, Ord>, UNSYM);
 	wf.add_vector_form(0, resid_form<double, scalar>, resid_form<Ord, Ord>);
 
-	DiscreteProblem dp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, false);
 
 	NoxSolver solver(&dp);
 #if defined NONLIN2

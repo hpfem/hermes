@@ -118,20 +118,14 @@ int main(int argc, char **args) {
 	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	printf("* Setup space #1\n");
-	H1Space space1(&mesh, &shapeset);
-	space1.set_bc_types(bc_types);
-
 	Ord3 o1(2, 2, 2);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o1.x, o1.y, o1.z);
-	space1.set_uniform_order(o1);
+	H1Space space1(&mesh, bc_types, essential_bc_values, o1);
 
 	printf("* Setup space #2\n");
-	H1Space space2(&mesh, &shapeset);
-	space2.set_bc_types(bc_types);
-
 	Ord3 o2(4, 4, 4);
+	H1Space space2(&mesh, bc_types, essential_bc_values, o2);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o2.x, o2.y, o2.z);
-	space2.set_uniform_order(o2);
 
 	int ndofs = 0;
 	ndofs += space1.assign_dofs();
@@ -165,7 +159,7 @@ int main(int argc, char **args) {
 	wf.add_matrix_form(1, 1, bilinear_form_2<double, scalar>, bilinear_form_2<Ord, Ord>, SYM);
 	wf.add_vector_form(1, linear_form_2<double, scalar>, linear_form_2<Ord, Ord>);
 
-	LinearProblem lp(&wf, Tuple<Space *>(&space1, &space2));
+	DiscreteProblem lp(&wf, Tuple<Space *>(&space1, &space2), true);
 
 	// assemble stiffness matrix
 	Timer assemble_timer("Assembling stiffness matrix");

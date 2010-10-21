@@ -389,11 +389,6 @@ int main(int argc, char **args) {
 	H1ShapesetLobattoHex shapeset;
 //	shapeset.preload_products();
 
-	printf("* Setting the space up\n");
-	H1Space space(&mesh, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
-
 #ifdef XM_YN_ZO
 	Ord3 o(3, 3, 4);
 #elif defined XM_YN_ZO_2
@@ -403,8 +398,11 @@ int main(int argc, char **args) {
 #elif defined X3_Y3_Z3
 	Ord3 o(3, 3, 3);
 #endif
+
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o.x, o.y, o.z);
-	space.set_uniform_order(o);
+
+	printf("* Setting the space up\n");
+	H1Space space(&mesh, bc_types, essential_bc_values, o);
 
 	int ndofs = space.assign_dofs();
 	printf("  - Number of DOFs: %d\n", ndofs);
@@ -429,19 +427,19 @@ int main(int argc, char **args) {
 
 	WeakForm wf(1);
 #ifdef DIRICHLET
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
 	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 #elif defined NEWTON
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
 	wf.add_matrix_form_surf(0, 0, bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
 	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 	wf.add_vector_form_surf(0, linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
 #endif
 
 	// assemble stiffness matrix
-	LinearProblem lp(&wf, &space);
+	DiscreteProblem dp(&wf, &space, true);
 
-	lp.assemble(&mat, &rhs);
+	dp.assemble(&mat, &rhs);
 
 #ifdef OUTPUT_DIR
 	{
