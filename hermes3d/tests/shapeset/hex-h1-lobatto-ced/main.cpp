@@ -145,7 +145,7 @@ int hex[2][24][8] = {
 */
 // CAUTION: do not change the following unless you know what you are doing
 // the order of hexes is crucial (function get_face_perm_ori depends on the ordering)
-Word_t hex[48][8] = {
+unsigned int hex[48][8] = {
 	// hex 1
 	{  0,  1,  2,  3,  4,  5,  6,  7 },
 	{  1,  2,  3,  0,  5,  6,  7,  4 },

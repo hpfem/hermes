@@ -56,7 +56,7 @@ void Space::EdgeData::dump(int id) {
 		printf("edge_comp = %d", edge_ncomponents);
 		for (int i = 0; i < edge_ncomponents; i++) {
 			if (i > 0) printf(",");
-			printf(" (edge = %ld, ori = %d, part = %d, coef = " SCALAR_FMT ")", edge_baselist[i].edge_id, edge_baselist[i].ori,
+			printf(" (edge = %u, ori = %d, part = %d, coef = " SCALAR_FMT ")", edge_baselist[i].edge_id, edge_baselist[i].ori,
 				edge_baselist[i].part.part, SCALAR(edge_baselist[i].coef));
 		}
 		printf(", ");
@@ -64,7 +64,7 @@ void Space::EdgeData::dump(int id) {
 		printf("face_comp = %d", face_ncomponents);
 		for (int i = 0; i < face_ncomponents; i++) {
 			if (i > 0) printf(",");
-			printf(" (face = %ld, ori = %d, iface = %d, part = (horz = %d, vert = %d), dir = %d, coef = " SCALAR_FMT ")",
+			printf(" (face = %u, ori = %d, iface = %d, part = (horz = %d, vert = %d), dir = %d, coef = " SCALAR_FMT ")",
 				face_baselist[i].face_id, face_baselist[i].ori, face_baselist[i].iface,
 				face_baselist[i].part.horz, face_baselist[i].part.vert, face_baselist[i].dir,
 				SCALAR(face_baselist[i].coef));
@@ -87,7 +87,7 @@ void Space::EdgeData::dump(int id) {
 void Space::FaceData::dump(int id) {
 	printf("face #%d: ced = %d, ", id, ced);
 	if (ced) {
-		printf("part = (%d, %d), ori = %d, facet_id = %ld", part.horz, part.vert, ori, facet_id);
+		printf("part = (%d, %d), ori = %d, facet_id = %u", part.horz, part.vert, ori, facet_id);
 	}
 	else {
 		printf("order = %s, dof = %d, n = %d", order.str(), dof, n);

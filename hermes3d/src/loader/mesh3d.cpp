@@ -356,7 +356,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	for (int i = tet.first(); i != INVALID_IDX; i = tet.next(i)) {
 		unsigned int vtcs[Tetra::NUM_VERTICES];
 		tet[i]->get_vertices(vtcs);
-		fprintf(file, "%ld %ld %ld %ld\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+		fprintf(file, "%u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 	}
 	fprintf(file, "\n");
 
@@ -366,7 +366,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	for (int i = hex.first(); i != INVALID_IDX; i = hex.next(i)) {
 		unsigned int vtcs[Hex::NUM_VERTICES];
 		hex[i]->get_vertices(vtcs);
-		fprintf(file, "%ld %ld %ld %ld %ld %ld %ld %ld\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
+		fprintf(file, "%u %u %u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
 	}
 	fprintf(file, "\n");
 
@@ -376,7 +376,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	for (int i = pri.first(); i != INVALID_IDX; i = pri.next(i)) {
 		unsigned int vtcs[Prism::NUM_VERTICES];
 		pri[i]->get_vertices(vtcs);
-		fprintf(file, "%ld %ld %ld %ld %ld %ld\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
+		fprintf(file, "%u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
 	}
 	fprintf(file, "\n");
 
@@ -403,7 +403,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 		unsigned int vtcs[Tri::NUM_VERTICES];
 		elem->get_face_vertices(facet->left_face_num, vtcs);
 
-		fprintf(file, "%ld %ld %ld     %d\n", vtcs[0], vtcs[1], vtcs[2], bnd->marker);
+		fprintf(file, "%u %u %u     %d\n", vtcs[0], vtcs[1], vtcs[2], bnd->marker);
 	}
 	fprintf(file, "\n");
 
@@ -418,7 +418,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 		unsigned int vtcs[Quad::NUM_VERTICES];
 		elem->get_face_vertices(facet->left_face_num, vtcs);
 
-		fprintf(file, "%ld %ld %ld %ld     %d\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], bnd->marker);
+		fprintf(file, "%u %u %u %u     %d\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], bnd->marker);
 	}
 	fprintf(file, "\n");
 

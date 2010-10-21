@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 	MumpsSolver solver(&mat, &rhs);
 #endif
 
-	Word_t ne = mesh.elements.count();
+	unsigned int ne = mesh.elements.count();
 	// make the mesh for the ref. solution
 	mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
@@ -221,10 +221,10 @@ int main(int argc, char *argv[])
 	Solution sln(&mesh);
 	sln.set_coeff_vector(&space, solver.get_solution());
 
-	for (Word_t idx = mesh.elements.first(); idx <= ne; idx = mesh.elements.next(idx)) {
+	for (unsigned int idx = mesh.elements.first(); idx <= ne; idx = mesh.elements.next(idx)) {
 		Element *e = mesh.elements[idx];
 
-		order3_t order(4, 4, 4);
+		Ord3 order(4, 4, 4);
 		double error;
 
 		Projection *proj;

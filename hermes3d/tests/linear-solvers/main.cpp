@@ -140,13 +140,13 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs, Spar
 {
 	// matrix
 	mat->prealloc(n);
-	for (Word_t i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
+	for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
 		MatrixEntry &me = ar_mat[i];
 		mat->pre_add_ij(me.m, me.n);
 	}
 
 	mat->alloc();
-	for (Word_t i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
+	for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
 		MatrixEntry &me = ar_mat[i];
 		mat->add(me.m, me.n, me.value);
 	}
@@ -154,7 +154,7 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs, Spar
 
 	// RHS
 	rhs->alloc(n);
-	for (Word_t i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
+	for (unsigned int i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
 		rhs->add((int) i, ar_rhs[i]);
 	}
 	rhs->finish();
@@ -177,7 +177,7 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs
 		cols[i] = i;
 		rows[i] = i;
 	}
-	for (Word_t i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
+	for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
 		MatrixEntry &me = ar_mat[i];
 		mat[me.m][me.n] = me.value;
 	}
@@ -187,7 +187,7 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs
 	// rhs
 	rhs->alloc(n);
 	scalar *rs = new scalar[n];
-	for (Word_t i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
+	for (unsigned int i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
 		rs[i] = ar_rhs[i];
 	}
 	rhs->add(n, rows, rs);

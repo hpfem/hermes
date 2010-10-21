@@ -67,7 +67,7 @@ Point3D vtcs[] = {
 };
 
 // mesh
-Word_t hexs[2][48][8] = {
+unsigned int hexs[2][48][8] = {
 	// hexs 1
 	{
 		{  0,  1,  2,  3,  4,  5,  6,  7 },
@@ -194,7 +194,7 @@ Word_t hexs[2][48][8] = {
 	}
 };
 
-Word_t bnd[10][5] = {
+unsigned int bnd[10][5] = {
 	{ 0,  3,  7,  4, 1 },
 	{ 8,  9, 11, 10, 2 },
 	{ 0,  1,  5,  4, 3 },
@@ -230,7 +230,7 @@ int compare(const void *a, const void *b) {
 }
 
 
-bool test_cont_values_of_vertex_fns(Mesh *mesh, Word_t fid, int pos0, int pos1, Shapeset *shapeset) {
+bool test_cont_values_of_vertex_fns(Mesh *mesh, unsigned int fid, int pos0, int pos1, Shapeset *shapeset) {
 	_F_
 	Facet *facet = mesh->facets[fid];
 	Quad3D *quad = get_quadrature(MODE);
@@ -345,7 +345,7 @@ bool test_cont_values_of_vertex_fns(Mesh *mesh, Word_t fid, int pos0, int pos1, 
 	return true;
 }
 
-bool test_cont_values_of_edge_fns(Mesh *mesh, Word_t fid, int pos0, int pos1, Shapeset *shapeset) {
+bool test_cont_values_of_edge_fns(Mesh *mesh, unsigned int fid, int pos0, int pos1, Shapeset *shapeset) {
 	_F_
 	Facet *facet = mesh->facets[fid];
 	Quad3D *quad = get_quadrature(MODE);
@@ -483,7 +483,7 @@ bool test_cont_values_of_edge_fns(Mesh *mesh, Word_t fid, int pos0, int pos1, Sh
 	return true;
 }
 
-bool test_cont_values_of_face_fns(Mesh *mesh, Word_t fid, int pos0, int pos1, Shapeset *shapeset) {
+bool test_cont_values_of_face_fns(Mesh *mesh, unsigned int fid, int pos0, int pos1, Shapeset *shapeset) {
 	_F_
 	Quad3D *quad = get_quadrature(MODE);
 	Facet *facet = mesh->facets[fid];
@@ -579,19 +579,19 @@ bool test_continuity(Shapeset *shapeset) {
 		for (int j = 0; j < 48; j++) {
 			// build the mesh
 			Mesh mesh;
-			for (Word_t k = 0; k < countof(vtcs); k++)
+			for (unsigned int k = 0; k < countof(vtcs); k++)
 				mesh.add_vertex(vtcs[k].x, vtcs[k].y, vtcs[k].z);
-			Word_t h1[] = {
+			unsigned int h1[] = {
 					hexs[0][i][0] + 1, hexs[0][i][1] + 1, hexs[0][i][2] + 1, hexs[0][i][3] + 1,
 					hexs[0][i][4] + 1, hexs[0][i][5] + 1, hexs[0][i][6] + 1, hexs[0][i][7] + 1 };
 			mesh.add_hex(h1);
-			Word_t h2[] = {
+			unsigned int h2[] = {
 					hexs[1][j][0] + 1, hexs[1][j][1] + 1, hexs[1][j][2] + 1, hexs[1][j][3] + 1,
 					hexs[1][j][4] + 1, hexs[1][j][5] + 1, hexs[1][j][6] + 1, hexs[1][j][7] + 1 };
 			mesh.add_hex(h2);
 			// bc
-			for (Word_t k = 0; k < countof(bnd); k++) {
-				Word_t facet_idxs[Quad::NUM_VERTICES] = { bnd[k][0] + 1, bnd[k][1] + 1, bnd[k][2] + 1, bnd[k][3] + 1 };
+			for (unsigned int k = 0; k < countof(bnd); k++) {
+				unsigned int facet_idxs[Quad::NUM_VERTICES] = { bnd[k][0] + 1, bnd[k][1] + 1, bnd[k][2] + 1, bnd[k][3] + 1 };
 				mesh.add_quad_boundary(facet_idxs, bnd[k][4]);
 			}
 			mesh.ugh();
@@ -600,7 +600,7 @@ bool test_continuity(Shapeset *shapeset) {
 
 			// test continuity on inner factes
 			// since we have only 2 elements, there is only one such facet
-			for (Word_t fid = mesh.facets.first(); fid != INVALID_IDX; fid = mesh.facets.next(fid)) {
+			for (unsigned int fid = mesh.facets.first(); fid != INVALID_IDX; fid = mesh.facets.next(fid)) {
 				Facet *facet = mesh.facets[fid];
 				if (facet->type == Facet::INNER) {
 					printf("  - vertex fns..."); fflush(stdout);

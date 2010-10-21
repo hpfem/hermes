@@ -307,7 +307,7 @@ public:
 struct Point {
 	double ref_x, ref_y, ref_z;
 	double phys_x, phys_y, phys_z;
-	Word_t elm_idx, fac_idx;
+	unsigned int elm_idx, fac_idx;
 
 	Point(int idx, int f_idx, double rx, double ry, double rz, double px, double py, double pz) {
 		elm_idx = idx; fac_idx = f_idx;
@@ -517,7 +517,7 @@ int main(int argc, char **args) {
 				ref_map.set_active_element(e);
 //				ref_map.set_quad(&my_quad);
 				for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-					Word_t fac_idx = mesh.get_facet_id(e, iface);
+					unsigned int fac_idx = mesh.get_facet_id(e, iface);
 
 					QuadPt3D *quad_pts = my_quad.get_face_points(iface, order);
 					int np = my_quad.get_face_num_points(iface, order);
@@ -585,7 +585,7 @@ int main(int argc, char **args) {
 
 			double max_difference = 0.;
 			double max_pt_x, max_pt_y, max_pt_z, max_val_1, max_val_2;
-			Word_t max_elm_1, max_elm_2;
+			unsigned int max_elm_1, max_elm_2;
 
 			// loop over all pairs of points, that correspond to one point in the physical domain
 			for (int pair = 0; pair < num_pairs; pair++) {

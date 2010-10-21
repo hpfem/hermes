@@ -108,8 +108,8 @@ class column
 	public:
 	double lo ;
 	double hi ;
-	std::set<Word_t> elements ;
-	column(double nlo, double nhi, std::set<Word_t> nelements) { this->lo = nlo ; this->hi = nhi ; this->elements = nelements ;} ;
+	std::set<unsigned int> elements ;
+	column(double nlo, double nhi, std::set<unsigned int> nelements) { this->lo = nlo ; this->hi = nhi ; this->elements = nelements ;} ;
 	column(const column &);
 	column(); // default constructor
 	~column(){};
@@ -132,10 +132,10 @@ column::column()
 typedef std::map< corner, column > columnList ; 
 
 // override << opeartor for easy output 
-std::ostream &operator<<(std::ostream &output, const std::set<Word_t> &aaa)
+std::ostream &operator<<(std::ostream &output, const std::set<unsigned int> &aaa)
 {
 	output <<  aaa.size() << " : " ;
-	for(std::set<Word_t>::const_iterator i = aaa.begin() ; i != aaa.end() ; i++) output << *i << " " ;
+	for(std::set<unsigned int>::const_iterator i = aaa.begin() ; i != aaa.end() ; i++) output << *i << " " ;
 	return output;
 }
 
@@ -162,11 +162,11 @@ int main(int argc, char **args)
 	{
 		std::cout << "Performing Refinement Level: " << iter << std::endl ;
 		further = false ;
-		for ( Word_t idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
+		for ( unsigned int idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
 		if ( mesh.elements[idx]->used) if (mesh.elements[idx]->active)
 		{
 			std::vector<unsigned int> vtcs(mesh.elements[idx]->get_num_vertices()) ;
-			//Word_t vtcs[mesh.elements[idx]->get_num_vertices()] ;
+			//unsigned int vtcs[mesh.elements[idx]->get_num_vertices()] ;
 			mesh.elements[idx]->get_vertices(&vtcs[0]) ;
 			//mesh.vertices[vtcs[0]]->dump() ;
 			double minX=+std::numeric_limits<double>::max() ;
@@ -216,10 +216,10 @@ int main(int argc, char **args)
 	}
 
 
-	for ( Word_t idx = mesh.vertices.first(), _max = mesh.vertices.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.vertices.next(idx) )
+	for ( unsigned int idx = mesh.vertices.first(), _max = mesh.vertices.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.vertices.next(idx) )
 		if( std::abs(mesh.vertices[idx]->z - 0.) < 1e-32 ) mesh.vertices[idx]->z = r1.interpolate(mesh.vertices[idx]->x,mesh.vertices[idx]->y) ;	
 
-	for ( Word_t idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
+	for ( unsigned int idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
 		if ( mesh.elements[idx]->used) if (mesh.elements[idx]->active)
 		{
 			std::vector<unsigned int> vtcs(mesh.elements[idx]->get_num_vertices()) ;

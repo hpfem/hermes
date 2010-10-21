@@ -650,7 +650,7 @@ void Adapt::adapt(double thr)
 			                       spaces[comp]->get_shapeset(), split, p);
 
 		if (log_file != NULL)
-			fprintf(log_file, "%ld %d %d %d %d %d %d %d %d %d\n", e->id, split,
+			fprintf(log_file, "%u %d %d %d %d %d %d %d %d %d\n", e->id, split,
 				p[0].get_idx(), p[1].get_idx(), p[2].get_idx(), p[3].get_idx(),
 				p[4].get_idx(), p[5].get_idx(), p[6].get_idx(), p[7].get_idx());
 

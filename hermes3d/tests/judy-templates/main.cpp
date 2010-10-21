@@ -55,7 +55,7 @@ int testArrayInt() {
 	printf("- Testing Array<int>-----\n");
 	Array<int> int_array;
 	bool r;
-	Word_t idx;
+	unsigned int idx;
 
 	// fill the array
 	printf("  * Filling the array with numbers\n");
@@ -90,13 +90,13 @@ int testArrayInt() {
 	//
 	printf("  * Testing iterators\n");
 	r = true;
-	for (Word_t i = int_array.first(); i != INVALID_IDX; i = int_array.next(i))
+	for (unsigned int i = int_array.first(); i != INVALID_IDX; i = int_array.next(i))
 		r &= int_array.get(i) == (int) (i + 100);
 	if (!testPrint(r, "    - Forward iteration", true))
 		return ERROR_FAILURE;
 
 	r = true;
-	for (Word_t i = int_array.last(); i != INVALID_IDX; i = int_array.prev(i))
+	for (unsigned int i = int_array.last(); i != INVALID_IDX; i = int_array.prev(i))
 		r &= int_array.get(i) == (int) (i + 100);
 	if (!testPrint(r, "    - Backward iteration", true))
 		return ERROR_FAILURE;
@@ -111,7 +111,7 @@ int testArrayInt() {
 		return ERROR_FAILURE;
 
 	// MEMORY
-	Word_t mem_used;
+	unsigned int mem_used;
 
 	// mem used
 	mem_used = int_array.mem_used();
@@ -152,7 +152,7 @@ int testArrayStruct() {
 
 	Array<Point> pt_array;
 	bool r;
-	Word_t idx;
+	unsigned int idx;
 
 	// fill the array
 	printf("  * Filling the array with numbers\n");
@@ -189,14 +189,14 @@ int testArrayStruct() {
 	//
 	printf("  * Testing iterators\n");
 	r = true;
-	for (Word_t i = pt_array.first(); i != INVALID_IDX; i = pt_array.next(i)) {
+	for (unsigned int i = pt_array.first(); i != INVALID_IDX; i = pt_array.next(i)) {
 		r &= (pt_array.get(i).X == (int) (i + 100)) && (pt_array.get(i).Y == (int) (i + 1000));
 	}
 	if (!testPrint(r, "    - Forward iteration", true))
 		return ERROR_FAILURE;
 
 	r = true;
-	for (Word_t i = pt_array.last(); i != INVALID_IDX; i = pt_array.prev(i)) {
+	for (unsigned int i = pt_array.last(); i != INVALID_IDX; i = pt_array.prev(i)) {
 		r &= (pt_array.get(i).X == (int) (i + 100)) && (pt_array.get(i).Y == (int) (i + 1000));
 	}
 	if (!testPrint(r, "    - Backward iteration", true))
@@ -212,7 +212,7 @@ int testArrayStruct() {
 		return ERROR_FAILURE;
 
 	// MEMORY
-	Word_t mem_used;
+	unsigned int mem_used;
 
 	// mem used
 	mem_used = pt_array.mem_used();
@@ -254,7 +254,7 @@ int testArrayPtrStruct() {
 
 	ArrayPtr<Point> ptr_array;
 	bool r;
-	Word_t idx;
+	unsigned int idx;
 
 	// fill the array
 	printf("  * Filling the array with items\n");
@@ -290,7 +290,7 @@ int testArrayPtrStruct() {
 	//
 	printf("  * Testing iterators\n");
 	r = true;
-	for (Word_t i = ptr_array.first(); i != INVALID_IDX; i = ptr_array.next(i)) {
+	for (unsigned int i = ptr_array.first(); i != INVALID_IDX; i = ptr_array.next(i)) {
 		Point *pt = ptr_array.get(i);
 		r &= (pt->X == (int) (i + 100)) && (pt->Y == (int) (i + 1000));
 	}
@@ -298,7 +298,7 @@ int testArrayPtrStruct() {
 		return ERROR_FAILURE;
 
 	r = true;
-	for (Word_t i = ptr_array.last(); i != INVALID_IDX; i = ptr_array.prev(i)) {
+	for (unsigned int i = ptr_array.last(); i != INVALID_IDX; i = ptr_array.prev(i)) {
 		Point *pt = ptr_array.get(i);
 		r &= (pt->X == (int) (i + 100)) && (pt->Y == (int) (i + 1000));
 	}
@@ -317,7 +317,7 @@ int testArrayPtrStruct() {
 		return ERROR_FAILURE;
 
 	// MEMORY
-	Word_t mem_used;
+	unsigned int mem_used;
 
 	// mem used
 	mem_used = ptr_array.mem_used();
@@ -325,7 +325,7 @@ int testArrayPtrStruct() {
 		return ERROR_FAILURE;
 
 	// free memory
-	for (Word_t i = ptr_array.first(); i != INVALID_IDX; i = ptr_array.next(i))
+	for (unsigned int i = ptr_array.first(); i != INVALID_IDX; i = ptr_array.next(i))
 		delete ptr_array.get(i);
 
 	ptr_array.remove_all();
@@ -346,7 +346,7 @@ int testMap() {
 	bool r;
 
 	Map<char, Point> pt_map;
-	Word_t idx;
+	unsigned int idx;
 
 	// fill the array
 	printf("  * Filling the map with items\n");
@@ -369,7 +369,7 @@ int testMap() {
 	printf("  * Testing iterators\n");
 	r = true;
 	int i = 0;
-	for (Word_t iter = pt_map.first(); iter != INVALID_IDX; iter = pt_map.next(iter)) {
+	for (unsigned int iter = pt_map.first(); iter != INVALID_IDX; iter = pt_map.next(iter)) {
 		Point pt = pt_map.get(iter);
 		r &= (pt.X == i + 100) && (pt.Y == i + 200);
 		i++;
@@ -379,7 +379,7 @@ int testMap() {
 
 	r = true;
 	i = 3;
-	for (Word_t iter = pt_map.last(); iter != INVALID_IDX; iter = pt_map.prev(iter)) {
+	for (unsigned int iter = pt_map.last(); iter != INVALID_IDX; iter = pt_map.prev(iter)) {
 		Point pt = pt_map.get(iter);
 		r &= (pt.X == i + 100) && (pt.Y == i + 100);
 		i--;
@@ -406,7 +406,7 @@ int testMap() {
 		return ERROR_FAILURE;
 
 	// count
-	Word_t count = pt_map.count();
+	unsigned int count = pt_map.count();
 	if (!testPrint(count == 3, "  * Number of items == 3", true))
 		return ERROR_FAILURE;
 
@@ -428,18 +428,18 @@ int testMapHSOrd() {
 
 	// fill the array
 	printf("  * Filling the map with items\n");
-	Word_t k0[] = { 1, 2 };
+	unsigned int k0[] = { 1, 2 };
 	map.set(k0, 2, 100);
-	Word_t k1[] = { 1, 3 };
+	unsigned int k1[] = { 1, 3 };
 	map.set(k1, 2, 101);
-	Word_t k2[] = { 1, 4 };
+	unsigned int k2[] = { 1, 4 };
 	map.set(k2, 2, 102);
-	Word_t k3[] = { 1, 5 };
+	unsigned int k3[] = { 1, 5 };
 	map.set(k3, 2, 103);
 
 	// test the values
 	r = true;
-	Word_t w;
+	unsigned int w;
 	r &= (map.lookup(k0, 2, w) && w == 100);
 	r &= (map.lookup(k1, 2, w) && w == 101);
 	r &= (map.lookup(k2, 2, w) && w == 102);
@@ -448,7 +448,7 @@ int testMapHSOrd() {
 		return ERROR_FAILURE;
 
 	// non-existent item
-	Word_t nk[] = { 100, 100 };
+	unsigned int nk[] = { 100, 100 };
 	r = (map.lookup(nk, 2, w));
 	if (!testPrint(r, "  * Checking non-existent item", false))
 		return ERROR_FAILURE;
@@ -488,7 +488,7 @@ int testMapHS() {
 
 	// test the values
 	r = true;
-	Word_t w;
+	unsigned int w;
 	r &= (map.lookup((uint8_t *) "a", 1, w) && w == 100);
 	r &= (map.lookup((uint8_t *) "ab", 2, w) && w == 101);
 	r &= (map.lookup((uint8_t *) "abc", 3, w) && w == 102);
@@ -524,9 +524,9 @@ int testMapHS() {
 int testBitArray() {
 	BitArray bit_array;
 	bool r;
-	Word_t count;
-	Word_t index, value;
-	Word_t mem_used;
+	unsigned int count;
+	unsigned int index, value;
+	unsigned int mem_used;
 
 	printf("- Testing BitArray -----\n");
 

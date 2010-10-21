@@ -84,7 +84,7 @@ Point3D vtcs[] = {
 };
 
 // mesh
-Word_t hexs[2][48][8] = {
+unsigned int hexs[2][48][8] = {
 	// hexs 1
 	{
 		{  0,  1,  2,  3,  4,  5,  6,  7 },
@@ -211,7 +211,7 @@ Word_t hexs[2][48][8] = {
 	}
 };
 
-Word_t bnd[10][5] = {
+unsigned int bnd[10][5] = {
 	{ 0,  3,  7,  4, 1 },
 	{ 8,  9, 11, 10, 2 },
 	{ 0,  1,  5,  4, 3 },
@@ -372,19 +372,19 @@ int main(int argc, char **args) {
 
 				Mesh mesh;
 
-				for (Word_t k = 0; k < countof(vtcs); k++)
+				for (unsigned int k = 0; k < countof(vtcs); k++)
 					mesh.add_vertex(vtcs[k].x, vtcs[k].y, vtcs[k].z);
-				Word_t h1[] = {
+				unsigned int h1[] = {
 						hexs[0][i][0] + 1, hexs[0][i][1] + 1, hexs[0][i][2] + 1, hexs[0][i][3] + 1,
 						hexs[0][i][4] + 1, hexs[0][i][5] + 1, hexs[0][i][6] + 1, hexs[0][i][7] + 1 };
 				mesh.add_hex(h1);
-				Word_t h2[] = {
+				unsigned int h2[] = {
 						hexs[1][j][0] + 1, hexs[1][j][1] + 1, hexs[1][j][2] + 1, hexs[1][j][3] + 1,
 						hexs[1][j][4] + 1, hexs[1][j][5] + 1, hexs[1][j][6] + 1, hexs[1][j][7] + 1 };
 				mesh.add_hex(h2);
 				// bc
-				for (Word_t k = 0; k < countof(bnd); k++) {
-					Word_t facet_idxs[Quad::NUM_VERTICES] = { bnd[k][0] + 1, bnd[k][1] + 1, bnd[k][2] + 1, bnd[k][3] + 1 };
+				for (unsigned int k = 0; k < countof(bnd); k++) {
+					unsigned int facet_idxs[Quad::NUM_VERTICES] = { bnd[k][0] + 1, bnd[k][1] + 1, bnd[k][2] + 1, bnd[k][3] + 1 };
 					mesh.add_quad_boundary(facet_idxs, bnd[k][4]);
 				}
 
@@ -394,7 +394,7 @@ int main(int argc, char **args) {
 //				Element *hx[] = { mesh.elements[1], mesh.elements[2] };
 //				printf("[%d, %d]\n", hx[0]->get_face_orientation(1), hx[1]->get_face_orientation(2));
 
-//				Word_t fidx[4];
+//				unsigned int fidx[4];
 //				hx[1]->get_face_vertices(2, fidx);
 //				printf("FI: %d, %d, %d, %d\n", fidx[0], fidx[1], fidx[2], fidx[3]);
 				printf("\n");
