@@ -26,7 +26,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _WIN32
 // Microsoft C libraries do not have backtrace() functionality
 #include <string>
 #include <iostream>
@@ -48,7 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // the comments), which is not available in C++:
 
 // backtrace() function for retrieving the stacktrace
+#ifdef HAVE_EXECINFO
 #include <execinfo.h>
+#endif
 
 // For the HAVE_TEUCHOS_LINK and HAVE_TEUCHOS_BFD defines
 #if defined(H1D_REAL) || defined(H1D_COMPLEX)
@@ -74,7 +75,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // For demangling function names
+#ifdef HAVE_CXXABI
 #include <cxxabi.h>
+#endif
 
 #ifdef HAVE_TEUCHOS_BFD
   // For bfd_* family of functions for loading debugging symbols from the binary
@@ -155,6 +158,7 @@ std::string read_line_from_file(std::string filename, unsigned int line_number)
 /* Allows printf like formatting, but returns a std::string. */
 std::string format(const char *fmt, ...)
 {
+#ifdef HAVE_VASPRINTF
     va_list argptr;
     va_start(argptr, fmt);
 
@@ -165,6 +169,9 @@ std::string format(const char *fmt, ...)
 
     va_end(argptr);
     return s;
+#else
+  return "Necessary function vasprintf() missing.";
+#endif
 }
 // 2010/09/20: rabartl: Above, the function uses varargs (...) which is
 // recommended against in Item 98 "Don't use varargs (ellipsis)" in "C++
@@ -180,8 +187,10 @@ std::string format(const char *fmt, ...)
    Makes sure that it ends with (), which is automatic in C++, but it has to be
    added by hand in C.
 */
+
 std::string demangle_function_name(std::string name)
 {
+#ifdef HAVE_CXXABI
     std::string s;
 
     if (name.length() == 0) {
@@ -199,8 +208,10 @@ std::string demangle_function_name(std::string name)
     }
 
     return s;
+#else
+  return "Necessary function __cxa_demangle() missing.";
+#endif
 }
-
 
 #ifdef HAVE_TEUCHOS_BFD
 
@@ -467,6 +478,7 @@ void loc_abort_callback_print_stack(int sig_num)
 
 std::string Teuchos::get_stacktrace()
 {
+#ifdef HAVE_EXECINFO
     const int STACKTRACE_ARRAY_SIZE = 100; // 2010/09/22: rabartl: Is this large enough?
     // Obtain the list of addresses
     void *stacktrace_array[STACKTRACE_ARRAY_SIZE];
@@ -478,6 +490,9 @@ std::string Teuchos::get_stacktrace()
     std::string s("Traceback (most recent call last):\n");
     s += strings;
     return s;
+#else
+  return "Necessary function backtrace() missing.";
+#endif
 }
 
 
@@ -495,6 +510,3 @@ void Teuchos::print_stack_on_segfault()
     signal(SIGSEGV, loc_segfault_callback_print_stack);
     signal(SIGABRT, loc_abort_callback_print_stack);
 }
-#else
-#define backtrace (params)
-#endif

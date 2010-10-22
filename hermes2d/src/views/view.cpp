@@ -556,9 +556,7 @@ void View::wait_for_draw()
   //signal(SIGSEGV, old_segv);
   //signal(SIGABRT, old_abrt);
   // So we just restore it by calling the original handler:
-#ifndef _WIN32
   Teuchos::print_stack_on_segfault();
-#endif
 }
 
 double View::get_tick_count()
