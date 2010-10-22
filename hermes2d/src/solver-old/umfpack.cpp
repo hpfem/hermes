@@ -29,7 +29,6 @@ extern "C" {
 #include <common/trace.h>
 #include <common/error.h>
 #include <common/utils.h>
-#include <common/callstack.h>
 #include <common/timer.h>
 
 UMFPackMatrix::UMFPackMatrix() {
