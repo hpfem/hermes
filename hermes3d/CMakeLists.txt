@@ -110,11 +110,11 @@ endif(DEBUG)
 find_package(JUDY REQUIRED)
 find_package(PTHREAD REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
+add_definitions(-DWITH_BLAS)
 
 if(NOT MSVC)
-	enable_language(Fortran)		  # need a fortran compiler for checking BLAS
+	enable_language(Fortran)	# need a fortran compiler for checking BLAS
 	find_package(LAPACK REQUIRED) # also searches for BLAS
-	add_definitions(-DWITH_BLAS)
 endif(NOT MSVC)
 
 # solvers
