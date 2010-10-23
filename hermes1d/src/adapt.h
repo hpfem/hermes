@@ -18,7 +18,7 @@
 // Assumes that the element was not refined in space for the 
 // reference solution. 
 // FIXME: to be moved to the Element class
-double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref,
+double __declspec(dllexport) calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref,
         int sln=0);
 
 // Calculates the square in L2 or H1 norm of the difference between 
@@ -26,35 +26,35 @@ double calc_elem_est_error_squared_p(int norm, Element *e, Element *e_ref,
 // Assumes that the element was refined in space for the 
 // reference solution.
 // FIXME: to be moved to the Element class
-double calc_elem_est_error_squared_hp(int norm, Element *e, 
+double __declspec(dllexport) calc_elem_est_error_squared_hp(int norm, Element *e, 
                         Element *e_ref_left, Element *e_ref_right,
                         int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
 // and reference solutions in all active elements of 'mesh'. Total
 // error is returned.
-double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref, 
+double __declspec(dllexport) calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref, 
 			   double *err_array, int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
 // and reference solutions in all active elements of 'mesh'. Total
 // error is returned.
-double calc_error_estimate(int norm, Mesh* mesh, 
+double __declspec(dllexport) calc_error_estimate(int norm, Mesh* mesh, 
                            ElemPtr2* ref_element_pairs);
 
 // Can be used for both the coarse and reference solutions
-double calc_solution_norm(int norm, Mesh* mesh);
-double calc_solution_norm(int norm, Mesh* mesh, ElemPtr2* ref_element_pairs);
+double __declspec(dllexport) calc_solution_norm(int norm, Mesh* mesh);
+double __declspec(dllexport) calc_solution_norm(int norm, Mesh* mesh, ElemPtr2* ref_element_pairs);
 
 // Sort err_array[] and returning array of sorted element indices
-void sort_element_errors(int n, double *err_array, int *id_array); 
+void __declspec(dllexport) sort_element_errors(int n, double *err_array, int *id_array); 
 
 // Assumes that reference solution is defined on two half-elements 'e_ref_left'
 // and 'e_ref_right'. The reference solution is projected onto the space of 
 // (discontinuous) polynomials of degree 'p_left' on 'e_ref_left'
 // and degree 'p_right' on 'e_ref_right'. Returned is projection error and
 // number of dof added by this candidate.
-void check_cand_coarse_hp_fine_hp(Element *e, Element *e_ref_left, Element *e_ref_right, 
+void __declspec(dllexport) check_cand_coarse_hp_fine_hp(Element *e, Element *e_ref_left, Element *e_ref_right, 
                                   int p_left, int p_right,
                                   double &err, int &dof);
 
@@ -63,7 +63,7 @@ void check_cand_coarse_hp_fine_hp(Element *e, Element *e_ref_left, Element *e_re
 // polynomials of degree 'p_left' on the left half of 'e' and degree 
 // 'p_right' on the right half of 'e'. Returned is projection error and
 // number of dof added by this candidate.
-void check_cand_coarse_hp_fine_p(Element *e, Element *e_ref,
+void __declspec(dllexport) check_cand_coarse_hp_fine_p(Element *e, Element *e_ref,
                                  int p_left, int p_right,
                                  double &err, int &dof);
 
@@ -71,7 +71,7 @@ void check_cand_coarse_hp_fine_p(Element *e, Element *e_ref,
 // and 'e_ref_right'. The reference solution is projected onto the space of 
 // polynomials of degree 'p' on 'e'. Returned is projection error and
 // number of dof added by this candidate.
-void check_cand_coarse_p_fine_hp(Element *e, Element *e_ref_left, Element *e_ref_right, 
+void __declspec(dllexport) check_cand_coarse_p_fine_hp(Element *e, Element *e_ref_left, Element *e_ref_right, 
                                  int p, double &err, int &dof);
 
 // Assumes that reference solution is defined on one single element 
@@ -79,19 +79,19 @@ void check_cand_coarse_p_fine_hp(Element *e, Element *e_ref_left, Element *e_ref
 // The reference solution is projected onto the space of 
 // polynomials of degree 'p' on 'e'. Returned is projection error and
 // number of dof added by this candidate.
-void check_cand_coarse_p_fine_p(Element *e, Element *e_ref, int p,
+void __declspec(dllexport) check_cand_coarse_p_fine_p(Element *e, Element *e_ref, int p,
                                 double &err, int &dof);
 
 // Error wrt. exact solution (if provided) on element 'e' 
-double calc_elem_exact_error_squared(int norm, exact_sol_type exact_sol,
+double __declspec(dllexport) calc_elem_exact_error_squared(int norm, exact_sol_type exact_sol,
                                      Element *e, int order);
 
 // Error wrt. exact solution (if provided) on the entire interval (A, B) 
-double calc_error_exact(int norm, Mesh *mesh, 
+double __declspec(dllexport) calc_error_exact(int norm, Mesh *mesh, 
                         exact_sol_type exact_sol); 
 
 // Calculates L2 or H1 norm of function exact_sol in interval (A, B)
-double calc_solution_norm(int norm, exact_sol_type exact_sol, 
+double __declspec(dllexport) calc_solution_norm(int norm, exact_sol_type exact_sol, 
                            int n_eq, 
                            double A, double B, int subdivision, 
                            int order);
@@ -101,7 +101,7 @@ double calc_solution_norm(int norm, exact_sol_type exact_sol,
 // Each refinement candidate is a triple of integers. First one means 
 // p-refinement (0) or hp-refinement (1). Second and/or third number are 
 // the new proposed polynomial degrees.
-int select_hp_refinement(Element *e, Element *e_ref, Element * e_ref2,
+int __declspec(dllexport) select_hp_refinement(Element *e, Element *e_ref, Element * e_ref2,
                          int num_cand, int3 *cand_list, int ref_sol_type, 
                          int norm); 
 

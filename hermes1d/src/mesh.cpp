@@ -615,7 +615,7 @@ int Mesh::assign_dofs()
   return this->n_dof;
 }
 
-int Mesh::assign_elem_ids()
+void Mesh::assign_elem_ids()
 {
     Iterator *I = new Iterator(this);
     int count_id = 0;

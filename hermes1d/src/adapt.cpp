@@ -409,7 +409,7 @@ void calc_proj_coeffs_H1(int n_eq, int fns_num, int pts_num,
 // (discontinuous) polynomials of degree 'p_left' on 'e_ref_left'
 // and degree 'p_right' on 'e_ref_right'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left, 
+void check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left, 
                                     Element *e_ref_right, 
                                     int p_left, int p_right,
                                     double &err, int &dof)
@@ -688,7 +688,7 @@ double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
 // polynomials of degree 'p_left' on the left half of 'e' and degree 
 // 'p_right' on the right half of 'e'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
+void check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
                                    int p_left, int p_right,
                                    double &err, int &dof)
 {
@@ -962,7 +962,7 @@ double check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
 // and 'e_ref_right'. The reference solution is projected onto the space of 
 // polynomials of degree 'p' on 'e'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left, 
+void check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left, 
                                    Element *e_ref_right, int p,
                                    double &err, int &dof)
 {
@@ -1278,7 +1278,7 @@ double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
 // The reference solution is projected onto the space of 
 // polynomials of degree 'p' on 'e'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
+void check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
                                   int p, double &err, int &dof)
 {
   int n_eq = e->n_eq;
@@ -1642,7 +1642,7 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
       // p-candidate (preferred - not penalized by the dof number)
       if (cand_list[i][0] == 0) crit = (log(err_cand) - log(err_orig));
       // hp-candidate
-      else crit = (log(err_cand) - log(err_orig)) / sqrt(dof_cand - dof_orig); 
+      else crit = (log(err_cand) - log(err_orig)) / sqrt(double(dof_cand - dof_orig)); 
     } 
 
     // debug

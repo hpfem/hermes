@@ -43,7 +43,7 @@ double Val_dir_left_1 = K;
 // When changing exact solution, do not 
 // forget to update interval accordingly
 const int EXACT_SOL_PROVIDED = 1;
-double exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
   u[0] = sin(K*x);
   dudx[0] = K*cos(K*x);
   u[1] = K*cos(K*x);

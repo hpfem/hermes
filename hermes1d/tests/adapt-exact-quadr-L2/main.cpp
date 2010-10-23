@@ -46,7 +46,7 @@ double f(double x) {
 
 // Exact solution
 const int EXACT_SOL_PROVIDED = 1;
-double exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
   //u[0] = sin(x);
   //dudx[0] = cos(x);
   u[0] = 1. - x*x;

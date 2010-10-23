@@ -46,7 +46,7 @@ const int MAX_COEFFS_NUM = MAX_P + 1;  // this is the maximum number of
                                        // polynomial coefficients
 const int MAX_STRING_LENGTH = 100;     // maximum string length 
 
-typedef double (*exact_sol_type)(double x, 
+typedef void (*exact_sol_type)(double x, 
         double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]);
 
 void error(const char *msg);
@@ -60,6 +60,13 @@ typedef double double2[2];
 typedef int int2[2];
 typedef int int3[3];
 typedef double (*shape_fn_t)(double);
+
+// Temporary solution for building on win.
+#ifdef WIN32
+#define H1D_API __declspec(dllexport)
+#else
+#define H1D_API
+#endif
 
 // auxiliary functions
 void intro();

@@ -56,12 +56,13 @@ double L2_projection_liform(int num, double *x, double *weights,
                 double *v, double *dvdx, void *user_data)
 {
     // Value of the projected function at gauss points:
-    double f[num];
+    double* f = new double[num];
     _f(num, x, f, NULL);
     double val = 0;
     for (int i=0; i<num; i++) {
         val += weights[i] * (f[i] * v[i]);
     }
+    delete [] f;
     return val;
 }
 
@@ -71,12 +72,15 @@ double H1_projection_liform(int num, double *x, double *weights,
                 double *v, double *dvdx, void *user_data)
 {
     // Value of the projected function at gauss points:
-    double f[num], dfdx[num];
+    double* f = new double[num];
+    double* dfdx = new double[num];
     _f(num, x, f, dfdx);
     double val = 0;
     for (int i=0; i<num; i++) {
         val += weights[i] * (f[i] * v[i] + dfdx[i] * dvdx[i]);
     }
+    delete [] f;
+    delete [] dfdx;
     return val;
 }
 

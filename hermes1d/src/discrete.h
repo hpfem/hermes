@@ -34,7 +34,7 @@ typedef double (*vector_form_surf) (double x, double u_prev[MAX_SLN_NUM][MAX_EQN
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v, double dvdx,
         void *user_data);
 
-class DiscreteProblem {
+class __declspec(dllexport) DiscreteProblem {
 
 public:
     DiscreteProblem();
@@ -91,7 +91,7 @@ void element_shapefn(double a, double b,
 void element_shapefn_point(double x_ref, double a, double b, 
 			   int k, double &val, double &der);
 
-void newton(DiscreteProblem *dp, Mesh *mesh, 
+void __declspec(dllexport) newton(DiscreteProblem *dp, Mesh *mesh, 
             CommonSolver *solver,
             double newton_tol, int newton_maxiter,
             bool verbose=true);
