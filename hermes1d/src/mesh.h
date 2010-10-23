@@ -10,7 +10,7 @@
 #include "legendre.h"
 #include "lobatto.h"
 
-class Element {
+class __declspec(dllexport) Element {
 public:
     Element();
     Element(double x_left, double x_right, int level, int deg, 
@@ -64,10 +64,10 @@ public:
 
 typedef Element* ElemPtr2[2];
 
-class Mesh;
+class __declspec(dllexport) Mesh;
 
-void copy_mesh_to_vector(Mesh *mesh, double *y, int sln=0);
-void copy_vector_to_mesh(double *y, Mesh *mesh, int sln=0);
+void __declspec(dllexport) copy_mesh_to_vector(Mesh *mesh, double *y, int sln=0);
+void __declspec(dllexport) copy_vector_to_mesh(double *y, Mesh *mesh, int sln=0);
 
 class Mesh {
     public:
@@ -119,7 +119,7 @@ class Mesh {
         int get_n_eq() {
             return this->n_eq;
         }
-        int set_n_eq(int n_eq) {
+        void set_n_eq(int n_eq) {
             this->n_eq = n_eq;
         }
         int get_n_sln() {
@@ -165,7 +165,7 @@ class Mesh {
                         int subdivision = 500);  // plots error wrt. reference solution
         void plot_error_exact(int norm, exact_sol_type exact_sol, const char *filename,  
                         int subdivision = 500); // plots error wrt. exact solution
-        int assign_elem_ids();
+        void assign_elem_ids();
         int n_active_elem;
         void copy_vector_to_mesh(double *y, int sln=0) {
             ::copy_vector_to_mesh(y, this, sln);
@@ -194,7 +194,7 @@ class Mesh {
 // coarse and reference mesh solutions on them, respectively. 
 // The coefficient vectors and numbers of degrees of freedom 
 // on both meshes are also updated. 
-void adapt(int norm, int adapt_type, double threshold, 
+void __declspec(dllexport) adapt(int norm, int adapt_type, double threshold, 
            double *err_squared_array,
            Mesh* &mesh, Mesh* &mesh_ref);
 
@@ -202,15 +202,15 @@ void adapt(int norm, int adapt_type, double threshold,
 // coarse solution on it. 
 // The coefficient vector and number of degrees of freedom 
 // also is updated. 
-void adapt(int norm, int adapt_type, double threshold, 
+void __declspec(dllexport) adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
            Mesh* &mesh, ElemPtr2 *ref_elem_pairs);
 
-void adapt_plotting(Mesh *mesh, Mesh *mesh_ref,
+void __declspec(dllexport) adapt_plotting(Mesh *mesh, Mesh *mesh_ref,
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 
 
-void adapt_plotting(Mesh *mesh, ElemPtr2* ref_elem_pairs,
+void __declspec(dllexport) adapt_plotting(Mesh *mesh, ElemPtr2* ref_elem_pairs,
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 
 #endif

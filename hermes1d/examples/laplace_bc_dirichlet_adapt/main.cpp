@@ -49,7 +49,7 @@ double f(double x) {
 // When changing exact solution, do not 
 // forget to update interval accordingly
 const int EXACT_SOL_PROVIDED = 1;
-double exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
   //if (x <= 0) u[0] = 0;
   //else u[0] = pow(x, alpha);
   //if (x <= 0) dudx[0] = 0;
