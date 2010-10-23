@@ -21,6 +21,7 @@
 #define _CALLSTACK_H_
 
 #include <stdio.h>
+#include "compat.h"
 
 // __PRETTY_FUNCTION__ missing on MSVC
 #ifdef _MSC_VER		// #ifdef _WIN32 was here in H3D
@@ -31,7 +32,7 @@
 
 /// Holds data for one call stack object
 ///
-struct CallStackObj 
+struct HERMES_API CallStackObj 
 {
 	CallStackObj(int ln, const char *func, const char *file);
 	~CallStackObj();
@@ -43,7 +44,7 @@ struct CallStackObj
 
 /// Call stack object
 ///
-class CallStack 
+class HERMES_API CallStack 
 {
 public:
 	CallStack(int max_size = 32);
