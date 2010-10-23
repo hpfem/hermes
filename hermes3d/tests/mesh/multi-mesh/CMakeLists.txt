@@ -22,7 +22,7 @@ ADD_BIN(${PROJECT_NAME}-sys3 SYS3)
 # Tests
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-rhs2)
-add_test(${PROJECT_NAME}-rhs2-1  ${BIN} ${MESHES_DIR}/mesh3d/hex8.mesh3d)
+add_test(${PROJECT_NAME}-rhs2-1  ${BIN} hex8.mesh3d)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-sys3)
-add_test(${PROJECT_NAME}-sys3-1  ${BIN} ${MESHES_DIR}/mesh3d/hex8.mesh3d)
+add_test(${PROJECT_NAME}-sys3-1  ${BIN} hex8.mesh3d)

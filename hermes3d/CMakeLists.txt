@@ -85,7 +85,6 @@ endif(ELEMTYPES_LEN GREATER 0)
 # set internal library-wide variables
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
-set(MESHES_DIR ${PROJECT_SOURCE_DIR}/meshes)
 
 # internals regarding build type
 if(DEBUG)
