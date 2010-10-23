@@ -290,7 +290,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 include(CPack)
 
 if(HAVE_TEUCHOS_STACKTRACE)
-    message("Print Teuchos stacktrace on segfault: YES")
+    message("-- Print Teuchos stacktrace on segfault: YES")
 else(HAVE_TEUCHOS_STACKTRACE)
-    message("Print Teuchos stacktrace on segfault: NO")
+    message("-- Print Teuchos stacktrace on segfault: NO")
 endif(HAVE_TEUCHOS_STACKTRACE)

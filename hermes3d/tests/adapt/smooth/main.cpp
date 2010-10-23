@@ -17,7 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-// Test to verify the hp-adaptivity
+// Test to verify that hp-adaptivity worsk well.
 //
 
 #include "config.h"
@@ -25,11 +25,19 @@
 #include "../../../../hermes_common/trace.h"
 #include "../../../../hermes_common/common_time_period.h"
 #include "../../../../hermes_common/error.h"
-#ifdef WITH_PETSC
-#include "../../../../hermes_common/solver/petsc.h"
-#endif
 
-#undef REFERENCE_SOLUTION				// use ref. solution for guiding the adaptivity
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+
+#undef REFERENCE_SOLUTION			// use ref. solution for guiding the adaptivity
 
 const double TOLERANCE = 0.000001;		// error tolerance in percent
 const double THRESHOLD = 0.3;			// error threshold for element refinement
@@ -267,25 +275,18 @@ bool check_order(const Ord3 &spord)
 
 // main ///////////////////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char **argv)
+int main(int argc, char **args)
 {
 	int res = ERR_SUCCESS;
 
-#ifdef WITH_PETSC
-	PetscInitialize(&argc, &argv, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-	set_verbose(false);
-
 	if (argc < 3) error("Not enough parameters.");
 
-	parse_aniso_type(argv[2]);
+	parse_aniso_type(args[2]);
 
-	H1ShapesetLobattoHex shapeset;
-
-	printf("* Loading mesh '%s'\n", argv[1]);
+	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
 	H3DReader mloader;
-	if (!mloader.load(argv[1], &mesh)) error("Loading mesh file '%s'\n", argv[1]);
+	if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
 	printf("* Setting the space up\n");
 
@@ -320,6 +321,7 @@ int main(int argc, char **argv)
 			order = Ord3(init_p, init_p, init_p);
 			break;
 	}
+
 	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
 	H1Space space(&mesh, bc_types, essential_bc_values, order);
 
@@ -328,20 +330,21 @@ int main(int argc, char **argv)
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
 
         bool is_linear = true;
-	DiscreteProblem lp(&wf, &space, is_linear);
+	DiscreteProblem dp(&wf, &space, is_linear);
+
+        // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+        initialize_solution_environment(matrix_solver, argc, args);
 
 	bool done = false;
 	int iter = 0;
+        Space* ref_space;
 	do {
-		Timer assemble_timer("Assembling stiffness matrix");
-		Timer solve_timer("Solving stiffness matrix");
-
 		printf("\n=== Iter #%d ================================================================\n", iter);
 
-		// check the we are doing all right
+		// check if we are doing all right
 		FOR_ALL_ACTIVE_ELEMENTS(eid, &mesh) {
 			Ord3 spord = space.get_element_order(eid);
-			printf("#%ld: order = (%d, %d, %d)\n", eid, spord.x, spord.y, spord.z);
+			printf("#%u: order = (%d, %d, %d)\n", eid, spord.x, spord.y, spord.z);
 		}
 
 		if (mesh.get_num_elements() != 1) {
@@ -360,43 +363,24 @@ int main(int argc, char **argv)
 		// we're good -> go ahead
 		printf("\nSolution\n");
 
-#if defined WITH_UMFPACK
-		UMFPackMatrix mat;
-		UMFPackVector rhs;
-		UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-		PardisoMatrix mat;
-		PardisoVector rhs;
-		PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-		PetscMatrix mat;
-		PetscVector rhs;
-		PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-		MumpsMatrix mat;
-		MumpsVector rhs;
-		MumpsSolver solver(&mat, &rhs);
-#endif
+                // Set up the solver, matrix, and rhs according to the solver selection.
+                SparseMatrix* matrix = create_matrix(matrix_solver);
+                Vector* rhs = create_vector(matrix_solver);
+                Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
 		int ndofs = space.assign_dofs();
 		printf("  - Number of DOFs: %d\n", ndofs);
 
 		// assemble stiffness matrix
 		printf("  - Assembling... "); fflush(stdout);
-		assemble_timer.reset();
-		assemble_timer.start();
-		lp.assemble(&mat, &rhs);
-		assemble_timer.stop();
-		printf("done in %s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
+		dp.assemble(matrix, rhs);
+		printf("done\n");
 
 		// solve the stiffness matrix
 		printf("  - Solving... "); fflush(stdout);
-		solve_timer.reset();
-		solve_timer.start();
-		bool solved = solver.solve();
-		solve_timer.stop();
+		bool solved = solver->solve();
 		if (solved)
-			printf("done in %s (%lf secs)\n", solve_timer.get_human_time(), solve_timer.get_seconds());
+			printf("done\n");
 		else {
 			res = ERR_FAILURE;
 			printf("failed\n");
@@ -404,72 +388,57 @@ int main(int argc, char **argv)
 		}
 
 		Solution sln(&mesh);
-		sln.set_coeff_vector(&space, solver.get_solution());
+		Solution::vector_to_solution(solver->get_solution(), &space, &sln);
 
 		printf("Reference solution\n");
 
-		Mesh rmesh;
-		rmesh.copy(mesh);
-		rmesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
+		Mesh ref_mesh;
+		ref_mesh.copy(mesh);
+		ref_mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
 #ifdef REFERENCE_SOLUTION
 
-#if defined WITH_UMFPACK
-		UMFPackLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_PARDISO
-		PardisoLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_PETSC
-		PetscLinearSolver rsolver(&mat, &rhs);
-#elif defined WITH_MUMPS
-		MumpsSolver rsolver(&mat, &rhs);
-#endif
+		ref_space = space.dup(&ref_mesh);
+		ref_space->copy_orders(space, 1);
 
-		Space *rspace = space.dup(&rmesh);
-		rspace->copy_orders(space, 1);
+		DiscreteProblem rdp(&wf, ref_space, is_linear);
+		rdp.set_space(ref_space);
 
-		DiscreteProblem rlp(&wf, rspace, is_linear);
-		rlp.set_space(rspace);
-
-		int rndofs = rspace->assign_dofs();
-		printf("  - Number of DOFs: %d\n", rndofs);
+		int ref_ndof = ref_space->assign_dofs();
+		printf("  - Number of DOFs: %d\n", ref_ndof);
 
 		printf("  - Assembling... "); fflush(stdout);
-		assemble_timer.reset();
-		assemble_timer.start();
-		rlp.assemble(&mat, &rhs);
-		assemble_timer.stop();
-		printf("done in %s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
+		rdp.assemble(&mat, &rhs);
+		printf("done\n");
 
 		printf("  - Solving... "); fflush(stdout);
-		solve_timer.reset();
-		solve_timer.start();
 		bool rsolved = rsolver.solve();
-		solve_timer.stop();
 		if (rsolved)
-			printf("done in %s (%lf secs)\n", solve_timer.get_human_time(), solve_timer.get_seconds());
+			printf("done\n");
 		else {
 			res = ERR_FAILURE;
 			printf("failed\n");
 			break;
 		}
-		Solution rsln(&rmesh);
-		rsln.set_coeff_vector(rspace, rsolver.get_solution());
+		Solution ref_sln(&ref_mesh);
+		Solution::vector_to_solution(ref_solver.get_solution(), ref_space, ref_sln);
 #else
-		ExactSolution rsln(&rmesh, exact_solution);
+		ExactSolution ref_sln(&ref_mesh, exact_solution);
 #endif
 
 		{
-			double h1_err_norm = h1_error(&sln, &rsln) * 100;
+			double h1_err_norm = h1_error(&sln, &ref_sln) * 100;
 			printf("  - H1 error norm:      % le\n", h1_err_norm);
 		}
 
 		printf("Adaptivity:\n");
-		H1Adapt hp(&space);
-		hp.set_aniso(true);
-		double tol = hp.calc_error(&sln, &rsln) * 100;
+                Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+		adaptivity->set_aniso(true);
+                bool solutions_for_adapt = true;
+                double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt) * 100;
 		printf("  - tolerance: "); fflush(stdout);
-		printf("% lf\n", tol);
-		if (tol < TOLERANCE || iter == 8) {
+		printf("% lf\n", err_est_rel);
+		if (err_est_rel < TOLERANCE || iter == 8) {
 			ExactSolution ex_sln(&mesh, exact_solution);
 			printf("\nDone\n");
 			// norm
@@ -491,19 +460,25 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		Timer t("");
 		printf("  - adapting... "); fflush(stdout);
-		t.start();
-		hp.adapt(THRESHOLD);
-		t.stop();
-		printf("done in %lf secs (refined %d element(s))\n", t.get_seconds(), hp.get_num_refined_elements());
+		adaptivity->adapt(THRESHOLD);
+		printf("done (refined %d element(s))\n", adaptivity->get_num_refined_elements());
+
+                // Clean up.
+#ifdef REFERENCE_SOLUTION
+                delete ref_space->get_mesh();
+                delete ref_space;
+#endif
+                delete matrix;
+                delete rhs;
+                delete solver;
+                delete adaptivity;
 
 		iter++;
 	} while (!done && iter < 5);
 
-#ifdef WITH_PETSC
-	PetscFinalize();
-#endif
+        // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+        finalize_solution_environment(matrix_solver);
 
 	return res;
 }

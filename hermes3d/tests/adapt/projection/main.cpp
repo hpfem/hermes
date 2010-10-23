@@ -1,8 +1,9 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
+#include "config.h"
+#include <hermes3d.h>
+#include "../../../../hermes_common/trace.h"
+#include "../../../../hermes_common/error.h"
+#include <float.h>
+
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation; either version 2 of the License,
@@ -20,16 +21,17 @@
 //
 // Testing projections
 //
-//
 
-#include "config.h"
-#ifdef WITH_PETSC
-#include "../../../../hermes_common/solver/petsc.h"
-#endif
-#include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/error.h"
-#include <float.h>
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+
 
 #define ERROR_SUCCESS								0
 #define ERROR_FAILURE								-1
@@ -40,7 +42,6 @@
 //#define X2_Y2_Z2
 //#define X3_Y3_Z3
 #define XN_YM_ZO
-
 
 int m = 2, n = 2, o = 2;
 
@@ -139,7 +140,7 @@ res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_
 // main
 //
 
-int main(int argc, char *argv[])
+int main(int argc, char *args[])
 {
   _F_
   int ret = ERROR_SUCCESS;
@@ -149,47 +150,21 @@ int main(int argc, char *argv[])
     return ERR_FAILURE;
   }
 
-  if (strcmp(argv[1], "h1") != 0 && strcmp(argv[1], "h1-ipol")) {
+  if (strcmp(args[1], "h1") != 0 && strcmp(args[1], "h1-ipol")) {
     fprintf(stderr, "ERROR: unknown type of the projection\n");
     return ERR_FAILURE;
   }
 
-#ifdef WITH_PETSC
-  PetscInitialize(NULL, NULL, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-  set_verbose(false);
-
-  H1ShapesetLobattoHex shapeset;
-
   Mesh mesh;
   H3DReader mloader;
-  if (!mloader.load(argv[2], &mesh)) {
-    fprintf(stderr, "ERROR: loading mesh file '%s'\n", argv[2]);
+  if (!mloader.load(args[2], &mesh)) {
+    fprintf(stderr, "ERROR: loading mesh file '%s'\n", args[2]);
     return ERR_FAILURE;
   }
-
-#if defined WITH_UMFPACK
-  UMFPackMatrix mat;
-  UMFPackVector rhs;
-  UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-  PardisoMatrix mat;
-  PardisoVector rhs;
-  PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-  PetscMatrix mat;
-  PetscVector rhs;
-  PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-  MumpsMatrix mat;
-  MumpsVector rhs;
-  MumpsSolver solver(&mat, &rhs);
-#endif
 
   unsigned int ne = mesh.elements.count();
   // make the mesh for the ref. solution
   mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-
 
 #if defined X2_Y2_Z2
   Ord3 o(2, 2, 2);
@@ -208,16 +183,30 @@ int main(int argc, char *argv[])
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 
-  space.assign_dofs();
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
 
   // assemble the stiffness matrix
-  dp.assemble(&mat, &rhs);
+  dp.assemble(matrix, rhs);
 
   // solve the stiffness matrix
-  solver.solve();
+  solver->solve();
 
   Solution sln(&mesh);
-  Solution::set_coeff_vector(&sln, &space, solver.get_solution());
+  Solution::vector_to_solution(solver->get_solution(), &space, &sln);
 
   for (unsigned int idx = mesh.elements.first(); idx <= ne; idx = mesh.elements.next(idx)) {
     Element *e = mesh.elements[idx];
@@ -226,8 +215,8 @@ int main(int argc, char *argv[])
     double error;
 
     Projection *proj;
-    if (strcmp(argv[1], "h1") == 0) proj = new H1Projection(&sln, e, &shapeset);
-    else if (strcmp(argv[1], "h1-ipol") == 0) proj = new H1ProjectionIpol(&sln, e, &shapeset);
+    if (strcmp(args[1], "h1") == 0) proj = new H1Projection(&sln, e, space.get_shapeset());
+    else if (strcmp(args[1], "h1-ipol") == 0) proj = new H1ProjectionIpol(&sln, e, space.get_shapeset());
     else return ERR_FAILURE;
 
     //
@@ -294,9 +283,8 @@ int main(int argc, char *argv[])
     delete proj;
   }
 
-#ifdef WITH_PETSC
-  PetscFinalize();
-#endif
+  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  finalize_solution_environment(matrix_solver);
 
   return ret;
 }
