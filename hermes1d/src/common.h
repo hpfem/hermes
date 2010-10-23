@@ -61,6 +61,13 @@ typedef int int2[2];
 typedef int int3[3];
 typedef double (*shape_fn_t)(double);
 
+// Temporary solution for building on win.
+#ifdef WIN32
+#define H1D_API __declspec(dllexport)
+#else
+#define H1D_API
+#endif
+
 // auxiliary functions
 void intro();
 #define MEM_CHECK(var) if (var == NULL) { printf("Out of memory."); exit(1); }
