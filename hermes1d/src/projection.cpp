@@ -84,7 +84,7 @@ double H1_projection_liform(int num, double *x, double *weights,
     return val;
 }
 
-void assemble_projection_matrix_rhs(Mesh *mesh, Matrix *A, double *rhs,
+void assemble_projection_matrix_rhs(Mesh *mesh, SparseMatrix *A, double *rhs,
         ExactFunction fn, int projection_type)
 {
     DiscreteProblem *dp1 = new DiscreteProblem();

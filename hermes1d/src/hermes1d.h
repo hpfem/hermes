@@ -13,9 +13,9 @@
 #include <string.h>
 
 #include "quad_std.h"
-#include "common.h"
+#include "../../hermes_common/common.h"
 #include "mesh.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
 #include "quad_std.h"
 #include "legendre.h"
 #include "lobatto.h"
@@ -27,6 +27,7 @@
 #include "adapt.h"
 #include "graph.h"
 
-#include "solvers.h"
+#include "h1d_common.h"
+#include "h1d_logging.h"
 
 #endif

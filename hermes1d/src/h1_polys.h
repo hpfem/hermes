@@ -8,7 +8,9 @@
 
 #include <math.h>
 
-#include "common.h"
+#include "../../hermes_common/common.h"
+
+typedef double (*shape_fn_t)(double);
 
 extern shape_fn_t h1_polys_fn_tab_1d[];
 extern shape_fn_t h1_polys_der_tab_1d[];

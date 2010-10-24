@@ -189,7 +189,7 @@
 #include "stdlib.h"
 #include "arrayobject.h"
 #include "stdcython.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
 #include "hermes1d.h"
 #include "stdexcept"
 #include "stdio.h"

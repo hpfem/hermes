@@ -232,9 +232,25 @@ enum EMatrixDumpFormat {
 
 class HERMES_API Matrix {
 public:
-	virtual ~Matrix() { }
-	Matrix() {this->size = 0;}
-	Matrix(int size) {this->size = size;}
+int get_size() 
+{
+  return this->size;
+};
+
+Matrix(int size) 
+{
+  this->size = size;
+};
+
+~Matrix() 
+{
+};
+
+Matrix() 
+{
+  this->size = 0;
+}
+;
 
 	/// allocate the memory for stiffness matrix and right-hand side
 	virtual void alloc() = 0;
@@ -247,8 +263,6 @@ public:
 	/// @param[in] m - the number of row
 	/// @param[in] n - the number of column
 	virtual scalar get(int m, int n) = 0;
-
-	virtual int get_size() {return this->size;};
 
 	/// Zero the matrix
 	virtual void zero() = 0;
@@ -402,7 +416,7 @@ public:
   int length() {return this->size;}
 
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
-
+  
 protected:
 	int size;
 };

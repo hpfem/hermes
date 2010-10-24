@@ -8,7 +8,7 @@
 
 #include <math.h>
 
-#include "common.h"
+#include "../../hermes_common/common.h"
 #include "quad_std.h"
 
 extern double leg_norm_const_ref(int n);

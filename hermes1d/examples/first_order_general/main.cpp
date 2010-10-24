@@ -8,6 +8,10 @@
 // or nonlinear in 'y', as long as it is differentiable
 // with respect to this variable (needed for the Newton's method). 
 
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+
 // General input:
 static int N_eq = 1;                    // number of equations
 int N_elem = 10;                        // number of elements
@@ -46,7 +50,7 @@ int main() {
   dp->add_vector_form(0, residual);
 
   // Newton's loop
-  newton(dp, mesh, NULL, NEWTON_TOL, NEWTON_MAXITER);
+  newton(dp, mesh, NEWTON_TOL, NEWTON_MAXITER, matrix_solver);
 
   // Plot the solution
   Linearizer l(mesh);

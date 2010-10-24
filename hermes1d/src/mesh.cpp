@@ -8,6 +8,7 @@
 #include "adapt.h"
 #include "transforms.h"
 #include "linearizer.h"
+#include "h1d_common.h"
 
 // debug - prints element dof arrays in assign_dofs()
 int DEBUG_ELEM_DOF = 0;
@@ -46,6 +47,17 @@ Element::Element(double x_left, double x_right, int level, int deg, int n_eq, in
   this->level = level;
   this->marker = marker;
   id = -1;
+}
+
+void Element::free_element() 
+{
+  if (this->sons[0] != NULL) delete this->sons[0];
+  if (this->sons[1] != NULL) delete this->sons[1];
+}
+
+Element::~Element()
+{
+  this->free_element();
 }
 
 unsigned Element::is_active() 
@@ -1074,6 +1086,105 @@ void Mesh::plot_error_exact(int norm, exact_sol_type exact_sol,
 
   fclose(f);
   printf("Exact solution error written to %s.\n", final_filename);
+}
+
+int Mesh::get_n_base_elem()
+{
+  return this->n_base_elem;
+}
+
+Mesh::~Mesh() 
+{
+  if (this->base_elems != NULL) {
+    delete[] this->base_elems;
+  }
+}
+
+void Mesh::free_elements()
+{
+  if (this->base_elems != NULL) {
+    delete[] this->base_elems;
+    }
+}
+
+Element * Mesh::get_base_elems() 
+{
+  return this->base_elems;
+}
+
+void Mesh::set_n_base_elem(int n_base_elem)
+{
+  this->n_base_elem = n_base_elem;
+}
+
+int Mesh::get_n_active_elem()
+{
+  return this->n_active_elem;
+}
+
+void Mesh::set_n_active_elem(int n)
+{
+    this->n_active_elem = n;
+}
+
+int Mesh::get_n_dof()
+{
+  return this->n_dof;
+}
+
+void Mesh::set_n_dof(int n)
+{
+  this->n_dof = n;
+}
+
+int Mesh::get_n_eq()
+{
+  return this->n_eq;
+}
+
+void Mesh::set_n_eq(int n_eq)
+{
+  this->n_eq = n_eq;
+}
+
+int Mesh::get_n_sln()
+{
+  return this->n_sln;
+}
+
+void Mesh::set_n_sln(int n_sln)
+{
+  this->n_sln = n_sln;
+}
+
+double Mesh::get_left_endpoint()
+{
+  return this->left_endpoint; 
+}
+
+void Mesh::set_left_endpoint(double a)
+{
+  this->left_endpoint = a; 
+}
+
+double Mesh::get_right_endpoint()
+{
+  return this->right_endpoint; 
+}
+
+void Mesh::set_right_endpoint(double b)
+{
+  this->right_endpoint = b; 
+}
+
+void Mesh::copy_vector_to_mesh(double *y, int sln) 
+{
+  ::copy_vector_to_mesh(y, this, sln);
+}
+
+void Mesh::copy_mesh_to_vector(double *y, int sln) 
+{
+  ::copy_mesh_to_vector(this, y, sln);
 }
 
 // Use the err_array[] and threshold to create a list of 

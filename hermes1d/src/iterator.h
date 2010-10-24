@@ -6,11 +6,12 @@
 #ifndef _ITERATOR_H_
 #define _ITERATOR_H_
 
-#include "common.h"
-#include "mesh.h"
 #include <stack>
+#include "hermes1d.h"
 
-class Iterator {
+class Mesh;
+class Element;
+class HERMES_API Iterator {
 public:
   Iterator(Mesh *mesh) 
   {

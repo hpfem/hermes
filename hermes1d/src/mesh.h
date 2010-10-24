@@ -6,22 +6,21 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 
-#include "common.h"
+#include "../../hermes_common/common.h"
 #include "legendre.h"
 #include "lobatto.h"
 
-class H1D_API Element {
+class HERMES_API Mesh;
+
+class HERMES_API Element {
 public:
     Element();
     Element(double x_left, double x_right, int level, int deg, 
             int n_eq, int n_sln, int marker);
-    void free_element() {
-        if (this->sons[0] != NULL) delete this->sons[0];
-        if (this->sons[1] != NULL) delete this->sons[1];
-    }
-    ~Element() {
-        this->free_element();
-    }
+    void free_element();
+
+    ~Element();
+
     void init(double x1, double x2, int p_init, 
 	      int id, int active, int level, int n_eq, int n_sln, int marker);
     void copy_into(Element *e_trg);
@@ -64,11 +63,8 @@ public:
 
 typedef Element* ElemPtr2[2];
 
-
-class H1D_API Mesh;
-
-void H1D_API copy_mesh_to_vector(Mesh *mesh, double *y, int sln=0);
-void H1D_API copy_vector_to_mesh(double *y, Mesh *mesh, int sln=0);
+void HERMES_API copy_mesh_to_vector(Mesh *mesh, double *y, int sln=0);
+void HERMES_API copy_vector_to_mesh(double *y, Mesh *mesh, int sln=0);
 
 class Mesh {
     public:
@@ -85,62 +81,43 @@ class Mesh {
         // div_array[]...  array of macroelement equidistant divisions
         Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, 
              int *div_array, int n_eq=1, int n_sln=1, bool print_banner=true);
-        ~Mesh() {
-            if (this->base_elems != NULL) {
-                delete[] this->base_elems;
-            }
-        }
-        void free_elements() {
-            if (this->base_elems != NULL) {
-                delete[] this->base_elems;
-            }
-        }
+        
+        ~Mesh();
+
+        void free_elements();
+
         int assign_dofs();
-        Element *get_base_elems() {
-            return this->base_elems;
-        }
-        int get_n_base_elem() {
-            return this->n_base_elem;
-        }
-        void set_n_base_elem(int n_base_elem) {
-            this->n_base_elem = n_base_elem;
-        }
-        int get_n_active_elem() {
-            return this->n_active_elem;
-        }
-        void set_n_active_elem(int n) {
-            this->n_active_elem = n;
-        }
-        int get_n_dof() {
-            return this->n_dof;
-        }
-        void set_n_dof(int n) {
-            this->n_dof = n;
-        }
-        int get_n_eq() {
-            return this->n_eq;
-        }
-        void set_n_eq(int n_eq) {
-            this->n_eq = n_eq;
-        }
-        int get_n_sln() {
-            return this->n_sln;
-        }
-        void set_n_sln(int n_sln) {
-            this->n_sln = n_sln;
-        }
-        double get_left_endpoint() {
-            return this->left_endpoint; 
-        }
-        void set_left_endpoint(double a) {
-            this->left_endpoint = a; 
-        }
-        double get_right_endpoint() {
-            return this->right_endpoint; 
-        }
-        void set_right_endpoint(double b) {
-            this->right_endpoint = b; 
-        }
+
+        Element *get_base_elems();
+
+        int get_n_base_elem();
+
+        void set_n_base_elem(int n_base_elem);
+
+        int get_n_active_elem();
+
+        void set_n_active_elem(int n);
+        
+        int get_n_dof();
+
+        void set_n_dof(int n);
+
+        int get_n_eq();
+
+        void set_n_eq(int n_eq);
+
+        int get_n_sln();
+
+        void set_n_sln(int n_sln);
+
+        double get_left_endpoint();
+
+        void set_left_endpoint(double a);
+        
+        double get_right_endpoint();
+
+        void set_right_endpoint(double b);
+
         Element* first_active_element();
         Element* last_active_element();
         void set_bc_left_dirichlet(int eqn, double val);
@@ -168,12 +145,9 @@ class Mesh {
                         int subdivision = 500); // plots error wrt. exact solution
         void assign_elem_ids();
         int n_active_elem;
-        void copy_vector_to_mesh(double *y, int sln=0) {
-            ::copy_vector_to_mesh(y, this, sln);
-        }
-        void copy_mesh_to_vector(double *y, int sln=0) {
-            ::copy_mesh_to_vector(this, y, sln);
-        }
+        void copy_vector_to_mesh(double *y, int sln=0);
+
+        void copy_mesh_to_vector(double *y, int sln=0);
 
     private:
         double left_endpoint, right_endpoint;
@@ -196,7 +170,7 @@ class Mesh {
 // The coefficient vectors and numbers of degrees of freedom 
 // on both meshes are also updated. 
 
-void H1D_API adapt(int norm, int adapt_type, double threshold, 
+void HERMES_API adapt(int norm, int adapt_type, double threshold, 
 
            double *err_squared_array,
            Mesh* &mesh, Mesh* &mesh_ref);
@@ -206,15 +180,15 @@ void H1D_API adapt(int norm, int adapt_type, double threshold,
 // The coefficient vector and number of degrees of freedom 
 // also is updated. 
 
-void H1D_API adapt(int norm, int adapt_type, double threshold, 
+void HERMES_API adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
            Mesh* &mesh, ElemPtr2 *ref_elem_pairs);
 
-void H1D_API adapt_plotting(Mesh *mesh, Mesh *mesh_ref,
+void HERMES_API adapt_plotting(Mesh *mesh, Mesh *mesh_ref,
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 
 
-void H1D_API adapt_plotting(Mesh *mesh, ElemPtr2* ref_elem_pairs,
+void HERMES_API adapt_plotting(Mesh *mesh, ElemPtr2* ref_elem_pairs,
 
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 

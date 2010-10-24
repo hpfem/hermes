@@ -12,7 +12,9 @@
 #include "quad_std.h"
 #include "legendre.h"
 #include "lobatto.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
+#include "../../hermes_common/common.h"
+#include "../../hermes_common/solver/solver.h"
 #include "iterator.h"
 
 typedef double (*matrix_form) (int num, double *x, double *weights,
@@ -34,8 +36,7 @@ typedef double (*vector_form_surf) (double x, double u_prev[MAX_SLN_NUM][MAX_EQN
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v, double dvdx,
         void *user_data);
 
-class H1D_API DiscreteProblem {
-
+class HERMES_API DiscreteProblem {
 public:
     DiscreteProblem();
     void add_matrix_form(int i, int j, matrix_form fn, int marker=ANY);
@@ -43,14 +44,23 @@ public:
     void add_matrix_form_surf(int i, int j, matrix_form_surf fn, int bdy_index);
     void add_vector_form_surf(int i, vector_form_surf fn, int bdy_index);
     // c is solution component
-    void process_vol_forms(Mesh *mesh, Matrix *mat, double *res, 
+    void process_surf_forms(Mesh *mesh, SparseMatrix *mat, double *res, 
+                            int matrix_flag, int bdy_index);
+    void assemble(Mesh *mesh, SparseMatrix *mat, double *res, int matrix_flag);
+    void assemble_matrix_and_vector(Mesh *mesh, SparseMatrix *mat, double *res); 
+
+    void process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *res, 
                            int matrix_flag);
     // c is solution component
-    void process_surf_forms(Mesh *mesh, Matrix *mat, double *res, 
+    void process_surf_forms(Mesh *mesh, SparseMatrix *mat, Vector *res, 
                             int matrix_flag, int bdy_index);
-    void assemble(Mesh *mesh, Matrix *mat, double *res, int matrix_flag);
-    void assemble_matrix_and_vector(Mesh *mesh, Matrix *mat, double *res); 
-    void assemble_matrix(Mesh *mesh, Matrix *mat);
+    void assemble(Mesh *mesh, SparseMatrix *mat, Vector *res, int matrix_flag);
+    void assemble_matrix_and_vector(Mesh *mesh, SparseMatrix *mat, Vector *res);
+    void process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *res, 
+                           int matrix_flag);
+    
+    //FIXME: are these used?
+    void assemble_matrix(Mesh *mesh, SparseMatrix *mat);
     void assemble_vector(Mesh *mesh, double *res);
 
 private:
@@ -91,10 +101,9 @@ void element_shapefn(double a, double b,
 void element_shapefn_point(double x_ref, double a, double b, 
 			   int k, double &val, double &der);
 
-void H1D_API newton(DiscreteProblem *dp, Mesh *mesh, 
-            CommonSolver *solver,
-            double newton_tol, int newton_maxiter,
-            bool verbose=true);
+void HERMES_API newton(DiscreteProblem *dp, Mesh *mesh, 
+            double newton_tol, int newton_maxiter, MatrixSolverType matrix_solver,
+            bool verbose = true);
 
 void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
              double matrix_solver_tol, int matrix_solver_maxiter,  
