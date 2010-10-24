@@ -15,15 +15,17 @@ possible to prescribe boundary conditions either at the beginning or at the end
 of the time interval (combinations are possible for systems). The hp-FEM
 discretization leads to a system of nonlinear algebraic equations that is
 solved via the Newton's method or JFNK. Sphinx documentation  is still in
-progress.  Hermes1D comes with a free interactive online lab powered by UNR HPC
+progress. Hermes1D comes with a free interactive online lab powered by UNR HPC
 cluster.
 
+
+License
+=======
+
 Hermes1D is distributed under the BSD license (it covers all files in the
-Hermes1D repository unless stated otherwise.), see the LICENSE file for a
+Hermes1D repository unless stated otherwise), see the LICENSE file for a
 copyright/license information and the AUTHORS file for the list of authors.
 
-Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-Email: hpfem@unr.edu, home page: http://hpfem.org/.
 
 Compilation
 ===========
@@ -36,6 +38,7 @@ $ apt-get install cmake g++
 $ cmake .
 $ make
 
+
 Examples
 ========
 
@@ -43,6 +46,7 @@ $ cd examples/laplace
 $ ./laplace
 $ gnuplot
 gnuplot> plot './solution.gp' w l
+
 
 Documentation
 =============
@@ -57,6 +61,7 @@ then:
 $ cd doc
 $ make html
 $ firefox _build/html/index.html
+
 
 Python
 ======
