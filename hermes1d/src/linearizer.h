@@ -10,7 +10,7 @@
 #include "legendre.h"
 #include "lobatto.h"
 
-class __declspec(dllexport) Linearizer {
+class H1D_API Linearizer {
     public:
         Linearizer(Mesh *mesh) {
             this->mesh = mesh;
