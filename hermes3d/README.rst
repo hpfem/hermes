@@ -1,0 +1,105 @@
+Welcome to Hermes3D
+===================
+
+Hermes3D is a C++ library for rapid prototyping of adaptive hp-FEM solvers for
+3D problems. The usage of Hermes3D is very similar to Hermes2D, and thus it is
+recommend to get familiar with Hermes2D first. Also the User Documentation
+of Hermes3D concentrates on things that are different from Hermes2D.
+
+
+Download and Installation
+=========================
+
+Installation instructions can be found in the Sphinx documentation at
+http://hpfem.org/hermes/doc/index.html.
+
+
+Documentation
+=============
+
+Generating and Viewing User Documentation Offline (Linux)
+---------------------------------------------------------
+
+Source files of the (Sphinx) user documentation are in the
+directory doc/. In order to compile the user documentation,
+you need to install Sphinx. Then follow these steps::
+
+    cd doc
+    make html
+    firefox _build/html
+
+Generating and Viewing Developer Documentation Offline (Linux)
+--------------------------------------------------------------
+
+Source files of the (Doxygen) developer documentation are
+in the directory doc.cpp/. In order to build them you need
+to install Doxygen. Then do::
+
+    cd doc.cpp/
+    doxygen hermes3d.lib-real.doxyfile
+    doxygen hermes3d.lib-cplx.doxyfile
+
+This will generate documentation for the real and complex
+version of the library, respectively. To view the docs,
+type
+::
+
+    firefox h3d-real/html/index.html
+    firefox h3d-cplx/html/index.html
+
+
+Compilation
+===========
+
+::
+
+    $ cmake .
+    $ make
+
+If you have cmake text-based UI installed, you can do::
+
+    $ ccmake .
+      press C
+      customize your build
+      press C
+      press G
+    $ make
+
+Hermes3D build configuration scripts will look for required libraries on
+default include and system paths. If you packages are installed elsewhere, you
+need to specify their paths. Consult either online documetation
+(http://hpfem.org/hermes3d/doc/install.html) or cmake/FindXYX.cmake files for
+exact names. These values have to be put into CMake.var file located in your
+build directory.
+
+Intel C Compiler
+================
+
+To use Intel C compiler::
+
+    $ export CC=/path/to/icc
+    $ export CXX=/path/to/icpc
+    $ cmake .
+    $ make
+
+NOTE: version 10.0.026 did not work for me (some compatibility issues with
+STL), 10.1.022 works ok
+
+
+Tests
+=====
+
+To enable tests, say 'set(WITH_TESTS YES)' in your CMake.vars.
+To run the tests, type::
+
+    $ make test
+
+To run quick tests, type::
+
+    $ make test-quick
+
+Note: To run developer tests, say 'set(DEV_TESTS YES)' in CMake.vars. This is
+needed to run only if the lowest internals are changed. Developers test suite
+includes hundreds of tests for hanging nodes. These will run for several hours
+in case of H1 space, Hcurl ones take days. These test do not have to be run
+every time.
