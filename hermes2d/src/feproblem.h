@@ -128,15 +128,6 @@ protected:
 
 };
 
-/// Calls the required (de)initialization routines of the selected matrix solver.
-HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
-HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
-
-/// Selects the appropriate linear solver.
-HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
-HERMES_API SparseMatrix* create_matrix(MatrixSolverType matrix_solver);
-HERMES_API Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
-
 // Create globally refined space.
 HERMES_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);

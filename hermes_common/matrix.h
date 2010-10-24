@@ -183,7 +183,8 @@ void lubksb(double **a, int n, int *indx, T *b) {
 }
 
 
-
+/// Simple dot product.
+double vec_dot(double *r, double *s, int n_dof);
 
 /// Given a positive-definite symmetric matrix a[n][n], this routine constructs its Cholesky
 /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not
@@ -405,5 +406,17 @@ public:
 protected:
 	int size;
 };
+
+/// Calls the required (de)initialization routines of the selected matrix solver.
+HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
+HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
+
+HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
+HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
+
+class Solver;
+HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+
+
 
 #endif
