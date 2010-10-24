@@ -3,6 +3,10 @@
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
+#include "mesh.h"
+
+class Mesh;
+
 // Set component "comp" of the solution to be a constant "val" everywhere
 // Note: This function does not touch Dirichlet boundary 
 // conditions, those must be set to "val" separately.

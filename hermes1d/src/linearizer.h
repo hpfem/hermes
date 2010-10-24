@@ -6,11 +6,14 @@
 #ifndef _LINEARIZER_H_
 #define _LINEARIZER_H_
 
-#include "common.h"
 #include "legendre.h"
 #include "lobatto.h"
+#include "mesh.h"
 
-class H1D_API Linearizer {
+class Element;
+typedef Element* ElemPtr2[2];
+
+class HERMES_API Linearizer {
     public:
         Linearizer(Mesh *mesh) {
             this->mesh = mesh;

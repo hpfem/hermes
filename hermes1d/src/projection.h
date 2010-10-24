@@ -6,9 +6,9 @@
 #ifndef _PROJECTION_H_
 #define _PROJECTION_H_
 
-#include "common.h"
+#include "../../hermes_common/common.h"
 #include "mesh.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
 
 double L2_projection_biform(int num, double *x, double *weights,
                 double *u, double *dudx, double *v, double *dvdx,

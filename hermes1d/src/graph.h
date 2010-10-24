@@ -16,7 +16,7 @@
 ///  Please note that this is a base class that cannot be instantiated.
 ///  Use MatlabGraph or GnuplotGraph instead.
 ///
-class H1D_API Graph
+class HERMES_API Graph
 {
 public:
 
@@ -65,7 +65,7 @@ protected:
 
 ///  Outputs a MATLAB graph.
 ///
-class H1D_API MatlabGraph : public Graph
+class HERMES_API MatlabGraph : public Graph
 {
 public:
   
@@ -79,7 +79,7 @@ public:
 
 ///  Outputs a GNUPLOT graph.
 ///
-class H1D_API GnuplotGraph : public Graph
+class HERMES_API GnuplotGraph : public Graph
 {
 public:
   

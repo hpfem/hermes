@@ -6,11 +6,11 @@
 #ifndef _TRANSFORMS_H_
 #define _TRANSFORMS_H_
 
-#include "common.h"
+#include "../../hermes_common/common.h"
 #include "lobatto.h"
 #include "legendre.h"
 #include "mesh.h"
-#include "matrix.h"
+#include "../../hermes_common/matrix.h"
 #include "iterator.h"
 
 void transform_element_refined_forward(int sln, int comp, Element *e, Element *e_ref_left, 

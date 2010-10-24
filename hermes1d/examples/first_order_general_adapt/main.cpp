@@ -8,6 +8,9 @@
 // or nonlinear in 'y', as long as it is differentiable
 // with respect to this variable (needed for the Newton's method). 
 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+
 // General input:
 const int N_eq = 1;                     // Number of equations
 const int N_elem = 5;                   // Number of elements
@@ -67,7 +70,7 @@ int main() {
   dp->add_vector_form(0, residual);
 
   // Initial Newton's loop on coarse mesh
-  newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+  newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
 
   // Replicate coarse mesh including solution.
   Mesh *mesh_ref = mesh->replicate();
@@ -92,7 +95,7 @@ int main() {
     printf("============ Adaptivity step %d ============\n", adapt_iterations); 
 
     // Newton's loop on fine mesh
-    newton(dp, mesh_ref, NULL, NEWTON_TOL_REF, NEWTON_MAXITER);
+    newton(dp, mesh_ref, NEWTON_TOL_REF, NEWTON_MAXITER, matrix_solver);
 
     // Starting with second adaptivity step, obtain new coarse 
     // mesh solution via Newton's method where initial condition 
@@ -100,7 +103,7 @@ int main() {
     if (adapt_iterations > 1) {
  
       // Newton's loop on coarse mesh
-      newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+      newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
     }
 
     // In the next step, estimate element errors based on 

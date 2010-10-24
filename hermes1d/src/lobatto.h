@@ -8,7 +8,8 @@
 
 #include <math.h>
 
-#include "common.h"
+#include "../../hermes_common/common.h"
+#include "hermes1d.h"
 
 void fill_lobatto_array_ref(double x, 
 			double lobatto_array_val[MAX_P+1],

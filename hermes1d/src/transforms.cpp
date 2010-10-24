@@ -88,15 +88,13 @@ void fill_trans_matrices(TransMatrix trans_matrix_left,
     // loop over shape functions on coarse element
     for (int j=0; j < max_fns_num; j++) {
         // backup of projectionmatrix
-        Matrix *mat_left = new DenseMatrix(max_fns_num);
-        Matrix *mat_right = new DenseMatrix(max_fns_num);
-        mat_left->set_zero();
-        mat_right->set_zero();
+        double** mat_left = new_matrix<double>(max_fns_num, max_fns_num);
+        double** mat_right = new_matrix<double>(max_fns_num, max_fns_num);
         for (int r=0; r < max_fns_num; r++) {
-	    for (int s=0; s < max_fns_num; s++) {
-                mat_left->add(r, s, proj_matrix[r][s]);
-                mat_right->add(r, s, proj_matrix[r][s]);
-            }
+          for (int s=0; s < max_fns_num; s++) {
+            mat_left[r][s] += proj_matrix[r][s];
+            mat_right[r][s] += proj_matrix[r][s];
+          }
         }
         // fill right-hand side vectors f_left and f_right for j-th 
         // Lobatto shape function on (-1, 0) and (0, 1), respectively
@@ -112,16 +110,28 @@ void fill_trans_matrices(TransMatrix trans_matrix_left,
           for (int k=0; k < pts_num_right; k++) {
             f_right[i] += phys_weights_right[k] * lobatto(j, phys_x_right[k]) *
                                                   lobatto_right(i, phys_x_right[k]);
-	  }
+          }
         }
+        
         // for each 'j' we get a new column in the 
         // transformation matrices
-        solve_linear_system_dense_lu(mat_left, f_left);
-        solve_linear_system_dense_lu(mat_right, f_right);
+
+        int *indx = new int[max_fns_num];
+        double d;
+        ludcmp(mat_left, max_fns_num, indx, &d);
+        // solve system
+        lubksb(mat_left, max_fns_num, indx, f_left);
+
+        ludcmp(mat_right, max_fns_num, indx, &d);
+        // solve system
+        lubksb(mat_right, max_fns_num, indx, f_right);
+
         for (int i=0; i < max_fns_num; i++) {
             trans_matrix_left[i][j] = f_left[i];
             trans_matrix_right[i][j] = f_right[i];
         }
+        delete [] mat_left;
+        delete [] mat_right;
     }
     /* DEBUG
     for (int i=0; i < n; i++) {

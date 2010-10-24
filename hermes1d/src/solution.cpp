@@ -39,7 +39,7 @@ void multiply_dofs_with_constant(Mesh* mesh, double val, int sln)
 
 // Copies all solution coefficients for component "comp" from 
 // solution "sln_src" to target solution "sln_trg"
-void copy_dofs(int sln_src, int sln_trg, Mesh* mesh, int comp=0) 
+void copy_dofs(int sln_src, int sln_trg, Mesh* mesh, int comp) 
 {
   if(sln_src < 0 || sln_src > MAX_SLN_NUM) error("wrong solution index in copy_dofs().");
   if(sln_trg < 0 || sln_trg > MAX_SLN_NUM) error("wrong solution index in copy_dofs().");

@@ -6,7 +6,8 @@
 #ifndef __HERMES1D_QUAD_H
 #define __HERMES1D_QUAD_H
 
-#include "common.h"
+#include "../../hermes_common/common.h"
+#include "h1d_common.h"
 
 /// Quad1D is a base class for all 1D quadrature points.
 ///

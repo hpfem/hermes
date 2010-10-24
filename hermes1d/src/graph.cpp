@@ -4,8 +4,7 @@
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
 #include <string.h>
-#include "common.h"
-#include "graph.h"
+#include "hermes1d.h"
 
 
 //// Graph /////////////////////////////////////////////////////////////////////////////////////////
