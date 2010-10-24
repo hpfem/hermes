@@ -43,14 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Teuchos_stacktrace.hpp"
 
 
-// The following C headers are needed for some specific C functionality (see
-// the comments), which is not available in C++:
-
-// backtrace() function for retrieving the stacktrace
-#ifdef HAVE_EXECINFO
-#include <execinfo.h>
-#endif
-
 // For the HAVE_TEUCHOS_LINK and HAVE_TEUCHOS_BFD defines
 #if defined(H1D_REAL) || defined(H1D_COMPLEX)
   #ifndef CONFIG_H_INCLUDED
@@ -68,6 +60,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define CONFIG_H_INCLUDED
   #endif
 #endif
+
+// The following C headers are needed for some specific C functionality (see
+// the comments), which is not available in C++:
+
+// backtrace() function for retrieving the stacktrace
+#ifdef HAVE_EXECINFO
+#include <execinfo.h>
+#endif
+
 
 #ifdef HAVE_TEUCHOS_LINK
 // For dl_iterate_phdr() functionality
