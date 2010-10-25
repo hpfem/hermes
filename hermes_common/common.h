@@ -50,22 +50,21 @@
 #include "error.h"
 //.
 
+#define HERMES  "Hermes"
+
 // Decide which version of Hermes is being compiled and import
 // the build options from the corresponding config.h file.
 #if defined(H1D_REAL) || defined(H1D_COMPLEX)
-  #define HERMES  "Hermes1D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes1d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
 #elif defined(H2D_REAL) || defined(H2D_COMPLEX)
-  #define HERMES  "Hermes2D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes2d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
 #elif defined(H3D_REAL) || defined(H3D_COMPLEX)
-  #define HERMES  "Hermes3D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes3d/src/config.h"
     #define CONFIG_H_INCLUDED
