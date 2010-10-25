@@ -36,8 +36,7 @@
 #cmakedefine PRELOADING
 
 /* --- */
-#define PACKAGE_BUGREPORT "dandrs@unr.edu"
-#define PACKAGE_NAME "Hermes3D"
-#define PACKAGE_TARNAME "hermes3d"
+#define PACKAGE_NAME "Hermes1D"
+#define PACKAGE_TARNAME "hermes1d"
 #define PACKAGE_VERSION "0.0.1"
-#define PACKAGE_STRING "Hermes3D v" PACKAGE_VERSION
+#define PACKAGE_STRING "Hermes1D v" PACKAGE_VERSION
