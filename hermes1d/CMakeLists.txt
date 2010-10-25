@@ -49,7 +49,7 @@ set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 
 # For use in the common code.
 set(H1D_REAL YES)
-#add_definitions(-DH1D_REAL)
+add_definitions(-DH1D_REAL)
 
 
 if(DEBUG)
