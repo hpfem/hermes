@@ -60,15 +60,10 @@ if(RELEASE)
         set(HERMES_BIN hermes1d)
 endif(RELEASE)
 
-add_subdirectory(src)
-
-
 find_package(PythonLibs REQUIRED)
 find_package(NumPy REQUIRED)
 
 if(WITH_PYTHON)
-    include(UseCython)
-
     # if the user specified PYTHON_INCLUDE_PATH, let's use that, otherwise let's
     # try to guess using cmake/FindPythonLibs.cmake
     if (NOT PYTHON_INCLUDE_PATH)
@@ -77,8 +72,6 @@ if(WITH_PYTHON)
     find_package(NumPy REQUIRED)
 
     include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-    include_directories(src)
-    add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 if(WITH_EXAMPLES)
     add_subdirectory(examples)
@@ -94,7 +87,6 @@ find_package(JUDY REQUIRED)
 find_package(PTHREAD REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
 include_directories(${HERMES_COMMON_DIR})
-
 
 # solvers
 if(WITH_PETSC)
@@ -127,6 +119,7 @@ if(WITH_TRILINOS)
 	include_directories(${TRILINOS_INCLUDE_DIR})
 endif(WITH_TRILINOS)
 
+add_subdirectory(src)
 
 add_subdirectory(doc.old)
 

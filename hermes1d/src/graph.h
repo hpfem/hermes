@@ -82,7 +82,7 @@ public:
 class HERMES_API GnuplotGraph : public Graph
 {
 public:
-  
+  ~GnuplotGraph() {};
   GnuplotGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL)
        : Graph(title, x_axis_name, y_axis_name) {}
         

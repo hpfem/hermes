@@ -1,7 +1,5 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
-
-#include "legendre.h"
-#include "quad_std.h"
 
 // This test makes sure that all Legendre 
 // polynomials (starting with the linear 

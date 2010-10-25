@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -12,6 +13,9 @@
 // by the error in global norm or by the error in the quantity of interest. 
 // One can use either standard Newton's method or JFNK to solve discrete 
 // problems for trial refinements.
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
 const int N_eq = 1;
@@ -140,7 +144,7 @@ int main() {
     // Newton's loop on coarse mesh
     int success;
     if(JFNK == 0) {
-      newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+      newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
     }
     else {
       jfnk_cg(dp, mesh, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
@@ -166,7 +170,7 @@ int main() {
 
       // Newton's loop on the FTR mesh
       if(JFNK == 0) {
-        newton(dp, mesh_ref_local, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+        newton(dp, mesh_ref_local, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
       }
       else {
         jfnk_cg(dp, mesh_ref_local, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER, 

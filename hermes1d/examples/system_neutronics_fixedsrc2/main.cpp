@@ -1,12 +1,8 @@
-//#define NDEBUG
-
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
-#include <map>
-#include <cassert>
-
-using std::cout;
-using std::endl;
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // *****************************************************************************
 
@@ -89,7 +85,7 @@ int main() {
   dp->add_vector_form(1, residual_mat3_1, mat3);  
 	  	
   // Newton's loop		
-  newton(dp, mesh, NULL, NEWTON_TOL, NEWTON_MAXITER, verbose);
+  newton(dp, mesh, NEWTON_TOL, NEWTON_MAXITER, matrix_solver, verbose);
 	 
   // Plot the resulting neutron flux
   Linearizer l(mesh);

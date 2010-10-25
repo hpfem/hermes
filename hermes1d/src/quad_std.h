@@ -33,21 +33,21 @@ protected:
 
 /// 1D quadrature points on the standard reference domain (-1,1)
 
-class Quad1DStd : public Quad1D
+class HERMES_API Quad1DStd : public Quad1D
 {
   public: Quad1DStd();
     
   virtual void dummy_fn() {}  
 };
 
-extern Quad1DStd g_quad_1d_std;
+extern HERMES_API Quad1DStd g_quad_1d_std;
 
 // Gauss quadrature of order 'order' in (-1,1)
 void create_ref_element_quadrature(int order, double *x_ref, 
                                    double *w_ref, int *pts_num);
 
 // Gauss quadrature of order 'order' in (a, b)
-void create_phys_element_quadrature(double a, double b, 
+void HERMES_API create_phys_element_quadrature(double a, double b, 
                                     int order, double *x_phys, 
                                     double *w_phys, int *pts_num);
 

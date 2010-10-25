@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -8,6 +9,9 @@
 // in an interval (0, 2*pi) equipped with Dirichlet bdy conditions 
 // u(0) = 0, v(0) = k
 // The exact solution is u(x) = sin(k*x), v(x) = k*cos(k*x)
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
 static int N_eq = 2;
@@ -69,7 +73,7 @@ int main() {
   dp->add_vector_form(1, residual_1);
 
   // Initial Newton's loop on coarse mesh
-  newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+  newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
 
   // Replicate coarse mesh including solution.
   Mesh *mesh_ref = mesh->replicate();
@@ -93,14 +97,14 @@ int main() {
     printf("============ Adaptivity step %d ============\n", adapt_iterations); 
 
     // Newton's loop on fine mesh
-    newton(dp, mesh_ref, NULL, NEWTON_TOL_REF, NEWTON_MAXITER);
+    newton(dp, mesh_ref, NEWTON_TOL_REF, NEWTON_MAXITER, matrix_solver);
 
     // Starting with second adaptivity step, obtain new coarse 
     // mesh solution via Newton's method. Initial condition is 
     // the last coarse mesh solution.
     if (adapt_iterations > 1) {
       // Newton's loop on coarse mesh
-      newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+      newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
     }
 
     // In the next step, estimate element errors based on 

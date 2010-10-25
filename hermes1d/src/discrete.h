@@ -105,7 +105,7 @@ void HERMES_API newton(DiscreteProblem *dp, Mesh *mesh,
             double newton_tol, int newton_maxiter, MatrixSolverType matrix_solver,
             bool verbose = true);
 
-void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
+void HERMES_API jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
              double matrix_solver_tol, int matrix_solver_maxiter,  
 	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, bool verbose=true);
 

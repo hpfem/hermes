@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -6,6 +7,9 @@
 // an interval (A, B), equipped with a Dirichlet boundary
 // condition on the left and a Newton BC "u + \alpha dudn = \beta" 
 // on the right. 
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
 static int N_eq = 1;
@@ -47,7 +51,7 @@ int main() {
   dp->add_vector_form_surf(0, residual_surf_right, BOUNDARY_RIGHT);
 
   // Newton's loop
-  newton(dp, mesh, NULL, NEWTON_TOL, NEWTON_MAXITER);
+  newton(dp, mesh, NEWTON_TOL, NEWTON_MAXITER, matrix_solver);
 
   // Plot the solution
   Linearizer l(mesh);

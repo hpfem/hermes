@@ -11,14 +11,14 @@
 #include "../../hermes_common/common.h"
 #include "hermes1d.h"
 
-void fill_lobatto_array_ref(double x, 
+void HERMES_API fill_lobatto_array_ref(double x, 
 			double lobatto_array_val[MAX_P+1],
 			double lobatto_array_der[MAX_P+1]);
-double lobatto_val_ref(double x, int n);
-double lobatto_der_ref(double x, int n);
+double HERMES_API lobatto_val_ref(double x, int n);
+double HERMES_API lobatto_der_ref(double x, int n);
 
 // Poly orders of Lobatto functions
-extern int lobatto_order_1d[];
+extern int HERMES_API lobatto_order_1d[];
 
 // Precalculated values of Lobatto polynomials and their derivatives 
 // at all Gauss quadrature rules on the reference interval (-1, 1). 
@@ -26,9 +26,9 @@ extern int lobatto_order_1d[];
 // orders. The second index runs through the quadrature points of 
 // the corresponding rule, and the third through the values of 
 // Legendre polynomials at that point. 
-extern double lobatto_val_ref_tab[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
-extern double lobatto_der_ref_tab[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
-extern void precalculate_lobatto_1d();
+extern double HERMES_API lobatto_val_ref_tab[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
+extern double HERMES_API lobatto_der_ref_tab[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
+extern void HERMES_API precalculate_lobatto_1d();
 
 // The first index runs through Gauss quadrature 
 // Precalculated values of Lobatto polynomials and their derivatives 
@@ -37,9 +37,9 @@ extern void precalculate_lobatto_1d();
 // The second index runs through the quadrature points of 
 // the corresponding rule, and the third through the values of 
 // Legendre polynomials at that point. 
-extern double lobatto_val_ref_tab_left[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
-extern double lobatto_der_ref_tab_left[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
-extern void precalculate_lobatto_1d_left();
+extern double HERMES_API lobatto_val_ref_tab_left[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
+extern double HERMES_API lobatto_der_ref_tab_left[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
+extern void HERMES_API precalculate_lobatto_1d_left();
 
 // Precalculated values of Lobatto polynomials and their derivatives 
 // defined in (-1, 1) at all Gauss quadrature rules which are 
@@ -48,8 +48,8 @@ extern void precalculate_lobatto_1d_left();
 // orders. The second index runs through the quadrature points of 
 // the corresponding rule, and the third through the values of 
 // Legendre polynomials at that point. 
-extern double lobatto_val_ref_tab_right[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
-extern double lobatto_der_ref_tab_right[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
-extern void precalculate_lobatto_1d_right();
+extern double HERMES_API lobatto_val_ref_tab_right[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
+extern double HERMES_API lobatto_der_ref_tab_right[MAX_QUAD_ORDER][MAX_QUAD_PTS_NUM][MAX_P + 1];
+extern void HERMES_API precalculate_lobatto_1d_right();
 
 #endif /* SHAPESET_LOBATTO_H_ */

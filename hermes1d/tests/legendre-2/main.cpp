@@ -1,7 +1,5 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
-
-#include "legendre.h"
-#include "quad_std.h"
 
 // This test makes sure that Legendre polynomials
 // are orthonormal. It may take a lot of time.

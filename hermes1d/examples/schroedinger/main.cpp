@@ -1,8 +1,12 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 #include "python_api.h"
 
 #include "h1d_wrapper_api.h"
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 static int N_eq = 1;
 int N_elem = 40;                         // number of elements

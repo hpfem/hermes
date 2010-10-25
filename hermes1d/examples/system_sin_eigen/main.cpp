@@ -1,7 +1,5 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
-
-#include "python_api.h"
-
 #include "h1d_wrapper_api.h"
 
 int N_elem = 2;                         // number of elements

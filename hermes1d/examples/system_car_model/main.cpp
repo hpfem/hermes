@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -28,6 +29,9 @@
 
 // Print data ?
 const int PRINT = 0;
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
 const int N_eq = 5;
@@ -71,7 +75,7 @@ void compute_trajectory(Mesh *mesh, DiscreteProblem *dp)
          zeta_ctrl[1], zeta_ctrl[2], zeta_ctrl[3]); 
 
   // Newton's loop
-  newton(dp, mesh, NULL, NEWTON_TOL, NEWTON_MAXITER);
+  newton(dp, mesh, NEWTON_TOL, NEWTON_MAXITER, matrix_solver);
 }
 
 void plot_trajectory(Mesh *mesh, int subdivision) 

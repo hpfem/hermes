@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -7,6 +8,9 @@
 // boundary conditions on both end points. A series of small reference 
 // solutions (we call them fast trial refinements, FTR) is used both 
 // to decide what elements will be refined, and how they will be refined. 
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
 static int N_eq = 1;
@@ -100,7 +104,7 @@ int main() {
     printf("N_dof = %d\n", mesh->get_n_dof());
  
     // Newton's loop on coarse mesh
-    newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+    newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
 
     // For every element perform its fast trial refinement (FTR),
     // calculate the norm of the difference between the FTR
@@ -120,7 +124,7 @@ int main() {
              i, mesh_ref_local->assign_dofs());
 
       // Newton's loop on the FTR mesh
-      newton(dp, mesh_ref_local, NULL, NEWTON_TOL_REF, NEWTON_MAXITER);
+      newton(dp, mesh_ref_local, NEWTON_TOL_REF, NEWTON_MAXITER, matrix_solver);
 
       // Print FTR solution (enumerated) 
       Linearizer *lxx = new Linearizer(mesh_ref_local);
