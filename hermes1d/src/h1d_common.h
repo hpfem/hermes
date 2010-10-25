@@ -58,9 +58,9 @@ typedef double (*shape_fn_t)(double);
 
 // auxiliary functions
 
-#define MEM_CHECK(var) if (var == NULL) { printf("Out of memory."); exit(1); }
-#define verbose(msg)
-#define warn(msg)
+//#define MEM_CHECK(var) if (var == NULL) { printf("Out of memory."); exit(1); }
+//#define verbose(msg)
+//#define warn(msg)
 
 #undef _POSIX_C_SOURCE
 
