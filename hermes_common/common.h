@@ -43,6 +43,7 @@
 #include <cstring>
 //
 // commonly used functions from hermes_common
+#include "hermes_logging.h"       // logging
 #include "common_time_period.h"   // timing utilities
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
@@ -57,21 +58,18 @@
     #include "../hermes1d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
-  #include "../hermes1d/src/h1d_logging.h"
 #elif defined(H2D_REAL) || defined(H2D_COMPLEX)
   #define HERMES  "Hermes2D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes2d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
-  #include "../hermes2d/src/h2d_logging.h"  
 #elif defined(H3D_REAL) || defined(H3D_COMPLEX)
   #define HERMES  "Hermes3D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes3d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
-  #include "../hermes3d/src/h3d_logging.h"  
 #endif
 
 // Error codes

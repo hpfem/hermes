@@ -394,11 +394,6 @@ Mesh::Mesh() {
 Mesh::Mesh(double a, double b, int n_base_elem, int p_init, int n_eq, int
         n_sln, bool print_banner)
 {
-  // print the banner (only once)
-  static int n_calls = 0;
-  n_calls++;
-  if (n_calls == 1 && print_banner) intro();
-
   // check maximum number of equations
   if(n_eq > MAX_EQN_NUM) 
   error("Maximum number of equations exceeded (set in common.h)");
@@ -438,11 +433,6 @@ Mesh::Mesh(double a, double b, int n_base_elem, int p_init, int n_eq, int
 Mesh::Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
         *div_array, int n_eq, int n_sln, bool print_banner)
 {
-  // print the banner (only once)
-  static int n_calls = 0;
-  n_calls++;
-  if (n_calls == 1 && print_banner) intro();
-
   // check maximum number of equations
   if(n_eq > MAX_EQN_NUM) 
   error("Maximum number of equations exceeded (set in common.h)");

@@ -19,6 +19,19 @@ option(WITH_TRILINOS "Enable support for Trilinos solvers" NO)
 option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
 option(WITH_HDF5     "Enable support for HDF5" NO)
 
+# Reporting and logging:
+set(REPORT_WITH_LOGO        YES)  #logo will be shown
+set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is inteded just for Python wrappers.
+set(REPORT_ALL              NO)   #do not report all events, just selected ones
+set(REPORT_WARNING          YES)  #warnings will be reported
+set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+set(REPORT_INFO             YES)  #info will be reported
+set(REPORT_VERBOSE          NO)   #info details will not be reported
+set(REPORT_TRACE            NO)   #code execution tracing will not be reported
+set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
+
 
 # Doxygen related
 set(DOXYGEN_BINARY doxygen)

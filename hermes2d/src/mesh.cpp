@@ -1667,10 +1667,10 @@ void Mesh::save_raw(FILE* f)
   assert(sizeof(int) == 4);
   assert(sizeof(double) == 8);
 
-  hermes2d_fwrite("H2DM\001\000\000\000", 1, 8, f);
+  hermes_fwrite("H2DM\001\000\000\000", 1, 8, f);
 
   #define output(n, type) \
-    hermes2d_fwrite(&(n), sizeof(type), 1, f)
+    hermes_fwrite(&(n), sizeof(type), 1, f)
 
   output(nbase, int);
   output(ntopvert, int);
@@ -1755,14 +1755,14 @@ void Mesh::load_raw(FILE* f)
 
   // check header
   struct { char magic[4]; int ver; } hdr;
-  hermes2d_fread(&hdr, sizeof(hdr), 1, f);
+  hermes_fread(&hdr, sizeof(hdr), 1, f);
   if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'M')
     error("Not a Hermes2D raw mesh file.");
   if (hdr.ver > 1)
     error("Unsupported file version.");
 
   #define input(n, type) \
-    hermes2d_fread(&(n), sizeof(type), 1, f)
+    hermes_fread(&(n), sizeof(type), 1, f)
 
   //printf("Calling Mesh::free() in Mesh::load_raw().\n");
   free();

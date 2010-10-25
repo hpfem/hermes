@@ -1086,27 +1086,27 @@ void Solution::save(const char* filename, bool compress)
   }
 
   // write header
-  hermes2d_fwrite("H2DS\001\000\000\000", 1, 8, f);
+  hermes_fwrite("H2DS\001\000\000\000", 1, 8, f);
   int ssize = sizeof(scalar);
-  hermes2d_fwrite(&ssize, sizeof(int), 1, f);
-  hermes2d_fwrite(&num_components, sizeof(int), 1, f);
-  hermes2d_fwrite(&num_elems, sizeof(int), 1, f);
-  hermes2d_fwrite(&num_coefs, sizeof(int), 1, f);
+  hermes_fwrite(&ssize, sizeof(int), 1, f);
+  hermes_fwrite(&num_components, sizeof(int), 1, f);
+  hermes_fwrite(&num_elems, sizeof(int), 1, f);
+  hermes_fwrite(&num_coefs, sizeof(int), 1, f);
 
   // write monomial coefficients
-  hermes2d_fwrite(mono_coefs, sizeof(scalar), num_coefs, f);
+  hermes_fwrite(mono_coefs, sizeof(scalar), num_coefs, f);
 
   // write element orders
   char* temp_orders = new char[num_elems];
   for (i = 0; i < num_elems; i++) {
     temp_orders[i] = elem_orders[i];
   }
-  hermes2d_fwrite(temp_orders, sizeof(char), num_elems, f);
+  hermes_fwrite(temp_orders, sizeof(char), num_elems, f);
   delete [] temp_orders;
 
   // write element coef table
   for (i = 0; i < num_components; i++)
-    hermes2d_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
+    hermes_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
 
   // write the mesh
   mesh->save_raw(f);
@@ -1143,7 +1143,7 @@ void Solution::load(const char* filename)
     char magic[4];
     int  ver, ss, nc, ne, nf;
   } hdr;
-  hermes2d_fread(&hdr, sizeof(hdr), 1, f);
+  hermes_fread(&hdr, sizeof(hdr), 1, f);
 
   // some checks
   if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'S')
@@ -1156,7 +1156,7 @@ void Solution::load(const char* filename)
   if (hdr.ss == sizeof(double))
   {
     double* temp = new double[num_coefs];
-    hermes2d_fread(temp, sizeof(double), num_coefs, f);
+    hermes_fread(temp, sizeof(double), num_coefs, f);
 
     #ifndef H2D_COMPLEX
       mono_coefs = temp;
@@ -1172,7 +1172,7 @@ void Solution::load(const char* filename)
     #ifndef H2D_COMPLEX
       warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
       scalar* temp = new double[num_coefs*2];
-      hermes2d_fread(temp, sizeof(scalar), num_coefs*2, f);
+      hermes_fread(temp, sizeof(scalar), num_coefs*2, f);
       mono_coefs = new double[num_coefs];
       for (i = 0; i < num_coefs; i++)
         mono_coefs[i] = temp[2*i];
@@ -1180,7 +1180,7 @@ void Solution::load(const char* filename)
 
     #else
       mono_coefs = new scalar[num_coefs];;
-      hermes2d_fread(mono_coefs, sizeof(scalar), num_coefs, f);
+      hermes_fread(mono_coefs, sizeof(scalar), num_coefs, f);
     #endif
   }
   else
@@ -1189,7 +1189,7 @@ void Solution::load(const char* filename)
   // load element orders
   num_elems = hdr.ne;
   char* temp_orders = new char[num_elems];
-  hermes2d_fread(temp_orders, sizeof(char), num_elems, f);
+  hermes_fread(temp_orders, sizeof(char), num_elems, f);
   elem_orders = new int[num_elems];
   for (i = 0; i < num_elems; i++)
     elem_orders[i] = temp_orders[i];
@@ -1200,7 +1200,7 @@ void Solution::load(const char* filename)
   for (i = 0; i < num_components; i++)
   {
     elem_coefs[i] = new int[num_elems];
-    hermes2d_fread(elem_coefs[i], sizeof(int), num_elems, f);
+    hermes_fread(elem_coefs[i], sizeof(int), num_elems, f);
   }
 
   // load the mesh

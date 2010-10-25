@@ -43,16 +43,17 @@ set(SRC
 	transform.cpp
 	traverse.cpp
 	weakform.cpp
-  adapt/adapt.cpp
+        adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
-	${HERMES_COMMON_DIR}/common_time_period.cpp
+  ${HERMES_COMMON_DIR}/logging.cpp
+  ${HERMES_COMMON_DIR}/hermes_logging.cpp
+  ${HERMES_COMMON_DIR}/common_time_period.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
-  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
   ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 

@@ -1,6 +1,6 @@
-#define H3D_REPORT_WARN
-#define H3D_REPORT_INFO
-#define H3D_REPORT_VERBOSE
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 // This file is part of Hermes3D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).

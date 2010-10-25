@@ -19,7 +19,7 @@
 #define __HERMES_2D_H
 
 #include "h2d_common.h"
-#include "h2d_logging.h"
+#include "hermes_logging.h"
 
 #include "range.h"
 #include "limit_order.h"

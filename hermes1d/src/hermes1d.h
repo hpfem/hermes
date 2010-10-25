@@ -28,6 +28,6 @@
 #include "graph.h"
 
 #include "h1d_common.h"
-#include "h1d_logging.h"
+#include "../../hermes_common/hermes_logging.h"
 
 #endif

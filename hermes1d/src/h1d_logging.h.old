@@ -23,8 +23,8 @@
 #define H1D_BUILD_LOG_INFO(__event) HermesLogEventInfo(__event, H1D_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__)
 
 /* error and assert macros */
-#define error(...) hermes_exit_if(hermes_log_message_if(true, H1D_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
-#define error_if(__cond, ...) hermes_exit_if(hermes_log_message_if(__cond, H1D_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
+//#define error(...) hermes_exit_if(hermes_log_message_if(true, H1D_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
+//#define error_if(__cond, ...) hermes_exit_if(hermes_log_message_if(__cond, H1D_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
 #ifndef NDEBUG
 # define assert_msg(__cond, ...) assert(!hermes_log_message_if(!(__cond), H1D_BUILD_LOG_INFO(HERMES_EC_ASSERT), __VA_ARGS__))
 #else

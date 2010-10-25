@@ -6,7 +6,7 @@ void hermes_exit_if(bool cond, int code) {
 }
 
 /// Logging output monitor. \internal \ingroup g_logging
-/** This class protects a logging function __h2d_log_message_if() in multithreded environment. */
+/** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
 class LoggerMonitor 
 {
   pthread_mutexattr_t mutex_attr; ///< Mutext attributes.

@@ -1,6 +1,6 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "hermes2d.h"
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1

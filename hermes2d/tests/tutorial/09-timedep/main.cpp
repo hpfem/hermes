@@ -1,5 +1,5 @@
-#define H2D_REPORT_INFO
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 // This test makes sure that example 09-timedep works correctly.

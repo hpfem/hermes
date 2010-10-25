@@ -8,11 +8,12 @@ set(SRC
     discrete.cpp solution.cpp mesh.cpp
     projection.cpp
     linearizer.cpp quad_std.cpp transforms.cpp
-    adapt.cpp graph.cpp h1_polys.cpp h1d_logging.cpp
+    adapt.cpp graph.cpp h1_polys.cpp
+  ${HERMES_COMMON_DIR}/logging.cpp
+  ${HERMES_COMMON_DIR}/hermes_logging.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
-  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
   ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 
