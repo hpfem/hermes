@@ -32,8 +32,9 @@
 
 /// Holds data for one call stack object
 ///
-struct HERMES_API CallStackObj 
+class HERMES_API CallStackObj 
 {
+public:
 	CallStackObj(int ln, const char *func, const char *file);
 	~CallStackObj();
 

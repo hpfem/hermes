@@ -149,7 +149,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *r
 		    if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
 		    // add the result to the matrix
 		    if (val_ij != 0) mat->add(pos_i, pos_j, val_ij);
-		    if (DEBUG) {
+		    if (DEBUG_MATRIX) {
 		      printf("Adding to matrix pos %d, %d value %g (comp %d, %d)\n", 
 		      pos_i, pos_j, val_ij, c_i, c_j);
 		    }
@@ -187,7 +187,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *r
 	        if(fabs(val_i) < 1e-12) val_i = 0.0; 
 	        // add the contribution to the residual vector
  	        if (val_i != 0) res[pos_i] += val_i;
-	        if (DEBUG) {
+	        if (DEBUG_MATRIX) {
 		  if (val_i != 0) {
 	            printf("Adding to residual pos %d value %g (comp %d)\n", 
                     pos_i, val_i, c_i);
@@ -385,7 +385,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *r
 		    if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
 		    // add the result to the matrix
 		    if (val_ij != 0) mat->add(pos_i, pos_j, val_ij);
-		    if (DEBUG) {
+		    if (DEBUG_MATRIX) {
 		      printf("Adding to matrix pos %d, %d value %g (comp %d, %d)\n", 
 		      pos_i, pos_j, val_ij, c_i, c_j);
 		    }
@@ -423,7 +423,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *r
 	        if(fabs(val_i) < 1e-12) val_i = 0.0; 
 	        // add the contribution to the residual vector
           if (val_i != 0) res->add(pos_i, val_i);
-	        if (DEBUG) {
+	        if (DEBUG_MATRIX) {
 		  if (val_i != 0) {
 	            printf("Adding to residual pos %d value %g (comp %d)\n", 
                     pos_i, val_i, c_i);
@@ -570,7 +570,7 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, double *res,
   process_surf_forms(mesh, mat, res, matrix_flag, BOUNDARY_RIGHT);
 
   // DEBUG: print Jacobi matrix
-  if(DEBUG && (matrix_flag == 0 || matrix_flag == 1)) {
+  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
     printf("Jacobi matrix:\n");
     for(int i=0; i<n_dof; i++) {
       for(int j=0; j<n_dof; j++) {
@@ -580,7 +580,7 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, double *res,
   }
 
   // DEBUG: print residual vector
-  if(DEBUG && (matrix_flag == 0 || matrix_flag == 2)) {
+  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 2)) {
     printf("Residual:\n");
     for(int i=0; i<n_dof; i++) {
       printf("%g ", res[i]);
@@ -623,7 +623,7 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res,
   process_surf_forms(mesh, mat, res, matrix_flag, BOUNDARY_RIGHT);
 
   // DEBUG: print Jacobi matrix
-  if(DEBUG && (matrix_flag == 0 || matrix_flag == 1)) {
+  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
     printf("Jacobi matrix:\n");
     for(int i=0; i<n_dof; i++) {
       for(int j=0; j<n_dof; j++) {
@@ -633,7 +633,7 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res,
   }
 
   // DEBUG: print residual vector
-  if(DEBUG && (matrix_flag == 0 || matrix_flag == 2)) {
+  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 2)) {
     printf("Residual:\n");
     for(int i=0; i<n_dof; i++) {
       printf("%g ", res->get(i));

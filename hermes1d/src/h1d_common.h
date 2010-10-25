@@ -10,9 +10,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// print general debug information
-#define DEBUG 0
-
 // printf debug information about the stiffness/Jacobi matrix
 #define DEBUG_MATRIX 0
 
