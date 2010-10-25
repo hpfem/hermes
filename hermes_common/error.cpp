@@ -52,7 +52,7 @@ void h_exit(int line, const char *func, const char *file, char const *fmt, ...)
 	exit(128);
 }
 
-void error(const char *err, ...)
+void error_function(const char *err, ...)
 {
 	va_list params;
 
