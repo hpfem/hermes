@@ -22,7 +22,7 @@ const int P_init = 1;                   // Initial polynomal degree
 // Stopping criteria for Newton
 const double NEWTON_TOL_COARSE = 1e-8;  // Coarse mesh
 const double NEWTON_TOL_REF = 1e-8;     // Fine mesh
-const int NEWTON_MAXITER = 150;
+const int NEWTON_MAX_ITER = 150;
 
 // Adaptivity
 const int ADAPT_TYPE = 0;         // 0... hp-adaptivity
@@ -70,8 +70,62 @@ int main() {
   dp->add_matrix_form(0, 0, jacobian);
   dp->add_vector_form(0, residual);
 
-  // Initial Newton's loop on coarse mesh
-  newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
+  // Newton's loop on coarse mesh
+  // Obtain the number of degrees of freedom.
+  int ndof = mesh->get_n_dof();
+
+  // Fill vector y using dof and coeffs arrays in elements.
+  double *y = new double[ndof];
+  copy_mesh_to_vector(mesh, y);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  int it = 1;
+  while (1)
+  {
+    // Construct matrix and residual vector.
+    dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+
+    // Calculate L2 norm of residual vector.
+    double res_norm_squared = 0;
+    for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+
+    info("---- Newton iter %d, residual norm: %.15f\n", it, sqrt(res_norm_squared));
+
+    // If residual norm less than 'NEWTON_TOL', quit
+    // latest solution is in the vector y.
+    // NOTE: at least one full iteration forced
+    //       here because sometimes the initial
+    //       residual on fine mesh is too small
+    if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
+
+    // Changing sign of vector res.
+    for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+
+    // Calculate the coefficient vector.
+    bool solved = solver->solve();
+    if (solved) 
+    {
+      double* solution_vector = new double[ndof];
+      solution_vector = solver->get_solution();
+      for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
+      // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
+      solution_vector = NULL;
+    }
+    it++;
+
+    if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+    
+    // copy coefficients from vector y to elements
+    copy_vector_to_mesh(y, mesh);
+  }
+  
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   // Replicate coarse mesh including solution.
   Mesh *mesh_ref = mesh->replicate();
@@ -96,15 +150,123 @@ int main() {
     printf("============ Adaptivity step %d ============\n", adapt_iterations); 
 
     // Newton's loop on fine mesh
-    newton(dp, mesh_ref, NEWTON_TOL_REF, NEWTON_MAXITER, matrix_solver);
+    // Obtain the number of degrees of freedom.
+    int ndof = mesh_ref->get_n_dof();
+
+    // Fill vector y using dof and coeffs arrays in elements.
+    double *y = new double[ndof];
+    copy_mesh_to_vector(mesh_ref, y);
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    int it = 1;
+    while (1)
+    {
+      // Construct matrix and residual vector.
+      dp->assemble_matrix_and_vector(mesh_ref, matrix, rhs);
+
+      // Calculate L2 norm of residual vector.
+      double res_norm_squared = 0;
+      for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+
+      info("---- Newton iter %d, residual norm: %.15f\n", it, sqrt(res_norm_squared));
+
+      // If residual norm less than 'NEWTON_TOL', quit
+      // latest solution is in the vector y.
+      // NOTE: at least one full iteration forced
+      //       here because sometimes the initial
+      //       residual on fine mesh is too small
+      if(res_norm_squared < NEWTON_TOL_REF*NEWTON_TOL_REF && it > 1) break;
+
+      // Changing sign of vector res.
+      for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+
+      // Calculate the coefficient vector.
+      bool solved = solver->solve();
+      if (solved) 
+      {
+        double* solution_vector = new double[ndof];
+        solution_vector = solver->get_solution();
+        for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
+        // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
+        solution_vector = NULL;
+      }
+      it++;
+
+      if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+      
+      // copy coefficients from vector y to elements
+      copy_vector_to_mesh(y, mesh_ref);
+    }
+    
+    delete matrix;
+    delete rhs;
+    delete solver;
 
     // Starting with second adaptivity step, obtain new coarse 
-    // mesh solution via Newton's method where initial condition 
-    // is the last coarse mesh solution.
+    // mesh solution via Newton's method. Initial condition is 
+    // the last coarse mesh solution.
     if (adapt_iterations > 1) {
- 
+
       // Newton's loop on coarse mesh
-      newton(dp, mesh, NEWTON_TOL_COARSE, NEWTON_MAXITER, matrix_solver);
+      // Obtain the number of degrees of freedom.
+      int ndof = mesh->get_n_dof();
+
+      // Fill vector y using dof and coeffs arrays in elements.
+      double *y = new double[ndof];
+      copy_mesh_to_vector(mesh, y);
+
+      // Set up the solver, matrix, and rhs according to the solver selection.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+      int it = 1;
+      while (1)
+      {
+        // Construct matrix and residual vector.
+        dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+
+        // Calculate L2 norm of residual vector.
+        double res_norm_squared = 0;
+        for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+
+        info("---- Newton iter %d, residual norm: %.15f\n", it, sqrt(res_norm_squared));
+
+        // If residual norm less than 'NEWTON_TOL', quit
+        // latest solution is in the vector y.
+        // NOTE: at least one full iteration forced
+        //       here because sometimes the initial
+        //       residual on fine mesh is too small
+        if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
+
+        // Changing sign of vector res.
+        for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+
+        // Calculate the coefficient vector.
+        bool solved = solver->solve();
+        if (solved) 
+        {
+          double* solution_vector = new double[ndof];
+          solution_vector = solver->get_solution();
+          for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
+          // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
+          solution_vector = NULL;
+        }
+        it++;
+
+        if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+        
+        // copy coefficients from vector y to elements
+        copy_vector_to_mesh(y, mesh);
+      }
+      
+      delete matrix;
+      delete rhs;
+      delete solver;
     }
 
     // In the next step, estimate element errors based on 

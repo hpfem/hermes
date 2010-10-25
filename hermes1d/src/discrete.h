@@ -101,10 +101,6 @@ void element_shapefn(double a, double b,
 void element_shapefn_point(double x_ref, double a, double b, 
 			   int k, double &val, double &der);
 
-void HERMES_API newton(DiscreteProblem *dp, Mesh *mesh, 
-            double newton_tol, int newton_maxiter, MatrixSolverType matrix_solver,
-            bool verbose = true);
-
 void HERMES_API jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
              double matrix_solver_tol, int matrix_solver_maxiter,  
 	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, bool verbose=true);
