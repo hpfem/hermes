@@ -1,0 +1,4 @@
+rm *~ 
+./fichera
+python plot_graph.py &
+

@@ -1,32 +1,25 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2010 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-// Test to verify that hp-adaptivity worsk well.
-//
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/common_time_period.h"
-#include "../../../../hermes_common/error.h"
 
+//  This test makes sure that the benchmark smooth-7-versions works correctly.
 
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+int P_INIT_X, P_INIT_Y, P_INIT_Z;                 // Initial polynomial degree of all mesh elements, to be 
+                                                  // determined according to the anisotropy. See bc_types().
+const double THRESHOLD = 0.3;                     // Error threshold for element refinement of the adapt(...) function 
+                                                  // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
+                                                  // times total error is processed. If more elements have similar errors, 
+                                                  // refine all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  // than THRESHOLD times maximum element error.
+const double ERR_STOP = 1e-4;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
+                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
+bool solution_output = false;                     // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
@@ -37,448 +30,248 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
-#undef REFERENCE_SOLUTION			// use ref. solution for guiding the adaptivity
+// Exact solution
+#define ANISO_X	   1     
+#define ANISO_Y	   2
+#define ANISO_Z	   4
+int ANISO_TYPE;
+#include "exact_solution.cpp"
 
-const double TOLERANCE = 0.000001;		// error tolerance in percent
-const double THRESHOLD = 0.3;			// error threshold for element refinement
-
-#define ANISO_X						1
-#define ANISO_Y						2
-#define ANISO_Z						4
-
-int init_q = 1;							// initial order
-int init_p = 2;							// initial order
-int aniso_type = 0;
-
-// error should be smaller than this epsilon
-#define EPS								10e-10F
-
-double fnc(double x, double y, double z)
-{
-	switch (aniso_type) {
-		case ANISO_X: return sin(x);
-		case ANISO_Y: return sin(y);
-		case ANISO_Z: return sin(z);
-
-		case ANISO_X | ANISO_Y: return sin(x) * sin(y);
-		case ANISO_X | ANISO_Z: return sin(x) * sin(z);
-		case ANISO_Y | ANISO_Z: return sin(y) * sin(z);
-
-		case ANISO_X | ANISO_Y | ANISO_Z: return sin(x) * sin(y) * sin(z);
-
-		default:
-			return 0;
-	}
-}
-
-template<typename T>
-T rhs(T x, T y, T z)
-{
-	T ddxx = 0;
-	T ddyy = 0;
-	T ddzz = 0;
-
-	switch (aniso_type) {
-		case ANISO_X: ddxx = -sin(x); break;
-		case ANISO_Y: ddyy = -sin(y); break;
-		case ANISO_Z: ddzz = -sin(z); break;
-
-		case ANISO_X | ANISO_Y:
-			ddxx = - sin(x) * sin(y);
-			ddyy = - sin(x) * sin(y);
-			break;
-
-		case ANISO_X | ANISO_Z:
-			ddxx = - sin(x) * sin(z);
-			ddzz = - sin(x) * sin(z);
-			break;
-
-		case ANISO_Y | ANISO_Z:
-			ddyy = - sin(y) * sin(z);
-			ddzz = - sin(y) * sin(z);
-			break;
-
-		case ANISO_X | ANISO_Y | ANISO_Z:
-			ddxx = - sin(x) * sin(y) * sin(z);
-			ddyy = - sin(x) * sin(y) * sin(z);
-			ddzz = - sin(x) * sin(y) * sin(z);
-			break;
-	}
-
-	return ddxx + ddyy + ddzz;
-}
-
-// needed for calculation norms and used by visualizator
-double exact_solution(double x, double y, double z, double &dx, double &dy, double &dz)
-{
-	switch (aniso_type) {
-		case ANISO_X:
-			dx = cos(x);
-			dy = 0;
-			dz = 0;
-			break;
-
-		case ANISO_Y:
-			dx = 0;
-			dy = cos(y);
-			dz = 0;
-			break;
-
-		case ANISO_Z:
-			dx = 0;
-			dy = 0;
-			dz = cos(z);
-			break;
-
-		case ANISO_X | ANISO_Y:
-			dx = cos(x) * sin(y);
-			dy = sin(x) * cos(y);
-			dz = 0;
-			break;
-
-		case ANISO_X | ANISO_Z:
-			dx = cos(x) * sin(z);
-			dy = 0;
-			dz = sin(x) * cos(z);
-			break;
-
-		case ANISO_Y | ANISO_Z:
-			dx = 0;
-			dy = cos(y) * sin(z);
-			dz = sin(y) * cos(z);
-			break;
-
-		case ANISO_X | ANISO_Y | ANISO_Z:
-			dx = cos(x) * sin(y) * sin(z);
-			dy = sin(x) * cos(y) * sin(z);
-			dz = sin(x) * sin(y) * cos(z);
-			break;
-	}
-
-	return fnc(x, y, z);
-}
-
-//
-
+// Boundary condition types. We also assign directional polynomial degrees here. 
 BCType bc_types(int marker)
 {
-	switch (aniso_type) {
-		case ANISO_X:
-			if (marker == 1 || marker == 2) return BC_ESSENTIAL;
-			else return BC_NATURAL;
+  switch (ANISO_TYPE) {
+    // u = sin(x), thus we prescribe zero Dirichlet at faces 1 and 2, and zero Neumann elsewhere.
+    case ANISO_X: if (marker == 1 || marker == 2) return BC_ESSENTIAL; 
+                  else return BC_NATURAL;
+    // u = sin(y), thus we prescribe zero Dirichlet at faces 3 and 4, and zero Neumann elsewhere.
+    case ANISO_Y: if (marker == 3 || marker == 4) return BC_ESSENTIAL; 
+                  else return BC_NATURAL;
+    // u = sin(z), thus we prescribe zero Dirichlet at faces 5 and 6, and zero Neumann elsewhere.
+    case ANISO_Z: if (marker == 5 || marker == 6) return BC_ESSENTIAL; 
+                  else return BC_NATURAL;
+    // u = sin(x)*sin(y), thus we prescribe zero Dirichlet at faces 1, 2, 3, 4 and zero Neumann elsewhere.
+    case ANISO_X | ANISO_Y: if (marker == 1 || marker == 2 || marker == 3 || marker == 4) return BC_ESSENTIAL; 
+                            else return BC_NATURAL;
+    // u = sin(x)*sin(z), thus we prescribe zero Dirichlet at faces 1, 2, 5, 6 and zero Neumann elsewhere.
+    case ANISO_X | ANISO_Z: if (marker == 1 || marker == 2 || marker == 5 || marker == 6) return BC_ESSENTIAL; 
+                            else return BC_NATURAL;
+    // u = sin(y)*sin(z), thus we prescribe zero Dirichlet at faces 3, 4, 5, 6 and zero Neumann elsewhere.
+    case ANISO_Y | ANISO_Z: if (marker == 3 || marker == 4 || marker == 5 || marker == 6) return BC_ESSENTIAL; 
+                            else return BC_NATURAL;
+    // u = sin(x)*sin(y)*sin(z), thus we prescribe zero Dirichlet everywhere.
+    case ANISO_X | ANISO_Y | ANISO_Z: return BC_ESSENTIAL;
+    default: error("Admissible command-line options are x, y, x, xy, xz, yz, xyz.");
+  }
 
-		case ANISO_Y:
-			if (marker == 3 || marker == 4) return BC_ESSENTIAL;
-			else return BC_NATURAL;
-
-		case ANISO_Z:
-			if (marker == 5 || marker == 6) return BC_ESSENTIAL;
-			else return BC_NATURAL;
-
-		case ANISO_X | ANISO_Y:
-			if (marker == 1 || marker == 2 || marker == 3 || marker == 4) return BC_ESSENTIAL;
-			else return BC_NATURAL;
-
-		case ANISO_X | ANISO_Z:
-			if (marker == 1 || marker == 2 || marker == 5 || marker == 6) return BC_ESSENTIAL;
-			else return BC_NATURAL;
-
-		case ANISO_Y | ANISO_Z:
-			if (marker == 3 || marker == 4 || marker == 5 || marker == 6) return BC_ESSENTIAL;
-			else return BC_NATURAL;
-
-		case ANISO_X | ANISO_Y | ANISO_Z:
-			return BC_ESSENTIAL;
-	}
-
-	return BC_ESSENTIAL;
+  return BC_ESSENTIAL;
 }
 
+// Assign the lowest possible directional polynomial degrees so that the problem's NDOF >= 1.
+void assign_poly_degrees()
+{
+  switch (ANISO_TYPE) {
+    // u = sin(x), thus we prescribe zero Dirichlet at faces 1 and 2, and zero Neumann elsewhere.
+    case ANISO_X: P_INIT_X = 2; P_INIT_Y = 1; P_INIT_Z = 1; break;
+    // u = sin(y), thus we prescribe zero Dirichlet at faces 3 and 4, and zero Neumann elsewhere.
+    case ANISO_Y: P_INIT_X = 1; P_INIT_Y = 2; P_INIT_Z = 1; break;
+    // u = sin(z), thus we prescribe zero Dirichlet at faces 5 and 6, and zero Neumann elsewhere.
+    case ANISO_Z: P_INIT_X = 1; P_INIT_Y = 1; P_INIT_Z = 2; break; 
+    // u = sin(x)*sin(y), thus we prescribe zero Dirichlet at faces 1, 2, 3, 4 and zero Neumann elsewhere.
+    case ANISO_X | ANISO_Y: P_INIT_X = 2; P_INIT_Y = 2; P_INIT_Z = 1; break;
+    // u = sin(x)*sin(z), thus we prescribe zero Dirichlet at faces 1, 2, 5, 6 and zero Neumann elsewhere.
+    case ANISO_X | ANISO_Z: P_INIT_X = 2; P_INIT_Y = 1; P_INIT_Z = 2; break;
+    // u = sin(y)*sin(z), thus we prescribe zero Dirichlet at faces 3, 4, 5, 6 and zero Neumann elsewhere.
+    case ANISO_Y | ANISO_Z: P_INIT_X = 1; P_INIT_Y = 2; P_INIT_Z = 2; break;
+    // u = sin(x)*sin(y)*sin(z), thus we prescribe zero Dirichlet everywhere.
+    case ANISO_X | ANISO_Y | ANISO_Z: P_INIT_X = 2; P_INIT_Y = 2; P_INIT_Z = 2; break;
+    default: error("Admissible command-line options are x, y, x, xy, xz, yz, xyz.");
+  }
+}
+
+// Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
-	return 0;
+  return fn(x, y, z);
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data)
+// Determine type of anisotropy from the command-line parameter.
+int parse_aniso_type(char *str)
 {
-	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
+  int type = 0;
+  if (strchr(str, 'x') != NULL) type |= ANISO_X;
+  if (strchr(str, 'y') != NULL) type |= ANISO_Y;
+  if (strchr(str, 'z') != NULL) type |= ANISO_Z;
+  return type;
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data)
-{
-	return -int_F_v<f_t, res_t>(n, wt, rhs, u, e);
-}
-
-void out_fn_vtk(MeshFunction *x, const char *name, int i) {
-#ifdef OUTPUT_DIR
-	char of_name[1024];
-	FILE *ofile;
-	// mesh out
-	sprintf(of_name, "%s/%s-%d.vtk", OUTPUT_DIR, name, i);
-	ofile = fopen(of_name, "w");
-	if (ofile != NULL) {
-		VtkOutputEngine output(ofile);
-		output.out(x, name);
-		fclose(ofile);
-	}
-	else {
-		warning("Can not open '%s' for writing.", of_name);
-	}
-#endif
-}
-
-void parse_aniso_type(char *str)
-{
-	int type = 0;
-	if (strchr(str, 'x') != NULL) type |= ANISO_X;
-	if (strchr(str, 'y') != NULL) type |= ANISO_Y;
-	if (strchr(str, 'z') != NULL) type |= ANISO_Z;
-	aniso_type = type;
-}
-
-bool check_order(const Ord3 &spord)
-{
-	switch (aniso_type)
-	{
-		case ANISO_X:
-			if (spord.y == init_q && spord.z == init_q) return true;
-			break;
-
-		case ANISO_Y:
-			if (spord.x == init_q && spord.z == init_q) return true;
-			break;
-
-		case ANISO_Z:
-			if (spord.x == init_q && spord.y == init_q) return true;
-			break;
-
-		case ANISO_X | ANISO_Y:
-			if (spord.z == init_q) return true;
-			break;
-
-		case ANISO_X | ANISO_Z:
-			if (spord.y == init_q) return true;
-			break;
-
-		case ANISO_Y | ANISO_Z:
-			if (spord.x == init_q) return true;
-			break;
-
-		case ANISO_X | ANISO_Y | ANISO_Z:
-			return true;
-	}
-
-	return false;
-}
-
-// main ///////////////////////////////////////////////////////////////////////////////////////////
+// Weak forms.
+#include "forms.cpp"
 
 int main(int argc, char **args)
 {
-	int res = ERR_SUCCESS;
+  // Check the number of command-line parameters.
+  if (argc < 2) {
+    info("Use x, y, z, xy, xz, yz, or xyz as a command-line parameter.");
+    error("Not enough command-line parameters.");
+  }
 
-	if (argc < 3) error("Not enough parameters.");
+  // Determine anisotropy type from the command-line parameter.
+  ANISO_TYPE = parse_aniso_type(args[1]);
 
-	parse_aniso_type(args[2]);
+  // Load the mesh.
+  Mesh mesh;
+  H3DReader mesh_loader;
+  mesh_loader.load("hex-0-1.mesh3d", &mesh);
 
-	printf("* Loading mesh '%s'\n", args[1]);
-	Mesh mesh;
-	H3DReader mloader;
-	if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+  // Assign the lowest possible directional polynomial degrees so that the problem's NDOF >= 1.
+  assign_poly_degrees();
 
-	printf("* Setting the space up\n");
+  // Create an H1 space with default shapeset.
+  info("Setting directional polynomial degrees %d, %d, %d.", P_INIT_X, P_INIT_Y, P_INIT_Z);
+  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
-	Ord3 order;
-	switch (aniso_type)
-	{
-		case ANISO_X:
-			order = Ord3(init_p, init_q, init_q);
-			break;
+  // Initialize weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM, HERMES_ANY);
+  wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
 
-		case ANISO_Y:
-			order = Ord3(init_q, init_p, init_q);
-			break;
+  // Set exact solution.
+  ExactSolution exact(&mesh, fndd);
 
-		case ANISO_Z:
-			order = Ord3(init_q, init_q, init_p);
-			break;
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
 
-		case ANISO_X | ANISO_Y:
-			order = Ord3(init_p, init_p, init_q);
-			break;
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
 
-		case ANISO_X | ANISO_Z:
-			order = Ord3(init_p, init_q, init_p);
-			break;
+  // Adaptivity loop. 
+  int as = 1; 
+  bool done = false;
+  do 
+  {
+    info("---- Adaptivity step %d:", as);
 
-		case ANISO_Y | ANISO_Z:
-			order = Ord3(init_q, init_p, init_p);
-			break;
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
 
-		case ANISO_X | ANISO_Y | ANISO_Z:
-			order = Ord3(init_p, init_p, init_p);
-			break;
-	}
+    // Initialize discrete problem.
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, ref_space, is_linear);
 
-	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
-	H1Space space(&mesh, bc_types, essential_bc_values, order);
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    
+    // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+    if (matrix_solver == SOLVER_AZTECOO) 
+    {
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
+    }
+  
+    // Assemble the reference problem.
+    info("Assembling on reference mesh (ndof: %d).", Space::get_num_dofs(ref_space));
+    dp.assemble(matrix, rhs);
 
-	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM, HERMES_ANY);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
+    // Time measurement.
+    cpu_time.tick();
 
-        bool is_linear = true;
-	DiscreteProblem dp(&wf, &space, is_linear);
+    // Solve the linear system on reference mesh. If successful, obtain the solution.
+    info("Solving on reference mesh.");
+    Solution ref_sln(ref_space->get_mesh());
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else error ("Matrix solver failed.\n");
 
-        // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-        initialize_solution_environment(matrix_solver, argc, args);
+    // Time measurement.
+    cpu_time.tick();
 
-	bool done = false;
-	int iter = 0;
-        Space* ref_space;
-	do {
-		printf("\n=== Iter #%d ================================================================\n", iter);
+    // Project the reference solution on the coarse mesh.
+    Solution sln(space.get_mesh());
+    info("Projecting reference solution on coarse mesh.");
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
-		// check if we are doing all right
-		FOR_ALL_ACTIVE_ELEMENTS(eid, &mesh) {
-			Ord3 spord = space.get_element_order(eid);
-			printf("#%u: order = (%d, %d, %d)\n", eid, spord.x, spord.y, spord.z);
-		}
+    // Time measurement.
+    cpu_time.tick();
 
-		if (mesh.get_num_elements() != 1) {
-			res = ERR_FAILURE;
-			printf("failed\n");
-			break;
-		}
+    // Output solution and mesh with polynomial orders.
+    if (solution_output) 
+    {
+      out_fn_vtk(&sln, "sln", as);
+      out_orders_vtk(&space, "order", as);
+    }
 
-		Ord3 spord = space.get_element_order(1);
-		if (!check_order(spord)) {
-			res = ERR_FAILURE;
-			printf("failed\n");
-			break;
-		}
+    // Skip the visualization time.
+    cpu_time.tick(HERMES_SKIP);
 
-		// we're good -> go ahead
-		printf("\nSolution\n");
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate and exact error.");
+    Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt) * 100;
 
-                // Set up the solver, matrix, and rhs according to the solver selection.
-                SparseMatrix* matrix = create_matrix(matrix_solver);
-                Vector* rhs = create_vector(matrix_solver);
-                Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    // Calculate exact error.
+    solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
-		int ndofs = space.assign_dofs();
-		printf("  - Number of DOFs: %d\n", ndofs);
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    info("err_est_rel: %g%%, err_exact_rel: %g%%.", err_est_rel, err_exact_rel);
 
-		// assemble stiffness matrix
-		printf("  - Assembling... "); fflush(stdout);
-		dp.assemble(matrix, rhs);
-		printf("done\n");
+    // If err_est_rel is too large, adapt the mesh. 
+    if (err_est_rel < ERR_STOP) done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      adaptivity->adapt(THRESHOLD);
+    }
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
-		// solve the stiffness matrix
-		printf("  - Solving... "); fflush(stdout);
-		bool solved = solver->solve();
-		if (solved)
-			printf("done\n");
-		else {
-			res = ERR_FAILURE;
-			printf("failed\n");
-			break;
-		}
+    // Clean up.
+    delete ref_space->get_mesh();
+    delete ref_space;
+    delete matrix;
+    delete rhs;
+    delete solver;
+    delete adaptivity;
 
-		Solution sln(&mesh);
-		Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    // Increase the counter of performed adaptivity steps.
+    as++;
+  } while (!done);
 
-		printf("Reference solution\n");
+  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  finalize_solution_environment(matrix_solver);
 
-		Mesh ref_mesh;
-		ref_mesh.copy(mesh);
-		ref_mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
+  // This is the actual test.
+#define ERROR_SUCCESS                               0
+#define ERROR_FAILURE                               -1
+  int ndof_allowed;
+  switch (ANISO_TYPE) {
+  case ANISO_X: ndof_allowed = 28; break;
+    case ANISO_Y: ndof_allowed = 28; break;
+    case ANISO_Z: ndof_allowed = 28; break;
+    case ANISO_X | ANISO_Y: ndof_allowed = 98; break;
+    case ANISO_X | ANISO_Z: ndof_allowed = 98; break;
+    case ANISO_Y | ANISO_Z: ndof_allowed = 98; break;
+  case ANISO_X | ANISO_Y | ANISO_Z: ndof_allowed = 343; break; 
+    default: error("Admissible command-line options are x, y, x, xy, xz, yz, xyz.");
+  }
 
-#ifdef REFERENCE_SOLUTION
+  int ndof = Space::get_num_dofs(&space);
 
-		ref_space = space.dup(&ref_mesh);
-		ref_space->copy_orders(space, 1);
+  info("ndof_actual = %d", ndof);
+  info("ndof_allowed = %d", ndof_allowed); 
+  if (ndof <= ndof_allowed) {
+    printf("Success!\n");
+    return ERROR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERROR_FAILURE;
+  }
 
-		DiscreteProblem rdp(&wf, ref_space, is_linear);
-		rdp.set_space(ref_space);
-
-		int ref_ndof = ref_space->assign_dofs();
-		printf("  - Number of DOFs: %d\n", ref_ndof);
-
-		printf("  - Assembling... "); fflush(stdout);
-		rdp.assemble(&mat, &rhs);
-		printf("done\n");
-
-		printf("  - Solving... "); fflush(stdout);
-		bool rsolved = rsolver.solve();
-		if (rsolved)
-			printf("done\n");
-		else {
-			res = ERR_FAILURE;
-			printf("failed\n");
-			break;
-		}
-		Solution ref_sln(&ref_mesh);
-		Solution::vector_to_solution(ref_solver.get_solution(), ref_space, ref_sln);
-#else
-		ExactSolution ref_sln(&ref_mesh, exact_solution);
-#endif
-
-		{
-			double h1_err_norm = h1_error(&sln, &ref_sln) * 100;
-			printf("  - H1 error norm:      % le\n", h1_err_norm);
-		}
-
-		printf("Adaptivity:\n");
-                Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
-		adaptivity->set_aniso(true);
-                bool solutions_for_adapt = true;
-                double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt) * 100;
-		printf("  - tolerance: "); fflush(stdout);
-		printf("% lf\n", err_est_rel);
-		if (err_est_rel < TOLERANCE || iter == 8) {
-			ExactSolution ex_sln(&mesh, exact_solution);
-			printf("\nDone\n");
-			// norm
-			double h1_sln_norm = h1_norm(&sln);
-			double h1_err_norm = h1_error(&sln, &ex_sln);
-			printf("  - H1 solution norm:   % le\n", h1_sln_norm);
-			printf("  - H1 error norm:      % le\n", h1_err_norm);
-
-			double l2_sln_norm = l2_norm(&sln);
-			double l2_err_norm = l2_error(&sln, &ex_sln);
-			printf("  - L2 solution norm:   % le\n", l2_sln_norm);
-			printf("  - L2 error norm:      % le\n", l2_err_norm);
-
-			if (h1_err_norm > EPS || l2_err_norm > EPS) {
-				// calculated solution is not enough precise
-				res = ERR_FAILURE;
-			}
-
-			break;
-		}
-
-		printf("  - adapting... "); fflush(stdout);
-		adaptivity->adapt(THRESHOLD);
-		printf("done (refined %d element(s))\n", adaptivity->get_num_refined_elements());
-
-                // Clean up.
-#ifdef REFERENCE_SOLUTION
-                delete ref_space->get_mesh();
-                delete ref_space;
-#endif
-                delete matrix;
-                delete rhs;
-                delete solver;
-                delete adaptivity;
-
-		iter++;
-	} while (!done && iter < 5);
-
-        // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-        finalize_solution_environment(matrix_solver);
-
-	return res;
+  return 1;
 }

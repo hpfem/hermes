@@ -15,9 +15,9 @@ using namespace RefinementSelectors;
 //
 //  Known exact solution, see functions fn() and fndd().
 //
-//  Domain: square domain (0, pi)x(0, pi), mesh file square_quad.mesh.
+//  Domain: square domain (0, pi) x (0, pi), mesh file square_quad.mesh.
 //
-//  BC:  Dirichlet, given by exact solution.
+//  BC:  Dirichlet and Neumann, given by exact solution.
 //
 //  The following parameters can be changed:
 
