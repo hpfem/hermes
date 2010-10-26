@@ -8,6 +8,7 @@ set(WITH_PYTHON no)
 set(DEBUG yes)
 set(RELEASE no)
 set(WITH_EXAMPLES yes)
+set(WITH_BENCHMARKS yes)
 set(WITH_TESTS yes)
 
 option(WITH_UMFPACK  "Enable support for UMFPACK" YES)
@@ -73,9 +74,14 @@ if(WITH_PYTHON)
 
     include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
+
 if(WITH_EXAMPLES)
     add_subdirectory(examples)
 endif(WITH_EXAMPLES)
+
+if(WITH_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif(WITH_BENCHMARKS)
 
 if(WITH_TESTS)
     enable_testing()
