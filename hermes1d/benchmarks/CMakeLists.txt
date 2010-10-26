@@ -4,7 +4,3 @@ add_subdirectory(first_order_general_adapt)
 add_subdirectory(laplace_bc_dirichlet_adapt_new)
 add_subdirectory(first_order_general_adapt_new)
 add_subdirectory(laplace_bc_dirichlet_adapt_goal)
-
-if(WITH_PYTHON)
-    add_subdirectory(schroedinger)
-endif(WITH_PYTHON)
