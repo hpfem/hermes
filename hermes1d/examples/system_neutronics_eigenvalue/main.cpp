@@ -1,11 +1,9 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
-using std::cout;
-using std::endl;
 
 // *****************************************************************************
 
@@ -19,7 +17,7 @@ using std::endl;
 // (homogeneous b.c. of Neumann/Dirichlet type, respectively). Example from
 // 	 Yoshikawa and Wakabayashi, Journal of NUCLEAR SCIENCE and TECHNOLOGY (7), 
 //	 p. 355-365 (July 1970)
-	
+
 /******************************************************************************/
 // Problem specification (core geometry, material properties, initial FE mesh)
 #include "neutronics_problem_def.cpp"
@@ -42,9 +40,12 @@ int Max_SI = 1000;          // Max. number of eigenvalue iterations
 int N_SLN = 2;              // Number of solutions
 
 // Newton's method
-double NEWTON_TOL = 1e-5;               // tolerance for the Newton's method
-int NEWTON_MAX_ITER = 150;               // max. number of Newton iterations
-double TOL_SI = 1e-6;                   // tol. for the source (eigenvalue) iteration
+double NEWTON_TOL = 1e-5;   // tolerance for the Newton's method
+int NEWTON_MAX_ITER = 150;  // max. number of Newton iterations
+double TOL_SI = 1e-6;       // tol. for the source (eigenvalue) iteration
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 /******************************************************************************/
 

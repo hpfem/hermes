@@ -26,10 +26,10 @@ const int MATRIX_SOLVER = 0;            // 0... default (LU decomposition)
 const double MATRIX_SOLVER_TOL = 1e-7;  // Tolerance for residual in L2 norm
 const int MATRIX_SOLVER_MAXITER = 150;  // Max. number of iterations
 
-// Stopping criteria for Newton
-const double NEWTON_TOL_COARSE = 1e-10;        // Coarse mesh
-const double NEWTON_TOL_REF = 1e-10;           // Reference mesh
-const int NEWTON_MAX_ITER = 150;
+// Newton's method
+double NEWTON_TOL_COARSE = 1e-10;        // Coarse mesh
+double NEWTON_TOL_REF = 1e-10;           // Reference mesh
+int NEWTON_MAX_ITER = 150;
 
 // Adaptivity
 const int ADAPT_TYPE = 0;               // 0... hp-adaptivity

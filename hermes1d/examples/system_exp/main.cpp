@@ -1,4 +1,7 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -9,9 +12,6 @@
 // u(A) = exp(A), u(B) = exp(B), v(A) = exp(-A), v(B) = exp(-B). 
 // The exact solution is u(x) = exp(x), v(x) = exp(-x). 
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
 // General input:
 static int N_eq = 2;
 int N_elem = 2;          // number of elements
@@ -21,6 +21,9 @@ int P_init = 2;          // initial polynomal degree
 // Newton's method
 double NEWTON_TOL = 1e-5;
 int NEWTON_MAX_ITER = 150;
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions
 double Val_dir_left_0 = exp(A);

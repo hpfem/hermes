@@ -19,7 +19,7 @@ double A = -M_PI, B = M_PI;             // Domain end points
 //double A = -1, B = 1;                 // Domain end points
 int P_init = 1;                         // Initial polynomal degree
 
-// Stopping criteria for Newton
+// Newton's method
 double NEWTON_TOL_COARSE = 1e-10;       // Coarse mesh
 double NEWTON_TOL_REF = 1e-10;          // Reference mesh
 int NEWTON_MAX_ITER = 150;

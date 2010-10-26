@@ -34,9 +34,9 @@ const int JFNK = 0;                     // 0... classical Newton
 const double JFNK_EPSILON = 1e-4;       // Parameter in the JFNK finite difference
  
 // Newton's method
-const double NEWTON_TOL_COARSE = 1e-8;  // Coarse mesh
-const double NEWTON_TOL_REF = 1e-8;     // Reference mesh
-const int NEWTON_MAX_ITER = 150;
+double NEWTON_TOL_COARSE = 1e-8;  // Coarse mesh
+double NEWTON_TOL_REF = 1e-8;     // Reference mesh
+int NEWTON_MAX_ITER = 150;
 
 // Adaptivity
 const int GOAL_ORIENTED = 0;            // 0... standard adaptivity in norm

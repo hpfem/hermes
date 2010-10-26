@@ -1,4 +1,7 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -10,15 +13,12 @@
 // u(0) = 0, v(0) = k
 // The exact solution is u(x) = sin(k*x), v(x) = k*cos(k*x)
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
 // General input:
 static int N_eq = 2;
-int N_elem = 20;          // number of elements
+int N_elem = 20;              // number of elements
 double A = 0, B = 2*M_PI;     // domain end points
-int P_init = 2;          // initial polynomal degree
-double k = 1.0;          // the constant in the equation
+int P_init = 2;               // initial polynomal degree
+double k = 1.0;               // the constant in the equation
 
 // Newton's method
 double NEWTON_TOL = 1e-5;
@@ -27,6 +27,9 @@ int NEWTON_MAX_ITER = 150;
 // Boundary conditions
 double Val_dir_left_0 = 0;
 double Val_dir_left_1 = k;
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Weak forms for Jacobi matrix and residual
 #include "forms.cpp"

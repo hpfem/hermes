@@ -19,10 +19,10 @@ const double A = 0, B = 10;             // Domain end points
 const double YA = 1;                    // Equation parameter
 const int P_init = 1;                   // Initial polynomal degree
 
-// Stopping criteria for Newton
-const double NEWTON_TOL_COARSE = 1e-8;  // Coarse mesh
-const double NEWTON_TOL_REF = 1e-8;     // Fine mesh
-const int NEWTON_MAX_ITER = 150;
+// Newton's method
+double NEWTON_TOL_COARSE = 1e-8;  // Coarse mesh
+double NEWTON_TOL_REF = 1e-8;     // Fine mesh
+int NEWTON_MAX_ITER = 150;
 
 // Adaptivity
 const int ADAPT_TYPE = 0;         // 0... hp-adaptivity

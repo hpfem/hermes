@@ -1,4 +1,7 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
 // This test makes sure that an exact function 
@@ -9,9 +12,6 @@
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
 // General input:
 static int N_eq = 1;
 int N_elem = 2;                         // Number of elements
@@ -19,9 +19,9 @@ double A = -M_PI, B = M_PI;              // Domain end points
 int P_init = 1;                         // Initial polynomal degree
 
 // Newton's method
-const double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh
-const double NEWTON_TOL_REF = 1e-6;           // Reference mesh
-const int NEWTON_MAX_ITER = 150;
+double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh
+double NEWTON_TOL_REF = 1e-6;           // Reference mesh
+int NEWTON_MAX_ITER = 150;
 
 // Adaptivity
 const int ADAPT_TYPE = 0;               // 0... hp-adaptivity
@@ -33,6 +33,9 @@ const double TOL_ERR_REL = 1e-6;        // Tolerance for the relative error betw
                                         // the coarse mesh and reference solutions
 const int NORM = 1;                     // 1... H1 norm
                                         // 0... L2 norm
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions
 double Val_dir_left = 0;                // Dirichlet condition left

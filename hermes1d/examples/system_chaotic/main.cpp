@@ -1,4 +1,7 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
 // ********************************************************************
@@ -10,9 +13,6 @@
 
 // in an interval (0, 10) equipped with Dirichlet bdy conditions
 // x1(0) = 1, x2(0) = 0, x3(0) = 0, x4(0) = 0
-
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
 static int N_eq = 4;
@@ -33,6 +33,9 @@ double DAMPING = 1.0;    // DAMPING is an artificial param. used to
 // Newton's method
 double NEWTON_TOL = 1e-5;
 int NEWTON_MAX_ITER = 150;
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions
 double Val_dir_left_1 = 1;

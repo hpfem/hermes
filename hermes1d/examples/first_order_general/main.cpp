@@ -21,8 +21,8 @@ double YA = 1;                          // equation parameter
 int P_init = 2;                         // initial polynomal degree
 
 // Newton's method
-const double NEWTON_TOL = 1e-5;
-const int NEWTON_MAX_ITER = 150;
+double NEWTON_TOL = 1e-5;
+int NEWTON_MAX_ITER = 150;
 
 // Function f(y, x)
 double f(double y, double x) {

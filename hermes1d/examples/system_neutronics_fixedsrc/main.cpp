@@ -1,8 +1,9 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // *****************************************************************************
 
@@ -40,7 +41,10 @@ int N_SLN = 1;              						// Number of solutions
 
 // Newton's method
 double NEWTON_TOL = 1e-5;               // tolerance for the Newton's method
-int NEWTON_MAX_ITER = 150;               // max. number of Newton iterations
+int NEWTON_MAX_ITER = 150;              // max. number of Newton iterations
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 /******************************************************************************/
 

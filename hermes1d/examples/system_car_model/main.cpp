@@ -30,9 +30,6 @@
 // Print data ?
 const int PRINT = 0;
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
 // General input:
 const int N_eq = 5;
 const int N_elem = 5;              // number of elements
@@ -61,6 +58,9 @@ double zeta_ctrl[N_ctrl] = {0, 0, 0, 0};
 // Newton's method
 double NEWTON_TOL = 1e-5;
 int NEWTON_MAX_ITER = 150;
+
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // ********************************************************************
 

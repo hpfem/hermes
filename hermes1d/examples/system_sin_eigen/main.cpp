@@ -1,11 +1,9 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 #include "h1d_wrapper_api.h"
-
-int N_elem = 2;                         // number of elements
-static int N_eq = 2;
-double A = 0, B = M_PI;                     // domain end points
-int P_init = 7;                           // initial polynomal degree
 
 /*
 This example solves u'' + k^2 u = 0 as an eigenvalue problem, by reducing it to
@@ -33,6 +31,10 @@ We solve A*x = E*B*x, where A, B are matrices composed of 2x2 blocks.
 
 */
 
+int N_elem = 2;                         // number of elements
+static int N_eq = 2;
+double A = 0, B = M_PI;                     // domain end points
+int P_init = 7;                           // initial polynomal degree
 
 double kappa = 1;
 
