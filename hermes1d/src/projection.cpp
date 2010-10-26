@@ -99,8 +99,8 @@ void assemble_projection_matrix_rhs(Mesh *mesh, SparseMatrix *A, double *rhs,
 
     _f = fn;
     int N_dof = mesh->assign_dofs();
-    printf("Assembling projection linear system. ndofs: %d\n", N_dof);
+    info("Assembling projection linear system. ndofs: %d\n", N_dof);
     dp1->assemble_matrix_and_vector(mesh, A, rhs);
-    printf("  Done assembling.\n");
+    info("  Done assembling.\n");
     delete dp1;
 }

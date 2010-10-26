@@ -61,7 +61,7 @@ int main() {
   Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
   mesh->set_bc_left_dirichlet(0, Val_dir_left_0);
   mesh->set_bc_left_dirichlet(1, Val_dir_left_1);
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
 
   // Create discrete problem
   DiscreteProblem *dp = new DiscreteProblem();
@@ -136,7 +136,7 @@ int main() {
   int start_elem_id = 0; 
   int num_to_ref = mesh_ref->get_n_active_elem();
   mesh_ref->reference_refinement(start_elem_id, num_to_ref);
-  printf("Fine mesh created (%d DOF).\n", mesh_ref->get_n_dof());
+  info("Fine mesh created (%d DOF).\n", mesh_ref->get_n_dof());
 
   // Convergence graph wrt. the number of degrees of freedom
   GnuplotGraph graph;
@@ -148,7 +148,7 @@ int main() {
   // Main adaptivity loop
   int adapt_iterations = 1;
   while(1) {
-    printf("============ Adaptivity step %d ============\n", adapt_iterations); 
+    info("============ Adaptivity step %d ============\n", adapt_iterations); 
 
     // Newton's loop on fine mesh
     // Obtain the number of degrees of freedom.
@@ -281,7 +281,7 @@ int main() {
 
     // Calculate an estimate of the global relative error
     double err_est_rel = err_est_total/ref_sol_norm;
-    printf("Relative error (est) = %g %%\n", 100.*err_est_rel);
+    info("Relative error (est) = %g %%\n", 100.*err_est_rel);
 
     // If exact solution available, also calculate exact error
     if (EXACT_SOL_PROVIDED) {
@@ -297,7 +297,7 @@ int main() {
            exact_sol, N_eq, A, B, subdivision, order);
       // Calculate an estimate of the global relative error
       double err_exact_rel = err_exact_total/exact_sol_norm;
-      printf("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
+      info("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
       graph.add_values(0, mesh->get_n_dof(), 100 * err_exact_rel);
     }
 
@@ -327,6 +327,6 @@ int main() {
   // Save convergence graph
   graph.save("conv_dof.gp");
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

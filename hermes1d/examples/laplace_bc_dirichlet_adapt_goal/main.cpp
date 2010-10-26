@@ -137,9 +137,9 @@ int main() {
     ref_ftr_pairs[i][1] = new Element();
   }
   while(1) {
-    printf("============ Adaptivity step %d ============\n", adapt_iterations); 
+    info("============ Adaptivity step %d ============\n", adapt_iterations); 
 
-    printf("N_dof = %d\n", mesh->get_n_dof());
+    info("N_dof = %d\n", mesh->get_n_dof());
  
     // Newton's loop on coarse mesh
     int success;
@@ -212,14 +212,14 @@ int main() {
     double max_qoi_err_est = 0;
     for (int i=0; i < n_elem; i++) {
 
-      printf("=== Starting FTR of Elem [%d]\n", i);
+      info("=== Starting FTR of Elem [%d]\n", i);
 
       // Replicate coarse mesh including solution.
       Mesh *mesh_ref_local = mesh->replicate();
 
       // Perform FTR of element 'i'
       mesh_ref_local->reference_refinement(i, 1);
-      printf("Elem [%d]: fine mesh created (%d DOF).\n", 
+      info("Elem [%d]: fine mesh created (%d DOF).\n", 
              i, mesh_ref_local->assign_dofs());
 
       // Newton's loop on the FTR mesh
@@ -375,7 +375,7 @@ int main() {
   // Save convergence graph
   graph_ftr.save("conv_dof.gp");
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }
 

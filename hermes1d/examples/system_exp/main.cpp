@@ -50,7 +50,7 @@ int main() {
   mesh->set_bc_right_dirichlet(0, Val_dir_right_0);
   mesh->set_bc_left_dirichlet(1, Val_dir_left_1);
   mesh->set_bc_right_dirichlet(1, Val_dir_right_1);
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
 
   // Register weak forms
   DiscreteProblem *dp = new DiscreteProblem();
@@ -122,7 +122,7 @@ int main() {
   Linearizer l(mesh);
   l.plot_solution("solution.gp");
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }
 

@@ -39,16 +39,16 @@ int main(int argc, char* argv[])
         //val += legendre_val_ref(point_i, poly_deg) * weight_i;
         val += legendre_val_ref_tab[quad_order][i][poly_deg] * weight_i;
       }
-      printf("poly_deg = %d, quad_order = %d, integral = %g\n",
+      info("poly_deg = %d, quad_order = %d, integral = %g\n",
              poly_deg, quad_order, val);      
       if (max_actual_error > max_allowed_error) {
-        printf("Failure!\n");
+        info("Failure!\n");
         return ERROR_FAILURE;
       }
       if (fabs(val) > max_actual_error) max_actual_error = fabs(val);
     }
   }
 
-  printf("Success!\n");
+  info("Success!\n");
   return ERROR_SUCCESS;
 }

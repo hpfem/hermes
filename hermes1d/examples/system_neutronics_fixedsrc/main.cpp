@@ -50,7 +50,7 @@ int main() {
   Mesh *mesh = new Mesh(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
   mesh->plot("mesh.gp");
 
   for (int g = 0; g < N_GRP; g++)  {
@@ -135,8 +135,8 @@ int main() {
 	// Calculate flux integral for comparison with the reference value
 	double I = calc_integrated_flux(mesh, 1, 60., 80.);
 	double Iref = 134.9238787715397;
-	printf("I = %.13f, err = %.13f%%\n", I, 100.*(I - Iref)/Iref );
+	info("I = %.13f, err = %.13f%%\n", I, 100.*(I - Iref)/Iref );
 	
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

@@ -130,7 +130,7 @@ int main() {
 
   // Create coarse mesh, enumerate basis functions
   Mesh *mesh = new Mesh(N_MAT, interfaces, poly_orders, material_markers, subdivisions, N_GRP, N_SLN);
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
 
   // Initial approximation: u = 1
   double K_EFF_old;
@@ -233,8 +233,8 @@ int main() {
   l.plot_solution("solution_320W.gp");	
   mesh->plot("mesh.gp");
 
-  printf("K_EFF = %f\n", K_EFF);
+  info("K_EFF = %f\n", K_EFF);
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

@@ -623,7 +623,7 @@ void check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_refsol, "%g %g\n", plot_x_right[j], plot_u_ref_right[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points left
     double plot_leg_pol_val_left[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -675,7 +675,7 @@ void check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_cand, "%g %g\n", plot_x_right[j], plot_u_right[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
   // **************************************************************************
@@ -898,7 +898,7 @@ void check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_refsol, "%g %g\n", plot_x_right[j], plot_u_ref_right[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points left
     double plot_leg_pol_val_left[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -950,7 +950,7 @@ void check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_cand, "%g %g\n", plot_x_right[j], plot_u_right[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
   // **************************************************************************
@@ -1213,7 +1213,7 @@ void check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_refsol, "%g %g\n", plot_x_right[j], plot_u_ref_right[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points left
     double plot_leg_pol_val_left[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -1265,7 +1265,7 @@ void check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_cand, "%g %g\n", plot_x_right[j], plot_u_right[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
   // **************************************************************************
@@ -1389,7 +1389,7 @@ void check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points
       fprintf(f_refsol, "%g %g\n", plot_x[j], plot_u_ref[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points
     double plot_leg_pol_val[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -1418,7 +1418,7 @@ void check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting
       fprintf(f_cand, "%g %g\n", plot_x[j], plot_u[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
   // **************************************************************************
@@ -1556,7 +1556,7 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
       err_orig, dof_orig);
   }
   if (PRINT_CANDIDATES) {
-    printf("  Elem (%g, %g): err_orig = %g, dof_orig = %d\n", 
+    info("  Elem (%g, %g): err_orig = %g, dof_orig = %d\n", 
            e->x1, e->x2, err_orig, dof_orig);
   }
 
@@ -1597,9 +1597,9 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
     if (fabs(err_cand) < 1e-12) {
       choice = i;
       if (PRINT_CANDIDATES) {
-        printf("  Elem (%g, %g): reference solution recovered, \
+        info("  Elem (%g, %g): reference solution recovered, \
                   taking the following candidate:\n", e->x1, e->x2);
-        printf("  Elem (%g, %g): cand (%d %d %d), err_cand = %g, dof_cand = %d\n", 
+        info("  Elem (%g, %g): cand (%d %d %d), err_cand = %g, dof_cand = %d\n", 
                e->x1, e->x2, 
                cand_list[i][0], cand_list[i][1], cand_list[i][2], err_cand, dof_cand);
       }
@@ -1611,9 +1611,9 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
     if (dof_cand - dof_orig <= 0) {
       if (err_cand < err_orig) {
         if (PRINT_CANDIDATES) {
-          printf("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0\n", e->x1, e->x2,
+          info("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0\n", e->x1, e->x2,
                     cand_list[i][0], cand_list[i][1], cand_list[i][2]);
-          printf("               dof_cand = %d, err_orig = %g, err_cand = %g (accepting)\n", 
+          info("               dof_cand = %d, err_orig = %g, err_cand = %g (accepting)\n", 
                  dof_cand, err_orig, err_cand);
         }
         if (ALLOW_TO_DECREASE_DOFS)
@@ -1623,9 +1623,9 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
       }
       else {
         if (PRINT_CANDIDATES) {
-          printf("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0\n", e->x1, e->x2,
+          info("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0\n", e->x1, e->x2,
                     cand_list[i][0], cand_list[i][1], cand_list[i][2]);
-          printf("               dof_cand = %d, err_orig = %g, err_new = %g (throwing away)\n", 
+          info("               dof_cand = %d, err_orig = %g, err_new = %g (throwing away)\n", 
                  dof_cand, err_orig, err_cand);
         }
         crit = 1e10;  // forget this candidate
@@ -1645,7 +1645,7 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
 
     // debug
     if (PRINT_CANDIDATES) {
-      printf("  Elem (%g, %g): cand (%d %d %d), err_reduction = %g, dof_added = %d, crit = %g\n", 
+      info("  Elem (%g, %g): cand (%d %d %d), err_reduction = %g, dof_added = %d, crit = %g\n", 
              e->x1, e->x2, cand_list[i][0], cand_list[i][1], cand_list[i][2], 
              err_orig - err_cand, dof_cand - dof_orig, crit);
     }

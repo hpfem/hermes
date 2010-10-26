@@ -39,16 +39,16 @@ int main(int argc, char* argv[])
         //                  lobatto_der_ref(point_i, n));
         double val = fabs(legendre_val_ref_tab[quad_order][i][n-1] -
                           lobatto_der_ref_tab[quad_order][i][n]);
-        printf("poly_deg = %d, quad_order = %d, x = %g, difference = %g\n", 
+        info("poly_deg = %d, quad_order = %d, x = %g, difference = %g\n", 
                n, quad_order, point_i, val);
         if(val > max_allowed_error) {
-          printf("Failure!\n");
+          info("Failure!\n");
           return ERROR_FAILURE;
         }
       }
     }
   }
 
-  printf("Success!\n");
+  info("Success!\n");
   return ERROR_SUCCESS;
 }

@@ -49,7 +49,7 @@ int main() {
   Mesh *mesh = new Mesh(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
   mesh->plot("mesh.gp");
 
   for (int g = 0; g < N_GRP; g++)  {
@@ -144,6 +144,6 @@ int main() {
   Linearizer l(mesh);
   l.plot_solution("solution.gp");
 	
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

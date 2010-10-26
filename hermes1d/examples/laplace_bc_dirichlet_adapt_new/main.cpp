@@ -99,9 +99,9 @@ int main() {
     ref_ftr_pairs[i][1] = new Element();
   }
   while(1) {
-    printf("============ Adaptivity step %d ============\n", adapt_iterations); 
+    info("============ Adaptivity step %d ============\n", adapt_iterations); 
 
-    printf("N_dof = %d\n", mesh->get_n_dof());
+    info("N_dof = %d\n", mesh->get_n_dof());
  
     // Newton's loop on coarse mesh
     // Obtain the number of degrees of freedom.
@@ -167,14 +167,14 @@ int main() {
     int n_elem = mesh->get_n_active_elem();
     for (int i=0; i < n_elem; i++) {
 
-      printf("=== Starting FTR of Elem [%d]\n", i);
+      info("=== Starting FTR of Elem [%d]\n", i);
 
       // Replicate coarse mesh including solution.
       Mesh *mesh_ref_local = mesh->replicate();
 
       // Perform FTR of element 'i'
       mesh_ref_local->reference_refinement(i, 1);
-      printf("Elem [%d]: fine mesh created (%d DOF).\n", 
+      info("Elem [%d]: fine mesh created (%d DOF).\n", 
              i, mesh_ref_local->assign_dofs());
 
       // Obtain the number of degrees of freedom.
@@ -295,7 +295,7 @@ int main() {
     for (int i=0; i < mesh->get_n_active_elem(); i++) {
       if (ftr_errors[i] > max_ftr_error) max_ftr_error = ftr_errors[i];
     }
-    printf("Max FTR error = %g\n", max_ftr_error);
+    info("Max FTR error = %g\n", max_ftr_error);
 
     // Add entry to DOF convergence graph
     graph.add_values(1, mesh->get_n_dof(), max_ftr_error);
@@ -320,7 +320,7 @@ int main() {
   // Save convergence graph
   graph.save("conv_dof.gp");
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }
 

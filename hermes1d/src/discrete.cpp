@@ -150,7 +150,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *r
 		    // add the result to the matrix
 		    if (val_ij != 0) mat->add(pos_i, pos_j, val_ij);
 		    if (DEBUG_MATRIX) {
-		      printf("Adding to matrix pos %d, %d value %g (comp %d, %d)\n", 
+		      info("Adding to matrix pos %d, %d value %g (comp %d, %d)\n", 
 		      pos_i, pos_j, val_ij, c_i, c_j);
 		    }
 	          }
@@ -189,7 +189,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *r
  	        if (val_i != 0) res[pos_i] += val_i;
 	        if (DEBUG_MATRIX) {
 		  if (val_i != 0) {
-	            printf("Adding to residual pos %d value %g (comp %d)\n", 
+	            info("Adding to residual pos %d value %g (comp %d)\n", 
                     pos_i, val_i, c_i);
                   }
                 }
@@ -386,7 +386,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *r
 		    // add the result to the matrix
 		    if (val_ij != 0) mat->add(pos_i, pos_j, val_ij);
 		    if (DEBUG_MATRIX) {
-		      printf("Adding to matrix pos %d, %d value %g (comp %d, %d)\n", 
+		      info("Adding to matrix pos %d, %d value %g (comp %d, %d)\n", 
 		      pos_i, pos_j, val_ij, c_i, c_j);
 		    }
 	          }
@@ -425,7 +425,7 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *r
           if (val_i != 0) res->add(pos_i, val_i);
 	        if (DEBUG_MATRIX) {
 		  if (val_i != 0) {
-	            printf("Adding to residual pos %d value %g (comp %d)\n", 
+	            info("Adding to residual pos %d value %g (comp %d)\n", 
                     pos_i, val_i, c_i);
                   }
                 }
@@ -571,21 +571,21 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, double *res,
 
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
-    printf("Jacobi matrix:\n");
+    info("Jacobi matrix:\n");
     for(int i=0; i<n_dof; i++) {
       for(int j=0; j<n_dof; j++) {
-        printf("%g ", mat->get(i, j));
+        info("%g ", mat->get(i, j));
       }
     }
   }
 
   // DEBUG: print residual vector
   if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 2)) {
-    printf("Residual:\n");
+    info("Residual:\n");
     for(int i=0; i<n_dof; i++) {
-      printf("%g ", res[i]);
+      info("%g ", res[i]);
     }
-    printf("\n");
+    info("\n");
   }
 } 
 
@@ -624,21 +624,21 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res,
 
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
-    printf("Jacobi matrix:\n");
+    info("Jacobi matrix:\n");
     for(int i=0; i<n_dof; i++) {
       for(int j=0; j<n_dof; j++) {
-        printf("%g ", mat->get(i, j));
+        info("%g ", mat->get(i, j));
       }
     }
   }
 
   // DEBUG: print residual vector
   if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 2)) {
-    printf("Residual:\n");
+    info("Residual:\n");
     for(int i=0; i<n_dof; i++) {
-      printf("%g ", res->get(i));
+      info("%g ", res->get(i));
     }
-    printf("\n");
+    info("\n");
   }
 } 
 
@@ -732,10 +732,10 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
     for(int i=0; i<n_dof; i++) res_norm_squared += f_orig[i]*f_orig[i];
 
     // If residual norm less than 'tol_jfnk', break
-    if (verbose) printf("Residual norm: %.15f\n", sqrt(res_norm_squared));
+    if (verbose) info("Residual norm: %.15f\n", sqrt(res_norm_squared));
     if(res_norm_squared < tol_jfnk*tol_jfnk) break;
 
-    if (verbose) printf("JFNK iteration: %d\n", jfnk_iter_num);
+    if (verbose) info("JFNK iteration: %d\n", jfnk_iter_num);
 
     // right-hand side is negative residual
     // (rhs stays unchanged through the CG loop)
@@ -779,7 +779,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
       for (int i=0; i < n_dof; i++) p[i] = r[i] + beta*p[i];
     }
     // check whether CG converged
-    if (verbose) printf("CG (JFNK) made %d iteration(s) (tol = %g)\n", 
+    if (verbose) info("CG (JFNK) made %d iteration(s) (tol = %g)\n", 
            iter_current, sqrt(tol_current_squared));
     if(tol_current_squared > matrix_solver_tol*matrix_solver_tol) {
       error("CG (JFNK) did not converge.");

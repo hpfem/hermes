@@ -23,19 +23,19 @@ int main(int argc, char* argv[])
     double val_right = lobatto_val_ref(1.0, n);
       
     if (fabs(val_left) > max_allowed_error) {
-      printf("n = %d, val_left = %g\n", n, val_left); 
+      info("n = %d, val_left = %g\n", n, val_left); 
       ok = 0;
     }
     if (fabs(val_right) > max_allowed_error) {
-      printf("n = %d, val_right = %g\n", n, val_right); 
+      info("n = %d, val_right = %g\n", n, val_right); 
       ok = 0;
     }
   }
   if (ok) {
-      printf("Success!\n");
+      info("Success!\n");
       return ERROR_SUCCESS;
   } else {
-      printf("Failure!\n");
+      info("Failure!\n");
       return ERROR_FAILURE;
   }
 }

@@ -55,7 +55,7 @@ int main() {
   delete md;
   
 	// Enumerate basis functions
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
   mesh->plot("mesh.gp");
   
   double K_EFF = 1.0;         // Initial approximation of the dominant eigenvalue
@@ -174,11 +174,11 @@ int main() {
     // Normalize total neutron flux to one fission neutron
     multiply_dofs_with_constant(mesh, 1./K_EFF, current_solution);
     
-    if (verbose) printf("K_EFF_%d = %.8f\n", i+1, K_EFF);
+    if (verbose) info("K_EFF_%d = %.8f\n", i+1, K_EFF);
   }
   
   // Print the converged eigenvalue
-  printf("K_EFF = %.8f, err= %.8f%%\n", K_EFF, 100*(K_EFF-1));
+  info("K_EFF = %.8f, err= %.8f%%\n", K_EFF, 100*(K_EFF-1));
 
   // Plot the converged critical  neutron flux
   sprintf(solution_file, "solution.gp");
@@ -189,12 +189,12 @@ int main() {
 
 	get_solution_at_point(mesh, 0.0, flux, J);
 	R = flux[0]/flux[1];
-	printf("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%\n", R, 100*(R-2.5332)/2.5332);
+	info("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%\n", R, 100*(R-2.5332)/2.5332);
 	
 	get_solution_at_point(mesh, 40.0, flux, J);
 	R = flux[0]/flux[1];
-	printf("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%\n", R, 100*(R-1.5162)/1.5162);
+	info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%\n", R, 100*(R-1.5162)/1.5162);
 	
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

@@ -43,15 +43,15 @@ int main(int argc, char* argv[])
         der_1 *= leg_norm_const_ref(poly_deg + 1);
         der_2 *= leg_norm_const_ref(poly_deg - 1);
         double check_val = fabs(val_1 - (der_1 - der_2));
-          printf("poly_deg = %d, i = %d, quad_order = %d, val_1 = %g, der_1 = %g, der_2 = %g, check_val = %g\n", poly_deg, i, quad_order, val_1, der_1, der_2, check_val);      
+          info("poly_deg = %d, i = %d, quad_order = %d, val_1 = %g, der_1 = %g, der_2 = %g, check_val = %g\n", poly_deg, i, quad_order, val_1, der_1, der_2, check_val);      
         if (check_val > max_allowed_error) {
-          printf("Failure!\n");
+          info("Failure!\n");
           return ERROR_FAILURE;
         }
       }
     }
   }
 
-  printf("Success!\n");
+  info("Success!\n");
   return ERROR_SUCCESS;
 }

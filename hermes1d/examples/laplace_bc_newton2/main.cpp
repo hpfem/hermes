@@ -40,7 +40,7 @@ int main() {
   // Create coarse mesh, set Dirichlet BC, enumerate 
   // basis functions
   Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
 
   // Register weak forms
   DiscreteProblem *dp = new DiscreteProblem();
@@ -112,6 +112,6 @@ int main() {
   Linearizer l(mesh);
   l.plot_solution("solution.gp");
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

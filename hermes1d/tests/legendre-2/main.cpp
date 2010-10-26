@@ -43,10 +43,10 @@ int main(int argc, char* argv[])
         double val_final;
         if (poly_deg_1 == poly_deg_2) val_final = val - 1.0;
         else val_final = val;  
-        printf("poly_deg_1 = %d, poly_deg_2 = %d, quad_order = %d, val_final = %g\n", 
+        info("poly_deg_1 = %d, poly_deg_2 = %d, quad_order = %d, val_final = %g\n", 
                 poly_deg_1, poly_deg_2, quad_order, val_final);      
         if (max_actual_error > max_allowed_error) {
-          printf("Failure!\n");
+          info("Failure!\n");
           return ERROR_FAILURE;
         }
         if (fabs(val_final) > max_actual_error) {
@@ -56,6 +56,6 @@ int main(int argc, char* argv[])
     }
   }
 
-  printf("Success!\n");
+  info("Success!\n");
   return ERROR_SUCCESS;
 }

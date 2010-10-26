@@ -91,9 +91,9 @@ int main() {
     ref_elem_pairs[i][1] = new Element();
   }
   while(1) {
-    printf("============ Adaptivity step %d ============\n", adapt_iterations); 
+    info("============ Adaptivity step %d ============\n", adapt_iterations); 
 
-    printf("N_dof = %d\n", mesh->get_n_dof());
+    info("N_dof = %d\n", mesh->get_n_dof());
  
     // Newton's loop on coarse mesh
     // Obtain the number of degrees of freedom.
@@ -159,14 +159,14 @@ int main() {
     int n_elem = mesh->get_n_active_elem();
     for (int i=0; i < n_elem; i++) {
 
-      printf("=== Starting FTR of Elem [%d]\n", i);
+      info("=== Starting FTR of Elem [%d]\n", i);
 
       // Replicate coarse mesh including solution.
       Mesh *mesh_ref_local = mesh->replicate();
 
       // Perform FTR of element 'i'
       mesh_ref_local->reference_refinement(i, 1);
-      printf("Elem [%d]: fine mesh created (%d DOF).\n", 
+      info("Elem [%d]: fine mesh created (%d DOF).\n", 
              i, mesh_ref_local->assign_dofs());
 
       // Obtain the number of degrees of freedom.
@@ -239,7 +239,7 @@ int main() {
       double err_est_array[MAX_ELEM_NUM];
       elem_errors[i] = calc_error_estimate(NORM, mesh, mesh_ref_local, 
                        err_est_array);
-      printf("Elem [%d]: absolute error (est) = %g\n", i, elem_errors[i]);
+      info("Elem [%d]: absolute error (est) = %g\n", i, elem_errors[i]);
 
       // Copy the reference element pair for element 'i'
       // into the ref_elem_pairs[i][] array
@@ -278,7 +278,7 @@ int main() {
                                                   subdivision, order);
       // Calculate an estimate of the global relative error
       double err_exact_rel = err_exact_total/exact_sol_norm;
-      printf("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
+      info("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
       graph.add_values(0, mesh->get_n_dof(), 100 * err_exact_rel);
     }
 
@@ -287,7 +287,7 @@ int main() {
     for (int i=0; i < mesh->get_n_active_elem(); i++) {
       if (elem_errors[i] > max_ftr_error) max_ftr_error = elem_errors[i];
     }
-    printf("Max FTR error = %g\n", max_ftr_error);
+    info("Max FTR error = %g\n", max_ftr_error);
 
     // Add entry to DOF convergence graph
     graph.add_values(1, mesh->get_n_dof(), max_ftr_error);
@@ -312,6 +312,6 @@ int main() {
   // Save convergence graph
   graph.save("conv_dof.gp");
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }

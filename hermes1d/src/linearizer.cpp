@@ -55,7 +55,7 @@ void Linearizer::plot_solution(const char *out_filename,
         fprintf(f[c], "\n");
         delete[] x;
         delete[] y;
-        printf("Output written to %s.\n", final_filename[c]);
+        info("Output written to %s.\n", final_filename[c]);
         fclose(f[c]);
     }
 }
@@ -84,7 +84,7 @@ void Linearizer::plot_ref_elem_pairs(ElemPtr2* ref_elem_pairs,
         fprintf(f[c], "\n");
         delete[] x;
         delete[] y;
-        printf("Output written to %s.\n", final_filename[c]);
+        info("Output written to %s.\n", final_filename[c]);
         fclose(f[c]);
     }
 }
@@ -130,7 +130,7 @@ void Linearizer::get_xy_mesh(int comp,
 
     // FIXME:
     if(n_eq > MAX_EQN_NUM) {
-      printf("n_eq = %d\n", n_eq);
+      info("n_eq = %d\n", n_eq);
         error("number of equations too high in plot_solution().");
     }
     // FIXME
@@ -144,8 +144,8 @@ void Linearizer::get_xy_mesh(int comp,
     while ((e = I->next_active_element()) != NULL) {
         //printf("linearizer: in element (%g, %g)\n", e->x1, e->x2);
         if (counter >= n_active_elem) {
-	  printf("n_active_elem = %d\n", n_active_elem);
-	  printf("counter = %d\n", counter);
+	  info("n_active_elem = %d\n", n_active_elem);
+	  info("counter = %d\n", counter);
             error("Internal error: wrong n_active_elem");
         }
 
@@ -183,7 +183,7 @@ void Linearizer::get_xy_ref_array(int comp, ElemPtr2* ref_elem_pairs,
 
     // FIXME:
     if(n_eq > MAX_EQN_NUM) {
-      printf("n_eq = %d\n", n_eq);
+      info("n_eq = %d\n", n_eq);
         error("number of equations too high in plot_solution().");
     }
     // FIXME

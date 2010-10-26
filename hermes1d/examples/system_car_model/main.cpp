@@ -69,7 +69,7 @@ int NEWTON_MAX_ITER = 150;
 
 void compute_trajectory(Mesh *mesh, DiscreteProblem *dp) 
 {
-  printf("alpha = (%g, %g, %g, %g), zeta = (%g, %g, %g, %g)\n", 
+  info("alpha = (%g, %g, %g, %g), zeta = (%g, %g, %g, %g)\n", 
          alpha_ctrl[0], alpha_ctrl[1], 
          alpha_ctrl[2], alpha_ctrl[3], zeta_ctrl[0], 
          zeta_ctrl[1], zeta_ctrl[2], zeta_ctrl[3]); 
@@ -219,7 +219,7 @@ int main() {
 
   // enumerate shape functions and calculate
   // the number of DOF
-  printf("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d\n", mesh->assign_dofs());
 
   // register weak forms
   DiscreteProblem *dp = new DiscreteProblem();
@@ -282,6 +282,6 @@ int main() {
     }
   }
 
-  printf("Done.\n");
+  info("Done.\n");
   return 1;
 }
