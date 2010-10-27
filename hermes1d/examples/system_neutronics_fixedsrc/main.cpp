@@ -77,11 +77,11 @@ int main() {
 	  	
   // Newton's loop		
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_n_dof();
+  int ndof = mesh->get_num_dofs();
 
   // Fill vector y using dof and coeffs arrays in elements.
   double *y = new double[ndof];
-  copy_mesh_to_vector(mesh, y);
+  solution_to_vector(mesh, y);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -125,7 +125,7 @@ int main() {
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // copy coefficients from vector y to elements
-    copy_vector_to_mesh(y, mesh);
+    vector_to_solution(y, mesh);
   }
   
   delete matrix;

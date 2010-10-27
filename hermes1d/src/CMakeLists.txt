@@ -5,7 +5,7 @@ endif(MSVC)
 set(SRC
     iterator.cpp qsort.cpp
     lobatto.cpp legendre.cpp
-    discrete.cpp solution.cpp mesh.cpp
+    discrete_problem.cpp solution.cpp mesh.cpp
     projection.cpp
     linearizer.cpp quad_std.cpp transforms.cpp
     adapt.cpp graph.cpp h1_polys.cpp

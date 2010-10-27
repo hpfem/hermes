@@ -8,8 +8,8 @@
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-static int N_eq = 1;
-int N_elem = 40;                         // number of elements
+static int NEQ = 1;
+int NELEM = 40;                         // number of elements
 double A = 0, B = 20;                     // domain end points
 int P_init = 2;                           // initial polynomal degree
 
@@ -73,7 +73,7 @@ double residual(int num, double *x, double *weights,
 /******************************************************************************/
 int main(int argc, char* argv[]) {
   // create mesh
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   // you can set the zero dirichlet at the right hand side
   //mesh.set_bc_right_dirichlet(0, 0);
 

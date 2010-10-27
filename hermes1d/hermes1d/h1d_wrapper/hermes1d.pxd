@@ -32,13 +32,13 @@ cdef extern from "hermes1d.h":
         Element *get_base_elems()
         void set_bc_left_dirichlet(int eq_n, double val)
         void set_bc_right_dirichlet(int eq_n, double val)
-        void copy_vector_to_mesh(double *y, int sln)
-        void copy_mesh_to_vector(double *y, int sln)
+        void vector_to_solution(double *y, int sln)
+        void solution_to_vector(double *y, int sln)
         void plot(char* filename)
         Mesh *replicate()
         void reference_refinement(int start_elem_id, int elem_num)
         int get_n_active_elem()
-        int get_n_dof()
+        int get_num_dofs()
 
     cdef cppclass Linearizer:
         Linearizer(Mesh *mesh)

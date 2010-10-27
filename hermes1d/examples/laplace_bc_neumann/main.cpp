@@ -11,8 +11,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // General input:
-static int N_eq = 1;
-int N_elem = 30;                       // number of elements
+static int NEQ = 1;
+int NELEM = 30;                       // number of elements
 double A = 0, B = 2*M_PI;              // domain end points
 int P_init = 1;                        // initial polynomal degree
 
@@ -37,7 +37,7 @@ double f(double x) {
 int main() {
   // Create coarse mesh, set Dirichlet BC, enumerate 
   // basis functions
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   mesh->set_bc_left_dirichlet(0, Val_dir_left);
   info("N_dof = %d\n", mesh->assign_dofs());
 
@@ -49,11 +49,11 @@ int main() {
 
   // Newton's loop
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_n_dof();
+  int ndof = mesh->get_num_dofs();
 
   // Fill vector y using dof and coeffs arrays in elements.
   double *y = new double[ndof];
-  copy_mesh_to_vector(mesh, y);
+  solution_to_vector(mesh, y);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -97,7 +97,7 @@ int main() {
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // copy coefficients from vector y to elements
-    copy_vector_to_mesh(y, mesh);
+    vector_to_solution(y, mesh);
   }
   
   delete matrix;

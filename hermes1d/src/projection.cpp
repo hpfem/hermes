@@ -5,7 +5,7 @@
 
 #include "projection.h"
 #include "math.h"
-#include "discrete.h"
+#include "discrete_problem.h"
 
 double L2_projection_biform(int num, double *x, double *weights,
                 double *u, double *dudx, double *v, double *dvdx,

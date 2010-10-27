@@ -1117,7 +1117,7 @@ void Mesh::set_n_active_elem(int n)
     this->n_active_elem = n;
 }
 
-int Mesh::get_n_dof()
+int Mesh::get_num_dofs()
 {
   return this->n_dof;
 }
@@ -1167,14 +1167,14 @@ void Mesh::set_right_endpoint(double b)
   this->right_endpoint = b; 
 }
 
-void Mesh::copy_vector_to_mesh(double *y, int sln) 
+void Mesh::vector_to_solution(double *y, int sln) 
 {
-  ::copy_vector_to_mesh(y, this, sln);
+  ::vector_to_solution(y, this, sln);
 }
 
-void Mesh::copy_mesh_to_vector(double *y, int sln) 
+void Mesh::solution_to_vector(double *y, int sln) 
 {
-  ::copy_mesh_to_vector(this, y, sln);
+  ::solution_to_vector(this, y, sln);
 }
 
 // Use the err_array[] and threshold to create a list of 
@@ -1538,7 +1538,7 @@ void adapt_plotting(Mesh *mesh, ElemPtr2 *ref_elem_pairs,
   }
 }
 
-void copy_mesh_to_vector(Mesh *mesh, double *y, int sln) {
+void solution_to_vector(Mesh *mesh, double *y, int sln) {
   Element *e;
   Iterator *I = new Iterator(mesh);
   while ((e = I->next_active_element()) != NULL) {
@@ -1547,7 +1547,7 @@ void copy_mesh_to_vector(Mesh *mesh, double *y, int sln) {
   delete I;
 }
 
-void copy_vector_to_mesh(double *y, Mesh *mesh, int sln) 
+void vector_to_solution(double *y, Mesh *mesh, int sln) 
 {
   Element *e;
   Iterator *I = new Iterator(mesh);

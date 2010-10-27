@@ -31,8 +31,8 @@ We solve A*x = E*B*x, where A, B are matrices composed of 2x2 blocks.
 
 */
 
-int N_elem = 2;                         // number of elements
-static int N_eq = 2;
+int NELEM = 2;                         // number of elements
+static int NEQ = 2;
 double A = 0, B = M_PI;                     // domain end points
 int P_init = 7;                           // initial polynomal degree
 
@@ -83,7 +83,7 @@ double B_00(int num, double *x, double *weights,
 /******************************************************************************/
 int main(int argc, char* argv[]) {
   // create mesh
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   // you can set the zero dirichlet at the right hand side
   mesh->set_bc_left_dirichlet(0, 0);
   mesh->set_bc_right_dirichlet(0, 0);

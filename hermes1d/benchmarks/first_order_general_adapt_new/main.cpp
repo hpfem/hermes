@@ -15,8 +15,8 @@
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 // General input:
-const int N_eq = 1;                     // Number of equations
-const int N_elem = 5;                   // Number of elements
+const int NEQ = 1;                     // Number of equations
+const int NELEM = 5;                   // Number of elements
 const double A = 0, B = 10;             // Domain end points
 const double YA = 1;                    // Equation parameter
 const int P_init = 1;                   // Initial polynomal degree
@@ -63,7 +63,7 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
 int main() {
   // Create coarse mesh, set Dirichlet BC, enumerate 
   // basis functions
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   mesh->set_bc_left_dirichlet(0, YA);
   mesh->assign_dofs();
 
@@ -93,15 +93,15 @@ int main() {
   while(1) {
     info("============ Adaptivity step %d ============\n", adapt_iterations); 
 
-    info("N_dof = %d\n", mesh->get_n_dof());
+    info("N_dof = %d\n", mesh->get_num_dofs());
  
     // Newton's loop on coarse mesh
     // Obtain the number of degrees of freedom.
-    int ndof = mesh->get_n_dof();
+    int ndof = mesh->get_num_dofs();
 
     // Fill vector y using dof and coeffs arrays in elements.
     double *y = new double[ndof];
-    copy_mesh_to_vector(mesh, y);
+    solution_to_vector(mesh, y);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -145,7 +145,7 @@ int main() {
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
       // copy coefficients from vector y to elements
-      copy_vector_to_mesh(y, mesh);
+      vector_to_solution(y, mesh);
     }
     
     delete matrix;
@@ -170,11 +170,11 @@ int main() {
              i, mesh_ref_local->assign_dofs());
 
       // Obtain the number of degrees of freedom.
-      int ndof = mesh_ref_local->get_n_dof();
+      int ndof = mesh_ref_local->get_num_dofs();
 
       // Fill vector y using dof and coeffs arrays in elements.
       double *y = new double[ndof];
-      copy_mesh_to_vector(mesh_ref_local, y);
+      solution_to_vector(mesh_ref_local, y);
     
       // Set up the solver, matrix, and rhs according to the solver selection.
       SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -218,7 +218,7 @@ int main() {
         if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
         
         // copy coefficients from vector y to elements
-        copy_vector_to_mesh(y, mesh_ref_local);
+        vector_to_solution(y, mesh_ref_local);
       }
       
       delete matrix;
@@ -274,12 +274,12 @@ int main() {
       // (using a fine subdivision and high-order quadrature)
       int subdivision = 500; // heuristic parameter
       int order = 20;        // heuristic parameter
-      double exact_sol_norm = calc_solution_norm(NORM, exact_sol, N_eq, A, B,
+      double exact_sol_norm = calc_solution_norm(NORM, exact_sol, NEQ, A, B,
                                                   subdivision, order);
       // Calculate an estimate of the global relative error
       double err_exact_rel = err_exact_total/exact_sol_norm;
       info("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
-      graph.add_values(0, mesh->get_n_dof(), 100 * err_exact_rel);
+      graph.add_values(0, mesh->get_num_dofs(), 100 * err_exact_rel);
     }
 
     // Calculate max FTR error
@@ -290,7 +290,7 @@ int main() {
     info("Max FTR error = %g\n", max_ftr_error);
 
     // Add entry to DOF convergence graph
-    graph.add_values(1, mesh->get_n_dof(), max_ftr_error);
+    graph.add_values(1, mesh->get_num_dofs(), max_ftr_error);
 
     // Decide whether the max. FTR error is sufficiently small
     if(max_ftr_error < TOL_ERR_FTR) break;

@@ -19,7 +19,7 @@
 #include "quad_std.h"
 #include "legendre.h"
 #include "lobatto.h"
-#include "discrete.h"
+#include "discrete_problem.h"
 #include "solution.h"
 #include "linearizer.h"
 #include "transforms.h"

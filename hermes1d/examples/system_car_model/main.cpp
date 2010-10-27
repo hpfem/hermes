@@ -31,8 +31,8 @@
 const int PRINT = 0;
 
 // General input:
-const int N_eq = 5;
-const int N_elem = 5;              // number of elements
+const int NEQ = 5;
+const int NELEM = 5;              // number of elements
 const double A = 0, B = 10;         // domain end points
 const int P_init = 2;              // initial polynomal degree 
 
@@ -76,11 +76,11 @@ void compute_trajectory(Mesh *mesh, DiscreteProblem *dp)
 
   // Newton's loop
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_n_dof();
+  int ndof = mesh->get_num_dofs();
 
   // Fill vector y using dof and coeffs arrays in elements.
   double *y = new double[ndof];
-  copy_mesh_to_vector(mesh, y);
+  solution_to_vector(mesh, y);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -124,7 +124,7 @@ void compute_trajectory(Mesh *mesh, DiscreteProblem *dp)
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // copy coefficients from vector y to elements
-    copy_vector_to_mesh(y, mesh);
+    vector_to_solution(y, mesh);
   }
   
   delete matrix;
@@ -210,7 +210,7 @@ void set_alpha_and_zeta(int component, double ray_angle, double radius) {
 /******************************************************************************/
 int main() {
   // create mesh
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   mesh->set_bc_left_dirichlet(0, X0_left);
   mesh->set_bc_left_dirichlet(1, Y0_left);
   mesh->set_bc_left_dirichlet(2, Vel_left);

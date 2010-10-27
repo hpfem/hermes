@@ -63,8 +63,8 @@ public:
 
 typedef Element* ElemPtr2[2];
 
-void HERMES_API copy_mesh_to_vector(Mesh *mesh, double *y, int sln=0);
-void HERMES_API copy_vector_to_mesh(double *y, Mesh *mesh, int sln=0);
+void HERMES_API solution_to_vector(Mesh *mesh, double *y, int sln=0);
+void HERMES_API vector_to_solution(double *y, Mesh *mesh, int sln=0);
 
 class Mesh {
     public:
@@ -98,7 +98,7 @@ class Mesh {
 
         void set_n_active_elem(int n);
         
-        int get_n_dof();
+        int get_num_dofs();
 
         void set_n_dof(int n);
 
@@ -145,9 +145,9 @@ class Mesh {
                         int subdivision = 500); // plots error wrt. exact solution
         void assign_elem_ids();
         int n_active_elem;
-        void copy_vector_to_mesh(double *y, int sln=0);
+        void vector_to_solution(double *y, int sln=0);
 
-        void copy_mesh_to_vector(double *y, int sln=0);
+        void solution_to_vector(double *y, int sln=0);
 
     private:
         double left_endpoint, right_endpoint;

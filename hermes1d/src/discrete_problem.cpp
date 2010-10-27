@@ -4,7 +4,7 @@
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
 #include "../../hermes_common/matrix.h"
-#include "discrete.h"
+#include "discrete_problem.h"
 #include "mesh.h"
 
 #include "../../hermes_common/error.h"
@@ -554,7 +554,7 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, double *res,
   int n_eq = mesh->get_n_eq();
 
   // total number of unknowns
-  int n_dof = mesh->get_n_dof();
+  int n_dof = mesh->get_num_dofs();
 
   // erase residual vector
   if(matrix_flag == 0 || matrix_flag == 2) 
@@ -595,7 +595,7 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res,
   int n_eq = mesh->get_n_eq();
 
   // total number of unknowns
-  int n_dof = mesh->get_n_dof();
+  int n_dof = mesh->get_num_dofs();
 
   // Reallocate the matrix and residual vector.
   res->alloc(n_dof);
@@ -674,9 +674,9 @@ void J_dot_vec_jfnk(DiscreteProblem *dp, Mesh *mesh, double* vec,
   for (int i=0; i<n_dof; i++) {
     y_perturbed[i] = y_orig[i] + jfnk_epsilon*vec[i];
   }
-  copy_vector_to_mesh(y_perturbed, mesh);
+  vector_to_solution(y_perturbed, mesh);
   dp->assemble_vector(mesh, f_perturbed); 
-  copy_vector_to_mesh(y_orig, mesh);
+  vector_to_solution(y_orig, mesh);
   for (int i=0; i<n_dof; i++) {
     J_dot_vec[i] = (f_perturbed[i] - f_orig[i])/jfnk_epsilon;
   }
@@ -688,7 +688,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
              double matrix_solver_tol, int matrix_solver_maxiter, 
 	     double jfnk_epsilon, double tol_jfnk, int jfnk_maxiter, bool verbose)
 {
-  int n_dof = mesh->get_n_dof();
+  int n_dof = mesh->get_num_dofs();
   // vectors for JFNK
   double f_orig[MAX_N_DOF];
   double y_orig[MAX_N_DOF];
@@ -703,7 +703,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
   /*
   // debug
   // fill vector y_orig using dof and coeffs arrays in elements
-  copy_mesh_to_vector(mesh, y_orig);
+  solution_to_vector(mesh, y_orig);
   dp->assemble_vector(mesh, f_orig); 
   double *w = new double[n_dof];
   for(int i=0; i<n_dof; i++) w[i] = 0;
@@ -721,7 +721,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
   int jfnk_iter_num = 1;
   while (1) {
     // fill vector y_orig using dof and coeffs arrays in elements
-    copy_mesh_to_vector(mesh, y_orig);
+    solution_to_vector(mesh, y_orig);
 
     // construct residual vector f_orig corresponding to y_orig
     // (f_orig stays unchanged through the entire CG loop)
@@ -789,7 +789,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
     for(int i=0; i<n_dof; i++) y_orig[i] += vec[i];
 
     // copying vector y_orig to mesh elements
-    copy_vector_to_mesh(y_orig, mesh);
+    vector_to_solution(y_orig, mesh);
 
     jfnk_iter_num++;
     if (jfnk_iter_num >= jfnk_maxiter) {
@@ -798,6 +798,6 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
   }
 
   // copy updated vector y_orig to mesh
-  copy_vector_to_mesh(y_orig, mesh);
+  vector_to_solution(y_orig, mesh);
 }
 

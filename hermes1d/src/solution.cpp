@@ -3,7 +3,7 @@
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-#include "discrete.h"
+#include "discrete_problem.h"
 
 // Set component "comp" of the solution to be a constant "val" everywhere
 // Note: This function does not touch Dirichlet boundary 
@@ -24,7 +24,7 @@ void set_vertex_dofs_constant(Mesh* mesh, double val, int comp, int sln)
 // are present - the lifts must be multiplied separately.
 void multiply_dofs_with_constant(Mesh* mesh, double val, int sln)
 {
-  int n_dof = mesh->get_n_dof();
+  int n_dof = mesh->get_num_dofs();
   double *y = new double[n_dof];
   Iterator *I = new Iterator(mesh);
   Element *e;

@@ -29,8 +29,8 @@ double Zl=60;                  // load impedance[Ohm]
 //double Val_newton_alpha_I_Im=-omega*C*Zl;
 
 // General input:
-static int N_eq = 4;
-int N_elem = 1000;          // number of elements
+static int NEQ = 4;
+int NELEM = 1000;          // number of elements
 double A = 0, B = l;        // domain end points
 int P_init = 2;             // initial polynomal degree
 
@@ -60,7 +60,7 @@ double Val_dir_left_4 = 0;  // imaginary part of the voltage at the beginnig of 
 /******************************************************************************/
 int main() {
     // create mesh
-    Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+    Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
     mesh->set_bc_left_dirichlet(0, Val_dir_left_1);
     mesh->set_bc_left_dirichlet(1, Val_dir_left_2);
     mesh->set_bc_left_dirichlet(2, Val_dir_left_3);

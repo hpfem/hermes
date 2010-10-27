@@ -13,8 +13,8 @@
 #define ERROR_FAILURE                               -1
 
 // General input:
-static int N_eq = 1;
-int N_elem = 2;                         // Number of elements
+static int NEQ = 1;
+int NELEM = 2;                         // Number of elements
 double A = -M_PI, B = M_PI;              // Domain end points
 int P_init = 1;                         // Initial polynomal degree
 
@@ -101,7 +101,7 @@ double residual(int num, double *x, double *weights,
 /******************************************************************************/
 int main() {
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   mesh->set_bc_left_dirichlet(0, Val_dir_left);
   mesh->set_bc_right_dirichlet(0, Val_dir_right);
   info("N_dof = %d\n", mesh->assign_dofs());
@@ -113,11 +113,11 @@ int main() {
 
   // Newton's loop on coarse mesh
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_n_dof();
+  int ndof = mesh->get_num_dofs();
 
   // Fill vector y using dof and coeffs arrays in elements.
   double *y = new double[ndof];
-  copy_mesh_to_vector(mesh, y);
+  solution_to_vector(mesh, y);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -161,7 +161,7 @@ int main() {
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // copy coefficients from vector y to elements
-    copy_vector_to_mesh(y, mesh);
+    vector_to_solution(y, mesh);
   }
   
   delete matrix;
@@ -175,7 +175,7 @@ int main() {
   int start_elem_id = 0; 
   int num_to_ref = mesh_ref->get_n_active_elem();
   mesh_ref->reference_refinement(start_elem_id, num_to_ref);
-  info("Fine mesh created (%d DOF).\n", mesh_ref->get_n_dof());
+  info("Fine mesh created (%d DOF).\n", mesh_ref->get_num_dofs());
 
   // Convergence graph wrt. the number of degrees of freedom
   GnuplotGraph graph;
@@ -191,11 +191,11 @@ int main() {
 
     // Newton's loop on fine mesh
     // Obtain the number of degrees of freedom.
-    int ndof = mesh_ref->get_n_dof();
+    int ndof = mesh_ref->get_num_dofs();
 
     // Fill vector y using dof and coeffs arrays in elements.
     double *y = new double[ndof];
-    copy_mesh_to_vector(mesh_ref, y);
+    solution_to_vector(mesh_ref, y);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -239,7 +239,7 @@ int main() {
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
       // copy coefficients from vector y to elements
-      copy_vector_to_mesh(y, mesh_ref);
+      vector_to_solution(y, mesh_ref);
     }
     
     delete matrix;
@@ -253,11 +253,11 @@ int main() {
 
       // Newton's loop on coarse mesh
       // Obtain the number of degrees of freedom.
-      int ndof = mesh->get_n_dof();
+      int ndof = mesh->get_num_dofs();
 
       // Fill vector y using dof and coeffs arrays in elements.
       double *y = new double[ndof];
-      copy_mesh_to_vector(mesh, y);
+      solution_to_vector(mesh, y);
 
       // Set up the solver, matrix, and rhs according to the solver selection.
       SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -301,7 +301,7 @@ int main() {
         if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
         
         // copy coefficients from vector y to elements
-        copy_vector_to_mesh(y, mesh);
+        vector_to_solution(y, mesh);
       }
       
       delete matrix;
@@ -332,16 +332,16 @@ int main() {
       // (using a fine subdivision and high-order quadrature)
       int subdivision = 500; // heuristic parameter
       int order = 20;        // heuristic parameter
-      double exact_sol_norm = calc_solution_norm(NORM, exact_sol, N_eq, A, B,
+      double exact_sol_norm = calc_solution_norm(NORM, exact_sol, NEQ, A, B,
                                                   subdivision, order);
       // Calculate an estimate of the global relative error
       err_exact_rel = err_exact_total/exact_sol_norm;
       info("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
-      graph.add_values(0, mesh->get_n_dof(), 100 * err_exact_rel);
+      graph.add_values(0, mesh->get_num_dofs(), 100 * err_exact_rel);
     }
 
     // add entry to DOF convergence graph
-    graph.add_values(1, mesh->get_n_dof(), 100 * err_est_rel);
+    graph.add_values(1, mesh->get_num_dofs(), 100 * err_est_rel);
 
     // Decide whether the relative error is sufficiently small
     if(err_est_rel*100 < TOL_ERR_REL) break;
@@ -367,8 +367,8 @@ int main() {
   graph.save("conv_dof.gp");
 
   int success_test = 1; 
-  info("N_dof = %d\n", mesh->get_n_dof());
-  if (mesh->get_n_dof() > 40) success_test = 0;
+  info("N_dof = %d\n", mesh->get_num_dofs());
+  if (mesh->get_num_dofs() > 40) success_test = 0;
 
   if (success_test) {
     info("Success!\n");

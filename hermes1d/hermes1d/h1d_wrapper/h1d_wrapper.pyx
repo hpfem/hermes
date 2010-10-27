@@ -85,11 +85,11 @@ cdef class Mesh:
         if self.delptr:
             del self.thisptr
 
-    def copy_vector_to_mesh(self, sol, int comp):
+    def vector_to_solution(self, sol, int comp):
         cdef double *Y
         cdef int n
         numpy2c_double_inplace(sol, &Y, &n)
-        self.thisptr.copy_vector_to_mesh(Y, comp)
+        self.thisptr.vector_to_solution(Y, comp)
 
     def assign_dofs(self):
         return self.thisptr.assign_dofs()
@@ -127,8 +127,8 @@ cdef class Mesh:
     def get_n_active_elem(self):
         return self.thisptr.get_n_active_elem()
 
-    def get_n_dof(self):
-        return self.thisptr.get_n_dof()
+    def get_num_dofs(self):
+        return self.thisptr.get_num_dofs()
 
     def _reference_refinement(self, a, b):
         """
@@ -184,7 +184,7 @@ cdef class Linearizer:
         cdef double *x
         cdef double *y
         cdef int n
-        self.mesh.copy_vector_to_mesh(sol, comp)
+        self.mesh.vector_to_solution(sol, comp)
         self.thisptr.get_xy_mesh(comp, plotting_elem_subdivision,
                 &x, &y, &n)
         x_numpy = c2numpy_double(x, n)
@@ -233,7 +233,7 @@ class FESolution:
         """
         Returns the value of the solution at a point 'x'.
         """
-        self._mesh.copy_vector_to_mesh(self._coefs, comp)
+        self._mesh.vector_to_solution(self._coefs, comp)
 
         pts = []
         p = []
@@ -248,7 +248,7 @@ class FESolution:
         """
         Returns the derivative of the solution at a point 'x'.
         """
-        self._mesh.copy_vector_to_mesh(self._coefs, comp)
+        self._mesh.vector_to_solution(self._coefs, comp)
 
         pts = []
         p = []
@@ -263,7 +263,7 @@ class FESolution:
         """
         Returns the L2 norm of the solution.
         """
-        self._mesh.copy_vector_to_mesh(self._coefs, comp)
+        self._mesh.vector_to_solution(self._coefs, comp)
 
         pts = []
         p = []
@@ -281,7 +281,7 @@ class FESolution:
         """
         Returns the H1 norm of the solution.
         """
-        self._mesh.copy_vector_to_mesh(self._coefs, comp)
+        self._mesh.vector_to_solution(self._coefs, comp)
 
         pts = []
         p = []
@@ -317,7 +317,7 @@ class FESolution:
         Returns a list of FE coefficients for each element, corresponding to
         the solution component 'comp'.
         """
-        self._mesh.copy_vector_to_mesh(self._coefs, comp)
+        self._mesh.vector_to_solution(self._coefs, comp)
         coeffs = []
         I = Iterator(self._mesh)
         cdef hermes1d.Element *e = I._next_active_element()
