@@ -133,7 +133,8 @@ void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
 ///
 bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (int j = 0; j < size; j++)
@@ -143,7 +144,8 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       int nnz = Ap[size];

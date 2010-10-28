@@ -40,10 +40,10 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // UMFPack specific data structures for storing matrix, rhs
-  int *Ap;
-  int *Ai;
-  scalar *Ax;
+  // UMFPack specific data structures for storing the system matrix (CSC format).
+  scalar *Ax;   // Matrix entries (column-wise).
+  int *Ai;      // Row indices of values in Ax.
+  int *Ap;      // Index to Ax/Ai, where each column starts.
 
   static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
 
@@ -67,6 +67,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
+  //UMFPack specific data structures for storing the rhs.
   scalar *v;
 
   friend class UMFPackLinearSolver;

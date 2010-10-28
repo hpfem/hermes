@@ -42,7 +42,7 @@ UMFPackMatrix::UMFPackMatrix() {
 UMFPackMatrix::UMFPackMatrix(int size) {
   _F_
   this->size = size;
-        this->alloc();
+  this->alloc();
 }
 
 UMFPackMatrix::~UMFPackMatrix() {
@@ -53,7 +53,7 @@ UMFPackMatrix::~UMFPackMatrix() {
 void UMFPackMatrix::alloc() {
   _F_
   assert(pages != NULL);
-        assert(size != 0);
+  assert(size != 0);
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];
@@ -126,7 +126,8 @@ void UMFPackMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
 ///
 bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (int j = 0; j < size; j++)
@@ -136,7 +137,8 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       int nnz = Ap[size];

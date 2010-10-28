@@ -59,17 +59,17 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // MUMPS specific data structures for storing matrix, rhs
-  int nnz;				// number of non-zero elements
-  int *irn;				// row indices
-  int *jcn;				// column indices
+  // MUMPS specific data structures for storing the system matrix (CSC format).
+  int nnz;        // Number of non-zero elements. 
+  int *irn;       // Row indices.
+  int *jcn;       // Column indices.
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  scalar *a;				// matrix entries
+  scalar *Ax;     // Matrix entries (column-wise).
 #else
-  ZMUMPS_COMPLEX *a;
+  ZMUMPS_COMPLEX *Ax;
 #endif
-  int *ap;
-  int *ai;
+  int *Ai;        // Row indices of values in Ax.
+  int *Ap;        // Index to Ax/Ai, where each column starts.
 
   friend class MumpsSolver;
 };
@@ -95,6 +95,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
+  // MUMPS specific data structures for storing the rhs.
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   scalar *v;
 #else

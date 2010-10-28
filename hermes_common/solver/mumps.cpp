@@ -67,11 +67,12 @@ MumpsMatrix::MumpsMatrix()
 {
   _F_
   nnz = 0;
+  size = 0;
   irn = NULL;
   jcn = NULL;
-  a = NULL;
-  ap = NULL;
-  ai = NULL;
+  Ax = NULL;
+  Ap = NULL;
+  Ai = NULL;
 }
 
 MumpsMatrix::~MumpsMatrix()
@@ -84,30 +85,33 @@ void MumpsMatrix::alloc()
 {
   _F_
   assert(pages != NULL);
+  assert(size != 0);
 
   // initialize the arrays Ap and Ai
-  ap = new int[size + 1];
+  Ap = new int [size + 1];
+  MEM_CHECK(Ap);
   int aisize = get_num_indices();
-  ai = new int[aisize];
+  Ai = new int [aisize];
+  MEM_CHECK(Ai);
 
   // sort the indices and remove duplicities, insert into Ai
   int i, pos = 0;
   for (i = 0; i < size; i++) {
-    ap[i] = pos;
-    pos += sort_and_store_indices(pages[i], ai + pos, ai + aisize);
+    Ap[i] = pos;
+    pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
   }
-  ap[i] = pos;
+  Ap[i] = pos;
 
-  delete[] pages;
+  delete [] pages;
   pages = NULL;
 
-  nnz = ap[size];
+  nnz = Ap[size];
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  a = new scalar[nnz];
-  memset(a, 0, sizeof(scalar) * nnz);
+  Ax = new scalar[nnz];
+  memset(Ax, 0, sizeof(scalar) * nnz);
 #else
-  a = new ZMUMPS_COMPLEX[nnz];
-  memset(a, 0, sizeof(ZMUMPS_COMPLEX) * nnz);
+  Ax = new ZMUMPS_COMPLEX[nnz];
+  memset(Ax, 0, sizeof(ZMUMPS_COMPLEX) * nnz);
 #endif
 
   irn = new int[nnz];
@@ -120,9 +124,9 @@ void MumpsMatrix::free()
 {
   _F_
   nnz = 0;
-  delete[] ap; ap = NULL;
-  delete[] ai; ai = NULL;
-  delete[] a; a = NULL;
+  delete[] Ap; Ap = NULL;
+  delete[] Ai; Ai = NULL;
+  delete[] Ax; Ax = NULL;
   delete[] irn; irn = NULL;
   delete[] jcn; jcn = NULL;
 }
@@ -130,11 +134,11 @@ void MumpsMatrix::free()
 scalar MumpsMatrix::get(int m, int n)
 {
   _F_
-  int mid = ap[n] + find_position(ai + ap[n], ap[n + 1] - ap[n], m);
+  int mid = Ap[n] + find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  return a[mid];
+  return Ax[mid];
 #else
-  return cplx(a[mid].r, a[mid].i);
+  return cplx(Ax[mid].r, Ax[mid].i);
 #endif
 }
 
@@ -142,9 +146,9 @@ void MumpsMatrix::zero()
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  memset(a, 0, sizeof(scalar) * ap[size]);
+  memset(Ax, 0, sizeof(scalar) * Ap[size]);
 #else
-  memset(a, 0, sizeof(ZMUMPS_COMPLEX) * ap[size]);
+  memset(Ax, 0, sizeof(ZMUMPS_COMPLEX) * Ap[size]);
 #endif
 }
 
@@ -152,12 +156,12 @@ void MumpsMatrix::add(int m, int n, scalar v)
 {
   _F_
   if (m >= 0 && n >= 0) {		// ignore dirichlet DOFs
-    int pos = ap[n] + find_position(ai + ap[n], ap[n + 1] - ap[n], m);
+    int pos = Ap[n] + find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    a[pos] += v;
+    Ax[pos] += v;
 #else
-    a[pos].r += v.real();
-    a[pos].i += v.imag();
+    Ax[pos].r += v.real();
+    Ax[pos].i += v.imag();
 #endif
     irn[pos] = m + 1;			// MUMPS is indexing from 1
     jcn[pos] = n + 1;
@@ -172,29 +176,54 @@ void MumpsMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
       add(rows[i], cols[j], mat[i][j]);
 }
 
-
 /// dumping matrix and right-hand side
 ///
 bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   // TODO
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_NATIVE:
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
       for (int i = 0; i < nnz; i++)
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-        fprintf(file, "%d %d %lf\n", irn[i], jcn[i], a[i]);
+        fprintf(file, "%d %d %lf\n", irn[i], jcn[i], Ax[i]);
 #else
-        fprintf(file, "%d %d (%lf,%lf)\n", irn[i], jcn[i], a[i].r, a[i].i);
+        fprintf(file, "%d %d (%lf,%lf)\n", irn[i], jcn[i], Ax[i].r, Ax[i].i);
 #endif
       return true;
 
-    case DF_MATLAB_SPARSE: return false;
-    case DF_HERMES_BIN: return false;
-    case DF_PLAIN_ASCII: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return false;
-    default: return false;
+    case DF_MATLAB_SPARSE:
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
+      for (int j = 0; j < size; j++)
+        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
+      fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+
+      return true;
+
+    case DF_HERMES_BIN: 
+    {
+      hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
+      int ssize = sizeof(scalar);
+      int nnz = Ap[size];
+      hermes_fwrite(&ssize, sizeof(int), 1, file);
+      hermes_fwrite(&size, sizeof(int), 1, file);
+      hermes_fwrite(&nnz, sizeof(int), 1, file);
+      hermes_fwrite(Ap, sizeof(int), size + 1, file);
+      hermes_fwrite(Ai, sizeof(int), nnz, file);
+      hermes_fwrite(Ax, sizeof(scalar), nnz, file);
+      return true;
+    }
+
+    case DF_PLAIN_ASCII:
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+      return false;
+
+    default:
+      return false;
   }
 }
 
@@ -207,7 +236,7 @@ int MumpsMatrix::get_matrix_size() const
 double MumpsMatrix::get_fill_in() const
 {
   _F_
-  return ap[size] / ((double) size * (double) size);
+  return Ap[size] / (double) (size * size);
 }
 
 // MumpsVector /////////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +438,7 @@ bool MumpsSolver::solve()
   id.nz = m->nnz;
   id.irn = m->irn;
   id.jcn = m->jcn;
-  id.a = m->a;
+  id.a = m->Ax;
 
   // right-hand side
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
