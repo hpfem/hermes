@@ -5,9 +5,6 @@
 #include "hermes2d.h"
 #include "function.h"
 
-//#include <iostream> // I do use std::cout sometime sorry... DO NOT DO THAT, THANKS.
-//#include <cmath> // I use C function exp for instance.
-
 using namespace RefinementSelectors;
 
 //  This example is derived from tutorial 18 and shows an example of 
@@ -18,6 +15,9 @@ using namespace RefinementSelectors;
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
+//
+//  Note: f is chosen on purpose 2nd order in space such that error comes from time integration.
+//  You can change it but then you need to refine sufficiently to kill spatial error.
 //
 //  Domain: square (-1,1)^2.
 //
@@ -44,7 +44,6 @@ double TIME = 0.0;
 
 const double SIGMA = 1.0;
 const double ALPHA = 0.0;
-const double BETA = 1.0;
 const double GAMMA = 1 - 1/sqrt(2);
 enum TimeDiscretization {IE, SDIRK};
 TimeDiscretization method = SDIRK;
@@ -86,7 +85,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 template<typename Real>
 Real heat_src(Real x, Real y, double t)
 {
-  return -ALPHA*pow(exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LY-y)-exp(OMEGA*TIME)*(LY+y)*(LX-x)*(LY-y),2.0)*pow(exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA-1.0)-ALPHA*pow(exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LX-x)-exp(OMEGA*TIME)*(LX+x)*(LX-x)*(LY-y),2.0)*pow(exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA-1.0)+exp(OMEGA*TIME)*(pow(exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA)+1.0)*(LX+x)*(LX-x)*2.0+exp(OMEGA*TIME)*(pow(exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA)+1.0)*(LY+y)*(LY-y)*2.0+OMEGA*exp(OMEGA*TIME)*(LX+x)*(LY+y)*(LX-x)*(LY-y);
+  return -ALPHA*pow(exp(OMEGA*t)*(LX+x)*(LY+y)*(LY-y)-exp(OMEGA*t)*(LY+y)*(LX-x)*(LY-y),2.0)*pow(exp(OMEGA*t)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA-1.0)-ALPHA*pow(exp(OMEGA*t)*(LX+x)*(LY+y)*(LX-x)-exp(OMEGA*t)*(LX+x)*(LX-x)*(LY-y),2.0)*pow(exp(OMEGA*t)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA-1.0)+exp(OMEGA*t)*(pow(exp(OMEGA*t)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA)+1.0)*(LX+x)*(LX-x)*2.0+exp(OMEGA*t)*(pow(exp(OMEGA*t)*(LX+x)*(LY+y)*(LX-x)*(LY-y),ALPHA)+1.0)*(LY+y)*(LY-y)*2.0+OMEGA*exp(OMEGA*t)*(LX+x)*(LY+y)*(LX-x)*(LY-y);
 }
 
 // Exact solution.
@@ -170,25 +169,12 @@ int main(int argc, char* argv[])
     bool is_linear = false; 
     DiscreteProblem dp(&wf, &space, is_linear); 
 
-    /*
-    // Ugly hack to get the mass matrix for debugging purposes.
-    WeakForm dummy_wf;
-    dummy_wf.add_matrix_form(callback(dummy_bilinear_form), H2D_UNSYM, H2D_ANY);
-    dummy_wf.add_vector_form(callback(dummy_linear_form), H2D_ANY);
-    Vector* dummy_vec = new AVector();
-    project_global(space, H2D_H1_NORM, &u_prev_time, Tuple<Solution*>(), dummy_vec);
-    std::cout << "JUST CHECKING MASS MATRIX -->";
-    solve_newton(space, &dummy_wf, dummy_vec, matrix_solver, 1e2, 1, true);
-    */
-
     // Time stepping loop:
-    double current_time = 0.0; int ts = 0;
+    int ts = 0;
     do {
-      info("---- Time step %d, t = %g s.", ++ts, current_time);
+      info("---- Time step %d, t = %g s.", ++ts, TIME);
 
-      // I do not like current time neither...
-      TIME = TIME + TAU;
-      info("TIME is %g s.", TIME);
+      info("We are computing solution at next time step TIME+TAU = %g s.", TIME+TAU);
 
       // Perform Newton's iteration.
       int it = 1;
@@ -229,7 +215,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
       // Update time.
-      current_time += TAU;
+      TIME = TIME + TAU;
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
@@ -268,11 +254,11 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&space, &u_prev_time, coeff_vec2, matrix_solver);
 
     WeakForm wf1;
-    wf1.add_matrix_form(callback(jac1), HERMES_UNSYM, HERMES_ANY);
-    wf1.add_vector_form(callback(res1), HERMES_ANY, Tuple<MeshFunction*>(&u_prev_time));
+    wf1.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
+    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Tuple<MeshFunction*>(&u_prev_time));
     WeakForm wf2;
-    wf2.add_matrix_form(callback(jac2), HERMES_UNSYM, HERMES_ANY);
-    wf2.add_vector_form(callback(res2), HERMES_ANY, Tuple<MeshFunction*>(&u_prev_time, &Y1));
+    wf2.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
+    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Tuple<MeshFunction*>(&u_prev_time, &Y1));
 
     // Initialize the FE problem. 
     bool is_linear = false;
@@ -284,8 +270,7 @@ int main(int argc, char* argv[])
       info("---- Time step %d, t = %g s.", ++ts, current_time);
 
       // Compute Y1.
-      TIME = TIME + GAMMA * TAU;
-      info("Compute Y1 at t = %g s.", TIME);
+      info("Compute Y1 at t = %g s.", TIME+GAMMA*TAU);
 
       // Perform Newton's iteration for Y1.
       int it = 1;
@@ -325,8 +310,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_vec1, &space, &Y1);
 
       // Compute Y2.
-      TIME = TIME + (1-GAMMA) * TAU;
-      info("Compute Y2 at t = %g s.", TIME);
+      info("Compute Y2 at t = %g s.", TIME+TAU);
 
       // Perform Newton's iteration.
       while (1) {
@@ -364,8 +348,11 @@ int main(int argc, char* argv[])
       // Store Y2.
       Solution::vector_to_solution(coeff_vec2, &space, &Y2);
 
+      // Update previous time level solution.
       u_prev_time = Y2;
-      current_time += TAU;
+
+      // Update time.
+      TIME = TIME + TAU;
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
