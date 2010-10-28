@@ -163,7 +163,8 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 int UMFPackMatrix::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
-  return (sizeof(int) + sizeof(scalar)) * (Ap[size] + size);
+  /*          Ai             Ax             nnz         Ap         n      */    
+  return (sizeof(int) + sizeof(scalar)) * Ap[size] + sizeof(int)*(size+1);
 }
 
 double UMFPackMatrix::get_fill_in() const {

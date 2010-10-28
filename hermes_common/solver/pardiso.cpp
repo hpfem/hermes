@@ -170,7 +170,8 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 int PardisoMatrix::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
-  return (sizeof(int) + sizeof(scalar)) * (Ap[size] + size);
+  /*          Ai             Ax             nnz         Ap         m      */    
+  return (sizeof(int) + sizeof(scalar)) * Ap[size] + sizeof(int)*(size+1);
 }
 
 double PardisoMatrix::get_fill_in() const {
