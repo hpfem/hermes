@@ -5,7 +5,6 @@
 #include "hermes1d.h"
 
 
-// *****************************************************************************
 
 // This example solves a 1D fixed source problem for the neutron diffusion eqn.
 // in a two-group approximation	: 
@@ -20,48 +19,47 @@
 // 		A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
 //		Example 4.A (pp. 168)
 
-/******************************************************************************/
-// Problem specification (core geometry, material properties, initial FE mesh)
+
+// Problem specification (core geometry, material properties, initial FE mesh).
 #include "neutronics_problem_def.cpp"
 
 // Common functions for neutronics problems (requires variable declarations from
-// "neutronics_problem_def.cpp")
+// "neutronics_problem_def.cpp").
 #include "neutronics_common.cpp"
 
 // Weak forms for the problem (requires variable declarations from
-// "neutronics_problem_def.cpp")
+// "neutronics_problem_def.cpp").
 #include "forms.cpp"
-/******************************************************************************/
-// General input (external source problem):
 
-bool flag = false;											// Flag for debugging purposes
+// General input (external source problem).
+
+bool flag = false;											// Flag for debugging purposes.
 bool verbose = true;										
 
-int N_SLN = 1;              						// Number of solutions
+int N_SLN = 1;              						// Number of solutions.
 
 // Newton's method
-double NEWTON_TOL = 1e-5;               // tolerance for the Newton's method
-int NEWTON_MAX_ITER = 150;              // max. number of Newton iterations
+double NEWTON_TOL = 1e-5;               // Tolerance for the Newton's method.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-/******************************************************************************/
-
 int main() {
- // Create coarse mesh
-  MeshData *md = new MeshData();		// transform input data to the format used by the "Mesh" constructor
+  // Create coarse mesh.
+  // Transform input data to the format used by the "Mesh" constructor.
+  MeshData *md = new MeshData();
   Mesh *mesh = new Mesh(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-  info("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d", mesh->assign_dofs());
   mesh->plot("mesh.gp");
 
   for (int g = 0; g < N_GRP; g++)  {
   	mesh->set_bc_right_dirichlet(g, flux_right_surf[g]);
 	}
   
-  // Register weak forms
+  // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem();
   
   dp->add_matrix_form(0, 0, jacobian_fuel_0_0, fuel);
@@ -75,7 +73,7 @@ int main() {
   dp->add_vector_form_surf(0, residual_surf_left_0, BOUNDARY_LEFT);
   dp->add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
 	  	
-  // Newton's loop		
+  // Newton's loop.
   // Obtain the number of degrees of freedom.
   int ndof = mesh->get_num_dofs();
 
@@ -94,20 +92,21 @@ int main() {
     // Construct matrix and residual vector.
     dp->assemble_matrix_and_vector(mesh, matrix, rhs);
 
-    // Calculate L2 norm of residual vector.
+    // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
     for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
 
-    info("---- Newton iter %d, residual norm: %.15f\n", it, sqrt(res_norm_squared));
+    // Info for user.
+    info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
 
-    // If residual norm less than 'NEWTON_TOL', quit
-    // latest solution is in the vector y.
+    // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
-    //       residual on fine mesh is too small
+    //       residual on fine mesh is too small.
     if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
 
-    // Changing sign of vector res.
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
     // Calculate the coefficient vector.
@@ -124,7 +123,7 @@ int main() {
 
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
-    // copy coefficients from vector y to elements
+    // Copy coefficients from vector y to elements.
     vector_to_solution(y, mesh);
   }
   
@@ -132,15 +131,15 @@ int main() {
   delete rhs;
   delete solver;
 	 
-  // Plot the resulting neutron flux
+  // Plot the resulting neutron flux.
   Linearizer l(mesh);
   l.plot_solution("solution.gp");
 
-	// Calculate flux integral for comparison with the reference value
+	// Calculate flux integral for comparison with the reference value.
 	double I = calc_integrated_flux(mesh, 1, 60., 80.);
 	double Iref = 134.9238787715397;
-	info("I = %.13f, err = %.13f%%\n", I, 100.*(I - Iref)/Iref );
+	info("I = %.13f, err = %.13f%%", I, 100.*(I - Iref)/Iref );
 	
-  info("Done.\n");
+  info("Done.");
   return 1;
 }

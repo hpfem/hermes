@@ -447,7 +447,7 @@ Mesh::Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
     if(pts_array[i] >= pts_array[i+1]) error("Inadmissible macroelement grid point.");
     n_base_elem += div_array[i];
   }
-  info("Number of elements: %d\n", n_base_elem);
+  info("Number of elements: %d", n_base_elem);
 
   // define all Mesh class variables
   this->left_endpoint = pts_array[0];
@@ -484,7 +484,7 @@ void Mesh::refine_single_elem(int id, int3 cand)
     Iterator I(this);
     Element *e;
     while ((e = I.next_active_element()) != NULL) {
-        info("%d %d\n", e->id, id);
+        info("%d %d", e->id, id);
         if (e->id == id) {
             e->refine(cand);
             if (cand[0] == 1) this->n_active_elem++; // hp-refinement
@@ -596,21 +596,20 @@ int Mesh::assign_dofs()
 
   // print element connectivities
   if(DEBUG_ELEM_DOF) {
-    info("Printing element DOF arrays:\n");
-    info("Elements = %d\n", this->n_base_elem);
+    info("Printing element DOF arrays:");
+    info("Elements = %d", this->n_base_elem);
     info("DOF = %d", this->n_dof);
     for(int c = 0; c<this->n_eq; c++) {
       I->reset();
       Element *e;
       while ((e = I->next_active_element()) != NULL) {
-        info("\nElement (%g, %g), id = %d, p = %d\n ", 
+        info("\nElement (%g, %g), id = %d, p = %d", 
                e->x1, e->x2, e->id, e->p); 
         for(int j = 0; j<e->p + 1; j++) {
-          info("dof[%d][%d] = %d\n ", c, j, e->dof[c][j]);
+          info("dof[%d][%d] = %d", c, j, e->dof[c][j]);
         }
       }
     }
-    info("\n"); 
   }
 
   delete I;
@@ -731,9 +730,9 @@ int Element::create_cand_list(int adapt_type, int p_ref_left,
 
 void Element::print_cand_list(int num_cand, int3 *cand_list) 
 {
-  info("Element (%g, %g): refinement candidates:\n", this->x1, this->x2);
+  info("Element (%g, %g): refinement candidates:", this->x1, this->x2);
   for (int i=0; i < num_cand; i++) { 
-    info("%d %d %d\n", cand_list[i][0], cand_list[i][1], cand_list[i][2]);
+    info("%d %d %d", cand_list[i][0], cand_list[i][1], cand_list[i][2]);
   }
 }
 
@@ -805,7 +804,7 @@ void Mesh::plot(const char* filename)
       fprintf(f, "%g %d\n\n", e->x2, 0);
     }
     fclose(f);
-    info("Mesh written to %s.\n", filename);
+    info("Mesh written to %s.", filename);
 }
 
 // Plots the error between the reference and coarse mesh solutions
@@ -816,7 +815,7 @@ void Mesh::plot_element_error_p(int norm, FILE *f, Element *e, Element *e_ref,
   int n_eq = this->get_n_eq();
   int pts_num = subdivision + 1;
   if (pts_num > MAX_PLOT_PTS_NUM) {
-    info("Try to increase MAX_PLOT_PTS_NUM in common.h\n");
+    info("Try to increase MAX_PLOT_PTS_NUM in common.h");
     error("MAX_PLOT_PTS_NUM exceeded in plot_element_error_p().");
   }
   double x1 = e->x1;
@@ -865,7 +864,7 @@ void Mesh::plot_element_error_hp(int norm, FILE *f, Element *e,
   subdivision /= 2;
   int pts_num = subdivision + 1;
   if (pts_num > MAX_PLOT_PTS_NUM) {
-    info("Try to increase MAX_PLOT_PTS_NUM in common.h\n");
+    info("Try to increase MAX_PLOT_PTS_NUM in common.h");
     error("MAX_PLOT_PTS_NUM exceeded in plot_element_error_hp().");
   }
 
@@ -992,7 +991,7 @@ void Mesh::plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename,
     if (e->level == e_ref->level) { // element 'e' was not refined in space
                                     // for reference solution
       if (e_ref->p >= MAX_P) {
-        info("Try to increase MAX_P in common.h.\n");
+        info("Try to increase MAX_P in common.h.");
         error("Max poly degree exceeded in plot_error_estimate().");
       }
       plot_element_error_p(norm, f, e, e_ref, subdivision);
@@ -1001,7 +1000,7 @@ void Mesh::plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename,
       Element* e_ref_left = e_ref;
       Element* e_ref_right = I_ref->next_active_element();
       if (e_ref_left->p >= MAX_P || e_ref_right->p >= MAX_P) {
-        info("Try to increase MAX_P in common.h.\n");
+        info("Try to increase MAX_P in common.h.");
         error("Max poly degree exceeded in plot_error_estimate().");
       }
       plot_element_error_hp(norm, f, e, e_ref_left, e_ref_right, 
@@ -1010,7 +1009,7 @@ void Mesh::plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename,
   }
 
   fclose(f);
-  info("Error function written to %s.\n", final_filename);
+  info("Error function written to %s.", final_filename);
 }
 
 // Plots the error between the coarse mesh solution
@@ -1032,7 +1031,7 @@ void Mesh::plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs,
     if (e->level == e_ref->level) { // element 'e' was not refined in space
                                     // for reference solution
       if (e_ref->p >= MAX_P) {
-        info("Try to increase MAX_P in common.h.\n");
+        info("Try to increase MAX_P in common.h.");
         error("Max poly degree exceeded in plot_error_estimate().");
       }
       plot_element_error_p(norm, f, e, e_ref, subdivision);
@@ -1041,7 +1040,7 @@ void Mesh::plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs,
       Element* e_ref_left = e_ref;
       Element* e_ref_right = elem_ref_pairs[e->id][1];
       if (e_ref_left->p >= MAX_P || e_ref_right->p >= MAX_P) {
-        info("Try to increase MAX_P in common.h.\n");
+        info("Try to increase MAX_P in common.h.");
         error("Max poly degree exceeded in plot_error_estimate().");
       }
       plot_element_error_hp(norm, f, e, e_ref_left, e_ref_right, 
@@ -1050,7 +1049,7 @@ void Mesh::plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs,
   }
 
   fclose(f);
-  info("Error function written to %s.\n", final_filename);
+  info("Error function written to %s.", final_filename);
 }
 
 // Plots the error wrt. the exact solution (if available)
@@ -1068,14 +1067,14 @@ void Mesh::plot_error_exact(int norm, exact_sol_type exact_sol,
   Iterator *I = new Iterator(this);
   while ((e = I->next_active_element()) != NULL) {
     if (e->p >= MAX_P) {
-      info("Try to increase MAX_P in common.h.\n");
+      info("Try to increase MAX_P in common.h.");
       error("Max poly degree exceeded in plot_error_exact().");
     }
     plot_element_error_exact(norm, f, e, exact_sol, subdivision);
   }
 
   fclose(f);
-  info("Exact solution error written to %s.\n", final_filename);
+  info("Exact solution error written to %s.", final_filename);
 }
 
 int Mesh::get_n_base_elem()
@@ -1371,9 +1370,9 @@ void adapt(int norm, int adapt_type, double threshold,
   // enumerate dofs in both new meshes
   int n_dof_new = mesh_new->assign_dofs();
   int n_dof_ref_new = mesh_ref_new->assign_dofs();
-  info("Coarse mesh refined (%d elem, %d DOF)\n", 
+  info("Coarse mesh refined (%d elem, %d DOF)", 
          mesh_new->get_n_active_elem(), n_dof_new);
-  info("Fine mesh refined (%d elem, %d DOF)\n", 
+  info("Fine mesh refined (%d elem, %d DOF)", 
   	 mesh_ref_new->get_n_active_elem(), n_dof_ref_new);
 
   // Delete old meshes and copy the new ones in place of them
@@ -1461,7 +1460,7 @@ void adapt(int norm, int adapt_type, double threshold,
       e_new = I_new->next_active_element();
       // perform the refinement of element e_new_last
       e_new_last->refine(cand_list[choice]);
-      info("  Refined element (%g, %g), cand = (%d %d %d)\n", 
+      info("  Refined element (%g, %g), cand = (%d %d %d)", 
              e_new_last->x1, e_new_last->x2, cand_list[choice][0], 
              cand_list[choice][1], cand_list[choice][2]);
       if(cand_list[choice][0] == 1) mesh_new->n_active_elem++;
@@ -1473,7 +1472,7 @@ void adapt(int norm, int adapt_type, double threshold,
   }
   // enumerate dofs in both new meshes
   int n_dof_new = mesh_new->assign_dofs();
-  info("New mesh has %d elements.\n",
+  info("New mesh has %d elements.",
          mesh_new->get_n_active_elem(), n_dof_new);
 
   // Delete old coarse mesh

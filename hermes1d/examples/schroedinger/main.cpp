@@ -70,7 +70,7 @@ double residual(int num, double *x, double *weights,
     return val;
 }
 
-/******************************************************************************/
+
 int main(int argc, char* argv[]) {
   // create mesh
   Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
@@ -79,9 +79,9 @@ int main(int argc, char* argv[]) {
 
   // variable for the total number of DOF
   int N_dof = mesh->assign_dofs();
-  printf("ndofs: %d\n", N_dof);
+  printf("ndofs: %d", N_dof);
 
-  // register weak forms
+  // Initialize the FE problem.
   DiscreteProblem *dp1 = new DiscreteProblem();
   dp1->add_matrix_form(0, 0, lhs);
   DiscreteProblem *dp2 = new DiscreteProblem();
@@ -111,27 +111,27 @@ int main(int argc, char* argv[]) {
 
   double *res = new double[N_dof];
   E = py2c_double(p.pull("E"));
-  printf("E=%.10f\n", E);
+  printf("E=%.10f", E);
   E = -0.5;
   dp3->assemble_vector(mesh, res);
   // calculate L2 norm of residual vector
   double res_norm = 0;
   for(int i=0; i<N_dof; i++) res_norm += res[i]*res[i];
   res_norm = sqrt(res_norm);
-  printf("L2 norm of the residual: %f\n", res_norm);
+  printf("L2 norm of the residual: %f", res_norm);
 
 
   Linearizer l(mesh);
   const char *out_filename = "solution.gp";
   l.plot_solution(out_filename);
 
-  printf("still ok\n");
+  info("still ok");
   if (import_hermes1d__h1d_wrapper__h1d_wrapper())
       throw std::runtime_error("Can't import hermes1d");
   p.push("mesh",  c2py_Mesh(mesh));
-  printf("2\n");
+  info("2");
   p.exec("from plot import plot_eigs, plot_file");
   p.exec("plot_eigs(mesh, eigs)");
-  printf("Done.\n");
+  info("Done.");
   return 0;
 }

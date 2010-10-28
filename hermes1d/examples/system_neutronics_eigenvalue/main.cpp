@@ -5,7 +5,6 @@
 #include "hermes1d.h"
 
 
-// *****************************************************************************
 
 // This example solves a 1D eigenvalue problem for the neutron diffusion equation
 // in a two-group approximation	: 
@@ -18,56 +17,58 @@
 // 	 Yoshikawa and Wakabayashi, Journal of NUCLEAR SCIENCE and TECHNOLOGY (7), 
 //	 p. 355-365 (July 1970)
 
-/******************************************************************************/
-// Problem specification (core geometry, material properties, initial FE mesh)
+
+// Problem specification (core geometry, material properties, initial FE mesh).
 #include "neutronics_problem_def.cpp"
 
 // Common functions for neutronics problems (requires variable declarations from
-// "neutronics_problem_def.cpp")
+// "neutronics_problem_def.cpp").
 #include "neutronics_common.cpp"
 
 // Weak forms for the problem (requires variable declarations from
-// "neutronics_problem_def.cpp")
+// "neutronics_problem_def.cpp").
 #include "forms.cpp"
-/******************************************************************************/
-// General input (eigenvalue problem):
 
-bool flag = false;					// flag for debugging purposes
+// General input (eigenvalue problem).
+
+bool flag = false;					// Flag for debugging purposes.
 bool verbose = true;
 
-// Power method initialization
-int Max_SI = 1000;          // Max. number of eigenvalue iterations
-int N_SLN = 2;              // Number of solutions
+// Power method initialization.
+int Max_SI = 1000;          // Max. number of eigenvalue iterations.
+int N_SLN = 2;              // Number of solutions.
 
-// Newton's method
-double NEWTON_TOL = 1e-5;   // tolerance for the Newton's method
-int NEWTON_MAX_ITER = 150;  // max. number of Newton iterations
-double TOL_SI = 1e-6;       // tol. for the source (eigenvalue) iteration
+// Newton's method.
+double NEWTON_TOL = 1e-5;   // Tolerance for the Newton's method.
+int NEWTON_MAX_ITER = 150;  // Maximum number of Newton iterations.
+double TOL_SI = 1e-6;       // Toleration for the source (eigenvalue) iteration.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-/******************************************************************************/
 
 int main() {		
-  // Create coarse mesh
-  MeshData *md = new MeshData(verbose);		// transform input data to the format used by the "Mesh" constructor
+  // Create coarse mesh.
+  // Transform input data to the format used by the "Mesh" constructor.
+  MeshData *md = new MeshData(verbose);		
   Mesh *mesh = new Mesh(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-	// Enumerate basis functions
-  info("N_dof = %d\n", mesh->assign_dofs());
+	// Enumerate basis functions.
+  info("N_dof = %d", mesh->assign_dofs());
   mesh->plot("mesh.gp");
   
-  double K_EFF = 1.0;         // Initial approximation of the dominant eigenvalue
-	double init_val = 1.0;			// Initial approximation of the dominant eigenvector
+  // Initial approximation of the dominant eigenvalue.
+  double K_EFF = 1.0;
+  // Initial approximation of the dominant eigenvector.
+	double init_val = 1.0;
 
   for (int g = 0; g < N_GRP; g++)  {
   	set_vertex_dofs_constant(mesh, init_val, g);
   	mesh->set_bc_right_dirichlet(g, flux_right_surf[g]);
 	}
   
-  // Register weak forms
+  // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem();
   
   dp->add_matrix_form(0, 0, jacobian_fuel_0_0, fuel);
@@ -95,17 +96,16 @@ int main() {
 	char solution_file[32];
 
   // Source iteration
-
 	int i;
   int current_solution = 0, previous_solution = 1;
  	double K_EFF_old;
   for (i = 0; i < Max_SI; i++)
   {	
-  	// Plot the critical (i.e. steady-state) flux in the actual iteration
+  	// Plot the critical (i.e. steady-state) flux in the actual iteration.
   	sprintf(solution_file, "solution_%d.gp", i);
 	  l.plot_solution(solution_file); 		
 	  
-    // Store the previous solution (used at the right-hand side)
+    // Store the previous solution (used at the right-hand side).
     for (int g = 0; g < N_GRP; g++)
 	    copy_dofs(current_solution, previous_solution, mesh, g);
 
@@ -127,20 +127,21 @@ int main() {
       // Construct matrix and residual vector.
       dp->assemble_matrix_and_vector(mesh, matrix, rhs);
 
-      // Calculate L2 norm of residual vector.
+      // Calculate the l2-norm of residual vector.
       double res_norm_squared = 0;
       for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
 
-      info("---- Newton iter %d, residual norm: %.15f\n", it, sqrt(res_norm_squared));
+      // Info for user.
+      info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
 
-      // If residual norm less than 'NEWTON_TOL', quit
-      // latest solution is in the vector y.
+      // If l2 norm of the residual vector is within tolerance, then quit.
       // NOTE: at least one full iteration forced
       //       here because sometimes the initial
-      //       residual on fine mesh is too small
+      //       residual on fine mesh is too small.
       if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
 
-      // Changing sign of vector res.
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
       for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
       // Calculate the coefficient vector.
@@ -157,7 +158,7 @@ int main() {
 
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
-      // copy coefficients from vector y to elements
+      // Copy coefficients from vector y to elements.
       vector_to_solution(y, mesh);
     }
     
@@ -165,37 +166,37 @@ int main() {
     delete rhs;
     delete solver;
 			
-    // Update the eigenvalue
+    // Update the eigenvalue.
     K_EFF_old = K_EFF;
     K_EFF = calc_total_reaction_rate(mesh, nSf, 0., 40.); 
     
-    // Convergence test
+    // Convergence test.
     if (fabs(K_EFF - K_EFF_old)/K_EFF < TOL_SI) break;
     
-    // Normalize total neutron flux to one fission neutron
+    // Normalize total neutron flux to one fission neutron.
     multiply_dofs_with_constant(mesh, 1./K_EFF, current_solution);
     
-    if (verbose) info("K_EFF_%d = %.8f\n", i+1, K_EFF);
+    if (verbose) info("K_EFF_%d = %.8f", i+1, K_EFF);
   }
   
-  // Print the converged eigenvalue
-  info("K_EFF = %.8f, err= %.8f%%\n", K_EFF, 100*(K_EFF-1));
+  // Print the converged eigenvalue.
+  info("K_EFF = %.8f, err= %.8f%%", K_EFF, 100*(K_EFF-1));
 
-  // Plot the converged critical  neutron flux
+  // Plot the converged critical  neutron flux.
   sprintf(solution_file, "solution.gp");
   l.plot_solution(solution_file);
 
-	// Comparison with analytical results (see the reference above)
+	// Comparison with analytical results (see the reference above).
 	double flux[N_GRP], J[N_GRP], R;
 
 	get_solution_at_point(mesh, 0.0, flux, J);
 	R = flux[0]/flux[1];
-	info("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%\n", R, 100*(R-2.5332)/2.5332);
+	info("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%", R, 100*(R-2.5332)/2.5332);
 	
 	get_solution_at_point(mesh, 40.0, flux, J);
 	R = flux[0]/flux[1];
-	info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%\n", R, 100*(R-1.5162)/1.5162);
+	info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%", R, 100*(R-1.5162)/1.5162);
 	
-  info("Done.\n");
+  info("Done.");
   return 1;
 }

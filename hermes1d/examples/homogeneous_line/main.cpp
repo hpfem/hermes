@@ -1,7 +1,6 @@
 #define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
-// ********************************************************************
 // This example shows solution of harmonic steady state on the homoegenous transmision line.
 // Wave propagation is described by two linear differencial equation with complex coefficients.
 // dU(x)/dx = -(R+j\omega L)I(x)
@@ -57,7 +56,7 @@ double Val_dir_left_4 = 0;  // imaginary part of the voltage at the beginnig of 
 // Weak forms for Jacobi matrix and residual
 #include "forms.cpp"
 
-/******************************************************************************/
+
 int main() {
     // create mesh
     Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
@@ -65,9 +64,9 @@ int main() {
     mesh->set_bc_left_dirichlet(1, Val_dir_left_2);
     mesh->set_bc_left_dirichlet(2, Val_dir_left_3);
     mesh->set_bc_left_dirichlet(3, Val_dir_left_4);
-    printf("N_dof = %d\n", mesh->assign_dofs());
+    info("N_dof = %d", mesh->assign_dofs());
 
-    // register weak forms
+    // Initialize the FE problem.
     DiscreteProblem *dp = new DiscreteProblem();
     dp->add_matrix_form(0, 0, jacobian_1_1);
     dp->add_matrix_form(0, 2, jacobian_1_3);
@@ -94,10 +93,10 @@ int main() {
     newton(dp, mesh, MATRIX_SOLVER, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
            NEWTON_TOL, NEWTON_MAXITER);
 
-    // Plot the solution
+    // Plot the solution.
     Linearizer l(mesh);
     l.plot_solution("solution.gp");
 
-    printf("Done.\n");
+    info("Done.");
     return 1;
 }

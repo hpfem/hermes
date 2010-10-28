@@ -13,7 +13,7 @@
 //
 //  Interval: (A, B)
 //
-//  The following parameters can be changed:
+//  The following parameters can be changed.
 
 int P_INIT = 2;                                   // Initial polynomal degree.
 static int NEQ = 1;                               // Number of equations.
@@ -75,11 +75,12 @@ int main() {
 
     info("---- Newton iter %d, residual norm: %.15f.", it, res_norm);
 
-    // If residual norm less than 'NEWTON_TOL', quit
+    // If l2 norm of the residual vector is within tolerance, then quit.
     // Latest solution is in the vector 'y'.
     if(res_norm < NEWTON_TOL && it > 1) break;
 
-    // Changing sign of vector res.
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
     // Calculate the coefficient vector.
@@ -112,6 +113,6 @@ int main() {
   // Plot the resulting mesh.
   mesh->plot("mesh.gp");
 
-  info("Done.\n");
+  info("Done.");
   return 1;
 }

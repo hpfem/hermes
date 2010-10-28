@@ -4,7 +4,6 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-// ********************************************************************
 // This example solves the mathematical pendulum equation 
 // y'' + k**2 * sin(y) = 0 in an interval (A, B), equipped with the 
 // initial conditions y(A) = Init_angle, y'(0) = Init_vel. The 
@@ -26,37 +25,36 @@
 // u(0) = 0, v(0) = k
 // The approximate (linearized) solution is u(x) = sin(k*x), v(x) = k*cos(k*x)
 
-// General input:
+// General input.
 static int NEQ = 2;
-int NELEM = 1292;            // number of elements
-double A = 0, B = 10;         // domain end points
-int P_init = 1;               // initial polynomal degree
+int NELEM = 1292;             // Number of elements.
+double A = 0, B = 10;         // Domain end points.
+int P_init = 1;               // Initial polynomal degree.
 double k = 0.5;
 
-// Newton's method
+// Newton's method.
 double NEWTON_TOL = 1e-5;
 int NEWTON_MAX_ITER = 150;
 
-// Boundary conditions
-double Init_angle = M_PI/2.;  // initial angle
-double Init_vel = 0;          // initial velocity
+// Boundary conditions.
+double Init_angle = M_PI/2.;  // Initial angle.
+double Init_vel = 0;          // Initial velocity.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-// Weak forms for Jacobi matrix and residual
+// Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
 
-/******************************************************************************/
+
 int main() {
-  // Create coarse mesh, set Dirichlet BC, enumerate 
-  // basis functions
+  // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
   Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   mesh->set_bc_left_dirichlet(0, Init_angle);
   mesh->set_bc_left_dirichlet(1, Init_vel);
-  info("N_dof = %d\n", mesh->assign_dofs());
+  info("N_dof = %d", mesh->assign_dofs());
 
-  // Register weak forms
+  // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem();
   dp->add_matrix_form(0, 0, jacobian_0_0);
   dp->add_matrix_form(0, 1, jacobian_0_1);
@@ -65,7 +63,7 @@ int main() {
   dp->add_vector_form(0, residual_0);
   dp->add_vector_form(1, residual_1);
 
-  // Newton's loop
+  // Newton's loop.
   // Obtain the number of degrees of freedom.
   int ndof = mesh->get_num_dofs();
 
@@ -84,20 +82,21 @@ int main() {
     // Construct matrix and residual vector.
     dp->assemble_matrix_and_vector(mesh, matrix, rhs);
 
-    // Calculate L2 norm of residual vector.
+    // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
     for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
 
-    info("---- Newton iter %d, residual norm: %.15f\n", it, sqrt(res_norm_squared));
+    // Info for user.
+    info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
 
-    // If residual norm less than 'NEWTON_TOL', quit
-    // latest solution is in the vector y.
+    // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
-    //       residual on fine mesh is too small
+    //       residual on fine mesh is too small.
     if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
 
-    // Changing sign of vector res.
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
     // Calculate the coefficient vector.
@@ -114,7 +113,7 @@ int main() {
 
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
-    // copy coefficients from vector y to elements
+    // Copy coefficients from vector y to elements.
     vector_to_solution(y, mesh);
   }
   
@@ -122,10 +121,10 @@ int main() {
   delete rhs;
   delete solver;
 
-  // Plot the solution
+  // Plot the solution.
   Linearizer l(mesh);
   l.plot_solution("solution.gp");
 
-  info("Done.\n");
+  info("Done.");
   return 1;
 }

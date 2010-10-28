@@ -157,15 +157,15 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   // checking whether elements match
   if (fabs(e->x1 - e_ref_left->x1) > 1e-10 ||
       fabs(e->x2 - e_ref_right->x2) > 1e-10) {
-    info("e->x1 = %g, e_ref_left->x1 = %g\n", e->x1, e_ref_left->x1); 
-    info("e->x2 = %g, e_ref_right->x2 = %g\n", e->x2, e_ref_left->x2); 
+    info("e->x1 = %g, e_ref_left->x1 = %g", e->x1, e_ref_left->x1); 
+    info("e->x2 = %g, e_ref_right->x2 = %g", e->x2, e_ref_left->x2); 
     error("Elements mismatched in transform_element_refined()");
   }
   int fns_num_ref_left = e_ref_left->p + 1;
   int fns_num_ref_right = e_ref_right->p + 1;
 
   if (DEBUG_SOLUTION_TRANSFER){
-    info("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d), (%g, %g, p=%d)\n",
+    info("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d), (%g, %g, p=%d)",
          e->x1, e->x2, e->p, e_ref_left->x1, e_ref_left->x2, e_ref_left->p, 
          e_ref_right->x1, e_ref_right->x2, e_ref_right->p);
   }
@@ -178,9 +178,8 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   //debug
   if (DEBUG_SOLUTION_TRANSFER) {
     for (int i=0; i < fns_num_coarse; i++) {
-      info("y_prev_loc[%d] = %f\n", i, y_prev_loc[i]);
+      info("y_prev_loc[%d] = %f", i, y_prev_loc[i]);
     }
-    info("\n");
   }
   if (trans_matrices_initialized == 0) {
     fill_trans_matrices(trans_matrix_left, trans_matrix_right);
@@ -196,9 +195,8 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   //debug
   if (DEBUG_SOLUTION_TRANSFER) {
     for (int i=0; i < fns_num_ref_left; i++) {
-      info("y_prev_loc_trans_left[%d] = %f\n", i, y_prev_loc_trans_left[i]);
+      info("y_prev_loc_trans_left[%d] = %f", i, y_prev_loc_trans_left[i]);
     }
-    info("\n");
   }
 
   // transform coefficients on the right son
@@ -212,9 +210,8 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   //debug
   if (DEBUG_SOLUTION_TRANSFER) {
     for (int i=0; i < fns_num_ref_right; i++) {
-      info("y_prev_loc_trans_right[%d] = %f\n", i, y_prev_loc_trans_right[i]);
+      info("y_prev_loc_trans_right[%d] = %f", i, y_prev_loc_trans_right[i]);
     }
-    info("\n");
   }
 
   // Copying computed coefficients into the elements e_ref_left and e_ref_right.
@@ -254,12 +251,12 @@ void transform_element_unrefined_forward(int sln, int comp, Element *e, Element 
   // checking whether elements match
   if (fabs(e->x1 - e_ref->x1) > 1e-10 ||
       fabs(e->x2 - e_ref->x2) > 1e-10) {
-    info("e->x1 = %g, e_ref->x1 = %g\n", e->x1, e_ref->x1); 
-    info("e->x2 = %g, e_ref->x2 = %g\n", e->x2, e_ref->x2); 
+    info("e->x1 = %g, e_ref->x1 = %g", e->x1, e_ref->x1); 
+    info("e->x2 = %g, e_ref->x2 = %g", e->x2, e_ref->x2); 
     error("Elements mismatched in transform_element_unrefined()");
   }
   if (DEBUG_SOLUTION_TRANSFER){
-    info("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d)\n",
+    info("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d)",
          e->x1, e->x2, e->p, e_ref->x1, e_ref->x2, e_ref->p);
   }
   int fns_num = e->p + 1; 
