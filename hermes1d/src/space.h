@@ -3,14 +3,14 @@
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-#ifndef _MESH_H_
-#define _MESH_H_
+#ifndef _Space_H_
+#define _Space_H_
 
 #include "../../hermes_common/common.h"
 #include "legendre.h"
 #include "lobatto.h"
 
-class HERMES_API Mesh;
+class HERMES_API Space;
 
 class HERMES_API Element {
 public:
@@ -57,32 +57,32 @@ public:
     double coeffs[MAX_SLN_NUM][MAX_EQN_NUM][MAX_P + 1];   // solution coefficient array of length p+1 
                                                           // for every component and every solution 
     int id;
-    unsigned level;    // refinement level (zero for initial mesh elements) 
+    unsigned level;    // refinement level (zero for initial space elements) 
     Element *sons[2];  // for refinement
 };
 
 typedef Element* ElemPtr2[2];
 
-void HERMES_API solution_to_vector(Mesh *mesh, double *y, int sln=0);
-void HERMES_API vector_to_solution(double *y, Mesh *mesh, int sln=0);
+void HERMES_API solution_to_vector(Space *space, double *y, int sln=0);
+void HERMES_API vector_to_solution(double *y, Space *space, int sln=0);
 
-class Mesh {
+class Space {
     public:
-        Mesh();
-        // Creates equidistant mesh with uniform polynomial degree of elements.
+        Space();
+        // Creates equidistant space with uniform polynomial degree of elements.
         // All elements will have the same (zero) marker.
-        Mesh(double a, double b, int n_elem, int p_init=1, int n_eq=1, int
+        Space(double a, double b, int n_elem, int p_init=1, int n_eq=1, int
                 n_sln=1, bool print_banner=true);
-        // Creates a general mesh (used, e.g., in example "neutronics").
+        // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements
         // pts_array[]...  array of macroelement grid points
         // p_array[]...    array of macroelement poly degrees
         // m_array[]...    array of macroelement material markers
         // div_array[]...  array of macroelement equidistant divisions
-        Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, 
+        Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, 
              int *div_array, int n_eq=1, int n_sln=1, bool print_banner=true);
         
-        ~Mesh();
+        ~Space();
 
         void free_elements();
 
@@ -98,7 +98,7 @@ class Mesh {
 
         void set_n_active_elem(int n);
         
-        int get_num_dofs();
+        static int get_num_dofs(Space* space);
 
         void set_n_dof(int n);
 
@@ -125,8 +125,8 @@ class Mesh {
         void refine_single_elem(int id, int3 cand);
         void refine_elems(int elem_num, int *id_array, int3 *cand_array);
         void reference_refinement(int start_elem_id, int elem_num);
-        Mesh *replicate(); 
-        void plot(const char* filename); // plots the mesh and polynomial degrees of elements
+        Space *replicate(); 
+        void plot(const char* filename); // plots the space and polynomial degrees of elements
         void plot_element_error_p(int norm, FILE *f, Element *p, Element *e_ref,  
                                   int subdivision = 20); // plots error wrt. reference solution
         void plot_element_error_hp(int norm, FILE *f, Element *p, 
@@ -137,7 +137,7 @@ class Mesh {
 				   exact_sol_type exact_sol,
                                    int subdivision = 20); // plots error wrt. reference solution
                                                           // if ref. refinement was hp-refinement
-        void plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename, 
+        void plot_error_estimate(int norm, Space* space_ref, const char *filename, 
                         int subdivision = 500);  // plots error wrt. reference solution
         void plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs, const char *filename,  
                         int subdivision = 500);  // plots error wrt. reference solution
@@ -153,27 +153,27 @@ class Mesh {
         double left_endpoint, right_endpoint;
         int n_eq;            // number of equations in the system
         int n_sln;           // number of solution copies
-        int n_base_elem;     // number of elements in the base mesh
+        int n_base_elem;     // number of elements in the base space
         int n_dof;           // number of DOF (in each solution copy)
-        Element *base_elems; // base mesh
+        Element *base_elems; // base space
 
 };
 
-// Returns updated coarse and reference meshes, with the last 
-// coarse and reference mesh solutions on them, respectively. 
+// Returns updated coarse and reference spacees, with the last 
+// coarse and reference space solutions on them, respectively. 
 // The coefficient vectors and numbers of degrees of freedom 
-// on both meshes are also updated. 
+// on both spacees are also updated. 
 // Refine coarse mesh elements whose id_array >= 0, and 
-// adjust the reference mesh accordingly.  
-// Returns updated coarse and reference meshes, with the last 
-// coarse and reference mesh solutions on them, respectively. 
+// adjust the reference space accordingly.  
+// Returns updated coarse and reference spacees, with the last 
+// coarse and reference space solutions on them, respectively. 
 // The coefficient vectors and numbers of degrees of freedom 
-// on both meshes are also updated. 
+// on both spacees are also updated. 
 
 void HERMES_API adapt(int norm, int adapt_type, double threshold, 
 
            double *err_squared_array,
-           Mesh* &mesh, Mesh* &mesh_ref);
+           Space* &space, Space* &space_ref);
 
 // Returns updated coarse mesh, with the last 
 // coarse solution on it. 
@@ -182,13 +182,13 @@ void HERMES_API adapt(int norm, int adapt_type, double threshold,
 
 void HERMES_API adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Mesh* &mesh, ElemPtr2 *ref_elem_pairs);
+           Space* &space, ElemPtr2 *ref_elem_pairs);
 
-void HERMES_API adapt_plotting(Mesh *mesh, Mesh *mesh_ref,
+void HERMES_API adapt_plotting(Space *space, Space *space_ref,
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 
 
-void HERMES_API adapt_plotting(Mesh *mesh, ElemPtr2* ref_elem_pairs,
+void HERMES_API adapt_plotting(Space *space, ElemPtr2* ref_elem_pairs,
 
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 

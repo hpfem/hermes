@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "mesh.h"
+#include "space.h"
 #include "quad_std.h"
 #include "legendre.h"
 #include "lobatto.h"
@@ -44,24 +44,24 @@ public:
     void add_matrix_form_surf(int i, int j, matrix_form_surf fn, int bdy_index);
     void add_vector_form_surf(int i, vector_form_surf fn, int bdy_index);
     // c is solution component
-    void process_surf_forms(Mesh *mesh, SparseMatrix *mat, double *res, 
+    void process_surf_forms(Space *space, SparseMatrix *mat, double *res, 
                             int matrix_flag, int bdy_index);
-    void assemble(Mesh *mesh, SparseMatrix *mat, double *res, int matrix_flag);
-    void assemble_matrix_and_vector(Mesh *mesh, SparseMatrix *mat, double *res); 
+    void assemble(Space *space, SparseMatrix *mat, double *res, int matrix_flag);
+    void assemble_matrix_and_vector(Space *space, SparseMatrix *mat, double *res); 
 
-    void process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *res, 
+    void process_vol_forms(Space *space, SparseMatrix *mat, double *res, 
                            int matrix_flag);
     // c is solution component
-    void process_surf_forms(Mesh *mesh, SparseMatrix *mat, Vector *res, 
+    void process_surf_forms(Space *space, SparseMatrix *mat, Vector *res, 
                             int matrix_flag, int bdy_index);
-    void assemble(Mesh *mesh, SparseMatrix *mat, Vector *res, int matrix_flag);
-    void assemble_matrix_and_vector(Mesh *mesh, SparseMatrix *mat, Vector *res);
-    void process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *res, 
+    void assemble(Space *space, SparseMatrix *mat, Vector *res, int matrix_flag);
+    void assemble_matrix_and_vector(Space *space, SparseMatrix *mat, Vector *res);
+    void process_vol_forms(Space *space, SparseMatrix *mat, Vector *res, 
                            int matrix_flag);
     
     //FIXME: are these used?
-    void assemble_matrix(Mesh *mesh, SparseMatrix *mat);
-    void assemble_vector(Mesh *mesh, double *res);
+    void assemble_matrix(Space *space, SparseMatrix *mat);
+    void assemble_vector(Space *space, double *res);
 
 private:
 	struct MatrixFormVol {
@@ -101,7 +101,7 @@ void element_shapefn(double a, double b,
 void element_shapefn_point(double x_ref, double a, double b, 
 			   int k, double &val, double &der);
 
-void HERMES_API jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
+void HERMES_API jfnk_cg(DiscreteProblem *dp, Space *space,
              double matrix_solver_tol, int matrix_solver_maxiter,  
 	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, bool verbose=true);
 

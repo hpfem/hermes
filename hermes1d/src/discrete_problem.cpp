@@ -5,7 +5,7 @@
 
 #include "../../hermes_common/matrix.h"
 #include "discrete_problem.h"
-#include "mesh.h"
+#include "space.h"
 
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/callstack.h"
@@ -71,12 +71,12 @@ void DiscreteProblem::add_vector_form_surf(int i, vector_form_surf fn, int bdy_i
 }
 
 // process volumetric weak forms
-void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *res, 
+void DiscreteProblem::process_vol_forms(Space *space, SparseMatrix *mat, double *res, 
 					int matrix_flag) {
-  int n_eq = mesh->get_n_eq();
-  Element *elems = mesh->get_base_elems();
-  int n_elem = mesh->get_n_base_elem();
-  Iterator *I = new Iterator(mesh);
+  int n_eq = space->get_n_eq();
+  Element *elems = space->get_base_elems();
+  int n_elem = space->get_n_base_elem();
+  Iterator *I = new Iterator(space);
 
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
@@ -205,9 +205,9 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, double *r
 }
 
 // process boundary weak forms
-void DiscreteProblem::process_surf_forms(Mesh *mesh, SparseMatrix *mat, double *res, 
+void DiscreteProblem::process_surf_forms(Space *space, SparseMatrix *mat, double *res, 
 					 int matrix_flag, int bdy_index) {
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e; 
 
   // evaluate previous solution and its derivative at the end point
@@ -220,12 +220,12 @@ void DiscreteProblem::process_surf_forms(Mesh *mesh, SparseMatrix *mat, double *
   if(bdy_index == BOUNDARY_LEFT) {
     e = I->first_active_element(); 
     x_ref = -1; // left end of reference element
-    x_phys = mesh->get_left_endpoint();
+    x_phys = space->get_left_endpoint();
   }
   else {
     e = I->last_active_element(); 
     x_ref = 1;  // right end of reference element
-    x_phys = mesh->get_right_endpoint();
+    x_phys = space->get_right_endpoint();
   }
 
   // get solution value and derivative at the boundary point
@@ -307,12 +307,12 @@ void DiscreteProblem::process_surf_forms(Mesh *mesh, SparseMatrix *mat, double *
 }
 
 
-void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *res, 
+void DiscreteProblem::process_vol_forms(Space *space, SparseMatrix *mat, Vector *res, 
 					int matrix_flag) {
-  int n_eq = mesh->get_n_eq();
-  Element *elems = mesh->get_base_elems();
-  int n_elem = mesh->get_n_base_elem();
-  Iterator *I = new Iterator(mesh);
+  int n_eq = space->get_n_eq();
+  Element *elems = space->get_base_elems();
+  int n_elem = space->get_n_base_elem();
+  Iterator *I = new Iterator(space);
 
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
@@ -441,9 +441,9 @@ void DiscreteProblem::process_vol_forms(Mesh *mesh, SparseMatrix *mat, Vector *r
 }
 
 // process boundary weak forms
-void DiscreteProblem::process_surf_forms(Mesh *mesh, SparseMatrix *mat, Vector *res, 
+void DiscreteProblem::process_surf_forms(Space *space, SparseMatrix *mat, Vector *res, 
 					 int matrix_flag, int bdy_index) {
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e; 
 
   // evaluate previous solution and its derivative at the end point
@@ -456,12 +456,12 @@ void DiscreteProblem::process_surf_forms(Mesh *mesh, SparseMatrix *mat, Vector *
   if(bdy_index == BOUNDARY_LEFT) {
     e = I->first_active_element(); 
     x_ref = -1; // left end of reference element
-    x_phys = mesh->get_left_endpoint();
+    x_phys = space->get_left_endpoint();
   }
   else {
     e = I->last_active_element(); 
     x_ref = 1;  // right end of reference element
-    x_phys = mesh->get_right_endpoint();
+    x_phys = space->get_right_endpoint();
   }
 
   // get solution value and derivative at the boundary point
@@ -548,26 +548,26 @@ void DiscreteProblem::process_surf_forms(Mesh *mesh, SparseMatrix *mat, Vector *
 // matrix_flag == 2... assembling residual vector only
 // NOTE: Simultaneous assembling of the Jacobi matrix and residual
 // vector is more efficient than if they are assembled separately
-void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, double *res, 
+void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, double *res, 
                                int matrix_flag) {
   // number of equations in the system
-  int n_eq = mesh->get_n_eq();
+  int n_eq = space->get_n_eq();
 
   // total number of unknowns
-  int n_dof = mesh->get_num_dofs();
+  int n_dof = Space::get_num_dofs(space);
 
   // erase residual vector
   if(matrix_flag == 0 || matrix_flag == 2) 
     for(int i=0; i<n_dof; i++) res[i] = 0;
 
   // process volumetric weak forms via an element loop
-  process_vol_forms(mesh, mat, res, matrix_flag);
+  process_vol_forms(space, mat, res, matrix_flag);
 
   // process surface weak forms for the left boundary
-  process_surf_forms(mesh, mat, res, matrix_flag, BOUNDARY_LEFT);
+  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_LEFT);
 
   // process surface weak forms for the right boundary
-  process_surf_forms(mesh, mat, res, matrix_flag, BOUNDARY_RIGHT);
+  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_RIGHT);
 
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
@@ -588,13 +588,13 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, double *res,
   }
 } 
 
-void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res, 
+void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, Vector *res, 
                                int matrix_flag) {
   // number of equations in the system
-  int n_eq = mesh->get_n_eq();
+  int n_eq = space->get_n_eq();
 
   // total number of unknowns
-  int n_dof = mesh->get_num_dofs();
+  int n_dof = Space::get_num_dofs(space);
 
   // Reallocate the matrix and residual vector.
   res->alloc(n_dof);
@@ -613,13 +613,13 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res,
   }
 
   // process volumetric weak forms via an element loop
-  process_vol_forms(mesh, mat, res, matrix_flag);
+  process_vol_forms(space, mat, res, matrix_flag);
 
   // process surface weak forms for the left boundary
-  process_surf_forms(mesh, mat, res, matrix_flag, BOUNDARY_LEFT);
+  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_LEFT);
 
   // process surface weak forms for the right boundary
-  process_surf_forms(mesh, mat, res, matrix_flag, BOUNDARY_RIGHT);
+  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_RIGHT);
 
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
@@ -641,28 +641,28 @@ void DiscreteProblem::assemble(Mesh *mesh, SparseMatrix *mat, Vector *res,
 } 
 
 // construct both the Jacobi matrix and the residual vector
-void DiscreteProblem::assemble_matrix_and_vector(Mesh *mesh, 
+void DiscreteProblem::assemble_matrix_and_vector(Space *space, 
                       SparseMatrix *mat, double *res) {
-  assemble(mesh, mat, res, 0);
+  assemble(space, mat, res, 0);
 } 
 
-void DiscreteProblem::assemble_matrix_and_vector(Mesh *mesh, 
+void DiscreteProblem::assemble_matrix_and_vector(Space *space, 
                       SparseMatrix *mat, Vector *res) {
-  assemble(mesh, mat, res, 0);
+  assemble(space, mat, res, 0);
 }
 // construct Jacobi matrix only
-void DiscreteProblem::assemble_matrix(Mesh *mesh, SparseMatrix *mat) {
+void DiscreteProblem::assemble_matrix(Space *space, SparseMatrix *mat) {
   double *void_res = NULL;
-  assemble(mesh, mat, void_res, 1);
+  assemble(space, mat, void_res, 1);
 } 
 
 // construct residual vector only
-void DiscreteProblem::assemble_vector(Mesh *mesh, double *res) {
+void DiscreteProblem::assemble_vector(Space *space, double *res) {
   SparseMatrix *void_mat = NULL;
-  assemble(mesh, void_mat, res, 2);
+  assemble(space, void_mat, res, 2);
 } 
 
-void J_dot_vec_jfnk(DiscreteProblem *dp, Mesh *mesh, double* vec,
+void J_dot_vec_jfnk(DiscreteProblem *dp, Space *space, double* vec,
                     double* y_orig, double* f_orig, 
                     double* J_dot_vec,
                     double jfnk_epsilon, int n_dof) 
@@ -672,9 +672,9 @@ void J_dot_vec_jfnk(DiscreteProblem *dp, Mesh *mesh, double* vec,
   for (int i=0; i<n_dof; i++) {
     y_perturbed[i] = y_orig[i] + jfnk_epsilon*vec[i];
   }
-  vector_to_solution(y_perturbed, mesh);
-  dp->assemble_vector(mesh, f_perturbed); 
-  vector_to_solution(y_orig, mesh);
+  vector_to_solution(y_perturbed, space);
+  dp->assemble_vector(space, f_perturbed); 
+  vector_to_solution(y_orig, space);
   for (int i=0; i<n_dof; i++) {
     J_dot_vec[i] = (f_perturbed[i] - f_orig[i])/jfnk_epsilon;
   }
@@ -682,11 +682,11 @@ void J_dot_vec_jfnk(DiscreteProblem *dp, Mesh *mesh, double* vec,
 
 // CG method adjusted for JFNK
 // NOTE: 
-void jfnk_cg(DiscreteProblem *dp, Mesh *mesh, 
+void jfnk_cg(DiscreteProblem *dp, Space *space, 
              double matrix_solver_tol, int matrix_solver_maxiter, 
 	     double jfnk_epsilon, double tol_jfnk, int jfnk_maxiter, bool verbose)
 {
-  int n_dof = mesh->get_num_dofs();
+  int n_dof = Space::get_num_dofs(space);
   // vectors for JFNK
   double f_orig[MAX_N_DOF];
   double y_orig[MAX_N_DOF];
@@ -701,12 +701,12 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
   /*
   // debug
   // fill vector y_orig using dof and coeffs arrays in elements
-  solution_to_vector(mesh, y_orig);
-  dp->assemble_vector(mesh, f_orig); 
+  solution_to_vector(space, y_orig);
+  dp->assemble_vector(space, f_orig); 
   double *w = new double[n_dof];
   for(int i=0; i<n_dof; i++) w[i] = 0;
   w[0] = 1;
-  J_dot_vec_jfnk(dp, mesh, w, y_orig, f_orig, 
+  J_dot_vec_jfnk(dp, space, w, y_orig, f_orig, 
                  J_dot_vec, jfnk_epsilon, n_dof);
   printf("   J_dot_vec = ");
   for (int i=0; i < n_dof; i++) {
@@ -719,11 +719,11 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
   int jfnk_iter_num = 1;
   while (1) {
     // fill vector y_orig using dof and coeffs arrays in elements
-    solution_to_vector(mesh, y_orig);
+    solution_to_vector(space, y_orig);
 
     // construct residual vector f_orig corresponding to y_orig
     // (f_orig stays unchanged through the entire CG loop)
-    dp->assemble_vector(mesh, f_orig); 
+    dp->assemble_vector(space, f_orig); 
 
     // calculate L2 norm of f_orig
     double res_norm_squared = 0;
@@ -751,7 +751,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
     // initializing the solution vector with zero
     for(int i=0; i<n_dof; i++) vec[i] = 0;
     while (1) {
-      J_dot_vec_jfnk(dp, mesh, p, y_orig, f_orig,
+      J_dot_vec_jfnk(dp, space, p, y_orig, f_orig,
                      J_dot_vec, jfnk_epsilon, n_dof);
       double r_times_r = vec_dot(r, r, n_dof);
       double alpha = r_times_r / vec_dot(p, J_dot_vec, n_dof); 
@@ -786,8 +786,8 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
     // updating vector y_orig by new solution which is in x
     for(int i=0; i<n_dof; i++) y_orig[i] += vec[i];
 
-    // copying vector y_orig to mesh elements
-    vector_to_solution(y_orig, mesh);
+    // copying vector y_orig to space elements
+    vector_to_solution(y_orig, space);
 
     jfnk_iter_num++;
     if (jfnk_iter_num >= jfnk_maxiter) {
@@ -795,7 +795,7 @@ void jfnk_cg(DiscreteProblem *dp, Mesh *mesh,
     }
   }
 
-  // copy updated vector y_orig to mesh
-  vector_to_solution(y_orig, mesh);
+  // copy updated vector y_orig to space
+  vector_to_solution(y_orig, space);
 }
 

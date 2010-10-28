@@ -158,14 +158,14 @@ double calc_elem_est_error_squared_hp(int norm, Element *e,
   return err_squared;
 }
 
-double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
+double calc_error_estimate(int norm, Space* space, Space* space_ref,
 			   double *err_array, int sln)
 {
   double err_total_squared = 0;
-  Iterator *I = new Iterator(mesh);
-  Iterator *I_ref = new Iterator(mesh_ref);
+  Iterator *I = new Iterator(space);
+  Iterator *I_ref = new Iterator(space_ref);
 
-  // simultaneous traversal of 'mesh' and 'mesh_ref'
+  // simultaneous traversal of 'space' and 'space_ref'
   Element *e;
   int counter = 0;
   while ((e = I->next_active_element()) != NULL) {
@@ -192,13 +192,13 @@ double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
   return sqrt(err_total_squared);
 }
 
-double calc_error_estimate(int norm, Mesh* mesh, 
+double calc_error_estimate(int norm, Space* space, 
                            ElemPtr2* ref_element_pairs)
 {
   double err_total_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
 
-  // simultaneous traversal of 'mesh' and 'ref_element_pairs' 
+  // simultaneous traversal of 'space' and 'ref_element_pairs' 
   Element *e;
   int counter = 0;
   while ((e = I->next_active_element()) != NULL) {
@@ -222,12 +222,12 @@ double calc_error_estimate(int norm, Mesh* mesh,
   return sqrt(err_total_squared);
 }
 
-double calc_solution_norm(int norm, Mesh* mesh)
+double calc_solution_norm(int norm, Space* space)
 {
   double norm_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
 
-  // traverse 'mesh' and calculate squared solution L2 or H1 norm 
+  // traverse 'space' and calculate squared solution L2 or H1 norm 
   // in every element 
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
@@ -236,14 +236,14 @@ double calc_solution_norm(int norm, Mesh* mesh)
   return sqrt(norm_squared);
 }
 
-double calc_solution_norm(int norm, Mesh *mesh, 
+double calc_solution_norm(int norm, Space *space, 
                             ElemPtr2* elem_ref_pairs)
 {
-  int n_elem = mesh->get_n_active_elem();
+  int n_elem = space->get_n_active_elem();
   double norm_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
 
-  // traverse 'mesh' and 'elem_ref_pairs' simultaneously 
+  // traverse 'space' and 'elem_ref_pairs' simultaneously 
   // calculate squared solution L2 or H1 norm in every element 
   // of 'elem_ref_pairs'
   Element *e;
@@ -1503,11 +1503,11 @@ double calc_elem_exact_error_squared(int norm, exact_sol_type exact_sol,
   return err_squared;
 }
 
-double calc_error_exact(int norm, Mesh *mesh, 
+double calc_error_exact(int norm, Space *space, 
                         exact_sol_type exact_sol) 
 {
   double total_err_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
     int order = std::max(20, 3*e->p);         // heuristic parameter

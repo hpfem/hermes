@@ -28,20 +28,20 @@ double HERMES_API calc_elem_est_error_squared_hp(int norm, Element *e,
                         int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
-// and reference solutions in all active elements of 'mesh'. Total
+// and reference solutions in all active elements of 'space'. Total
 // error is returned.
-double HERMES_API calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref, 
+double HERMES_API calc_error_estimate(int norm, Space* space, Space* space_ref, 
 			   double *err_array, int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
-// and reference solutions in all active elements of 'mesh'. Total
+// and reference solutions in all active elements of 'space'. Total
 // error is returned.
-double HERMES_API calc_error_estimate(int norm, Mesh* mesh, 
+double HERMES_API calc_error_estimate(int norm, Space* space, 
                            ElemPtr2* ref_element_pairs);
 
 // Can be used for both the coarse and reference solutions
-double HERMES_API calc_solution_norm(int norm, Mesh* mesh);
-double HERMES_API calc_solution_norm(int norm, Mesh* mesh, ElemPtr2* ref_element_pairs);
+double HERMES_API calc_solution_norm(int norm, Space* space);
+double HERMES_API calc_solution_norm(int norm, Space* space, ElemPtr2* ref_element_pairs);
 
 // Sort err_array[] and returning array of sorted element indices
 void HERMES_API sort_element_errors(int n, double *err_array, int *id_array); 
@@ -84,7 +84,7 @@ double HERMES_API calc_elem_exact_error_squared(int norm, exact_sol_type exact_s
                                      Element *e, int order);
 
 // Error wrt. exact solution (if provided) on the entire interval (A, B) 
-double HERMES_API calc_error_exact(int norm, Mesh *mesh, 
+double HERMES_API calc_error_exact(int norm, Space *space, 
                         exact_sol_type exact_sol); 
 
 // Calculates L2 or H1 norm of function exact_sol in interval (A, B)

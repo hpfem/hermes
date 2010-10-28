@@ -65,7 +65,7 @@ int NEWTON_MAX_ITER = 150;
 // Include weak forms
 #include "forms.cpp"
 
-void compute_trajectory(Mesh *mesh, DiscreteProblem *dp) 
+void compute_trajectory(Space *space, DiscreteProblem *dp) 
 {
   info("alpha = (%g, %g, %g, %g), zeta = (%g, %g, %g, %g)", 
          alpha_ctrl[0], alpha_ctrl[1], 
@@ -74,11 +74,11 @@ void compute_trajectory(Mesh *mesh, DiscreteProblem *dp)
 
   // Newton's loop.
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
 
   // Fill vector y using dof and coeffs arrays in elements.
-  double *y = new double[ndof];
-  solution_to_vector(mesh, y);
+  double *coeff_vec = new double[ndof];
+  solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -88,8 +88,8 @@ void compute_trajectory(Mesh *mesh, DiscreteProblem *dp)
   int it = 1;
   while (1)
   {
-    // Construct matrix and residual vector.
-    dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble_matrix_and_vector(space, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -108,30 +108,29 @@ void compute_trajectory(Mesh *mesh, DiscreteProblem *dp)
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-    // Calculate the coefficient vector.
-    bool solved = solver->solve();
-    if (solved) 
-    {
-      double* solution_vector = new double[ndof];
-      solution_vector = solver->get_solution();
-      for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-      // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-      solution_vector = NULL;
-    }
-    it++;
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
 
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // Copy coefficients from vector y to elements.
-    vector_to_solution(y, mesh);
+    vector_to_solution(coeff_vec, space);
+
+    it++;
   }
   
+  // Cleanup.
   delete matrix;
   delete rhs;
   delete solver;
 }
 
-void plot_trajectory(Mesh *mesh, int subdivision) 
+void plot_trajectory(Space *space, int subdivision) 
 {
   static int first_traj = 1;
   const char *traj_filename = "trajectory.gp";
@@ -142,7 +141,7 @@ void plot_trajectory(Mesh *mesh, int subdivision)
   }
   else f = fopen(traj_filename, "ab");
   if(f == NULL) error("Problem opening trajectory file.");
-  Linearizer l_traj(mesh);
+  Linearizer l_traj(space);
   // Take first solution component as the x-coordinate.
   int x_comp = 0;
   // Take second solution component as the y-coordinate.
@@ -151,7 +150,7 @@ void plot_trajectory(Mesh *mesh, int subdivision)
   fclose(f);
 }
 
-void plot_trajectory_endpoint(Mesh *mesh) 
+void plot_trajectory_endpoint(Space *space) 
 {
   static int first_traj = 1;
   const char *traj_filename = "reach.gp";
@@ -162,11 +161,11 @@ void plot_trajectory_endpoint(Mesh *mesh)
   }
   else f = fopen(traj_filename, "ab");
   if(f == NULL) error("Problem opening reachability file.");
-  Linearizer l_reach(mesh);
+  Linearizer l_reach(space);
   double x_ref = 1; 
   double x_phys; 
   double val[MAX_EQN_NUM];
-  l_reach. eval_approx(mesh->last_active_element(), x_ref, &x_phys, val);
+  l_reach. eval_approx(space->last_active_element(), x_ref, &x_phys, val);
   // Take first solution component as the x-coordinate.
   int x_comp = 0;
   // Take second solution component as the y-coordinate.
@@ -175,9 +174,9 @@ void plot_trajectory_endpoint(Mesh *mesh)
   fclose(f);
 }
 
-void plot_solution(Mesh *mesh, int subdivision)
+void plot_solution(Space *space, int subdivision)
 {
-  Linearizer l(mesh);
+  Linearizer l(space);
   const char *out_filename = "solution.gp";
   l.plot_solution(out_filename, subdivision);
 }
@@ -212,14 +211,14 @@ void set_alpha_and_zeta(int component, double ray_angle, double radius) {
 
 
 int main() {
-  // Create mesh, set Dirichlet BC, enumerate basis functions.
-  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
-  mesh->set_bc_left_dirichlet(0, X0_left);
-  mesh->set_bc_left_dirichlet(1, Y0_left);
-  mesh->set_bc_left_dirichlet(2, Vel_left);
-  mesh->set_bc_left_dirichlet(3, Phi_left);
-  mesh->set_bc_left_dirichlet(4, Theta_left);
-  info("N_dof = %d", mesh->assign_dofs());
+  // Create space, set Dirichlet BC, enumerate basis functions.
+  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  space->set_bc_left_dirichlet(0, X0_left);
+  space->set_bc_left_dirichlet(1, Y0_left);
+  space->set_bc_left_dirichlet(2, Vel_left);
+  space->set_bc_left_dirichlet(3, Phi_left);
+  space->set_bc_left_dirichlet(4, Theta_left);
+  info("N_dof = %d", space->assign_dofs());
 
   // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem();
@@ -264,11 +263,11 @@ int main() {
           // parameters alpha_ctrl[] and zeta_ctrl[] via the Newton's 
           // method, using the last computed trajectory as the initial 
           // condition.
-          compute_trajectory(mesh, dp);
+          compute_trajectory(space, dp);
 
           // Save trajectory to a file.
           int plotting_subdivision = 10;
-          plot_trajectory_endpoint(mesh); 
+          plot_trajectory_endpoint(space); 
         }
       }
     }

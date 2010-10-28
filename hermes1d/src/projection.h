@@ -7,7 +7,7 @@
 #define _PROJECTION_H_
 
 #include "../../hermes_common/common.h"
-#include "mesh.h"
+#include "space.h"
 #include "../../hermes_common/matrix.h"
 
 double L2_projection_biform(int num, double *x, double *weights,
@@ -66,7 +66,7 @@ double H1_projection_liform(int num, double *x, double *weights,
 typedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[]);
 
 
-void assemble_projection_matrix_rhs(Mesh *mesh, Matrix *A, double *rhs,
+void assemble_projection_matrix_rhs(Space *space, Matrix *A, double *rhs,
         ExactFunction fn, int projection_type=H1D_L2_ortho_global);
 
 #endif

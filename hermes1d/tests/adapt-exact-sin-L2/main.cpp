@@ -20,7 +20,7 @@ int P_init = 1;                         // Initial polynomal degree.
 
 // Newton's method.
 double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh.
-double NEWTON_TOL_REF = 1e-6;           // Reference mesh.
+double NEWTON_TOL_REF = 1e-6;           // Reference space.
 int NEWTON_MAX_ITER = 150;
 
 // Adaptivity.
@@ -98,10 +98,10 @@ double residual(int num, double *x, double *weights,
 
 int main() {
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
-  mesh->set_bc_left_dirichlet(0, Val_dir_left);
-  mesh->set_bc_right_dirichlet(0, Val_dir_right);
-  info("N_dof = %d", mesh->assign_dofs());
+  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  space->set_bc_left_dirichlet(0, Val_dir_left);
+  space->set_bc_right_dirichlet(0, Val_dir_right);
+  info("N_dof = %d", space->assign_dofs());
 
   // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem();
@@ -109,11 +109,11 @@ int main() {
   dp->add_vector_form(0, residual);
 
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
 
   // Fill vector y using dof and coeffs arrays in elements.
-  double *y = new double[ndof];
-  solution_to_vector(mesh, y);
+  double *coeff_vec = new double[ndof];
+  solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -124,7 +124,7 @@ int main() {
   while (1)
   {
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+    dp->assemble_matrix_and_vector(space, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -143,36 +143,35 @@ int main() {
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-    // Calculate the coefficient vector.
-    bool solved = solver->solve();
-    if (solved) 
-    {
-      double* solution_vector = new double[ndof];
-      solution_vector = solver->get_solution();
-      for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-      // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-      solution_vector = NULL;
-    }
-    it++;
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
 
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // Copy coefficients from vector y to elements.
-    vector_to_solution(y, mesh);
+    vector_to_solution(coeff_vec, space);
+
+    it++;
   }
   
+  // Cleanup.
   delete matrix;
   delete rhs;
   delete solver;
 
   // Replicate coarse mesh including dof arrays.
-  Mesh *mesh_ref = mesh->replicate();
+  Space *space_ref = space->replicate();
 
-  // Refine entire mesh_ref uniformly in 'h' and 'p'.
+  // Refine entire space_ref uniformly in 'h' and 'p'.
   int start_elem_id = 0; 
-  int num_to_ref = mesh_ref->get_n_active_elem();
-  mesh_ref->reference_refinement(start_elem_id, num_to_ref);
-  info("Fine mesh created (%d DOF).", mesh_ref->get_num_dofs());
+  int num_to_ref = space_ref->get_n_active_elem();
+  space_ref->reference_refinement(start_elem_id, num_to_ref);
+  info("Fine mesh created (%d DOF).", Space::get_num_dofs(space_ref));
 
   // Convergence graph wrt. the number of degrees of freedom.
   GnuplotGraph graph;
@@ -188,11 +187,11 @@ int main() {
 
     // Newton's loop on fine mesh.
     // Obtain the number of degrees of freedom.
-    int ndof = mesh_ref->get_num_dofs();
+    int ndof = Space::get_num_dofs(space_ref);
 
     // Fill vector y using dof and coeffs arrays in elements.
-    double *y = new double[ndof];
-    solution_to_vector(mesh_ref, y);
+    double *coeff_vec = new double[ndof];
+    solution_to_vector(space_ref, coeff_vec);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -203,7 +202,7 @@ int main() {
     while (1)
     {
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble_matrix_and_vector(mesh_ref, matrix, rhs);
+      dp->assemble_matrix_and_vector(space_ref, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_norm_squared = 0;
@@ -222,40 +221,39 @@ int main() {
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
       for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-      // Calculate the coefficient vector.
-      bool solved = solver->solve();
-      if (solved) 
-      {
-        double* solution_vector = new double[ndof];
-        solution_vector = solver->get_solution();
-        for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-        // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-        solution_vector = NULL;
-      }
-      it++;
+      // Solve the linear system.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
 
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+      // If the maximum number of iteration has been reached, then quit.
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
       // Copy coefficients from vector y to elements.
-      vector_to_solution(y, mesh_ref);
+      vector_to_solution(coeff_vec, space_ref);
+
+      it++;
     }
     
+    // Cleanup.
     delete matrix;
     delete rhs;
     delete solver;
 
     // Starting with second adaptivity step, obtain new coarse 
-    // mesh solution via Newton's method. Initial condition is 
+    // space solution via Newton's method. Initial condition is 
     // the last coarse mesh solution.
     if (adapt_iterations > 1) {
 
       // Newton's loop on coarse mesh
       // Obtain the number of degrees of freedom.
-      int ndof = mesh->get_num_dofs();
+      int ndof = Space::get_num_dofs(space);
 
       // Fill vector y using dof and coeffs arrays in elements.
-      double *y = new double[ndof];
-      solution_to_vector(mesh, y);
+      double *coeff_vec = new double[ndof];
+      solution_to_vector(space, coeff_vec);
 
       // Set up the solver, matrix, and rhs according to the solver selection.
       SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -266,7 +264,7 @@ int main() {
       while (1)
       {
         // Assemble the Jacobian matrix and residual vector.
-        dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+        dp->assemble_matrix_and_vector(space, matrix, rhs);
 
         // Calculate the l2-norm of residual vector.
         double res_norm_squared = 0;
@@ -285,24 +283,23 @@ int main() {
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
         for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-        // Calculate the coefficient vector.
-        bool solved = solver->solve();
-        if (solved) 
-        {
-          double* solution_vector = new double[ndof];
-          solution_vector = solver->get_solution();
-          for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-          // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-          solution_vector = NULL;
-        }
-        it++;
+        // Solve the linear system.
+        if(!solver->solve())
+          error ("Matrix solver failed.\n");
 
+        // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+        // If the maximum number of iteration has been reached, then quit.
         if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
         
         // Copy coefficients from vector y to elements.
-        vector_to_solution(y, mesh);
+        vector_to_solution(coeff_vec, space);
+        
+        it++;
       }
       
+      // Cleanup.
       delete matrix;
       delete rhs;
       delete solver;
@@ -311,11 +308,11 @@ int main() {
     // In the next step, estimate element errors based on 
     // the difference between the fine mesh and coarse mesh solutions. 
     double err_est_array[MAX_ELEM_NUM]; 
-    double err_est_total = calc_error_estimate(NORM, mesh, mesh_ref, 
+    double err_est_total = calc_error_estimate(NORM, space, space_ref, 
                            err_est_array);
 
     // Calculate the norm of the fine mesh solution.
-    double ref_sol_norm = calc_solution_norm(NORM, mesh_ref);
+    double ref_sol_norm = calc_solution_norm(NORM, space_ref);
 
     // Calculate an estimate of the global relative error.
     double err_est_rel = err_est_total/ref_sol_norm;
@@ -325,7 +322,7 @@ int main() {
     double err_exact_rel;  
     if (EXACT_SOL_PROVIDED) {
       // Calculate element errors wrt. exact solution.
-      double err_exact_total = calc_error_exact(NORM, mesh, exact_sol);
+      double err_exact_total = calc_error_exact(NORM, space, exact_sol);
      
       // Calculate the norm of the exact solution
       // (using a fine subdivision and high-order quadrature).
@@ -336,11 +333,11 @@ int main() {
       // Calculate an estimate of the global relative error.
       err_exact_rel = err_exact_total/exact_sol_norm;
       info("Relative error (exact) = %g %%", 100.*err_exact_rel);
-      graph.add_values(0, mesh->get_num_dofs(), 100 * err_exact_rel);
+      graph.add_values(0, Space::get_num_dofs(space), 100 * err_exact_rel);
     }
 
     // Add entry to DOF convergence graph.
-    graph.add_values(1, mesh->get_num_dofs(), 100 * err_est_rel);
+    graph.add_values(1, Space::get_num_dofs(space), 100 * err_est_rel);
 
     // Decide whether the relative error is sufficiently small.
     if(err_est_rel*100 < TOL_ERR_REL) break;
@@ -350,21 +347,21 @@ int main() {
     // The coefficient vectors and numbers of degrees of freedom 
     // on both meshes are also updated.
     adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array,
-          mesh, mesh_ref);
+          space, space_ref);
 
     adapt_iterations++;
   }
 
   // Plot meshes, results, and errors.
-  adapt_plotting(mesh, mesh_ref, 
+  adapt_plotting(space, space_ref, 
                  NORM, EXACT_SOL_PROVIDED, exact_sol);
 
   // Save convergence graph.
   graph.save("conv_dof.gp");
 
   int success_test = 1; 
-  info("N_dof = %d", mesh->get_num_dofs());
-  if (mesh->get_num_dofs() > 40) success_test = 0;
+  info("N_dof = %d", Space::get_num_dofs(space));
+  if (Space::get_num_dofs(space) > 40) success_test = 0;
 
   if (success_test) {
     info("Success!");

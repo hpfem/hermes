@@ -14,7 +14,7 @@
 
 #include "quad_std.h"
 #include "../../hermes_common/common.h"
-#include "mesh.h"
+#include "space.h"
 #include "../../hermes_common/matrix.h"
 #include "quad_std.h"
 #include "legendre.h"

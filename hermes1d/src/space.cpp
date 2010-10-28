@@ -3,7 +3,7 @@
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-#include "mesh.h"
+#include "space.h"
 #include "iterator.h"
 #include "adapt.h"
 #include "transforms.h"
@@ -257,7 +257,7 @@ double Element::get_solution_value(double x_phys, int comp)
 {
     double val[MAX_EQN_NUM];
     double der[MAX_EQN_NUM];
-    // This needs the coefficients to be copied to the mesh, with index 0:
+    // This needs the coefficients to be copied to the space, with index 0:
     this->get_solution_point(x_phys, val, der, 0);
     return val[comp];
 }
@@ -268,7 +268,7 @@ double Element::get_solution_deriv(double x_phys, int comp)
 {
     double val[MAX_EQN_NUM];
     double der[MAX_EQN_NUM];
-    // This needs the coefficients to be copied to the mesh, with index 0:
+    // This needs the coefficients to be copied to the space, with index 0:
     this->get_solution_point(x_phys, val, der, 0);
     return der[comp];
 }
@@ -380,7 +380,7 @@ double Element::get_x_phys(double x_ref)
   return (a+b)/2. + x_ref*(b-a)/2.;
 }
 
-Mesh::Mesh() {
+Space::Space() {
   n_eq = 0;
   n_sln = 0;
   n_base_elem = 0;
@@ -389,16 +389,16 @@ Mesh::Mesh() {
   base_elems = NULL;
 }
 
-// Creates equidistant mesh with uniform polynomial degree of elements.
+// Creates equidistant space with uniform polynomial degree of elements.
 // All elements will have the same (zero) marker.
-Mesh::Mesh(double a, double b, int n_base_elem, int p_init, int n_eq, int
+Space::Space(double a, double b, int n_base_elem, int p_init, int n_eq, int
         n_sln, bool print_banner)
 {
   // check maximum number of equations
   if(n_eq > MAX_EQN_NUM) 
   error("Maximum number of equations exceeded (set in common.h)");
 
-  // all Mesh class variables
+  // all Space class variables
   this->left_endpoint = a;
   this->right_endpoint = b;
   this->n_base_elem = n_base_elem;
@@ -408,7 +408,7 @@ Mesh::Mesh(double a, double b, int n_base_elem, int p_init, int n_eq, int
 
   // allocate element array
   this->base_elems = new Element[this->n_base_elem];     
-  if (base_elems == NULL) error("Not enough memory in Mesh::create().");
+  if (base_elems == NULL) error("Not enough memory in Space::create().");
   if (p_init > MAX_P) 
     error("Max element order exceeded (set in common.h).");
   // element length
@@ -424,13 +424,13 @@ Mesh::Mesh(double a, double b, int n_base_elem, int p_init, int n_eq, int
   }
 }
 
-// Creates a general mesh (used, e.g., in example "neutronics").
+// Creates a general space (used, e.g., in example "neutronics").
 // n_macro_elem... number of macro elements
 // pts_array[]...  array of macroelement grid points
 // p_array[]...    array of macroelement poly degrees
 // m_array[]...    array of macroelement material markers
 // div_array[]...  array of macroelement equidistant divisions
-Mesh::Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
+Space::Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
         *div_array, int n_eq, int n_sln, bool print_banner)
 {
   // check maximum number of equations
@@ -449,7 +449,7 @@ Mesh::Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
   }
   info("Number of elements: %d", n_base_elem);
 
-  // define all Mesh class variables
+  // define all Space class variables
   this->left_endpoint = pts_array[0];
   this->right_endpoint = pts_array[n_macro_elem];
   this->n_base_elem = n_base_elem;
@@ -459,7 +459,7 @@ Mesh::Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
 
   // allocate base element array
   this->base_elems = new Element[this->n_base_elem];     
-  if (base_elems == NULL) error("Not enough memory for base element array in Mesh::create().");
+  if (base_elems == NULL) error("Not enough memory for base element array in Space::create().");
 
   // initialize element array
   int count = 0;
@@ -479,7 +479,7 @@ Mesh::Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array, int
 
 // CAUTION - this is expensive (traverses the entire tree 
 // from the beginning until the element is found)
-void Mesh::refine_single_elem(int id, int3 cand)
+void Space::refine_single_elem(int id, int3 cand)
 {
     Iterator I(this);
     Element *e;
@@ -494,10 +494,10 @@ void Mesh::refine_single_elem(int id, int3 cand)
     error("refine_single_elem: Element not found.");
 }
 
-// performs mesh refinement using a list of elements to be 
+// performs space refinement using a list of elements to be 
 // refined and a list of corresponding polynomial degree 
 // pairs for the sons
-void Mesh::refine_elems(int elem_num, int *id_array, int3 *cand_array)
+void Space::refine_elems(int elem_num, int *id_array, int3 *cand_array)
 {
     Iterator *I = new Iterator(this);
     Element *e;
@@ -516,7 +516,7 @@ void Mesh::refine_elems(int elem_num, int *id_array, int3 *cand_array)
 // Splits the indicated elements and 
 // increases poly degree in sons by one.
 // Solution is transfered to new elements.
-void Mesh::reference_refinement(int start_elem_id, int elem_num)
+void Space::reference_refinement(int start_elem_id, int elem_num)
 {
     Iterator *I = new Iterator(this);
     Element *e;
@@ -534,7 +534,7 @@ void Mesh::reference_refinement(int start_elem_id, int elem_num)
     this->assign_dofs();
 }
 
-void Mesh::set_bc_left_dirichlet(int eqn, double val)
+void Space::set_bc_left_dirichlet(int eqn, double val)
 {
   // deactivate the corresponding dof for the left-most
   // element and all his descendants adjacent to the 
@@ -549,7 +549,7 @@ void Mesh::set_bc_left_dirichlet(int eqn, double val)
   } while (e != NULL);
 }
 
-void Mesh::set_bc_right_dirichlet(int eqn, double val)
+void Space::set_bc_right_dirichlet(int eqn, double val)
 {
   // deactivate the corresponding dof for the right-most
   // element and all his descendants adjacent to the 
@@ -565,7 +565,7 @@ void Mesh::set_bc_right_dirichlet(int eqn, double val)
 }
 
 // define element connectivities (dof arrays)
-int Mesh::assign_dofs()
+int Space::assign_dofs()
 {
   Iterator *I = new Iterator(this);
   // (1) enumerate vertex dofs
@@ -616,7 +616,7 @@ int Mesh::assign_dofs()
   return this->n_dof;
 }
 
-void Mesh::assign_elem_ids()
+void Space::assign_elem_ids()
 {
     Iterator *I = new Iterator(this);
     int count_id = 0;
@@ -629,7 +629,7 @@ void Mesh::assign_elem_ids()
     delete I;
 }
 
-Element* Mesh::first_active_element()
+Element* Space::first_active_element()
 {
   Element *e = base_elems;
   while(!e->is_active()) {
@@ -638,7 +638,7 @@ Element* Mesh::first_active_element()
   return e;
 }
 
-Element* Mesh::last_active_element()
+Element* Space::last_active_element()
 {
   Element *e = base_elems + n_base_elem - 1;
   while(!e->is_active()) {
@@ -762,39 +762,39 @@ void element_shapefn_point(double x_ref, double a, double b,
     der = lobatto_der_ref(x_ref, k) / jac; 
 }
 
-// Replicate mesh including dof arrays in all elements
-Mesh *Mesh::replicate()
+// Replicate space including dof arrays in all elements
+Space *Space::replicate()
 {
-  // copy base mesh element array, use dummy poly degree first 
-  // (poly degrees in base mesh may have changed since initialization)
+  // copy base space element array, use dummy poly degree first 
+  // (poly degrees in base space may have changed since initialization)
   int p_dummy = -1; 
-  Mesh *mesh_new = new Mesh(this->left_endpoint, this->right_endpoint, 
+  Space *space_new = new Space(this->left_endpoint, this->right_endpoint, 
 			    this->n_base_elem, p_dummy, this->n_eq, this->n_sln);
 
-  // copy all Mesh class variables
-  mesh_new->set_n_eq(this->n_eq);
-  mesh_new->set_n_base_elem(this->n_base_elem);
-  mesh_new->set_n_active_elem(this->n_active_elem);
-  mesh_new->set_left_endpoint(this->left_endpoint);
-  mesh_new->set_right_endpoint(this->right_endpoint);
-  mesh_new->set_n_dof(this->n_dof);
+  // copy all Space class variables
+  space_new->set_n_eq(this->n_eq);
+  space_new->set_n_base_elem(this->n_base_elem);
+  space_new->set_n_active_elem(this->n_active_elem);
+  space_new->set_left_endpoint(this->left_endpoint);
+  space_new->set_right_endpoint(this->right_endpoint);
+  space_new->set_n_dof(this->n_dof);
 
-  // replicate all base mesh elements including all their 
+  // replicate all base space elements including all their 
   // variables, dof arrays, and tree-structure
-  Element *base_elems_new = mesh_new->get_base_elems();
+  Element *base_elems_new = space_new->get_base_elems();
   for(int i=0; i<this->n_base_elem; i++) {
     Element *e_src = this->base_elems + i;
     Element *e_trg = base_elems_new + i;
     e_src->copy_recursively_into(e_trg);
   }
 
-  return mesh_new;
+  return space_new;
 }
 
-void Mesh::plot(const char* filename) 
+void Space::plot(const char* filename) 
 {
     FILE *f = fopen(filename, "wb");
-    if(f == NULL) error("problem opening file in Mesh::plot().");
+    if(f == NULL) error("problem opening file in Space::plot().");
     Iterator I(this);
     Element *e;
     while ((e = I.next_active_element()) != NULL) {
@@ -804,12 +804,12 @@ void Mesh::plot(const char* filename)
       fprintf(f, "%g %d\n\n", e->x2, 0);
     }
     fclose(f);
-    info("Mesh written to %s.", filename);
+    info("Space written to %s.", filename);
 }
 
 // Plots the error between the reference and coarse mesh solutions
 // if the reference refinement was p-refinement
-void Mesh::plot_element_error_p(int norm, FILE *f, Element *e, Element *e_ref,
+void Space::plot_element_error_p(int norm, FILE *f, Element *e, Element *e_ref,
                                 int subdivision)
 {
   int n_eq = this->get_n_eq();
@@ -853,7 +853,7 @@ void Mesh::plot_element_error_p(int norm, FILE *f, Element *e, Element *e_ref,
 
 // Plots the error between the reference and coarse mesh solutions
 // if the reference refinement was hp-refinement
-void Mesh::plot_element_error_hp(int norm, FILE *f, Element *e, 
+void Space::plot_element_error_hp(int norm, FILE *f, Element *e, 
                                  Element *e_ref_left, 
                                  Element *e_ref_right,
                                  int subdivision)
@@ -938,7 +938,7 @@ void Mesh::plot_element_error_hp(int norm, FILE *f, Element *e,
 }
 
 // Plots the error wrt. the exact solution (if available)
-void Mesh::plot_element_error_exact(int norm, FILE *f, Element *e, 
+void Space::plot_element_error_exact(int norm, FILE *f, Element *e, 
                                     exact_sol_type exact_sol, int subdivision)
 {
   int pts_num = subdivision + 1;
@@ -974,7 +974,7 @@ void Mesh::plot_element_error_exact(int norm, FILE *f, Element *e,
 }
 
 // Plots the error between the reference and coarse mesh solutions
-void Mesh::plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename, 
+void Space::plot_error_estimate(int norm, Space* space_ref, const char *filename, 
 		          int subdivision)
 {
   char final_filename[MAX_STRING_LENGTH];
@@ -982,10 +982,10 @@ void Mesh::plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename,
   FILE *f = fopen(final_filename, "wb");
   if(f == NULL) error("problem opening file in plot_error_estimate().");
 
-  // simultaneous traversal of 'this' and 'mesh_ref'
+  // simultaneous traversal of 'this' and 'space_ref'
   Element *e;
   Iterator *I = new Iterator(this);
-  Iterator *I_ref = new Iterator(mesh_ref);
+  Iterator *I_ref = new Iterator(space_ref);
   while ((e = I->next_active_element()) != NULL) {
     Element *e_ref = I_ref->next_active_element();
     if (e->level == e_ref->level) { // element 'e' was not refined in space
@@ -1014,7 +1014,7 @@ void Mesh::plot_error_estimate(int norm, Mesh* mesh_ref, const char *filename,
 
 // Plots the error between the coarse mesh solution
 // and the solution stored in the elem_ref_pairs[] array
-void Mesh::plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs, 
+void Space::plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs, 
                                const char *filename, 
 		               int subdivision)
 {
@@ -1053,7 +1053,7 @@ void Mesh::plot_error_estimate(int norm, ElemPtr2* elem_ref_pairs,
 }
 
 // Plots the error wrt. the exact solution (if available)
-void Mesh::plot_error_exact(int norm, exact_sol_type exact_sol, 
+void Space::plot_error_exact(int norm, exact_sol_type exact_sol, 
                             const char *filename,  
 		            int subdivision)
 {
@@ -1077,101 +1077,101 @@ void Mesh::plot_error_exact(int norm, exact_sol_type exact_sol,
   info("Exact solution error written to %s.", final_filename);
 }
 
-int Mesh::get_n_base_elem()
+int Space::get_n_base_elem()
 {
   return this->n_base_elem;
 }
 
-Mesh::~Mesh() 
+Space::~Space() 
 {
   if (this->base_elems != NULL) {
     delete[] this->base_elems;
   }
 }
 
-void Mesh::free_elements()
+void Space::free_elements()
 {
   if (this->base_elems != NULL) {
     delete[] this->base_elems;
     }
 }
 
-Element * Mesh::get_base_elems() 
+Element * Space::get_base_elems() 
 {
   return this->base_elems;
 }
 
-void Mesh::set_n_base_elem(int n_base_elem)
+void Space::set_n_base_elem(int n_base_elem)
 {
   this->n_base_elem = n_base_elem;
 }
 
-int Mesh::get_n_active_elem()
+int Space::get_n_active_elem()
 {
   return this->n_active_elem;
 }
 
-void Mesh::set_n_active_elem(int n)
+void Space::set_n_active_elem(int n)
 {
     this->n_active_elem = n;
 }
 
-int Mesh::get_num_dofs()
+int Space::get_num_dofs(Space* space)
 {
-  return this->n_dof;
+  return space->n_dof;
 }
 
-void Mesh::set_n_dof(int n)
+void Space::set_n_dof(int n)
 {
   this->n_dof = n;
 }
 
-int Mesh::get_n_eq()
+int Space::get_n_eq()
 {
   return this->n_eq;
 }
 
-void Mesh::set_n_eq(int n_eq)
+void Space::set_n_eq(int n_eq)
 {
   this->n_eq = n_eq;
 }
 
-int Mesh::get_n_sln()
+int Space::get_n_sln()
 {
   return this->n_sln;
 }
 
-void Mesh::set_n_sln(int n_sln)
+void Space::set_n_sln(int n_sln)
 {
   this->n_sln = n_sln;
 }
 
-double Mesh::get_left_endpoint()
+double Space::get_left_endpoint()
 {
   return this->left_endpoint; 
 }
 
-void Mesh::set_left_endpoint(double a)
+void Space::set_left_endpoint(double a)
 {
   this->left_endpoint = a; 
 }
 
-double Mesh::get_right_endpoint()
+double Space::get_right_endpoint()
 {
   return this->right_endpoint; 
 }
 
-void Mesh::set_right_endpoint(double b)
+void Space::set_right_endpoint(double b)
 {
   this->right_endpoint = b; 
 }
 
-void Mesh::vector_to_solution(double *y, int sln) 
+void Space::vector_to_solution(double *y, int sln) 
 {
   ::vector_to_solution(y, this, sln);
 }
 
-void Mesh::solution_to_vector(double *y, int sln) 
+void Space::solution_to_vector(double *y, int sln) 
 {
   ::solution_to_vector(this, y, sln);
 }
@@ -1228,14 +1228,14 @@ void create_ref_index_array(double threshold, double *err_array,
 }
 
 // Returns updated coarse and reference meshes, with the last 
-// coarse and reference mesh solutions on them, respectively. 
+// coarse and reference space solutions on them, respectively. 
 // The coefficient vectors and numbers of degrees of freedom 
 // on both meshes are also updated. 
 void adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Mesh* &mesh, Mesh* &mesh_ref) 
+           Space* &space, Space* &space_ref) 
 {
-  int n_elem = mesh->get_n_active_elem();
+  int n_elem = space->get_n_active_elem();
   
   // Use the err_array[] and threshold to create a list of 
   // elements to be refined.
@@ -1245,18 +1245,18 @@ void adapt(int norm, int adapt_type, double threshold,
 
   // Replicate the coarse and fine meshes. The original meshes become
   // backup and refinements will only be done in the new ones.
-  Mesh *mesh_new = mesh->replicate();
-  Mesh *mesh_ref_new = mesh_ref->replicate();
+  Space *space_new = space->replicate();
+  Space *space_ref_new = space_ref->replicate();
 
   // Simultaneous traversal of all meshes.
-  // For each element in 'mesh_new', create a list of refinement 
+  // For each element in 'space_new', create a list of refinement 
   // candidates and select the one that best resembles the reference 
-  // solution on 'mesh_ref_new'. While elements in 'mesh_new' are refined, 
-  // corresponding refinements are also done in 'mesh_ref_new'.
-  Iterator *I = new Iterator(mesh);
-  Iterator *I_new = new Iterator(mesh_new);
-  Iterator *I_ref = new Iterator(mesh_ref);
-  Iterator *I_ref_new = new Iterator(mesh_ref_new);
+  // solution on 'space_ref_new'. While elements in 'space_new' are refined, 
+  // corresponding refinements are also done in 'space_ref_new'.
+  Iterator *I = new Iterator(space);
+  Iterator *I_new = new Iterator(space_new);
+  Iterator *I_ref = new Iterator(space_ref);
+  Iterator *I_ref_new = new Iterator(space_ref_new);
   Element *e = I->next_active_element();
   Element *e_new = I_new->next_active_element();
   Element *e_ref = I_ref->next_active_element();
@@ -1300,7 +1300,7 @@ void adapt(int norm, int adapt_type, double threshold,
       }
 
       // Next we perform the refinement defined by cand_list[choice]
-      // e_new_last... element in mesh_new that will be refined,
+      // e_new_last... element in space_new that will be refined,
       // e_ref_left... corresponding element in fine mesh (if reference 
       //               refinement was p-refinement). In this case 
       //               e_ref_right == NULL
@@ -1318,7 +1318,7 @@ void adapt(int norm, int adapt_type, double threshold,
       //printf("  Refined element (%g, %g), cand = (%d %d %d)\n", 
       //       e_new_last->x1, e_new_last->x2, cand_list[choice][0], 
       //       cand_list[choice][1], cand_list[choice][2]);
-      if(cand_list[choice][0] == 1) mesh_new->n_active_elem++; 
+      if(cand_list[choice][0] == 1) space_new->n_active_elem++; 
       // perform corresponding refinement(s) in the new fine mesh
       if (e_new_last->level == e_ref_left->level) { // ref. refinement of 'e_last' was 
                                                     // p-refinement so also future ref. 
@@ -1333,7 +1333,7 @@ void adapt(int norm, int adapt_type, double threshold,
           int new_p_left = cand_list[choice][1];
           int new_p_right = cand_list[choice][2];
 	  e_ref_new_left->refine(1, new_p_left + 1, new_p_right + 1);
-          mesh_ref_new->n_active_elem++;
+          space_ref_new->n_active_elem++;
         }
       }
       else { // ref. refinement was hp-refinement, so also future
@@ -1350,9 +1350,9 @@ void adapt(int norm, int adapt_type, double threshold,
           int new_p_left = cand_list[choice][1];
           int new_p_right = cand_list[choice][2];
 	  e_ref_new_left->refine(1, new_p_left + 1, new_p_left + 1);
-          mesh_ref_new->n_active_elem++;
+          space_ref_new->n_active_elem++;
 	  e_ref_new_right->refine(1, new_p_right + 1, new_p_right + 1);
-          mesh_ref_new->n_active_elem++;
+          space_ref_new->n_active_elem++;
         }
       }
     }
@@ -1367,23 +1367,23 @@ void adapt(int norm, int adapt_type, double threshold,
       }    
     }
   }
-  // enumerate dofs in both new meshes
-  int n_dof_new = mesh_new->assign_dofs();
-  int n_dof_ref_new = mesh_ref_new->assign_dofs();
+  // Enumerate dofs in both new spaces.
+  int n_dof_new = space_new->assign_dofs();
+  int n_dof_ref_new = space_ref_new->assign_dofs();
   info("Coarse mesh refined (%d elem, %d DOF)", 
-         mesh_new->get_n_active_elem(), n_dof_new);
+         space_new->get_n_active_elem(), n_dof_new);
   info("Fine mesh refined (%d elem, %d DOF)", 
-  	 mesh_ref_new->get_n_active_elem(), n_dof_ref_new);
+  	 space_ref_new->get_n_active_elem(), n_dof_ref_new);
 
-  // Delete old meshes and copy the new ones in place of them
-  delete mesh;
-  delete mesh_ref;
-  mesh = mesh_new;
-  mesh_ref = mesh_ref_new;
+  // Delete old spaces and copy the new ones in place of them
+  delete space;
+  delete space_ref;
+  space = space_new;
+  space_ref = space_ref_new;
 
-  // Last adjust the number of dofs in each mesh
-  mesh->set_n_dof(n_dof_new);
-  mesh_ref->set_n_dof(n_dof_ref_new);
+  // Last adjust the number of dofs in each space
+  space->set_n_dof(n_dof_new);
+  space_ref->set_n_dof(n_dof_ref_new);
 }
 
 // Returns updated coarse mesh, with the last 
@@ -1392,9 +1392,9 @@ void adapt(int norm, int adapt_type, double threshold,
 // also is updated. 
 void adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Mesh* &mesh, ElemPtr2 *ref_elem_pairs) 
+           Space* &space, ElemPtr2 *ref_elem_pairs) 
 {
-  int n_elem = mesh->get_n_active_elem();
+  int n_elem = space->get_n_active_elem();
   
   // Use the err_array[] and threshold to create a list of 
   // elements to be refined.
@@ -1404,14 +1404,14 @@ void adapt(int norm, int adapt_type, double threshold,
 
   // Replicate the coarse mesh. The original coarse mesh becomes
   // backup and refinements will only be done in the new one.
-  Mesh *mesh_new = mesh->replicate();
+  Space *space_new = space->replicate();
 
-  // Simultaneous traversal of mesh_new and the ref_elem_pairs[] array.
-  // For each element in mesh_new create a list of refinement 
+  // Simultaneous traversal of space_new and the ref_elem_pairs[] array.
+  // For each element in space_new create a list of refinement 
   // candidates and select the one that best resembles the reference 
   // solution in ref_elem_pairs[]. 
-  Iterator *I = new Iterator(mesh);
-  Iterator *I_new = new Iterator(mesh_new);
+  Iterator *I = new Iterator(space);
+  Iterator *I_new = new Iterator(space_new);
   Element *e = I->next_active_element();
   Element *e_new = I_new->next_active_element();
   int counter_adapt = 0;
@@ -1448,7 +1448,7 @@ void adapt(int norm, int adapt_type, double threshold,
       }
 
       // Next we perform the refinement defined by cand_list[choice]
-      // e_new_last... element in mesh_new that will be refined,
+      // e_new_last... element in space_new that will be refined,
       // e_ref_left... corresponding element in ref_elem_pairs[] (if reference 
       //               refinement was p-refinement). In this case 
       //               e_ref_right == NULL
@@ -1463,93 +1463,93 @@ void adapt(int norm, int adapt_type, double threshold,
       info("  Refined element (%g, %g), cand = (%d %d %d)", 
              e_new_last->x1, e_new_last->x2, cand_list[choice][0], 
              cand_list[choice][1], cand_list[choice][2]);
-      if(cand_list[choice][0] == 1) mesh_new->n_active_elem++;
+      if(cand_list[choice][0] == 1) space_new->n_active_elem++;
     }
     else {
       e = I->next_active_element();
       e_new = I_new->next_active_element();
     }
   }
-  // enumerate dofs in both new meshes
-  int n_dof_new = mesh_new->assign_dofs();
-  info("New mesh has %d elements.",
-         mesh_new->get_n_active_elem(), n_dof_new);
+  // Enumerate dofs in both new spaces.
+  int n_dof_new = space_new->assign_dofs();
+  info("New space has %d elements.",
+         space_new->get_n_active_elem(), n_dof_new);
 
   // Delete old coarse mesh
-  delete mesh;
-  mesh = mesh_new;
+  delete space;
+  space = space_new;
 
   // check on DOF overflow
   if (n_dof_new > MAX_N_DOF) error("MAX_N_DOF exceeded in adapt().");
 
   // Adjust the number of dofs
-  mesh->set_n_dof(n_dof_new);
+  space->set_n_dof(n_dof_new);
 }
 
-void adapt_plotting(Mesh *mesh, Mesh *mesh_ref, 
+void adapt_plotting(Space *space, Space *space_ref, 
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol) 
 {
   // Plot the coarse mesh solution
-  Linearizer l(mesh);
+  Linearizer l(space);
   l.plot_solution("solution.gp");
 
   // Plot the fine mesh solution
-  Linearizer l_ref(mesh_ref);
+  Linearizer l_ref(space_ref);
   l_ref.plot_solution("solution_ref.gp");
 
   // Plot the coarse and fine meshes
-  mesh->plot("mesh.gp");
-  mesh_ref->plot("mesh_ref.gp");
+  space->plot("space.gp");
+  space_ref->plot("space_ref.gp");
 
   // Plot the error estimate (difference between 
   // coarse and fine mesh solutions)
-  mesh->plot_error_estimate(norm, mesh_ref, "error_est.gp");
+  space->plot_error_estimate(norm, space_ref, "error_est.gp");
 
   // Plot error wrt. exact solution (if available)
   if (exact_sol_provided) {   
-    mesh->plot_error_exact(norm, exact_sol, "error_exact.gp");
+    space->plot_error_exact(norm, exact_sol, "error_exact.gp");
   }
 }
 
-void adapt_plotting(Mesh *mesh, ElemPtr2 *ref_elem_pairs,
+void adapt_plotting(Space *space, ElemPtr2 *ref_elem_pairs,
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol) 
 {
   // Plot the coarse mesh solution.
-  Linearizer l(mesh);
+  Linearizer l(space);
   l.plot_solution("solution.gp");
 
   // Plot solution stored in the ref_elem_pairs[] array.
-  Linearizer l_ref(mesh);
+  Linearizer l_ref(space);
   l_ref.plot_ref_elem_pairs(ref_elem_pairs, "solution_ref.gp");
 
-  // Plot the mesh
-  mesh->plot("mesh.gp");
+  // Plot the space
+  space->plot("space.gp");
 
   // Plot the difference between the coarse mesh solution
   // and the solution stored in the ref_elem_pairs[] array.
-  mesh->plot_error_estimate(norm, ref_elem_pairs, "error_est.gp");
+  space->plot_error_estimate(norm, ref_elem_pairs, "error_est.gp");
 
   // Plot error wrt. exact solution (if available).
   if (exact_sol_provided) {   
-    mesh->plot_error_exact(norm, exact_sol, "error_exact.gp");
+    space->plot_error_exact(norm, exact_sol, "error_exact.gp");
   }
 }
 
-void solution_to_vector(Mesh *mesh, double *y, int sln) {
+void solution_to_vector(Space *space, double *y, int sln) {
   Element *e;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   while ((e = I->next_active_element()) != NULL) {
     e->copy_coeffs_to_vector(y, sln);
   }
   delete I;
 }
 
-void vector_to_solution(double *y, Mesh *mesh, int sln) 
+void vector_to_solution(double *y, Space *space, int sln) 
 {
   Element *e;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   while ((e = I->next_active_element()) != NULL) {
     e->get_coeffs_from_vector(y, sln);
   }

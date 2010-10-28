@@ -46,12 +46,12 @@ double f_1(double x) {
 
 int main() {
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
-  mesh->set_bc_left_dirichlet(0, Val_dir_left_0);
-  mesh->set_bc_right_dirichlet(0, Val_dir_right_0);
-  mesh->set_bc_left_dirichlet(1, Val_dir_left_1);
-  mesh->set_bc_right_dirichlet(1, Val_dir_right_1);
-  info("N_dof = %d", mesh->assign_dofs());
+  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  space->set_bc_left_dirichlet(0, Val_dir_left_0);
+  space->set_bc_right_dirichlet(0, Val_dir_right_0);
+  space->set_bc_left_dirichlet(1, Val_dir_left_1);
+  space->set_bc_right_dirichlet(1, Val_dir_right_1);
+  info("N_dof = %d", space->assign_dofs());
 
   // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem();
@@ -64,11 +64,11 @@ int main() {
 
   // Newton's loop.
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
 
   // Fill vector y using dof and coeffs arrays in elements.
-  double *y = new double[ndof];
-  solution_to_vector(mesh, y);
+  double *coeff_vec = new double[ndof];
+  solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -78,8 +78,8 @@ int main() {
   int it = 1;
   while (1)
   {
-    // Construct matrix and residual vector.
-    dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble_matrix_and_vector(space, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -98,30 +98,29 @@ int main() {
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-    // Calculate the coefficient vector.
-    bool solved = solver->solve();
-    if (solved) 
-    {
-      double* solution_vector = new double[ndof];
-      solution_vector = solver->get_solution();
-      for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-      // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-      solution_vector = NULL;
-    }
-    it++;
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
 
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // Copy coefficients from vector y to elements.
-    vector_to_solution(y, mesh);
+    vector_to_solution(coeff_vec, space);
+
+    it++;
   }
   
+  // Cleanup.
   delete matrix;
   delete rhs;
   delete solver;
 
   // Plot the solution.
-  Linearizer l(mesh);
+  Linearizer l(space);
   l.plot_solution("solution.gp");
 
   info("Done.");

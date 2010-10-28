@@ -15,12 +15,12 @@
 // (homogeneous b.c. of Neumann/Dirichlet type, respectively). There is
 // a uniform source of 1.5 fast neutrons (group 1) per cm per sec. 
 //	Reference:
-// 		HP-MESH ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
+// 		HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
 // 		A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
 //		Example 4.A (pp. 168)
 
 
-// Problem specification (core geometry, material properties, initial FE mesh).
+// Problem specification (core geometry, material properties, initial FE space).
 #include "neutronics_problem_def.cpp"
 
 // Common functions for neutronics problems (requires variable declarations from
@@ -47,16 +47,16 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 int main() {
   // Create coarse mesh.
-  // Transform input data to the format used by the "Mesh" constructor.
-  MeshData *md = new MeshData();
-  Mesh *mesh = new Mesh(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  // Transform input data to the format used by the "Space" constructor.
+  SpaceData *md = new SpaceData();
+  Space *space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-  info("N_dof = %d", mesh->assign_dofs());
-  mesh->plot("mesh.gp");
+  info("N_dof = %d", space->assign_dofs());
+  space->plot("space.gp");
 
   for (int g = 0; g < N_GRP; g++)  {
-  	mesh->set_bc_right_dirichlet(g, flux_right_surf[g]);
+  	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
 	}
   
   // Initialize the FE problem.
@@ -75,11 +75,11 @@ int main() {
 	  	
   // Newton's loop.
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
 
   // Fill vector y using dof and coeffs arrays in elements.
-  double *y = new double[ndof];
-  solution_to_vector(mesh, y);
+  double *coeff_vec = new double[ndof];
+  solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -89,8 +89,8 @@ int main() {
   int it = 1;
   while (1)
   {
-    // Construct matrix and residual vector.
-    dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble_matrix_and_vector(space, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -109,34 +109,33 @@ int main() {
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-    // Calculate the coefficient vector.
-    bool solved = solver->solve();
-    if (solved) 
-    {
-      double* solution_vector = new double[ndof];
-      solution_vector = solver->get_solution();
-      for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-      // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-      solution_vector = NULL;
-    }
-    it++;
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
 
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // Copy coefficients from vector y to elements.
-    vector_to_solution(y, mesh);
+    vector_to_solution(coeff_vec, space);
+
+    it++;
   }
   
+  // Cleanup.
   delete matrix;
   delete rhs;
   delete solver;
 	 
   // Plot the resulting neutron flux.
-  Linearizer l(mesh);
+  Linearizer l(space);
   l.plot_solution("solution.gp");
 
 	// Calculate flux integral for comparison with the reference value.
-	double I = calc_integrated_flux(mesh, 1, 60., 80.);
+	double I = calc_integrated_flux(space, 1, 60., 80.);
 	double Iref = 134.9238787715397;
 	info("I = %.13f, err = %.13f%%", I, 100.*(I - Iref)/Iref );
 	

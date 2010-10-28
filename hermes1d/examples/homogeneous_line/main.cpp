@@ -58,13 +58,13 @@ double Val_dir_left_4 = 0;  // imaginary part of the voltage at the beginnig of 
 
 
 int main() {
-    // create mesh
-    Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
-    mesh->set_bc_left_dirichlet(0, Val_dir_left_1);
-    mesh->set_bc_left_dirichlet(1, Val_dir_left_2);
-    mesh->set_bc_left_dirichlet(2, Val_dir_left_3);
-    mesh->set_bc_left_dirichlet(3, Val_dir_left_4);
-    info("N_dof = %d", mesh->assign_dofs());
+    // create space
+    Space *space = new Space(A, B, NELEM, P_init, NEQ);
+    space->set_bc_left_dirichlet(0, Val_dir_left_1);
+    space->set_bc_left_dirichlet(1, Val_dir_left_2);
+    space->set_bc_left_dirichlet(2, Val_dir_left_3);
+    space->set_bc_left_dirichlet(3, Val_dir_left_4);
+    info("N_dof = %d", space->assign_dofs());
 
     // Initialize the FE problem.
     DiscreteProblem *dp = new DiscreteProblem();
@@ -90,11 +90,11 @@ int main() {
     dp->add_matrix_form_surf(1, 3, jacobian_surf_right_I_Im, BOUNDARY_RIGHT);
 
     // Newton's loop
-    newton(dp, mesh, MATRIX_SOLVER, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
+    newton(dp, space, MATRIX_SOLVER, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
            NEWTON_TOL, NEWTON_MAXITER);
 
     // Plot the solution.
-    Linearizer l(mesh);
+    Linearizer l(space);
     l.plot_solution("solution.gp");
 
     info("Done.");

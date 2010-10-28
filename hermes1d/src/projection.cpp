@@ -84,7 +84,7 @@ double H1_projection_liform(int num, double *x, double *weights,
     return val;
 }
 
-void assemble_projection_matrix_rhs(Mesh *mesh, SparseMatrix *A, double *rhs,
+void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, double *rhs,
         ExactFunction fn, int projection_type)
 {
     DiscreteProblem *dp1 = new DiscreteProblem();
@@ -98,9 +98,9 @@ void assemble_projection_matrix_rhs(Mesh *mesh, SparseMatrix *A, double *rhs,
         throw std::runtime_error("Unknown projection type");
 
     _f = fn;
-    int N_dof = mesh->assign_dofs();
+    int N_dof = space->assign_dofs();
     info("Assembling projection linear system. ndofs: %d", N_dof);
-    dp1->assemble_matrix_and_vector(mesh, A, rhs);
+    dp1->assemble_matrix_and_vector(space, A, rhs);
     info("  Done assembling.");
     delete dp1;
 }

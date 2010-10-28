@@ -39,10 +39,10 @@ double dfdy(double y, double x) {
 #include "forms.cpp"
 
 int main() {
-  // Create mesh, set Dirichlet BC, enumerate basis functions.
-  Mesh *mesh = new Mesh(A, B, NELEM, P_INIT, NEQ);
-  mesh->set_bc_left_dirichlet(0, YA);
-  info("N_dof = %d.", mesh->assign_dofs());
+  // Create space, set Dirichlet BC, enumerate basis functions.
+  Space *space = new Space(A, B, NELEM, P_INIT, NEQ);
+  space->set_bc_left_dirichlet(0, YA);
+  info("N_dof = %d.", space->assign_dofs());
 
   // Initialize the weak formulation.
   DiscreteProblem *dp = new DiscreteProblem();
@@ -50,11 +50,11 @@ int main() {
   dp->add_vector_form(0, residual);
 
   // Obtain the number of degrees of freedom.
-  int ndof = mesh->get_num_dofs();
+  int ndof = Space::get_num_dofs(space);
 
   // Copy solution coefficients into a vector.
-  double *y = new double[ndof];
-  solution_to_vector(mesh, y);
+  double *coeff_vec = new double[ndof];
+  solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -66,7 +66,7 @@ int main() {
   while (1)
   {
     // Assemble the stiffness matrix and right-hand side vector.
-    dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+    dp->assemble_matrix_and_vector(space, matrix, rhs);
 
     // Calculate L2 norm of the residual vector.
     double res_norm_squared = 0;
@@ -83,22 +83,20 @@ int main() {
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-    // Calculate the coefficient vector.
-    bool solved = solver->solve();
-    if (solved) 
-    {
-      double* solution_vector = new double[ndof];
-      solution_vector = solver->get_solution();
-      for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-      // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-      solution_vector = NULL;
-    }
-    it++;
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
 
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // Copy coefficients from vector y to elements.
-    vector_to_solution(y, mesh);
+    vector_to_solution(coeff_vec, space);
+
+    it++;
   }
   
   // Clean up.
@@ -107,11 +105,11 @@ int main() {
   delete solver;
 
   // Plot the solution.
-  Linearizer l(mesh);
+  Linearizer l(space);
   l.plot_solution("solution.gp");
 
-  // Plot the resulting mesh.
-  mesh->plot("mesh.gp");
+  // Plot the resulting space.
+  space->plot("space.gp");
 
   info("Done.");
   return 1;

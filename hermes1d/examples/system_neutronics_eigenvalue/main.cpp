@@ -18,7 +18,7 @@
 //	 p. 355-365 (July 1970)
 
 
-// Problem specification (core geometry, material properties, initial FE mesh).
+// Problem specification (core geometry, material properties, initial FE space).
 #include "neutronics_problem_def.cpp"
 
 // Common functions for neutronics problems (requires variable declarations from
@@ -49,14 +49,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 int main() {		
   // Create coarse mesh.
-  // Transform input data to the format used by the "Mesh" constructor.
-  MeshData *md = new MeshData(verbose);		
-  Mesh *mesh = new Mesh(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  // Transform input data to the format used by the "Space" constructor.
+  SpaceData *md = new SpaceData(verbose);		
+  Space *space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
 	// Enumerate basis functions.
-  info("N_dof = %d", mesh->assign_dofs());
-  mesh->plot("mesh.gp");
+  info("N_dof = %d", space->assign_dofs());
+  space->plot("space.gp");
   
   // Initial approximation of the dominant eigenvalue.
   double K_EFF = 1.0;
@@ -64,8 +64,8 @@ int main() {
 	double init_val = 1.0;
 
   for (int g = 0; g < N_GRP; g++)  {
-  	set_vertex_dofs_constant(mesh, init_val, g);
-  	mesh->set_bc_right_dirichlet(g, flux_right_surf[g]);
+  	set_vertex_dofs_constant(space, init_val, g);
+  	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
 	}
   
   // Initialize the FE problem.
@@ -92,7 +92,7 @@ int main() {
   dp->add_vector_form_surf(0, residual_surf_left_0, BOUNDARY_LEFT);
   dp->add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
 
-	Linearizer l(mesh);
+	Linearizer l(space);
 	char solution_file[32];
 
   // Source iteration
@@ -107,14 +107,14 @@ int main() {
 	  
     // Store the previous solution (used at the right-hand side).
     for (int g = 0; g < N_GRP; g++)
-	    copy_dofs(current_solution, previous_solution, mesh, g);
+	    copy_dofs(current_solution, previous_solution, space, g);
 
     // Obtain the number of degrees of freedom.
-    int ndof = mesh->get_num_dofs();
+    int ndof = Space::get_num_dofs(space);
 
     // Fill vector y using dof and coeffs arrays in elements.
-    double *y = new double[ndof];
-    solution_to_vector(mesh, y);
+    double *coeff_vec = new double[ndof];
+    solution_to_vector(space, coeff_vec);
   
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -124,8 +124,8 @@ int main() {
     int it = 1;
     while (1)
     {
-      // Construct matrix and residual vector.
-      dp->assemble_matrix_and_vector(mesh, matrix, rhs);
+      // Assemble the Jacobian matrix and residual vector.
+      dp->assemble_matrix_and_vector(space, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_norm_squared = 0;
@@ -144,37 +144,36 @@ int main() {
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
       for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
-      // Calculate the coefficient vector.
-      bool solved = solver->solve();
-      if (solved) 
-      {
-        double* solution_vector = new double[ndof];
-        solution_vector = solver->get_solution();
-        for(int i=0; i<ndof; i++) y[i] += solution_vector[i];
-        // No need to deallocate the solution_vector here, it is done later by the call to ~Solver.
-        solution_vector = NULL;
-      }
-      it++;
+      // Solve the linear system.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
 
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+      // If the maximum number of iteration has been reached, then quit.
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
       // Copy coefficients from vector y to elements.
-      vector_to_solution(y, mesh);
+      vector_to_solution(coeff_vec, space);
+
+      it++;
     }
     
+    // Cleanup.
     delete matrix;
     delete rhs;
     delete solver;
 			
     // Update the eigenvalue.
     K_EFF_old = K_EFF;
-    K_EFF = calc_total_reaction_rate(mesh, nSf, 0., 40.); 
+    K_EFF = calc_total_reaction_rate(space, nSf, 0., 40.); 
     
     // Convergence test.
     if (fabs(K_EFF - K_EFF_old)/K_EFF < TOL_SI) break;
     
     // Normalize total neutron flux to one fission neutron.
-    multiply_dofs_with_constant(mesh, 1./K_EFF, current_solution);
+    multiply_dofs_with_constant(space, 1./K_EFF, current_solution);
     
     if (verbose) info("K_EFF_%d = %.8f", i+1, K_EFF);
   }
@@ -189,11 +188,11 @@ int main() {
 	// Comparison with analytical results (see the reference above).
 	double flux[N_GRP], J[N_GRP], R;
 
-	get_solution_at_point(mesh, 0.0, flux, J);
+	get_solution_at_point(space, 0.0, flux, J);
 	R = flux[0]/flux[1];
 	info("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%", R, 100*(R-2.5332)/2.5332);
 	
-	get_solution_at_point(mesh, 40.0, flux, J);
+	get_solution_at_point(space, 40.0, flux, J);
 	R = flux[0]/flux[1];
 	info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%", R, 100*(R-1.5162)/1.5162);
 	

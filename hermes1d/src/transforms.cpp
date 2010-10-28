@@ -279,14 +279,14 @@ void transform_element_unrefined_forward(int comp, Element *e, Element* e_ref)
 // y_prev_ref will be constructed/
 // WARNING: For this to work, element DOF must be assigned correctly 
 // in both the coarse and fine meshes!
-void transfer_solution_forward(Mesh *mesh, Mesh *mesh_ref)
+void transfer_solution_forward(Space *space, Space *space_ref)
 {
-    Iterator *I = new Iterator(mesh);
-    Iterator *I_ref = new Iterator(mesh_ref);
+    Iterator *I = new Iterator(space);
+    Iterator *I_ref = new Iterator(space_ref);
 
-    // simultaneous traversal of 'mesh' and 'mesh_ref'
+    // simultaneous traversal of 'space' and 'space_ref'
     Element *e, *e_ref, *e_ref_left, *e_ref_right;
-    for (int comp=0; comp < mesh->get_n_eq(); comp++) {
+    for (int comp=0; comp < space->get_n_eq(); comp++) {
         I->reset();
         I_ref->reset();
         while ((e = I->next_active_element()) != NULL) {
