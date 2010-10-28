@@ -24,14 +24,14 @@
 #include "../callstack.h"
 
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  #define MUMPS			dmumps_c
-  #define MUMPS_STRUCT	DMUMPS_STRUC_C
+  #define MUMPS         dmumps_c
+  #define MUMPS_STRUCT  DMUMPS_STRUC_C
 #else
-  #define MUMPS			zmumps_c
-  #define MUMPS_STRUCT	ZMUMPS_STRUC_C
+  #define MUMPS         zmumps_c
+  #define MUMPS_STRUCT  ZMUMPS_STRUC_C
 #endif
 
-#define USE_COMM_WORLD -987654
+#define USE_COMM_WORLD  -987654
 
 #ifdef WITH_MUMPS
 
@@ -42,25 +42,31 @@ extern "C" {
 #else
 #endif
 
-static
-int find_position(int *Ai, int Alen, int idx) {
+// Binary search for the location of a particular CSC/CSR matrix entry.
+//
+// Typically, we search for the index into Ax that corresponds to a given 
+// row (CSC) or column (CSR) ('idx') among indices of nonzero values in 
+// a particular column (CSC) or row (CSR) ('Ai').
+//
+static int find_position(int *Ai, int Alen, int idx) {
   _F_
-  if (idx >= 0) {
-    register int lo = 0, hi = Alen - 1, mid;
+  assert (idx >= 0);
+  
+  register int lo = 0, hi = Alen - 1, mid;
 
-    while (1) {
-      mid = (lo + hi) >> 1;
+  while (1) 
+  {
+    mid = (lo + hi) >> 1;
 
-      if (idx < Ai[mid]) hi = mid - 1;
-      else if (idx > Ai[mid]) lo = mid + 1;
-      else break;
+    if (idx < Ai[mid]) hi = mid - 1;
+    else if (idx > Ai[mid]) lo = mid + 1;
+    else break;
 
-      if (lo > hi) error("Sparse matrix entry not found.");
-    }
-
-    return mid;
+    // Sparse matrix entry not found (raise an error when trying to add 
+    // value to this position, return 0 when obtaining value there).
+    if (lo > hi) mid = -1;
   }
-  return -1;
+  return mid;
 }
 
 MumpsMatrix::MumpsMatrix()
@@ -134,7 +140,12 @@ void MumpsMatrix::free()
 scalar MumpsMatrix::get(int m, int n)
 {
   _F_
-  int mid = Ap[n] + find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+  // Find m-th row in the n-th column.
+  int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+  // Return 0 if the entry has not been found.
+  if (mid < 0) return 0.0;
+  // Otherwise, add offset to the n-th column and return the value.
+  if (mid >= 0) mid += Ap[n];
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   return Ax[mid];
 #else
@@ -155,15 +166,25 @@ void MumpsMatrix::zero()
 void MumpsMatrix::add(int m, int n, scalar v)
 {
   _F_
-  if (m >= 0 && n >= 0) {		// ignore dirichlet DOFs
-    int pos = Ap[n] + find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+  // WARNING: The additional condition v != 0.0 used in (Pardiso/Umfpack)Matrix
+  //          produced an error in neutronics-2-group-adapt (although tutorial-07
+  //          ran well).
+  if (m >= 0 && n >= 0) // ignore dirichlet DOFs
+  {   
+    // Find m-th row in the n-th column.
+    int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+    // Make sure we are adding to an existing non-zero entry.
+    if (pos < 0) 
+      error("Sparse matrix entry not found");
+    // Add offset to the n-th column.
+    pos += Ap[n];
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     Ax[pos] += v;
 #else
     Ax[pos].r += v.real();
     Ax[pos].i += v.imag();
 #endif
-    irn[pos] = m + 1;			// MUMPS is indexing from 1
+    irn[pos] = m + 1;  // MUMPS is indexing from 1
     jcn[pos] = n + 1;
   }
 }
@@ -171,8 +192,8 @@ void MumpsMatrix::add(int m, int n, scalar v)
 void MumpsMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
 {
   _F_
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
+  for (int i = 0; i < m; i++)       // rows
+    for (int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 

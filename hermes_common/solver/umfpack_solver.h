@@ -45,8 +45,6 @@ protected:
   int *Ai;      // Row indices of values in Ax.
   int *Ap;      // Index to Ax/Ai, where each column starts.
 
-  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
-
   friend class UMFPackLinearSolver;
 };
 

@@ -31,6 +31,27 @@
 #include "../utils.h"
 #include "../callstack.h"
 
+static int find_position(int *Ai, int Alen, int idx) {
+  _F_
+  assert (idx >= 0);
+  
+  register int lo = 0, hi = Alen - 1, mid;
+  
+  while (1) 
+  {
+    mid = (lo + hi) >> 1;
+    
+    if (idx < Ai[mid]) hi = mid - 1;
+    else if (idx > Ai[mid]) lo = mid + 1;
+    else break;
+    
+    // Sparse matrix entry not found (raise an error when trying to add 
+    // value to this position, return 0 when obtaining value there).
+    if (lo > hi) mid = -1;
+  }
+  return mid;
+}
+
 UMFPackMatrix::UMFPackMatrix() {
   _F_
   size = 0;
@@ -88,20 +109,13 @@ void UMFPackMatrix::free() {
 scalar UMFPackMatrix::get(int m, int n)
 {
   _F_
+  // Find m-th row in the n-th column.
+  int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
 
-  // bin search the value
-  register int lo = Ap[m], hi = Ap[m + 1], mid;
-  while (1) {
-    mid = (lo + hi) >> 1;
-
-    if (n < Ai[mid]) hi = mid - 1;
-    else if (n > Ai[mid]) lo = mid + 1;
-    else break;
-
-    if (lo > hi) return 0.0;		// entry not set -> e.i. it is zero
-  }
-
-  return Ax[mid];
+  if (mid < 0) // if the entry has not been found
+    return 0.0;   
+  else 
+    return Ax[Ap[n]+mid];
 }
 
 void UMFPackMatrix::zero() {
@@ -111,14 +125,22 @@ void UMFPackMatrix::zero() {
 
 void UMFPackMatrix::add(int m, int n, scalar v) {
   _F_
-  if (v != 0.0 && m >= 0 && n >= 0)		// ignore dirichlet DOFs
-    insert_value(Ai + Ap[n], Ax + Ap[n], Ap[n + 1] - Ap[n], m, v);
+  if (v != 0.0 && m >= 0 && n >= 0)   // ignore dirichlet DOFs
+  {
+    // Find m-th row in the n-th column.
+    int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+    // Make sure we are adding to an existing non-zero entry.
+    if (pos < 0) 
+      error("Sparse matrix entry not found");
+    
+    Ax[Ap[n]+pos] += v;
+  }
 }
 
 void UMFPackMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
+  for (int i = 0; i < m; i++)       // rows
+    for (int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 
@@ -170,25 +192,6 @@ int UMFPackMatrix::get_matrix_size() const {
 double UMFPackMatrix::get_fill_in() const {
   _F_
   return Ap[size] / (double) (size * size);
-}
-
-void UMFPackMatrix::insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value) {
-  _F_
-  if (idx >= 0) {
-    register int lo = 0, hi = Alen - 1, mid;
-
-    while (1) {
-      mid = (lo + hi) >> 1;
-
-      if (idx < Ai[mid]) hi = mid - 1;
-      else if (idx > Ai[mid]) lo = mid + 1;
-      else break;
-
-      if (lo > hi) EXIT("Sparse matrix entry not found.");
-    }
-
-    Ax[mid] += value;
-  }
 }
 
 

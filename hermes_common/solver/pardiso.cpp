@@ -24,22 +24,51 @@
 #include "../utils.h"
 #include "../callstack.h"
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef WITH_PARDISO
+  #ifdef __cplusplus
+    extern "C" {
+  #endif
+      extern int pardisoinit_(void *, int *, int *, int*, double *, int *);
+      extern int pardiso_(void *, int *, int *, int *, int *, int *,
+                          scalar *, int *, int *, int *, int *, int *, int *, 
+                          scalar *, scalar *, int *, double *);
+  #ifdef __cplusplus
+    }
+  #endif
+  
+  #define PARDISOINIT pardisoinit_
+  #define PARDISO pardiso_
+#else
+  #define PARDISOINIT
+  #define PARDISO
 #endif
 
-extern int pardisoinit_(void *, int *, int *, int*, double *, int *);
-
-extern int
-    pardiso_(void *, int *, int *, int *, int *, int *,
-             scalar *, int *, int *, int *, int *, int *, int *, scalar *, scalar *, int *, double *);
-
-#define PARDISOINIT pardisoinit_
-#define PARDISO pardiso_
-
-#ifdef __cplusplus
+// Binary search for the location of a particular CSC/CSR matrix entry.
+//
+// Typically, we search for the index into Ax that corresponds to a given 
+// row (CSC) or column (CSR) ('idx') among indices of nonzero values in 
+// a particular column (CSC) or row (CSR) ('Ai').
+//
+static int find_position(int *Ai, int Alen, int idx) {
+  _F_
+  assert (idx >= 0);
+  
+  register int lo = 0, hi = Alen - 1, mid;
+  
+  while (1) 
+  {
+    mid = (lo + hi) >> 1;
+    
+    if (idx < Ai[mid]) hi = mid - 1;
+    else if (idx > Ai[mid]) lo = mid + 1;
+    else break;
+    
+    // Sparse matrix entry not found (raise an error when trying to add 
+    // value to this position, return 0 when obtaining value there).
+    if (lo > hi) mid = -1;
+  }
+  return mid;
 }
-#endif
 
 PardisoMatrix::PardisoMatrix() {
   _F_
@@ -95,20 +124,13 @@ void PardisoMatrix::free() {
 scalar PardisoMatrix::get(int m, int n)
 {
   _F_
+  // Find n-th column in the m-th row.
+  int mid = find_position(Ai + Ap[m], Ap[m + 1] - Ap[m], n);
 
-  // bin search the value
-  register int lo = Ap[m], hi = Ap[m + 1], mid;
-  while (1) {
-    mid = (lo + hi) >> 1;
-
-    if (n < Ai[mid]) hi = mid - 1;
-    else if (n > Ai[mid]) lo = mid + 1;
-    else break;
-
-    if (lo > hi) return 0.0;		// entry not set -> e.i. it is zero
-  }
-
-  return Ax[mid];
+  if (mid < 0) // if the entry has not been found
+    return 0.0;   
+  else 
+    return Ax[Ap[m]+mid];
 }
 
 void PardisoMatrix::zero() {
@@ -118,15 +140,23 @@ void PardisoMatrix::zero() {
 
 void PardisoMatrix::add(int m, int n, scalar v) {
   _F_
-  insert_value(Ai + Ap[m], Ax + Ap[m], Ap[m + 1] - Ap[m], n, v);
+  if (v != 0.0 && m >= 0 && n >= 0) // ignore dirichlet DOFs
+  {   
+    // Find n-th column in the m-th row.
+    int pos = find_position(Ai + Ap[m], Ap[m + 1] - Ap[m], n);
+    // Make sure we are adding to an existing non-zero entry.
+    if (pos < 0) 
+      error("Sparse matrix entry not found");
+    
+    Ax[Ap[m]+pos] += v;
+  }
 }
 
 void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
-      if (mat[i][j] != 0.0 && rows[i] >= 0 && cols[j] >= 0)		// ignore dirichlet DOFs
-        add(rows[i], cols[j], mat[i][j]);
+  for (int i = 0; i < m; i++)       // rows
+    for (int j = 0; j < n; j++)     // cols
+      add(rows[i], cols[j], mat[i][j]);
 }
 
 /// dumping matrix and right-hand side
@@ -177,25 +207,6 @@ int PardisoMatrix::get_matrix_size() const {
 double PardisoMatrix::get_fill_in() const {
   _F_
   return Ap[size] / (double) (size * size);
-}
-
-void PardisoMatrix::insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value) {
-  _F_
-  if (idx >= 0) {
-    register int lo = 0, hi = Alen - 1, mid;
-
-    while (1) {
-      mid = (lo + hi) >> 1;
-
-      if (idx < Ai[mid]) hi = mid - 1;
-      else if (idx > Ai[mid]) lo = mid + 1;
-      else break;
-
-      if (lo > hi) EXIT("Sparse matrix entry not found.");
-    }
-
-    Ax[mid] += value;
-  }
 }
 
 

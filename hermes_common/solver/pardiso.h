@@ -46,9 +46,6 @@ protected:
   int *Ai;      // Column indices of values in Ax.
   int *Ap;      // Index to Ax/Ai, where each row starts.
   
-
-  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
-
   friend class PardisoLinearSolver;
 };
 
