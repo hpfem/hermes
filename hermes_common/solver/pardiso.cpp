@@ -267,7 +267,8 @@ void PardisoVector::add(int n, int *idx, scalar *y) {
 
 bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (int i = 0; i < this->size; i++)
@@ -275,7 +276,8 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
       fprintf(file, " ];\n");
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN:
+    {
       hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);

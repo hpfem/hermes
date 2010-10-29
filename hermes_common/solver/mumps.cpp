@@ -206,6 +206,7 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   switch (fmt) 
   {
     case DF_NATIVE:
+    case DF_PLAIN_ASCII:
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
       for (int i = 0; i < nnz; i++)
@@ -238,10 +239,6 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
       hermes_fwrite(Ax, sizeof(scalar), nnz, file);
       return true;
     }
-
-    case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-      return false;
 
     default:
       return false;
@@ -352,8 +349,10 @@ void MumpsVector::add(int n, int *idx, scalar *y)
 bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_NATIVE:
+    case DF_PLAIN_ASCII:
       for (int i = 0; i < size; i++)
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
         fprintf(file, "%lf\n", v[i]);
@@ -373,7 +372,8 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
       fprintf(file, " ];\n");
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
@@ -381,10 +381,6 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
       hermes_fwrite(v, sizeof(scalar), size, file);
       return true;
     }
-
-    case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-      return false;
 
     default:
       return false;
@@ -415,12 +411,12 @@ MumpsSolver::~MumpsSolver()
 #ifdef WITH_MUMPS
 
 // macro s.t. indices match Fortran documentation
-#define ICNTL(I)						icntl[(I)-1]
-#define MUMPS_INFO(id, I)				id->infog[(I)-1]
-#define INFOG(I)						infog[(I)-1]
+#define ICNTL(I)            icntl[(I)-1]
+#define MUMPS_INFO(id, I)   id->infog[(I)-1]
+#define INFOG(I)            infog[(I)-1]
 
-#define JOB_INIT						-1
-#define JOB_END							-2
+#define JOB_INIT            -1
+#define JOB_END             -2
 
 static bool check_status(MUMPS_STRUCT *id)
 {

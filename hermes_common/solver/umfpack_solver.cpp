@@ -253,7 +253,8 @@ void UMFPackVector::add(int n, int *idx, scalar *y) {
 
 bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (int i = 0; i < size; i++)
@@ -261,7 +262,8 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
       fprintf(file, " ];\n");
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
@@ -282,21 +284,21 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 // UMFPack solver //////
 
 #if !defined (H2D_COMPLEX) && !defined (H3D_COMPLEX)
-// real case
-#define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)		umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
-#define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)			umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)
-#define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I)	umfpack_di_solve(sys, Ap, Ai, Ax, X, B, N, C, I)
-#define umfpack_free_symbolic							umfpack_di_free_symbolic
-#define umfpack_free_numeric							umfpack_di_free_numeric
-#define umfpack_defaults								umfpack_di_defaults
+  // real case
+  #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
+  #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)
+  #define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I) umfpack_di_solve(sys, Ap, Ai, Ax, X, B, N, C, I)
+  #define umfpack_free_symbolic                         umfpack_di_free_symbolic
+  #define umfpack_free_numeric                          umfpack_di_free_numeric
+  #define umfpack_defaults                              umfpack_di_defaults
 #else
-// macros for calling complex UMFPACK in packed-complex mode
-#define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)		umfpack_zi_symbolic(m, n, Ap, Ai, (double *) (Ax), NULL, S, C, I)
-#define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)			umfpack_zi_numeric(Ap, Ai, (double *) (Ax), NULL, S, N, C, I)
-#define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I)	umfpack_zi_solve(sys, Ap, Ai, (double *) (Ax), NULL, (double *) (X), NULL, (double *) (B), NULL, N, C, I)
-#define umfpack_free_symbolic							umfpack_di_free_symbolic
-#define umfpack_free_numeric							umfpack_zi_free_numeric
-#define umfpack_defaults								umfpack_zi_defaults
+  // macros for calling complex UMFPACK in packed-complex mode
+  #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_zi_symbolic(m, n, Ap, Ai, (double *) (Ax), NULL, S, C, I)
+  #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_zi_numeric(Ap, Ai, (double *) (Ax), NULL, S, N, C, I)
+  #define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I) umfpack_zi_solve(sys, Ap, Ai, (double *) (Ax), NULL, (double *) (X), NULL, (double *) (B), NULL, N, C, I)
+  #define umfpack_free_symbolic                         umfpack_di_free_symbolic
+  #define umfpack_free_numeric                          umfpack_zi_free_numeric
+  #define umfpack_defaults                              umfpack_zi_defaults
 #endif
 
 

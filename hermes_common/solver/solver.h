@@ -53,7 +53,7 @@ public:
 protected:
   scalar *sln;
   int error;
-  double time;			/// time spent on solving (in secs)
+  double time;  ///< time spent on solving (in secs)
 };
 
 
