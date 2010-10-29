@@ -26,6 +26,13 @@
   #include <Teuchos_RefCountPtr.hpp>
 #endif
 
+enum MatrixReuseOptions
+{
+  HERMES_DONT_REUSE_MATRIX,
+  HERMES_REUSE_MATRIX_REORDERING,
+  HERMES_REUSE_MATRIX_FACTORIZATION
+};
+
 /// @defgroup solvers Solvers
 ///
 /// TODO: description
@@ -48,7 +55,9 @@ public:
 
   int get_error() { return error; }
   double get_time() { return time; }
-        
+  
+  virtual void reuse_matrix(MatrixReuseOptions reuse_scheme) {};
+  virtual void reuse_matrix() { reuse_matrix(HERMES_REUSE_MATRIX_FACTORIZATION); }
 
 protected:
   scalar *sln;
@@ -64,7 +73,11 @@ protected:
 class LinearSolver : public Solver 
 {
   public:
-    LinearSolver() : Solver() {}
+    LinearSolver(unsigned int matrix_reuse_scheme = HERMES_DONT_REUSE_MATRIX) 
+      : Solver(), matrix_reuse_scheme(matrix_reuse_scheme) {};
+    
+  protected:
+    unsigned int matrix_reuse_scheme;
 };
 
 /// Abstract class for defining interface for LinearSolvers

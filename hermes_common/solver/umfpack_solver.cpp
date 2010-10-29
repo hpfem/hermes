@@ -303,7 +303,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 
 UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
-  : LinearSolver(), m(m), rhs(rhs)
+  : LinearSolver(HERMES_DONT_REUSE_MATRIX), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -316,6 +316,8 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
 #ifdef WITH_UMFPACK  
+  if (numeric != NULL) umfpack_free_numeric(&numeric); 
+  if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
   //if (m != NULL) delete m;
   //if (rhs != NULL) delete rhs;
 #endif
@@ -353,22 +355,29 @@ bool UMFPackLinearSolver::solve() {
 
   TimePeriod tmr;
 
-  void *symbolic, *numeric;
   int status;
 
-  status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
-  if (status != UMFPACK_OK) {
-    check_status("umfpack_di_symbolic", status);
-    return false;
+  if (symbolic == NULL)
+  {
+    //debug_log("Factorizing symbolically.");
+    status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
+    if (status != UMFPACK_OK) {
+      check_status("umfpack_di_symbolic", status);
+      return false;
+    }
+    if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
   }
-  if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
 
-  status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
-  if (status != UMFPACK_OK) {
-    check_status("umfpack_di_numeric", status);
-    return false;
+  if (numeric == NULL)
+  {
+    //debug_log("Factorizing numerically.");
+    status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
+    if (status != UMFPACK_OK) {
+      check_status("umfpack_di_numeric", status);
+      return false;
+    }
+    if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
   }
-  if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
 
   delete [] sln;
   sln = new scalar[m->size];
@@ -383,12 +392,29 @@ bool UMFPackLinearSolver::solve() {
 
   tmr.tick();
   time = tmr.accumulated();
-
-  umfpack_free_symbolic(&symbolic);
-  umfpack_free_numeric(&numeric);
-
+  
+  free_factorization_info();
+  
   return true;
 #else
   return false;
 #endif
 }
+
+void UMFPackLinearSolver::free_factorization_info()
+{ 
+  _F_
+#ifdef WITH_UMFPACK
+  switch(matrix_reuse_scheme)
+  {
+    case HERMES_DONT_REUSE_MATRIX:
+      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+      symbolic = NULL;
+    case HERMES_REUSE_MATRIX_REORDERING:
+      if (numeric != NULL) umfpack_free_numeric(&numeric);
+      numeric = NULL;
+  }
+#endif
+}
+
+
