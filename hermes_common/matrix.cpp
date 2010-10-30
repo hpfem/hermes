@@ -117,16 +117,20 @@ void choldc(double **a, int n, double p[])
 // Simple dot product.
 double vec_dot(double *r, double *s, int n_dof)
 {
-    double result = 0;
-    for (int i=0; i < n_dof; i++) result += r[i]*s[i];
-    return result;
+  double result = 0;
+  for (int i=0; i < n_dof; i++) result += r[i]*s[i];
+  return result;
 }
 
 double vec_dot(Vector *r, Vector *s, int n_dof)
 {
-    double result = 0;
-    for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
-    return result;
+  double result = 0;
+#ifndef H2D_COMPLEX
+#ifndef H3D_COMPLEX
+  for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
+#endif
+#endif
+  return result;
 }
 
 // SparseMatrix ////////////////////////////////////////////////////////////////////////////////////
