@@ -19,7 +19,7 @@
 #include "../norm.h"
 #include "../forms.h"
 #include "../space/space.h"
-#include "../tuple.h"
+#include "../../../hermes_common/tuple.h"
 #include "../weakform.h"
 #include "../integrals_h1.h"
 #include "../integrals_hcurl.h"
