@@ -49,6 +49,7 @@
 #include "callstack.h"            // error tracing
 #include "error.h"
 //.
+#include "tuple.h"
 
 #define HERMES  "Hermes"
 

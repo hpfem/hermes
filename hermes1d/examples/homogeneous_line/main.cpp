@@ -31,7 +31,7 @@ double Zl=60;                  // load impedance[Ohm]
 static int NEQ = 4;
 int NELEM = 1000;          // number of elements
 double A = 0, B = l;        // domain end points
-int P_init = 2;             // initial polynomal degree
+int P_init = 2;             // initial polynomial degree
 
 // Matrix solver
 const int MATRIX_SOLVER = 1;            // 0... default (LU decomposition)
@@ -59,12 +59,15 @@ double Val_dir_left_4 = 0;  // imaginary part of the voltage at the beginnig of 
 
 int main() {
     // create space
-    Space *space = new Space(A, B, NELEM, P_init, NEQ);
-    space->set_bc_left_dirichlet(0, Val_dir_left_1);
-    space->set_bc_left_dirichlet(1, Val_dir_left_2);
-    space->set_bc_left_dirichlet(2, Val_dir_left_3);
-    space->set_bc_left_dirichlet(3, Val_dir_left_4);
-    info("N_dof = %d", space->assign_dofs());
+    Space space(A, B, NELEM, P_init, NEQ);
+    space.set_bc_left_dirichlet(0, Val_dir_left_1);
+    space.set_bc_left_dirichlet(1, Val_dir_left_2);
+    space.set_bc_left_dirichlet(2, Val_dir_left_3);
+    space.set_bc_left_dirichlet(3, Val_dir_left_4);
+    info("N_dof = %d", space.assign_dofs());
+
+    // Initialize the weak formulation.
+  WeakForm wf;
 
     // Initialize the FE problem.
     DiscreteProblem *dp = new DiscreteProblem();
@@ -94,7 +97,7 @@ int main() {
            NEWTON_TOL, NEWTON_MAXITER);
 
     // Plot the solution.
-    Linearizer l(space);
+    Linearizer l(&space);
     l.plot_solution("solution.gp");
 
     info("Done.");

@@ -51,7 +51,18 @@ void Graph::set_row_style(int row, const char* color, const char* line, const ch
 void Graph::add_values(int row, double x, double y)
 {
   if (!rows.size()) add_row(NULL);
-  if (row < 0 || row >= rows.size()) error("Invalid row number.");
+  if (fabs(x) < 1e-12) return;  // this is to avoid problems with plotting in log-log scale
+                                 // (sometimes the CPU time was zero and plotting crashed)
+  if (row < 0 || row >= (int)rows.size()) error("Invalid row number.");
+  Values xy = { x, y };
+  rows[row].data.push_back(xy);
+}
+void Graph::add_values(double x, double y)
+{
+  int row = 0;
+  if (!rows.size()) add_row(NULL);
+  if (fabs(x) < 1e-12 ) return;  // this is to avoid problems with plotting in log-log scale
+                                 // (sometimes the CPU time was zero and plotting crashed)
   Values xy = { x, y };
   rows[row].data.push_back(xy);
 }
@@ -78,6 +89,28 @@ void Graph::save_numbered(const char* filename, int number)
   save(buffer);
 }
 
+
+
+//// SimpleGraph //////////////////////////////////////////////////////////////////////////////////
+
+void SimpleGraph::save(const char* filename)
+{
+  if (!rows.size()) error("No data rows defined.");
+
+  FILE* f = fopen(filename, "w");
+  if (f == NULL) error("Error writing to %s.", filename);
+
+  for (int i = 0; i < rows.size(); i++)
+  {
+    int rsize = rows[i].data.size();
+    for (int j = 0; j < rsize; j++)
+      fprintf(f, "%.14g  %.14g\n", rows[i].data[j].x, rows[i].data[j].y);
+  }
+
+  fclose(f);
+
+  verbose("Graph saved to file '%s'.", filename);
+}
 
 //// MatlabGraph ///////////////////////////////////////////////////////////////////////////////////
 

@@ -11,7 +11,7 @@
 
 /// Quad1D is a base class for all 1D quadrature points.
 ///
-class Quad1D
+class HERMES_API Quad1D
 {
 public:
   

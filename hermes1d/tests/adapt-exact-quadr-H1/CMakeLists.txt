@@ -1,4 +1,4 @@
-project(adapt-exact-quadr-H1-solver0)
+project(adapt-exact-quadr-H1)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (../../examples/CMake.common)

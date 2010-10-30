@@ -30,13 +30,13 @@ double HERMES_API calc_elem_est_error_squared_hp(int norm, Element *e,
 // Calculates L2 or H1 norm of the difference between the coarse
 // and reference solutions in all active elements of 'space'. Total
 // error is returned.
-double HERMES_API calc_error_estimate(int norm, Space* space, Space* space_ref, 
-			   double *err_array, int sln=0);
+double HERMES_API calc_err_est(int norm, Space* space, Space* space_ref, 
+			   double *err_array = NULL, int sln=0);
 
 // Calculates L2 or H1 norm of the difference between the coarse
 // and reference solutions in all active elements of 'space'. Total
 // error is returned.
-double HERMES_API calc_error_estimate(int norm, Space* space, 
+double HERMES_API calc_err_est(int norm, Space* space, 
                            ElemPtr2* ref_element_pairs);
 
 // Can be used for both the coarse and reference solutions
@@ -84,8 +84,8 @@ double HERMES_API calc_elem_exact_error_squared(int norm, exact_sol_type exact_s
                                      Element *e, int order);
 
 // Error wrt. exact solution (if provided) on the entire interval (A, B) 
-double HERMES_API calc_error_exact(int norm, Space *space, 
-                        exact_sol_type exact_sol); 
+double HERMES_API calc_err_exact(int norm, Space *space, 
+                        exact_sol_type exact_sol, int neq, double a, double b); 
 
 // Calculates L2 or H1 norm of function exact_sol in interval (A, B)
 double HERMES_API calc_solution_norm(int norm, exact_sol_type exact_sol, 

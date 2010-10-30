@@ -22,6 +22,7 @@
 
 #include "common.h"
 #include "error.h"
+#
 
 
 /// Creates a new (full) matrix with m rows and n columns with entries of the type T.
@@ -184,7 +185,10 @@ void lubksb(double **a, int n, int *indx, T *b) {
 
 
 /// Simple dot product.
-double vec_dot(double *r, double *s, int n_dof);
+double HERMES_API vec_dot(double *r, double *s, int n_dof);
+
+class Vector;
+double HERMES_API vec_dot(Vector *r, Vector *s, int n_dof);
 
 /// Given a positive-definite symmetric matrix a[n][n], this routine constructs its Cholesky
 /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not

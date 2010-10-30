@@ -1,27 +1,35 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
 //  This example solves a general first-order equation 
 //  y' = f(y, x) in an interval (A, B), equipped with the 
 //  initial condition y(A) = YA. The function f can be linear
 //  or nonlinear in 'y', as long as it is differentiable
-//  with respect to this variable (needed for the Newton's method). 
+//  with respect to this variable (needed for the Newton's method).
 //
-//  Equation: y' = f(y, x)
+//  PDE: y' = f(y, x).
 //
-//  Initial condition: y(A) = YA
+//  Interval: (A, B).
 //
-//  Interval: (A, B)
+//  IC: y(A) = YA.
 //
-//  The following parameters can be changed.
+//  DC: Determined by the initial condition.
+//
+//  The following parameters can be changed:
+const int NEQ = 1;                      // Number of equations.
+const int NELEM = 10;                   // Number of elements.
+const double A = 0, B = 10;             // Domain end points.
+const double YA = 1;                    // Equation parameter.
+const int P_INIT = 2;                   // Polynomial degree.
 
-int P_INIT = 2;                                   // Initial polynomal degree.
-static int NEQ = 1;                               // Number of equations.
-int NELEM = 10;                                   // Number of elements.
-double A = 0, B = 10;                             // Domain end points.
-double YA = 1;                                    // Equation parameter.
-double NEWTON_TOL = 1e-5;                         // Tolerance for the Newton's method.
-int NEWTON_MAX_ITER = 150;                        // Maximum allowed number of iterations.
+// Newton's method.
+double NEWTON_TOL = 1e-5;               // Tolerance.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
+
+
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
@@ -40,20 +48,21 @@ double dfdy(double y, double x) {
 
 int main() {
   // Create space, set Dirichlet BC, enumerate basis functions.
-  Space *space = new Space(A, B, NELEM, P_INIT, NEQ);
+  Space* space = new Space(A, B, NELEM, P_INIT, NEQ);
   space->set_bc_left_dirichlet(0, YA);
   info("N_dof = %d.", space->assign_dofs());
 
   // Initialize the weak formulation.
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian);
-  dp->add_vector_form(0, residual);
+  WeakForm wf;
+  wf.add_matrix_form(jacobian);
+  wf.add_vector_form(residual);
 
-  // Obtain the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(space);
+  // Initialize the FE problem.
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
 
-  // Copy solution coefficients into a vector.
-  double *coeff_vec = new double[ndof];
+  // Newton's loop.
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
   solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -61,23 +70,26 @@ int main() {
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Newton's iteration.
   int it = 1;
-  while (1)
-  {
-    // Assemble the stiffness matrix and right-hand side vector.
-    dp->assemble_matrix_and_vector(space, matrix, rhs);
+  while (1) {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
 
-    // Calculate L2 norm of the residual vector.
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble(matrix, rhs);
+
+      // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
     for(int i = 0; i < ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
-    double res_norm = sqrt(res_norm_squared);
 
-    info("---- Newton iter %d, residual norm: %.15f.", it, res_norm);
+    // Info for user.
+    info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
 
     // If l2 norm of the residual vector is within tolerance, then quit.
-    // Latest solution is in the vector 'y'.
-    if(res_norm < NEWTON_TOL && it > 1) break;
+    // NOTE: at least one full iteration forced
+    //       here because sometimes the initial
+    //       residual on fine mesh is too small.
+    if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -98,11 +110,6 @@ int main() {
 
     it++;
   }
-  
-  // Clean up.
-  delete matrix;
-  delete rhs;
-  delete solver;
 
   // Plot the solution.
   Linearizer l(space);

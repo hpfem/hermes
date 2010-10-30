@@ -5,6 +5,7 @@
 
 #include "../../hermes_common/matrix.h"
 #include "discrete_problem.h"
+#include "weakform.h"
 #include "space.h"
 
 #include "../../hermes_common/error.h"
@@ -22,57 +23,33 @@
 
 static int _precalculated = 0;
 
-DiscreteProblem::DiscreteProblem() {
-    if (_precalculated == 0) {
-        // precalculating values and derivatives 
-        // of all polynomials at all possible 
-        // integration points
-        fprintf(stderr, "Precalculating Legendre polynomials...");
-        fflush(stderr);
-        precalculate_legendre_1d();
-        precalculate_legendre_1d_left();
-        precalculate_legendre_1d_right();
-        fprintf(stderr, "done.\n");
-
-        fprintf(stderr, "Precalculating Lobatto shape functions...");
-        fflush(stderr);
-        precalculate_lobatto_1d();
-        precalculate_lobatto_1d_left();
-        precalculate_lobatto_1d_right();
-        fprintf(stderr, "done.\n");
-        _precalculated = 1;
-    }
-}
-
-void DiscreteProblem::add_matrix_form(int i, int j, matrix_form fn, int marker)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space) : wf(wf), space(space)
 {
-    if (marker != ANY && marker < 0) error("Invalid element marker.");
-    MatrixFormVol form = {i, j, fn, marker};
-    this->matrix_forms_vol.push_back(form);
-}
+  if(space->get_n_eq() != wf->get_neq())
+        error("WeakForm does not have as many equations as Space in DiscreteProblem::DiscreteProblem()");
+  if (_precalculated == 0) {
+    // precalculating values and derivatives 
+    // of all polynomials at all possible 
+    // integration points
+    fprintf(stderr, "Precalculating Legendre polynomials...");
+    fflush(stderr);
+    precalculate_legendre_1d();
+    precalculate_legendre_1d_left();
+    precalculate_legendre_1d_right();
+    fprintf(stderr, "done.\n");
 
-void DiscreteProblem::add_vector_form(int i, vector_form fn, int marker)
-{
-    if (marker != ANY && marker < 0) error("Invalid element marker.");
-	VectorFormVol form = {i, fn, marker};
-    this->vector_forms_vol.push_back(form);
-}
-
-void DiscreteProblem::add_matrix_form_surf(int i, int j, matrix_form_surf fn, int bdy_index)
-{
-    MatrixFormSurf form = {i, j, bdy_index, fn};
-    this->matrix_forms_surf.push_back(form);
-}
-
-void DiscreteProblem::add_vector_form_surf(int i, vector_form_surf fn, int bdy_index)
-{
-    VectorFormSurf form = {i, bdy_index, fn};
-    this->vector_forms_surf.push_back(form);
+    fprintf(stderr, "Precalculating Lobatto shape functions...");
+    fflush(stderr);
+    precalculate_lobatto_1d();
+    precalculate_lobatto_1d_left();
+    precalculate_lobatto_1d_right();
+    fprintf(stderr, "done.\n");
+    _precalculated = 1;
+  }
 }
 
 // process volumetric weak forms
-void DiscreteProblem::process_vol_forms(Space *space, SparseMatrix *mat, double *res, 
-					int matrix_flag) {
+void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhsonly) {
   int n_eq = space->get_n_eq();
   Element *elems = space->get_base_elems();
   int n_elem = space->get_n_base_elem();
@@ -111,338 +88,87 @@ void DiscreteProblem::process_vol_forms(Space *space, SparseMatrix *mat, double 
     }
 
     // volumetric bilinear forms
-    if(matrix_flag == 0 || matrix_flag == 1) 
-    {
-      for (int ww = 0; ww < this->matrix_forms_vol.size(); ww++)
-      {
-	MatrixFormVol *mfv = &this->matrix_forms_vol[ww];
-	if (e->marker == mfv->marker ||  mfv->marker == ANY) {
-  	  int c_i = mfv->i;  
-	  int c_j = mfv->j;  
+    for (int ww = 0; ww < this->wf->matrix_forms_vol.size(); ww++) {
+	    WeakForm::MatrixFormVol *mfv = &this->wf->matrix_forms_vol[ww];
+	    if (e->marker == mfv->marker ||  mfv->marker == ANY) {
+  	    int c_i = mfv->i;  
+	      int c_j = mfv->j;  
 
-	  // loop over test functions (rows)
-	  for(int i=0; i<e->p + 1; i++) {
-	    // if i-th test function is active
-	    int pos_i = e->dof[c_i][i]; // row in matrix
-            //printf("elem (%g, %g): pos_i = %d\n", e->x1, e->x2, pos_i);
-	    if(pos_i != -1) {
-	      // transform i-th test function to element 'm'
-              //printf("Elem (%g, %g): i = %d, order = %d\n", e->x1, e->x2, i, order);
-	      element_shapefn(e->x1, e->x2,  
-			      i, order, phys_v, phys_dvdx); 
-	      // if we are constructing the matrix
-	      if(matrix_flag == 0 || matrix_flag == 1) {
-	        // loop over basis functions (columns)
-	        for(int j=0; j < e->p + 1; j++) {
-		  int pos_j = e->dof[c_j][j]; // matrix column
-                  //printf("elem (%g, %g): pos_j = %d\n", e->x1, e->x2, pos_j);
-		  // if j-th basis function is active
-		  if(pos_j != -1) {
-		    // transform j-th basis function to element 'm'
-		    element_shapefn(e->x1, e->x2,  
-				    j, order, phys_u, phys_dudx); 
-		    // evaluate the bilinear form
-		    double val_ij = mfv->fn(pts_num, phys_pts,
-			      phys_weights, phys_u, phys_dudx, phys_v, phys_dvdx,
-			      phys_u_prev, phys_du_prevdx, NULL); 
-		    //truncating
-		    if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
-		    // add the result to the matrix
-		    if (val_ij != 0) mat->add(pos_i, pos_j, val_ij);
-		    if (DEBUG_MATRIX) {
-		      info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
-		      pos_i, pos_j, val_ij, c_i, c_j);
-		    }
-	          }
-	        }
-	      }
-	    }
-          }
-	}
-      }
-    }
-
-    // volumetric part of residual
-    if(matrix_flag == 0 || matrix_flag == 2) {
-      for (int ww = 0; ww < this->vector_forms_vol.size(); ww++)
-      {
-        VectorFormVol *vfv = &this->vector_forms_vol[ww];
-	if (e->marker == vfv->marker ||  vfv->marker == ANY) {
-          int c_i = vfv->i;  
-
-          // loop over test functions (rows)
-          for(int i=0; i<e->p + 1; i++) {
-	    // if i-th test function is active
-	    int pos_i = e->dof[c_i][i]; // row in residual vector
-	    if(pos_i != -1) {
-	      // transform i-th test function to element 'm'
-	      element_shapefn(e->x1, e->x2,  
-			      i, order, phys_v, phys_dvdx); 
-	      // contribute to residual vector
-	      if(matrix_flag == 0 || matrix_flag == 2) {
-	        double val_i = vfv->fn(pts_num, phys_pts, phys_weights, 
-				       phys_u_prev, phys_du_prevdx, phys_v,
-				       phys_dvdx, NULL);
-	        // truncating
-	        if(fabs(val_i) < 1e-12) val_i = 0.0; 
-	        // add the contribution to the residual vector
- 	        if (val_i != 0) res[pos_i] += val_i;
-	        if (DEBUG_MATRIX) {
-		  if (val_i != 0) {
-	            info("Adding to residual pos %d value %g (comp %d)", 
-                    pos_i, val_i, c_i);
+	      // loop over test functions (rows)
+	      for(int i=0; i<e->p + 1; i++) {
+	        // if i-th test function is active
+	        int pos_i = e->dof[c_i][i]; // row in matrix
+          //printf("elem (%g, %g): pos_i = %d\n", e->x1, e->x2, pos_i);
+	        if(pos_i != -1) {
+	          // transform i-th test function to element 'm'
+            //printf("Elem (%g, %g): i = %d, order = %d\n", e->x1, e->x2, i, order);
+	          element_shapefn(e->x1, e->x2, i, order, phys_v, phys_dvdx); 
+	          // if we are constructing the matrix
+            // loop over basis functions (columns)
+            for(int j=0; j < e->p + 1; j++) {
+	            int pos_j = e->dof[c_j][j]; // matrix column
+              //printf("elem (%g, %g): pos_j = %d\n", e->x1, e->x2, pos_j);
+	            // if j-th basis function is active
+	            if(pos_j != -1) {
+	              // transform j-th basis function to element 'm'
+	              element_shapefn(e->x1, e->x2,  
+			          j, order, phys_u, phys_dudx); 
+	              // evaluate the bilinear form
+	              double val_ij = mfv->fn(pts_num, phys_pts,
+		            phys_weights, phys_u, phys_dudx, phys_v, phys_dvdx,
+		            phys_u_prev, phys_du_prevdx, NULL); 
+	              //truncating
+	              if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
+	              // add the result to the matrix
+	              if (val_ij != 0) 
+                  if(!rhsonly) 
+                  {
+                    mat->add(pos_i, pos_j, val_ij);
+	                  if (DEBUG_MATRIX) {
+	                    info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
+	                    pos_i, pos_j, val_ij, c_i, c_j);
+                    }
                   }
-                }
               }
-	    }
-	  }
-        }
-      }
-    }
-  } // end while
-
-  delete I;
-}
-
-// process boundary weak forms
-void DiscreteProblem::process_surf_forms(Space *space, SparseMatrix *mat, double *res, 
-					 int matrix_flag, int bdy_index) {
-  Iterator *I = new Iterator(space);
-  Element *e; 
-
-  // evaluate previous solution and its derivative at the end point
-  // FIXME: maximum number of equations limited by [MAX_EQN_NUM][MAX_QUAD_PTS_NUM]
-  double phys_u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
-         phys_du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM]; // at the end point
-
-  // decide whether we are on the left-most or right-most one
-  double x_ref, x_phys; 
-  if(bdy_index == BOUNDARY_LEFT) {
-    e = I->first_active_element(); 
-    x_ref = -1; // left end of reference element
-    x_phys = space->get_left_endpoint();
-  }
-  else {
-    e = I->last_active_element(); 
-    x_ref = 1;  // right end of reference element
-    x_phys = space->get_right_endpoint();
-  }
-
-  // get solution value and derivative at the boundary point
-  for(int sln=0; sln < e->n_sln; sln++) {
-    e->get_solution_point(x_phys, phys_u_prev[sln], phys_du_prevdx[sln], sln); 
-  }
-
-  // surface bilinear forms
-  if(matrix_flag == 0 || matrix_flag == 1) {
-    for (int ww = 0; ww < this->matrix_forms_surf.size(); ww++)
-    {
-      MatrixFormSurf *mfs = &this->matrix_forms_surf[ww];
-      if (mfs->bdy_index != bdy_index) continue;
-      int c_i = mfs->i;  
-      int c_j = mfs->j;  
-
-      // loop over test functions on the boundary element
-      for(int i=0; i<e->p + 1; i++) {
-        double phys_v, phys_dvdx; 
-        int pos_i = e->dof[c_i][i]; // matrix row
-        if(pos_i != -1) {
-          // transform j-th basis function to the boundary element
-          element_shapefn_point(x_ref, e->x1, e->x2, i, phys_v, 
-                                phys_dvdx); 
-          // loop over basis functions on the boundary element
-          for(int j=0; j < e->p + 1; j++) {
-            double phys_u, phys_dudx;
-            int pos_j = e->dof[c_j][j]; // matrix column
-            // if j-th basis function is active
-            if(pos_j != -1) {
-              // transform j-th basis function to the boundary element
-              element_shapefn_point(x_ref, e->x1, e->x2, j, phys_u, 
-                                    phys_dudx); 
-              // evaluate the surface bilinear form
-              double val_ij_surf = mfs->fn(x_phys,
-                               phys_u, phys_dudx, phys_v, 
-                               phys_dvdx, phys_u_prev, phys_du_prevdx, 
-                               NULL); 
-  	      // truncating
-	      if(fabs(val_ij_surf) < 1e-12) val_ij_surf = 0.0; 
-              // add the result to the matrix
-              if (val_ij_surf != 0) mat->add(pos_i, pos_j, val_ij_surf);
             }
           }
-	}
-      }
-    }
-  }
-
-  // surface part of residual
-  if(matrix_flag == 0 || matrix_flag == 2) {
-    for (int ww = 0; ww < this->vector_forms_surf.size(); ww++)
-    {
-      VectorFormSurf *vfs = &this->vector_forms_surf[ww];
-      if (vfs->bdy_index != bdy_index) continue;
-      int c_i = vfs->i;  
-
-      // loop over test functions on the boundary element
-      for(int i=0; i<e->p + 1; i++) {
-        double phys_v, phys_dvdx; 
-        int pos_i = e->dof[c_i][i]; // matrix row
-        if(pos_i != -1) {
-          // transform j-th basis function to the boundary element
-          element_shapefn_point(x_ref, e->x1, e->x2, i, phys_v, 
-                                phys_dvdx); 
-          // evaluate the surface bilinear form
-          double val_i_surf = vfs->fn(x_phys,
-                          phys_u_prev, phys_du_prevdx, phys_v, phys_dvdx, 
-                          NULL);
-          // truncating
-          if(fabs(val_i_surf) < 1e-12) val_i_surf = 0.0; 
-          // add the result to the matrix
-          if (val_i_surf != 0) res[pos_i] += val_i_surf;
         }
-      }
-    }
-  }
-  delete I;
-}
-
-
-void DiscreteProblem::process_vol_forms(Space *space, SparseMatrix *mat, Vector *res, 
-					int matrix_flag) {
-  int n_eq = space->get_n_eq();
-  Element *elems = space->get_base_elems();
-  int n_elem = space->get_n_base_elem();
-  Iterator *I = new Iterator(space);
-
-  Element *e;
-  while ((e = I->next_active_element()) != NULL) {
-    //printf("Processing elem %d\n", m);
-    int    pts_num;                                     // num of quad points
-    double phys_pts[MAX_QUAD_PTS_NUM];                  // quad points
-    double phys_weights[MAX_QUAD_PTS_NUM];              // quad weights
-    double phys_u[MAX_QUAD_PTS_NUM];                    // basis function 
-    double phys_dudx[MAX_QUAD_PTS_NUM];                 // basis function x-derivative
-    double phys_v[MAX_QUAD_PTS_NUM];                    // test function
-    double phys_dvdx[MAX_QUAD_PTS_NUM];                 // test function x-derivative
-    if (n_eq > MAX_EQN_NUM) error("number of equations exceeded in process_vol_forms().");
-    // all previous solutions (all components)
-    double phys_u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM];     
-    // x-derivatives of all previous solutions (all components)
-    double phys_du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM];  
-    // decide quadrature order and set up 
-    // quadrature weights and points in element m
-    // CAUTION: This is heuristic
-    int order = 4*e->p;
-
-    // prepare quadrature points and weights in element 'e'
-    create_phys_element_quadrature(e->x1, e->x2,  
-                               order, phys_pts, phys_weights, &pts_num); 
-
-    // evaluate previous solution and its derivative 
-    // at all quadrature points in the element, 
-    // for every solution component
-    // 0... in the entire element
-    for(int sln=0; sln < e->n_sln; sln++) {
-      e->get_solution_quad(0, order, phys_u_prev[sln], phys_du_prevdx[sln], sln); 
-    }
-
-    // volumetric bilinear forms
-    if(matrix_flag == 0 || matrix_flag == 1) 
-    {
-      for (int ww = 0; ww < this->matrix_forms_vol.size(); ww++)
-      {
-	MatrixFormVol *mfv = &this->matrix_forms_vol[ww];
-	if (e->marker == mfv->marker ||  mfv->marker == ANY) {
-  	  int c_i = mfv->i;  
-	  int c_j = mfv->j;  
-
-	  // loop over test functions (rows)
-	  for(int i=0; i<e->p + 1; i++) {
-	    // if i-th test function is active
-	    int pos_i = e->dof[c_i][i]; // row in matrix
-            //printf("elem (%g, %g): pos_i = %d\n", e->x1, e->x2, pos_i);
-	    if(pos_i != -1) {
-	      // transform i-th test function to element 'm'
-              //printf("Elem (%g, %g): i = %d, order = %d\n", e->x1, e->x2, i, order);
-	      element_shapefn(e->x1, e->x2,  
-			      i, order, phys_v, phys_dvdx); 
-	      // if we are constructing the matrix
-	      if(matrix_flag == 0 || matrix_flag == 1) {
-	        // loop over basis functions (columns)
-	        for(int j=0; j < e->p + 1; j++) {
-		  int pos_j = e->dof[c_j][j]; // matrix column
-                  //printf("elem (%g, %g): pos_j = %d\n", e->x1, e->x2, pos_j);
-		  // if j-th basis function is active
-		  if(pos_j != -1) {
-		    // transform j-th basis function to element 'm'
-		    element_shapefn(e->x1, e->x2,  
-				    j, order, phys_u, phys_dudx); 
-		    // evaluate the bilinear form
-		    double val_ij = mfv->fn(pts_num, phys_pts,
-			      phys_weights, phys_u, phys_dudx, phys_v, phys_dvdx,
-			      phys_u_prev, phys_du_prevdx, NULL); 
-		    //truncating
-		    if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
-		    // add the result to the matrix
-		    if (val_ij != 0) mat->add(pos_i, pos_j, val_ij);
-		    if (DEBUG_MATRIX) {
-		      info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
-		      pos_i, pos_j, val_ij, c_i, c_j);
-		    }
-	          }
-	        }
-	      }
-	    }
-          }
-	}
       }
     }
 
     // volumetric part of residual
-    if(matrix_flag == 0 || matrix_flag == 2) {
-      for (int ww = 0; ww < this->vector_forms_vol.size(); ww++)
-      {
-        VectorFormVol *vfv = &this->vector_forms_vol[ww];
-	if (e->marker == vfv->marker ||  vfv->marker == ANY) {
-          int c_i = vfv->i;  
-
-          // loop over test functions (rows)
-          for(int i=0; i<e->p + 1; i++) {
-	    // if i-th test function is active
-	    int pos_i = e->dof[c_i][i]; // row in residual vector
-	    if(pos_i != -1) {
-	      // transform i-th test function to element 'm'
-	      element_shapefn(e->x1, e->x2,  
-			      i, order, phys_v, phys_dvdx); 
-	      // contribute to residual vector
-	      if(matrix_flag == 0 || matrix_flag == 2) {
-	        double val_i = vfv->fn(pts_num, phys_pts, phys_weights, 
-				       phys_u_prev, phys_du_prevdx, phys_v,
-				       phys_dvdx, NULL);
-	        // truncating
-	        if(fabs(val_i) < 1e-12) val_i = 0.0; 
-	        // add the contribution to the residual vector
+    for (int ww = 0; ww < this->wf->vector_forms_vol.size(); ww++) {
+      WeakForm::VectorFormVol *vfv = &this->wf->vector_forms_vol[ww];
+      int c_i = vfv->i;  
+      // loop over test functions (rows)
+      for(int i=0; i<e->p + 1; i++) {
+        // if i-th test function is active
+        int pos_i = e->dof[c_i][i]; // row in residual vector
+        if(pos_i != -1) {
+          // transform i-th test function to element 'm'
+          element_shapefn(e->x1, e->x2,  
+		      i, order, phys_v, phys_dvdx); 
+          // contribute to residual vector
+          double val_i = vfv->fn(pts_num, phys_pts, phys_weights, 
+			       phys_u_prev, phys_du_prevdx, phys_v,
+			       phys_dvdx, NULL);
+          // truncating
+          if(fabs(val_i) < 1e-12) val_i = 0.0; 
+          // add the contribution to the residual vector
           if (val_i != 0) res->add(pos_i, val_i);
-	        if (DEBUG_MATRIX) {
-		  if (val_i != 0) {
+          if (DEBUG_MATRIX)
+	          if (val_i != 0)
 	            info("Adding to residual pos %d value %g (comp %d)", 
-                    pos_i, val_i, c_i);
-                  }
-                }
-              }
-	    }
-	  }
+                  pos_i, val_i, c_i);
         }
       }
     }
   } // end while
-
   delete I;
 }
 
 // process boundary weak forms
-void DiscreteProblem::process_surf_forms(Space *space, SparseMatrix *mat, Vector *res, 
-					 int matrix_flag, int bdy_index) {
+void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *res, int bdy_index, bool rhsonly) {
   Iterator *I = new Iterator(space);
   Element *e; 
 
@@ -470,72 +196,69 @@ void DiscreteProblem::process_surf_forms(Space *space, SparseMatrix *mat, Vector
   }
 
   // surface bilinear forms
-  if(matrix_flag == 0 || matrix_flag == 1) {
-    for (int ww = 0; ww < this->matrix_forms_surf.size(); ww++)
-    {
-      MatrixFormSurf *mfs = &this->matrix_forms_surf[ww];
-      if (mfs->bdy_index != bdy_index) continue;
-      int c_i = mfs->i;  
-      int c_j = mfs->j;  
+  for (int ww = 0; ww < this->wf->matrix_forms_surf.size(); ww++) {
+    WeakForm::MatrixFormSurf *mfs = &this->wf->matrix_forms_surf[ww];
+    if (mfs->bdy_index != bdy_index) continue;
+    int c_i = mfs->i;  
+    int c_j = mfs->j;  
 
-      // loop over test functions on the boundary element
-      for(int i=0; i<e->p + 1; i++) {
-        double phys_v, phys_dvdx; 
-        int pos_i = e->dof[c_i][i]; // matrix row
-        if(pos_i != -1) {
-          // transform j-th basis function to the boundary element
-          element_shapefn_point(x_ref, e->x1, e->x2, i, phys_v, 
-                                phys_dvdx); 
-          // loop over basis functions on the boundary element
-          for(int j=0; j < e->p + 1; j++) {
-            double phys_u, phys_dudx;
-            int pos_j = e->dof[c_j][j]; // matrix column
-            // if j-th basis function is active
-            if(pos_j != -1) {
-              // transform j-th basis function to the boundary element
-              element_shapefn_point(x_ref, e->x1, e->x2, j, phys_u, 
-                                    phys_dudx); 
-              // evaluate the surface bilinear form
-              double val_ij_surf = mfs->fn(x_phys,
-                               phys_u, phys_dudx, phys_v, 
-                               phys_dvdx, phys_u_prev, phys_du_prevdx, 
-                               NULL); 
-  	      // truncating
-	      if(fabs(val_ij_surf) < 1e-12) val_ij_surf = 0.0; 
-              // add the result to the matrix
-              if (val_ij_surf != 0) mat->add(pos_i, pos_j, val_ij_surf);
-            }
+    // loop over test functions on the boundary element
+    for(int i=0; i<e->p + 1; i++) {
+      double phys_v, phys_dvdx; 
+      int pos_i = e->dof[c_i][i]; // matrix row
+      if(pos_i != -1) {
+        // transform j-th basis function to the boundary element
+        element_shapefn_point(x_ref, e->x1, e->x2, i, phys_v, 
+                              phys_dvdx); 
+        // loop over basis functions on the boundary element
+        for(int j=0; j < e->p + 1; j++) {
+          double phys_u, phys_dudx;
+          int pos_j = e->dof[c_j][j]; // matrix column
+          // if j-th basis function is active
+          if(pos_j != -1) {
+            // transform j-th basis function to the boundary element
+            element_shapefn_point(x_ref, e->x1, e->x2, j, phys_u, 
+                                  phys_dudx); 
+            // evaluate the surface bilinear form
+            double val_ij_surf = mfs->fn(x_phys,
+                             phys_u, phys_dudx, phys_v, 
+                             phys_dvdx, phys_u_prev, phys_du_prevdx, 
+                             NULL); 
+	          // truncating
+            if(fabs(val_ij_surf) < 1e-12) val_ij_surf = 0.0; 
+            // add the result to the matrix
+            if (val_ij_surf != 0) 
+              if(!rhsonly) 
+                mat->add(pos_i, pos_j, val_ij_surf);
           }
-	}
+        }
       }
     }
   }
 
   // surface part of residual
-  if(matrix_flag == 0 || matrix_flag == 2) {
-    for (int ww = 0; ww < this->vector_forms_surf.size(); ww++)
-    {
-      VectorFormSurf *vfs = &this->vector_forms_surf[ww];
-      if (vfs->bdy_index != bdy_index) continue;
-      int c_i = vfs->i;  
+  for (int ww = 0; ww < this->wf->vector_forms_surf.size(); ww++)
+  {
+    WeakForm::VectorFormSurf *vfs = &this->wf->vector_forms_surf[ww];
+    if (vfs->bdy_index != bdy_index) continue;
+    int c_i = vfs->i;  
 
-      // loop over test functions on the boundary element
-      for(int i=0; i<e->p + 1; i++) {
-        double phys_v, phys_dvdx; 
-        int pos_i = e->dof[c_i][i]; // matrix row
-        if(pos_i != -1) {
-          // transform j-th basis function to the boundary element
-          element_shapefn_point(x_ref, e->x1, e->x2, i, phys_v, 
-                                phys_dvdx); 
-          // evaluate the surface bilinear form
-          double val_i_surf = vfs->fn(x_phys,
-                          phys_u_prev, phys_du_prevdx, phys_v, phys_dvdx, 
-                          NULL);
-          // truncating
-          if(fabs(val_i_surf) < 1e-12) val_i_surf = 0.0; 
-          // add the result to the matrix
-          if (val_i_surf != 0) res->add(pos_i, val_i_surf);
-        }
+    // loop over test functions on the boundary element
+    for(int i=0; i<e->p + 1; i++) {
+      double phys_v, phys_dvdx; 
+      int pos_i = e->dof[c_i][i]; // matrix row
+      if(pos_i != -1) {
+        // transform j-th basis function to the boundary element
+        element_shapefn_point(x_ref, e->x1, e->x2, i, phys_v, 
+                              phys_dvdx); 
+        // evaluate the surface bilinear form
+        double val_i_surf = vfs->fn(x_phys,
+                        phys_u_prev, phys_du_prevdx, phys_v, phys_dvdx, 
+                        NULL);
+        // truncating
+        if(fabs(val_i_surf) < 1e-12) val_i_surf = 0.0; 
+        // add the result to the matrix
+        if (val_i_surf != 0) res->add(pos_i, val_i_surf);
       }
     }
   }
@@ -543,53 +266,7 @@ void DiscreteProblem::process_surf_forms(Space *space, SparseMatrix *mat, Vector
 }
 
 // construct Jacobi matrix or residual vector
-// matrix_flag == 0... assembling Jacobi matrix and residual vector together
-// matrix_flag == 1... assembling Jacobi matrix only
-// matrix_flag == 2... assembling residual vector only
-// NOTE: Simultaneous assembling of the Jacobi matrix and residual
-// vector is more efficient than if they are assembled separately
-void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, double *res, 
-                               int matrix_flag) {
-  // number of equations in the system
-  int n_eq = space->get_n_eq();
-
-  // total number of unknowns
-  int n_dof = Space::get_num_dofs(space);
-
-  // erase residual vector
-  if(matrix_flag == 0 || matrix_flag == 2) 
-    for(int i=0; i<n_dof; i++) res[i] = 0;
-
-  // process volumetric weak forms via an element loop
-  process_vol_forms(space, mat, res, matrix_flag);
-
-  // process surface weak forms for the left boundary
-  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_LEFT);
-
-  // process surface weak forms for the right boundary
-  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_RIGHT);
-
-  // DEBUG: print Jacobi matrix
-  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
-    info("Jacobi matrix:");
-    for(int i=0; i<n_dof; i++) {
-      for(int j=0; j<n_dof; j++) {
-        info("%g ", mat->get(i, j));
-      }
-    }
-  }
-
-  // DEBUG: print residual vector
-  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 2)) {
-    info("Residual:");
-    for(int i=0; i<n_dof; i++) {
-      info("%g ", res[i]);
-    }
-  }
-} 
-
-void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, Vector *res, 
-                               int matrix_flag) {
+void DiscreteProblem::assemble(SparseMatrix *mat, Vector *res, bool rhsonly) {
   // number of equations in the system
   int n_eq = space->get_n_eq();
 
@@ -613,16 +290,16 @@ void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, Vector *res,
   }
 
   // process volumetric weak forms via an element loop
-  process_vol_forms(space, mat, res, matrix_flag);
+  process_vol_forms(mat, res, rhsonly);
 
   // process surface weak forms for the left boundary
-  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_LEFT);
+  process_surf_forms(mat, res, BOUNDARY_LEFT, rhsonly);
 
   // process surface weak forms for the right boundary
-  process_surf_forms(space, mat, res, matrix_flag, BOUNDARY_RIGHT);
+  process_surf_forms(mat, res, BOUNDARY_RIGHT, rhsonly);
 
   // DEBUG: print Jacobi matrix
-  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 1)) {
+  if(DEBUG_MATRIX) {
     info("Jacobi matrix:");
     for(int i=0; i<n_dof; i++) {
       for(int j=0; j<n_dof; j++) {
@@ -632,7 +309,7 @@ void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, Vector *res,
   }
 
   // DEBUG: print residual vector
-  if(DEBUG_MATRIX && (matrix_flag == 0 || matrix_flag == 2)) {
+  if(DEBUG_MATRIX) {
     info("Residual:");
     for(int i=0; i<n_dof; i++) {
       info("%g ", res->get(i));
@@ -640,63 +317,45 @@ void DiscreteProblem::assemble(Space *space, SparseMatrix *mat, Vector *res,
   }
 } 
 
-// construct both the Jacobi matrix and the residual vector
-void DiscreteProblem::assemble_matrix_and_vector(Space *space, 
-                      SparseMatrix *mat, double *res) {
-  assemble(space, mat, res, 0);
-} 
-
-void DiscreteProblem::assemble_matrix_and_vector(Space *space, 
-                      SparseMatrix *mat, Vector *res) {
-  assemble(space, mat, res, 0);
-}
-// construct Jacobi matrix only
-void DiscreteProblem::assemble_matrix(Space *space, SparseMatrix *mat) {
-  double *void_res = NULL;
-  assemble(space, mat, void_res, 1);
-} 
-
-// construct residual vector only
-void DiscreteProblem::assemble_vector(Space *space, double *res) {
-  SparseMatrix *void_mat = NULL;
-  assemble(space, void_mat, res, 2);
-} 
-
-void J_dot_vec_jfnk(DiscreteProblem *dp, Space *space, double* vec,
-                    double* y_orig, double* f_orig, 
-                    double* J_dot_vec,
-                    double jfnk_epsilon, int n_dof) 
+void J_dot_vec_jfnk(DiscreteProblem *dp, Space *space, Vector* vec,
+                    Vector* y_orig, Vector* f_orig, 
+                    Vector* J_dot_vec,
+                    double jfnk_epsilon, int n_dof, MatrixSolverType matrix_solver) 
 {
-  double y_perturbed[MAX_N_DOF];
-  double f_perturbed[MAX_N_DOF];
-  for (int i=0; i<n_dof; i++) {
-    y_perturbed[i] = y_orig[i] + jfnk_epsilon*vec[i];
-  }
+  Vector* y_perturbed = create_vector(matrix_solver);
+  Vector* f_perturbed = create_vector(matrix_solver);
+  for (int i=0; i<n_dof; i++)
+    y_perturbed->set(i, y_orig->get(i) + jfnk_epsilon*vec->get(i));
   vector_to_solution(y_perturbed, space);
-  dp->assemble_vector(space, f_perturbed); 
+  // NULL stands for that we are not interested in the matrix, just the vector.
+  dp->assemble(NULL, f_perturbed, true); 
   vector_to_solution(y_orig, space);
   for (int i=0; i<n_dof; i++) {
-    J_dot_vec[i] = (f_perturbed[i] - f_orig[i])/jfnk_epsilon;
+    J_dot_vec->set(i,(f_perturbed->get(i) - f_orig->get(i))/jfnk_epsilon);
   }
+  delete y_perturbed;
+  delete f_perturbed;
 }
 
 // CG method adjusted for JFNK
 // NOTE: 
 void jfnk_cg(DiscreteProblem *dp, Space *space, 
              double matrix_solver_tol, int matrix_solver_maxiter, 
-	     double jfnk_epsilon, double tol_jfnk, int jfnk_maxiter, bool verbose)
+	     double jfnk_epsilon, double tol_jfnk, int jfnk_maxiter, MatrixSolverType matrix_solver, bool verbose)
 {
   int n_dof = Space::get_num_dofs(space);
   // vectors for JFNK
-  double f_orig[MAX_N_DOF];
-  double y_orig[MAX_N_DOF];
-  double vec[MAX_N_DOF];
-  double rhs[MAX_N_DOF];
+  Vector* f_orig = create_vector(matrix_solver);
+  Vector* y_orig = create_vector(matrix_solver);
+  Vector* vec = create_vector(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
 
   // vectors for the CG method
-  double r[MAX_N_DOF];
-  double p[MAX_N_DOF];
-  double J_dot_vec[MAX_N_DOF];
+  Vector* r = create_vector(matrix_solver);
+  Vector* p = create_vector(matrix_solver);
+  Vector* J_dot_vec = create_vector(matrix_solver);
+
+
 
   /*
   // debug
@@ -723,11 +382,12 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
 
     // construct residual vector f_orig corresponding to y_orig
     // (f_orig stays unchanged through the entire CG loop)
-    dp->assemble_vector(space, f_orig); 
+    // NULL stands for that we are not interested in the matrix, just the vector.
+    dp->assemble(NULL, f_orig, true); 
 
     // calculate L2 norm of f_orig
     double res_norm_squared = 0;
-    for(int i=0; i<n_dof; i++) res_norm_squared += f_orig[i]*f_orig[i];
+    for(int i=0; i<n_dof; i++) res_norm_squared += f_orig->get(i)*f_orig->get(i);
 
     // If residual norm less than 'tol_jfnk', break
     if (verbose) info("Residual norm: %.15f", sqrt(res_norm_squared));
@@ -737,27 +397,27 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
 
     // right-hand side is negative residual
     // (rhs stays unchanged through the CG loop)
-    for(int i=0; i<n_dof; i++) rhs[i] = -f_orig[i];
+    for(int i=0; i<n_dof; i++) rhs->set(i, -f_orig->get(i));
 
     // beginning CG method
     // r = rhs - A*vec0 (where the initial vector vec0 = 0)
-    for (int i=0; i < n_dof; i++) r[i] = rhs[i];
+    for (int i=0; i < n_dof; i++) r->set(i, rhs->get(i));
     // p = r
-    for (int i=0; i < n_dof; i++) p[i] = r[i];
+    for (int i=0; i < n_dof; i++) p->set(i, r->get(i));
 
     // CG loop
     int iter_current = 0;
     double tol_current_squared;
     // initializing the solution vector with zero
-    for(int i=0; i<n_dof; i++) vec[i] = 0;
+    for(int i=0; i<n_dof; i++) vec->set(i, 0);
     while (1) {
       J_dot_vec_jfnk(dp, space, p, y_orig, f_orig,
-                     J_dot_vec, jfnk_epsilon, n_dof);
+                     J_dot_vec, jfnk_epsilon, n_dof, matrix_solver);
       double r_times_r = vec_dot(r, r, n_dof);
       double alpha = r_times_r / vec_dot(p, J_dot_vec, n_dof); 
       for (int i=0; i < n_dof; i++) {
-        vec[i] += alpha*p[i];
-        r[i] -= alpha*J_dot_vec[i];
+        vec->set(i, vec->get(i) + alpha*p->get(i));
+        r->set(i, r->get(i) - alpha*J_dot_vec->get(i));
       }
       /*
       // debug - output of solution vector
@@ -774,7 +434,7 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
       if (tol_current_squared < matrix_solver_tol*matrix_solver_tol 
           || iter_current >= matrix_solver_maxiter) break;
       double beta = r_times_r_new/r_times_r;
-      for (int i=0; i < n_dof; i++) p[i] = r[i] + beta*p[i];
+      for (int i=0; i < n_dof; i++) p->set(i, r->get(i) + beta*p->get(i));
     }
     // check whether CG converged
     if (verbose) info("CG (JFNK) made %d iteration(s) (tol = %g)", 
@@ -784,7 +444,7 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
     }
 
     // updating vector y_orig by new solution which is in x
-    for(int i=0; i<n_dof; i++) y_orig[i] += vec[i];
+    for(int i=0; i<n_dof; i++) y_orig->set(i, y_orig->get(i) + vec->get(i));
 
     // copying vector y_orig to space elements
     vector_to_solution(y_orig, space);
@@ -795,7 +455,22 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
     }
   }
 
+  delete f_orig;
   // copy updated vector y_orig to space
   vector_to_solution(y_orig, space);
 }
 
+Space* construct_refined_space(Space* space, int order_increase)
+{
+  Space* ref_space = space->replicate();
+  Iterator *I = new Iterator(ref_space);
+  Element *e;
+  while ((e = I->next_active_element()) != NULL) {
+    int3 cand = {1, e->p + order_increase, e->p + order_increase};
+    e->refine(cand);
+    if (cand[0] == 1) 
+      ref_space->n_active_elem++; // if hp-refinement
+  }
+  ref_space->assign_dofs();
+  return ref_space;
+}

@@ -34,6 +34,7 @@ public:
   void set_row_style(int row, const char* color = "k", const char* line = "-", const char* marker = "");
 
   void add_values(int row, double x, double y);
+  void add_values(double x, double y);
   void add_values(int row, int n, double* x, double* y);
   void add_values(int row, int n, double2* xy);
 
@@ -59,6 +60,20 @@ protected:
   };
 
   std::vector<Row> rows;
+
+};
+
+
+///  Outputs just two numbers per row.
+///
+class HERMES_API SimpleGraph : public Graph
+{
+public:
+
+  SimpleGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL)
+       : Graph(title, x_axis_name, y_axis_name) {}
+
+  virtual void save(const char* filename);
 
 };
 

@@ -1,39 +1,46 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-// This example solves a simplified car control model consisting of
-// five first-order equations
+//  This example solves a simplified car control model consisting of
+//  five first-order equations equipped with the constraints
+//  |alpha| <= alpha_max
+//  |zeta| <= zeta_max
+//  |v| <= v_max
+//  |phi| <= phi_max
+//  Goal: Calculate all possible trajectories of the car given the 
+//  initial condition and intervals for alpha and zeta. The current 
+//  algorithm considers 9 control parameters and moves only on the 
+//  boundary of the 8-dimensional rectangle. TODO: forget trajectories 
+//  where |v| > v_max or |phi| > phi_max.
 //
-// x' - v cos(phi) cos(theta) = 0
-// y' - v cos(phi) sin(theta) = 0
-// v' - alpha                 = 0
-// phi' - zeta                = 0
-// theta' - v sin(phi)        = 0
+//  PDE: x' - v cos(phi) cos(theta) = 0
+//       y' - v cos(phi) sin(theta) = 0
+//       v' - alpha                 = 0
+//       phi' - zeta                = 0
+//       theta' - v sin(phi)        = 0.
 //
-// equipped with the constraints
+//  Time interval: (0, T).
 //
-// |alpha| <= alpha_max
-// |zeta| <= zeta_max
-// |v| <= v_max
-// |phi| <= phi_max
-
-// The problem is considered in a time interval (0, T), and Dirichlet 
-// conditions are given for all quantities at the beginning.
-
-// Goal: Calculate all possible trajectories of the car given the 
-// initial condition and intervals for alpha and zeta. The current 
-// algorithm considers 9 control parameters and moves only on the 
-// boundary of the 8-dimensional rectangle. TODO: forget trajectories 
-// where |v| > v_max or |phi| > phi_max.
-
+//  Interval: (A, B).
+//
+//  BC: Homogenous Dirichlet.
+//
+//  The following parameters can be changed:
 // Print data.
 const int PRINT = 0;
 
-// General input.
-const int NEQ = 5;
-const int NELEM = 5;                // Number of elements.
-const double A = 0, B = 10;         // Domain end points.
-const int P_init = 2;               // Initial polynomal degree.
+//  The following parameters can be changed:
+const int NEQ = 5;                      // Number of equations.
+const int NELEM = 5;                    // Number of elements.
+const double A = 0, B = 10;             // Domain end points.
+const int P_INIT = 2;                   // Polynomial degree.
+
+// Newton's method.
+double NEWTON_TOL = 1e-5;               // Tolerance.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 // Parameters.
 const double Alpha_max = 1.;
@@ -57,12 +64,8 @@ double time_ctrl[N_ctrl] =
 double alpha_ctrl[N_ctrl] = {0, 0, 0, 0};
 double zeta_ctrl[N_ctrl] = {0, 0, 0, 0};
 
-// Newton's method.
-double NEWTON_TOL = 1e-5;
-int NEWTON_MAX_ITER = 150;
 
-
-// Include weak forms
+// Include weak forms.
 #include "forms.cpp"
 
 void compute_trajectory(Space *space, DiscreteProblem *dp) 
@@ -73,11 +76,8 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
          zeta_ctrl[1], zeta_ctrl[2], zeta_ctrl[3]); 
 
   // Newton's loop.
-  // Obtain the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(space);
-
-  // Fill vector y using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[ndof];
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
   solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -86,10 +86,12 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1)
-  {
+  while (1) {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
+
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble_matrix_and_vector(space, matrix, rhs);
+    dp->assemble(matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -128,6 +130,7 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
   delete matrix;
   delete rhs;
   delete solver;
+  delete [] coeff_vec;
 }
 
 void plot_trajectory(Space *space, int subdivision) 
@@ -212,34 +215,38 @@ void set_alpha_and_zeta(int component, double ray_angle, double radius) {
 
 int main() {
   // Create space, set Dirichlet BC, enumerate basis functions.
-  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  Space* space = new Space(A, B, NELEM, P_INIT, NEQ);
   space->set_bc_left_dirichlet(0, X0_left);
   space->set_bc_left_dirichlet(1, Y0_left);
   space->set_bc_left_dirichlet(2, Vel_left);
   space->set_bc_left_dirichlet(3, Phi_left);
   space->set_bc_left_dirichlet(4, Theta_left);
-  info("N_dof = %d", space->assign_dofs());
+  info("N_dof = %d.", space->assign_dofs());
+
+  // Initialize the weak formulation.
+  WeakForm wf(5);
+  wf.add_matrix_form(0, 0, jacobian_0_0);
+  wf.add_matrix_form(0, 2, jacobian_0_2);
+  wf.add_matrix_form(0, 3, jacobian_0_3);
+  wf.add_matrix_form(0, 4, jacobian_0_4);
+  wf.add_matrix_form(1, 1, jacobian_1_1);
+  wf.add_matrix_form(1, 2, jacobian_1_2);
+  wf.add_matrix_form(1, 3, jacobian_1_3);
+  wf.add_matrix_form(1, 4, jacobian_1_4);
+  wf.add_matrix_form(2, 2, jacobian_2_2);
+  wf.add_matrix_form(3, 3, jacobian_3_3);
+  wf.add_matrix_form(4, 2, jacobian_4_2);
+  wf.add_matrix_form(4, 3, jacobian_4_3);
+  wf.add_matrix_form(4, 4, jacobian_4_4);
+  wf.add_vector_form(0, residual_0);
+  wf.add_vector_form(1, residual_1);
+  wf.add_vector_form(2, residual_2);
+  wf.add_vector_form(3, residual_3);
+  wf.add_vector_form(4, residual_4);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian_0_0);
-  dp->add_matrix_form(0, 2, jacobian_0_2);
-  dp->add_matrix_form(0, 3, jacobian_0_3);
-  dp->add_matrix_form(0, 4, jacobian_0_4);
-  dp->add_matrix_form(1, 1, jacobian_1_1);
-  dp->add_matrix_form(1, 2, jacobian_1_2);
-  dp->add_matrix_form(1, 3, jacobian_1_3);
-  dp->add_matrix_form(1, 4, jacobian_1_4);
-  dp->add_matrix_form(2, 2, jacobian_2_2);
-  dp->add_matrix_form(3, 3, jacobian_3_3);
-  dp->add_matrix_form(4, 2, jacobian_4_2);
-  dp->add_matrix_form(4, 3, jacobian_4_3);
-  dp->add_matrix_form(4, 4, jacobian_4_4);
-  dp->add_vector_form(0, residual_0);
-  dp->add_vector_form(1, residual_1);
-  dp->add_vector_form(2, residual_2);
-  dp->add_vector_form(3, residual_3);
-  dp->add_vector_form(4, residual_4);
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  
 
   // Move on the boundary of the rectangle 
   // (-Alpha_max, Alpha_max) x (-Zeta_max, Zeta_max) in the CCW

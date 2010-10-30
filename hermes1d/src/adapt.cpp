@@ -158,7 +158,7 @@ double calc_elem_est_error_squared_hp(int norm, Element *e,
   return err_squared;
 }
 
-double calc_error_estimate(int norm, Space* space, Space* space_ref,
+double calc_err_est(int norm, Space* space, Space* space_ref,
 			   double *err_array, int sln)
 {
   double err_total_squared = 0;
@@ -181,15 +181,17 @@ double calc_error_estimate(int norm, Space* space, Space* space_ref,
       err_squared = calc_elem_est_error_squared_hp(norm, e, 
                     e_ref_left, e_ref_right, sln);
     }
-    err_array[e->id] = err_squared;
+    if(err_array != NULL)
+      err_array[e->id] = err_squared;
     err_total_squared += err_squared;
     counter++;
   }
 
-  for (int i=0; i < counter; i++) {
-    err_array[i] = sqrt(err_array[i]);
-  }
-  return sqrt(err_total_squared);
+  for (int i=0; i < counter; i++)
+    if(err_array != NULL)
+      err_array[i] = sqrt(err_array[i]);
+
+  return sqrt(err_total_squared) / calc_solution_norm(norm, space_ref);
 }
 
 double calc_error_estimate(int norm, Space* space, 
@@ -1503,8 +1505,8 @@ double calc_elem_exact_error_squared(int norm, exact_sol_type exact_sol,
   return err_squared;
 }
 
-double calc_error_exact(int norm, Space *space, 
-                        exact_sol_type exact_sol) 
+double calc_err_exact(int norm, Space *space, 
+                        exact_sol_type exact_sol, int neq, double a, double b) 
 {
   double total_err_squared = 0;
   Iterator *I = new Iterator(space);
@@ -1515,8 +1517,12 @@ double calc_error_exact(int norm, Space *space,
         calc_elem_exact_error_squared(norm, exact_sol, e, order);
       total_err_squared += elem_err_squared;
   }
-  
-  return sqrt(total_err_squared);
+  int subdivision = 500; // heuristic parameter
+  int order = 20;        // heuristic parameter
+      
+  return sqrt(total_err_squared) / calc_solution_norm(norm, 
+           exact_sol, neq, a, b, subdivision, order);
+
 }
 
 // Selects best hp-refinement from the given list (distinguishes whether 

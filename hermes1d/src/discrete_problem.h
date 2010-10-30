@@ -12,80 +12,25 @@
 #include "quad_std.h"
 #include "legendre.h"
 #include "lobatto.h"
+#include "weakform.h"
 #include "../../hermes_common/matrix.h"
 #include "../../hermes_common/common.h"
 #include "../../hermes_common/solver/solver.h"
 #include "iterator.h"
 
-typedef double (*matrix_form) (int num, double *x, double *weights,
-        double *u, double *dudx, double *v, double *dvdx, 
-        double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM],
-        double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM], void *user_data);
-
-typedef double (*vector_form) (int num, double *x, double *weights,
-        double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
-               double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
-               double *v, double *dvdx,
-        void *user_data);
-
-typedef double (*matrix_form_surf) (double x, double u, double dudx, 
-        double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
-        double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data);
-
-typedef double (*vector_form_surf) (double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
-        double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v, double dvdx,
-        void *user_data);
-
 class HERMES_API DiscreteProblem {
 public:
-    DiscreteProblem();
-    void add_matrix_form(int i, int j, matrix_form fn, int marker=ANY);
-    void add_vector_form(int i, vector_form fn, int marker=ANY);
-    void add_matrix_form_surf(int i, int j, matrix_form_surf fn, int bdy_index);
-    void add_vector_form_surf(int i, vector_form_surf fn, int bdy_index);
-    // c is solution component
-    void process_surf_forms(Space *space, SparseMatrix *mat, double *res, 
-                            int matrix_flag, int bdy_index);
-    void assemble(Space *space, SparseMatrix *mat, double *res, int matrix_flag);
-    void assemble_matrix_and_vector(Space *space, SparseMatrix *mat, double *res); 
+  DiscreteProblem(WeakForm* wf, Space* space);
 
-    void process_vol_forms(Space *space, SparseMatrix *mat, double *res, 
-                           int matrix_flag);
-    // c is solution component
-    void process_surf_forms(Space *space, SparseMatrix *mat, Vector *res, 
-                            int matrix_flag, int bdy_index);
-    void assemble(Space *space, SparseMatrix *mat, Vector *res, int matrix_flag);
-    void assemble_matrix_and_vector(Space *space, SparseMatrix *mat, Vector *res);
-    void process_vol_forms(Space *space, SparseMatrix *mat, Vector *res, 
-                           int matrix_flag);
-    
-    //FIXME: are these used?
-    void assemble_matrix(Space *space, SparseMatrix *mat);
-    void assemble_vector(Space *space, double *res);
+  void process_surf_forms(SparseMatrix *mat, Vector *res, int bdy_index, bool rhsonly);
+  
+  void process_vol_forms(SparseMatrix *mat, Vector *res, bool rhsonly);
+
+  void assemble(SparseMatrix *mat, Vector *res, bool rhsonly = false);
 
 private:
-	struct MatrixFormVol {
-		int i, j;
-		matrix_form fn;
-	        int marker;
-	};
-	struct MatrixFormSurf {
-		int i, j, bdy_index;
-		matrix_form_surf fn;
-	};
-	struct VectorFormVol {
-		int i;
-		vector_form fn;
-	        int marker;
-	};
-	struct VectorFormSurf {
-		int i, bdy_index;
-		vector_form_surf fn;
-	};
-	std::vector<MatrixFormVol> matrix_forms_vol;
-	std::vector<MatrixFormSurf> matrix_forms_surf;
-	std::vector<VectorFormVol> vector_forms_vol;
-	std::vector<VectorFormSurf> vector_forms_surf;
+  WeakForm* wf;
+  Space* space;
 };
 
 // return coefficients for all shape functions on the element m,
@@ -103,8 +48,11 @@ void element_shapefn_point(double x_ref, double a, double b,
 
 void HERMES_API jfnk_cg(DiscreteProblem *dp, Space *space,
              double matrix_solver_tol, int matrix_solver_maxiter,  
-	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, bool verbose=true);
+	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, MatrixSolverType matrix_solver, bool verbose = true);
 
-
+// Splits the indicated elements and 
+// increases poly degree in sons by one.
+// Solution is transfered to new elements.
+HERMES_API Space* construct_refined_space(Space* space, int order_increase = 1);
 
 #endif

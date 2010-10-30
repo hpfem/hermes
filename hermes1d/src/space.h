@@ -7,6 +7,7 @@
 #define _Space_H_
 
 #include "../../hermes_common/common.h"
+#include "../../hermes_common/matrix.h"
 #include "legendre.h"
 #include "lobatto.h"
 
@@ -65,6 +66,8 @@ typedef Element* ElemPtr2[2];
 
 void HERMES_API solution_to_vector(Space *space, double *y, int sln=0);
 void HERMES_API vector_to_solution(double *y, Space *space, int sln=0);
+void HERMES_API solution_to_vector(Space *space, Vector *y, int sln=0);
+void HERMES_API vector_to_solution(Vector *y, Space *space, int sln=0);
 
 class Space {
     public:
@@ -171,9 +174,8 @@ class Space {
 // on both spacees are also updated. 
 
 void HERMES_API adapt(int norm, int adapt_type, double threshold, 
-
            double *err_squared_array,
-           Space* &space, Space* &space_ref);
+           Space* & space, Space* & space_ref);
 
 // Returns updated coarse mesh, with the last 
 // coarse solution on it. 
@@ -182,14 +184,13 @@ void HERMES_API adapt(int norm, int adapt_type, double threshold,
 
 void HERMES_API adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Space* &space, ElemPtr2 *ref_elem_pairs);
+           Space* space, ElemPtr2 *ref_elem_pairs);
 
 void HERMES_API adapt_plotting(Space *space, Space *space_ref,
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 
 
 void HERMES_API adapt_plotting(Space *space, ElemPtr2* ref_elem_pairs,
-
                     int norm, int exact_sol_provided, 
                     exact_sol_type exact_sol); 
 #endif

@@ -84,23 +84,25 @@ double H1_projection_liform(int num, double *x, double *weights,
     return val;
 }
 
-void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, double *rhs,
+void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, Vector *rhs,
         ExactFunction fn, int projection_type)
 {
-    DiscreteProblem *dp1 = new DiscreteProblem();
-    if (projection_type == H1D_L2_ortho_global) {
-        dp1->add_matrix_form(0, 0, L2_projection_biform);
-        dp1->add_vector_form(0, L2_projection_liform);
-    } else if (projection_type == H1D_H1_ortho_global) {
-        dp1->add_matrix_form(0, 0, H1_projection_biform);
-        dp1->add_vector_form(0, H1_projection_liform);
-    } else
-        throw std::runtime_error("Unknown projection type");
+  WeakForm* wf = new WeakForm;
+  if (projection_type == H1D_L2_ortho_global) {
+      wf->add_matrix_form(L2_projection_biform);
+      wf->add_vector_form(L2_projection_liform);
+  } else if (projection_type == H1D_H1_ortho_global) {
+      wf->add_matrix_form(H1_projection_biform);
+      wf->add_vector_form(H1_projection_liform);
+  } else
+      throw std::runtime_error("Unknown projection type");
 
-    _f = fn;
-    int N_dof = space->assign_dofs();
-    info("Assembling projection linear system. ndofs: %d", N_dof);
-    dp1->assemble_matrix_and_vector(space, A, rhs);
-    info("  Done assembling.");
-    delete dp1;
+  DiscreteProblem *dp1 = new DiscreteProblem(wf, space);
+
+  _f = fn;
+  int N_dof = space->assign_dofs();
+  info("Assembling projection linear system. ndofs: %d", N_dof);
+  dp1->assemble(A, rhs);
+  info("  Done assembling.");
+  delete dp1;
 }

@@ -1,27 +1,33 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
+//  This example solves the Poisson equation.
+//
+//  PDE: -u'' - f = 0.
+//
+//  Interval: (A, B).
+//
+//  BC: Dirichlet on the left, Neumann on the right.
+//
+//  The following parameters can be changed:
+const int NEQ = 1;                      // Number of equations.
+const int NELEM = 30;                   // Number of elements.
+const double A = 0, B = 2*M_PI;         // Domain end points.
+const int P_INIT = 2;                   // Polynomial degree.
 
-// This example solves the Poisson equation -u'' - f = 0 in
-// an interval (A, B), equipped with a Dirichlet boundary
-// condition on the left and a Neumann BC on the right. 
+// Newton's method.
+double NEWTON_TOL = 1e-5;               // Tolerance.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-// General input.
-static int NEQ = 1;
-int NELEM = 30;                         // Number of elements.
-double A = 0, B = 2*M_PI;               // Domain end points.
-int P_init = 1;                         // Initial polynomal degree.
-
 // Boundary conditions.
 double Val_dir_left = 0;
 double Val_neum_right = 0;
-
-// Newton's method.
-double NEWTON_TOL = 1e-5;
-int NEWTON_MAX_ITER = 150;
 
 // Function f(x).
 double f(double x) {
@@ -33,23 +39,23 @@ double f(double x) {
 
 
 int main() {
-  // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  // Create space, set Dirichlet BC, enumerate basis functions.
+  Space* space = new Space(A, B, NELEM, P_INIT, NEQ);
   space->set_bc_left_dirichlet(0, Val_dir_left);
-  info("N_dof = %d", space->assign_dofs());
+  info("N_dof = %d.", space->assign_dofs());
+
+  // Initialize the weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(jacobian_vol);
+  wf.add_vector_form(residual_vol);
+  wf.add_vector_form_surf(0, residual_surf_right, BOUNDARY_RIGHT);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian_vol);
-  dp->add_vector_form(0, residual_vol);
-  dp->add_vector_form_surf(0, residual_surf_right, BOUNDARY_RIGHT);
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
 
   // Newton's loop.
-  // Obtain the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(space);
-
-  // Fill vector y using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[ndof];
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
   solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -58,10 +64,12 @@ int main() {
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1)
-  {
+  while (1) {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
+
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble_matrix_and_vector(space, matrix, rhs);
+    dp->assemble(matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -96,14 +104,12 @@ int main() {
     it++;
   }
   
-  // Cleanup.
-  delete matrix;
-  delete rhs;
-  delete solver;
-
   // Plot the solution.
   Linearizer l(space);
   l.plot_solution("solution.gp");
+
+  // Plot the resulting space.
+  space->plot("space.gp");
 
   info("Done.");
   return 1;

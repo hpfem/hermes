@@ -1392,7 +1392,7 @@ void adapt(int norm, int adapt_type, double threshold,
 // also is updated. 
 void adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Space* &space, ElemPtr2 *ref_elem_pairs) 
+           Space* space, ElemPtr2 *ref_elem_pairs) 
 {
   int n_elem = space->get_n_active_elem();
   
@@ -1546,12 +1546,36 @@ void solution_to_vector(Space *space, double *y, int sln) {
   delete I;
 }
 
-void vector_to_solution(double *y, Space *space, int sln) 
-{
+void vector_to_solution(double *y, Space *space, int sln) {
   Element *e;
   Iterator *I = new Iterator(space);
   while ((e = I->next_active_element()) != NULL) {
     e->get_coeffs_from_vector(y, sln);
+  }
+  delete I;
+}
+
+void solution_to_vector(Space *space, Vector *y, int sln) {
+  y->zero();
+  Element *e;
+  Iterator *I = new Iterator(space);
+  while ((e = I->next_active_element()) != NULL) {
+    for(int c=0; c < e->n_eq; c++)
+      for (int j=0; j < e->p + 1; j++)
+        if (e->dof[c][j] != -1)
+          y->add(e->dof[c][j], e->coeffs[sln][c][j]);
+  }
+  delete I;
+}
+
+void vector_to_solution(Vector *y, Space *space, int sln) {
+  y->zero();
+  Element *e;
+  Iterator *I = new Iterator(space);
+  while ((e = I->next_active_element()) != NULL) {
+    for(int c=0; c < e->n_eq; c++)
+      for (int j=0; j < e->p + 1; j++)
+        if (e->dof[c][j] != -1) e->coeffs[sln][c][j] = y->get(e->dof[c][j]);
   }
   delete I;
 }

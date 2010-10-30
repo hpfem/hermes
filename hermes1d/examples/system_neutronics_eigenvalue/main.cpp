@@ -4,20 +4,22 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-
-
-// This example solves a 1D eigenvalue problem for the neutron diffusion equation
-// in a two-group approximation	: 
-//		-(D1.u1')' + Sa1.u1 = 1/k.(nSf1.u1 + nSf2.u2) 
-//		-(D2.u2')' + Sa2.u2 = S12.u1  
-// The 80cm core is enclosed by a 30cm reflector on both sides. Only the right 
-// half is calculated, with reflective boundary condition on the centerline of
-// the core and zero-flux condition on the outermost end of the reflector 
-// (homogeneous b.c. of Neumann/Dirichlet type, respectively). Example from
-// 	 Yoshikawa and Wakabayashi, Journal of NUCLEAR SCIENCE and TECHNOLOGY (7), 
-//	 p. 355-365 (July 1970)
-
-
+//  This example solves a 1D eigenvalue problem for the neutron diffusion equation
+//  in a two-group approximation.
+//  The 80cm core is enclosed by a 30cm reflector on both sides. Only the right 
+//  half is calculated, with reflective boundary condition on the centerline of
+//  the core and zero-flux condition on the outermost end of the reflector 
+//  (homogeneous b.c. of Neumann/Dirichlet type, respectively). Example from
+// 	Yoshikawa and Wakabayashi, Journal of NUCLEAR SCIENCE and TECHNOLOGY (7), 
+//	p. 355-365 (July 1970)
+//
+//  PDE: -(D1.u1')' + Sa1.u1 = 1/k.(nSf1.u1 + nSf2.u2) 
+//		   -(D2.u2')' + Sa2.u2 = S12.u1.
+//
+//  Interval: .
+//
+//  BC:  .
+//
 // Problem specification (core geometry, material properties, initial FE space).
 #include "neutronics_problem_def.cpp"
 
@@ -39,23 +41,24 @@ int Max_SI = 1000;          // Max. number of eigenvalue iterations.
 int N_SLN = 2;              // Number of solutions.
 
 // Newton's method.
-double NEWTON_TOL = 1e-5;   // Tolerance for the Newton's method.
-int NEWTON_MAX_ITER = 150;  // Maximum number of Newton iterations.
-double TOL_SI = 1e-6;       // Toleration for the source (eigenvalue) iteration.
+double NEWTON_TOL = 1e-5;               // Tolerance.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
+double TOL_SI = 1e-6;                   // Tolerance for the source (eigenvalue) iteration.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 
 int main() {		
-  // Create coarse mesh.
+  // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData(verbose);		
-  Space *space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-	// Enumerate basis functions.
-  info("N_dof = %d", space->assign_dofs());
+  // Enumerate basis functions, info for user.
+  info("N_dof = %d.", space->assign_dofs());
+  // Plot the space.
   space->plot("space.gp");
   
   // Initial approximation of the dominant eigenvalue.
@@ -68,30 +71,32 @@ int main() {
   	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
 	}
   
-  // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem();
-  
-  dp->add_matrix_form(0, 0, jacobian_fuel_0_0, fuel);
-  dp->add_matrix_form(0, 0, jacobian_water_0_0, water);
+  // Initialize the weak formulation.
+  WeakForm wf(2);
+  wf.add_matrix_form(0, 0, jacobian_fuel_0_0, fuel);
+  wf.add_matrix_form(0, 0, jacobian_water_0_0, water);
 
- 	dp->add_matrix_form(0, 1, jacobian_fuel_0_1, fuel);
-  dp->add_matrix_form(0, 1, jacobian_water_0_1, water);  
+  wf.add_matrix_form(0, 1, jacobian_fuel_0_1, fuel);
+  wf.add_matrix_form(0, 1, jacobian_water_0_1, water);  
 
- 	dp->add_matrix_form(1, 0, jacobian_fuel_1_0, fuel);
-  dp->add_matrix_form(1, 0, jacobian_water_1_0, water);
+  wf.add_matrix_form(1, 0, jacobian_fuel_1_0, fuel);
+  wf.add_matrix_form(1, 0, jacobian_water_1_0, water);
 
-  dp->add_matrix_form(1, 1, jacobian_fuel_1_1, fuel);
-  dp->add_matrix_form(1, 1, jacobian_water_1_1, water);
+  wf.add_matrix_form(1, 1, jacobian_fuel_1_1, fuel);
+  wf.add_matrix_form(1, 1, jacobian_water_1_1, water);
     
-  dp->add_vector_form(0, residual_fuel_0, fuel);
-  dp->add_vector_form(0, residual_water_0, water);  
+  wf.add_vector_form(0, residual_fuel_0, fuel);
+  wf.add_vector_form(0, residual_water_0, water);  
   
-  dp->add_vector_form(1, residual_fuel_1, fuel);
-  dp->add_vector_form(1, residual_water_1, water); 
+  wf.add_vector_form(1, residual_fuel_1, fuel);
+  wf.add_vector_form(1, residual_water_1, water); 
 
-  dp->add_vector_form_surf(0, residual_surf_left_0, BOUNDARY_LEFT);
-  dp->add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
+  wf.add_vector_form_surf(0, residual_surf_left_0, BOUNDARY_LEFT);
+  wf.add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
 
+  // Initialize the FE problem.
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  
 	Linearizer l(space);
 	char solution_file[32];
 
@@ -112,8 +117,8 @@ int main() {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
-    // Fill vector y using dof and coeffs arrays in elements.
-    double *coeff_vec = new double[ndof];
+    // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
     solution_to_vector(space, coeff_vec);
   
     // Set up the solver, matrix, and rhs according to the solver selection.
@@ -122,10 +127,12 @@ int main() {
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
   
     int it = 1;
-    while (1)
-    {
+  while (1) {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
+
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble_matrix_and_vector(space, matrix, rhs);
+      dp->assemble(matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_norm_squared = 0;
@@ -164,6 +171,7 @@ int main() {
     delete matrix;
     delete rhs;
     delete solver;
+    delete [] coeff_vec;
 			
     // Update the eigenvalue.
     K_EFF_old = K_EFF;

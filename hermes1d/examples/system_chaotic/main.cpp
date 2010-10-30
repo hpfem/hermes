@@ -4,20 +4,24 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-// This example solves a nonlinear system of four first-order equations
-// x1' - DAMPING*(1 - x2^2)*x1   +   x2 = 0
-// x2'         -x1   +   x3 = 0
-// x3'         -x2   +   x4 = 0
-// x4'         -x3          = 0
-
-// in an interval (0, 10) equipped with Dirichlet bdy conditions
-// x1(0) = 1, x2(0) = 0, x3(0) = 0, x4(0) = 0
-
-// General input.
-static int NEQ = 4;
-int NELEM = 500;            // Number of elements.
-double A = 0, B = 10;       // Domain end points.
-int P_init = 2;             // Initial polynomal degree.
+// This example solves a nonlinear system of four first-order equations.
+//
+//  PDE: x1' - DAMPING*(1 - x2^2)*x1   +   x2 = 0
+//       x2'         -x1   +   x3 = 0
+//       x3'         -x2   +   x4 = 0
+//       x4'         -x3          = 0.
+//
+//  Interval: (0, 10).
+//
+//  BC: Dirichlet, x1(0) = 1, x2(0) = 0, x3(0) = 0, x4(0) = 0.
+//
+//  Exact solution: u(x) = exp(x), v(x) = exp(-x).
+//
+//  The following parameters can be changed:
+const int NEQ = 4;                      // Number of equations.
+const int NELEM = 500;                   // Number of elements.
+const double A = 0, B = 10;             // Domain end points.
+const int P_INIT = 2;                   // Polynomial degree.
 
 // Damping parameter.
 int DAMPING_STEPS = 20;     // Number of damping steps. The entire problem
@@ -30,8 +34,8 @@ double DAMPING = 1.0;       // DAMPING is an artificial param. used to
                             // (The nonlinearity is multiplied with it.)
 
 // Newton's method.
-double NEWTON_TOL = 1e-5;
-int NEWTON_MAX_ITER = 150;
+double NEWTON_TOL = 1e-5;               // Tolerance.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
@@ -47,37 +51,37 @@ double Val_dir_left_4 = 0;
 
 
 int main() {
-  // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  // Create space, set Dirichlet BC, enumerate basis functions.
+  Space* space = new Space(A, B, NELEM, P_INIT, NEQ);
   space->set_bc_left_dirichlet(0, Val_dir_left_1);
   space->set_bc_left_dirichlet(1, Val_dir_left_2);
   space->set_bc_left_dirichlet(2, Val_dir_left_3);
   space->set_bc_left_dirichlet(3, Val_dir_left_4);
-  info("N_dof = %d", space->assign_dofs());
+  info("N_dof = %d.", space->assign_dofs());
+
+  // Initialize the weak formulation.
+  WeakForm wf(4);
+  wf.add_matrix_form(0, 0, jacobian_1_1);
+  wf.add_matrix_form(0, 1, jacobian_1_2);
+  wf.add_matrix_form(1, 0, jacobian_2_1);
+  wf.add_matrix_form(1, 1, jacobian_2_2);
+  wf.add_matrix_form(1, 2, jacobian_2_3);
+  wf.add_matrix_form(2, 1, jacobian_3_2);
+  wf.add_matrix_form(2, 2, jacobian_3_3);
+  wf.add_matrix_form(2, 3, jacobian_3_4);
+  wf.add_matrix_form(3, 2, jacobian_4_3);
+  wf.add_matrix_form(3, 3, jacobian_4_4);
+  wf.add_vector_form(0, residual_1);
+  wf.add_vector_form(1, residual_2);
+  wf.add_vector_form(2, residual_3);
+  wf.add_vector_form(3, residual_4);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian_1_1);
-  dp->add_matrix_form(0, 1, jacobian_1_2);
-  dp->add_matrix_form(1, 0, jacobian_2_1);
-  dp->add_matrix_form(1, 1, jacobian_2_2);
-  dp->add_matrix_form(1, 2, jacobian_2_3);
-  dp->add_matrix_form(2, 1, jacobian_3_2);
-  dp->add_matrix_form(2, 2, jacobian_3_3);
-  dp->add_matrix_form(2, 3, jacobian_3_4);
-  dp->add_matrix_form(3, 2, jacobian_4_3);
-  dp->add_matrix_form(3, 3, jacobian_4_4);
-  dp->add_vector_form(0, residual_1);
-  dp->add_vector_form(1, residual_2);
-  dp->add_vector_form(2, residual_3);
-  dp->add_vector_form(3, residual_4);
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
 
   // Newton's loop.
-  // Obtain the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(space);
-
-  // Fill vector y using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[ndof];
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
   solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -86,10 +90,12 @@ int main() {
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1)
-  {
+  while (1) {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
+
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble_matrix_and_vector(space, matrix, rhs);
+    dp->assemble(matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -124,14 +130,12 @@ int main() {
     it++;
   }
   
-  // Cleanup.
-  delete matrix;
-  delete rhs;
-  delete solver;
-
   // Plot the solution.
   Linearizer l(space);
   l.plot_solution("solution.gp");
+
+  // Plot the resulting space.
+  space->plot("space.gp");
 
   info("Done.");
   return 1;

@@ -122,7 +122,12 @@ double vec_dot(double *r, double *s, int n_dof)
     return result;
 }
 
-// Matrix ////////////////////////////////////////////////////////////////////////////////////
+double vec_dot(Vector *r, Vector *s, int n_dof)
+{
+    double result = 0;
+    for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
+    return result;
+}
 
 // SparseMatrix ////////////////////////////////////////////////////////////////////////////////////
 

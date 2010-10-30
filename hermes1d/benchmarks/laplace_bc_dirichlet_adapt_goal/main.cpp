@@ -1,24 +1,32 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-
-// This example uses hp-adaptivity to solve the Poisson equation 
-// -u'' - f = 0 in an interval (A, B), equipped with Dirichlet 
-// boundary conditions on both end points. A series of small reference 
-// solutions (we call them fast trial refinements, FTR) is used both 
-// to decide what elements will be refined, and how they will be refined.
-// One has to define a goal of computation (quantity of interest) which 
-// is any linear functional of the solution. Adaptivity can be guided either
-// by the error in global norm or by the error in the quantity of interest. 
-// One can use either standard Newton's method or JFNK to solve discrete 
-// problems for trial refinements.
-
-// General input.
+//  This example uses hp-adaptivity to solve the Poisson equation 
+//  A series of small reference solutions (we call them fast trial refinements, FTR) 
+//  is used both to decide what elements will be refined, and how they will be 
+//  refined. One has to define a goal of computation (quantity of interest) which 
+//  is any linear functional of the solution. Adaptivity can be guided either
+//  by the error in global norm or by the error in the quantity of interest. 
+//  One can use either standard Newton's method or JFNK to solve discrete 
+//  problems for trial refinements.
+//
+//  PDE: -u'' - f = 0.
+//
+//  Interval: (A, B).
+//
+//  BC: Homogeneous Dirichlet.
+//
+//  Exact solution: u(x) = sin(x).
+//
+//  The following parameters can be changed:
 const int NEQ = 1;
 const int NELEM = 30;                     // Number of elements
 const double A = -M_PI, B = M_PI;         // Domain end points
 const double EPSILON = 0.01;              // Equation parameter
-const int P_init = 1;                     // Initial polynomal degree
+const int P_init = 1;                     // Initial polynomial degree
 
 // JFNK or classical Newton.
 const double MATRIX_SOLVER_TOL = 1e-5;
@@ -30,7 +38,7 @@ const double JFNK_EPSILON = 1e-4;         // Parameter in the JFNK finite differ
  
 // Newton's method.
 double NEWTON_TOL_COARSE = 1e-8;          // Coarse mesh
-double NEWTON_TOL_REF = 1e-8;             // Reference space
+double NEWTON_TOL_REF = 1e-8;             // Fine mesh.
 int NEWTON_MAX_ITER = 150;
 
 // Adaptivity.
@@ -76,7 +84,7 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
 // NOTE: quantity of interest is any linear functional of solution.
 double quantity_of_interest(Space *space, double x)
 {
-  // Traversal of the space.
+  // Traversal of the space->
   Iterator *I = new Iterator(space);
   Element *e;
   double val[MAX_EQN_NUM];
@@ -93,62 +101,127 @@ double quantity_of_interest(Space *space, double x)
 
 
 int main() {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Space *space = new Space(A, B, NELEM, P_init, NEQ);
+  Space* space = new Space(A, B, NELEM, P_init, NEQ);
   space->set_bc_left_dirichlet(0, Val_dir_left);
   space->set_bc_right_dirichlet(0, Val_dir_right);
-  space->assign_dofs();
+  info("N_dof = %d", space->assign_dofs());
+
+  // Initialize the weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(jacobian);
+  wf.add_vector_form(residual);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian);
-  dp->add_vector_form(0, residual);
+  DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space);
+  if(JFNK == 0)
+  {
+    // Newton's loop on coarse mesh.
+    // Fill vector coeff_vec using dof and coeffs arrays in elements.
+    double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
+    solution_to_vector(space, coeff_vec_coarse);
 
-  // Convergence graph wrt. the number of degrees of freedom
-  // (goal-oriented adaptivity).
-  GnuplotGraph graph_ftr;
-  graph_ftr.set_log_y();
-  graph_ftr.set_captions("Convergence History", "Degrees of Freedom", "QOI error");
-  graph_ftr.add_row("QOI error - FTR (exact)", "k", "-", "o");
-  graph_ftr.add_row("QOI error - FTR (est)", "k", "--");
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+    Vector* rhs_coarse = create_vector(matrix_solver);
+    Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+
+    int it = 1;
+    while (1) {
+      // Obtain the number of degrees of freedom.
+      int ndof_coarse = Space::get_num_dofs(space);
+
+      // Assemble the Jacobian matrix and residual vector.
+      dp_coarse->assemble(matrix_coarse, rhs_coarse);
+
+      // Calculate the l2-norm of residual vector.
+      double res_norm_squared = 0;
+      for(int i=0; i<ndof_coarse; i++) res_norm_squared += rhs_coarse->get(i)*rhs_coarse->get(i);
+
+      // Info for user.
+      info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+
+      // If l2 norm of the residual vector is within tolerance, then quit.
+      // NOTE: at least one full iteration forced
+      //       here because sometimes the initial
+      //       residual on fine mesh is too small.
+      if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
+
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for(int i=0; i<ndof_coarse; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
+
+      // Solve the linear system.
+      if(!solver_coarse->solve())
+        error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
+
+      // If the maximum number of iteration has been reached, then quit.
+      if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+      
+      // Copy coefficients from vector y to elements.
+      vector_to_solution(coeff_vec_coarse, space);
+      
+      it++;
+    }
+    
+    // Cleanup.
+    delete matrix_coarse;
+    delete rhs_coarse;
+    delete solver_coarse;
+    delete [] coeff_vec_coarse;
+  }
+  else
+    jfnk_cg(dp_coarse, space, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
+            JFNK_EPSILON, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, matrix_solver);
+
+  // Cleanup.
+  delete dp_coarse;
+
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est;
+  SimpleGraph graph_dof_exact, graph_cpu_exact;
 
   // Main adaptivity loop.
-  int adapt_iterations = 1;
+  int as = 1;
   double ftr_errors[MAX_ELEM_NUM];        // This array decides what 
                                           // elements will be refined.
-  ElemPtr2 ref_ftr_pairs[MAX_ELEM_NUM];   // To store element pairs from the 
-                                          // FTR solution. Decides how 
-                                          // elements will be hp-refined. 
-  for (int i=0; i < MAX_ELEM_NUM; i++) {
-    ref_ftr_pairs[i][0] = new Element();
-    ref_ftr_pairs[i][1] = new Element();
-  }
-  while(1) {
-    info("============ Adaptivity step %d ============", adapt_iterations); 
 
-    info("N_dof = %d", Space::get_num_dofs(space));
+  while(1) {
+    info("============ Adaptivity step %d ============", as); 
+
+    // Construct globally refined reference mesh and setup reference space->
+    Space* ref_space = construct_refined_space(space);
  
-    // Newton's loop on coarse mesh.
-    int success;
+    // Initialize the FE problem. 
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
+      
     if(JFNK == 0)
     {
-      // Obtain the number of degrees of freedom.
-      int ndof = Space::get_num_dofs(space);
-
-      // Fill vector y using dof and coeffs arrays in elements.
-      double *coeff_vec = new double[ndof];
-      solution_to_vector(space, coeff_vec);
-    
       // Set up the solver, matrix, and rhs according to the solver selection.
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    
-      int it = 1;
-      while (1)
-      {
+      
+      // Newton's loop on fine mesh.
+      // Fill vector coeff_vec using dof and coeffs arrays in elements.
+      double *coeff_vec = new double[Space::get_num_dofs(ref_space)];
+      solution_to_vector(ref_space, coeff_vec);
+
+        int it = 1;
+      while (1) {
+        // Obtain the number of degrees of freedom.
+        int ndof = Space::get_num_dofs(ref_space);
+
         // Assemble the Jacobian matrix and residual vector.
-        dp->assemble_matrix_and_vector(space, matrix, rhs);
+        dp->assemble(matrix, rhs);
 
         // Calculate the l2-norm of residual vector.
         double res_norm_squared = 0;
@@ -161,7 +234,7 @@ int main() {
         // NOTE: at least one full iteration forced
         //       here because sometimes the initial
         //       residual on fine mesh is too small.
-        if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
+        if(res_norm_squared < NEWTON_TOL_REF*NEWTON_TOL_REF && it > 1) break;
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n). 
@@ -178,157 +251,130 @@ int main() {
         if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
         
         // Copy coefficients from vector y to elements.
-        vector_to_solution(coeff_vec, space);
+        vector_to_solution(coeff_vec, ref_space);
 
         it++;
       }
-      
       // Cleanup.
       delete matrix;
       delete rhs;
       delete solver;
+      delete [] coeff_vec;
     }
     else
-      jfnk_cg(dp, space, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
-              JFNK_EPSILON, NEWTON_TOL_COARSE, NEWTON_MAX_ITER);
-    // For every element perform its fast trial refinement (FTR),
-    // calculate the norm of the difference between the FTR
-    // solution and the coarse mesh solution, and store the
-    // error in the ftr_errors[] array.
-    int n_elem = space->get_n_active_elem();
-    double max_qoi_err_est = 0;
-    for (int i=0; i < n_elem; i++) {
+      jfnk_cg(dp, ref_space, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
+              JFNK_EPSILON, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, matrix_solver);
+ 
+    // Cleanup.
+    delete dp;
+    
+    // Starting with second adaptivity step, obtain new coarse 
+    // space solution via Newton's method. Initial condition is 
+    // the last coarse mesh solution.
+    if (as > 1) {
+      //Info for user.
+      info("Solving on coarse mesh");
 
-      info("=== Starting FTR of Elem [%d]", i);
+      // Initialize the FE problem.
+      DiscreteProblem* dp_coarse = new DiscreteProblem(&wf, space);
 
-      // Replicate coarse mesh including solution.
-      Space *space_ref_local = space->replicate();
-
-      // Perform FTR of element 'i'.
-      space_ref_local->reference_refinement(i, 1);
-      info("Elem [%d]: fine mesh created (%d DOF).", 
-             i, space_ref_local->assign_dofs());
-
-      // Newton's loop on the FTR space.
       if(JFNK == 0)
       {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(space_ref_local);
+        // Newton's loop on coarse mesh.
+        // Fill vector coeff_vec using dof and coeffs arrays in elements.
+        double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
+        solution_to_vector(space, coeff_vec_coarse);
 
-        // Fill vector y using dof and coeffs arrays in elements.
-        double *coeff_vec = new double[ndof];
-        solution_to_vector(space_ref_local, coeff_vec);
-      
         // Set up the solver, matrix, and rhs according to the solver selection.
-        SparseMatrix* matrix = create_matrix(matrix_solver);
-        Vector* rhs = create_vector(matrix_solver);
-        Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-      
+        SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+        Vector* rhs_coarse = create_vector(matrix_solver);
+        Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+
         int it = 1;
         while (1)
         {
+          // Obtain the number of degrees of freedom.
+          int ndof_coarse = Space::get_num_dofs(space);
+
           // Assemble the Jacobian matrix and residual vector.
-          dp->assemble_matrix_and_vector(space_ref_local, matrix, rhs);
+          dp_coarse->assemble(matrix_coarse, rhs_coarse);
 
           // Calculate the l2-norm of residual vector.
           double res_norm_squared = 0;
-          for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+          for(int i=0; i<ndof_coarse; i++) res_norm_squared += rhs_coarse->get(i)*rhs_coarse->get(i);
 
           // Info for user.
           info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
 
-          // If l2 norm of the residual vector is within tolerance, then quit.
+		      // If l2 norm of the residual vector is within tolerance, then quit.
           // NOTE: at least one full iteration forced
           //       here because sometimes the initial
           //       residual on fine mesh is too small.
-          if(res_norm_squared < NEWTON_TOL_REF*NEWTON_TOL_REF && it > 1) break;
+          if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
 
-          // Multiply the residual vector with -1 since the matrix 
+		      // Multiply the residual vector with -1 since the matrix 
           // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-          for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+          for(int i=0; i<ndof_coarse; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
 
           // Solve the linear system.
-          if(!solver->solve())
+          if(!solver_coarse->solve())
             error ("Matrix solver failed.\n");
 
           // Add \deltaY^{n+1} to Y^n.
-          for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+          for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
 
           // If the maximum number of iteration has been reached, then quit.
           if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
           
           // Copy coefficients from vector y to elements.
-          vector_to_solution(coeff_vec, space_ref_local);
+          vector_to_solution(coeff_vec_coarse, space);
 
           it++;
         }
         
-        // Cleanup.
-        delete matrix;
-        delete rhs;
-        delete solver;
+	      // Cleanup.
+        delete matrix_coarse;
+        delete rhs_coarse;
+        delete solver_coarse;
+        delete [] coeff_vec_coarse;
       }
       else
-        jfnk_cg(dp, space_ref_local, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER, 
-                JFNK_EPSILON, NEWTON_TOL_REF, NEWTON_MAX_ITER);
+        jfnk_cg(dp_coarse, space, MATRIX_SOLVER_TOL, MATRIX_SOLVER_MAXITER,
+              JFNK_EPSILON, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, matrix_solver);
+      
+      // Cleanup.
+      delete dp_coarse;
+    }
 
-      // Print FTR solution (enumerated).
-      Linearizer *lxx = new Linearizer(space_ref_local);
-      char out_filename[255];
-      sprintf(out_filename, "solution_ref_%d.gp", i);
-      lxx->plot_solution(out_filename);
-      delete lxx;
-
-      // Calculate FTR errors for refinement purposes.
+    double max_qoi_err_est = 0;
+    for (int i=0; i < space->get_n_active_elem(); i++)
+    {
       if (GOAL_ORIENTED == 1) {
         // Use quantity of interest.
         double qoi_est = quantity_of_interest(space, X_QOI);
-        double qoi_ref_est = quantity_of_interest(space_ref_local, X_QOI);
+        double qoi_ref_est = quantity_of_interest(ref_space, X_QOI);
         ftr_errors[i] = fabs(qoi_ref_est - qoi_est);
       }
       else {
-        // Use global norm.
+        // Use global norm
         double err_est_array[MAX_ELEM_NUM];
-        ftr_errors[i] = calc_error_estimate(NORM, space, space_ref_local, 
+        ftr_errors[i] = calc_err_est(NORM, space, ref_space,
                                             err_est_array);
       }
 
-      // Calculating maximum of QOI FTR error for plotting purposes.
+      // Calculating maximum of QOI FTR error for plotting purposes
       if (GOAL_ORIENTED == 1) {
-        if (ftr_errors[i] > max_qoi_err_est) 
-	  max_qoi_err_est = ftr_errors[i];
+        if (ftr_errors[i] > max_qoi_err_est)
+          max_qoi_err_est = ftr_errors[i];
       }
       else {
         double qoi_est = quantity_of_interest(space, X_QOI);
-        double qoi_ref_est = quantity_of_interest(space_ref_local, X_QOI);
+        double qoi_ref_est = quantity_of_interest(ref_space, X_QOI);
         double err_est = fabs(qoi_ref_est - qoi_est);
-        if (err_est > max_qoi_err_est) 
-	  max_qoi_err_est = err_est;
+        if (err_est > max_qoi_err_est)
+          max_qoi_err_est = err_est;
       }
-
-      // Copy the reference element pair for element 'i'
-      // into the ref_ftr_pairs[i][] array.
-      Iterator *I = new Iterator(space);
-      Iterator *I_ref = new Iterator(space_ref_local);
-      Element *e, *e_ref;
-      while (1) {
-        e = I->next_active_element();
-        e_ref = I_ref->next_active_element();
-        if (e->id == i) {
-  	  e_ref->copy_into(ref_ftr_pairs[e->id][0]);
-          // Coarse element 'e' was split in space.
-          if (e->level != e_ref->level) {
-            e_ref = I_ref->next_active_element();
-            e_ref->copy_into(ref_ftr_pairs[e->id][1]);
-          }
-          break;
-        }
-      }
-
-      delete I;
-      delete I_ref;
-      delete space_ref_local;
-    }  
+    }
 
     // Add entries to convergence graphs.
     if (EXACT_SOL_PROVIDED) {
@@ -336,28 +382,41 @@ int main() {
       double u[MAX_EQN_NUM], dudx[MAX_EQN_NUM];
       exact_sol(X_QOI, u, dudx);
       double err_qoi_exact = fabs(u[0] - qoi_est);
-      // Plotting error in quantity of interest wrt. exact value.
-      graph_ftr.add_values(0, Space::get_num_dofs(space), err_qoi_exact);
+      // Add entry to DOF and CPU convergence graphs.
+      graph_dof_exact.add_values(Space::get_num_dofs(space), err_qoi_exact);
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_qoi_exact);
     }
-    graph_ftr.add_values(1, Space::get_num_dofs(space), max_qoi_err_est);
+    
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(Space::get_num_dofs(space), max_qoi_err_est);
+    graph_cpu_est.add_values(cpu_time.accumulated(), max_qoi_err_est);
 
     // Decide whether the max. FTR error in the quantity of interest 
     // is sufficiently small.
     if(max_qoi_err_est < TOL_ERR_QOI) break;
 
-    // Returns updated coarse mesh with the last solution on it. 
+    // Returns updated coarse and fine meshes, with the last 
+    // coarse and fine mesh solutions on them, respectively. 
+    // The coefficient vectors and numbers of degrees of freedom 
+    // on both meshes are also updated. 
     adapt(NORM, ADAPT_TYPE, THRESHOLD, ftr_errors,
-          space, ref_ftr_pairs);
+          space, ref_space);
 
-    adapt_iterations++;
-  }
+    as++;
 
   // Plot meshes, results, and errors.
-  adapt_plotting(space, ref_ftr_pairs,
+    adapt_plotting(space, ref_space, 
                  NORM, EXACT_SOL_PROVIDED, exact_sol);
 
-  // Save convergence graph.
-  graph_ftr.save("conv_dof.gp");
+    // Cleanup.
+    delete ref_space;
+  }
+
+  // Save convergence graphs.
+  graph_dof_est.save("conv_dof_est.dat");
+  graph_cpu_est.save("conv_cpu_est.dat");
+  graph_dof_exact.save("conv_dof_exact.dat");
+  graph_cpu_exact.save("conv_cpu_exact.dat");
 
   info("Done.");
   return 1;

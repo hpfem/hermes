@@ -4,22 +4,24 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-
-
-// This example solves a 1D fixed source problem for the neutron diffusion eqn.
-// in a two-group approximation	: 
-//		-(D1.u1')' + Sa1.u1 = Q 
-//		-(D2.u2')' + Sa2.u2 = S12.u1  
-// The core is composed of a single, 80cm wide slab. Reflective boundary 
-// condition is prescribed on the left end, zero-flux condition on the right end
-// (homogeneous b.c. of Neumann/Dirichlet type, respectively). There is
-// a uniform source of 1.5 fast neutrons (group 1) per cm per sec. 
+//  This example solves a 1D fixed source problem for the neutron diffusion eqn.
+//  in a two-group approximation.
+//  The core is composed of a single, 80cm wide slab. Reflective boundary 
+//  condition is prescribed on the left end, zero-flux condition on the right end
+//  (homogeneous b.c. of Neumann/Dirichlet type, respectively). There is
+//  a uniform source of 1.5 fast neutrons (group 1) per cm per sec. 
 //	Reference:
 // 		HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
 // 		A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
-//		Example 4.A (pp. 168)
-
-
+//		Example 4.A (pp. 168).
+//
+//  PDE: -(D1.u1')' + Sa1.u1 = Q 
+//		   -(D2.u2')' + Sa2.u2 = S12.u1.
+//
+//  Interval: .
+//
+//  BC:  .
+//
 // Problem specification (core geometry, material properties, initial FE space).
 #include "neutronics_problem_def.cpp"
 
@@ -38,47 +40,49 @@ bool verbose = true;
 
 int N_SLN = 1;              						// Number of solutions.
 
-// Newton's method
-double NEWTON_TOL = 1e-5;               // Tolerance for the Newton's method.
+// Newton's method.
+double NEWTON_TOL = 1e-5;               // Tolerance.
 int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 int main() {
-  // Create coarse mesh.
+
+  // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData();
-  Space *space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
   delete md;
   
-  info("N_dof = %d", space->assign_dofs());
+  // Enumerate basis functions, info for user.
+  info("N_dof = %d.", space->assign_dofs());
+  // Plot the space.
   space->plot("space.gp");
 
   for (int g = 0; g < N_GRP; g++)  {
   	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
 	}
   
-  // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem();
-  
-  dp->add_matrix_form(0, 0, jacobian_fuel_0_0, fuel);
-  dp->add_matrix_form(0, 1, jacobian_fuel_0_1, fuel);
-  dp->add_matrix_form(1, 0, jacobian_fuel_1_0, fuel);    
-  dp->add_matrix_form(1, 1, jacobian_fuel_1_1, fuel);
+  // Initialize the weak formulation.
+  WeakForm wf(2);
+  wf.add_matrix_form(0, 0, jacobian_fuel_0_0, fuel);
+  wf.add_matrix_form(0, 1, jacobian_fuel_0_1, fuel);
+  wf.add_matrix_form(1, 0, jacobian_fuel_1_0, fuel);    
+  wf.add_matrix_form(1, 1, jacobian_fuel_1_1, fuel);
     
-  dp->add_vector_form(0, residual_fuel_0, fuel);  
-  dp->add_vector_form(1, residual_fuel_1, fuel); 
+  wf.add_vector_form(0, residual_fuel_0, fuel);  
+  wf.add_vector_form(1, residual_fuel_1, fuel); 
 
-  dp->add_vector_form_surf(0, residual_surf_left_0, BOUNDARY_LEFT);
-  dp->add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
+  wf.add_vector_form_surf(0, residual_surf_left_0, BOUNDARY_LEFT);
+  wf.add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
+
+  // Initialize the FE problem.
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
 	  	
   // Newton's loop.
-  // Obtain the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(space);
-
-  // Fill vector y using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[ndof];
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
   solution_to_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -87,10 +91,12 @@ int main() {
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1)
-  {
+  while (1) {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
+
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble_matrix_and_vector(space, matrix, rhs);
+    dp->assemble(matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_norm_squared = 0;
@@ -125,12 +131,7 @@ int main() {
     it++;
   }
   
-  // Cleanup.
-  delete matrix;
-  delete rhs;
-  delete solver;
-	 
-  // Plot the resulting neutron flux.
+  // Plot the solution.
   Linearizer l(space);
   l.plot_solution("solution.gp");
 
