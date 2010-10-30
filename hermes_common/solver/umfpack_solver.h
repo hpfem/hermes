@@ -44,6 +44,7 @@ protected:
   scalar *Ax;   // Matrix entries (column-wise).
   int *Ai;      // Row indices of values in Ax.
   int *Ap;      // Index to Ax/Ai, where each column starts.
+  int nnz;      // Number of non-zero entries (= Ap[size]).
 
   friend class UMFPackLinearSolver;
 };
@@ -91,8 +92,9 @@ protected:
   UMFPackMatrix *m;
   UMFPackVector *rhs;
   
-  void *symbolic; // Reordering of matrix 'm' to reduce fill-in during factorization.
-  void *numeric;  // LU factorization of matrix 'm'.
+  // Reusable factorization information (A denotes matrix represented by the pointer 'm').
+  void *symbolic; // Reordering of matrix A to reduce fill-in during factorization.
+  void *numeric;  // LU factorization of matrix A.
   
   void free_factorization_info();
 };

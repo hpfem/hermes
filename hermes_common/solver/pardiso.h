@@ -45,6 +45,7 @@ protected:
   scalar *Ax;   // Matrix entries (row-wise). 
   int *Ai;      // Column indices of values in Ax.
   int *Ap;      // Index to Ax/Ai, where each row starts.
+  int nnz;      // Number of non-zero entries (= Ap[size]).
   
   friend class PardisoLinearSolver;
 };

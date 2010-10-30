@@ -91,7 +91,7 @@ void MumpsMatrix::alloc()
 {
   _F_
   assert(pages != NULL);
-  assert(size != 0);
+  assert(size > 0);
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];

@@ -54,7 +54,7 @@ static int find_position(int *Ai, int Alen, int idx) {
 
 UMFPackMatrix::UMFPackMatrix() {
   _F_
-  size = 0;
+  size = 0; nnz = 0;
   Ap = NULL;
   Ai = NULL;
   Ax = NULL;
@@ -74,7 +74,7 @@ UMFPackMatrix::~UMFPackMatrix() {
 void UMFPackMatrix::alloc() {
   _F_
   assert(pages != NULL);
-  assert(size != 0);
+  assert(size > 0);
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];
@@ -94,13 +94,16 @@ void UMFPackMatrix::alloc() {
   delete [] pages;
   pages = NULL;
 
-  Ax = new scalar [Ap[size]];
+  nnz = Ap[size];
+  
+  Ax = new scalar [nnz];
   MEM_CHECK(Ax);
-  memset(Ax, 0, sizeof(scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
 void UMFPackMatrix::free() {
   _F_
+  nnz = 0;
   delete [] Ap; Ap = NULL;
   delete [] Ai; Ai = NULL;
   delete [] Ax; Ax = NULL;
@@ -120,7 +123,7 @@ scalar UMFPackMatrix::get(int m, int n)
 
 void UMFPackMatrix::zero() {
   _F_
-  memset(Ax, 0, sizeof(scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
 void UMFPackMatrix::add(int m, int n, scalar v) {
@@ -151,7 +154,7 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   switch (fmt) 
   {
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, nnz, nnz);
       for (int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
@@ -163,7 +166,6 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
-      int nnz = Ap[size];
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
@@ -185,13 +187,13 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 int UMFPackMatrix::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
-  /*          Ai             Ax             nnz         Ap         n      */    
-  return (sizeof(int) + sizeof(scalar)) * Ap[size] + sizeof(int)*(size+1);
+  /*          Ai             Ax                      Ap                     nnz     */    
+  return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
 
 double UMFPackMatrix::get_fill_in() const {
   _F_
-  return Ap[size] / (double) (size * size);
+  return nnz / (double) (size * size);
 }
 
 
@@ -316,8 +318,8 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
 #ifdef WITH_UMFPACK  
-  if (numeric != NULL) umfpack_free_numeric(&numeric); 
-  if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+  matrix_reuse_scheme = HERMES_DONT_REUSE_MATRIX;
+  free_factorization_info();
   //if (m != NULL) delete m;
   //if (rhs != NULL) delete rhs;
 #endif
