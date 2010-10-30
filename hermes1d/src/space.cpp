@@ -47,6 +47,14 @@ Element::Element(double x_left, double x_right, int level, int deg, int n_eq, in
   this->level = level;
   this->marker = marker;
   id = -1;
+  for(int i = 0; i < MAX_EQN_NUM; i++)
+    for(int j = 0; j < MAX_P + 1; j++)
+      this->dof[i][j] = 0;
+  
+  for(int i = 0; i < MAX_SLN_NUM; i++)
+    for(int j = 0; j < MAX_EQN_NUM; j++)
+      for(int k = 0; k < MAX_P + 1; k++)
+        this->coeffs[i][j][k] = 0;
 }
 
 void Element::free_element() 
@@ -1367,6 +1375,12 @@ void adapt(int norm, int adapt_type, double threshold,
       }    
     }
   }
+
+  delete I;
+  delete I_new;
+  delete I_ref;
+  delete I_ref_new;
+
   // Enumerate dofs in both new spaces.
   int n_dof_new = space_new->assign_dofs();
   int n_dof_ref_new = space_ref_new->assign_dofs();
