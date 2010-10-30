@@ -112,13 +112,9 @@ void MumpsMatrix::alloc()
   pages = NULL;
 
   nnz = Ap[size];
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  Ax = new scalar[nnz];
-  memset(Ax, 0, sizeof(scalar) * nnz);
-#else
-  Ax = new ZMUMPS_COMPLEX[nnz];
-  memset(Ax, 0, sizeof(ZMUMPS_COMPLEX) * nnz);
-#endif
+
+  Ax = new mumps_scalar[nnz];
+  memset(Ax, 0, sizeof(mumps_scalar) * nnz);
 
   irn = new int[nnz];
   memset(irn, 0, sizeof(int) * nnz);
@@ -156,11 +152,7 @@ scalar MumpsMatrix::get(int m, int n)
 void MumpsMatrix::zero()
 {
   _F_
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  memset(Ax, 0, sizeof(scalar) * Ap[size]);
-#else
-  memset(Ax, 0, sizeof(ZMUMPS_COMPLEX) * Ap[size]);
-#endif
+  memset(Ax, 0, sizeof(mumps_scalar) * Ap[size]);
 }
 
 void MumpsMatrix::add(int m, int n, scalar v)
@@ -210,18 +202,18 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
       for (int i = 0; i < nnz; i++)
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-        fprintf(file, "%d %d %lf\n", irn[i], jcn[i], Ax[i]);
-#else
-        fprintf(file, "%d %d (%lf,%lf)\n", irn[i], jcn[i], Ax[i].r, Ax[i].i);
-#endif
+        fprintf(file, "%d %d " SCALAR_FMT "\n", irn[i], jcn[i], MUMPS_SCALAR(Ax[i]));
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)          
+          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
+#else          
+          fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
+#endif          
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
       return true;
@@ -230,13 +222,12 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
-      int nnz = Ap[size];
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
       hermes_fwrite(Ap, sizeof(int), size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
-      hermes_fwrite(Ax, sizeof(scalar), nnz, file);
+      hermes_fwrite(Ax, sizeof(mumps_scalar), nnz, file);
       return true;
     }
 
@@ -280,22 +271,14 @@ void MumpsVector::alloc(int n)
   _F_
   free();
   size = n;
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  v = new scalar[n];
-#else
-  v = new ZMUMPS_COMPLEX[n];
-#endif
+  v = new mumps_scalar[n];
   zero();
 }
 
 void MumpsVector::zero()
 {
   _F_
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  memset(v, 0, size * sizeof(scalar));
-#else
-  memset(v, 0, size * sizeof(ZMUMPS_COMPLEX));
-#endif
+  memset(v, 0, size * sizeof(mumps_scalar));
 }
 
 void MumpsVector::free()
@@ -354,21 +337,14 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
       for (int i = 0; i < size; i++)
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-        fprintf(file, "%lf\n", v[i]);
-#else
-        fprintf(file, "(%lf,%lf)\n", v[i].r, v[i].i);
-#endif
+        fprintf(file, SCALAR_FMT "\n", MUMPS_SCALAR(v[i]));
+
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (int i = 0; i < size; i++)
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-        fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
-#else
-      fprintf(file, "(%lf, %lf)\n", v[i].r, v[i].i);
-#endif
+        fprintf(file, SCALAR_FMT "\n", MUMPS_SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;
 
@@ -461,13 +437,8 @@ bool MumpsSolver::solve()
   id.a = m->Ax;
 
   // right-hand side
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  id.rhs = new double[m->size];
-  memcpy(id.rhs, rhs->v, m->size * sizeof(double));
-#else
-  id.rhs = new ZMUMPS_COMPLEX[m->size];
-  memcpy(id.rhs, rhs->v, m->size * sizeof(ZMUMPS_COMPLEX));
-#endif
+  id.rhs = new mumps_scalar[m->size];
+  memcpy(id.rhs, rhs->v, m->size * sizeof(mumps_scalar));
 
   // No printings
   id.ICNTL(1) = -1;

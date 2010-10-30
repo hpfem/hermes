@@ -28,22 +28,32 @@
     #include <mumps_c_types.h>
   #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     #include <dmumps_c.h>
+    typedef scalar mumps_scalar;
+    #define MUMPS_SCALAR(a) SCALAR(a)
   #else
     #include <zmumps_c.h>
+    typedef ZMUMPS_COMPLEX mumps_scalar;
+    #define MUMPS_SCALAR(a) a.r, a.i  
   #endif
   }
   
   #ifdef WITH_MPI
     #include <mpi.h>
   #endif
+  
 #else
-  struct ZMUMPS_COMPLEX {
-    double r, i;
-  };
+  #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    typedef scalar mumps_scalar;
+    #define MUMPS_SCALAR(a) SCALAR(a)
+  #else
+    typedef struct { double r, i; } mumps_scalar;
+    #define MUMPS_SCALAR(a) a.r, a.i
+  #endif
 #endif
 
 
-class MumpsMatrix : public SparseMatrix {
+class MumpsMatrix : public SparseMatrix 
+{
 public:
   MumpsMatrix();
   virtual ~MumpsMatrix();
@@ -60,16 +70,12 @@ public:
 
 protected:
   // MUMPS specific data structures for storing the system matrix (CSC format).
-  int nnz;        // Number of non-zero elements. 
-  int *irn;       // Row indices.
-  int *jcn;       // Column indices.
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  scalar *Ax;     // Matrix entries (column-wise).
-#else
-  ZMUMPS_COMPLEX *Ax;
-#endif
-  int *Ai;        // Row indices of values in Ax.
-  int *Ap;        // Index to Ax/Ai, where each column starts.
+  int nnz;          // Number of non-zero elements. 
+  int *irn;         // Row indices.
+  int *jcn;         // Column indices.
+  mumps_scalar *Ax; // Matrix entries (column-wise).
+  int *Ai;          // Row indices of values in Ax.
+  int *Ap;          // Index to Ax/Ai, where each column starts.
 
   friend class MumpsSolver;
 };
@@ -96,11 +102,7 @@ public:
 
 protected:
   // MUMPS specific data structures for storing the rhs.
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  scalar *v;
-#else
-  ZMUMPS_COMPLEX *v;
-#endif
+  mumps_scalar *v;
 
   friend class MumpsSolver;
 };
