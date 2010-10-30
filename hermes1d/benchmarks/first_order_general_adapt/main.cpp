@@ -256,11 +256,11 @@ int main() {
         for(int i=0; i<ndof_coarse; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
 
         // Solve the linear system.
-        if(!solver->solve())
+        if(!solver_coarse->solve())
           error ("Matrix solver failed.\n");
 
         // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof_coarse; i++) coeff_vec[i] += solver->get_solution()[i];
+        for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
 
         // If the maximum number of iteration has been reached, then quit.
         if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
@@ -275,7 +275,7 @@ int main() {
       delete matrix_coarse;
       delete rhs_coarse;
       delete solver_coarse;
-      delete dp;
+      delete dp_coarse;
       delete [] coeff_vec_coarse;
     }
 
@@ -321,7 +321,7 @@ int main() {
 
     as++;
 
-  // Plot meshes, results, and errors.
+    // Plot meshes, results, and errors.
     adapt_plotting(space, ref_space, 
            NORM, EXACT_SOL_PROVIDED, exact_sol);
 
