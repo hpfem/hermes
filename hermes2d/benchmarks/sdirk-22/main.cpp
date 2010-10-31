@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
   }
 
   // This is important to make sure we compare solution at exact same point in time when studying convergence.
-  int N_STEP = T_FINAL / TAU + 0.5;
+  int N_STEP = std::ceil(T_FINAL / TAU);
   if (fabs(T_FINAL - N_STEP * TAU) > 1e-10) {
     error("bad choice of TAU");
   }
