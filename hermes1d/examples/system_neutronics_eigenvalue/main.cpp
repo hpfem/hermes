@@ -95,7 +95,8 @@ int main() {
   wf.add_vector_form_surf(1, residual_surf_left_1, BOUNDARY_LEFT);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
   
 	Linearizer l(space);
 	char solution_file[32];

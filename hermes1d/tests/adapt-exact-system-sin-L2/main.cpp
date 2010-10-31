@@ -162,7 +162,8 @@ int main() {
   wf.add_vector_form(1, residual_1);
   
   // Initialize the FE problem.
-  DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
   // Newton's loop on coarse mesh.
   // Obtain the number of degrees of freedom.
@@ -239,8 +240,9 @@ int main() {
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(space);
 
-    // Initialize the FE problem. 
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
+    // Initialize the FE problem.
+    bool is_linear = false;
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -309,7 +311,8 @@ int main() {
       info("Solving on coarse mesh");
 
       // Initialize the FE problem.
-      DiscreteProblem* dp_coarse = new DiscreteProblem(&wf, space);
+      bool is_linear = false;
+      DiscreteProblem* dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
       // Newton's loop on coarse mesh.
       // Fill vector coeff_vec using dof and coeffs arrays in elements.

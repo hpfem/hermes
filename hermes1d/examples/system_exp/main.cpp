@@ -61,7 +61,8 @@ int main() {
   wf.add_vector_form(1, residual_1);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
 
   // Newton's loop.
   // Fill vector coeff_vec using dof and coeffs arrays in elements.

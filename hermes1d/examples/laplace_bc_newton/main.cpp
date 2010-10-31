@@ -54,7 +54,8 @@ int main() {
   wf.add_vector_form_surf(0, residual_surf_right, BOUNDARY_RIGHT);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
 
   // Newton's loop.
   // Fill vector coeff_vec using dof and coeffs arrays in elements.

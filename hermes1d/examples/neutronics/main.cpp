@@ -150,7 +150,8 @@ int main() {
   wf.add_vector_form_surf(residual_surf_right, BOUNDARY_RIGHT);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
 
   // Source iteration (power method).
   for (int i = 0; i < Max_SI; i++)

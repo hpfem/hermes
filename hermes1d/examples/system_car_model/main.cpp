@@ -238,7 +238,8 @@ int main() {
   wf.add_vector_form(4, residual_4);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
   
 
   // Move on the boundary of the rectangle 

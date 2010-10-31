@@ -194,7 +194,7 @@ int main() {
     info("Ndof coarse: %d, ndof ref: %d", Space::get_num_dofs(space), Space::get_num_dofs(ref_space));
 
     // Initialize the FE problem. 
-    //bool is_linear = false;
+    bool is_linear = false;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
