@@ -20,7 +20,7 @@
 
 class HERMES_API DiscreteProblem {
 public:
-  DiscreteProblem(WeakForm* wf, Space* space);
+  DiscreteProblem(WeakForm* wf, Space* space, bool is_linear = true);
 
   void process_surf_forms(SparseMatrix *mat, Vector *res, int bdy_index, bool rhsonly);
   
@@ -30,6 +30,7 @@ public:
 
 private:
   WeakForm* wf;
+  bool is_linear;
   Space* space;
 };
 

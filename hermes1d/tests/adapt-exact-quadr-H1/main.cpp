@@ -96,8 +96,6 @@ double residual(int num, double *x, double *weights,
   return val;
 };
 
-
-
 int main() {
   // Time measurement.
   TimePeriod cpu_time;
@@ -115,7 +113,8 @@ int main() {
   wf.add_vector_form(residual);
 
   // Initialize the FE problem.
-  DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space);
+  bool is_linear = false;
+  DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
   // Newton's loop on coarse mesh.
   // Obtain the number of degrees of freedom.
@@ -192,8 +191,12 @@ int main() {
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(space);
 
+    // Info for user.
+    info("Ndof coarse: %d, ndof ref: %d", Space::get_num_dofs(space), Space::get_num_dofs(ref_space));
+
     // Initialize the FE problem. 
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
+    bool is_linear = false;
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -261,7 +264,8 @@ int main() {
       info("Solving on coarse mesh");
 
       // Initialize the FE problem.
-      DiscreteProblem* dp_coarse = new DiscreteProblem(&wf, space);
+      bool is_linear = false;
+      DiscreteProblem* dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
       // Newton's loop on coarse mesh.
       // Fill vector coeff_vec using dof and coeffs arrays in elements.
@@ -359,7 +363,7 @@ int main() {
     if(err_est_rel < TOL_ERR_REL) break;
 
     // Extra code for this test.
-    if (as == 2) {
+    if (as == 30) {
       if (err_est_rel > 1e-10) success_test = 0;
       if (space->get_n_active_elem() != 2) success_test = 0;
       Element *e = space->first_active_element();

@@ -23,7 +23,7 @@
 
 static int _precalculated = 0;
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space) : wf(wf), space(space)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear) : wf(wf), space(space), is_linear(is_linear)
 {
   if(space->get_n_eq() != wf->get_neq())
         error("WeakForm does not have as many equations as Space in DiscreteProblem::DiscreteProblem()");
@@ -109,27 +109,29 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhs
 	            int pos_j = e->dof[c_j][j]; // matrix column
               //printf("elem (%g, %g): pos_j = %d\n", e->x1, e->x2, pos_j);
 	            // if j-th basis function is active
-	            if(pos_j != -1) {
 	              // transform j-th basis function to element 'm'
-	              element_shapefn(e->x1, e->x2,  
-			          j, order, phys_u, phys_dudx); 
-	              // evaluate the bilinear form
-	              double val_ij = mfv->fn(pts_num, phys_pts,
-		            phys_weights, phys_u, phys_dudx, phys_v, phys_dvdx,
-		            phys_u_prev, phys_du_prevdx, NULL); 
-	              //truncating
-	              if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
-	              // add the result to the matrix
-	              if (val_ij != 0) 
-                  if(!rhsonly) 
-                  {
+              element_shapefn(e->x1, e->x2,  
+		          j, order, phys_u, phys_dudx); 
+              // evaluate the bilinear form
+              double val_ij = mfv->fn(pts_num, phys_pts,
+	            phys_weights, phys_u, phys_dudx, phys_v, phys_dvdx,
+              phys_u_prev, phys_du_prevdx, mfv->space); 
+              //truncating
+              if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
+              // add the result to the matrix
+              if (val_ij != 0) 
+                if(pos_j != -1) {
+                  if(!rhsonly) {
                     mat->add(pos_i, pos_j, val_ij);
-	                  if (DEBUG_MATRIX) {
-	                    info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
-	                    pos_i, pos_j, val_ij, c_i, c_j);
+                    if (DEBUG_MATRIX) {
+                      info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
+                      pos_i, pos_j, val_ij, c_i, c_j);
                     }
                   }
-              }
+                }
+                else
+                  if(this->is_linear)
+                    res->add(pos_i, -val_ij);
             }
           }
         }
@@ -151,7 +153,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhs
           // contribute to residual vector
           double val_i = vfv->fn(pts_num, phys_pts, phys_weights, 
 			       phys_u_prev, phys_du_prevdx, phys_v,
-			       phys_dvdx, NULL);
+             phys_dvdx, vfv->space);
           // truncating
           if(fabs(val_i) < 1e-12) val_i = 0.0; 
           // add the contribution to the residual vector
@@ -215,22 +217,30 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *res, int bdy
           double phys_u, phys_dudx;
           int pos_j = e->dof[c_j][j]; // matrix column
           // if j-th basis function is active
-          if(pos_j != -1) {
-            // transform j-th basis function to the boundary element
-            element_shapefn_point(x_ref, e->x1, e->x2, j, phys_u, 
-                                  phys_dudx); 
-            // evaluate the surface bilinear form
-            double val_ij_surf = mfs->fn(x_phys,
-                             phys_u, phys_dudx, phys_v, 
-                             phys_dvdx, phys_u_prev, phys_du_prevdx, 
-                             NULL); 
-	          // truncating
-            if(fabs(val_ij_surf) < 1e-12) val_ij_surf = 0.0; 
-            // add the result to the matrix
-            if (val_ij_surf != 0) 
-              if(!rhsonly) 
+          // transform j-th basis function to the boundary element
+          element_shapefn_point(x_ref, e->x1, e->x2, j, phys_u, 
+                                phys_dudx); 
+          // evaluate the surface bilinear form
+          double val_ij_surf = mfs->fn(x_phys,
+                           phys_u, phys_dudx, phys_v, 
+                           phys_dvdx, phys_u_prev, phys_du_prevdx, 
+                           NULL); 
+          // truncating
+          if(fabs(val_ij_surf) < 1e-12) val_ij_surf = 0.0; 
+          // add the result to the matrix
+          if (val_ij_surf != 0) 
+            if(pos_j != -1) {
+              if(!rhsonly) {
                 mat->add(pos_i, pos_j, val_ij_surf);
-          }
+                if (DEBUG_MATRIX) {
+                    info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
+                    pos_i, pos_j, val_ij_surf, c_i, c_j);
+                }
+              }
+            }
+            else
+              if(this->is_linear)
+                  res->add(pos_i, -val_ij_surf);
         }
       }
     }
