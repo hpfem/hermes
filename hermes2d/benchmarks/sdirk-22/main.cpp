@@ -29,7 +29,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 0;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-double TAU = 0.01;                                // Time step.
+double TAU = 0.1;                                // Time step.
 const double T_FINAL = 1.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-10;                  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
   }
 
   // This is important to make sure we compare solution at exact same point in time when studying convergence.
-  int N_STEP = T_FINAL / TAU;
+  int N_STEP = T_FINAL / TAU + 0.5;
   if (fabs(T_FINAL - N_STEP * TAU) > 1e-10) {
     error("bad choice of TAU");
   }
