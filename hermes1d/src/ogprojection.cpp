@@ -3,7 +3,7 @@
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-#include "projection.h"
+#include "ogprojection.h"
 #include "math.h"
 #include "discrete_problem.h"
 #include "weakform.h"

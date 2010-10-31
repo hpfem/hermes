@@ -6,7 +6,7 @@ set(SRC
     iterator.cpp qsort.cpp
     lobatto.cpp legendre.cpp
     discrete_problem.cpp solution.cpp space.cpp
-    projection.cpp
+    ogprojection.cpp
     linearizer.cpp quad_std.cpp transforms.cpp
     adapt.cpp graph.cpp h1_polys.cpp
     weakform.cpp
