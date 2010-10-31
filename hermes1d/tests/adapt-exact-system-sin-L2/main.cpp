@@ -237,7 +237,7 @@ int main() {
   while(1) {
     info("============ Adaptivity step %d ============", as); 
 
-    // Construct globally refined reference mesh and setup reference space->
+    // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(space);
 
     // Initialize the FE problem. 

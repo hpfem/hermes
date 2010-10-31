@@ -21,7 +21,7 @@
 #define __SPACE_H
 
 #include "../mesh.h"
-#include "../tuple.h"
+#include "../../../hermes_common/tuple.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
 #include "../quad.h"

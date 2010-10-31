@@ -20,7 +20,7 @@
 #ifndef _ADAPT_H_
 #define _ADAPT_H_
 
-#include "../tuple.h"
+#include "../../../hermes_common/tuple.h"
 #include "../weakform.h"
 
 /// hp-Adaptivity module
