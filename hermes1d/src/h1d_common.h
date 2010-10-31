@@ -16,6 +16,8 @@
 #define BOUNDARY_LEFT 0
 #define BOUNDARY_RIGHT 1
 
+typedef std::pair<int, double> BCSpec;
+
 // for material flags
 const int ANY = -1234;
 

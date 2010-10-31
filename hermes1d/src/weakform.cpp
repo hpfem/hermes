@@ -28,17 +28,17 @@ WeakForm::WeakForm(int neq, bool mat_free)
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-void WeakForm::add_matrix_form(int i, int j, matrix_form fn, int marker)
+void WeakForm::add_matrix_form(int i, int j, matrix_form fn, Space* space, int marker)
 {
     if (marker != ANY && marker < 0) error("Invalid element marker.");
-    MatrixFormVol form = {i, j, fn, marker};
+    MatrixFormVol form = {i, j, fn, marker, space};
     this->matrix_forms_vol.push_back(form);
 }
 
-void WeakForm::add_vector_form(int i, vector_form fn, int marker)
+void WeakForm::add_vector_form(int i, vector_form fn, Space* space, int marker)
 {
     if (marker != ANY && marker < 0) error("Invalid element marker.");
-	VectorFormVol form = {i, fn, marker};
+	  VectorFormVol form = {i, fn, marker, space};
     this->vector_forms_vol.push_back(form);
 }
 
@@ -54,17 +54,17 @@ void WeakForm::add_vector_form_surf(int i, vector_form_surf fn, int bdy_index)
     this->vector_forms_surf.push_back(form);
 }
 
-void WeakForm::add_matrix_form(matrix_form fn, int marker)
+void WeakForm::add_matrix_form(matrix_form fn, Space* space, int marker)
 {
     if (marker != ANY && marker < 0) error("Invalid element marker.");
-    MatrixFormVol form = {0, 0, fn, marker};
+    MatrixFormVol form = {0, 0, fn, marker, space};
     this->matrix_forms_vol.push_back(form);
 }
 
-void WeakForm::add_vector_form(vector_form fn, int marker)
+void WeakForm::add_vector_form(vector_form fn, Space* space, int marker)
 {
     if (marker != ANY && marker < 0) error("Invalid element marker.");
-	VectorFormVol form = {0, fn, marker};
+	  VectorFormVol form = {0, fn, marker, space};
     this->vector_forms_vol.push_back(form);
 }
 

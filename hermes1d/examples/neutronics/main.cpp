@@ -130,7 +130,7 @@ int main() {
   // Create space.
   Space* space = new Space(N_MAT, interfaces, poly_orders, material_markers, subdivisions, N_GRP, N_SLN);
   // Enumerate basis functions, info for user.
-  info("N_dof = %d.", space->assign_dofs());
+  info("N_dof = %d", Space::get_num_dofs(space));
 
   // Initial approximation: u = 1.
   double K_EFF_old;
@@ -139,12 +139,12 @@ int main() {
   
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(jacobian_vol_inner, Marker_inner);
-  wf.add_matrix_form(jacobian_vol_outer, Marker_outer);
-  wf.add_matrix_form(jacobian_vol_reflector, Marker_reflector);
-  wf.add_vector_form(residual_vol_inner, Marker_inner);
-  wf.add_vector_form(residual_vol_outer, Marker_outer);
-  wf.add_vector_form(residual_vol_reflector, Marker_reflector);
+  wf.add_matrix_form(jacobian_vol_inner, NULL, Marker_inner);
+  wf.add_matrix_form(jacobian_vol_outer, NULL, Marker_outer);
+  wf.add_matrix_form(jacobian_vol_reflector, NULL, Marker_reflector);
+  wf.add_vector_form(residual_vol_inner, NULL, Marker_inner);
+  wf.add_vector_form(residual_vol_outer, NULL, Marker_outer);
+  wf.add_vector_form(residual_vol_reflector, NULL, Marker_reflector);
   wf.add_vector_form_surf(residual_surf_left, BOUNDARY_LEFT);
   wf.add_matrix_form_surf(jacobian_surf_right, BOUNDARY_RIGHT);
   wf.add_vector_form_surf(residual_surf_right, BOUNDARY_RIGHT);
@@ -180,17 +180,18 @@ int main() {
       dp->assemble(matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
-      double res_norm_squared = 0;
-      for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+      double res_norm = 0;
+      for(int i=0; i<ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
+      res_norm = sqrt(res_norm);
 
       // Info for user.
-      info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+      info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
 
       // If l2 norm of the residual vector is within tolerance, then quit.
       // NOTE: at least one full iteration forced
       //       here because sometimes the initial
       //       residual on fine mesh is too small.
-      if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
+      if(res_norm < NEWTON_TOL && it > 1) break;
 
       // Multiply the residual vector with -1 since the matrix 
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).

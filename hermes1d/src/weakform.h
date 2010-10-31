@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "space.h"
+class Space;
 
 #ifndef __H1D_WEAKFORM_H
 #define __H1D_WEAKFORM_H
@@ -55,11 +57,11 @@ public:
           void *user_data);
 
   // general case
-  void add_matrix_form(int i, int j, matrix_form fn, int marker=ANY);
-  void add_matrix_form(matrix_form fn, int marker=ANY); // single equation case
+  void add_matrix_form(int i, int j, matrix_form fn, Space* space = NULL, int marker=ANY);
+  void add_matrix_form(matrix_form fn, Space* space = NULL, int marker=ANY); // single equation case
   
-  void add_vector_form(int i, vector_form fn, int marker=ANY);
-  void add_vector_form(vector_form fn, int marker=ANY); // single equation case
+  void add_vector_form(int i, vector_form fn, Space* space = NULL, int marker=ANY);
+  void add_vector_form(vector_form fn, Space* space = NULL, int marker=ANY); // single equation case
   
   void add_matrix_form_surf(int i, int j, matrix_form_surf fn, int bdy_index);
   void add_matrix_form_surf(matrix_form_surf fn, int bdy_index); // single equation case
@@ -70,7 +72,8 @@ public:
   struct MatrixFormVol {
 		int i, j;
 		matrix_form fn;
-	        int marker;
+    int marker;
+    Space* space;
 	};
 	struct MatrixFormSurf {
 		int i, j, bdy_index;
@@ -79,7 +82,8 @@ public:
 	struct VectorFormVol {
 		int i;
 		vector_form fn;
-	        int marker;
+    int marker;
+    Space* space;
 	};
 	struct VectorFormSurf {
 		int i, bdy_index;

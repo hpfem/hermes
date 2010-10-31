@@ -74,8 +74,11 @@ class Space {
         Space();
         // Creates equidistant space with uniform polynomial degree of elements.
         // All elements will have the same (zero) marker.
-        Space(double a, double b, int n_elem, int p_init=1, int n_eq=1, int
+        Space(double a, double b, int n_base_elem, int p_init=1, int n_eq=1, int
                 n_sln=1, bool print_banner=true);
+        Space(double a, double b, int n_base_elem, Tuple<std::pair<int, double> *> left_boundary_conditions = Tuple<std::pair<int, double> *>(), 
+          Tuple<std::pair<int, double> *> right_boundary_conditions = Tuple<std::pair<int, double> *>(), int p_init=1, int n_eq=1, int
+          n_sln=1, bool print_banner=true);
         // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements
         // pts_array[]...  array of macroelement grid points
@@ -85,6 +88,8 @@ class Space {
         Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, 
              int *div_array, int n_eq=1, int n_sln=1, bool print_banner=true);
         
+        void init(double a, double b, int n_base_elem, int p_init, int n_eq, int
+                n_sln, bool print_banner);
         ~Space();
 
         void free_elements();

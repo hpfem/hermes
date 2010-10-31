@@ -53,7 +53,7 @@ int main() {
   delete md;
   
   // Enumerate basis functions, info for user.
-  info("N_dof = %d.", space->assign_dofs());
+  info("N_dof = %d", Space::get_num_dofs(space));
   // Plot the space.
   space->plot("space.gp");
 
@@ -64,29 +64,29 @@ int main() {
   
   // Initialize the weak formulation.
   WeakForm wf(2);
-  wf.add_matrix_form(0, 0, jacobian_mat1_0_0, mat1);
-  wf.add_matrix_form(0, 0, jacobian_mat2_0_0, mat2);
-  wf.add_matrix_form(0, 0, jacobian_mat3_0_0, mat3);
+  wf.add_matrix_form(0, 0, jacobian_mat1_0_0, NULL, mat1);
+  wf.add_matrix_form(0, 0, jacobian_mat2_0_0, NULL, mat2);
+  wf.add_matrix_form(0, 0, jacobian_mat3_0_0, NULL, mat3);
   
-  wf.add_matrix_form(0, 1, jacobian_mat1_0_1, mat1);
-  wf.add_matrix_form(0, 1, jacobian_mat2_0_1, mat2);
-  wf.add_matrix_form(0, 1, jacobian_mat3_0_1, mat3);
+  wf.add_matrix_form(0, 1, jacobian_mat1_0_1, NULL, mat1);
+  wf.add_matrix_form(0, 1, jacobian_mat2_0_1, NULL, mat2);
+  wf.add_matrix_form(0, 1, jacobian_mat3_0_1, NULL, mat3);
   
-  wf.add_matrix_form(1, 0, jacobian_mat1_1_0, mat1);    
-  wf.add_matrix_form(1, 0, jacobian_mat2_1_0, mat2);
-  wf.add_matrix_form(1, 0, jacobian_mat3_1_0, mat3);
+  wf.add_matrix_form(1, 0, jacobian_mat1_1_0, NULL, mat1);    
+  wf.add_matrix_form(1, 0, jacobian_mat2_1_0, NULL, mat2);
+  wf.add_matrix_form(1, 0, jacobian_mat3_1_0, NULL, mat3);
     
-  wf.add_matrix_form(1, 1, jacobian_mat1_1_1, mat1);
-	wf.add_matrix_form(1, 1, jacobian_mat2_1_1, mat2);
-	wf.add_matrix_form(1, 1, jacobian_mat3_1_1, mat3);
+  wf.add_matrix_form(1, 1, jacobian_mat1_1_1, NULL, mat1);
+	wf.add_matrix_form(1, 1, jacobian_mat2_1_1, NULL, mat2);
+	wf.add_matrix_form(1, 1, jacobian_mat3_1_1, NULL, mat3);
   
-  wf.add_vector_form(0, residual_mat1_0, mat1);  
-	wf.add_vector_form(0, residual_mat2_0, mat2);  
-	wf.add_vector_form(0, residual_mat3_0, mat3);
+  wf.add_vector_form(0, residual_mat1_0, NULL, mat1);  
+	wf.add_vector_form(0, residual_mat2_0, NULL, mat2);  
+	wf.add_vector_form(0, residual_mat3_0, NULL, mat3);
 	    
-  wf.add_vector_form(1, residual_mat1_1, mat1);
-  wf.add_vector_form(1, residual_mat2_1, mat2); 
-  wf.add_vector_form(1, residual_mat3_1, mat3);  
+  wf.add_vector_form(1, residual_mat1_1, NULL, mat1);
+  wf.add_vector_form(1, residual_mat2_1, NULL, mat2); 
+  wf.add_vector_form(1, residual_mat3_1, NULL, mat3);  
 
   // Initialize the FE problem.
   DiscreteProblem *dp = new DiscreteProblem(&wf, space);
@@ -110,17 +110,18 @@ int main() {
     dp->assemble(matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
-    double res_norm_squared = 0;
-    for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+    double res_norm = 0;
+    for(int i=0; i<ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
+    res_norm = sqrt(res_norm);
 
     // Info for user.
-    info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+    info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
 
     // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
     //       residual on fine mesh is too small.
-    if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
+    if(res_norm < NEWTON_TOL && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).

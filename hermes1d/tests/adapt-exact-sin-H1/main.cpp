@@ -16,7 +16,7 @@
 static int NEQ = 1;
 int NELEM = 2;                          // Number of elements.
 double A = -M_PI, B = M_PI;             // Domain end points.
-int P_init = 1;                         // Initial polynomial degree.
+int P_INIT = 1;                         // Initial polynomial degree.
 
 // Newton's method.
 double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh.
@@ -39,8 +39,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions.
-double Val_dir_left = 0;
-double Val_dir_right = 0;
+Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,0));
+Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,0));
 
 // Function f(x).
 double f(double x) {
@@ -103,10 +103,8 @@ int main() {
   cpu_time.tick();
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Space* space = new Space(A, B, NELEM, P_init, NEQ);
-  space->set_bc_left_dirichlet(0, Val_dir_left);
-  space->set_bc_right_dirichlet(0, Val_dir_right);
-  info("N_dof = %d", space->assign_dofs());
+  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
+  info("N_dof = %d.", Space::get_num_dofs(space));
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -138,17 +136,18 @@ int main() {
     dp_coarse->assemble(matrix_coarse, rhs_coarse);
 
     // Calculate the l2-norm of residual vector.
-    double res_norm_squared = 0;
-    for(int i=0; i<ndof_coarse; i++) res_norm_squared += rhs_coarse->get(i)*rhs_coarse->get(i);
+    double res_norm = 0;
+    for(int i=0; i<ndof_coarse; i++) res_norm += rhs_coarse->get(i)*rhs_coarse->get(i);
+    res_norm = sqrt(res_norm);
 
     // Info for user.
-    info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+    info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
 
     // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
     //       residual on fine mesh is too small.
-    if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
+    if(res_norm < NEWTON_TOL_COARSE && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -212,17 +211,18 @@ int main() {
       dp->assemble(matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
-      double res_norm_squared = 0;
-      for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+      double res_norm = 0;
+      for(int i=0; i<ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
+      res_norm = sqrt(res_norm);
 
       // Info for user.
-      info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+      info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
 
       // If l2 norm of the residual vector is within tolerance, then quit.
       // NOTE: at least one full iteration forced
       //       here because sometimes the initial
       //       residual on fine mesh is too small.
-      if(res_norm_squared < NEWTON_TOL_REF*NEWTON_TOL_REF && it > 1) break;
+      if(res_norm < NEWTON_TOL_REF && it > 1) break;
 
       // Multiply the residual vector with -1 since the matrix 
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -281,17 +281,18 @@ int main() {
         dp_coarse->assemble(matrix_coarse, rhs_coarse);
 
         // Calculate the l2-norm of residual vector.
-        double res_norm_squared = 0;
-        for(int i=0; i<ndof_coarse; i++) res_norm_squared += rhs_coarse->get(i)*rhs_coarse->get(i);
+        double res_norm = 0;
+        for(int i=0; i<ndof_coarse; i++) res_norm += rhs_coarse->get(i)*rhs_coarse->get(i);
+        res_norm = sqrt(res_norm);
 
         // Info for user.
-        info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+        info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
 
         // If l2 norm of the residual vector is within tolerance, then quit.
         // NOTE: at least one full iteration forced
         //       here because sometimes the initial
         //       residual on fine mesh is too small.
-        if(res_norm_squared < NEWTON_TOL_COARSE*NEWTON_TOL_COARSE && it > 1) break;
+        if(res_norm < NEWTON_TOL_COARSE && it > 1) break;
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -378,7 +379,7 @@ int main() {
   graph_cpu_exact.save("conv_cpu_exact.dat");
 
   int success_test = 1; 
-  info("N_dof = %d", Space::get_num_dofs(space));
+  info("N_dof = %d.", Space::get_num_dofs(space));
   if (Space::get_num_dofs(space) > 40) success_test = 0;
 
   if (success_test) {

@@ -41,7 +41,7 @@ double f(double x) {
 int main() {
   // Create space, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, P_INIT, NEQ);
-  info("N_dof = %d.", space->assign_dofs());
+  info("N_dof = %d", Space::get_num_dofs(space));
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -74,17 +74,18 @@ int main() {
     dp->assemble(matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
-    double res_norm_squared = 0;
-    for(int i=0; i<ndof; i++) res_norm_squared += rhs->get(i)*rhs->get(i);
+    double res_norm = 0;
+    for(int i=0; i<ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
+    res_norm = sqrt(res_norm);
 
     // Info for user.
-    info("---- Newton iter %d, residual norm: %.15f", it, sqrt(res_norm_squared));
+    info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
 
     // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
     //       residual on fine mesh is too small.
-    if(res_norm_squared < NEWTON_TOL*NEWTON_TOL && it > 1) break;
+    if(res_norm < NEWTON_TOL && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).

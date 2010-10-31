@@ -31,7 +31,7 @@ double Zl=60;                  // load impedance[Ohm]
 static int NEQ = 4;
 int NELEM = 1000;          // number of elements
 double A = 0, B = l;        // domain end points
-int P_init = 2;             // initial polynomial degree
+int P_INIT = 2;             // initial polynomial degree
 
 // Matrix solver
 const int MATRIX_SOLVER = 1;            // 0... default (LU decomposition)
@@ -46,10 +46,8 @@ double NEWTON_TOL = 1e-2;
 int NEWTON_MAXITER = 150;
 
 // Boundary conditions
-double Val_dir_left_1 = 1;  // real part of the voltage at the beginnig of the line
-double Val_dir_left_2 = 0;  // imaginary part of the voltage at the beginnig of the line
-double Val_dir_left_3 = 0;  // real part of the voltage at the beginnig of the line
-double Val_dir_left_4 = 0;  // imaginary part of the voltage at the beginnig of the line
+Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,1), new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0));
+Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 
 //At the end of the line is an indirect boundary condition U(l) = I(l)*Zl see below
 
@@ -59,15 +57,11 @@ double Val_dir_left_4 = 0;  // imaginary part of the voltage at the beginnig of 
 
 int main() {
     // create space
-    Space space(A, B, NELEM, P_init, NEQ);
-    space.set_bc_left_dirichlet(0, Val_dir_left_1);
-    space.set_bc_left_dirichlet(1, Val_dir_left_2);
-    space.set_bc_left_dirichlet(2, Val_dir_left_3);
-    space.set_bc_left_dirichlet(3, Val_dir_left_4);
-    info("N_dof = %d", space.assign_dofs());
+    Space Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
+    info("N_dof = %d", Space::get_num_dofs(&space));
 
     // Initialize the weak formulation.
-  WeakForm wf;
+    WeakForm wf;
 
     // Initialize the FE problem.
     DiscreteProblem *dp = new DiscreteProblem();

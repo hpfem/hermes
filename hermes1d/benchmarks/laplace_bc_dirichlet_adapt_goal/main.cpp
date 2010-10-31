@@ -26,7 +26,7 @@ const int NEQ = 1;
 const int NELEM = 30;                     // Number of elements
 const double A = -M_PI, B = M_PI;         // Domain end points
 const double EPSILON = 0.01;              // Equation parameter
-const int P_init = 1;                     // Initial polynomial degree
+const int P_INIT = 1;                     // Initial polynomial degree
 
 // JFNK or classical Newton.
 const double MATRIX_SOLVER_TOL = 1e-5;
@@ -60,8 +60,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions.
-double Val_dir_left = 0;
-double Val_dir_right = 0;
+Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,0));
+Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,0));
 
 // Function f(x).
 double f(double x) {
@@ -105,10 +105,8 @@ int main() {
   cpu_time.tick();
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
-  Space* space = new Space(A, B, NELEM, P_init, NEQ);
-  space->set_bc_left_dirichlet(0, Val_dir_left);
-  space->set_bc_right_dirichlet(0, Val_dir_right);
-  info("N_dof = %d", space->assign_dofs());
+  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
+  info("N_dof = %d.", Space::get_num_dofs(space));
 
   // Initialize the weak formulation.
   WeakForm wf;

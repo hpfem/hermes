@@ -400,36 +400,26 @@ Space::Space() {
 // Creates equidistant space with uniform polynomial degree of elements.
 // All elements will have the same (zero) marker.
 Space::Space(double a, double b, int n_base_elem, int p_init, int n_eq, int
+      n_sln, bool print_banner)
+{
+  this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
+}
+
+Space::Space(double a, double b, int n_base_elem, Tuple<std::pair<int, double> *> left_boundary_conditions, 
+        Tuple<std::pair<int, double> *> right_boundary_conditions, int p_init, int n_eq, int
         n_sln, bool print_banner)
 {
-  // check maximum number of equations
-  if(n_eq > MAX_EQN_NUM) 
-  error("Maximum number of equations exceeded (set in common.h)");
+  this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
 
-  // all Space class variables
-  this->left_endpoint = a;
-  this->right_endpoint = b;
-  this->n_base_elem = n_base_elem;
-  this->n_eq = n_eq;
-  this->n_sln = n_sln;
-  this->n_active_elem = n_base_elem;
-
-  // allocate element array
-  this->base_elems = new Element[this->n_base_elem];     
-  if (base_elems == NULL) error("Not enough memory in Space::create().");
-  if (p_init > MAX_P) 
-    error("Max element order exceeded (set in common.h).");
-  // element length
-  double h = (b - a)/this->n_base_elem;
-  int marker_default = 0;       
-  // fill initial element array
-  for(int i=0; i<this->n_base_elem; i++) { 
-    int id = i;         
-    int active = 1;
-    int level = 0; 
-    this->base_elems[i].init(a + i*h, a + i*h + h, p_init, 
-                             id, active, level, n_eq, n_sln, marker_default);
-  }
+  // Assign Dirichlet boundary conditions.
+  if(left_boundary_conditions != Tuple<std::pair<int, double> *>())
+    for(int i = 0; i < left_boundary_conditions.size(); i++)
+      this->set_bc_left_dirichlet(left_boundary_conditions.at(i)->first, left_boundary_conditions.at(i)->second);
+  if(right_boundary_conditions != Tuple<std::pair<int, double> *>())
+    for(int i = 0; i < right_boundary_conditions.size(); i++)
+      this->set_bc_right_dirichlet(right_boundary_conditions.at(i)->first, right_boundary_conditions.at(i)->second);
+  // Assign degrees of freedom.
+  this->assign_dofs();
 }
 
 // Creates a general space (used, e.g., in example "neutronics").
@@ -482,6 +472,40 @@ Space::Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, in
       this->base_elems[count].init(x_left, x_right, p_array[i], id, active, level, n_eq, n_sln, m_array[i]);
       count++;
     }
+  }
+  this->assign_dofs();
+}
+
+void Space::init(double a, double b, int n_base_elem, int p_init, int n_eq, int
+                n_sln, bool print_banner)
+{
+  // check maximum number of equations
+  if(n_eq > MAX_EQN_NUM) 
+  error("Maximum number of equations exceeded (set in common.h)");
+
+  // all Space class variables
+  this->left_endpoint = a;
+  this->right_endpoint = b;
+  this->n_base_elem = n_base_elem;
+  this->n_eq = n_eq;
+  this->n_sln = n_sln;
+  this->n_active_elem = n_base_elem;
+
+  // allocate element array
+  this->base_elems = new Element[this->n_base_elem];     
+  if (base_elems == NULL) error("Not enough memory in Space::create().");
+  if (p_init > MAX_P) 
+    error("Max element order exceeded (set in common.h).");
+  // element length
+  double h = (b - a)/this->n_base_elem;
+  int marker_default = 0;       
+  // fill initial element array
+  for(int i=0; i<this->n_base_elem; i++) { 
+    int id = i;         
+    int active = 1;
+    int level = 0; 
+    this->base_elems[i].init(a + i*h, a + i*h + h, p_init, 
+                             id, active, level, n_eq, n_sln, marker_default);
   }
 }
 
