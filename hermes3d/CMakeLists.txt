@@ -18,6 +18,7 @@ option(WITH_HEX      "Enable hexahedral elements" YES)
 option(WITH_PRISM    "Enable prism elements" NO)
 
 option(WITH_UMFPACK  "Enable support for UMFPACK" YES)
+option(WITH_SUPERLU  "Enable support for SUPERLU" NO)
 option(WITH_PETSC    "Enable support for PETSc" NO)
 option(WITH_PARDISO  "Enable support for PARDISO" NO)
 option(WITH_MUMPS    "Enable support for MUMPS solver" NO)
@@ -159,6 +160,14 @@ if(WITH_TRILINOS)
 	find_package(TRILINOS REQUIRED)
 	include_directories(${TRILINOS_INCLUDE_DIR})
 endif(WITH_TRILINOS)
+
+if(WITH_SUPERLU)
+  find_package(SUPERLU REQUIRED)
+  include_directories(${SUPERLU_INCLUDE_DIR})
+  if(SUPERLU_MT)
+    add_definitions(-DSLU_MT)
+  endif(SUPERLU_MT)
+endif(WITH_SUPERLU)
 
 # SMP
 if(WITH_OPENMP)
