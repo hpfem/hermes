@@ -305,7 +305,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 
 UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
-  : LinearSolver(HERMES_DONT_REUSE_MATRIX), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
+  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -317,12 +317,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
-#ifdef WITH_UMFPACK  
-  matrix_reuse_scheme = HERMES_DONT_REUSE_MATRIX;
-  free_factorization_info();
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
-#endif
+  free_factorization_structures();
 }
 
 #ifdef WITH_UMFPACK
@@ -359,26 +354,10 @@ bool UMFPackLinearSolver::solve() {
 
   int status;
 
-  if (symbolic == NULL)
+  if ( !prepare_factorization_structures() )
   {
-    //debug_log("Factorizing symbolically.");
-    status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
-    if (status != UMFPACK_OK) {
-      check_status("umfpack_di_symbolic", status);
-      return false;
-    }
-    if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
-  }
-
-  if (numeric == NULL)
-  {
-    //debug_log("Factorizing numerically.");
-    status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
-    if (status != UMFPACK_OK) {
-      check_status("umfpack_di_numeric", status);
-      return false;
-    }
-    if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
+    warning("LU factorization could not be completed.");
+    return false;
   }
 
   delete [] sln;
@@ -395,7 +374,42 @@ bool UMFPackLinearSolver::solve() {
   tmr.tick();
   time = tmr.accumulated();
   
-  free_factorization_info();
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool UMFPackLinearSolver::prepare_factorization_structures()
+{
+  _F_
+#ifdef WITH_UMFPACK
+  int status;
+  switch(factorization_scheme)
+  {
+    case HERMES_FACTORIZE_FROM_SCRATCH:
+      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+      
+      debug_log("Factorizing symbolically.");
+      status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
+      if (status != UMFPACK_OK) {
+        check_status("umfpack_di_symbolic", status);
+        return false;
+      }
+      if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
+      
+    case HERMES_REUSE_MATRIX_REORDERING:
+    case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
+      if (numeric != NULL) umfpack_free_numeric(&numeric);
+      
+      debug_log("Factorizing numerically.");
+      status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
+      if (status != UMFPACK_OK) {
+        check_status("umfpack_di_numeric", status);
+        return false;
+      }
+      if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
+  }
   
   return true;
 #else
@@ -403,19 +417,14 @@ bool UMFPackLinearSolver::solve() {
 #endif
 }
 
-void UMFPackLinearSolver::free_factorization_info()
+void UMFPackLinearSolver::free_factorization_structures()
 { 
   _F_
 #ifdef WITH_UMFPACK
-  switch(matrix_reuse_scheme)
-  {
-    case HERMES_DONT_REUSE_MATRIX:
-      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
-      symbolic = NULL;
-    case HERMES_REUSE_MATRIX_REORDERING:
-      if (numeric != NULL) umfpack_free_numeric(&numeric);
-      numeric = NULL;
-  }
+  if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+  symbolic = NULL;
+  if (numeric != NULL) umfpack_free_numeric(&numeric);
+  numeric = NULL;
 #endif
 }
 

@@ -26,16 +26,55 @@
   #include <Teuchos_RefCountPtr.hpp>
 #endif
 
-enum MatrixReuseOptions
-{
-  HERMES_DONT_REUSE_MATRIX,
-  HERMES_REUSE_MATRIX_REORDERING,
-  HERMES_REUSE_MATRIX_FACTORIZATION
-};
-
 /// @defgroup solvers Solvers
 ///
 /// TODO: description
+
+/// Options for matrix factorization reuse.
+///
+/// Reusing the information computed during previous solution of a similar problem 
+/// significantly improves efficiency of the solver. 
+/// <b>Usage:</b> 
+/// Each solver which allows factorization reuse should perform complete factorization 
+/// from scratch for the first time it is invoked, keep the precomputed structures 
+/// according to the current factorization reuse stratregy and use them for next 
+/// factorization.
+/// 
+/// <b>Enabled solvers:</b>
+///   -\c SuperLU - currently the only solver that can distinguish between all 4 options.
+///   -\c UMFPack - performs scaling and factorization in one step. The option
+///                 \c REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
+///                 \c REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
+///   -\c Pardiso - not yet. The library may be set not to perform scaling or to perform 
+///                 reordering and scaling in one step, preceding the numerical 
+///                 factorization (default). 
+///   -\c MUMPS   - not yet. The library may be set to perform scaling either during 
+///                 analysis (together with reordering), during factorization, or decide 
+///                 about the scaling phase automatically (default).
+///   -\c AMESOS  - not yet. 
+/// <b>Typical scenario:</b>
+/// When \c rhsonly was set to \c true for the assembly phase, 
+/// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following 
+/// solution phase.
+///
+enum FactorizationScheme
+{
+  HERMES_FACTORIZE_FROM_SCRATCH,              ///< Perform new factorization, don't reuse
+                                              ///< existing factorization data.
+  HERMES_REUSE_MATRIX_REORDERING,             ///< Factorize matrix with the same sparsity
+                                              ///< pattern as the one already factorized.
+  HERMES_REUSE_MATRIX_REORDERING_AND_SCALING, ///< Factorize matrix with the same sparsity 
+                                              ///< pattern and similar numerical values
+                                              ///< as the one already factorized.
+  HERMES_REUSE_FACTORIZATION_COMPLETELY       ///< Completely reuse the already performed
+                                              ///< factorization.
+};
+
+/// A user may pass these constants to Solver::notify to tell it that the matrix and/or rhs
+/// has been changed (i.e. this allows him to use the same instance of the solver for 
+/// solving different systems).
+const int HERMES_NOTIFY_MATRIX_CHANGED = 0x01;
+const int HERMES_NOTIFY_RHS_CHANGED    = 0x02;
 
 class DiscreteProblem;
 
@@ -56,8 +95,11 @@ public:
   int get_error() { return error; }
   double get_time() { return time; }
   
-  virtual void reuse_matrix(MatrixReuseOptions reuse_scheme) {};
-  virtual void reuse_matrix() { reuse_matrix(HERMES_REUSE_MATRIX_FACTORIZATION); }
+  virtual void notify(const int notification) { };
+  virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
+  virtual void set_factorization_scheme() {
+    set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY); 
+  }
 
 protected:
   scalar *sln;
@@ -73,11 +115,15 @@ protected:
 class LinearSolver : public Solver 
 {
   public:
-    LinearSolver(unsigned int matrix_reuse_scheme = HERMES_DONT_REUSE_MATRIX) 
-      : Solver(), matrix_reuse_scheme(matrix_reuse_scheme) {};
+    LinearSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH) 
+      : Solver(), factorization_scheme(factorization_scheme) {};
     
   protected:
-    unsigned int matrix_reuse_scheme;
+    virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { 
+      factorization_scheme = reuse_scheme;
+    }
+        
+    unsigned int factorization_scheme;
 };
 
 /// Abstract class for defining interface for LinearSolvers

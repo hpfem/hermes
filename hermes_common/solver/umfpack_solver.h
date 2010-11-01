@@ -82,11 +82,6 @@ public:
   virtual ~UMFPackLinearSolver();
 
   virtual bool solve();
-  virtual void reuse_matrix(MatrixReuseOptions reuse_scheme)
-  {
-    matrix_reuse_scheme = reuse_scheme; 
-    free_factorization_info();
-  }
     
 protected:
   UMFPackMatrix *m;
@@ -96,7 +91,8 @@ protected:
   void *symbolic; // Reordering of matrix A to reduce fill-in during factorization.
   void *numeric;  // LU factorization of matrix A.
   
-  void free_factorization_info();
+  bool prepare_factorization_structures();
+  void free_factorization_structures();
 };
 
 #endif
