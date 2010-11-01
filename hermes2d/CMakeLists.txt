@@ -66,8 +66,8 @@ set(WITH_MUMPS              NO)
 # header files as the serial library. 
 #
 set(WITH_SUPERLU            YES)
-set(SUPERLU_ROOT            root/dir/of/superlu/)
-set(SUPERLU_MT              YES)
+set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
+set(SUPERLU_MT              NO)
 
 # If PARDISO is enabled, WITH_OPENMP must be set as well (and perhaps some other libraries
 # added to ADDITIONAL_LIBS according to PARDISO user guide).

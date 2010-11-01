@@ -80,6 +80,7 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/amesos.cpp
        ${HERMES_COMMON_DIR}/solver/mumps.cpp 
        ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
+       ${HERMES_COMMON_DIR}/solver/superlu.cpp
        ${HERMES_COMMON_DIR}/solver/petsc.cpp 
        ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
        ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
@@ -118,6 +119,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_LIBRARIES}
+      ${SUPERLU_LIBRARY}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
       ${ADDITIONAL_LIBS}        
