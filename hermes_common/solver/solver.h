@@ -29,6 +29,8 @@
 /// @defgroup solvers Solvers
 ///
 /// TODO: description
+///
+/*@{*/ // Beginning of documentation group Solvers.
 
 /// Options for matrix factorization reuse.
 ///
@@ -78,12 +80,10 @@ const int HERMES_NOTIFY_RHS_CHANGED    = 0x02;
 
 class DiscreteProblem;
 
-/// Abstract class for defining solver interface
-///
+/// Abstract class for defining solver interface.
 ///
 /// TODO: Adjust interface to support faster update of matrix and rhs
 ///
-/// @ingroup solvers
 class Solver {
 public:
   Solver() { sln = NULL; time = -1.0; }
@@ -108,10 +108,8 @@ protected:
 };
 
 
-/// Abstract class for defining interface for LinearSolvers
+/// Abstract class for defining interface for linear solvers.
 ///
-///
-/// @ingroup solvers
 class LinearSolver : public Solver 
 {
   public:
@@ -126,10 +124,8 @@ class LinearSolver : public Solver
     unsigned int factorization_scheme;
 };
 
-/// Abstract class for defining interface for LinearSolvers
+/// Abstract class for defining interface for nonlinear solvers.
 ///
-///
-/// @ingroup solvers
 class NonlinearSolver : public Solver {
   public:
     NonlinearSolver() : Solver() { dp = NULL; }
@@ -140,6 +136,8 @@ class NonlinearSolver : public Solver {
     // NonlinearProblem(DiscreteProblem *) ctor
 };
 
+/// Abstract class for defining interface for iterative solvers.
+///
 class IterSolver : public Solver
 {
   public:
@@ -167,5 +165,7 @@ class IterSolver : public Solver
     double tolerance;       ///< Convergence tolerance.
     bool precond_yes;
 };
+
+/*@}*/ // End of documentation group Solvers.
 
 #endif
