@@ -13,7 +13,7 @@
 //
 //  BC: Dirichlet, y(A) = YA.
 //
-//  Exact solution: y(x) = sin(x).
+//  Exact solution: y(x) = 1/(x+1).
 //
 //  The following parameters can be changed:
 
@@ -49,8 +49,7 @@ Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 
 // Right-hand side function f(y, x).
 double f(double y, double x) {
-  // With y(0)=1, exact solution is y=1/(x+1).
-  return -y*y; 
+  return -y*y;
 }
 
 // y-derivative of dfdy(y, x).
