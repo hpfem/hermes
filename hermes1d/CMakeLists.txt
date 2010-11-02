@@ -20,6 +20,8 @@ option(WITH_TRILINOS "Enable support for Trilinos solvers" NO)
 option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
 option(WITH_HDF5     "Enable support for HDF5" NO)
 
+option(WITH_OPENMP   "Build with OpenMP support" NO)
+
 # Reporting and logging:
 set(REPORT_WITH_LOGO        YES)  #logo will be shown
 set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
@@ -124,6 +126,13 @@ if(WITH_TRILINOS)
 	find_package(TRILINOS REQUIRED)
 	include_directories(${TRILINOS_INCLUDE_DIR})
 endif(WITH_TRILINOS)
+
+# SMP
+if(WITH_OPENMP)
+  find_package(OpenMP REQUIRED)
+  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
+endif(WITH_OPENMP)
 
 add_subdirectory(src)
 
