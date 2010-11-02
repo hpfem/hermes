@@ -2,7 +2,7 @@
 // Distributed under the terms of the BSD license (see the LICENSE
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
-
+#define HERMES_REPORT_INFO
 #include "ogprojection.h"
 #include "math.h"
 #include "discrete_problem.h"
@@ -116,7 +116,7 @@ void OGProjection::project_global(int sln, Space *space, Space* space_ref, Matri
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Get the target space's number of degrees of freedom.
-  int ndof = space->assign_dofs();
+  int ndof = Space::get_num_dofs(space);
   
   // Initialize coefficient vector to copy the solution to ref_space.
   double* coeff_vec = new double[ndof];
@@ -128,7 +128,7 @@ void OGProjection::project_global(int sln, Space *space, Space* space_ref, Matri
   // Solve the linear system.
   if(!solver->solve())
     error ("Matrix solver failed.\n");
-  for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+  for (int i = 0; i < ndof; i++) coeff_vec[i] = solver->get_solution()[i];
 
   // Save the projection.
   vector_to_solution(coeff_vec, space, sln);
