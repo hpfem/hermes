@@ -25,6 +25,7 @@ set(SRC
   ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
   ${HERMES_COMMON_DIR}/solver/petsc.cpp 
   ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
+  ${HERMES_COMMON_DIR}/solver/superlu.cpp
   ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
   ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
   ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
@@ -62,6 +63,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${HDF5_LIBRARY}
       ${METIS_LIBRARY}
       ${UMFPACK_LIBRARY}
+      ${SUPERLU_LIBRARY}
       ${AMD_LIBRARY}
       ${PARDISO_LIBRARY}
       ${TRILINOS_LIBRARIES}
