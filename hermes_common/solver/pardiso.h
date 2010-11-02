@@ -41,13 +41,12 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // PARDISO specific data structures for storing matrix, rhs
-  int *Ap;
-  int *Ai;
-  scalar *Ax;
-
-  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
-
+  // PARDISO specific data structures for storing the system matrix (CSR format).
+  scalar *Ax;   // Matrix entries (row-wise). 
+  int *Ai;      // Column indices of values in Ax.
+  int *Ap;      // Index to Ax/Ai, where each row starts.
+  int nnz;      // Number of non-zero entries (= Ap[size]).
+  
   friend class PardisoLinearSolver;
 };
 
@@ -67,6 +66,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
+  // PARDISO specific data structures for storing the rhs.
   scalar *v;
 
   friend class PardisoLinearSolver;

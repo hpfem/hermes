@@ -24,17 +24,6 @@
 #include "solution.h"
 #include "config.h"
 
-//  Solvers
-#include "../../hermes_common/solver/solver.h"
-#include "../../hermes_common/solver/umfpack_solver.h"
-#include "../../hermes_common/solver/amesos.h"
-#include "../../hermes_common/solver/pardiso.h"
-#include "../../hermes_common/solver/petsc.h"
-#include "../../hermes_common/solver/mumps.h"
-#include "../../hermes_common/solver/nox.h"
-#include "../../hermes_common/solver/aztecoo.h"
-
-
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
 {
   _F_

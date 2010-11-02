@@ -56,6 +56,19 @@ set(WITH_MUMPS              NO)
 # set(MUMPS_ROOT            root/dir/of/mumps/)
 # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
 
+# First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
+# and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
+# for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
+# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or 
+# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if 
+# WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
+# SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
+# header files as the serial library. 
+#
+set(WITH_SUPERLU            YES)
+set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
+set(SUPERLU_MT              NO)
+
 # If PARDISO is enabled, WITH_OPENMP must be set as well (and perhaps some other libraries
 # added to ADDITIONAL_LIBS according to PARDISO user guide).
 #
@@ -193,11 +206,11 @@ endif(WITH_OPENMP)
 if(NOT MSVC)
   # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
   # FindLAPACK is Fortran-only so Fortran must be enabled as well.
-  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS)
+  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
     enable_language(Fortran)
     find_package(LAPACK REQUIRED)
     add_definitions(-DWITH_BLAS)
-  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS)
+  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 endif(NOT MSVC)  
  
 # Solvers:
@@ -230,6 +243,15 @@ endif(WITH_PETSC)
 if(WITH_PARDISO)
   find_package(PARDISO REQUIRED) 
 endif(WITH_PARDISO)
+
+if(WITH_SUPERLU)
+  find_package(SUPERLU REQUIRED)
+  include_directories(${SUPERLU_INCLUDE_DIR})
+  if(SUPERLU_MT)
+    set(MT "_MT")
+    add_definitions(-DSLU_MT)
+  endif(SUPERLU_MT)
+endif(WITH_SUPERLU)
 
 include_directories(${HERMES_COMMON_DIR})
 
@@ -315,6 +337,7 @@ message("Build with UMFPACK: ${WITH_UMFPACK}")
 message("Build with PETSC: ${WITH_PETSC}")
 message("Build with PARDISO: ${WITH_PARDISO}")
 message("Build with MUMPS: ${WITH_MUMPS}")
+message("Build with SUPERLU${MT}: ${WITH_SUPERLU}")
 message("Build with TRILINOS: ${WITH_TRILINOS}")
 message("Build with MPI: ${WITH_MPI}")
 message("Build with OPENMP: ${WITH_OPENMP}")

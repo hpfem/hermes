@@ -84,6 +84,7 @@ enum MatrixSolverType
    SOLVER_PETSC, 
    SOLVER_MUMPS,
    SOLVER_PARDISO,
+   SOLVER_SUPERLU,
    SOLVER_NOX,
    SOLVER_AMESOS,
    SOLVER_AZTECOO
@@ -91,11 +92,12 @@ enum MatrixSolverType
 
 // Should be in the same order as MatrixSolverTypes above, so that the
 // names may be accessed by the same enumeration variable.
-const std::string MatrixSolverNames[7] = {
+const std::string MatrixSolverNames[8] = {
   "UMFPACK",
   "PETSc",
   "MUMPS",
   "Pardiso",
+  "SuperLU",
   "Trilinos/NOX",
   "Trilinos/Amesos",
   "Trilinos/AztecOO"
@@ -105,6 +107,7 @@ const std::string MatrixSolverNames[7] = {
 #define PETSC_NOT_COMPILED    HERMES " was not built with PETSC support."
 #define MUMPS_NOT_COMPILED    HERMES " was not built with MUMPS support."
 #define PARDISO_NOT_COMPILED  HERMES " was not built with PARDISO support."
+#define SUPERLU_NOT_COMPILED  HERMES " was not built with SUPERLU support."
 #define NOX_NOT_COMPILED      HERMES " was not built with NOX support."
 #define AMESOS_NOT_COMPILED   HERMES " was not built with AMESOS support."
 #define AZTECOO_NOT_COMPILED  HERMES " was not built with AZTECOO support."

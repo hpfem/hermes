@@ -38,14 +38,13 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual int get_matrix_size() const;
   virtual double get_fill_in() const;
-
+  
 protected:
-  // UMFPack specific data structures for storing matrix, rhs
-  int *Ap;
-  int *Ai;
-  scalar *Ax;
-
-  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
+  // UMFPack specific data structures for storing the system matrix (CSC format).
+  scalar *Ax;   // Matrix entries (column-wise).
+  int *Ai;      // Row indices of values in Ax.
+  int *Ap;      // Index to Ax/Ai, where each column starts.
+  int nnz;      // Number of non-zero entries (= Ap[size]).
 
   friend class UMFPackLinearSolver;
 };
@@ -67,6 +66,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
+  //UMFPack specific data structures for storing the rhs.
   scalar *v;
 
   friend class UMFPackLinearSolver;
@@ -82,10 +82,17 @@ public:
   virtual ~UMFPackLinearSolver();
 
   virtual bool solve();
-
+    
 protected:
   UMFPackMatrix *m;
   UMFPackVector *rhs;
+  
+  // Reusable factorization information (A denotes matrix represented by the pointer 'm').
+  void *symbolic; // Reordering of matrix A to reduce fill-in during factorization.
+  void *numeric;  // LU factorization of matrix A.
+  
+  bool prepare_factorization_structures();
+  void free_factorization_structures();
 };
 
 #endif

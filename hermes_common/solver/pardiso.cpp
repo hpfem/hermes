@@ -24,25 +24,55 @@
 #include "../utils.h"
 #include "../callstack.h"
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef WITH_PARDISO
+  #ifdef __cplusplus
+    extern "C" {
+  #endif
+      extern int pardisoinit_(void *, int *, int *, int*, double *, int *);
+      extern int pardiso_(void *, int *, int *, int *, int *, int *,
+                          scalar *, int *, int *, int *, int *, int *, int *, 
+                          scalar *, scalar *, int *, double *);
+  #ifdef __cplusplus
+    }
+  #endif
+  
+  #define PARDISOINIT pardisoinit_
+  #define PARDISO pardiso_
+#else
+  #define PARDISOINIT
+  #define PARDISO
 #endif
 
-extern int pardisoinit_(void *, int *, int *, int*, double *, int *);
-
-extern int
-    pardiso_(void *, int *, int *, int *, int *, int *,
-             scalar *, int *, int *, int *, int *, int *, int *, scalar *, scalar *, int *, double *);
-
-#define PARDISOINIT pardisoinit_
-#define PARDISO pardiso_
-
-#ifdef __cplusplus
+// Binary search for the location of a particular CSC/CSR matrix entry.
+//
+// Typically, we search for the index into Ax that corresponds to a given 
+// row (CSC) or column (CSR) ('idx') among indices of nonzero values in 
+// a particular column (CSC) or row (CSR) ('Ai').
+//
+static int find_position(int *Ai, int Alen, int idx) {
+  _F_
+  assert (idx >= 0);
+  
+  register int lo = 0, hi = Alen - 1, mid;
+  
+  while (1) 
+  {
+    mid = (lo + hi) >> 1;
+    
+    if (idx < Ai[mid]) hi = mid - 1;
+    else if (idx > Ai[mid]) lo = mid + 1;
+    else break;
+    
+    // Sparse matrix entry not found (raise an error when trying to add 
+    // value to this position, return 0 when obtaining value there).
+    if (lo > hi) mid = -1;
+  }
+  return mid;
 }
-#endif
 
 PardisoMatrix::PardisoMatrix() {
   _F_
+  size = 0; nnz = 0;
   Ap = NULL;
   Ai = NULL;
   Ax = NULL;
@@ -61,6 +91,7 @@ void PardisoMatrix::pre_add_ij(int row, int col) {
 void PardisoMatrix::alloc() {
   _F_
   assert(pages != NULL);
+  assert(size > 0);
 
   // initialize the arrays Ap and Ai
   Ap = new int[size + 1];
@@ -80,13 +111,16 @@ void PardisoMatrix::alloc() {
   delete[] pages;
   pages = NULL;
 
-  Ax = new scalar[Ap[size]];
+  nnz = Ap[size];
+  
+  Ax = new scalar[nnz];
   MEM_CHECK(Ax);
   zero();
 }
 
 void PardisoMatrix::free() {
   _F_
+  nnz = 0;
   delete [] Ap; Ap = NULL;
   delete [] Ai; Ai = NULL;
   delete [] Ax; Ax = NULL;
@@ -95,47 +129,49 @@ void PardisoMatrix::free() {
 scalar PardisoMatrix::get(int m, int n)
 {
   _F_
+  // Find n-th column in the m-th row.
+  int mid = find_position(Ai + Ap[m], Ap[m + 1] - Ap[m], n);
 
-  // bin search the value
-  register int lo = Ap[m], hi = Ap[m + 1], mid;
-  while (1) {
-    mid = (lo + hi) >> 1;
-
-    if (n < Ai[mid]) hi = mid - 1;
-    else if (n > Ai[mid]) lo = mid + 1;
-    else break;
-
-    if (lo > hi) return 0.0;		// entry not set -> e.i. it is zero
-  }
-
-  return Ax[mid];
+  if (mid < 0) // if the entry has not been found
+    return 0.0;   
+  else 
+    return Ax[Ap[m]+mid];
 }
 
 void PardisoMatrix::zero() {
   _F_
-    memset(Ax, 0, sizeof(scalar) * Ap[size]);
+    memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
 void PardisoMatrix::add(int m, int n, scalar v) {
   _F_
-  insert_value(Ai + Ap[m], Ax + Ap[m], Ap[m + 1] - Ap[m], n, v);
+  if (v != 0.0 && m >= 0 && n >= 0) // ignore dirichlet DOFs
+  {   
+    // Find n-th column in the m-th row.
+    int pos = find_position(Ai + Ap[m], Ap[m + 1] - Ap[m], n);
+    // Make sure we are adding to an existing non-zero entry.
+    if (pos < 0) 
+      error("Sparse matrix entry not found");
+    
+    Ax[Ap[m]+pos] += v;
+  }
 }
 
 void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
-      if (mat[i][j] != 0.0 && rows[i] >= 0 && cols[j] >= 0)		// ignore dirichlet DOFs
-        add(rows[i], cols[j], mat[i][j]);
+  for (int i = 0; i < m; i++)       // rows
+    for (int j = 0; j < n; j++)     // cols
+      add(rows[i], cols[j], mat[i][j]);
 }
 
 /// dumping matrix and right-hand side
 ///
 bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, nnz, nnz);
       for (int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT ";\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
@@ -143,10 +179,10 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
-      int nnz = Ap[size];
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
@@ -168,31 +204,13 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 int PardisoMatrix::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
-  return (sizeof(int) + sizeof(scalar)) * (Ap[size] + size);
+  /*          Ai             Ax                     Ap                    nnz       */    
+  return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
 
 double PardisoMatrix::get_fill_in() const {
   _F_
-  return Ap[size] / (double) (size * size);
-}
-
-void PardisoMatrix::insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value) {
-  _F_
-  if (idx >= 0) {
-    register int lo = 0, hi = Alen - 1, mid;
-
-    while (1) {
-      mid = (lo + hi) >> 1;
-
-      if (idx < Ai[mid]) hi = mid - 1;
-      else if (idx > Ai[mid]) lo = mid + 1;
-      else break;
-
-      if (lo > hi) EXIT("Sparse matrix entry not found.");
-    }
-
-    Ax[mid] += value;
-  }
+  return nnz / (double) (size * size);
 }
 
 
@@ -253,7 +271,8 @@ void PardisoVector::add(int n, int *idx, scalar *y) {
 
 bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (int i = 0; i < this->size; i++)
@@ -261,7 +280,8 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
       fprintf(file, " ];\n");
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN:
+    {
       hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);

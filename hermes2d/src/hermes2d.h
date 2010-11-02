@@ -57,6 +57,7 @@
 #include "../hermes_common/solver/pardiso.h"
 #include "../hermes_common/solver/petsc.h"
 #include "../hermes_common/solver/umfpack_solver.h"
+#include "../hermes_common/solver/superlu.h"
 
 // preconditioners
 #include "../hermes_common/solver/precond.h"

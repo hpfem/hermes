@@ -31,9 +31,30 @@
 #include "../utils.h"
 #include "../callstack.h"
 
+static int find_position(int *Ai, int Alen, int idx) {
+  _F_
+  assert (idx >= 0);
+  
+  register int lo = 0, hi = Alen - 1, mid;
+  
+  while (1) 
+  {
+    mid = (lo + hi) >> 1;
+    
+    if (idx < Ai[mid]) hi = mid - 1;
+    else if (idx > Ai[mid]) lo = mid + 1;
+    else break;
+    
+    // Sparse matrix entry not found (raise an error when trying to add 
+    // value to this position, return 0 when obtaining value there).
+    if (lo > hi) mid = -1;
+  }
+  return mid;
+}
+
 UMFPackMatrix::UMFPackMatrix() {
   _F_
-  size = 0;
+  size = 0; nnz = 0;
   Ap = NULL;
   Ai = NULL;
   Ax = NULL;
@@ -42,7 +63,7 @@ UMFPackMatrix::UMFPackMatrix() {
 UMFPackMatrix::UMFPackMatrix(int size) {
   _F_
   this->size = size;
-        this->alloc();
+  this->alloc();
 }
 
 UMFPackMatrix::~UMFPackMatrix() {
@@ -53,7 +74,7 @@ UMFPackMatrix::~UMFPackMatrix() {
 void UMFPackMatrix::alloc() {
   _F_
   assert(pages != NULL);
-        assert(size != 0);
+  assert(size > 0);
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];
@@ -73,13 +94,16 @@ void UMFPackMatrix::alloc() {
   delete [] pages;
   pages = NULL;
 
-  Ax = new scalar [Ap[size]];
+  nnz = Ap[size];
+  
+  Ax = new scalar [nnz];
   MEM_CHECK(Ax);
-  memset(Ax, 0, sizeof(scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
 void UMFPackMatrix::free() {
   _F_
+  nnz = 0;
   delete [] Ap; Ap = NULL;
   delete [] Ai; Ai = NULL;
   delete [] Ax; Ax = NULL;
@@ -88,37 +112,38 @@ void UMFPackMatrix::free() {
 scalar UMFPackMatrix::get(int m, int n)
 {
   _F_
+  // Find m-th row in the n-th column.
+  int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
 
-  // bin search the value
-  register int lo = Ap[m], hi = Ap[m + 1], mid;
-  while (1) {
-    mid = (lo + hi) >> 1;
-
-    if (n < Ai[mid]) hi = mid - 1;
-    else if (n > Ai[mid]) lo = mid + 1;
-    else break;
-
-    if (lo > hi) return 0.0;		// entry not set -> e.i. it is zero
-  }
-
-  return Ax[mid];
+  if (mid < 0) // if the entry has not been found
+    return 0.0;   
+  else 
+    return Ax[Ap[n]+mid];
 }
 
 void UMFPackMatrix::zero() {
   _F_
-  memset(Ax, 0, sizeof(scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
 void UMFPackMatrix::add(int m, int n, scalar v) {
   _F_
-  if (v != 0.0 && m >= 0 && n >= 0)		// ignore dirichlet DOFs
-    insert_value(Ai + Ap[n], Ax + Ap[n], Ap[n + 1] - Ap[n], m, v);
+  if (v != 0.0 && m >= 0 && n >= 0)   // ignore dirichlet DOFs
+  {
+    // Find m-th row in the n-th column.
+    int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+    // Make sure we are adding to an existing non-zero entry.
+    if (pos < 0) 
+      error("Sparse matrix entry not found");
+    
+    Ax[Ap[n]+pos] += v;
+  }
 }
 
 void UMFPackMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
+  for (int i = 0; i < m; i++)       // rows
+    for (int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 
@@ -126,9 +151,10 @@ void UMFPackMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
 ///
 bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, nnz, nnz);
       for (int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
@@ -136,10 +162,10 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
-      int nnz = Ap[size];
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
@@ -161,31 +187,13 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 int UMFPackMatrix::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
-  return (sizeof(int) + sizeof(scalar)) * (Ap[size] + size);
+  /*          Ai             Ax                      Ap                     nnz     */    
+  return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
 
 double UMFPackMatrix::get_fill_in() const {
   _F_
-  return Ap[size] / (double) (size * size);
-}
-
-void UMFPackMatrix::insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value) {
-  _F_
-  if (idx >= 0) {
-    register int lo = 0, hi = Alen - 1, mid;
-
-    while (1) {
-      mid = (lo + hi) >> 1;
-
-      if (idx < Ai[mid]) hi = mid - 1;
-      else if (idx > Ai[mid]) lo = mid + 1;
-      else break;
-
-      if (lo > hi) EXIT("Sparse matrix entry not found.");
-    }
-
-    Ax[mid] += value;
-  }
+  return nnz / (double) (size * size);
 }
 
 
@@ -247,7 +255,8 @@ void UMFPackVector::add(int n, int *idx, scalar *y) {
 
 bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
-  switch (fmt) {
+  switch (fmt) 
+  {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (int i = 0; i < size; i++)
@@ -255,7 +264,8 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
       fprintf(file, " ];\n");
       return true;
 
-    case DF_HERMES_BIN: {
+    case DF_HERMES_BIN: 
+    {
       hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
@@ -276,26 +286,26 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 // UMFPack solver //////
 
 #if !defined (H2D_COMPLEX) && !defined (H3D_COMPLEX)
-// real case
-#define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)		umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
-#define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)			umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)
-#define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I)	umfpack_di_solve(sys, Ap, Ai, Ax, X, B, N, C, I)
-#define umfpack_free_symbolic							umfpack_di_free_symbolic
-#define umfpack_free_numeric							umfpack_di_free_numeric
-#define umfpack_defaults								umfpack_di_defaults
+  // real case
+  #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
+  #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)
+  #define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I) umfpack_di_solve(sys, Ap, Ai, Ax, X, B, N, C, I)
+  #define umfpack_free_symbolic                         umfpack_di_free_symbolic
+  #define umfpack_free_numeric                          umfpack_di_free_numeric
+  #define umfpack_defaults                              umfpack_di_defaults
 #else
-// macros for calling complex UMFPACK in packed-complex mode
-#define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)		umfpack_zi_symbolic(m, n, Ap, Ai, (double *) (Ax), NULL, S, C, I)
-#define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)			umfpack_zi_numeric(Ap, Ai, (double *) (Ax), NULL, S, N, C, I)
-#define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I)	umfpack_zi_solve(sys, Ap, Ai, (double *) (Ax), NULL, (double *) (X), NULL, (double *) (B), NULL, N, C, I)
-#define umfpack_free_symbolic							umfpack_di_free_symbolic
-#define umfpack_free_numeric							umfpack_zi_free_numeric
-#define umfpack_defaults								umfpack_zi_defaults
+  // macros for calling complex UMFPACK in packed-complex mode
+  #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_zi_symbolic(m, n, Ap, Ai, (double *) (Ax), NULL, S, C, I)
+  #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_zi_numeric(Ap, Ai, (double *) (Ax), NULL, S, N, C, I)
+  #define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I) umfpack_zi_solve(sys, Ap, Ai, (double *) (Ax), NULL, (double *) (X), NULL, (double *) (B), NULL, N, C, I)
+  #define umfpack_free_symbolic                         umfpack_di_free_symbolic
+  #define umfpack_free_numeric                          umfpack_zi_free_numeric
+  #define umfpack_defaults                              umfpack_zi_defaults
 #endif
 
 
 UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
-  : LinearSolver(), m(m), rhs(rhs)
+  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -307,10 +317,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
-#ifdef WITH_UMFPACK  
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
-#endif
+  free_factorization_structures();
 }
 
 #ifdef WITH_UMFPACK
@@ -345,22 +352,13 @@ bool UMFPackLinearSolver::solve() {
 
   TimePeriod tmr;
 
-  void *symbolic, *numeric;
   int status;
 
-  status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
-  if (status != UMFPACK_OK) {
-    check_status("umfpack_di_symbolic", status);
+  if ( !prepare_factorization_structures() )
+  {
+    warning("LU factorization could not be completed.");
     return false;
   }
-  if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
-
-  status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
-  if (status != UMFPACK_OK) {
-    check_status("umfpack_di_numeric", status);
-    return false;
-  }
-  if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
 
   delete [] sln;
   sln = new scalar[m->size];
@@ -375,12 +373,59 @@ bool UMFPackLinearSolver::solve() {
 
   tmr.tick();
   time = tmr.accumulated();
-
-  umfpack_free_symbolic(&symbolic);
-  umfpack_free_numeric(&numeric);
-
+  
   return true;
 #else
   return false;
 #endif
 }
+
+bool UMFPackLinearSolver::prepare_factorization_structures()
+{
+  _F_
+#ifdef WITH_UMFPACK
+  int status;
+  switch(factorization_scheme)
+  {
+    case HERMES_FACTORIZE_FROM_SCRATCH:
+      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+      
+      debug_log("Factorizing symbolically.");
+      status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
+      if (status != UMFPACK_OK) {
+        check_status("umfpack_di_symbolic", status);
+        return false;
+      }
+      if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
+      
+    case HERMES_REUSE_MATRIX_REORDERING:
+    case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
+      if (numeric != NULL) umfpack_free_numeric(&numeric);
+      
+      debug_log("Factorizing numerically.");
+      status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
+      if (status != UMFPACK_OK) {
+        check_status("umfpack_di_numeric", status);
+        return false;
+      }
+      if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
+  }
+  
+  return true;
+#else
+  return false;
+#endif
+}
+
+void UMFPackLinearSolver::free_factorization_structures()
+{ 
+  _F_
+#ifdef WITH_UMFPACK
+  if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+  symbolic = NULL;
+  if (numeric != NULL) umfpack_free_numeric(&numeric);
+  numeric = NULL;
+#endif
+}
+
+

@@ -33,6 +33,7 @@
 // linear solvers
 #include "../../hermes_common/solver/solver.h"
 #include "../../hermes_common/solver/umfpack_solver.h"
+#include "../../hermes_common/solver/superlu.h"
 #include "../../hermes_common/solver/pardiso.h"
 #include "../../hermes_common/solver/petsc.h"
 #include "../../hermes_common/solver/epetra.h"

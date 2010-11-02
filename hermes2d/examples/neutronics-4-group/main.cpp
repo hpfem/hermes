@@ -47,7 +47,7 @@ const int P_INIT_1 = 4,                           // Initial polynomial degree f
           P_INIT_3 = 4,                           // Initial polynomial degree for approximation of group 3 fluxes.
           P_INIT_4 = 4;                           // Initial polynomial degree for approximation of group 4 fluxes.
 const double ERROR_STOP = 1e-5;                   // Tolerance for the eigenvalue.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+MatrixSolverType matrix_solver = SOLVER_SUPERLU;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -216,9 +216,16 @@ int main(int argc, char* argv[])
   do
   {
     info("------------ Power iteration %d:", iter);
-
+    
     info("Assembling the stiffness matrix and right-hand side vector.");
     dp.assemble(matrix, rhs, rhs_only);
+    
+    if (iter == 10)  
+      solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING);
+    if (iter == 20)
+      solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+    if (iter == 30) 
+      solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
     
     info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
     solver_time.tick(HERMES_SKIP);  

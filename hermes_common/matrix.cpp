@@ -25,6 +25,7 @@
 //  Solvers
 #include "solver/solver.h"
 #include "solver/umfpack_solver.h"
+#include "solver/superlu.h"
 #include "solver/amesos.h"
 #include "solver/pardiso.h"
 #include "solver/petsc.h"
@@ -296,6 +297,11 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
         return new UMFPackMatrix;
         break;
       }
+    case SOLVER_SUPERLU: 
+    {
+      return new SuperLUMatrix;
+      break;
+    }
     default: 
       error("Unknown matrix solver requested.");
   }
@@ -343,6 +349,12 @@ Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vec
         info("Using UMFPack."); 
         break;
       }
+    case SOLVER_SUPERLU: 
+    {
+      return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs)); 
+      info("Using SuperLU."); 
+      break;
+    }
     default: 
       error("Unknown matrix solver requested.");
   }
@@ -379,6 +391,11 @@ Vector* create_vector(MatrixSolverType matrix_solver)
         return new UMFPackVector;
         break;
       }
+    case SOLVER_SUPERLU: 
+    {
+      return new SuperLUVector;
+      break;
+    }
     default: 
       error("Unknown matrix solver requested.");
   }
