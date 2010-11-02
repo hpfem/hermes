@@ -65,7 +65,7 @@ set(WITH_MUMPS              NO)
 # SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
 # header files as the serial library. 
 #
-set(WITH_SUPERLU            YES)
+set(WITH_SUPERLU            NO)
 set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
 set(SUPERLU_MT              NO)
 
