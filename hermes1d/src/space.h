@@ -189,7 +189,7 @@ void HERMES_API adapt(int norm, int adapt_type, double threshold,
 
 void HERMES_API adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Space* space, ElemPtr2 *ref_elem_pairs);
+           Space* &space, ElemPtr2 *ref_elem_pairs);
 
 void HERMES_API adapt_plotting(Space *space, Space *space_ref,
                     int norm, int exact_sol_provided, 

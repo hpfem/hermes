@@ -1430,7 +1430,7 @@ void adapt(int norm, int adapt_type, double threshold,
 // also is updated. 
 void adapt(int norm, int adapt_type, double threshold, 
            double *err_array, 
-           Space* space, ElemPtr2 *ref_elem_pairs) 
+           Space* &space, ElemPtr2 *ref_elem_pairs) 
 {
   int n_elem = space->get_n_active_elem();
   
