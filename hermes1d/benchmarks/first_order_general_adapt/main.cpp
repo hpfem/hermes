@@ -217,11 +217,11 @@ int main() {
     delete solver;
 
     // Starting with second adaptivity step, obtain new coarse 
-    // space mesh via projecting the fine mesh solution.
+    // mesh solution via projecting the fine mesh solution.
     if(as > 1)
     {
       info("Projecting the fine mesh solution onto the coarse mesh.");
-      OGProjection::project_global(space, ref_space);
+      OGProjection::project_global(space, ref_space, matrix_solver);
     }
 
     // In the next step, estimate element errors based on 

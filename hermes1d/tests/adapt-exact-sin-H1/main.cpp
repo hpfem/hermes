@@ -254,75 +254,11 @@ int main() {
     delete [] coeff_vec;
 
     // Starting with second adaptivity step, obtain new coarse 
-    // space solution via Newton's method. Initial condition is 
-    // the last coarse mesh solution.
-    if (as > 1) {
-      //Info for user.
-      info("Solving on coarse mesh");
-
-      // Initialize the FE problem.
-      bool is_linear = false;
-      DiscreteProblem* dp_coarse = new DiscreteProblem(&wf, space, is_linear);
-
-      // Newton's loop on coarse mesh.
-      // Fill vector coeff_vec using dof and coeffs arrays in elements.
-      double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
-      solution_to_vector(space, coeff_vec_coarse);
-
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-      Vector* rhs_coarse = create_vector(matrix_solver);
-      Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof_coarse = Space::get_num_dofs(space);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp_coarse->assemble(matrix_coarse, rhs_coarse);
-
-        // Calculate the l2-norm of residual vector.
-        double res_norm = 0;
-        for(int i=0; i<ndof_coarse; i++) res_norm += rhs_coarse->get(i)*rhs_coarse->get(i);
-        res_norm = sqrt(res_norm);
-
-        // Info for user.
-        info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
-
-        // If l2 norm of the residual vector is within tolerance, then quit.
-        // NOTE: at least one full iteration forced
-        //       here because sometimes the initial
-        //       residual on fine mesh is too small.
-        if(res_norm < NEWTON_TOL_COARSE && it > 1) break;
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for(int i=0; i<ndof_coarse; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-
-        // Solve the linear system.
-        if(!solver_coarse->solve())
-          error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-
-        // If the maximum number of iteration has been reached, then quit.
-        if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
-        
-        // Copy coefficients from vector y to elements.
-        vector_to_solution(coeff_vec_coarse, space);
-
-        it++;
-      }
-      
-      // Cleanup.
-      delete matrix_coarse;
-      delete rhs_coarse;
-      delete solver_coarse;
-      delete dp_coarse;
-      delete [] coeff_vec_coarse;
+    // mesh solution via projecting the fine mesh solution.
+    if(as > 1)
+    {
+      info("Projecting the fine mesh solution onto the coarse mesh.");
+      OGProjection::project_global(space, ref_space, matrix_solver);
     }
 
     // In the next step, estimate element errors based on 

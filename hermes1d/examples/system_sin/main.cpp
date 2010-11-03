@@ -38,7 +38,7 @@ Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 
 int main() {
   // Create space, set Dirichlet BC, enumerate basis functions.
-  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, Tuple<BCSpec *>(), P_INIT, NEQ);
+  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, Tuple<BCSpec *>(), P_INIT, NEQ, NEQ);
   info("N_dof = %d.", Space::get_num_dofs(space));
 
   // Initialize the weak formulation.
