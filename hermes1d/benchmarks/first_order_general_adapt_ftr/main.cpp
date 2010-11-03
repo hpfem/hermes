@@ -64,6 +64,8 @@ double dfdy(double y, double x) {
 }
 
 // Exact solution.
+// When changing exact solution, do not 
+// forget to update interval accordingly.
 const int EXACT_SOL_PROVIDED = 1;
 void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
   u[0] = 1./(x+1);
@@ -73,7 +75,6 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
 
-/******************************************************************************/
 int main() {
   // Time measurement.
   TimePeriod cpu_time;
@@ -101,22 +102,18 @@ int main() {
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_exact, graph_cpu_exact;
 
-  // Main adaptivity loop.
+  // Adaptivity loop:
   int as = 1;
-  while(1) {
+  bool done = false;
+  do
+  {
     info("---- Adaptivity step %d:", as);
 
     // Initialize the FE problem.
     bool is_linear = false;
     DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space, is_linear);
     
-    // Info for the user.
-    info("N_dof = %d", Space::get_num_dofs(space));
- 
     // Newton's loop on coarse mesh.
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(space);
-
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
     double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
     solution_to_vector(space, coeff_vec_coarse);
@@ -135,18 +132,16 @@ int main() {
       dp_coarse->assemble(matrix_coarse, rhs_coarse);
 
       // Calculate the l2-norm of residual vector.
-      double res_norm = 0;
-      for(int i=0; i<ndof_coarse; i++) res_norm += rhs_coarse->get(i)*rhs_coarse->get(i);
-      res_norm = sqrt(res_norm);
+    double res_l2_norm = get_l2_norm(rhs_coarse);
 
-      // Info for the user.
-      info("---- Newton iter %d, residual norm: %.15f.", it, res_norm);
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, then quit.
       // NOTE: at least one full iteration forced
       //       here because sometimes the initial
       //       residual on fine mesh is too small.
-      if(res_norm < NEWTON_TOL_COARSE && it > 1) break;
+    if(res_l2_norm < NEWTON_TOL_COARSE && it > 1) break;
 
       // Multiply the residual vector with -1 since the matrix 
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -154,7 +149,7 @@ int main() {
 
       // Solve the linear system.
       if(!solver_coarse->solve())
-        error ("Matrix solver failed.");
+      error ("Matrix solver failed.\n");
 
       // Add \deltaY^{n+1} to Y^n.
       for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
@@ -216,18 +211,16 @@ int main() {
         dp->assemble(matrix, rhs);
 
         // Calculate the l2-norm of residual vector.
-        double res_norm = 0;
-        for(int i=0; i<ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
-        res_norm = sqrt(res_norm);
+      double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space_ref_local), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, then quit.
         // NOTE: at least one full iteration forced
         //       here because sometimes the initial
         //       residual on fine mesh is too small.
-        if(res_norm < NEWTON_TOL_REF && it > 1) break;
+      if(res_l2_norm < NEWTON_TOL_REF && it > 1) break;
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -235,7 +228,7 @@ int main() {
 
         // Solve the linear system.
         if(!solver->solve())
-          error ("Matrix solver failed.");
+        error ("Matrix solver failed.\n");
 
         // Add \deltaY^{n+1} to Y^n.
         for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
@@ -336,11 +329,13 @@ int main() {
 
     as++;
   }
+  while (done == false);
+
+  info("Total running time: %g s", cpu_time.accumulated());
   
   // Save convergence graphs.
   graph_dof_exact.save("conv_dof_exact.dat");
   graph_cpu_exact.save("conv_cpu_exact.dat");
 
-  info("Done.");
-  return 1;
+  return 0;
 }

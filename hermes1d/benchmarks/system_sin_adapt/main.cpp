@@ -83,6 +83,7 @@ int main() {
   bool is_linear = false;
   DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
+  // Newton's loop on coarse mesh.
   // Fill vector coeff_vec using dof and coeffs arrays in elements.
   double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
   solution_to_vector(space, coeff_vec_coarse);
@@ -92,7 +93,6 @@ int main() {
   Vector* rhs_coarse = create_vector(matrix_solver);
   Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
-  // Newton's loop on coarse mesh.
   int it = 1;
   while (1) {
     // Obtain the number of degrees of freedom.
@@ -102,18 +102,16 @@ int main() {
     dp_coarse->assemble(matrix_coarse, rhs_coarse);
 
     // Calculate the l2-norm of residual vector.
-    double res_norm = 0;
-    for(int i = 0; i < ndof_coarse; i++) res_norm += rhs_coarse->get(i)*rhs_coarse->get(i);
-    res_norm = sqrt(res_norm);
+    double res_l2_norm = get_l2_norm(rhs_coarse);
 
     // Info for user.
-    info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
 
     // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
     //       residual on fine mesh is too small.
-    if(res_norm < NEWTON_TOL_COARSE && it > 1) break;
+    if(res_l2_norm < NEWTON_TOL_COARSE && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -139,16 +137,18 @@ int main() {
   delete matrix_coarse;
   delete rhs_coarse;
   delete solver_coarse;
-  delete dp_coarse;
   delete [] coeff_vec_coarse;
+  delete dp_coarse;
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
   SimpleGraph graph_dof_exact, graph_cpu_exact;
 
-  // Main adaptivity loop.
+  // Adaptivity loop:
   int as = 1;
-  while(1) {
+  bool done = false;
+  do
+  {
     info("---- Adaptivity step %d:", as); 
 
     // Construct globally refined reference mesh and setup reference space.
@@ -163,7 +163,8 @@ int main() {
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Newton's loop on fine mesh.
+    // Newton's loop on the fine mesh.
+    info("Solving on fine mesh:");
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
     double *coeff_vec = new double[Space::get_num_dofs(ref_space)];
     solution_to_vector(ref_space, coeff_vec);
@@ -177,18 +178,16 @@ int main() {
       dp->assemble(matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
-      double res_norm = 0;
-      for(int i = 0; i < ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
-      res_norm = sqrt(res_norm);
+      double res_l2_norm = get_l2_norm(rhs);
 
       // Info for user.
-      info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, then quit.
       // NOTE: at least one full iteration forced
       //       here because sometimes the initial
       //       residual on fine mesh is too small.
-      if(res_norm < NEWTON_TOL_REF && it > 1) break;
+      if(res_l2_norm < NEWTON_TOL_REF && it > 1) break;
 
       // Multiply the residual vector with -1 since the matrix 
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -210,13 +209,6 @@ int main() {
       it++;
     }
     
-    // Cleanup.
-    delete matrix;
-    delete rhs;
-    delete solver;
-    delete dp;
-    delete [] coeff_vec;
-
     // Starting with second adaptivity step, obtain new coarse 
     // mesh solution via projecting the fine mesh solution.
     if(as > 1)
@@ -225,13 +217,15 @@ int main() {
       OGProjection::project_global(space, ref_space, matrix_solver);
     }
 
-    // In the next step, estimate element errors based on 
-    // the difference between the fine mesh and coarse mesh solutions.
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate.");
     double err_est_array[MAX_ELEM_NUM];
-    double err_est_rel = calc_err_est(NORM, space, ref_space, err_est_array) * 100;
+    double err_est_rel = calc_err_est(NORM, 
+              space, ref_space, err_est_array) * 100;
 
-    // Info for user.
-    info("Relative error (est) = %g %%", err_est_rel);
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      Space::get_num_dofs(space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
@@ -239,7 +233,8 @@ int main() {
     // If exact solution available, also calculate exact error.
     if (EXACT_SOL_PROVIDED) {
       // Calculate element errors wrt. exact solution.
-      double err_exact_rel = calc_err_exact(NORM, space, exact_sol, NEQ, A, B) * 100;
+      double err_exact_rel = calc_err_exact(NORM, 
+         space, exact_sol, NEQ, A, B) * 100;
      
       // Info for user.
       info("Relative error (exact) = %g %%", err_exact_rel);
@@ -253,15 +248,13 @@ int main() {
     graph_dof_est.add_values(Space::get_num_dofs(space), err_est_rel);
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
 
-    // Decide whether the relative error is sufficiently small.
-    if(err_est_rel < TOL_ERR_REL) break;
-
-    // Returns updated coarse and fine meshes, with the last 
-    // coarse and fine mesh solutions on them, respectively. 
-    // The coefficient vectors and numbers of degrees of freedom 
-    // on both meshes are also updated. 
+    // If err_est_rel too large, adapt the mesh.
+    if (err_est_rel < NEWTON_TOL_REF) done = true;
+    else {
+      info("Adapting the coarse mesh.");
     adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array,
           space, ref_space);
+    }
 
     as++;
     
@@ -270,8 +263,17 @@ int main() {
                  NORM, EXACT_SOL_PROVIDED, exact_sol);
 
     // Cleanup.
+    delete solver;
+    delete matrix;
+    delete rhs;
     delete ref_space;
+    delete dp;
+    delete [] coeff_vec;
+
   }
+  while (done == false);
+
+  info("Total running time: %g s", cpu_time.accumulated());
 
   // Save convergence graphs.
   graph_dof_est.save("conv_dof_est.dat");
@@ -279,6 +281,5 @@ int main() {
   graph_dof_exact.save("conv_dof_exact.dat");
   graph_cpu_exact.save("conv_cpu_exact.dat");
 
-  info("Done.");
-  return 1;
+  return 0;
 }

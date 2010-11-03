@@ -82,19 +82,17 @@ int main() {
     // Assemble the Jacobian matrix and residual vector.
     dp->assemble(matrix, rhs);
 
-      // Calculate the l2-norm of residual vector.
-    double res_norm = 0;
-    for(int i = 0; i < ndof; i++) res_norm += rhs->get(i)*rhs->get(i);
-    res_norm = sqrt(res_norm);
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs);
 
     // Info for user.
-    info("---- Newton iter %d, residual norm: %.15f", it, res_norm);
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
 
     // If l2 norm of the residual vector is within tolerance, then quit.
     // NOTE: at least one full iteration forced
     //       here because sometimes the initial
     //       residual on fine mesh is too small.
-    if(res_norm < NEWTON_TOL && it > 1) break;
+    if(res_l2_norm < NEWTON_TOL && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -124,5 +122,5 @@ int main() {
   space->plot("space.gp");
 
   info("Done.");
-  return 1;
+  return 0;
 }

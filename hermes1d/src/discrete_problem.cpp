@@ -478,3 +478,12 @@ Space* construct_refined_space(Space* space, int order_increase)
   ref_space->assign_dofs();
   return ref_space;
 }
+
+double get_l2_norm(Vector* vec) 
+{
+  _F_
+  double val = 0;
+  for (int i = 0; i < vec->length(); i++)
+    val = val + vec->get(i)*vec->get(i);
+  return sqrt(std::abs(val));
+}

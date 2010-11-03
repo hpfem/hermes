@@ -56,4 +56,6 @@ void HERMES_API jfnk_cg(DiscreteProblem *dp, Space *space,
 // Solution is transfered to new elements.
 HERMES_API Space* construct_refined_space(Space* space, int order_increase = 1);
 
+HERMES_API double get_l2_norm(Vector* vec);
+
 #endif
