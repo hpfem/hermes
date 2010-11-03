@@ -125,7 +125,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhs
                 }
                 else
                   if(this->is_linear)
-                    res->add(pos_i, -val_ij);
+                    res->add(pos_i, -val_ij * e->coeffs[c_j][c_j][j]);
             }
           }
         }
