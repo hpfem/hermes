@@ -43,24 +43,34 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 // Write the matrix in Matrix Market format.
 void write_matrix_mm(const char* filename, Matrix* mat) 
 {
+  // Get matrix size.
   int ndof = mat->get_size();
+  printf("ndof = %d\n", ndof);
   FILE *out = fopen(filename, "w" );
-  int nz=0;
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
+  if (out == NULL) error("failed to open file for writing.");
+
+  // Calculate the number of nonzeros.
+  int nz = 0;
+  for (int i = 0; i < ndof; i++) {
+    for (int j = 0; j <= i; j++) { 
+      double tmp = mat->get(i, j);
+      printf("(%d, %d, %24.15e)\n", i, j, tmp);
       if (fabs(tmp) > 1e-15) nz++;
     }
   } 
 
+  printf("here 1\n");
+
+  // Write the matrix in MatrixMarket format
   fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
   fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i+1, j+1, tmp);
+  for (int i = 0; i < ndof; i++) {
+    for (int j = 0; j <= i; j++) { 
+      double tmp = mat->get(i, j);
+      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
     }
   } 
+  printf("here 2\n");
   fclose(out);
 }
 
@@ -81,7 +91,7 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d.", ndof);
 
-  // Initialize the weak formulation for the left hand side i.e. H 
+  // Initialize the weak formulation for the left hand side, i.e., H.
   WeakForm wf_left, wf_right;
   wf_left.add_matrix_form(callback(bilinear_form_left));
   wf_right.add_matrix_form(callback(bilinear_form_right));
