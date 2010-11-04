@@ -203,10 +203,10 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS       0
 #define ERROR_FAILURE      -1
-  int ndof_allowed = 650;
+  int ndof_allowed = 920;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
-  if (ndof <= ndof_allowed) {      // ndofs was 636 at the time this test was created
+  if (ndof <= ndof_allowed) {      // ndofs was 908 at the time this test was created
     printf("Success!\n");
     return ERROR_SUCCESS;
   }
