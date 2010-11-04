@@ -98,9 +98,12 @@ int main(int argc, char* argv[])
   dp_left.assemble(matrix_left, eivec);
   DiscreteProblem dp_right(&wf_right, &space, is_linear);
   dp_right.assemble(matrix_right, eivec);
+  printf("writing matrix 1\n");
 
   // Write matrix_left in MatrixMarket format.
   write_matrix_mm("mat_left.mtx", matrix_left);
+
+  printf("writing matrix 2\n");
 
   // Write matrix_left in MatrixMarket format.
   write_matrix_mm("mat_right.mtx", matrix_right);
