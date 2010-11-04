@@ -99,15 +99,14 @@ int main(int argc, char* argv[])
   // Initialize matrices and matrix solver.
   SparseMatrix* matrix_left = create_matrix(matrix_solver);
   SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Vector* eivec = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_left, eivec);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_left);
 
   // Assemble the matrices.
   bool is_linear = true;
   DiscreteProblem dp_left(&wf_left, &space, is_linear);
-  dp_left.assemble(matrix_left, eivec);
+  dp_left.assemble(matrix_left);
   DiscreteProblem dp_right(&wf_right, &space, is_linear);
-  dp_right.assemble(matrix_right, eivec);
+  dp_right.assemble(matrix_right);
   printf("writing matrix 1\n");
 
   // Write matrix_left in MatrixMarket format.

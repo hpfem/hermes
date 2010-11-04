@@ -433,7 +433,7 @@ HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
 HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
 
 class Solver;
-HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
+HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs = NULL);
 
 
 

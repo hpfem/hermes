@@ -311,47 +311,55 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
   _F_
+  Vector* rhs_dummy;
   switch (matrix_solver) 
   {
     case SOLVER_AZTECOO:
       {
-        return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        if (rhs != NULL) return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        else return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs_dummy));
         info("Using AztecOO."); 
         break;
       }
     case SOLVER_AMESOS:
       {
-        return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        if (rhs != NULL) return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        else return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs_dummy));
         info("Using Amesos."); 
         break;
       }
     case SOLVER_MUMPS: 
       {
-        return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
+        if (rhs != NULL) return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
+        else return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs_dummy)); 
         info("Using Mumps."); 
         break;
       }
     case SOLVER_PARDISO: 
       {
-        return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
+        if (rhs != NULL) return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
+        else return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs_dummy));
         info("Using Pardiso."); 
         break;
       }
     case SOLVER_PETSC: 
       {
-        return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
+        if (rhs != NULL) return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
+        else return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs_dummy)); 
         info("Using PETSc.");
         break;
       }
     case SOLVER_UMFPACK: 
       {
-        return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
+        if (rhs != NULL) return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
+        else return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs_dummy)); 
         info("Using UMFPack."); 
         break;
       }
     case SOLVER_SUPERLU: 
     {
-      return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs)); 
+      if (rhs != NULL) return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs)); 
+      else return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs_dummy)); 
       info("Using SuperLU."); 
       break;
     }

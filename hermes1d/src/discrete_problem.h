@@ -26,7 +26,7 @@ public:
   
   void process_vol_forms(SparseMatrix *mat, Vector *res, bool rhsonly);
 
-  void assemble(SparseMatrix *mat, Vector *res, bool rhsonly = false);
+  void assemble(SparseMatrix *mat, Vector *rhs = NULL, bool rhsonly = false);
 
 private:
   WeakForm* wf;

@@ -43,7 +43,7 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear) : w
 }
 
 // process volumetric weak forms
-void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhsonly) {
+void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhsonly) {
   int n_eq = space->get_n_eq();
   Element *elems = space->get_base_elems();
   int n_elem = space->get_n_base_elem();
@@ -124,8 +124,8 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhs
                   }
                 }
                 else
-                  if(this->is_linear)
-                    res->add(pos_i, -val_ij * e->coeffs[c_j][c_j][j]);
+                  if(this->is_linear && rhs != NULL)
+                    rhs->add(pos_i, -val_ij * e->coeffs[c_j][c_j][j]);
             }
           }
         }
@@ -151,7 +151,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhs
           // truncating
           if(fabs(val_i) < 1e-12) val_i = 0.0; 
           // add the contribution to the residual vector
-          if (val_i != 0) res->add(pos_i, val_i);
+          if (val_i != 0 && rhs != NULL) rhs->add(pos_i, val_i);
           if (DEBUG_MATRIX)
 	          if (val_i != 0)
 	            info("Adding to residual pos %d value %g (comp %d)", 
@@ -164,7 +164,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *res, bool rhs
 }
 
 // process boundary weak forms
-void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *res, int bdy_index, bool rhsonly) {
+void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy_index, bool rhsonly) {
   Iterator *I = new Iterator(space);
   Element *e; 
 
@@ -233,8 +233,8 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *res, int bdy
               }
             }
             else
-              if(this->is_linear)
-                  res->add(pos_i, -val_ij_surf);
+              if(this->is_linear && rhs != NULL)
+                  rhs->add(pos_i, -val_ij_surf);
         }
       }
     }
@@ -262,7 +262,7 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *res, int bdy
         // truncating
         if(fabs(val_i_surf) < 1e-12) val_i_surf = 0.0; 
         // add the result to the matrix
-        if (val_i_surf != 0) res->add(pos_i, val_i_surf);
+        if (val_i_surf != 0 && rhs != NULL) rhs->add(pos_i, val_i_surf);
       }
     }
   }
@@ -270,7 +270,7 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *res, int bdy
 }
 
 // construct Jacobi matrix or residual vector
-void DiscreteProblem::assemble(SparseMatrix *mat, Vector *res, bool rhsonly) {
+void DiscreteProblem::assemble(SparseMatrix *mat, Vector *rhs, bool rhsonly) {
   // number of equations in the system
   int n_eq = space->get_n_eq();
 
@@ -278,9 +278,9 @@ void DiscreteProblem::assemble(SparseMatrix *mat, Vector *res, bool rhsonly) {
   int n_dof = Space::get_num_dofs(space);
 
   // Reallocate the matrix and residual vector.
-  res->alloc(n_dof);
+  if (rhs != NULL) rhs->alloc(n_dof);
   // Zero the vector, which should be done by the appropriate implementation anyway.
-  res->zero();
+  if (rhs != NULL) rhs->zero();
   if (mat != NULL)
   {
     mat->free();
@@ -294,13 +294,13 @@ void DiscreteProblem::assemble(SparseMatrix *mat, Vector *res, bool rhsonly) {
   }
 
   // process volumetric weak forms via an element loop
-  process_vol_forms(mat, res, rhsonly);
+  process_vol_forms(mat, rhs, rhsonly);
 
   // process surface weak forms for the left boundary
-  process_surf_forms(mat, res, BOUNDARY_LEFT, rhsonly);
+  process_surf_forms(mat, rhs, BOUNDARY_LEFT, rhsonly);
 
   // process surface weak forms for the right boundary
-  process_surf_forms(mat, res, BOUNDARY_RIGHT, rhsonly);
+  process_surf_forms(mat, rhs, BOUNDARY_RIGHT, rhsonly);
 
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX) {
@@ -313,10 +313,10 @@ void DiscreteProblem::assemble(SparseMatrix *mat, Vector *res, bool rhsonly) {
   }
 
   // DEBUG: print residual vector
-  if(DEBUG_MATRIX) {
+  if(DEBUG_MATRIX && rhs != NULL) {
     info("Residual:");
     for(int i=0; i<n_dof; i++) {
-      info("%g ", res->get(i));
+      info("%g ", rhs->get(i));
     }
   }
 } 

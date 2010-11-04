@@ -50,11 +50,11 @@ public:
 
         // General assembling procedure for nonlinear problems. coeff_vec is the 
         // previous Newton vector.
-	void assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly = false);
+	void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
 
         // Assembling for linear problems. Same as the previous functions, but 
         // does not need the coeff_vector.
-	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
+	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
                       bool rhsonly = false);
 
         // Get the number of unknowns.
