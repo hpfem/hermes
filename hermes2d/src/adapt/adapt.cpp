@@ -18,7 +18,7 @@
 #include "../h2d_common.h"
 #include "../limit_order.h"
 #include "../solution.h"
-#include "../feproblem.h"
+#include "../discrete_problem.h"
 #include "../refmap.h"
 #include "../quad_all.h"
 #include "../traverse.h"

@@ -15,7 +15,7 @@
 
 #include "h2d_common.h"
 #include "limit_order.h"
-#include "feproblem.h"
+#include "discrete_problem.h"
 #include "traverse.h"
 #include "space/space.h"
 #include "precalc.h"

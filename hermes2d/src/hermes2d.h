@@ -45,7 +45,7 @@
 #include "trans.h"
 
 #include "weakform.h"
-#include "feproblem.h"
+#include "discrete_problem.h"
 #include "forms.h"
 
 // solvers
