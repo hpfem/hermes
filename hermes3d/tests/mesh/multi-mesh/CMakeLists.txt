@@ -5,7 +5,7 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 set(BINARIES)
 
 macro(ADD_BIN BIN DEFINE)
-	add_executable(${BIN}		multi-mesh.cpp)
+	add_executable(${BIN}		main.cpp)
 	set_common_target_properties(${BIN})
 
 	set_target_properties(${BIN} PROPERTIES COMPILE_FLAGS -D${DEFINE})

@@ -23,7 +23,7 @@
 #include "solver.h"
 #include "../matrix.h"
 
-class UMFPackMatrix : public SparseMatrix {
+class HERMES_API UMFPackMatrix : public SparseMatrix {
 public:
   UMFPackMatrix();
   UMFPackMatrix(int size);
@@ -49,7 +49,7 @@ protected:
   friend class UMFPackLinearSolver;
 };
 
-class UMFPackVector : public Vector {
+class HERMES_API UMFPackVector : public Vector {
 public:
   UMFPackVector();
   UMFPackVector(int size);

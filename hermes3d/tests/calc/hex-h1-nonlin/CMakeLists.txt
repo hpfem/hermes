@@ -5,7 +5,7 @@ set(BINARIES)
 include (${hermes3d_SOURCE_DIR}/CMake.common)
 
 macro(ADD_BIN BIN DEFINE)
-	add_executable(${BIN}		hex-nonlin.cpp)
+	add_executable(${BIN}		main.cpp)
 
   set_common_target_properties(${BIN})
 
