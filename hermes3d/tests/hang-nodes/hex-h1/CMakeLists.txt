@@ -6,7 +6,7 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 
 # Dirichlet ####
 
-add_executable(${BIN_DIRICHLET}	hang-nodes-cont.cpp)
+add_executable(${BIN_DIRICHLET}	main.cpp)
 set_common_target_properties(${BIN_DIRICHLET})
 
 set_target_properties(${BIN_DIRICHLET}
@@ -15,7 +15,7 @@ set_target_properties(${BIN_DIRICHLET}
 
 # Newton ####
 
-add_executable(${BIN_NEWTON}	hang-nodes-cont.cpp)
+add_executable(${BIN_NEWTON}	main.cpp)
 set_common_target_properties(${BIN_NEWTON})
 
 set_target_properties(${BIN_NEWTON}

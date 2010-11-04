@@ -2,7 +2,7 @@ project(mesh-copy)
 
 include(${hermes3d_SOURCE_DIR}/CMake.common)
 
-add_executable(${PROJECT_NAME}	mesh-copy.cpp)
+add_executable(${PROJECT_NAME}	main.cpp)
 set_common_target_properties(${PROJECT_NAME})
 
 # Tests
