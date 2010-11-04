@@ -17,7 +17,7 @@
 
 int NUMBER_OF_EIGENVALUES = 6;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
+const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
