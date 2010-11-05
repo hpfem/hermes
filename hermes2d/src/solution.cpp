@@ -1317,7 +1317,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
   }
   else if (type == HERMES_CONST)
   {
-    if (b = 0) return cnst[a];
+    if (b == 0) return cnst[a];
     return 0.0;
   }
   else if (type == HERMES_UNDEF)
