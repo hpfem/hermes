@@ -146,7 +146,8 @@ int main()
   {
     info("---- Adaptivity step %d:", as); 
 
-    // Construct globally refined reference mesh and setup reference space.
+    // Construct globally refined reference mesh, create reference space on it,
+    // and transfer the coarse mesh solution there.
     Space* ref_space = construct_refined_space(space);
     
     // Initialize the FE problem.
