@@ -187,7 +187,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
       for (int i = 0; i < wf->neq; i++)
       {
         // TODO: do not get the assembly list again if the element was not changed
-        if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], al + i);
+        if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], &(al[i]));
       }
 
       // go through all equation-blocks of the local stiffness matrix
@@ -197,8 +197,8 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
         {
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) 
           {
-            AsmList *am = al + m;
-            AsmList *an = al + n;
+            AsmList *am = &(al[m]);
+            AsmList *an = &(al[n]);
 
             // pretend assembling of the element stiffness matrix
             // register nonzero elements
@@ -345,7 +345,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         }
 
         // TODO: do not obtain again if the element was not changed.
-        spaces[j]->get_element_assembly_list(e[i], al + j);
+        spaces[j]->get_element_assembly_list(e[i], &(al[j]));
 
         // This is different in H3D (PrecalcShapeset is not used)
         spss[j]->set_active_element(e[i]);
@@ -395,13 +395,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {
-                    scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
+                    scalar val = eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
+                            &(refmap[m])) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   } 
                 }
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
+                  scalar val = eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
+                          &(refmap[m])) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 }
               }
@@ -417,13 +419,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {
-                    scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
+                    scalar val = eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
+                            &(refmap[m])) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   }
                 } 
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
+                  scalar val = eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
+                          &(refmap[m])) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
                 }
               }
@@ -480,13 +484,13 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           if (vfv->area != HERMES_ANY && !wf->is_in_area(marker, vfv->area)) continue;
           int m = vfv->i;  
           fv = spss[m];    // H3D uses fv = test_fn + m;
-          am = al + m;
+          am = &(al[m]);
 
           for (int i = 0; i < am->cnt; i++)
           {
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
-            scalar val = eval_form(vfv, u_ext, fv, refmap + m) * am->coef[i];
+            scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];
             rhs->add(am->dof[i], val);
           }
         }
@@ -507,7 +511,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           if (e[i] == NULL) continue;
           int j = s->idx[i];
           if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
-            spaces[j]->get_boundary_assembly_list(e[i], isurf, al + j);
+            spaces[j]->get_boundary_assembly_list(e[i], isurf, &(al[j]));
         }
 
         // assemble surface matrix forms ///////////////////////////////////
@@ -522,8 +526,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             int n = mfs->j;  
             fu = pss[n];      // This is different in H3D.
             fv = spss[m];     // This is different in H3D.
-            am = al + m;
-            an = al + n;
+            am = &(al[m]);
+            an = &(al[n]);
 
             if (!nat[m] || !nat[n]) continue;
             surf_pos[isurf].base = trav.get_base();
@@ -543,15 +547,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
                   if (rhs != NULL && this->is_linear) 
                   {
-                    scalar val = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m, 
-                                           surf_pos + isurf) * an->coef[j] * am->coef[i];
+                    scalar val = eval_form(mfs, u_ext, fu, fv, &(refmap[n]),
+                            &(refmap[m]), surf_pos + isurf) * an->coef[j] * am->coef[i];
                     rhs->add(am->dof[i], -val);
                   }
                 }
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m, 
-                                         surf_pos + isurf) * an->coef[j] * am->coef[i];
+                  scalar val = eval_form(mfs, u_ext, fu, fv, &(refmap[n]),
+                          &(refmap[m]), surf_pos + isurf) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 } 
               }
@@ -571,7 +575,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             if (vfs->area != HERMES_ANY && !wf->is_in_area(marker, vfs->area)) continue;
             int m = vfs->i;  
             fv = spss[m];        // This is different from H3D.  
-            am = al + m;
+            am = &(al[m]);
 
             if (!nat[m]) continue;
             surf_pos[isurf].base = trav.get_base();
@@ -581,7 +585,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             {
               if (am->dof[i] < 0) continue;
               fv->set_active_shape(am->idx[i]);
-              scalar val = eval_form(vfs, u_ext, fv, refmap + m, surf_pos + isurf) * am->coef[i];
+              scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
               rhs->add(am->dof[i], val);
             }
           }
