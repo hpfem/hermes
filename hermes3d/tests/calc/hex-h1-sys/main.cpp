@@ -1,43 +1,33 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-// Two uncoupled equations:
-// -\laplace u_1 = f_1        u_1 = (1 - x^2) (1 - y^2) (1 - z^2)
-// -\laplace u_2 = f_2        u_2 = (1 - x^2) x^2 (1 - y^2) y^2 (1 - z^2) z^2
-//
-// u_1 = 0 on \partial\Omega
-// u_2 = 0 on \partial\Omega
-//
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
+//#include <getopt.h>
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/common_time_period.h"
-#include "../../../../hermes_common/error.h"
-#ifdef WITH_PETSC
-#include "../../../../hermes_common/solver/petsc.h"
-#endif
 
-// error should be smaller than this epsilon
+// PDE: -\laplace u_1 = f_1,
+//		-\laplace u_2 = f_2.	
+//
+// BC:         u_1 = 0, u_2 = 0.
+//
+// exact solution: u_1 = (1 - x^2) (1 - y^2) (1 - z^2),
+//				   u_2 = (1 - x^2) x^2 (1 - y^2) y^2 (1 - z^2) z^2. 	
+
+// The following parameters can be changed:
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+
+// Error should be smaller than this epsilon.
 #define EPS								10e-10F
 
-// needed for calculation norms and used by visualizator
+// Exact solutions.
 double exact_sln_fn_1(double x, double y, double z, double &dx, double &dy, double &dz) {
 	dx = -2 * x * (1 - y*y) * (1 - z*z);
 	dy = -2 * (1 - x*x) * y * (1 - z*z);
@@ -54,20 +44,20 @@ double exact_sln_fn_2(double x, double y, double z, double &dx, double &dy, doub
 	return (1 - x*x) * x*x * (1 - y*y) * y*y * (1 - z*z) * z*z;
 }
 
-//
-
-BCType bc_types(int marker) {
+// Boundary condition types.
+BCType bc_types(int marker) 
+{
 	return BC_ESSENTIAL;
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form_1(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
+template<typename Real, typename Scalar>
+Scalar bilinear_form_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form_2(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
+template<typename Real, typename Scalar>
+Scalar bilinear_form_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
 template<typename T>
@@ -79,9 +69,9 @@ T f1(T x, T y, T z) {
 	return -(ddxx + ddyy + ddzz);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form_1(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_F_v<f_t, res_t>(n, wt, f1, u, e);
+template<typename Real, typename Scalar>
+Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_F_v<Real, Scalar>(n, wt, f1, u, e);
 }
 
 template<typename T>
@@ -93,162 +83,103 @@ T f2(T x, T y, T z) {
 	return -(ddxx + ddyy + ddzz);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form_2(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_F_v<f_t, res_t>(n, wt, f2, u, e);
+template<typename Real, typename Scalar>
+Scalar linear_form_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_F_v<Real, Scalar>(n, wt, f2, u, e);
 }
 
-// main ///////////////////////////////////////////////////////////////////////////////////////////
+scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
+	return 0;
+}
 
-int main(int argc, char **args) {
-	int res = ERR_SUCCESS;
-
-#ifdef WITH_PETSC
-	PetscInitialize(&argc, &args, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-	set_verbose(false);
+int main(int argc, char **args)
+{
+  // Test variable.
+  int success_test = 1;
 
 	if (argc < 2) error("Not enough parameters");
 
-	H1ShapesetLobattoHex shapeset;
-
+  // Load the mesh.
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
-	H3DReader mesh_loader;
-	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+  H3DReader mloader;
+  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
-	printf("* Setup space #1\n");
+  // Initialize the space 1.
 	Ord3 o1(2, 2, 2);
-	printf("  - Setting uniform order to (%d, %d, %d)\n", o1.x, o1.y, o1.z);
 	H1Space space1(&mesh, bc_types, essential_bc_values, o1);
 
-	printf("* Setup space #2\n");
+	// Initialize the space 2.
 	Ord3 o2(4, 4, 4);
 	H1Space space2(&mesh, bc_types, essential_bc_values, o2);
-	printf("  - Setting uniform order to (%d, %d, %d)\n", o2.x, o2.y, o2.z);
 
-	int ndofs = 0;
-	ndofs += space1.assign_dofs();
-	ndofs += space2.assign_dofs(ndofs);
-	printf("  - Number of DOFs: %d\n", ndofs);
-
-	printf("* Calculating a solution\n");
-
-#if defined WITH_UMFPACK
-	UMFPackMatrix mat;
-	UMFPackVector rhs;
-	UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-	PardisoMatrix mat;
-	PardisoVector rhs;
-	PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-	PetscMatrix mat;
-	PetscVector rhs;
-	PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-	MumpsMatrix mat;
-	MumpsVector rhs;
-	MumpsSolver solver(&mat, &rhs);
-#endif
-
-	WeakForm wf(2);
-	wf.add_matrix_form(0, 0, bilinear_form_1<double, scalar>, bilinear_form_1<Ord, Ord>, SYM);
+  // Initialize the weak formulation.
+  WeakForm wf(2);
+	wf.add_matrix_form(0, 0, bilinear_form_1<double, scalar>, bilinear_form_1<Ord, Ord>, HERMES_SYM);
 	wf.add_vector_form(0, linear_form_1<double, scalar>, linear_form_1<Ord, Ord>);
-
-	wf.add_matrix_form(1, 1, bilinear_form_2<double, scalar>, bilinear_form_2<Ord, Ord>, SYM);
+	wf.add_matrix_form(1, 1, bilinear_form_2<double, scalar>, bilinear_form_2<Ord, Ord>, HERMES_SYM);
 	wf.add_vector_form(1, linear_form_2<double, scalar>, linear_form_2<Ord, Ord>);
 
-	DiscreteProblem lp(&wf, Tuple<Space *>(&space1, &space2), true);
+  // Initialize the FE problem.
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2), is_linear);
 
-	// assemble stiffness matrix
-	Timer assemble_timer("Assembling stiffness matrix");
-	assemble_timer.start();
-	lp.assemble(&mat, &rhs);
-	assemble_timer.stop();
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
 
-	// solve the stiffness matrix
-	Timer solve_timer("Solving stiffness matrix");
-	solve_timer.start();
-	bool solved = solver.solve();
-	solve_timer.stop();
+  // Set up the solver, matrix, and rhs according to the solver seleRealion.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-	// output the measured values
-	printf("%s: %s (%lf secs)\n", assemble_timer.get_name(), assemble_timer.get_human_time(), assemble_timer.get_seconds());
-	printf("%s: %s (%lf secs)\n", solve_timer.get_name(), solve_timer.get_human_time(), solve_timer.get_seconds());
+  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
 
-	if (solved) {
-		// solution 1
-		Solution sln1(&mesh);
-		sln1.set_coeff_vector(&space1, solver.get_solution());
+  // Assemble the linear problem.
+  info("Assembling (ndof: %d).", Space::get_num_dofs(Tuple<Space *>(&space1, &space2)));
+  dp.assemble(matrix, rhs);
+    
+  // Solve the linear system. If successful, obtain the solution.
+  info("Solving.");
+  Solution sln1(&mesh);
+  Solution sln2(&mesh);
+  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&space1, &space2), Tuple<Solution *>(&sln1, &sln2));
+  else error ("Matrix solver failed.\n");
+    
+  ExactSolution ex_sln1(&mesh, exact_sln_fn_1);
+  ExactSolution ex_sln2(&mesh, exact_sln_fn_2);
 
-		ExactSolution esln1(&mesh, exact_sln_fn_1);
-		// norm
-		double h1_sln_norm1 = h1_norm(&sln1);
-		double h1_err_norm1 = h1_error(&sln1, &esln1);
+  // Calculate exact error.
+  info("Calculating exact error.");
+  Adapt *adaptivity = new Adapt(Tuple<Space *>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+  bool solutions_for_adapt = false;
+  double err_exact = adaptivity->calc_err_exact(Tuple<Solution *>(&sln1, &sln2), Tuple<Solution *>(&ex_sln1, &ex_sln2), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
 
-		printf(" - H1 solution norm:   % le\n", h1_sln_norm1);
-		printf(" - H1 error norm:      % le\n", h1_err_norm1);
+  if (err_exact > EPS)
+		// Calculated solution is not precise enough.
+		success_test = 0;
 
-		double l2_sln_norm1 = l2_norm(&sln1);
-		double l2_err_norm1 = l2_error(&sln1, &esln1);
-		printf(" - L2 solution norm:   % le\n", l2_sln_norm1);
-		printf(" - L2 error norm:      % le\n", l2_err_norm1);
+  // Clean up.
+  delete matrix;
+  delete rhs;
+  delete solver;
+  delete adaptivity;
 
-		if (h1_err_norm1 > EPS || l2_err_norm1 > EPS) {
-			// calculated solution is not enough precise
-			res = ERR_FAILURE;
-		}
-
-		// solution 2
-		Solution sln2(&mesh);
-		sln2.set_coeff_vector(&space2, solver.get_solution());
-
-		ExactSolution esln2(&mesh, exact_sln_fn_2);
-		// norm
-		double h1_sln_norm2 = h1_norm(&sln2);
-		double h1_err_norm2 = h1_error(&sln2, &esln2);
-
-		printf(" - H1 solution norm:   % le\n", h1_sln_norm2);
-		printf(" - H1 error norm:      % le\n", h1_err_norm2);
-
-		double l2_sln_norm2 = l2_norm(&sln2);
-		double l2_err_norm2 = l2_error(&sln2, &esln2);
-		printf(" - L2 solution norm:   % le\n", l2_sln_norm2);
-		printf(" - L2 error norm:      % le\n", l2_err_norm2);
-
-		if (h1_err_norm2 > EPS || l2_err_norm2 > EPS) {
-			// calculated solution is not enough precise
-			res = ERR_FAILURE;
-		}
-
-#ifdef OUTPUT_DIR
-		// output
-		const char *of_name = OUTPUT_DIR "/solution.pos";
-		FILE *ofile = fopen(of_name, "w");
-		if (ofile != NULL) {
-			GmshOutputEngine output(ofile);
-			output.out(&sln1, "Uh_1");
-			output.out(&esln1, "U1");
-			output.out(&sln2, "Uh_2");
-			output.out(&esln2, "U2");
-
-			fclose(ofile);
-		}
-		else {
-			warning("Can not open '%s' for writing.", of_name);
-		}
-#endif
-	}
-
-#ifdef WITH_PETSC
-	mat.free();
-	rhs.free();
-	PetscFinalize();
-#endif
-
-	TRACE_END;
-
-	return res;
+  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  finalize_solution_environment(matrix_solver);
+  
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }
 
