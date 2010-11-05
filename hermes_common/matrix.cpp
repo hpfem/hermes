@@ -311,7 +311,7 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
   _F_
-  Vector* rhs_dummy;
+  Vector* rhs_dummy = NULL;
   switch (matrix_solver) 
   {
     case SOLVER_AZTECOO:

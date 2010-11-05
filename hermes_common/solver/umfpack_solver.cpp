@@ -47,7 +47,11 @@ static int find_position(int *Ai, int Alen, int idx) {
     
     // Sparse matrix entry not found (raise an error when trying to add 
     // value to this position, return 0 when obtaining value there).
-    if (lo > hi) mid = -1;
+    if (lo > hi) 
+    {
+      mid = -1;
+      break;
+    }
   }
   return mid;
 }
