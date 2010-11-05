@@ -317,6 +317,8 @@ static int compare(const void* p1, const void* p2)
   if (x1 > x2) return 1;
   if (x1 == x2 && y1 > y2) return 1;
   if (x1 == x2 && y1 == y2) return 0;
+  error("internal error: reached end of non-void function");
+  return 0;
 }
 
 
