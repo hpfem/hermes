@@ -80,7 +80,6 @@ int main(int argc, char **args)
   if (argc < 5) error("Not enough parameters");
 
   // Load the mesh.
-  printf("* Loading mesh '%s'\n", args[1]);
   Mesh mesh;
   H3DReader mloader;
   if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
@@ -106,7 +105,7 @@ int main(int argc, char **args)
   // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   initialize_solution_environment(matrix_solver, argc, args);
 
-  // Set up the solver, matrix, and rhs according to the solver seleRealion.
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);

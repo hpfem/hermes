@@ -360,7 +360,8 @@ bool UMFPackLinearSolver::solve() {
     return false;
   }
 
-  delete [] sln;
+  if(sln)
+    delete [] sln;
   sln = new scalar[m->size];
   MEM_CHECK(sln);
   memset(sln, 0, m->size * sizeof(scalar));

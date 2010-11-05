@@ -84,7 +84,7 @@ int main(int argc, char **args)
   // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   initialize_solution_environment(matrix_solver, argc, args);
 
-  // Set up the solver, matrix, and rhs according to the solver seleRealion.
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);

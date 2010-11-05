@@ -91,7 +91,6 @@ int main(int argc, char **args)
 	if (argc < 2) error("Not enough parameters");
 
   // Load the mesh.
-	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh;
   H3DReader mloader;
   if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);

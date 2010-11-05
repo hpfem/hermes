@@ -149,7 +149,7 @@ scalar3 &bc_values(int ess_bdy_marker, double x, double y, double z) {
 // Boundary condition types.
 BCType bc_types(int marker) 
 {
-	return BC_ESSENTIAL;
+	return BC_NATURAL;
 }
 
 template<typename Real, typename Scalar>
@@ -251,7 +251,7 @@ int main(int argc, char **args)
 
   // Calculate exact error.
   info("Calculating exact error.");
-  Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+  Adapt *adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
   bool solutions_for_adapt = false;
   double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
 

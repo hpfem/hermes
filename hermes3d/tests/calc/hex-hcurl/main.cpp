@@ -19,8 +19,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // The error should be smaller than this epsilon.
 #define EPS								10e-10F
 
-
-
 // Problem parameters.
 const double alpha = 1.0;
 
@@ -130,7 +128,7 @@ int main(int argc, char **args)
   // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   initialize_solution_environment(matrix_solver, argc, args);
 
-  // Set up the solver, matrix, and rhs according to the solver seleRealion.
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -157,7 +155,7 @@ int main(int argc, char **args)
 
   // Calculate exact error.
   info("Calculating exact error.");
-  Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+  Adapt *adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
   bool solutions_for_adapt = false;
   double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
 
