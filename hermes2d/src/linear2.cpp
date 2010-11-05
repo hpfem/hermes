@@ -73,7 +73,10 @@ Orderizer::Orderizer()
     for (int j = 0; j <= 10; j++)
     {
       assert(p < sizeof(buffer)-5);
-      sprintf(buffer+p, (i == j) ? "%d" : "%d|%d", i, j);
+      if (i == j)
+          sprintf(buffer+p, "%d", i);
+      else
+          sprintf(buffer+p, "%d|%d", i, j);
       labels[i][j] = buffer+p;
       p += strlen(buffer+p) + 1;
     }

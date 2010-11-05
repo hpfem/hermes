@@ -19,25 +19,25 @@ public:
   /// A default constructor. Creates an empty vector.
   explicit Tuple() {};
   /// 1 parameter constructor.
-  Tuple(const T& a) { push_back(a); };
+  Tuple(const T& a) { this->push_back(a); };
   /// 2 parameters constructor.
-  Tuple(const T& a, const T& b) { std::vector<T>::reserve(2); push_back(a); push_back(b); };
+  Tuple(const T& a, const T& b) { std::vector<T>::reserve(2); this->push_back(a); this->push_back(b); };
   /// 3 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c) { std::vector<T>::reserve(3); push_back(a); push_back(b); push_back(c); };
+  Tuple(const T& a, const T& b, const T& c) { std::vector<T>::reserve(3); this->push_back(a); this->push_back(b); this->push_back(c); };
   /// 4 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d) { std::vector<T>::reserve(4); push_back(a); push_back(b); push_back(c); push_back(d); };
+  Tuple(const T& a, const T& b, const T& c, const T& d) { std::vector<T>::reserve(4); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); };
   /// 5 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e) { std::vector<T>::reserve(5); push_back(a); push_back(b); push_back(c); push_back(d); push_back(e); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e) { std::vector<T>::reserve(5); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); };
   /// 6 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f) { std::vector<T>::reserve(6); push_back(a); push_back(b); push_back(c); push_back(d); push_back(e); push_back(f); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f) { std::vector<T>::reserve(6); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); };
   /// 7 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g) { std::vector<T>::reserve(7); push_back(a); push_back(b); push_back(c); push_back(d); push_back(e); push_back(f); push_back(g); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g) { std::vector<T>::reserve(7); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); };
   /// 8 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h) { std::vector<T>::reserve(8); push_back(a); push_back(b); push_back(c); push_back(d); push_back(e); push_back(f); push_back(g); push_back(h); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h) { std::vector<T>::reserve(8); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); };
   /// 9 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i) { std::vector<T>::reserve(9); push_back(a); push_back(b); push_back(c); push_back(d); push_back(e); push_back(f); push_back(g); push_back(h); push_back(i); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i) { std::vector<T>::reserve(9); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); };
   /// 10 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { std::vector<T>::reserve(10); push_back(a); push_back(b); push_back(c); push_back(d); push_back(e); push_back(f); push_back(g); push_back(h); push_back(i); push_back(j); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { std::vector<T>::reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
 };
 
 #endif
