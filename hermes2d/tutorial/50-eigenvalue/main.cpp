@@ -17,7 +17,7 @@
 
 int NUMBER_OF_EIGENVALUES = 6;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
+const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
@@ -45,7 +45,6 @@ void write_matrix_mm(const char* filename, Matrix* mat)
 {
   // Get matrix size.
   int ndof = mat->get_size();
-  printf("ndof = %d\n", ndof);
   FILE *out = fopen(filename, "w" );
   if (out == NULL) error("failed to open file for writing.");
 
@@ -54,12 +53,9 @@ void write_matrix_mm(const char* filename, Matrix* mat)
   for (int i = 0; i < ndof; i++) {
     for (int j = 0; j <= i; j++) { 
       double tmp = mat->get(i, j);
-      printf("(%d, %d, %24.15e)\n", i, j, tmp);
       if (fabs(tmp) > 1e-15) nz++;
     }
   } 
-
-  printf("here 1\n");
 
   // Write the matrix in MatrixMarket format
   fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
@@ -70,7 +66,7 @@ void write_matrix_mm(const char* filename, Matrix* mat)
       if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
     }
   } 
-  printf("here 2\n");
+
   fclose(out);
 }
 
@@ -107,12 +103,9 @@ int main(int argc, char* argv[])
   dp_left.assemble(matrix_left);
   DiscreteProblem dp_right(&wf_right, &space, is_linear);
   dp_right.assemble(matrix_right);
-  printf("writing matrix 1\n");
 
   // Write matrix_left in MatrixMarket format.
   write_matrix_mm("mat_left.mtx", matrix_left);
-
-  printf("writing matrix 2\n");
 
   // Write matrix_left in MatrixMarket format.
   write_matrix_mm("mat_right.mtx", matrix_right);
