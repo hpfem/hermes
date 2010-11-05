@@ -121,7 +121,7 @@ int main() {
     // Newton's loop on coarse mesh.
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
     double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
-    solution_to_vector(space, coeff_vec_coarse);
+    get_coeff_vector(space, coeff_vec_coarse);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
@@ -163,7 +163,7 @@ int main() {
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
       // Copy coefficients from vector y to elements.
-      vector_to_solution(coeff_vec_coarse, space);
+      set_coeff_vector(coeff_vec_coarse, space);
       
       it++;
     }
@@ -214,7 +214,7 @@ int main() {
     info("Solving on fine mesh:");
       // Fill vector coeff_vec using dof and coeffs arrays in elements.
       double *coeff_vec = new double[Space::get_num_dofs(ref_space)];
-      solution_to_vector(ref_space, coeff_vec);
+      get_coeff_vector(ref_space, coeff_vec);
 
         int it = 1;
       while (1) {
@@ -251,7 +251,7 @@ int main() {
         if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
         
         // Copy coefficients from vector y to elements.
-        vector_to_solution(coeff_vec, ref_space);
+        set_coeff_vector(coeff_vec, ref_space);
 
         it++;
       }

@@ -231,10 +231,10 @@ void OGProjection::project_internal(Space *space, MatrixSolverType matrix_solver
   
   // Initialize coefficient vector to copy the solution to ref_space.
   double* coeff_vec = new double[ndof];
-  memset(coeff_vec, 0, ndof * sizeof(double));
+  set_zero(coeff_vec, ndof);
 
   info("Assembling projection linear system. ndofs: %d", ndof);
-  dp->assemble(matrix, rhs);
+  dp->assemble(coeff_vec, matrix, rhs);
   
   // Solve the linear system.
   if(!solver->solve())
@@ -244,9 +244,9 @@ void OGProjection::project_internal(Space *space, MatrixSolverType matrix_solver
   // Save the projection.
   if(sln_to_save == -1)
     for(int i = 0; i < space->get_n_sln(); i++)
-      vector_to_solution(coeff_vec + (ndof/(OGProjection::sln+1)) * i, space, i);
+      set_coeff_vector(coeff_vec + (ndof/(OGProjection::sln+1)) * i, space, i);
   else
-      vector_to_solution(coeff_vec + (ndof/(OGProjection::sln+1)) * sln_to_save, space, sln_to_save);
+      set_coeff_vector(coeff_vec + (ndof/(OGProjection::sln+1)) * sln_to_save, space, sln_to_save);
 
   // Cleanup.
   delete dp;

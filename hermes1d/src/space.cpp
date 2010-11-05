@@ -1198,14 +1198,14 @@ void Space::set_right_endpoint(double b)
   this->right_endpoint = b; 
 }
 
-void Space::vector_to_solution(double *y, int sln) 
+void Space::set_coeff_vector(scalar *y, int sln) 
 {
-  ::vector_to_solution(y, this, sln);
+  ::set_coeff_vector(y, this, sln);
 }
 
-void Space::solution_to_vector(double *y, int sln) 
+void Space::get_coeff_vector(scalar *y, int sln) 
 {
-  ::solution_to_vector(this, y, sln);
+  ::get_coeff_vector(this, y, sln);
 }
 
 // Use the err_array[] and threshold to create a list of 
@@ -1530,23 +1530,23 @@ void adapt_plotting(Space *space, Space *space_ref,
 {
   // Plot the coarse mesh solution
   Linearizer l(space);
-  l.plot_solution("solution.gp");
+  l.plot_solution("solution.dat");
 
   // Plot the fine mesh solution
   Linearizer l_ref(space_ref);
-  l_ref.plot_solution("solution_ref.gp");
+  l_ref.plot_solution("solution_ref.dat");
 
   // Plot the coarse and fine meshes
-  space->plot("space.gp");
-  space_ref->plot("space_ref.gp");
+  space->plot("space.dat");
+  space_ref->plot("space_ref.dat");
 
   // Plot the error estimate (difference between 
   // coarse and fine mesh solutions)
-  space->plot_error_estimate(norm, space_ref, "error_est.gp");
+  space->plot_error_estimate(norm, space_ref, "error_est.dat");
 
   // Plot error wrt. exact solution (if available)
   if (exact_sol_provided) {   
-    space->plot_error_exact(norm, exact_sol, "error_exact.gp");
+    space->plot_error_exact(norm, exact_sol, "error_exact.dat");
   }
 }
 
@@ -1556,26 +1556,26 @@ void adapt_plotting(Space *space, ElemPtr2 *ref_elem_pairs,
 {
   // Plot the coarse mesh solution.
   Linearizer l(space);
-  l.plot_solution("solution.gp");
+  l.plot_solution("solution.dat");
 
   // Plot solution stored in the ref_elem_pairs[] array.
   Linearizer l_ref(space);
-  l_ref.plot_ref_elem_pairs(ref_elem_pairs, "solution_ref.gp");
+  l_ref.plot_ref_elem_pairs(ref_elem_pairs, "solution_ref.dat");
 
   // Plot the space
-  space->plot("space.gp");
+  space->plot("space.dat");
 
   // Plot the difference between the coarse mesh solution
   // and the solution stored in the ref_elem_pairs[] array.
-  space->plot_error_estimate(norm, ref_elem_pairs, "error_est.gp");
+  space->plot_error_estimate(norm, ref_elem_pairs, "error_est.dat");
 
   // Plot error wrt. exact solution (if available).
   if (exact_sol_provided) {   
-    space->plot_error_exact(norm, exact_sol, "error_exact.gp");
+    space->plot_error_exact(norm, exact_sol, "error_exact.dat");
   }
 }
 
-void solution_to_vector(Space *space, double *y, int sln) {
+void get_coeff_vector(Space *space, scalar *y, int sln) {
   Element *e;
   Iterator *I = new Iterator(space);
   while ((e = I->next_active_element()) != NULL) {
@@ -1584,7 +1584,7 @@ void solution_to_vector(Space *space, double *y, int sln) {
   delete I;
 }
 
-void vector_to_solution(double *y, Space *space, int sln) {
+void set_coeff_vector(scalar *y, Space *space, int sln) {
   Element *e;
   Iterator *I = new Iterator(space);
   while ((e = I->next_active_element()) != NULL) {
@@ -1593,7 +1593,7 @@ void vector_to_solution(double *y, Space *space, int sln) {
   delete I;
 }
 
-void solution_to_vector(Space *space, Vector *y, int sln) {
+void get_coeff_vector(Space *space, Vector *y, int sln) {
   y->zero();
   Element *e;
   Iterator *I = new Iterator(space);
@@ -1606,7 +1606,7 @@ void solution_to_vector(Space *space, Vector *y, int sln) {
   delete I;
 }
 
-void vector_to_solution(Vector *y, Space *space, int sln) {
+void set_coeff_vector(Vector *y, Space *space, int sln) {
   y->zero();
   Element *e;
   Iterator *I = new Iterator(space);

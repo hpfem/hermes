@@ -17,7 +17,8 @@
 
 static int _precalculated = 0;
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear) : wf(wf), space(space), is_linear(is_linear)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear) : wf(wf), 
+space(space), is_linear(is_linear)
 {
   if(space->get_n_eq() != wf->get_neq())
         error("WeakForm does not have as many equations as Space in DiscreteProblem::DiscreteProblem()");
@@ -25,19 +26,15 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear) : w
     // precalculating values and derivatives 
     // of all polynomials at all possible 
     // integration points
-    fprintf(stderr, "Precalculating Legendre polynomials...");
-    fflush(stderr);
+    info("Precalculating Legendre polynomials...");
     precalculate_legendre_1d();
     precalculate_legendre_1d_left();
     precalculate_legendre_1d_right();
-    fprintf(stderr, "done.\n");
 
-    fprintf(stderr, "Precalculating Lobatto shape functions...");
-    fflush(stderr);
+    info("Precalculating Lobatto shape functions...");
     precalculate_lobatto_1d();
     precalculate_lobatto_1d_left();
     precalculate_lobatto_1d_right();
-    fprintf(stderr, "done.\n");
     _precalculated = 1;
   }
 }
@@ -270,23 +267,26 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy
 }
 
 // construct Jacobi matrix or residual vector
-void DiscreteProblem::assemble(SparseMatrix *mat, Vector *rhs, bool rhsonly) {
+void DiscreteProblem::assemble(scalar *coeff_vec, SparseMatrix *mat, Vector *rhs, bool rhsonly) {
   // number of equations in the system
   int n_eq = space->get_n_eq();
 
   // total number of unknowns
-  int n_dof = Space::get_num_dofs(space);
+  int ndof = Space::get_num_dofs(space);
+
+  // Copy coefficients from vector coeff_vec to elements.
+  if (coeff_vec != NULL) set_coeff_vector(coeff_vec, space);
 
   // Reallocate the matrix and residual vector.
-  if (rhs != NULL) rhs->alloc(n_dof);
+  if (rhs != NULL) rhs->alloc(ndof);
   // Zero the vector, which should be done by the appropriate implementation anyway.
   if (rhs != NULL) rhs->zero();
   if (mat != NULL)
   {
     mat->free();
-    mat->prealloc(n_dof);
-    for(int i = 0; i < n_dof; i++)
-      for(int j = 0; j< n_dof; j++)
+    mat->prealloc(ndof);
+    for(int i = 0; i < ndof; i++)
+      for(int j = 0; j< ndof; j++)
         mat->pre_add_ij(i, j);
     mat->alloc();
     // Zero the matrix, which should be done by the appropriate implementation anyway.
@@ -305,8 +305,8 @@ void DiscreteProblem::assemble(SparseMatrix *mat, Vector *rhs, bool rhsonly) {
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX) {
     info("Jacobi matrix:");
-    for(int i=0; i<n_dof; i++) {
-      for(int j=0; j<n_dof; j++) {
+    for(int i=0; i<ndof; i++) {
+      for(int j=0; j<ndof; j++) {
         info("%g ", mat->get(i, j));
       }
     }
@@ -315,42 +315,42 @@ void DiscreteProblem::assemble(SparseMatrix *mat, Vector *rhs, bool rhsonly) {
   // DEBUG: print residual vector
   if(DEBUG_MATRIX && rhs != NULL) {
     info("Residual:");
-    for(int i=0; i<n_dof; i++) {
+    for(int i=0; i<ndof; i++) {
       info("%g ", rhs->get(i));
     }
   }
 } 
 
 void J_dot_vec_jfnk(DiscreteProblem *dp, Space *space, Vector* vec,
-                    Vector* y_orig, Vector* f_orig, 
+                    scalar* y_orig, Vector* f_orig, 
                     Vector* J_dot_vec,
-                    double jfnk_epsilon, int n_dof, MatrixSolverType matrix_solver) 
+                    double jfnk_epsilon, int ndof, MatrixSolverType matrix_solver) 
 {
-  Vector* y_perturbed = create_vector(matrix_solver);
+  scalar* y_perturbed = new scalar[ndof];
   Vector* f_perturbed = create_vector(matrix_solver);
-  for (int i=0; i<n_dof; i++)
-    y_perturbed->set(i, y_orig->get(i) + jfnk_epsilon*vec->get(i));
-  vector_to_solution(y_perturbed, space);
+  for (int i = 0; i < ndof; i++)
+    y_perturbed[i] = y_orig[i] + jfnk_epsilon*vec->get(i);
   // NULL stands for that we are not interested in the matrix, just the vector.
-  dp->assemble(NULL, f_perturbed, true); 
-  vector_to_solution(y_orig, space);
-  for (int i=0; i<n_dof; i++) {
+  dp->assemble(y_perturbed, NULL, f_perturbed, true); 
+  set_coeff_vector(y_orig, space);
+  for (int i = 0; i < ndof; i++) {
     J_dot_vec->set(i,(f_perturbed->get(i) - f_orig->get(i))/jfnk_epsilon);
   }
-  delete y_perturbed;
-  delete f_perturbed;
+  delete [] y_perturbed;
+  delete [] f_perturbed;
 }
 
 // CG method adjusted for JFNK
 // NOTE: 
 void jfnk_cg(DiscreteProblem *dp, Space *space, 
              double matrix_solver_tol, int matrix_solver_maxiter, 
-	     double jfnk_epsilon, double tol_jfnk, int jfnk_maxiter, MatrixSolverType matrix_solver, bool verbose)
+	     double jfnk_epsilon, double tol_jfnk, int jfnk_maxiter, 
+             MatrixSolverType matrix_solver, bool verbose)
 {
-  int n_dof = Space::get_num_dofs(space);
+  int ndof = Space::get_num_dofs(space);
   // vectors for JFNK
   Vector* f_orig = create_vector(matrix_solver);
-  Vector* y_orig = create_vector(matrix_solver);
+  scalar* y_orig = new scalar[ndof];
   Vector* vec = create_vector(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
 
@@ -359,39 +359,20 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
   Vector* p = create_vector(matrix_solver);
   Vector* J_dot_vec = create_vector(matrix_solver);
 
-
-
-  /*
-  // debug
   // fill vector y_orig using dof and coeffs arrays in elements
-  solution_to_vector(space, y_orig);
-  dp->assemble_vector(space, f_orig); 
-  double *w = new double[n_dof];
-  for(int i=0; i<n_dof; i++) w[i] = 0;
-  w[0] = 1;
-  J_dot_vec_jfnk(dp, space, w, y_orig, f_orig, 
-                 J_dot_vec, jfnk_epsilon, n_dof);
-  printf("   J_dot_vec = ");
-  for (int i=0; i < n_dof; i++) {
-    printf("%g ", J_dot_vec[i]);
-  }
-  printf("\n\n");
-  */
+  get_coeff_vector(space, y_orig);
 
   // JFNK loop
   int jfnk_iter_num = 1;
   while (1) {
-    // fill vector y_orig using dof and coeffs arrays in elements
-    solution_to_vector(space, y_orig);
-
     // construct residual vector f_orig corresponding to y_orig
     // (f_orig stays unchanged through the entire CG loop)
     // NULL stands for that we are not interested in the matrix, just the vector.
-    dp->assemble(NULL, f_orig, true); 
+    dp->assemble(y_orig, NULL, f_orig, true); 
 
     // calculate L2 norm of f_orig
     double res_norm_squared = 0;
-    for(int i=0; i<n_dof; i++) res_norm_squared += f_orig->get(i)*f_orig->get(i);
+    for(int i = 0; i < ndof; i++) res_norm_squared += f_orig->get(i)*f_orig->get(i);
 
     // If residual norm less than 'tol_jfnk', break
     if (verbose) info("Residual norm: %.15f", sqrt(res_norm_squared));
@@ -401,44 +382,44 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
 
     // right-hand side is negative residual
     // (rhs stays unchanged through the CG loop)
-    for(int i=0; i<n_dof; i++) rhs->set(i, -f_orig->get(i));
+    for(int i = 0; i < ndof; i++) rhs->set(i, -f_orig->get(i));
 
     // beginning CG method
     // r = rhs - A*vec0 (where the initial vector vec0 = 0)
-    for (int i=0; i < n_dof; i++) r->set(i, rhs->get(i));
+    for (int i=0; i < ndof; i++) r->set(i, rhs->get(i));
     // p = r
-    for (int i=0; i < n_dof; i++) p->set(i, r->get(i));
+    for (int i=0; i < ndof; i++) p->set(i, r->get(i));
 
     // CG loop
     int iter_current = 0;
     double tol_current_squared;
     // initializing the solution vector with zero
-    for(int i=0; i<n_dof; i++) vec->set(i, 0);
+    for(int i = 0; i < ndof; i++) vec->set(i, 0);
     while (1) {
       J_dot_vec_jfnk(dp, space, p, y_orig, f_orig,
-                     J_dot_vec, jfnk_epsilon, n_dof, matrix_solver);
-      double r_times_r = vec_dot(r, r, n_dof);
-      double alpha = r_times_r / vec_dot(p, J_dot_vec, n_dof); 
-      for (int i=0; i < n_dof; i++) {
+                     J_dot_vec, jfnk_epsilon, ndof, matrix_solver);
+      double r_times_r = vec_dot(r, r, ndof);
+      double alpha = r_times_r / vec_dot(p, J_dot_vec, ndof); 
+      for (int i=0; i < ndof; i++) {
         vec->set(i, vec->get(i) + alpha*p->get(i));
         r->set(i, r->get(i) - alpha*J_dot_vec->get(i));
       }
       /*
       // debug - output of solution vector
       printf("   vec = ");
-      for (int i=0; i < n_dof; i++) {
+      for (int i=0; i < ndof; i++) {
         printf("%g ", vec[i]);
       }
       printf("\n");
       */
 
-      double r_times_r_new = vec_dot(r, r, n_dof);
+      double r_times_r_new = vec_dot(r, r, ndof);
       iter_current++;
       tol_current_squared = r_times_r_new;
       if (tol_current_squared < matrix_solver_tol*matrix_solver_tol 
           || iter_current >= matrix_solver_maxiter) break;
       double beta = r_times_r_new/r_times_r;
-      for (int i=0; i < n_dof; i++) p->set(i, r->get(i) + beta*p->get(i));
+      for (int i=0; i < ndof; i++) p->set(i, r->get(i) + beta*p->get(i));
     }
     // check whether CG converged
     if (verbose) info("CG (JFNK) made %d iteration(s) (tol = %g)", 
@@ -448,10 +429,7 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
     }
 
     // updating vector y_orig by new solution which is in x
-    for(int i=0; i<n_dof; i++) y_orig->set(i, y_orig->get(i) + vec->get(i));
-
-    // copying vector y_orig to space elements
-    vector_to_solution(y_orig, space);
+    for(int i=0; i<ndof; i++) y_orig[i] = y_orig[i] + vec->get(i);
 
     jfnk_iter_num++;
     if (jfnk_iter_num >= jfnk_maxiter) {
@@ -461,7 +439,7 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
 
   delete f_orig;
   // copy updated vector y_orig to space
-  vector_to_solution(y_orig, space);
+  set_coeff_vector(y_orig, space);
 }
 
 Space* construct_refined_space(Space* space, int order_increase)
@@ -486,4 +464,9 @@ double get_l2_norm(Vector* vec)
   for (int i = 0; i < vec->length(); i++)
     val = val + vec->get(i)*vec->get(i);
   return sqrt(std::abs(val));
+}
+
+void set_zero(scalar *vec, int length) 
+{
+  memset(vec, 0, length * sizeof(scalar));
 }

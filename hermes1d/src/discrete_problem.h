@@ -26,7 +26,8 @@ public:
   
   void process_vol_forms(SparseMatrix *mat, Vector *res, bool rhsonly);
 
-  void assemble(SparseMatrix *mat, Vector *rhs = NULL, bool rhsonly = false);
+  void assemble(scalar* coeff_vec, SparseMatrix *mat, Vector *rhs = NULL, 
+                bool rhsonly = false);
 
 private:
   WeakForm* wf;
@@ -49,7 +50,8 @@ void element_shapefn_point(double x_ref, double a, double b,
 
 void HERMES_API jfnk_cg(DiscreteProblem *dp, Space *space,
              double matrix_solver_tol, int matrix_solver_maxiter,  
-	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, MatrixSolverType matrix_solver, bool verbose = true);
+	     double jfnk_epsilon, double jfnk_tol, int jfnk_maxiter, 
+             MatrixSolverType matrix_solver, bool verbose = true);
 
 // Splits the indicated elements and 
 // increases poly degree in sons by one.
@@ -57,5 +59,8 @@ void HERMES_API jfnk_cg(DiscreteProblem *dp, Space *space,
 HERMES_API Space* construct_refined_space(Space* space, int order_increase = 1);
 
 HERMES_API double get_l2_norm(Vector* vec);
+
+HERMES_API void set_zero(scalar *vec, int length);
+
 
 #endif

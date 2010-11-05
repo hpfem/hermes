@@ -64,10 +64,10 @@ public:
 
 typedef Element* ElemPtr2[2];
 
-void HERMES_API solution_to_vector(Space *space, double *y, int sln=0);
-void HERMES_API vector_to_solution(double *y, Space *space, int sln=0);
-void HERMES_API solution_to_vector(Space *space, Vector *y, int sln=0);
-void HERMES_API vector_to_solution(Vector *y, Space *space, int sln=0);
+void HERMES_API get_coeff_vector(Space *space, scalar *y, int sln=0);
+void HERMES_API set_coeff_vector(scalar *y, Space *space, int sln=0);
+void HERMES_API get_coeff_vector(Space *space, Vector *y, int sln=0);
+void HERMES_API set_coeff_vector(Vector *y, Space *space, int sln=0);
 
 class Space {
     public:
@@ -153,9 +153,9 @@ class Space {
                         int subdivision = 500); // plots error wrt. exact solution
         void assign_elem_ids();
         int n_active_elem;
-        void vector_to_solution(double *y, int sln=0);
+        void set_coeff_vector(scalar *y, int sln=0);
 
-        void solution_to_vector(double *y, int sln=0);
+        void get_coeff_vector(scalar *y, int sln=0);
 
     private:
         double left_endpoint, right_endpoint;

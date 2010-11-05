@@ -17,31 +17,29 @@
 //  Exact solution: u(x) = sin(k*x), v(x) = k*cos(k*x).
 //
 //  The following parameters can be changed:
+
 static int NEQ = 2;
 int NELEM = 3;                          // Number of elements.
-double A = 0, B = 2*M_PI;               // Domain end points.
 int P_INIT = 1;                         // Initial polynomial degree.
-double K = 1.0;                         // Equation parameter.
-
-// Newton's method.
-double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh.
-double NEWTON_TOL_REF = 1e-6;           // Fine mesh.
-int NEWTON_MAX_ITER = 150;
-
-// Adaptivity.
-const int ADAPT_TYPE = 0;         // 0... hp-adaptivity.
-                                  // 1... h-adaptivity.
-                                  // 2... p-adaptivity.
-const double THRESHOLD = 0.7;     // Refined will be all elements whose error 
-                                  // is greater than THRESHOLD*max_elem_error.
-const double TOL_ERR_REL = 1e-1;  // Tolerance for the relative error between 
-                                  // the coarse mesh and fine solutions.
-const int NORM = 1;               // To measure errors.
-                                  // 1... H1 norm.
-                                  // 0... L2 norm.
-
+const int ADAPT_TYPE = 0;               // 0... hp-adaptivity.
+                                        // 1... h-adaptivity.
+                                        // 2... p-adaptivity.
+const double THRESHOLD = 0.7;           // Refined will be all elements whose error 
+                                        // is greater than THRESHOLD*max_elem_error.
+const double TOL_ERR_REL = 1e-1;        // Tolerance for the relative error between 
+                                        // the coarse mesh and fine solutions.
+const int NORM = 1;                     // To measure errors.
+                                        // 1... H1 norm.
+                                        // 0... L2 norm.
+double NEWTON_TOL_COARSE = 1e-6;        // Newton tolerance on coarse mesh.
+double NEWTON_TOL_REF = 1e-6;           // Newton tolerance on fine mesh.
+int NEWTON_MAX_ITER = 150;              // Maximum number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+
+// Equation parameters.
+double K = 1.0;                         // Equation parameter.
+double A = 0, B = 2*M_PI;               // Domain end points.
 
 // Boundary conditions.
 Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,0), new BCSpec(1,K));
@@ -61,14 +59,15 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
 
-int main() {
+int main() 
+{
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+  info("ndof: %d.", Space::get_num_dofs(space));
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -83,23 +82,24 @@ int main() {
   bool is_linear = false;
   DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
-  // Newton's loop on coarse mesh.
-  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  // Set zero initial condition.
   double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
-  solution_to_vector(space, coeff_vec_coarse);
+  set_zero(coeff_vec_coarse, Space::get_num_dofs(space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
   Vector* rhs_coarse = create_vector(matrix_solver);
   Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
+  // Newton's loop on coarse mesh.
   int it = 1;
-  while (1) {
+  while (1) 
+  {
     // Obtain the number of degrees of freedom.
     int ndof_coarse = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp_coarse->assemble(matrix_coarse, rhs_coarse);
+    dp_coarse->assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs_coarse);
@@ -108,9 +108,8 @@ int main() {
     info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
 
     // If l2 norm of the residual vector is within tolerance, then quit.
-    // NOTE: at least one full iteration forced
-    //       here because sometimes the initial
-    //       residual on fine mesh is too small.
+    // NOTE: at least one full iteration forced here because sometimes the initial
+    //       residual on fine mesh is already too small.
     if(res_l2_norm < NEWTON_TOL_COARSE && it > 1) break;
 
     // Multiply the residual vector with -1 since the matrix 
@@ -118,18 +117,14 @@ int main() {
     for(int i = 0; i < ndof_coarse; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
 
     // Solve the linear system.
-    if(!solver_coarse->solve())
-      error ("Matrix solver failed.\n");
+    if(!solver_coarse->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
 
     // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
-    
-    // Copy coefficients from vector y to elements.
-    vector_to_solution(coeff_vec_coarse, space);
-    
+        
     it++;
   }
   
@@ -163,19 +158,20 @@ int main() {
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Newton's loop on the fine mesh.
-    info("Solving on fine mesh:");
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
     double *coeff_vec = new double[Space::get_num_dofs(ref_space)];
-    solution_to_vector(ref_space, coeff_vec);
+    get_coeff_vector(ref_space, coeff_vec);
 
+    // Newton's loop on the fine mesh.
+    info("Solving on fine mesh:");
     int it = 1;
-    while (1) {
+    while (1) 
+    {
       // Obtain the number of degrees of freedom.
       int ndof = Space::get_num_dofs(ref_space);
 
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble(matrix, rhs);
+      dp->assemble(coeff_vec, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
@@ -184,9 +180,8 @@ int main() {
       info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, then quit.
-      // NOTE: at least one full iteration forced
-      //       here because sometimes the initial
-      //       residual on fine mesh is too small.
+      // NOTE: at least one full iteration forced here because sometimes the initial
+      //       residual on fine mesh is already too small.
       if(res_l2_norm < NEWTON_TOL_REF && it > 1) break;
 
       // Multiply the residual vector with -1 since the matrix 
@@ -194,8 +189,7 @@ int main() {
       for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
       // Solve the linear system.
-      if(!solver->solve())
-        error ("Matrix solver failed.\n");
+      if(!solver->solve()) error ("Matrix solver failed.\n");
 
       // Add \deltaY^{n+1} to Y^n.
       for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
@@ -203,9 +197,6 @@ int main() {
       // If the maximum number of iteration has been reached, then quit.
       if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
       
-      // Copy coefficients from vector y to elements.
-      vector_to_solution(coeff_vec, ref_space);
-
       it++;
     }
     
@@ -220,8 +211,7 @@ int main() {
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
     double err_est_array[MAX_ELEM_NUM];
-    double err_est_rel = calc_err_est(NORM, 
-              space, ref_space, err_est_array) * 100;
+    double err_est_rel = calc_err_est(NORM, space, ref_space, err_est_array) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
@@ -231,10 +221,10 @@ int main() {
     cpu_time.tick();
 
     // If exact solution available, also calculate exact error.
-    if (EXACT_SOL_PROVIDED) {
+    if (EXACT_SOL_PROVIDED) 
+    {
       // Calculate element errors wrt. exact solution.
-      double err_exact_rel = calc_err_exact(NORM, 
-         space, exact_sol, NEQ, A, B) * 100;
+      double err_exact_rel = calc_err_exact(NORM, space, exact_sol, NEQ, A, B) * 100;
      
       // Info for user.
       info("Relative error (exact) = %g %%", err_exact_rel);
@@ -252,15 +242,13 @@ int main() {
     if (err_est_rel < NEWTON_TOL_REF) done = true;
     else {
       info("Adapting the coarse mesh.");
-    adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array,
-          space, ref_space);
+      adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array, space, ref_space);
     }
 
     as++;
     
     // Plot meshes, results, and errors.
-    adapt_plotting(space, ref_space, 
-                 NORM, EXACT_SOL_PROVIDED, exact_sol);
+    adapt_plotting(space, ref_space, NORM, EXACT_SOL_PROVIDED, exact_sol);
 
     // Cleanup.
     delete solver;
