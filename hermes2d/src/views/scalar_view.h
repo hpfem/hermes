@@ -200,9 +200,9 @@ protected:
   bool is_constant; ///< true if the function to be displayed is constant
 
   // Perspective projection parameters.
-  int fovy;        ///< Field of view in the vertical direction (in degrees).
-  double znear;  ///< Distance of the near clipping plane of the viewing frustum from the camera.
-  double zfar;     ///< Distance of the Far clipping plane of the viewing frustum from the camera.
+  static const int fovy;        ///< Field of view in the vertical direction (in degrees).
+  static const double znear;  ///< Distance of the near clipping plane of the viewing frustum from the camera.
+  static const double zfar;     ///< Distance of the Far clipping plane of the viewing frustum from the camera.
 
   bool pmode, mode3d, panning;
   double xrot, yrot, xtrans, ytrans, ztrans;
