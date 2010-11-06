@@ -381,7 +381,7 @@ SuperLUSolver::SuperLUSolver(SuperLUMatrix *m, SuperLUVector *rhs)
   set_default_options(&options);
   options.PrintStat = YES;   // Set to NO to suppress output.
   
-  has_A = has_B = has_fact_structs = factorized = false;
+  has_A = has_B = inited = false;
 #else
   error(SUPERLU_NOT_COMPILED);
 #endif
@@ -464,21 +464,16 @@ bool SuperLUSolver::solve()
     }
   }
   
-  // If the right-hand side vector changed, recreate the input rhs for the solver driver from 
-  // a local copy of the new value array.
-  if (B_changed)
-    free_rhs();
+  // Recreate the input rhs for the solver driver from a local copy of the new value array.
+  free_rhs();
+ 
+  if (local_rhs) delete [] local_rhs;
+  local_rhs = new slu_scalar [rhs->size];
+  memcpy(local_rhs, rhs->v, rhs->size * sizeof(slu_scalar));
   
-  if (!has_B)
-  {
-    if (local_rhs) delete [] local_rhs;
-    local_rhs = new slu_scalar [rhs->size];
-    memcpy(local_rhs, rhs->v, rhs->size * sizeof(slu_scalar));
-    
-    SLU_CREATE_DENSE_MATRIX(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
-    
-    has_B = true;
-  }
+  SLU_CREATE_DENSE_MATRIX(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
+  
+  has_B = true;
   
   // Initialize the solution variable.
   SuperMatrix X;
@@ -498,10 +493,11 @@ bool SuperLUSolver::solve()
   
   // A and B may have been multiplied by the scaling vectors R and C on the output of the 
   // solver. If the next call to the solver should reuse factorization only partially,
-  // it will need the original unscaled matrix - this will indicate such situation.
-  A_changed = B_changed = (options.Equil == YES && *equed != 'N');
+  // it will need the original unscaled matrix - this will indicate such situation 
+  // (rhs is always recreated anew).
+  A_changed = (options.Equil == YES && *equed != 'N');
      
-  factorized = check_status(info);
+  bool factorized = check_status(info);
   
   if (factorized) 
   {
@@ -535,11 +531,6 @@ bool SuperLUSolver::solve()
 #endif
 }
 
-#define CHECK_FACT_STATE  \
-  if (!has_fact_structs || !factorized) { \
-    warning("Factorization structures could not be reused - no successful factorization performed yet.");\
-    return false;\
-  }
 bool SuperLUSolver::prepare_factorization_structures()
 {
   _F_
@@ -549,6 +540,13 @@ bool SuperLUSolver::prepare_factorization_structures()
     warning("You cannot reuse factorization structures for factorizing matrices of different sizes.");
     return false;
   }
+  
+  // Always factorize from scratch for the first time.
+  int eff_fact_scheme;
+  if (!inited)
+    eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+  else
+    eff_fact_scheme = factorization_scheme;
     
   // Prepare factorization structures. In case of a particular reuse scheme, comments are given
   // to clarify which arguments will be reused and which will be reset by the dgssvx (zgssvx) routine. 
@@ -580,12 +578,12 @@ bool SuperLUSolver::prepare_factorization_structures()
       if ( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
         ABORT("SUPERLU_MALLOC fails for C[].");
             
-      options.Fact = DOFACT;      
+      options.Fact = DOFACT;
+      A_changed = true;
       break;
     case HERMES_REUSE_MATRIX_REORDERING:
       // needed from previous:      etree, perm_c
       // not needed from previous:  perm_r, R, C, L, U, equed     
-      CHECK_FACT_STATE
       options.Fact = SamePattern;
       Destroy_SuperNode_Matrix(&L);
       Destroy_CompCol_Matrix(&U);
@@ -593,18 +591,16 @@ bool SuperLUSolver::prepare_factorization_structures()
     case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
       // needed from previous:      etree, perm_c, perm_r, L, U
       // not needed from previous:  R, C, equed
-      CHECK_FACT_STATE
       options.Fact = SamePattern_SameRowPerm;
       break;
     case HERMES_REUSE_FACTORIZATION_COMPLETELY:
       // needed from previous:      perm_c, perm_r, equed, L, U
       // not needed from previous:  etree, R, C
-      CHECK_FACT_STATE
       options.Fact = FACTORED;
       break;
   }
   
-  has_fact_structs = true;
+  inited = true;
   
   return true;
 #else
@@ -640,7 +636,7 @@ void SuperLUSolver::free_factorization_structures()
 { 
   _F_
 #ifdef WITH_SUPERLU
-  if (has_fact_structs)
+  if (inited)
   {
     SUPERLU_FREE (etree);
     SUPERLU_FREE (perm_c);
@@ -649,7 +645,7 @@ void SuperLUSolver::free_factorization_structures()
     SUPERLU_FREE (C);
     Destroy_SuperNode_Matrix(&L);
     Destroy_CompCol_Matrix(&U);
-    has_fact_structs = false;
+    inited = false;
   }
 #endif
 }

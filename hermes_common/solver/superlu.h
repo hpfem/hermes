@@ -131,20 +131,15 @@ public:
 
   virtual bool solve();
   
-  bool prepare_factorization_structures();
-  void free_factorization_structures();
-  void free_matrix();
-  void free_rhs();
-  
 protected:
   SuperLUMatrix *m;       
   SuperLUVector *rhs;
   
   bool has_A, has_B;            // Have the native SuperLU matrices been created?
-  bool has_fact_structs;        // Have the factorization structures been allocated?
-  bool factorized;              // Indicates successful factorization.
-  bool A_changed, B_changed;    // Indicates that the A and B matrices have been changed
-                                // internally during factorization or externally by the user.
+  bool inited;                  // Have the factorization structures been allocated?
+  bool A_changed;               // Indicates that the system matrix has been changed
+                                // internally during factorization or externally by
+                                // the user.
                                 
   bool check_status(int info);  // Check the status returned from the solver routine.
   
@@ -152,6 +147,11 @@ protected:
   // hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
   int *local_Ai, *local_Ap;
   slu_scalar *local_Ax, *local_rhs;
+  
+  bool prepare_factorization_structures();
+  void free_factorization_structures();
+  void free_matrix();
+  void free_rhs();
   
 #ifdef WITH_SUPERLU  
   SuperMatrix A, B;             // Native SuperLU representations of 'm' and 'rhs'.
