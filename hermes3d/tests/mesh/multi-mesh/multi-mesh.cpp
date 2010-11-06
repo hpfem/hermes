@@ -112,8 +112,6 @@ int main(int argc, char **args)
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o1.x, o1.y, o1.z);
 	H1Space space1(&mesh1, bc_types_1, essential_bc_values_1, o1);
 
-	space1.set_uniform_order(o1);
-
 	Ord3 o2(2, 2, 2);
 	printf("  - Setting uniform order to (%d, %d, %d)\n", o2.x, o2.y, o2.z);
 	H1Space space2(&mesh2, bc_types_2, essential_bc_values_2, o2);

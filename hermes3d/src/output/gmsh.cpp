@@ -683,7 +683,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 	fprintf(this->out_file, "$EndElements\n");
 }
 
-void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
+void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 	_F_
 	// see Gmsh documentation on details (http://www.geuz.org/gmsh/doc/texinfo/gmsh-full.html)
 
@@ -776,7 +776,7 @@ void GmshOutputEngine::out_bc(Mesh *mesh, const char *name) {
 	fprintf(this->out_file, "$EndElementNodeData\n");
 }
 
-void GmshOutputEngine::out_orders(Space *space, const char *name) {
+void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	_F_
 	Mesh *mesh = space->get_mesh();
 

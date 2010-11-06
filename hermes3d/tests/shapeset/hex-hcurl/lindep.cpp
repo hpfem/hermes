@@ -72,7 +72,7 @@ bool test_lin_indep(Shapeset *shapeset) {
 
 	ShapeFunction pss_u(shapeset), pss_v(shapeset);
 	int n = Hex::NUM_EDGES * shapeset->get_num_edge_fns(H3D_MAX_ELEMENT_ORDER)
-		+ Hex::NUM_FACES * shapeset->get_num_face_fns(order2_t(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER))
+		+ Hex::NUM_FACES * shapeset->get_num_face_fns(Ord2(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER))
 	    + shapeset->get_num_bubble_fns(Ord3(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER));
 
 	printf("number of functions = %d\n", n);
@@ -88,7 +88,7 @@ bool test_lin_indep(Shapeset *shapeset) {
 	}
 	// face fns
 	for (int i = 0; i < Hex::NUM_FACES; i++) {
-		order2_t order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+		Ord2 order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 		int *face_idx = shapeset->get_face_indices(i, 0, order);
 		for (int j = 0; j < shapeset->get_num_face_fns(order); j++, m++)
 			fn_idx[m] = face_idx[j];

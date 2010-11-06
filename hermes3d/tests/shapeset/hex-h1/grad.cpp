@@ -70,7 +70,7 @@ void h1_int_surf(ShapeFunction *fu, double3 result) {
 	// integrating over reference brick -> jacobian is 1.0 (we do not have to bother with refmap)
 	result[0] = result[1] = result[2] = 0.0;
 	for (int face = 0; face < Hex::NUM_FACES; face++) {
-		order2_t face_order = quad->get_face_max_order(face);
+		Ord2 face_order = quad->get_face_max_order(face);
 
 		QuadPt3D *pt = quad->get_face_points(face, face_order);
 		int np = quad->get_face_num_points(face, face_order);
@@ -142,7 +142,7 @@ bool test_gradients(Shapeset *shapeset) {
 	// face fns
 	printf("\n* Face functions\n");
 	for (int i = 0; i < Hex::NUM_FACES; i++) {
-		order2_t order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+		Ord2 order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 		for (int ori = 0; ori < RefHex::get_face_orientations(i); ori++) {
 			int *face_idx = shapeset->get_face_indices(i, ori, order);
 			for (int j = 0; j < shapeset->get_num_face_fns(order); j++) {

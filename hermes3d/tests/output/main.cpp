@@ -1,3 +1,10 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#include "config.h"
+#include <math.h>
+#include <hermes3d.h>
+
 // This file is part of Hermes3D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
@@ -17,9 +24,13 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "config.h"
-#include <math.h>
-#include <hermes3d.h>
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
 #if defined GMSH
 	GmshOutputEngine output(stdout);
@@ -135,43 +146,55 @@ res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_
 void test_mat(Mesh *mesh, StiffMatrix &mat)
 {
 #if defined WITH_UMFPACK
-	UMFPackVector rhs;
-	UMFPackLinearSolver solver(&mat, &rhs);
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;
 #elif defined WITH_PARDISO
-	PardisoVector rhs;
-	PardisoLinearSolver solver(&mat, &rhs);
+MatrixSolverType matrix_solver = SOLVER_PARDISO;
 #elif defined WITH_PETSC
-	PetscVector rhs;
-	PetscLinearSolver solver(&mat, &rhs);
+MatrixSolverType matrix_solver = SOLVER_PETSC;
 #elif defined WITH_MUMPS
-	MumpsVector rhs;
-	MumpsSolver solver(&mat, &rhs);
-#elif defined WITH_TRILINOS
-	EpetraVector rhs;
-	AztecOOSolver solver(&mat, &rhs);
+MatrixSolverType matrix_solver = SOLVER_MUMPS;
+#elif defined WITH_TRILINOS 
+MatrixSolverType matrix_solver = SOLVER_AZTECOO;
 #endif
-
-	H1ShapesetLobattoHex shapeset;
-	H1Space space(mesh, &shapeset);
-	space.set_bc_types(bc_types);
-	space.set_essential_bc_values(essential_bc_values);
 
 	m = n = o = 2;
 	int mx = maxn(4, m, n, o, 4);
 	Ord3 order(mx, mx, mx);
-	space.set_uniform_order(order);
 
-	space.assign_dofs();
+	// Create an H1 space with default shapeset.
+	H1Space space(mesh, bc_types, essential_bc_values, order);
 
 	WeakForm wf(1);
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
 	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 
-	DiscreteProblem dp(&wf, &space, true);
+	// Initialize discrete problem.
+	bool is_linear = true;
+	DiscreteProblem dp(&wf, &space, is_linear);
 
-	// assemble stiffness matrix
-	dp.assemble(&mat, &rhs);
-	solver.solve();
+	// Set up the solver, matrix, and rhs according to the solver selection.
+	SparseMatrix* matrix = create_matrix(matrix_solver);
+	Vector* rhs = create_vector(matrix_solver);
+	Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+	// Initialize the preconditioner in the case of SOLVER_AZTECOO.
+	if (matrix_solver == SOLVER_AZTECOO) 
+	{
+	((AztecOOSolver*) solver)->set_solver(iterative_method);
+	((AztecOOSolver*) solver)->set_precond(preconditioner);
+	// Using default iteration parameters (see solver/aztecoo.h).
+	}
+
+	// Assemble stiffness matrix and load vector.
+	info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
+	dp.assemble(matrix, rhs);
+
+	// Solve the linear system. If successful, obtain the solution.
+	info("Solving the linear problem.");
+	Solution sln(space.get_mesh());
+	if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+	else error ("Matrix solver failed.\n");
+
 }
 
 void test_mm(Mesh *mesh)
@@ -226,8 +249,6 @@ int main(int argc, char **args)
 		output.out(&ex_sln0, &ex_sln1, &ex_sln2, "U");
 	}
 	else if (strcmp(type, "ord") == 0) {
-		H1ShapesetLobattoHex shapeset;
-
 
 		Ord3 order;
 		if (mesh.elements[1]->get_mode() == MODE_HEXAHEDRON)
@@ -239,10 +260,19 @@ int main(int argc, char **args)
 
 		H1Space space(&mesh, bc_types, essential_bc_values, order);
 
-		output.out_orders_vtk(&space, "orders");
+#if defined GMSH
+		output.out_orders_gmsh(&space, "orders_gmsh");
+#elif defined VTK
+		output.out_orders_vtk(&space, "orders_vtk");
+#endif
 	}
 	else if (strcmp(type, "bc") == 0) {
+
+#if defined GMSH
+		output.out_bc_gmsh(&mesh);
+#elif defined VTK
 		output.out_bc_vtk(&mesh);
+#endif
 	}
 	else if (strcmp(type, "mat") == 0) {
 		StiffMatrix mat;

@@ -290,7 +290,7 @@ bool test_cont_values_of_edge_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 
 	// obtain coordinates where edge functions are going to be evaluated
 	Pts fpts[2];
-	order2_t face_ord = quad->get_face_max_order(facet->left_face_num);
+	Ord2 face_ord = quad->get_face_max_order(facet->left_face_num);
 	int np = quad->get_face_num_points(facet->left_face_num, face_ord);
 
 	QuadPt3D *pt[2] = {
@@ -322,7 +322,7 @@ bool test_cont_values_of_edge_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 
 		// loop through edge functions
 		// get all face functions on the face
-		order1_t order(H3D_MAX_ELEMENT_ORDER);
+		Ord1 order(H3D_MAX_ELEMENT_ORDER);
 		int *edge_fn[] = {
 			shapeset->get_edge_indices(face_edges[0][i1], edge_ori[0][i1], order),
 			shapeset->get_edge_indices(face_edges[1][i2], edge_ori[1][i2], order)
@@ -394,7 +394,7 @@ bool test_cont_values_of_face_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 
 	// get points where the functions are going to be evaluated
 	Pts fpts[2];
-	order2_t face_ord = quad->get_face_max_order(facet->left_face_num);
+	Ord2 face_ord = quad->get_face_max_order(facet->left_face_num);
 	int np = quad->get_face_num_points(facet->left_face_num, face_ord);
 
 	QuadPt3D *pt[2] = {
@@ -420,7 +420,7 @@ bool test_cont_values_of_face_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 	}
 
 	// get all face functions on the face
-	order2_t order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+	Ord2 order(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 	int *face_fn[] = {
 		shapeset->get_face_indices(facet->left_face_num, face_ori[0], order),
 		shapeset->get_face_indices(facet->right_face_num, face_ori[1], order)

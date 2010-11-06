@@ -1,3 +1,9 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#include "config.h"
+#include <hermes3d.h>
+
 // This file is part of Hermes3D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
@@ -16,9 +22,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-#include "config.h"
-#include <hermes3d.h>
 
 #define ERR_SUCCESS					0
 #define ERR_FAILURE					-1

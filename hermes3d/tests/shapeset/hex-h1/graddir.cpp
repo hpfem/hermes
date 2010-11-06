@@ -97,7 +97,7 @@ bool test_gradients_directly(Shapeset *ss) {
 		if (!test(ss, index)) passed = false;
 	}
 
-	order1_t eorder = H3D_MAX_ELEMENT_ORDER;
+	Ord1 eorder = H3D_MAX_ELEMENT_ORDER;
 	for (int ie = 0; ie < 12; ie++) {
 		for (int ori = 0; ori < 2; ori++) {
 			indices = ss->get_edge_indices(ie, ori, eorder);
@@ -109,7 +109,7 @@ bool test_gradients_directly(Shapeset *ss) {
 		}
 	}
 
-	order2_t forder(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
+	Ord2 forder(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER);
 	for (int ic = 0; ic < 6; ic++) {
 		for (int ori = 0; ori < 8; ori++) {
 			indices = ss->get_face_indices(ic, ori, forder);
