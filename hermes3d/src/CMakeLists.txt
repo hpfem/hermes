@@ -55,6 +55,7 @@ set(SRC
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
+  ${HERMES_COMMON_DIR}/trace.cpp
   ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 
   ${HERMES_COMMON_DIR}/solver/epetra.cpp 

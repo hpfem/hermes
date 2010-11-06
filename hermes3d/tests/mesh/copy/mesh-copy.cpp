@@ -1,3 +1,9 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#include "config.h"
+#include <hermes3d.h>
+
 // This file is part of Hermes3D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
@@ -18,20 +24,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /*
- * mesh-copy.cc
+ * mesh-copy.cpp
  *
  * usage: $0 <mesh file>
  *
  */
-
-#include "config.h"
-#include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/common_time_period.h"
-#include "../../../../hermes_common/error.h"
-#ifdef WITH_PETSC
-#include "../../../../hermes_common/solver/petsc.h"
-#endif
 
 enum ECopyType {
 	CT_NONE,
