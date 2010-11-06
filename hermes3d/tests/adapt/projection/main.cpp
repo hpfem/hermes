@@ -1,25 +1,12 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
+//#include <getopt.h>
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/error.h"
-#include <float.h>
-
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //
-// Testing projections
+// Testing projections.
 //
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
@@ -33,11 +20,10 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 
-#define ERROR_SUCCESS								0
-#define ERROR_FAILURE								-1
+// The error should be smaller than this epsilon.
+#define EPS								10e-10F
 
-#define EPS											10e-10
-
+// Problem parameters.
 //#define X2_Y2_Z2_025
 //#define X2_Y2_Z2
 //#define X3_Y3_Z3
@@ -75,7 +61,7 @@ T dfnc(T x, T y, T z) {
 #endif
 }
 
-// needed for calculation norms and used by visualizator
+// Exact solution.
 double exact_solution(double x, double y, double z, double &dx, double &dy, double &dz) {
 #if defined X2_Y2_Z2_025
   if ((x*x + y*y + z*z) != 0.0) {
@@ -106,12 +92,13 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
   return fnc(x, y, z);
 }
 
-//
-
-BCType bc_types(int marker) {
+// Boundary condition types.
+BCType bc_types(int marker) 
+{
   return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
   return fnc(x, y, z);
 }
@@ -126,60 +113,40 @@ res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_
   return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
 }
 
-
-//
-
-#define CHECK_ERROR \
-  printf("Elem #%u: error = % lf\n", e->id, error); \
-  if (error > EPS) { \
-    ret = ERR_FAILURE; \
-    break; \
-  }
-
-//
-// main
-//
-
-int main(int argc, char *args[])
+int main(int argc, char **args) 
 {
-  _F_
-  int ret = ERROR_SUCCESS;
+  // Test variable.
+  int success_test = 1;
 
-  if (argc < 3) {
-    fprintf(stderr, "ERROR: not enough parameters\n");
-    return ERR_FAILURE;
-  }
+  if (argc < 3) error("Not enough parameters.");
 
-  if (strcmp(args[1], "h1") != 0 && strcmp(args[1], "h1-ipol")) {
-    fprintf(stderr, "ERROR: unknown type of the projection\n");
-    return ERR_FAILURE;
-  }
+  if (strcmp(args[1], "h1") != 0 && strcmp(args[1], "h1-ipol"))
+    error("Unknown type of the projection.");
 
+	// Load the mesh.
   Mesh mesh;
   H3DReader mloader;
-  if (!mloader.load(args[2], &mesh)) {
-    fprintf(stderr, "ERROR: loading mesh file '%s'\n", args[2]);
-    return ERR_FAILURE;
-  }
+  if (!mloader.load(args[2], &mesh)) error("Loading mesh file '%s'\n", args[1]);
 
-  unsigned int ne = mesh.elements.count();
-  // make the mesh for the ref. solution
+	// Refine the mesh.
   mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
 
+	// Initialize the space.
 #if defined X2_Y2_Z2
-  Ord3 o(2, 2, 2);
+  Ord3 order(2, 2, 2);
 #elif defined X3_Y3_Z3
-  Ord3 o(3, 3, 3);
+  Ord3 order(3, 3, 3);
 #elif defined XN_YM_ZO
-  Ord3 o(2, 3, 4);
+  Ord3 order(2, 3, 4);
 #endif
+  H1Space space(&mesh, bc_types, essential_bc_values, order);
 
-  H1Space space(&mesh, bc_types, essential_bc_values, o);
-
+  // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM, HERMES_ANY);
   wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
 
+  // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 
@@ -199,15 +166,19 @@ int main(int argc, char *args[])
     // Using default iteration parameters (see solver/aztecoo.h).
   }
 
-  // assemble the stiffness matrix
+  // Assemble the linear problem.
   dp.assemble(matrix, rhs);
 
-  // solve the stiffness matrix
-  solver->solve();
-
+  // Solve the linear system. If successful, obtain the solution.
+  info("Solving the linear problem.");
   Solution sln(&mesh);
-  Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  else {
+	  printf("Matrix solver failed.\n");
+	  success_test = 0;
+  }
 
+  unsigned int ne = mesh.get_num_base_elements();
   for (unsigned int idx = mesh.elements.first(); idx <= ne; idx = mesh.elements.next(idx)) {
     Element *e = mesh.elements[idx];
 
@@ -217,34 +188,42 @@ int main(int argc, char *args[])
     Projection *proj;
     if (strcmp(args[1], "h1") == 0) proj = new H1Projection(&sln, e, space.get_shapeset());
     else if (strcmp(args[1], "h1-ipol") == 0) proj = new H1ProjectionIpol(&sln, e, space.get_shapeset());
-    else return ERR_FAILURE;
+    else success_test = 0;
 
-    //
     error = 0.0;
     error += proj->get_error(H3D_REFT_HEX_NONE, -1, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
     error += proj->get_error(H3D_REFT_HEX_X, 20, order);
     error += proj->get_error(H3D_REFT_HEX_X, 21, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
     error += proj->get_error(H3D_REFT_HEX_Y, 22, order);
     error += proj->get_error(H3D_REFT_HEX_Y, 23, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
     error += proj->get_error(H3D_REFT_HEX_Z, 24, order);
     error += proj->get_error(H3D_REFT_HEX_Z, 25, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
@@ -253,7 +232,9 @@ int main(int argc, char *args[])
     error += proj->get_error(H3D_H3D_REFT_HEX_XY, 10, order);
     error += proj->get_error(H3D_H3D_REFT_HEX_XY, 11, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
@@ -262,7 +243,9 @@ int main(int argc, char *args[])
     error += proj->get_error(H3D_H3D_REFT_HEX_XZ, 14, order);
     error += proj->get_error(H3D_H3D_REFT_HEX_XZ, 15, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
@@ -271,20 +254,32 @@ int main(int argc, char *args[])
     error += proj->get_error(H3D_H3D_REFT_HEX_YZ, 18, order);
     error += proj->get_error(H3D_H3D_REFT_HEX_YZ, 19, order);
     error = sqrt(error);
-    CHECK_ERROR;
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 
     //
     error = 0.0;
     for (int j = 0; j < 8; j++)
       error += proj->get_error(H3D_H3D_H3D_REFT_HEX_XYZ, j, order);
     error = sqrt(error);
-    CHECK_ERROR;
 
     delete proj;
+    
+    if (error > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
   }
 
   // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   finalize_solution_environment(matrix_solver);
 
-  return ret;
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }

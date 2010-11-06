@@ -110,6 +110,9 @@ int parse_aniso_type(char *str)
 
 int main(int argc, char **args)
 {
+  // Test variable.
+  int success_test = 1;
+
   // Check the number of command-line parameters.
   if (argc < 2) {
     info("Use x, y, z, xy, xz, yz, or xyz as a command-line parameter.");
@@ -121,8 +124,8 @@ int main(int argc, char **args)
 
   // Load the mesh.
   Mesh mesh;
-  H3DReader mesh_loader;
-  mesh_loader.load("hex-0-1.mesh3d", &mesh);
+  H3DReader mloader;
+  mloader.load("hex-0-1.mesh3d", &mesh);
 
   // Assign the lowest possible directional polynomial degrees so that the problem's NDOF >= 1.
   assign_poly_degrees();
@@ -156,7 +159,7 @@ int main(int argc, char **args)
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space,1 , H3D_H3D_H3D_REFT_HEX_XYZ);
 
-    // Initialize discrete problem.
+    // Initialize the FE problem.
     bool is_linear = true;
     DiscreteProblem dp(&wf, ref_space, is_linear);
 
@@ -184,7 +187,10 @@ int main(int argc, char **args)
     info("Solving on reference mesh.");
     Solution ref_sln(ref_space->get_mesh());
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+    else {
+		  printf("Matrix solver failed.\n");
+		  success_test = 0;
+	  }
 
     // Time measurement.
     cpu_time.tick();
@@ -264,14 +270,15 @@ int main(int argc, char **args)
 
   info("ndof_actual = %d", ndof);
   info("ndof_allowed = %d", ndof_allowed); 
-  if (ndof <= ndof_allowed) {
-    printf("Success!\n");
-    return ERROR_SUCCESS;
+  if (ndof <= ndof_allowed)
+    success_test = 0;
+  
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
   }
   else {
-    printf("Failure!\n");
-    return ERROR_FAILURE;
+    info("Failure!");
+    return ERR_FAILURE;
   }
-
-  return 1;
 }

@@ -27,7 +27,7 @@
 /// FIXME: hex specific
 ///
 /// @ingroup hp-adaptivity
-class H1ProjectionIpol : public ProjectionIpol {
+class HERMES_API H1ProjectionIpol : public ProjectionIpol {
 public:
 	H1ProjectionIpol(Solution *afn, Element *e, Shapeset *ss);
 

@@ -165,9 +165,7 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
     delete tpt;
 	}
 
-  
-
-	sln->enable_transform(true);
+  sln->enable_transform(true);
 
 	return error;
 }
