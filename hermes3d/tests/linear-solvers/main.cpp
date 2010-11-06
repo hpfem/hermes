@@ -1,40 +1,12 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-/*
- * main.cc
- *
- * Test of linear solver
- * Read matrix and RHS from file and print out the result
- *
- */
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
-#ifdef WITH_PETSC
-  #include <petsc.h>
-#endif
-
-#include "../../../hermes_common/trace.h"
-#include "../../../hermes_common/array.h"
-#include "../../../hermes_common/error.h"
-
+//#include <getopt.h>
 #include <hermes3d.h>
+
+// Test of linear solvers.
+// Read matrix and RHS from a file.
 
 // max row length in input file
 #define MAX_ROW_LEN									1024
@@ -221,12 +193,11 @@ int main(int argc, char *argv[])
 	// disable PETSc error handler
 	PetscPushErrorHandler(PetscIgnoreErrorHandler, PETSC_NULL);
 #endif
-	set_verbose(false);
 
 #ifndef H3D_COMPLEX
-	if (argc < 3) error("Not enough parameters");
+	if (argc < 3) error("Not enough parameters.");
 #else
-	if (argc < 2) error("Not enough parameters");
+	if (argc < 2) error("Not enough parameters.");
 #endif
 
 	int n;
@@ -337,7 +308,7 @@ int main(int argc, char *argv[])
 		if (AmesosSolver::is_available("Klu")) {
 			AmesosSolver solver("Klu", &mat, &rhs);
 			solve(solver, n);
-		}
+		} 
 #endif
 	}
 	else if (strcasecmp(argv[1], "mumps") == 0) {

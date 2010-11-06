@@ -38,12 +38,10 @@ using namespace std;
 
 //// ScalarView ////////////////////////////////////////////////////////////////////////////////////
 // For MS Visual Studio it is necessary to initialize the constant static attributes outside of the class body as follows : 
-#ifdef _MSC_VER
-	const int ScalarView::fovy = 50;
-	const double ScalarView::znear = 0.05;
-	const double ScalarView::zfar = 10;
-#endif
 
+const int ScalarView::fovy = 50;
+const double ScalarView::znear = 0.05;
+const double ScalarView::zfar = 10;
 
 void ScalarView::init()
 {

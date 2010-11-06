@@ -43,7 +43,7 @@ int parse_reft(char *str) {
 int main(int argc, char *argv[]) {
 	set_verbose(false);
 
-	if (argc < 1) error("Not enough parameters");
+	if (argc < 1) error("Not enough parameters.");
 
 	Mesh mesh;
 	H3DReader mesh_loader;

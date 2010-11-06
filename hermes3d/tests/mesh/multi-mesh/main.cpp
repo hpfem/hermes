@@ -37,6 +37,8 @@
 //
 // error should be smaller than this epsilon
 
+#define EPS								10e-10F
+
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
@@ -47,7 +49,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
-#define EPS								10e-10F
+
 
 
 // Weak forms. 
@@ -64,7 +66,7 @@ int main(int argc, char **args)
 #endif
 	set_verbose(false);
 
-	if (argc < 2) error("Not enough parameters");
+	if (argc < 2) error("Not enough parameters.");
 
 	printf("* Loading mesh '%s'\n", args[1]);
 	Mesh mesh1;

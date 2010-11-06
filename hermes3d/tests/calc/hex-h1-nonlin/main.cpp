@@ -1,33 +1,25 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-//  Testing nonlinear solver using Newton's method
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
-#include <math.h>
+//#include <getopt.h>
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/common_time_period.h"
-#include "../../../../hermes_common/error.h"
-#include "../../../../hermes_common/utils.h"
 
-// error should be smaller than this epsilon
+//  Testing nonlinear solver using Newton's method.
+
+
+// The following parameters influence the projection system solving:
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+
+// The error should be smaller than this epsilon.
 #define EPS								10e-10F
 
 #define grad_grad(u, v) (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i] + u->dz[i] * v->dz[i])
@@ -35,19 +27,19 @@
 
 #if defined LINEAR
 
-//  Solving a linear problem using nonlinear solver with Newton's method
+//  Solving a linear problem using nonlinear solver with Newton's method.
 //
-//  PDE: stationary heat transfer with nonlinear thermal conductivity
-//  -\Laplace u = f
+//  PDE: stationary heat transfer with nonlinear thermal conductivity.
+//  -\Laplace u = f.
 //
-//  Exact solution: u(x,y,z) = x^2 + y^2 + z^2
+//  Exact solution: u(x,y,z) = x^2 + y^2 + z^2.
 
 double fnc(double x, double y, double z)
 {
 	return x*x + y*y + z*z;
 }
 
-// needed for calculation norms and used by visualizator
+// Exact solution.
 double exact_solution(double x, double y, double z, double &dx, double &dy, double &dz)
 {
 	dx = 2 * x;
@@ -57,106 +49,111 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 	return fnc(x, y, z);
 }
 
+// Boundary condition types.
 BCType bc_types(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
 	return fnc(x, y, z);
 }
 
-template<typename f_t, typename res_t>
-res_t jacobi_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
-                  ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar jacobi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *vi, Func<Real> *vj, Geom<Real> *e,
+                  ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<f_t, res_t>(n, wt, vi, vj, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, vi, vj, e);
 }
 
-template<typename f_t, typename res_t>
-res_t resid_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *vi, Geom<f_t> *e,
-                 ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar resid_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *vi, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
-		res += wt[i] * (grad_grad(u_ext[0], vi) + 6.0 * vi->fn[i]);
+		res += wt[i] * (grad_grad(u_ext[0], vi) + 6.0 * vi->val[i]);
 	return res;
 }
 
 #elif defined NONLIN1
 
-//  Solving a nonlinear problem using Newton's method
+//  Solving a nonlinear problem using Newton's method.
 //
-//  PDE: stationary heat transfer with nonlinear thermal conductivity
-//  - div[lambda(u) grad u] = f
-//                lambda(u) = 1 + u^2
+//  PDE: stationary heat transfer with nonlinear thermal conductivity.
+//  - div[lambda(u) grad u] = f,
+//                lambda(u) = 1 + u^2.
 //
-//  BC:  T = 100 on the left, top and bottom edges
-//       dT/dn = 0 on the face
+//  BC:  T = 100 on the left, top and bottom edges,
+//       dT/dn = 0 on the face.
 //
-//  Exact solution: u(x,y,z) = 100
+//  Exact solution: u(x,y,z) = 100.
 
-// thermal conductivity (temperature-dependent)
-// for any u, this function has to be  positive in the entire domain!
+// Thermal conductivity (temperature-dependent).
+// For any u, this function has to be  positive in the entire domain!
 template<typename T>
 inline T lambda(T temp)  { return 10 + 0.1 * pow(temp, 2); }
-// derivate of lambda wrt temperature
+
+// Derivate of lambda wrt temperature.
 template<typename T>
 inline T dlambda(T temp) { return 0.2 * temp; }
 
 const int marker_right = 2;
 
+// Boundary condition types.
 BCType bc_types(int marker)
 {
 	if (marker == marker_right) return BC_NATURAL;
 	else return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
 	return 100.0;
 }
 
-template<typename f_t, typename res_t>
-res_t jacobi_form(int n, double *wt, Func<res_t> *itr[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e,
-                  ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar jacobi_form(int n, double *wt, Func<Scalar> *itr[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                  ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
 		res += wt[i] *
-			(dlambda(itr[0]->fn[i]) * u->fn[i] * grad_grad(itr[0], v) +
-			  lambda(itr[0]->fn[i]) * grad_grad(u, v));
+			(dlambda(itr[0]->val[i]) * u->val[i] * grad_grad(itr[0], v) +
+			  lambda(itr[0]->val[i]) * grad_grad(u, v));
 	return res;
 }
 
-template<typename f_t, typename res_t>
-res_t resid_form(int n, double *wt, Func<res_t> *itr[], Func<f_t> *v, Geom<f_t> *e,
-                 ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar resid_form(int n, double *wt, Func<Scalar> *itr[], Func<Real> *v, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
-		res += wt[i] * (lambda(itr[0]->fn[i]) * grad_grad(itr[0], v));
+		res += wt[i] * (lambda(itr[0]->val[i]) * grad_grad(itr[0], v));
 	return res;
 }
 
 #elif defined NONLIN2
 
-//  Solving a nonlinear problem using Newton's method
+//  Solving a nonlinear problem using Newton's method.
 //
-//  PDE: stationary heat transfer with nonlinear thermal conductivity
-//  - div [u grad u] = f
+//  PDE: stationary heat transfer with nonlinear thermal conductivity.
+//  - div [u grad u] = f.
 //
-//  BC:  u = x^2 + y^2 + z^2 on dOmega
+//  BC:  u = x^2 + y^2 + z^2 on dOmega.
 //
-//  Exact solution: u(x,y,z) = x^2 + y^2 + z^2
+//  Exact solution: u(x,y,z) = x^2 + y^2 + z^2.
 
 double fnc(double x, double y, double z)
 {
 	return x*x + y*y + z*z;
 }
 
-// needed for calculation norms and used by visualizator
+// Exact solution.
 double exact_solution(double x, double y, double z, double &dx, double &dy, double &dz)
 {
 	dx = 2 * x;
@@ -166,19 +163,17 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 	return fnc(x, y, z);
 }
 
-// BC
-
+// Boundary condition types.
 BCType bc_types(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
 	return fnc(x, y, z);
 }
-
-// forms
 
 template<typename T>
 inline T f(T x, T y, T z)
@@ -187,126 +182,128 @@ inline T f(T x, T y, T z)
 }
 
 
-template<typename f_t, typename res_t>
-res_t jacobi_form(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Func<f_t> *vj, Geom<f_t> *e,
-                  ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar jacobi_form(int n, double *wt, Func<Real> *u[], Func<Real> *vi, Func<Real> *vj, Geom<Real> *e,
+                  ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
-		res += wt[i] * (vj->fn[i] * grad_grad(u[0], vi) + u[0]->fn[i] * grad_grad(vj, vi));
+		res += wt[i] * (vj->val[i] * grad_grad(u[0], vi) + u[0]->val[i] * grad_grad(vj, vi));
 	return res;
 }
 
 
-template<typename f_t, typename res_t>
-res_t resid_form(int n, double *wt, Func<f_t> *u[], Func<f_t> *vi, Geom<f_t> *e,
-                 ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar resid_form(int n, double *wt, Func<Real> *u[], Func<Real> *vi, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
-		res += wt[i] * (u[0]->fn[i] * grad_grad(u[0], vi) - f(e->x[i], e->y[i], e->z[i]) * vi->fn[i]);
+		res += wt[i] * (u[0]->val[i] * grad_grad(u[0], vi) - f(e->x[i], e->y[i], e->z[i]) * vi->val[i]);
 	return res;
 }
 
-// PROJ
-
-template<typename f_t, typename res_t>
-res_t biproj_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e,
-                  ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar biproj_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                  ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
-		res += wt[i] * (u->fn[i] * v->fn[i] + grad_grad(u, v));
+		res += wt[i] * (u->val[i] * v->val[i] + grad_grad(u, v));
 	return res;
 }
 
-template<typename f_t, typename res_t>
-res_t liproj_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar liproj_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data)
 {
-	res_t res = 0.0;
+	Scalar res = 0.0;
 	return res;
 }
-
 #endif
 
-// main ////////////////////////////////////////////////////////////////////////////////////////////
-
-int main(int argc, char **argv)
+int main(int argc, char **args)
 {
-	int res = ERR_SUCCESS;
-	set_verbose(false);
+  // Test variable.
+  int success_test = 1;
 
-	if (argc < 2) error("Not enough parameters");
+  if (argc < 2) error("Not enough parameters.");
 
-	printf("* Loading mesh '%s'\n", argv[1]);
+  // Load the mesh.
 	Mesh mesh;
-	H3DReader mesh_loader;
-	if (!mesh_loader.load(argv[1], &mesh)) error("loading mesh file '%s'\n", argv[1]);
+  H3DReader mloader;
+  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
 
+	// Initialize the space.
 #if defined NONLIN1
 	Ord3 order(1, 1, 1);
 #else
 	Ord3 order(2, 2, 2);
 #endif
-	printf("* Setting the space up\n");
 	H1Space space(&mesh, bc_types, essential_bc_values, order);
 
-	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
-	space.set_uniform_order(order);
-
-	int ndofs = space.assign_dofs();
-	printf("  - Number of DOFs: %d\n", ndofs);
-
 #if defined NONLIN2
-	// do L2 projection of zero function
+	// Do L2 projection of zero function.
 	WeakForm proj_wf;
-	proj_wf.add_matrix_form(biproj_form<double, scalar>, biproj_form<Ord, Ord>, SYM);
+	proj_wf.add_matrix_form(biproj_form<double, scalar>, biproj_form<Ord, Ord>, HERMES_SYM);
 	proj_wf.add_vector_form(liproj_form<double, scalar>, liproj_form<Ord, Ord>);
 
-	DiscreteProblem lp(&proj_wf, &space, true);
+	bool is_linear = true;
+	DiscreteProblem lp(&proj_wf, &space, is_linear);
 
-#ifdef WITH_UMFPACK
-	UMFPackMatrix m;
-	UMFPackVector v;
-	UMFPackLinearSolver sl(&m, &v);
-#elif defined WITH_MUMPS
-	MumpsMatrix m;
-	MumpsVector v;
-	MumpsSolver sl(&m, &v);
+	// Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver_proj = create_linear_solver(matrix_solver, matrix, rhs);
+  
+  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver_proj)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver_proj)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
+  
+  // Assemble the linear problem.
+  info("Assembling (ndof: %d).", Space::get_num_dofs(&space));
+  lp.assemble(matrix, rhs);
+    
+  // Solve the linear system.
+  info("Solving.");
+  if(!solver_proj->solve());
+  	error ("Matrix solver failed.\n");
+
+  delete matrix;
+  delete rhs;
 #endif
-	lp.assemble(&m, &v);
-	sl.solve();
 
-	double *ps = sl.get_solution();
-#endif
-
-	printf("* Calculating a solution\n");
-
+	// Initialize the weak formulation.
 	WeakForm wf(1);
-	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<Ord, Ord>, UNSYM);
+	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<Ord, Ord>, HERMES_UNSYM);
 	wf.add_vector_form(0, resid_form<double, scalar>, resid_form<Ord, Ord>);
 
-	DiscreteProblem dp(&wf, &space, false);
+	// Initialize the FE problem.
+#if defined NONLIN2
+  is_linear = false;
+#else
+  bool is_linear = false;
+#endif
+	DiscreteProblem dp(&wf, &space, is_linear);
 
 	NoxSolver solver(&dp);
+
 #if defined NONLIN2
-	solver.set_init_sln(ps);
+solver.set_init_sln(solver_proj->get_solution());
+delete solver_proj;
 #endif
-	solver.set_conv_iters(10);
 
-	printf("  - solving..."); fflush(stdout);
-	Timer solve_timer;
-	solve_timer.start();
-	bool solved = solver.solve();
-	solve_timer.stop();
-
-	if (solved) {
-		printf(" done in %s (%lf secs), iters = %d\n", solve_timer.get_human_time(),
-		       solve_timer.get_seconds(), solver.get_num_iters());
-
-		double *s = solver.get_solution();
-		Solution sln(&mesh);
-		sln.set_coeff_vector(&space, s);
+solver.set_conv_iters(10);
+	info("Solving.");
+	Solution sln(&mesh);
+	if(solver.solve()) Solution::vector_to_solution(solver.get_solution(), &space, &sln);
+  else error ("Matrix solver failed.\n");
 
 		Solution ex_sln(&mesh);
 #ifdef NONLIN1
@@ -314,33 +311,23 @@ int main(int argc, char **argv)
 #else
 		ex_sln.set_exact(exact_solution);
 #endif
-		double h1_err = h1_error(&sln, &ex_sln);
-		printf("  - H1 error norm:      % le\n", h1_err);
-		double l2_err = l2_error(&sln, &ex_sln);
-		printf("  - L2 error norm:      % le\n", l2_err);
+		// Calculate exact error.
+  info("Calculating exact error.");
+  Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+  bool solutions_for_adapt = false;
+  double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
 
-		if (h1_err > EPS || l2_err > EPS) {
-			// calculated solution is not enough precise
-			res = ERR_FAILURE;
-		}
-#ifdef OUTPUT_DIR
-		printf("* Output\n");
-		// output
-		const char *of_name = OUTPUT_DIR "/solution.vtk";
-		FILE *ofile = fopen(of_name, "w");
-		if (ofile != NULL) {
-			VtkOutputEngine output(ofile);
-			output.out(&sln, "Uh", FN_VAL_0);
-			fclose(ofile);
-		}
-		else {
-			warning("Cann not open '%s' for writing.", of_name);
-		}
+  if (err_exact > EPS)
+		// Calculated solution is not precise enough.
+		success_test = 0;
 
-#endif
-	}
-	else
-		res = ERR_FAILURE;
-
-	return res;
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }
+

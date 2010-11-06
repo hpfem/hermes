@@ -51,7 +51,7 @@ option(WITH_PYTHON   "Enable support for Python" NO)
 
 set(OUTPUT_DIR "" CACHE STRING "Directory were the output will be written")
 
-set(DEV_TESTS YES)
+set(DEV_TESTS NO)
 
 # Doxygen related
 #set(DOXYGEN_BINARY doxygen)

@@ -1,51 +1,30 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-//
-// hang-nodes-continuity.cc
-//
-// usage: $0 <mesh file> <element id> <refinement id> [<element id> <refinement id>...]
-//
-//
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
+//#include <getopt.h>
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/common_time_period.h"
-#include "../../../../hermes_common/error.h"
-#ifdef WITH_PETSC
-#include "../../../../hermes_common/solver/petsc.h"
-#endif
-
-#define BEGIN_BLOCK						{
-#define END_BLOCK						}
 
 
+// The following parameters can be changed:
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+
+// Problem parameters.
 //#define X2_Y2_Z2
 #define FN4
 
-// general polynomial function satisfying perfect conductor bc
-// exact solution has zero tangential component on the boundary on the domain (-1, 1)^3
-// DO NOT TEST on other domains
 
 const double alpha = 1.0;
 
+// Exact solution.
 scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz) {
 	_F_
 	static scalar3 val;
@@ -151,26 +130,26 @@ void f(S x, S y, S z, T (&val)[3]) {
 	val[2] = curlpart[2] - alpha * ev[2];
 }
 
-BCType bc_types(int marker) {
+// Boundary condition types.
+BCType bc_types(int marker) 
+{
 	return BC_ESSENTIAL;
 }
 
-// definition of the forms
-
-template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
 	return
-		hcurl_int_curl_u_curl_v<f_t, res_t>(n, wt, u, v, e) -
-		alpha * hcurl_int_u_v<f_t, res_t>(n, wt, u, v, e);
+		hcurl_int_curl_u_curl_v<Real, Scalar>(n, wt, u, v, e) -
+		alpha * hcurl_int_u_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	return hcurl_int_F_v<f_t, res_t>(n, wt, f<f_t, res_t>, u, e);
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	return hcurl_int_F_v<Real, Scalar>(n, wt, f<Real, Scalar>, u, e);
 }
 
 
-// helpers ////////////////////////////////////////////////////////////////////////////////////////
+// Helpers.
 
 int parse_reft(char *str) {
 	if (strcasecmp(str, "x") == 0) return H3D_REFT_HEX_X;
@@ -184,9 +163,7 @@ int parse_reft(char *str) {
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-
-// maximal level of refinement considered (= 0 .. # of ref)
+// Maximum level of refinement considered (= 0 .. # of ref)
 #ifdef DEV_TESTS
 	#define MAX_LEVEL					4
 #else
@@ -194,7 +171,7 @@ int parse_reft(char *str) {
 #endif
 #define NUM_RULES						((MAX_LEVEL + 1) * (MAX_LEVEL + 1))
 
-// special quadrature used in this test to define set of points, where
+// Special quadrature used in this test to define set of points, where
 // continuity is tested. Quadrature is used in order to use RefMap abilities
 // calculate physical coordinates of points from the reference domain.
 //
@@ -210,13 +187,11 @@ int parse_reft(char *str) {
 //   LEVEL = 1  divisions 0 x 1 y or 0 x 1 y 3 z are ok, but 0 x 1 y 3 y not
 //   LEVEL = 2  division 0 x 1 y 3 y is ok, but 0 x 1 y 3 y 5 y not
 // - if LEVEL is not sufficient, there will be some faces, that will not be tested,
-//   because no points from the face will match to points from the constraining face
+//   because no points from the face will match to points from the constraining face.
 class ContQuad : public Quad3D {
 public:
 	ContQuad() {
 		_F_
-//		max_order = max_edge_order = max_face_order = NUM_RULES;
-
 		int my_np_1d[MAX_LEVEL + 1];
 		double my_tables_1d[MAX_LEVEL + 1][1000];
 
@@ -308,11 +283,10 @@ public:
 struct Point {
 	double ref_x, ref_y, ref_z;
 	double phys_x, phys_y, phys_z;
-	unsigned int elm_idx;
-	int iface;
+	unsigned int elm_idx, fac_idx;
 
-	Point(int idx, int ifa, double rx, double ry, double rz, double px, double py, double pz) {
-		elm_idx = idx; iface = ifa;
+	Point(int idx, int f_idx, double rx, double ry, double rz, double px, double py, double pz) {
+		elm_idx = idx; fac_idx = f_idx;
 		ref_x = rx;  ref_y = ry;  ref_z = rz;
 		phys_x = px; phys_y = py; phys_z = pz;
 	}
@@ -331,7 +305,9 @@ int compare(Point **pt1, Point **pt2) {
 	else return 0;
 }
 
-const double EPS = 1e-13;
+// The error should be smaller than this epsilon.  
+const double EPS = 1e-10;
+// For the testing of continuity, the jump can not be higher than this.
 const double TOLERANCE = 1e-10;
 
 bool equal(Point *pt1, Point *pt2) {
@@ -342,193 +318,86 @@ bool equal(Point *pt1, Point *pt2) {
 	return true;
 }
 
-// main ///////////////////////////////////////////////////////////////////////////////////////////
+int main(int argc, char **args) 
+{
+  // Test variable.
+  int success_test = 1;
 
-int main(int argc, char **args) {
-	_F_
-	int res = ERR_SUCCESS;
+	if (argc < 2) error("Not enough parameters.");
 
-#ifdef WITH_PETSC
-	PetscInitialize(NULL, NULL, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-	set_verbose(false);
-
-	if (argc < 2) error("Not enough parameters");
-
+  // Load the mesh.
 	Mesh mesh;
-	H3DReader mesh_loader;
-	if (!mesh_loader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+	H3DReader mloader;
+  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
 
-	// apply refinements
+	// Apply refinements according to the command line parameters passed.
 	for (int i = 2; i < argc; i += 2) {
 		int elem_id, reft_id;
 		sscanf(args[i], "%d", &elem_id);
 		reft_id = parse_reft(args[i + 1]);
 		mesh.refine_element(elem_id + 1, reft_id);
 	}
-//	mesh.dump();
 
-
-#ifdef OUTPUT_DIR
-	BEGIN_BLOCK
-	// output the mesh
-		const char *of_name = OUTPUT_DIR "/ref.msh";
-		FILE *ofile = fopen(of_name, "w");
-		if (ofile != NULL) {
-			GmshOutputEngine output(ofile);
-			output.out(&mesh);
-			fclose(ofile);
-		}
-		else {
-			warning("Can not open '%s' for writing.", of_name);
-		}
-	END_BLOCK
-#endif
-
+	// Initialize the space.
 #if defined FN4
-	Ord3 o(4, 4, 4);
+	Ord3 order(4, 4, 4);
 #elif defined X2_Y2_Z2
-	Ord3 o(2, 2, 2);
+	Ord3 order(2, 2, 2);
+#else
+	Ord3 order(2, 2, 2);
 #endif
-	printf("  - Setting uniform order to (%d, %d, %d)\n", o.x, o.y, o.z);
+	HcurlSpace space(&mesh, bc_types, NULL, order);
 
-	printf("* Setting the space up\n");
-	HcurlSpace space(&mesh, bc_types, NULL, o);
+	
 
-	int ndofs = space.assign_dofs();
-	printf("  - Number of DOFs: %d\n", ndofs);
-
-	printf("* Calculating a solution\n");
-
-#if defined WITH_UMFPACK
-	UMFPackMatrix mat;
-	UMFPackVector rhs;
-	UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-	PardisoMatrix mat;
-	PardisoVector rhs;
-	PardisoLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PETSC
-	PetscMatrix mat;
-	PetscVector rhs;
-	PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-	MumpsMatrix mat;
-	MumpsVector rhs;
-	MumpsSolver solver(&mat, &rhs);
-#endif
-
+	// Initialize the weak formulation.
 	WeakForm wf(1);
-	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
+	wf.add_matrix_form(0, 0, bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
 	wf.add_vector_form(0, linear_form<double, scalar>, linear_form<Ord, Ord>);
 
-	// assemble stiffness matrix
-	DiscreteProblem dp(&wf, &space, true);
+	// Initialize the FE problem.
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, &space, is_linear);
 
-	dp.assemble(&mat, &rhs);
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
 
-#if 0 //def OUTPUT_DIR
-	{
-		char file_name[1024];
-		sprintf(file_name, "%s/matrix", OUTPUT_DIR);
-		FILE *file = fopen(file_name, "w");
-		if (file != NULL) {
-			mat.dump(file, "A");
-			rhs.dump(file, "b");
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-			fclose(file);
+  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
 		}
-	}
-#endif
 
-	try {
-		Solution sln(&mesh);
-#if 1
-		// solve the stiffness matrix
-		bool solved = solver.solve();
-		if (!solved) throw ERR_FAILURE;
+  // Assemble the linear problem.
+  info("Assembling (ndof: %d).", Space::get_num_dofs(&space));
+  dp.assemble(matrix, rhs);
 
-		sln.set_coeff_vector(&space, solver.get_solution());
+  // Solve the linear system. If successful, obtain the solution.
+  info("Solving.");
+  Solution sln(&mesh);
+  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  else error ("Matrix solver failed.\n");
 
-		ExactSolution exsln(&mesh, exact_solution);
-		// norm
-		double h1_sln_norm = h1_norm(&sln);
-		double h1_err_norm = h1_error(&sln, &exsln);
-		printf(" - H1 solution norm:   % le\n", h1_sln_norm);
-		printf(" - H1 error norm:      % le\n", h1_err_norm);
+	ExactSolution ex_sln(&mesh, exact_solution);
 
-		double l2_sln_norm = l2_norm(&sln);
-		double l2_err_norm = l2_error(&sln, &exsln);
-		printf(" - L2 solution norm:   % le\n", l2_sln_norm);
-		printf(" - L2 error norm:      % le\n", l2_err_norm);
+  // Calculate exact error.
+  info("Calculating exact error.");
+  Adapt *adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
+  bool solutions_for_adapt = false;
+  double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
 
-		if (h1_err_norm > EPS || l2_err_norm > EPS) {
-			// calculated solution is not enough precise
-			res = ERR_FAILURE;
-			printf("Solution is not precise enough.\n");
-		}
-#endif
-		//
-		//
-		// the main code starts here
-		//
-		//
+  if (err_exact > EPS)
+		// Calculated solution is not precise enough.
+		success_test = 0;
 
-#if 0
-		RefMap rm(&mesh);
-		{
-			// prepare solution correspondig to basis function with dof dof
-			double sln_vector[ndofs + 1];
-			memset(sln_vector, 0, (ndofs + 1) * sizeof(double));
-			sln_vector[0] = 1.0;
-			sln.set_coeff_vector(&space, sln_vector);
-
-			rm.set_active_element(mesh.elements[2]);
-
-			int np = 1;
-			QuadPt3D pt[1];
-			pt[0].x =  1.0;
-			pt[0].y = -0.5;
-			pt[0].z =  0.0;
-			double *phys_x = rm.get_phys_x(np, pt);
-			double *phys_y = rm.get_phys_y(np, pt);
-			double *phys_z = rm.get_phys_z(np, pt);
-
-			printf("------------------------------------------------\n");
-			printf("% lf, % lf, % lf\n", phys_x[0], phys_y[0], phys_z[0]);
-			sln.set_active_element(mesh.elements[2]);
-			sln.precalculate(1, pt, FN_VAL);
-			double *v0 = sln.get_fn_values(0);
-			double *v1 = sln.get_fn_values(1);
-			double *v2 = sln.get_fn_values(2);
-			printf("val = % lf, % lf, % lf\n", v0[0], v1[0], v2[0]);
-
-			///
-			{
-				rm.set_active_element(mesh.elements[4]);
-
-
-				pt[0].x = -1.0;
-				pt[0].y =  0.0;
-				pt[0].z =  0.0;
-				double *phys_x = rm.get_phys_x(np, pt);
-				double *phys_y = rm.get_phys_y(np, pt);
-				double *phys_z = rm.get_phys_z(np, pt);
-
-				printf("------------------------------------------------\n");
-				printf("% lf, % lf, % lf\n", phys_x[0], phys_y[0], phys_z[0]);
-				sln.set_active_element(mesh.elements[4]);
-				sln.precalculate(1, pt, FN_VAL);
-				double *v0 = sln.get_fn_values(0);
-				double *v1 = sln.get_fn_values(1);
-				double *v2 = sln.get_fn_values(2);
-				printf("val = % lf, % lf, % lf\n", v0[0], v1[0], v2[0]);
-
-			}
-		}
-#endif
-
-#if 1
+  // Special code for this test starts here.
 		ContQuad my_quad;
 		RefMap ref_map(&mesh);
 
@@ -543,27 +412,21 @@ int main(int argc, char **args) {
 		Point **points = new Point *[num_points];
 		int ipt = 0;
 
-		// find points
+	// Find points.
 		for (int order = 0; order < NUM_RULES; order++) {
 			FOR_ALL_ACTIVE_ELEMENTS(idx, &mesh) {
 				Element *e = mesh.elements[idx];
 				ref_map.set_active_element(e);
-//				ref_map.set_quad(&my_quad);
-				for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-//					unsigned int fac_idx = mesh.get_facet_id(e, iface);
-
-					QuadPt3D *quad_pts = my_quad.get_face_points(iface, order);
-					int np = my_quad.get_face_num_points(iface, order);
-//					double *phys_x = ref_map.get_face_phys_x(iface, order);
-//					double *phys_y = ref_map.get_face_phys_y(iface, order);
-//					double *phys_z = ref_map.get_face_phys_z(iface, order);
+				for (int fac_idx = 0; fac_idx < Hex::NUM_FACES; fac_idx++) {
+					QuadPt3D *quad_pts = my_quad.get_face_points(fac_idx, order);
+					int np = my_quad.get_face_num_points(fac_idx, order);
 					double *phys_x = ref_map.get_phys_x(np, quad_pts);
 					double *phys_y = ref_map.get_phys_y(np, quad_pts);
 					double *phys_z = ref_map.get_phys_z(np, quad_pts);
 
-					// for each face and each integration point store reference and physical coordinates
+				// For each face and each integration point store reference and physical coordinates.
 					for (int pt = 0; pt < np; pt++) {
-						points[ipt++] = new Point(idx, iface,
+					points[ipt++] = new Point(idx, fac_idx,
 							quad_pts[pt].x, quad_pts[pt].y, quad_pts[pt].z,
 							phys_x[pt], phys_y[pt], phys_z[pt]);
 					}
@@ -571,24 +434,24 @@ int main(int argc, char **args) {
 			}
 		}
 
-		// sort points according to first phys_x, then phys_y and phys_z
+	// Sort points according to first phys_x, then phys_y and phys_z
 		// it means, that two points, with almost identical physical coordinates
-		// (even though from different elements) will be next to each other in the array
+	// (even though from different elements) will be next to each other in the array.
 		qsort((void *) points, num_points, sizeof(Point *), (compfn) compare);
 
 		int *pairs = new int [num_points];
 		int num_pairs = 0;
 
-		// choose those indicies, that correspond to pairs with identical physical coordinates
-		// and store them in field pairs
+	// Choose those indicies, that correspond to pairs with identical physical coordinates
+	// and store them in field pairs.
 		for (int i = 0; i < num_points - 1; i++) {
 			if (equal(points[i], points[i+1])) {
 				pairs[num_pairs++] = i;
 			}
 		}
 
-		// check, whether we tested points from all inner active facets
-		// this is done only for testing of correctness of the test itself
+	// Check, whether we tested points from all inner active facets
+	// this is done only for testing of correctness of the test itself.
 		int nonchecked_faces = 0;
 		FOR_ALL_FACETS(fid, &mesh) {
 			bool ok = false;
@@ -596,8 +459,8 @@ int main(int argc, char **args) {
 			if (fac->type == Facet::OUTER) continue;
 			if (!(fac->ractive || fac->lactive)) continue;
 			for (int i = 0; i < num_pairs - 1; i++) {
-				unsigned int fac_idx1 = mesh.get_facet_id(points[pairs[i]]->elm_idx, points[pairs[i]]->iface);
-				unsigned int fac_idx2 = mesh.get_facet_id(points[pairs[i + 1]]->elm_idx, points[pairs[i + 1]]->iface);
+				unsigned int fac_idx1 = mesh.get_facet_id(points[pairs[i]]->elm_idx, points[pairs[i]]->fac_idx);
+				unsigned int fac_idx2 = mesh.get_facet_id(points[pairs[i + 1]]->elm_idx, points[pairs[i + 1]]->fac_idx);
 				if ((fac_idx1 == fid) || (fac_idx2 == fid)) {
 					ok = true;
 					break;
@@ -608,15 +471,16 @@ int main(int argc, char **args) {
 		}
 
 
-		// loop over all basis functions
+	// Loop over all basis functions.
+  int ndofs = Space::get_num_dofs(&space);
 		for (int dof = 0; dof < ndofs; dof++) {
-			printf("processing dof %d...\n", dof);
+		info("processing dof %d...", dof);
 
-			// prepare solution correspondig to basis function with dof dof
-			double sln_vector[ndofs];
+		// Prepare solution corresponding to basis function with dof dof.
+		double *sln_vector = new double[ndofs];
 			memset(sln_vector, 0, ndofs * sizeof(double));
 			sln_vector[dof] = 1.0;
-			sln.set_coeff_vector(&space, sln_vector);
+      Solution::vector_to_solution(sln_vector, &space, &sln);
 
 			double max_difference[3] = { 0., 0.0, 0.0 };
 			double max_pt_x, max_pt_y, max_pt_z, max_val_1[3], max_val_2[3];
@@ -625,7 +489,7 @@ int main(int argc, char **args) {
 			RefMap *rm;
 			double *nx, *ny, *nz;
 
-			// loop over all pairs of points, that correspond to one point in the physical domain
+			// Loop over all pairs of points, that correspond to one point in the physical domain.
 			for(int pair = 0; pair < num_pairs; pair++) {
 				int i = pairs[pair];
 
@@ -635,7 +499,7 @@ int main(int argc, char **args) {
 				rm = sln.get_refmap();
 				// FIXME: !!!
 				QuadPt3D pt1(points[i]->ref_x, points[i]->ref_y, points[i]->ref_z, 1.0);
-				rm->calc_face_normal(points[i]->iface, 1, &pt1, nx, ny, nz);
+				rm->calc_face_normal(points[i]->fac_idx, 1, &pt1, nx, ny, nz);
 
 				// TODO: improve me!
 				double3 val1 = {
@@ -657,7 +521,7 @@ int main(int argc, char **args) {
 
 				rm = sln.get_refmap();
 				QuadPt3D pt2(points[i]->ref_x, points[i]->ref_y, points[i]->ref_z, 1.0);
-				rm->calc_face_normal(points[i]->iface, 1, &pt2, nx, ny, nz);
+				rm->calc_face_normal(points[i]->fac_idx, 1, &pt2, nx, ny, nz);
 
 				// TODO: improve me!
 				double val2[3] = {
@@ -680,9 +544,6 @@ int main(int argc, char **args) {
 					fabs(tp1[2] - tp2[2])
 				};
 
-//				printf("(% lf, % lf, % lf): [% lf, % lf, % lf] <=> [% lf, % lf, % lf]\n",
-//					points[i]->phys_x, points[i]->phys_y, points[i]->phys_z,
-//				    val1[0], val1[1], val1[2], val2[0], val2[1], val2[2]);
 
 				double norm = sqrt(sqr(difference[0]) + sqr(difference[1] + sqr(difference[2])));
 				double md_norm = sqrt(sqr(max_difference[0]) + sqr(max_difference[1] + sqr(max_difference[2])));
@@ -696,7 +557,6 @@ int main(int argc, char **args) {
 					max_pt_z = points[i]->phys_z;
 					memcpy(max_val_1, val1, 3 * sizeof(double));
 					memcpy(max_val_2, val2, 3 * sizeof(double));
-//					max_val_2 = val2;
 					max_elm_1 = points[i]->elm_idx;
 					max_elm_2 = points[i + 1]->elm_idx;
 				}
@@ -704,104 +564,29 @@ int main(int argc, char **args) {
 
 			double md_norm = sqrt(sqr(max_difference[0]) + sqr(max_difference[1] + sqr(max_difference[2])));
 			if (md_norm > TOLERANCE) {
-				printf("base fn %d NOT continuous between elements %ld and %ld @ (% lf, % lf, % lf), "
-					"max difference [%g, %g, %g] ([%.15g, %.15g, %.15g] <-> [%.15g, %.15g, %.15g])\n",
+				info("base fn %d NOT continuous between elements %ld and %ld @ (% lf, % lf, % lf), "
+					"max difference [%g, %g, %g] ([%.15g, %.15g, %.15g] <-> [%.15g, %.15g, %.15g]).",
 					 dof, max_elm_1, max_elm_2 , max_pt_x, max_pt_y, max_pt_z, max_difference[0], max_difference[1], max_difference[2],
 					 max_val_1[0], max_val_1[1], max_val_1[2], max_val_2[0], max_val_2[1], max_val_2[2]);
-				res = ERR_FAILURE;
+				success_test = 0;
 			}
-
-//			printf("--\n");
+      else
+			  info("ok");
 		}
 
+		for (int i = 0; i < num_points; i++) delete points[i];
 		delete [] pairs;
 		delete [] points;
 
-		printf("continuity tested in %d points and %d inner faces with at least one active adjacent element were not tested\n", num_pairs, nonchecked_faces);
-#endif
+		info("continuity tested in %d points and %d inner faces with at least one active adjacent element were not tested.", num_pairs, nonchecked_faces);
 
-#if 0
-#ifdef OUTPUT_DIR
-		{
-			char of_name[512];
-			sprintf(of_name, "%s/sln.gmsh", OUTPUT_DIR);
-			FILE *ofile = fopen(of_name, "w");
-			if (ofile != NULL) {
-				GmshOutputEngine output(ofile);
-				output.out(&sln, "Uh");
-				output.out(&exsln, "U");
-
-				fclose(ofile);
-			}
-			else {
-				ERROR("Cannot open '%s' for writing.", of_name);
-			}
-		}
-#endif
-#endif
-
-#if 0
-		// loop over all basis functions
-//		int idof = 2; {
-//		for (int idof = 0; idof < ndofs; idof++) {
-		for (int idof = 0; idof < 4; idof++) {
-//		for (int idof = 40; idof <= 41; idof++) {
-			printf("dumping fn %d...\n", idof);
-
-			// prepare solution corresponding to basis function with dof 'dof'
-			double sln_vector[ndofs];
-			memset(sln_vector, 0, ndofs * sizeof(double));
-			sln_vector[idof] = 1.0;
-			sln.set_coeff_vector(&space, sln_vector);
-
-//			sln.enable_transform(false);
-
-#ifdef OUTPUT_DIR
-			char of_name[512];
-			sprintf(of_name, "%s/f%d.gmsh", OUTPUT_DIR, idof);
-//			sprintf(of_name, "%s/f%d.vtk", OUTPUT_DIR, idof);
-			FILE *ofile = fopen(of_name, "w");
-			if (ofile != NULL) {
-				GmshOutputEngine output(ofile);
-//				VtkOutputEngine output(ofile, 7);
-//				MagFilter mag(&sln);
-
-				int mask = FN_VAL;
-				if (idof == 0 || idof == 1) mask = FN_VAL_1;
-				else if (idof == 2 || idof == 3) mask = FN_VAL_2;
-//				mask = FN_VAL_0;
-
-				output.out(&sln, "U", mask);
-//				output.out(&sln, "U_dx", FN_DX);
-//				output.out(&sln, "U_dy", FN_DY);
-//				output.out(&sln, "U_dz", FN_DZ);
-
-				fclose(ofile);
-			}
-			else {
-				ERROR("Cannot open '%s' for writing.", of_name);
-			}
-#endif
-		}
-#endif
-
-		if (res != ERR_SUCCESS) throw res;
-
-		printf("Passed\n");
-	}
-	catch (int e) {
-		res = e;
-		printf("Failed\n");
-	}
-
-#ifdef WITH_PETSC
-	mat.free();
-	rhs.free();
-	PetscFinalize();
-#endif
-
-	TRACE_END;
-
-	return res;
+	if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }
 

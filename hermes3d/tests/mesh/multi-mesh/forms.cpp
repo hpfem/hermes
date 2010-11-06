@@ -15,27 +15,29 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 	return fnc(x, y, z);
 }
 
+// Boundary condition types.
 BCType bc_types(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
 	return fnc(x, y, z);
 }
 
-template<typename real, typename scalar>
-scalar bilinear_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e, ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                    ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename real, typename scalar>
-scalar linear_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v, Geom<real> *e, ExtData<scalar> *data) 
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data)
 {
-	scalar res = 0.0;
-	// FIXME: 
+	Scalar res = 0.0;
 //	for (int i = 0; i < n; i++)
 //		res += wt[i] * (data->ext[0].fn[i] * v->fn[i]);
 	return res;
@@ -83,40 +85,42 @@ double exact_sln_fn_2(double x, double y, double z, double &dx, double &dy, doub
 	return u2(x, y, z);
 }
 
-//
-
+// Boundary condition types.
 BCType bc_types_1(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values_1(int ess_bdy_marker, double x, double y, double z) {
 	return u1(x, y, z);
 }
 
+// Boundary condition types.
 BCType bc_types_2(int marker)
 {
 	if (marker == 3) return BC_NATURAL;
 	else return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values_2(int ess_bdy_marker, double x, double y, double z) {
 	return u2(x, y, z);
 }
 
-template<typename real, typename scalar>
-scalar bilinear_form_1_1(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                        ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar bilinear_form_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                        ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename real, typename scalar>
-scalar bilinear_form_1_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                        ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar bilinear_form_1_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                        ExtData<Scalar> *data)
 {
 //	return 0.0;
-	return int_u_v<real, scalar>(n, wt, u, v, e);
+	return int_u_v<Real, Scalar>(n, wt, u, v, e);
 }
 
 //template<typename T>
@@ -129,32 +133,32 @@ scalar bilinear_form_1_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u
 //	return -(ddxx + ddyy + ddzz) + u2(x, y, z);
 //}
 
-template<typename real, typename scalar>
-scalar linear_form_1(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Geom<realt> *e, ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data)
 {
-//	return int_F_v<f_t, res_t>(n, wt, f1, u, e);
-//	return -3.0 * int_u<f_t, res_t>(n, wt, u, e);
-	scalar res = 0.0;
+//	return int_F_v<Real, Scalar>(n, wt, f1, u, e);
+//	return -3.0 * int_u<Real, Scalar>(n, wt, u, e);
+	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
 		res += wt[i] * ((-6.0 + (e->x[i]) * u->fn[i]);
 	return res;
-//	int_u<f_t, scalar>(n, wt, u, e);
+//	int_u<Real, Scalar>(n, wt, u, e);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//template<typename f_t, typename res_t>
-//res_t bilinear_form_2_1(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e,
-//                        ExtData<res_t> *data)
+//template<typename Real, typename Scalar>
+//Scalar bilinear_form_2_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+//                        ExtData<Scalar> *data)
 //{
-//	return int_u_v<f_t, res_t>(n, wt, u, v, e);
+//	return int_u_v<Real, Scalar>(n, wt, u, v, e);
 //}
 
-template<typename real, typename scalar>
-scalar bilinear_form_2_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                        ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar bilinear_form_2_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                        ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
 //template<typename T>
@@ -167,22 +171,22 @@ scalar bilinear_form_2_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u
 //	return -(ddxx + ddyy + ddzz) + u1(x, y, z);
 //}
 
-template<typename real, typename scalar>
-scalar linear_form_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Geom<real> *e, ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar linear_form_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data)
 {
-//	return int_F_v<f_t, res_t>(n, wt, f2, u, e);
-//	return -6.0 * int_u<f_t, res_t>(n, wt, u, e);
+//	return int_F_v<Real, Scalar>(n, wt, f2, u, e);
+//	return -6.0 * int_u<Real, Scalar>(n, wt, u, e);
 	return 0;
 }
 
-template<typename real, typename scalar>
-scalar linear_form_2_surf(int np, double *wt, Func<scalar> *u_ext[], Func<real> *u, Geom<real> *e, ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar linear_form_2_surf(int np, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data)
 {
-	scalar result = 0;
+	Scalar result = 0;
 	for (int i = 0; i < np; i++) {
-		res_t dx = 1;
-		res_t dy = 0;
-		res_t dz = 0;
+		Scalar dx = 1;
+		Scalar dy = 0;
+		Scalar dz = 0;
 
 		result += wt[i] * (u->fn[i] * (dx * e->nx[i] + dy * e->ny[i] + dz * e->nz[i]));
 	}
@@ -236,32 +240,36 @@ double exact_sln_fn_3(double x, double y, double z, double &dx, double &dy, doub
 	return u3(x, y, z);
 }
 
-//
-
+// Boundary condition types.
 BCType bc_types_1(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values_1(int ess_bdy_marker, double x, double y, double z) {
 	return u1(x, y, z);
 }
 
+// Boundary condition types.
 BCType bc_types_2(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values_2(int ess_bdy_marker, double x, double y, double z)
 {
 	return 0;
 }
 
+// Boundary condition types.
 BCType bc_types_3(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values_3(int ess_bdy_marker, double x, double y, double z)
 {
 	return x;
@@ -269,18 +277,18 @@ scalar essential_bc_values_3(int ess_bdy_marker, double x, double y, double z)
 
 // 1. eqn ------------------------------------------------------------------------------------------
 
-template<typename real, typename scalar>
-scalar biform_1_1(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                 ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar biform_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename real, typename scalar>
-scalar biform_1_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                 ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar biform_1_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	return int_u_v<real, scalar>(n, wt, u, v, e);
+	return int_u_v<Real, Scalar>(n, wt, u, v, e);
 }
 
 template<typename T>
@@ -289,11 +297,10 @@ T rhs1(T x, T y, T z)
 	return -6.0 + u2(x, y, z);
 }
 
-template<typename real, typename scalar>
-scalar liform_1(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v, Geom<real> *e, ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar liform_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data)
 {
-	scalar res = 0.0;
-	// FIXME: 
+	Scalar res = 0.0;
 //	for (int i = 0; i < n; i++)
 //		res += wt[i] * (rhs1(e->x[i], e->y[i], e->z[i]) * v->fn[i]);
 	return res;
@@ -301,18 +308,18 @@ scalar liform_1(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v, Geom<re
 
 // 2. eqn ------------------------------------------------------------------------------------------
 
-template<typename real, typename scalar>
-scalar biform_2_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                 ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar biform_2_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename real, typename scalar>
-scalar biform_2_3(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                 ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar biform_2_3(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                 ExtData<Scalar> *data)
 {
-	return int_u_v<real, scalar>(n, wt, u, v, e);
+	return int_u_v<Real, Scalar>(n, wt, u, v, e);
 }
 
 template<typename T>
@@ -322,20 +329,19 @@ T rhs2(T x, T y, T z)
 	return laplace + u3(x, y, z);
 }
 
-template<typename real, typename scalar>
-scalar liform_2(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v, Geom<real> *e, ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar liform_2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data)
 {
-	return int_F_v<real, scalar>(n, wt, rhs2, v, e);
+	return int_F_v<Real, Scalar>(n, wt, rhs2, v, e);
 }
 
 // 3. eqn ------------------------------------------------------------------------------------------
 
-template<typename real, typename scalar>
-scalar biform_3_3(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, Func<real> *v, Geom<real> *e,
-                        ExtData<scalar> *data)
+template<typename Real, typename Scalar>
+Scalar biform_3_3(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                        ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<real, scalar>(n, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
+#endif 
 
-
-#endif
