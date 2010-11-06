@@ -25,10 +25,8 @@
 
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   #define MUMPS         dmumps_c
-  #define MUMPS_STRUCT  DMUMPS_STRUC_C
 #else
   #define MUMPS         zmumps_c
-  #define MUMPS_STRUCT  ZMUMPS_STRUC_C
 #endif
 
 #define USE_COMM_WORLD  -987654
@@ -36,7 +34,7 @@
 #ifdef WITH_MUMPS
 
 extern "C" {
-  extern void MUMPS(MUMPS_STRUCT *idptr);
+  extern void MUMPS(MUMPS_STRUCT *mumps_param_ptr);
 }
 
 #else
@@ -365,11 +363,87 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 
 // MUMPS solver ////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef WITH_MUMPS
+
+// Macros allowing to use indices according to the Fortran documentation to index C arrays.
+#define ICNTL(I)            icntl[(I)-1]
+#define MUMPS_INFO(param,I) param->infog[(I)-1]
+#define INFOG(I)            infog[(I)-1]
+
+// Job definitions according to MUMPS documentation.
+#define JOB_INIT                    -1
+#define JOB_END                     -2
+#define JOB_ANALYZE_FACTORIZE_SOLVE  6
+#define JOB_FACTORIZE_SOLVE          5
+#define JOB_SOLVE                    3
+
+static bool check_status(MUMPS_STRUCT *param)
+{
+  _F_
+  switch (param->INFOG(1)) {
+    case 0: return true; // no error
+    case -1: warning("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
+    // TODO: add the rest according to the MUMPS docs
+    default: warning("INFOG(1) = %d", param->INFOG(1)); break;
+  }
+  return false;
+}
+
+bool MumpsSolver::reinit()
+{
+  _F_
+  if (inited)
+  {
+    // If there is already an instance of MUMPS running, 
+    // terminate it.
+    param.job = JOB_END;
+    MUMPS(&param);
+  }
+  
+  param.job = JOB_INIT;
+  param.par = 1; // host also performs calculations
+  param.sym = 0; // 0 = unsymmetric
+  param.comm_fortran=USE_COMM_WORLD;
+  
+  MUMPS(&param);
+  inited = check_status(&param);
+  
+  if (inited)
+  {
+    // No printings.
+    param.ICNTL(1) = -1;
+    param.ICNTL(2) = -1;
+    param.ICNTL(3) = -1;
+    param.ICNTL(4) = 0;
+    
+    param.ICNTL(20) = 0; // centralized dense RHS
+    param.ICNTL(21) = 0; // centralized dense solution
+    
+    // Specify the matrix.
+    param.n = m->size;
+    param.nz = m->nnz;
+    param.irn = m->irn;
+    param.jcn = m->jcn;
+    param.a = m->Ax;
+  }
+  
+  return inited;
+}
+
+#endif
+
 MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
   LinearSolver(), m(m), rhs(rhs)
 {
   _F_
 #ifdef WITH_MUMPS
+  inited = false;
+  
+  // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
+  // before MUMPS has been initialized.
+  param.rhs = NULL;
+  param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING 
+                          // in prepare_factorization_structures()
 #else
   error(MUMPS_NOT_COMPILED);
 #endif
@@ -379,34 +453,16 @@ MumpsSolver::~MumpsSolver()
 {
   _F_
 #ifdef WITH_MUMPS
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
-#endif
-}
-
-#ifdef WITH_MUMPS
-
-// macro s.t. indices match Fortran documentation
-#define ICNTL(I)            icntl[(I)-1]
-#define MUMPS_INFO(id, I)   id->infog[(I)-1]
-#define INFOG(I)            infog[(I)-1]
-
-#define JOB_INIT            -1
-#define JOB_END             -2
-
-static bool check_status(MUMPS_STRUCT *id)
-{
-  _F_
-  switch (id->INFOG(1)) {
-    case 0: return true; // no error
-    case -1: warning("Error occured on processor %d", MUMPS_INFO(id, 2)); break;
-    // TODO: add the rest according to the MUMPS docs
-    default: warning("INFOG(1) = %d", id->INFOG(1)); break;
+  // Terminate the current instance of MUMPS.
+  if (inited)
+  {
+    param.job = JOB_END;
+    MUMPS(&param);
   }
-  return false;
-}
-
+  
+  if (param.rhs != NULL) delete [] param.rhs;
 #endif
+}
 
 bool MumpsSolver::solve()
 {
@@ -418,65 +474,103 @@ bool MumpsSolver::solve()
 
   TimePeriod tmr;
 
-  MUMPS_STRUCT id;
-
-  // Initialize a MUMPS instance
-  id.job = JOB_INIT;
-  id.par = 1; // host also performs calculations
-  id.sym = 0; // 0 = unsymmetric
-  id.comm_fortran=USE_COMM_WORLD;
+  // Prepare the MUMPS data structure with input for the solver driver 
+  // (according to the chosen factorization reuse strategy), as well as
+  // the system matrix.
+  if ( !prepare_factorization_structures() )
+  {
+    warning("LU factorization could not be completed.");
+    return false;
+  }
   
-  MUMPS(&id);
-  check_status(&id);
-
-  // matrix
-  id.n = m->size;
-  id.nz = m->nnz;
-  id.irn = m->irn;
-  id.jcn = m->jcn;
-  id.a = m->Ax;
-
-  // right-hand side
-  id.rhs = new mumps_scalar[m->size];
-  memcpy(id.rhs, rhs->v, m->size * sizeof(mumps_scalar));
-
-  // No printings
-  id.ICNTL(1) = -1;
-  id.ICNTL(2) = -1;
-  id.ICNTL(3) = -1;
-  id.ICNTL(4) = 0;
-
-  id.ICNTL(20) = 0; // centralized dense RHS
-  id.ICNTL(21) = 0; // centralized dense solution
+  // Specify the right-hand side (will be replaced by the solution).
+  param.rhs = new mumps_scalar[m->size];
+  memcpy(param.rhs, rhs->v, m->size * sizeof(mumps_scalar));
   
-  id.job = 6; // 6 means Analysis + factorization + solve (FIXME: remove magic constant - see MUMPS docs)
-  MUMPS(&id);
+  // Do the jobs specified in prepare_factorization_structures().
+  MUMPS(&param);
   
-  ret = check_status(&id);
+  ret = check_status(&param);
 
-  if (ret) {
+  if (ret) 
+  {
     delete [] sln;
     sln = new scalar[m->size];
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     for (int i = 0; i < rhs->size; i++)
-      sln[i] = id.rhs[i];
+      sln[i] = param.rhs[i];
 #else
     for (int i = 0; i < rhs->size; i++)
-      sln[i] = cplx(id.rhs[i].r, id.rhs[i].i);
+      sln[i] = cplx(param.rhs[i].r, param.rhs[i].i);
 #endif
   }
-
-  // Terminate/free current instance
-  id.job = JOB_END;
-  MUMPS(&id);
 
   tmr.tick();
   time = tmr.accumulated();
 
-  delete [] id.rhs;
+  delete [] param.rhs;
+  param.rhs = NULL;
 
   return ret;
 #else
   return false;
+#endif
+}
+
+bool MumpsSolver::prepare_factorization_structures()
+{
+  _F_
+#ifdef WITH_MUMPS
+  // When called for the first time, all three phases (analysis, factorization,
+  // solution) must be performed. 
+  int eff_fact_scheme = factorization_scheme;
+  if (!inited)
+    if( factorization_scheme == HERMES_REUSE_MATRIX_REORDERING || 
+        factorization_scheme == HERMES_REUSE_FACTORIZATION_COMPLETELY )
+      eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+  
+  switch (eff_fact_scheme)
+  {
+    case HERMES_FACTORIZE_FROM_SCRATCH: 
+      // (Re)initialize new instance.
+      reinit();
+      
+      // Let MUMPS decide when and how to compute matrix reordering and scaling.
+      param.ICNTL(6) = 7;
+      param.ICNTL(8) = 77;
+      param.job = JOB_ANALYZE_FACTORIZE_SOLVE;
+      
+      break;
+    case HERMES_REUSE_MATRIX_REORDERING:
+      // Let MUMPS reuse results of the symbolic analysis and perform 
+      // scaling during each factorization (values 1-8 may be set here, 
+      // corresponding to different scaling algorithms during factorization; 
+      // see the MUMPS documentation for details).
+      param.ICNTL(8) = 7; 
+      param.job = JOB_FACTORIZE_SOLVE;
+      
+      break;
+    case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
+      // Perform scaling along with reordering during the symbolic analysis phase
+      // and then reuse it during subsequent factorizations. New instance of MUMPS
+      // has to be created before the analysis phase. 
+      if (param.INFOG(33) != -2)
+      {
+        reinit();
+        param.ICNTL(6) = 5;
+        param.job = JOB_ANALYZE_FACTORIZE_SOLVE;
+        // After analysis is done, INFOG(33) will be set to -2 by MUMPS.
+      }
+      else
+      {
+        param.job = JOB_FACTORIZE_SOLVE;
+      }
+      break;
+    case HERMES_REUSE_FACTORIZATION_COMPLETELY:
+      param.job = JOB_SOLVE;
+      break;
+  }
+  
+  return true;
 #endif
 }
