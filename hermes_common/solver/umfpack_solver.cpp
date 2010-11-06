@@ -47,7 +47,11 @@ static int find_position(int *Ai, int Alen, int idx) {
     
     // Sparse matrix entry not found (raise an error when trying to add 
     // value to this position, return 0 when obtaining value there).
-    if (lo > hi) mid = -1;
+    if (lo > hi) 
+    {
+      mid = -1;
+      break;
+    }
   }
   return mid;
 }
@@ -360,7 +364,8 @@ bool UMFPackLinearSolver::solve() {
     return false;
   }
 
-  delete [] sln;
+  if(sln)
+    delete [] sln;
   sln = new scalar[m->size];
   MEM_CHECK(sln);
   memset(sln, 0, m->size * sizeof(scalar));
@@ -390,7 +395,7 @@ bool UMFPackLinearSolver::prepare_factorization_structures()
     case HERMES_FACTORIZE_FROM_SCRATCH:
       if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
       
-      debug_log("Factorizing symbolically.");
+      //debug_log("Factorizing symbolically.");
       status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_symbolic", status);
@@ -402,7 +407,7 @@ bool UMFPackLinearSolver::prepare_factorization_structures()
     case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
       if (numeric != NULL) umfpack_free_numeric(&numeric);
       
-      debug_log("Factorizing numerically.");
+      //debug_log("Factorizing numerically.");
       status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_numeric", status);

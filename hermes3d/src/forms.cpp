@@ -172,6 +172,7 @@ sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const Q
 	_F_
 
 	sFunc *u = new sFunc; MEM_CHECK(u);
+  u->num_gip = np;
 	u->nc = shfn->get_num_components();
 	shfn->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
@@ -233,6 +234,7 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	_F_
 
 	mFunc *u = new mFunc;
+  u->num_gip = np;
 	u->nc = f->get_num_components();
 	f->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
@@ -282,6 +284,18 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 		memcpy(u->dz0, f->get_dz_values(0), np * sizeof(scalar));
 		memcpy(u->dz1, f->get_dz_values(1), np * sizeof(scalar));
 		memcpy(u->dz2, f->get_dz_values(2), np * sizeof(scalar));
+
+    // CURL
+		u->curl0 = new scalar [np]; MEM_CHECK(u->dz0);
+		u->curl1 = new scalar [np]; MEM_CHECK(u->dz1);
+		u->curl2 = new scalar [np]; MEM_CHECK(u->dz2);
+
+    for (int i = 0; i < np; i++)
+      u->curl0[i] = (u->dz1[i] * u->dy0[i]) - (u->dz0[i] * u->dy1[i]);
+    for (int i = 0; i < np; i++)
+      u->curl1[i] = (u->dx1[i] * u->dz0[i]) - (u->dx0[i] * u->dz1[i]);
+    for (int i = 0; i < np; i++)
+      u->curl2[i] = (u->dy1[i] * u->dx0[i]) - (u->dy0[i] * u->dx1[i]);
 	}
 	else {
 		EXIT(HERMES_ERR_NOT_IMPLEMENTED);

@@ -677,8 +677,8 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
             idx_new[i] = (idx[i] << 3) + son + 1;
           } else {
             e_new[i] = e[i]->sons[sons[i][son] & 3];
-            move_to_son(er_new+i, er+i, sons[i][son]);
-            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, er_new+i);
+            move_to_son(&(er_new[i]), er+i, sons[i][son]);
+            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
           }
         }
         union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
@@ -703,8 +703,8 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
             idx_new[i] = (idx[i] << 3) + son + 1;
           } else {
             e_new[i] = e[i]->sons[sons[i][j] & 3];
-            move_to_son(er_new+i, er+i, sons[i][j]);
-            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, er_new+i);
+            move_to_son(&(er_new[i]), er+i, sons[i][j]);
+            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
           }
         }
         union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
@@ -720,8 +720,8 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
           e_new[i] = e[i];
         else {
           e_new[i] = e[i]->sons[sons[i][0] & 3];
-          move_to_son(er_new+i, er+i, sons[i][0]);
-          if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, er_new+i);
+          move_to_son(&(er_new[i]), er+i, sons[i][0]);
+          if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
         }
       }
       union_recurrent(&cr_new, e_new, er_new, idx_new, uni);

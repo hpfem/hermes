@@ -51,7 +51,7 @@ set(SRC
        ref_selectors/hcurl_proj_based_selector.cpp
        h2d_common.cpp  
        weakform.cpp 
-       feproblem.cpp
+       discrete_problem.cpp
        forms.cpp
        mesh_parser.cpp mesh_lexer.cpp
        exodusii.cpp 

@@ -1,6 +1,6 @@
 #include "../h2d_common.h"
 #include "../solution.h"
-#include "../feproblem.h"
+#include "../discrete_problem.h"
 #include "../quad_all.h"
 #include "../element_to_refine.h"
 #include "order_permutator.h"

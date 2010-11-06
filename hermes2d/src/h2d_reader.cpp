@@ -724,7 +724,7 @@ void H2DReader::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
                  nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2],
                  i < nurbs->np-2 ? "," : "");
 
-    fprintf(f, "}, { ", nurbs->nk - 2*(nurbs->degree+1));
+    fprintf(f, "}, { ");
     int max = nurbs->nk - (nurbs->degree+1);
     for (int i = nurbs->degree+1; i < max; i++)
       fprintf(f, "%.16g%s", nurbs->kv[i], i < max-1 ? "," : "");

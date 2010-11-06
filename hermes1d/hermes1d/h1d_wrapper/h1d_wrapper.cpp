@@ -1018,7 +1018,7 @@ static char __pyx_k__get_n_active_elem[] = "get_n_active_elem";
 static char __pyx_k__get_element_coeffs[] = "get_element_coeffs";
 static char __pyx_k__get_solution_deriv[] = "get_solution_deriv";
 static char __pyx_k__get_solution_value[] = "get_solution_value";
-static char __pyx_k__vector_to_solution[] = "vector_to_solution";
+static char __pyx_k__set_coeff_vector[] = "set_coeff_vector";
 static char __pyx_k__last_active_element[] = "last_active_element";
 static char __pyx_k__next_active_element[] = "next_active_element";
 static PyObject *__pyx_kp_s_1;
@@ -1079,7 +1079,7 @@ static PyObject *__pyx_n_s__buf;
 static PyObject *__pyx_n_s__byteorder;
 static PyObject *__pyx_n_s__coefs;
 static PyObject *__pyx_n_s__comp;
-static PyObject *__pyx_n_s__vector_to_solution;
+static PyObject *__pyx_n_s__set_coeff_vector;
 static PyObject *__pyx_n_s__delptr;
 static PyObject *__pyx_n_s__deriv;
 static PyObject *__pyx_n_s__descr;
@@ -2015,7 +2015,7 @@ static void __pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh___dealloc__(PyO
  *         if self.delptr:
  *             del self.thisptr             # <<<<<<<<<<<<<<
  * 
- *     def vector_to_solution(self, sol, int comp):
+ *     def set_coeff_vector(self, sol, int comp):
  */
     delete ((struct __pyx_obj_8hermes1d_11h1d_wrapper_11h1d_wrapper_Mesh *)__pyx_v_self)->thisptr;
     goto __pyx_L5;
@@ -2033,20 +2033,20 @@ static void __pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh___dealloc__(PyO
 /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":88
  *             del self.thisptr
  * 
- *     def vector_to_solution(self, sol, int comp):             # <<<<<<<<<<<<<<
+ *     def set_coeff_vector(self, sol, int comp):             # <<<<<<<<<<<<<<
  *         cdef double *Y
  *         cdef int n
  */
 
-static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_solution(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_solution(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_set_coeff_vector(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_set_coeff_vector(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_sol = 0;
   int __pyx_v_comp;
   double *__pyx_v_Y;
   int __pyx_v_n;
   PyObject *__pyx_r = NULL;
   static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__sol,&__pyx_n_s__comp,0};
-  __Pyx_RefNannySetupContext("vector_to_solution");
+  __Pyx_RefNannySetupContext("set_coeff_vector");
   if (unlikely(__pyx_kwds)) {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
     PyObject* values[2] = {0,0};
@@ -2065,11 +2065,11 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_
       values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__comp);
       if (likely(values[1])) kw_args--;
       else {
-        __Pyx_RaiseArgtupleInvalid("vector_to_solution", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_RaiseArgtupleInvalid("set_coeff_vector", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     }
     if (unlikely(kw_args > 0)) {
-      if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "vector_to_solution") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "set_coeff_vector") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     }
     __pyx_v_sol = values[0];
     __pyx_v_comp = __Pyx_PyInt_AsInt(values[1]); if (unlikely((__pyx_v_comp == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
@@ -2081,9 +2081,9 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("vector_to_solution", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("set_coeff_vector", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("hermes1d.h1d_wrapper.h1d_wrapper.Mesh.vector_to_solution");
+  __Pyx_AddTraceback("hermes1d.h1d_wrapper.h1d_wrapper.Mesh.set_coeff_vector");
   return NULL;
   __pyx_L4_argument_unpacking_done:;
 
@@ -2091,7 +2091,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_
  *         cdef double *Y
  *         cdef int n
  *         numpy2c_double_inplace(sol, &Y, &n)             # <<<<<<<<<<<<<<
- *         self.thisptr.vector_to_solution(Y, comp)
+ *         self.thisptr.set_coeff_vector(Y, comp)
  * 
  */
   numpy2c_double_inplace(__pyx_v_sol, (&__pyx_v_Y), (&__pyx_v_n));
@@ -2099,11 +2099,11 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":92
  *         cdef int n
  *         numpy2c_double_inplace(sol, &Y, &n)
- *         self.thisptr.vector_to_solution(Y, comp)             # <<<<<<<<<<<<<<
+ *         self.thisptr.set_coeff_vector(Y, comp)             # <<<<<<<<<<<<<<
  * 
  *     def assign_dofs(self):
  */
-  ((struct __pyx_obj_8hermes1d_11h1d_wrapper_11h1d_wrapper_Mesh *)__pyx_v_self)->thisptr->vector_to_solution(__pyx_v_Y, __pyx_v_comp);
+  ((struct __pyx_obj_8hermes1d_11h1d_wrapper_11h1d_wrapper_Mesh *)__pyx_v_self)->thisptr->set_coeff_vector(__pyx_v_Y, __pyx_v_comp);
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   __Pyx_XGIVEREF(__pyx_r);
@@ -2112,7 +2112,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_
 }
 
 /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":94
- *         self.thisptr.vector_to_solution(Y, comp)
+ *         self.thisptr.set_coeff_vector(Y, comp)
  * 
  *     def assign_dofs(self):             # <<<<<<<<<<<<<<
  *         return self.thisptr.assign_dofs()
@@ -3408,11 +3408,11 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10Linearizer_get
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":187
  *         cdef double *y
  *         cdef int n
- *         self.mesh.vector_to_solution(sol, comp)             # <<<<<<<<<<<<<<
+ *         self.mesh.set_coeff_vector(sol, comp)             # <<<<<<<<<<<<<<
  *         self.thisptr.get_xy_mesh(comp, plotting_elem_subdivision,
  *                 &x, &y, &n)
  */
-  __pyx_t_1 = PyObject_GetAttr(((PyObject *)((struct __pyx_obj_8hermes1d_11h1d_wrapper_11h1d_wrapper_Linearizer *)__pyx_v_self)->mesh), __pyx_n_s__vector_to_solution); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_GetAttr(((PyObject *)((struct __pyx_obj_8hermes1d_11h1d_wrapper_11h1d_wrapper_Linearizer *)__pyx_v_self)->mesh), __pyx_n_s__set_coeff_vector); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyInt_FromLong(__pyx_v_comp); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
@@ -3431,7 +3431,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10Linearizer_get
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":189
- *         self.mesh.vector_to_solution(sol, comp)
+ *         self.mesh.set_coeff_vector(sol, comp)
  *         self.thisptr.get_xy_mesh(comp, plotting_elem_subdivision,
  *                 &x, &y, &n)             # <<<<<<<<<<<<<<
  *         x_numpy = c2numpy_double(x, n)
@@ -3986,13 +3986,13 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_val
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":236
  *         Returns the value of the solution at a point 'x'.
  *         """
- *         self._mesh.vector_to_solution(self._coefs, comp)             # <<<<<<<<<<<<<<
+ *         self._mesh.set_coeff_vector(self._coefs, comp)             # <<<<<<<<<<<<<<
  * 
  *         pts = []
  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___mesh); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__vector_to_solution); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__set_coeff_vector); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___coefs); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4014,7 +4014,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_val
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":238
- *         self._mesh.vector_to_solution(self._coefs, comp)
+ *         self._mesh.set_coeff_vector(self._coefs, comp)
  * 
  *         pts = []             # <<<<<<<<<<<<<<
  *         p = []
@@ -4252,13 +4252,13 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_der
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":251
  *         Returns the derivative of the solution at a point 'x'.
  *         """
- *         self._mesh.vector_to_solution(self._coefs, comp)             # <<<<<<<<<<<<<<
+ *         self._mesh.set_coeff_vector(self._coefs, comp)             # <<<<<<<<<<<<<<
  * 
  *         pts = []
  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___mesh); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__vector_to_solution); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__set_coeff_vector); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___coefs); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4280,7 +4280,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_der
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":253
- *         self._mesh.vector_to_solution(self._coefs, comp)
+ *         self._mesh.set_coeff_vector(self._coefs, comp)
  * 
  *         pts = []             # <<<<<<<<<<<<<<
  *         p = []
@@ -4515,13 +4515,13 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_l2_
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":266
  *         Returns the L2 norm of the solution.
  *         """
- *         self._mesh.vector_to_solution(self._coefs, comp)             # <<<<<<<<<<<<<<
+ *         self._mesh.set_coeff_vector(self._coefs, comp)             # <<<<<<<<<<<<<<
  * 
  *         pts = []
  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___mesh); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__vector_to_solution); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__set_coeff_vector); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___coefs); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4543,7 +4543,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_l2_
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":268
- *         self._mesh.vector_to_solution(self._coefs, comp)
+ *         self._mesh.set_coeff_vector(self._coefs, comp)
  * 
  *         pts = []             # <<<<<<<<<<<<<<
  *         p = []
@@ -4876,13 +4876,13 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_h1_
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":284
  *         Returns the H1 norm of the solution.
  *         """
- *         self._mesh.vector_to_solution(self._coefs, comp)             # <<<<<<<<<<<<<<
+ *         self._mesh.set_coeff_vector(self._coefs, comp)             # <<<<<<<<<<<<<<
  * 
  *         pts = []
  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___mesh); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__vector_to_solution); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__set_coeff_vector); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___coefs); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4904,7 +4904,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_h1_
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":286
- *         self._mesh.vector_to_solution(self._coefs, comp)
+ *         self._mesh.set_coeff_vector(self._coefs, comp)
  * 
  *         pts = []             # <<<<<<<<<<<<<<
  *         p = []
@@ -5612,13 +5612,13 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_get
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":320
  *         the solution component 'comp'.
  *         """
- *         self._mesh.vector_to_solution(self._coefs, comp)             # <<<<<<<<<<<<<<
+ *         self._mesh.set_coeff_vector(self._coefs, comp)             # <<<<<<<<<<<<<<
  *         coeffs = []
  *         I = Iterator(self._mesh)
  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___mesh); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__vector_to_solution); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__set_coeff_vector); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_s___coefs); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -5641,7 +5641,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_get
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":321
  *         """
- *         self._mesh.vector_to_solution(self._coefs, comp)
+ *         self._mesh.set_coeff_vector(self._coefs, comp)
  *         coeffs = []             # <<<<<<<<<<<<<<
  *         I = Iterator(self._mesh)
  *         cdef hermes1d.Element *e = I._next_active_element()
@@ -5653,7 +5653,7 @@ static PyObject *__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_10FESolution_get
   __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes1d/hermes1d/h1d_wrapper/h1d_wrapper.pyx":322
- *         self._mesh.vector_to_solution(self._coefs, comp)
+ *         self._mesh.set_coeff_vector(self._coefs, comp)
  *         coeffs = []
  *         I = Iterator(self._mesh)             # <<<<<<<<<<<<<<
  *         cdef hermes1d.Element *e = I._next_active_element()
@@ -8760,7 +8760,7 @@ static int __pyx_tp_clear_8hermes1d_11h1d_wrapper_11h1d_wrapper_Mesh(PyObject *o
 }
 
 static PyMethodDef __pyx_methods_8hermes1d_11h1d_wrapper_11h1d_wrapper_Mesh[] = {
-  {__Pyx_NAMESTR("vector_to_solution"), (PyCFunction)__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_vector_to_solution, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(0)},
+  {__Pyx_NAMESTR("set_coeff_vector"), (PyCFunction)__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_set_coeff_vector, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(0)},
   {__Pyx_NAMESTR("assign_dofs"), (PyCFunction)__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_assign_dofs, METH_NOARGS, __Pyx_DOCSTR(0)},
   {__Pyx_NAMESTR("plot_to_file"), (PyCFunction)__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_plot_to_file, METH_O, __Pyx_DOCSTR(0)},
   {__Pyx_NAMESTR("get_mesh_data"), (PyCFunction)__pyx_pf_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_get_mesh_data, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_8hermes1d_11h1d_wrapper_11h1d_wrapper_4Mesh_get_mesh_data)},
@@ -9741,7 +9741,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s__byteorder, __pyx_k__byteorder, sizeof(__pyx_k__byteorder), 0, 0, 1, 1},
   {&__pyx_n_s__coefs, __pyx_k__coefs, sizeof(__pyx_k__coefs), 0, 0, 1, 1},
   {&__pyx_n_s__comp, __pyx_k__comp, sizeof(__pyx_k__comp), 0, 0, 1, 1},
-  {&__pyx_n_s__vector_to_solution, __pyx_k__vector_to_solution, sizeof(__pyx_k__vector_to_solution), 0, 0, 1, 1},
+  {&__pyx_n_s__set_coeff_vector, __pyx_k__set_coeff_vector, sizeof(__pyx_k__set_coeff_vector), 0, 0, 1, 1},
   {&__pyx_n_s__delptr, __pyx_k__delptr, sizeof(__pyx_k__delptr), 0, 0, 1, 1},
   {&__pyx_n_s__deriv, __pyx_k__deriv, sizeof(__pyx_k__deriv), 0, 0, 1, 1},
   {&__pyx_n_s__descr, __pyx_k__descr, sizeof(__pyx_k__descr), 0, 0, 1, 1},

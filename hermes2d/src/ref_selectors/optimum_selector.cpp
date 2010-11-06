@@ -1,6 +1,6 @@
 #include "../h2d_common.h"
 #include "../solution.h"
-#include "../feproblem.h"
+#include "../discrete_problem.h"
 #include "../quad_all.h"
 #include "../element_to_refine.h"
 #include "optimum_selector.h"
@@ -35,7 +35,7 @@ namespace RefinementSelectors {
       case H2D_HP_ANISO_H: return "HP_ANISO_H";
       case H2D_HP_ANISO_P: return "HP_ANISO_P";
       case H2D_HP_ANISO: return "HP_ANISO";
-      default: error("Invalid adapt type %d.", cand_list); return false;
+      default: error("Invalid adapt type %d.", cand_list); return NULL;
     }
   }
 
@@ -290,6 +290,7 @@ namespace RefinementSelectors {
       case H2D_HP_ISO:
       case H2D_HP_ANISO_H:
         iso_p = true; break; //iso change of orders
+      default: error("Internal error: Invalid adapt type %d.", cand_list);
     }
     append_candidates_split(quad_order, last_quad_order, H2D_REFINEMENT_P, tri || iso_p);
 
@@ -310,6 +311,7 @@ namespace RefinementSelectors {
       case H2D_HP_ISO:
       case H2D_HP_ANISO_H:
         iso_p = true; break; //iso change of orders
+      default: error("Internal error: Invalid adapt type %d.", cand_list);
     }
     append_candidates_split(start_quad_order, last_quad_order, H2D_REFINEMENT_H, tri || iso_p);
 
@@ -329,6 +331,7 @@ namespace RefinementSelectors {
 
         case H2D_HP_ANISO_H:
           iso_p = true; break; //iso change of orders
+        default: error("Internal error: Invalid adapt type %d.", cand_list);
       }
       if (iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
         int order = std::min(H2D_GET_H_ORDER(start_quad_order_hz), H2D_GET_V_ORDER(start_quad_order_hz));

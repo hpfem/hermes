@@ -67,7 +67,7 @@ int main() {
   // Newton's loop.
   // Fill vector coeff_vec using dof and coeffs arrays in elements.
   double *coeff_vec = new double[Space::get_num_dofs(space)];
-  solution_to_vector(space, coeff_vec);
+  get_coeff_vector(space, coeff_vec);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -109,7 +109,7 @@ int main() {
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
     // Copy coefficients from vector y to elements.
-    vector_to_solution(coeff_vec, space);
+    set_coeff_vector(coeff_vec, space);
 
     it++;
   }

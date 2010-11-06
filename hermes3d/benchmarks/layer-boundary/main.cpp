@@ -47,10 +47,10 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // Problem parameters.
 const double K = 1e2;
 
-// Exact solution
+// Exact solution.
 #include "exact_solution.cpp"
 
-// Boundary condition types. 
+// Boundary condition types.
 BCType bc_types(int marker)
 {
   return BC_ESSENTIAL;

@@ -52,6 +52,7 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
       break;
     case MODE_TETRAHEDRON: 
       if (p_init.order < 1) error("P_INIT must be >= 1 in an H1 space on tetrahedra.");
+      else this->set_uniform_order_internal(p_init);
       break;
     default: error("Unknown element type in H1Space::H1Space().");
   }

@@ -1281,7 +1281,8 @@ scalar Solution::get_ref_value_transformed(Element* e, double xi1, double xi2, i
     else
       error("Getting derivatives of the vector solution: Not implemented yet.");
   }
-
+  error("internal error: reached end of non-void function");
+  return 0;
 }
 
 scalar Solution::get_pt_value(double x, double y, int item)
@@ -1316,7 +1317,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
   }
   else if (type == HERMES_CONST)
   {
-    if (b = 0) return cnst[a];
+    if (b == 0) return cnst[a];
     return 0.0;
   }
   else if (type == HERMES_UNDEF)

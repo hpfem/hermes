@@ -289,7 +289,7 @@ void GnuplotGraph::save(const char* filename)
     if (legend)
       fprintf(f, " title '%s' ", rows[i].name.c_str());
     else
-      fprintf(f, " notitle ", rows[i].name.c_str());
+      fprintf(f, " notitle ");
 
     if (i < rows.size() - 1) fprintf(f, ", ");
   }

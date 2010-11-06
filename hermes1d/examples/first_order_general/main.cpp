@@ -11,6 +11,7 @@
 //  with respect to this variable (needed for the Newton's method).
 //
 //  PDE: y' = f(y, x).
+//  The function f(y, x) can be changed below.
 //
 //  Interval: (A, B).
 //
@@ -19,17 +20,14 @@
 //  DC: Determined by the initial condition.
 //
 //  The following parameters can be changed:
-const int NEQ = 1;                      // Number of equations.
-const int NELEM = 10;                   // Number of elements.
-const double A = 0, B = 10;             // Domain end points.
-const double YA = 1;                    // Equation parameter.
-const int P_INIT = 2;                   // Polynomial degree.
 
-// Newton's method.
-double NEWTON_TOL = 1e-5;               // Tolerance.
-int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
-
-
+const int NEQ = 1;                                // Number of equations.
+const int NELEM = 10;                             // Number of elements.
+const double A = 0, B = 10;                       // Domain end points.
+const double YA = 1;                              // Equation parameter.
+const int P_INIT = 2;                             // Polynomial degree.
+double NEWTON_TOL = 1e-5;                         // Tolerance.
+int NEWTON_MAX_ITER = 150;                        // Max. number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
@@ -39,21 +37,23 @@ Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 
 // Function f(y, x).
 double f(double y, double x) {
-  return -y;
+  return -y*y;
 }
 
 // Function dfdy(y, x).
 double dfdy(double y, double x) {
-  return -1;
+  return -2*y;
 }
 
 // Weak forms for the Jacobi matrix and residual.
 #include "forms.cpp"
 
-int main() {
+int main() 
+{
   // Create space, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -64,10 +64,9 @@ int main() {
   bool is_linear = false;
   DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
 
-  // Newton's loop.
-  // Fill vector coeff_vec using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[Space::get_num_dofs(space)];
-  solution_to_vector(space, coeff_vec);
+  // Set zero initial condition.
+  double *coeff_vec = new double[ndof];
+  set_zero(coeff_vec, ndof);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -75,12 +74,13 @@ int main() {
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1) {
+  while (1) 
+  {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(matrix, rhs);
+    dp->assemble(coeff_vec, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
@@ -108,18 +108,12 @@ int main() {
     // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
     
-    // Copy coefficients from vector y to elements.
-    vector_to_solution(coeff_vec, space);
-
     it++;
   }
 
   // Plot the solution.
   Linearizer l(space);
-  l.plot_solution("solution.gp");
-
-  // Plot the resulting space.
-  space->plot("space.gp");
+  l.plot_solution("solution.dat");
 
   info("Done.");
   return 0;

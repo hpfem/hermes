@@ -1,5 +1,5 @@
 project(calc-tetra-h1-dirichlet)
-add_executable(${PROJECT_NAME}	tetra-dirichlet.cpp)
+add_executable(${PROJECT_NAME}	main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)
 set_common_target_properties(${PROJECT_NAME})

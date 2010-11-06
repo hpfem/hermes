@@ -162,15 +162,14 @@ int main(int argc, char* argv[])
     // Initialize matrices and matrix solver on referenc emesh.
     SparseMatrix* matrix_left = create_matrix(matrix_solver);
     SparseMatrix* matrix_right = create_matrix(matrix_solver);
-    Vector* eivec = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix_left, eivec);
+    Solver* solver = create_linear_solver(matrix_solver, matrix_left);
 
     // Assemble the matrices on reference mesh.
     bool is_linear = true;
     DiscreteProblem* dp_left = new DiscreteProblem(&wf_left, ref_space, is_linear);
-    dp_left->assemble(matrix_left, eivec);
+    dp_left->assemble(matrix_left);
     DiscreteProblem* dp_right = new DiscreteProblem(&wf_right, ref_space, is_linear);
-    dp_right->assemble(matrix_right, eivec);
+    dp_right->assemble(matrix_right);
 
     // Time measurement.
     cpu_time.tick();
@@ -300,7 +299,6 @@ int main(int argc, char* argv[])
     delete solver;
     delete matrix_left;
     delete matrix_right;
-    delete eivec;
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;

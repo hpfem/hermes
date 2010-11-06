@@ -44,6 +44,21 @@ res_t h1_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<res_
 	return result;
 }
 
+template<typename f_t, typename res_t>
+res_t hcurl_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<res_t> *v, Geom<f_t> *e,
+              ExtData<res_t> *ext)
+{
+	res_t result = 0;
+	for (int i = 0; i < n; i++)
+		result += wt[i] * (u->curl0[i] * conj(v->curl0[i]) +
+                       u->curl1[i] * conj(v->curl1[i]) +
+                       u->curl2[i] * conj(v->curl2[i]) +
+                       u->val0[i] * conj(v->val0[i]) +
+                       u->val1[i] * conj(v->val1[i]) +
+                       u->val2[i] * conj(v->val2[i]));
+	return result;
+}
+
 // H1 adapt ///////////////////////////////////////////////////////////////////////////////////////
 
 void Adapt::init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms)
@@ -72,6 +87,7 @@ void Adapt::init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms)
 			if (i == j && proj_norms.size() > 0) {
 				switch (proj_norms[i]) {
         case HERMES_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
+        case HERMES_HCURL_NORM: form[i][i] = hcurl_form<double, scalar>; ord[i][i]  = hcurl_form<Ord, Ord>; break;
         default: error("Unknown projection type in Adapt::Adapt().");
         }  
 			}
@@ -769,16 +785,8 @@ scalar Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Me
 	Func<scalar> *v1 = init_fn(rsln1, rrv1, np, pt);
 	Func<scalar> *v2 = init_fn(rsln2, rrv2, np, pt);
 
-	for (int i = 0; i < np; i++) {
-		err1->val[i] = err1->val[i] - v1->val[i];
-		err1->dx[i] = err1->dx[i] - v1->dx[i];
-		err1->dy[i] = err1->dy[i] - v1->dy[i];
-		err1->dz[i] = err1->dz[i] - v1->dz[i];
-		err2->val[i] = err2->val[i] - v2->val[i];
-		err2->dx[i] = err2->dx[i] - v2->dx[i];
-		err2->dy[i] = err2->dy[i] - v2->dy[i];
-		err2->dz[i] = err2->dz[i] - v2->dz[i];
-	}
+	err1->subtract(*v1);
+  err2->subtract(*v2);
 
 	scalar res = bi_fn(np, jwt, NULL, err1, err2, &e, NULL);
 
