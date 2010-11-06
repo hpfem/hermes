@@ -131,11 +131,6 @@ public:
 
   virtual bool solve();
   
-  virtual void notify(const int notification) {
-    if (notification & HERMES_NOTIFY_MATRIX_CHANGED) A_changed = true;
-    if (notification & HERMES_NOTIFY_RHS_CHANGED)    B_changed = true;  
-  }
-  
   bool prepare_factorization_structures();
   void free_factorization_structures();
   void free_matrix();

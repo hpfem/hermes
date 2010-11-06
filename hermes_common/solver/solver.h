@@ -36,6 +36,7 @@
 ///
 /// Reusing the information computed during previous solution of a similar problem 
 /// significantly improves efficiency of the solver. 
+///
 /// <b>Usage:</b> 
 /// Each solver which allows factorization reuse should perform complete factorization 
 /// from scratch for the first time it is invoked, keep the precomputed structures 
@@ -43,17 +44,22 @@
 /// factorization.
 /// 
 /// <b>Enabled solvers:</b>
-///   -\c SuperLU - currently the only solver that can distinguish between all 4 options.
+///   -\c SuperLU - performs reordering, scaling and factorization separately.
 ///   -\c UMFPack - performs scaling and factorization in one step. The option
-///                 \c REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
-///                 \c REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
-///   -\c Pardiso - not yet. The library may be set not to perform scaling or to perform 
+///                 \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
+///                 \c HERMES_REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
+///   -\c Pardiso - The library itself may be set not to perform scaling or to perform 
 ///                 reordering and scaling in one step, preceding the numerical 
-///                 factorization (default). 
-///   -\c MUMPS   - not yet. The library may be set to perform scaling either during 
-///                 analysis (together with reordering), during factorization, or decide 
-///                 about the scaling phase automatically (default).
+///                 factorization (default). Since scaling might be important for good 
+///                 conditioning of the matrix entering the factorization phase and also
+///                 contribute to lower fill-in during that phase, the latter is chosen.
+///   -\c MUMPS   - If \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING is set, scaling is performed
+///                 during analysis and only factorization is repeated during each solve.
+///                 If \c HERMES_REUSE_MATRIX_REORDERING is set, scaling is performed during 
+///                 the factorization phase. This may be less efficient, but more reliable,
+///                 especially for highly non-symmetric matrices.
 ///   -\c AMESOS  - not yet. 
+///
 /// <b>Typical scenario:</b>
 /// When \c rhsonly was set to \c true for the assembly phase, 
 /// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following 
@@ -72,12 +78,6 @@ enum FactorizationScheme
                                               ///< factorization.
 };
 
-/// A user may pass these constants to Solver::notify to tell it that the matrix and/or rhs
-/// has been changed (i.e. this allows him to use the same instance of the solver for 
-/// solving different systems).
-const int HERMES_NOTIFY_MATRIX_CHANGED = 0x01;
-const int HERMES_NOTIFY_RHS_CHANGED    = 0x02;
-
 class DiscreteProblem;
 
 /// Abstract class for defining solver interface.
@@ -95,7 +95,6 @@ public:
   int get_error() { return error; }
   double get_time() { return time; }
   
-  virtual void notify(const int notification) { };
   virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
   virtual void set_factorization_scheme() {
     set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY); 
