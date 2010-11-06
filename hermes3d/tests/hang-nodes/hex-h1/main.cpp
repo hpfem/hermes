@@ -91,6 +91,7 @@ BCType bc_types(int marker)
 #endif
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 #ifdef DIRICHLET
 	return fnc<double, scalar>(x, y, z);
@@ -324,12 +325,12 @@ int main(int argc, char **args)
   // Test variable.
   int success_test = 1;
 
-  if (argc < 2) error("Not enough parameters");
+  if (argc < 2) error("Not enough parameters.");
 
   // Load the mesh.
 	Mesh mesh;
 	H3DReader mloader;
-  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
 
 	// Apply refinements according to the command line parameters passed.
 	for (int i = 2; i < argc; i += 2) {

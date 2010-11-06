@@ -270,7 +270,7 @@ int main(int argc, char **args)
 
   info("ndof_actual = %d", ndof);
   info("ndof_allowed = %d", ndof_allowed); 
-  if (ndof <= ndof_allowed)
+  if (ndof > ndof_allowed)
     success_test = 0;
   
   if (success_test) {

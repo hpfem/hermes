@@ -94,30 +94,29 @@ scalar3 &exact_vec_solution(double x, double y, double z, scalar3 &dx, scalar3 &
 	return val;
 }
 
-
-//
-
+// Boundary condition types.
 BCType bc_types(int marker)
 {
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
 	return fnc(x, y, z);
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form(int np, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e,
-                    ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int np, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e,
+                    ExtData<Scalar> *data)
 {
-	return int_grad_u_grad_v<f_t, res_t>(np, wt, u, v, e);
+	return int_grad_u_grad_v<Real, Scalar>(np, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data)
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data)
 {
-	return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
+	return int_F_v<Real, Scalar>(n, wt, dfnc, u, e);
 }
 
 #if defined WITH_UMFPACK
@@ -200,7 +199,7 @@ int main(int argc, char **args)
 {
 	set_verbose(false);
 
-	if (argc < 3) error("Not enough parameters");
+	if (argc < 3) error("Not enough parameters.");
 
 	char *type = args[1];
 

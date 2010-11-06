@@ -88,12 +88,12 @@ int main(int argc, char **args)
   // Test variable.
   int success_test = 1;
 
-	if (argc < 2) error("Not enough parameters");
+	if (argc < 2) error("Not enough parameters.");
 
   // Load the mesh.
 	Mesh mesh;
   H3DReader mloader;
-  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
 
 	// Initialize the space.
 	Ord3 o(4, 4, 4);

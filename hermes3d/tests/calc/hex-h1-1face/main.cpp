@@ -266,6 +266,7 @@ BCType bc_types(int marker) {
 #endif
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 #ifdef DIRICHLET
 	return fnc(x, y, z);
