@@ -26,7 +26,7 @@ const int INIT_REF_NUM = 0;         // Number of initial uniform mesh refinement
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;             // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;       // Error threshold for element refinement of the adapt(...) function 
+const double THRESHOLD = 0.7;       // Error threshold for element refinement of the adapt(...) function 
                                     // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
                                     // times total error is processed. If more elements have similar errors, 
                                     // refine all to keep the mesh symmetric.
