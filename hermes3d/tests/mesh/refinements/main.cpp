@@ -61,7 +61,7 @@ int main(int argc, char **args) {
 	DEBUG_OUTPUT_ON;
 	SET_VERBOSE_LEVEL(0);
 
-	if (argc < 1) error("Not enough parameters");
+	if (argc < 1) error("Not enough parameters.");
 
 	Mesh mesh;
 	H3DReader mesh_loader;

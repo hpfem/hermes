@@ -72,7 +72,7 @@ int main(int argc, char **args) {
 	DEBUG_OUTPUT_ON;
 	SET_VERBOSE_LEVEL(0);
 
-	if (argc < 2) error("Not enough parameters");
+	if (argc < 2) error("Not enough parameters.");
 
 	ECopyType copy_type = parse_copy_type(args[1]);
 	if (copy_type == CT_NONE) error("Unknown copy type (%s).\n", args[1]);

@@ -136,16 +136,16 @@ BCType bc_types(int marker)
 	return BC_ESSENTIAL;
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
 	return
-		hcurl_int_curl_u_curl_v<f_t, res_t>(n, wt, u, v, e) -
-		alpha * hcurl_int_u_v<f_t, res_t>(n, wt, u, v, e);
+		hcurl_int_curl_u_curl_v<Real, Scalar>(n, wt, u, v, e) -
+		alpha * hcurl_int_u_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	return hcurl_int_F_v<f_t, res_t>(n, wt, f<f_t, res_t>, u, e);
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	return hcurl_int_F_v<Real, Scalar>(n, wt, f<Real, Scalar>, u, e);
 }
 
 
@@ -323,12 +323,12 @@ int main(int argc, char **args)
   // Test variable.
   int success_test = 1;
 
-	if (argc < 2) error("Not enough parameters");
+	if (argc < 2) error("Not enough parameters.");
 
   // Load the mesh.
 	Mesh mesh;
 	H3DReader mloader;
-  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+  if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
 
 	// Apply refinements according to the command line parameters passed.
 	for (int i = 2; i < argc; i += 2) {
