@@ -49,7 +49,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_SUPERLU;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
