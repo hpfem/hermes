@@ -4,6 +4,7 @@
 add_subdirectory(adapt)
 add_subdirectory(benchmarks)
 add_subdirectory(calc)
+add_subdirectory(examples)
 add_subdirectory(hang-nodes)
 add_subdirectory(judy-templates)
 add_subdirectory(linear-solvers)
