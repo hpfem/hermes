@@ -220,8 +220,8 @@ protected:
 
 // interface for getting quadratures - library wide ////////////////////////////////////////////////
 
-Quad1D *get_quadrature_1d();
-Quad3D *get_quadrature(ElementMode3D mode);
+Quad1D HERMES_API *get_quadrature_1d();
+Quad3D HERMES_API *get_quadrature(ElementMode3D mode);
 
 
 #ifndef DEBUG_ORDER

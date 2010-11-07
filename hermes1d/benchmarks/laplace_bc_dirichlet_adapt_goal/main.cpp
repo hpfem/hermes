@@ -273,6 +273,7 @@ int main() {
     if(as > 1)
     {
       info("Projecting the fine mesh solution onto the coarse mesh.");
+      // Project the fine mesh solution (defined on space_ref) onto the coarse mesh (defined on space).
       OGProjection::project_global(space, ref_space, matrix_solver);
     }
 

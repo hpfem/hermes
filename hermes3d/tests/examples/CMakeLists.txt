@@ -1,6 +1,6 @@
 if(H3D_REAL)
-add_subdirectory(smooth-7-versions)
+add_subdirectory(elasticity-cubit-hex)
 endif(H3D_REAL)
 if(H3D_COMPLEX)
-add_subdirectory(bessel)
+
 endif(H3D_COMPLEX)

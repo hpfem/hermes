@@ -8,7 +8,7 @@
 // Test of linear solvers.
 // Read matrix and RHS from a file.
 
-// max row length in input file
+// Max row length in input file.
 #define MAX_ROW_LEN									1024
 
 struct MatrixEntry {
@@ -19,21 +19,21 @@ struct MatrixEntry {
 		this->value = value;
 	}
 
-	int m, n;			// position
+	int m, n;
 	scalar value;
 };
 
-// helpers ////////////////////////////////////////////////////////////////////
+// Helpers.
 
 bool testPrint(bool value, const char *msg, bool correct)
 {
-	printf("%s...", msg);
+	info("%s...", msg);
 	if (value == correct) {
-		printf("OK\n");
+		info("OK.");
 		return true;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return false;
 	}
 }
@@ -110,7 +110,6 @@ int read_matrix_and_rhs(char *file_name, int &n, Array<MatrixEntry> &mat, Array<
 void build_matrix(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs, SparseMatrix *mat,
                   Vector *rhs)
 {
-	// matrix
 	mat->prealloc(n);
 	for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
 		MatrixEntry &me = ar_mat[i];
@@ -124,7 +123,6 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs, Spar
 	}
 	mat->finish();
 
-	// RHS
 	rhs->alloc(n);
 	for (unsigned int i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
 		rhs->add((int) i, ar_rhs[i]);
@@ -135,7 +133,6 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs, Spar
 void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs,
                         SparseMatrix *matrix, Vector *rhs)
 {
-	// matrix
 	matrix->prealloc(n);
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
@@ -156,7 +153,6 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs
 	matrix->add(n, n, mat, rows, cols);
 	matrix->finish();
 
-	// rhs
 	rhs->alloc(n);
 	scalar *rs = new scalar[n];
 	for (unsigned int i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
@@ -166,20 +162,17 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs
 	rhs->finish();
 }
 
-//
-// tests themselves
-//
-
+// Test code.
 void solve(Solver &solver, int n)
 {
 	if (solver.solve()) {
 		scalar *sln = solver.get_solution();
 		for (int i = 0; i < n; i++) {
-			printf(SCALAR_FMT"\n", SCALAR(sln[i]));
+			info(SCALAR_FMT"\n", SCALAR(sln[i]));
 		}
 	}
 	else {
-		printf("Unable to solve\n");
+		info("Unable to solve.");
 	}
 }
 
