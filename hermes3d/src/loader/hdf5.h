@@ -25,7 +25,7 @@
 /// Mesh loader from HDF5 format
 ///
 /// @ingroup meshloaders
-class HDF5Reader : public MeshLoader {
+class HERMES_API HDF5Reader : public MeshLoader {
 public:
 	HDF5Reader();
 	virtual ~HDF5Reader();
