@@ -389,8 +389,15 @@ bool UMFPackLinearSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_UMFPACK
+  // Perform both factorization phases for the first time.
+  int eff_fact_scheme;
+  if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
+    eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+  else
+    eff_fact_scheme = factorization_scheme;
+  
   int status;
-  switch(factorization_scheme)
+  switch(eff_fact_scheme)
   {
     case HERMES_FACTORIZE_FROM_SCRATCH:
       if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
