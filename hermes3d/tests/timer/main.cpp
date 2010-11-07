@@ -34,23 +34,23 @@
 // helpers ////////////////////////////////////////////////////////////////////
 
 bool test_print(bool value, const char *msg, bool correct) {
-	printf("%s...", msg);
+	info("%s...", msg);
 	if (value == correct) {
-		printf("OK\n");
+		info("OK");
 		return true;
 	}
 	else {
-		printf("failed\n");
+		info("failed");
 		return false;
 	}
 }
 
 void print_result(bool value) {
 	if (value) {
-		printf("OK\n");
+		info("OK");
 	}
 	else {
-		printf("failed\n");
+		info("failed");
 	}
 }
 
@@ -62,7 +62,7 @@ bool test_timer_rough() {
 	#define SECS		3
 
 	// test #1 running timer fo 3 secs
-	printf("* Running timer for %d secs...", SECS);
+	info("* Running timer for %d secs...", SECS);
 	fflush(stdout);
 
 	Timer t("LowPrecision timer");
@@ -79,7 +79,7 @@ bool test_timer_rough() {
 
 bool test_timer_hiprecision() {
 	// test #1 running timer fo 123 ms
-	printf("* Running timer for 123 ms...");
+	info("* Running timer for 123 ms...");
 	fflush(stdout);
 
 	Timer t("HiPrecision timer");
@@ -103,7 +103,7 @@ bool test_timer_output() {
 	sleep(2);
 	t.stop();
 
-	printf("* Time: %lf secs (%s)\n", t.get_seconds(), t.get_human_time());
+	info("* Time: %lf secs (%s)", t.get_seconds(), t.get_human_time());
 
 	return true;
 }

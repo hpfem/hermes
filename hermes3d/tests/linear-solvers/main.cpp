@@ -27,13 +27,13 @@ struct MatrixEntry {
 
 bool testPrint(bool value, const char *msg, bool correct)
 {
-	printf("%s...", msg);
+	info("%s...", msg);
 	if (value == correct) {
-		printf("OK\n");
+		info("OK.");
 		return true;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return false;
 	}
 }
@@ -168,11 +168,11 @@ void solve(Solver &solver, int n)
 	if (solver.solve()) {
 		scalar *sln = solver.get_solution();
 		for (int i = 0; i < n; i++) {
-			printf(SCALAR_FMT"\n", SCALAR(sln[i]));
+			info(SCALAR_FMT"\n", SCALAR(sln[i]));
 		}
 	}
 	else {
-		printf("Unable to solve\n");
+		info("Unable to solve.");
 	}
 }
 

@@ -154,7 +154,7 @@ int main(int argc, char **args)
     Solution ref_sln(ref_space->get_mesh());
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else {
-		  printf("Matrix solver failed.\n");
+		  info("Matrix solver failed.");
 		  success_test = 0;
 	  }
     
