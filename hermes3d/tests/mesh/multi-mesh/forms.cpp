@@ -38,8 +38,8 @@ template<typename Real, typename Scalar>
 Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data)
 {
 	Scalar res = 0.0;
-//	for (int i = 0; i < n; i++)
-//		res += wt[i] * (data->ext[0].fn[i] * v->fn[i]);
+	for (int i = 0; i < n; i++)
+		res += wt[i] * (data->fn[0].val[i] * v->val[i]);
 	return res;
 }
 
@@ -301,8 +301,8 @@ template<typename Real, typename Scalar>
 Scalar liform_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data)
 {
 	Scalar res = 0.0;
-//	for (int i = 0; i < n; i++)
-//		res += wt[i] * (rhs1(e->x[i], e->y[i], e->z[i]) * v->fn[i]);
+	for (int i = 0; i < n; i++)
+	  res += wt[i] * rhs1(e->x[i], e->y[i], e->z[i]) * v->val[i];
 	return res;
 }
 
