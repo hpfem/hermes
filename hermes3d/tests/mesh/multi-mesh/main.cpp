@@ -422,24 +422,24 @@ int main(int argc, char **args)
 
 	if (argc < 2) error("Not enough parameters.");
 
-	printf("* Loading mesh '%s'\n", args[1]);
+	info("* Loading mesh '%s'.", args[1]);
 	Mesh mesh1;
 	H3DReader mesh_loader;
-	if (!mesh_loader.load(args[1], &mesh1)) error("Loading mesh file '%s'\n", args[1]);
+	if (!mesh_loader.load(args[1], &mesh1)) error("Loading mesh file '%s'.", args[1]);
 
 	H1ShapesetLobattoHex shapeset;
 #if defined RHS2
 
 	Ord3 order(2, 2, 2);
-	printf("  - Setting uniform order to (%d, %d, %d)\n", order.x, order.y, order.z);
+	info("  - Setting uniform order to (%d, %d, %d).", order.x, order.y, order.z);
 
-	printf("* Setting the space up\n");
+	info("* Setting the space up.");
 	H1Space space(&mesh1, bc_types, essential_bc_values, order);
 
 	int ndofs = space.assign_dofs();
-	printf("  - Number of DOFs: %d\n", ndofs);
+	info("  - Number of DOFs: %d.", ndofs);
 
-	printf("* Calculating a solution\n");
+	info("* Calculating a solution.");
 
 	// duplicate the mesh
 	Mesh mesh2;
@@ -463,13 +463,13 @@ int main(int argc, char **args)
 	mesh2.refine_all_elements(H3D_REFT_HEX_Y);
 	mesh3.refine_all_elements(H3D_REFT_HEX_Z);
 
-	printf("* Setup spaces\n");
+	info("* Setup spaces.");
 	H1Space space1(&mesh1, &shapeset);
 	space1.set_bc_types(bc_types_1);
 	space1.set_essential_bc_values(essential_bc_values_1);
 
 	Ord3 o1(2, 2, 2);
-	printf("  - Setting uniform order to (%d, %d, %d)\n", o1.x, o1.y, o1.z);
+	info("  - Setting uniform order to (%d, %d, %d).", o1.x, o1.y, o1.z);
 	space1.set_uniform_order(o1);
 
 	H1Space space2(&mesh2, &shapeset);
@@ -477,7 +477,7 @@ int main(int argc, char **args)
 	space2.set_essential_bc_values(essential_bc_values_2);
 
 	Ord3 o2(2, 2, 2);
-	printf("  - Setting uniform order to (%d, %d, %d)\n", o2.x, o2.y, o2.z);
+	info("  - Setting uniform order to (%d, %d, %d).", o2.x, o2.y, o2.z);
 	space2.set_uniform_order(o2);
 
 	H1Space space3(&mesh3, &shapeset);
@@ -485,14 +485,14 @@ int main(int argc, char **args)
 	space3.set_essential_bc_values(essential_bc_values_3);
 
 	Ord3 o3(1, 1, 1);
-	printf("  - Setting uniform order to (%d, %d, %d)\n", o3.x, o3.y, o3.z);
+	info("  - Setting uniform order to (%d, %d, %d).", o3.x, o3.y, o3.z);
 	space3.set_uniform_order(o3);
 
 	int ndofs = 0;
 	ndofs += space1.assign_dofs();
 	ndofs += space2.assign_dofs(ndofs);
 	ndofs += space3.assign_dofs(ndofs);
-	printf("  - Number of DOFs: %d\n", ndofs);
+	info("  - Number of DOFs: %d.", ndofs);
 #endif
 
 #if defined WITH_UMFPACK
@@ -537,20 +537,20 @@ int main(int argc, char **args)
 #endif
 
 	// assemble stiffness matrix
-	printf("  - assembling... "); fflush(stdout);
+	info("  - assembling... "); fflush(stdout);
 	Timer assemble_timer;
 	assemble_timer.start();
 	dp.assemble(&mat, &rhs);
 	assemble_timer.stop();
-	printf("%s (%lf secs)\n", assemble_timer.get_human_time(), assemble_timer.get_seconds());
+	info("%s (%lf secs).", assemble_timer.get_human_time(), assemble_timer.get_seconds());
 
 	// solve the stiffness matrix
-	printf("  - solving... "); fflush(stdout);
+	info("  - solving... "); fflush(stdout);
 	Timer solve_timer;
 	solve_timer.start();
 	bool solved = solver.solve();
 	solve_timer.stop();
-	printf("%s (%lf secs)\n", solve_timer.get_human_time(), solve_timer.get_seconds());
+	info("%s (%lf secs).", solve_timer.get_human_time(), solve_timer.get_seconds());
 
 	if (solved) {
 #ifdef RHS2
@@ -560,19 +560,19 @@ int main(int argc, char **args)
 		sln.set_coeff_vector(&space, solver.get_solution());
 		sln_pre_tmr.stop();
 
-		printf("* Solution:\n");
+		info("* Solution:.");
 
 		ExactSolution ex_sln(&mesh1, exact_solution);
 		// norm
 		double h1_sln_norm = h1_norm(&sln);
 		double h1_err_norm = h1_error(&sln, &ex_sln);
-		printf("  - H1 solution norm:   % le\n", h1_sln_norm);
-		printf("  - H1 error norm:      % le\n", h1_err_norm);
+		info("  - H1 solution norm:   % le.", h1_sln_norm);
+		info("  - H1 error norm:      % le.", h1_err_norm);
 
 		double l2_sln_norm = l2_norm(&sln);
 		double l2_err_norm = l2_error(&sln, &ex_sln);
-		printf("  - L2 solution norm:   % le\n", l2_sln_norm);
-		printf("  - L2 error norm:      % le\n", l2_err_norm);
+		info("  - L2 solution norm:   % le.", l2_sln_norm);
+		info("  - L2 error norm:      % le.", l2_err_norm);
 
 		if (h1_err_norm > EPS || l2_err_norm > EPS) {
 			// calculated solution is not enough precise
@@ -601,22 +601,22 @@ int main(int argc, char **args)
 		double l2_err_norm2 = l2_error(&sln2, &esln2);
 		double l2_err_norm3 = l2_error(&sln3, &esln3);
 
-		printf("  - H1 error norm:      % le\n", h1_err_norm1);
-		printf("  - L2 error norm:      % le\n", l2_err_norm1);
+		info("  - H1 error norm:      % le.", h1_err_norm1);
+		info("  - L2 error norm:      % le.", l2_err_norm1);
 		if (h1_err_norm1 > EPS || l2_err_norm1 > EPS) {
 			// calculated solution is not enough precise
 			res = ERR_FAILURE;
 		}
 
-		printf("  - H1 error norm:      % le\n", h1_err_norm2);
-		printf("  - L2 error norm:      % le\n", l2_err_norm2);
+		info("  - H1 error norm:      % le.", h1_err_norm2);
+		info("  - L2 error norm:      % le.", l2_err_norm2);
 		if (h1_err_norm2 > EPS || l2_err_norm2 > EPS) {
 			// calculated solution is not enough precise
 			res = ERR_FAILURE;
 		}
 
-		printf("  - H1 error norm:      % le\n", h1_err_norm3);
-		printf("  - L2 error norm:      % le\n", l2_err_norm3);
+		info("  - H1 error norm:      % le.", h1_err_norm3);
+		info("  - L2 error norm:      % le.", l2_err_norm3);
 		if (h1_err_norm3 > EPS || l2_err_norm3 > EPS) {
 			// calculated solution is not enough precise
 			res = ERR_FAILURE;

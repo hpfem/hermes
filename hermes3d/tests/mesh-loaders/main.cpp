@@ -19,7 +19,7 @@ int test_mesh3d_loader(char *file_name)
 		return ERR_SUCCESS;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return ERR_FAILURE;
 	}
 }
@@ -34,7 +34,7 @@ int test_hdf5_loader(char *file_name)
 		return ERR_SUCCESS;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return ERR_FAILURE;
 	}
 }
@@ -49,7 +49,7 @@ int test_exodusii_loader(char *file_name)
 		return ERR_SUCCESS;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return ERR_FAILURE;
 	}
 }

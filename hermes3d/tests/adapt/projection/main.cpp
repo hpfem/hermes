@@ -174,7 +174,7 @@ int main(int argc, char **args)
   Solution sln(&mesh);
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else {
-	  printf("Matrix solver failed.\n");
+	  info("Matrix solver failed.");
 	  success_test = 0;
   }
 

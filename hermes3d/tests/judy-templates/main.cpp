@@ -8,13 +8,13 @@
 // Testing templates of Judy arrays
 
 bool testPrint(bool value, const char *msg, bool correct) {
-	printf("%s...", msg);
+	info("%s...", msg);
 	if (value == correct) {
-		printf("OK\n");
+		info("OK.");
 		return true;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return false;
 	}
 }
@@ -24,13 +24,13 @@ bool testPrint(bool value, const char *msg, bool correct) {
 //
 
 int testArrayInt() {
-	printf("- Testing Array<int>-----\n");
+	info("- Testing Array<int>-----");
 	Array<int> int_array;
 	bool r;
 	unsigned int idx;
 
 	// fill the array
-	printf("  * Filling the array with numbers\n");
+	info("  * Filling the array with numbers.");
 	for (int i = 0; i < 100; i++)
 		int_array.set(i, i + 100);
 
@@ -60,7 +60,7 @@ int testArrayInt() {
 		return -1;
 
 	//
-	printf("  * Testing iterators\n");
+	info("  * Testing iterators.");
 	r = true;
 	for (unsigned int i = int_array.first(); i != INVALID_IDX; i = int_array.next(i))
 		r &= int_array.get(i) == (int) (i + 100);
@@ -120,14 +120,14 @@ struct Point {
 };
 
 int testArrayStruct() {
-	printf("- Testing Array<struct>-----\n");
+	info("- Testing Array<struct>-----");
 
 	Array<Point> pt_array;
 	bool r;
 	unsigned int idx;
 
 	// fill the array
-	printf("  * Filling the array with numbers\n");
+	info("  * Filling the array with numbers.");
 	for (int i = 0; i < 100; i++) {
 		pt_array.set(i, Point(100 + i, 1000 + i));
 	}
@@ -159,7 +159,7 @@ int testArrayStruct() {
 		return -1;
 
 	//
-	printf("  * Testing iterators\n");
+	info("  * Testing iterators.");
 	r = true;
 	for (unsigned int i = pt_array.first(); i != INVALID_IDX; i = pt_array.next(i)) {
 		r &= (pt_array.get(i).X == (int) (i + 100)) && (pt_array.get(i).Y == (int) (i + 1000));
@@ -222,14 +222,14 @@ int testArray() {
 //
 
 int testArrayPtrStruct() {
-	printf("- Testing ArrayPtr<struct>-----\n");
+	info("- Testing ArrayPtr<struct>-----");
 
 	ArrayPtr<Point> ptr_array;
 	bool r;
 	unsigned int idx;
 
 	// fill the array
-	printf("  * Filling the array with items\n");
+	info("  * Filling the array with items.");
 	for (int i = 0; i < 100; i++) {
 		Point *pt = new Point(100 + i, 1000 + i);
 		ptr_array.set(i, pt);
@@ -260,7 +260,7 @@ int testArrayPtrStruct() {
 		return -1;
 
 	//
-	printf("  * Testing iterators\n");
+	info("  * Testing iterators.");
 	r = true;
 	for (unsigned int i = ptr_array.first(); i != INVALID_IDX; i = ptr_array.next(i)) {
 		Point *pt = ptr_array.get(i);
@@ -313,7 +313,7 @@ int testArrayPtrStruct() {
 
 // test Map
 int testMap() {
-	printf("- Testing Map<struct>-----\n");
+	info("- Testing Map<struct>-----");
 /*
 	bool r;
 
@@ -321,7 +321,7 @@ int testMap() {
 	unsigned int idx;
 
 	// fill the array
-	printf("  * Filling the map with items\n");
+	info("  * Filling the map with items.");
 	pt_map.set("a", Point(100, 200));
 	pt_map.set("b", Point(101, 201));
 	pt_map.set("c", Point(102, 202));
@@ -338,7 +338,7 @@ int testMap() {
 		return -1;
 
 	//  iterators
-	printf("  * Testing iterators\n");
+	info("  * Testing iterators.");
 	r = true;
 	int i = 0;
 	for (unsigned int iter = pt_map.first(); iter != INVALID_IDX; iter = pt_map.next(iter)) {
@@ -392,14 +392,14 @@ int testMap() {
 
 // test MapHSOrd
 int testMapHSOrd() {
-	printf("- Testing MapHSOrd<struct>-----\n");
+	info("- Testing MapHSOrd<struct>-----");
 
 	bool r;
 
 	MapHSOrd map;
 
 	// fill the array
-	printf("  * Filling the map with items\n");
+	info("  * Filling the map with items.");
 	unsigned int k0[] = { 1, 2 };
 	map.set(k0, 2, 100);
 	unsigned int k1[] = { 1, 3 };
@@ -445,14 +445,14 @@ int testMapHSOrd() {
 
 // test MapHS
 int testMapHS() {
-	printf("- Testing MapHS<struct>-----\n");
+	info("- Testing MapHS<struct>-----");
 
 	bool r;
 
 	MapHS map;
 
 	// fill the array
-	printf("  * Filling the map with items\n");
+	info("  * Filling the map with items.");
 	map.set((uint8_t *) "a", 1, 100);
 	map.set((uint8_t *) "ab", 2, 101);
 	map.set((uint8_t *) "abc", 3, 102);
@@ -500,7 +500,7 @@ int testBitArray() {
 	unsigned int index, value;
 	unsigned int mem_used;
 
-	printf("- Testing BitArray -----\n");
+	info("- Testing BitArray -----");
 
 	// first set a value in the empty array
 	r = bit_array.set(1);
