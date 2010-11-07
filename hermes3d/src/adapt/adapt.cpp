@@ -958,7 +958,10 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
     assert(k == nact);
     cmp_err = errors;
     qsort(esort, nact, sizeof(int2), compare);
-    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) 
+    // Element error mask is used here, because this variable is used in the adapt()
+    // function, where the processed error (sum of errors of processed element errors)
+    // is matched to this variable.
+    if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
       total_err = total_err / total_norm;
 
     have_errors = true;
