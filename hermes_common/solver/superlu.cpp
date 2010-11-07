@@ -390,7 +390,7 @@ SuperLUSolver::SuperLUSolver(SuperLUMatrix *m, SuperLUVector *rhs)
 SuperLUSolver::~SuperLUSolver()
 {
   _F_
-  free_factorization_structures();
+  free_factorization_data();
   free_matrix();
   free_rhs();
   
@@ -426,7 +426,7 @@ bool SuperLUSolver::solve()
     
   // Prepare data structures serving as input for the solver driver 
   // (according to the chosen factorization reuse strategy).
-  if ( !prepare_factorization_structures() )
+  if ( !setup_factorization() )
   {
     warning("LU factorization could not be completed.");
     return false;
@@ -531,7 +531,7 @@ bool SuperLUSolver::solve()
 #endif
 }
 
-bool SuperLUSolver::prepare_factorization_structures()
+bool SuperLUSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_SUPERLU
@@ -564,7 +564,7 @@ bool SuperLUSolver::prepare_factorization_structures()
       // matrix and rhs size - for simplicity, we reallocate the structures every time.
       
       // Clear the structures emanating from previous factorization.
-      free_factorization_structures();
+      free_factorization_data();
       
       // Allocate the new structures (internal arrays of L, U are allocated automatically by SuperLU).
       if ( !(etree = intMalloc(m->size)) )  
@@ -632,7 +632,7 @@ void SuperLUSolver::free_rhs()
   #endif  
 }
 
-void SuperLUSolver::free_factorization_structures()
+void SuperLUSolver::free_factorization_data()
 { 
   _F_
 #ifdef WITH_SUPERLU

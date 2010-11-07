@@ -443,7 +443,7 @@ MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
   // before MUMPS has been initialized.
   param.rhs = NULL;
   param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING 
-                          // in prepare_factorization_structures()
+                          // in setup_factorization()
 #else
   error(MUMPS_NOT_COMPILED);
 #endif
@@ -477,7 +477,7 @@ bool MumpsSolver::solve()
   // Prepare the MUMPS data structure with input for the solver driver 
   // (according to the chosen factorization reuse strategy), as well as
   // the system matrix.
-  if ( !prepare_factorization_structures() )
+  if ( !setup_factorization() )
   {
     warning("LU factorization could not be completed.");
     return false;
@@ -487,7 +487,7 @@ bool MumpsSolver::solve()
   param.rhs = new mumps_scalar[m->size];
   memcpy(param.rhs, rhs->v, m->size * sizeof(mumps_scalar));
   
-  // Do the jobs specified in prepare_factorization_structures().
+  // Do the jobs specified in setup_factorization().
   MUMPS(&param);
   
   ret = check_status(&param);
@@ -517,7 +517,7 @@ bool MumpsSolver::solve()
 #endif
 }
 
-bool MumpsSolver::prepare_factorization_structures()
+bool MumpsSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_MUMPS

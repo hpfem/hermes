@@ -321,7 +321,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
-  free_factorization_structures();
+  free_factorization_data();
 }
 
 #ifdef WITH_UMFPACK
@@ -358,7 +358,7 @@ bool UMFPackLinearSolver::solve() {
 
   int status;
 
-  if ( !prepare_factorization_structures() )
+  if ( !setup_factorization() )
   {
     warning("LU factorization could not be completed.");
     return false;
@@ -385,7 +385,7 @@ bool UMFPackLinearSolver::solve() {
 #endif
 }
 
-bool UMFPackLinearSolver::prepare_factorization_structures()
+bool UMFPackLinearSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -422,7 +422,7 @@ bool UMFPackLinearSolver::prepare_factorization_structures()
 #endif
 }
 
-void UMFPackLinearSolver::free_factorization_structures()
+void UMFPackLinearSolver::free_factorization_data()
 { 
   _F_
 #ifdef WITH_UMFPACK

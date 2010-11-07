@@ -124,7 +124,7 @@ protected:
   MumpsMatrix *m;
   MumpsVector *rhs;
   
-  bool prepare_factorization_structures();
+  bool setup_factorization();
 
 #ifdef WITH_MUMPS
   MUMPS_STRUCT  param;

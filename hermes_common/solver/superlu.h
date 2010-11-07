@@ -148,8 +148,8 @@ protected:
   int *local_Ai, *local_Ap;
   slu_scalar *local_Ax, *local_rhs;
   
-  bool prepare_factorization_structures();
-  void free_factorization_structures();
+  bool setup_factorization();
+  void free_factorization_data();
   void free_matrix();
   void free_rhs();
   
