@@ -8,4 +8,3 @@
 
 #cmakedefine OUTPUT_DIR "@OUTPUT_DIR@"
 
-#cmakedefine H3D_COMPLEX

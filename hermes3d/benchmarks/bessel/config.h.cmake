@@ -6,4 +6,3 @@
 #cmakedefine TRACING
 #cmakedefine DEBUG
 
-#cmakedefine H3D_COMPLEX

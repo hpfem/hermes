@@ -39,7 +39,7 @@ Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom
 {
 	Scalar res = 0.0;
 	for (int i = 0; i < n; i++)
-		res += wt[i] * (data->fn[0].val[i] * v->val[i]);
+		res += wt[i] * (data->fn[0]->val[i] * v->val[i]);
 	return res;
 }
 

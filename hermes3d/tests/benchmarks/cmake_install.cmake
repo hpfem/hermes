@@ -1,8 +1,8 @@
-# Install script for directory: D:/School/mgr/diplomka/hpfem-7/GitRepo/New/hermes/hermes3d/tests/benchmarks
+# Install script for directory: /home/mazh/hermes/new_repo/hermes/hermes-pull/hermes3d/tests/benchmarks
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_INSTALL_PREFIX "C:/Program Files/hermes3d")
+  SET(CMAKE_INSTALL_PREFIX "/usr/local")
 ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 STRING(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -12,7 +12,7 @@ IF(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     STRING(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   ELSE(BUILD_TYPE)
-    SET(CMAKE_INSTALL_CONFIG_NAME "Release")
+    SET(CMAKE_INSTALL_CONFIG_NAME "Debug")
   ENDIF(BUILD_TYPE)
   MESSAGE(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 ENDIF(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
@@ -27,10 +27,15 @@ IF(NOT CMAKE_INSTALL_COMPONENT)
   ENDIF(COMPONENT)
 ENDIF(NOT CMAKE_INSTALL_COMPONENT)
 
+# Install shared libraries without execute permission?
+IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
+  SET(CMAKE_INSTALL_SO_NO_EXE "0")
+ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
+
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  INCLUDE("D:/School/mgr/diplomka/hpfem-7/GitRepo/New/hermes/hermes3d/tests/benchmarks/smooth-7-versions/cmake_install.cmake")
-  INCLUDE("D:/School/mgr/diplomka/hpfem-7/GitRepo/New/hermes/hermes3d/tests/benchmarks/bessel/cmake_install.cmake")
+  INCLUDE("/home/mazh/hermes/new_repo/hermes/hermes-pull/hermes3d/tests/benchmarks/smooth-7-versions/cmake_install.cmake")
+  INCLUDE("/home/mazh/hermes/new_repo/hermes/hermes-pull/hermes3d/tests/benchmarks/bessel/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 

@@ -6,4 +6,3 @@
 /* #undef TRACING */
 #define DEBUG
 
-#define H3D_COMPLEX
