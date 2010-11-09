@@ -209,5 +209,5 @@ int main(int argc, char **args)
   // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   finalize_solution_environment(matrix_solver);
   
-  return 1;
+  return 0;
 }

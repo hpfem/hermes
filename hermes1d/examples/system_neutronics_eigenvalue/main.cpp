@@ -205,5 +205,5 @@ int main() {
 	info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%", R, 100*(R-1.5162)/1.5162);
 	
   info("Done.");
-  return 1;
+  return 0;
 }
