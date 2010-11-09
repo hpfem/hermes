@@ -4,14 +4,8 @@
 #include "config.h"
 #include <hermes3d.h>
 
-// This example shows how to solve a linear elasticity problem using
-// a hexahedral mesh in Exodus format.
-//
-// PDE: Lame equations of linear elasticity.
-//
-// BC: u_x = u_y = 0 
-//     du_z/dn = f on top of the L-beam
-//     du_x/dn = du_y/dn = du_z/dn = 0 elsewhere
+
+// This test makes sure that the example elasticity-cubit-hex works correctly.
 //
 // The following parameters can be changed:
 
@@ -31,11 +25,13 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Problem parameters. 
-const double E  = 200e9; 		// Young modulus for steel: 200 GPa.
-const double nu = 0.3;			// Poisson ratio. 
-const double f_x  = 0;   		// x-direction load force (N). 
-const double f_y  = 1e4;   		// y-direction load force (N). 
-const double f_z  = 0;   		// z-direction load force (N). 
+
+const double E  = 200e9; 		          // Young modulus for steel: 200 GPa.
+const double nu = 0.3;			          // Poisson ratio. 
+const double f_x  = 0;   		          // x-direction load force (N). 
+const double f_y  = 1e4;   		          // y-direction load force (N). 
+const double f_z  = 0;   		          // z-direction load force (N). 
+
 const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
 const double mu = E / (2*(1 + nu));
 

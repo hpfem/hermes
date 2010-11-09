@@ -360,7 +360,7 @@ int main() {
   graph_cpu_exact.save("conv_cpu_exact.dat");
 
   info("Done.");
-  return 1;
+  return 0;
 }
 
 

@@ -48,15 +48,6 @@ int parse_reft(char *str) {
 int main(int argc, char **args) {
 	int res = ERR_SUCCESS;
 
-#ifdef WITH_PETSC
-	PetscInitialize(&argc, &args, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-	set_verbose(false);
-
-	TRACE_START("trace.txt");
-	DEBUG_OUTPUT_ON;
-	SET_VERBOSE_LEVEL(0);
-
 	if (argc < 1) error("Not enough parameters.");
 
 	Mesh mesh;
@@ -79,13 +70,6 @@ int main(int argc, char **args) {
 		warning("Unable to refine a mesh.");
 		res = ERR_FAILURE;
 	}
-
-
-#ifdef WITH_PETSC
-	PetscFinalize();
-#endif
-
-	TRACE_END;
 
 	return res;
 }

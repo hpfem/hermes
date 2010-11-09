@@ -135,5 +135,5 @@ int main() {
   l.plot_solution("solution.gp");
 
   info("Done.");
-  return 1;
+  return 0;
 }

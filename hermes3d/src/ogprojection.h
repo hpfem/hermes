@@ -62,10 +62,10 @@ protected:
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++)
-      result += wt[i] * (ext->fn[0].val[i] * v->val[i] + 
-                         ext->fn[0].dx[i] * v->dx[i] + 
-                         ext->fn[0].dy[i] * v->dy[i] + 
-                         ext->fn[0].dz[i] * v->dz[i]);
+      result += wt[i] * (ext->fn[0]->val[i] * v->val[i] + 
+                         ext->fn[0]->dx[i] * v->dx[i] + 
+                         ext->fn[0]->dy[i] * v->dy[i] + 
+                         ext->fn[0]->dz[i] * v->dz[i]);
     return result;
   }
 
@@ -85,9 +85,9 @@ protected:
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++)
-      result += wt[i] * (ext->fn[0].dx[i] * v->dx[i] + 
-                         ext->fn[0].dy[i] * v->dy[i] + 
-                         ext->fn[0].dz[i] * v->dz[i]);
+      result += wt[i] * (ext->fn[0]->dx[i] * v->dx[i] + 
+                         ext->fn[0]->dy[i] * v->dy[i] + 
+                         ext->fn[0]->dz[i] * v->dz[i]);
     return result;
   }
 
@@ -105,7 +105,7 @@ protected:
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++)
-      result += wt[i] * (ext->fn[0].val[i] * v->val[i]);
+      result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
     return result;
   }
 
@@ -128,8 +128,8 @@ protected:
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++) {
-      result += wt[i] * (ext->fn[0].curl0[i] * conj(v->curl0[i]) + ext->fn[0].curl1[i] * conj(v->curl1[i]) + ext->fn[0].curl2[i] * conj(v->curl2[i]));
-      result += wt[i] * (ext->fn[0].val0[i] * conj(v->val0[i]) + ext->fn[0].val1[i] * conj(v->val1[i]));
+      result += wt[i] * (ext->fn[0]->curl0[i] * conj(v->curl0[i]) + ext->fn[0]->curl1[i] * conj(v->curl1[i]) + ext->fn[0]->curl2[i] * conj(v->curl2[i]));
+      result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
     }
     return result;
   }

@@ -741,12 +741,12 @@ Ord3 Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMa
 {
 	_F_
 	// determine the integration order
-	Func<Ord> ou = init_fn_ord(ordu);
-	Func<Ord> ov = init_fn_ord(ordv);
+	Func<Ord> *ou = init_fn_ord(ordu);
+	Func<Ord> *ov = init_fn_ord(ordv);
 
 	double fake_wt = 1.0;
 	Geom<Ord> fake_e = init_geom(marker);
-	Ord o = mf_ord(1, &fake_wt, NULL, &ou, &ov, &fake_e, NULL);
+	Ord o = mf_ord(1, &fake_wt, NULL, ou, ov, &fake_e, NULL);
 	Ord3 order = ru->get_inv_ref_order();
 	switch (order.type) {
 		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
@@ -754,8 +754,10 @@ Ord3 Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMa
 	}
 	order.limit();
 
-	free_fn(&ou);
-	free_fn(&ov);
+	free_fn(ou);
+	free_fn(ov);
+  delete ou;
+  delete ov;
 
 	return order;
 }

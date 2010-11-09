@@ -193,7 +193,7 @@ Geom<double> init_geom(int marker, RefMap *rm, int iface, const int np, const Qu
 void free_geom(Geom<double> *e);
 
 /// Init the function for calculation the integration order
-Func<Ord> init_fn_ord(const Ord3 &order);
+Func<Ord> *init_fn_ord(const Ord3 &order);
 
 /// Init the function for the evaluation of the volumetric integral
 sFunc *init_fn(ShapeFunction *fu, RefMap *rm, const int np, const QuadPt3D *pt);
@@ -216,7 +216,7 @@ template<typename T>
 class HERMES_API ExtData {
 public:
 	int nf;					// number of functions in 'fn' array
-	Func<T> *fn;				// array of pointers to functions
+	Func<T> **fn;				// array of pointers to functions
 
 	ExtData() {
 		nf = 0;
