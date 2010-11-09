@@ -2,33 +2,10 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
 #include "config.h"
+//#include <getopt.h>
 #include <hermes3d.h>
 
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-/*
- * mesh-copy.cpp
- *
- * usage: $0 <mesh file>
- *
- */
+// This test makes sure that meshes are copied correctly.
 
 enum ECopyType {
 	CT_NONE,
@@ -36,7 +13,7 @@ enum ECopyType {
 	CT_COPY_BASE
 };
 
-// helpers ////////////////////////////////////////////////////////////////////////////////////////
+// Helpers.
 
 int parse_reft(char *str) {
 	if (strcasecmp(str, "x") == 0) return H3D_REFT_HEX_X;
@@ -55,19 +32,11 @@ ECopyType parse_copy_type(char *str) {
 	else return CT_NONE;
 }
 
-// main ///////////////////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char **args) {
-	int res = ERR_SUCCESS;
-
-#ifdef WITH_PETSC
-	PetscInitialize(&argc, &args, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-	set_verbose(false);
-
-	TRACE_START("trace.txt");
-	DEBUG_OUTPUT_ON;
-	SET_VERBOSE_LEVEL(0);
+int main(int argc, char **args) 
+{
+	// Test variable.
+  	int success_test = 1;
 
 	if (argc < 2) error("Not enough parameters.");
 
@@ -75,10 +44,10 @@ int main(int argc, char **args) {
 	if (copy_type == CT_NONE) error("Unknown copy type (%s).\n", args[1]);
 
 	Mesh mesh;
-	H3DReader mesh_loader;
-	if (!mesh_loader.load(args[2], &mesh)) error("Loading mesh file '%s'\n", args[2]);
+	H3DReader mloader;
+	if (!mloader.load(args[2], &mesh)) error("Loading mesh file '%s'.", args[2]);
 
-	// apply refinements
+	// Apply refinements.
 	bool ok = true;
 	for (int k = 3; k < argc && ok; k += 2) {
 		int elem_id, reft_id;
@@ -99,14 +68,15 @@ int main(int argc, char **args) {
 	}
 	else {
 		warning("Unable to refine a mesh.");
-		res = ERR_FAILURE;
+		success_test = 0;
 	}
 
-#ifdef WITH_PETSC
-	PetscFinalize();
-#endif
-
-	TRACE_END;
-
-	return res;
+	if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }

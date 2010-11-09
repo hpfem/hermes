@@ -17,5 +17,5 @@ template<typename real> real rhs(real x, real y, real z)
 template<typename real, typename scalar>
 scalar linear_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v, Geom<real> *e, ExtData<scalar> *data) 
 {
-  return int_F_v<real, scalar>(n, wt, rhs, v, e) + int_u_v<real, scalar>(n, wt, data->fn + 0, v, e) / TAU;
+  return int_F_v<real, scalar>(n, wt, rhs, v, e) + int_u_v<real, scalar>(n, wt, data->fn[0], v, e) / TAU;
 }

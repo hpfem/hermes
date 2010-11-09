@@ -30,6 +30,7 @@ ENDIF(NOT CMAKE_INSTALL_COMPONENT)
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   INCLUDE("D:/School/mgr/diplomka/hpfem-7/GitRepo/New/hermes/hermes3d/tests/benchmarks/smooth-7-versions/cmake_install.cmake")
+  INCLUDE("D:/School/mgr/diplomka/hpfem-7/GitRepo/New/hermes/hermes3d/tests/benchmarks/bessel/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 

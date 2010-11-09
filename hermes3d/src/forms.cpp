@@ -79,19 +79,19 @@ void free_geom(Geom<double> *e) {
 	delete [] e->nz;
 }
 
-Func<Ord> init_fn_ord(const Ord3 &order) {
+Func<Ord> *init_fn_ord(const Ord3 &order) {
 	_F_
 	int o = order.get_ord();
 	Ord *d = new Ord(o);
 
-	Func<Ord> f;
-	f.val = d;
-	f.dx = f.dy = f.dz = d;
-	f.val0 = f.val1 = f.val2 = d;
-	f.dx0 = f.dx1 = f.dx2 = d;
-	f.dy0 = f.dy1 = f.dy2 = d;
-	f.dz0 = f.dz1 = f.dz2 = d;
-	f.curl0 = f.curl1 = f.curl2 = d;
+	Func<Ord> * f = new Func<Ord>;
+	f->val = d;
+	f->dx = f->dy = f->dz = d;
+	f->val0 = f->val1 = f->val2 = d;
+	f->dx0 = f->dx1 = f->dx2 = d;
+	f->dy0 = f->dy1 = f->dy2 = d;
+	f->dz0 = f->dz1 = f->dz2 = d;
+	f->curl0 = f->curl1 = f->curl2 = d;
 	return f;
 }
 
