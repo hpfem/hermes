@@ -4,29 +4,13 @@
 #include "config.h"
 #include <hermes3d.h>
 
-//  This example shows how to solve a time-dependent PDE discretized
-//  in time via the implicit Euler method on a fixed mesh. 
-//  You will see how to use the solution from previous time step.
-//
-//  PDE: stationary heat transfer equation
-//  dT/dt - Laplace T = f.
-//
-//  Domain: (0, 0, 1)x(0, 1, 0)x(1, 0, 0), see the file hexahedron.mesh3d. 
-//
-//  Known exact solution, see unctions fn() and fndd(). 
-//
-//  IC:  T = 0.
-//  BC:  T = 0. ... Dirichlet,
-//
-//  Time-stepping: implicit Euler.
-//
-//  The following parameters can be changed:
+// This test makes sure that the example heat-conduction works correctly.
 
-const int INIT_REF_NUM = 2;			                  // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
-const double TAU = 0.05;			                    // Time step in seconds. 
+const double TAU = 0.05;                          // Time step in seconds. 
 bool solution_output = true;                      // Generate output files (if true).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
@@ -62,9 +46,8 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 
 int main(int argc, char **args) 
 {
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
+  // Test variable.
+  int success_test = 1;
 
   // Load the initial mesh. 
   Mesh mesh;
@@ -106,9 +89,8 @@ int main(int argc, char **args)
     // Using default iteration parameters (see solver/aztecoo.h).
   }
 
-  // Output mesh with polynomial orders.
-  if (solution_output)
-    out_orders_vtk(&space, "order");
+  // Exact error for testing purposes.
+  double err_exact;
 
   // Time stepping. 
   int nsteps = (int) (FINAL_TIME/TAU + 0.5);
@@ -132,22 +114,26 @@ int main(int argc, char **args)
     if (solution_output)
       out_fn_vtk(&sln, "sln", ts);
 
-    // Calculate error wrt. exact solution. 
-    info("Calculating exact error.");
+
+    // Calculate exact error.
     ExactSolution esln(&mesh, fndd);
-    double err_exact = h1_error(&sln, &esln) * 100; 
+
+    info("Calculating exact error.");
+    Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    bool solutions_for_adapt = false;
+    err_exact = adaptivity->calc_err_exact(&sln, &esln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS) * 100;
     info("Err. exact: %g%%.", err_exact);
 
     // Next time step.
     sln_prev = sln;
     TIME += TAU;
+
+    // Cleanup.
+    delete adaptivity;
   }
 
-  // Time measurement.
-  cpu_time.tick();
-
-  // Print timing information.
-  info("Solutions and mesh with polynomial orders saved. Total running time: %g s", cpu_time.accumulated());
+  if(err_exact > 3.00)
+    success_test = 0;
 
   // Clean up.
   delete matrix;
@@ -156,6 +142,15 @@ int main(int argc, char **args)
 
   // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   finalize_solution_environment(matrix_solver);
+
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 
   return 0;
 }
