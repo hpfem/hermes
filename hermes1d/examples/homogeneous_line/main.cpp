@@ -37,7 +37,7 @@ double A = 0, B = l;        // domain end points
 int P_INIT = 2;             // initial polynomial degree
 
 // Matrix solver.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
                                                   // Only relevant for iterative matrix solvers:
 

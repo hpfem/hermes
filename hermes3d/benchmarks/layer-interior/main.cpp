@@ -36,7 +36,7 @@ const double ERR_STOP = 1.0;        // Stopping criterion for adaptivity (rel. e
 const int NDOF_STOP = 100000;       // Adaptivity process stops when the number of degrees of freedom grows
                                     // over this limit. This is to prevent h-adaptivity to go on forever.
 bool solution_output = true;        // Generate output files (if true).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 

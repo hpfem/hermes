@@ -5,11 +5,11 @@
 
 #include "h1d_wrapper_api.h"
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 static int NEQ = 1;
-int NELEM = 40;                         // number of elements
+int NELEM = 40;                           // number of elements
 double A = 0, B = 20;                     // domain end points
 int P_init = 2;                           // initial polynomal degree
 
