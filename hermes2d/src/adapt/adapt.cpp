@@ -737,7 +737,10 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
           errors[i][e->id] /= norms[i];
       }
     }
-    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) 
+    // Element error mask is used here, because this variable is used in the adapt()
+    // function, where the processed error (sum of errors of processed element errors)
+    // is matched to this variable.
+    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) 
       errors_squared_sum = errors_squared_sum / total_norm;
   }
 

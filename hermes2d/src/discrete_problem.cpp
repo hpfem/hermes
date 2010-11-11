@@ -205,6 +205,18 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
     trav.finish();
     delete [] blocks;
 
+    // If DG discretization is used, we do not a-priori know which matrix entries
+    // will be non-zero and therefore we pre-add all of them.
+    bool is_DG = false;
+    for(int i = 0; i < this->wf->mfsurf.size(); i++)
+      if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE)
+        is_DG = true;
+
+    if(is_DG)
+      for(int i = 0; i < ndof; i++)
+        for(int j = 0; j < ndof; j++)
+          mat->pre_add_ij(i,j);
+
     mat->alloc();
   }
   
@@ -596,147 +608,147 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               }
             }
           }
-          else  // Assemble inner edges (in discontinuous Galerkin discretization):
-          {
-            // The following variables will be used to search for neighbors of the currently assembled element on 
-            // the u- and v- meshes and work with the produced elemental neighborhoods.
-            NeighborSearch *nbs_u = NULL;
-            NeighborSearch *nbs_v = NULL;
+        }
+        else  // Assemble inner edges (in discontinuous Galerkin discretization):
+        {
+          // The following variables will be used to search for neighbors of the currently assembled element on 
+          // the u- and v- meshes and work with the produced elemental neighborhoods.
+          NeighborSearch *nbs_u = NULL;
+          NeighborSearch *nbs_v = NULL;
+          
+          // assemble inner surface bilinear forms ///////////////////////////////////
+          for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
+          {        
+            WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
             
-            // assemble inner surface bilinear forms ///////////////////////////////////
-            for (unsigned int ww = 0; ww < s->mfsurf.size(); ww++)
-            {        
-              WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
-              
-              if (isempty[mfs->i] || isempty[mfs->j]) continue;         
-              if (mfs->area != H2D_DG_INNER_EDGE) continue;
-              
-              int m = mfs->i;    
-              int n = mfs->j;
-              fv = spss[m];
-              fu = pss[n];
-              am = &al[m];
-              an = &al[n];
-              
-              surf_pos[isurf].base = trav.get_base();
-              surf_pos[isurf].space_v = spaces[m];
-              surf_pos[isurf].space_u = spaces[n];
+            if (isempty[mfs->i] || isempty[mfs->j]) continue;         
+            if (mfs->area != H2D_DG_INNER_EDGE) continue;
+            
+            int m = mfs->i;    
+            int n = mfs->j;
+            fv = spss[m];
+            fu = pss[n];
+            am = &al[m];
+            an = &al[n];
+            
+            surf_pos[isurf].base = trav.get_base();
+            surf_pos[isurf].space_v = spaces[m];
+            surf_pos[isurf].space_u = spaces[n];
 
-              // Assemble DG inner surface matrix form - a single mesh version (all functions are defined on the
-              // same mesh, with the same neighborhood of active element.
+            // Assemble DG inner surface matrix form - a single mesh version (all functions are defined on the
+            // same mesh, with the same neighborhood of active element.
+            
+            // Find all neighbors of active element across active edge and partition it into segements
+            // shared by the active element and distinct neighbors.
+            nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+            nbs_v->set_active_edge(isurf);
+            nbs_v->attach_pss(fv, &refmap[m]);
+            
+            nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
+            nbs_u->set_active_edge(isurf);
+            nbs_u->attach_pss(fu, &refmap[n]);
+            
+            // Go through each segment of the active edge. If the active segment has already
+            // been processed (when the neighbor element was assembled), it is skipped.
+            for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
+            { 
+              bool needs_processing_u = nbs_u->set_active_segment(neighbor);
+              bool needs_processing_v = nbs_v->set_active_segment(neighbor);
               
-              // Find all neighbors of active element across active edge and partition it into segements
-              // shared by the active element and distinct neighbors.
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
-              nbs_v->set_active_edge(isurf);
-              nbs_v->attach_pss(fv, &refmap[m]);
+              if (!needs_processing_u) continue;
               
-              nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
-              nbs_u->set_active_edge(isurf);
-              nbs_u->attach_pss(fu, &refmap[n]);
+              // Create the extended shapeset on the union of the central element and its current neighbor.
+              int u_shapes_cnt = nbs_u->create_extended_shapeset(spaces[n], an);
+              int v_shapes_cnt = nbs_v->create_extended_shapeset(spaces[m], am);
               
-              // Go through each segment of the active edge. If the active segment has already
-              // been processed (when the neighbor element was assembled), it is skipped.
-              for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
-              { 
-                bool needs_processing_u = nbs_u->set_active_segment(neighbor);
-                bool needs_processing_v = nbs_v->set_active_segment(neighbor);
+              scalar **local_stiffness_matrix = get_matrix_buffer(std::max(u_shapes_cnt, v_shapes_cnt));
+              for (int i = 0; i < v_shapes_cnt; i++)
+              {               
+                if (nbs_v->supported_shapes->dof[i] < 0) continue;
                 
-                if (!needs_processing_u) continue;
+                // Get a pointer to the i-th shape function from the extended shapeset. If i is less than the 
+                // number of shape functions on the central element, the extended shape function will have non-zero
+                // values on the central element and will be zero on neighbor. Otherwise vice-versa.
+                ExtendedShapeFnPtr active_shape_v = nbs_v->supported_shapes->get_extended_shape_fn(i);
                 
-                // Create the extended shapeset on the union of the central element and its current neighbor.
-                int u_shapes_cnt = nbs_u->create_extended_shapeset(spaces[n], an);
-                int v_shapes_cnt = nbs_v->create_extended_shapeset(spaces[m], am);
-                
-                scalar **local_stiffness_matrix = get_matrix_buffer(std::max(u_shapes_cnt, v_shapes_cnt));
-                for (int i = 0; i < v_shapes_cnt; i++)
-                {               
-                  if (nbs_v->supported_shapes->dof[i] < 0) continue;
-                  
-                  // Get a pointer to the i-th shape function from the extended shapeset. If i is less than the 
-                  // number of shape functions on the central element, the extended shape function will have non-zero
-                  // values on the central element and will be zero on neighbor. Otherwise vice-versa.
-                  ExtendedShapeFnPtr active_shape_v = nbs_v->supported_shapes->get_extended_shape_fn(i);
-                  
-                  for (int j = 0; j < u_shapes_cnt; j++)
-                  { 
-                    ExtendedShapeFnPtr active_shape_u = nbs_u->supported_shapes->get_extended_shape_fn(j);
-                                        
-                    if (nbs_u->supported_shapes->dof[j] < 0) {
-                      if (rhs != NULL && this->is_linear) {
-                        // Evaluate the form with the activated discontinuous shape functions.
-                        scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, surf_pos+isurf) 
-                                        * active_shape_v->coef * active_shape_u->coef;
-                                        
-                        // Add the contribution to the global dof index (corresponding to the central element if 'i' is
-                        // less than the number of shape functions on the central element, to the neighbor otherwise).
-                        rhs->add(nbs_v->supported_shapes->dof[i], -val);
-                      }
-                    } 
-                    else if (rhsonly == false) {
+                for (int j = 0; j < u_shapes_cnt; j++)
+                { 
+                  ExtendedShapeFnPtr active_shape_u = nbs_u->supported_shapes->get_extended_shape_fn(j);
+                                      
+                  if (nbs_u->supported_shapes->dof[j] < 0) {
+                    if (rhs != NULL && this->is_linear) {
+                      // Evaluate the form with the activated discontinuous shape functions.
                       scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, surf_pos+isurf) 
-                                        * active_shape_v->coef * active_shape_u->coef;
-                      local_stiffness_matrix[i][j] = val;
+                                      * active_shape_v->coef * active_shape_u->coef;
+                                      
+                      // Add the contribution to the global dof index (corresponding to the central element if 'i' is
+                      // less than the number of shape functions on the central element, to the neighbor otherwise).
+                      rhs->add(nbs_v->supported_shapes->dof[i], -val);
                     }
+                  } 
+                  else if (rhsonly == false) {
+                    scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, surf_pos+isurf) 
+                                      * active_shape_v->coef * active_shape_u->coef;
+                    local_stiffness_matrix[i][j] = val;
                   }
                 }
-                if (rhsonly == false) {
-                  mat->add(v_shapes_cnt, u_shapes_cnt, local_stiffness_matrix, 
-                              nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof);
-                }
               }
-              
-              // This automatically restores the transformations pushed to the attached PrecalcShapesets fu/fv, so that
-              // they are ready for any further form evaluation.
-              delete nbs_u;
-              delete nbs_v;
-            }  
-            
-            // assemble inner surface linear forms /////////////////////////////////////
-            for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
-            {
-              WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
-              
-              if (isempty[vfs->i]) continue;
-              if (vfs->area != H2D_DG_INNER_EDGE) continue;
-              
-              int m = vfs->i;
-              fv = spss[m];
-              am = &al[m];
-              
-              surf_pos[isurf].base = trav.get_base();
-              surf_pos[isurf].space_v = spaces[m];
-              
-              // Assemble DG inner surface vector form - a single mesh version.
-              
-              // Find all neighbors of active element across active edge and partition it into segements
-              // shared by the active element and distinct neighbors.
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
-              nbs_v->set_active_edge(isurf, false);
-              nbs_v->attach_pss(fv, &refmap[m]);              
-              
-              // Go through each segment of the active edge. Do not skip if the segment has already been 
-              // processed.
-              for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
-              {
-                nbs_v->set_active_segment(neighbor, false);
-                
-                // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
-                // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
-                // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
-                for (int i = 0; i < am->cnt; i++)       
-                {
-                  if (am->dof[i] < 0) continue;
-                  fv->set_active_shape(am->idx[i]); 
-                  scalar val = eval_dg_form(vfs, u_ext, nbs_v, fv, &refmap[m], surf_pos+isurf) * am->coef[i];
-                  rhs->add(am->dof[i], val);
-                }
+              if (rhsonly == false) {
+                mat->add(v_shapes_cnt, u_shapes_cnt, local_stiffness_matrix, 
+                            nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof);
               }
-              
-              // This automatically restores the transformations pushed to the attached PrecalcShapeset fv, so that
-              // it is ready for any further form evaluation.
-              delete nbs_v;
             }
+            
+            // This automatically restores the transformations pushed to the attached PrecalcShapesets fu/fv, so that
+            // they are ready for any further form evaluation.
+            delete nbs_u;
+            delete nbs_v;
+          }  
+          
+          // assemble inner surface linear forms /////////////////////////////////////
+          for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
+          {
+            WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
+            
+            if (isempty[vfs->i]) continue;
+            if (vfs->area != H2D_DG_INNER_EDGE) continue;
+            
+            int m = vfs->i;
+            fv = spss[m];
+            am = &al[m];
+            
+            surf_pos[isurf].base = trav.get_base();
+            surf_pos[isurf].space_v = spaces[m];
+            
+            // Assemble DG inner surface vector form - a single mesh version.
+            
+            // Find all neighbors of active element across active edge and partition it into segements
+            // shared by the active element and distinct neighbors.
+            nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+            nbs_v->set_active_edge(isurf, false);
+            nbs_v->attach_pss(fv, &refmap[m]);              
+            
+            // Go through each segment of the active edge. Do not skip if the segment has already been 
+            // processed.
+            for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
+            {
+              nbs_v->set_active_segment(neighbor, false);
+              
+              // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
+              // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
+              // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
+              for (int i = 0; i < am->cnt; i++)       
+              {
+                if (am->dof[i] < 0) continue;
+                fv->set_active_shape(am->idx[i]); 
+                scalar val = eval_dg_form(vfs, u_ext, nbs_v, fv, &refmap[m], surf_pos+isurf) * am->coef[i];
+                rhs->add(am->dof[i], val);
+              }
+            }
+            
+            // This automatically restores the transformations pushed to the attached PrecalcShapeset fv, so that
+            // it is ready for any further form evaluation.
+            delete nbs_v;
           }
         }
       }
