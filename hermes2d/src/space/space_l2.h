@@ -67,6 +67,7 @@ protected:
   virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al);
   virtual void get_bubble_assembly_list(Element* e, AsmList* al);
 
+  // FIXME: This function should probably not be used at all.
   virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
 };

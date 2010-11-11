@@ -58,6 +58,7 @@ public:
   Ord operator/=(const double &d) { return *this; }
 
   bool operator<(double d) { return true; }
+  bool operator>(double d) { return false; }
 
 protected:
   int order;
@@ -87,15 +88,18 @@ inline Ord exp(const Ord &a) { return Ord(3 * a.get_order()); }
 template<typename T>
 class Func
 {
-  const int num_gip; ///< A number of integration points used by this instance.
+protected:
+    static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS;
+
 public:
+  const int num_gip; ///< A number of integration points used by this intance.
   const int nc;	///< A number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
   T *val;					// function values. If orders differ for a diffrent
                                                 // direction, this returns max(h_order, v_order).
   T *dx, *dy; 					// derivatives
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
   T *laplace;                                   // must be enabled by defining H2D_SECOND_DERIVATIVES_ENABLED
-                                                // in h2d_common.h. Default is NOT ENABLED.
+                                                // in common.h. Default is NOT ENABLED.
 #endif
   T *val0, *val1;				// components of function values
   T *dx0, *dx1;					// components of derivatives
@@ -123,6 +127,7 @@ public:
 
   /// Calculate this -= func for each function expations and each integration point.
   /** \param[in] func A function which is subtracted from *this. A number of integratio points and a number of component has to match. */
+  //FIXME : It should be 'virtual', but then it doesn't compile.
   void subtract(const Func<T>& func) {
     assert_msg(num_gip == func.num_gip, "Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
     assert_msg(nc == func.nc, "Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
@@ -144,7 +149,7 @@ public:
   };
 #undef H2D_SUBTRACT_IF_NOT_NULL
 
-  void free_ord() {
+  virtual void free_ord() {
     delete val;
     val = val0 = val1 = NULL;
     dx = dx0 = dx1 = NULL;
@@ -154,7 +159,7 @@ public:
     laplace = NULL;
 #endif
   }
-  void free_fn()
+  virtual void free_fn()
   {
     delete [] val; val = NULL;
     delete [] dx; dx = NULL;
@@ -168,6 +173,128 @@ public:
     delete [] dy0;  delete [] dy1; dy0 = dy1 = NULL;
     delete [] curl; curl = NULL;
   }
+  
+  virtual ~Func() { }; // All deallocation done via free_fn / free_ord. 
+                       // This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
+  
+  // NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
+  // Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
+  // expected from a continuous function. 
+  virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; } 
+  virtual T& get_val_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+  virtual T& get_dx_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+  virtual T& get_dx_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+  virtual T& get_dy_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS);  return * new T; }
+  virtual T& get_dy_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+
+};
+
+#define GET_CENT(__ATTRIB) return (fn_central != NULL) ? fn_central->__ATTRIB[k] : zero;
+#define GET_NEIB(__ATTRIB) return (fn_neighbor != NULL) ? fn_neighbor->__ATTRIB[ reverse_neighbor_side ? fn_neighbor->num_gip-k-1 : k ] : zero;
+
+/** \class DiscontinuousFunc forms.h "src/forms.h"
+ *  \brief This class represents a function with jump discontinuity on an interface of two elements.
+ *
+ *  We will refer to one of the elements sharing the interface of discontinuity  as to the \em central element,
+ *  while to the other one as to the \em neighbor element.
+ *
+ *  Instance of the class may be constructed either with two \c Func objects, which represent the continuous 
+ *  components on the central and the neighbor element, respectively, or with only one \c Func object and
+ *  information about its support (where it attains non-zero value). The discontinuous function is in the latter
+ *  case constructed by extending the supplied function by zero to the other element. Values and derivatives from 
+ *  both elements may then be obtained by querying the corresponding \c Func object, using methods
+ *  \c get_val_central, \c get_val_neighbor, etc.
+ **/
+template<typename T>
+class DiscontinuousFunc : public Func<T>
+{
+  private:
+    bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
+                                ///< (when retrieving values on an edge that is oriented differently in both elements).
+    static T zero;              ///< Zero value used for the zero-extension.
+    
+  public: 
+    Func<T> *fn_central;        ///< Central element's component.
+    Func<T> *fn_neighbor;       ///< Neighbor element's component.
+    
+    /// One-component constructor.
+    ///
+    /// \param[in]  fn                  Function defined either on the central or the neighbor element.
+    /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
+    /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+    ///
+    DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false) :
+      Func<T>(fn->num_gip, fn->nc), 
+      fn_central(NULL), fn_neighbor(NULL),
+      reverse_neighbor_side(reverse) 
+    { 
+      assert_msg(fn != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
+      if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
+    }
+    
+    /// Two-component constructor.
+    ///
+    /// \param[in]  fn_c                Function defined on the central element.
+    /// \param[in]  fn_n                Function defined on the neighbor element.
+    /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+    ///
+    DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) : 
+      Func<T>(fn_c->num_gip, fn_c->nc),
+      fn_central(fn_c),
+      fn_neighbor(fn_n),
+      reverse_neighbor_side(reverse)
+    { 
+      assert_msg(fn_c != NULL && fn_n != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
+      assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,
+                 "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
+    }
+    
+    // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
+    
+    virtual T& get_val_central(int k) const { GET_CENT(val); }
+    virtual T& get_val_neighbor(int k) const { GET_NEIB(val); }
+    virtual T& get_dx_central(int k) const { GET_CENT(dx); }
+    virtual T& get_dx_neighbor(int k) const { GET_NEIB(dx); }
+    virtual T& get_dy_central(int k) const { GET_CENT(dy); }
+    virtual T& get_dy_neighbor(int k) const { GET_NEIB(dy); }
+    
+    #ifdef H2D_SECOND_DERIVATIVES_ENABLED
+      virtual T& get_laplace_central(int k) { GET_CENT(laplace); }
+      virtual T& get_laplace_neighbor(int k) { GET_NEIB(laplace); }
+    #endif
+    
+    void subtract(const DiscontinuousFunc<T>& func) 
+    { 
+      // TODO: Add sanity checks, revise for adaptivity.
+      if (fn_central != NULL && func.fn_central != NULL)
+        fn_central->subtract(func.fn_central);
+      if (fn_neighbor != NULL && func.fn_neighbor != NULL)
+        fn_neighbor->subtract(func.fn_neighbor);
+    }
+    
+    // Default destructor may be used. Deallocation is done using the following functions.
+    // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized
+    //  destructors should be used instead (also in Func).
+    virtual void free_fn() { 
+      if (fn_central != NULL) {
+        fn_central->free_fn(); 
+        fn_central = NULL;
+      }
+      if (fn_neighbor != NULL) {
+        fn_neighbor->free_fn();
+        fn_neighbor = NULL;
+      }
+    }
+    virtual void free_ord() {
+      if (fn_central != NULL) {
+        fn_central->free_ord(); 
+        fn_central = NULL;
+      }
+      if (fn_neighbor != NULL) {
+        fn_neighbor->free_ord();
+        fn_neighbor = NULL;
+      }
+    }
 };
 
 

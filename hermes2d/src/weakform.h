@@ -24,7 +24,7 @@ class RefMap;
 class DiscreteProblem;
 class Space;
 class MeshFunction;
-struct EdgePos;
+struct SurfPos;
 class Ord;
 
 struct Element;

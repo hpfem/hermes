@@ -26,6 +26,8 @@
 #include "views/scalar_view.h"
 #include "views/vector_view.h"
 #include "views/order_view.h"
+#include "function.h"
+#include "neighbor.h"
 #include "ref_selectors/selector.h"
 #include <map>
 
@@ -106,7 +108,9 @@ protected:
 
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge);
+  ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order);
+  ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 
   // Caching transformed values for element
@@ -126,6 +130,13 @@ protected:
   scalar eval_form(WeakForm::VectorFormSurf *vfv, Tuple<Solution *> u_ext, 
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
 
+  // Evaluation of forms, discontinuous Galerkin case.
+  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, 
+                      NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
+                      SurfPos* ep);
+  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln,
+                      NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
+                      SurfPos* ep);
 };
 
 // Create globally refined space.
@@ -135,6 +146,3 @@ HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1)
 HERMES_API double get_l2_norm(Vector* vec); 
 
 #endif
-
-
-

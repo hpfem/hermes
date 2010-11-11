@@ -184,14 +184,11 @@ void Traverse::set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos)
 
   for (unsigned int i = 0; i < base->nvert; i++)
   {
-    if (bnd[i])
-    {
       int j = base->next_vert(i);
       surf_pos[i].v1 = base->vn[i]->id;
       surf_pos[i].v2 = base->vn[j]->id;
       surf_pos[i].marker = e->en[i]->marker;
       surf_pos[i].surf_num = i;
-    }
   }
 }
 

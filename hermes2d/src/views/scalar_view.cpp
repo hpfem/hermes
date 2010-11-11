@@ -37,7 +37,6 @@ using namespace std;
 #define D3DV_SCALE_STEP_COEF 1.1 ///< A scale coefficient for changing contours and scaling along the Y-axis using keyboard.
 
 //// ScalarView ////////////////////////////////////////////////////////////////////////////////////
-// For MS Visual Studio it is necessary to initialize the constant static attributes outside of the class body as follows : 
 
 const int ScalarView::fovy = 50;
 const double ScalarView::znear = 0.05;

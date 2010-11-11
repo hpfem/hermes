@@ -18,6 +18,8 @@ set(SRC
        precalc.cpp 
        solution.cpp 
        filter.cpp
+       neighbor.cpp
+       numerical_flux.cpp
        space/space.cpp 
        space/space_h1.cpp 
        space/space_hcurl.cpp 
