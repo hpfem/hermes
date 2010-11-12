@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Thermoelasticity &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Examples" href="../examples.html" />
+    <link rel="next" title="Saphir (Neutronics)" href="saphir.html" />
+    <link rel="prev" title="Bracket (Linear Elasticity)" href="bracket.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="saphir.html" title="Saphir (Neutronics)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bracket.html" title="Bracket (Linear Elasticity)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../examples.html" accesskey="U">Hermes2D: Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="thermoelasticity">
+<h1>Thermoelasticity<a class="headerlink" href="#thermoelasticity" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Example <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/thermoelasticity">thermoelasticity</a>.</p>
+<p>The example deals with a massive hollow conductor is heated by induction and
+cooled by water running inside. We will model this problem using linear thermoelasticity
+equations, where the x-displacement, y-displacement, and the temperature will be approximated
+on individual meshes equipped with mutually independent adaptivity mechanisms.</p>
+<p>The computational domain is shown in the following figure and the details of the geometry can be found
+in the corresponding
+<a class="reference external" href="http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/thermoelasticity/domain.mesh">mesh file</a>.
+It is worth mentioning how the circular arcs are defined via NURBS:</p>
+<div class="highlight-python"><pre>curves =
+{
+  { 11, 19, 90 },
+  { 10, 15, 90 },
+  { 16, 6, 90 },
+  { 12, 7, 90 }
+}</pre>
+</div>
+<p>The triplet on each line consists of two boundary vertex indices and
+the angle of the circular arc.</p>
+<div align="center" class="align-center"><img alt="Domain." class="align-center" src="../../../_images/domain4.png" style="width: 700px;" /></div>
+<p>For the equations of linear thermoelasticity and the boundary conditions we refer to the
+paper <em>P. Solin, J. Cerveny, L. Dubcova, D. Andrs: Monolithic Discretization
+of Linear Thermoelasticity Problems via Adaptive Multimesh hp-FEM</em>,
+<a class="reference external" href="http://dx.doi.org/10.1016/j.cam.2009.08.092">doi.org/10.1016/j.cam.2009.08.092</a>.
+The corresponding weak forms are:</p>
+<div class="highlight-python"><pre>template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_0_0(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return l2m * int_dudx_dvdx&lt;Real, Scalar&gt;(n, wt, u, v) +
+          mu * int_dudy_dvdy&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_0_1(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return lambda * int_dudy_dvdx&lt;Real, Scalar&gt;(n, wt, u, v) +
+             mu * int_dudx_dvdy&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_0_2(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return - (3*lambda + 2*mu) * alpha * int_dudx_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_1_0(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return     mu * int_dudy_dvdx&lt;Real, Scalar&gt;(n, wt, u, v) +
+         lambda * int_dudx_dvdy&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_1_1(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return  mu * int_dudx_dvdx&lt;Real, Scalar&gt;(n, wt, u, v) +
+         l2m * int_dudy_dvdy&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_1_2(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return - (3*lambda + 2*mu) * alpha * int_dudy_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_2_2(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return int_grad_u_grad_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar linear_form_1(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return -g * rho * int_v&lt;Real, Scalar&gt;(n, wt, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar linear_form_2(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return HEAT_SRC * int_v&lt;Real, Scalar&gt;(n, wt, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar linear_form_surf_2(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return HEAT_FLUX_OUTER * int_v&lt;Real, Scalar&gt;(n, wt, v);
+}</pre>
+</div>
+<p>The multimesh discretization is initialized by creating the master mesh
+via copying the xmesh into ymesh and tmesh:</p>
+<div class="highlight-python"><pre>// Load the mesh.
+Mesh xmesh, ymesh, tmesh;
+H2DReader mloader;
+mloader.load("domain.mesh", &amp;xmesh); // Master mesh.
+
+// Initialize multimesh hp-FEM.
+ymesh.copy(&amp;xmesh);                  // Ydisp will share master mesh with xdisp.
+tmesh.copy(&amp;xmesh);                  // Temp will share master mesh with xdisp.</pre>
+</div>
+<p>Then three H1 spaces are created. Note that we do not have to provide essential
+boundary conditions functions if they are zero Dirichlet:</p>
+<div class="highlight-python"><pre>// Create H1 spaces with default shapesets.
+H1Space xdisp(&amp;xmesh, bc_types_x, NULL, P_INIT_DISP);
+H1Space ydisp(MULTI ? &amp;ymesh : &amp;xmesh, bc_types_y, NULL, P_INIT_DISP);
+H1Space temp(MULTI ? &amp;tmesh : &amp;xmesh, bc_types_t, essential_bc_values_temp, P_INIT_TEMP);</pre>
+</div>
+<p>The weak formulation is initialized as follows:</p>
+<div class="highlight-python"><pre>// Initialize the weak formulation.
+WeakForm wf(3);
+wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));
+wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);
+wf.add_matrix_form(0, 2, callback(bilinear_form_0_2));
+wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));
+wf.add_matrix_form(1, 2, callback(bilinear_form_1_2));
+wf.add_matrix_form(2, 2, callback(bilinear_form_2_2));
+wf.add_vector_form(1, callback(linear_form_1));
+wf.add_vector_form(2, callback(linear_form_2));
+wf.add_vector_form_surf(2, callback(linear_form_surf_2));</pre>
+</div>
+<p>Then we solve on the uniformly refined mesh and either project
+the solution on the coarse mesh, or solve on the coarse mesh,
+to obtain the pair of solutions needed for error estimation:</p>
+<div class="highlight-python"><pre>// Solve the fine mesh problems.
+RefSystem rs(&amp;ls);
+rs.assemble();
+rs.solve(Tuple&lt;Solution*&gt;(&amp;x_sln_fine, &amp;y_sln_fine, &amp;t_sln_fine));
+
+// Either solve on coarse meshes or project the fine mesh solutions
+// on the coarse mesh.
+if (SOLVE_ON_COARSE_MESH) {
+  info("Solving on coarse mesh.");
+  ls.assemble();
+  ls.solve(Tuple&lt;Solution*&gt;(&amp;x_sln_coarse, &amp;y_sln_coarse, &amp;t_sln_coarse));
+}
+else {
+  info("Projecting fine mesh solution on coarse mesh.");
+  ls.project_global(Tuple&lt;MeshFunction*&gt;(&amp;x_sln_fine, &amp;y_sln_fine, &amp;t_sln_fine),
+                    Tuple&lt;Solution*&gt;(&amp;x_sln_coarse, &amp;y_sln_coarse, &amp;t_sln_coarse));
+}</pre>
+</div>
+<p>The following code defines the global norm for error measurement, and
+calculates element errors. The code uses a selector which instance is created outside the adaptivity loop:</p>
+<div class="highlight-python"><pre>// Calculate element errors and total error estimate.
+H1Adapt hp(&amp;ls);
+hp.set_solutions(Tuple&lt;Solution*&gt;(&amp;x_sln_coarse, &amp;y_sln_coarse, &amp;t_sln_coarse),
+                 Tuple&lt;Solution*&gt;(&amp;x_sln_fine, &amp;y_sln_fine, &amp;t_sln_fine));
+hp.set_error_form(0, 0, bilinear_form_0_0&lt;scalar, scalar&gt;, bilinear_form_0_0&lt;Ord, Ord&gt;);
+hp.set_error_form(0, 1, bilinear_form_0_1&lt;scalar, scalar&gt;, bilinear_form_0_1&lt;Ord, Ord&gt;);
+hp.set_error_form(0, 2, bilinear_form_0_2&lt;scalar, scalar&gt;, bilinear_form_0_2&lt;Ord, Ord&gt;);
+hp.set_error_form(1, 0, bilinear_form_1_0&lt;scalar, scalar&gt;, bilinear_form_1_0&lt;Ord, Ord&gt;);
+hp.set_error_form(1, 1, bilinear_form_1_1&lt;scalar, scalar&gt;, bilinear_form_1_1&lt;Ord, Ord&gt;);
+hp.set_error_form(1, 2, bilinear_form_1_2&lt;scalar, scalar&gt;, bilinear_form_1_2&lt;Ord, Ord&gt;);
+hp.set_error_form(2, 2, bilinear_form_2_2&lt;scalar, scalar&gt;, bilinear_form_2_2&lt;Ord, Ord&gt;);
+double err_est = hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;</pre>
+</div>
+<p>Sample snapshot of solutions, meshes and convergence graphs are below.</p>
+<p>Solution (Von Mises stress):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/mises.png" style="width: 790px;" /></div>
+<p>Solution (temperature):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/temp.png" style="width: 780px;" /></div>
+<p>Final meshes for <img class="math" src="../../../_images/math/0559ffc8c62a08ff533f3fcd1a5c1713a520755d.png" alt="u_1"/>, <img class="math" src="../../../_images/math/0725e2d5475070ba690e43acfb1adb66de9051fc.png" alt="u_2"/> and <img class="math" src="../../../_images/math/2554b6496c3b678897e9b060ef00aa9f0a7d7ece.png" alt="T"/> (h-FEM with linear elements):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/x-mesh-h1.png" style="width: 760px;" /></div>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/y-mesh-h1.png" style="width: 760px;" /></div>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/t-mesh-h1.png" style="width: 760px;" /></div>
+<p>Final meshes for <img class="math" src="../../../_images/math/0559ffc8c62a08ff533f3fcd1a5c1713a520755d.png" alt="u_1"/>, <img class="math" src="../../../_images/math/0725e2d5475070ba690e43acfb1adb66de9051fc.png" alt="u_2"/> and <img class="math" src="../../../_images/math/2554b6496c3b678897e9b060ef00aa9f0a7d7ece.png" alt="T"/> (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/x-mesh-h2.png" style="width: 760px;" /></div>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/y-mesh-h2.png" style="width: 760px;" /></div>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/t-mesh-h2.png" style="width: 760px;" /></div>
+<p>Final meshes for <img class="math" src="../../../_images/math/0559ffc8c62a08ff533f3fcd1a5c1713a520755d.png" alt="u_1"/>, <img class="math" src="../../../_images/math/0725e2d5475070ba690e43acfb1adb66de9051fc.png" alt="u_2"/> and <img class="math" src="../../../_images/math/2554b6496c3b678897e9b060ef00aa9f0a7d7ece.png" alt="T"/> (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/x-mesh-hp.png" style="width: 760px;" /></div>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/y-mesh-hp.png" style="width: 760px;" /></div>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/t-mesh-hp.png" style="width: 760px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof10.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU time convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu10.png" style="width: 600px; height: 400px;" /></div>
+<p>Next let us compare, for example, multimesh h-FEM with linear elements with the standard (single-mesh)
+h-FEM:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_compar_dof2.png" style="width: 600px; height: 400px;" /></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="bracket.html"
+                                  title="previous chapter">Bracket (Linear Elasticity)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="saphir.html"
+                                  title="next chapter">Saphir (Neutronics)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="saphir.html" title="Saphir (Neutronics)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bracket.html" title="Bracket (Linear Elasticity)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../examples.html" >Hermes2D: Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Heat Conduction &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes3D: Examples" href="../examples.html" />
+    <link rel="next" title="Singular Perturbation" href="singpert-aniso.html" />
+    <link rel="prev" title="Hermes3D: Examples" href="../examples.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="singpert-aniso.html" title="Singular Perturbation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../examples.html" title="Hermes3D: Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../examples.html" accesskey="U">Hermes3D: Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="heat-conduction">
+<span id="example-heat-conduction"></span><h1>Heat Conduction<a class="headerlink" href="#heat-conduction" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Examples <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/examples/heat-conduction">heat conduction</a>.</p>
+<p>This example describes the implementation of a simple time-dependent heat conduction problem inside the domain.</p>
+<p id="index-4">The standard heat transfer PDE solved:</p>
+<div class="math" id="equation-heat-conduction">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/dddddf9a918f5eef766b7ac96b11e1fd4bbf23df.png" alt="\begin{eqnarray*}
+\frac{\partial T}{\partial t} - \Delta T &amp;= &amp; f \hbox{ in }\Omega \\
+                                       T &amp;= &amp; 0 \hbox{ on }\partial\Omega
+\end{eqnarray*}" /></p>
+</div><p>Domain of interest: Unit cube <img class="math" src="../../../_images/math/00bea9e8ee29be50387a735d584b6adf8eda0c33.png" alt="(-1, 1)^3"/>:</p>
+<img alt="../../../_images/heat-cond-domain.png" src="../../../_images/heat-cond-domain.png" />
+<p>Right-hand side (load function):</p>
+<div class="math" id="equation-heat-conduction-rhs">
+<p><span class="eqno">(2)</span><img src="../../../_images/math/e2b884f12008875355ad8cd38473c86067dda8fe.png" alt="\begin{eqnarray*}
+f(x, y, z, t) &amp; = &amp; \mbox{cos}(t)(1-x^2)(1-y^2)(1-z^2)\ +\ \left(
+                2\mbox{sin}(t)(1-y^2)(1-z^2)
+                +2\mbox{sin}(t)(1-x^2)(1-z^2)
+                +2\mbox{sin}(t)(1-x^2)(1-y^2)
+                \right)
+\end{eqnarray*}" /></p>
+</div><p>Equation <a href="#equation-heat-conduction">(1)</a> is also equipped with an initial condition of the form:</p>
+<div class="math" id="equation-heat-conduction-IC">
+<p><span class="eqno">(3)</span><img src="../../../_images/math/eef2d644d7c2bb9346766614f959ab59eb4185a4.png" alt="T(x, y, z, 0)  =  T_{init}(x, y, z) = 0  \ \ \ \mbox{in} \ \Omega." /></p>
+</div><p>Exact solution is:</p>
+<div class="math" id="equation-heat-conduction-exact">
+<p><span class="eqno">(4)</span><img src="../../../_images/math/08529f2e6bc01bec234497b1619419d09758e691.png" alt="\begin{eqnarray*}
+T(x, y, z)  = \sin(t) (1 - x^2) (1 - y^2) (1 - z^2)
+\end{eqnarray*}" /></p>
+</div><p>For simplicity we will use the implicit Euler method with a constant time step <img class="math" src="../../../_images/math/1dc1c0119a604b91be9142370dc3159b6a9bbcb9.png" alt="\tau"/>,
+which transforms equation <a href="#equation-heat-conduction">(1)</a> into:</p>
+<div class="math" id="equation-heat-conduction-implicit">
+<p><span class="eqno">(5)</span><img src="../../../_images/math/e8a1e7bbc2bd744000307c0bdc59e75000c8f652.png" alt="\frac{T^{n+1} - T^n}{\tau} - \Delta T^{n+1} = 0." /></p>
+</div><p>The corresponding weak formulation is:</p>
+<div class="math" id="equation-heat-conduction-form">
+<p><span class="eqno">(6)</span><img src="../../../_images/math/33a567dede2ab467aafb5a92bfbfa784ab27c113.png" alt="\int_{\Omega} \nabla T^{n+1}\cdot \nabla v + \int_{\Omega} \frac{T^{n+1}}{\tau} =
+ \int_{\Omega} f(t^{n+1}) v + \int_{\Omega} \frac{T^{n}}{\tau}." /></p>
+</div><p>Code for the exact solution and the weak forms:</p>
+<div class="highlight-c++"><div class="highlight"><pre>
+</pre></div>
+</div>
+<div class="highlight-python"><pre>double fn(double x, double y, double z)
+{
+  return sin(TIME) * (1 - x*x) * (1 - y*y) * (1 - z*z);
+}
+
+double fndd(double x, double y, double z, double &amp;dx, double &amp;dy, double &amp;dz)
+{
+  dx = -2 * sin(TIME) * x * (1 - y*y) * (1 - z*z);
+  dy = -2 * sin(TIME) * (1 - x*x) * y * (1 - z*z);
+  dz = -2 * sin(TIME) * (1 - x*x) * (1 - y*y) * z;
+
+  return fn(x, y, z);
+ }
+
+ // Boundary condition types.
+ BCType bc_types(int marker) {
+   return BC_ESSENTIAL;
+ }
+
+ template&lt;typename real, typename scalar&gt;
+ scalar bilinear_form(int n, double *wt, fn_t&lt;scalar&gt; *u_ext[], fn_t&lt;real&gt; *u, fn_t&lt;real&gt; *v, geom_t&lt;real&gt; *e, user_data_t&lt;scalar&gt; *data)
+ {
+   return int_grad_u_grad_v&lt;real, scalar&gt;(n, wt, u, v, e) + int_u_v&lt;real, scalar&gt;(n, wt, u, v, e) / TAU;
+ }
+
+ template&lt;typename real&gt; real rhs(real x, real y, real z)
+ {
+   real ddxx = -2 * sin(TIME) * (1 - y*y) * (1 - z*z);
+   real ddyy = -2 * sin(TIME) * (1 - x*x) * (1 - z*z);
+   real ddzz = -2 * sin(TIME) * (1 - x*x) * (1 - y*y);
+   real dt = cos(TIME) * (1 - x*x) * (1 - y*y) * (1 - z*z);
+
+   return dt - (ddxx + ddyy + ddzz);
+ }
+
+ template&lt;typename real, typename scalar&gt;
+ scalar linear_form(int n, double *wt, fn_t&lt;scalar&gt; *u_ext[], fn_t&lt;real&gt; *v, geom_t&lt;real&gt; *e, user_data_t&lt;scalar&gt; *data)
+ {
+   return int_F_v&lt;real, scalar&gt;(n, wt, rhs, v, e) + int_u_v&lt;real, scalar&gt;(n, wt, data-&gt;ext + 0, v, e) / TAU;
+ }</pre>
+</div>
+<p>Before entering the main iteration loop, we need to initialize the previous solution sln_prev with the
+initial condition <img class="math" src="../../../_images/math/8843278e1fa4353f948b2d74780348d2f927542e.png" alt="T_{init}"/> The solution class can be forced to return zero, to return a constant,
+or to return an arbitrary function using the methods set_zero(), set_const() and
+set_exact(), repectively. In this example, we initilize the temperature as all zero:</p>
+<div class="highlight-c++"><div class="highlight"><pre>
+</pre></div>
+</div>
+<div class="highlight-python"><pre>// Construct initial solution and set zero.
+Solution sln_prev(&amp;mesh);
+sln_prev.set_zero();</pre>
+</div>
+<p>Next, the weak forms above are registered as following:</p>
+<div class="highlight-c++"><div class="highlight"><pre>
+</pre></div>
+</div>
+<div class="highlight-python"><pre>// Initialize the weak formulation.
+
+WeakForm wf;
+wf.add_matrix_form(bilinear_form&lt;double, scalar&gt;, bilinear_form&lt;ord_t, ord_t&gt;, SYM);
+wf.add_vector_form(linear_form&lt;double, scalar&gt;, linear_form&lt;ord_t, ord_t&gt;, ANY, &amp;sln_prev);</pre>
+</div>
+<p>Since the Stiffness matrix does not dependend on the solution, so assembling only need to be done once
+in the first time step. For all remaining time step it will be the same, and we just need to
+re-construct the the load vector. The code needed to be implemented.</p>
+<p>Solution graph:</p>
+<img alt="../../../_images/heat-cond-sln.png" src="../../../_images/heat-cond-sln.png" />
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="singpert-aniso.html#example-sing-pert"><em>Singular Perturbation</em></a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="../examples.html"
+                                  title="previous chapter">Hermes3D: Examples</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="singpert-aniso.html"
+                                  title="next chapter">Singular Perturbation</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="singpert-aniso.html" title="Singular Perturbation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../examples.html" title="Hermes3D: Examples"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../examples.html" >Hermes3D: Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

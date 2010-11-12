@@ -1,6 +1,6 @@
-=================================================
-Hermes2D Tutorial: Part II (Automatic Adaptivity)
-=================================================
+=======================================
+Tutorial Part II (Automatic Adaptivity)
+=======================================
 
 So far we have not paid any attention to the accuracy of the results. In general, 
 a computation on a fixed mesh is not likely to be very accurate. There is a need 

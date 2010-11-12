@@ -1,6 +1,6 @@
-====================================================
-Hermes2D Tutorial: Part V (Miscellaneous Techniques)
-====================================================
+==========================================
+Tutorial Part V (Miscellaneous Techniques)
+==========================================
 
 This section is a collection of various examples and techniques 
 that are worth showing even though they do not fit exactly into 

@@ -1,7 +1,7 @@
 .. _examples-doc:
 
-Hermes3D: Examples
-==================
+Examples
+========
 
 This is a list of examples which show what you can do with Hermes3D.
 

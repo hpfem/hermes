@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>How to Submit Your First Pull Request &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../index.html" />
+    <link rel="next" title="Hermes2D Tutorial: Part I (Linear Problems)" href="hermes2d/tutorial-1.html" />
+    <link rel="prev" title="Installation of Matrix Solvers" href="matrix_solvers.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="hermes2d/tutorial-1.html" title="Hermes2D Tutorial: Part I (Linear Problems)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="matrix_solvers.html" title="Installation of Matrix Solvers"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Content</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="how-to-submit-your-first-pull-request">
+<h1>How to Submit Your First Pull Request<a class="headerlink" href="#how-to-submit-your-first-pull-request" title="Permalink to this headline">¶</a></h1>
+<p>The following is a very simple primer on Github and Git whose objective is
+to show you how to effortlessly download Hermes and eventually contribute
+to the project by creating an interesting example, fixing a bug, improving
+documentation, etc. We begin with creating a free account at Github, fork
+the Hermes git repository, clone your Github copy to your local computer,
+and continue through setting up the .gitconfig file, creating a new branch,
+committing changes, pushing them to your Github repository, and generating
+a pull request. Some good references for further reading are given after
+that.</p>
+<div class="section" id="create-a-free-github-account">
+<h2>Create a Free Github Account<a class="headerlink" href="#create-a-free-github-account" title="Permalink to this headline">¶</a></h2>
+<p>Go to the <a class="reference external" href="http://github.com">Github home page</a>. Click on &#8220;Plans, Pricing and Signup&#8221;
+and then on &#8220;Create a free account&#8221;. You&#8217;ll be asked to enter your username, email,
+and a password. That&#8217;s it, it does not take much time, and it is free for open source
+projects.</p>
+</div>
+<div class="section" id="fork-the-hermes-git-repository">
+<h2>Fork the Hermes Git Repository<a class="headerlink" href="#fork-the-hermes-git-repository" title="Permalink to this headline">¶</a></h2>
+<p>Enter your account using the &#8220;Login&#8221; link in the upper right corner. Type
+&#8220;hpfem&#8221; into the search line in the upper right corner and hit enter. You
+will see a list of several repositories and one of them will be &#8220;hpfem / hermes&#8221;.
+Click on it and this will bring you to the <a class="reference external" href="http://github.com/hpfem/hermes">Hermes page at Github</a>.
+Click on the &#8220;Fork&#8221; button in the upper part of the page. This will create a copy
+of the Hermes repository in your Github account, establish important links to
+the master Hermes repository, and add you to the Hermes network.</p>
+</div>
+<div class="section" id="generate-and-register-your-public-ssh-key">
+<h2>Generate and Register Your Public SSH Key<a class="headerlink" href="#generate-and-register-your-public-ssh-key" title="Permalink to this headline">¶</a></h2>
+<p>Start by generating the public ssh key typing (on Linux):</p>
+<blockquote>
+ssh-keygen</blockquote>
+<p>You will be asked to enter a file for the key to be stored, and
+a passphrase. The passphrase may be left empty. After the file with
+the key is generated, open it in some text editor. Then return to your
+Github page, click on &#8220;Account Settings&#8221;, and on &#8220;SSH Public Keys&#8221;.
+This is where you need to paste the public key that you just generated
+on your computer.</p>
+</div>
+<div class="section" id="download-hermes-to-your-local-computer">
+<h2>Download Hermes to Your Local Computer<a class="headerlink" href="#download-hermes-to-your-local-computer" title="Permalink to this headline">¶</a></h2>
+<p>Once your public SSH key is registered at Github, you can
+clone the Hermes repository from your Github account to
+your local computer. This is done by typing:</p>
+<div class="highlight-python"><pre>git clone git@github.com:your_name/hermes.git</pre>
+</div>
+<p>Now you can build Hermes as described in the Installation
+section above.</p>
+<p>In the next paragraphs we describe how to work inside
+the Hermes Git repository on your local computer.</p>
+</div>
+<div class="section" id="create-the-gitconfig-file">
+<h2>Create the .gitconfig File<a class="headerlink" href="#create-the-gitconfig-file" title="Permalink to this headline">¶</a></h2>
+<p>The .gitconfig file can be used to define your identity
+for git as well as useful abbreviations. Change dir to your
+home directory. Then adjust and save the following as
+&#8220;~/.gitconfig&#8221;:</p>
+<div class="highlight-python"><pre>[user]
+        name = Pavel Solin
+        email = solin.pavel@gmail.com
+
+[core]
+        editor = vim
+
+[color]
+        ui = true
+[color "branch"]
+        current = yellow reverse
+        local = yellow
+        remote = green
+[color "diff"]
+        meta = yellow bold
+        frag = magenta bold
+        old = red bold
+        new = green bold
+        whitespace = red reverse
+[color "status"]
+        added = yellow
+        changed = green
+        untracked = cyan
+[core]
+        whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+
+[alias]
+        st = status
+        ci = commit
+        br = branch
+        co = checkout
+        df = diff
+        lg = log -p</pre>
+</div>
+</div>
+<div class="section" id="create-a-local-branch">
+<h2>Create a Local Branch<a class="headerlink" href="#create-a-local-branch" title="Permalink to this headline">¶</a></h2>
+<p>Change dir back to hermes/hermes1d/, hermes/hermes2d/ or hermes/hermes3d/
+where you were before. Whenever you want to do any changes, such as modify
+an existing example or create a new one, always create a local branch -
+do not work in the master branch.</p>
+<p>You can get an overview of existing branches by typing:</p>
+<div class="highlight-python"><pre>git branch</pre>
+</div>
+<p>This will show you something like this:</p>
+<blockquote>
+<div align="center" class="align-center"><img alt="Terminal screenshot" class="align-center" src="../_images/terminal-git.png" style="width: 600px;" /></div>
+</blockquote>
+<p>If this is your first time, then you will see
+just the master branch with the star next to it,
+which tells you that there are no other branches.</p>
+<p>A new branch is created by typing:</p>
+<div class="highlight-python"><pre>git co -b test-1</pre>
+</div>
+<p>where test-1 is the name of your new local branch. Now you
+can do any changes you like and you do not have to be afraid
+of damaging your master branch. HOWEVER, you always must
+commit your changes as described below.
+Unless you commit your changes, Git does not
+know that they belong to your local branch. This may cause
+conflicts, you may not be able to update your local repository,
+you may not be able to switch branches at all, etc.</p>
+</div>
+<div class="section" id="commit-your-changes">
+<h2>Commit Your Changes<a class="headerlink" href="#commit-your-changes" title="Permalink to this headline">¶</a></h2>
+<p>Say that you modified an existing or added a new
+file &#8220;file.cpp&#8221;. In order to register the new changes,
+type:</p>
+<div class="highlight-python"><pre>git add file.cpp</pre>
+</div>
+<p>You can do this with as many files as you like. Use the
+command:</p>
+<div class="highlight-python"><pre>git diff</pre>
+</div>
+<p>to see whether you have unregistered changes. If all
+your changes are registered, the command will print
+nothing.</p>
+<p>After all your changes are registered, type:</p>
+<div class="highlight-python"><pre>git commit</pre>
+</div>
+<p>This will invoke a basic text editor
+where you will be asked to enter a one-line comment
+describing your changes. Without this line,
+your commit will not be accepted.</p>
+</div>
+<div class="section" id="push-the-changes-to-your-github-account">
+<h2>Push the Changes to Your Github Account<a class="headerlink" href="#push-the-changes-to-your-github-account" title="Permalink to this headline">¶</a></h2>
+<p>You cannot push to the master repository
+of Hermes directly. The way to get your changes there
+is to first push them to your Github fork and then send
+a pull request to the Hermes network. To push your
+changes, type:</p>
+<div class="highlight-python"><pre>git push git@github.com:your_name/hermes.git</pre>
+</div>
+<p>Now you can go back to your Github account, click on
+&#8220;Commits&#8221; and you should see your changes there.</p>
+</div>
+<div class="section" id="send-a-pull-request">
+<h2>Send a Pull Request<a class="headerlink" href="#send-a-pull-request" title="Permalink to this headline">¶</a></h2>
+<p>In order to submit your changes to the Hermes network,
+click on the button &#8220;Pull request&#8221; in the upper right
+part of your Github page.
+Describe the changes you did in the text window that
+appears. On the right you can see
+a list of people who wil be notified about your changes.
+You can preview your pull request by clicking on
+&#8220;Preview&#8221; above the text window. The source and target
+branch are displayed above the text window and you can
+change them when you click on them. When you are ready,
+click on &#8220;Send pull request&#8221;.</p>
+<p>For more details on pull requests visit <a class="reference external" href="http://help.github.com/pull-requests/">this page</a>.</p>
+</div>
+<div class="section" id="switching-branches">
+<h2>Switching Branches<a class="headerlink" href="#switching-branches" title="Permalink to this headline">¶</a></h2>
+<p>Before changing to a different branch in your
+local repository, type:</p>
+<div class="highlight-python"><pre>git status</pre>
+</div>
+<p>You will see something like this:</p>
+<blockquote>
+<div align="center" class="align-center"><img alt="Terminal screenshot" class="align-center" src="../_images/terminal-git-2.png" style="width: 600px;" /></div>
+</blockquote>
+<p>The green font tells you that git has the latest
+version of the file. All modified files in red
+need to be added using &#8220;git add&#8221;. It is a good
+idea to go through the untracked files too, in case
+that you wish to add some of them as well.
+Related to the sample screenshot above, after
+typing:</p>
+<div class="highlight-python"><pre>git add src/intro-2.rst
+git st</pre>
+</div>
+<p>you will see</p>
+<blockquote>
+<div align="center" class="align-center"><img alt="Terminal screenshot" class="align-center" src="../_images/terminal-git-3.png" style="width: 600px;" /></div>
+</blockquote>
+<p>Now you can proceed with &#8220;git commit&#8221; as described above.
+After the commit, you can switch to a different branch
+by typing:</p>
+<div class="highlight-python"><pre>git co branch-name</pre>
+</div>
+</div>
+<div class="section" id="special-note-on-sphinx-docs">
+<h2>Special Note on Sphinx Docs<a class="headerlink" href="#special-note-on-sphinx-docs" title="Permalink to this headline">¶</a></h2>
+<p>The Sphinx documentation you are reading now is also
+part of the Hermes git repository and can be developed
+in the same way as source files of Hermes. This very
+file can be found in doc/src/intro-2.rst. After
+making any changes to Sphinx docs, type:</p>
+<div class="highlight-python"><pre>make html</pre>
+</div>
+<p>in the doc/ directory. This will launch
+a build process that will take a few seconds.
+After it finishes, type:</p>
+<div class="highlight-python"><pre>firefox _build/html</pre>
+</div>
+<p>This will open a new tab in your Firefox where you will
+see something like</p>
+<blockquote>
+<div align="center" class="align-center"><img alt="Firefox screenshot" class="align-center" src="../_images/firefox.png" style="width: 600px;" /></div>
+</blockquote>
+<p>Click on the link &#8220;index.html&#8221; and you should see
+the local form of your Sphinx docs that include your
+changes.</p>
+</div>
+<div class="section" id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<p>Git and Github are very powerful tools and we covered just a tiny part
+of the story. After you familiarize yourself with the contents of
+this simple primer, read more in <a class="reference external" href="http://progit.org/book/">Pro Git</a>.</p>
+<p>Also watch this <a class="reference external" href="http://www.youtube.com/watch?v=OFkgSjRnay4">YouTube video</a>
+by Scott Chacon.</p>
+<p>Good luck and let us know if you think that this document could be improved!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">How to Submit Your First Pull Request</a><ul>
+<li><a class="reference external" href="#create-a-free-github-account">Create a Free Github Account</a></li>
+<li><a class="reference external" href="#fork-the-hermes-git-repository">Fork the Hermes Git Repository</a></li>
+<li><a class="reference external" href="#generate-and-register-your-public-ssh-key">Generate and Register Your Public SSH Key</a></li>
+<li><a class="reference external" href="#download-hermes-to-your-local-computer">Download Hermes to Your Local Computer</a></li>
+<li><a class="reference external" href="#create-the-gitconfig-file">Create the .gitconfig File</a></li>
+<li><a class="reference external" href="#create-a-local-branch">Create a Local Branch</a></li>
+<li><a class="reference external" href="#commit-your-changes">Commit Your Changes</a></li>
+<li><a class="reference external" href="#push-the-changes-to-your-github-account">Push the Changes to Your Github Account</a></li>
+<li><a class="reference external" href="#send-a-pull-request">Send a Pull Request</a></li>
+<li><a class="reference external" href="#switching-branches">Switching Branches</a></li>
+<li><a class="reference external" href="#special-note-on-sphinx-docs">Special Note on Sphinx Docs</a></li>
+<li><a class="reference external" href="#further-reading">Further Reading</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="matrix_solvers.html"
+                                  title="previous chapter">Installation of Matrix Solvers</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="hermes2d/tutorial-1.html"
+                                  title="next chapter">Hermes2D Tutorial: Part I (Linear Problems)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="hermes2d/tutorial-1.html" title="Hermes2D Tutorial: Part I (Linear Problems)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="matrix_solvers.html" title="Installation of Matrix Solvers"
+             >previous</a> |</li>
+        <li><a href="../index.html">Content</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

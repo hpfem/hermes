@@ -1,6 +1,6 @@
-===========================================
-Hermes2D Tutorial: Part I (Linear Problems)
-===========================================
+=================================
+Tutorial Part I (Linear Problems)
+=================================
 
 This tutorial should give you a good idea of how Hermes works. It begins with eight
 sections related to Hermes2D (six tutorial sections, benchmarks, and examples). 

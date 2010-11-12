@@ -1,6 +1,6 @@
-================================================
-Hermes2D Tutorial: Part III (Nonlinear Problems)
-================================================
+======================================
+Tutorial Part III (Nonlinear Problems)
+======================================
 
 This part of the tutorial assumes that the reader is familiar with the solution of 
 linear problems (Part I). We will begin with explaining the basics of the Newton's 

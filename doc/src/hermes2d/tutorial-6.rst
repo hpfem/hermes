@@ -1,6 +1,6 @@
-===========================================
-Hermes2D Tutorial: Part VI (Using Trilinos)
-===========================================
+=================================
+Tutorial Part VI (Using Trilinos)
+=================================
 
 This section shows how to use Trilinos solvers in Hermes2D.
 

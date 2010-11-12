@@ -1,7 +1,7 @@
 .. _benchmarks-doc:
 
-Hermes3D: Benchmarks with Known Exact Solution
-==============================================
+Benchmarks with Known Exact Solution
+====================================
 
 This section contains the description of selected `benchmarks
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/benchmarks>`_.

@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2-Group Neutronics (Neutronics) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Benchmarks with Known Exact Solution" href="../benchmarks.html" />
+    <link rel="next" title="Screen (Maxwell’s Equations)" href="screen.html" />
+    <link rel="prev" title="Kellogg (Elliptic)" href="kellogg.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="screen.html" title="Screen (Maxwell’s Equations)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="kellogg.html" title="Kellogg (Elliptic)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" accesskey="U">Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="group-neutronics-neutronics">
+<h1>2-Group Neutronics (Neutronics)<a class="headerlink" href="#group-neutronics-neutronics" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Benchmark <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt">neutronics-2-group-adapt</a>.</p>
+<p>This benchmark uses automatic adaptivity to solve a system of weakly coupled elliptic PDEs describing diffusion of neutrons through given medium.
+It employs the simple (yet often used in practice) two-group approximation by which all neutrons are divided into two distinct groups according to their energy (speed). This leads to the system of two equations shown below.</p>
+<p>Equations solved:</p>
+<div class="math" id="equation-neutronics-2g">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/a79fd8d39a8458b00ac42221ad8ed7ff6068c996.png" alt="- \nabla \cdot D_1 \nabla \phi_1 + \Sigma_{r1}\phi_1 - \nu\Sigma_{f1} \phi_1 - \nu\Sigma_{f2} \phi_2 = Q_1,\\
+- \nabla \cdot D_2 \nabla \phi_2 + \Sigma_{r2}\phi_2 - \Sigma_{s,2\leftarrow 1} \phi_1 = Q_2." /></p>
+</div><p>For physical meaning of the various material parameters, see the example <a class="reference external" href="http://hpfem.org/hermes/doc/hermes2d/src/examples.html#group-neutronics">4-Group Neutronics</a>. Their numerical values for this benchmark will be given below.</p>
+<p>Domain of interest:</p>
+<div align="center" class="align-center"><img alt="Computational domain." class="align-center" src="../../../_images/domain1.png" style="width: 400px; height: 400px;" /></div>
+<p>Piecewise constant material properties for the four regions of the domain (reactor core) and each energy group are specified by the following code:</p>
+<div class="highlight-python"><pre>const double D[4][2]  = { {1.12, 0.6},
+                          {1.2, 0.5},
+                          {1.35, 0.8},
+                          {1.3, 0.9}  };
+const double Sr[4][2] = { {0.011, 0.13},
+                          {0.09, 0.15},
+                          {0.035, 0.25},
+                          {0.04, 0.35}        };
+const double nSf[4][2]= { {0.0025, 0.15},
+                          {0.0, 0.0},
+                          {0.0011, 0.1},
+                          {0.004, 0.25}       };
+const double chi[4][2]= { {1, 0},
+                          {1, 0},
+                          {1, 0},
+                          {1, 0} };
+const double Ss[4][2][2] = {
+                             { { 0.0, 0.0 },
+                               { 0.05, 0.0 }  },
+                             { { 0.0, 0.0 },
+                               { 0.08, 0.0 }  },
+                             { { 0.0, 0.0 },
+                               { 0.025, 0.0 } },
+                             { { 0.0, 0.0 },
+                               { 0.014, 0.0 } }
+                           };</pre>
+</div>
+<p>Boundary conditions: Typical conditions for nuclear reactor core calculations are used:</p>
+<ul class="simple">
+<li>zero Neumann on left and top edge (axes of symmetry),</li>
+<li>zero Dirichlet on bottom edge (neutron-inert medium around the reactor core),</li>
+<li>Newton condition on right edge (neutron-reflecting medium around the core):</li>
+</ul>
+<div class="math">
+<p><img src="../../../_images/math/9de5f70bb8c1f50732744f0efe8b107612b5ce2a.png" alt="-\frac{\partial D_1\phi_1}{\partial n} = \gamma_1 \phi_1, \quad\quad -\frac{\partial D_2\phi_2}{\partial n} = \gamma_2 \phi_2," /></p>
+</div><p>where the <em>reflector albedo</em> <img class="math" src="../../../_images/math/66981fa3920210c6ad8dbe5e968783d5dd7520c3.png" alt="\gamma"/> is given by the exact solution and is equal for both groups to 8.</p>
+<p>Exact solution: Quite complicated, see the code below.</p>
+<div class="highlight-python"><pre>static double exact_flux1(double x, double y, double&amp; dx, double&amp; dy)
+{
+  double em4x2 = exp(-4*sqr(x));
+  dx =  2.0*em4x2*x*y*(y-2);
+  dy = -0.5*em4x2*(y-1);
+  return em4x2*(y/2.-sqr(y/2.));
+}
+
+static double exact_flux2(double x, double y, double&amp; dx, double&amp; dy)
+{
+  double em4x2 = exp(-4*sqr(x));
+  dx = 0.1*em4x2*y*(y-2)*(2*x+(2*x*sqr(sin(4*M_PI*x))-M_PI*sin(8*M_PI*x))*sqr(sin(4*M_PI*y)));
+  dy = 0.05*em4x2*(1-y+sqr(sin(4*M_PI*x))*(-(y-1)*sqr(sin(4*M_PI*y))-2*M_PI*y*(y-2)*sin(8*M_PI*y)));
+  return em4x2*(y/2.-sqr(y/2.)) * (1 + sqr(sin(4*M_PI*x)) * sqr(sin(4*M_PI*y))) / 10.0;
+}</pre>
+</div>
+<p>Right-hand side: Obtained by inserting the exact solution into the equation.
+The corresponding code snippet is shown below:</p>
+<div class="highlight-python"><pre>double Q1(double x, double y)
+{
+  int q = get_material(x,y);
+
+  double exfl1 = exp(-4*sqr(x))*(y/2.-sqr(y/2.));
+  double exfl2 = exfl1 * (1 + sqr(sin(4*M_PI*x)) * sqr(sin(4*M_PI*y))) / 10.0;
+
+  double L = 0.5*exp(-4*sqr(x))*(1+4*(8*sqr(x)-1)*y*(y-2))*D[q][0];
+  return L + Sr[q][0]*exfl1 - chi[q][0]*nSf[q][0]*exfl1 - chi[q][1]*nSf[q][1]*exfl2;
+}
+
+double Q2(double x, double y)
+{
+  int q = get_material(x,y);
+
+  double yym2 = (y-2)*y;
+  double pi2 = sqr(M_PI), x2 = sqr(x), pix = M_PI*x, piy = M_PI*y;
+  double cy2 = sqr(cos(4*piy)),
+         sy2 = sqr(sin(4*piy)),
+         sx2 = sqr(sin(4*pix)),
+         em4x2 = exp(-4*x2);
+
+  double exfl1 = em4x2*(y/2.-sqr(y/2.));
+  double exfl2 = exfl1 * (1 + sx2 * sy2) / 10.0;
+
+  double L = 1./20.*em4x2*D[q][1]*(
+             1+4*(8*x2-1)*yym2+16*pi2*yym2*cy2*sx2 + 0.5*sy2*(1-4*(1+4*pi2-8*x2)*yym2 +
+             (4*(1+12*pi2-8*x2)*yym2-1)*cos(8*pix) - 64*pix*yym2*sin(8*pix)) + 8*M_PI*(y-1)*sx2*sin(8*piy) );
+  return L + Sr[q][1]*exfl2 - Ss[q][1][0]*exfl1;
+}</pre>
+</div>
+<p>where the function <em>get_material</em> is used to obtain the material marker given the physical coordinates (see
+<a class="reference external" href="http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt/main.cpp">main.cpp</a>).
+The following picture shows the two right-hand side functions (distribution of neutron sources/sinks) - <img class="math" src="../../../_images/math/c16e423c8f499e0bef8c20078b04126aeb9417bc.png" alt="Q_1"/> is plotted on the left, <img class="math" src="../../../_images/math/f83bf0891a57ba8a1ee68d8c72f141ccbc14186d.png" alt="Q_2"/> on the right.</p>
+<div align="center" class="align-center"><img alt="Right-hand side." class="align-center" src="../../../_images/rhs.png" style="width: 700px; height: 275px;" /></div>
+<p>Weak formulation of the present two-group neutron diffusion problem with fixed source terms may be derived from the general multigroup formulation shown in the <a class="reference external" href="http://hpfem.org/hermes/doc/src/hermes2d/examples.html#group-neutronics">4-Group Neutronics</a> example. Concerning its implementation (see the file <a class="reference external" href="http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt/forms.cpp">forms.cpp</a>), it is worth noticing that we manually define a higher integration order for the volumetric linear forms to correctly integrate the non-polynomial source terms, although we may set it lower for the group-1 equations than for the group-2 equations as <img class="math" src="../../../_images/math/c16e423c8f499e0bef8c20078b04126aeb9417bc.png" alt="Q_1"/> is much smoother than <img class="math" src="../../../_images/math/f83bf0891a57ba8a1ee68d8c72f141ccbc14186d.png" alt="Q_2"/>:</p>
+<div class="highlight-python"><pre>Ord liform_0_ord(int n, double *wt, Func&lt;Ord&gt; *u_ext[], Func&lt;Ord&gt; *v, Geom&lt;Ord&gt; *e, ExtData&lt;Ord&gt; *ext)
+{
+  return Ord(20+v-&gt;val[0].get_order());
+}
+
+Ord liform_1_ord(int n, double *wt, Func&lt;Ord&gt; *u_ext[], Func&lt;Ord&gt; *v, Geom&lt;Ord&gt; *e, ExtData&lt;Ord&gt; *ext)
+{
+  return Ord(30+v-&gt;val[0].get_order());
+}</pre>
+</div>
+<p>The following figures show the computed distributions of neutron flux for both neutron groups.</p>
+<div align="center" class="align-center"><img alt="Both components of solution." class="align-center" src="../../../_images/solution12.png" style="height: 415px;" /></div>
+<p>Notice the largely different behavior of the two solution components, where the first one is quite smooth while the other one more oscillating. It reflects the typical behavior observed in real cases, which arises from the different rate of interactions of fast (<cite>1</cite><sup>st</sup> group) and slow (<cite>2</cite><sup>nd</sup> group) neutrons with surrounding nuclei. This makes <a class="reference external" href="http://hpfem.org/hermes/doc/src/hermes2d/tutorial-2.html#multimesh-hp-fem">multimesh</a> a preferred choice for automatic adaptivity, as can be clearly seen from the first of the series of convergence comparisons presented below.</p>
+<p>In each convergence comparison, the reported error is the true approximation error calculated wrt. the exact solution given above and measured in a <cite>H</cite><sup>1</sup> norm. The calculation was ended when the energy error estimate (often used to guide adaptivity in real multiphysics problems where exact solution is not known) became lower than 0.1%.</p>
+<div class="section" id="comparison-of-single-multi-mesh-hp-fem">
+<h2>Comparison of single/multi-mesh hp-FEM<a class="headerlink" href="#comparison-of-single-multi-mesh-hp-fem" title="Permalink to this headline">¶</a></h2>
+<p>Final mesh (hp-FEM, single-mesh): 2590 DOF, error = 3.46787%</p>
+<div align="center" class="align-center"><img alt="Final mesh" class="align-center" src="../../../_images/mesh_hp_iso_single.png" style="width: 500px; height: 400px;" /></div>
+<p>Final mesh (hp-FEM, multi-mesh): 1724 DOF, error = 3.46713%</p>
+<div align="center" class="align-center"><img alt="Final mesh" class="align-center" src="../../../_images/mesh_hp_iso_multi.png" style="height: 400px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof_multimesh.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu_multimesh.png" style="width: 600px; height: 400px;" /></div>
+</div>
+<div class="section" id="comparison-of-h-fem-p-1-h-fem-p-2-and-hp-fem-with-h-anisotropic-refinements">
+<h2>Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with h-anisotropic refinements<a class="headerlink" href="#comparison-of-h-fem-p-1-h-fem-p-2-and-hp-fem-with-h-anisotropic-refinements" title="Permalink to this headline">¶</a></h2>
+<p>Now, with multimesh enabled, we proceed to compare h-adaptivity with fixed order of approximation with hp-adaptivity. Note that in the first case of linear elements, the calculation had to be ended prematurely because of insufficient memory for reference calculation (the energy error estimate was 1.24495%).</p>
+<p>Final mesh (h-FEM, p=1): 31441 DOF, error = 3.69096%</p>
+<div align="center" class="align-center"><img alt="Final mesh" class="align-center" src="../../../_images/mesh_h1_1_iso_multi.png" style="height: 400px;" /></div>
+<p>Final mesh (h-FEM, p=2): 27824 DOF, error = 3.46712%</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_h2_2_iso_multi.png" style="height: 400px;" /></div>
+<p>Final mesh (hp-FEM): 1724 DOF, error = 3.46713%</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_iso_multi.png" style="height: 400px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof_iso.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu_iso.png" style="width: 600px; height: 400px;" /></div>
+</div>
+<div class="section" id="comparison-of-hp-fem-with-iso-p-aniso-h-aniso-and-hp-aniso-refinements">
+<h2>Comparison of hp-FEM with iso, p-aniso, h-aniso and hp-aniso refinements<a class="headerlink" href="#comparison-of-hp-fem-with-iso-p-aniso-h-aniso-and-hp-aniso-refinements" title="Permalink to this headline">¶</a></h2>
+<p>The solution is almost isotropic in this case and using the generally more expensive anisotropic refinements may not neccessarily result in better meshes (and errors). The possible strategies for capturing anisotropy are compared below. Note that only the p-anisotropic refinements produced better mesh (with a lower number of DOF) than the simple isotropic refinements, but took more time than would be justified for the increase in accuracy.</p>
+<p>Final mesh (hp-FEM, isotropic refinements): 1724 DOF, error = 3.46713%</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_iso_multi.png" style="height: 400px;" /></div>
+<p>Final mesh (hp-FEM, h-anisotropic refinements): 1768 DOF, error = 3.46731%</p>
+<div align="center" class="align-center"><img alt="Final mesh" class="align-center" src="../../../_images/mesh_hp_anisoh_multi.png" style="height: 400px;" /></div>
+<p>Final mesh (hp-FEM, p-anisotropic refinements): 1584 DOF, error = 3.46668%</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_anisop_multi.png" style="height: 400px;" /></div>
+<p>Final mesh (hp-FEM, hp-anisotropic refinements): 1926 DOF, error = 3.46626%</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_aniso_multi.png" style="height: 400px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof_hp1.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu_hp1.png" style="width: 600px; height: 400px;" /></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="../../../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">2-Group Neutronics (Neutronics)</a><ul>
+<li><a class="reference external" href="#comparison-of-single-multi-mesh-hp-fem">Comparison of single/multi-mesh hp-FEM</a></li>
+<li><a class="reference external" href="#comparison-of-h-fem-p-1-h-fem-p-2-and-hp-fem-with-h-anisotropic-refinements">Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with h-anisotropic refinements</a></li>
+<li><a class="reference external" href="#comparison-of-hp-fem-with-iso-p-aniso-h-aniso-and-hp-aniso-refinements">Comparison of hp-FEM with iso, p-aniso, h-aniso and hp-aniso refinements</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="kellogg.html"
+                                  title="previous chapter">Kellogg (Elliptic)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="screen.html"
+                                  title="next chapter">Screen (Maxwell&#8217;s Equations)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="screen.html" title="Screen (Maxwell’s Equations)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="kellogg.html" title="Kellogg (Elliptic)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" >Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

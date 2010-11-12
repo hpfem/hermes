@@ -1,6 +1,6 @@
-===================================================================
-Hermes2D Tutorial: Part IV (Adaptivity for Time-Dependent Problems)
-===================================================================
+=========================================================
+Tutorial Part IV (Adaptivity for Time-Dependent Problems)
+=========================================================
 
 (Space-time) adaptive FEM and *hp*-FEM for time-dependent PDE and PDE systems is one of 
 the most advanced techniques Hermes can do. Although we have published it 
