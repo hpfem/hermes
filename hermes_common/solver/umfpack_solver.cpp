@@ -321,7 +321,7 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 
 UMFPackLinearSolver::~UMFPackLinearSolver() {
   _F_
-  free_factorization_structures();
+  free_factorization_data();
 }
 
 #ifdef WITH_UMFPACK
@@ -358,7 +358,7 @@ bool UMFPackLinearSolver::solve() {
 
   int status;
 
-  if ( !prepare_factorization_structures() )
+  if ( !setup_factorization() )
   {
     warning("LU factorization could not be completed.");
     return false;
@@ -385,12 +385,19 @@ bool UMFPackLinearSolver::solve() {
 #endif
 }
 
-bool UMFPackLinearSolver::prepare_factorization_structures()
+bool UMFPackLinearSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_UMFPACK
+  // Perform both factorization phases for the first time.
+  int eff_fact_scheme;
+  if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
+    eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+  else
+    eff_fact_scheme = factorization_scheme;
+  
   int status;
-  switch(factorization_scheme)
+  switch(eff_fact_scheme)
   {
     case HERMES_FACTORIZE_FROM_SCRATCH:
       if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
@@ -422,7 +429,7 @@ bool UMFPackLinearSolver::prepare_factorization_structures()
 #endif
 }
 
-void UMFPackLinearSolver::free_factorization_structures()
+void UMFPackLinearSolver::free_factorization_data()
 { 
   _F_
 #ifdef WITH_UMFPACK

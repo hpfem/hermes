@@ -30,10 +30,12 @@
     #include <dmumps_c.h>
     typedef scalar mumps_scalar;
     #define MUMPS_SCALAR(a) SCALAR(a)
+    #define MUMPS_STRUCT    DMUMPS_STRUC_C
   #else
     #include <zmumps_c.h>
     typedef ZMUMPS_COMPLEX mumps_scalar;
     #define MUMPS_SCALAR(a) a.r, a.i  
+    #define MUMPS_STRUCT    ZMUMPS_STRUC_C
   #endif
   }
   
@@ -121,6 +123,16 @@ public:
 protected:
   MumpsMatrix *m;
   MumpsVector *rhs;
+  
+  bool setup_factorization();
+
+#ifdef WITH_MUMPS
+  MUMPS_STRUCT  param;
+  
+  /// Initialize a MUMPS instance.
+  bool reinit();
+  bool inited;
+#endif
 };
 
 #endif
