@@ -1,6 +1,6 @@
-=======================
-Installation of Solvers
-=======================
+==============================
+Installation of Matrix Solvers
+==============================
 
 Mumps
 -----
@@ -16,6 +16,13 @@ PETSc
 -----
 
 In preparation.
+
+SuperLU
+-------
+
+In preparation.
+
+
 
 Trilinos
 --------
