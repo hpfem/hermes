@@ -173,7 +173,7 @@ call the method ``load()``::
       H2DReader mloader;
       mloader.load("domain.mesh", &mesh);
 
-Note: To load the exodus-II mesh file, one has to use ``ExodusIIReader`` class instead.
+Note: To load an ExodusII mesh file, one has to use ``ExodusIIReader`` class instead.
 
 The following portion of code illustrates various types of initial mesh refinements.
 It does not matter if the mesh becomes irregular, in fact, arbitrarily irregular

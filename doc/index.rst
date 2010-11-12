@@ -62,6 +62,7 @@ usage is very similar to Hermes2D.
 .. toctree::
     :maxdepth: 1
 
+    src/hermes3d/mesh.rst
     src/hermes3d/benchmarks.rst
     src/hermes3d/examples.rst
 
