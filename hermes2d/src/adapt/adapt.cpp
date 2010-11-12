@@ -702,7 +702,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
           if(solutions_for_adapt)
           {
             this->errors[i][ee[i]->id] += err;
-	    this->errors_squared_sum += err;
+	          this->errors_squared_sum += err;
           }
 	}
       }

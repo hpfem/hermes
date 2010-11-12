@@ -20,22 +20,9 @@
 #include "../shapeset/shapeset_l2_all.h"
 
 
-L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset): Space(mesh, shapeset, NULL, NULL, Ord2(p_init, p_init))
-{
-  if (shapeset == NULL) this->shapeset = new L2Shapeset;
-  ldata = NULL;
-  lsize = 0;
-
-  // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an L2 space.");
-  else this->set_uniform_order_internal(Ord2(p_init, p_init));
-
-  // enumerate basis functions
-  this->assign_dofs();
-}
-
-L2Space::L2Space(Mesh* mesh, Ord2 p_init, Shapeset* shapeset)
-  : Space(mesh, shapeset, NULL, NULL, p_init)
+L2Space::L2Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
+	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+    bc_type_callback, bc_value_callback_by_coord, p_init)
 {
   if (shapeset == NULL) this->shapeset = new L2Shapeset;
   ldata = NULL;
@@ -49,6 +36,21 @@ L2Space::L2Space(Mesh* mesh, Ord2 p_init, Shapeset* shapeset)
   this->assign_dofs();
 }
 
+L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, NULL, NULL, Ord2(p_init, p_init))
+{
+  if (shapeset == NULL) this->shapeset = new L2Shapeset;
+  ldata = NULL;
+  lsize = 0;
+
+  // set uniform poly order in elements
+  if (p_init < 0) error("P_INIT must be >= 0 in an L2 space.");
+  else this->set_uniform_order_internal(Ord2(p_init, p_init));
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
 L2Space::~L2Space()
 {
   ::free(ldata);
@@ -57,7 +59,7 @@ L2Space::~L2Space()
 
 Space* L2Space::dup(Mesh* mesh) const
 {
-  L2Space* space = new L2Space(mesh, Ord2(0,0), shapeset);
+  L2Space* space = new L2Space(mesh, 0, shapeset);
   space->copy_callbacks(this);
   return space;
 }

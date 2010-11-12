@@ -1,5 +1,8 @@
-#define H2D_REPORT_INFO
-#include "hermes2d.h"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#include "config.h"
+#include <hermes2d.h>
 
 //  This example solves a linear advection equation using Dicontinuous Galerkin (DG) method.
 //	It is intended to show how evalutation of surface matrix forms that take basis functions defined
@@ -17,8 +20,8 @@
 using namespace RefinementSelectors;
 
 const int INIT_REF = 2;                         // Number of initial uniform mesh refinements.
-const int P_INIT = 0;                           // Polynomial degree of mesh elements.
-
+const int P_INIT_H = 0, P_INIT_V = 0;           // Initial polynomial degrees of mesh elements in vertical and horizontal
+                                                // directions.
 const double THRESHOLD = 0.2;                   // This is a quantitative parameter of the adapt(...) function and
                                                 // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                         // Adaptive strategy:
@@ -48,8 +51,15 @@ const int NDOF_STOP = 60000;                    // Adaptivity process stops when
                                                 // over this limit. This is to prevent h-adaptivity to go on forever.
 
 
-MatrixSolverType matrix_solver = SOLVER_MUMPS;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Flux definition.
 
@@ -81,6 +91,7 @@ inline Ord upwind_flux(Ord u_cent, Ord u_neib, Ord a_dot_n)
 
 // Boundary conditions.
 
+// Boundary condition types.
 BCType bc_types(int marker)
 {
   return BC_NONE;
@@ -157,22 +168,19 @@ Scalar linear_form_boundary(int n, double *wt, Func<Real> *u_ext[], Func<Real> *
   return result;
 }
 
-// MAIN
-
-int main(int argc, char* argv[])
+int main(int argc, char* args[])
 {
-  // Load and refine the mesh.
+  // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
 
-  // Initial uniform refinement.
+  // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
   
-  // Create the L2 space.
-  L2Space space(&mesh,P_INIT);
-  space.set_bc_types(bc_types);
-
+  // Create an L2 space.
+  L2Space space(&mesh, bc_types, NULL, Ord2(P_INIT_H, P_INIT_V));
+  
   // Initialize refinement selector.
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
   
@@ -193,7 +201,7 @@ int main(int argc, char* argv[])
   bview.show(&space);
 
   Solution sln;
-	Solution ref_sln;
+  Solution ref_sln;
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -210,23 +218,39 @@ int main(int argc, char* argv[])
   do
   {
     info("---- Adaptivity step %d:", as);
-    info("Solving on reference mesh.");
 
     // Construct globally refined reference mesh
     // and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-    // Assemble the reference problem.
     info("Solving on reference mesh.");
+
+	  // Initialize the FE problem.
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    
+    // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+    initialize_solution_environment(matrix_solver, argc, args);
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+    if (matrix_solver == SOLVER_AZTECOO) 
+    {
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
+    }    
+
+    // Assemble the linear problem.
+    info("Assembling (ndof: %d).", Space::get_num_dofs(ref_space));
     dp->assemble(matrix, rhs);
 
-    // Solve the linear system of the reference problem. 
-    // If successful, obtain the solution.
+    // Solve the linear system. If successful, obtain the solution.
+    info("Solving.");
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
     
@@ -243,14 +267,18 @@ int main(int argc, char* argv[])
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
 
-    // Calculate element errors.
-    info("Calculating error (est).");
-    Adapt hp(&space, HERMES_L2_NORM);
-    double err_est_rel = hp.calc_err_est(&sln, &ref_sln, true, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_L2_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
  
     // Report results.
-    info("ndof: %d, ref_ndof: %d, err_est_rel_total: %g%%", 
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
          Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
+
+    // Time measurement.
+    cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
@@ -258,24 +286,36 @@ int main(int argc, char* argv[])
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
 
-    // If err_est too large, adapt the mesh.
+    // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else {
       info("Adapting the coarse mesh.");
-      done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
+      if (Space::get_num_dofs(&space) >= NDOF_STOP) 
+      {
+        done = true;
+        break;
+      }
     }
 
-    // Free reference space and mesh.
-    ref_space->free();
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete adaptivity;
+    if(done == false)
+      delete ref_space->get_mesh();
+    delete ref_space;
+    delete dp;
 
     as++;
   }
   while (done == false);
 
+	info("Total running time: %g s", cpu_time.accumulated());
+  
   // wait for keyboard or mouse input
   View::wait();
   return 0;
 }
-

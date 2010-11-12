@@ -28,7 +28,7 @@ const char* iterative_method = "cg";              // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h).
 const int BDY_VERTICAL = 2;
 
 // Problem parameters.

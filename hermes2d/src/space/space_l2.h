@@ -30,7 +30,10 @@ public:
   // For backward compatibility. Good to be deleted as soon as all the examples etc. use the second one.
   L2Space(Mesh* mesh, int p_init, Shapeset* shapeset = NULL);
 
-  L2Space(Mesh* mesh = NULL, Ord2 p_init = Ord2(1,1), Shapeset* shapeset = NULL);
+  L2Space(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
+	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
+          Shapeset* shapeset = NULL);
+
   virtual ~L2Space();
 
   virtual Space* dup(Mesh* mesh) const;

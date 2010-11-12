@@ -1,4 +1,6 @@
-#define H2D_REPORT_INFO
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 //  This example solves a linear advection equation using Discontinuous Galerkin (DG) method.
@@ -13,20 +15,27 @@
 //				
 //  The following parameters can be changed:
 
-const int P_INIT = 0;                             // Polynomial degree of mesh elements.
+const int P_H = 0, P_V = 0;                       // Polynomial degrees of mesh elements in horizontal and vertical directions.
 const int INIT_REF = 1;                           // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
+const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  //  preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Flux definition.
 #include "fluxes.cpp"
-
 
 // Boundary conditions.
 BCType bc_types(int marker)
 {
   return BC_NONE;
 }
+
 // Essential (Dirichlet) boundary condition values.
 template<typename Real, typename Scalar>
 Scalar g(int ess_bdy_marker, Real x, Real y)
@@ -39,12 +48,16 @@ Scalar g(int ess_bdy_marker, Real x, Real y)
 
 int main(int argc, char* argv[])
 {
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
 
-  // Initial mesh refinement.
+  // Perform initial mesh refinements.
   mesh.refine_element(0, 1);
   mesh.refine_element(2);
   mesh.refine_element(3);
@@ -65,19 +78,10 @@ int main(int argc, char* argv[])
   mesh.refine_element(13, 1);
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
   
-  //mesh.refine_all_elements();
-  //mesh.refine_all_elements();
-  
   // Create an L2 space with default shapeset.
-  L2Space space(&mesh,P_INIT);
-  space.set_bc_types(bc_types);
-  info("ndof: %d", get_num_dofs(&space));
-
-  // Display the mesh.
-  OrderView oview("Mesh", new WinGeom(0, 0, 440, 350));
-  oview.show(&space);
-  BaseView bview("Basis Functions", new WinGeom(450, 0, 400, 350));
-  bview.show(&space);
+  L2Space space(&mesh, bc_types, NULL, Ord2(P_H, P_V));
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -87,31 +91,49 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(callback(linear_form_boundary), H2D_DG_BOUNDARY_EDGE);
   wf.add_matrix_form_surf(callback(bilinear_form_interface), H2D_DG_INNER_EDGE);
 
-  // Assemble and solve the finite element problem.
-  Solution sln;
-  info("Solving...");
+  // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem* dp = new DiscreteProblem(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space, is_linear);
+
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, argv);
+  
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-  dp->assemble(matrix, rhs);
+  
+  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+  if (matrix_solver == SOLVER_AZTECOO) 
+  {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
+    
+  // Initialize the solution.
+  Solution sln;
+  
+  // Assemble the stiffness matrix and right-hand side vector.
+  info("Assembling the stiffness matrix and right-hand side vector.");
+  dp.assemble(matrix, rhs);
+  
+  // Solve the linear system and if successful, obtain the solution.
+  info("Solving the matrix problem.");
+  if(solver->solve())
+    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  else
+    error ("Matrix solver failed.\n");
   
   // Time measurement.
-  //cpu_time.tick();
-  /*
-  MumpsMatrix* mm = static_cast<MumpsMatrix*>(matrix);
-  MumpsVector* mv = static_cast<MumpsVector*>(rhs);
-  FILE *file;
-  file = fopen("test.txt", "wt");
-  mm->dump(file, "A", DF_PLAIN_ASCII);
-  mv->dump(file, "x", DF_PLAIN_ASCII);
-  fclose(file);
-  */
-  // Solve the linear system of the reference problem. 
-  // If successful, obtain the solution.
-  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-  else error ("Matrix solver failed.\n");
+  cpu_time.tick();
+  
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
+  
+  finalize_solution_environment(matrix_solver);
   
   // Visualize the solution.
   ScalarView view1("Solution", new WinGeom(860, 0, 400, 350));
@@ -119,6 +141,7 @@ int main(int argc, char* argv[])
 
   // Wait for all views to be closed.
   View::wait();
+  
   return 0;
 }
 

@@ -109,7 +109,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
   int i, j;
   
   int ne = mesh->get_max_element_id() + 1;
-  double elem_error[ne];
+  double *elem_error = new double[ne];
   memset(elem_error, 0, sizeof(double) * ne);
   
   double error;
@@ -169,6 +169,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
   }    
 
   delete [] elist;
+  delete [] elem_error;
  
   return false;
 }
