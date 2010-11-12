@@ -288,7 +288,8 @@ int main(int argc, char* args[])
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else {
+    else 
+    {
       info("Adapting the coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
