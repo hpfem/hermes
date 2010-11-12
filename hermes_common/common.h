@@ -91,13 +91,12 @@ enum MatrixSolverType
 
 // Should be in the same order as MatrixSolverTypes above, so that the
 // names may be accessed by the same enumeration variable.
-const std::string MatrixSolverNames[8] = {
+const std::string MatrixSolverNames[7] = {
   "UMFPACK",
   "PETSc",
   "MUMPS",
   "Pardiso",
   "SuperLU",
-  "Trilinos/NOX",
   "Trilinos/Amesos",
   "Trilinos/AztecOO"
 };
