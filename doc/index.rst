@@ -16,9 +16,18 @@ installation on various platforms and related issues.
 You will also learn how to use Git and Github, and 
 how to contribute to the project if interested. The tutorial itself begins with 
 Section 3 that explains in many incremental steps how 
-Hermes2D is used. Sections 4 and 5 present examples and benchmarks for Hermes3D 
-and Hermes1D. The 3D and 1D codes are not described in great detail since their
-usage is very similar to Hermes2D. 
+Hermes2D is used. Sections 4 and 5 contain several examples 
+and benchmarks for Hermes3D and Hermes1D whose usage is practically 
+identical to Hermes2D.
+
+This document is under continuous development and certainly it is not perfect. 
+If you find bugs, typos, dead links or such, help us improve it by reporting them
+through one of the mailing lists for 
+`Hermes1D <http://groups.google.com/group/hermes1d/>`_,
+`Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
+`Hermes3D <http://groups.google.com/group/hermes3d/>`_. 
+
+Thank you in advance for helping us improve Hermes!
 
 1. Introduction
 ---------------

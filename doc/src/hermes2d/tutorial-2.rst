@@ -238,7 +238,7 @@ following graph that belongs to the benchmark
 Electrostatic Micromotor Problem (10)
 -------------------------------------
 
-**Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt>`_. Long version: `10-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt-long>`_.
+**Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt>`_. 
 
 Let us demonstrate the use of adaptive h-FEM and hp-FEM on a linear elliptic problem
 describing an electrostatic micromotor. This is a MEMS device free of any coils, and 
@@ -347,48 +347,7 @@ In this case, default settings are used. If expressed explicitly, the code would
     selector.set_option(H2D_PREFER_SYMMETRIC_MESH, true);
     selector.set_option(H2D_APPLY_CONV_EXP_DOF, false);
 
-Short version
-~~~~~~~~~~~~~
-
-If you prefer to avoid technical details of automatic adaptivity, fill the structure 
-AdaptivityParamType with parameters ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-and MESH_REGULARITY::
-
-    // Initialize adaptivity parameters.
-    AdaptivityParamType apt(ERR_STOP, NDOF_STOP, THRESHOLD, STRATEGY, 
-                            MESH_REGULARITY);
-
-The algorithm will stop after the relative error estimate in percent drops 
-below ERR_STOP or if the number of degrees of freedom exceeds NDOF_STOP.
-The meaning of the other three parameters will be explained below.
-
-Next, just call the function solve_linear_adapt()::
-
-    // Adaptivity loop.
-    Solution *sln = new Solution();
-    Solution *ref_sln = new Solution();
-    WinGeom* sln_win_geom = new WinGeom(0, 0, 400, 600);
-    WinGeom* mesh_win_geom = new WinGeom(410, 0, 400, 600);
-    bool verbose = true;     // Print info during adaptivity.
-    // The NULL pointer means that we do not want the resulting coefficient vector.
-    solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
-                       sln_win_geom, mesh_win_geom, &selector, &apt, verbose);
-
-Here 'sln' and 'ref_sln' stand for solutions on the coarse and globally refined mesh,
-respectively, and the WinGeom structures hold positions and geometries for visualization
-of the coarse mesh solution and the mesh during adaptivity. The visualization can be 
-turned off by providing NULL pointers. After adaptivity is finished, the Space contains 
-the latest coarse mesh, and the user can request the coefficient vector by providing 
-a non-NULL pointer to Vector as the third argument. The latest solutions on the coarse and 
-globally refined meshes are in 'sln' and 'ref_sln'.
-
-Long version 
-~~~~~~~~~~~~
-
-The long version of this example, 
-`10-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt-long>`_, exposes all
-details of the adaptivity algorithm. First one needs to initialize
-the matrix solver (as in example 03)::
+We begin with initializing a matrix solver::
 
     // Initialize matrix solver.
     Matrix* mat; Vector* rhs; CommonSolver* solver;  
@@ -661,7 +620,7 @@ The input parameter of the method calc_error() is a combination that is a pair: 
 Simplified Fitzhugh-Nagumo System (11)
 --------------------------------------
 
-**Git reference:** Tutorial example `11-system-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt>`_. Long version: `11-system-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt-long>`_
+**Git reference:** Tutorial example `11-system-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/11-system-adapt>`_. 
 
 We consider a simplified version of the Fitzhugh-Nagumo equation.
 This equation is a~prominent example of activator-inhibitor systems in two-component reaction-diffusion 
@@ -750,36 +709,6 @@ they are registered as follows::
 Beware that although each of the forms is actually symmetric, one cannot use the H2D_SYM flag as in the 
 elasticity equations, since it has a slightly different 
 meaning (see example `08-system <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1.html#systems-of-equations-08>`_).
-
-Short version
-~~~~~~~~~~~~~
-
-For the short version it is enough to call the function solve_linear_adapt()::
-
-    // Adaptivity loop.
-    Solution *u_sln = new Solution();
-    Solution *v_sln = new Solution();
-    Solution *ref_u_sln = new Solution();
-    Solution *ref_v_sln = new Solution();
-    ExactSolution u_exact(&u_mesh, uexact);
-    ExactSolution v_exact(&v_mesh, vexact);
-    bool verbose = true;  // Print info during adaptivity.
-    // The NULL pointer means that we do not want the resulting coefficient vector.
-    solve_linear_adapt(Tuple<Space *>(&u_space, &v_space), &wf, NULL, matrix_solver,
-                       Tuple<int>(H2D_H1_NORM, H2D_H1_NORM), 
-                       Tuple<Solution *>(u_sln, v_sln), 
-                       Tuple<Solution *>(ref_u_sln, ref_v_sln), 
-                       Tuple<WinGeom *>(u_sln_win_geom, v_sln_win_geom), 
-                       Tuple<WinGeom *>(u_mesh_win_geom, v_mesh_win_geom), 
-                       Tuple<RefinementSelectors::Selector *> (&selector, &selector), &apt, 
-                       verbose, Tuple<ExactSolution *>(&u_exact, &v_exact));
-
-The only differences compared to example 10 are that (a) one needs two coarse and 
-two reference mesh solutions, and that (b) we provide an exact solution for exact error 
-calculation. Note that H1-norms are used for both solution components. 
-
-Long version
-~~~~~~~~~~~~
 
 The adaptivity workflow is the same as in example 10-adapt: First we perform 
 global refinement of each mesh::
@@ -931,7 +860,7 @@ CPU time convergence graphs:
 Adaptivity for General 2nd-Order Linear Equation (12)
 -----------------------------------------------------
 
-**Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt>`_. Long version: `12-general-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt-long>`_.
+**Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt>`_. 
 
 This example does not bring anything substantially new and its purpose is solely to 
 save you work adding adaptivity to the tutorial example 
@@ -974,7 +903,7 @@ Convergence comparison in terms of CPU time.
 Complex-Valued Problem (13)
 ---------------------------
 
-**Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt>`_. Long version: `13-complex-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt-long>`_.
+**Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt>`_. 
 
 This example solves a complex-valued vector potential problem
 
@@ -1052,29 +981,7 @@ The weak forms are registered as follows:
     wf.add_matrix_form(callback(bilinear_form_air), H2D_SYM, 1);
     wf.add_vector_form(callback(linear_form_wire), 2);
 
-Short version
-~~~~~~~~~~~~~
-
-The only thing worth noticing here is that a Boolean variable 
-'is_complex = true' is passed into the function solve_linear_adapt()::
-
-    // Adaptivity loop.
-    Solution *sln = new Solution();
-    Solution *ref_sln = new Solution();
-    WinGeom* sln_win_geom = new WinGeom(0, 0, 600, 350);
-    WinGeom* mesh_win_geom = new WinGeom(610, 0, 520, 350);
-    bool verbose = true;     // Print info during adaptivity.
-    bool is_complex = true;
-    // The NULL pointer means that we do not want the resulting coefficient vector.
-    solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_H1_NORM, sln, ref_sln, 
-                       sln_win_geom, mesh_win_geom, &selector, &apt, verbose,
-                       Tuple<ExactSolution *>(), is_complex);
-
-
-Long version
-~~~~~~~~~~~~
-
-In the long version, the variable 'is_complex' is used at several places.
+The variable 'is_complex' is used at several places.
 First during the matrix initialization::
 
     // Initialize matrix solver.
@@ -1133,7 +1040,7 @@ and hp-FEM are shown below.
 Time-Harmonic Maxwell's Equations (14)
 --------------------------------------
 
-**Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt>`_. Long version: `14-hcurl-adapt-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt-long>`_.
+**Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt>`_. 
 
 This example solves the time-harmonic Maxwell's equations in an L-shaped domain and it 
 describes the diffraction of an electromagnetic wave from a re-entrant corner. It comes with an 
@@ -1205,28 +1112,7 @@ Also the refinement selector is for the Hcurl space::
     // Initialize refinement selector.
     HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-Short version
-~~~~~~~~~~~~~
-
-In the short version we need to use the H2D_HCURL_NORM::
-
-    // Adaptivity loop.
-    Solution *sln = new Solution();
-    Solution *ref_sln = new Solution();
-    ExactSolution exact_sln(&mesh, exact);
-    WinGeom* sln_win_geom = new WinGeom(0, 0, 440, 350);
-    WinGeom* mesh_win_geom = new WinGeom(450, 0, 400, 350);
-    bool verbose = true;     // Print info during adaptivity.
-    bool is_complex = true;
-    // The NULL pointer means that we do not want the resulting coefficient vector.
-    solve_linear_adapt(&space, &wf, NULL, matrix_solver, H2D_HCURL_NORM, sln, ref_sln,  
-                       sln_win_geom, mesh_win_geom, &selector, &apt, verbose, &exact_sln, is_complex);
-
-
-Long version
-~~~~~~~~~~~~
-
-In the long version it is worth noticing that H2D_HCURL_NORM is used in the 
+It is worth noticing that H2D_HCURL_NORM is used in the 
 global projection
 
 ::

@@ -2,26 +2,6 @@
 Tutorial Part I (Linear Problems)
 =================================
 
-This tutorial should give you a good idea of how Hermes works. It begins with eight
-sections related to Hermes2D (six tutorial sections, benchmarks, and examples). 
-Then we discuss selected examples for Hermes1D and several benchmarks and examples 
-for Hermes3D. 
-
-After reading the tutorial, you will be able to create your own applications and/or 
-adjust existing Hermes examples for your 
-purposes. At the beginning of every section we give a reference to the corresponding example in the 
-Hermes git repository -- there you will always find the corresponding main.cpp file, weak forms, 
-mesh file, etc.
-
-This document is under continuous development and certainly it is not perfect. 
-If you find bugs, typos, dead links or such, help us improve it by reporting them
-through one of the mailing lists for 
-`Hermes1D <http://groups.google.com/group/hermes1d/>`_,
-`Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
-`Hermes3D <http://groups.google.com/group/hermes3d/>`_. 
-We are looking forward to your feedback!
-
-
 Finite Element Mesh (01)
 ------------------------
 
@@ -442,51 +422,6 @@ The following figure shows the output of this example (again, press '3' for 3D v
    :height: 350
    :alt: Solution of the Poisson equation.
 
-Short and Long Versions of Examples
------------------------------------
-
-Some tutorial examples come in two versions: A short one that is intended for effortless basic use, and a long one that is more explicit and thus more convenient for development. The first example with a long version is 03-poisson.
-
-**Git reference:** Tutorial example `03-poisson-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/03-poisson-long>`_. 
-
-The long version does not employ the function solve_linear(). Instead, after initializing the weak formulation, one initializes the LinearProblem class::
-
-      // Initialize the linear problem.
-      LinearProblem lp(&wf, &space);
-
-This class is a descendant of a more general DiscreteProblem class that handles nonlinear problems. Next we initialize the matrix solver and the corresponding matrix and vector structures::
-
-      // Select matrix solver.
-      Matrix* mat; Vector* rhs; CommonSolver* solver;
-      init_matrix_solver(SOLVER_UMFPACK, ndof, mat, rhs, solver);
-
-Again, other matrix solvers besides SOLVER_UMFPACK can be used. The variable *ndof* stands for the number of degrees of greedom (unknowns in the discrete problem) that can be calculated after initializing a Space::
-
-      int ndof = get_num_dofs(&space);
-
-Assembling is done into the user-provided data structures::
-
-      // Assemble stiffness matrix and rhs.
-      lp.assemble(mat, rhs);
-
-After this, the matrix problem is solved::
-
-      // Solve the matrix problem.
-      if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-And finally, the solution vector is translated into a Solution::
-
-      // Convert coefficient vector into a Solution.
-      Solution* sln = new Solution(&space, rhs);
-
-For this, one can also use the method Solution::set_coeff_vector()::
-
-      // Convert coefficient vector into a Solution.
-      Solution sln;
-      sln.set_coeff_vector(&space, rhs);
-
-Visualization and the rest of the main() function are the same as in the short version.
-
 Boundary Conditions (04, 05, 06)
 --------------------------------
 
@@ -496,12 +431,10 @@ space while natural conditions do not - they are incorporated into boundary inte
 In the context of elliptic problems, Dirichlet conditions are essential and Neumann/Newton
 conditions are natural.
 
-Examples 04, 05 and 06 also come in long versions but we will not discuss them explicitly since they are analogous to the long version of example 03.
-
 Dirichlet BC
 ~~~~~~~~~~~~
 
-**Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet>`_. Long version: `04-bc-dirichlet-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet-long>`_. 
+**Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet>`_. 
 
 Since essential boundary conditions eliminate degrees of freedom (DOF) from the FE space, 
 they need to be incorporated while the space is set up.
@@ -558,7 +491,7 @@ For the value $CONST_F = -4$, the output is shown below:
 Neumann BC
 ~~~~~~~~~~
 
-**Git reference:** Tutorial example `05-bc-neumann <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann>`_. Long version: `05-bc-neumann-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann-long>`_.
+**Git reference:** Tutorial example `05-bc-neumann <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann>`_. 
 
 Next, let us consider Neumann boundary conditions. The new model problem
 will have the form
@@ -661,7 +594,7 @@ shown in the following figures:
 Newton BC
 ~~~~~~~~~
 
-**Git reference:** Tutorial example `06-bc-newton <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton>`_. Long version: `06-bc-newton-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton-long>`_.
+**Git reference:** Tutorial example `06-bc-newton <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton>`_. 
 
 Another common natural boundary condition is the Newton (sometimes called Robin) condition
 of the form
@@ -876,7 +809,7 @@ The following example handles quadrature orders manually.
 General 2nd-Order Linear Equation (07)
 --------------------------------------
 
-**Git reference:** Tutorial example `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. Long version: `07-general-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general-long>`_.
+**Git reference:** Tutorial example `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. 
 
 This example deals with a linear second-order equation of the form 
 
@@ -974,7 +907,7 @@ The output of this example is shown below:
 Systems of Equations (08)
 -------------------------
 
-**Git reference:** Tutorial example `08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system>`_. Long version `08-system-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system-long>`_.
+**Git reference:** Tutorial example `08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system>`_. 
 
 So far we have just solved single linear PDE problems with a weak formulation
 of the form $a(u,v) = l(v)$, where $u, v$ were continuous approximations in the
@@ -1138,31 +1071,7 @@ Von Mises stress can be visualized via the VonMises filter as follows::
     view.show_mesh(false);
     view.show(&stress, H2D_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
-We will say more about visualization and Filters in a moment, after showing the long version of this example.
-
-Long Version of Example 08
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Git reference:** Tutorial example `08-system-long <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system-long>`_.
-
-As in example 03, the long version of this example does not employ the function solve_linear(). Instead, after initializing the weak formulation, one initializes the LinearProblem class, selects a matrix solver, assembles the matrix problem, solves it, and translates the resulting coefficient vector into Solutions::
-
-    // Initialize the linear problem.
-    LinearProblem lp(&wf, Tuple<Space *>(&u_space, &v_space));
-
-    // Select matrix solver.
-    Matrix* mat; Vector* rhs; CommonSolver* solver;
-    init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
-
-    // Assemble stiffness matrix and rhs.
-    lp.assemble(mat, rhs);
-
-    // Solve the matrix problem.
-    if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-    // Convert coefficient vector into a Solution.  
-    Solution* u_sln = new Solution(&u_space, rhs);
-    Solution* v_sln = new Solution(&v_space, rhs);
+Let us say more about visualization and Filters in the following.
 
 Visualization and Filters
 -------------------------
