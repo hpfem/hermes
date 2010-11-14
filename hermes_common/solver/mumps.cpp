@@ -571,6 +571,6 @@ bool MumpsSolver::setup_factorization()
       break;
   }
   
-  return true;
 #endif
+  return true;
 }
