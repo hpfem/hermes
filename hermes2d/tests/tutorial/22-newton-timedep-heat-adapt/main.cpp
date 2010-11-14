@@ -10,8 +10,9 @@ using namespace RefinementSelectors;
 
 const int INIT_REF_NUM = 2;                // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements.
-const int TIME_DISCR = 2;                  // 1 for implicit Euler, 2 for Crank-Nicolson.
-const double TAU = 0.5;                    // Time step.
+const int TIME_DISCR = 1;//2;                  // 1 for implicit Euler, 2 for Crank-Nicolson.
+const double TAU =
+  TIME_DISCR == 1 ? 0.5 : 0.1;             // Time step (0.5 for implicit Euler, 0.1 for Crank-Nicolson).
 const double T_FINAL = 5.0;                // Time interval length.
 
 // Adaptivity
@@ -39,7 +40,7 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 1.0;               // Default value is 1.0. This parameter influences the selection of
                                            // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;               // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 3.0;               // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -49,7 +50,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 // Newton's method
 const double NEWTON_TOL_COARSE = 0.01;     // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.05;       // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 100;            // Maximum allowed number of Newton iterations.
+const int NEWTON_MAX_ITER = 20;            // Maximum allowed number of Newton iterations.
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -234,11 +235,11 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &sln, coeff_vec);
+        OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, coeff_vec);
+        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
 
       // Newton's loop on the fine mesh.
@@ -281,6 +282,10 @@ int main(int argc, char* argv[])
 
       // Store the result in ref_sln.
       Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -329,9 +334,9 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 1100);
+  printf("ndof allowed = %d\n", 240);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 1100) {      // ndofs was 1038 at the time this test was created
+  if (ndof < 1100) {      // ndofs was 231 at the time this test was created
     printf("Success!\n");
     return ERROR_SUCCESS;
   }
