@@ -51,12 +51,12 @@ protected:
 	ProjItem **proj;				// projection
 	int proj_fns;					// number of funcions
 
-	void free_proj();
-	void calc_projection(int split, int son, const Ord3 &order);
-	virtual void calc_vertex_proj(int split, int son) = 0;
-	virtual void calc_edge_proj(int edge, int split, int son, const Ord3 &order) = 0;
-	virtual void calc_face_proj(int face, int split, int son, const Ord3 &order) = 0;
-	virtual void calc_bubble_proj(int split, int son, const Ord3 &order) = 0;
+	virtual void free_proj();
+	virtual void calc_projection(int split, int son, Ord3 &order);
+  virtual void calc_vertex_proj(int split, int son){};
+  virtual void calc_edge_proj(int edge, int split, int son, const Ord3 &order){};
+  virtual void calc_face_proj(int face, int split, int son, const Ord3 &order){};
+  virtual void calc_bubble_proj(int split, int son, const Ord3 &order){};
 };
 
 #endif
