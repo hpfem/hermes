@@ -89,18 +89,13 @@ Code for the exact solution and the weak forms:
 
 Convergence graphs:
 
-.. image:: fichera-conv.png
+.. image:: fichera/fichera-conv.png
 
-.. image:: fichera-conv-time.png
+.. image:: fichera/fichera-conv-time.png
 
 
 Solution and hp-mesh:
 
-.. image:: fichera-sln.png
+.. image:: fichera/fichera-sln.png
 
-.. image:: fichera-order.png
-
-
-.. seealso::
-
-   :ref:`benchmark-bessel`
+.. image:: fichera/fichera-order.png
