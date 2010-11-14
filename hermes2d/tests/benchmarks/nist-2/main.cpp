@@ -168,8 +168,8 @@ int main(int argc, char* argv[])
 
     // Calculate exact error.
     solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
-
+//    double err_exact_rel = adaptivity->calc_err_exact(HERMES_TOTAL_ERROR_REL, &exact) * 100;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d",
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  int n_dof_allowed = 630;
+  int n_dof_allowed = 650;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
