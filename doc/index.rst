@@ -62,6 +62,7 @@ Thank you in advance for helping us improve Hermes!
     src/hermes2d/tutorial-4
     src/hermes2d/tutorial-5
     src/hermes2d/tutorial-6
+    src/hermes2d/tutorial-7
     src/hermes2d/benchmarks
     src/hermes2d/examples
     
