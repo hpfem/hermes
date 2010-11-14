@@ -13,7 +13,9 @@ for comparisons of various methods and adaptivity algorithms.
 .. toctree::
    :maxdepth: 2
 
-   benchmarks/layer
-   benchmarks/fichera-corner
+   benchmarks/smooth-7-versions
+   benchmarks/layer-boundary
+   benchmarks/layer-interior
+   benchmarks/fichera
    benchmarks/bessel
 

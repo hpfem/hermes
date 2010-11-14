@@ -18,10 +18,11 @@ at the beginning of your main.cpp file.
 To load an ExodusII mesh file, use ``ExodusIIReader`` class instead
 of "H3DReader". 
 
-Below is a sample mesh file for one hex element. Note the 
+Below is a sample mesh file containing a single hex element. Note the 
 ordering of vertices in elements and on faces. Also note 
-that indices start from 1 which is different from Hermes2D
-(we are going to change them soon to start from zero as well)::
+that indices start from 1 and that elements do not 
+have material markers as in Hermes2D. We are going to 
+resolve both these incompatibilities soon::
 
     # vertices
     8
