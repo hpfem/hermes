@@ -115,9 +115,12 @@ void MumpsMatrix::alloc()
   memset(Ax, 0, sizeof(mumps_scalar) * nnz);
 
   irn = new int[nnz];
-  memset(irn, 0, sizeof(int) * nnz);
   jcn = new int[nnz];
-  memset(jcn, 0, sizeof(int) * nnz);
+  for (int i = 0; i < nnz; i++)
+  {
+    irn[i] = 1;
+    jcn[i] = 1;
+  }  
 }
 
 void MumpsMatrix::free()
