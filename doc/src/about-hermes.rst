@@ -6,13 +6,13 @@ Hermes is a free C++/Python library for rapid development of
 adaptive *hp*-FEM and *hp*-DG solvers for partial differential equations (PDE)
 and multiphysics PDE systems. The developer team includes the 
 `hp-FEM group <http://hpfem.org/>`_ at the `University of Nevada, Reno <http://www.unr.edu>`_ 
-and their `collaborators <http://git.hpfem.org/git/hermes.git/tree/HEAD:/AUTHORS>`_ 
+and their `collaborators <http://git.hpfem.org/hermes.git/blob/HEAD:/AUTHORS>`_ 
 from numerous places around the globe.
 
 The standard way to use Hermes is to write short C++ user programs, but for 
 those who prefer to use a graphical interface, there is an 
 `interactive GUI Agros2D <http://hpfem.org/agros2d/>`_. We also provide 
-an `interactive online lab <http://nb.femhub.org/>`_ where
+an interactive `Online Lab <http://lab.femhub.org/>`_ where
 the user can compute with Hermes and other FEM codes in `FEMhub <http://femhub.org>`_ 
 via any web browser without having to install anything (CPU time is on us). 
 
@@ -21,7 +21,7 @@ unique technology and its user base is growing fast. We hope that you will
 enjoy the software and that you will find this documentation useful. Let us know if 
 you find mistakes or with any improvement suggestions. Anyone who contributes
 a patch becomes automatically a 
-`co-author <http://git.hpfem.org/git/hermes.git/tree/HEAD:/AUTHORS>`_ of the code.
+`co-author <http://git.hpfem.org/hermes.git/blob/HEAD:/AUTHORS>`_ of the code.
 
 The library is available under the GPL license (Version 2, 1991). 
 
@@ -32,7 +32,7 @@ User documentation (tutorial, benchmarks, examples) can be found in
 the directory 'doc/'. Type 'make html' there to build it. The HTML pages are then
 in _build/html.
 
-In the following, you can replace "2d" with "3d" or "1d" to obtain links
+In the following paragraph, you can replace "2d" with "3d" or "1d" to obtain links
 for Hermes3D and Hermes1D, respectively.
 
 To compile the C++ reference manual for Hermes2D, go to 'hermes2d/doc.cpp/'. There

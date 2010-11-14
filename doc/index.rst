@@ -11,14 +11,12 @@ Thank you for your interest in Hermes!
 
 This document is organized as follows: 
 Section 1 contains general information about Hermes, its math background,
-and interactive web accessibility. Section 2 will walk you through its 
-installation on various platforms and related issues. 
-You will also learn how to use Git and Github, and 
-how to contribute to the project if interested. The tutorial itself begins with 
-Section 3 that explains in many incremental steps how 
-Hermes2D is used. Sections 4 and 5 contain several examples 
-and benchmarks for Hermes3D and Hermes1D whose usage is practically 
-identical to Hermes2D.
+and interactive web accessibility. You will also learn how to use Git and 
+Github, and how to contribute to the project if interested. Section 2 will 
+walk you through its installation on various platforms and related issues. 
+The tutorial itself begins with Section 3 that explains in many incremental 
+steps how Hermes2D is used. Sections 4 and 5 contain examples and benchmarks 
+for Hermes3D and Hermes1D (their usage is practically identical to Hermes2D).
 
 This document is under continuous development and certainly it is not perfect. 
 If you find bugs, typos, dead links or such, help us improve it by reporting them
@@ -39,16 +37,19 @@ Thank you in advance for helping us improve Hermes!
     src/math-background
     src/web-access
     src/citing-hermes
+    src/first_pull_request
 
-2. Getting Started
-------------------
+2. Installation
+---------------
 
 .. toctree::
     :maxdepth: 1
 
-    src/installation
-    src/matrix_solvers
-    src/first_pull_request
+    src/installation/linux
+    src/installation/mac
+    src/installation/win-cygwin
+    src/installation/win-msvc
+    src/installation/matrix_solvers
 
 3. Hermes2D
 -----------
