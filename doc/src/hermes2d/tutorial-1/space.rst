@@ -5,6 +5,10 @@ Finite Element Space (02)
 
 Hermes follows the mathematical concept of FEM closely -- after creating a mesh,
 in the next step one needs to construct a finite element space on it.
+
+Spaces available
+~~~~~~~~~~~~~~~~
+
 The following predefined spaces are currently available:
 
 * H1Space - the most common space of continuous, piecewise-polynomial functions belonging to $H^1(\Omega) = \{ v \in L^2(\Omega); \nabla u \in [L^2(\Omega)]^2 \}$,
@@ -14,6 +18,10 @@ The following predefined spaces are currently available:
 
 All these spaces allow for higher-order elements, meshes with arbitrary-level hanging nodes,
 and automatic *hp*-adaptivity. 
+
+Structure of higher-order basis functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 If you are not familiar with higher-order FEM, let us just say that the spaces can contain
 quadratic, cubic, etc., *edge functions* that generate higher-degree
 polynomials along mesh edges, and *bubble functions* that complete the higher-order
@@ -36,7 +44,7 @@ in most computations (according to our experience) are simply called
 H1Shapeset, HcurlShapeset, HdivShapeset and L2Shapeset.
 Others can be found in the directory `src/shapeset/ <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/src/shapeset>`_. 
 
-We are now ready for an example. The following is (up to some omitted comments) the complete
+We are now ready for an example. After leaving out some comments, the following is the complete
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/02-space/main.cpp>`_ file
 of the example 02-space::
 
@@ -61,6 +69,9 @@ of the example 02-space::
       return 0;
     }
 
+Initializing a space
+~~~~~~~~~~~~~~~~~~~~
+
 An instance of H1Space is initialized with four arguments: 
 
 * Pointer to a mesh, 
@@ -70,6 +81,9 @@ An instance of H1Space is initialized with four arguments:
   essential boundary markers (NULL here since all BC are natural),
 * uniform initial polynomial degree of all mesh elements.
 
+Setting element orders individually
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Polynomial degrees of elements can also be set individually by calling 
 the method Space::set_element_order() or for all elements at once using
 Space::set_uniform_order(). Note that element degrees
@@ -78,6 +92,9 @@ have multiple spaces with different element degrees and even types
 over the same mesh. In Hermes, Mesh only stores geometrical information.
 A space created in this way is ready for use. 
 
+Visualizing basis functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 As a debugging/learning feature, Hermes can visualize the basis of each Space.
 Similarly to MeshView, one can create a BaseView object and use it 
 to display the entire basis (VectorBaseView has to be used for vector-valued 
@@ -85,6 +102,9 @@ approximations in spaces Hcurl and Hdiv - this will be discussed later).
 One can cycle through all basis functions in the window using the arrow keys. 
 If you press the left mouse button at the beginning, you will see the Dirichlet 
 lift (a function that represents Dirichlet boundary conditions).
+
+3D view
+~~~~~~~
 
 This is how the last figure above was obtained (press the '3' key for 3D mode).
 We suggest that you spend some time experimenting with element refinements and 

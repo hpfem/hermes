@@ -3,9 +3,9 @@ Mathematical Background
 
 Main strengths of Hermes are 
 
- * adaptive *hp*-FEM and *hp*-DG methods, 
- * adaptivity for time-dependent problems on dynamically-changing *hp*-meshes, and
- * monolithic discretization of multiphysics problems via multimesh *hp*-FEM/*hp*-DG. 
+ * Robust PDE-independent adaptivity algorithms. 
+ * Adaptivity algorithms for time-dependent problems.
+ * Monolithic discretization of multiphysics problems.
 
 The following list describes the above in more detail:
 
@@ -57,14 +57,12 @@ Same graphs as above but now in terms of CPU time:
 
 .. image:: hermes2d/img/intro/hm-sln-frame.png
    :align: left
-   :width: 500
-   :height: 410
+   :width: 480
    :alt: Illustration of multimesh hp-FEM.
 
 .. image:: hermes2d/img/intro/hm-mesh-frame.png
    :align: right
-   :width: 500
-   :height: 410
+   :width: 480
    :alt: Illustration of multimesh hp-FEM.
 
 .. raw:: html

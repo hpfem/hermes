@@ -23,15 +23,16 @@ quadrilaterals and two curvilinear triangles. The elements are enumerated from 0
 One also needs to enumerate all mesh vertices and assign markers to all boundary edges. 
 Boundary markers are used to link boundary conditions with the boundary edges. 
 
-Mesh File Format
+Mesh file format
 ~~~~~~~~~~~~~~~~
 
 Hermes can read meshes in its own generic format as well as in the
 `ExodusII <http://sourceforge.net/projects/exodusii/>`_ format
-(this is, for example, the output of `Cubit <http://cubit.sandia.gov/>`_).
+(this is a widely used format that can be generated, for example, 
+with `Cubit <http://cubit.sandia.gov/>`_).
 First let us discuss the generic Hermes mesh data format. Reading
 of ExodusII mesh files is very simple as we will see in example 
-`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples.html#iron-water-neutronics>`_. 
+`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples/iron-water.html>`_. 
 
 Generic Hermes mesh file consists of variable assignments. Each variable can hold a real number, 
 list of real numbers, or list of lists. The following are all valid definitions in 
@@ -44,7 +45,7 @@ the Hermes mesh file format::
 
 Every mesh file must contain at least the variables ``vertices``, ``elements``
 and ``boundaries``. The variable ``vertices`` defines the coordinates
-of all mesh vertices (in any order). In our case it looks like this::
+of all mesh vertices (in any order). For the above geometry it looks like this::
 
     a = 1.0  # size of the mesh
     b = sqrt(2)/2
@@ -61,7 +62,7 @@ of all mesh vertices (in any order). In our case it looks like this::
       { a*b, a*b }  # vertex 7
     }
 
-The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra number denoting the element (material) marker. Element markers allow you to use different material parameters in areas with different material parameters. Moreover, Hermes allows you to assign different weak formulations to those areas, which can be very useful for some types of multiphysics problems. If the domain is composed of only one material, as in our case, all elements may be assigned a zero marker:
+The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra number denoting the element (material) marker. Element markers allow you to use different material parameters in areas with different material parameters. Moreover, Hermes allows you to assign different weak formulations to those areas, which can be very useful for some types of multiphysics problems. If the domain is composed of only one material, as the above geometry, all elements may be assigned a zero marker:
 ::
 
     elements =
@@ -76,7 +77,7 @@ The last mandatory variable, ``boundaries``, defines boundary markers for all
 boundary edges. By default, all edges have zero markers. Only those with
 positive markers are considered to be part of the domain boundary and can be
 assigned a boundary condition, as we will see later. An edge is identified by
-two vertex indices. In our case, we have
+three numbers: two vertex indices and its marker. For the above geometry, we have
 ::
 
     boundaries =
@@ -91,12 +92,12 @@ two vertex indices. In our case, we have
       { 5, 2, 3 }
     }
 
-Finally, the file can also include the variable ``curves``, which lists all
+Finally, the mesh file can also include the variable ``curves`` which lists all
 curved edges.  Each curved edge is described by one NURBS curve, defined by its
 degree, control points and knot vector. Simplified syntax is available for
 circular arcs.
 
-NURBS Curves
+NURBS curves
 ~~~~~~~~~~~~
 
 Every NURBS curve is defined by its degree, control points with weights and the
@@ -124,13 +125,13 @@ above example, we have
 
     curves =
     {
-      { 4, 7, 45 },  # +45 degree circular arcs
-      { 7, 6, 45 }
+      { 4, 7, 45 },  # circular arcs with central angle 45 degrees
+      { 7, 6, 45 }   # circular arcs with central angle 45 degrees
     }
     # EOF
 
 
-Loading Mesh
+Loading mesh
 ~~~~~~~~~~~~
 
 As a ''Hello world'' example, let us load the mesh we have just created, and display it in a window. 
@@ -152,8 +153,7 @@ call the method ``load()``::
 Note: To load an ExodusII mesh file, one has to use ``ExodusIIReader`` class instead.
 
 The following portion of code illustrates various types of initial mesh refinements.
-It does not matter if the mesh becomes irregular, in fact, arbitrarily irregular
-meshes are at the heart of Hermes::
+It does not matter if the mesh becomes irregular:: 
 
       // Perform some sample initial refinements.
       mesh.refine_all_elements();          // refines all elements

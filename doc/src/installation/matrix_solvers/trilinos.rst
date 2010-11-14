@@ -1,29 +1,3 @@
-==============================
-Installation of Matrix Solvers
-==============================
-
-Mumps
------
-
-In preparation.
-
-Pardiso
--------
-
-In preparation.
-
-PETSc
------
-
-In preparation.
-
-SuperLU
--------
-
-In preparation.
-
-
-
 Trilinos
 --------
 
@@ -61,14 +35,3 @@ MAC OS
 ~~~~~~
 
 In preparation.
-
-UMFpack
--------
-
-In preparation.
-
-
-
-
-
-
