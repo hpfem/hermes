@@ -22,7 +22,7 @@ add_subdirectory(nist-10)
 add_subdirectory(nist-11)
 add_subdirectory(nist-12)
 add_subdirectory(sdirk-22)
-#add_subdirectory(nonsym-check)
+add_subdirectory(nonsym-check)
 
 #if(NOT WITH_TRILINOS)
   add_subdirectory(screen)
