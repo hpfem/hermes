@@ -68,7 +68,7 @@ The corresponding weak formulation is
 
 .. math::
 
-     \int_{\Omega} c \varrho\frac{T^{n+1}}{\tau} + \int_{\Omega} \lambda \nabla T^{n+1}\cdot \nabla v + \int_{\Gamma_{air}} \alpha \lambda T^{n+1}v = \int_{\Omega} c \varrho\frac{T^{n}}{\tau} + \int_{\Gamma_{air}} \alpha \lambda T_{ext}(t^{n+1})v.
+     \int_{\Omega} c \varrho\frac{T^{n+1}}{\tau}v + \int_{\Omega} \lambda \nabla T^{n+1}\cdot \nabla v + \int_{\Gamma_{air}} \alpha \lambda T^{n+1}v = \int_{\Omega} c \varrho\frac{T^{n}}{\tau}v + \int_{\Gamma_{air}} \alpha \lambda T_{ext}(t^{n+1})v.
 
 The implementation starts by defining the
 boundary condition types::
@@ -131,21 +131,24 @@ Here we simply call set_const() and supply the initial temperature::
 
 The weak forms are registered as follows::
 
+
     // Initialize weak formulation.
-    WeakForm wf();
+    WeakForm wf;
     wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
     wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
-    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, H2D_ANY, &tsln);
+    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
     wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
 
-Next, the LinearProblem class and the matrix solver structures are initialized::
+Next, the DiscreteProblem class and the matrix solver structures are initialized::
 
-    // Initialize the linear problem.
-    LinearProblem lp(&wf, &space);
+    // Initialize the FE problem.
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, &space, is_linear);
 
-    // Initialize matrix solver.
-    Matrix* mat; Vector* rhs; CommonSolver* solver;  
-    init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
 We are now ready to start the iterative process. Since the stiffness matrix does
 not depend on the solution, it only needs to be assembled once in the first time
@@ -154,20 +157,26 @@ re-construct the load vector. This is done via the Boolean variable rhsonly
 which is set to false before the time stepping begins. For completeness, we show 
 the entire time stepping loop below::
 
-    bool rhsonly = false;
+    // Time stepping:
+    int nsteps = (int)(FINAL_TIME/TAU + 0.5);
+    bool rhs_only = false;
     for(int ts = 1; ts <= nsteps; ts++)
     {
       info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
 
-      // Assemble stiffness matrix and rhs.
-      lp.assemble(mat, rhs, rhsonly);
-      rhsonly = true;
+      // First time assemble both the stiffness matrix and right-hand side vector,
+      // then just the right-hand side vector.
+      if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+      else info("Assembling the right-hand side vector (only).");
+      dp.assemble(matrix, rhs, rhs_only);
+      rhs_only = true;
 
-      // Solve the matrix problem.
-      if (!solver->solve(mat, rhs)) error ("Matrix solver failed.\n");
-
-      // Update tsln.
-      tsln.set_coeff_vector(&space, rhs);
+      // Solve the linear system and if successful, obtain the solution.
+      info("Solving the matrix problem.");
+      if(solver->solve())
+        Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
+      else 
+        error ("Matrix solver failed.\n");
 
       // Update the time variable.
       TIME += TAU;

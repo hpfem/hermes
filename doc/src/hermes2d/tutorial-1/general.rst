@@ -86,7 +86,9 @@ additional function are not used for computation.
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
 
-Note the sign of the surface linear form - when using the LinearProblem class, all linear forms have to be on the right-hand side and all bilinear forms on the left. 
+Note the sign of the surface linear form. When solving a linear problems, i.e., when initializing the 
+DiscreteProblem class with the third parameter being is_linear = true, all linear forms have to be on 
+the right-hand side and all bilinear forms on the left. 
 
 The output of this example is shown below:
 

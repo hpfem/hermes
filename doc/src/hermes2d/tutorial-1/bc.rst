@@ -1,36 +1,13 @@
 Boundary Conditions (04, 05, 06)
 --------------------------------
 
-Hermes recognizes two basic types of boundary conditions: *essential* and *natural*.
-Essential boundary conditions (prescribed values on the boundary) influence the finite element 
-space while natural conditions do not - they are incorporated into boundary integrals in the weak formulation.
-In the context of elliptic problems, Dirichlet conditions are essential and Neumann/Newton
-conditions are natural.
-
 Dirichlet BC
 ~~~~~~~~~~~~
 
 **Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet>`_. 
 
-Since essential boundary conditions eliminate degrees of freedom (DOF) from the FE space, 
-they need to be incorporated while the space is set up.
-The user has to provide the following two callback functions::
-
-    BCType bc_types(int marker);
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y);
-
-The first one takes as argument a boundary marker number, and it determines the type of BC 
-for the corresponding portion of the domain boundary, by returning one of the predefined constants 
-BC_ESSENTIAL, BC_NATURAL. The second callback needs to return the boundary value for a given marker
-and position on the boundary (only needed for essential boundary condition markers - for natural
-boundary conditions this value is ignored). The space initialization then consists of the following 
-line::
-
-    H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-
-Here P_INIT is the initial polynomial degree of all elements in the mesh as before. 
-Suppose that we would like to modify the boundary conditions for the previous Poisson 
-model problem as follows:
+Suppose that we would like to modify the boundary conditions for 
+example 03-poisson as follows:
 
 .. math::
          u(x,y) = -\frac{CONST_F}{4}(x^2 + y^2)\,\ \mbox{on}\,\ \partial \Omega.
@@ -56,13 +33,54 @@ It is easy to see that the solution to this problem is the function
 .. math::
          u(x,y) = -\frac{CONST_F}{4}(x^2 + y^2). 
 
-For the value $CONST_F = -4$, the output is shown below:
+For the values $CONST_F = -4$ and P_INIT = 5, the output is shown below:
 
 .. image:: 04/dirichlet.png
    :align: center
    :width: 400
    :height: 350
    :alt: Solution of the Dirichlet problem.
+
+Mathematics of Dirichlet BC
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Mathematically, Dirichlet conditions in Hermes are handled 
+as follows: The user chooses the so-called Dirichlet lift 
+function $G$ that matches the prescribed values on all parts 
+of the Dirichlet boundary. The Dirichlet lift is nothing 
+else than the function that one uses inside the callback 
+essential_bc_values(). The function $G$ can be chosen in 
+many different ways, but it is easy to prove that this does 
+not matter.
+
+Next, the solution $u$ to the original weak problem 
+
+.. math::
+    
+    a(u,v) = l(v)
+
+is written as $u = U + G$ where $U$ satisfies zero Dirichlet
+boundary conditions. Hereby the weak formulation turns into
+
+.. math::
+    
+    a(U,v) + a(G, v) = l(v)
+
+and since $a(G, v)$ is a linear form, we put it on the right-hand side:
+
+.. math::
+    
+    a(U,v) = l(v) - a(G, v)
+
+This is a new weak formulation that is solved by Hermes, and its solution 
+is $U$. The user, however, does not see any of this, as he is given 
+back the function $U + G$. 
+
+For more details on the treatment of boundary conditions as well as on the
+rest of the finite element technology, we refer the reader to 
+P. Solin: Partial Differential Equations and the Finite Element Methods,
+J. Wiley & Sons, 2005.
+
 
 Neumann BC
 ~~~~~~~~~~
@@ -130,6 +148,9 @@ to capture the singular gradient::
 
     mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);  // '3' is the vertex index from the mesh file.
 
+Visualizing solution gradient
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
 The gradient magnitude can be visualized via a MagFilter::
 
     // Compute and show gradient magnitude
@@ -138,14 +159,6 @@ The gradient magnitude can be visualized via a MagFilter::
     ScalarView gradview("Gradient", grad_win_geom);
     MagFilter grad(Tuple<MeshFunction>(&sln, &sln), Tuple<int>(H2D_FN_DX, H2D_FN_DY));
     gradview.show(&grad);
-
-Here we first meet Tuple - a construction designed to avoid variable argument 
-lists. The first Tuple is used to pass a pair of pointers to the same MeshFunction,
-and the next Tuple says that the vector components for the magnitude calculation 
-are the x- and y- partial derivatives. The class Solution that represents a piecewise-polynomial
-finite element function on a Mesh, is descendant of a more general class MeshFunction
-that can represent constants, general functions given via an analytic formula, 
-finite element solutions, etc. 
 
 The approximate solution for the values $C_1 = -1/2$, $C_2 = 1$, $C_3 = -1/2$,
 along with the singularity of gradient at the re-entrant corner are
@@ -166,6 +179,18 @@ shown in the following figures:
 .. raw:: html
 
    <hr style="clear: both; visibility: hidden;">
+
+Tuples
+~~~~~~
+
+Above we first met Tuple - a construction designed to avoid variable argument 
+lists. The first Tuple is used to pass a pair of pointers to the same MeshFunction,
+and the next Tuple says that the vector components for the magnitude calculation 
+are the x- and y- partial derivatives. The class Solution that represents a piecewise-polynomial
+finite element function on a Mesh, is descendant of a more general class MeshFunction
+that can represent constants, general functions given via an analytic formula, 
+finite element solutions, etc. 
+
 
 Newton BC
 ~~~~~~~~~

@@ -133,4 +133,4 @@ one can assign different weak forms to elements with different material markers.
 described in examples `iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/iron-water>`_,
 `saphir <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/saphir/main.cpp>`_ and others.
 
-The following example handles quadrature orders manually. 
+The following example 07-general handles quadrature orders manually. 
