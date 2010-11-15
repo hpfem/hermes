@@ -92,10 +92,8 @@ public:
 
   bool is_matrix_free() { return is_matfree; }
 
-  int neq;
-
 protected:
-
+  int neq;
   int seq;
   bool is_matfree;
 

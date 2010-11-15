@@ -329,6 +329,9 @@ public:
   /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
   static int max_neighbors;
 
+  /// Function that sets the variable ignore_errors. See the variable description.
+  void set_ignore_errors(bool value) {this->ignore_errors = value;};
+
 private:  
   
   Mesh* mesh;
@@ -639,6 +642,10 @@ public:
       
       friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
   };
+
+  /// When creating sparse structure of a matrix using this class, we want to ignore errors
+  /// and do nothing instead when set_active_edge() funciton is called for a non-boundary edge.
+  bool ignore_errors;
 };
 
 typedef NeighborSearch::ExtendedShapeset::ExtendedShapeFunction* ExtendedShapeFnPtr;

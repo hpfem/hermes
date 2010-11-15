@@ -21,6 +21,8 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
              "You must pass an active element to the NeighborSearch constructor.");  
   neighbors.reserve(NeighborSearch::max_neighbors * 2);
   neighbor_edges.reserve(NeighborSearch::max_neighbors * 2);
+
+  ignore_errors = false;
 } 
  
 
@@ -148,7 +150,8 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
 		}
 	}
 	else
-		error("The given edge isn't inner");
+    if(!ignore_errors)
+		  error("The given edge isn't inner");
   
   // Reset the neighbor information to force the user to set the correct active segment.
   neighb_el = NULL;
