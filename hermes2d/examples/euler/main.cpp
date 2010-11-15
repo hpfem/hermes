@@ -7,7 +7,7 @@
 
 const int P_INIT = 0;
 
-double TAU = 1E-4;
+double TAU = 1E-5;
 
 double t = 0;
 
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 	for(t = 0.0; t < TAU * 1000; t += TAU)
 	{		
 		iteration++;
-		
+
 		// Assemble stiffness matrix and rhs.
 		dp.assemble(matrix, rhs, iteration == 1 ? false : true);
 
@@ -178,16 +178,6 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e), Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
     else
     error ("Matrix solver failed.\n");
-  
-
-		// Debugging continued.
-    std::ofstream out("sol");
-    for(int j = 0; j < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e)); j++)
-      if(solver->get_solution()[j] != 0)
-					out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
-		out.close();
-		
 
 		prev_rho.copy(&sln_rho);
 		prev_rho_v_x.copy(&sln_rho_v_x);

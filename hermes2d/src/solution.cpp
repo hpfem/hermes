@@ -405,6 +405,8 @@ void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
     if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
 
     set_coeff_vector(space, pss, coeffs, add_dir_lift);
+
+    delete pss;
 }
 
 // using pss and coefficient array
@@ -431,17 +433,18 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   type = HERMES_SLN;
   num_dofs = Space::get_num_dofs(space);
 
-  // copy the mesh   TODO: share meshes between solutions
-  mesh = new Mesh;
-  //printf("Copying mesh from Space and setting own_mesh = true.\n");
-  mesh->copy(space->get_mesh());
-  own_mesh = true;
+  // copy the mesh   TODO: share meshes between solutions // WHAT???
+  mesh = space->get_mesh();
 
   // allocate the coefficient arrays
   num_elems = mesh->get_max_element_id();
+  if(elem_orders != NULL)
+    delete [] elem_orders;
   elem_orders = new int[num_elems];
   memset(elem_orders, 0, sizeof(int) * num_elems);
   for (int l = 0; l < num_components; l++) {
+    if(elem_coefs[l] != NULL)
+      delete [] elem_coefs[l];
     elem_coefs[l] = new int[num_elems];
     memset(elem_coefs[l], 0, sizeof(int) * num_elems);
   }
@@ -466,6 +469,8 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
     elem_orders[e->id] = o;
   }
   num_coefs *= num_components;
+  if(mono_coefs != NULL)
+    delete [] mono_coefs;
   mono_coefs = new scalar[num_coefs];
 
   // express the solution on elements as a linear combination of monomials
@@ -511,6 +516,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 
   if(mesh == NULL) error("mesh == NULL.\n");
   init_dxdy_buffer();
+
 }
 
 
