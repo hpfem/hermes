@@ -336,7 +336,7 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   printf("ndof allowed = %d\n", 240);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 1100) {      // ndofs was 231 at the time this test was created
+  if (ndof < 240) {      // ndofs was 231 at the time this test was created.
     printf("Success!\n");
     return ERROR_SUCCESS;
   }
