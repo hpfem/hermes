@@ -1,9 +1,8 @@
-// Development version of Euler equations example. For testing the equations are solved on a simple rectangular mesh.
-// Boundary conditions are specified for Inlet / Outlet / Solid wall parts of the boundary in a common way.
-// Explicit Euler's method used is used for the time discretization.
-// Initial conditions :  w0 = 0.0, w1 = 50.0, w2 = 0.0, w3 = 1E5.
-// Prescribed boundary values correspond with the initial conditions.
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_FILE "application.log"
+#include "hermes2d.h"
 
+// Development version of Euler equations example. 
 
 const int P_INIT = 0;
 
@@ -17,6 +16,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
                                                   //                SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
 // Set up numerical flux with default parameters.
+// For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux;
 
 BCType bc_types(int marker)
@@ -26,36 +26,30 @@ BCType bc_types(int marker)
 
 int main(int argc, char* argv[])
 {
+  // Load the mesh.
 	Mesh mesh;
 	H2DReader mloader;
 	mloader.load("GAMM-channel.mesh", &mesh);
 
+  // Perform initial mesh refinements.
 	mesh.refine_all_elements();
 	mesh.refine_all_elements();
 	mesh.refine_all_elements();
 	mesh.refine_all_elements();
 
-  
-
+  // Initialize spaces with default shapesets.
 	L2Space space_rho(&mesh,P_INIT);
 	L2Space space_rho_v_x(&mesh,P_INIT);
 	L2Space space_rho_v_y(&mesh,P_INIT);
 	L2Space space_e(&mesh,P_INIT);
 
+  // Set boundary condition types.
 	space_rho.set_bc_types(bc_types);
 	space_rho_v_x.set_bc_types(bc_types);
 	space_rho_v_y.set_bc_types(bc_types);
 	space_e.set_bc_types(bc_types);
 
-	/*
-	BaseView bview;
-	bview.show(&space_rho);
-	//MeshView mview("Mesh");
-	//mview.show(&mesh);
-	View::wait();
-	*/
-
-
+  // Initialize solutions, set initial conditions.
 	Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;
 	sln_rho.set_exact(&mesh, ic_density);
 	sln_rho_v_x.set_exact(&mesh, ic_density_vel_x);
@@ -66,6 +60,7 @@ int main(int argc, char* argv[])
 	prev_rho_v_y.set_exact(&mesh, ic_density_vel_y);
 	prev_e.set_exact(&mesh, ic_energy);
 
+  // Initialize weak formulation.
 	WeakForm wf(4);
 
 	// Bilinear forms coming from time discretization by explicit Euler's method.
@@ -74,7 +69,7 @@ int main(int argc, char* argv[])
 	wf.add_matrix_form(2,2,callback(bilinear_form_2_2_time));
 	wf.add_matrix_form(3,3,callback(bilinear_form_3_3_time));
 
-	//Volumetric linear forms.
+	// Volumetric linear forms.
 	// Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
 	// First flux.
 	wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
@@ -129,6 +124,7 @@ int main(int argc, char* argv[])
 	wf.add_vector_form_surf(2,bdy_flux_solid_wall_comp_2, linear_form_order, 1, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 	wf.add_vector_form_surf(3,bdy_flux_solid_wall_comp_3, linear_form_order, 1, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
+  // Initialize the FE problem.
   bool is_linear = true;
 	DiscreteProblem dp(&wf, Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
 
@@ -149,28 +145,33 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
   
 	for(t = 0.0; t < TAU * 1000; t += TAU)
-	{		
+	{
+    info("---- Time step %d, time %3.5f.", iteration, t);
+
 		iteration++;
 
-		// Assemble stiffness matrix and rhs.
-		dp.assemble(matrix, rhs, iteration == 1 ? false : true);
+		// Assemble stiffness matrix and rhs or just rhs.
+    bool rhs_only = iteration == 1 ? false : true;
+    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+    else info("Assembling the right-hand side vector (only).");
+		dp.assemble(matrix, rhs, rhs_only);
 
 		// Debugging.
-		/*
+    /*
 		std::ofstream out("matrix");
-		for(int i = 0; i < mat->get_size(); i++)
-			for(int j = 0; j < mat->get_size(); j++)
-				if(mat->get(i,j) != 0)
-					out << '(' << i << ',' << j << ')' << ':' << mat->get(i,j) << std::endl;
+		for(int i = 0; i < matrix->get_size(); i++)
+			for(int j = 0; j < matrix->get_size(); j++)
+				if(std::abs(matrix->get(i,j)) > 1E-6)
+					out << '(' << i << ',' << j << ')' << ':' << matrix->get(i,j) << std::endl;
 		out.close();
 
 		out.open("rhs");
-			for(int j = 0; j < mat->get_size(); j++)
-				if(rhs->get(j) != 0)
+			for(int j = 0; j < matrix->get_size(); j++)
+				if(std::abs(rhs->get(j)) > 1E-6)
 					out << '(' << j << ')' << ':' << rhs->get(j) << std::endl;
 		out.close();
-		*/
-		
+    */
+				
 		// Solve the matrix problem.
 		info("Solving the matrix problem.");
     if(solver->solve())
@@ -179,6 +180,7 @@ int main(int argc, char* argv[])
     else
     error ("Matrix solver failed.\n");
 
+    // Copy the solutions into the previous time level ones.
 		prev_rho.copy(&sln_rho);
 		prev_rho_v_x.copy(&sln_rho_v_x);
 		prev_rho_v_y.copy(&sln_rho_v_y);

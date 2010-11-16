@@ -150,7 +150,7 @@ public:
 #undef H2D_SUBTRACT_IF_NOT_NULL
 
   virtual void free_ord() {
-    delete val;
+    delete [] val;
     val = val0 = val1 = NULL;
     dx = dx0 = dx1 = NULL;
     dy = dy0 = dy1 = NULL;
@@ -248,6 +248,15 @@ class DiscontinuousFunc : public Func<T>
       assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,
                  "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
     }
+
+    /// Desctructor.
+    ~DiscontinuousFunc()
+    {
+      if(fn_central != NULL)
+        delete fn_central;
+      if(fn_neighbor != NULL)
+        delete fn_neighbor;
+    }
     
     // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
     
@@ -278,21 +287,17 @@ class DiscontinuousFunc : public Func<T>
     virtual void free_fn() { 
       if (fn_central != NULL) {
         fn_central->free_fn(); 
-        fn_central = NULL;
       }
       if (fn_neighbor != NULL) {
         fn_neighbor->free_fn();
-        fn_neighbor = NULL;
       }
     }
     virtual void free_ord() {
       if (fn_central != NULL) {
         fn_central->free_ord(); 
-        fn_central = NULL;
       }
       if (fn_neighbor != NULL) {
         fn_neighbor->free_ord();
-        fn_neighbor = NULL;
       }
     }
 };

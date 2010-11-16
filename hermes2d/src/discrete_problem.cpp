@@ -450,7 +450,9 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           /* BEGIN IDENTICAL CODE WITH H3D */
 
           // assemble the local stiffness matrix for the form mfv
-          scalar **local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
+          scalar **local_stiffness_matrix;
+          if(rhsonly == false)
+            local_stiffness_matrix = get_matrix_buffer(std::max(am->cnt, an->cnt));
           for (int i = 0; i < am->cnt; i++)
           {
             if (!tra && am->dof[i] < 0) continue;
@@ -1545,6 +1547,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
     if (prev[i] != NULL) {prev[i]->free_fn(); delete prev[i]; }
   }
   if (ext != NULL) {ext->free(); delete ext;}
+
   
   return 0.5 * res; // Edges are parametrized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
