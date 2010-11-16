@@ -44,26 +44,32 @@
 /// factorization.
 /// 
 /// <b>Enabled solvers:</b>
-///   -\c SuperLU - performs reordering, scaling and factorization separately.
-///   -\c UMFPack - performs scaling and factorization in one step. The option
+///   -\c SuperLU - performs reordering, scaling and factorization separately. When the 
+///                 multithreaded version is used, scaling is performed during the factorization
+///                 phase (if neccessary) and thus \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
+///                 and \c HERMES_REUSE_MATRIX_REORDERING have the same effect.
+///   -\c UMFPack - like the MT version of SuperLU, performs scaling and factorization in one step.
 ///                 \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
 ///                 \c HERMES_REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
-///   -\c Pardiso - The library itself may be set not to perform scaling or to perform 
-///                 reordering and scaling in one step, preceding the numerical 
-///                 factorization (default). Since scaling might be important for good 
-///                 conditioning of the matrix entering the factorization phase and also
-///                 contribute to lower fill-in during that phase, the latter is chosen.
+///   -\c Pardiso - performs reordering and scaling in one step, during the symbolic analysis. Both 
+///                 options \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING and 
+///                 \c HERMES_REUSE_MATRIX_REORDERING have the same meaning, i.e. results of the 
+///                 symbolic phase will be reused and L, U will be computed anew.
 ///   -\c MUMPS   - If \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING is set, scaling is performed
 ///                 during analysis and only factorization is repeated during each solve.
 ///                 If \c HERMES_REUSE_MATRIX_REORDERING is set, scaling is performed during 
 ///                 the factorization phase. This may be less efficient, but more reliable,
 ///                 especially for highly non-symmetric matrices.
-///   -\c AMESOS  - not yet. 
+///   -\c AMESOS  - Behaves like UMFPack.
+///   -\c PETSc   - Factorization reuse applies to the construction of PETSc preconditioner.
+///                 Both \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING and 
+///                 \c HERMES_REUSE_MATRIX_REORDERING allow to reuse the non-zero pattern of the
+///                 previously created preconditioner, \c HERMES_REUSE_FACTORIZATION_COMPLETELY
+///                 indicates that the preconditioner may be reused completely for future solves.
 ///
 /// <b>Typical scenario:</b>
 /// When \c rhsonly was set to \c true for the assembly phase, 
-/// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following 
-/// solution phase.
+/// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following solution phase.
 ///
 enum FactorizationScheme
 {
