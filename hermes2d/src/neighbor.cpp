@@ -34,6 +34,8 @@ NeighborSearch::~NeighborSearch()
   clear_supported_shapes();
   clear_neighbor_pss();
   detach_pss();
+  for(int i = 0; i < transformations.size(); i++)
+    delete [] transformations.at(i);
   transformations.clear();
   n_trans.clear();
 }
@@ -590,8 +592,9 @@ double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
 {
   ensure_active_segment(this);
-  Func<Ord>* fo = init_fn_ord(fu->get_edge_fn_order(active_edge));
-  return new DiscontinuousFunc<Ord>(fo, fo);
+  Func<Ord>* fo1 = init_fn_ord(fu->get_edge_fn_order(active_edge));
+  Func<Ord>* fo2 = init_fn_ord(fu->get_edge_fn_order(active_edge));
+  return new DiscontinuousFunc<Ord>(fo1, fo2);
 }
 
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
