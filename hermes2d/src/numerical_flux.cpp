@@ -1,11 +1,6 @@
 #include "numerical_flux.h"
 
-// shortcuts for physical constants
-#define R H2D_PARAM_R
-#define c_v H2D_PARAM_c_v
-#define kappa H2D_PARAM_kappa
-
-double f_x(int i, double w0, double w1, double w3, double w4)
+double NumericalFlux::f_x(int i, double w0, double w1, double w3, double w4)
 {
     if (i == 0)
         return w1;
@@ -19,7 +14,7 @@ double f_x(int i, double w0, double w1, double w3, double w4)
     error("Invalid index.");
 }
 
-double f_z(int i, double w0, double w1, double w3, double w4)
+double NumericalFlux::f_z(int i, double w0, double w1, double w3, double w4)
 {
     if (i == 0)
         return w3;
@@ -33,7 +28,7 @@ double f_z(int i, double w0, double w1, double w3, double w4)
     error("Invalid index.");
 }
 
-double A_x(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double w4)
 {
     if (i == 0 && j == 0)
         return 0;
@@ -81,7 +76,7 @@ double A_x(int i, int j, double w0, double w1, double w3, double w4)
     error("Invalid index.");
 }
 
-double A_z(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::A_z(int i, int j, double w0, double w1, double w3, double w4)
 {
     if (i == 0 && j == 0)
         return 0;
@@ -128,7 +123,7 @@ double A_z(int i, int j, double w0, double w1, double w3, double w4)
     error("Invalid index.");
 }
 
-double matrix_R(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::matrix_R(int i, int j, double w0, double w1, double w3, double w4)
 {
     double rho = w0;
     double u = w1/w0;
@@ -177,7 +172,7 @@ double matrix_R(int i, int j, double w0, double w1, double w3, double w4)
     error("Invalid index.");
 }
 
-double matrix_R_inv(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::matrix_R_inv(int i, int j, double w0, double w1, double w3, double w4)
 {
     double rho = w0;
     double u = w1/w0;
@@ -229,7 +224,7 @@ double matrix_R_inv(int i, int j, double w0, double w1, double w3, double w4)
     return result/(c*c);
 }
 
-double matrix_D_minus(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::matrix_D_minus(int i, int j, double w0, double w1, double w3, double w4)
 {
     double rho = w0;
     double u = w1/w0;
@@ -282,7 +277,7 @@ double matrix_D_minus(int i, int j, double w0, double w1, double w3, double w4)
 }
 
 // multiplies two matrices
-void dot(double result[4][4], double A[4][4], double B[4][4])
+void NumericalFlux::dot(double result[4][4], double A[4][4], double B[4][4])
 {
     for (int i=0; i < 4; i++)
         for (int j=0; j < 4; j++) {
@@ -294,7 +289,7 @@ void dot(double result[4][4], double A[4][4], double B[4][4])
 }
 
 // multiplies a matrix and a vector
-void dot_vector(double result[4], double A[4][4], double B[4])
+void NumericalFlux::dot_vector(double result[4], double A[4][4], double B[4])
 {
     for (int i=0; i < 4; i++) {
         double sum=0;
@@ -310,7 +305,7 @@ void dot_vector(double result[4], double A[4][4], double B[4])
 // becomes
 // [nx, ny]
 // [-ny, nx]
-void T_rot(double result[4][4], double beta)
+void NumericalFlux::T_rot(double result[4][4], double beta)
 {
     for (int i=0; i < 4; i++)
         for (int j=0; j < 4; j++)
@@ -323,7 +318,7 @@ void T_rot(double result[4][4], double beta)
     result[3][3] = 1;
 }
 
-void A_minus(double result[4][4], double w0, double w1, double w3, double w4)
+void NumericalFlux::A_minus(double result[4][4], double w0, double w1, double w3, double w4)
 {
     double _R[4][4];
     double _D_minus[4][4];
@@ -343,7 +338,7 @@ void A_minus(double result[4][4], double w0, double w1, double w3, double w4)
     dot(result, _R, _tmp);
 }
 
-void riemann_solver(double result[4], double w_l[4], double w_r[4])
+void NumericalFlux::riemann_solver(double result[4], double w_l[4], double w_r[4])
 {
     //printf("w_l: %f %f %f %f\n", w_l[0], w_l[1], w_l[2], w_l[3]);
     //printf("w_r: %f %f %f %f\n", w_r[0], w_r[1], w_r[2], w_r[3]);
@@ -365,7 +360,7 @@ void riemann_solver(double result[4], double w_l[4], double w_r[4])
 
 // calculates the inverted flux, for testing purposes
 // it should return the same thing as riemann_solver(), only with minus sign
-void riemann_solver_invert(double result[4], double w_l[4], double w_r[4])
+void NumericalFlux::riemann_solver_invert(double result[4], double w_l[4], double w_r[4])
 {
     double m[4][4];
     double _w_l[4];
@@ -382,7 +377,7 @@ void riemann_solver_invert(double result[4], double w_l[4], double w_r[4])
 // Calculates the numerical flux in the normal (nx, ny) by rotating into the
 // local system, solving the Riemann problem and rotating back. It returns the
 // state as a 4-component vector.
-void numerical_flux(double result[4], double w_l[4], double w_r[4],
+void NumericalFlux::numerical_flux(double result[4], double w_l[4], double w_r[4],
         double nx, double ny)
 {
     double alpha = atan2(ny, nx);
@@ -400,7 +395,7 @@ void numerical_flux(double result[4], double w_l[4], double w_r[4],
 }
 
 // The same as numerical_flux, but only returns the i-th component:
-double numerical_flux_i(int i, double w_l[4], double w_r[4],
+double NumericalFlux::numerical_flux_i(int i, double w_l[4], double w_r[4],
         double nx, double ny)
 {
     double result[4];
