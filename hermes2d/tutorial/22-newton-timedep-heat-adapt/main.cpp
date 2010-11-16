@@ -341,17 +341,17 @@ int main(int argc, char* argv[])
       delete ref_space->get_mesh();
       delete ref_space;
       delete dp;
-
-      // Visualize the solution and mesh.
-      char title[100];
-      sprintf(title, "Solution, time level %d", ts);
-      view.set_title(title);
-      view.show(&sln);
-      sprintf(title, "Mesh, time level %d", ts);
-      ordview.set_title(title);
-      ordview.show(&space);
     }
     while (done == false);
+
+    // Visualize the solution and mesh.
+    char title[100];
+    sprintf(title, "Solution, time level %d", ts);
+    view.set_title(title);
+    view.show(&sln);
+    sprintf(title, "Mesh, time level %d", ts);
+    ordview.set_title(title);
+    ordview.show(&space);
 
     // Copy last reference solution into sln_prev_time.
     sln_prev_time.copy(&ref_sln);
