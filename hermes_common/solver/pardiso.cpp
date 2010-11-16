@@ -26,7 +26,8 @@
 
 #ifdef WITH_PARDISO
   #ifdef __cplusplus
-    extern "C" {
+    extern "C" 
+    {
   #endif
       extern int pardisoinit_(void *, int *, int *, int*, double *, int *);
       extern int pardiso_(void *, int *, int *, int *, int *, int *,
@@ -49,7 +50,8 @@
 // row (CSC) or column (CSR) ('idx') among indices of nonzero values in 
 // a particular column (CSC) or row (CSR) ('Ai').
 //
-static int find_position(int *Ai, int Alen, int idx) {
+static int find_position(int *Ai, int Alen, int idx)
+{
   _F_
   assert (idx >= 0);
   
@@ -70,7 +72,8 @@ static int find_position(int *Ai, int Alen, int idx) {
   return mid;
 }
 
-PardisoMatrix::PardisoMatrix() {
+PardisoMatrix::PardisoMatrix() 
+{
   _F_
   size = 0; nnz = 0;
   Ap = NULL;
@@ -78,12 +81,14 @@ PardisoMatrix::PardisoMatrix() {
   Ax = NULL;
 }
 
-PardisoMatrix::~PardisoMatrix() {
+PardisoMatrix::~PardisoMatrix() 
+{
   _F_
   free();
 }
 
-void PardisoMatrix::pre_add_ij(int row, int col) {
+void PardisoMatrix::pre_add_ij(int row, int col) 
+{
   _F_
   SparseMatrix::pre_add_ij(col, row);
 }
@@ -157,16 +162,16 @@ void PardisoMatrix::add(int m, int n, scalar v) {
   }
 }
 
-void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
+void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) 
+{
   _F_
   for (int i = 0; i < m; i++)       // rows
     for (int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 
-/// dumping matrix and right-hand side
-///
-bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
+{
   _F_
   switch (fmt) 
   {
@@ -201,14 +206,16 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   }
 }
 
-int PardisoMatrix::get_matrix_size() const {
+int PardisoMatrix::get_matrix_size() const
+{
   _F_
   assert(Ap != NULL);
   /*          Ai             Ax                     Ap                    nnz       */    
   return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
 
-double PardisoMatrix::get_fill_in() const {
+double PardisoMatrix::get_fill_in() const 
+{
   _F_
   return nnz / (double) (size * size);
 }
@@ -216,18 +223,21 @@ double PardisoMatrix::get_fill_in() const {
 
 // PardisoVector ///////
 
-PardisoVector::PardisoVector() {
+PardisoVector::PardisoVector() 
+{
   _F_
   v = NULL;
   size = 0;
 }
 
-PardisoVector::~PardisoVector() {
+PardisoVector::~PardisoVector() 
+{
   _F_
   free();
 }
 
-void PardisoVector::alloc(int n) {
+void PardisoVector::alloc(int n) 
+{
   _F_
   free();
   v = new scalar[n];
@@ -236,24 +246,28 @@ void PardisoVector::alloc(int n) {
   zero();
 }
 
-void PardisoVector::zero() {
+void PardisoVector::zero() 
+{
   _F_
   memset(v, 0, size * sizeof(scalar));
 }
 
-void PardisoVector::free() {
+void PardisoVector::free() 
+{
   _F_
   delete [] v;
   v = NULL;
   size = 0;
 }
 
-void PardisoVector::set(int idx, scalar y) {
+void PardisoVector::set(int idx, scalar y) 
+{
   _F_
   if (idx >= 0) v[idx] = y;
 }
 
-void PardisoVector::add(int idx, scalar y) {
+void PardisoVector::add(int idx, scalar y) 
+{
   _F_
   if (idx >= 0) v[idx] += y;
 }
@@ -263,13 +277,15 @@ void PardisoVector::extract(scalar *v) const
   return;
 }
 
-void PardisoVector::add(int n, int *idx, scalar *y) {
+void PardisoVector::add(int n, int *idx, scalar *y) 
+{
   _F_
   for (int i = 0; i < n; i++)
     if (idx[i] >= 0) v[idx[i]] += y[i];
 }
 
-bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
+{
   _F_
   switch (fmt) 
   {
@@ -301,129 +317,200 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 // PARDISO solver //////
 
+bool PardisoLinearSolver::check_status()
+{
+  _F_
+  switch(err)
+  {
+    case    0:
+      return true;
+    case   -1:
+      warning("Input inconsistent.");
+      break;
+    case   -2:
+      warning("Not enough memory.");
+      break;
+    case   -3:
+      warning("Reordering problem.");
+      break;
+    case   -4:
+      warning("Zero pivot, numerical fact. or iterative refinement problem.");
+      break;
+    case   -5:
+      warning("Unclassified (internal) error.");
+      break;
+    case   -6:
+      warning("Preordering failed (matrix types 11, 13 only).");
+      break;
+    case   -7:
+      warning("Diagonal matrix problem.");
+      break;
+    case   -8:
+      warning("32-bit integer overflow problem.");
+      break;
+    case  -10:
+      warning("No license file pardiso.lic found.");
+      break;
+    case  -11:
+      warning("License is expired.");
+      break;
+    case  -12:
+      warning("Wrong username or hostname.");
+      break;
+    case -100:
+      warning("Reached maximum number of Krylov-subspace iteration in iterative solver.");
+      break;
+    case -101:
+      warning("No sufficient convergence in Krylov-subspace iteration within 25 iterations.");
+      break;
+    case -102:
+      warning("Error in Krylov-subspace iteration.");
+      break;
+    case -103:
+      warning("Break-Down in Krylov-subspace iteration.");
+      break;
+  }
+  return false;
+}
+
+
 PardisoLinearSolver::PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs)
-  : LinearSolver(), m(m), rhs(rhs)
+  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), inited(false)
 {
   _F_
 #ifdef WITH_PARDISO
+  solver = 0;   // Sparse direct solver. Set solver = 1 for multi-recursive iterative solver.
+  maxfct = 1;   // Maximum number of numerical factorizations.
+  mnum = 1;     // Which factorization to use.
+  msglvl = 0;   // Do not print statistical information.
+  err = 0;      // Initialize error flag.
+  
+#if defined (H2D_COMPLEX) || defined (H3D_COMPLEX)
+  mtype = 13;     // Complex unsymmetric matrix.
+#else    
+  mtype = 11;     // Real unsymmetric matrix.
+#endif
+  
+  nrhs = 1;       // Number of right hand sides.
+  
+  // Set the number of threads.
+  char *var = getenv("OMP_NUM_THREADS");
+  if (var != NULL) sscanf(var, "%d", &num_procs);
+  else num_procs = 1;
+  iparm[2] = num_procs;  
+  
+  // Initialize Pardiso and set default control parameters (iparm[0,1,3-64])
+  PARDISOINIT(pt, &mtype, &solver, iparm, dparm, &err);
+  
+  switch(err)
+  {
+    case -10: 
+      error("No license file pardiso.lic found.");
+    case -11: 
+      error("License is expired.");
+    case -12: 
+      error("Wrong username or hostname.");
+  }
+  
+  // Override some default parameters.
+  iparm[8] = 1; // Max. number of iterative refinement steps.
+  
 #else
   error(PARDISO_NOT_COMPILED);
 #endif
 }
 
-PardisoLinearSolver::~PardisoLinearSolver() {
+PardisoLinearSolver::~PardisoLinearSolver() 
+{
   _F_
 #ifdef WITH_PARDISO  
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
+  // Auxiliary variables.
+  scalar ddum;  // Double/complex dummy.
+  int idum;     // Integer dummy.
+  
+  // Termination.
+  phase = -1; // Release internal memory.
+  PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &m->size, &ddum, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
 #endif
 }
 
-bool PardisoLinearSolver::solve() {
+bool PardisoLinearSolver::solve() 
+{
   _F_
 #ifdef WITH_PARDISO
   assert(m != NULL);
   assert(rhs != NULL);
 
-  bool res = true;
-  int n = m->size;
+  assert(m->size == rhs->size);
 
-  try {
-    // Numbers of processors, value of OMP_NUM_THREADS
-    int num_procs;
-    char *var = getenv("OMP_NUM_THREADS");
-    if (var != NULL) sscanf(var, "%d", &num_procs);
-    else num_procs = 1;
-
-#if defined (H2D_COMPLEX) || defined (H3D_COMPLEX)
-    int mtype = 13;		// Complex unsymmetric matrix
-#else    
-    int mtype = 11;   // Real unsymmetric matrix
+  TimePeriod tmr;
+        
+  // Convert matrix from 0-based C-notation to Fortran 1-based notation.
+  for (int i = 0; i < m->size + 1; i++) m->Ap[i] += 1;
+  for (int i = 0; i < m->nnz; i++) m->Ai[i] += 1;
+  
+  // Prepare the solution vector;
+  delete [] sln;
+  sln = new scalar[m->size];
+  MEM_CHECK(sln);
+  memset(sln, 0, (m->size) * sizeof(scalar));
+  
+  // Determine which kind of calculation will be performed, according to the
+  // factorization data reuse strategy.
+  if (!setup_factorization())
+  {
+    warning("Factorization could not be completed.");
+    return false;
+  }
+  
+  // Perform the jobs specified by setup_factorization().
+  int idummy;
+  PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &m->size, m->Ax, m->Ap, m->Ai, &idummy, &nrhs, iparm, &msglvl, rhs->v, sln, &err, dparm);
+      
+  //  Convert matrix back to 0-based C-notation.
+  for (int i = 0; i < m->size + 1; i++) m->Ap[i] -= 1;
+  for (int i = 0; i < m->nnz; i++) m->Ai[i] -= 1;
+  
+  tmr.tick();
+  time = tmr.accumulated();
+  
+  return check_status();
+#else
+  return false;
 #endif
+}
 
-    int nrhs = 1;		// Number of right hand sides
-    int nnz = m->Ap[n];	// The number of nonzero elements
+#define JOB_ANALYZE_FACTORIZE_SOLVE   13        // Symbolic factorization (reordering,scaling) + numerical factorization + solution.
+#define JOB_FACTORIZE_SOLVE           23        // Numerical factorization + solution.
+#define JOB_SOLVE                     33        // Solution: back substitution and iterative refinement.
 
-    // Internal solver memory pointer pt,
-    // 32-bit: int pt[64]; 64-bit: long int pt[64]
-    // or void *pt[64] should be OK on both architectures
-    void *pt[64];
-    // Pardiso control parameters. Consult Pardiso manual for interpretation.
-    int iparm[64];
-    double dparm[64];
-    int maxfct, mnum, phase, err, msglvl;
-    // Auxiliary variables.
-    scalar ddum; // Double dummy
-    int idum; // Integer dummy.
-
-    iparm[2] = num_procs; // Number of SMP threads. Remaining entries in iparm
-                          // will be filled by default values by PARDISOINIT.
-                          
-    int solver = 0;   // Sparse direct solver. Set solver = 1 for multi-recursive
-                      // iterative solver.
-
-    maxfct = 1;		// Maximum number of numerical factorizations.
-    mnum = 1;		// Which factorization to use.
-    msglvl = 0;		// Do not print statistical information
-    err = 0;		// Initialize error flag
-
-    // Convert matrix from 0-based C-notation to Fortran 1-based notation.
-    for (int i = 0; i < n + 1; i++) m->Ap[i] += 1;
-    for (int i = 0; i < nnz; i++) m->Ai[i] += 1;
-
-    TimePeriod tmr;
+bool PardisoLinearSolver::setup_factorization()
+{
+  _F_
+#ifdef WITH_PARDISO
+  // When called for the first time, all three phases (analysis, factorization,
+  // solution) must be performed. 
+  int eff_fact_scheme = factorization_scheme;
+  if( !inited && factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH)
+    eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
     
-    // Setup Pardiso control parameters.
-    PARDISOINIT(pt, &mtype, &solver, iparm, dparm, &err);
-
-    // .. Reordering and Symbolic Factorization. This step also allocates
-    // all memory that is necessary for the factorization.
-    phase = 11;
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
-    if (err != 0) {
-      // ERROR during symbolic factorization: err
-      throw ERR_FAILURE;
-    }
-
-    // .. Numerical factorization.
-    phase = 22;
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
-    if (err != 0) {
-      // ERROR during numerical factorization: err
-      throw ERR_FAILURE;
-    }
-
-    // .. Back substitution and iterative refinement.
-    delete [] sln;
-    sln = new scalar[m->size];
-    MEM_CHECK(sln);
-    memset(sln, 0, (m->size) * sizeof(scalar));
-
-    phase = 33;
-    iparm[7] = 1; // Max numbers of iterative refinement steps.
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, m->Ax, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, rhs->v, sln, &err, dparm);
-    if (err != 0) {
-      // ERROR during solution: err
-      throw ERR_FAILURE;
-    }
-
-    tmr.tick();
-    time = tmr.accumulated();
-
-    //  Convert matrix back to 0-based C-notation.
-    for (int i = 0; i < n + 1; i++) m->Ap[i] -= 1;
-    for (int i = 0; i < nnz; i++) m->Ai[i] -= 1;
-
-    // .. Termination and release of memory.
-    phase = -1; // Release internal memory.
-    PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &n, &ddum, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
+  switch (eff_fact_scheme)
+  {
+    case HERMES_FACTORIZE_FROM_SCRATCH:        
+      phase = JOB_ANALYZE_FACTORIZE_SOLVE;
+      break;
+    case HERMES_REUSE_MATRIX_REORDERING:
+    case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
+      phase = JOB_FACTORIZE_SOLVE;
+      break;
+    case HERMES_REUSE_FACTORIZATION_COMPLETELY:
+      phase = JOB_SOLVE;
+      break;
   }
-  catch (int e) {
-    error = e;
-    res = false;
-  }
-
-  return res;
+  
+  inited = true;
+  
+  return true;
 #else
   return false;
 #endif
