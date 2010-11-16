@@ -129,7 +129,9 @@ protected:
 #ifdef WITH_MUMPS
   MUMPS_STRUCT  param;
   
-  /// Initialize a MUMPS instance.
+  bool check_status();
+  
+  /// (Re)initialize a MUMPS instance.
   bool reinit();
   bool inited;
 #endif

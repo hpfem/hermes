@@ -370,7 +370,7 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 
 // Macros allowing to use indices according to the Fortran documentation to index C arrays.
 #define ICNTL(I)            icntl[(I)-1]
-#define MUMPS_INFO(param,I) param->infog[(I)-1]
+#define MUMPS_INFO(param,I) (param).infog[(I)-1]
 #define INFOG(I)            infog[(I)-1]
 
 // Job definitions according to MUMPS documentation.
@@ -380,14 +380,14 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 #define JOB_FACTORIZE_SOLVE          5
 #define JOB_SOLVE                    3
 
-static bool check_status(MUMPS_STRUCT *param)
+bool MumpsSolver::check_status()
 {
   _F_
-  switch (param->INFOG(1)) {
+  switch (param.INFOG(1)) {
     case 0: return true; // no error
     case -1: warning("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
     // TODO: add the rest according to the MUMPS docs
-    default: warning("INFOG(1) = %d", param->INFOG(1)); break;
+    default: warning("INFOG(1) = %d", param.INFOG(1)); break;
   }
   return false;
 }
@@ -409,7 +409,7 @@ bool MumpsSolver::reinit()
   param.comm_fortran=USE_COMM_WORLD;
   
   MUMPS(&param);
-  inited = check_status(&param);
+  inited = check_status();
   
   if (inited)
   {
@@ -493,7 +493,7 @@ bool MumpsSolver::solve()
   // Do the jobs specified in setup_factorization().
   MUMPS(&param);
   
-  ret = check_status(&param);
+  ret = check_status();
 
   if (ret) 
   {
@@ -574,6 +574,8 @@ bool MumpsSolver::setup_factorization()
       break;
   }
   
-#endif
   return true;
+#else
+  return false;
+#endif
 }
