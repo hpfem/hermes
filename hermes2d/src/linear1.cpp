@@ -172,7 +172,7 @@ int Linearizer::get_vertex(int p1, int p2, double x, double y, double value)
 
 int Linearizer::get_top_vertex(int id, double value)
 {
-  if (fabs(value - verts[id][2]) < max*1e-4) return id;
+  if (fabs(value - verts[id][2]) < max*1e-24) return id;
   return get_vertex(-rand(), -rand(), verts[id][0], verts[id][1], value);
 }
 
