@@ -538,7 +538,8 @@ bool SuperLUSolver::solve()
   slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
                         &L, &U, &B, &X, &rpivot_growth, &rcond, &ferr, &berr, 
                         &stat, &memusage, &info );
-*/                        
+*/
+                        
   // ... OR ...
   
   // Estimate reciprocal condition number of A and solve the system. If A is singular, info
@@ -549,7 +550,8 @@ bool SuperLUSolver::solve()
                         &stat, NULL, &info );
 
   // ... OR ...
-/*
+
+/*  
   // Do not check the regularity of A and just solve the system.
   //
   slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,

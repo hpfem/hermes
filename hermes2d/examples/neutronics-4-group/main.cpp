@@ -41,7 +41,7 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
 const int P_INIT_1 = 4,                           // Initial polynomial degree for approximation of group 1 fluxes.
           P_INIT_2 = 4,                           // Initial polynomial degree for approximation of group 2 fluxes.
           P_INIT_3 = 4,                           // Initial polynomial degree for approximation of group 3 fluxes.
@@ -213,6 +213,8 @@ int main(int argc, char* argv[])
   // Main power iteration loop:
   int iter = 1; bool done = false;
   bool rhs_only = false;
+  
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
   do
   {
     info("------------ Power iteration %d:", iter);
@@ -220,13 +222,16 @@ int main(int argc, char* argv[])
     info("Assembling the stiffness matrix and right-hand side vector.");
     dp.assemble(matrix, rhs, rhs_only);
     
+    /* 
+    // Testing the factorization reuse schemes for direct solvers.
     if (iter == 10)  
       solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING);
     if (iter == 20)
       solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
     if (iter == 30) 
       solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
-    
+    */
+ 
     info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
     solver_time.tick(HERMES_SKIP);  
     bool solved = solver->solve();  
