@@ -362,11 +362,38 @@ SuperLUSolver::SuperLUSolver(SuperLUMatrix *m, SuperLUVector *rhs)
 {
   _F_
 #ifdef WITH_SUPERLU
-  R = C = NULL;
-  perm_r = perm_c = etree = NULL;
+  R = NULL;
+  C = NULL;
+  perm_r = NULL;
+  perm_c = NULL;
+  etree = NULL; 
+#ifndef SLU_MT
   *equed = '\0';
+#endif  
+
+  // Set the default input options:
+#ifdef SLU_MT
+  // I am not sure if this will work well on Windows:
+  // http://stackoverflow.com/questions/631664/accessing-environment-variables-in-c
+  char *nt_var = getenv("OMP_NUM_THREADS");
+  if (nt_var)
+    options.nprocs          = std::max(1, atoi(nt_var));
+  else
+    options.nprocs          = 1;
   
-  /* Set the default input options:
+  options.fact              = EQUILIBRATE;  // Rescale the matrix if neccessary.
+  options.trans             = NOTRANS;      // Not solving the transposed problem.
+  options.refact            = NO;           // Factorize from scratch for the first time.
+  options.diag_pivot_thresh = 1.0;          // Use partial pivoting during GEM.
+  options.usepr             = NO;           // Let SuperLU compute the row permutations.
+  options.drop_tol          = 0.0;          // Not yet implemented in SuperLU_MT 2.0.
+  options.SymmetricMode     = NO;           // Assume general non-symmetric problem.
+    
+  // Default options related to the supernodal algorithm.
+  options.panel_size        = sp_ienv(1);
+  options.relax             = sp_ienv(2);
+#else
+  /*
   options.Fact = DOFACT;
   options.Equil = YES;
   options.ColPerm = COLAMD;
@@ -378,7 +405,9 @@ SuperLUSolver::SuperLUSolver(SuperLUMatrix *m, SuperLUVector *rhs)
   options.ConditionNumber = NO;
   options.PrintStat = YES;
   */
-  set_default_options(&options);
+  set_default_options(&options);  // This function is only present in the sequential SLU.
+#endif  
+
   options.PrintStat = YES;   // Set to NO to suppress output.
   
   has_A = has_B = inited = false;
@@ -409,23 +438,28 @@ bool SuperLUSolver::solve()
   
   TimePeriod tmr;
   
-  // Initialize SuperLU.
-  void *work = NULL;      // Explicit pointer to the factorization workspace 
-                          // (unused, see below).
-  int lwork = 0;          // Space for the factorization will be allocated 
-                          // internally by system malloc.
-  double ferr = 1.0;      // Estimated relative forward error 
-                          // (unused unless iterative refinement is performed).
-  double berr = 1.0;      // Estimated relative backward error 
-                          // (unused unless iterative refinement is performed).
-  mem_usage_t mem_usage;  // Record the memory usage statistics.
-  double rpivot_growth;   // The reciprocal pivot growth factor.
-  double rcond;           // The estimate of the reciprocal condition number.
-
-  int info;
-    
+  // Initialize the statistics variable.
+  slu_stat_t stat;
+  SLU_INIT_STAT(&stat);
+  
   // Prepare data structures serving as input for the solver driver 
   // (according to the chosen factorization reuse strategy).
+  void *work = NULL;        // Explicit pointer to the factorization workspace 
+                            // (unused, see below).
+  int lwork = 0;            // Space for the factorization will be allocated 
+                            // internally by system malloc.
+  double ferr = 1.0;        // Estimated relative forward error 
+                            // (unused unless iterative refinement is performed).
+  double berr = 1.0;        // Estimated relative backward error 
+                            // (unused unless iterative refinement is performed).
+  slu_memusage_t memusage;  // Record the memory usage statistics.
+  double rpivot_growth;     // The reciprocal pivot growth factor.
+  double rcond;             // The estimate of the reciprocal condition number.                          
+#ifdef SLU_MT
+  options.work = work;
+  options.lwork = lwork;
+#endif
+
   if ( !setup_factorization() )
   {
     warning("LU factorization could not be completed.");
@@ -436,7 +470,7 @@ bool SuperLUSolver::solve()
   // keep the (possibly rescaled) matrix from the last factorization, otherwise recreate it 
   // from the master SuperLUMatrix pointed to by this->m (this also applies to the case when 
   // A does not yet exist).
-  if (factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+  if (!has_A || factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
   {
     if (A_changed) 
       free_matrix();
@@ -463,7 +497,7 @@ bool SuperLUSolver::solve()
       has_A = true;
     }
   }
-  
+
   // Recreate the input rhs for the solver driver from a local copy of the new value array.
   free_rhs();
  
@@ -479,24 +513,65 @@ bool SuperLUSolver::solve()
   SuperMatrix X;
   slu_scalar *x;
   if ( !(x = SLU_SCALAR_MALLOC(m->size)) ) 
-    ABORT("Malloc fails for x[].");
+    error("Malloc fails for x[].");
   SLU_CREATE_DENSE_MATRIX(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
-  
-  // Initialize the statistics variable.
-  SuperLUStat_t stat;
-  StatInit(&stat);
-  
+    
   // Solve the system.
+  int info;
+
+#ifdef SLU_MT  
+  if (options.refact == NO)
+  {
+    // Get column permutation vector perm_c[], according to the first argument:
+    //  0: natural ordering 
+    //  1: minimum degree ordering on structure of A'*A
+    //  2: minimum degree ordering on structure of A'+A
+    //  3: approximate minimum degree for unsymmetric matrices   
+    get_perm_c(1, &A, perm_c);
+  }
+   
+/*
+  // Compute reciprocal pivot growth, estimate reciprocal condition number of A, solve,
+  // perform iterative refinement of the solution and estimate forward and backward error.
+  // Memory usage will be acquired at the end. If A is singular, info will be set to A->ncol+1.
+  //
+  slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
+                        &L, &U, &B, &X, &rpivot_growth, &rcond, &ferr, &berr, 
+                        &stat, &memusage, &info );
+*/                        
+  // ... OR ...
+  
+  // Estimate reciprocal condition number of A and solve the system. If A is singular, info
+  // will be set to A->ncol+1.
+  //
+  slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
+                        &L, &U, &B, &X, NULL, &rcond, NULL, NULL, 
+                        &stat, NULL, &info );
+
+  // ... OR ...
+/*
+  // Do not check the regularity of A and just solve the system.
+  //
+  slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
+                        &L, &U, &B, &X, NULL, NULL, NULL, NULL, 
+                        &stat, NULL, &info );                        
+*/
+#else
   SLU_SOLVER_DRIVER(&options, &A, perm_c, perm_r, etree, equed, R, C, &L, &U,
                     work, lwork, &B, &X, &rpivot_growth, &rcond, &ferr, &berr,
-                    &mem_usage, &stat, &info);
-  
+                    &memusage, &stat, &info);
+#endif
+                    
   // A and B may have been multiplied by the scaling vectors R and C on the output of the 
   // solver. If the next call to the solver should reuse factorization only partially,
   // it will need the original unscaled matrix - this will indicate such situation 
   // (rhs is always recreated anew).
-  A_changed = (options.Equil == YES && *equed != 'N');
-     
+#ifdef SLU_MT  
+  A_changed = (equed != NOEQUIL);
+#else
+  A_changed = (*equed != 'N');
+#endif  
+
   bool factorized = check_status(info);
   
   if (factorized) 
@@ -515,7 +590,7 @@ bool SuperLUSolver::solve()
   }
   
   // If required, print statistics.
-  if ( options.PrintStat ) StatPrint(&stat);
+  if ( options.PrintStat ) SLU_PRINT_STAT(&stat);
   
   // Free temporary local variables.
   StatFree(&stat);
@@ -547,7 +622,7 @@ bool SuperLUSolver::setup_factorization()
     eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
   else
     eff_fact_scheme = factorization_scheme;
-    
+  
   // Prepare factorization structures. In case of a particular reuse scheme, comments are given
   // to clarify which arguments will be reused and which will be reset by the dgssvx (zgssvx) routine. 
   // It was determined empirically by running the dlinsolx2 example from SuperLU, setting options.Fact
@@ -557,7 +632,7 @@ bool SuperLUSolver::setup_factorization()
   // each other and often lead to segfault when the structures are reallocated according to them.
   // It might thus bring some insight into how SuperLU works and how to correctly use it 
   // (the PDF documentation is, unfortunately, even less helpful).
-  switch (factorization_scheme)
+  switch (eff_fact_scheme)
   {
     case HERMES_FACTORIZE_FROM_SCRATCH:
       // This case should generally allow for solving a completely new system, i.e. for a change of 
@@ -566,37 +641,67 @@ bool SuperLUSolver::setup_factorization()
       // Clear the structures emanating from previous factorization.
       free_factorization_data();
       
-      // Allocate the new structures (internal arrays of L, U are allocated automatically by SuperLU).
-      if ( !(etree = intMalloc(m->size)) )  
-        ABORT("Malloc fails for etree[].");
+      // Allocate the row/column reordering vectors.
       if ( !(perm_c = intMalloc(m->size)) ) 
-        ABORT("Malloc fails for perm_c[].");
+        error("Malloc fails for perm_c[].");
       if ( !(perm_r = intMalloc(m->size)) ) 
-        ABORT("Malloc fails for perm_r[].");
+        error("Malloc fails for perm_r[].");
+      
+      // Allocate vectors with row/column scaling factors.
       if ( !(R = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) ) 
-        ABORT("SUPERLU_MALLOC fails for R[].");
+        error("SUPERLU_MALLOC fails for R[].");
       if ( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
-        ABORT("SUPERLU_MALLOC fails for C[].");
-            
+        error("SUPERLU_MALLOC fails for C[].");
+
+#ifdef SLU_MT
+      options.fact = EQUILIBRATE;
+      options.refact = NO;      
+      options.perm_c = perm_c;
+      options.perm_r = perm_r;
+#else 
+      // Allocate additional structures used by the driver routine of sequential SuperLU.
+      // Elimination tree is contained in the options structure in SuperLU_MT.
+      if ( !(etree = intMalloc(m->size)) )    
+        error("Malloc fails for etree[].");
+
       options.Fact = DOFACT;
+#endif      
       A_changed = true;
       break;
     case HERMES_REUSE_MATRIX_REORDERING:
       // needed from previous:      etree, perm_c
       // not needed from previous:  perm_r, R, C, L, U, equed     
+#ifdef SLU_MT
+      options.fact = EQUILIBRATE;
+      options.refact = YES;
+#else
       options.Fact = SamePattern;
-      Destroy_SuperNode_Matrix(&L);
-      Destroy_CompCol_Matrix(&U);
+#endif      
+      // L,U matrices may be reused without reallocating.
+      // SLU_DESTROY_L(&L);
+      // SLU_DESTROY_U(&U);
       break;
     case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
       // needed from previous:      etree, perm_c, perm_r, L, U
       // not needed from previous:  R, C, equed
+#ifdef SLU_MT
+      // MT version of SLU cannot reuse the equilibration factors (R, C), so
+      // this is the same as the previous case.
+      options.fact = EQUILIBRATE; 
+      options.refact = YES;
+#else
       options.Fact = SamePattern_SameRowPerm;
+#endif      
       break;
     case HERMES_REUSE_FACTORIZATION_COMPLETELY:
       // needed from previous:      perm_c, perm_r, equed, L, U
       // not needed from previous:  etree, R, C
+#ifdef SLU_MT
+      options.fact = FACTORED;
+      options.refact = YES;
+#else      
       options.Fact = FACTORED;
+#endif      
       break;
   }
   
@@ -638,14 +743,237 @@ void SuperLUSolver::free_factorization_data()
 #ifdef WITH_SUPERLU
   if (inited)
   {
+#ifdef SLU_MT    
+    SUPERLU_FREE(options.etree);
+    SUPERLU_FREE(options.colcnt_h);
+    SUPERLU_FREE(options.part_super_h);
+    Destroy_CompCol_Permuted(&AC);
+#else
     SUPERLU_FREE (etree);
+#endif    
     SUPERLU_FREE (perm_c);
     SUPERLU_FREE (perm_r);
     SUPERLU_FREE (R);
     SUPERLU_FREE (C);
-    Destroy_SuperNode_Matrix(&L);
-    Destroy_CompCol_Matrix(&U);
+    SLU_DESTROY_L(&L);
+    SLU_DESTROY_U(&U);
     inited = false;
   }
 #endif
 }
+
+#ifdef SLU_MT
+// This is a modification of the original p*gssvx routines from the SuperLU_MT library.
+//
+// The original routines have been changed in view of our applications, i.e. 
+//  * only one right hand side is allowed, 
+//  * some initial parameter checks have been omitted, 
+//  * macros allowing abstraction from the fundamental scalar datatype have been used
+//  * some phases of the calculation may be omitted for speed-up (less information about
+//    the matrix/solution can then be acquired, however),
+//  * deallocation at the end of the routine has been removed (this was neccessary to 
+//    enable factorization reuse).
+//
+// See the correspondingly named attributes of SuperLUSolver class for brief description 
+// of most parameters or the library source code for pdgssvx for more details. You may pass
+// NULL for
+//  * recip_pivot_growth  - reciprocal pivot growth factor will then not be computed;
+//                          reip_pivot_growth much less than one may indicate poor 
+//                          stability of the factorization;
+//  * rcond               - estimate of the reciprocal condition number of matrix A will
+//                          then not be computed; this will prevent detection of singularity
+//                          of matrix A;
+//  * ferr or berr        - iterative refinement of the solution will then not be performed;
+//                          this also prevents computation of forward and backward error 
+//                          estimates of the computed solution;
+//  * memusage            - memory usage during the factorization/solution will not be queried.
+//
+void slu_mt_solver_driver(slu_options_t *options, SuperMatrix *A, 
+                          int *perm_c, int *perm_r, SuperMatrix *AC,
+                          equed_t *equed, double *R, double *C,
+                          SuperMatrix *L, SuperMatrix *U,
+                          SuperMatrix *B, SuperMatrix *X, 
+                          double *recip_pivot_growth, double *rcond, 
+                          double *ferr, double *berr, 
+                          slu_stat_t *stat, slu_memusage_t *memusage,
+                          int *info)
+{
+  /* Profiling variables. */
+  double    t0;
+  flops_t   flopcnt;
+  
+  /* State variables. */
+  int dofact = (options->fact == DOFACT);
+  int equil = (options->fact == EQUILIBRATE);
+  int notran = (options->trans == NOTRANS);
+  int colequ, rowequ;
+  
+  /* Right hand side and solution vectors. */
+  DNformat *Bstore = (DNformat*) B->Store;
+  DNformat *Xstore = (DNformat*) X->Store;
+  slu_scalar *Bmat = (slu_scalar*) Bstore->nzval;
+  slu_scalar *Xmat = (slu_scalar*) Xstore->nzval;
+    
+  *info = 0;
+  
+  /* ------------------------------------------------------------
+  Diagonal scaling to equilibrate the matrix.
+  ------------------------------------------------------------*/
+  if (dofact || equil) 
+  {
+    *equed = NOEQUIL;
+    rowequ = colequ = FALSE;
+  } 
+  else 
+  {
+    rowequ = (*equed == ROW) || (*equed == BOTH);
+    colequ = (*equed == COL) || (*equed == BOTH);
+  }
+  
+  if ( equil ) 
+  {
+    t0 = SuperLU_timer_();
+    /* Compute row and column scalings to equilibrate the matrix A. */
+    int info1;
+    double rowcnd, colcnd, amax;
+    SLU_GSEQU(A, R, C, &rowcnd, &colcnd, &amax, &info1);
+    
+    if ( info1 == 0 ) {
+      /* Equilibrate matrix A. */
+      SLU_LAQGS(A, R, C, rowcnd, colcnd, amax, equed);
+      rowequ = (*equed == ROW) || (*equed == BOTH);
+      colequ = (*equed == COL) || (*equed == BOTH);
+    }
+    stat->utime[EQUIL] = SuperLU_timer_() - t0;
+  }
+  
+  /* ------------------------------------------------------------
+  Scale the right hand side.
+  ------------------------------------------------------------*/
+  if ( notran ) 
+  {
+    if ( rowequ ) 
+      for (int i = 0; i < A->nrow; ++i) 
+        SLU_MULT(Bmat[i], R[i]);
+  } 
+  else if ( colequ ) 
+  {
+    for (int i = 0; i < A->nrow; ++i)
+      SLU_MULT(Bmat[i], C[i]);
+  }
+  
+  /* ------------------------------------------------------------
+  Perform the LU factorization.
+  ------------------------------------------------------------*/
+  if ( dofact || equil ) 
+  {  
+    /* Obtain column etree, the column count (colcnt_h) and supernode
+    partition (part_super_h) for the Householder matrix. */
+    if (options->refact == NO)
+    {
+      t0 = SuperLU_timer_();
+      SLU_SP_COLORDER(A, perm_c, options, AC);
+      stat->utime[ETREE] = SuperLU_timer_() - t0;
+    }
+     
+    /* Compute the LU factorization of A*Pc. */
+    t0 = SuperLU_timer_();
+    SLU_GSTRF(options, AC, perm_r, L, U, stat, info);
+    stat->utime[FACT] = SuperLU_timer_() - t0;
+    
+    flopcnt = 0;
+    for (int i = 0; i < options->nprocs; ++i) flopcnt += stat->procstat[i].fcops;
+    stat->ops[FACT] = flopcnt;
+    
+    if ( options->lwork == -1 ) 
+    {
+      if (memusage)
+        memusage->total_needed = *info - A->ncol;
+      return;
+    }
+  }
+  
+  if ( *info > 0 ) 
+  {
+    if ( *info <= A->ncol ) 
+    {
+      /* Compute the reciprocal pivot growth factor of the leading
+        rank-deficient *info columns of A. */
+      if (recip_pivot_growth)
+      *recip_pivot_growth = SLU_PIVOT_GROWTH(*info, A, perm_c, L, U);
+    }
+  } 
+  else 
+  {
+    /* ------------------------------------------------------------
+      Compute the reciprocal pivot growth factor *recip_pivot_growth.
+      ------------------------------------------------------------*/
+    if (recip_pivot_growth)
+      *recip_pivot_growth = SLU_PIVOT_GROWTH(A->ncol, A, perm_c, L, U);
+
+    /* ------------------------------------------------------------
+      Estimate the reciprocal of the condition number of A.
+      ------------------------------------------------------------*/
+    if (rcond) 
+    {
+      t0 = SuperLU_timer_();
+      
+      // Next two lines are a bit complicated, but taken as they appear
+      // in the original library function.
+      char norm[1];
+      *(unsigned char *)norm = (notran) ? '1' : 'I';
+      
+      double anorm = SLU_LANGS(norm, A);
+      SLU_GSCON(norm, L, U, anorm, rcond, info);
+      stat->utime[RCOND] = SuperLU_timer_() - t0;
+    }  
+
+    /* ------------------------------------------------------------
+      Compute the solution matrix X.
+      ------------------------------------------------------------*/
+    // Save a copy of the right hand side.
+    memcpy(Xmat, Bmat, B->nrow * sizeof(slu_scalar)); 
+            
+    t0 = SuperLU_timer_();
+    SLU_GSTRS(options->trans, L, U, perm_r, perm_c, X, stat, info);
+    stat->utime[SOLVE] = SuperLU_timer_() - t0;
+    stat->ops[SOLVE] = stat->ops[TRISOLVE];
+      
+    /* ------------------------------------------------------------
+      Use iterative refinement to improve the computed solution and
+      compute error bounds and backward error estimates for it.
+      ------------------------------------------------------------*/
+    if (ferr && berr)
+    {
+      t0 = SuperLU_timer_();
+      SLU_GSRFS(options->trans, A, L, U, perm_r, perm_c, *equed,
+                R, C, B, X, ferr, berr, stat, info);
+      stat->utime[REFINE] = SuperLU_timer_() - t0;
+    }
+
+    /* ------------------------------------------------------------
+      Transform the solution matrix X to a solution of the original
+      system.
+      ------------------------------------------------------------*/
+    if ( notran ) 
+    {
+      if ( colequ ) 
+        for (int i = 0; i < A->nrow; ++i)
+          SLU_MULT(Xmat[i], C[i]);
+    } 
+    else if ( rowequ ) 
+    {
+      for (int i = 0; i < A->nrow; ++i)
+        SLU_MULT(Xmat[i], R[i]);
+    }
+
+    /* Set INFO = A->ncol+1 if the matrix is singular to 
+      working precision.*/
+    char param[1]; param[0] = 'E';
+    if ( rcond && *rcond < SLU_LAMCH_(param) ) *info = A->ncol + 1; 
+  }
+
+  if (memusage)
+    SLU_QUERY_SPACE(options->nprocs, L, U, options->panel_size, memusage);
+}
+#endif
