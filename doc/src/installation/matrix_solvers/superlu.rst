@@ -171,8 +171,22 @@ following lines (or append to the existing one)::
 
 Finally execute::
 
-    cmake .
-    make
+  cmake .
+  make
+    
+Hermes{1|2|3}d will now be compiled and linked with the multithreaded SuperLU 
+library. Before running the parallel calculation, you just need to set the 
+environment variable ``OMP_NUM_THREADS`` to the number of threads you wish to 
+employ for solution of your system (this is typically the number of cores in your 
+multicore machine). For example, on my dual-core laptop I could run
+
+::
+
+  cd hermes2d/tutorial/03-poisson
+  OMP_NUM_THREADS=2 ./poisson
+
+Note that you use the variable ``OMP_NUM_THREADS`` with both OpenMP and Pthreads
+versions of SuperLU.
 
 Windows
 ~~~~~~~
