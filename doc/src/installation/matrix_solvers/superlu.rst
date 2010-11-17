@@ -78,9 +78,10 @@ following lines (or append to the existing one)::
   set(SUPERLU_MT   NO)
 
 Finally execute::
-
-    cmake .
-    make
+  
+  rm CMakeCache.txt
+  cmake .
+  make
     
 
 Multithreaded
@@ -171,6 +172,7 @@ following lines (or append to the existing one)::
 
 Finally execute::
 
+  rm CMakeCache.txt
   cmake .
   make
     

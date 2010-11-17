@@ -42,6 +42,7 @@ Go to the directory with hermes{1|2|3}d. Create the file CMake.vars with the fol
 
 Then execute::
 
+    rm CMakeCache.txt
     cmake .
     make
 
