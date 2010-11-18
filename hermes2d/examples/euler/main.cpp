@@ -37,6 +37,14 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
   mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, 1);
+  mesh.refine_element(1053);
+  mesh.refine_element(1054);
+  mesh.refine_element(1087);
+  mesh.refine_element(1088);
+  mesh.refine_element(1117);
+  mesh.refine_element(1118);
+  mesh.refine_element(1151);
+  mesh.refine_element(1152);
 
   // Initialize spaces with default shapesets.
   L2Space space_rho(&mesh,P_INIT);
