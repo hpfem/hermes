@@ -295,17 +295,25 @@ class DiscontinuousFunc : public Func<T>
     virtual void free_fn() { 
       if (fn_central != NULL) {
         fn_central->free_fn(); 
+        delete fn_central;
+        fn_central = NULL;
       }
       if (fn_neighbor != NULL) {
         fn_neighbor->free_fn();
+        delete fn_neighbor;
+        fn_neighbor = NULL;
       }
     }
     virtual void free_ord() {
       if (fn_central != NULL) {
         fn_central->free_ord(); 
+        delete fn_central;
+        fn_central = NULL;
       }
       if (fn_neighbor != NULL) {
         fn_neighbor->free_ord();
+        delete fn_neighbor;
+        fn_neighbor = NULL;
       }
     }
 };
