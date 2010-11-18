@@ -190,12 +190,12 @@ multicore machine). For example, on my dual-core laptop I could run
 Note that you use the variable ``OMP_NUM_THREADS`` with both OpenMP and Pthreads
 versions of SuperLU.
 
-Windows
-~~~~~~~
+Windows MSVC
+~~~~~~~~~~~~
 
-In preparation.
+http://crd.lbl.gov/~xiaoye/SuperLU/faq.html
 
 MAC OS
 ~~~~~~
 
-In preparation.
+http://www.bleedingmind.com/index.php/2010/07/31/compiling-superlu-on-os-x/
