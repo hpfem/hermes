@@ -56,8 +56,7 @@ Exponential convergence of adaptive hp-FEM
 
 It is predicted by theory that adaptive $hp$-FEM should attain 
 exponential convergence rate. This means that the slope of the
-convergence graph is steadily increasing, as shown in the 
-following figure.
+convergence graph is the steeper the more one goes to the right:
 
 .. image:: conv-intro/aniso-hp.png
    :align: center
@@ -65,7 +64,7 @@ following figure.
    :height: 450
    :alt: Convergence graph.
 
-While this often is the case with adaptive $hp$-FEM, there are 
+While this is often the case with adaptive $hp$-FEM, there are 
 problems whose difficulty is such that the convergence is not 
 exponential. Or at least not during a long pre-asymptotic 
 stage of adaptivity. This may happen, for example, when the solution 
@@ -96,7 +95,7 @@ This is shown in the figure below.
 In problems with extremely strong singularities the difference between the 
 exact and estimated error can be significant. This is illustrated in the 
 following graph that belongs to the benchmark 
-`kellogg <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks.html#kellogg-elliptic>`_.
+`kellogg <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks/kellogg.html>`_.
 
  .. image:: ../benchmarks/benchmark-kellogg/kellogg-conv.png
    :align: center
