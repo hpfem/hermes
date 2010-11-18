@@ -386,6 +386,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   neighb_el = neighbors[active_segment];
   neighbor_edge = neighbor_edges[active_segment].local_num_of_edge;
   
+  // TODO: If two spaces share one mesh, can this cause troubles (if the parameter
+  // ignore_visited_segments is forgotten??
   if (neighb_el->visited && ignore_visited_segments)
     return false;
  

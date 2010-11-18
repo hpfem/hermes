@@ -13,7 +13,7 @@ double bc_density(double y)
 // Density * velocity in the x coordinate boundary condition.
 double bc_density_vel_x(double y)
 {
-  return 200.0;
+  return 50.0;
 }
 
 // Density * velocity in the y coordinate boundary condition.
@@ -643,7 +643,7 @@ double linear_form_interface(int element, int n, double *wt, Func<double> *ue[],
     w_r[2] = w22;
     w_r[3] = w32;
 
-    result += wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+    result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
   return result;
 }
@@ -691,10 +691,13 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
 
     w31 = ext->fn[3]->val[i];
 
+    /* Auxiliary state.
     double sound_speed_l = calc_sound_speed(w01, w11, w21, w31);
     double sound_speed_b = sound_speed_l + (num_flux.R/num_flux.c_v) * w11 / (2*w01);
     double rho_b = std::pow((sound_speed_b*sound_speed_b*w01/(num_flux.kappa*calc_pressure<double>(w01,w11,w21,w31))),num_flux.c_v/num_flux.R) * w01;
     double p_b = rho_b * sound_speed_b * sound_speed_b / num_flux.kappa;
+    */
+    double p_b = calc_pressure<double>(w01, w11, w21, w31);
     
     //Ondrej's code.
     double flux[4];
@@ -709,6 +712,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     num_flux.dot_vector(flux, mat_rot_inv, flux_local);
 
     // Mirroring the state
+    /*
     double w_l[4];
     double w_r[4];
     w_l[0] = w_r[0] = w01;
@@ -717,8 +721,9 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     w_l[3] = w_r[3] = w31;
 
     result += wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+    */
 
-    //result += wt[i] * v->val[i] * flux[element];
+    result -= wt[i] * v->val[i] * flux[element];
   }
   return result;
 }
@@ -900,7 +905,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
         num_flux.dot_vector(flux, mat_rot_inv, flux);
       }
     }
-  result += wt[i] * v->val[i] * flux[element];
+  result -= wt[i] * v->val[i] * flux[element];
   }
   return result;
 }

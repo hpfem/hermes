@@ -35,6 +35,8 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
   mesh.refine_all_elements();
   mesh.refine_all_elements();
+  mesh.refine_all_elements();
+  mesh.refine_towards_boundary(1, 1);
 
   // Initialize spaces with default shapesets.
   L2Space space_rho(&mesh,P_INIT);
@@ -85,6 +87,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(3,callback(linear_form_3_2_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3,callback(linear_form_3_3_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   // Second flux.
+  
   wf.add_vector_form(0,callback(linear_form_0_2),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
   wf.add_vector_form(1,callback(linear_form_1_0_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1,callback(linear_form_1_1_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
@@ -98,7 +101,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(3,callback(linear_form_3_1_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3,callback(linear_form_3_2_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3,callback(linear_form_3_3_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-
+  
   // Volumetric linear forms coming from the time discretization.
   wf.add_vector_form(0,linear_form, linear_form_order, HERMES_ANY, &prev_rho);
   wf.add_vector_form(1,linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
@@ -132,8 +135,13 @@ int main(int argc, char* argv[])
   SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
-  VectorView vview("Velocity", 0, 0, 600, 300);
-  ScalarView sview("Pressure", 700, 0, 600, 300);
+  //VectorView vview("Velocity", 0, 0, 600, 300);
+  //ScalarView sview("Pressure", 700, 0, 600, 300);
+
+  ScalarView s1("w1", 0, 0, 600, 300);
+  ScalarView s2("w2", 650, 0, 600, 300);
+  ScalarView s3("w3", 0, 350, 600, 300);
+  ScalarView s4("w4", 650, 350, 600, 300);
 
   // Iteration number.
   int iteration = 0;
@@ -192,12 +200,18 @@ int main(int argc, char* argv[])
     prev_e.copy(&sln_e);
 
     // Visualization.
+    /*
     pressure.reinit();
     u.reinit();
     w.reinit();
     sview.show(&pressure);
     vview.show(&u,&w);
+    */
+
+    s1.show(&sln_rho);
+    s2.show(&sln_rho_v_x);
+    s3.show(&sln_rho_v_y);
+    s4.show(&sln_e);
   }
-  vview.close();
   return 0;
 }

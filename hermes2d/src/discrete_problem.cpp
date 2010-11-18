@@ -749,8 +749,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                         scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, surf_pos+isurf) 
                                         * active_shape_v->coef * active_shape_u->coef;
                                         
-                        // Add the contribution to the global dof index (corresponding to the central element if 'i' is
-                        // less than the number of shape functions on the central element, to the neighbor otherwise).
+                        // Add the contribution to the global dof index.
                         rhs->add(nbs_v->supported_shapes->dof[i], -val);
                       }
                     } 
