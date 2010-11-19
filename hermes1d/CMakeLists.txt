@@ -97,7 +97,17 @@ find_package(PTHREAD REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
 include_directories(${HERMES_COMMON_DIR})
 
-# solvers
+if(NOT MSVC)
+  # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
+  # FindLAPACK is Fortran-only so Fortran must be enabled as well.
+  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+    enable_language(Fortran)
+    find_package(LAPACK REQUIRED)
+    add_definitions(-DWITH_BLAS)
+  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+endif(NOT MSVC)
+
+# Solvers:
 if(WITH_PETSC)
 	find_package(PETSC REQUIRED)
 	# For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
