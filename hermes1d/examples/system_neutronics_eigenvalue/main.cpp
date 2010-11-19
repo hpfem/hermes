@@ -49,7 +49,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 
-int main() {		
+int main() 
+{		
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData(verbose);		
@@ -57,19 +58,22 @@ int main() {
   delete md;
   
   // Enumerate basis functions, info for user.
-  info("N_dof = %d", Space::get_num_dofs(space));
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
+
   // Plot the space.
   space->plot("space.gp");
   
   // Initial approximation of the dominant eigenvalue.
   double K_EFF = 1.0;
   // Initial approximation of the dominant eigenvector.
-	double init_val = 1.0;
+  double init_val = 1.0;
 
-  for (int g = 0; g < N_GRP; g++)  {
-  	set_vertex_dofs_constant(space, init_val, g);
-  	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-	}
+  for (int g = 0; g < N_GRP; g++)  
+  {
+    set_vertex_dofs_constant(space, init_val, g);
+    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
+  }
   
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -98,28 +102,28 @@ int main() {
   bool is_linear = false;
   DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
   
-	Linearizer l(space);
-	char solution_file[32];
+  Linearizer l(space);
+  char solution_file[32];
 
   // Source iteration
-	int i;
+  int i;
   int current_solution = 0, previous_solution = 1;
- 	double K_EFF_old;
+  double K_EFF_old;
   for (i = 0; i < Max_SI; i++)
   {	
-  	// Plot the critical (i.e. steady-state) flux in the actual iteration.
-  	sprintf(solution_file, "solution_%d.gp", i);
-	  l.plot_solution(solution_file); 		
+    // Plot the critical (i.e. steady-state) flux in the actual iteration.
+    sprintf(solution_file, "solution_%d.gp", i);
+    l.plot_solution(solution_file); 		
 	  
     // Store the previous solution (used at the right-hand side).
     for (int g = 0; g < N_GRP; g++)
-	    copy_dofs(current_solution, previous_solution, space, g);
+      copy_dofs(current_solution, previous_solution, space, g);
 
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[Space::get_num_dofs(space)];
+    double *coeff_vec = new double[Space::get_num_dofs(space)];
     get_coeff_vector(space, coeff_vec);
   
     // Set up the solver, matrix, and rhs according to the solver selection.
@@ -128,12 +132,13 @@ int main() {
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
   
     int it = 1;
-  while (1) {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(space);
+    while (1) 
+    {
+      // Obtain the number of degrees of freedom.
+      int ndof = Space::get_num_dofs(space);
 
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble(matrix, rhs);
+      dp->assemble(coeff_vec, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
@@ -193,16 +198,16 @@ int main() {
   sprintf(solution_file, "solution.gp");
   l.plot_solution(solution_file);
 
-	// Comparison with analytical results (see the reference above).
-	double flux[N_GRP], J[N_GRP], R;
+  // Comparison with analytical results (see the reference above).
+  double flux[N_GRP], J[N_GRP], R;
 
-	get_solution_at_point(space, 0.0, flux, J);
-	R = flux[0]/flux[1];
-	info("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%", R, 100*(R-2.5332)/2.5332);
+  get_solution_at_point(space, 0.0, flux, J);
+  R = flux[0]/flux[1];
+  info("phi_fast/phi_therm at x=0 : %.4f, err = %.2f%%", R, 100*(R-2.5332)/2.5332);
 	
-	get_solution_at_point(space, 40.0, flux, J);
-	R = flux[0]/flux[1];
-	info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%", R, 100*(R-1.5162)/1.5162);
+  get_solution_at_point(space, 40.0, flux, J);
+  R = flux[0]/flux[1];
+  info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%", R, 100*(R-1.5162)/1.5162);
 	
   info("Done.");
   return 0;

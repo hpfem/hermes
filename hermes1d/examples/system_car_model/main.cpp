@@ -83,12 +83,13 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1) {
+  while (1) 
+  {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(matrix, rhs);
+    dp->assemble(coeff_vec, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
@@ -134,17 +135,24 @@ void plot_trajectory(Space *space, int subdivision)
   static int first_traj = 1;
   const char *traj_filename = "trajectory.gp";
   FILE *f;
-  if (first_traj) {
+
+  if (first_traj) 
+  {
     f = fopen(traj_filename, "wb");
     first_traj = 0;
   }
-  else f = fopen(traj_filename, "ab");
+  else 
+  f = fopen(traj_filename, "ab");
+
   if(f == NULL) error("Problem opening trajectory file.");
+
   Linearizer l_traj(space);
   // Take first solution component as the x-coordinate.
   int x_comp = 0;
+
   // Take second solution component as the y-coordinate.
   int y_comp = 1;
+
   l_traj.plot_trajectory(f, x_comp, y_comp, subdivision);
   fclose(f);
 }
@@ -154,21 +162,28 @@ void plot_trajectory_endpoint(Space *space)
   static int first_traj = 1;
   const char *traj_filename = "reach.gp";
   FILE *f;
-  if (first_traj) {
+
+  if (first_traj) 
+  {
     f = fopen(traj_filename, "wb");
     first_traj = 0;
   }
-  else f = fopen(traj_filename, "ab");
+  else 
+  f = fopen(traj_filename, "ab");
+
   if(f == NULL) error("Problem opening reachability file.");
   Linearizer l_reach(space);
   double x_ref = 1; 
   double x_phys; 
   double val[MAX_EQN_NUM];
   l_reach. eval_approx(space->last_active_element(), x_ref, &x_phys, val);
+
   // Take first solution component as the x-coordinate.
   int x_comp = 0;
+
   // Take second solution component as the y-coordinate.
   int y_comp = 1;
+
   fprintf(f, "%g %g\n", val[x_comp], val[y_comp]);
   fclose(f);
 }
@@ -184,22 +199,26 @@ void plot_solution(Space *space, int subdivision)
 void set_alpha_and_zeta(int component, double ray_angle, double radius) { 
   double alpha = radius * cos(ray_angle);
   double zeta = radius * sin(ray_angle); 
-  if (alpha > Alpha_max) {
+  if (alpha > Alpha_max) 
+  {
     double coeff = Alpha_max/alpha;
     alpha = Alpha_max;
     zeta *= coeff;
   }
-  if (alpha < -Alpha_max) {
+  if (alpha < -Alpha_max) 
+  {
     double coeff = -Alpha_max/alpha;
     alpha = -Alpha_max;
     zeta *= coeff;
   }
-  if (zeta > Zeta_max) {
+  if (zeta > Zeta_max) 
+  {
     double coeff = Zeta_max/zeta;
     zeta = Zeta_max;
     alpha *= coeff;
   }
-  if (zeta < -Zeta_max) {
+  if (zeta < -Zeta_max) 
+  {
     double coeff = -Zeta_max/zeta;
     zeta = -Zeta_max;
     alpha *= coeff;
@@ -209,10 +228,12 @@ void set_alpha_and_zeta(int component, double ray_angle, double radius) {
 }
 
 
-int main() {
+int main() 
+{
   // Create space, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf(5);
@@ -239,22 +260,25 @@ int main() {
   bool is_linear = false;
   DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
   
-
   // Move on the boundary of the rectangle 
   // (-Alpha_max, Alpha_max) x (-Zeta_max, Zeta_max) in the CCW
   // direction, starting at the point [Alpha_max, 0].
   double radius = sqrt(Alpha_max*Alpha_max + Zeta_max*Zeta_max);
   double angle_increment = 2.*M_PI/Num_rays;
-  for (int ray_0 = 0; ray_0 < Num_rays; ray_0++) {
+  for (int ray_0 = 0; ray_0 < Num_rays; ray_0++) 
+  {
     // Set alpha_ctrl[0], zeta_ctrl[0].
     set_alpha_and_zeta(0, ray_0*angle_increment, radius); 
-    for (int ray_1 = 0; ray_1 < Num_rays; ray_1++) {
+    for (int ray_1 = 0; ray_1 < Num_rays; ray_1++) 
+    {
       // Set alpha_ctrl[1], zeta_ctrl[1]. 
       set_alpha_and_zeta(1, ray_1*angle_increment, radius); 
-      for (int ray_2 = 0; ray_2 < Num_rays; ray_2++) {
+      for (int ray_2 = 0; ray_2 < Num_rays; ray_2++) 
+      {
         // Set alpha_ctrl[2], zeta_ctrl[2]. 
         set_alpha_and_zeta(2, ray_2*angle_increment, radius); 
-        for (int ray_3 = 0; ray_3 < Num_rays; ray_3++) {
+        for (int ray_3 = 0; ray_3 < Num_rays; ray_3++) 
+        {
           // Set alpha_ctrl[3], zeta_ctrl[3]. 
           set_alpha_and_zeta(3, ray_3*angle_increment, radius); 
   

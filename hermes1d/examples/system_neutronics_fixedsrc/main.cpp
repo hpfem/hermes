@@ -47,8 +47,8 @@ int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-int main() {
-
+int main() 
+{
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData();
@@ -56,13 +56,16 @@ int main() {
   delete md;
   
   // Enumerate basis functions, info for user.
-  info("N_dof = %d", Space::get_num_dofs(space));
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
+
   // Plot the space.
   space->plot("space.gp");
 
-  for (int g = 0; g < N_GRP; g++)  {
-  	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-	}
+  for (int g = 0; g < N_GRP; g++)  
+  {
+    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
+  }
   
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -92,12 +95,13 @@ int main() {
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1) {
+  while (1) 
+  {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(matrix, rhs);
+    dp->assemble(coeff_vec, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
@@ -135,10 +139,10 @@ int main() {
   Linearizer l(space);
   l.plot_solution("solution.gp");
 
-	// Calculate flux integral for comparison with the reference value.
-	double I = calc_integrated_flux(space, 1, 60., 80.);
-	double Iref = 134.9238787715397;
-	info("I = %.13f, err = %.13f%%", I, 100.*(I - Iref)/Iref );
+  // Calculate flux integral for comparison with the reference value.
+  double I = calc_integrated_flux(space, 1, 60., 80.);
+  double Iref = 134.9238787715397;
+  info("I = %.13f, err = %.13f%%", I, 100.*(I - Iref)/Iref );
 	
   info("Done.");
   return 0;
