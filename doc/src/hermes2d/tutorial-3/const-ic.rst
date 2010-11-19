@@ -34,9 +34,11 @@ and
     \int_{\Omega} \left[ \frac{\partial \lambda}{\partial u}(u) v_j 
     \nabla u + \lambda(u)\nabla v_j \right] \cdot \nabla v_i \, \mbox{d}x\mbox{d}y.
 
-In the code, this becomes
+Defining Jacobian matrix and residual vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+In the `code <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/15-newton-elliptic-1/forms.cpp>`_, 
+the above formulas become::
 
     // Heat sources (can be a general function of 'x' and 'y').
     template<typename Real>
@@ -75,6 +77,9 @@ $v_i$ are entering the weak forms via the parameters u and v, respectively (same
 problems). The user does not have to 
 take care about their indices $i$ and $j$, this is handled by Hermes outside the weak forms. 
 
+Using the ExtData and Geom structures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The code snippet above also shows how values and derivatives of the solution $u$ can be accessed via 
 the ExtData structure, and the coordinates of the integration points via the Geom structure. 
 The contents of ExtData is user-defined and the Geom structure contains geometrical information 
@@ -82,68 +87,137 @@ including the unit normal and tangential vectors to the boundary at the integrat
 (also for curved boundaries). See the file 
 `src/forms.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_ for more details. 
 
-The Newton's method always has to start from an initial condition, and in this example 
-this is 
+Defining nonlinearities and their derivatives
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+The function $\lambda(u)$ and its derivative are defined as follows::
 
-    // Initial condition. It will be projected on the FE mesh 
-    // to obtain initial coefficient vector for the Newton's method.
-    scalar init_cond(double x, double y, double& dx, double& dy)
-    {
-      dx = 0;
-      dy = 0;
-      return INIT_COND_CONST;
+    // Thermal conductivity (temperature-dependent)
+    // Note: for any u, this function has to be positive.
+    template<typename Real>
+    Real lam(Real u) 
+    { 
+      return 1 + pow(u, 4); 
     }
 
-The weak forms are registered as usual, except that the previous solution u_prev 
-is passed into the form as an extra argument::
+    // Derivative of the thermal conductivity with respect to 'u'.
+    template<typename Real>
+    Real dlam_du(Real u) 
+    { 
+      return 4*pow(u, 3); 
+    }
 
-    // Previous solution for the Newton's iteration.
-    Solution u_prev;
+Obtaining an initial coefficient vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Newton's method always starts from an initial coefficient vector $\bfY_0$.
+If we want to start from a zero initial function, we can just define this vector 
+to be zero. However, more often we want to start from some nonzero function
+(such as, for example, the previous time-level solution in time-dependent problems). 
+In such a case, the initial coefficient vector is obtained by projecting the 
+initial solution on the finite element space. In the present example, the initial 
+solution is a constant function::
+
+    // Project the initial condition on the FE space to obtain initial
+    // coefficient vector for the Newton's method.
+    info("Projecting to obtain initial vector for the Newton's method.");
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)];
+    Solution* init_sln = new Solution();
+    init_sln->set_const(&mesh, INIT_COND_CONST);
+    OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver);
+    delete init_sln;
+
+The method project_global() has an optional parameter which is the projection 
+norm. Its default value is HERMES_H1_NORM but other norms such as HERMES_HCURL_NORM,
+HERMES_HDIV_NORM, and HERMES_L2_NORM are also possible. This will be explained 
+later and we'll also show how to handle projections for systems of equations.
+
+The user is at liberty to use for the (always symmetric positive definite) 
+projection matrix a different matrix solver
+than for the solution of the matrix problems arising in the Newton's iteration. 
+
+The weak forms are registered as usual::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY, &u_prev);
-    wf.add_vector_form(callback(res), H2D_ANY, &u_prev);
+    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(res), HERMES_ANY);
 
-Recall that by H2D_UNSYM we declare that the Jacobian bilinear form is not symmetric,
-and by H2D_ANY that the form should be used for elements with any material marker.
+Recall that by HERMES_UNSYM we declare that the Jacobian bilinear form is not symmetric,
+and by HERMES_ANY that the form should be used for elements with any material marker.
 
-The NonlinSystem class is initialized in the same way as LinSystem::
+Initializing a nonlinear DiscreteProblem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Initialize the linear system.
-    NonlinSystem nls(&wf, &space);
+As opposed to linear problems, the DiscreteProblem class is now initialized with 
+the boolean flag is_linear=false::
 
-An important step in the Newton's method that cannot be skipped is the projection 
-of the initial condition on the FE space. This is where the initial coefficient 
-vector $\bfY_0$ for the Newton's iteration is created::
+    // Initialize the FE problem.
+    bool is_linear = false;
+    DiscreteProblem dp(&wf, &space, is_linear);
 
-    // Project the function init_cond() on the FE space
-    // to obtain initial coefficient vector for the Newton's method.
-    info("Projecting initial condition to obtain initial vector for the Newton'w method.");
-    nls.project_global(init_cond, &u_prev);  
+The iteration loop
+~~~~~~~~~~~~~~~~~~
 
-The method project_global() has an optional third argument which is the projection 
-norm. Its default value is H2D_DEFAULT_PROJ_NORM = 1 ($H^1$ norm). Other 
-admissible values are 0 ($L^2$ norm), 2 ($Hcurl$ norm) and 3 ($Hdiv$ norm) whose 
-use will be shown later. Later we'll also see how to handle the projection for PDE systems.
+The Newton's iteration loop is very similar in all examples, hence we show it 
+in full here::
 
-The Newton's iteration is done using the method solve_newton()::
+    // Perform Newton's iteration.
+    int it = 1;
+    while (1)
+    {
+      // Obtain the number of degrees of freedom.
+      int ndof = Space::get_num_dofs(&space);
 
-  // Perform Newton's iteration.
-  info("Performing Newton's iteration.");
-  bool verbose = true; // Default is false.
-  if (!nls.solve_newton(&u_prev, NEWTON_TOL, NEWTON_MAX_ITER, verbose)) 
-    error("Newton's method did not converge.");
+      // Assemble the Jacobian matrix and residual vector.
+      dp.assemble(coeff_vec, matrix, rhs, false);
 
-If the optional parameter "verbose" is set to "true", convergence 
-information is printed. 
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
 
-Note that arbitrary Filters can be passed as additional optional parameters. 
-This will be shown in the tutorial example 
-`19-timedep-flame <http://hpfem.org/hermes2d/doc/src/tutorial-3.html#flame-propagation-problem-19>`_.
-Results for this example are shown below.
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, or the maximum number 
+      // of iteration has been reached, then quit.
+      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+      // Solve the linear system.
+      if(!solver->solve()) error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+    
+      if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+
+      it++;
+    }
+
+Note that the Newton's loop always handles a coefficient vector, not 
+solutions. 
+
+Translating the resulting vector into a Solution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After the Newton's loop is finished, the resulting coefficient vector 
+is translated into a Solution as follows::
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, &space, &sln);
+
+As a last step, we clean up as usual::
+
+    // Cleanup.
+    delete [] coeff_vec;
+    delete matrix;
+    delete rhs;
+    delete solver;
+
+Sample results for this example are shown below.
 
 Approximate solution $u$ for $\alpha = 2$: 
 
