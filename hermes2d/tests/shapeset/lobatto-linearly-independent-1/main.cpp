@@ -67,6 +67,15 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
 
+  // precalc structure
+  mat->prealloc(ndof);
+  for (int i = 0; i < ndof; i++)
+    for (int j = 0; j < ndof; j++)
+      mat->pre_add_ij(i, j);
+        
+  mat->alloc();
+  rhs->alloc(ndof);
+
   info("Assembling matrix ...");
   for (int i = 0; i < ndof; i++)
   {
