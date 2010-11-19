@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 const int P_INIT = 2;                    // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.2;            // This is a quantitative parameter of the adapt(...) function and
                                          // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 1;                  // Adaptive strategy:
+const int STRATEGY = 0;                  // Adaptive strategy:
                                          // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                          //   error is processed. If more elements have similar errors, refine
                                          //   all to keep the mesh symmetric.
@@ -170,9 +170,9 @@ int main(int argc, char* argv[])
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 950);
+  printf("ndof allowed = %d\n", 800);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 950) {      // ndofs was 935 at the time this test was created
+  if (ndof < 800) {      // ndofs was 785 at the time this test was created
     printf("Success!\n");
     return ERROR_SUCCESS;
   }

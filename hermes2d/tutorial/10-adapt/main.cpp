@@ -34,7 +34,7 @@ using namespace RefinementSelectors;
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 1;                           // Adaptive strategy:
+const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
