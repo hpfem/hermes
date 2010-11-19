@@ -68,7 +68,7 @@ Underlying algorithms (hanging nodes, adaptivity, shape functions):
       pages = {1374 - 1394}
     } 
 
-Topical papers from various application areas:
+Multimesh hp-FEM and selected applications:
 
 ::
 

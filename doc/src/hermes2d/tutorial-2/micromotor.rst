@@ -183,8 +183,8 @@ The function project_global() is very general, and it can accept multiple
 spaces, multiple functions, and various projection norms as parameters. For more details,
 see the file `ogprojection.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/ogprojection.h>`_.
 
-Calculating error
-~~~~~~~~~~~~~~~~~
+Calculating error estimate
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The coarse and reference mesh approximations are inserted into the class Adapt
 and a global error estimate as well as element error estimates are calculated::
@@ -194,6 +194,10 @@ and a global error estimate as well as element error estimates are calculated::
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+Here, solutions_for_adapt=true means that this solution pair will be used to calculate 
+element errors to guide adaptivity. With solutions_for_adapt=false, just the total error 
+would be calculated (not the element errors). 
 
 When working with another space than H^1, the HERMES_H1_NORM can be replaced with 
 HERMES_HCURL_NORM, HERMES_HDIV_NORM, or HERMES_L2_NORM. For equation systems, 

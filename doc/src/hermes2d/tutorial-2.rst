@@ -14,7 +14,7 @@ error is large.
     tutorial-2/conv   
     tutorial-2/micromotor 
     tutorial-2/multimesh
-    tutorial-2/fitz-nagumo
+    tutorial-2/multimesh-example
     tutorial-2/general-adapt
     tutorial-2/complex-adapt
     tutorial-2/maxwell-adapt

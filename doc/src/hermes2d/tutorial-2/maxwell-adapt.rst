@@ -68,28 +68,32 @@ New in this example is the fact that we solve in the Hcurl space::
     // Create an Hcurl space with default shapeset.
     HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
 
-Also the refinement selector is for the Hcurl space::
+Therefore we need to use a refinement selector for the Hcurl space::
 
     // Initialize refinement selector.
     HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-It is worth noticing that H2D_HCURL_NORM is used in the 
-global projection
+The H2D_HCURL_NORM needs to be used in the global projection::
 
-::
-
-    // Project the reference solution on the coarse mesh.
+    // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    // NULL means that we do not want to know the resulting coefficient vector.
-    project_global(space, H2D_HCURL_NORM, ref_sln, sln, NULL, is_complex); 
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM); 
 
 as well as in the initialization of the Adapt class::
 
-    // Calculate element errors.
-    info("Calculating error (est).");
-    Adapt hp(space, H2D_HCURL_NORM);
-    hp.set_solutions(sln, ref_sln);
-    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100.;
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate and exact error."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+Here, solutions_for_adapt=true means that 'sln' and 'ref_sln' will be used to calculate element 
+errors to guide adaptivity. In the following call to calc_err_exact() we set solutions_for_adapt=false 
+so that just the total error is calculated::
+
+    // Calculate exact error,
+    solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
 The code for the weak forms looks as follows::
 

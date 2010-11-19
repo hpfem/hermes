@@ -1,18 +1,19 @@
 Multimesh hp-FEM
 ----------------
 
-In multiphysics PDE systems (or just PDE systems) it can happen that one
+In multiphysics PDE problems (and other PDE systems) it often happens that one
 physical field (solution component) has a singularity or a boundary layer 
-where other fields are smooth. If one approximates all fields on the 
-same mesh, then the necessity to refine the mesh at the singularity
-or boundary layer implies new degrees of freedom for the smooth fields 
-as well. This can be very wasteful indeed, as we will see in the next
-example that deals with a simplified Fitzhugh-Nagumo system. But let us 
-first explain briefly the main idea of the multimesh discretization 
-method that we developed to circumvent this problem.
+where other fields are smooth. If one approximates all of them on the 
+same mesh, then some of them will be refined where this is absolutely not needed.
+This can be extremely wasteful, as we will see in the tutorial example 11. 
+But first let us introduce the multimesh discretization method that we developed 
+to circumvent this problem.
 
-Hermes makes it possible to approximate them 
-on individual meshes. These meshes are not completely independent
+Multimesh assembling
+~~~~~~~~~~~~~~~~~~~~
+
+Hermes makes it possible to approximate each physical field (or solution
+component) on an individual mesh. These meshes are not completely independent
 of each other -- they have a common coarse mesh that we call *master mesh*.
 The master mesh is there for algorithmic purposes only, it may not 
 even be used for discretization purposes: Every mesh in the system 
@@ -46,51 +47,37 @@ or commit errors while transferring solution data between different meshes.
 The multimesh assembling in Hermes works with all meshes at the same time, 
 there is no such thing as interpolating or projecting functions between 
 different meshes. More details about this method can be found in the 
-corresponding `research article <http://science.atmoshome.net/science?_ob=MImg&_imagekey=B6TYH-4X1J73B-V-8Y&_cdi=5619&_user=10&_pii=S0377042709005731&_orig=browse&_coverDate=08%2F18%2F2009&_sk=999999999&view=c&wchp=dGLbVzz-zSkWz&md5=6552d3390232dcffc9ca97e9bb626fb0&ie=/sdarticle.pdf>`_. 
+corresponding `research articles <http://hpfem.org/hermes/doc/src/citing-hermes.html>`_. 
 
-Adaptivity in the Multimesh hp-FEM
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Simultaneous adaptivity on multiple meshes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In principle, the adaptivity procedure for single PDE could be extended 
-directly to systems of PDEs. In other words, two spaces can be passed into a constructor of the class H1Adapt,
-two coarse and two fine solutions can be passed into set_solutions(),
-and finally, calc_error() and adapt() can be called as before. In this way, error estimates in
-$H^1$ norm are calculated for elements in both spaces independently and the
-worst ones are refined. However, this approach is not optimal if the PDEs are
-coupled, since an error caused in one solution component influences the errors
-in other components and vice versa.
+As explained above, each physical field (solution component0 has its own mesh 
+and these meshes can be very different. The adaptivity algorithm puts all elements 
+of all these meshes one single array, and calculates an error function as a difference
+between the coarse and reference mesh approximations. Elements are then sorted according 
+to their norm of the error function, and then the ones with the largest errors are refined
+as in the standard hp-FEM. Note that if some physical field is already resolved well, 
+this algorithm leaves its mesh alone and will only perform refinements in the other 
+meshes where they are needed. 
 
-Recall that in elliptic problems the bilinear form $a(u,v)$ defines the energetic inner product,
+The function calc_error()
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. math::
-
-    (u,v)_e = a(u,v).
-
-The norm induced by this product,
-
-.. math::
-
-    ||u||_e = \sqrt{(u,u)_e},
-
-is called the *energy norm*. When measuring the error in the energy norm
-of the entire system, one can reduce the above-mentioned difficulties dramatically.
-When calculating the error on an element, the energy norm accounts
-also for the error caused by other solution components. 
-
-It is also worth mentioning that the adaptivity algorithm does not make distinctions 
-between various meshes. The elements of *all meshes in the system* are put into one
-single array, sorted according to their estimated errors, and then the ones with the 
-largest error are refined. In other words, it may happen that all elements marked for refinement 
-will belong just to one mesh.
-
-If norms of components are substantially different, it is more beneficial to use a relative error of an element rather than an absolute error. The relative error of an element is an absolute error divided by a norm of a component. This behavior can be requested while calling the method calc_error()::
+Errors for the adaptvity algorithm as well as the total error are calculated in the 
+function calc_error().
+This function can be called with four combinations of the absolute/relative flags 
+for the total error and the element errors::
 
     hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL)
+    hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS)
+    hp.calc_error(H2D_TOTAL_ERROR_ABS | H2D_ELEMENT_ERROR_REL)
+    hp.calc_error(H2D_TOTAL_ERROR_ABS | H2D_ELEMENT_ERROR_ABS)
 
-The input parameter of the method calc_error() is a combination that is a pair: one member of the pair has to be a constant ```H2D_TOTAL_ERROR_*```, the other member has to be a constant ```H2D_ELEMENT_ERROR_*```. If not specified, the default pair is ```H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS```. Currently available contants are:
+The exact meaning of these flags is as follows:
 
-- ```H2D_TOTAL_ERROR_REL```: Returned total error will be the absolute error divided by the total norm.
-- ```H2D_TOTAL_ERROR_ABS```: Returned total error will be the absolute error.
-- ```H2D_TOTAL_ERROR_REL```: Element error which is used to select elements for refinement will be an absolute error divided by the norm of the corresponding solution component.
-- ```H2D_TOTAL_ERROR_ABS```: Element error which is used to select elements for refinement will be the absolute error.
+- ```H2D_TOTAL_ERROR_REL```: Total error is the norm of the error function (which is the difference between the reference and coarse mesh solutions) divided by the norm of the reference solution.
+- ```H2D_TOTAL_ERROR_ABS```: Total error is the norm of the error function.
+- ```H2D_TOTAL_ERROR_REL```: Element error is the norm of the error function on that element divided by the norm of the corresponding solution component. 
+- ```H2D_TOTAL_ERROR_ABS```: Element error is the norm of the error function on that element.
 

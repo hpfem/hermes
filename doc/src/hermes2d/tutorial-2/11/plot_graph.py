@@ -10,11 +10,11 @@ pylab.ylabel("Error [%]")
 data = numpy.loadtxt("conv_dof_m.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="error (multi-mesh)")
+semilogy(x, y, "-s", label="error (multi-mesh)")
 data = numpy.loadtxt("conv_dof_s.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="error (single-mesh)")
+semilogy(x, y, "-s", label="error (single-mesh)")
 
 legend()
 
@@ -28,11 +28,11 @@ pylab.ylabel("Error [%]")
 data = numpy.loadtxt("conv_cpu_m.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="error (multi-mesh)")
+semilogy(x, y, "-s", label="error (multi-mesh)")
 data = numpy.loadtxt("conv_cpu_s.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="error (single-mesh)")
+semilogy(x, y, "-s", label="error (single-mesh)")
 legend()
 
 

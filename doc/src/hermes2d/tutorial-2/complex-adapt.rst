@@ -9,8 +9,8 @@ This example solves a complex-valued vector potential problem
 
     -\Delta A + j \omega \gamma \mu A = \mu J_{ext}
 
-in a two-dimensional cross-section containing a conductor and an iron object as
-shown in the following schematic picture:
+in a two-dimensional cross-section containing a conductor and an iron object.
+Note: in 2D this is a scalar problem. A scheme is shown in the following picture:
 
 .. image:: 13/domain.png
    :align: center
@@ -31,9 +31,7 @@ Solution:
    :height: 400
    :alt: Solution.
 
-Complex-valued weak forms:
-
-::
+Complex-valued weak forms::
 
     template<typename Real, typename Scalar>
     Scalar bilinear_form_iron(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -60,47 +58,31 @@ Complex-valued weak forms:
       return J_wire * int_v<Real, Scalar>(n, wt, v);
     }
 
-After loading the mesh and performing initial mesh refinements, we create an H1 space:
+Otherwise everything works in the same way as in example `10-adapt <file:///home/pavel/hermes/doc/_build/html/src/hermes2d/tutorial-2/micromotor.html>`_. A few differences:
 
-::
-
-    // Create an H1 space with default shapeset.
-    H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-
-
-The weak forms are registered as follows:
-
-::
-
-    // Initialize the weak formulation.
-    WeakForm wf;
-    wf.add_matrix_form(callback(bilinear_form_iron), H2D_SYM, 3);
-    wf.add_matrix_form(callback(bilinear_form_wire), H2D_SYM, 2);
-    wf.add_matrix_form(callback(bilinear_form_air), H2D_SYM, 1);
-    wf.add_vector_form(callback(linear_form_wire), 2);
-
-The variable 'is_complex' is used at several places.
-First during the matrix initialization::
+We use the matrix solver AztecOO from the Trilinos package. It is initialized as follows::
 
     // Initialize matrix solver.
-    bool is_complex = true;
-    Matrix* mat; Vector* rhs; CommonSolver* solver;  
-    init_matrix_solver(matrix_solver, get_num_dofs(space), mat, rhs, solver, is_complex);
+    initialize_solution_environment(matrix_solver, argc, argv);
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-Then in the solution of the linear problem on the globally refined reference mesh::
+Next we select an iterative solver and precosditioner::
 
-    // Solve the reference problem.
-    // The NULL pointer means that we do not want the resulting coefficient vector.
-    solve_linear(ref_space, &wf, matrix_solver, ref_sln, NULL, is_complex);
+    if (matrix_solver == SOLVER_AZTECOO) {
+      ((AztecOOSolver*) solver)->set_solver(iterative_method);
+      ((AztecOOSolver*) solver)->set_precond(preconditioner);
+      // Using default iteration parameters (see solver/aztecoo.h).
+    }
 
-And finally in the global projection on the coarse mesh::
+At the end, after the adaptivity loop is finished, we clean up::
 
-    // Project the reference solution on the coarse mesh.
-    info("Projecting reference solution on coarse mesh.");
-    // NULL means that we do not want to know the resulting coefficient vector.
-    project_global(space, H2D_H1_NORM, ref_sln, sln, NULL, is_complex); 
-
-Otherwise everything is the same as in example 10.
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    finalize_solution_environment(matrix_solver);
 
 Let us compare adaptive $h$-FEM with linear and quadratic elements and the $hp$-FEM.
 

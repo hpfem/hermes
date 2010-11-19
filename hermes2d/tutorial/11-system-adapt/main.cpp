@@ -68,7 +68,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.01;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -158,13 +158,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&u_space, &v_space));
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Assemble reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -256,12 +258,6 @@ int main(int argc, char* argv[])
   while (done == false);
 
   verbose("Total running time: %g s", cpu_time.accumulated());
-
-  // Show the reference solution - the final result.
-  s_view_0.set_title("Fine mesh Solution[0]");
-  s_view_0.show(&u_ref_sln);
-  s_view_1.set_title("Fine mesh Solution[1]");
-  s_view_1.show(&v_ref_sln);
 
   // Wait for all views to be closed.
   View::wait();
