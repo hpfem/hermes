@@ -54,12 +54,14 @@ Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0, YA));
 Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
  
 // Right-hand side function f(y, x).
-double f(double y, double x) {
+double f(double y, double x) 
+{
   return -y*y;
 }
 
 // y-derivative of dfdy(y, x).
-double dfdy(double y, double x) {
+double dfdy(double y, double x) 
+{
   return -2*y;
 }
 
@@ -67,7 +69,8 @@ double dfdy(double y, double x) {
 // When changing exact solution, do not 
 // forget to update interval accordingly.
 const int EXACT_SOL_PROVIDED = 1;
-void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) 
+{
   u[0] = 1./(x+1);
   dudx[0] = -1/((x+1)*(x+1));
 }
@@ -75,14 +78,18 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
 
-int main() {
+int main() 
+{
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -94,7 +101,8 @@ int main() {
   ElemPtr2 ref_elem_pairs[MAX_ELEM_NUM]; // To store element pairs from the 
                                          // FTR solution. Decides how 
                                          // elements will be hp-refined. 
-  for (int i=0; i < MAX_ELEM_NUM; i++) {
+  for (int i=0; i < MAX_ELEM_NUM; i++) 
+  {
     ref_elem_pairs[i][0] = new Element();
     ref_elem_pairs[i][1] = new Element();
   }
@@ -124,24 +132,25 @@ int main() {
     Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
     int it = 1;
-    while (1) {
+    while (1) 
+    {
       // Obtain the number of degrees of freedom.
       int ndof_coarse = Space::get_num_dofs(space);
 
       // Assemble the Jacobian matrix and residual vector.
-      dp_coarse->assemble(matrix_coarse, rhs_coarse);
+      dp_coarse->assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse);
 
       // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs_coarse);
+      double res_l2_norm = get_l2_norm(rhs_coarse);
 
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, then quit.
       // NOTE: at least one full iteration forced
       //       here because sometimes the initial
       //       residual on fine mesh is too small.
-    if(res_l2_norm < NEWTON_TOL_COARSE && it > 1) break;
+      if(res_l2_norm < NEWTON_TOL_COARSE && it > 1) break;
 
       // Multiply the residual vector with -1 since the matrix 
       // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -175,7 +184,8 @@ int main() {
     // solution and the coarse space solution, and store the
     // error in the elem_errors[] array.
     int n_elem = space->get_n_active_elem();
-    for (int i=0; i < n_elem; i++) {
+    for (int i=0; i < n_elem; i++) 
+    {
 
       info("=== Starting FTR of Elem [%d].", i);
 
@@ -203,24 +213,25 @@ int main() {
       memset(coeff_vec, 0, Space::get_num_dofs(space_ref_local)*sizeof(double));
 
       int it = 1;
-      while (1) {
+      while (1) 
+      {
         // Obtain the number of degrees of freedom.
         int ndof = Space::get_num_dofs(space_ref_local);
 
         // Assemble the Jacobian matrix and residual vector.
-        dp->assemble(matrix, rhs);
+        dp->assemble(coeff_vec, matrix, rhs);
 
         // Calculate the l2-norm of residual vector.
-      double res_l2_norm = get_l2_norm(rhs);
+        double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space_ref_local), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space_ref_local), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, then quit.
         // NOTE: at least one full iteration forced
         //       here because sometimes the initial
         //       residual on fine mesh is too small.
-      if(res_l2_norm < NEWTON_TOL_REF && it > 1) break;
+        if(res_l2_norm < NEWTON_TOL_REF && it > 1) break;
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -261,8 +272,7 @@ int main() {
       // NOTE: later we want to look at the difference in some quantity 
       // of interest rather than error in global norm.
       double err_est_array[MAX_ELEM_NUM];
-      elem_errors[i] = calc_err_est(NORM, space, space_ref_local, 
-                       err_est_array) * 100;
+      elem_errors[i] = calc_err_est(NORM, space, space_ref_local, err_est_array) * 100;
       info("Elem [%d]: absolute error (est) = %g%%", i, elem_errors[i]);
 
       // Copy the reference element pair for element 'i'.
@@ -270,13 +280,16 @@ int main() {
       Iterator *I = new Iterator(space);
       Iterator *I_ref = new Iterator(space_ref_local);
       Element *e, *e_ref;
-      while (1) {
+      while (1) 
+     {
         e = I->next_active_element();
         e_ref = I_ref->next_active_element();
-        if (e->id == i) {
+        if (e->id == i) 
+        {
   	  e_ref->copy_into(ref_elem_pairs[e->id][0]);
           // coarse element 'e' was split in space.
-          if (e->level != e_ref->level) {
+          if (e->level != e_ref->level) 
+          {
             e_ref = I_ref->next_active_element();
             e_ref->copy_into(ref_elem_pairs[e->id][1]);
           }
@@ -293,10 +306,10 @@ int main() {
     cpu_time.tick();
 
     // If exact solution available, also calculate exact error.
-    if (EXACT_SOL_PROVIDED) {
+    if (EXACT_SOL_PROVIDED) 
+    {
       // Calculate element errors wrt. exact solution.
-      double err_exact_rel = calc_err_exact(NORM, 
-         space, exact_sol, NEQ, A, B) * 100;
+      double err_exact_rel = calc_err_exact(NORM, space, exact_sol, NEQ, A, B) * 100;
      
       // Info for user.
       info("Relative error (exact) = %g %%", err_exact_rel);
@@ -308,7 +321,8 @@ int main() {
 
     // Calculate max FTR error.
     double max_ftr_error = 0;
-    for (int i=0; i < space->get_n_active_elem(); i++) {
+    for (int i=0; i < space->get_n_active_elem(); i++) 
+    {
       if (elem_errors[i] > max_ftr_error) max_ftr_error = elem_errors[i];
     }
     info("Max FTR error = %g%%.", max_ftr_error);
@@ -320,12 +334,10 @@ int main() {
     //if (as == 4) break;
 
     // Returns updated coarse space with the last solution on it. 
-    adapt(NORM, ADAPT_TYPE, THRESHOLD, elem_errors,
-          space, ref_elem_pairs);
+    adapt(NORM, ADAPT_TYPE, THRESHOLD, elem_errors, space, ref_elem_pairs);
 
     // Plot spaces, results, and errors.
-    adapt_plotting(space, ref_elem_pairs,
-                 NORM, EXACT_SOL_PROVIDED, exact_sol);
+    adapt_plotting(space, ref_elem_pairs, NORM, EXACT_SOL_PROVIDED, exact_sol);
 
     as++;
   }

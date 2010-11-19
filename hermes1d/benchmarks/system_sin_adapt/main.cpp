@@ -49,7 +49,8 @@ Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 // When changing exact solution, do not 
 // forget to update interval accordingly.
 const int EXACT_SOL_PROVIDED = 1;
-void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) 
+{
   u[0] = sin(K*x);
   dudx[0] = K*cos(K*x);
   u[1] = K*cos(K*x);
@@ -67,7 +68,10 @@ int main()
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ, NEQ);
-  info("ndof: %d.", Space::get_num_dofs(space));
+
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -242,7 +246,8 @@ int main()
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < NEWTON_TOL_REF) done = true;
-    else {
+    else 
+    {
       info("Adapting the coarse mesh.");
       adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array, space, ref_space);
     }
@@ -259,7 +264,6 @@ int main()
     delete ref_space;
     delete dp;
     delete [] coeff_vec;
-
   }
   while (done == false);
 

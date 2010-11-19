@@ -47,7 +47,8 @@ Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,0));
 
 // Function f(x).
 double alpha = 1.5;
-double f(double x) {
+double f(double x) 
+{
   return sin(x);
 }
 
@@ -55,7 +56,8 @@ double f(double x) {
 // When changing exact solution, do not 
 // forget to update interval accordingly.
 const int EXACT_SOL_PROVIDED = 1;
-void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) 
+{
   u[0] = sin(x);
   dudx[0] = cos(x);
 }
@@ -70,7 +72,10 @@ int main() {
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -97,7 +102,7 @@ int main() {
     int ndof_coarse = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp_coarse->assemble(matrix_coarse, rhs_coarse);
+    dp_coarse->assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs_coarse);
@@ -163,17 +168,19 @@ int main() {
 
     // Newton's loop on the fine mesh.
     info("Solving on fine mesh:");
+
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
     double *coeff_vec = new double[Space::get_num_dofs(ref_space)];
     get_coeff_vector(ref_space, coeff_vec);
 
     int it = 1;
-    while (1) {
+    while (1) 
+    {
       // Obtain the number of degrees of freedom.
       int ndof = Space::get_num_dofs(ref_space);
 
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble(matrix, rhs);
+      dp->assemble(coeff_vec, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
@@ -219,8 +226,7 @@ int main() {
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
     double err_est_array[MAX_ELEM_NUM]; 
-    double err_est_rel = calc_err_est(NORM, 
-              space, ref_space, err_est_array) * 100;
+    double err_est_rel = calc_err_est(NORM, space, ref_space, err_est_array) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
@@ -230,10 +236,10 @@ int main() {
     cpu_time.tick();
 
     // If exact solution available, also calculate exact error.
-    if (EXACT_SOL_PROVIDED) {
+    if (EXACT_SOL_PROVIDED) 
+    {
       // Calculate element errors wrt. exact solution.
-      double err_exact_rel = calc_err_exact(NORM, 
-         space, exact_sol, NEQ, A, B) * 100;
+      double err_exact_rel = calc_err_exact(NORM, space, exact_sol, NEQ, A, B) * 100;
      
       // Info for user.
       info("Relative error (exact) = %g %%", err_exact_rel);
@@ -249,17 +255,16 @@ int main() {
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < NEWTON_TOL_REF) done = true;
-    else {
+    else 
+    {
       info("Adapting the coarse mesh.");
-      adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array,
-          space, ref_space);
+      adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array, space, ref_space);
     }
 
     as++;
 
     // Plot meshes, results, and errors.
-    adapt_plotting(space, ref_space, 
-                 NORM, EXACT_SOL_PROVIDED, exact_sol);
+    adapt_plotting(space, ref_space, NORM, EXACT_SOL_PROVIDED, exact_sol);
 
     // Cleanup.
     delete solver;
@@ -268,7 +273,6 @@ int main() {
     delete ref_space;
     delete dp;
     delete [] coeff_vec;
-
   }
   while (done == false);
 
@@ -282,21 +286,3 @@ int main() {
 
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

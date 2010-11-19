@@ -31,7 +31,8 @@ Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,1));
 Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,1));
 
 // Function f(x).
-double f(double x) {
+double f(double x) 
+{
   return sin(x);
 }
 
