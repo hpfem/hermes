@@ -34,11 +34,17 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 // Thermal conductivity (temperature-dependent)
 // Note: for any u, this function has to be positive.
 template<typename Real>
-Real lam(Real u) { return 1 + pow(u, 4); }
+Real lam(Real u) 
+{ 
+  return 1 + pow(u, 4); 
+}
 
 // Derivative of the thermal conductivity with respect to 'u'.
 template<typename Real>
-Real dlam_du(Real u) { return 4*pow(u, 3); }
+Real dlam_du(Real u) 
+{ 
+  return 4*pow(u, 3); 
+}
 
 // Boundary condition types.
 BCType bc_types(int marker)
@@ -90,7 +96,7 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)];
   Solution* init_sln = new Solution();
   init_sln->set_const(&mesh, INIT_COND_CONST);
   OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver);

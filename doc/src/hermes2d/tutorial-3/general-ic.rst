@@ -18,9 +18,7 @@ but now with nonhomogeneous Dirichlet boundary conditions
 
 and with a general initial guess init_guess(x,y).
 
-The treatment of the Dirichlet boundary conditions in the code looks as follows:
-
-::
+The treatment of the Dirichlet boundary conditions in the code looks as follows::
 
     // This function is used to define Dirichlet boundary conditions.
     double dir_lift(double x, double y, double& dx, double& dy) {
@@ -53,17 +51,16 @@ The initial condition has the form::
       return val;
     }
 
-The initial condition must be projected on the finite element space 
-in order to obtain the initial coefficient vector $\bfY_0$ for the Newton's
-iteration::
+As in the previous example, the initial condition is projected on the finite element space 
+to obtain an initial coefficient vector $\bfY_0$ for the Newton's iteration::
 
-    // Project the function init_cond() on the FE space
-    // to obtain initial coefficient vector for the Newton's method.
-    info("Projecting initial condition to obtain initial vector for the Newton'w method.");
-    nls.project_global(init_cond, &u_prev);
-
-Recall that the vector $\bfY_0$ can be retrieved from the NonLinSystem
-class using the method get_solution_vector(). 
+    // Project the initial condition on the FE space to obtain initial 
+    // coefficient vector for the Newton's method.
+    info("Projecting to obtain initial vector for the Newton's method.");
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
+    Solution* init_sln = new Solution(&mesh, init_cond);
+    OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver); 
+    delete init_sln;
 
 The following figure shows the $H^1$-projection of the initial condition init_cond():
 
@@ -72,16 +69,6 @@ The following figure shows the $H^1$-projection of the initial condition init_co
    :width: 600
    :height: 350
    :alt: H1 projection
-
-The Newton's iteration is again performed using
-
-::
-
-  // Perform Newton's iteration.
-  info("Performing Newton's iteration.");
-  bool verbose = true; // Default is false.
-  if (!nls.solve_newton(&u_prev, NEWTON_TOL, NEWTON_MAX_ITER, verbose)) 
-    error("Newton's method did not converge.");
 
 The converged solution looks as follows:
 
