@@ -153,7 +153,8 @@ int main(int argc, char* argv[])
   OGProjection::project_global(&space, init_sln, coeff_vec_coarse, matrix_solver); 
   delete init_sln;
 
-  // Newton's loop on the coarse mesh.
+  // Newton's loop on the coarse mesh. This is needed to obtain a good 
+  // starting point for the Newton's method on the reference mesh.
   info("Solving on coarse mesh:");
   int it = 1;
   while (1)
@@ -179,14 +180,12 @@ int main(int argc, char* argv[])
     if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
 
     // Solve the linear system and if successful, obtain the solution.
-    if(!solver_coarse->solve())
-      error ("Matrix solver failed.\n");
+    if(!solver_coarse->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
     
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
+    if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
 
     it++;
   }
@@ -210,19 +209,25 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-    scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
+    // Initialize discrete problem on the reference mesh.
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
+    // Calculate initial coefficient vector on the reference mesh.
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
     if (as == 1) 
     {
+      // In the first step, project the coarse mesh solution.
       info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
       OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
     }
     else 
     {
+      // In all other steps, project the previous fine mesh solution.
       info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
       OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
     }
@@ -272,7 +277,8 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
@@ -291,8 +297,8 @@ int main(int argc, char* argv[])
     if (err_est_rel < ERR_STOP) done = true;
     else 
     {
-        info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      info("Adapting the coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       if (Space::get_num_dofs(&space) >= NDOF_STOP) 
       {
@@ -304,6 +310,7 @@ int main(int argc, char* argv[])
       // to obtain new coars emesh solution.
       info("Projecting reference solution on new coarse mesh for error calculation.");
       OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+
       // View the coarse mesh solution.
       sview.show(&sln);
       oview.show(&space);
@@ -314,8 +321,7 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    if(done == false)
-      delete ref_space->get_mesh();
+    if(done == false) delete ref_space->get_mesh();
     delete ref_space;
     delete dp;
 
