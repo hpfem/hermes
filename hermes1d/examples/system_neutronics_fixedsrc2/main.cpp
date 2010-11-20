@@ -9,13 +9,13 @@
 //  The core is composed of a seven 100cm wide assemblies. Zero-flux conditions
 //  on both the right and left boundaries of the core (homogeneous Dirichlet).
 //  There is an assembly-wise constant source of fast (group 1) neutrons. 
-//	Reference:
-// 		HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
-// 		A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
-//		Example 3 (pp. 154).
+//  Reference:
+//  HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
+//  A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
+//  Example 3 (pp. 154).
 //
 //  PDE: -(D1.u1')' + Sa1.u1 = nSf1.u1 + nSf2.u2 + Q 
-//		   -(D2.u2')' + Sa2.u2 = S12.u1.
+//       -(D2.u2')' + Sa2.u2 = S12.u1.
 //
 //  Interval: .
 //
@@ -45,7 +45,8 @@ int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-int main() {
+int main() 
+{
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData();		
@@ -53,14 +54,17 @@ int main() {
   delete md;
   
   // Enumerate basis functions, info for user.
-  info("N_dof = %d", Space::get_num_dofs(space));
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
+
   // Plot the space.
   space->plot("space.gp");
 
-  for (int g = 0; g < N_GRP; g++)  {
-  	space->set_bc_left_dirichlet(g, flux_left_surf[g]);
-  	space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-	}
+  for (int g = 0; g < N_GRP; g++)  
+  {
+    space->set_bc_left_dirichlet(g, flux_left_surf[g]);
+    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
+  }
   
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -77,12 +81,12 @@ int main() {
   wf.add_matrix_form(1, 0, jacobian_mat3_1_0, NULL, mat3);
     
   wf.add_matrix_form(1, 1, jacobian_mat1_1_1, NULL, mat1);
-	wf.add_matrix_form(1, 1, jacobian_mat2_1_1, NULL, mat2);
-	wf.add_matrix_form(1, 1, jacobian_mat3_1_1, NULL, mat3);
+  wf.add_matrix_form(1, 1, jacobian_mat2_1_1, NULL, mat2);
+  wf.add_matrix_form(1, 1, jacobian_mat3_1_1, NULL, mat3);
   
   wf.add_vector_form(0, residual_mat1_0, NULL, mat1);  
-	wf.add_vector_form(0, residual_mat2_0, NULL, mat2);  
-	wf.add_vector_form(0, residual_mat3_0, NULL, mat3);
+  wf.add_vector_form(0, residual_mat2_0, NULL, mat2);  
+  wf.add_vector_form(0, residual_mat3_0, NULL, mat3);
 	    
   wf.add_vector_form(1, residual_mat1_1, NULL, mat1);
   wf.add_vector_form(1, residual_mat2_1, NULL, mat2); 
@@ -103,12 +107,13 @@ int main() {
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1) {
+  while (1) 
+  {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(matrix, rhs);
+    dp->assemble(coeff_vec, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);

@@ -118,7 +118,8 @@ void normalize_to_power(Space* space, double desired_power)
 
 
 
-int main() {
+int main() 
+{
   // Three macroelements are defined above via the interfaces[] array.
   // poly_orders[]... initial poly degrees of macroelements.
   // material_markers[]... material markers of macroelements.
@@ -130,7 +131,8 @@ int main() {
   // Create space.
   Space* space = new Space(N_MAT, interfaces, poly_orders, material_markers, subdivisions, N_GRP, N_SLN);
   // Enumerate basis functions, info for user.
-  info("N_dof = %d", Space::get_num_dofs(space));
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initial approximation: u = 1.
   double K_EFF_old;
@@ -164,7 +166,7 @@ int main() {
     int ndof = Space::get_num_dofs(space);
 
     // Fill vector coeff_vec using dof and coeffs arrays in elements.
-  double *coeff_vec = new double[Space::get_num_dofs(space)];
+    double *coeff_vec = new double[Space::get_num_dofs(space)];
     get_coeff_vector(space, coeff_vec);
   
     // Set up the solver, matrix, and rhs according to the solver selection.
@@ -173,12 +175,12 @@ int main() {
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
   
     int it = 1;
-  while (1) {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(space);
+    while (1) {
+      // Obtain the number of degrees of freedom.
+      int ndof = Space::get_num_dofs(space);
 
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble(matrix, rhs);
+      dp->assemble(coeff_vec, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
@@ -216,7 +218,7 @@ int main() {
     delete matrix;
     delete rhs;
     delete solver;
-	  delete [] coeff_vec;
+    delete [] coeff_vec;
     
     // Update the eigenvalue.
     K_EFF_old = K_EFF;

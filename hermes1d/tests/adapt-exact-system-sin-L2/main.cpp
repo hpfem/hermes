@@ -47,7 +47,8 @@ Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 // When changing exact solution, do not 
 // forget to update interval accordingly.
 const int EXACT_SOL_PROVIDED = 1;
-void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) 
+{
   u[0] = sin(K*x);
   dudx[0] = K*cos(K*x);
   u[1] = K*cos(K*x);
@@ -65,7 +66,8 @@ double jacobian_0_0(int num, double *x, double *weights,
                 void *user_data)
 {
   double val = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += dudx[i]*v[i]*weights[i];
   }
   return val;
@@ -79,7 +81,8 @@ double jacobian_0_1(int num, double *x, double *weights,
                 void *user_data)
 {
   double val = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += -u[i]*v[i]*weights[i];
   }
   return val;
@@ -93,7 +96,8 @@ double jacobian_1_0(int num, double *x, double *weights,
                 void *user_data)
 {
   double val = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += K*K*u[i]*v[i]*weights[i];
   }
   return val;
@@ -107,7 +111,8 @@ double jacobian_1_1(int num, double *x, double *weights,
                 void *user_data)
 {
   double val = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += dudx[i]*v[i]*weights[i];
   }
   return val;
@@ -122,7 +127,8 @@ double residual_0(int num, double *x, double *weights,
   double val = 0;
   // Solution index (only 0 is relevant for this example).
   int si = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += (du_prevdx[si][0][i] - u_prev[si][1][i])*v[i]*weights[i];
   }
   return val;
@@ -137,20 +143,25 @@ double residual_1(int num, double *x, double *weights,
   double val = 0;
   // Solution index (only 0 is relevant for this example).
   int si = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += (K*K*u_prev[si][0][i] + du_prevdx[si][1][i])*v[i]*weights[i];
   }
   return val;
 };
 
-int main() {
+int main() 
+{
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
   // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -176,12 +187,13 @@ int main() {
   Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
   int it = 1;
-  while (1) {
+  while (1) 
+  {
     // Obtain the number of degrees of freedom.
     int ndof_coarse = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp_coarse->assemble(matrix_coarse, rhs_coarse);
+    dp_coarse->assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs_coarse);
@@ -257,7 +269,7 @@ int main() {
       int ndof = Space::get_num_dofs(ref_space);
 
       // Assemble the Jacobian matrix and residual vector.
-      dp->assemble(matrix, rhs);
+      dp->assemble(coeff_vec, matrix, rhs);
 
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
@@ -303,8 +315,7 @@ int main() {
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
     double err_est_array[MAX_ELEM_NUM]; 
-    double err_est_rel = calc_err_est(NORM, 
-              space, ref_space, err_est_array) * 100;
+    double err_est_rel = calc_err_est(NORM, space, ref_space, err_est_array) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
@@ -314,10 +325,10 @@ int main() {
     cpu_time.tick();
 
     // If exact solution available, also calculate exact error.
-    if (EXACT_SOL_PROVIDED) {
+    if (EXACT_SOL_PROVIDED) 
+    {
       // Calculate element errors wrt. exact solution.
-      double err_exact_rel = calc_err_exact(NORM, 
-         space, exact_sol, NEQ, A, B) * 100;
+      double err_exact_rel = calc_err_exact(NORM, space, exact_sol, NEQ, A, B) * 100;
      
       // Info for user.
       info("Relative error (exact) = %g %%", err_exact_rel);
@@ -338,14 +349,12 @@ int main() {
     // coarse and fine mesh solutions on them, respectively. 
     // The coefficient vectors and numbers of degrees of freedom 
     // on both meshes are also updated. 
-    adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array,
-          space, ref_space);
+    adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array, space, ref_space);
 
     as++;
 
     // Plot meshes, results, and errors.
-    adapt_plotting(space, ref_space, 
-                 NORM, EXACT_SOL_PROVIDED, exact_sol);
+    adapt_plotting(space, ref_space, NORM, EXACT_SOL_PROVIDED, exact_sol);
 
     // Cleanup.
     delete solver;
@@ -371,15 +380,14 @@ int main() {
   info("N_dof = %d.", Space::get_num_dofs(space));
   if (Space::get_num_dofs(space) > 70) success_test = 0;
 
-  if (success_test) {
+  if (success_test) 
+  {
     info("Success!");
     return ERROR_SUCCESS;
   }
-  else {
+  else 
+  {
     info("Failure!");
     return ERROR_FAILURE;
   }
 }
-
-
-

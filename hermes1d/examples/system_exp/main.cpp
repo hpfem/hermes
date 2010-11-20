@@ -46,10 +46,14 @@ double f_1(double x) {
 #include "forms.cpp"
 
 
-int main() {
+int main() 
+{
   // Create space, set Dirichlet BC, enumerate basis functions.
   Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ, NEQ);
-  info("N_dof = %d.", Space::get_num_dofs(space));
+
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -80,7 +84,7 @@ int main() {
     int ndof = Space::get_num_dofs(space);
 
     // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(matrix, rhs);
+    dp->assemble(coeff_vec, matrix, rhs);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);

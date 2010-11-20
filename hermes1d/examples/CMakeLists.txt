@@ -8,6 +8,7 @@ add_subdirectory(neutronics)
 
 if(WITH_PYTHON)
   add_subdirectory(schroedinger)
+  add_subdirectory(system_sin_eigen)
 endif(WITH_PYTHON)
 
 add_subdirectory(system_car_model)
@@ -18,5 +19,3 @@ add_subdirectory(system_neutronics_fixedsrc)
 add_subdirectory(system_neutronics_fixedsrc2)
 add_subdirectory(system_pendulum)
 add_subdirectory(system_sin)
-add_subdirectory(system_sin_eigen)
-
