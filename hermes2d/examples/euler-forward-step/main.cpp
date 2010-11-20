@@ -19,7 +19,7 @@
  
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
-double TAU = 1E-5;                                // Time step.
+double TAU = 1E-3;                                // Time step.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
@@ -29,10 +29,12 @@ double RHO_EXT = 1.4;       // Inlet density (dimensionless).
 double V1_EXT = 3.0;        // Inlet x-velocity (dimensionless).
 double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 double KAPPA = 1.4;         // Kappa.
-double C_V = 717.5;         // C_v.
-double R = 287.14;          // R.
 
 double t = 0;
+
+// Numerical flux.
+// For numerical fluxes, please see hermes2d/src/numerical_flux.h
+NumericalFlux num_flux(KAPPA);
 
 // Boundary condition types.
 BCType bc_types(int marker)
@@ -76,23 +78,23 @@ double bc_energy(double y)
 
 // Calculates energy from other quantities.
 // FIXME: this should be in the src/ directory, not here.
-double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure, double kappa)
+double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
 {
-  return pressure/(kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 }
 
 // Calculates pressure from other quantities.
 // FIXME: this should be in the src/ directory, not here.
-double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
+double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
 {
-  return (kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / 2*rho);
+  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / 2*rho);
 }
 
 // Calculates speed of sound.
 // FIXME: this should be in the src/ directory, not here.
-double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
+double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy)
 {
-  return std::sqrt(kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy, kappa) / rho);
+  return std::sqrt(num_flux.kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy) / rho);
 }
 
 // Constant initial state (matching the supersonic inlet state).
@@ -110,7 +112,7 @@ double ic_density_vel_y(double x, double y, scalar& dx, scalar& dy)
 }
 double ic_energy(double x, double y, scalar& dx, scalar& dy)
 {
-  return calc_energy(RHO_EXT, RHO_EXT*V1_EXT, RHO_EXT*V2_EXT, P_EXT, KAPPA);
+  return calc_energy(RHO_EXT, RHO_EXT*V1_EXT, RHO_EXT*V2_EXT, P_EXT);
 }
 
 // Weak forms.
@@ -118,9 +120,6 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 
 // Filters.
 #include "filters.cpp"
-
-// Numerical flux with default parameters (see hermes2d/src/numerical_flux.h).
-NumericalFlux num_flux;
 
 int main(int argc, char* argv[])
 {
@@ -131,12 +130,6 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-
-  // Setting R, C_V and KAPPA (should be fixed, these do not belong into the 
-  // numerical flux, they are parameters for the equations).
-  num_flux.R = R;
-  num_flux.c_v = C_V;
-  num_flux.kappa = KAPPA;
 
   // Initialize spaces with default shapesets.
   L2Space space_rho(&mesh,P_INIT);

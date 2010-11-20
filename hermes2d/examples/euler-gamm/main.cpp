@@ -12,13 +12,18 @@ double t = 0;
 
 #include "forms.cpp"
 #include "filters.cpp"
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO,
                                                   //                SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
-// Set up numerical flux with default parameters.
-// For numerical fluxes, please see hermes2d/src/numerical_flux.h
-NumericalFlux num_flux;
+// Equation parameters.
+double KAPPA = 1.4;         // Kappa.
 
+// Numerical flux.
+// For numerical fluxes, please see hermes2d/src/numerical_flux.h
+NumericalFlux num_flux(KAPPA);
+
+// Boundary condition types.
 BCType bc_types(int marker)
 {
   return BC_NATURAL;

@@ -97,6 +97,7 @@
 #include "neighbor.h"
 #include "ogprojection.h"
 
+#include "numerical_flux.h"
 /**
 
 \mainpage

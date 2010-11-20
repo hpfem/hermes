@@ -30,7 +30,7 @@ double bc_energy(double y)
 // Calculation of the pressure on the boundary.
 double bc_pressure(double y)
 {
-  return num_flux.R/num_flux.c_v * (bc_energy(y) - (bc_density_vel_x(y) * bc_density_vel_x(y) + bc_density_vel_y(y) * bc_density_vel_y(y))/(2 * bc_density(y)));
+  return (num_flux.kappa - 1.) * (bc_energy(y) - (bc_density_vel_x(y) * bc_density_vel_x(y) + bc_density_vel_y(y) * bc_density_vel_y(y))/(2 * bc_density(y)));
 }
 
 
@@ -54,22 +54,19 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 }
 
 // Calculates pressure from other quantities.
-template<typename Scalar>
-Scalar calc_pressure(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
+double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
 {
-  return (num_flux.R/num_flux.c_v) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
+  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
 }
 // Calculates the local speed of sound from other quantities.
-template<typename Scalar>
-Scalar calc_sound_speed(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
+double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy)
 {
   return std::sqrt(num_flux.kappa * calc_pressure(rho,rho_v_x,rho_v_y,energy) / rho);
 }
 // Calculates energy from other quantities.
-template<typename Scalar>
-Scalar calc_energy(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar pressure)
+double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
 {
-  return (num_flux.c_v/num_flux.R) * pressure + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+  return (num_flux.kappa - 1.) * pressure + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 }
 
 ///////////////////////////////////////////////////
@@ -102,25 +99,26 @@ Scalar A_1_0_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 template<typename Scalar>
 Scalar A_1_1_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - ((rho_v_x * rho_v_x) / (rho * rho)) + 0.5 * (num_flux.R / num_flux.c_v) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+  return - ((rho_v_x * rho_v_x) / (rho * rho)) + 0.5 * (num_flux.kappa - 1.) * 
+		((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
 }
 
 template<typename Scalar>
 Scalar A_1_1_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return 2 * (rho_v_x / rho) - (num_flux.R / num_flux.c_v) * (rho_v_x / rho);
+  return 2 * (rho_v_x / rho) - (num_flux.kappa - 1.) * (rho_v_x / rho);
 }
 
 template<typename Scalar>
 Scalar A_1_1_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - (num_flux.R / num_flux.c_v) * (rho_v_y / rho);;
+  return - (num_flux.kappa - 1.) * (rho_v_y / rho);;
 }
 
 template<typename Scalar>
 Scalar A_1_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return (num_flux.R / num_flux.c_v);
+  return num_flux.kappa - 1.;
 }
 
 template<typename Scalar>
@@ -150,25 +148,25 @@ Scalar A_1_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 template<typename Scalar>
 Scalar A_1_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - (rho_v_x * energy) / (rho * rho) - (rho_v_x / (rho * rho)) * (num_flux.R / num_flux.c_v) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_x / rho) * (num_flux.R / num_flux.c_v) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
+  return - (rho_v_x * energy) / (rho * rho) - (rho_v_x / (rho * rho)) * (num_flux.kappa - 1.) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_x / rho) * (num_flux.kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
 }
 
 template<typename Scalar>
 Scalar A_1_3_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return (energy / rho) + (1 / rho) * (num_flux.R / num_flux.c_v) * ( energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho))) - (num_flux.R / num_flux.c_v) * ((rho_v_x * rho_v_x) / (rho * rho));
+  return (energy / rho) + (1 / rho) * (num_flux.kappa - 1.) * ( energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho))) - (num_flux.kappa - 1.) * ((rho_v_x * rho_v_x) / (rho * rho));
 }
 
 template<typename Scalar>
 Scalar A_1_3_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - (num_flux.R / num_flux.c_v) * (rho_v_x * rho_v_y) / (rho * rho);
+  return - (num_flux.kappa - 1.) * (rho_v_x * rho_v_y) / (rho * rho);
 }
 
 template<typename Scalar>
 Scalar A_1_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return rho_v_x / rho + (num_flux.R / num_flux.c_v) * (rho_v_x / rho);
+  return rho_v_x / rho + (num_flux.kappa - 1.) * (rho_v_x / rho);
 }
 
 
@@ -280,51 +278,51 @@ Scalar A_2_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 template<typename Scalar>
 Scalar A_2_2_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - ((rho_v_y * rho_v_y) / (rho * rho)) + 0.5 * (num_flux.R / num_flux.c_v) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+  return - ((rho_v_y * rho_v_y) / (rho * rho)) + 0.5 * (num_flux.kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
 
 }
 
 template<typename Scalar>
 Scalar A_2_2_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - (num_flux.R / num_flux.c_v) * (rho_v_x / rho);
+  return - (num_flux.kappa - 1.) * (rho_v_x / rho);
   
 }
 
 template<typename Scalar>
 Scalar A_2_2_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return 2 * (rho_v_y / rho) - (num_flux.R / num_flux.c_v) * (rho_v_y / rho);
+  return 2 * (rho_v_y / rho) - (num_flux.kappa - 1.) * (rho_v_y / rho);
 }
 
 template<typename Scalar>
 Scalar A_2_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return num_flux.R / num_flux.c_v;
+  return num_flux.kappa - 1.;
 }
 
 template<typename Scalar>
 Scalar A_2_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - (rho_v_y * energy) / (rho * rho) - (rho_v_y / (rho * rho)) * (num_flux.R / num_flux.c_v) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_y / rho) * (num_flux.R / num_flux.c_v) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
+  return - (rho_v_y * energy) / (rho * rho) - (rho_v_y / (rho * rho)) * (num_flux.kappa - 1.) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_y / rho) * (num_flux.kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
 }
 
 template<typename Scalar>
 Scalar A_2_3_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - (num_flux.R / num_flux.c_v) * (rho_v_x * rho_v_y) / (rho * rho);
+  return - (num_flux.kappa - 1.) * (rho_v_x * rho_v_y) / (rho * rho);
 }
 
 template<typename Scalar>
 Scalar A_2_3_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return (energy / rho) + (1 / rho) * (num_flux.R / num_flux.c_v) * ( energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho))) - (num_flux.R / num_flux.c_v) * ((rho_v_y * rho_v_y) / (rho * rho));
+  return (energy / rho) + (1 / rho) * (num_flux.kappa - 1.) * ( energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho))) - (num_flux.kappa - 1.) * ((rho_v_y * rho_v_y) / (rho * rho));
 }
 
 template<typename Scalar>
 Scalar A_2_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return rho_v_y / rho + (num_flux.R / num_flux.c_v) * (rho_v_y / rho);
+  return rho_v_y / rho + (num_flux.kappa - 1.) * (rho_v_y / rho);
 }
 
 
@@ -697,7 +695,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     double rho_b = std::pow((sound_speed_b*sound_speed_b*w01/(num_flux.kappa*calc_pressure<double>(w01,w11,w21,w31))),num_flux.c_v/num_flux.R) * w01;
     double p_b = rho_b * sound_speed_b * sound_speed_b / num_flux.kappa;
     */
-    double p_b = calc_pressure<double>(w01, w11, w21, w31);
+    double p_b = calc_pressure(w01, w11, w21, w31);
     
     //Ondrej's code.
     double flux[4];

@@ -5,11 +5,11 @@ double NumericalFlux::f_x(int i, double w0, double w1, double w3, double w4)
     if (i == 0)
         return w1;
     else if (i == 1)
-        return w1*w1/w0 + R/c_v * (w4 - (w1*w1+w3*w3)/(2*w0));
+        return w1*w1/w0 + (kappa - 1.) * (w4 - (w1*w1+w3*w3)/(2*w0));
     else if (i == 2)
         return w1*w3/w0;
     else if (i == 3)
-        return w1/w0 * (w4 + R/c_v * (w4 - (w1*w1+w3*w3)/(2*w0)));
+        return w1/w0 * (w4 + (kappa - 1.) * (w4 - (w1*w1+w3*w3)/(2*w0)));
 
     error("Invalid index.");
 }
@@ -21,9 +21,9 @@ double NumericalFlux::f_z(int i, double w0, double w1, double w3, double w4)
     else if (i == 1)
         return w3*w1/w0;
     else if (i == 2)
-        return w3*w3/w0 + R/c_v * (w4 - (w1*w1+w3*w3)/(2*w0));
+        return w3*w3/w0 + (kappa - 1.) * (w4 - (w1*w1+w3*w3)/(2*w0));
     else if (i == 3)
-        return w3/w0 * (w4 + R/c_v * (w4 - (w1*w1+w3*w3)/(2*w0)));
+        return w3/w0 * (w4 + (kappa - 1.) * (w4 - (w1*w1+w3*w3)/(2*w0)));
 
     error("Invalid index.");
 }
@@ -40,13 +40,13 @@ double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double 
         return 0;
 
     else if (i == 1 && j == 0)
-        return -w1*w1/(w0*w0) + R * (w1*w1 + w3*w3)/(2*c_v * w0*w0);
+        return -w1*w1/(w0*w0) + (kappa - 1.) * (w1*w1 + w3*w3)/(2 * w0*w0);
     else if (i == 1 && j == 1)
-        return 2*w1/w0 - R * w1 / (c_v * w0);
+        return 2*w1/w0 - (kappa - 1.) * w1 / w0;
     else if (i == 1 && j == 2)
-        return -R * w3 / (c_v * w0);
+        return - (kappa - 1.) * w3 / w0;
     else if (i == 1 && j == 3)
-        return R/c_v;
+        return kappa - 1.;
 
     else if (i == 2 && j == 0)
         return -w1*w3/(w0*w0);
@@ -58,19 +58,19 @@ double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double 
         return 0;
 
     else if (i == 3 && j == 0)
-        return -w1*w4/(w0*w0) - w1/(w0*w0) * R/c_v
-            * (w4 - (w1*w1+w3*w3)/(2*w0)) + w1/w0 * R/c_v
+        return -w1*w4/(w0*w0) - w1/(w0*w0) * (kappa - 1.)
+            * (w4 - (w1*w1+w3*w3)/(2*w0)) + w1/w0 * (kappa - 1.)
             * (w1*w1+w3*w3)/(2*w0*w0);
         // or equivalently:
-        //return w1/w0 * (R/c_v * (w1*w1+w3*w3)/(w0*w0) - (R/c_v + 1) * w4/w0);
+        //return w1/w0 * ((kappa - 1.) * (w1*w1+w3*w3)/(w0*w0) - ((kappa - 1.) + 1) * w4/w0);
     else if (i == 3 && j == 1)
-        return w4/w0 + 1/w0 * R/c_v
-            * (w4 - (w1*w1+w3*w3)/(2*w0)) - R/c_v
+        return w4/w0 + 1/w0 * (kappa - 1.)
+            * (w4 - (w1*w1+w3*w3)/(2*w0)) - (kappa - 1.)
             * w1*w1/(w0*w0);
     else if (i == 3 && j == 2)
-        return - R/c_v * w1*w3/(w0*w0);
+        return - (kappa - 1.) * w1*w3/(w0*w0);
     else if (i == 3 && j == 3)
-        return w1/w0 + R/c_v * w1/w0;
+        return w1/w0 + (kappa - 1.) * w1/w0;
 
     printf("i=%d, j=%d;\n", i, j);
     error("Invalid index.");
@@ -97,28 +97,28 @@ double NumericalFlux::A_z(int i, int j, double w0, double w1, double w3, double 
         return 0;
 
     else if (i == 2 && j == 0)
-        return -w3*w3/(w0*w0) + R * (w1*w1 + w3*w3)/(2*c_v * w0*w0);
+        return -w3*w3/(w0*w0) + (kappa - 1.) * (w1*w1 + w3*w3)/(2*w0*w0);
     else if (i == 2 && j == 1)
-        return -R * w1 / (c_v * w0);
+        return - (kappa - 1.) * w1 / w0;
     else if (i == 2 && j == 2)
-        return 2*w3/w0 - R * w3 / (c_v * w0);
+        return 2*w3/w0 - (kappa - 1.) * w3 / w0;
     else if (i == 2 && j == 3)
-        return R/c_v;
+        return (kappa - 1.);
 
     else if (i == 3 && j == 0)
-        return -w3*w4/(w0*w0) - w3/(w0*w0) * R/c_v
-            * (w4 - (w1*w1+w3*w3)/(2*w0)) + w3/w0 * R/c_v
+        return -w3*w4/(w0*w0) - w3/(w0*w0) * (kappa - 1.)
+            * (w4 - (w1*w1+w3*w3)/(2*w0)) + w3/w0 * (kappa - 1.)
             * (w1*w1+w3*w3)/(2*w0*w0);
         // or equivalently:
-        //return w1/w0 * (R/c_v * (w1*w1+w3*w3)/(w0*w0) - (R/c_v + 1) * w4/w0);
+        //return w1/w0 * ((kappa - 1.) * (w1*w1+w3*w3)/(w0*w0) - ((kappa - 1.) + 1) * w4/w0);
     else if (i == 3 && j == 1)
-        return - R/c_v * w3*w1/(w0*w0);
+        return - (kappa - 1.) * w3*w1/(w0*w0);
     else if (i == 3 && j == 2)
-        return w4/w0 + 1/w0 * R/c_v
-            * (w4 - (w1*w1+w3*w3)/(2*w0)) - R/c_v
+        return w4/w0 + 1/w0 * (kappa - 1.)
+            * (w4 - (w1*w1+w3*w3)/(2*w0)) - (kappa - 1.)
             * w3*w3/(w0*w0);
     else if (i == 3 && j == 3)
-        return w3/w0 + R/c_v * w3/w0;
+        return w3/w0 + (kappa - 1.) * w3/w0;
 
     error("Invalid index.");
 }

@@ -6,7 +6,7 @@
 HERMES_API class NumericalFlux
 {
 public:
-  NumericalFlux(double R = 287.14, double c_v = 717.5, double kappa = (1 + 287.14 / 717.5)) : R(R), c_v(c_v), kappa(kappa) {};
+  NumericalFlux(double kappa) : kappa(kappa) {};
 
   double f_x(int i, double w0, double w1, double w3, double w4);
   double f_z(int i, double w0, double w1, double w3, double w4);
@@ -26,8 +26,6 @@ public:
   double HERMES_API numerical_flux_i(int i, double w_l[4], double w_r[4],
           double nx, double ny);
 
-  double R;
-  double c_v;
   double kappa;
 
 protected:
