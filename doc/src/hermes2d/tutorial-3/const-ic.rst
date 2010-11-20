@@ -47,32 +47,38 @@ the above formulas become::
       return 1.0;
     }
 
-    // Jacobian matrix.
+    // Jacobian matrix
     template<typename Real, typename Scalar>
-    Scalar jac(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar jac(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
-      Func<Scalar>* u_prev = ext->fn[0];
+      Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (dlam_du(u_prev->val[i]) * u->val[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
                            + lam(u_prev->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
-                       
+
       return result;
     }
 
-    // Residual vector.
+    // Fesidual vector
     template<typename Real, typename Scalar>
-    Scalar res(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar res(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
-      Func<Scalar>* u_prev = ext->fn[0];
+      Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (lam(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
 	    	           - heat_src(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
-Notice that the basis function $v_j$ and the test function 
+Notice that the solution $u$ is accessed through
+
+::
+
+    Func<Scalar>* u_prev = u_ext[0];
+
+Also notice that the basis function $v_j$ and the test function 
 $v_i$ are entering the weak forms via the parameters u and v, respectively (same as for linear 
 problems). The user does not have to 
 take care about their indices $i$ and $j$, this is handled by Hermes outside the weak forms. 
@@ -217,7 +223,8 @@ As a last step, we clean up as usual::
     delete rhs;
     delete solver;
 
-Sample results for this example are shown below.
+Sample results
+~~~~~~~~~~~~~~
 
 Approximate solution $u$ for $\alpha = 2$: 
 

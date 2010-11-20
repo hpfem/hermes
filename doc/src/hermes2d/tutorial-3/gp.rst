@@ -139,7 +139,8 @@ will not surprize a reader who made it this far in the tutorial::
       Psi_prev_time.copy(&Psi_prev_newton);
     }
 
-Sample solution snapshots are shown below:
+Sample results
+~~~~~~~~~~~~~~
 
 
 Snapshot 1:

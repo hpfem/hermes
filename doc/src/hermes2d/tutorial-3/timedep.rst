@@ -1,4 +1,4 @@
-Nonlinear Parabolic Problem (18)
+Nonlinear Time-Dependent Problem (18)
 --------------------------------
 
 **Git reference:** Tutorial example `18-newton-timedep-heat 
@@ -21,6 +21,9 @@ We prescribe nonhomogeneous Dirichlet boundary conditions
 and the same function is used to define the initial condition. The 
 problem will be solved in the square $\Omega = (-10,10)^2$ and time interval $(0, T)$.
 
+Weak formulation
+~~~~~~~~~~~~~~~~
+
 The weak formulation of the time-discretized problem reads
 
 .. math::
@@ -29,21 +32,24 @@ The weak formulation of the time-discretized problem reads
 
 where the indices $n$ and $n+1$ indicate the previous and new time level, respectively. Hence in each 
 time step we need to solve a *time-independent* nonlinear problem, and this is something we learned 
-in the previous sections. The weak forms for the Newton's method from the previous sections only 
-need to be enhanced with a simple term containing the time step $\tau$ (called TAU):
+in the previous sections. 
 
-::
+Jacobian matrix and residual vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The weak forms for the Newton's method from the previous sections only 
+need to be enhanced with a simple term containing the time step $\tau$ (called TAU)::
 
     // Jacobian matrix.
     template<typename Real, typename Scalar>
-    Scalar jac(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar jac(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
-      Func<Scalar>* u_prev_newton = ext->fn[0];
+      Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * v->val[i] / TAU + dlam_du(u_prev_newton->val[i]) * u->val[i] * 
+        result += wt[i] * (u->val[i] * v->val[i] / TAU + dlam_du(u_prev_newton->val[i]) * u->val[i] *
                            (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
-                           + lam(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));                    
+                           + lam(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
       return result;
     }
 
@@ -51,13 +57,13 @@ Here the function u_prev_newton plays the role of u_prev from the previous secti
 previous solution inside the Newton's iteration. Note that the previous time level solution 
 $u^n$ that we call u_prev_time is not present in the Jacobian matrix. It is used in the residual only::
 
-    // Fesidual vector.
+    // Fesidual vector
     template<typename Real, typename Scalar>
-    Scalar res(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar res(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
-      Func<Scalar>* u_prev_newton = ext->fn[0];
-      Func<Scalar>* u_prev_time = ext->fn[1];
+      Func<Scalar>* u_prev_newton = u_ext[0];
+      Func<Scalar>* u_prev_time = ext->fn[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * ((u_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / TAU +
                           lam(u_prev_newton->val[i]) * (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
@@ -66,35 +72,66 @@ $u^n$ that we call u_prev_time is not present in the Jacobian matrix. It is used
     }
 
 Note that the function u_prev_newton evolves during the Newton's iteration
-but the previous time level solution u_prev_time only is updated after the time step
-is finished. The weak forms are registered as usual::
+but the previous time level solution u_prev_time only is updated after the time 
+step is finished. The weak forms are registered as usual::
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(jac), H2D_UNSYM, H2D_ANY, &u_prev_newton);
-  wf.add_vector_form(callback(res), H2D_ANY, Tuple<MeshFunction*>(&u_prev_newton, &u_prev_time));
+    // Initialize the weak formulation.
+    WeakForm wf;
+    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
+
+Time stepping loop
+~~~~~~~~~~~~~~~~~~
 
 The entire time-stepping loop (minus visualization) looks as follows::
 
-  // Time stepping loop:
-  double current_time = 0.0;
-  int t_step = 1;
-  do {
-    info("---- Time step %d, t = %g s.", t_step, current_time); t_step++;
+    // Time stepping loop:
+    double current_time = 0.0; int ts = 1;
+    do 
+    {
+      info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
-    // Newton's method.
-    info("Performing Newton's method.");
-    bool verbose = true; // Default is false.
-    if (!nls.solve_newton(&u_prev_newton, NEWTON_TOL, NEWTON_MAX_ITER, verbose)) 
-      error("Newton's method did not converge.");
+      // Perform Newton's iteration.
+      int it = 1;
+      while (1)
+      {
+        // Obtain the number of degrees of freedom.
+        int ndof = Space::get_num_dofs(&space);
 
-    // Update previous time level solution.
-    u_prev_time.copy(&u_prev_newton);
+        // Assemble the Jacobian matrix and residual vector.
+        dp.assemble(coeff_vec, matrix, rhs, false);
 
-    // Update time.
-    current_time += TAU;
+        // Multiply the residual vector with -1 since the matrix 
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+        // Calculate the l2-norm of residual vector.
+        double res_l2_norm = get_l2_norm(rhs);
 
-  } while (current_time < T_FINAL);
+        // Info for user.
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
 
-The stationary solution is not shown here since we already saw it 
-in the previous sections.
+        // If l2 norm of the residual vector is within tolerance, or the maximum number 
+        // of iteration has been reached, then quit.
+        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+        // Solve the linear system.
+        if(!solver->solve()) error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+        if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+
+        it++;
+      }
+
+      // Update previous time level solution.
+      Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
+
+      // Update time.
+      current_time += TAU;
+    } 
+    while (current_time < T_FINAL);
+
+The stationary solution is the same as in the previous sections.

@@ -8,7 +8,11 @@ of the form $a(u,v) = l(v)$, where $u, v$ were continuous approximations in the
 $H^1$ space. One can also solve equations whose solutions lie in the spaces
 $Hcurl$, $Hdiv$ or $L^2$, and one can combine these spaces for PDE systems.
 
-Here we show how to handle systems of linear PDE whose weak formulation is written as
+General scheme
+~~~~~~~~~~~~~~
+
+Here we show how to handle systems of linear PDE whose weak formulation 
+is written as
 
 .. math::
     :label: weaksystem
@@ -27,6 +31,9 @@ The solution $u = (u_1, u_2, \dots, u_n)$ and test functions $v =
 $H(curl)$, $H(div)$ or $L^2$. The resulting discrete matrix problem will have 
 an $n \times n$ block structure.
 
+Model problem of linear elasticity
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Let us illustrate this by solving a simple problem of linear elasticity. Consider a
 two-dimensional elastic body shown in the following figure (the bottom edge is
 axis of planar symmetry):
@@ -42,6 +49,8 @@ deformation of the body subject to the forces $f$. The deformation is sought
 as a vector function $u(x) = (u_1, u_2)^T$, describing the displacement of each point
 $x \in \Omega$ after the load $f = (f_1, f_2)^T$ is applied.
 
+Boundary conditions
+~~~~~~~~~~~~~~~~~~~
 
 The boundary conditions are
 
@@ -56,7 +65,11 @@ The boundary conditions are
     u_1 &=& u_2 = 0 \ \mbox{on} \ \Gamma_1. 
     \end{eqnarray*}
 
-Applying the standard procedure to the elastostatic equilibrium equations, we arrive at the following weak formulation:
+Weak formulation
+~~~~~~~~~~~~~~~~
+
+Applying the standard procedure to the elastostatic equilibrium equations, we 
+arrive at the following weak formulation:
 
 .. math::
     :nowrap:
@@ -101,19 +114,25 @@ conditions can be implemented as follows::
     scalar essential_bc_values(int ess_bdy_marker, double x, double y)
       { return 0; }
 
+Displacement spaces
+~~~~~~~~~~~~~~~~~~~
+
 Next we create two displacement spaces::
 
     // Create x- and y- displacement spaces using default H1 shapesets.
     H1Space xdisp(&mesh, bc_types, essential_bc_values, P_INIT);
     H1Space ydisp(&mesh, bc_types, essential_bc_values, P_INIT);
 
+Vector-valued WeakForm
+~~~~~~~~~~~~~~~~~~~~~~
+
 The WeakForm instance is initialized for a system of two equations::
 
-    // initialize the weak formulation
+    // Initialize the weak formulation.
     WeakForm wf(2);
-    wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), H2D_SYM);  // Note that only one symmetric part is
-    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);  // added in the case of symmetric bilinear
-    wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), H2D_SYM);  // forms.
+    wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // Note that only one symmetric part is
+    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
+    wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms.
     wf.add_vector_form_surf(0, callback(linear_form_surf_0), GAMMA_3_BDY);
     wf.add_vector_form_surf(1, callback(linear_form_surf_1), GAMMA_3_BDY);
 
@@ -124,37 +143,64 @@ space 0 (x-displacement space) and test functions from space 0. The block index
 from space 1 (y-displacement space), etc. This yields a 2x2 block structure in the 
 resulting matrix system.
 
-Also explanation of the extra parameter H2D_SYM in add_matrix_form() is in order.
+Flags HERMES_SYM, HERMES_UNSYM, HERMES_ANTISYM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+Also explanation of the extra parameter HERMES_SYM in add_matrix_form() is in order.
 Since the two diagonal forms $a_{11}$ and $a_{22}$ are symmetric, i.e.,
 $a_{ii}(u,v) = a_{ii}(v,u)$, Hermes can be told to only evaluate them once for the
 two cases $a_{ii}(u,v)$ and $a_{ii}(v,u)$ to speed up assembly. In fact, we should have
-used the H2D_SYM flag already in the previous sections, since the form
+used the HERMES_SYM flag already in the previous sections, since the form
 $a(u,v) = \nabla u \cdot \nabla v$ was symmetric. Of course this is not the case
 for all forms and so the default value of the fourth parameter of add_matrix_form() 
-is H2D_UNSYM.
+is HERMES_UNSYM.
 
 The off-diagonal forms $a_{12}(u_2, v_1)$ and $a_{21}(u_1, v_2)$ are not
 (and cannot) be symmetric, since their arguments come from different spaces in general.
 However, we can see that $a_{12}(u, v) = a_{21}(v, u)$, i.e., the corresponding blocks
-of the local stiffness matrix are transposes of each other. Here, the H2D_SYM flag
+of the local stiffness matrix are transposes of each other. Here, the HERMES_SYM flag
 has a different effect: it tells Hermes to take the block of the local stiffness
 matrix corresponding to the form $a_{12}$, transpose it and copy it where a block
 corresponding to $a_{21}$ would belong, without evaluating $a_{21}$ at all (this is why
 we don't add bilinear_form_1_0). This again speeds up the matrix assembly.
-You can also use the flag H2D_ANTISYM, which moreover inverts the sign of the block.
+You can also use the flag HERMES_ANTISYM, which moreover inverts the sign of the block.
 This makes sense in the case where $a_{ij}(u, v) = -a_{ji}(v, u)$.
 
-It is recommended that you start with the default (and safe) H2D_UNSYM flag for all
+It is recommended that you start with the default (and safe) HERMES_UNSYM flag for all
 forms when developing your project, and only optimize the evaluation of the forms when
 the code works well.
 
-When the spaces and weak forms are ready, one can use the function solve_linear() to
-assemble and solve the discrete problem::
+Assembling and solving the discrete problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Solve the linear problem.
-    Solution u_sln, v_sln;
-    solve_linear(Tuple<Space *>(&u_space, &v_space), &wf, 
-                 Tuple<Solution*>(&u_sln, &v_sln), matrix_solver);
+When the spaces and weak forms are ready, one can initialize the 
+discrete problem::
+
+    // Initialize the FE problem.
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
+
+Next we initialize the matrix solver::
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+And assemble and solve the matrix problem::
+
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    dp.assemble(matrix, rhs);
+
+    // Solve the linear system and if successful, obtain the solutions.
+    info("Solving the matrix problem.");
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), 
+                                                      Tuple<Solution *>(&u_sln, &v_sln));
+    else error ("Matrix solver failed.\n");
+
+Visualizing Von Mises stress
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Von Mises stress can be visualized via the VonMises filter as follows::
 
@@ -163,6 +209,6 @@ Von Mises stress can be visualized via the VonMises filter as follows::
     ScalarView view("Von Mises stress [Pa]", sln_win_geom);
     VonMisesFilter stress(Tuple<MeshFunction*>(&u_sln, &v_sln), lambda, mu);
     view.show_mesh(false);
-    view.show(&stress, H2D_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
+    view.show(&stress, HERMES_EPS_HIGH, HERMES_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
-Let us say more about visualization and Filters in the following section.
+More about visualization and Filters will be said in the following section.

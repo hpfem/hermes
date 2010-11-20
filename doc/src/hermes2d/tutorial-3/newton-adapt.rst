@@ -210,6 +210,9 @@ coarse mesh::
       oview.show(&space);
     }
 
+Sample results
+~~~~~~~~~~~~~~
+
 In our experience, the Newton's loop on the new coarse mesh can be skipped since this 
 does not affect convergence and one saves some CPU time. This is illustrated in the 
 following convergence comparison:

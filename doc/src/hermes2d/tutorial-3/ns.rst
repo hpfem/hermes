@@ -149,13 +149,15 @@ The time stepping loop looks as follows:
         ls.solve(Tuple<Solution*>(&xvel_prev_newton, &yvel_prev_newton, &p_prev_newton));
       }
 
+Sample results
+~~~~~~~~~~~~~~
+
 The following comparisons demonstrate the effect of using the Newton's method, and of using 
 continuous vs. discontinuous 
 elements for the pressure. There are three triplets of velocity snapshots. In each one, the images 
 were obtained with (1) NEWTON == false && PRESSURE_IN_L2 undefined, (2) NEWTON == true && PRESSURE_IN_L2 
 undefined, and (3) NEWTON == true && PRESSURE_IN_L2 defined. It follows from these comparisons that one 
 should definitely use the option (3).
-
 
 Time t = 10 s:
 

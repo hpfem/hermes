@@ -37,6 +37,9 @@ $\rm Le$ the Lewis number (ratio of diffusivity of heat and diffusivity
 of mass). Both $\theta$, $0 \le \theta \le 1$ and 
 $Y$, $0 \le Y \le 1$ are dimensionless and so is the time $t$. 
 
+Second-order BDF formula for time integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Time integration is performed using a second-order implicit BDF formula
 
 .. math::
@@ -70,6 +73,9 @@ Problem parameters are chosen as
     const double kappa = 0.1;
     const double x1 = 9.0;
 
+Initial conditions
+~~~~~~~~~~~~~~~~~~
+
 It is worth mentioning that the initial conditions for $T$ and $Y$,
 
 ::
@@ -88,85 +94,91 @@ are defined as exact functions::
     t_prev_time_2.set_exact(&mesh, temp_ic); c_prev_time_2.set_exact(&mesh, conc_ic);
     t_prev_newton.set_exact(&mesh, temp_ic);  c_prev_newton.set_exact(&mesh, conc_ic);
 
-
 Here the pairs of solutions (t_prev_time_1, y_prev_time_1) and (t_prev_time_2, y_prev_time_2)
 correspond to the two first-order time-stepping methods described above. and 
 (t_prev_newton, y_prev_newton) are used to store the previous step approximation
-in the Newton's method. The reaction rate $\omega$ and its derivatives are handled
+in the Newton's method. 
+
+Using Filters
+~~~~~~~~~~~~~
+
+The reaction rate $\omega$ and its derivatives are handled
 via Filters::
 
-    // Define filters for the reaction rate omega.
-    DXDYFilter omega(omega_fn, &t_prev_newton, &y_prev_newton);
-    DXDYFilter omega_dt(omega_dt_fn, &t_prev_newton, &y_prev_newton);
-    DXDYFilter omega_dy(omega_dy_fn, &t_prev_newton, &y_prev_newton);
+    // Filters for the reaction rate omega and its derivatives.
+    DXDYFilter omega(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    DXDYFilter omega_dt(omega_dt_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    DXDYFilter omega_dc(omega_dc_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
 
 Details on the functions omega_fn, omega_dt_fn, omega_dy_fn and the weak 
 forms can be found in the file `forms.cpp 
 <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-flame/forms.cpp>`_
-Here is how we register the weak forms,
 
-::
+Registering weak forms
+~~~~~~~~~~~~~~~~~~~~~~
+
+Here is how we register the weak forms::
 
     // Initialize the weak formulation.
     WeakForm wf(2);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), H2D_UNSYM, H2D_ANY, &omega_dt);
+    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
     wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), 3);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), H2D_UNSYM, H2D_ANY, &omega_dc);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), H2D_UNSYM, H2D_ANY, &omega_dt);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), H2D_UNSYM, H2D_ANY, &omega_dc);
-    wf.add_vector_form(0, callback(newton_linear_form_0), H2D_ANY, 
-                       Tuple<MeshFunction*>(&t_prev_newton, &t_prev_time_1, &t_prev_time_2, &omega));
-    wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3, &t_prev_newton);
-    wf.add_vector_form(1, callback(newton_linear_form_1), H2D_ANY, 
-                       Tuple<MeshFunction*>(&c_prev_newton, &c_prev_time_1, &c_prev_time_2, &omega));
+    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
+    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+    wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
+                       Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+    wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
+    wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
+                       Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
-The nonlinear system is initialized as follows::
 
-    // Initialize the nonlinear system.
-    NonlinSystem nls(&wf, Tuple<Space*>(&tspace, &cspace));
+The nonlinear discrete problem is initialized as follows::
+
+    // Initialize the FE problem.
+    bool is_linear = false;
+    DiscreteProblem dp(&wf, Tuple<Space *>(&tspace, &cspace), is_linear);
 
 The initial coefficient vector $\bfY_0$ for the Newton's method is calculated 
 by projecting the initial conditions on the FE spaces::
 
-    // Project temp_ic() and conc_ic() onto the FE spaces to obtain initial 
-    // coefficient vector for the Newton's method.   
-    info("Projecting initial conditions to obtain initial vector for the Newton'w method.");
-    nls.project_global(Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton), 
-                       Tuple<Solution*>(&t_prev_newton, &c_prev_newton));
+    // Project the initial condition on the FE space to obtain initial
+    // coefficient vector for the Newton's method.
+    info("Projecting initial condition to obtain initial vector for the Newton's method.");
+    scalar* coeff_vec = new scalar[ndof];
+    OGProjection::project_global(Tuple<Space *>(&tspace, &cspace), 
+                                 Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), 
+                                 coeff_vec, matrix_solver);
 
-The time stepping loop looks as follows, notice the visualization of $\omega$
-through a DXDYFilter::
+Reinitialization of Filters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Time stepping loop:
-    double current_time = 0.0; int ts = 1;
-    do {
-      info("---- Time step %d, t = %g s.", ts, current_time);
+Notice the reinitialization of the Filters at the end of the Newton's loop.
+This is necessary as the functions defining the Filter have changed::
 
-      // Newton's method.
-      info("Performing Newton's iteration.");
-      bool verbose = true; // Default is false.
-      if (!nls.solve_newton(Tuple<Solution*>(&t_prev_newton, &c_prev_newton), NEWTON_TOL, NEWTON_MAX_ITER, verbose,
-	  		    Tuple<MeshFunction*>(&omega, &omega_dt, &omega_dc))) error("Newton's method did not converge.");
+    // Set current solutions to the latest Newton iterate 
+    // and reinitialize filters of these solutions.
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), 
+                                    Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+    omega.reinit();
+    omega_dt.reinit();
+    omega_dc.reinit();
 
-      // Visualization.
-      DXDYFilter omega_view(omega_fn, &t_prev_newton, &c_prev_newton);
-      rview.set_min_max_range(0.0,2.0);
-      char title[100];
-      sprintf(title, "Reaction rate, t = %g", current_time);
-      rview.set_title(title);
-      rview.show(&omega_view);
+Visualization of a Filter
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      // Update current time.
-      current_time += TAU;
+Also notice the visualization of a Filter::
 
-      // Store two time levels of previous solutions.
-      t_prev_time_2.copy(&t_prev_time_1);
-      c_prev_time_2.copy(&c_prev_time_1);
-      t_prev_time_1.copy(&t_prev_newton);
-      c_prev_time_1.copy(&c_prev_newton);
+    // Visualization.
+    DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    rview.set_min_max_range(0.0,2.0);
+    char title[100];
+    sprintf(title, "Reaction rate, t = %g", current_time);
+    rview.set_title(title);
+    rview.show(&omega_view);
 
-      ts++;
-    } while (current_time <= T_FINAL);
+Sample results
+~~~~~~~~~~~~~~
 
 A few snapshots of the reaction rate $\omega$ at various times are shown below:
 

@@ -62,6 +62,9 @@ to obtain an initial coefficient vector $\bfY_0$ for the Newton's iteration::
     OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver); 
     delete init_sln;
 
+Sample results
+~~~~~~~~~~~~~~
+
 The following figure shows the $H^1$-projection of the initial condition init_cond():
 
 .. image:: 16/proj-h1.png
