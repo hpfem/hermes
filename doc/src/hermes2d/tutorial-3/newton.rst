@@ -1,7 +1,7 @@
 The Newton's Method
 -------------------
 
-Consider a simple model problem of the form 
+Consider a simple nonlinear model problem of the form 
 
 .. math::
     :label: newton0
@@ -29,18 +29,20 @@ The nonlinear discrete problem can be written in the compact form
 
     \bfF(\bfY) = {\bf 0},
  
-where $\bfF = (F_1, F_2, \ldots, F_N)^T$ is the residual vector defined by
+where $\bfF = (F_1, F_2, \ldots, F_N)^T$ is the so-called *residuum* or *residual vector*.
+
+Residual vector and Jacobian matrix
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The residual vector $\bfF(\bfY)$ has $N$ components of the form
 
 .. math::
 
     F_i(\bfY) =  \int_{\Omega} \lambda(u)\nabla u \cdot \nabla v_i 
     - f v_i \, \mbox{d}\bfx.
 
-The Jacobi matrix $\bfJ(\bfY) = D\bfF/D\bfY$ has the same sparsity structure as the 
-standard stiffness matrix that we know from linear problems. In fact, when the 
-problem is linear then the Jacobi matrix and the stiffness matrix are the same 
-thing. Using the chain rule of differentiation, we calculate that on the 
-position $ij$, the Jacobi matrix has the value
+Here $v_i$ is the $i$-th test function, $i = 1, 2, \ldots, N$.
+The $N\times N$ Jacobian matrix $\bfJ(\bfY) = D\bfF/D\bfY$ has the components 
 
 .. math::
 
@@ -48,7 +50,26 @@ position $ij$, the Jacobi matrix has the value
     \int_{\Omega} \left[ \frac{\partial \lambda}{\partial u} \frac{\partial u}{\partial y_j} 
     \nabla u + \lambda(u)\frac{\partial \nabla u}{\partial y_j} \right] \cdot \nabla v_i \, \mbox{d}\bfx.
 
-To this end, note that 
+Using elementary relations shown below, we obtain
+
+.. math::
+
+    J_{ij}(\bfY) =
+    \int_{\Omega} \left[ \frac{\partial \lambda}{\partial u}(u) v_j 
+    \nabla u + \lambda(u)\nabla v_j \right] \cdot \nabla v_i \, \mbox{d}\bfx.
+
+It is worth noticing that $\bfJ(\bfY)$ has the same sparsity structure as the 
+standard stiffness matrix that we know from linear problems. In fact, when the 
+problem is linear then the Jacobian matrix and the stiffness matrix are the same 
+thing (see last paragraph in this section). 
+
+How to differentiate weak forms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Chain rule is used all the time. If your equation contains parameters that depend on 
+the solution, you will need their derivatives with respect to the solution (such as we needed 
+the derivative of $\lambda$ above). In addition, the following elementary rules are useful 
+for the differentiation of the weak forms: 
 
 .. math::
 
@@ -60,16 +81,10 @@ and
 
     \frac{\partial \nabla u}{\partial y_k} = \frac{\partial}{\partial y_k}\sum_{j=1}^N y_j \nabla v_j = \nabla v_k.
 
+Practical formula
+~~~~~~~~~~~~~~~~~
 
-Using these relations, we obtain
-
-.. math::
-
-    J_{ij}(\bfY) =
-    \int_{\Omega} \left[ \frac{\partial \lambda}{\partial u}(u) v_j 
-    \nabla u + \lambda(u)\nabla v_j \right] \cdot \nabla v_i \, \mbox{d}\bfx.
-
-Let's assume that the Jacobi matrix has been assembled. 
+Let's assume that the Jacobian matrix has been assembled. 
 The Newton's method is written formally as 
 
 .. math::
@@ -86,8 +101,19 @@ This is a system of linear algebraic equations that needs to be solved in every 
 iteration. The Newton's method will stop when $\bfF(\bfY_{\!\!n+1})$ is sufficiently close 
 to the zero vector.
 
-A remark on the linear case
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Stopping criteria
+~~~~~~~~~~~~~~~~~
+
+There are two basic stopping criteria that should be combined 
+for safety:
+
+* Checking whether the (vector) norm of the coefficient vector $\bfY_{n+1}$ is sufficiently close to zero.
+* Checking whether the (vector) norm of $\bfY_{n+1} - \bfY_{n}$ is sufficiently close to zero.
+
+If just one of these two criteria is used, the Newton's method may finish prematurely.
+
+Linear problems
+~~~~~~~~~~~~~~~
 
 In the linear case we have 
 
@@ -103,5 +129,19 @@ The Newton's method is now
     \bfS\bfY_{\!\!n+1} = \bfJ(\bfY_{\!\!n})\bfY_{\!\!n} 
     - \bfJ(\bfY_{\!\!n})\bfY_{\!\!n} + \bfb = \bfb.
 
-Therefore, the Newton's method will converge in one iteration.
+There exists a widely adopted mistake saying that 
+the Newton's method, when applied to a linear problem, 
+will converge in one iteration. This is only true if 
+one uses the first (residual norm based) stopping 
+criterion above. If the second criterion is used, 
+which is based on the distance of two consecutive 
+solution vectors, then the Newton's method will do 
+two steps before stopping. In practice, using just 
+the residual criterion is dangerous.
+
+This explains that it makes sense to 
+use the knowledge that the problem is linear, and 
+stop the Newton's iteration after the first step 
+manually.
+
 
