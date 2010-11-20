@@ -2,56 +2,6 @@
 #include "numerical_flux.h"
 
 extern NumericalFlux num_flux;
-// The following boundary conditions are the prescribed values used on 
-// the inlet and outlet part of the boundary.
-// Density boundary condition.
-double bc_density(double y)
-{
-  return 1.0;
-}
-
-// Density * velocity in the x coordinate boundary condition.
-double bc_density_vel_x(double y)
-{
-  return 50.0;
-}
-
-// Density * velocity in the y coordinate boundary condition.
-double bc_density_vel_y(double y)
-{
-  return 0;
-}
-
-// Energy boundary condition.
-double bc_energy(double y)
-{
-  return 1E5;
-}
-// Calculation of the pressure on the boundary.
-double bc_pressure(double y)
-{
-  return num_flux.R/num_flux.c_v * (bc_energy(y) - (bc_density_vel_x(y) * bc_density_vel_x(y) + bc_density_vel_y(y) * bc_density_vel_y(y))/(2 * bc_density(y)));
-}
-
-
-// Initial conditions. Initial conditions correspond with the boundary ones, that is why functions
-// specifying boundary conditions are used.
-double ic_density(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_density(y);
-}
-double ic_density_vel_x(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_density_vel_x(y);
-}
-double ic_density_vel_y(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_density_vel_y(y);
-}
-double ic_energy(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_energy(y);
-}
 
 // Calculates pressure from other quantities.
 template<typename Scalar>
@@ -70,6 +20,57 @@ template<typename Scalar>
 Scalar calc_energy(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar pressure)
 {
   return (num_flux.c_v/num_flux.R) * pressure + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+}
+
+// The following boundary conditions are the prescribed values used on 
+// the inlet and outlet part of the boundary.
+// Density boundary condition.
+double bc_density(double y)
+{
+  return 1.4;
+}
+
+// Density * velocity in the x coordinate boundary condition.
+double bc_density_vel_x(double y)
+{
+  return 3.0;
+}
+
+// Density * velocity in the y coordinate boundary condition.
+double bc_density_vel_y(double y)
+{
+  return 0;
+}
+
+// Calculation of the pressure on the boundary.
+double bc_pressure(double y)
+{
+  return 1.0;
+}
+
+// Energy boundary condition.
+double bc_energy(double y)
+{
+  return calc_energy<double>(bc_density(y), bc_density_vel_x(y), bc_density_vel_y(y), bc_pressure(y));
+}
+
+// Initial conditions. Initial conditions correspond with the boundary ones, that is why functions
+// specifying boundary conditions are used.
+double ic_density(double x, double y, scalar& dx, scalar& dy)
+{
+  return bc_density(y);
+}
+double ic_density_vel_x(double x, double y, scalar& dx, scalar& dy)
+{
+  return bc_density_vel_x(y);
+}
+double ic_density_vel_y(double x, double y, scalar& dx, scalar& dy)
+{
+  return bc_density_vel_y(y);
+}
+double ic_energy(double x, double y, scalar& dx, scalar& dy)
+{
+  return bc_energy(y);
 }
 
 ///////////////////////////////////////////////////
@@ -752,20 +753,32 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 {
   double result = 0;
   // Left (inner) state.
-  double wl[4];
+  double w_l[4];
+  // Right (boundary) state.
+  double w_r[4];
   // Eulerian flux.
   double flux[4];
 
   for (int i = 0; i < n; i++) 
   {
     // Left (inner) state from the previous time level solution.
-    wl[0] = ext->fn[0]->val[i];
+    w_l[0] = ext->fn[0]->val[i];
     
-    wl[1] = ext->fn[1]->val[i];
+    w_l[1] = ext->fn[1]->val[i];
 
-    wl[2] = ext->fn[2]->val[i];
+    w_l[2] = ext->fn[2]->val[i];
 
-    wl[3] = ext->fn[3]->val[i];
+    w_l[3] = ext->fn[3]->val[i];
+
+    w_r[0] = bc_density(e->y[i]);
+
+    w_r[1] = bc_density_vel_x(e->y[i]);
+
+    w_r[2] = bc_density_vel_y(e->y[i]);
+
+    w_r[3] = bc_energy(e->y[i]);
+    
+    /*
 
     // The inlet part (left part of the computational domain).
     if(e->nx[i] < 0)
@@ -776,13 +789,13 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
       double velocity_y_b = bc_density_vel_y(e->y[i]) / bc_density(e->y[i]);
 
       // Sound speed on the left (inner) side of the boundary.
-      double sound_speed_l = calc_sound_speed(wl[0], wl[1], wl[2], wl[3]);
+      double sound_speed_l = calc_sound_speed(w_l[0], w_l[1], w_l[2], w_l[3]);
 
       // Intersection state calculation (marked with an underscore1 (_1)).
-      double sound_speed_1 = sound_speed_l + (num_flux.R/num_flux.c_v) * (wl[1]/wl[0] - velocity_x_b);
-      double rho_1 = std::pow(sound_speed_1*sound_speed_1*wl[0]/(num_flux.kappa*calc_pressure(wl[0],wl[1],wl[2],wl[3])), num_flux.c_v/num_flux.R) * wl[0];
+      double sound_speed_1 = sound_speed_l + (num_flux.R/num_flux.c_v) * (w_l[1]/w_l[0] - velocity_x_b);
+      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
       double velocity_x_1 = velocity_x_b;
-      double velocity_y_1 = wl[2] / wl[0];
+      double velocity_y_1 = w_l[2] / w_l[0];
 
       // Boundary pressure calculated from the intersection state.
       double p_b = rho_1 * sound_speed_1 * sound_speed_1 / num_flux.kappa;
@@ -790,10 +803,10 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
       double energy_1 = calc_energy<double>(rho_1, velocity_x_1* rho_1, velocity_y_1 * rho_1, p_b);
 
       // Calculation of the state for inflow/outlow velocities above the local speed of sound.
-      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * wl[1] / wl[0] + 2 * sound_speed_l / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l,2*num_flux.c_v / num_flux.R) * wl[0];
+      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * sound_speed_l / (2+num_flux.R/num_flux.c_v);
+      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l,2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
-      double velocity_y_l_star = wl[2] / wl[0];
+      double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
       double energy_l_star = calc_energy<double>(rho_l_star, velocity_x_l_star * rho_l_star, velocity_y_l_star * rho_l_star, p_l_star);
 
@@ -847,15 +860,15 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     {
       // These calculations are the same as above.
       double p_b = bc_pressure(e->y[i]);
-      double rho_b = wl[0] * std::pow(p_b/calc_pressure(wl[0],wl[1],wl[2],wl[3]),(1/num_flux.kappa));
-      double velocity_x_b = (wl[1] / wl[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(wl[0],wl[1],wl[2],wl[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
-      double velocity_y_b = wl[2] / wl[0];
+      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3]),(1/num_flux.kappa));
+      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
+      double velocity_y_b = w_l[2] / w_l[0];
       double energy_b = calc_energy<double>(rho_b, velocity_x_b*rho_b, velocity_y_b*rho_b, p_b);
 
-      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * wl[1] / wl[0] + 2 * calc_sound_speed<double>(wl[0],wl[1],wl[2],wl[3]) / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(wl[0],wl[1],wl[2],wl[3]),2*num_flux.c_v / num_flux.R) * wl[0];
+      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) / (2+num_flux.R/num_flux.c_v);
+      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]),2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
-      double velocity_y_l_star = wl[2] / wl[0];
+      double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
       double energy_l_star = calc_energy<double>(rho_l_star, velocity_x_l_star * rho_l_star, velocity_y_l_star * rho_l_star, p_l_star);
 
@@ -905,7 +918,9 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
         num_flux.dot_vector(flux, mat_rot_inv, flux);
       }
     }
-  result -= wt[i] * v->val[i] * flux[element];
+  */
+    
+    result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
   return result;
 }

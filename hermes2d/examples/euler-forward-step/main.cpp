@@ -29,22 +29,12 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &mesh);
+  mloader.load("ffs.mesh", &mesh);
 
   // Perform initial mesh refinements.
   mesh.refine_all_elements();
   mesh.refine_all_elements();
   mesh.refine_all_elements();
-  mesh.refine_all_elements();
-  mesh.refine_towards_boundary(1, 1);
-  mesh.refine_element(1053);
-  mesh.refine_element(1054);
-  mesh.refine_element(1087);
-  mesh.refine_element(1088);
-  mesh.refine_element(1117);
-  mesh.refine_element(1118);
-  mesh.refine_element(1151);
-  mesh.refine_element(1152);
 
   // Initialize spaces with default shapesets.
   L2Space space_rho(&mesh,P_INIT);
@@ -181,7 +171,7 @@ int main(int argc, char* argv[])
     error ("Matrix solver failed.\n");
 
     // Debugging.
-    
+    /*
     std::ofstream out("matrix");
     for(int i = 0; i < matrix->get_size(); i++)
       for(int j = 0; j < matrix->get_size(); j++)
@@ -199,7 +189,7 @@ int main(int argc, char* argv[])
       for(int j = 0; j < matrix->get_size(); j++)
         out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
     out.close();
-    
+    */    
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
