@@ -2,27 +2,125 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-// Development version of Euler equations example. 
+//  This example solves the compressible Euler equations using a basic
+//  piecewise-constant finite volume method.
+//
+//  Equations: Compressible Euler equations, perfect gas state equation.
+//
+//  Domain: forward facing step, see mesh file ffs.mesh
+//
+//  BC: Normal velocity component is zero on solid walls.
+//      Full supersonic state prescribed at inlet.
+//      Pressure given at outlet, but used only if outlet flow is subsonic/
+//
+//  IC: Constant supersonic state identical to inlet. 
+//
+//  The following parameters can be changed:
+ 
+const int P_INIT = 0;                             // Initial polynomial degree.                      
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
+double TAU = 1E-5;                                // Time step.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
-const int P_INIT = 0;
-
-double TAU = 1E-5;
+// Equation parameters.
+double P_EXT = 1.0;         // Exterior pressure (dimensionless).
+double RHO_EXT = 1.4;       // Inlet density (dimensionless).   
+double V1_EXT = 3.0;        // Inlet x-velocity (dimensionless).
+double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
+double KAPPA = 1.4;         // Kappa.
+double C_V = 717.5;         // C_v.
+double R = 287.14;          // R.
 
 double t = 0;
 
-#include "forms.cpp"
-#include "filters.cpp"
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO,
-                                                  //                SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
-
-// Set up numerical flux with default parameters.
-// For numerical fluxes, please see hermes2d/src/numerical_flux.h
-NumericalFlux num_flux;
-
+// Boundary condition types.
 BCType bc_types(int marker)
 {
   return BC_NATURAL;
 }
+
+// Inlet/outlet boundary conditions.
+double bc_density(double y)
+{
+  return RHO_EXT;
+}
+
+// Density * velocity in the x coordinate boundary condition.
+double bc_density_vel_x(double y)
+{
+  return RHO_EXT * V1_EXT;
+}
+
+// Density * velocity in the y coordinate boundary condition.
+double bc_density_vel_y(double y)
+{
+  return V2_EXT;
+}
+
+// Calculation of the pressure on the boundary.
+double bc_pressure(double y)
+{
+  return P_EXT;
+}
+
+// Energy boundary condition.
+double bc_energy(double y)
+{
+  double rho = bc_density(y);
+  double rho_v_x = bc_density_vel_x(y);
+  double rho_v_y = bc_density_vel_y(y);
+  double pressure = bc_pressure(y);
+  return pressure/(KAPPA - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+}
+
+// Calculates energy from other quantities.
+// FIXME: this should be in the src/ directory, not here.
+double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure, double kappa)
+{
+  return pressure/(kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+}
+
+// Calculates pressure from other quantities.
+// FIXME: this should be in the src/ directory, not here.
+double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
+{
+  return (kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / 2*rho);
+}
+
+// Calculates speed of sound.
+// FIXME: this should be in the src/ directory, not here.
+double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
+{
+  return std::sqrt(kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy, kappa) / rho);
+}
+
+// Constant initial state (matching the supersonic inlet state).
+double ic_density(double x, double y, scalar& dx, scalar& dy)
+{
+  return RHO_EXT;
+}
+double ic_density_vel_x(double x, double y, scalar& dx, scalar& dy)
+{
+  return RHO_EXT * V1_EXT;
+}
+double ic_density_vel_y(double x, double y, scalar& dx, scalar& dy)
+{
+  return RHO_EXT * V2_EXT;
+}
+double ic_energy(double x, double y, scalar& dx, scalar& dy)
+{
+  return calc_energy(RHO_EXT, RHO_EXT*V1_EXT, RHO_EXT*V2_EXT, P_EXT, KAPPA);
+}
+
+// Weak forms.
+#include "forms.cpp"
+
+// Filters.
+#include "filters.cpp"
+
+// Numerical flux with default parameters (see hermes2d/src/numerical_flux.h).
+NumericalFlux num_flux;
 
 int main(int argc, char* argv[])
 {
@@ -32,9 +130,13 @@ int main(int argc, char* argv[])
   mloader.load("ffs.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  mesh.refine_all_elements();
-  mesh.refine_all_elements();
-  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Setting R, C_V and KAPPA (should be fixed, these do not belong into the 
+  // numerical flux, they are parameters for the equations).
+  num_flux.R = R;
+  num_flux.c_v = C_V;
+  num_flux.kappa = KAPPA;
 
   // Initialize spaces with default shapesets.
   L2Space space_rho(&mesh,P_INIT);

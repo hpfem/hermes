@@ -3,76 +3,6 @@
 
 extern NumericalFlux num_flux;
 
-// Calculates pressure from other quantities.
-template<typename Scalar>
-Scalar calc_pressure(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
-{
-  return (num_flux.R/num_flux.c_v) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
-}
-// Calculates the local speed of sound from other quantities.
-template<typename Scalar>
-Scalar calc_sound_speed(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
-{
-  return std::sqrt(num_flux.kappa * calc_pressure(rho,rho_v_x,rho_v_y,energy) / rho);
-}
-// Calculates energy from other quantities.
-template<typename Scalar>
-Scalar calc_energy(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar pressure)
-{
-  return (num_flux.c_v/num_flux.R) * pressure + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
-}
-
-// The following boundary conditions are the prescribed values used on 
-// the inlet and outlet part of the boundary.
-// Density boundary condition.
-double bc_density(double y)
-{
-  return 1.4;
-}
-
-// Density * velocity in the x coordinate boundary condition.
-double bc_density_vel_x(double y)
-{
-  return 3.0;
-}
-
-// Density * velocity in the y coordinate boundary condition.
-double bc_density_vel_y(double y)
-{
-  return 0;
-}
-
-// Calculation of the pressure on the boundary.
-double bc_pressure(double y)
-{
-  return 1.0;
-}
-
-// Energy boundary condition.
-double bc_energy(double y)
-{
-  return calc_energy<double>(bc_density(y), bc_density_vel_x(y), bc_density_vel_y(y), bc_pressure(y));
-}
-
-// Initial conditions. Initial conditions correspond with the boundary ones, that is why functions
-// specifying boundary conditions are used.
-double ic_density(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_density(y);
-}
-double ic_density_vel_x(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_density_vel_x(y);
-}
-double ic_density_vel_y(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_density_vel_y(y);
-}
-double ic_energy(double x, double y, scalar& dx, scalar& dy)
-{
-  return bc_energy(y);
-}
-
 ///////////////////////////////////////////////////
 ////////First flux jacobian/////////////////////
 ///////////////////////////////////////////////////
@@ -103,7 +33,8 @@ Scalar A_1_0_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 template<typename Scalar>
 Scalar A_1_1_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 {
-  return - ((rho_v_x * rho_v_x) / (rho * rho)) + 0.5 * (num_flux.R / num_flux.c_v) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+  return - ((rho_v_x * rho_v_x) / (rho * rho)) + 0.5 * (num_flux.R / num_flux.c_v) * 
+         ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
 }
 
 template<typename Scalar>
@@ -698,7 +629,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     double rho_b = std::pow((sound_speed_b*sound_speed_b*w01/(num_flux.kappa*calc_pressure<double>(w01,w11,w21,w31))),num_flux.c_v/num_flux.R) * w01;
     double p_b = rho_b * sound_speed_b * sound_speed_b / num_flux.kappa;
     */
-    double p_b = calc_pressure<double>(w01, w11, w21, w31);
+    double p_b = calc_pressure(w01, w11, w21, w31, KAPPA);
     
     //Ondrej's code.
     double flux[4];
