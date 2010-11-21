@@ -18,6 +18,7 @@
 #define __H2D_FEPROBLEM_H
 
 #include "../../hermes_common/matrix.h"
+#include "../../hermes_common/solver/solver.h"
 #include "adapt/adapt.h"
 #include "graph.h"
 #include "forms.h"
@@ -144,5 +145,8 @@ HERMES_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int o
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
 HERMES_API double get_l2_norm(Vector* vec); 
+
+HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose);
 
 #endif

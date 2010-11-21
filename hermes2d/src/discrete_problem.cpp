@@ -1591,3 +1591,44 @@ Space* construct_refined_space(Space* coarse, int order_increase)
   ref_space->copy_orders(coarse, order_increase);
   return ref_space;
 }
+
+// Perform Newton's iteration.
+bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+                  Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose)
+{
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = dp->get_num_dofs();
+
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble(coeff_vec, matrix, rhs, false);
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs);
+
+    // Info for user.
+    if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, ndof, res_l2_norm);
+
+    // If l2 norm of the residual vector is within tolerance, or the maximum number 
+    // of iteration has been reached, then quit.
+    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+    // Solve the linear system.
+    if(!solver->solve()) error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    it++;
+  }
+
+  if (it >= NEWTON_MAX_ITER) return false;
+
+  return true;
+}
