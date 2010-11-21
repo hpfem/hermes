@@ -132,7 +132,9 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, t = %g s.", ts, current_time);
 
-    // Perform Newton's iteration.
+    // Perform Newton's iteration. Note that we are not using the 
+    // function solve_newton() now since extra actions are needed
+    // inside the loop.
     int it = 1;
     while (1)
     {
