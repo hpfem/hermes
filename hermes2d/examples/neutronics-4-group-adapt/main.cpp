@@ -79,7 +79,7 @@ const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nod
                                          // their notoriously bad performance.
 const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
                                          // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1e-1;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -233,6 +233,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   SparseMatrix* mat = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
   
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
