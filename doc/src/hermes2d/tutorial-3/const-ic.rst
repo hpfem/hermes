@@ -4,6 +4,9 @@ Constant Initial Condition (15)
 **Git reference:** Tutorial example `15-newton-elliptic-1 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/15-newton-elliptic-1>`_.
 
+Model problem
+~~~~~~~~~~~~~
+
 Let us solve the nonlinear model problem from the previous section,
 
 .. math::
@@ -165,13 +168,21 @@ the boolean flag is_linear=false::
     bool is_linear = false;
     DiscreteProblem dp(&wf, &space, is_linear);
 
-The iteration loop
-~~~~~~~~~~~~~~~~~~
+The Newton's iteration loop
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Newton's iteration loop is very similar in all examples, hence we show it 
-in full here::
+The Newton's iteration loop is very similar in all examples, therefore we 
+provide a simple function solve_newton() that is called as follows::
 
     // Perform Newton's iteration.
+    bool verbose = true;
+    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+
+The same written in full would be::
+
+    // Perform Newton's iteration.
+    bool verbose = true;
     int it = 1;
     while (1)
     {
@@ -188,8 +199,9 @@ in full here::
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
 
-      // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
+      // Info for the user.
+      if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, 
+                   Space::get_num_dofs(&space), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.

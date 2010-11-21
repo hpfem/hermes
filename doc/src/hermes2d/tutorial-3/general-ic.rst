@@ -4,6 +4,9 @@ General Initial Condition (16)
 **Git reference:** Tutorial example `16-newton-elliptic-2 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/16-newton-elliptic-2>`_.
 
+Model problem
+~~~~~~~~~~~~~
+
 We will solve the nonlinear model problem from the previous section again,
 
 .. math::
