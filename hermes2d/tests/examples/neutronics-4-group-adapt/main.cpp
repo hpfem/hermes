@@ -47,7 +47,7 @@ const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nod
                                          // their notoriously bad performance.
 const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
                                          // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1e-1;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -201,6 +201,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   SparseMatrix* mat = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
   
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
@@ -221,8 +222,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     if (!solver->solve()) error ("Matrix solver failed.\n");
     
     // Convert coefficients vector into a set of Solution pointers.
-    // for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
-    Solution::vector_to_solutions(rhs, spaces, slptr_new_solution);
+    Solution::vector_to_solutions(solver->get_solution(), spaces, slptr_new_solution);
  
     // Update fission sources.
     SimpleFilter new_source(source_fn, mfptr_new_solution);
@@ -350,8 +350,8 @@ Extremum get_peak(MeshFunction *sln)
 }
 
 // Macros for simpler reporting (four group case).
-#define report_num_dofs(spaces) spaces[0]->Space::get_num_dofs(), spaces[1]->Space::get_num_dofs(),\
-                                spaces[2]->Space::get_num_dofs(), spaces[3]->Space::get_num_dofs(), Space::get_num_dofs(spaces)
+#define report_num_dofs(spaces) spaces[0]->get_num_dofs(), spaces[1]->get_num_dofs(),\
+                                spaces[2]->get_num_dofs(), spaces[3]->get_num_dofs(), Space::get_num_dofs(spaces)
 #define report_errors(errors) errors[0],errors[1],errors[2],errors[3]
 
 int main(int argc, char* argv[])
@@ -579,7 +579,7 @@ int main(int argc, char* argv[])
     graph_cpu.add_values(2, cta, keff_err);
 
     for_each_group(g)
-      graph_dof_evol.add_values(g, as, spaces[g]->Space::get_num_dofs());
+      graph_dof_evol.add_values(g, as, spaces[g]->get_num_dofs());
 
     cpu_time.tick(HERMES_SKIP);
 
@@ -618,7 +618,7 @@ int main(int argc, char* argv[])
 
   for_each_group(g) 
   {
-    delete spaces[g]; delete meshes[g];
+    delete meshes[g];
     delete slptr_coarse_slns[g], delete slptr_fine_slns[g]; delete slptr_pow_iter_slns[g];
   }
   
@@ -634,13 +634,16 @@ int main(int argc, char* argv[])
   eigenvalue.test_equality(k_eff, 1.140910);
   
   TestSubject<double> error_estimate(1e-5);
-  error_estimate.test_overshoot(energy_err_est, 0.002081);
+  error_estimate.test_overshoot(energy_err_est, 0.06546);
 
   TestSubject<int> ndof(100);
   const int expected_ndofs[N_GROUPS] = {
     1204, 884, 792, 1104
   };
-  for_each_group(g) ndof.test_overshoot(spaces[g]->get_num_dofs(), expected_ndofs[g]);
+  for_each_group(g) {
+    ndof.test_overshoot(spaces[g]->get_num_dofs(), expected_ndofs[g]);
+    delete spaces[g];
+  }
 
   TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
   const Extremum expected_maxima[N_GROUPS] = {
@@ -657,6 +660,11 @@ int main(int argc, char* argv[])
   }
   else {
     printf("Failure!\n");
+    if (!ndof.passed) printf("NDOF test failed.\n");
+    if (!peak.passed) printf("Peak flux test failed.\n");
+    if (!eigenvalue.passed) printf("Eigenvalue test failed.\n");
+    if (!num_iter.passed) printf("Number of iterations test failed.\n");
+    if (!error_estimate.passed) printf("Error estimate test failed.\n");
     return ERROR_FAILURE;
   }
 }
