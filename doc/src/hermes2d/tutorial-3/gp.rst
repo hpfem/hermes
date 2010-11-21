@@ -11,6 +11,9 @@ pseudopotential interaction model. For time-discretization one can use either
 the first-order implicit Euler method or the second-order Crank-Nicolson
 method. 
 
+Model problem
+~~~~~~~~~~~~~
+
 The computational domain is the square $(-1,1)^2$ and boundary conditions are zero Dirichlet. The equation has the form 
 
 .. math::
@@ -22,17 +25,10 @@ $\hbar$ the Planck constant, $m$ the mass of the boson,
 $g$ the coupling constant (proportional to the scattering length of two interacting bosons) and 
 $\omega$ the frequency.
 
-From the implementation point of view, the only detail worth mentioning is the 
-use of the complex version of Hermes in the file `CMakeLists.txt <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-gp/CMakeLists.txt>`_:
+Complex-valued Jacobian matrix and residual vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
-
-    # use the complex version of the library:
-    set(HERMES ${HERMES_CPLX_BIN})
-
-The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-gp/forms.cpp>`_:
-
-::
+We start by defining complex-valued  weak forms for the Newton's method::
 
     // Residuum for the implicit Euler time discretization
     template<typename Real, typename Scalar>
@@ -41,8 +37,8 @@ The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes.
       scalar ii = cplx(0.0, 1.0);  // imaginary unit, ii^2 = -1
 
       Scalar result = 0;
-      Func<Scalar>* psi_prev_newton = ext->fn[0];
-      Func<Scalar>* psi_prev_time = ext->fn[1];
+      Func<Scalar>* psi_prev_newton = u_ext[0];
+      Func<Scalar>* psi_prev_time = ext->fn[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (ii * H * (psi_prev_newton->val[i] - psi_prev_time->val[i]) * v->val[i] / TAU
                 - H*H/(2*M) * (psi_prev_newton->dx[i] * v->dx[i] + psi_prev_newton->dy[i] * v->dy[i])
@@ -59,7 +55,7 @@ The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes.
       scalar ii = cplx(0.0, 1.0);  // imaginary unit, ii^2 = -1
 
       Scalar result = 0;
-      Func<Scalar>* psi_prev_newton = ext->fn[0];
+      Func<Scalar>* psi_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (ii * H * u->val[i] * v->val[i] / TAU
                          - H*H/(2*M) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
@@ -76,8 +72,8 @@ The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes.
       scalar ii = cplx(0.0, 1.0);  // imaginary unit, ii^2 = -1
 
       Scalar result = 0;
-      Func<Scalar>* psi_prev_newton = ext->fn[0];
-      Func<Scalar>* psi_prev_time = ext->fn[1];
+      Func<Scalar>* psi_prev_newton = u_ext[0];
+      Func<Scalar>* psi_prev_time = ext->fn[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (ii * H * (psi_prev_newton->val[i] - psi_prev_time->val[i]) * v->val[i] / TAU
                 - 0.5*H*H/(2*M) * (psi_prev_newton->dx[i] * v->dx[i] + psi_prev_newton->dy[i] * v->dy[i])
@@ -96,52 +92,82 @@ The weak forms can be found in the file `forms.cpp <http://git.hpfem.org/hermes.
       scalar ii = cplx(0.0, 1.0);  // imaginary unit, ii^2 = -1
 
       Scalar result = 0;
-      Func<Scalar>* psi_prev_newton = ext->fn[0];
+      Func<Scalar>* psi_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (ii * H * u->val[i] * v->val[i] / TAU
                          - 0.5*H*H/(2*M) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
                          - 0.5*2* G * u->val[i] *  psi_prev_newton->val[i] * conj(psi_prev_newton->val[i]) * v->val[i]
                          - 0.5*G * psi_prev_newton->val[i] *  psi_prev_newton->val[i] * u->val[i] * v->val[i]
                          - 0.5*.5*M*OMEGA*OMEGA * (e->x[i] * e->x[i] + e->y[i] * e->y[i]) * u->val[i] * v->val[i]);
-      return result; 
+      return result;
     }
 
-The way the weak forms are registered is standard::
+Registration of weak forms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
 
     // Initialize the weak formulation.
     WeakForm wf;
     if(TIME_DISCR == 1) {
-      wf.add_matrix_form(callback(jacobian_euler), HERMES_UNSYM, H2D_ANY, &Psi_prev_newton);
-      wf.add_vector_form(callback(residual_euler), H2D_ANY, Tuple<MeshFunction*>(&Psi_prev_newton, &Psi_prev_time));
+      wf.add_matrix_form(callback(J_euler), HERMES_UNSYM, HERMES_ANY);
+      wf.add_vector_form(callback(F_euler), HERMES_ANY, &psi_prev_time);
     }
     else {
-      wf.add_matrix_form(callback(jacobian_cranic), HERMES_UNSYM, H2D_ANY, &Psi_prev_newton);
-      wf.add_vector_form(callback(residual_cranic), H2D_ANY, Tuple<MeshFunction*>(&Psi_prev_newton, &Psi_prev_time));
+      wf.add_matrix_form(callback(J_cranic), HERMES_UNSYM, HERMES_ANY);
+      wf.add_vector_form(callback(F_cranic), HERMES_ANY, &psi_prev_time);
     }
 
-Also the time stepping loop and the call to the Newton's method 
-will not surprize a reader who made it this far in the tutorial::
+Time stepping loop
+~~~~~~~~~~~~~~~~~~
+
+::
 
     // Time stepping loop:
     int nstep = (int)(T_FINAL/TAU + 0.5);
     for(int ts = 1; ts <= nstep; ts++)
     {
-
-      info("---- Time step %d:", ts);
+      info("Time step %d:", ts);
 
       // Newton's method.
       info("Performing Newton's method.");
-      bool verbose = true; // Default is false.
-      if (!nls.solve_newton(&Psi_prev_newton, NEWTON_TOL, NEWTON_MAX_ITER, verbose)) 
-        error("Newton's method did not converge.");
+      int it = 1;
+      while (1)
+      {
+        dp.assemble(coeff_vec, matrix, rhs, false);
+      
+        // Multiply the residual vector with -1 since the matrix 
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+      
+        // Calculate the l2-norm of residual vector.
+        double res_l2_norm = get_l2_norm(rhs);
 
-      // Copy result of the Newton's iteration into Psi_prev_time.
-      Psi_prev_time.copy(&Psi_prev_newton);
+        // Info for user.
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, ndof, res_l2_norm);
+
+        // If l2 norm of the residual vector is within tolerance, or the maximum number 
+        // of iteration has been reached, then quit.
+        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+        // Solve the linear system and if successful, obtain the solutions.
+        if(!solver->solve())
+          error ("Matrix solver failed.\n");
+
+        // Add \deltaY^{n+1} to Y^n.
+        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+      
+        if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+     
+        it++;
+      };
+    
+      // Update previous time level solution.
+      Solution::vector_to_solution(coeff_vec, &space, &psi_prev_time);
     }
 
 Sample results
 ~~~~~~~~~~~~~~
-
 
 Snapshot 1:
 

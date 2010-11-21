@@ -36,8 +36,8 @@ Find $u \in V$ such that
 
 Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$. 
 
-Define boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Defining boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Hermes recognizes two basic types of boundary conditions: essential and natural. Essential boundary conditions (prescribed values on the boundary) influence the finite element space while natural conditions do not - they are incorporated into boundary integrals in the weak formulation. In the context of elliptic problems, Dirichlet conditions are essential and Neumann/Newton conditions are natural.
 
@@ -67,8 +67,8 @@ non-constant boundary conditions easily.
 Note that values for natural boundary conditions are incorporated 
 into the weak forms.
 
-Define weak forms
-~~~~~~~~~~~~~~~~~
+Defining weak forms
+~~~~~~~~~~~~~~~~~~~
 
 The bilinear form $a(u,v)$ and the linear form $l(v)$ are defined using the following
 callbacks::
@@ -92,8 +92,12 @@ callbacks::
     }
 
 These callbacks are called by Hermes for each element during the assembly and they must return the 
-values of the bilinear and linear forms for the given arguments. Their arguments have the 
-following meaning:
+values of the bilinear and linear forms for the given arguments. 
+
+Arguments of weak forms
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The arguments of weak forms have the following meaning:
 
   * *n* ... the number of integration points,
   * *wt* ... array of integration weights for all integration points,
@@ -150,8 +154,8 @@ Predefined integrals like this also exist for the Hcurl, Hdiv and L2 spaces.
 
 Next let us present a typical sequence of steps that are needed to solve a linear problem.
 
-Load the mesh
-~~~~~~~~~~~~~
+Loading the mesh
+~~~~~~~~~~~~~~~~
 
 The main.cpp file typically begins with loading the mesh::
 
@@ -160,8 +164,8 @@ The main.cpp file typically begins with loading the mesh::
     H2DReader mloader;
     mloader.load("domain.mesh", &mesh);
 
-Initialize FE space
-~~~~~~~~~~~~~~~~~~~
+Initializing finite element space
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As a second step (after optional a-priori mesh refinements),
 we initialize the FE space::
@@ -174,8 +178,8 @@ we initialize the FE space::
 Note that here we used the boundary conditions callbacks bc_types() and 
 essential_bc_values() defined above.
 
-Initialize weak formulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Initializing weak formulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Weak forms need to be registered as follows::
 
@@ -191,8 +195,8 @@ One can optimize assembling by indicating that a matrix form is symmetric, assoc
 different weak forms with different element material markers, etc. All this will be 
 discussed later.
 
-Initialize discrete problem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Initializing discrete problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The weak formulation and space(s) constitute a finite element problem.
 To define it, one needs to create an instance of the DiscreteProblem 
@@ -207,8 +211,8 @@ assumes that the problem is nonlinear. In the nonlinear case, the
 matrix and vector weak forms are interpreted differently, we will 
 learn about this later. 
 
-Initialize matrix solver
-~~~~~~~~~~~~~~~~~~~~~~~~
+Initializing matrix solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next one needs to choose a matrix solver::
 
@@ -226,8 +230,8 @@ as follows::
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-Assemble the matrix and vector
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Assembleing the matrix and vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The stiffness matrix and load vector are assembled as follows::
 
@@ -236,8 +240,8 @@ The stiffness matrix and load vector are assembled as follows::
     dp.assemble(matrix, rhs);
 
 
-Solve the matrix problem
-~~~~~~~~~~~~~~~~~~~~~~~~
+Solving the matrix problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Finally, the matrix problem is solved via::
 
@@ -252,8 +256,8 @@ The matrix solver can fail for various reasons -- direct solvers (UMFPACK,
 SUPERLU, MUMPS) may run out of memory if the number of equations is large,
 iterative solvers may fail to converge if the matrix is ill-conditioned.  
 
-Visualize the solution
-~~~~~~~~~~~~~~~~~~~~~~
+Visualizing the solution
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The solution can be visualized via the ScalarView class::
 
@@ -272,8 +276,8 @@ The following figure shows the output of this example (again, press '3' for 3D v
    :height: 350
    :alt: Solution of the Poisson equation.
 
-Clean up
-~~~~~~~~
+Cleaning up
+~~~~~~~~~~~
 
 It is polite to clean after ourselves, and thus we finish the main.cpp file with::
 

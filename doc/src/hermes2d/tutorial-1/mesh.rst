@@ -23,16 +23,8 @@ quadrilaterals and two curvilinear triangles. The elements are enumerated from 0
 One also needs to enumerate all mesh vertices and assign markers to all boundary edges. 
 Boundary markers are used to link boundary conditions with the boundary edges. 
 
-Mesh file format
-~~~~~~~~~~~~~~~~
-
-Hermes can read meshes in its own generic format as well as in the
-`ExodusII <http://sourceforge.net/projects/exodusii/>`_ format
-(this is a widely used format that can be generated, for example, 
-with `Cubit <http://cubit.sandia.gov/>`_).
-First let us discuss the generic Hermes mesh data format. Reading
-of ExodusII mesh files is very simple as we will see in example 
-`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples/iron-water.html>`_. 
+Hermes2D mesh file format
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Generic Hermes mesh file consists of variable assignments. Each variable can hold a real number, 
 list of real numbers, or list of lists. The following are all valid definitions in 
@@ -119,9 +111,12 @@ interval $[0,1]$ into smaller intervals which determine the area of influence
 of the control points. Since the curve has to start and end at the edge
 vertices, the knot vector in Hermes always starts with $d+1$ zeros and ends
 with $d+1$ ones. Only the inner knots are listed in the above definition of the
-variable ``curves``, where $knots$ is a simple list of real values. For the 
-above example, we have
-::
+variable ``curves``, where $knots$ is a simple list of real values. 
+
+Circular arcs
+~~~~~~~~~~~~~
+
+Circular arcs are very easy to define. For the above example, we have::
 
     curves =
     {
@@ -131,8 +126,8 @@ above example, we have
     # EOF
 
 
-Loading mesh
-~~~~~~~~~~~~
+Loading meshes in Hermes2D format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As a ''Hello world'' example, let us load the mesh we have just created, and display it in a window. 
 Every main.cpp file in the git repository contains lots of comments and instructions. Skipping those, 
@@ -150,10 +145,21 @@ call the method ``load()``::
       H2DReader mloader;
       mloader.load("domain.mesh", &mesh);
 
-Note: To load an ExodusII mesh file, one has to use ``ExodusIIReader`` class instead.
+Loading meshes in ExodusII format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following portion of code illustrates various types of initial mesh refinements.
-It does not matter if the mesh becomes irregular:: 
+Hermes can read meshes in the `ExodusII <http://sourceforge.net/projects/exodusii/>`_ format.
+This is a widely used format that can be generated, for example, 
+with `Cubit <http://cubit.sandia.gov/>`_. To load an ExodusII mesh file, 
+one has to use the ``ExodusIIReader`` class instead of the ``H2DReader`` class above.
+We will encounter meshes in the ExodusII format in example 
+`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples/iron-water.html>`_. 
+
+Manual mesh refinements
+~~~~~~~~~~~~~~~~~~~~~~~
+
+After loading the mesh, the user can perform a variety of 
+a-priori mesh refinements::
 
       // Perform some sample initial refinements.
       mesh.refine_all_elements();          // refines all elements
@@ -170,19 +176,22 @@ It does not matter if the mesh becomes irregular::
       mesh.refine_element(114, 1);         // refines element #114
                                            // anisotropically
 
-Other ways of modifying meshes on the fly include::
+Other ways to modify meshes on the fly include::
 
     Mesh::refine_element(int id, int refinement = 0);
     Mesh::convert_quads_to_triangles();
     Mesh::convert_triangles_to_quads();
     Mesh::refine_by_criterion(int (*criterion)(Element* e), int depth);
-    Mesh::refine_towards_vertex(int vertex_id, int depth);
     Mesh::regularize(int n);
     Mesh::unrefine_element(int id);
     Mesh::unrefine_all_elements();
 
 See the file `src/mesh.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh.cpp>`_ for more details. 
-The following code illustrates how to visualize the mesh using the class MeshView::
+
+Visualizing the mesh
+~~~~~~~~~~~~~~~~~~~~
+
+The following code illustrates how to visualize the mesh using the MeshView class::
 
     // Display the mesh.
     // (0, 0) is the upper left corner position
@@ -190,8 +199,7 @@ The following code illustrates how to visualize the mesh using the class MeshVie
     MeshView mview("Hello world!", new WinGeom(0, 0, 350, 350));
     mview.show(&mesh);
 
-You can initialize it by supplying the title of the window and its initial position and size (all of these
-parameters are optional). The class MeshView provides the method show() that displays a window showing the mesh:
+The class MeshView provides the method show() that displays a window showing the mesh:
 
 .. image:: 01/meshview2.png
    :align: center
