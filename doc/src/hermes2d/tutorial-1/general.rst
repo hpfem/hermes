@@ -15,6 +15,9 @@ This example deals with a linear second-order equation of the form
 equipped with Dirichlet and/or Neumann boundary conditions. Its goal is to show how to 
 use space-dependent coefficients and how to define quadrature orders explicitly. 
 
+Defining non-constant equation coefficients
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 First we define the (generally) non-constant equation coefficients:
 ::
 

@@ -6,8 +6,8 @@ Finite Element Space (02)
 Hermes follows the mathematical concept of FEM closely -- after creating a mesh,
 in the next step one needs to construct a finite element space on it.
 
-Spaces available
-~~~~~~~~~~~~~~~~
+Spaces available in Hermes
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following predefined spaces are currently available:
 
@@ -44,7 +44,10 @@ in most computations (according to our experience) are simply called
 H1Shapeset, HcurlShapeset, HdivShapeset and L2Shapeset.
 Others can be found in the directory `src/shapeset/ <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/src/shapeset>`_. 
 
-We are now ready for an example. After leaving out some comments, the following is the complete
+Example
+~~~~~~~
+
+Up to some comments, the following is the complete
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/02-space/main.cpp>`_ file
 of the example 02-space::
 

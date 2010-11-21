@@ -158,32 +158,69 @@ We will encounter meshes in the ExodusII format in example
 Manual mesh refinements
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-After loading the mesh, the user can perform a variety of 
-a-priori mesh refinements::
+Below are examples of manual mesh refinements the user can do after loading the mesh.
+All of them work for triangular, quadrilateral, and curvilinear elements. 
 
-      // Perform some sample initial refinements.
-      mesh.refine_all_elements();          // refines all elements
-      mesh.refine_towards_vertex(3, 4);    // refines mesh towards
-                                           // vertex #3 (4x)
-      mesh.refine_towards_boundary(2, 4);  // refines all elements
-                                           // along boundary 2 (4x)
-      mesh.refine_element(86, 0);          // refines element #86
-                                           // isotropically
-      mesh.refine_element(112, 0);         // refines element #112
-                                           // isotropically
-      mesh.refine_element(84, 2);          // refines element #84
-                                           // anisotropically
-      mesh.refine_element(114, 1);         // refines element #114
-                                           // anisotropically
+To begin with, here is how to refine element with index 'id'. If the element
+is a quad, 0 means refine in both directions, 1 means refine
+horizontally (with respect to the reference domain), 2 means refine vertically::
 
-Other ways to modify meshes on the fly include::
+    void Mesh::refine_element(int id, int refinement = 0);
 
-    Mesh::refine_element(int id, int refinement = 0);
-    Mesh::convert_quads_to_triangles();
-    Mesh::convert_triangles_to_quads();
-    Mesh::refine_by_criterion(int (*criterion)(Element* e), int depth);
-    Mesh::regularize(int n);
+The mesh can be refined uniformly (multiple times if needed). The parameter 
+'refinement' has the same meaning as in refine_element() above::
+
+    void Mesh::refine_all_elements(int refinement = 0);
+
+The mesh can be refined 'depth' times towards a vertex with index 'vertex_id'. In this
+way a graded mesh towards the vertex is created::
+
+    void Mesh::refine_towards_vertex(int vertex_id, int depth);
+
+The following function performs repeated refinements of elements touching 
+the boundary with boundary marker 'marker'. Elements touching with an 
+edge or with a vertex are refined. 'aniso' allows or disables anisotropic
+splitting of quads::
+
+    void refine_towards_boundary(int marker, int depth, bool aniso = true);
+
+The following will convert all quadrilateral elements in a triangular or 
+triangular-quadrilateral mesh into triangles::
+
+    void Mesh::convert_quads_to_triangles();
+
+This will convert all triangular elements into quadrilaterals::
+
+    void Mesh::convert_triangles_to_quads();
+
+The following function selects elements to refine according to a given criterion and
+performs 'depth' levels of refinements. The criterion function
+receives a pointer to an element to be considered.
+It must return -1 if the element is not to be refined, 0 if it
+should be refined uniformly, 1 if it is a quad and should be split
+horizontally or 2 if it is a quad and should be split vertically::
+
+    void Mesh::refine_by_criterion(int (*criterion)(Element* e), int depth);
+
+Meshes in Hermes can be arbitrarily irregular. The following function 
+regularizes the mesh by refining elements with hanging nodes of
+degree more than 'n'. As a result, n-irregular mesh is obtained.
+If n = 0, completely regular mesh is created. In this case, however,
+due to incompatible refinements, the element refinement hierarchy
+is removed and all elements become top-level elements. Also, total
+regularization does not work on curved elements. Returns an array of 
+new element parents which can be passed to
+Space::distribute_orders()::
+
+    int* Mesh::regularize(int n);
+
+The following function recursively removes all son elements 
+of the given element and makes it active:: 
+
     Mesh::unrefine_element(int id);
+
+All elements in the mesh can be unrefined using::
+
     Mesh::unrefine_all_elements();
 
 See the file `src/mesh.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh.cpp>`_ for more details. 

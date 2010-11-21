@@ -279,7 +279,7 @@ The following figure shows the output of this example (again, press '3' for 3D v
 Cleaning up
 ~~~~~~~~~~~
 
-It is polite to clean after ourselves, and thus we finish the main.cpp file with::
+We finish the main.cpp file with::
 
     // Clean up.
     delete solver;

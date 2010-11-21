@@ -4,14 +4,14 @@ Systems of Equations (08)
 **Git reference:** Tutorial example `08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system>`_. 
 
 So far we have just solved single linear PDE problems with a weak formulation
-of the form $a(u,v) = l(v)$, where $u, v$ were continuous approximations in the
-$H^1$ space. One can also solve equations whose solutions lie in the spaces
+of the form $a(u,v) = l(v)$, where $u$ was a continuous approximation in the
+$H^1$ space. Hermes can also solve equations whose solutions lie in the spaces
 $Hcurl$, $Hdiv$ or $L^2$, and one can combine these spaces for PDE systems.
 
 General scheme
 ~~~~~~~~~~~~~~
 
-Here we show how to handle systems of linear PDE whose weak formulation 
+First let us understand how Hermes handles systems of linear PDE whose weak formulation 
 is written as
 
 .. math::
@@ -65,6 +65,29 @@ The boundary conditions are
     u_1 &=& u_2 = 0 \ \mbox{on} \ \Gamma_1. 
     \end{eqnarray*}
 
+They are implemented as follows::
+
+    // Boundary condition types.
+    BCType bc_types(int marker)
+      { return (marker == 1) ? BC_ESSENTIAL : BC_NATURAL;; }
+
+    // Essential (Dirichlet) boundary condition values.
+    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+      { return 0; }
+
+As usual, the Neumann boundary conditions will be incorporated into the 
+weak formulation.
+
+Displacement spaces
+~~~~~~~~~~~~~~~~~~~
+
+Next let us define function spaces for the two solution
+components, $u_1$ and $u_2$ (the $x$ and $y$ displacement)::
+
+    // Create x- and y- displacement spaces using default H1 shapesets.
+    H1Space xdisp(&mesh, bc_types, essential_bc_values, P_INIT);
+    H1Space ydisp(&mesh, bc_types, essential_bc_values, P_INIT);
+
 Weak formulation
 ~~~~~~~~~~~~~~~~
 
@@ -102,29 +125,8 @@ Here, $\mu$ and $\lambda$ are material constants (Lame coefficients) defined as
 where $E$ is the Young modulus and $\nu$ the Poisson ratio of the material. For
 steel, we have $E = 200$ GPa and $\nu = 0.3$. The load is $f = (0, 10^4)^T$ N.
 
-We begin with defining the function spaces for the two solution
-components, $u_1$ and $u_2$ (the $x$ and $y$ displacement). The boundary
-conditions can be implemented as follows::
-
-    // Boundary condition types.
-    BCType bc_types(int marker)
-      { return (marker == 1) ? BC_ESSENTIAL : BC_NATURAL;; }
-
-    // Essential (Dirichlet) boundary condition values.
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-      { return 0; }
-
-Displacement spaces
+Block-wise WeakForm
 ~~~~~~~~~~~~~~~~~~~
-
-Next we create two displacement spaces::
-
-    // Create x- and y- displacement spaces using default H1 shapesets.
-    H1Space xdisp(&mesh, bc_types, essential_bc_values, P_INIT);
-    H1Space ydisp(&mesh, bc_types, essential_bc_values, P_INIT);
-
-Vector-valued WeakForm
-~~~~~~~~~~~~~~~~~~~~~~
 
 The WeakForm instance is initialized for a system of two equations::
 

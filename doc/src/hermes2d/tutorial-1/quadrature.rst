@@ -12,13 +12,16 @@ to evaluate a weak form accurately may vary between zero (product of gradients o
 two linear functions) to infinity (whenever a nonpolynomial expression is present). 
 Numerical quadrature is one of the trickiest issues in higher-order FEM.
 
+Brute force does not work
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
 A brute-force solution to this problem would be to integrate everything using 
 a maximum order, but this would lead to tremendous computing times. Therefore Hermes offers 
 two options: the polynomial degree of the integrated expressions can be detected 
 automatically (via templates), or the user can define for each weak form the 
-quadrature order explicitly. If the weak form only contains polynomial expressions, 
+quadrature order manually. If the weak form only contains polynomial expressions, 
 the former approach works very well. If the form is more complicated, it is recommended 
-to handle the integration orders explicitly. 
+to handle the integration orders manually. 
 
 Automatic determination of quadrature order
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
