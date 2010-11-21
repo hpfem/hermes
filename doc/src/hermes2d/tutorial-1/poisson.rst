@@ -3,6 +3,9 @@ Poisson Equation (03)
 
 **Git reference:** Tutorial example `03-poisson <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/03-poisson>`_. 
 
+Model problem
+~~~~~~~~~~~~~
+
 Let us solve the Poisson equation
 
 .. math::

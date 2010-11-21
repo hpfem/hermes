@@ -3,6 +3,16 @@ Complex-Valued Problem (13)
 
 **Git reference:** Tutorial example `13-complex-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/13-complex-adapt>`_. 
 
+For this example we use the matrix solver AztecOO from the Trilinos package. 
+You need to have Trilinos installed on your system, and enabled in your CMake.vars 
+file::
+
+    set(WITH_TRILINOS YES)
+    set(TRILINOS_ROOT /opt/packages/trilinos)
+
+Model problem
+~~~~~~~~~~~~~
+
 This example solves a complex-valued vector potential problem
 
 .. math::
@@ -24,14 +34,10 @@ Different material markers are used for the wire, air, and iron
 Boundary conditions are zero Dirichlet on the top and right edges, and zero Neumann
 elsewhere.
 
-Solution:
+Complex-valued weak forms
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. image:: 13/solution.png
-   :align: center
-   :height: 400
-   :alt: Solution.
-
-Complex-valued weak forms::
+::
 
     template<typename Real, typename Scalar>
     Scalar bilinear_form_iron(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -58,9 +64,10 @@ Complex-valued weak forms::
       return J_wire * int_v<Real, Scalar>(n, wt, v);
     }
 
-Otherwise everything works in the same way as in example `10-adapt <file:///home/pavel/hermes/doc/_build/html/src/hermes2d/tutorial-2/micromotor.html>`_. A few differences:
+Initializing the AztecOO matrix solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We use the matrix solver AztecOO from the Trilinos package. It is initialized as follows::
+The matrix solver is initialized as follows::
 
     // Initialize matrix solver.
     initialize_solution_environment(matrix_solver, argc, argv);
@@ -68,7 +75,7 @@ We use the matrix solver AztecOO from the Trilinos package. It is initialized as
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-Next we select an iterative solver and precosditioner::
+Next we select an iterative solver and preconditioner::
 
     if (matrix_solver == SOLVER_AZTECOO) {
       ((AztecOOSolver*) solver)->set_solver(iterative_method);
@@ -76,6 +83,8 @@ Next we select an iterative solver and precosditioner::
       // Using default iteration parameters (see solver/aztecoo.h).
     }
 
+Otherwise everything works in the same way as in example 
+`10-adapt <file:///home/pavel/hermes/doc/_build/html/src/hermes2d/tutorial-2/micromotor.html>`_. 
 At the end, after the adaptivity loop is finished, we clean up::
 
     // Clean up.
@@ -84,10 +93,19 @@ At the end, after the adaptivity loop is finished, we clean up::
     delete rhs;
     finalize_solution_environment(matrix_solver);
 
+Sample results
+~~~~~~~~~~~~~~
+
+Solution:
+
+.. image:: 13/solution.png
+   :align: center
+   :height: 400
+   :alt: Solution.
+
 Let us compare adaptive $h$-FEM with linear and quadratic elements and the $hp$-FEM.
 
 Final mesh for $h$-FEM with linear elements: 18694 DOF, error = 1.02 \%
-
 
 .. image:: 13/mesh-h1.png
    :align: center

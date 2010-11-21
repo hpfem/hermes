@@ -113,8 +113,8 @@ The function $\lambda(u)$ and its derivative are defined as follows::
       return 4*pow(u, 3); 
     }
 
-Obtaining an initial coefficient vector
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setting a constant initial condition for the Newton's method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Newton's method always starts from an initial coefficient vector $\bfY_0$.
 If we want to start from a zero initial function, we can just define this vector 
@@ -141,6 +141,9 @@ later and we'll also show how to handle projections for systems of equations.
 The user is at liberty to use for the (always symmetric positive definite) 
 projection matrix a different matrix solver
 than for the solution of the matrix problems arising in the Newton's iteration. 
+
+Registering weak forms
+~~~~~~~~~~~~~~~~~~~~~~
 
 The weak forms are registered as usual::
 

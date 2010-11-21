@@ -258,8 +258,8 @@ are also more advanced examples illustrating automatic adaptivity for nonlinear
 problems solved via the Newton's method, adaptive multimesh *hp*-FEM,
 adaptivity for time-dependent problems on dynamical meshes, etc.
 
-Numerical results
-~~~~~~~~~~~~~~~~~
+Sample results
+~~~~~~~~~~~~~~
 
 But let's return to the micromotor example for a moment again: The computation
 starts with a very coarse mesh consisting of a few quadrilaterals, some

@@ -8,6 +8,9 @@ save you work adding adaptivity to the tutorial example
 `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. 
 Feel free to adjust this example for your own applications.
 
+Sample results
+~~~~~~~~~~~~~~
+
 Solution:
 
 .. image:: 12/12-solution.png

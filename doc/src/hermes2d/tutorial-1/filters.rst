@@ -12,11 +12,14 @@ later. In elasticity examples we typically use the predefined VonMisesFilter::
 
     VonMisesFilter stress(Tuple<MeshFunction*>(u_sln, v_sln), lambda, mu);
     view.show_mesh(false);
-    view.show(&stress, H2D_EPS_HIGH);
+    view.show(&stress, HERMES_EPS_HIGH);
+
+Flags HERMES_EPS_LOW, HERMES_EPS_NORMAL, and HERMES_EPS_HIGH
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The second line tells Hermes not to display mesh edges.
 The second parameter of show() is the visualization accuracy. It can have the 
-values H2D_EPS_LOW, H2D_EPS_NORMAL (default) and H2D_EPS_HIGH. This parameter 
+values HERMES_EPS_LOW, HERMES_EPS_NORMAL (default) and HERMES_EPS_HIGH. This parameter 
 influences the number of linear triangles that Hermes uses to approximate 
 higher-order polynomial solutions within finite elements. Using linear 
 triangles is required by OpenGL, so Hermes at least performs automatic 
@@ -25,18 +28,21 @@ are used to set the accuracy of this piecewise-linear approximation.
 
 The method show() has an optional third parameter to indicate whether 
 function values or partial derivatives should be displayed. For example,
-H2D_FN_VAL_0 stands for the function value of solution component 0
+HERMES_FN_VAL_0 stands for the function value of solution component 0
 (first solution component which in this case is the VonMises stress).
-H2D_FN_VAL_1 would mean the function value of the second solution component
+HERMES_FN_VAL_1 would mean the function value of the second solution component
 (relevant for vector-valued $Hcurl$ or $Hdiv$ elements only), 
-H2D_FN_DX_0 means the x-derivative of the first solution component, etc.
+HERMES_FN_DX_0 means the x-derivative of the first solution component, etc.
+
+Visualizing deformed computational domain (in elasticity) 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Finally, in elasticity problems it may be desirable to deform the computational
 domain according to the calculated displacements. The method View::show() has
 additional three optional parameters for this::
 
     VonMisesFilter stress(Tuple<MeshFunction*>(&u_sln, &v_sln), lambda, mu);
-    view.show(&stress, H2D_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
+    view.show(&stress, HERMES_EPS_HIGH, HERMES_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
 Here the fourth and fifth parameters are the displacement components used to 
 distort the domain geometry, and the sixth parameter is a scaling factor to multiply the 

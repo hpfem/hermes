@@ -211,4 +211,5 @@ Von Mises stress can be visualized via the VonMises filter as follows::
     view.show_mesh(false);
     view.show(&stress, HERMES_EPS_HIGH, HERMES_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
 
-More about visualization and Filters will be said in the following section.
+More about visualization and Filters will be said in the following section,
+where we will also show sample results for the present model problem.

@@ -18,7 +18,10 @@ but now with nonhomogeneous Dirichlet boundary conditions
 
 and with a general initial guess init_guess(x,y).
 
-The treatment of the Dirichlet boundary conditions in the code looks as follows::
+Defining nonhomogeneous Dirichlet boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
 
     // This function is used to define Dirichlet boundary conditions.
     double dir_lift(double x, double y, double& dx, double& dy) {
@@ -39,6 +42,9 @@ The treatment of the Dirichlet boundary conditions in the code looks as follows:
       double dx, dy;
       return dir_lift(x, y, dx, dy);
     }
+
+Setting a nonconstant initial condition for the Newton's method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The initial condition has the form::
 

@@ -4,6 +4,9 @@ Navier-Stokes Equations (20)
 **Git reference:** Tutorial example `20-newton-timedep-ns 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/20-newton-timedep-ns>`_.
 
+Model problem
+~~~~~~~~~~~~~
+
 In this example, the time-dependent laminar incompressible Navier-Stokes equations are
 discretized in time via the implicit Euler method. If NEWTON == true,
 the Newton's method is used to solve the nonlinear problem at each time 
@@ -53,6 +56,9 @@ standard "do nothing" boundary conditions are prescribed. No boundary conditions
 prescribed for pressure - being an $L^2$-function, the pressure does not 
 admit any boundary conditions. 
 
+Role of pressure in Navier-Stokes equations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The role of the pressure in the Navier-Stokes equations 
 is interesting and worth a brief discussion. Since the equations only contain its gradient, 
 it is determined up to a constant. This does not mean that the problem is ill-conditioned 
@@ -76,7 +82,13 @@ The time derivative is approximated using the implicit Euler method:
     \mbox{div} \bfv^{n+1} = 0,
 
 where $\tau$ is the time step. This is a nonlinear problem that involves three equations (two 
-for velocity components and the continuity equation). Accordingly, we define three spaces::
+for velocity components and the continuity equation). 
+
+Defining spaces
+~~~~~~~~~~~~~~~
+
+We define three spaces for the two velocity components and pressure.
+This is either [H1, H1, H1] or [H1, H1, L2]:: 
 
       // Spaces for velocity components and pressure.
       H1Space xvel_space(&mesh, xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
@@ -87,34 +99,44 @@ for velocity components and the continuity equation). Accordingly, we define thr
       H1Space p_space(&mesh, NULL, NULL, P_INIT_PRESSURE);
     #endif
 
-We also need to define the proper projection norms in these spaces::
+Defining projection norms
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We need to define the proper projection norms in these spaces::
 
       // Define projection norms.
-      int vel_proj_norm = 1;
+      ProjNormType vel_proj_norm = HERMES_H1_NORM;
     #ifdef PRESSURE_IN_L2
-      int p_proj_norm = 0;
+      ProjNormType p_proj_norm = HERMES_L2_NORM;
     #else
-      int p_proj_norm = 1;
+      ProjNormType p_proj_norm = HERMES_H1_NORM;
     #endif
 
-After registering weak forms and initializing the LinSystem and NonlinSystem, if NEWTON == true 
+Calculating initial coefficient vector for the Newton's method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After registering weak forms and initializing the DiscreteProblem, if NEWTON == true 
 we calculate the initial coefficient vector $\bfY_0$ for the Newton's method::
 
-  // Project initial conditions on FE spaces to obtain initial coefficient 
-  // vector for the Newton's method.
-  if (NEWTON) {
-    info("Projecting initial conditions to obtain initial vector for the Newton'w method.");
-    nls.project_global(Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                       Tuple<Solution*>(&xvel_prev_newton, &yvel_prev_newton, &p_prev_newton),
-                       Tuple<int>(vel_proj_norm, vel_proj_norm, p_proj_norm));  
-  }
+    // Project the initial condition on the FE space to obtain initial
+    // coefficient vector for the Newton's method.
+    scalar* coeff_vec = new scalar[Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
+    if (NEWTON) {
+      info("Projecting initial condition to obtain initial vector for the Newton's method.");
+      OGProjection::project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                     Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+                     coeff_vec, 
+                     matrix_solver, 
+                     Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    }
 
 Note that when projecting multiple functions, we can use different projection 
 norms for each. 
 
-The time stepping loop looks as follows:
+Time stepping
+~~~~~~~~~~~~~
 
-::
+The time stepping loop incorporates a Newton's loop, and it looks as follows::
 
     // Time-stepping loop:
     char title[100];
@@ -124,29 +146,59 @@ The time stepping loop looks as follows:
       TIME += TAU;
       info("---- Time step %d, time = %g:", ts, TIME);
 
-      if (NEWTON) {
-        if (TIME <= STARTUP_TIME) {
-          info("Updating time-dependent essential BC.");
-          nls.update_essential_bc_values();
+      // Update time-dependent essential BC are used.
+      if (TIME <= STARTUP_TIME) {
+        info("Updating time-dependent essential BC.");
+        update_essential_bc_values(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+      }
+
+      if (NEWTON) 
+      {
+        // Perform Newton's iteration.
+        int it = 1;
+        while (1)
+        {
+          // Assemble the Jacobian matrix and residual vector.
+          dp.assemble(coeff_vec, matrix, rhs, false);
+
+          // Multiply the residual vector with -1 since the matrix 
+          // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+          for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        
+          // Calculate the l2-norm of residual vector.
+          double res_l2_norm = get_l2_norm(rhs);
+
+          // Info for user.
+          info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
+
+          // If l2 norm of the residual vector is within tolerance, or the maximum number 
+          // of iteration has been reached, then quit.
+          if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+
+          // Solve the linear system.
+          if(!solver->solve())
+            error ("Matrix solver failed.\n");
+
+          // Add \deltaY^{n+1} to Y^n.
+          for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+        
+          if (it >= NEWTON_MAX_ITER)
+            error ("Newton method did not converge.");
+
+          it++;
         }
-        // Newton's method.
-        info("Performing Newton's method.");
-        bool verbose = true; // Default is false.
-        if (!nls.solve_newton(Tuple<Solution*>(&xvel_prev_newton, &yvel_prev_newton, &p_prev_newton), 
-                              NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
-          error("Newton's method did not converge.");
-        }
+  
+        // Update previous time level solutions.
+        Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       }
       else {
-        // Needed if time-dependent essential BC are used.
-        if (TIME <= STARTUP_TIME) {
-          info("Updating time-dependent essential BC.");
-          ls.update_essential_bc_values();
-        }
-        // Assemble and solve.
+        // Linear solve.
         info("Assembling and solving linear problem.");
-        ls.assemble();
-        ls.solve(Tuple<Solution*>(&xvel_prev_newton, &yvel_prev_newton, &p_prev_newton));
+        dp.assemble(matrix, rhs, false);
+        if(solver->solve()) 
+          Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+        else 
+          error ("Matrix solver failed.\n");
       }
 
 Sample results

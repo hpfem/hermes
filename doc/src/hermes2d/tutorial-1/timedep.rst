@@ -3,6 +3,9 @@ Time-Dependent Problems (09)
 
 **Git reference:** Tutorial example `09-timedep <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/09-timedep>`_. 
 
+Model problem
+~~~~~~~~~~~~~
+
 This section describes the implementation of a simple time-dependent
 heat transfer model that describes, in a naive approximation, how the St. Vitus cathedral
 in Prague responds to changes in the surrounding air temperature
@@ -54,8 +57,6 @@ form
 
      T(x,y,0) = T_{init}(x,y) \ \ \ \mbox{in} \ \Omega.
 
-
-
 For simplicity we will use the implicit Euler method with a constant
 time step $\tau$, which transforms equation :eq:`eqvit1` into
 
@@ -64,14 +65,16 @@ time step $\tau$, which transforms equation :eq:`eqvit1` into
 
      c \varrho\frac{T^{n+1} - T^n}{\tau} - \lambda \Delta T^{n+1} = 0.
 
+Weak formulation
+~~~~~~~~~~~~~~~~
+
 The corresponding weak formulation is
 
 .. math::
 
      \int_{\Omega} c \varrho\frac{T^{n+1}}{\tau}v + \int_{\Omega} \lambda \nabla T^{n+1}\cdot \nabla v + \int_{\Gamma_{air}} \alpha \lambda T^{n+1}v = \int_{\Omega} c \varrho\frac{T^{n}}{\tau}v + \int_{\Gamma_{air}} \alpha \lambda T_{ext}(t^{n+1})v.
 
-The implementation starts by defining the
-boundary condition types::
+The implementation starts by defining boundary condition types::
 
     BCType bc_types(int marker)
     {
@@ -90,7 +93,11 @@ Then the space for the temperature $T$ is set up::
 
     // Initialize an H1 space with default shepeset.
     H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-    int ndof = get_num_dofs(&space);
+    int ndof = Space::get_num_dofs(&space);
+    info("ndof = %d.", ndof);
+
+Defining weak forms and accessing external functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Bilinear and linear forms are defined as follows::
 
@@ -104,7 +111,8 @@ Bilinear and linear forms are defined as follows::
     template<typename Real, typename Scalar>
     Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      return HEATCAP * RHO * int_u_v<Real, Scalar>(n, wt, ext->fn[0], v) / TAU;
+      Func<Real> *temp_prev = ext->fn[0];
+      return HEATCAP * RHO * int_u_v<Real, Scalar>(n, wt, temp_prev, v) / TAU;
     }
   
     template<typename Real, typename Scalar>
@@ -119,7 +127,16 @@ Bilinear and linear forms are defined as follows::
       return LAMBDA * ALPHA * temp_ext(TIME) * int_v<Real, Scalar>(n, wt, v);
     }
 
-Next we need to initialize the previous solution tsln with the initial condition $T_{init}$.
+Notice how the previous time level temperature is accessed:
+
+::
+
+      Func<Real> *temp_prev = ext->fn[0];
+    
+Setting initial condition
+~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+Next we need to initialize the previous time level solution tsln with the initial condition $T_{init}$.
 Besides holding the finite element solution, the Solution class
 can be forced to return zero, to return a constant, or to return an arbitrary function
 using the methods set_zero(), set_const() and set_exact(), respectively.
@@ -129,8 +146,10 @@ Here we simply call set_const() and supply the initial temperature::
     Solution tsln;
     tsln.set_const(&mesh, T_INIT);
 
-The weak forms are registered as follows::
+Registering external functions in weak forms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The weak forms are registered as follows::
 
     // Initialize weak formulation.
     WeakForm wf;
@@ -138,6 +157,12 @@ The weak forms are registered as follows::
     wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
     wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
     wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
+
+Notice how the previous time level solution 'tsln' is registered. A few lines above
+we saw how it is accessed from inside the weak form:: 
+
+Initializing the discrete problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next, the DiscreteProblem class and the matrix solver structures are initialized::
 
@@ -150,7 +175,10 @@ Next, the DiscreteProblem class and the matrix solver structures are initialized
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-We are now ready to start the iterative process. Since the stiffness matrix does
+Assembling and the 'rhs_only' flag
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We are now ready to start the time stepping. Since the stiffness matrix does
 not depend on the solution, it only needs to be assembled once in the first time
 step. For all remaining time steps it will be the same, and we just need to
 re-construct the load vector. This is done via the Boolean variable rhsonly
@@ -186,3 +214,4 @@ the entire time stepping loop below::
       Tview.set_title(title);
       Tview.show(&tsln);
     }
+

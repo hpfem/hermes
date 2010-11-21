@@ -3,6 +3,9 @@ General 2nd-Order Linear Equation (07)
 
 **Git reference:** Tutorial example `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. 
 
+Model problem
+~~~~~~~~~~~~~
+
 This example deals with a linear second-order equation of the form 
 
 .. math::
@@ -20,8 +23,12 @@ First we define the (generally) non-constant equation coefficients:
       else return 1;
     }
 
-and so on. Then we define boundary conditions as usual. The weak formulation contains
-both volumetric and surface integrals. 
+and so on. Then we define boundary conditions as usual. 
+
+Manual setting of integration orders in weak forms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The weak formulation contains both volumetric and surface integrals. 
 
 The Ord class in Hermes (see the file `src/forms.h 
 <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_) provides
@@ -89,6 +96,9 @@ additional function are not used for computation.
 Note the sign of the surface linear form. When solving a linear problems, i.e., when initializing the 
 DiscreteProblem class with the third parameter being is_linear = true, all linear forms have to be on 
 the right-hand side and all bilinear forms on the left. 
+
+Sample results
+~~~~~~~~~~~~~~
 
 The output of this example is shown below:
 

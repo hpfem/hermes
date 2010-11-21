@@ -3,6 +3,9 @@ Time-Harmonic Maxwell's Equations (14)
 
 **Git reference:** Tutorial example `14-hcurl-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/14-hcurl-adapt>`_. 
 
+Model problem
+~~~~~~~~~~~~~
+
 This example solves the time-harmonic Maxwell's equations in an L-shaped domain and it 
 describes the diffraction of an electromagnetic wave from a re-entrant corner. It comes with an 
 exact solution that contains a strong singularity.
@@ -26,7 +29,8 @@ fourth quadrant. It is filled with air:
 Boundary conditions: Combined essential and natural, see the 
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/main.cpp>`_ file.
 
-Exact solution:
+Exact solution
+~~~~~~~~~~~~~~
 
 .. math::
     :label: example-14-exact
@@ -63,15 +67,24 @@ computer code, this reads:
 Here jv() is the Bessel function $\bfJ_{\alpha}$. For its source code see the 
 `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/forms.cpp>`_ file.
 
+Creating an Hcurl space
+~~~~~~~~~~~~~~~~~~~~~~~
+
 New in this example is the fact that we solve in the Hcurl space::
 
     // Create an Hcurl space with default shapeset.
     HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
 
+Choosing refinement selector for the Hcurl space
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Therefore we need to use a refinement selector for the Hcurl space::
 
     // Initialize refinement selector.
     HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+Projecting in the Hcurl norm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The H2D_HCURL_NORM needs to be used in the global projection::
 
@@ -79,7 +92,10 @@ The H2D_HCURL_NORM needs to be used in the global projection::
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM); 
 
-as well as in the initialization of the Adapt class::
+Initializing the Adapt class with the Hcurl norm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The H2D_HCURL_NORM is also used in the initialization of the Adapt class::
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error."); 
@@ -87,7 +103,10 @@ as well as in the initialization of the Adapt class::
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-Here, solutions_for_adapt=true means that 'sln' and 'ref_sln' will be used to calculate element 
+Exact error calculation and the 'solutions_for_adapt' flag
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Above, solutions_for_adapt=true means that 'sln' and 'ref_sln' will be used to calculate element 
 errors to guide adaptivity. In the following call to calc_err_exact() we set solutions_for_adapt=false 
 so that just the total error is calculated::
 
@@ -95,7 +114,10 @@ so that just the total error is calculated::
     solutions_for_adapt = false;
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-The code for the weak forms looks as follows::
+Weak forms
+~~~~~~~~~~
+
+::
 
     template<typename Real, typename Scalar>
     Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -134,6 +156,9 @@ The code for the weak forms looks as follows::
     // Maximal polynomial order to integrate surface linear form.
     Ord linear_form_surf_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {  return Ord(v->val[0].get_max_order());  }
+
+Sample results
+~~~~~~~~~~~~~~
 
 Solution:
 
