@@ -66,7 +66,7 @@ double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energ
 // Calculates energy from other quantities.
 double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
 {
-  return (num_flux.kappa - 1.) * pressure + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 }
 
 ///////////////////////////////////////////////////

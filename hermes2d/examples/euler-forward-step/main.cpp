@@ -87,7 +87,7 @@ double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
 // FIXME: this should be in the src/ directory, not here.
 double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
 {
-  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / 2*rho);
+  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
 }
 
 // Calculates speed of sound.
