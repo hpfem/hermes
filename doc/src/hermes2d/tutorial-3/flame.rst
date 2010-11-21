@@ -4,6 +4,9 @@ Flame Propagation Problem (19)
 **Git reference:** Tutorial example `19-newton-timedep-flame 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/19-newton-timedep-flame>`_.
 
+Model problem
+~~~~~~~~~~~~~
+
 We will employ the Newton's method to solve a nonlinear system of two parabolic equations 
 describing a very simple flame propagation model (laminar flame, no fluid mechanics involved).
 The computational domain shown below contains in the middle a narrow portion (cooling rods) 
