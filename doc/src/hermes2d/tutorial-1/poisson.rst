@@ -230,8 +230,8 @@ as follows::
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-Assembleing the matrix and vector
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Assembling the matrix and vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The stiffness matrix and load vector are assembled as follows::
 
