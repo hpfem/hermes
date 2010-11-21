@@ -99,9 +99,9 @@ The weak forms are registered as usual:
 
     // Initialize the weak formulation.
     WeakForm wf(2);
-    wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), H2D_SYM);
-    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), H2D_SYM);
+    wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
+    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
+    wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
     wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_TOP);
 
 Before entering the adaptivity loop, we create an instance of a selector:
@@ -150,7 +150,7 @@ is devided by a corresponding norm:
     hp.set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     hp.set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
     hp.set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
-    double err_est = hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est = hp.calc_error(H2D_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
 The rest is straightforward and details can be found in the 
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/crack/main.cpp>`_ file.

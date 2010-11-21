@@ -69,10 +69,10 @@ function calc_error().
 This function can be called with four combinations of the absolute/relative flags 
 for the total error and the element errors::
 
-    hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL)
-    hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS)
-    hp.calc_error(H2D_TOTAL_ERROR_ABS | H2D_ELEMENT_ERROR_REL)
-    hp.calc_error(H2D_TOTAL_ERROR_ABS | H2D_ELEMENT_ERROR_ABS)
+    hp.calc_error(H2D_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+    hp.calc_error(H2D_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
+    hp.calc_error(H2D_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_REL)
+    hp.calc_error(H2D_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS)
 
 The exact meaning of these flags is as follows:
 

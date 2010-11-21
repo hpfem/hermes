@@ -47,7 +47,7 @@ steps:
 
       // Initialize the weak formulation for Trilinos.
       WeakForm wf2(1, JFNK ? true : false);
-      wf2.add_matrix_form(callback(jacobian_form), H2D_SYM);
+      wf2.add_matrix_form(callback(jacobian_form), HERMES_SYM);
       wf2.add_vector_form(callback(residual_form));
 
 (2) Initialize the FeProblem class::

@@ -134,7 +134,7 @@ The weak formulation is initialized as follows:
     // Initialize the weak formulation.
     WeakForm wf(3);
     wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));
-    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), H2D_SYM);
+    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
     wf.add_matrix_form(0, 2, callback(bilinear_form_0_2));
     wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));
     wf.add_matrix_form(1, 2, callback(bilinear_form_1_2));
@@ -183,7 +183,7 @@ calculates element errors. The code uses a selector which instance is created ou
     hp.set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
     hp.set_error_form(1, 2, bilinear_form_1_2<scalar, scalar>, bilinear_form_1_2<Ord, Ord>);
     hp.set_error_form(2, 2, bilinear_form_2_2<scalar, scalar>, bilinear_form_2_2<Ord, Ord>);
-    double err_est = hp.calc_error(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_ABS) * 100;
+    double err_est = hp.calc_error(H2D_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
 Sample snapshot of solutions, meshes and convergence graphs are below. 
 

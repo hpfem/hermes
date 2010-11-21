@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
-  OrderView oview("Mesh", new WinGeom(520, 0, 450, 400));
+  OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
   oview.show(&space);
 
   // Time stepping loop:

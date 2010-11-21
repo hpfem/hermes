@@ -37,7 +37,7 @@ Error estimates are calculated as usual::
     info("Calculating error.");
     Adapt hp(&space, H2D_H1_NORM);
     hp.set_solutions(&sln_coarse, &sln_fine);
-    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | H2D_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
 Mesh adaptation is standard as well::
 
