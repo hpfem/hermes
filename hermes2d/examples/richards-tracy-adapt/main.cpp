@@ -253,44 +253,15 @@ int main(int argc, char* argv[])
   Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
   // Perform Newton's iteration.
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(&space);
-
-    // Assemble the Jacobian matrix_coarse and residual vector.
-    dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-    // Multiply the residual vector with -1 since the matrix_coarse 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs_coarse);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
-    // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system.
-    if(!solver_coarse->solve())
-      error ("matrix_coarse solver_coarse failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  info("Solving on coarse mesh.");
+  bool verbose = true;
+  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+      NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the actual solutions. 
   Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
+
+  // Clean up.
   delete [] coeff_vec_coarse;
   delete rhs_coarse;
   delete matrix_coarse;
@@ -350,42 +321,10 @@ int main(int argc, char* argv[])
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Perform Newton's iteration.
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(ref_space);
+      info("Solving on fine mesh.");
+      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+          NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve())
-          error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-        
-        if (it >= NEWTON_MAX_ITER)
-          error ("Newton method did not converge.");
-
-        it++;
-      }
-      
       // Translate the resulting coefficient vector into the actual solutions. 
       Solution::vector_to_solutions(coeff_vec, ref_space, &ref_sln);
 
@@ -437,7 +376,7 @@ int main(int argc, char* argv[])
         as++;
       }
 
-      // Cleanup.
+      // Clean up.
       delete [] coeff_vec;
       delete solver;
       delete matrix;
