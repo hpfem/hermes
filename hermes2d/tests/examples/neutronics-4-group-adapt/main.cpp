@@ -192,12 +192,6 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   DiscreteProblem dp(wf, spaces, is_linear);
   int ndof = Space::get_num_dofs(spaces);
   
-  // Select matrix solver.
-//  Matrix* mat; Vector* rhs; CommonSolver* solver;
-//  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
-
-//  initialize_solution_environment(matrix_solver, argc, argv);
-
   SparseMatrix* mat = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);

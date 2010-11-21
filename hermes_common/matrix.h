@@ -425,10 +425,6 @@ protected:
 	int size;
 };
 
-/// Calls the required (de)initialization routines of the selected matrix solver.
-HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
-HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
-
 HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
 HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
 

@@ -97,8 +97,6 @@ int main(int argc, char* argv[])
   bool is_linear = false;
   DiscreteProblem dp1(&wf1, &space, is_linear);
   
-  initialize_solution_environment(matrix_solver, argc, argv);
-
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -166,8 +164,6 @@ int main(int argc, char* argv[])
   delete(matrix);
   delete(rhs);
   delete(solver);
-  
-  finalize_solution_environment(matrix_solver);
 
   // CPU time needed by UMFpack
   double umf_time = cpu_time.tick().last();

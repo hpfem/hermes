@@ -221,50 +221,6 @@ int SparseMatrix::get_num_indices()
 	return total;
 }
 
-bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[])
-{
-  int ierr, myid;
-  
-  switch (matrix_solver) 
-  {
-    case SOLVER_PETSC:
-#ifdef WITH_PETSC      
-      ierr = PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL); CHKERRQ(ierr);
-#endif      
-      break;
-    case SOLVER_MUMPS:
-#ifdef WITH_MPI      
-      ierr = MPI_Init(&argc, &argv);
-      return (ierr == MPI_SUCCESS);
-#endif
-      break;
-  }
-  
-  return true;
-}
-
-bool finalize_solution_environment(MatrixSolverType matrix_solver)
-{
-  int ierr;
-  
-  switch (matrix_solver) 
-  {
-    case SOLVER_PETSC:
-#ifdef WITH_PETSC      
-      ierr = PetscFinalize(); CHKERRQ(ierr);
-#endif   
-      break;
-    case SOLVER_MUMPS:
-#ifdef WITH_MPI      
-      ierr = MPI_Finalize();
-      return (ierr == MPI_SUCCESS);
-#endif
-      break;
-  }
-  
-  return true;
-}
-
 // This function is identical in H2D and H3D.
 SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {

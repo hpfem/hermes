@@ -96,9 +96,6 @@ int main(int argc, char **args)
   TimePeriod cpu_time;
   cpu_time.tick();
 
-  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  initialize_solution_environment(matrix_solver, argc, args);
-
   // Adaptivity loop.
   int as = 1; 
   bool done = false;
@@ -205,9 +202,6 @@ int main(int argc, char **args)
     as++;
 
   } while (!done);
-
-  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  finalize_solution_environment(matrix_solver);
   
   return 0;
 }

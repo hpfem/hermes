@@ -105,9 +105,7 @@ int main(int argc, char **argv)
   // Initialize the linear FE problem.
   bool is_linear = true;
   DiscreteProblem dp1(&wf1, &space, is_linear);
-  
-  initialize_solution_environment(matrix_solver, argc, argv);
-  
+    
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -134,9 +132,7 @@ int main(int argc, char **argv)
   delete(matrix);
   delete(rhs);
   delete(solver);
-  
-  finalize_solution_environment(matrix_solver);
-  
+    
   // CPU time needed by UMFpack.
   double time1 = cpu_time.tick().last();
 

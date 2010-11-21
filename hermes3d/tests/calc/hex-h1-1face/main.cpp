@@ -332,9 +332,6 @@ int main(int argc, char **args)
   // Test variable.
   int success_test = 1;
 
-  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  initialize_solution_environment(matrix_solver, argc, args);
-
 	for (int i = 0; i < 48; i++) {
 		for (int j = 0; j < 48; j++) {
 			info("Config: %d, %d ", i, j);
@@ -435,9 +432,6 @@ int main(int argc, char **args)
       delete adaptivity;
 		}
 	}
-
-  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  finalize_solution_environment(matrix_solver);
   
   if (success_test) {
     info("Success!");

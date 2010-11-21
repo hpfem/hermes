@@ -246,9 +246,7 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, spaces, is_linear);
- 
-  initialize_solution_environment(matrix_solver, argc, argv);
-  
+   
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -325,8 +323,6 @@ int main(int argc, char* argv[])
   delete matrix;
   delete rhs;
   delete solver;
-  
-  finalize_solution_environment(matrix_solver);
 
   // Print timing information.
   verbose("Total running time: %g s", cpu_time.accumulated());
