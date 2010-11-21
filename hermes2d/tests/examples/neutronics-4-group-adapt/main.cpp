@@ -221,8 +221,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     if (!solver->solve()) error ("Matrix solver failed.\n");
     
     // Convert coefficients vector into a set of Solution pointers.
-    // for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
-    Solution::vector_to_solutions(rhs, spaces, slptr_new_solution);
+    Solution::vector_to_solutions(solver->get_solution(), spaces, slptr_new_solution);
  
     // Update fission sources.
     SimpleFilter new_source(source_fn, mfptr_new_solution);

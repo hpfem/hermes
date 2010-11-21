@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 
   for (int i = 0; i < ndof; i++)
   {
-    // Get the value of the matrix solution by calling Vertex::get().
+    // Get the value of the matrix solution by calling Vector::get().
     if (rhs->get(i) >= EPS)
     {
       printf("Shape functions are not linearly independent\n");
