@@ -26,7 +26,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 // Equation parameters.
 double P_EXT = 2.5;         // Exterior pressure (dimensionless).
 double RHO_EXT = 1.0;       // Inlet density (dimensionless).   
-double V1_EXT = 1.25;        // Inlet x-velocity (dimensionless).
+double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
 double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 double KAPPA = 1.4;         // Kappa.
 
@@ -237,13 +237,13 @@ int main(int argc, char* argv[])
   SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
-  //VectorView vview("Velocity", 0, 0, 600, 300);
-  //ScalarView sview("Pressure", 700, 0, 600, 300);
+  //VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
+  //ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
 
-  ScalarView s1("w1", 0, 0, 600, 300);
-  ScalarView s2("w2", 650, 0, 600, 300);
-  ScalarView s3("w3", 0, 350, 600, 300);
-  ScalarView s4("w4", 650, 350, 600, 300);
+  ScalarView s1("w1", new WinGeom(0, 0, 600, 300));
+  ScalarView s2("w2", new WinGeom(605, 0, 600, 300));
+  ScalarView s3("w3", new WinGeom(0, 350, 600, 300));
+  ScalarView s4("w4", new WinGeom(605, 350, 600, 300));
 
   // Iteration number.
   int iteration = 0;

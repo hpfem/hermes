@@ -3,6 +3,9 @@ Adaptivity for General 2nd-Order Linear Equation (12)
 
 **Git reference:** Tutorial example `12-general-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/12-general-adapt>`_. 
 
+Model problem
+~~~~~~~~~~~~~
+
 This example does not bring anything substantially new and its purpose is solely to 
 save you work adding adaptivity to the tutorial example 
 `07-general <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/07-general>`_. 
