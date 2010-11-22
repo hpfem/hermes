@@ -19,7 +19,8 @@
  
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
-double TAU = 1E-3;                                // Time step.
+double CFL = 0.8;                                 // CFL value.
+double TAU = 1E-4;                                // Time step.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
@@ -127,6 +128,7 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("ffs.mesh", &mesh);
+
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -243,15 +245,27 @@ int main(int argc, char* argv[])
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-  
-  for(t = 0.0; t < TAU * 1000; t += TAU)
+
+  // For calculation of the difference between two consecutive solutions.
+  double difference;
+  double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e))];
+  double *last_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e))];
+  for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e)); i++)
+      last_values[i] = 0.;
+
+  // At the beginning it is necessary to assemble the matrix,
+  // therefore this flag is set to do so.
+  bool rhs_only = false;
+  for(t = 0.0; t < 10; t += TAU)
   {
     info("---- Time step %d, time %3.5f.", iteration, t);
 
     iteration++;
 
     // Assemble stiffness matrix and rhs or just rhs.
-    bool rhs_only = iteration == 1 ? false : true;
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
     dp.assemble(matrix, rhs, rhs_only);
@@ -285,6 +299,47 @@ int main(int argc, char* argv[])
         out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
     out.close();
     */    
+
+    // Calculate the norm of the difference between solutions on this and on the previous time levels.
+    difference = 0;
+    for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e)); i++)
+    {
+      difference_values[i] = last_values[i] - solver->get_solution()[i];
+      difference += difference_values[i] * difference_values[i];
+      last_values[i] = solver->get_solution()[i];
+    }
+    difference = std::sqrt(difference);
+    // Info about L2 norm of the difference.
+    if(iteration > 1)
+      info("L2 norm of the difference between this time level and the previous time level : %g.", difference);
+    
+    // Determine the time step & if it changes, set the flag to re-assemble the matrix.
+    rhs_only = true;
+    double *solution_vector = solver->get_solution();
+    Element *e;
+    for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
+          if (((e) = mesh.get_element_fast(_id))->used) \
+            if ((e)->active)
+    {
+      AsmList al;
+      space_rho.get_element_assembly_list(e, &al);
+      double rho = solution_vector[al.dof[0]];
+      space_rho_v_x.get_element_assembly_list(e, &al);
+      double v1 = solution_vector[al.dof[0]] / rho;
+      space_rho_v_y.get_element_assembly_list(e, &al);
+      double v2 = solution_vector[al.dof[0]] / rho;
+      space_e.get_element_assembly_list(e, &al);
+      double energy = solution_vector[al.dof[0]];
+      
+      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
+      
+      if(TAU > condition)
+      {
+        TAU = condition;
+        rhs_only = false;
+      }
+    }
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
