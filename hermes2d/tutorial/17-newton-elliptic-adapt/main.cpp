@@ -202,6 +202,10 @@ int main(int argc, char* argv[])
       OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
     }
 
+    // Now we can deallocate the previous fine mesh.
+    if(as > 1)
+      delete ref_sln.get_mesh();
+
     // Newton's loop on the fine mesh.
     info("Solving on fine mesh:");
     if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
@@ -209,6 +213,10 @@ int main(int argc, char* argv[])
 
     // Translate the resulting coefficient vector into the Solution ref_sln.
     Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+    // Project the fine mesh solution on the coarse mesh.
+    info("Projecting reference solution on new coarse mesh for error calculation.");
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
@@ -230,6 +238,10 @@ int main(int argc, char* argv[])
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
 
+    // View the coarse mesh solution.
+    sview.show(&sln);
+    oview.show(&space);
+
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else 
@@ -242,15 +254,6 @@ int main(int argc, char* argv[])
         done = true;
         break;
       }
-      
-      // Project last fine mesh solution on the new coarse mesh
-      // to obtain new coars emesh solution.
-      info("Projecting reference solution on new coarse mesh for error calculation.");
-      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
-
-      // View the coarse mesh solution.
-      sview.show(&sln);
-      oview.show(&space);
     }
 
     // Clean up.
@@ -258,7 +261,6 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    if(done == false) delete ref_space->get_mesh();
     delete ref_space;
     delete dp;
 
