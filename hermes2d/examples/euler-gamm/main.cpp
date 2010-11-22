@@ -2,22 +2,35 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-// Development version of Euler equations example. 
-
-const int P_INIT = 0;
-
-double TAU = 1E-5;
-
-double t = 0;
-
-#include "forms.cpp"
-#include "filters.cpp"
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO,
-                                                  //                SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
+//  This example solves the compressible Euler equations using a basic
+//  piecewise-constant finite volume method.
+//
+//  Equations: Compressible Euler equations, perfect gas state equation.
+//
+//  Domain: GAMM channel, see mesh file GAMM-channel.mesh
+//
+//  BC: Normal velocity component is zero on solid walls.
+//      Subsonic state prescribed on inlet and outlet.
+//
+//  IC: Constant subsonic state identical to inlet. 
+//
+//  The following parameters can be changed:
+ 
+const int P_INIT = 0;                             // Initial polynomial degree.                      
+const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
+double CFL = 0.8;                                 // CFL value.
+double TAU = 1E-4;                                // Time step.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
 // Equation parameters.
+double P_EXT = 2.5;         // Exterior pressure (dimensionless).
+double RHO_EXT = 1.0;       // Inlet density (dimensionless).   
+double V1_EXT = 1.25;        // Inlet x-velocity (dimensionless).
+double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 double KAPPA = 1.4;         // Kappa.
+
+double t = 0;
 
 // Numerical flux.
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
@@ -29,6 +42,85 @@ BCType bc_types(int marker)
   return BC_NATURAL;
 }
 
+// Inlet/outlet boundary conditions.
+double bc_density(double y)
+{
+  return RHO_EXT;
+}
+
+// Density * velocity in the x coordinate boundary condition.
+double bc_density_vel_x(double y)
+{
+  return RHO_EXT * V1_EXT;
+}
+
+// Density * velocity in the y coordinate boundary condition.
+double bc_density_vel_y(double y)
+{
+  return V2_EXT;
+}
+
+// Calculation of the pressure on the boundary.
+double bc_pressure(double y)
+{
+  return P_EXT;
+}
+
+// Energy boundary condition.
+double bc_energy(double y)
+{
+  double rho = bc_density(y);
+  double rho_v_x = bc_density_vel_x(y);
+  double rho_v_y = bc_density_vel_y(y);
+  double pressure = bc_pressure(y);
+  return pressure/(KAPPA - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+}
+
+// Calculates energy from other quantities.
+// FIXME: this should be in the src/ directory, not here.
+double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
+{
+  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+}
+
+// Calculates pressure from other quantities.
+// FIXME: this should be in the src/ directory, not here.
+double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
+{
+  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
+}
+
+// Calculates speed of sound.
+// FIXME: this should be in the src/ directory, not here.
+double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy)
+{
+  return std::sqrt(num_flux.kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy) / rho);
+}
+
+// Constant initial state (matching the supersonic inlet state).
+double ic_density(double x, double y, scalar& dx, scalar& dy)
+{
+  return RHO_EXT;
+}
+double ic_density_vel_x(double x, double y, scalar& dx, scalar& dy)
+{
+  return RHO_EXT * V1_EXT;
+}
+double ic_density_vel_y(double x, double y, scalar& dx, scalar& dy)
+{
+  return RHO_EXT * V2_EXT;
+}
+double ic_energy(double x, double y, scalar& dx, scalar& dy)
+{
+  return calc_energy(RHO_EXT, RHO_EXT*V1_EXT, RHO_EXT*V2_EXT, P_EXT);
+}
+
+// Weak forms.
+#include "forms.cpp"
+
+// Filters.
+#include "filters.cpp"
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -37,10 +129,7 @@ int main(int argc, char* argv[])
   mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  mesh.refine_all_elements();
-  mesh.refine_all_elements();
-  mesh.refine_all_elements();
-  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, 1);
   mesh.refine_element(1053);
   mesh.refine_element(1054);
@@ -163,15 +252,27 @@ int main(int argc, char* argv[])
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // For calculation of the difference between two consecutive solutions.
+  double difference;
+  double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e))];
+  double *last_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e))];
+  for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e)); i++)
+      last_values[i] = 0.;
   
-  for(t = 0.0; t < TAU * 1000; t += TAU)
+  // At the beginning it is necessary to assemble the matrix,
+  // therefore this flag is set to do so.
+  bool rhs_only = false;
+  for(t = 0.0; t < 10; t += TAU)
   {
     info("---- Time step %d, time %3.5f.", iteration, t);
 
     iteration++;
 
     // Assemble stiffness matrix and rhs or just rhs.
-    bool rhs_only = iteration == 1 ? false : true;
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
     dp.assemble(matrix, rhs, rhs_only);
@@ -205,6 +306,47 @@ int main(int argc, char* argv[])
         out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
     out.close();
     */
+
+    // Calculate the norm of the difference between solutions on this and on the previous time levels.
+    difference = 0;
+    for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e)); i++)
+    {
+      difference_values[i] = last_values[i] - solver->get_solution()[i];
+      difference += difference_values[i] * difference_values[i];
+      last_values[i] = solver->get_solution()[i];
+    }
+    difference = std::sqrt(difference);
+    // Info about L2 norm of the difference.
+    if(iteration > 1)
+      info("L2 norm of the difference between this time level and the previous time level : %g.", difference);
+
+    // Determine the time step & if it changes, set the flag to re-assemble the matrix.
+    rhs_only = true;
+    double *solution_vector = solver->get_solution();
+    Element *e;
+    for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
+          if (((e) = mesh.get_element_fast(_id))->used) \
+            if ((e)->active)
+    {
+      AsmList al;
+      space_rho.get_element_assembly_list(e, &al);
+      double rho = solution_vector[al.dof[0]];
+      space_rho_v_x.get_element_assembly_list(e, &al);
+      double v1 = solution_vector[al.dof[0]] / rho;
+      space_rho_v_y.get_element_assembly_list(e, &al);
+      double v2 = solution_vector[al.dof[0]] / rho;
+      space_e.get_element_assembly_list(e, &al);
+      double energy = solution_vector[al.dof[0]];
+      
+      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
+      
+      if(TAU > condition)
+      {
+        TAU = condition;
+        rhs_only = false;
+      }
+    }
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
