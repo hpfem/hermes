@@ -3,6 +3,9 @@ Electrostatic Micromotor Problem (10)
 
 **Git reference:** Tutorial example `10-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/10-adapt>`_. 
 
+Model problem
+~~~~~~~~~~~~~
+
 Let us demonstrate the use of adaptive h-FEM and hp-FEM on a linear elliptic problem
 describing an electrostatic micromotor. This is a MEMS device free of any coils, and 
 thus (as opposed to classical electromotors) resistive to strong electromagnetic waves.
@@ -35,7 +38,12 @@ equipped with the Dirichlet boundary conditions
     \varphi = 50 V \ \ \ \ \mbox{on}\ \Gamma_2.
 
 The relative permittivity $\epsilon_r$ is piecewise-constant, $\epsilon_r = 1$ in $\Omega_1$ and
-$\epsilon_r = 10$ in $\Omega_2$. The weak formulation reads
+$\epsilon_r = 10$ in $\Omega_2$. 
+
+Weak formulation
+~~~~~~~~~~~~~~~~
+
+The weak formulation reads
 
 .. math::
 
@@ -170,8 +178,8 @@ Then the reference problem is solved::
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
 
-Obtaining coarse-mesh approximation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Projecting on coarse mesh
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After that, the reference solution is projected on the coarse mesh::
 
@@ -229,8 +237,8 @@ mesh adaptation::
 
 The constants ``THRESHOLD``, ``STRATEGY`` and ``MESH_REGULARITY`` have the following meaning:
 
-Adaptive strategy
-~~~~~~~~~~~~~~~~~
+Adaptive strategies
+~~~~~~~~~~~~~~~~~~~
 
 The constant ``STRATEGY`` indicates which adaptive strategy is used. In all cases, the strategy is applied to elements in an order defined through the error. If the user request to process an element outside this order, the element is processed regardless the strategy. Currently, Hermes2D supportes following strategies:
 
@@ -261,7 +269,7 @@ adaptivity for time-dependent problems on dynamical meshes, etc.
 Sample results
 ~~~~~~~~~~~~~~
 
-But let's return to the micromotor example for a moment again: The computation
+The computation
 starts with a very coarse mesh consisting of a few quadrilaterals, some
 of which are moreover very ill-shaped. Thanks to the anisotropic refinement
 capabilities of the selector, the mesh quickly adapts to the solution

@@ -1,5 +1,5 @@
-Adaptive h-FEM and hp-FEM
--------------------------
+Adaptive low-order FEM and hp-FEM
+---------------------------------
 
 In traditional low-order FEM, refining an element is not algorithmically complicated,
 and so the most difficult part is to find out what elements should be
@@ -15,6 +15,9 @@ guiding automatic hp-adaptivity are available even for simplest elliptic problem
 The heuristic techniques listed above are not employed in Hermes since they may fail 
 in non-standard situations, and because they lack a transparent relation to the 
 true approximation error.
+
+Why is low-order FEM so inefficient
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adaptive low-order FEM is known to be notoriously inefficient, and practitioners
 are rightfully skeptical of it. The reason is its extremely slow convergence 
@@ -45,6 +48,9 @@ many numerical experiments of independent researchers, and supported with
 theory. The low-order FEM is doomed by the underlying math -- its poor convergence cannot 
 be fixed by designing smarter adaptivity algorithms.
 
+Why is hp-FEM so efficient
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 In order to obtain fast, usable adaptivity (the red curve), one
 has to resort to adaptive *hp*-FEM. The *hp*-FEM takes advantage of 
 the following facts:
@@ -65,12 +71,13 @@ the following facts:
   `smooth-aniso-x <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks/smooth-aniso-x.html>`_  
   and `line singularity <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks/line-singularity.html>`_.
 
-Large number of possible element refinements in hp-FEM
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+What it takes to do adaptive hp-FEM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Automatic adaptivity in the *hp*-FEM is substantially different from adaptivity
 in low-order FEM, since every element can be refined in many different ways.
-The following figure shows several illustrative refinement candidates for a fourth-order element.
+The following figure shows several illustrative refinement candidates for 
+a fourth-order element.
 
 .. image:: conv-intro/refinements.png
    :align: center
@@ -89,12 +96,15 @@ option, around 100 refinement candidates for each element are considered.
 Naturally, the adaptivity algorithm takes progressively more time as more 
 refinement candidates are probed. The difference between the HP_ANISO_H
 option (next best to HP_ANISO) and HP_ANISO is quite significant. So, this is 
-where the user can use his a-priori knowledge of the solution to make the computation
-faster. 
+where the user can use his a-priori knowledge of the solution to make the 
+computation faster. 
 
-Due to the large number of refinement options, classical error estimators that
-provide a constant error estimate per element cannot be used to guide automatic 
-*hp*-adaptivity. For this, one needs to know the *shape* of the approximation error.
+Why do we need more than standard error estimates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Due to the large number of refinement options in each element, classical error estimators that
+provide just one number per element are not enough. To guide hp-adaptivity, one really needs 
+to know the **shape** of the approximation error, not only its magnitude.
 
 In analogy to the most successful adaptive ODE solvers,
 Hermes uses a pair of approximations with different orders of accuracy to obtain
@@ -110,12 +120,18 @@ mesh solution on the coarse mesh. In most cases, this yields a better
 convergence behavior than using the coarse mesh solve, and the projection 
 problem is always linear and well conditioned. 
 
-Note that this approach is PDE independent, which is truly great for multiphysics
+Robustness of the reference solution approach
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that the reference solution approach is PDE independent, which is truly great for multiphysics
 coupled problems. Hermes does not use a single analytical error estimate 
 or any other technique that would narrow down its applicability to selected 
 equations or low-order FEM. 
 
-An obvious disadvantage of the Hermes approach to automatic adaptivity is its higher 
+Room for improvement
+~~~~~~~~~~~~~~~~~~~~
+
+An obvious disadvantage of the reference solution approach to automatic adaptivity is its higher 
 computational cost, especially in 3D. We are aware of this fact and would not mind 
 at all replacing the current paradigm  
 with some cheaper technique -- as long as it is PDE-independent, 
