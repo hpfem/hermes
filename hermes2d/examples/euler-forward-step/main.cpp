@@ -233,10 +233,10 @@ int main(int argc, char* argv[])
   //VectorView vview("Velocity", 0, 0, 600, 300);
   //ScalarView sview("Pressure", 700, 0, 600, 300);
 
-  ScalarView s1("w1", 0, 0, 600, 300);
-  ScalarView s2("w2", 650, 0, 600, 300);
-  ScalarView s3("w3", 0, 350, 600, 300);
-  ScalarView s4("w4", 650, 350, 600, 300);
+  ScalarView s1("w1", new WinGeom(0, 0, 600, 300));
+  ScalarView s2("w2", new WinGeom(650, 0, 600, 300));
+  ScalarView s3("w3", new WinGeom(0, 350, 600, 300));
+  ScalarView s4("w4", new WinGeom(650, 350, 600, 300));
 
   // Iteration number.
   int iteration = 0;
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // For calculation of the difference between two consecutive solutions.
+  // For calculation of the time derivative of the norm of the solution approximation.
   double difference;
   double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e))];
@@ -255,6 +255,9 @@ int main(int argc, char* argv[])
   for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e)); i++)
       last_values[i] = 0.;
+
+  // Output of the approximate time derivative.
+  std::ofstream time_der_out("time_der");
 
   // At the beginning it is necessary to assemble the matrix,
   // therefore this flag is set to do so.
@@ -300,7 +303,7 @@ int main(int argc, char* argv[])
     out.close();
     */    
 
-    // Calculate the norm of the difference between solutions on this and on the previous time levels.
+    // Approximate the time derivative of the solution.
     difference = 0;
     for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e)); i++)
@@ -309,10 +312,13 @@ int main(int argc, char* argv[])
       difference += difference_values[i] * difference_values[i];
       last_values[i] = solver->get_solution()[i];
     }
-    difference = std::sqrt(difference);
-    // Info about L2 norm of the difference.
+    difference = std::sqrt(difference) / TAU;
+    // Info about the approximate time derivative.
     if(iteration > 1)
-      info("L2 norm of the difference between this time level and the previous time level : %g.", difference);
+    {
+      info("Approximate the   norm time derivative : %g.", difference);
+      time_der_out << iteration << '\t' << difference << std::endl;
+    }
     
     // Determine the time step & if it changes, set the flag to re-assemble the matrix.
     rhs_only = true;
@@ -361,5 +367,7 @@ int main(int argc, char* argv[])
     s3.show(&sln_rho_v_y);
     s4.show(&sln_e);
   }
+  
+  time_der_out.close();
   return 0;
 }
