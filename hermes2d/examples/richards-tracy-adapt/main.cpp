@@ -165,9 +165,9 @@ int main(int argc, char* argv[])
   // Initialize views.
   char title_init[200];
   sprintf(title_init, "Projection of initial condition");
-  ScalarView* view_init = new ScalarView(title_init, 0, 0, 410, 300);
+  ScalarView* view_init = new ScalarView(title_init, new WinGeom(0, 0, 410, 300));
   sprintf(title_init, "Initial mesh");
-  OrderView* ordview_init = new OrderView(title_init, 420, 0, 350, 300);
+  OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
   view_init->fix_scale_width(80);
 
   /*
@@ -236,8 +236,8 @@ int main(int argc, char* argv[])
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(&space)];
   OGProjection::project_global(&space, init_cond, coeff_vec_coarse, matrix_solver);
 
-  ScalarView view("Projection of initial condition", 0, 0, 410, 300);
-  OrderView ordview("Initial mesh", 420, 0, 350, 300);
+  ScalarView view("Projection of initial condition", new WinGeom(0, 0, 410, 300));
+  OrderView ordview("Initial mesh", new WinGeom(420, 0, 350, 300));
   view.fix_scale_width(80);
 
   // Newton's loop on the coarse mesh.

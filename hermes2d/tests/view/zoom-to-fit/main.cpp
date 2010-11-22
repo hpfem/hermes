@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
   if (fn_id == 4) { // Test manual setting bounds for the displayed range.
 
-    ScalarView view(const_cast<char *>(title.c_str()), screen_width/4, screen_height/4, screen_width/2, screen_width/2);
+    ScalarView view(const_cast<char *>(title.c_str()), new WinGeom(screen_width/4, screen_height/4, screen_width/2, screen_width/2));
     view.set_3d_mode(true);
 
     // Test the behaviour when user enters bigger lower bound.
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
   } else { // Test model positioning.
 
     for (int i = 0; i < 6; i++) {
-      ScalarView view(const_cast<char *>(title.c_str()), 0, 0, test_dims[i][0], test_dims[i][1]);
+      ScalarView view(const_cast<char *>(title.c_str()), new WinGeom(0, 0, test_dims[i][0], test_dims[i][1]));
       view.set_3d_mode(true);
 
       // Show the function.
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
       if (!auto_range) {
         char buf[256];
         sprintf(buf, "%s - restricted to (%f,%f)", title.c_str(), range_min, range_max);
-        ScalarView view(buf, 0, 0, test_dims[i][0], test_dims[i][1]);
+        ScalarView view(buf, new WinGeom(0, 0, test_dims[i][0], test_dims[i][1]));
         view.set_min_max_range(range_min, range_max);
         view.set_3d_mode();
         view.show_bounding_box();

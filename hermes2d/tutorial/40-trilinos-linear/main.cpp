@@ -224,7 +224,7 @@ int main(int argc, char **argv)
   double time2 = cpu_time.tick().last();
 
   // Show the NOX solution.
-  ScalarView view2("Solution 2", 450, 0, 440, 350);
+  ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
   //view2.set_min_max_range(0, 2);
   view2.show(&sln2);
 

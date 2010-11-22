@@ -312,12 +312,12 @@ int main(int argc, char* argv[])
   //selector.set_error_weights(2.1, 0.9, sqrt(2.0));
 
   // Initialize views.
-  ScalarView view1("Neutron flux 1", 0, 0, 500, 460);
-  ScalarView view2("Neutron flux 2", 510, 0, 500, 460);
-  ScalarView view3("Error in neutron flux 1", 280, 0, 500, 460);
-  ScalarView view4("Error in neutron flux 2", 780, 0, 500, 460);
-  OrderView oview1("Mesh and orders for group 1", 275, 0, 500, 460);
-  OrderView oview2("Mesh and orders for group 2", 780, 0, 500, 460);
+  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 500, 460));
+  ScalarView view2("Neutron flux 2", new WinGeom(510, 0, 500, 460));
+  ScalarView view3("Error in neutron flux 1", new WinGeom(280, 0, 500, 460));
+  ScalarView view4("Error in neutron flux 2", new WinGeom(780, 0, 500, 460));
+  OrderView oview1("Mesh and orders for group 1", new WinGeom(275, 0, 500, 460));
+  OrderView oview2("Mesh and orders for group 2", new WinGeom(780, 0, 500, 460));
 
   // Show meshes.
   view1.show_mesh(false); view1.set_3d_mode(true);

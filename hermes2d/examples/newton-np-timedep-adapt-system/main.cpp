@@ -223,10 +223,10 @@ int main (int argc, char* argv[]) {
 
   // Visualization windows.
   char title[100];
-  ScalarView Cview("Concentration [mol/m3]", 0, 0, 800, 800);
-  ScalarView phiview("Voltage [V]", 650, 0, 600, 600);
-  OrderView Cordview("C order", 0, 300, 600, 600);
-  OrderView phiordview("Phi order", 600, 300, 600, 600);
+  ScalarView Cview("Concentration [mol/m3]", new WinGeom(0, 0, 800, 800));
+  ScalarView phiview("Voltage [V]", new WinGeom(650, 0, 600, 600));
+  OrderView Cordview("C order", new WinGeom(0, 300, 600, 600));
+  OrderView phiordview("Phi order", new WinGeom(600, 300, 600, 600));
 
   Cview.show(&C_prev_time);
   Cordview.show(&C);

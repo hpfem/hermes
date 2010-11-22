@@ -203,8 +203,7 @@ int main(int argc, char* argv[])
     }
 
     // Now we can deallocate the previous fine mesh.
-    if(as > 1)
-      delete ref_sln.get_mesh();
+    if(as > 1) delete ref_sln.get_mesh();
 
     // Newton's loop on the fine mesh.
     info("Solving on fine mesh:");
@@ -215,8 +214,10 @@ int main(int argc, char* argv[])
     Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution on the coarse mesh.
-    info("Projecting reference solution on new coarse mesh for error calculation.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    if (as > 1) {
+      info("Projecting reference solution on new coarse mesh for error calculation.");
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    }
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 

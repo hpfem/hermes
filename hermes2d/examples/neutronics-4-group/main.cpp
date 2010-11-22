@@ -47,7 +47,7 @@ const int P_INIT_1 = 4,                           // Initial polynomial degree f
           P_INIT_3 = 4,                           // Initial polynomial degree for approximation of group 3 fluxes.
           P_INIT_4 = 4;                           // Initial polynomial degree for approximation of group 4 fluxes.
 const double ERROR_STOP = 1e-5;                   // Tolerance for the eigenvalue.
-MatrixSolverType matrix_solver = SOLVER_SUPERLU;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -161,10 +161,10 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
   
   // Initialize views.
-  ScalarView view1("Neutron flux 1", 0, 0, 320, 600);
-  ScalarView view2("Neutron flux 2", 350, 0, 320, 600);
-  ScalarView view3("Neutron flux 3", 700, 0, 320, 600);
-  ScalarView view4("Neutron flux 4", 1050, 0, 320, 600);
+  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 320, 600));
+  ScalarView view2("Neutron flux 2", new WinGeom(350, 0, 320, 600));
+  ScalarView view3("Neutron flux 3", new WinGeom(700, 0, 320, 600));
+  ScalarView view4("Neutron flux 4", new WinGeom(1050, 0, 320, 600));
   
   // Do not show meshes.
   view1.show_mesh(false); view1.set_3d_mode(true);
