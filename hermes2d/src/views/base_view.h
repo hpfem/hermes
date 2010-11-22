@@ -37,7 +37,6 @@ class HERMES_API BaseView : public ScalarView
 {
 public:
 
-  BaseView(const char* title = "BaseView", DEFAULT_WINDOW_POS);
 #ifndef _MSC_VER
   BaseView(const char* title = "BaseView", WinGeom* wg = NULL);
 #endif
