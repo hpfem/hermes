@@ -17,7 +17,7 @@ class Electrostatics {
 public:
   Electrostatics();
   ~Electrostatics();
-  bool set_mesh_filename(char* filename);
+  bool set_mesh_filename(const std::string &filename);
   void set_initial_mesh_refinement(int init_ref_num);
   void set_initial_poly_degree(int p);
   void set_material_markers(int* mat_markers);
@@ -30,7 +30,7 @@ public:
   bool calculate(Solution* phi);
 
 private:
-  char* mesh_filename;
+  std::string mesh_filename;
   int init_ref_num;
   int init_p;
   int n_mat_markers;

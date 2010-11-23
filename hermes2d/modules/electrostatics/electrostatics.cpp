@@ -28,7 +28,6 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
 // Constructor.
 Electrostatics::Electrostatics()
 {
-  mesh_filename = NULL;
   init_ref_num = -1;
   init_p = -1;
   n_mat_markers = -1;
@@ -50,13 +49,12 @@ Electrostatics::~Electrostatics()
 {
   delete this->mesh;
   delete this->space;
-  delete [] this->mesh_filename;
 }
 
 // Set mesh file name.
-bool Electrostatics::set_mesh_filename(char* filename)
+bool Electrostatics::set_mesh_filename(const std::string &filename)
 {
-  strcpy(filename, this->mesh_filename);
+    this->mesh_filename = filename;
 }
 
 // Set the number of initial uniform mesh refinements.
@@ -133,7 +131,7 @@ bool Electrostatics::calculate(Solution* phi)
 {
   // Load the mesh.
   H2DReader mloader;
-  mloader.load(this->mesh_filename, this->mesh);
+  mloader.load(this->mesh_filename.c_str(), this->mesh);
 
   // Perform initial uniform mesh refinements.
   for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();
