@@ -40,7 +40,7 @@ Electrostatics::Electrostatics()
   n_bc_derivative = -1;
   bc_markers_derivative = NULL;
   bc_derivative = NULL;
-  mesh = NULL;
+  mesh = new Mesh();
   space = NULL;
 }
 
@@ -49,6 +49,7 @@ Electrostatics::~Electrostatics()
 {
   delete this->mesh;
   delete this->space;
+  delete this->mesh;
 }
 
 // Set mesh file name.
@@ -137,7 +138,8 @@ bool Electrostatics::calculate(Solution* phi)
   for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();
 
   // Create an H1 space with default shapeset.
-  H1Space space(this->mesh, bc_types, essential_bc_values, this->init_p);
+  this->space = new H1Space(this->mesh, bc_types, essential_bc_values,
+          this->init_p);
   int ndof = Space::get_num_dofs(this->space);
   info("ndof = %d", ndof);
 
