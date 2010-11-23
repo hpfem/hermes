@@ -80,11 +80,15 @@ void Electrostatics::set_charge_density_array(const std::vector<double> cd_array
 
 }
 
+std::vector<int> _global_bdy_markers_val;
+std::vector<int> _global_bdy_markers_der;
+
 // Set VALUE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
     this->bc_markers_value = bdy_markers_val;
+    _global_bdy_markers_val = bdy_markers_val;
 }
 
 // Set boundary values.
@@ -96,7 +100,8 @@ void Electrostatics::set_boundary_values(const std::vector<double> bc_val)
 // Set DERIVATIVE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_derivative(const std::vector<int> bdy_markers_der)
 {
-
+    this->bc_markers_derivative = bdy_markers_der;
+    _global_bdy_markers_der = bdy_markers_der;
 }
 
 // Set boundary derivatives.
@@ -109,8 +114,13 @@ void Electrostatics::set_boundary_derivatives(const std::vector<double> bc_der)
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
 {
-  // FIXME: access data from the Electrostatics instance
-  return BC_ESSENTIAL;
+    for (int i=0; i < _global_bdy_markers_val.size(); i++)
+        if (_global_bdy_markers_val[i] == marker)
+            return BC_ESSENTIAL;
+    for (int i=0; i < _global_bdy_markers_der.size(); i++)
+        if (_global_bdy_markers_der[i] == marker)
+            return BC_NATURAL;
+    error("Wrong boundary marker");
 }
 
 // Essential (Dirichlet) boundary condition values.
