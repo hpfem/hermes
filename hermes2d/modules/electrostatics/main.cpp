@@ -26,19 +26,25 @@ int main(int argc, char* argv[])
   if(!Get(f, &n_mat_markers)) error("Could not read number of material markers.");
   if(n_mat_markers <= 0) error("At least one material merker must be given.");
   // Array of material markers.
-  int* mat_markers = (int*)malloc(n_mat_markers*sizeof(int));
+  std::vector<int> mat_markers;
   for (int i = 0; i < n_mat_markers; i++) {
-    if(!Get(f, mat_markers + i)) error("Could not read a material marker.");
+    int tmp;
+    if(!Get(f, &tmp)) error("Could not read a material marker.");
+    mat_markers.push_back(tmp);
   }
   // Array of material constants (permittivities).
-  double* permittivity_array = (double*)malloc(n_mat_markers*sizeof(double));
+  std::vector<double> permittivity_array;
   for (int i = 0; i < n_mat_markers; i++) {
-    if(!Get(f, permittivity_array + i)) error("Could not read a permittivity.");
+    double tmp;
+    if(!Get(f, &tmp)) error("Could not read a permittivity.");
+    permittivity_array.push_back(tmp);
   }
   // Array of material constants (charge densities).
-  double* charge_density_array = (double*)malloc(n_mat_markers*sizeof(double));
+  std::vector<double> charge_density_array;
   for (int i = 0; i < n_mat_markers; i++) {
-    if(!Get(f, charge_density_array + i)) error("Could not read a charge density.");
+    double tmp;
+    if(!Get(f, &tmp)) error("Could not read a charge density.");
+    charge_density_array.push_back(tmp);
   }
   // Number of VALUE boundary conditions.
   int n_bc_value;
@@ -52,25 +58,29 @@ int main(int argc, char* argv[])
     bc_markers_value.push_back(tmp);
   }
   // Boundary values (electric potential).
-  double* bc_values = (double*)malloc(n_bc_value*sizeof(double));
+  std::vector<double> bc_values;
   for (int i = 0; i < n_bc_value; i++) {
-    if(!Get(f, bc_values + i)) error("Could not read a boundary value.");
+    double tmp;
+    if(!Get(f, &tmp)) error("Could not read a boundary value.");
+    bc_values.push_back(tmp);
   }
   // Number of DERIVATIVE boundary conditions.
   int n_bc_derivative;
   if(!Get(f, &n_bc_derivative)) error("Could not read number of DERIVATIVE boundary markers.");
   // DERIVATIVE boundary markers.
-  int* bc_markers_derivative = NULL;
-  double* bc_derivatives = NULL;
+  std::vector<int> bc_markers_derivative;
+  std::vector<double> bc_derivatives;
   // Boundary derivatives.
   if(n_bc_derivative >= 1) {
-    bc_markers_derivative = (int*)malloc(n_bc_derivative*sizeof(int));
     for (int i = 0; i < n_bc_derivative; i++) {
-      if(!Get(f, bc_markers_derivative + i)) error("Could not read a DERIVATIVE boundary marker.");
+      int tmp;
+      if(!Get(f, &tmp)) error("Could not read a DERIVATIVE boundary marker.");
+      bc_markers_derivative.push_back(tmp);
     }
-    bc_derivatives = (double*)malloc(n_bc_derivative*sizeof(double));
     for (int i = 0; i < n_bc_derivative; i++) {
-      if(!Get(f, bc_derivatives + i)) error("Could not read a boundary derivative.");
+      double tmp;
+      if(!Get(f, &tmp)) error("Could not read a boundary derivative.");
+      bc_derivatives.push_back(tmp);
     }
   }
 
