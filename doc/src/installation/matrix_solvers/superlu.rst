@@ -2,8 +2,8 @@ SuperLU
 --------
 
 .. _SuperLU home page: http://crd.lbl.gov/~xiaoye/SuperLU/
-.. _solvers repository: https://github.com/mhanus/solvers
-.. _manual: https://github.com/mhanus/solvers/raw/master/manuals/SuperLU.pdf
+.. _solvers repository: https://github.com/hpfem/solvers
+.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/SuperLU.pdf
 
 Hermes currently supports two versions of the SuperLU library - the sequential
 one and the multithreaded one. Support for the MPI version will be added in the 
@@ -18,7 +18,7 @@ Sequential
 Download the software package from the `solvers repository`_ and unpack 
 it in some temporary directory::
   
-  wget https://github.com/mhanus/solvers/raw/master/packages/superlu-4.0.spkg --no-check-certificate
+  wget https://github.com/hpfem/solvers/raw/master/packages/superlu-4.0.spkg --no-check-certificate
   tar -jxvf superlu-4.0.spkg
   rm superlu-4.0.spkg
   cd superlu-4.0
@@ -93,7 +93,7 @@ specifically tuned for Hermes is available in the
 `solvers repository`_ and you may download and unpack it using the
 following commands::
 
-  wget https://github.com/mhanus/solvers/raw/master/packages/superlu_mt-2.0.spkg --no-check-certificate
+  wget https://github.com/hpfem/solvers/raw/master/packages/superlu_mt-2.0.spkg --no-check-certificate
   tar -jxvf superlu_mt-2.0.spkg
   rm superlu_mt-2.0.spkg
   cd superlu_mt-2.0
