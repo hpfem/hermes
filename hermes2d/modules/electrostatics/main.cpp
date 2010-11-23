@@ -2,30 +2,6 @@
 #include "disc.h"
 #include "electrostatics.h"
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
-// Problem parameters.
-double CONST_F = -1.0;                            // Right-hand side.
-double CONST_GAMMA[3] = {-0.5, 1.0, -0.5};        // Outer normal derivative on Gamma_1,2,3.
-
-// Boundary condition types.
-// Note: "natural" boundary condition means that 
-// the solution value is not prescribed.
-BCType bc_types(int marker)
-{
-  return (marker == 4) ? BC_ESSENTIAL : BC_NATURAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
-// Weak forms.
-#include "forms.cpp"
-
 int main(int argc, char* argv[])
 {
 

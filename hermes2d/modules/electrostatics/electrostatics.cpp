@@ -1,5 +1,30 @@
 #include "electrostatics.h"
 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+
+// Weak forms.
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                     Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+}
+
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
+                   Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  return int_v<Real, Scalar>(n, wt, v);
+}
+
+template<typename Real, typename Scalar>
+Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
+                        Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  return int_v<Real, Scalar>(n, wt, v);
+}
+
 // Constructor.
 Electrostatics::Electrostatics()
 {
@@ -35,7 +60,7 @@ bool Electrostatics::set_mesh_filename(char* filename)
 }
 
 // Set the number of initial uniform mesh refinements.
-void set_initial_mesh_refinement(int init_ref_num) 
+void Electrostatics::set_initial_mesh_refinement(int init_ref_num) 
 {
   this->init_ref_num = init_ref_num;
 }
@@ -53,25 +78,25 @@ void Electrostatics::set_material_markers(int* mat_markers)
 }
 
 // Set permittivity array.
-void Electrostatics set_permittivity_array(double* p_array)
+void Electrostatics::set_permittivity_array(double* p_array)
 {
 
 }
 
 // Set charge density array.
-void Electrostatics set_charge_density_array(double* cd_array)
+void Electrostatics::set_charge_density_array(double* cd_array)
 {
 
 }
 
 // Set VALUE boundary markers (also check with the mesh file).
-void Electrostatics set_boundary_markers_value(int* bdy_markers_val)
+void Electrostatics::set_boundary_markers_value(int* bdy_markers_val)
 {
 
 }
 
 // Set boundary values.
-void Electrostatics set_boundary_values(double* bc_val)
+void Electrostatics::set_boundary_values(double* bc_val)
 {
 
 }
@@ -83,23 +108,38 @@ void Electrostatics::set_boundary_markers_derivative(int* bc_markers_der)
 }
 
 // Set boundary derivatives.
-void Electrostatics set_boundary_derivatives(double* bc_der)
+void Electrostatics::set_boundary_derivatives(double* bc_der)
 {
 
 }
 
+// Boundary condition types.
+// Note: "essential" means that solution value is prescribed.
+BCType bc_types(int marker)
+{
+  // FIXME: access data from the Electrostatics instance
+  return BC_ESSENTIAL;
+}
+
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+{
+  // FIXME: access data from the Electrostatics instance
+  return 0;
+}
+
 // Solve the problem.
-void Electrostatics::calculate(Solution* phi) 
+bool Electrostatics::calculate(Solution* phi) 
 {
   // Load the mesh.
   H2DReader mloader;
   mloader.load(this->mesh_filename, this->mesh);
 
   // Perform initial uniform mesh refinements.
-  for (int i = 0; i < this->init_ref_num; i++) this->mesh.refine_all_elements();
+  for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();
 
   // Create an H1 space with default shapeset.
-  H1Space space(this->mesh, this->bc_types, this->essential_bc_values, this->init_p);
+  H1Space space(this->mesh, bc_types, essential_bc_values, this->init_p);
   int ndof = Space::get_num_dofs(this->space);
   info("ndof = %d", ndof);
 
@@ -135,24 +175,3 @@ void Electrostatics::calculate(Solution* phi)
   return true;
 }
 
-// Weak forms.
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-                     Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
-                   Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return CONST_F*int_v<Real, Scalar>(n, wt, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
-                        Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return CONST_GAMMA[e->marker - 1] * int_v<Real, Scalar>(n, wt, v);
-}
