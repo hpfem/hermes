@@ -42,7 +42,7 @@ private:
   std::vector<double> bc_values;
   int n_bc_derivative;
   std::vector<int> bc_markers_derivative;
-  std::vector<double> bc_derivative;
+  std::vector<double> bc_derivatives;
 
   Mesh* mesh;
   H1Space* space;

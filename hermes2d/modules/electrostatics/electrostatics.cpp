@@ -82,6 +82,8 @@ void Electrostatics::set_charge_density_array(const std::vector<double> cd_array
 
 std::vector<int> _global_bdy_markers_val;
 std::vector<int> _global_bdy_markers_der;
+std::vector<double> _global_bc_val;
+std::vector<double> _global_bc_der;
 
 // Set VALUE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
@@ -94,7 +96,8 @@ void Electrostatics::set_boundary_markers_value(const std::vector<int>
 // Set boundary values.
 void Electrostatics::set_boundary_values(const std::vector<double> bc_val)
 {
-
+    this->bc_values = bc_val;
+    _global_bc_val = bc_val;
 }
 
 // Set DERIVATIVE boundary markers (also check with the mesh file).
@@ -107,27 +110,39 @@ void Electrostatics::set_boundary_markers_derivative(const std::vector<int> bdy_
 // Set boundary derivatives.
 void Electrostatics::set_boundary_derivatives(const std::vector<double> bc_der)
 {
+    this->bc_derivatives = bc_der;
+    _global_bc_der = bc_der;
+}
 
+bool index(const std::vector<int> array, int x, int &i_out)
+{
+    for (int i=0; i < array.size(); i++)
+        if (array[i] == x) {
+            i_out = i;
+            return true;
+        }
+    return false;
 }
 
 // Boundary condition types.
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
 {
-    for (int i=0; i < _global_bdy_markers_val.size(); i++)
-        if (_global_bdy_markers_val[i] == marker)
-            return BC_ESSENTIAL;
-    for (int i=0; i < _global_bdy_markers_der.size(); i++)
-        if (_global_bdy_markers_der[i] == marker)
-            return BC_NATURAL;
+    int idx;
+    if (index(_global_bdy_markers_val, marker, idx))
+        return BC_ESSENTIAL;
+    if (index(_global_bdy_markers_der, marker, idx))
+        return BC_NATURAL;
     error("Wrong boundary marker");
 }
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
-  // FIXME: access data from the Electrostatics instance
-  return 0;
+    int idx;
+    if (!index(_global_bdy_markers_val, ess_bdy_marker, idx))
+        error("marker not found");
+    return _global_bc_val[idx];
 }
 
 // Solve the problem.
