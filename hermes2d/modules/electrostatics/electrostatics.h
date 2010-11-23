@@ -23,7 +23,7 @@ public:
   void set_material_markers(int* mat_markers);
   void set_permittivity_array(double* p_array);
   void set_charge_density_array(double* cd_array);
-  void set_boundary_markers_value(int* bdy_markers_val);
+  void set_boundary_markers_value(const std::vector<int> &bdy_markers_val);
   void set_boundary_values(double* bc_val);
   void set_boundary_markers_derivative(int* bdy_markers_der);
   void set_boundary_derivatives(double* bc_der);
@@ -38,7 +38,7 @@ private:
   double* permittivity_array;
   double* charge_density_array;
   int n_bc_value;
-  int* bc_markers_value;
+  std::vector<int> bc_markers_value;
   double* bc_values;
   int n_bc_derivative;
   int* bc_markers_derivative;

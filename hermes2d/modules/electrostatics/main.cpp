@@ -45,9 +45,11 @@ int main(int argc, char* argv[])
   if(!Get(f, &n_bc_value)) error("Could not read number of VALUE boundary markers.");
   if(n_bc_value <= 0) error("At least one VALUE boundary marker must be given.");
   // VALUE boundary markers.
-  int* bc_markers_value = (int*)malloc(n_bc_value*sizeof(int));
+  std::vector<int> bc_markers_value;
   for (int i = 0; i < n_bc_value; i++) {
-    if(!Get(f, bc_markers_value + i)) error("Could not read a VALUE boundary marker.");
+    int tmp;
+    if(!Get(f, &tmp)) error("Could not read a VALUE boundary marker.");
+    bc_markers_value.push_back(tmp);
   }
   // Boundary values (electric potential).
   double* bc_values = (double*)malloc(n_bc_value*sizeof(double));

@@ -35,7 +35,6 @@ Electrostatics::Electrostatics()
   permittivity_array = NULL;
   charge_density_array = NULL;
   n_bc_value = -1;
-  bc_markers_value = NULL;
   bc_values = NULL;
   n_bc_derivative = -1;
   bc_markers_derivative = NULL;
@@ -89,9 +88,10 @@ void Electrostatics::set_charge_density_array(double* cd_array)
 }
 
 // Set VALUE boundary markers (also check with the mesh file).
-void Electrostatics::set_boundary_markers_value(int* bdy_markers_val)
+void Electrostatics::set_boundary_markers_value(const std::vector<int>
+            &bdy_markers_val)
 {
-
+    this->bc_markers_value = bdy_markers_val;
 }
 
 // Set boundary values.
