@@ -108,18 +108,20 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("square.mesh", &basemesh);
 
-  // Initial mesh refinements.
+  // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
   mesh.copy(&basemesh);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d.", ndof);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
-  Solution sln_prev_time(&mesh, init_cond);
+
+  // Convert initial condition into a Solution.
+  Solution sln_prev_time;
+  sln_prev_time.set_exact(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -191,7 +193,7 @@ int main(int argc, char* argv[])
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(&space, &ref_sln, &sln);
+      OGProjection::project_global(&space, &sln_prev_time, &sln);
     }
 
     // Adaptivity loop:
@@ -213,12 +215,15 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &sln, coeff_vec);
+        OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, coeff_vec);
+        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
+
+      // Now we can deallocate the previous fine mesh.
+      if(as > 1) delete ref_sln.get_mesh();
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
@@ -237,7 +242,7 @@ int main(int argc, char* argv[])
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
       bool solutions_for_adapt = true;
       double err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
@@ -257,17 +262,16 @@ int main(int argc, char* argv[])
           as++;
       }
       
-      info("Projecting fine mesh solution on new coarse mesh.");
-        OGProjection::project_global(&space, &ref_sln, &sln);
-
       // Clean up.
       delete solver;
       delete matrix;
       delete rhs;
       delete adaptivity;
-      delete ref_space->get_mesh();
       delete ref_space;
       delete dp;
+      delete [] coeff_vec;
+    }
+    while (done == false);
 
       // Visualize the solution and mesh.
       char title[100];
@@ -277,8 +281,6 @@ int main(int argc, char* argv[])
       sprintf(title, "Mesh, time level %d", ts);
       ordview.set_title(title);
       ordview.show(&space);
-    }
-    while (done == false);
 
     // Copy last reference solution into sln_prev_time.
     sln_prev_time.copy(&ref_sln);

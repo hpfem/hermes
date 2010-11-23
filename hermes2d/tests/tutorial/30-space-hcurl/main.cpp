@@ -26,15 +26,13 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   if (success == true) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

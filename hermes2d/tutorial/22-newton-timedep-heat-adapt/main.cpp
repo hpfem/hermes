@@ -135,7 +135,6 @@ int main(int argc, char* argv[])
   // Convert initial condition into a Solution.
   Solution sln_prev_time;
   sln_prev_time.set_exact(&mesh, init_cond);
-
   // Initialize the weak formulation.
   WeakForm wf;
   if(TIME_DISCR == 1) {
@@ -200,7 +199,7 @@ int main(int argc, char* argv[])
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(&space, &ref_sln, &sln);
+      OGProjection::project_global(&space, &sln_prev_time, &sln);
     }
 
     // Adaptivity loop:
@@ -228,6 +227,9 @@ int main(int argc, char* argv[])
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
+
+      // Now we can deallocate the previous fine mesh.
+      if(as > 1) delete ref_sln.get_mesh();
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
@@ -266,17 +268,14 @@ int main(int argc, char* argv[])
           as++;
       }
       
-      info("Projecting fine mesh solution on new coarse mesh.");
-        OGProjection::project_global(&space, &ref_sln, &sln);
-
       // Clean up.
       delete solver;
       delete matrix;
       delete rhs;
       delete adaptivity;
-      delete ref_space->get_mesh();
       delete ref_space;
       delete dp;
+      delete [] coeff_vec;
     }
     while (done == false);
 

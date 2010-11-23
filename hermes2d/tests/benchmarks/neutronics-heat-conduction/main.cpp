@@ -277,8 +277,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 25, 75) phi value = %lf", phi_prev_time.get_pt_value(25.0, 75.0));
   info("Coordinate ( 75, 75) phi value = %lf", phi_prev_time.get_pt_value(75.0, 75.0));
  
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
   if (fabs(T_prev_time.get_pt_value(0.0, 0.0) - 0.000003) > eps) {
@@ -333,10 +331,10 @@ int main(int argc, char* argv[])
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

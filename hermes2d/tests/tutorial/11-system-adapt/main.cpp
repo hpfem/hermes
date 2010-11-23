@@ -217,17 +217,15 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space));
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   printf("ndof allowed = %d\n", 1040);
   printf("ndof actual = %d\n", ndof);
   if (ndof < 1040) {      // ndofs was 1030 at the time this test was created
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

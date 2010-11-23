@@ -173,8 +173,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 75,  75) value = %lf", u_prev_time.get_pt_value(75.0, 75.0));
   info("Coordinate (100, 100) value = %lf", u_prev_time.get_pt_value(100.0, 100.0));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   double coor_x_y[5] = {0.0, 25.0, 50.0, 75.0, 100.0};
   double value[5] = {-1000.000000, -969.316013, -836.504249, -651.433710, -1000.000000};
   for (int i = 0; i < 5; i++)
@@ -185,10 +183,10 @@ int main(int argc, char* argv[])
     else
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }
   }
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

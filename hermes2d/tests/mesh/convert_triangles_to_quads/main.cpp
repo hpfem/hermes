@@ -2,15 +2,12 @@
 
 // This example shows how to convert triangle elements into quadrangular elements.
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
 int main(int argc, char* argv[])
 {
   if (argc < 2)
   {
     printf("please input as this format: convert_to_quads  meshfile.mesh \n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   // load the mesh file
@@ -48,7 +45,7 @@ int main(int argc, char* argv[])
   if (element_num != mesh.get_max_element_id())
   {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   printf("The number of refined elements is %d\n", mesh.get_max_element_id());
@@ -69,5 +66,5 @@ int main(int argc, char* argv[])
       printf("\n");
   }
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }

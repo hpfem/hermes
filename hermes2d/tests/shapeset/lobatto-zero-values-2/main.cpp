@@ -1,6 +1,4 @@
 #include "hermes2d.h"
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
 
 int P_INIT = 10;
 double EPS = 10e-14;
@@ -50,14 +48,14 @@ int main(int argc, char* argv[])
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
 
       value = space.get_shapeset()->get_fn_value(fn_idx[i], x3, y3, 0);
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       printf("Vertices... Ok\n");
 
@@ -72,7 +70,7 @@ int main(int argc, char* argv[])
         {
           printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
           printf("... Failed\n");
-          return ERROR_FAILURE;
+          return ERR_FAILURE;
         }
       }
       printf("... Ok\n");
@@ -85,13 +83,13 @@ int main(int argc, char* argv[])
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       value = space.get_shapeset()->get_fn_value(fn_idx[i], x3, y3, 0);
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       printf("Vertices... Ok\n");
 
@@ -106,7 +104,7 @@ int main(int argc, char* argv[])
         {
           printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
           printf("... Failed\n");
-          return ERROR_FAILURE;
+          return ERR_FAILURE;
         }
       }
       printf("... Ok\n");
@@ -119,13 +117,13 @@ int main(int argc, char* argv[])
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       value = space.get_shapeset()->get_fn_value(fn_idx[i], x2, y2, 0);
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       printf("Vertices... Ok\n");
 
@@ -140,7 +138,7 @@ int main(int argc, char* argv[])
         {
           printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
           printf("... Failed\n");
-          return ERROR_FAILURE;
+          return ERR_FAILURE;
         }
       }
       printf("... Ok\n");
@@ -161,19 +159,19 @@ int main(int argc, char* argv[])
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       value = space.get_shapeset()->get_fn_value(fn_idx[m], x2, y2, 0);
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       value = space.get_shapeset()->get_fn_value(fn_idx[m], x3, y3, 0);
       if (value >= EPS)
       {
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
       printf("Vertices... Ok\n");
 
@@ -191,7 +189,7 @@ int main(int argc, char* argv[])
           {
             printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
             printf("... Failed\n");
-            return ERROR_FAILURE;
+            return ERR_FAILURE;
           }
         }
         // Check edge 3.
@@ -204,7 +202,7 @@ int main(int argc, char* argv[])
           {
             printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
             printf("... Failed\n");
-            return ERROR_FAILURE;
+            return ERR_FAILURE;
           }
         }
         printf("... Ok\n");
@@ -224,7 +222,7 @@ int main(int argc, char* argv[])
           {
             printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
             printf("... Failed\n");
-            return ERROR_FAILURE;
+            return ERR_FAILURE;
           }
         }
         // Check edge 3.
@@ -237,7 +235,7 @@ int main(int argc, char* argv[])
           {
             printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
             printf("... Failed\n");
-            return ERROR_FAILURE;
+            return ERR_FAILURE;
           }
         }
         printf("... Ok\n");
@@ -257,7 +255,7 @@ int main(int argc, char* argv[])
           {
             printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
             printf("... Failed\n");
-            return ERROR_FAILURE;
+            return ERR_FAILURE;
           }
         }
         // Check edge 1.
@@ -270,7 +268,7 @@ int main(int argc, char* argv[])
           {
             printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
             printf("... Failed\n");
-            return ERROR_FAILURE;
+            return ERR_FAILURE;
           }
         }
         printf("... Ok\n");
@@ -298,7 +296,7 @@ int main(int argc, char* argv[])
       {
         printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
     }
     printf("... Ok\n");
@@ -314,7 +312,7 @@ int main(int argc, char* argv[])
       {
         printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
     }
     printf("... Ok\n");
@@ -330,7 +328,7 @@ int main(int argc, char* argv[])
       {
         printf("\nx = %f, y = %f, value = %.20lf", x, y, value);
         printf("... Failed\n");
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
     }
     printf("... Ok\n");
@@ -340,6 +338,6 @@ int main(int argc, char* argv[])
   printf("Success!\n");
  
   delete [] fn_idx;
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

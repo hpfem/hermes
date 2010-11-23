@@ -168,17 +168,15 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   printf("ndof allowed = %d\n", 800);
   printf("ndof actual = %d\n", ndof);
   if (ndof < 800) {      // ndofs was 785 at the time this test was created
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

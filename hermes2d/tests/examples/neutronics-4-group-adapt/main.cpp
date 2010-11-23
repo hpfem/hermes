@@ -624,9 +624,6 @@ int main(int argc, char* argv[])
   
   // Test the results.
   
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
   TestSubject<int> num_iter(2);
   num_iter.test_overshoot(as, 14);
   
@@ -656,7 +653,7 @@ int main(int argc, char* argv[])
   
   if (ndof.passed && peak.passed && eigenvalue.passed && num_iter.passed && error_estimate.passed) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
@@ -665,6 +662,6 @@ int main(int argc, char* argv[])
     if (!eigenvalue.passed) printf("Eigenvalue test failed.\n");
     if (!num_iter.passed) printf("Number of iterations test failed.\n");
     if (!error_estimate.passed) printf("Error estimate test failed.\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

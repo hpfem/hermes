@@ -377,8 +377,6 @@ int main(int argc, char* argv[])
     values[4] = 0.516353;
   }  
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
   if (fabs(u_prev_time.get_pt_value(0.0, 0.0) - (values[0])) > eps) {
@@ -404,10 +402,10 @@ int main(int argc, char* argv[])
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

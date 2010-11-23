@@ -79,9 +79,6 @@ double CalculateBoundaryLength(Mesh* mesh, int bdryMarker)
   return length;
 } // end of CalculateBoundaryLength()
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
 //******************************************************************************
 // Main
 //
@@ -90,7 +87,7 @@ int main(int argc, char* argv[])
   if (argc != 3)
   {
     printf("Missing mesh filename and domain perimeter as command-line parameters.");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   // Load the mesh.
@@ -143,11 +140,11 @@ int main(int argc, char* argv[])
 
   if (fabs(perimeter - bdryLengthInput) < 1e-6) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
  
 

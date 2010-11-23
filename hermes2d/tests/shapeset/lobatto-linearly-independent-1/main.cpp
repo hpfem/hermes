@@ -2,8 +2,6 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
 #include "hermes2d.h"
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
 
 // This test makes sure the Lobatto shape 
 // functions are linearly independent.
@@ -150,7 +148,7 @@ int main(int argc, char* argv[])
     if (rhs->get(i) >= EPS)
     {
       printf("Shape functions are not linearly independent\n");
-      return ERROR_FAILURE; 
+      return ERR_FAILURE; 
     }
   }
   printf("Success!\n");
@@ -160,6 +158,6 @@ int main(int argc, char* argv[])
   delete mat;
   delete rhs;
   delete [] fn_idx;
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

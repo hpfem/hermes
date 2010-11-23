@@ -264,6 +264,7 @@ int main(int argc, char* argv[])
     delete adaptivity;
     delete ref_space;
     delete dp;
+    delete [] coeff_vec;
 
     as++;
   }

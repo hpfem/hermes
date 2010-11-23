@@ -95,15 +95,13 @@ int main(int argc, char* argv[])
   // Mesh: 0, 1, 2, 3, 4
   // Poly degrees: 10, 10, 10, 10
   // err = 2.11454e-09, err_squared = 4.47128e-18
-#define ERROR_SUCCESS       0
-#define ERROR_FAILURE      -1
   if ((err - 2.11454e-09) < 1E-6) {      // err was 2.11454e-09 at the time this test was created
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

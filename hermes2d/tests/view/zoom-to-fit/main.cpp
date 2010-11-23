@@ -34,9 +34,6 @@
 
 #include "test_functions.cpp"
 
-#define ERROR_SUCCESS       0
-#define ERROR_FAILURE       -1
-
 extern void init_glut();
 
 int main(int argc, char* argv[])
@@ -44,7 +41,7 @@ int main(int argc, char* argv[])
   if (argc < 3)
   {
     printf("Please input as this format: zoom-to-fit <function> <domain> \n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   // Define dimensions of the various tested views.
@@ -115,7 +112,7 @@ int main(int argc, char* argv[])
       printf("Please set the first argument to a number from 0 to 4: \n");
       for (int i = 0; i < 4; i++)
         printf("%d: %s\n", i, title.c_str());
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
   }
 
   if (fn_id == 4) { // Test manual setting bounds for the displayed range.
@@ -165,5 +162,5 @@ int main(int argc, char* argv[])
   }
 
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }

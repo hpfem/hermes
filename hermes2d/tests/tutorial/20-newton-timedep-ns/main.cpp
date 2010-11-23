@@ -254,8 +254,6 @@ int main(int argc, char* argv[])
   info("Coordinate (12.5, 2.5) yvel value = %lf", yvel_prev_time.get_pt_value(12.5, 2.5));
   info("Coordinate (  15, 2.5) yvel value = %lf", yvel_prev_time.get_pt_value(15.0, 2.5));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
   if (fabs(xvel_prev_time.get_pt_value(0.0, 2.5) - 0.200000) > eps) {
@@ -310,10 +308,10 @@ int main(int argc, char* argv[])
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

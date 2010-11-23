@@ -4,17 +4,12 @@
 // including the number of elements, the type of elements,
 // and find out if the elements are curvilinear.
 
-#undef ERROR_SUCCESS
-#undef ERROR_FAILURE
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
 int main(int argc, char* argv[])
 {
   if (argc < 2)
   {
     printf("please input as this format: refinements meshfile.mesh \n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   // load the mesh file
@@ -68,7 +63,7 @@ int main(int argc, char* argv[])
   if (element_num != mesh.get_max_element_id() - mesh.get_num_base_elements())
   {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   printf("Elements (count =  %d, including the coarse mesh elements)\n", mesh.get_max_element_id());
@@ -92,6 +87,6 @@ int main(int argc, char* argv[])
       }
   }
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

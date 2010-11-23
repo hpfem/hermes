@@ -148,15 +148,13 @@ int main(int argc, char* argv[])
   int success = 1;
   if (fabs(sum - 4737.73) > 1e-1) success = 0;
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

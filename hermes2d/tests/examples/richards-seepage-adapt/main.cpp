@@ -410,8 +410,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 6,  -4.0) value = %lf", sln_prev_time.get_pt_value( 6,  -4.0));
   info("Coordinate ( 4,  -3.0) value = %lf", sln_prev_time.get_pt_value( 4,  -3.0));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   double coor_x[5] = {2.0, 2.0, 6.0, 6.0, 4.0};
   double coor_y[5] = {-2.0, -4.0, -2.0, -4.0, -3.0};
   double value[5] = {-4.821844, -2.462673, -4.000754, -1.705534, -3.257146};
@@ -423,9 +421,9 @@ int main(int argc, char* argv[])
     else
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }
   }
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
