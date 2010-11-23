@@ -42,7 +42,6 @@ Electrostatics::~Electrostatics()
 {
   delete this->mesh;
   delete this->space;
-  delete this->mesh;
 }
 
 // Set mesh file name.
