@@ -1,11 +1,7 @@
+#include "hermes2d.h"
 #include "disc.h"
+#include "electrostatics.h"
 
-
-
-
-
-int P_INIT = 4;                                   // Initial polynomial degree in all elements.
-int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
@@ -41,7 +37,7 @@ int main(int argc, char* argv[])
   FILE* f = fopen(argv[1], "r");
   if(f == NULL) error("Cannot open file %s.", argv[1]);
   // Mesh filename.
-  char mesh_filename[200];
+  char *mesh_filename = new char[200];
   if(!Get(f, mesh_filename)) error("Could not read mesh filename.");
   // Number of initial uniform mesh refinements.
   int init_ref_num;
@@ -87,16 +83,16 @@ int main(int argc, char* argv[])
   if(!Get(f, &n_bc_derivative)) error("Could not read number of DERIVATIVE boundary markers.");
   // DERIVATIVE boundary markers.
   int* bc_markers_derivative = NULL;
-  double* bc_derivative = NULL;
+  double* bc_derivatives = NULL;
   // Boundary derivatives.
   if(n_bc_derivative >= 1) {
     bc_markers_derivative = (int*)malloc(n_bc_derivative*sizeof(int));
     for (int i = 0; i < n_bc_derivative; i++) {
       if(!Get(f, bc_markers_derivative + i)) error("Could not read a DERIVATIVE boundary marker.");
     }
-    bc_markers_derivative = (double*)malloc(n_bc_derivative*sizeof(double));
+    bc_derivatives = (double*)malloc(n_bc_derivative*sizeof(double));
     for (int i = 0; i < n_bc_derivative; i++) {
-      if(!Get(f, bc_derivative + i)) error("Could not read a boundary derivative.");
+      if(!Get(f, bc_derivatives + i)) error("Could not read a boundary derivative.");
     }
   }
 
@@ -107,7 +103,7 @@ int main(int argc, char* argv[])
   Electrostatics E;
 
   // Set mesh filename.
-  E.set_mesh_file(mesh_filename);
+  E.set_mesh_filename(mesh_filename);
   
   // Set number of initial uniform mesh refinements.
   E.set_initial_mesh_refinement(init_ref_num);
@@ -152,7 +148,7 @@ int main(int argc, char* argv[])
   // (Note that the gradient at the re-entrant
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
-  MagFilter grad(Tuple<MeshFunction *>(&sln, &sln), Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Tuple<MeshFunction *>(&phi, &phi), Tuple<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for the views to be closed.

@@ -1,3 +1,5 @@
+#include "electrostatics.h"
+
 // Constructor.
 Electrostatics::Electrostatics()
 {
@@ -132,12 +134,6 @@ void Electrostatics::calculate(Solution* phi)
 
   return true;
 }
-
-
-
-
-
-
 
 // Weak forms.
 template<typename Real, typename Scalar>
