@@ -1,4 +1,5 @@
 #include "logging.h"
+#include "Teuchos_stacktrace.hpp"
 
 void hermes_exit_if(bool cond, int code) {
   if (cond)
@@ -142,6 +143,8 @@ bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char
       new_block = false;
     }
     else {
+      if (info.code == 'E')
+          Teuchos::show_stacktrace();
       text[0] = info.code;
       text[1] = ' ';
       text_contents++;
