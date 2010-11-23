@@ -25,11 +25,11 @@
 
 #define callback(a)	a<double, scalar>, a<Ord, Ord>
 
-// Base type for orders of functions
-//
-// We defined a special arithmetics with this type to be able to analyze forms
-// and determine the necessary integration order.  This works for forms, but it also
-// works for user-defined functions.
+/// Base type for orders of functions.
+///
+/// We defined a special arithmetics with this type to be able to analyze forms
+/// and determine the necessary integration order.  This works for forms, but it also
+/// works for user-defined functions.
 class Ord
 {
 public:
@@ -89,23 +89,21 @@ template<typename T>
 class Func
 {
 protected:
-    static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS;
+  static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS;
 
 public:
-  const int num_gip; ///< A number of integration points used by this intance.
-  const int nc;	///< A number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
-  T *val;					// function values. If orders differ for a diffrent
-                                                // direction, this returns max(h_order, v_order).
-  T *dx, *dy; 					// derivatives
+  const int num_gip; ///< Number of integration points used by this intance.
+  const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
+  T *val;            ///< Function values. If T == Ord and orders vary with direction, this returns max(h_order, v_order).
+  T *dx, *dy;        ///< First-order partial derivatives.
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-  T *laplace;                                   // must be enabled by defining H2D_SECOND_DERIVATIVES_ENABLED
-                                                // in common.h. Default is NOT ENABLED.
+  T *laplace;        ///< Sum of second-order partial derivatives. Enabled by defining H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h.
 #endif
-  T *val0, *val1;				// components of function values
-  T *dx0, *dx1;					// components of derivatives
+  T *val0, *val1;    ///< Components of a vector field.
+  T *dx0, *dx1;      ///< Components of the gradient of a vector field.
   T *dy0, *dy1;
 
-  T *curl;					 // components of curl
+  T *curl;           ///< Components of the curl of a vector field.
 
   /// Constructor.
   /** \param[in] num_gip A number of integration points.
@@ -189,13 +187,13 @@ public:
 
 };
 
-#define GET_CENT(__ATTRIB) return (fn_central != NULL) ? fn_central->__ATTRIB[k] : zero;
-#define GET_NEIB(__ATTRIB) return (fn_neighbor != NULL) ? fn_neighbor->__ATTRIB[ reverse_neighbor_side ? fn_neighbor->num_gip-k-1 : k ] : zero;
+#define GET_CENT_FN(__ATTRIB) return (fn_central != NULL) ? fn_central->__ATTRIB[k] : zero;
+#define GET_NEIB_FN(__ATTRIB) return (fn_neighbor != NULL) ? fn_neighbor->__ATTRIB[ reverse_neighbor_side ? fn_neighbor->num_gip-k-1 : k ] : zero;
 
 /** \class DiscontinuousFunc forms.h "src/forms.h"
  *  \brief This class represents a function with jump discontinuity on an interface of two elements.
  *
- *  We will refer to one of the elements sharing the interface of discontinuity  as to the \em central element,
+ *  We will refer to one of the elements sharing the interface of discontinuity as to the \em central element,
  *  while to the other one as to the \em neighbor element.
  *
  *  Instance of the class may be constructed either with two \c Func objects, which represent the continuous 
@@ -208,138 +206,137 @@ public:
 template<typename T>
 class DiscontinuousFunc : public Func<T>
 {
-  private:
-    bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
-                                ///< (when retrieving values on an edge that is oriented differently in both elements).
-    static T zero;              ///< Zero value used for the zero-extension.
-    
-  public: 
-    Func<T> *fn_central;        ///< Central element's component.
-    Func<T> *fn_neighbor;       ///< Neighbor element's component.
-    
-    /// One-component constructor.
-    ///
-    /// \param[in]  fn                  Function defined either on the central or the neighbor element.
-    /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
-    /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
-    ///
-    DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false) :
-      Func<T>(fn->num_gip, fn->nc), 
-      fn_central(NULL), fn_neighbor(NULL),
-      reverse_neighbor_side(reverse) 
-    { 
-      assert_msg(fn != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
-      if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
-    }
-    
-    /// Two-component constructor.
-    ///
-    /// \param[in]  fn_c                Function defined on the central element.
-    /// \param[in]  fn_n                Function defined on the neighbor element.
-    /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
-    ///
-    DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) : 
-      Func<T>(fn_c->num_gip, fn_c->nc),
-      fn_central(fn_c),
-      fn_neighbor(fn_n),
-      reverse_neighbor_side(reverse)
-    { 
-      assert_msg(fn_c != NULL && fn_n != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
-      assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,
-                 "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
-    }
+private:
+  bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
+                              ///< (when retrieving values on an edge that is oriented differently in both elements).
+  static T zero;              ///< Zero value used for the zero-extension.
+  
+public: 
+  Func<T> *fn_central;        ///< Central element's component.
+  Func<T> *fn_neighbor;       ///< Neighbor element's component.
+  
+  /// One-component constructor.
+  ///
+  /// \param[in]  fn                  Function defined either on the central or the neighbor element.
+  /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
+  /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+  ///
+  DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false) :
+    Func<T>(fn->num_gip, fn->nc), 
+    fn_central(NULL), fn_neighbor(NULL),
+    reverse_neighbor_side(reverse) 
+  { 
+    assert_msg(fn != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
+    if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
+  }
+  
+  /// Two-component constructor.
+  ///
+  /// \param[in]  fn_c                Function defined on the central element.
+  /// \param[in]  fn_n                Function defined on the neighbor element.
+  /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+  ///
+  DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) : 
+    Func<T>(fn_c->num_gip, fn_c->nc),
+    fn_central(fn_c),
+    fn_neighbor(fn_n),
+    reverse_neighbor_side(reverse)
+  { 
+    assert_msg(fn_c != NULL && fn_n != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
+    assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,
+                "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
+  }
 
-    /// Desctructor.
-    ~DiscontinuousFunc()
+  /// Destructor.
+  ~DiscontinuousFunc()
+  {
+    /*
+    if(fn_central != NULL)
     {
-      /*
-      if(fn_central != NULL)
-      {
-        delete fn_central;
-        fn_central = NULL;
-      }
-      if(fn_neighbor != NULL)
-      {
-        delete fn_neighbor;
-        fn_neighbor = NULL;
-      }
-      */
+      delete fn_central;
+      fn_central = NULL;
     }
-    
-    // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
-    
-    virtual T& get_val_central(int k) const { GET_CENT(val); }
-    virtual T& get_val_neighbor(int k) const { GET_NEIB(val); }
-    virtual T& get_dx_central(int k) const { GET_CENT(dx); }
-    virtual T& get_dx_neighbor(int k) const { GET_NEIB(dx); }
-    virtual T& get_dy_central(int k) const { GET_CENT(dy); }
-    virtual T& get_dy_neighbor(int k) const { GET_NEIB(dy); }
-    
-    #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-      virtual T& get_laplace_central(int k) { GET_CENT(laplace); }
-      virtual T& get_laplace_neighbor(int k) { GET_NEIB(laplace); }
-    #endif
-    
-    void subtract(const DiscontinuousFunc<T>& func) 
-    { 
-      // TODO: Add sanity checks, revise for adaptivity.
-      if (fn_central != NULL && func.fn_central != NULL)
-        fn_central->subtract(func.fn_central);
-      if (fn_neighbor != NULL && func.fn_neighbor != NULL)
-        fn_neighbor->subtract(func.fn_neighbor);
+    if(fn_neighbor != NULL)
+    {
+      delete fn_neighbor;
+      fn_neighbor = NULL;
     }
-    
-    // Default destructor may be used. Deallocation is done using the following functions.
-    // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized
-    //  destructors should be used instead (also in Func).
-    virtual void free_fn() { 
-      if (fn_central != NULL) {
-        fn_central->free_fn(); 
-        delete fn_central;
-        fn_central = NULL;
-      }
-      if (fn_neighbor != NULL) {
-        fn_neighbor->free_fn();
-        delete fn_neighbor;
-        fn_neighbor = NULL;
-      }
+    */
+  }
+  
+  // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
+  
+  virtual T& get_val_central(int k) const { GET_CENT_FN(val); }
+  virtual T& get_val_neighbor(int k) const { GET_NEIB_FN(val); }
+  virtual T& get_dx_central(int k) const { GET_CENT_FN(dx); }
+  virtual T& get_dx_neighbor(int k) const { GET_NEIB_FN(dx); }
+  virtual T& get_dy_central(int k) const { GET_CENT_FN(dy); }
+  virtual T& get_dy_neighbor(int k) const { GET_NEIB_FN(dy); }
+  
+  #ifdef H2D_SECOND_DERIVATIVES_ENABLED
+    virtual T& get_laplace_central(int k) { GET_CENT_FN(laplace); }
+    virtual T& get_laplace_neighbor(int k) { GET_NEIB_FN(laplace); }
+  #endif
+  
+  void subtract(const DiscontinuousFunc<T>& func) 
+  { 
+    // TODO: Add sanity checks, revise for adaptivity.
+    if (fn_central != NULL && func.fn_central != NULL)
+      fn_central->subtract(func.fn_central);
+    if (fn_neighbor != NULL && func.fn_neighbor != NULL)
+      fn_neighbor->subtract(func.fn_neighbor);
+  }
+  
+  // Default destructor may be used. Deallocation is done using the following functions.
+  // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized
+  //  destructors should be used instead (also in Func).
+  virtual void free_fn() { 
+    if (fn_central != NULL) {
+      fn_central->free_fn(); 
+      delete fn_central;
+      fn_central = NULL;
     }
-    virtual void free_ord() {
-      if (fn_central != NULL) {
-        fn_central->free_ord(); 
-        delete fn_central;
-        fn_central = NULL;
-      }
-      if (fn_neighbor != NULL) {
-        fn_neighbor->free_ord();
-        delete fn_neighbor;
-        fn_neighbor = NULL;
-      }
+    if (fn_neighbor != NULL) {
+      fn_neighbor->free_fn();
+      delete fn_neighbor;
+      fn_neighbor = NULL;
     }
+  }
+  virtual void free_ord() {
+    if (fn_central != NULL) {
+      fn_central->free_ord(); 
+      delete fn_central;
+      fn_central = NULL;
+    }
+    if (fn_neighbor != NULL) {
+      fn_neighbor->free_ord();
+      delete fn_neighbor;
+      fn_neighbor = NULL;
+    }
+  }
 };
 
 
-/// Geometry (coordinates, normals, tangents) of either an element or an edge
+/// Geometry (coordinates, normals, tangents) of either an element or an edge.
 template<typename T>
 class Geom
 {
 public:
-  int marker;       // marker
-  int id;
-  T diam;           // element diameter
-  //Element *element;   // active element. NOTE: We used this for some time but
+  int marker;       ///< Element/edge marker.
+  int id;           ///< ID number of the element.
+  T diam;           ///< Element diameter.
+  //Element *element;   // Active element. NOTE: We used this for some time but
                         // decided against it because (a) it disables automatic
                         // order parsing and (b) if the form is called with T
                         // == Ord, element is not initialized, so the user has
                         // to be aware of this and test it in his weak form.
 
-  T *x, *y;         // coordinates [in physical domain]
-  T *nx, *ny;       // normals [in physical domain] (locally oriented
-                    // to point outside the element)
-  T *tx, *ty;       // tangents [in physical domain]
-  int orientation;  // 0 .... if (nx, ny) is equal to the global normal,
-                    // otherwise 1 (each mesh edge has a unique global normal
-                    // vector)
+  T *x, *y;         ///< Coordinates [in physical domain].
+  T *nx, *ny;       ///< Normals [in physical domain] (locally oriented
+                    ///< to point outside the element).
+  T *tx, *ty;       ///< Tangents [in physical domain].
+  int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
+                    ///< otherwise 1 (each edge has a unique global normal).
 
   Geom()
   {
@@ -358,35 +355,38 @@ public:
   }
 };
 
-/// Init element geometry for calculating the integration order
+/// Init element geometry for calculating the integration order.
 Geom<Ord>* init_geom_ord();
-/// Init element geometry for volumetric integrals
+/// Init element geometry for volumetric integrals.
 Geom<double>* init_geom_vol(RefMap *rm, const int order);
-/// Init element geometry for surface integrals
+/// Init element geometry for surface integrals.
 Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
 
 
-/// Init the function for calculation the integration order
+/// Init the function for calculation the integration order.
 Func<Ord>* init_fn_ord(const int order);
-/// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values)
+/// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-/// Init the mesh-function for the evaluation of the volumetric/surface integral
+/// Init the mesh-function for the evaluation of the volumetric/surface integral.
 Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order);
+
 
 
 /// User defined data that can go to the bilinear and linear forms.
 /// It also holds arbitraty number of functions, that user can use.
 /// Typically, these functions are solutions from the previous time/iteration levels.
 template<typename T>
-class ExtData {
+class ExtData 
+{
 public:
-	int nf;			  		// number of functions in 'fn' array
-	Func<T>** fn;				// array of pointers to functions
+  int nf;         ///< Number of functions in 'fn' array.
+  Func<T>** fn;   ///< Array of pointers to functions.
 
-	ExtData() {
-          nf = 0;
-          fn = NULL;
-	}
+  ExtData() 
+  {
+    nf = 0;
+    fn = NULL;
+  }
 
   void free()
   {
@@ -407,7 +407,6 @@ public:
     }
     delete [] fn;
   }
-
 };
 
 #endif
