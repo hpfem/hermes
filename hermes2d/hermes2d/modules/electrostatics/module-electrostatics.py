@@ -3,6 +3,7 @@ sys.path.append("../../../")
 
 from hermes2d.modules.electrostatics import Electrostatics
 from hermes2d.hermes2d import Linearizer
+from hermes2d.plot import sln2png
 
 def main():
     e = Electrostatics()
@@ -18,11 +19,7 @@ def main():
     e.set_boundary_derivatives([1, 5])
     r, sln = e.calculate()
     assert r is True
-    l = Linearizer()
-    l.process_solution(sln)
-    v = l.get_vertices()
-    t = l.get_triangles()
-    print v
+    sln2png(sln, "solution.png")
 
 if __name__ == "__main__":
     main()
