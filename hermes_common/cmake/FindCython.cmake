@@ -46,8 +46,11 @@ endif(NOT CYTHON_INCLUDE_DIRECTORIES)
 
 # Cythonizes the .pyx files into .cpp file (but doesn't compile it)
 macro(CYTHON_ADD_MODULE_PYX name)
-    #set(DEPENDS=${name}.pyx ${name}.pxd)
-    set(DEPENDS=${name}.pyx)
+    if(EXISTS ${name}.pxd)
+        set(DEPENDS=${name}.pyx ${name}.pxd)
+    else(EXISTS ${name}.pxd)
+        set(DEPENDS=${name}.pyx)
+    endif(EXISTS ${name}.pxd)
     add_custom_command(
         OUTPUT ${name}.cpp
         COMMAND ${CYTHON_BIN}
