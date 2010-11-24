@@ -19,6 +19,7 @@ def main():
     e.set_boundary_derivatives([1, 5])
     r, sln = e.calculate()
     assert r is True
+    print "Saving solution to 'solution.png'"
     sln2png(sln, "solution.png")
 
 if __name__ == "__main__":
