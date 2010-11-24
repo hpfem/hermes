@@ -4,7 +4,10 @@ from numpy_utils cimport c2numpy_int, c2numpy_double
 cimport hermes2d_defs
 
 cdef class MeshFunction:
-    cdef hermes2d_defs.MeshFunction *thisptr
+    pass
+
+cdef class Solution(MeshFunction):
+    pass
 
 cdef class Linearizer:
     """
