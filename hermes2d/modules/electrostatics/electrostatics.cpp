@@ -44,10 +44,10 @@ Electrostatics::~Electrostatics()
   delete this->space;
 }
 
-// Set mesh file name.
-bool Electrostatics::set_mesh_filename(const std::string &filename)
+// Set mesh
+void Electrostatics::set_mesh_str(const std::string &mesh)
 {
-    this->mesh_filename = filename;
+    this->mesh_str = mesh;
 }
 
 // Set the number of initial uniform mesh refinements.
@@ -152,7 +152,7 @@ bool Electrostatics::calculate(Solution* phi)
 {
   // Load the mesh.
   H2DReader mloader;
-  mloader.load(this->mesh_filename.c_str(), this->mesh);
+  mloader.load_str(this->mesh_str.c_str(), this->mesh);
   /*
   MeshView m("", 0, 0, 400, 400);
   m.show(this->mesh);

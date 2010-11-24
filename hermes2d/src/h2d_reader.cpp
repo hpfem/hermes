@@ -160,12 +160,12 @@ void H2DReader::load_old(const char* filename, Mesh *mesh)
   this->load_stream(f, mesh);
 }
 
-void H2DReader::load_str(char* mesh_str, Mesh *mesh)
+void H2DReader::load_str(const char* mesh_str, Mesh *mesh)
 {
   // open the mesh file
-  FILE* f = fmemopen(mesh_str, strlen(mesh_str), "r");
+  FILE* f = fmemopen((char*)mesh_str, strlen(mesh_str), "r");
   if (f == NULL) error("Could not create the read buffer");
-  this->load_stream(f, mesh);
+  this->load_internal(f, mesh, "");
 }
 
 /*
@@ -479,7 +479,15 @@ bool H2DReader::load(const char *filename, Mesh *mesh)
 
   // open the mesh file
   FILE* f = fopen(filename, "r");
-  if (f == NULL) error("Could not open the mesh file %s", filename);
+  return this->load_internal(f, mesh, filename);
+}
+
+
+bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
+{
+  int i, j, k, n;
+  Node* en;
+  bool debug = false;
 
   mesh->free();
 
