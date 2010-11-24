@@ -46,4 +46,4 @@ def plot_sln_mayavi(sln, offscreen=False, show_scale=True):
     #scene.render()
     # the above looks ok, but there is still quite a large margin, so we prefer
     # to just call .view(0, 0), which seems to be working fine.
-    return s
+    return mlab
