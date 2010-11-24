@@ -65,19 +65,19 @@ void Electrostatics::set_initial_poly_degree(int p)
 // Set material markers, and check compatibility with mesh file.
 void Electrostatics::set_material_markers(const std::vector<int> mat_markers)
 {
-
+    this->mat_markers = mat_markers;
 }
 
 // Set permittivity array.
 void Electrostatics::set_permittivity_array(const std::vector<double> p_array)
 {
-
+    this->permittivity_array = p_array;
 }
 
 // Set charge density array.
 void Electrostatics::set_charge_density_array(const std::vector<double> cd_array)
 {
-
+    this->charge_density_array = cd_array;
 }
 
 std::vector<int> _global_bdy_markers_val;
