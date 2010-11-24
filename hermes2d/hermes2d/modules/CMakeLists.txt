@@ -1,0 +1,3 @@
+CYTHON_ADD_MODULE_PYX(electrostatics)
+add_python_library(electrostatics electrostatics.cpp)
+

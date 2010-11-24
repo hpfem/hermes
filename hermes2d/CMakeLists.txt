@@ -280,11 +280,11 @@ if(WITH_TESTS)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
-  #add_subdirectory(python)
   find_package(Python REQUIRED)
   find_package(NumPy REQUIRED)
   find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  add_subdirectory(hermes2d)
 endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
