@@ -583,7 +583,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         {
           if (e[i] == NULL) continue;
           int j = s->idx[i];
-          nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL);
+          // For inner edges (with marker == 0), bc_types should not be called, 
+          // for them it is not important what value (true/false) is set, as it
+          // is not read anywhere.
+          if(marker > 0)
+            nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL);
           spaces[j]->get_boundary_assembly_list(e[i], isurf, &al[j]);
         }
 
@@ -604,11 +608,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               am = &(al[m]);
               an = &(al[n]);
             
-              //If the user added the form with HERMES_ANY, it will be evaluated only for natural boundaries
-              // (as usual in H2D for standard FEM). If the user added the form with area corresponding to the actual edge 
-              // marker, or just with H2D_DG_BOUNDARY_EDGE, it will be evaluated since in DG, there may be weak forms that
-              // enforce essential conditions or describe special BC_NONE boundaries.
-              if (mfs->area == HERMES_ANY && (!nat[m] || !nat[n])) continue;
+              if (!nat[m] || !nat[n]) continue;
               
               surf_pos[isurf].base = trav.get_base();
               surf_pos[isurf].space_v = spaces[m];
