@@ -1,7 +1,9 @@
+from libcpp cimport bool
+
 cdef extern from "electrostatics.h":
 
     cdef cppclass Electrostatics:
-        #bool set_mesh_filename(const std::string &filename)
+        bool set_mesh_filename(char *filename)
         void set_initial_mesh_refinement(int init_ref_num)
         void set_initial_poly_degree(int p)
         #void set_material_markers(const std::vector<int> mat_markers)
