@@ -28,7 +28,7 @@ set(WITH_TUTORIAL           YES)
 set(WITH_TESTS              YES)
 
 # Optional functionality:
-set(WITH_PYTHON             NO)
+set(WITH_PYTHON             YES)
 set(WITH_GLUT               YES)
 set(WITH_VIEWER_GUI         NO)
 set(WITH_UTIL               YES)
@@ -280,9 +280,10 @@ if(WITH_TESTS)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
-  add_subdirectory(python)
-  find_package(PythonLibs REQUIRED)
+  #add_subdirectory(python)
+  find_package(Python REQUIRED)
   find_package(NumPy REQUIRED)
+  find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
 
