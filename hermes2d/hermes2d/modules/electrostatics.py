@@ -1,0 +1,2 @@
+class Electrostatics(object):
+    pass
