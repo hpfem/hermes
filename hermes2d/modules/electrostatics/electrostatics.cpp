@@ -128,6 +128,8 @@ bool index(const std::vector<int> array, int x, int &i_out)
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
 {
+    if (marker == 0)
+        return BC_NONE;
     int idx;
     if (index(_global_bdy_markers_val, marker, idx))
         return BC_ESSENTIAL;
