@@ -9,8 +9,8 @@ cdef vector[int] array2vector_int(a):
         v.push_back(a[i])
     return v
 
-cdef vector[int] array2vector_double(a):
-    cdef vector[int] v
+cdef vector[double] array2vector_double(a):
+    cdef vector[double] v
     for i in range(len(a)):
         v.push_back(a[i])
     return v
@@ -35,3 +35,21 @@ cdef class Electrostatics:
 
     def set_material_markers(self, mat_markers):
         self.thisptr.set_material_markers(array2vector_int(mat_markers))
+
+    def set_permittivity_array(self, p_array):
+        self.thisptr.set_permittivity_array(array2vector_double(p_array))
+
+    def set_charge_density_array(self, cd_array):
+        self.thisptr.set_charge_density_array(array2vector_double(cd_array))
+
+    def set_boundary_markers_value(self, bdy_markers_val):
+        self.thisptr.set_boundary_markers_value(array2vector_int(bdy_markers_val))
+
+    def set_boundary_values(self, bc_val):
+        self.thisptr.set_boundary_values(array2vector_double(bc_val))
+
+    def set_boundary_markers_derivative(self, bdy_markers_der):
+        self.thisptr.set_boundary_markers_derivative(array2vector_int(bdy_markers_der))
+
+    def set_boundary_derivatives(self, bc_der):
+        self.thisptr.set_boundary_derivatives(array2vector_double(bc_der))

@@ -63,19 +63,19 @@ void Electrostatics::set_initial_poly_degree(int p)
 }
 
 // Set material markers, and check compatibility with mesh file.
-void Electrostatics::set_material_markers(const std::vector<int> mat_markers)
+void Electrostatics::set_material_markers(const std::vector<int> &mat_markers)
 {
     this->mat_markers = mat_markers;
 }
 
 // Set permittivity array.
-void Electrostatics::set_permittivity_array(const std::vector<double> p_array)
+void Electrostatics::set_permittivity_array(const std::vector<double> &p_array)
 {
     this->permittivity_array = p_array;
 }
 
 // Set charge density array.
-void Electrostatics::set_charge_density_array(const std::vector<double> cd_array)
+void Electrostatics::set_charge_density_array(const std::vector<double> &cd_array)
 {
     this->charge_density_array = cd_array;
 }
@@ -94,27 +94,27 @@ void Electrostatics::set_boundary_markers_value(const std::vector<int>
 }
 
 // Set boundary values.
-void Electrostatics::set_boundary_values(const std::vector<double> bc_val)
+void Electrostatics::set_boundary_values(const std::vector<double> &bc_val)
 {
     this->bc_values = bc_val;
     _global_bc_val = bc_val;
 }
 
 // Set DERIVATIVE boundary markers (also check with the mesh file).
-void Electrostatics::set_boundary_markers_derivative(const std::vector<int> bdy_markers_der)
+void Electrostatics::set_boundary_markers_derivative(const std::vector<int> &bdy_markers_der)
 {
     this->bc_markers_derivative = bdy_markers_der;
     _global_bdy_markers_der = bdy_markers_der;
 }
 
 // Set boundary derivatives.
-void Electrostatics::set_boundary_derivatives(const std::vector<double> bc_der)
+void Electrostatics::set_boundary_derivatives(const std::vector<double> &bc_der)
 {
     this->bc_derivatives = bc_der;
     _global_bc_der = bc_der;
 }
 
-bool index(const std::vector<int> array, int x, int &i_out)
+bool index(const std::vector<int> &array, int x, int &i_out)
 {
     for (int i=0; i < array.size(); i++)
         if (array[i] == x) {
