@@ -153,6 +153,11 @@ bool Electrostatics::calculate(Solution* phi)
   // Load the mesh.
   H2DReader mloader;
   mloader.load(this->mesh_filename.c_str(), this->mesh);
+  /*
+  MeshView m("", 0, 0, 400, 400);
+  m.show(this->mesh);
+  View::wait();
+  */
 
   // Perform initial uniform mesh refinements.
   for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();

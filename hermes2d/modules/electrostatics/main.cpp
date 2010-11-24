@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
   E.set_boundary_markers_derivative(bc_markers_derivative);
 
   // Set boundary derivatives.
-  E.set_boundary_values(bc_derivatives);
+  E.set_boundary_derivatives(bc_derivatives);
 
 
   /*** SOLVE THE PROBLEM ***/
