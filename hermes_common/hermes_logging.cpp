@@ -17,7 +17,9 @@ public:
     fflush(stdout);
   }
 };
-HermesLogoMessage hermes_logo_message;
+// FIXME: Currently, this can't be disabled from cmake (due to some bugs), so
+// cmake has to be fixed first, then this can be enabled again.
+//HermesLogoMessage hermes_logo_message;
 #endif
 
 //// runtime report control varibles //////////////////////////////////////////////////////////////////////////////////
