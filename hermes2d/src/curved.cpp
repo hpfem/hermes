@@ -20,7 +20,6 @@
 #include "curved.h"
 #include "mesh.h"
 #include "quad_all.h"
-#include "../../hermes_common/callstack.h"
 #include "../../hermes_common/matrix.h"
 
 // defined in refmap.cpp

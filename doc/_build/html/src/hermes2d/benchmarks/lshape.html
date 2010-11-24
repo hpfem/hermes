@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>L-Shape (Elliptic) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Benchmarks with Known Exact Solution" href="../benchmarks.html" />
+    <link rel="next" title="Interior Layer (Elliptic)" href="layer-interior.html" />
+    <link rel="prev" title="Smooth-aniso-y (Elliptic)" href="smooth-aniso-y.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="layer-interior.html" title="Interior Layer (Elliptic)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="smooth-aniso-y.html" title="Smooth-aniso-y (Elliptic)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" accesskey="U">Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="l-shape-elliptic">
+<h1>L-Shape (Elliptic)<a class="headerlink" href="#l-shape-elliptic" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Benchmark <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/lshape">lshape</a>.</p>
+<p>This is a standard adaptivity benchmark whose exact solution is smooth but
+contains singular gradient in a re-entrant corner.</p>
+<p>Equation solved: Laplace equation</p>
+<div class="math" id="equation-lshape">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/fe29b2e98b486fbee488c5047b58a0d277d9a4e3.png" alt="-\Delta u = 0." /></p>
+</div><p>Domain of interest:</p>
+<div align="center" class="align-center"><img alt="Computational domain." class="align-center" src="../../../_images/domain.png" style="width: 470px; height: 470px;" /></div>
+<p>Exact solution:</p>
+<div class="math" id="equation-lshape-exact">
+<p><span class="eqno">(2)</span><img src="../../../_images/math/b29d84592a0d28b1d0bcc870785e63c66db21b26.png" alt="u(x, y) = r^{2/3}\sin(2a/3 + \pi/3)" /></p>
+</div><p>where <img class="math" src="../../../_images/math/25697cf9de8f3db35a050763f661600b0927e5ff.png" alt="r(x,y) = \sqrt{x^2 + y^2}"/> and <img class="math" src="../../../_images/math/620e6e832bfbd76b11c05ea963d86328bc13277b.png" alt="a(x,y) = \mbox{atan}(x/y)"/>.</p>
+<p>Code for the exact solution, bundary conditions, and weak forms:</p>
+<div class="highlight-python"><pre>// Exact solution.
+static double fn(double x, double y)
+{
+  double r = sqrt(x*x + y*y);
+  double a = atan2(x, y);
+  return pow(r, 2.0/3.0) * sin(2.0*a/3.0 + M_PI/3);
+}
+
+static double fndd(double x, double y, double&amp; dx, double&amp; dy)
+{
+  double t1 = 2.0/3.0*atan2(x, y) + M_PI/3;
+  double t2 = pow(x*x + y*y, 1.0/3.0);
+  double t3 = x*x * ((y*y)/(x*x) + 1);
+  dx = 2.0/3.0*x*sin(t1)/(t2*t2) + 2.0/3.0*y*t2*cos(t1)/t3;
+  dy = 2.0/3.0*y*sin(t1)/(t2*t2) - 2.0/3.0*x*t2*cos(t1)/t3;
+  return fn(x, y);
+}
+
+// Boundary condition types.
+BCType bc_types(int marker)
+{
+  return BC_ESSENTIAL;
+}
+
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+{
+  return fn(x, y);
+}
+
+// Bilinear form corresponding to the Laplace equation.
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return int_grad_u_grad_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}</pre>
+</div>
+<p>Solution:</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/sol_3d_view1.png" style="width: 600px; height: 400px;" /></div>
+<p>Final mesh (h-FEM with linear elements):</p>
+<div align="center" class="align-center"><img alt="Final mesh (h-FEM with linear elements)." class="align-center" src="../../../_images/mesh-h12.png" style="width: 500px; height: 400px;" /></div>
+<p>Final mesh (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Final mesh (h-FEM with quadratic elements)." class="align-center" src="../../../_images/mesh-h22.png" style="width: 500px; height: 400px;" /></div>
+<p>Final mesh (hp-FEM):</p>
+<div align="center" class="align-center"><img alt="Final mesh (hp-FEM)." class="align-center" src="../../../_images/mesh-hp2.png" style="width: 500px; height: 400px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof2.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU time convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu2.png" style="width: 600px; height: 400px;" /></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="smooth-aniso-y.html"
+                                  title="previous chapter">Smooth-aniso-y (Elliptic)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="layer-interior.html"
+                                  title="next chapter">Interior Layer (Elliptic)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="layer-interior.html" title="Interior Layer (Elliptic)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="smooth-aniso-y.html" title="Smooth-aniso-y (Elliptic)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" >Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

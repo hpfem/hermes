@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function.h"
 
@@ -130,15 +130,13 @@ int main(int argc, char* argv[])
   delete rhs;
   delete solver;
   
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   if (success) {  // should pass with NEWTON_MAX_ITER = 7 and fail with NEWTON_MAX_ITER = 6
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

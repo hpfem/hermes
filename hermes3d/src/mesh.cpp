@@ -29,12 +29,8 @@
 
 const int TOP_LEVEL_REF = -1;
 
-// to print out the banner
-static bool print_banner = true;
 // forward declarations
 extern bool verbose;
-extern void banner();
-
 
 // Vertex /////////////////////////////////////////////////////////////////////
 
@@ -713,11 +709,6 @@ int g_mesh_seq = 0;
 
 Mesh::Mesh() {
 	_F_
-
-	if (print_banner) {
-		banner();
-		print_banner = false;
-	}
 
 	nactive = 0;
 	nbase = 0;

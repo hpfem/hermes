@@ -18,6 +18,7 @@ option(WITH_HEX      "Enable hexahedral elements" YES)
 option(WITH_PRISM    "Enable prism elements" NO)
 
 option(WITH_UMFPACK  "Enable support for UMFPACK" YES)
+option(WITH_SUPERLU  "Enable support for SUPERLU" NO)
 option(WITH_PETSC    "Enable support for PETSc" NO)
 option(WITH_PARDISO  "Enable support for PARDISO" NO)
 option(WITH_MUMPS    "Enable support for MUMPS solver" NO)
@@ -25,6 +26,19 @@ option(WITH_TRILINOS "Enable support for Trilinos solvers" NO)
 
 option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
 option(WITH_HDF5     "Enable support for HDF5" NO)
+
+# Reporting and logging:
+set(REPORT_WITH_LOGO        YES)  #logo will be shown
+set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is inteded just for Python wrappers.
+set(REPORT_ALL              NO)   #do not report all events, just selected ones
+set(REPORT_WARNING          YES)  #warnings will be reported
+set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+set(REPORT_INFO             YES)  #info will be reported
+set(REPORT_VERBOSE          NO)   #info details will not be reported
+set(REPORT_TRACE            NO)   #code execution tracing will not be reported
+set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
 
 option(WITH_OPENMP   "Build with OpenMP support" NO)
 
@@ -85,7 +99,6 @@ endif(ELEMTYPES_LEN GREATER 0)
 # set internal library-wide variables
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
-set(MESHES_DIR ${PROJECT_SOURCE_DIR}/meshes)
 
 # internals regarding build type
 if(DEBUG)
@@ -110,11 +123,11 @@ endif(DEBUG)
 find_package(JUDY REQUIRED)
 find_package(PTHREAD REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
+add_definitions(-DWITH_BLAS)
 
 if(NOT MSVC)
-	enable_language(Fortran)		  # need a fortran compiler for checking BLAS
+	enable_language(Fortran)	# need a fortran compiler for checking BLAS
 	find_package(LAPACK REQUIRED) # also searches for BLAS
-	add_definitions(-DWITH_BLAS)
 endif(NOT MSVC)
 
 # solvers
@@ -147,6 +160,14 @@ if(WITH_TRILINOS)
 	find_package(TRILINOS REQUIRED)
 	include_directories(${TRILINOS_INCLUDE_DIR})
 endif(WITH_TRILINOS)
+
+if(WITH_SUPERLU)
+  find_package(SUPERLU REQUIRED)
+  include_directories(${SUPERLU_INCLUDE_DIR})
+  if(SUPERLU_MT)
+    add_definitions(-DSLU_MT)
+  endif(SUPERLU_MT)
+endif(WITH_SUPERLU)
 
 # SMP
 if(WITH_OPENMP)
@@ -198,8 +219,15 @@ include_directories(${HERMES_COMMON_DIR})
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
 CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
+CHECK_INCLUDE_FILE("execinfo.h" HAVE_EXECINFO)
+IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(HAVE_CXXABI yes)
+ENDIF()
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(vasprintf HAVE_VASPRINTF)
+CHECK_FUNCTION_EXISTS(strcasecmp HAVE_STRCASECMP)
 
-IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(HAVE_TEUCHOS_STACKTRACE yes)
 ENDIF()
 
@@ -290,7 +318,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 include(CPack)
 
 if(HAVE_TEUCHOS_STACKTRACE)
-    message("Print Teuchos stacktrace on segfault: YES")
+    message("-- Print Teuchos stacktrace on segfault: YES")
 else(HAVE_TEUCHOS_STACKTRACE)
-    message("Print Teuchos stacktrace on segfault: NO")
+    message("-- Print Teuchos stacktrace on segfault: NO")
 endif(HAVE_TEUCHOS_STACKTRACE)

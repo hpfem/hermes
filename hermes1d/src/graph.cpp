@@ -4,8 +4,7 @@
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
 #include <string.h>
-#include "common.h"
-#include "graph.h"
+#include "hermes1d.h"
 
 
 //// Graph /////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +51,18 @@ void Graph::set_row_style(int row, const char* color, const char* line, const ch
 void Graph::add_values(int row, double x, double y)
 {
   if (!rows.size()) add_row(NULL);
-  if (row < 0 || row >= rows.size()) error("Invalid row number.");
+  if (fabs(x) < 1e-12) return;  // this is to avoid problems with plotting in log-log scale
+                                 // (sometimes the CPU time was zero and plotting crashed)
+  if (row < 0 || row >= (int)rows.size()) error("Invalid row number.");
+  Values xy = { x, y };
+  rows[row].data.push_back(xy);
+}
+void Graph::add_values(double x, double y)
+{
+  int row = 0;
+  if (!rows.size()) add_row(NULL);
+  if (fabs(x) < 1e-12 ) return;  // this is to avoid problems with plotting in log-log scale
+                                 // (sometimes the CPU time was zero and plotting crashed)
   Values xy = { x, y };
   rows[row].data.push_back(xy);
 }
@@ -79,6 +89,28 @@ void Graph::save_numbered(const char* filename, int number)
   save(buffer);
 }
 
+
+
+//// SimpleGraph //////////////////////////////////////////////////////////////////////////////////
+
+void SimpleGraph::save(const char* filename)
+{
+  if (!rows.size()) error("No data rows defined.");
+
+  FILE* f = fopen(filename, "w");
+  if (f == NULL) error("Error writing to %s.", filename);
+
+  for (int i = 0; i < rows.size(); i++)
+  {
+    int rsize = rows[i].data.size();
+    for (int j = 0; j < rsize; j++)
+      fprintf(f, "%.14g  %.14g\n", rows[i].data[j].x, rows[i].data[j].y);
+  }
+
+  fclose(f);
+
+  verbose("Graph saved to file '%s'.", filename);
+}
 
 //// MatlabGraph ///////////////////////////////////////////////////////////////////////////////////
 
@@ -146,38 +178,38 @@ void MatlabGraph::save(const char* filename)
 
 static void get_style_types(std::string line, std::string mark, std::string col, int& lt, int& pt, int& ct)
 {
-  if      (line == "-")  lt = 1; // solid
-  else if (line == ":")  lt = 4; // dotted
-  else if (line == "-.") lt = 5; // dash dot
-  else if (line == "--") lt = 2; // dashed
+  if      (strcmp(line.c_str(), "-") == 0)  lt = 1; // solid
+  else if (strcmp(line.c_str(), ":") == 0)  lt = 4; // dotted
+  else if (strcmp(line.c_str(), "-.") == 0) lt = 5; // dash dot
+  else if (strcmp(line.c_str(), "--") == 0) lt = 2; // dashed
   else lt = 1;
 
-  if      (mark == ".") pt = 7;  // full circle
-  else if (mark == "o") pt = 6;  // empty circle
-  else if (mark == "O") pt = 7;  // full circle
-  else if (mark == "x") pt = 2;  // cross
-  else if (mark == "+") pt = 1;  // cross
-  else if (mark == "*") pt = 3;  // star
-  else if (mark == "s") pt = 4;  // empty square
-  else if (mark == "S") pt = 5;  // full square
-  else if (mark == "d") pt = 10; // empty diamond
-  else if (mark == "D") pt = 11; // full diamond
-  else if (mark == "v") pt = 12; // empty triangle down
-  else if (mark == "V") pt = 13; // full triangle down
-  else if (mark == "^") pt = 9;  // full triangle up
-  else if (mark == "<") pt = 12; // empty triangle down
-  else if (mark == ">") pt = 8;  // empty triangle up
-  else if (mark == "p") pt = 14; // empty pentagon
-  else if (mark == "P") pt = 15; // full pentagon
+  if      (strcmp(mark.c_str(), ".") == 0) pt = 7;  // full circle
+  else if (strcmp(mark.c_str(), "o") == 0) pt = 6;  // empty circle
+  else if (strcmp(mark.c_str(), "O") == 0) pt = 7;  // full circle
+  else if (strcmp(mark.c_str(), "x") == 0) pt = 2;  // cross
+  else if (strcmp(mark.c_str(), "+") == 0) pt = 1;  // cross
+  else if (strcmp(mark.c_str(), "*") == 0) pt = 3;  // star
+  else if (strcmp(mark.c_str(), "s") == 0) pt = 4;  // empty square
+  else if (strcmp(mark.c_str(), "S") == 0) pt = 5;  // full square
+  else if (strcmp(mark.c_str(), "d") == 0) pt = 10; // empty diamond
+  else if (strcmp(mark.c_str(), "D") == 0) pt = 11; // full diamond
+  else if (strcmp(mark.c_str(), "v") == 0) pt = 12; // empty triangle down
+  else if (strcmp(mark.c_str(), "V") == 0) pt = 13; // full triangle down
+  else if (strcmp(mark.c_str(), "^") == 0) pt = 9;  // full triangle up
+  else if (strcmp(mark.c_str(), "<") == 0) pt = 12; // empty triangle down
+  else if (strcmp(mark.c_str(), ">") == 0) pt = 8;  // empty triangle up
+  else if (strcmp(mark.c_str(), "p") == 0) pt = 14; // empty pentagon
+  else if (strcmp(mark.c_str(), "P") == 0) pt = 15; // full pentagon
   else pt = 0;
 
-  if      (col == "k") ct = -1;  // black
-  else if (col == "b") ct = 3;   // blue
-  else if (col == "g") ct = 2;   // green
-  else if (col == "c") ct = 5;   // cyan
-  else if (col == "m") ct = 4;   // magenta
-  else if (col == "y") ct = 6;   // yellow
-  else if (col == "r") ct = 1;   // red
+  if      (strcmp(col.c_str(), "k") == 0) ct = -1;  // black
+  else if (strcmp(col.c_str(), "b") == 0) ct = 3;   // blue
+  else if (strcmp(col.c_str(), "g") == 0) ct = 2;   // green
+  else if (strcmp(col.c_str(), "c") == 0) ct = 5;   // cyan
+  else if (strcmp(col.c_str(), "m") == 0) ct = 4;   // magenta
+  else if (strcmp(col.c_str(), "y") == 0) ct = 6;   // yellow
+  else if (strcmp(col.c_str(), "r") == 0) ct = 1;   // red
   else ct = -1;
 }
 
@@ -194,7 +226,7 @@ void GnuplotGraph::save(const char* filename)
   fprintf(f, "set terminal postscript eps enhanced\n");
 
   int len = strlen(filename);
-  char outname[len + 10];
+  char* outname = new char[len + 10];
   strcpy(outname, filename);
   char* slash = strrchr(outname, '/');
   if (slash != NULL) strcpy(outname, ++slash);
@@ -250,4 +282,5 @@ void GnuplotGraph::save(const char* filename)
   fprintf(f, "set terminal x11\n");
   printf("Type 'gnuplot %s' to get convergence graph as .eps file.\n", filename);
   fclose(f);
+  delete [] outname;
 }

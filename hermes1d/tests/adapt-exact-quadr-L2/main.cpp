@@ -1,8 +1,8 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
-
-#include "legendre.h"
-#include "lobatto.h"
-#include "quad_std.h"
 
 // This test makes sure that an exact function 
 // 1-x^2 is found after one step of hp-adaptivity, 
@@ -12,56 +12,58 @@
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
 
-// General input:
-static int N_eq = 1;
-int N_elem = 2;                         // Number of elements
-double A = -1, B = 1;               // Domain end points
-int P_init = 1;                         // Initial polynomal degree
+//  The following parameters can be changed:
+static int NEQ = 1;
+int NELEM = 2;                          // Number of elements.
+double A = -1, B = 1;                   // Domain end points.
+int P_INIT = 1;                         // Initial polynomial degree.
 
-// Newton's method
-double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh
-double NEWTON_TOL_REF = 1e-6;           // Reference mesh
-const int NEWTON_MAXITER = 150;
+// Newton's method.
+double NEWTON_TOL_COARSE = 1e-6;        // Coarse mesh.
+double NEWTON_TOL_REF = 1e-6;           // Fine mesh.
+int NEWTON_MAX_ITER = 150;
 
-// Adaptivity
-const int ADAPT_TYPE = 0;               // 0... hp-adaptivity
-                                        // 1... h-adaptivity
-                                        // 2... p-adaptivity
-const double THRESHOLD = 0.7;           // Refined will be all elements whose error
-                                        // is greater than THRESHOLD*max_elem_error
+// Adaptivity.
+const int ADAPT_TYPE = 0;               // 0... hp-adaptivity.
+                                        // 1... h-adaptivity.
+                                        // 2... p-adaptivity.
+const double THRESHOLD = 0.7;           // Refined will be all elements whose error 
+                                        // is greater than THRESHOLD*max_elem_error.
 const double TOL_ERR_REL = 1e-3;        // Tolerance for the relative error between 
-                                        // the coarse mesh and reference solutions
-const int NORM = 0;                     // 1... H1 norm
-                                        // 0... L2 norm
+                                        // the coarse mesh and fine solutions.
+const int NORM = 0;                     // To measure errors.
+                                        // 1... H1 norm.
+                                        // 0... L2 norm.
 
-// Boundary conditions
-double Val_dir_left = 0;                // Dirichlet condition left
-double Val_dir_right = 0;               // Dirichlet condition right
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-// Function f(x)
-double f(double x) {
-  //return sin(x);
+// Boundary conditions.
+Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,0));
+Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,0));
+
+// Function f(x).
+double f(double x) 
+{
   return 2;
 }
 
-// Exact solution
+// Exact solution.
 const int EXACT_SOL_PROVIDED = 1;
-double exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) {
-  //u[0] = sin(x);
-  //dudx[0] = cos(x);
+void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM]) 
+{
   u[0] = 1. - x*x;
   dudx[0] = -2.*x;
 }
 
-// ********************************************************************
 
-// bilinear form for the Jacobi matrix 
-// num...number of Gauss points in element
-// x[]...Gauss points
-// weights[]...Gauss weights for points in x[]
-// u...basis function
-// v...test function
-// u_prev...previous solution (all solution components)
+// bilinear form for the Jacobi matrix.
+// num...number of Gauss points in element.
+// x[]...Gauss points.
+// weights[]...Gauss weights for points in x[].
+// u...basis function.
+// v...test function.
+// u_prev...previous solution (all solution components).
 double jacobian(int num, double *x, double *weights, 
                 double *u, double *dudx, double *v, double *dvdx, 
                 double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
@@ -69,127 +71,241 @@ double jacobian(int num, double *x, double *weights,
                 void *user_data)
 {
   double val = 0;
-  for(int i = 0; i<num; i++) {
+  for(int i = 0; i<num; i++) 
+  {
     val += dudx[i]*dvdx[i]*weights[i];
   }
   return val;
 };
 
-// (nonlinear) form for the residual vector
-// num...number of Gauss points in element
-// x[]...Gauss points
-// weights[]...Gauss weights for points in x[]
-// u...approximate solution
-// v...test function
-// u_prev...previous solution (all solution components)
+// (nonlinear) form for the residual vector.
+// num...number of Gauss points in element.
+// x[]...Gauss points.
+// weights[]...Gauss weights for points in x[].
+// u...approximate solution.
+// v...test function.
+// u_prev...previous solution (all solution components).
 double residual(int num, double *x, double *weights, 
                 double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
                 double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM],  
                 double *v, double *dvdx, void *user_data)
 {
   double val = 0;
-  int si = 0;      // solution index (only 0 is relevant for this example)
-  for(int i = 0; i<num; i++) {
+  // Solution index (only 0 is relevant for this example).
+  int si = 0;
+  for(int i = 0; i<num; i++) 
+  {
     val += (du_prevdx[si][0][i]*dvdx[i] - f(x[i])*v[i])*weights[i];
   }
   return val;
 };
 
-/******************************************************************************/
-int main() {
-  // Create coarse mesh, set Dirichlet BC, enumerate basis functions
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
-  mesh->set_bc_left_dirichlet(0, Val_dir_left);
-  mesh->set_bc_right_dirichlet(0, Val_dir_right);
-  printf("N_dof = %d\n", mesh->assign_dofs());
 
-  // Create discrete problem on coarse mesh
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian);
-  dp->add_vector_form(0, residual);
+int main() 
+{
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
 
-  // Initial Newton's loop on coarse mesh
-  newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+  // Create coarse mesh, set Dirichlet BC, enumerate basis functions.
+  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ, NEQ);
 
-  // Replicate coarse mesh including dof arrays
-  Mesh *mesh_ref = mesh->replicate();
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
-  // Refine entire mesh_ref uniformly in 'h' and 'p'
-  int start_elem_id = 0; 
-  int num_to_ref = mesh_ref->get_n_active_elem();
-  mesh_ref->reference_refinement(start_elem_id, num_to_ref);
-  printf("Fine mesh created (%d DOF).\n", mesh_ref->get_n_dof());
+  // Initialize the weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(jacobian);
+  wf.add_vector_form(residual);
 
-  // Convergence graph wrt. the number of degrees of freedom
-  GnuplotGraph graph;
-  graph.set_log_y();
-  graph.set_captions("Convergence History", "Degrees of Freedom", "Error [%]");
-  graph.add_row("exact error", "k", "-", "o");
-  graph.add_row("error estimate", "k", "--");
+  // Initialize the FE problem.
+  bool is_linear = false;
+  DiscreteProblem *dp_coarse = new DiscreteProblem(&wf, space, is_linear);
 
-  // Main adaptivity loop
-  int adapt_iterations = 1;
+  // Newton's loop on coarse mesh.
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec_coarse = new double[Space::get_num_dofs(space)];
+  get_coeff_vector(space, coeff_vec_coarse);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+  Vector* rhs_coarse = create_vector(matrix_solver);
+  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+
+  int it = 1;
+  while (1) 
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof_coarse = Space::get_num_dofs(space);
+
+    // Assemble the Jacobian matrix and residual vector.
+    dp_coarse->assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse);
+
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs_coarse);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
+
+    // If l2 norm of the residual vector is within tolerance, then quit.
+    // NOTE: at least one full iteration forced
+    //       here because sometimes the initial
+    //       residual on fine mesh is too small.
+    if(res_l2_norm < NEWTON_TOL_COARSE && it > 1) break;
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for(int i=0; i<ndof_coarse; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
+
+    // Solve the linear system.
+    if(!solver_coarse->solve())
+      error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof_coarse; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
+    if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+    
+    // Copy coefficients from vector y to elements.
+    set_coeff_vector(coeff_vec_coarse, space);
+    
+    it++;
+  }
+  
+  // Cleanup.
+  delete matrix_coarse;
+  delete rhs_coarse;
+  delete solver_coarse;
+  delete [] coeff_vec_coarse;
+  delete dp_coarse;
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof_est, graph_cpu_est;
+  SimpleGraph graph_dof_exact, graph_cpu_exact;
+
+  // Test variable.
   int success_test = 1;
-  while(1) {
-    printf("============ Adaptivity step %d ============\n", adapt_iterations); 
+  
+  // Adaptivity loop:
+  int as = 1;
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as); 
 
-    // Newton's loop on fine mesh
-    newton(dp, mesh_ref, NULL, NEWTON_TOL_REF, NEWTON_MAXITER);
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(space);
 
+    // Initialize the FE problem.
+    bool is_linear = false;
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Newton's loop on the fine mesh.
+    info("Solving on fine mesh:");
+    // Fill vector coeff_vec using dof and coeffs arrays in elements.
+    double *coeff_vec = new double[Space::get_num_dofs(ref_space)];
+    get_coeff_vector(ref_space, coeff_vec);
+
+    int it = 1;
+    while (1) 
+    {
+      // Obtain the number of degrees of freedom.
+      int ndof = Space::get_num_dofs(ref_space);
+
+      // Assemble the Jacobian matrix and residual vector.
+      dp->assemble(coeff_vec, matrix, rhs);
+
+      // Calculate the l2-norm of residual vector.
+      double res_l2_norm = get_l2_norm(rhs);
+
+      // Info for user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
+
+      // If l2 norm of the residual vector is within tolerance, then quit.
+      // NOTE: at least one full iteration forced
+      //       here because sometimes the initial
+      //       residual on fine mesh is too small.
+      if(res_l2_norm < NEWTON_TOL_REF && it > 1) break;
+
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+
+      // Solve the linear system.
+      if(!solver->solve())
+        error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
+      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+      // If the maximum number of iteration has been reached, then quit.
+      if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+      
+      // Copy coefficients from vector y to elements.
+      set_coeff_vector(coeff_vec, ref_space);
+
+      it++;
+    }
+    
     // Starting with second adaptivity step, obtain new coarse 
-    // mesh solution via Newton's method. Initial condition is 
-    // the last coarse mesh solution.
-    if (adapt_iterations > 1) {
-
-      // Newton's loop on coarse mesh
-      newton(dp, mesh, NULL, NEWTON_TOL_COARSE, NEWTON_MAXITER);
+    // mesh solution via projecting the fine mesh solution.
+    if(as > 1)
+    {
+      info("Projecting the fine mesh solution onto the coarse mesh.");
+      // Project the fine mesh solution (defined on space_ref) onto the coarse mesh (defined on space).
+      OGProjection::project_global(space, ref_space, matrix_solver);
     }
 
-    // In the next step, estimate element errors based on 
-    // the difference between the fine mesh and coarse mesh solutions. 
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate.");
     double err_est_array[MAX_ELEM_NUM]; 
-    double err_est_total = calc_error_estimate(NORM, mesh, mesh_ref, 
-                           err_est_array);
+    double err_est_rel = calc_err_est(NORM, space, ref_space, err_est_array) * 100;
 
-    // Calculate the norm of the fine mesh solution
-    double ref_sol_norm = calc_solution_norm(NORM, mesh_ref);
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      Space::get_num_dofs(space), Space::get_num_dofs(ref_space), err_est_rel);
 
-    // Calculate an estimate of the global relative error
-    double err_est_rel = err_est_total/ref_sol_norm;
-    printf("Relative error (est) = %g %%\n", 100.*err_est_rel);
+    // Time measurement.
+    cpu_time.tick();
 
-    // If exact solution available, also calculate exact error
-    double err_exact_rel;  
-    if (EXACT_SOL_PROVIDED) {
-      // Calculate element errors wrt. exact solution
-      double err_exact_total = calc_error_exact(NORM, mesh, exact_sol);
+    // If exact solution available, also calculate exact error.
+    if (EXACT_SOL_PROVIDED) 
+    {
+      // Calculate element errors wrt. exact solution.
+      double err_exact_rel = calc_err_exact(NORM, space, exact_sol, NEQ, A, B) * 100;
      
-      // Calculate the norm of the exact solution
-      // (using a fine subdivision and high-order quadrature)
-      int subdivision = 500; // heuristic parameter
-      int order = 20;        // heuristic parameter
-      double exact_sol_norm = calc_solution_norm(NORM, exact_sol, N_eq, A, B,
-                                                  subdivision, order);
-      // Calculate an estimate of the global relative error
-      err_exact_rel = err_exact_total/exact_sol_norm;
-      printf("Relative error (exact) = %g %%\n", 100.*err_exact_rel);
-      graph.add_values(0, mesh->get_n_dof(), 100 * err_exact_rel);
+      // Info for user.
+      info("Relative error (exact) = %g %%", err_exact_rel);
+     
+      // Add entry to DOF and CPU convergence graphs.
+      graph_dof_exact.add_values(Space::get_num_dofs(space), err_exact_rel);
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+      if (as == 2)
+        if (err_exact_rel > 1e-10) success_test = 0;
     }
 
-    // add entry to DOF convergence graph
-    graph.add_values(1, mesh->get_n_dof(), 100 * err_est_rel);
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof_est.add_values(Space::get_num_dofs(space), err_est_rel);
+    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
 
-    // Decide whether the relative error is sufficiently small
-    //if(err_est_rel*100 < TOL_ERR_REL) break;
+    // Decide whether the relative error is sufficiently small.
+    if(err_est_rel < TOL_ERR_REL) done = true;
 
-    // extra code for this test:
-    if (adapt_iterations == 2) {
+    // Extra code for this test.
+    if (as == 2) 
+    {
       if (err_est_rel > 1e-10) success_test = 0;
-      if (err_exact_rel > 1e-10) success_test = 0;
-      if (mesh->get_n_active_elem() != 2) success_test = 0;
-      Element *e = mesh->first_active_element();
+      if (space->get_n_active_elem() != 2) success_test = 0;
+      Element *e = space->first_active_element();
       if (e->p != 2) success_test = 0;
-      e = mesh->last_active_element();
+      e = space->last_active_element();
       if (e->p != 2) success_test = 0;
       break;
     }
@@ -198,25 +314,40 @@ int main() {
     // coarse and fine mesh solutions on them, respectively. 
     // The coefficient vectors and numbers of degrees of freedom 
     // on both meshes are also updated. 
-    adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array,
-          mesh, mesh_ref);
+    adapt(NORM, ADAPT_TYPE, THRESHOLD, err_est_array, space, ref_space);
 
-    adapt_iterations++;
+    as++;
+
+    // Plot meshes, results, and errors.
+    adapt_plotting(space, ref_space, NORM, EXACT_SOL_PROVIDED, exact_sol);
+
+    // Cleanup.
+    delete solver;
+    delete matrix;
+    delete rhs;
+    delete ref_space;
+    delete dp;
+    delete [] coeff_vec;
+
   }
+  while (done == false);
 
-  // Plot meshes, results, and errors
-  adapt_plotting(mesh, mesh_ref, 
-                 NORM, EXACT_SOL_PROVIDED, exact_sol);
+  info("Total running time: %g s", cpu_time.accumulated());
 
-  // Save convergence graph
-  graph.save("conv_dof.gp");
+  // Save convergence graphs.
+  graph_dof_est.save("conv_dof_est.dat");
+  graph_cpu_est.save("conv_cpu_est.dat");
+  graph_dof_exact.save("conv_dof_exact.dat");
+  graph_cpu_exact.save("conv_cpu_exact.dat");
 
-  if (success_test) {
-    printf("Success!\n");
+  if (success_test) 
+  {
+    info("Success!");
     return ERROR_SUCCESS;
   }
-  else {
-    printf("Failure!\n");
+  else 
+  {
+    info("Failure!");
     return ERROR_FAILURE;
   }
 }

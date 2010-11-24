@@ -9,5 +9,5 @@ set_common_target_properties(${PROJECT_NAME})
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 
-add_test(${PROJECT_NAME}-1 sh -c "${BIN} ${MESHES_DIR}/mesh3d/hex4.mesh3d 2 xyz | diff - ${CMAKE_CURRENT_SOURCE_DIR}/dump/1.dump")
-add_test(${PROJECT_NAME}-2 sh -c "${BIN} ${MESHES_DIR}/mesh3d/hex4.mesh3d 2 xyz 5 xyz | diff - ${CMAKE_CURRENT_SOURCE_DIR}/dump/2.dump")
+add_test(${PROJECT_NAME}-1 "${BIN}" hex4.mesh3d 2 xyz)
+add_test(${PROJECT_NAME}-2 "${BIN}" hex4.mesh3d 2 xyz 5 xyz)

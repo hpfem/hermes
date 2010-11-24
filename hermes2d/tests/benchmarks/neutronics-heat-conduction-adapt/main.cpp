@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include <cmath>
 #include <iostream>
@@ -568,8 +568,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 75.0, 75.0) phi value = %lf", phi_prev_time.get_pt_value(75.0, 75.0));
   info("Coordinate ( 50.0, 50.0) phi value = %lf", phi_prev_time.get_pt_value(50.0, 50.0));
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   int ndof_allowed_T = 130;
   int ndof_allowed_phi = 300;
   int ndof_T = Space::get_num_dofs(&space_T);
@@ -581,10 +579,10 @@ int main(int argc, char* argv[])
   if ((ndof_T <= ndof_allowed_T) && (ndof_phi <= ndof_allowed_phi)) {  
     // ndofs_T was 121 and ndof_phi was 267 at the time this test was created
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

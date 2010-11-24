@@ -17,7 +17,7 @@
 #ifndef __H2D_OGPROJECTION_H
 #define __H2D_OGPROJECTION_H
 
-#include "feproblem.h"
+#include "discrete_problem.h"
 
 class HERMES_API OGProjection
 {

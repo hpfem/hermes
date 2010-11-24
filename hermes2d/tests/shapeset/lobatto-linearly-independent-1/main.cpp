@@ -1,9 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "hermes2d.h"
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
 
 // This test makes sure the Lobatto shape 
 // functions are linearly independent.
@@ -66,6 +64,15 @@ int main(int argc, char* argv[])
   SparseMatrix* mat = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+
+  // precalc structure
+  mat->prealloc(ndof);
+  for (int i = 0; i < ndof; i++)
+    for (int j = 0; j < ndof; j++)
+      mat->pre_add_ij(i, j);
+        
+  mat->alloc();
+  rhs->alloc(ndof);
 
   info("Assembling matrix ...");
   for (int i = 0; i < ndof; i++)
@@ -137,11 +144,11 @@ int main(int argc, char* argv[])
 
   for (int i = 0; i < ndof; i++)
   {
-    // Get the value of the matrix solution by calling Vertex::get().
+    // Get the value of the matrix solution by calling Vector::get().
     if (rhs->get(i) >= EPS)
     {
       printf("Shape functions are not linearly independent\n");
-      return ERROR_FAILURE; 
+      return ERR_FAILURE; 
     }
   }
   printf("Success!\n");
@@ -151,6 +158,6 @@ int main(int argc, char* argv[])
   delete mat;
   delete rhs;
   delete [] fn_idx;
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

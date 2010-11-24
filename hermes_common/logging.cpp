@@ -1,12 +1,13 @@
 #include "logging.h"
+#include "Teuchos_stacktrace.hpp"
 
-HERMES_API void hermes_exit_if(bool cond, int code) {
+void hermes_exit_if(bool cond, int code) {
   if (cond)
     exit(code);
 }
 
 /// Logging output monitor. \internal \ingroup g_logging
-/** This class protects a logging function __h2d_log_message_if() in multithreded environment. */
+/** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
 class LoggerMonitor 
 {
   pthread_mutexattr_t mutex_attr; ///< Mutext attributes.
@@ -122,7 +123,7 @@ static bool write_console(const char code, const bool emphasize, const char* tex
 #endif
 }
 
-HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...) {
+bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...) {
   if (cond) {
     logger_monitor.enter();
 
@@ -142,6 +143,8 @@ HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info,
       new_block = false;
     }
     else {
+      if (info.code == 'E')
+          Teuchos::show_stacktrace();
       text[0] = info.code;
       text[1] = ' ';
       text_contents++;
@@ -222,3 +225,7 @@ void __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const H
   else if (ferror(stream))
     hermes_exit_if(hermes_log_message_if(true, err_info, "Error reading file: %s", strerror(ferror(stream))));
 }
+
+HermesLogEventInfo::HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
+    : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line) 
+{}

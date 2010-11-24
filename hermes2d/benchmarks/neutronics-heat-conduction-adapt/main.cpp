@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include <cmath>
 #include <iostream>
@@ -243,21 +243,21 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, res_phi, res_phi_ord, HERMES_ANY, &phi_prev_time);
 
   // Initialize solution views (their titles will be updated in each time step).
-  ScalarView view_T("", 460, 0, 450, 350);
+  ScalarView view_T("", new WinGeom(460, 0, 450, 350));
   view_T.fix_scale_width(80);
-  ScalarView view_T_exact("", 0, 0, 450, 350);
+  ScalarView view_T_exact("", new WinGeom(0, 0, 450, 350));
   view_T_exact.fix_scale_width(80);
   view_T_exact.show_mesh(false);
-  ScalarView view_phi("", 460, 400, 450, 350);
+  ScalarView view_phi("", new WinGeom(460, 400, 450, 350));
   view_phi.fix_scale_width(80);
-  ScalarView view_phi_exact("", 0, 400, 450, 350);
+  ScalarView view_phi_exact("", new WinGeom(0, 400, 450, 350));
   view_phi_exact.fix_scale_width(80);
   view_phi_exact.show_mesh(false);
 
   // Initialize mesh views (their titles will be updated in each time step).
-  OrderView ordview_T_coarse("", 920, 0, 450, 350);
+  OrderView ordview_T_coarse("", new WinGeom(920, 0, 450, 350));
   ordview_T_coarse.fix_scale_width(80);
-  OrderView ordview_phi_coarse("", 920, 400, 450, 350);
+  OrderView ordview_phi_coarse("", new WinGeom(920, 400, 450, 350));
   ordview_phi_coarse.fix_scale_width(80);
   
   char title[100]; // Character array to store the title for an actual view and time step.

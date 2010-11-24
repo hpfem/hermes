@@ -50,9 +50,9 @@ int main(int argc, char *argv[]) {
 #endif
 	set_verbose(false);
 
-	printf("Trying to initialize shapeset\n");
+	info("Trying to initialize shapeset.");
 	HcurlShapesetLobattoHex shapeset;
-	printf("Shapeset initialized\n");
+	info("Shapeset initialized.");
 
 	try {
 		// I. linear independency
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 		// V. computes gradients numericaly from fn values and compares
 		if (!test_gradients_directly(&shapeset)) throw ERR_FAILURE;
 
-		printf("Shapeset OK\n");
+		info("Shapeset OK.");
 	}
 	catch (int e) {
 		res = e;

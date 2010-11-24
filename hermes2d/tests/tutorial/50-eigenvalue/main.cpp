@@ -1,4 +1,4 @@
-#define H2D_REPORT_INFO
+#define HERMES_REPORT_INFO
 #include "hermes2d.h"
 #include <stdio.h>
 
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   system(call_cmd);
 
   // Initializing solution vector, solution and ScalarView.
-  double* coeff_vec = new double(ndof);
+  double* coeff_vec = new double[ndof];
   Solution sln;
 
   // Reading solution vectors from file and visualizing.

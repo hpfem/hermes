@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -109,7 +109,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
   int i, j;
   
   int ne = mesh->get_max_element_id() + 1;
-  double elem_error[ne];
+  double *elem_error = new double[ne];
   memset(elem_error, 0, sizeof(double) * ne);
   
   double error;
@@ -169,6 +169,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
   }    
 
   delete [] elist;
+  delete [] elem_error;
  
   return false;
 }
@@ -522,18 +523,16 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Tuple<Space *>(&xvel, &yvel, &press, &lset));
 
-#define ERROR_SUCCESS       0
-#define ERROR_FAILURE      -1
   int ndof_allowed = 550;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
   if (ndof <= ndof_allowed) {      // ndofs was 540 at the time this test was created
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
 }

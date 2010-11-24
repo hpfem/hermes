@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 //  The purpose of this example is to show how to use Trilinos for nonlinear PDE problems. It 
@@ -237,9 +237,9 @@ int main(int argc, char* argv[])
   info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   // Show both solutions.
-  ScalarView view1("Solution 1", 0, 0, 500, 400);
+  ScalarView view1("Solution 1", new WinGeom(0, 0, 500, 400));
   view1.show(&sln_hermes);
-  ScalarView view2("Solution 2", 510, 0, 500, 400);
+  ScalarView view2("Solution 2", new WinGeom(510, 0, 500, 400));
   view2.show(&sln_nox);
 
   // Wait for all views to be closed.

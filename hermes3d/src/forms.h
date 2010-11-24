@@ -84,6 +84,7 @@ inline Ord cos(const Ord &a) { return Ord(a.get_max_order()); }
 template<typename T>
 class HERMES_API Func {
 public:
+  int num_gip;  ///< A number of integration points used by this instance.
 	int nc;							// number of components
 	T *val;							// function values
 	T *dx, *dy, *dz;				// derivatives
@@ -101,7 +102,61 @@ public:
 		dy = dy0 = dy1 = dy2 = NULL;
 		dz = dz0 = dz1 = dz2 = NULL;
 		curl0 = curl1 = curl2 = NULL;
-	}
+	};
+  /// Subtract arrays stored in a given attribute from the same array in provided function.
+#define H3D_SUBTRACT_IF_NOT_NULL(__ATTRIB, __OTHER_FUNC) { if (__ATTRIB != NULL) { \
+  assert_msg(__OTHER_FUNC.__ATTRIB != NULL, "Unable to subtract a function expansion " #__ATTRIB " is NULL in the other function."); \
+  for(int i = 0; i < num_gip; i++) __ATTRIB[i] -= __OTHER_FUNC.__ATTRIB[i]; } }
+
+  /// Calculate this -= func for each function expations and each integration point.
+  /** \param[in] func A function which is subtracted from *this. A number of integratio points and a number of component has to match. */
+  void subtract(const Func<T>& func) {
+    assert_msg(num_gip == func.num_gip, "Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
+    assert_msg(nc == func.nc, "Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
+    if (nc == 1)
+    {
+      H3D_SUBTRACT_IF_NOT_NULL(val, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dx, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dy, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dz, func)
+    }
+    if (nc == 2) {
+      H3D_SUBTRACT_IF_NOT_NULL(val0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(val1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dx0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dx1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dy0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dy1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dz0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dz1, func)
+      if(func.curl0 && this->curl0)
+        H3D_SUBTRACT_IF_NOT_NULL(curl0, func)
+      if(func.curl1 && this->curl1)
+        H3D_SUBTRACT_IF_NOT_NULL(curl1, func)
+    }
+    if (nc == 3)
+    {
+      H3D_SUBTRACT_IF_NOT_NULL(val0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(val1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(val2, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dx0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dx1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dx2, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dy0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dy1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dy2, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dz0, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dz1, func)
+      H3D_SUBTRACT_IF_NOT_NULL(dz2, func)
+      if(func.curl0 && this->curl0)
+        H3D_SUBTRACT_IF_NOT_NULL(curl0, func)
+      if(func.curl1 && this->curl1)
+        H3D_SUBTRACT_IF_NOT_NULL(curl1, func)
+      if(func.curl2 && this->curl2)
+        H3D_SUBTRACT_IF_NOT_NULL(curl2, func)
+    }
+  };
+#undef H3D_SUBTRACT_IF_NOT_NULL
 };
 
 
@@ -138,7 +193,7 @@ Geom<double> init_geom(int marker, RefMap *rm, int iface, const int np, const Qu
 void free_geom(Geom<double> *e);
 
 /// Init the function for calculation the integration order
-Func<Ord> init_fn_ord(const Ord3 &order);
+Func<Ord> *init_fn_ord(const Ord3 &order);
 
 /// Init the function for the evaluation of the volumetric integral
 sFunc *init_fn(ShapeFunction *fu, RefMap *rm, const int np, const QuadPt3D *pt);
@@ -161,7 +216,7 @@ template<typename T>
 class HERMES_API ExtData {
 public:
 	int nf;					// number of functions in 'fn' array
-	Func<T> *fn;				// array of pointers to functions
+	Func<T> **fn;				// array of pointers to functions
 
 	ExtData() {
 		nf = 0;

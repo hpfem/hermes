@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -109,10 +109,6 @@ scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 
 int main(int argc, char* argv[])
 {
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh basemesh, T_mesh, M_mesh;
   H2DReader mloader;
@@ -208,16 +204,13 @@ int main(int argc, char* argv[])
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
       dp->assemble(matrix, rhs);
 
-      // Time measurement.
-      cpu_time.tick();
-      
+      // Now we can deallocate the previous fine meshes.
+      if(as > 1){ delete T_fine.get_mesh(); delete M_fine.get_mesh(); }
+
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
       if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
                                               Tuple<Solution *>(&T_fine, &M_fine));
       else error ("Matrix solver failed.\n");
-    
-      // Time measurement.
-      cpu_time.tick();
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
@@ -231,15 +224,25 @@ int main(int argc, char* argv[])
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&T_coarse, &M_coarse), Tuple<Solution *>(&T_fine, &M_fine), HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
-
-      // Time measurement.
-      cpu_time.tick();
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&T_coarse, &M_coarse), 
+                                 Tuple<Solution *>(&T_fine, &M_fine), 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
         Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
       
+      // Show new coarse meshes and solutions.
+      char title[100];
+      sprintf(title, "Temperature, t = %g days", CURRENT_TIME/3600./24);
+      T_sln_view.set_title(title);
+      T_sln_view.show(&T_coarse);
+      sprintf(title, "Moisture, t = %g days", CURRENT_TIME/3600./24);
+      M_sln_view.set_title(title);
+      M_sln_view.show(&M_coarse);
+      T_order_view.show(&T_space);
+      M_order_view.show(&M_space);
+
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
         done = true;
@@ -255,24 +258,11 @@ int main(int argc, char* argv[])
           as++;
       }
 
-      // Show new coarse meshes and solutions.
-      char title[100];
-      sprintf(title, "Temperature, t = %g days", CURRENT_TIME/3600./24);
-      T_sln_view.set_title(title);
-      T_sln_view.show(&T_coarse);
-      sprintf(title, "Moisture, t = %g days", CURRENT_TIME/3600./24);
-      M_sln_view.set_title(title);
-      M_sln_view.show(&M_coarse);
-      T_order_view.show(&T_space);
-      M_order_view.show(&M_space);
-
       // Clean up.
       delete solver;
       delete matrix;
       delete rhs;
       delete adaptivity;
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
       delete dp;
       

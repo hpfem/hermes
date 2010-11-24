@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function.h"
 #include "math.h"
@@ -171,10 +171,10 @@ int main(int argc, char* argv[])
                 phi_exact_solution(&mesh, phi_exact);
 
   // Initialize solution views (their titles will be2 updated in each time step).
-  ScalarView sview_T("", 0, 0, 500, 400);
-  ScalarView sview_phi("", 0, 500, 500, 400);
-  ScalarView sview_T_exact("", 550, 0, 500, 400);
-  ScalarView sview_phi_exact("", 550, 500, 500, 400);
+  ScalarView sview_T("", new WinGeom(0, 0, 500, 400));
+  ScalarView sview_phi("", new WinGeom(0, 500, 500, 400));
+  ScalarView sview_T_exact("", new WinGeom(550, 0, 500, 400));
+  ScalarView sview_phi_exact("", new WinGeom(550, 500, 500, 400));
   char title[100]; // Character array to store the title for an actual view and time step.
 
   // Solutions in the previous time step.

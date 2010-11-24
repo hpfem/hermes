@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #define DEBUG_ORDER
 #include "hermes2d.h"
 
@@ -24,7 +24,7 @@
 
 const int INIT_REF_NUM = 5;      // Number of initial uniform refinements.
 const int P_INIT = 1;            // Initial polynomial degree.
-const double TAU = 0.05;          // Time step.
+const double TAU = 0.05;         // Time step.
 const double T_FINAL = 1000;     // Time interval length.
 const int TIME_DISCR = 2;        // 1 for implicit Euler, 2 for Crank-Nicolson.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, callback(liform_euler_1), HERMES_ANY, &psi_prev_time);
 
   // Initialize views.
-  ScalarView view("Psi", 0, 0, 600, 500);
+  ScalarView view("Psi", new WinGeom(0, 0, 600, 500));
   view.fix_scale_width(80);
 
   // Time stepping loop:

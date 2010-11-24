@@ -18,7 +18,7 @@
 #include "../h2d_common.h"
 #include "../limit_order.h"
 #include "../solution.h"
-#include "../feproblem.h"
+#include "../discrete_problem.h"
 #include "../refmap.h"
 #include "../quad_all.h"
 #include "../traverse.h"
@@ -28,7 +28,6 @@
 #include "../views/scalar_view.h"
 #include "../views/order_view.h"
 #include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/callstack.h"
 #include "../../../hermes_common/common_time_period.h"
 
 using namespace std;
@@ -703,7 +702,7 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
           if(solutions_for_adapt)
           {
             this->errors[i][ee[i]->id] += err;
-	    this->errors_squared_sum += err;
+	          this->errors_squared_sum += err;
           }
 	}
       }
@@ -738,7 +737,10 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
           errors[i][e->id] /= norms[i];
       }
     }
-    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) 
+    // Element error mask is used here, because this variable is used in the adapt()
+    // function, where the processed error (sum of errors of processed element errors)
+    // is matched to this variable.
+    if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) 
       errors_squared_sum = errors_squared_sum / total_norm;
   }
 

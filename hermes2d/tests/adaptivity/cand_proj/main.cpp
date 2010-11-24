@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 //#include <hermes2d.h>
@@ -35,10 +35,6 @@ using namespace RefinementSelectors;
 #include "functions.h"
 
 /* global definitions */
-#undef ERROR_SUCCESS
-#undef ERROR_FAILURE
-#define ERROR_SUCCESS 0 ///< Test return code if success.
-#define ERROR_FAILURE -1 ///< Test return code if fails.
 #define H2D_TEST_ELEM_ID 0 ///< ID of an alement which is going to be handled.
 #define H2D_TEST_ZERO_QUADS 4e-12 ///< Numerical zero: quads. Since polynoms are defined on a reference domain, some high-order polynoms might yield error a little bit higher than \f$10^{-12}\f$ in H1. In L2, high-order polynomials yields an error higher than \f$3\times 10^{-12}\f$.
 #define H2D_TEST_ZERO_TRIS 6e-8 ///< Numerical zero: triangles. Since polynoms are defined on a reference domain, some high-order polynoms might yield error a little bit higher than \f$10^{-12}\f$ in H1. In L2, high-order polynomials yields an error higher than \f$6\times 2^{-8}\f$.
@@ -463,11 +459,11 @@ quit:
   if (test_success)
   {
     info("!Test: Success");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     info("!Test: Failed!");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

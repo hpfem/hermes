@@ -4,11 +4,14 @@
 
 #cmakedefine HAVE_TEUCHOS_LINK
 #cmakedefine HAVE_TEUCHOS_BFD
-
+#cmakedefine HAVE_EXECINFO
+#cmakedefine HAVE_VASPRINTF
+#cmakedefine HAVE_CXXABI
 
 #cmakedefine WITH_UMFPACK
 #cmakedefine WITH_PARDISO
 #cmakedefine WITH_MUMPS
+#cmakedefine WITH_SUPERLU
 #cmakedefine WITH_PETSC
 #cmakedefine WITH_HDF5
 #cmakedefine WITH_EXODUSII

@@ -22,6 +22,16 @@
 #include "error.h"
 #include "callstack.h"
 
+//  Solvers
+#include "solver/solver.h"
+#include "solver/umfpack_solver.h"
+#include "solver/superlu.h"
+#include "solver/amesos.h"
+#include "solver/pardiso.h"
+#include "solver/petsc.h"
+#include "solver/mumps.h"
+#include "solver/nox.h"
+#include "solver/aztecoo.h"
 
 #define HERMES_TINY 1.0e-20
 
@@ -103,6 +113,25 @@ void choldc(double **a, int n, double p[])
 				a[j][i] = sum / p[i];
 		}
 	}
+}
+
+// Simple dot product.
+double vec_dot(double *r, double *s, int n_dof)
+{
+  double result = 0;
+  for (int i=0; i < n_dof; i++) result += r[i]*s[i];
+  return result;
+}
+
+double vec_dot(Vector *r, Vector *s, int n_dof)
+{
+  double result = 0;
+#ifndef H2D_COMPLEX
+#ifndef H3D_COMPLEX
+  for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
+#endif
+#endif
+  return result;
 }
 
 // SparseMatrix ////////////////////////////////////////////////////////////////////////////////////
@@ -190,4 +219,192 @@ int SparseMatrix::get_num_indices()
 			total += page->count;
 
 	return total;
+}
+
+bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[])
+{
+  int ierr, myid;
+  
+  switch (matrix_solver) 
+  {
+    case SOLVER_PETSC:
+#ifdef WITH_PETSC      
+      ierr = PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL); CHKERRQ(ierr);
+#endif      
+      break;
+    case SOLVER_MUMPS:
+#ifdef WITH_MPI      
+      ierr = MPI_Init(&argc, &argv);
+      return (ierr == MPI_SUCCESS);
+#endif
+      break;
+  }
+  
+  return true;
+}
+
+bool finalize_solution_environment(MatrixSolverType matrix_solver)
+{
+  int ierr;
+  
+  switch (matrix_solver) 
+  {
+    case SOLVER_PETSC:
+#ifdef WITH_PETSC      
+      ierr = PetscFinalize(); CHKERRQ(ierr);
+#endif   
+      break;
+    case SOLVER_MUMPS:
+#ifdef WITH_MPI      
+      ierr = MPI_Finalize();
+      return (ierr == MPI_SUCCESS);
+#endif
+      break;
+  }
+  
+  return true;
+}
+
+// This function is identical in H2D and H3D.
+SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
+{
+  _F_
+  switch (matrix_solver) 
+  {
+    case SOLVER_AMESOS:
+    case SOLVER_AZTECOO:
+      {
+        return new EpetraMatrix;
+        break;
+      }
+    case SOLVER_MUMPS: 
+      {
+        return new MumpsMatrix;
+        break;
+      }
+    case SOLVER_PARDISO: 
+      {
+        return new PardisoMatrix;
+        break;
+      }
+    case SOLVER_PETSC: 
+      {
+        return new PetscMatrix;
+        break;
+      }
+    case SOLVER_UMFPACK: 
+      {
+        return new UMFPackMatrix;
+        break;
+      }
+    case SOLVER_SUPERLU: 
+    {
+      return new SuperLUMatrix;
+      break;
+    }
+    default: 
+      error("Unknown matrix solver requested.");
+  }
+}
+
+// This function is identical in H2D and H3D.
+Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
+{
+  _F_
+  Vector* rhs_dummy = NULL;
+  switch (matrix_solver) 
+  {
+    case SOLVER_AZTECOO:
+      {
+        if (rhs != NULL) return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        else return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs_dummy));
+        info("Using AztecOO."); 
+        break;
+      }
+    case SOLVER_AMESOS:
+      {
+        if (rhs != NULL) return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        else return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs_dummy));
+        info("Using Amesos."); 
+        break;
+      }
+    case SOLVER_MUMPS: 
+      {
+        if (rhs != NULL) return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
+        else return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs_dummy)); 
+        info("Using Mumps."); 
+        break;
+      }
+    case SOLVER_PARDISO: 
+      {
+        if (rhs != NULL) return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
+        else return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs_dummy));
+        info("Using Pardiso."); 
+        break;
+      }
+    case SOLVER_PETSC: 
+      {
+        if (rhs != NULL) return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
+        else return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs_dummy)); 
+        info("Using PETSc.");
+        break;
+      }
+    case SOLVER_UMFPACK: 
+      {
+        if (rhs != NULL) return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
+        else return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs_dummy)); 
+        info("Using UMFPack."); 
+        break;
+      }
+    case SOLVER_SUPERLU: 
+    {
+      if (rhs != NULL) return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs)); 
+      else return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs_dummy)); 
+      info("Using SuperLU."); 
+      break;
+    }
+    default: 
+      error("Unknown matrix solver requested.");
+  }
+}
+
+Vector* create_vector(MatrixSolverType matrix_solver)
+{
+  _F_
+  switch (matrix_solver) 
+  {
+    case SOLVER_AMESOS:
+    case SOLVER_AZTECOO:
+      {
+        return new EpetraVector;
+        break;
+      }
+    case SOLVER_MUMPS: 
+      {
+        return new MumpsVector;
+        break;
+      }
+    case SOLVER_PARDISO: 
+      {
+        return new PardisoVector;
+        break;
+      }
+    case SOLVER_PETSC: 
+      {
+        return new PetscVector;
+        break;
+      }
+    case SOLVER_UMFPACK: 
+      {
+        return new UMFPackVector;
+        break;
+      }
+    case SOLVER_SUPERLU: 
+    {
+      return new SuperLUVector;
+      break;
+    }
+    default: 
+      error("Unknown matrix solver requested.");
+  }
 }

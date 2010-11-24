@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Interior Layer (Elliptic) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Benchmarks with Known Exact Solution" href="../benchmarks.html" />
+    <link rel="next" title="Boundary Layer (Elliptic)" href="layer-boundary.html" />
+    <link rel="prev" title="L-Shape (Elliptic)" href="lshape.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="layer-boundary.html" title="Boundary Layer (Elliptic)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lshape.html" title="L-Shape (Elliptic)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" accesskey="U">Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interior-layer-elliptic">
+<h1>Interior Layer (Elliptic)<a class="headerlink" href="#interior-layer-elliptic" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Benchmark <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/layer-interior">layer-interior</a>.</p>
+<p>This example has a smooth solution that exhibits a steep interior layer.</p>
+<p>Equation solved: Poisson equation</p>
+<div class="math" id="equation-layer-interior">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/fe34dd71750fdc73b35c63dbed7ac777cd046233.png" alt="-\Delta u = f." /></p>
+</div><p>Domain of interest: Unit square <img class="math" src="../../../_images/math/427f511e9ede30ff9000599324871d1f525eb769.png" alt="(0, 1)^2"/>.</p>
+<p>Right-hand side:</p>
+<div class="math" id="equation-layer-interior-rhs">
+<p><span class="eqno">(2)</span><img src="../../../_images/math/8fd9b890015dbc3ed96d0437ff5f704fd2f84df1.png" alt="f(x, y) = \frac{27}{2} (2y + 0.5)^2 (\pi - 3t) \frac{S^3}{u^2 t_2} +
+\frac{27}{2} (2x - 2.5)^2 (\pi - 3t) \frac{S^3}{u^2 t_2}
+- \frac{9}{4} (2y + 0.5)^2 \frac{S}{u t^3} -
+\frac{9}{4} (2x - 2.5)^2 \frac{S}{u t^3} +
+18 \frac{S}{ut}." /></p>
+</div><p>Exact solution:</p>
+<div class="math" id="equation-layer-interior-exact">
+<p><span class="eqno">(3)</span><img src="../../../_images/math/fb7b4c96fa38fcddbba082e79fd0974e38dc4879.png" alt="u(x, y) = \mbox{atan}\left(S \sqrt{(x-1.25)^2 + (y+0.25)^2} - \pi/3\right)." /></p>
+</div><p>where <img class="math" src="../../../_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> is a parameter (slope of the layer). With larger <img class="math" src="../../../_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/>, this problem
+becomes difficult for adaptive algorithms, and at the same time the advantage of
+adaptive <img class="math" src="../../../_images/math/e158fefb7519a21c5a175711642a9c9295ef314f.png" alt="hp"/>-FEM over adaptive low-order FEM becomes more significant. We will
+use <img class="math" src="../../../_images/math/912753fbf090854556090d557f9ffa67cf5ac24b.png" alt="S = 60"/> in the following.</p>
+<p>Code for the exact solution and the weak forms:</p>
+<div class="highlight-python"><pre>// Exact solution.
+static double fn(double x, double y)
+{
+  return atan(SLOPE * (sqrt(sqr(x-1.25) + sqr(y+0.25)) - M_PI/3));
+}
+
+static double fndd(double x, double y, double&amp; dx, double&amp; dy)
+{
+  double t = sqrt(sqr(x-1.25) + sqr(y+0.25));
+  double u = t * (sqr(SLOPE) * sqr(t - M_PI/3) + 1);
+  dx = SLOPE * (x-1.25) / u;
+  dy = SLOPE * (y+0.25) / u;
+  return fn(x, y);
+}
+
+// Boundary condition types.
+BCType bc_types(int marker)
+{
+  return BC_ESSENTIAL;
+}
+
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+{
+  return fn(x, y);
+}
+
+// Bilinear form for the Poisson equation.
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return int_grad_u_grad_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real&gt;
+Real rhs(Real x, Real y)
+{
+  Real t2 = sqr(y + 0.25) + sqr(x - 1.25);
+  Real t = sqrt(t2);
+  Real u = (sqr(M_PI - 3.0*t)*sqr(SLOPE) + 9.0);
+  return 27.0/2.0 * sqr(2.0*y + 0.5) * (M_PI - 3.0*t) * pow(SLOPE,3.0) / (sqr(u) * t2) +
+         27.0/2.0 * sqr(2.0*x - 2.5) * (M_PI - 3.0*t) * pow(SLOPE,3.0) / (sqr(u) * t2) -
+         9.0/4.0 * sqr(2.0*y + 0.5) * SLOPE / (u * pow(t,3.0)) -
+         9.0/4.0 * sqr(2.0*x - 2.5) * SLOPE / (u * pow(t,3.0)) +
+         18.0 * SLOPE / (u * t);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar linear_form(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return -int_F_v&lt;Real, Scalar&gt;(n, wt, rhs, v, e);
+}</pre>
+</div>
+<p>Solution:</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/sol_3d_view.png" style="width: 600px; height: 400px;" /></div>
+<p>Final mesh (h-FEM with linear elements):</p>
+<div align="center" class="align-center"><img alt="Final mesh (h-FEM with linear elements)." class="align-center" src="../../../_images/mesh-h11.png" style="width: 500px; height: 400px;" /></div>
+<p>Final mesh (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Final mesh (h-FEM with quadratic elements)." class="align-center" src="../../../_images/mesh-h21.png" style="width: 500px; height: 400px;" /></div>
+<p>Final mesh (hp-FEM):</p>
+<div align="center" class="align-center"><img alt="Final mesh (hp-FEM)." class="align-center" src="../../../_images/mesh-hp1.png" style="width: 500px; height: 400px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof1.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU time convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu1.png" style="width: 600px; height: 400px;" /></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="lshape.html"
+                                  title="previous chapter">L-Shape (Elliptic)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="layer-boundary.html"
+                                  title="next chapter">Boundary Layer (Elliptic)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="layer-boundary.html" title="Boundary Layer (Elliptic)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lshape.html" title="L-Shape (Elliptic)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" >Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

@@ -29,8 +29,8 @@
 #include "../../../../hermes_common/solver/petsc.h"
 #endif
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/error.h"
+//#include "../../../../hermes_common/trace.h"
+//#include "../../../../hermes_common/error.h"
 
 // forward declarations (simpler than defining a special header file for each module that exports just one function)
 bool test_lin_indep(Shapeset *shapeset);
@@ -65,10 +65,10 @@ int main(int argc, char *argv[]) {
 		// V. computes gradients numericaly from fn values and compares
 		if (!test_gradients_directly(&shapeset)) throw ERR_FAILURE;
 
-		printf("Shapeset OK\n");
+		info("Shapeset OK.");
 	}
 	catch (int e) {
-		printf("Test failed\n");
+		info("Test failed.");
 		res = e;
 	}
 

@@ -1,5 +1,3 @@
-.. _example-sing-pert:
-
 Singular Perturbation
 =====================
 
@@ -33,17 +31,14 @@ a better initial mesh for adaptivity and  making convergence faster.
 
 Convergence graphs:
 
-.. image:: singpert-aniso-conv.png
+.. image:: singpert-aniso/singpert-aniso-conv.png
 
-.. image:: singpert-aniso-conv-time.png
+.. image:: singpert-aniso/singpert-aniso-conv-time.png
 
 
 Solution and hp-mesh:
 
-.. image:: singpert-aniso-sln.png
+.. image:: singpert-aniso/singpert-aniso-sln.png
 
-.. image:: singpert-aniso-order.png
+.. image:: singpert-aniso/singpert-aniso-order.png
 
-.. seealso::
-  
-   :ref:`example-elasto-statics`

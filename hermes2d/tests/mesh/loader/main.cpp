@@ -1,34 +1,31 @@
 #include "hermes2d.h"
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
 #define MAX_BUFFER 1024 ///< A maximum lenght of the buffer
 
 /// Dumps & compares a line.
 int dump_compare_line(FILE* file, const char* line, const int line_inx) {
   if (file == NULL) {
     printf("%s", line);
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     char buffer[MAX_BUFFER];
     if (fgets(buffer, MAX_BUFFER-1, file) == NULL) {
       error("unable to read line %d from the dump file", line_inx);
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }
     size_t len = strlen(buffer);
     if (buffer[len-1] == '\n')
       buffer[len-1] = '\0';
     if (strcmp(line, buffer) == 0)
-      return ERROR_SUCCESS;
+      return ERR_SUCCESS;
     else
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
   }
 }
 
 /// Compares the current line with a line in the dump file.
-#define DUMP_CMP(__line) if (dump_compare_line(file, __line, line_cnt) == ERROR_FAILURE) goto quit; \
+#define DUMP_CMP(__line) if (dump_compare_line(file, __line, line_cnt) == ERR_FAILURE) goto quit; \
   line_cnt++; line_inx = 0
 /// Prints the parameters to the line buffer.
 #define DUMP_OUT(__line, ...) { char buffer[MAX_BUFFER]; \
@@ -39,7 +36,7 @@ int dump_compare_line(FILE* file, const char* line, const int line_inx) {
 
 /// Compares dump with the mesh. If file_name_dump is NULL, it just prints the output.
 int dump_compare(const Mesh &mesh, const char* file_name_dump) {
-  int result = ERROR_FAILURE;
+  int result = ERR_FAILURE;
 
   //open source file if any
   FILE* file = NULL;
@@ -117,7 +114,7 @@ int dump_compare(const Mesh &mesh, const char* file_name_dump) {
     }
   }
 
-  result = ERROR_SUCCESS;
+  result = ERR_SUCCESS;
 
 quit: //finish
   if (file != NULL)
@@ -127,12 +124,12 @@ quit: //finish
 
 int main(int argc, char* argv[])
 {
-  int ret = ERROR_FAILURE;
+  int ret = ERR_FAILURE;
 
   if (argc < 2)
   {
     printf("please input as this format: <mesh type> <meshfile> [meshfiledump] \n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   char *mtype = argv[1];
@@ -192,7 +189,7 @@ int main(int argc, char* argv[])
   else
   {
     error("failed");
-    ret = ERROR_FAILURE;
+    ret = ERR_FAILURE;
   }
 
   delete mloader;

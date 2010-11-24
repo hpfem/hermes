@@ -18,6 +18,8 @@ set(SRC
        precalc.cpp 
        solution.cpp 
        filter.cpp
+       neighbor.cpp
+       numerical_flux.cpp
        space/space.cpp 
        space/space_h1.cpp 
        space/space_hcurl.cpp 
@@ -50,9 +52,8 @@ set(SRC
        ref_selectors/h1_proj_based_selector.cpp 
        ref_selectors/hcurl_proj_based_selector.cpp
        h2d_common.cpp  
-       h2d_logging.cpp
        weakform.cpp 
-       feproblem.cpp
+       discrete_problem.cpp
        forms.cpp
        mesh_parser.cpp mesh_lexer.cpp
        exodusii.cpp 
@@ -67,11 +68,12 @@ set(SRC
        views/view.cpp 
        views/view_data.cpp 
        views/view_support.cpp
+       ${HERMES_COMMON_DIR}/logging.cpp       
+       ${HERMES_COMMON_DIR}/hermes_logging.cpp
        ${HERMES_COMMON_DIR}/common_time_period.cpp
        ${HERMES_COMMON_DIR}/callstack.cpp
        ${HERMES_COMMON_DIR}/error.cpp
        ${HERMES_COMMON_DIR}/utils.cpp
-       ${HERMES_COMMON_DIR}/logging.cpp       
        ${HERMES_COMMON_DIR}/matrix.cpp
        ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
        ${HERMES_COMMON_DIR}/solver/nox.cpp 
@@ -80,6 +82,7 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/amesos.cpp
        ${HERMES_COMMON_DIR}/solver/mumps.cpp 
        ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
+       ${HERMES_COMMON_DIR}/solver/superlu.cpp
        ${HERMES_COMMON_DIR}/solver/petsc.cpp 
        ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
        ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
@@ -118,6 +121,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_LIBRARIES}
+      ${SUPERLU_LIBRARY}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
       ${ADDITIONAL_LIBS}        
@@ -139,16 +143,16 @@ if(REPORT_ALL)
 	set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_ALL")
 else(REPORT_ALL)
 	if(REPORT_WARNING)
-		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_WARNING")
+		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_WARNING")
 	endif(REPORT_WARNING)
 	if(REPORT_INTR_WARNING)
 		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_INTR_WARNING")
 	endif(REPORT_INTR_WARNING)
 	if(REPORT_INFO)
-		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_INFO")
+		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_INFO")
 	endif(REPORT_INFO)
 	if(REPORT_VERBOSE)
-		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_VERBOSE")
+		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_VERBOSE")
 	endif(REPORT_VERBOSE)
 	if(REPORT_TRACE)
 		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_TRACE")

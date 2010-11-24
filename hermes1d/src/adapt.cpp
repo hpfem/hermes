@@ -3,8 +3,6 @@
 // file for the exact terms).
 // Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-#include "common.h"
-#include "matrix.h"
 #include "transforms.h"
 #include "linearizer.h"
 #include "adapt.h"
@@ -160,14 +158,14 @@ double calc_elem_est_error_squared_hp(int norm, Element *e,
   return err_squared;
 }
 
-double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
+double calc_err_est(int norm, Space* space, Space* space_ref,
 			   double *err_array, int sln)
 {
   double err_total_squared = 0;
-  Iterator *I = new Iterator(mesh);
-  Iterator *I_ref = new Iterator(mesh_ref);
+  Iterator *I = new Iterator(space);
+  Iterator *I_ref = new Iterator(space_ref);
 
-  // simultaneous traversal of 'mesh' and 'mesh_ref'
+  // simultaneous traversal of 'space' and 'space_ref'
   Element *e;
   int counter = 0;
   while ((e = I->next_active_element()) != NULL) {
@@ -183,24 +181,26 @@ double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
       err_squared = calc_elem_est_error_squared_hp(norm, e, 
                     e_ref_left, e_ref_right, sln);
     }
-    err_array[e->id] = err_squared;
+    if(err_array != NULL)
+      err_array[e->id] = err_squared;
     err_total_squared += err_squared;
     counter++;
   }
 
-  for (int i=0; i < counter; i++) {
-    err_array[i] = sqrt(err_array[i]);
-  }
-  return sqrt(err_total_squared);
+  for (int i=0; i < counter; i++)
+    if(err_array != NULL)
+      err_array[i] = sqrt(err_array[i]);
+
+  return sqrt(err_total_squared) / calc_solution_norm(norm, space_ref);
 }
 
-double calc_error_estimate(int norm, Mesh* mesh, 
+double calc_error_estimate(int norm, Space* space, 
                            ElemPtr2* ref_element_pairs)
 {
   double err_total_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
 
-  // simultaneous traversal of 'mesh' and 'ref_element_pairs' 
+  // simultaneous traversal of 'space' and 'ref_element_pairs' 
   Element *e;
   int counter = 0;
   while ((e = I->next_active_element()) != NULL) {
@@ -224,12 +224,12 @@ double calc_error_estimate(int norm, Mesh* mesh,
   return sqrt(err_total_squared);
 }
 
-double calc_solution_norm(int norm, Mesh* mesh)
+double calc_solution_norm(int norm, Space* space)
 {
   double norm_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
 
-  // traverse 'mesh' and calculate squared solution L2 or H1 norm 
+  // traverse 'space' and calculate squared solution L2 or H1 norm 
   // in every element 
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
@@ -238,14 +238,14 @@ double calc_solution_norm(int norm, Mesh* mesh)
   return sqrt(norm_squared);
 }
 
-double calc_solution_norm(int norm, Mesh *mesh, 
+double calc_solution_norm(int norm, Space *space, 
                             ElemPtr2* elem_ref_pairs)
 {
-  int n_elem = mesh->get_n_active_elem();
+  int n_elem = space->get_n_active_elem();
   double norm_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
 
-  // traverse 'mesh' and 'elem_ref_pairs' simultaneously 
+  // traverse 'space' and 'elem_ref_pairs' simultaneously 
   // calculate squared solution L2 or H1 norm in every element 
   // of 'elem_ref_pairs'
   Element *e;
@@ -319,7 +319,7 @@ double** get_proj_matrix_H1(int n_eq, int fns_num, int pts_num,
                             double phys_weights[MAX_QUAD_PTS_NUM]) 
 { 
   // allocate
-  double** matrix = _new_matrix<double>(MAX_P+1, MAX_P+1);
+  double** matrix = new_matrix<double>(MAX_P+1, MAX_P+1);
 
   // fill
   for (int i=0; i<fns_num; i++) {
@@ -409,7 +409,7 @@ void calc_proj_coeffs_H1(int n_eq, int fns_num, int pts_num,
 // (discontinuous) polynomials of degree 'p_left' on 'e_ref_left'
 // and degree 'p_right' on 'e_ref_right'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left, 
+void check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left, 
                                     Element *e_ref_right, 
                                     int p_left, int p_right,
                                     double &err, int &dof)
@@ -587,7 +587,6 @@ double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
   err = sqrt(err_total);
   dof = p_left + p_right + 1;
 
-  // **************************************************************************
   // Debug - visualizing the reference solution and projection on the candidate
   // It might be a good idea to move this into a separate function later
   if (PLOT_CANDIDATE_PROJECTIONS) {
@@ -625,7 +624,7 @@ double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_refsol, "%g %g\n", plot_x_right[j], plot_u_ref_right[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points left
     double plot_leg_pol_val_left[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -677,10 +676,9 @@ double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_cand, "%g %g\n", plot_x_right[j], plot_u_right[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
-  // **************************************************************************
 }
 
 // Assumes that reference solution is defined on one single element 'e_ref' = 'e'. 
@@ -688,7 +686,7 @@ double check_cand_coarse_hp_fine_hp(int norm, Element *e, Element *e_ref_left,
 // polynomials of degree 'p_left' on the left half of 'e' and degree 
 // 'p_right' on the right half of 'e'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
+void check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
                                    int p_left, int p_right,
                                    double &err, int &dof)
 {
@@ -863,7 +861,6 @@ double check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
   err = sqrt(err_total);
   dof = p_left + p_right + 1;
 
-  // **************************************************************************
   // Debug - visualizing the reference solution and projection on the candidate
   // It might be a good idea to move this into a separate function later
   if (PLOT_CANDIDATE_PROJECTIONS) {
@@ -900,7 +897,7 @@ double check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_refsol, "%g %g\n", plot_x_right[j], plot_u_ref_right[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points left
     double plot_leg_pol_val_left[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -952,17 +949,16 @@ double check_cand_coarse_hp_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_cand, "%g %g\n", plot_x_right[j], plot_u_right[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
-  // **************************************************************************
 }
 
 // Assumes that reference solution is defined on two half-elements 'e_ref_left'
 // and 'e_ref_right'. The reference solution is projected onto the space of 
 // polynomials of degree 'p' on 'e'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left, 
+void check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left, 
                                    Element *e_ref_right, int p,
                                    double &err, int &dof)
 {
@@ -1059,7 +1055,7 @@ double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
                                       leg_pol_val_right, leg_pol_der_right, 
                                       phys_weights_right); 
     // add the two matrices 
-    double ** matrix = _new_matrix<double>(MAX_P+1, MAX_P+1);
+    double ** matrix = new_matrix<double>(MAX_P+1, MAX_P+1);
     for(int i=0; i < fns_num; i++) { 
       for(int j=0; j < fns_num; j++) { 
         matrix[i][j] = matrix_left[i][j] + matrix_right[i][j];
@@ -1177,7 +1173,6 @@ double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
   err = sqrt(err_total);
   dof = p + 1;
 
-  // **************************************************************************
   // Debug - visualizing the reference solution and projection on the candidate
   // It might be a good idea to move this into a separate function later
   if (PLOT_CANDIDATE_PROJECTIONS) {
@@ -1215,7 +1210,7 @@ double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_refsol, "%g %g\n", plot_x_right[j], plot_u_ref_right[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points left
     double plot_leg_pol_val_left[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -1267,10 +1262,9 @@ double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points right
       fprintf(f_cand, "%g %g\n", plot_x_right[j], plot_u_right[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
-  // **************************************************************************
 }
 
 // Assumes that reference solution is defined on one single element 
@@ -1278,7 +1272,7 @@ double check_cand_coarse_p_fine_hp(int norm, Element *e, Element *e_ref_left,
 // The reference solution is projected onto the space of 
 // polynomials of degree 'p' on 'e'. Returned is projection error and
 // number of dof added by this candidate.
-double check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
+void check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
                                   int p, double &err, int &dof)
 {
   int n_eq = e->n_eq;
@@ -1367,7 +1361,6 @@ double check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
   err = sqrt(err_total);
   dof = p + 1; 
 
-  // **************************************************************************
   // Debug - visualizing the reference solution and projection on the candidate
   // It might be a good idea to move this into a separate function later
   if (PLOT_CANDIDATE_PROJECTIONS) {
@@ -1391,7 +1384,7 @@ double check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting points
       fprintf(f_refsol, "%g %g\n", plot_x[j], plot_u_ref[0][j]);
     }
-    printf("Refsol (%g, %g) written to file %s\n", e->x1, e->x2, filename_refsol);
+    info("Refsol (%g, %g) written to file %s", e->x1, e->x2, filename_refsol);
     fclose(f_refsol);
     // values of Legendre polynomials at plotting points
     double plot_leg_pol_val[MAX_PLOT_PTS_NUM][MAX_P+1];
@@ -1420,10 +1413,9 @@ double check_cand_coarse_p_fine_p(int norm, Element *e, Element *e_ref,
     for (int j=0; j<plot_pts_num; j++) { // loop over plotting
       fprintf(f_cand, "%g %g\n", plot_x[j], plot_u[0][j]);
     }
-    printf("Cand (%g, %g) written to file %s\n", e->x1, e->x2, filename_cand);
+    info("Cand (%g, %g) written to file %s", e->x1, e->x2, filename_cand);
     fclose(f_cand);
   }
-  // **************************************************************************
 }
 
 double calc_solution_norm(int norm, exact_sol_type exact_sol, 
@@ -1513,11 +1505,11 @@ double calc_elem_exact_error_squared(int norm, exact_sol_type exact_sol,
   return err_squared;
 }
 
-double calc_error_exact(int norm, Mesh *mesh, 
-                        exact_sol_type exact_sol) 
+double calc_err_exact(int norm, Space *space, 
+                        exact_sol_type exact_sol, int neq, double a, double b) 
 {
   double total_err_squared = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
     int order = std::max(20, 3*e->p);         // heuristic parameter
@@ -1525,8 +1517,12 @@ double calc_error_exact(int norm, Mesh *mesh,
         calc_elem_exact_error_squared(norm, exact_sol, e, order);
       total_err_squared += elem_err_squared;
   }
-  
-  return sqrt(total_err_squared);
+  int subdivision = 500; // heuristic parameter
+  int order = 20;        // heuristic parameter
+      
+  return sqrt(total_err_squared) / calc_solution_norm(norm, 
+           exact_sol, neq, a, b, subdivision, order);
+
 }
 
 // Selects best hp-refinement from the given list (distinguishes whether 
@@ -1558,7 +1554,7 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
       err_orig, dof_orig);
   }
   if (PRINT_CANDIDATES) {
-    printf("  Elem (%g, %g): err_orig = %g, dof_orig = %d\n", 
+    info("  Elem (%g, %g): err_orig = %g, dof_orig = %d", 
            e->x1, e->x2, err_orig, dof_orig);
   }
 
@@ -1599,9 +1595,9 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
     if (fabs(err_cand) < 1e-12) {
       choice = i;
       if (PRINT_CANDIDATES) {
-        printf("  Elem (%g, %g): reference solution recovered, \
-                  taking the following candidate:\n", e->x1, e->x2);
-        printf("  Elem (%g, %g): cand (%d %d %d), err_cand = %g, dof_cand = %d\n", 
+        info("  Elem (%g, %g): reference solution recovered, \
+                  taking the following candidate:", e->x1, e->x2);
+        info("  Elem (%g, %g): cand (%d %d %d), err_cand = %g, dof_cand = %d", 
                e->x1, e->x2, 
                cand_list[i][0], cand_list[i][1], cand_list[i][2], err_cand, dof_cand);
       }
@@ -1613,9 +1609,9 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
     if (dof_cand - dof_orig <= 0) {
       if (err_cand < err_orig) {
         if (PRINT_CANDIDATES) {
-          printf("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0\n", e->x1, e->x2,
+          info("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0", e->x1, e->x2,
                     cand_list[i][0], cand_list[i][1], cand_list[i][2]);
-          printf("               dof_cand = %d, err_orig = %g, err_cand = %g (accepting)\n", 
+          info("               dof_cand = %d, err_orig = %g, err_cand = %g (accepting)", 
                  dof_cand, err_orig, err_cand);
         }
         if (ALLOW_TO_DECREASE_DOFS)
@@ -1625,9 +1621,9 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
       }
       else {
         if (PRINT_CANDIDATES) {
-          printf("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0\n", e->x1, e->x2,
+          info("  Elem (%g, %g): cand (%d %d %d) has dof_cand <= 0", e->x1, e->x2,
                     cand_list[i][0], cand_list[i][1], cand_list[i][2]);
-          printf("               dof_cand = %d, err_orig = %g, err_new = %g (throwing away)\n", 
+          info("               dof_cand = %d, err_orig = %g, err_new = %g (throwing away)", 
                  dof_cand, err_orig, err_cand);
         }
         crit = 1e10;  // forget this candidate
@@ -1642,12 +1638,12 @@ int select_hp_refinement(Element *e, Element *e_ref, Element *e_ref2,
       // p-candidate (preferred - not penalized by the dof number)
       if (cand_list[i][0] == 0) crit = (log(err_cand) - log(err_orig));
       // hp-candidate
-      else crit = (log(err_cand) - log(err_orig)) / sqrt(dof_cand - dof_orig); 
+      else crit = (log(err_cand) - log(err_orig)) / sqrt(double(dof_cand - dof_orig)); 
     } 
 
     // debug
     if (PRINT_CANDIDATES) {
-      printf("  Elem (%g, %g): cand (%d %d %d), err_reduction = %g, dof_added = %d, crit = %g\n", 
+      info("  Elem (%g, %g): cand (%d %d %d), err_reduction = %g, dof_added = %d, crit = %g", 
              e->x1, e->x2, cand_list[i][0], cand_list[i][1], cand_list[i][2], 
              err_orig - err_cand, dof_cand - dof_orig, crit);
     }

@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Iron-Water (Neutronics) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Examples" href="../examples.html" />
+    <link rel="next" title="4-Group (Neutronics)" href="neutronics-4-group-adapt.html" />
+    <link rel="prev" title="Saphir (Neutronics)" href="saphir.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="neutronics-4-group-adapt.html" title="4-Group (Neutronics)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="saphir.html" title="Saphir (Neutronics)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../examples.html" accesskey="U">Hermes2D: Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="iron-water-neutronics">
+<h1>Iron-Water (Neutronics)<a class="headerlink" href="#iron-water-neutronics" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Example <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/iron-water">iron-water</a>.</p>
+<p>This example is very similar to the example &#8220;saphir&#8221;, the main difference being that
+it reads a mesh file in the exodusii format (created by Cubit). This example only builds
+if you have the <a class="reference external" href="http://sourceforge.net/projects/exodusii/">ExodusII</a> and
+<a class="reference external" href="http://www.unidata.ucar.edu/software/netcdf/">NetCDF</a> libraries installed on your system and
+the variables WITH_EXODUSII, EXODUSII_ROOT and NETCDF_ROOT defined properly.
+The latter can be done, for example, in the CMake.vars file as follows:</p>
+<div class="highlight-python"><pre>SET(WITH_EXODUSII YES)
+SET(EXODUSII_ROOT /opt/packages/exodusii)
+SET(NETCDF_ROOT   /opt/packages/netcdf)</pre>
+</div>
+<p>The mesh is now loaded using the ExodusIIReader (see
+the <a class="reference external" href="http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh_loader.h">mesh_loader.h</a> file):</p>
+<div class="highlight-python"><pre>// Load the mesh
+Mesh mesh;
+ExodusIIReader mloader;
+if (!mloader.load("iron-water.e", &amp;mesh)) error("ExodusII mesh load failed.");</pre>
+</div>
+<p>The model describes an external-force-driven configuration without fissile materials present.
+We will solve the one-group neutron diffusion equation</p>
+<div class="math" id="equation-iron-water">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/4fcf363edcf298900b48bcb5b4a04de068468eb1.png" alt="-\nabla \cdot (D(x,y) \nabla \Phi) + \Sigma_a(x,y) \Phi = Q_{ext}(x,y)." /></p>
+</div><p>The domain of interest is a 30 x 30 cm square consisting of four regions.
+A uniform volumetric source is placed in water in the lower-left corner
+of the domain, surrounded with a layer of water, a layer of iron, and finally
+another layer of water:</p>
+<div align="center" class="align-center"><img alt="Schematic picture for the iron-water example." class="align-center" src="../../../_images/iron-water.png" style="width: 400px; height: 400px;" /></div>
+<p>The unknown is the neutron flux <img class="math" src="../../../_images/math/cef71864edd105c02ff34e63aea235aafd777f64.png" alt="\Phi(x, y)"/>. The values of the diffusion coefficient
+<img class="math" src="../../../_images/math/f463861bc2a7ea666a58729614b2f35db4bb391f.png" alt="D(x, y)"/>, absorption cross-section <img class="math" src="../../../_images/math/f3e62644b461223ab5c328f397fcdefc79c34d32.png" alt="\Sigma_a(x, y)"/> and the source term <img class="math" src="../../../_images/math/f80b0b1f3535c82c1331aee2c4113c2a28f0320d.png" alt="Q_{ext}(x,y)"/>
+are constant in the subdomains. The source <img class="math" src="../../../_images/math/e32bb149ff5e2cb7a4252afb76188cf4182ea9c5.png" alt="Q_{ext} = 1"/> in area 1 and zero
+elsewhere. The boundary conditions for this problem are zero Dirichlet (right and top edges)
+and zero Neumann (bottom and left edges). Sample results of this computation are shown below.</p>
+<p>Solution:</p>
+<div align="center" class="align-center"><img alt="Solution to the iron-water example." class="align-center" src="../../../_images/iron-water-sol.png" style="width: 600px; height: 400px;" /></div>
+<p>Final mesh (h-FEM with linear elements):</p>
+<div align="center" class="align-center"><img alt="Final finite element mesh for the iron-water example (h-FEM with linear elements)." class="align-center" src="../../../_images/iron-water-mesh-h1.png" style="width: 440px; height: 400px;" /></div>
+<p>Final mesh (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Final finite element mesh for the iron-water example (h-FEM with quadratic elements)." class="align-center" src="../../../_images/iron-water-mesh-h2.png" style="width: 440px; height: 400px;" /></div>
+<p>Final mesh (hp-FEM):</p>
+<div align="center" class="align-center"><img alt="Final finite element mesh for the iron-water example (hp-FEM)." class="align-center" src="../../../_images/iron-water-mesh-hp.png" style="width: 440px; height: 400px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph for example iron-water." class="align-center" src="../../../_images/conv_dof8.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU time convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph for example iron-water." class="align-center" src="../../../_images/conv_cpu8.png" style="width: 600px; height: 400px;" /></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="saphir.html"
+                                  title="previous chapter">Saphir (Neutronics)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="neutronics-4-group-adapt.html"
+                                  title="next chapter">4-Group (Neutronics)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="neutronics-4-group-adapt.html" title="4-Group (Neutronics)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="saphir.html" title="Saphir (Neutronics)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../examples.html" >Hermes2D: Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

@@ -19,8 +19,6 @@ int main(int argc, char* argv[])
   mesh.refine_element(114, 1);         // Refines element #114 anisotropically.
 
   // new code for the test
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   int n_elem = mesh.get_num_elements();
   printf("n_elem = %d\n", n_elem);
   int n_active = mesh.get_num_active_elements();
@@ -30,10 +28,10 @@ int main(int argc, char* argv[])
 
   if (n_elem == 576 && n_active == 424 && n_base == 4) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

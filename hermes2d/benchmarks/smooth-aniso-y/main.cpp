@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -15,9 +15,9 @@ using namespace RefinementSelectors;
 //
 //  Known exact solution, see functions fn() and fndd().
 //
-//  Domain: square domain (0, pi)x(0, pi), mesh file square_quad.mesh.
+//  Domain: square domain (0, pi) x (0, pi), mesh file square_quad.mesh.
 //
-//  BC:  Dirichlet, given by exact solution.
+//  BC:  Dirichlet and Neumann, given by exact solution.
 //
 //  The following parameters can be changed:
 

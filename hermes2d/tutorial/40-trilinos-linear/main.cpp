@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace Teuchos;
@@ -224,7 +224,7 @@ int main(int argc, char **argv)
   double time2 = cpu_time.tick().last();
 
   // Show the NOX solution.
-  ScalarView view2("Solution 2", 450, 0, 440, 350);
+  ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
   //view2.set_min_max_range(0, 2);
   view2.show(&sln2);
 

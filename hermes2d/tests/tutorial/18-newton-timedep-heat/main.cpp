@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function.h"
 
@@ -175,8 +175,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 10,  10) value = %lf", u_prev_time.get_pt_value(10.0, 10.0));
 
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   double coor_x_y[6] = {-10.0, -6.0, -2.0, 2.0, 6.0, 10.0};
   double value[6] = {0.000000, 2.311376, 2.748304, 2.919943, 3.146120, 4.000000};
   for (int i = 0; i < 6; i++)
@@ -188,9 +186,9 @@ int main(int argc, char* argv[])
     else
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }
   }
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -41,12 +41,12 @@ const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (r
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;            // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Time step and simulation time.
 const double TAU = 5.*24*60*60;                 // time step: 120 hours
-const double SIMULATION_TIME = TAU + 0.001;     // (seconds) physical time
+const double SIMULATION_TIME = TAU + 0.001;  // (seconds) physical time
 
 // Equation parameters.
 const double c_TT = 2.18e+6;
@@ -183,9 +183,12 @@ int main(int argc, char* argv[])
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
       dp->assemble(matrix, rhs);
 
+      // Now we can deallocate the previous fine meshes.
+      if(as > 1){ delete T_fine.get_mesh(); delete M_fine.get_mesh(); }
+      
       // Time measurement.
       cpu_time.tick();
-      
+
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
       if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
                                               Tuple<Solution *>(&T_fine, &M_fine));
@@ -206,7 +209,9 @@ int main(int argc, char* argv[])
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&T_coarse, &M_coarse), Tuple<Solution *>(&T_fine, &M_fine), HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&T_coarse, &M_coarse), 
+                                 Tuple<Solution *>(&T_fine, &M_fine), 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Time measurement.
       cpu_time.tick();
@@ -235,8 +240,6 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
       delete dp;
       
@@ -267,8 +270,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 12.0, 29.0) M value = %lf", M_prev.get_pt_value(12.0, 29.0));
   info("Coordinate (  5.0, 29.0) M value = %lf", M_prev.get_pt_value(5.0, 29.0));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
   if (fabs(T_prev.get_pt_value(5.0, 4.0) - 294.127903) > eps) {
@@ -305,10 +306,10 @@ int main(int argc, char* argv[])
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

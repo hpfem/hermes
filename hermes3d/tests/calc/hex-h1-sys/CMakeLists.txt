@@ -7,4 +7,4 @@ set_common_target_properties(${PROJECT_NAME})
 # Tests
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
-add_test(${PROJECT_NAME}-1 ${BIN} ${MESHES_DIR}/mesh3d/hex1.mesh3d)
+add_test(${PROJECT_NAME}-1 ${BIN} hex1.mesh3d)

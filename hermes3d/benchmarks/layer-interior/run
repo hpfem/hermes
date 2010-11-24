@@ -1,0 +1,4 @@
+rm *~ 
+./layer-interior
+python plot_graph.py &
+

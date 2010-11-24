@@ -39,8 +39,7 @@ public:
 	/// @return true if ok
 	/// @param[in] fn A function that will be visualized
 	virtual void out(MeshFunction *fn, const char *name, int item = FN_VAL);
-	virtual void out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn3, const char *name,
-	                 int item = FN_VAL_0);
+	virtual void out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn3, const char *name, int item = FN_VAL_0);
 	virtual void out(Mesh *mesh);
 	virtual void out_bc_vtk(Mesh *mesh, const char *name = "BCs");
 

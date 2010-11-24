@@ -79,19 +79,19 @@ void free_geom(Geom<double> *e) {
 	delete [] e->nz;
 }
 
-Func<Ord> init_fn_ord(const Ord3 &order) {
+Func<Ord> *init_fn_ord(const Ord3 &order) {
 	_F_
 	int o = order.get_ord();
 	Ord *d = new Ord(o);
 
-	Func<Ord> f;
-	f.val = d;
-	f.dx = f.dy = f.dz = d;
-	f.val0 = f.val1 = f.val2 = d;
-	f.dx0 = f.dx1 = f.dx2 = d;
-	f.dy0 = f.dy1 = f.dy2 = d;
-	f.dz0 = f.dz1 = f.dz2 = d;
-	f.curl0 = f.curl1 = f.curl2 = d;
+	Func<Ord> * f = new Func<Ord>;
+	f->val = d;
+	f->dx = f->dy = f->dz = d;
+	f->val0 = f->val1 = f->val2 = d;
+	f->dx0 = f->dx1 = f->dx2 = d;
+	f->dy0 = f->dy1 = f->dy2 = d;
+	f->dz0 = f->dz1 = f->dz2 = d;
+	f->curl0 = f->curl1 = f->curl2 = d;
 	return f;
 }
 
@@ -172,6 +172,7 @@ sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const Q
 	_F_
 
 	sFunc *u = new sFunc; MEM_CHECK(u);
+  u->num_gip = np;
 	u->nc = shfn->get_num_components();
 	shfn->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
@@ -233,6 +234,7 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	_F_
 
 	mFunc *u = new mFunc;
+  u->num_gip = np;
 	u->nc = f->get_num_components();
 	f->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
@@ -282,6 +284,18 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 		memcpy(u->dz0, f->get_dz_values(0), np * sizeof(scalar));
 		memcpy(u->dz1, f->get_dz_values(1), np * sizeof(scalar));
 		memcpy(u->dz2, f->get_dz_values(2), np * sizeof(scalar));
+
+    // CURL
+		u->curl0 = new scalar [np]; MEM_CHECK(u->dz0);
+		u->curl1 = new scalar [np]; MEM_CHECK(u->dz1);
+		u->curl2 = new scalar [np]; MEM_CHECK(u->dz2);
+
+    for (int i = 0; i < np; i++)
+      u->curl0[i] = (u->dz1[i] * u->dy0[i]) - (u->dz0[i] * u->dy1[i]);
+    for (int i = 0; i < np; i++)
+      u->curl1[i] = (u->dx1[i] * u->dz0[i]) - (u->dx0[i] * u->dz1[i]);
+    for (int i = 0; i < np; i++)
+      u->curl2[i] = (u->dy1[i] * u->dx0[i]) - (u->dy0[i] * u->dx1[i]);
 	}
 	else {
 		EXIT(HERMES_ERR_NOT_IMPLEMENTED);

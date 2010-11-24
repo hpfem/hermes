@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 
 #include "hermes2d.h"
 
@@ -347,9 +347,6 @@ int main(int argc, char* argv[])
   // Integral results.
   info("Core eigenvalue: %lf", k_eff);
   
-  #define ERROR_SUCCESS                                0
-  #define ERROR_FAILURE                               -1
-  
   TestSubject<int> num_iter(2);
   num_iter.test_overshoot(iter, 48);
   
@@ -364,10 +361,10 @@ int main(int argc, char* argv[])
   
   if (num_iter.passed && peak.passed && eigenvalue.passed) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

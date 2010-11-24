@@ -30,7 +30,7 @@
 /// NOTE: hex-specific
 ///
 /// @ingroup hp-adapt
-class ProjectionIpol : public Projection {
+class HERMES_API ProjectionIpol : public Projection {
 public:
 	ProjectionIpol(Solution *afn, Element *e, Shapeset *ss);
 	virtual ~ProjectionIpol();

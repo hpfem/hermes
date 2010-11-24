@@ -103,6 +103,8 @@ public:
 
 	void force_transform(uint64 sub_idx, Trf *ctm);
 
+  virtual bool is_jacobian_const(){ return is_const_jacobian; };
+
 protected:
 	Mesh *mesh;
 	ShapeFunction *pss;

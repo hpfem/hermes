@@ -26,7 +26,7 @@
 /// Preconditioners built on ML
 ///
 /// @ingroup preconds
-class MlPrecond : public Precond {
+class HERMES_API MlPrecond : public Precond {
 public:
   /// @param[in] type - type of the preconditioner [ sa | dd ]
   /// - sa = smooth aggregation

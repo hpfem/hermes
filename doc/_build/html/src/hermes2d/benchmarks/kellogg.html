@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Kellogg (Elliptic) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Benchmarks with Known Exact Solution" href="../benchmarks.html" />
+    <link rel="next" title="2-Group Neutronics (Neutronics)" href="neutronics-2-group-adapt.html" />
+    <link rel="prev" title="Line Singularity (Elliptic)" href="line-singularity.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="neutronics-2-group-adapt.html" title="2-Group Neutronics (Neutronics)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="line-singularity.html" title="Line Singularity (Elliptic)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" accesskey="U">Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="kellogg-elliptic">
+<h1>Kellogg (Elliptic)<a class="headerlink" href="#kellogg-elliptic" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Benchmark <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/kellogg">kellogg</a>.</p>
+<p>The solution to this elliptic problems contains a severe singularity that poses a challenge to
+adaptive methods.</p>
+<p>Equation solved:</p>
+<div class="math">
+<p><img src="../../../_images/math/5379eee39a284e758be358f0bdfa6734b8d485b3.png" alt="-\nabla \cdot (a(x,y) \nabla u) = 0," /></p>
+</div><p>where the parameter <img class="math" src="../../../_images/math/c7d457e388298246adb06c587bccd419ea67f7e8.png" alt="a"/> is piecewise-constant, <img class="math" src="../../../_images/math/6d44168677851c4342d492459158dd34ea1ed2d7.png" alt="a(x,y) = R"/> in the first and third quadrants and <img class="math" src="../../../_images/math/432b2567625b744fce4a2aa15d45e5eb3cb5dfec.png" alt="a(x,y) = 1"/>
+in the remaining two quadrants.</p>
+<p>Domain of interest: Square <img class="math" src="../../../_images/math/ab1c0fa4ad70ba60006a4ef99dd5a6e38c5d5eeb.png" alt="(-1, 1)^2"/>.</p>
+<p>Right-hand side: <img class="math" src="../../../_images/math/4c98656d3e94b26764f9f77aff2e3657badbe274.png" alt="f(x,y) = 0"/>.</p>
+<p>Boundary conditions: Dirichlet given by exact solution.</p>
+<p>Exact solution: Quite complicated, see the code below.</p>
+<div class="highlight-python"><pre>// Problem constants.
+const double R = 161.4476387975881;      // Equation parameter.
+const double TAU = 0.1;                  // Equation parameter.
+const double RHO = M_PI/4.;              // Equation parameter
+const double SIGMA = -14.92256510455152; // Equation parameter
+
+// Exact solution.
+static double fn(double x, double y)
+{
+  double theta = atan2(y,x);
+  if (theta &lt; 0) theta = theta + 2.*M_PI;
+  double r = sqrt(x*x + y*y);
+
+  double mu;
+  if (theta &lt;= M_PI/2.) {
+    mu = cos((M_PI/2. - SIGMA)*TAU) * cos((theta - M_PI/2. + RHO)*TAU);
+  }
+  else {
+    if (theta &lt;= M_PI) {
+      mu = cos(RHO*TAU) * cos((theta - M_PI + SIGMA)*TAU);
+    }
+    else {
+      if (theta &lt;= 3.*M_PI/2.) {
+        mu = cos(SIGMA*TAU) * cos((theta - M_PI - RHO)*TAU);
+      }
+      else {
+        mu = cos((M_PI/2. - RHO)*TAU) * cos((theta - 3.*M_PI/2. - SIGMA)*TAU);
+      }
+    }
+  }
+
+  return pow(r, TAU) * mu;
+}</pre>
+</div>
+<p>The weak forms are as follows:</p>
+<div class="highlight-python"><pre>// Weak forms
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_I_III(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return R*int_grad_u_grad_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}
+
+template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form_II_IV(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return 1.*int_grad_u_grad_v&lt;Real, Scalar&gt;(n, wt, u, v);
+}</pre>
+</div>
+<p>Solution:</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/solution.png" style="width: 600px;" /></div>
+<p>Final mesh (h-FEM with linear elements):</p>
+<div align="center" class="align-center"><img alt="Mesh." class="align-center" src="../../../_images/mesh-h1.png" style="width: 600px;" /></div>
+<p>Final mesh (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Mesh." class="align-center" src="../../../_images/mesh-h2.png" style="width: 600px;" /></div>
+<p>Final mesh (hp-FEM):</p>
+<div align="center" class="align-center"><img alt="Mesh." class="align-center" src="../../../_images/mesh-hp.png" style="width: 600px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU time convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu.png" style="width: 600px; height: 400px;" /></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="line-singularity.html"
+                                  title="previous chapter">Line Singularity (Elliptic)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="neutronics-2-group-adapt.html"
+                                  title="next chapter">2-Group Neutronics (Neutronics)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="neutronics-2-group-adapt.html" title="2-Group Neutronics (Neutronics)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="line-singularity.html" title="Line Singularity (Elliptic)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" >Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

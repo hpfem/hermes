@@ -13,7 +13,7 @@ void Iterator::reset() {
 
 Element* Iterator::first_active_element()
 {
-  return this->mesh->first_active_element();
+  return this->space->first_active_element();
 }
 
 Element* Iterator::next_active_element()
@@ -22,19 +22,19 @@ Element* Iterator::next_active_element()
   Element *e;
   // Either it is the first coarse mesh element
   if(current_coarse_elem_index == -1) { 
-    e = this->mesh->get_base_elems();
+    e = this->space->get_base_elems();
     current_coarse_elem_index = 0; 
   }
   // or we take it from the stack
   else {
     if(S.empty()) {
       // there is no new element to visit
-      if(current_coarse_elem_index == this->mesh->get_n_base_elem()-1) { 
+      if(current_coarse_elem_index == this->space->get_n_base_elem()-1) { 
         return NULL;
       }
       // we take the next coarse mesh element
       else { 
-        e = this->mesh->get_base_elems() + current_coarse_elem_index +1;
+        e = this->space->get_base_elems() + current_coarse_elem_index +1;
         current_coarse_elem_index++; 
       }
     }
@@ -57,7 +57,7 @@ Element* Iterator::next_active_element()
 
 Element* Iterator::last_active_element()
 {
-  return this->mesh->last_active_element();
+  return this->space->last_active_element();
 }
 
 

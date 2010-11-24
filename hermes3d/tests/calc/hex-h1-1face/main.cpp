@@ -1,43 +1,25 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-/*
- * hang-nodes-continuity.cc
- *
- * usage: $0 <mesh file> <element id> <refinement id> [<element id> <refinement id>...]
- *
- */
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
+//#include <getopt.h>
 #include <hermes3d.h>
-#include "../../../../hermes_common/trace.h"
-#include "../../../../hermes_common/common_time_period.h"
-#include "../../../../hermes_common/error.h"
-#ifdef WITH_PETSC
-#include "../../../../hermes_common/solver/petsc.h"
-#endif
 
-#define BEGIN_BLOCK							{
-#define END_BLOCK							}
+// Usage: $0 <mesh file> <element id> <refinement id> [<element id> <refinement id>...].
 
 //#define DIRICHLET
 #define NEWTON
+
+// The following parameters can be changed:
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+                                                  // by the other solvers). 
+                                                  // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
+                                                  // the other solvers). 
+                                                  // Possibilities: none, jacobi, neumann, least-squares, or a
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
 //#define X2_Y2_Z2
 //#define XM_YN_ZO
@@ -275,8 +257,7 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 	return fnc(x, y, z);
 }
 
-//
-
+// Boundary condition types.
 BCType bc_types(int marker) {
 #ifdef DIRICHLET
 	return BC_ESSENTIAL;
@@ -285,6 +266,7 @@ BCType bc_types(int marker) {
 #endif
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 #ifdef DIRICHLET
 	return fnc(x, y, z);
@@ -293,39 +275,39 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 #endif
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form_surf(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_u_v<f_t, res_t>(n, wt, u, v, e);
+template<typename Real, typename Scalar>
+Scalar bilinear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_u_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_F_v<Real, Scalar>(n, wt, dfnc, u, e);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form_surf(int np, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	res_t result = 0;
+template<typename Real, typename Scalar>
+Scalar linear_form_surf(int np, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	Scalar result = 0;
 	for (int i = 0; i < np; i++) {
 #ifdef XM_YN_ZO
-		res_t dx = m * pow(e->x[i], m - 1) * pow(e->y[i], n) * pow(e->z[i], o) + 2 * e->x[i] * pow(e->y[i], 3) - 3 * pow(e->x[i], 2) * e->z[i];
-		res_t dy = n * pow(e->x[i], m) * pow(e->y[i], n - 1) * pow(e->z[i], o) + 3 * pow(e->x[i], 2) * pow(e->y[i], 2);
-		res_t dz = o * pow(e->x[i], m) * pow(e->y[i], n) * pow(e->z[i], o - 1) - pow(e->x[i], 3) + 4 * pow(e->z[i], 3);
+		Scalar dx = m * pow(e->x[i], m - 1) * pow(e->y[i], n) * pow(e->z[i], o) + 2 * e->x[i] * pow(e->y[i], 3) - 3 * pow(e->x[i], 2) * e->z[i];
+		Scalar dy = n * pow(e->x[i], m) * pow(e->y[i], n - 1) * pow(e->z[i], o) + 3 * pow(e->x[i], 2) * pow(e->y[i], 2);
+		Scalar dz = o * pow(e->x[i], m) * pow(e->y[i], n) * pow(e->z[i], o - 1) - pow(e->x[i], 3) + 4 * pow(e->z[i], 3);
 #elif defined XM_YN_ZO_2
-		res_t dx = m * pow(e->x[i], m-1) * pow(e->y[i], n) * pow(e->z[i], o) + 2 * e->x[i] * pow(e->y[i], 3) - 2 * e->x[i] * e->z[i];
-		res_t dy = n * pow(e->x[i], m) * pow(e->y[i], n-1) * pow(e->z[i], o) + 3 * pow(e->x[i], 2) * pow(e->y[i], 2);
-		res_t dz = o * pow(e->x[i], m) * pow(e->y[i], n) * pow(e->z[i], o-1) - pow(e->x[i], 2) + 4 * pow(e->z[i], 3);
+		Scalar dx = m * pow(e->x[i], m-1) * pow(e->y[i], n) * pow(e->z[i], o) + 2 * e->x[i] * pow(e->y[i], 3) - 2 * e->x[i] * e->z[i];
+		Scalar dy = n * pow(e->x[i], m) * pow(e->y[i], n-1) * pow(e->z[i], o) + 3 * pow(e->x[i], 2) * pow(e->y[i], 2);
+		Scalar dz = o * pow(e->x[i], m) * pow(e->y[i], n) * pow(e->z[i], o-1) - pow(e->x[i], 2) + 4 * pow(e->z[i], 3);
 #elif defined X2_Y2_Z2
-		res_t dx = 2 * e->x[i];
-		res_t dy = 2 * e->y[i];
-		res_t dz = 2 * e->z[i];
+		Scalar dx = 2 * e->x[i];
+		Scalar dy = 2 * e->y[i];
+		Scalar dz = 2 * e->z[i];
 #endif
-		result += wt[i] * (u->fn[i] * (dx * e->nx[i] + dy * e->ny[i] + dz * e->nz[i] + fnc(e->x[i], e->y[i], e->z[i])));
+		result += wt[i] * (u->val[i] * (dx * e->nx[i] + dy * e->ny[i] + dz * e->nz[i] + fnc(e->x[i], e->y[i], e->z[i])));
 	}
 	return result;
 }
@@ -343,206 +325,127 @@ int parse_reft(char *str) {
 	else return H3D_REFT_HEX_NONE;
 }
 
-///
+const double EPS = 10e-12;
 
-const double EPS = 10e-14;
+int main(int argc, char **args) 
+{
+  // Test variable.
+  int success_test = 1;
 
+  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  initialize_solution_environment(matrix_solver, argc, args);
 
-// main ///////////////////////////////////////////////////////////////////////////////////////////
+	for (int i = 0; i < 48; i++) {
+		for (int j = 0; j < 48; j++) {
+			info("Config: %d, %d ", i, j);
 
-int main(int argc, char **args) {
-	int res = ERR_SUCCESS;
+			Mesh mesh;
 
-
-#ifdef WITH_PETSC
-	PetscInitialize(NULL, NULL, (char *) PETSC_NULL, PETSC_NULL);
-#endif
-	set_verbose(false);
-
-	TRACE_START("trace.txt");
-	DEBUG_OUTPUT_ON;
-	SET_VERBOSE_LEVEL(0);
-
-	try {
-		for (int i = 0; i < 48; i++) {
-			for (int j = 0; j < 48; j++) {
-//		int i = 5; {
-//		int j = 0; {
-				printf("Config: %d, %d ", i, j);
-
-				Mesh mesh;
-
-				for (unsigned int k = 0; k < countof(vtcs); k++)
-					mesh.add_vertex(vtcs[k].x, vtcs[k].y, vtcs[k].z);
-				unsigned int h1[] = {
-						hexs[0][i][0] + 1, hexs[0][i][1] + 1, hexs[0][i][2] + 1, hexs[0][i][3] + 1,
-						hexs[0][i][4] + 1, hexs[0][i][5] + 1, hexs[0][i][6] + 1, hexs[0][i][7] + 1 };
-				mesh.add_hex(h1);
-				unsigned int h2[] = {
-						hexs[1][j][0] + 1, hexs[1][j][1] + 1, hexs[1][j][2] + 1, hexs[1][j][3] + 1,
-						hexs[1][j][4] + 1, hexs[1][j][5] + 1, hexs[1][j][6] + 1, hexs[1][j][7] + 1 };
-				mesh.add_hex(h2);
-				// bc
-				for (unsigned int k = 0; k < countof(bnd); k++) {
-					unsigned int facet_idxs[Quad::NUM_VERTICES] = { bnd[k][0] + 1, bnd[k][1] + 1, bnd[k][2] + 1, bnd[k][3] + 1 };
-					mesh.add_quad_boundary(facet_idxs, bnd[k][4]);
-				}
-
-				mesh.ugh();
-//				mesh.dump();
-
-//				Element *hx[] = { mesh.elements[1], mesh.elements[2] };
-//				printf("[%d, %d]\n", hx[0]->get_face_orientation(1), hx[1]->get_face_orientation(2));
-
-//				unsigned int fidx[4];
-//				hx[1]->get_face_vertices(2, fidx);
-//				printf("FI: %d, %d, %d, %d\n", fidx[0], fidx[1], fidx[2], fidx[3]);
-				printf("\n");
-
-#ifdef OUTPUT_DIR
-				BEGIN_BLOCK
-					// output the mesh
-					const char *of_name = OUTPUT_DIR "/ref.msh";
-					FILE *ofile = fopen(of_name, "w");
-					if (ofile != NULL) {
-						GmshOutputEngine output(ofile);
-						output.out(&mesh);
-						fclose(ofile);
-					}
-					else {
-						warning("Can not open '%s' for writing.", of_name);
-					}
-				END_BLOCK
-#endif
-
-				H1ShapesetLobattoHex shapeset;
-
-//				printf("* Setting the space up\n");
-				H1Space space(&mesh, &shapeset);
-				space.set_bc_types(bc_types);
-				space.set_essential_bc_values(essential_bc_values);
-
-#ifdef XM_YN_ZO
-				Ord3 ord(4, 4, 4);
-#elif defined XM_YN_ZO_2
-				Ord3 ord(4, 4, 4);
-#elif defined X2_Y2_Z2
-				Ord3 ord(2, 2, 2);
-#endif
-//				printf("  - Setting uniform order to (%d, %d, %d)\n", dir_x, dir_y, dir_z);
-				space.set_uniform_order(ord);
-
-				space.assign_dofs();
-
-//				printf("* Calculating a solution\n");
-
-#if defined WITH_UMFPACK
-				UMFPackMatrix mat;
-				UMFPackVector rhs;
-				UMFPackLinearSolver solver(&mat, &rhs);
-#elif defined WITH_PARDISO
-				PardisoLinearSolver solver;
-#elif defined WITH_PETSC
-				PetscMatrix mat;
-				PetscVector rhs;
-				PetscLinearSolver solver(&mat, &rhs);
-#elif defined WITH_MUMPS
-				MumpsMatrix mat;
-				MumpsVector rhs;
-				MumpsSolver solver(&mat, &rhs);
-#endif
-
-				WeakForm wf;
-#ifdef DIRICHLET
-				wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
-				wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
-#elif defined NEWTON
-				wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, SYM);
-				wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
-				wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
-				wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
-#endif
-
-				LinProblem lp(&wf);
-				lp.set_space(&space);
-
-				// assemble stiffness matrix
-				lp.assemble(&mat, &rhs);
-
-				// solve the stiffness matrix
-				bool solved = solver.solve();
-				if (!solved) throw ERR_FAILURE;
-
-//				{
-//					char file_name[1024];
-//					sprintf(file_name, "%s/matrix-%d-%d", OUTPUT_DIR, i, j);
-//					FILE *file = fopen(file_name, "w");
-//					if (file != NULL) {
-//						solver.dump_matrix(file, "A");
-//						solver.dump_rhs(file, "b");
-//
-//						fclose(file);
-//					}
-//				}
-
-				Solution sln(&mesh);
-				sln.set_coeff_vector(&space, solver.get_solution());
-
-				ExactSolution exsln(&mesh, exact_solution);
-				// norm
-				double h1_sln_norm = h1_norm(&sln);
-				double h1_err_norm = h1_error(&sln, &exsln);
-				printf(" - H1 solution norm:   % le\n", h1_sln_norm);
-				printf(" - H1 error norm:      % le\n", h1_err_norm);
-
-				double l2_sln_norm = l2_norm(&sln);
-				double l2_err_norm = l2_error(&sln, &exsln);
-				printf(" - L2 solution norm:   % le\n", l2_sln_norm);
-				printf(" - L2 error norm:      % le\n", l2_err_norm);
-
-				assert(h1_sln_norm > 0 && h1_err_norm > 0);
-				assert(l2_sln_norm > 0 && l2_err_norm > 0);
-
-//				// out fn
-//				char fname[4096];
-//				sprintf(fname, "%s/cfg-%d-%d.pos", OUTPUT_DIR, i, j);
-//				FILE *fnf = fopen(fname, "w");
-//				assert(fnf != NULL);
-//				GmshOutputEngine out(fnf);
-//				char var[64];
-//				sprintf(var, "%d_%d", i, j);
-//				out.out(&sln, var);
-//				fclose(fnf);
-//
-//				char mfname[4096];
-//				sprintf(mfname, "%s/mesh-%d-%d.ref", OUTPUT_DIR, i, j);
-//				FILE *mfnf = fopen(mfname, "w");
-//				assert(mfnf != NULL);
-//				GmshOutputEngine outm(mfnf);
-//				outm.out(&mesh);
-//				fclose(mfnf);
-
-				if (h1_err_norm > EPS || l2_err_norm > EPS) {
-					// calculated solution is not enough precise
-					printf("Solution is not precise enough.\n");
-					throw ERR_FAILURE;
-				}
-
-				printf("Passed\n");
+			for (unsigned int k = 0; k < countof(vtcs); k++)
+				mesh.add_vertex(vtcs[k].x, vtcs[k].y, vtcs[k].z);
+			unsigned int h1[] = {
+					hexs[0][i][0] + 1, hexs[0][i][1] + 1, hexs[0][i][2] + 1, hexs[0][i][3] + 1,
+					hexs[0][i][4] + 1, hexs[0][i][5] + 1, hexs[0][i][6] + 1, hexs[0][i][7] + 1 };
+			mesh.add_hex(h1);
+			unsigned int h2[] = {
+					hexs[1][j][0] + 1, hexs[1][j][1] + 1, hexs[1][j][2] + 1, hexs[1][j][3] + 1,
+					hexs[1][j][4] + 1, hexs[1][j][5] + 1, hexs[1][j][6] + 1, hexs[1][j][7] + 1 };
+			mesh.add_hex(h2);
+			// bc
+			for (unsigned int k = 0; k < countof(bnd); k++) {
+				unsigned int facet_idxs[Quad::NUM_VERTICES] = { bnd[k][0] + 1, bnd[k][1] + 1, bnd[k][2] + 1, bnd[k][3] + 1 };
+				mesh.add_quad_boundary(facet_idxs, bnd[k][4]);
 			}
+
+			mesh.ugh();
+
+      // Initialize the space.
+			H1Space space(&mesh, bc_types, essential_bc_values);
+			
+#ifdef XM_YN_ZO
+			Ord3 ord(4, 4, 4);
+#elif defined XM_YN_ZO_2
+			Ord3 ord(4, 4, 4);
+#elif defined X2_Y2_Z2
+			Ord3 ord(2, 2, 2);
+#endif
+			space.set_uniform_order(ord);
+
+      // Initialize the weak formulation.
+      WeakForm wf;
+#ifdef DIRICHLET
+      wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
+      wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
+#elif defined NEWTON
+      wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
+      wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
+      wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
+      wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
+#endif
+
+      // Initialize the FE problem.
+      bool is_linear = true;
+      DiscreteProblem dp(&wf, &space, is_linear);
+
+      // Set up the solver, matrix, and rhs according to the solver selection.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+      
+      // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+      if (matrix_solver == SOLVER_AZTECOO) 
+      {
+        ((AztecOOSolver*) solver)->set_solver(iterative_method);
+        ((AztecOOSolver*) solver)->set_precond(preconditioner);
+        // Using default iteration parameters (see solver/aztecoo.h).
+      }
+
+      // Assemble the linear problem.
+      info("Assembling (ndof: %d).", Space::get_num_dofs(&space));
+      dp.assemble(matrix, rhs);
+        
+      // Solve the linear system. If successful, obtain the solution.
+      info("Solving.");
+      Solution sln(space.get_mesh());
+      if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+      else error ("Matrix solver failed.\n");
+
+
+      ExactSolution ex_sln(&mesh, exact_solution);
+
+      // Calculate exact error.
+      info("Calculating exact error.");
+      Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+      bool solutions_for_adapt = false;
+      double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
+
+      if (err_exact > EPS)
+      {
+        // Calculated solution is not precise enough.
+	      success_test = 0;
+        info("failed, error:%g", err_exact);
+      }
+      else
+        info("passed");
+
+      // Clean up.
+      delete matrix;
+      delete rhs;
+      delete solver;
+      delete adaptivity;
 		}
 	}
-	catch (int e) {
-		res = e;
-		printf("Failed\n");
-	}
 
-#ifdef WITH_PETSC
-	PetscFinalize();
-#endif
-
-	TRACE_END;
-
-	return res;
+  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
+  finalize_solution_environment(matrix_solver);
+  
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }
 

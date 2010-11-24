@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace Teuchos;
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
   }
 
   // Initialize the view.
-  ScalarView Tview("Temperature", 0, 0, 450, 400);
+  ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 400));
   Tview.set_min_max_range(10,20);
 
   // Time stepping loop:

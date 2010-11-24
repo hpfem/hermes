@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -30,9 +30,6 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 
-const bool SOLVE_ON_COARSE_MESH = false; // true... Newton is done on coarse mesh in every adaptivity step.
-                                         // false...Newton is done on coarse mesh only once, then projection
-                                         // of the fine mesh solution to coarse mesh is used.
 const int INIT_REF_NUM = 0;              // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 3;          // Number of initial mesh refinements towards boundary.
 #define PRESSURE_IN_L2                   // If this is defined, the pressure is approximated using
@@ -87,9 +84,8 @@ const double TAU = 0.01;             // Time step.
 const double T_FINAL = 30000.0;      // Time interval length.
 
 // Newton's method
-const double NEWTON_TOL_COARSE = 0.01;     // Stopping criterion for Newton on coarse mesh.
-const double NEWTON_TOL_FINE = 0.05;       // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 20;            // Maximum allowed number of Newton iterations.
+const double NEWTON_TOL = 0.05;      // Stopping criterion for Newton on fine mesh.
+const int NEWTON_MAX_ITER = 20;      // Maximum allowed number of Newton iterations.
 
 // Geometry
 const double H = 5;                  // Domain height (necessary to define the parabolic
@@ -189,7 +185,7 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-//  Solution xvel_fine, yvel_fine, p_fine;
+  // Solution xvel_fine, yvel_fine, p_fine;
   Solution xvel_sln, yvel_sln, p_sln;
   Solution xvel_ref_sln, yvel_ref_sln, p_ref_sln;
   Solution xvel_prev_time, yvel_prev_time, p_prev_time;
@@ -264,74 +260,52 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_sln, &yvel_sln, &p_sln), coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_sln, &yvel_sln, &p_sln), 
+                      coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
+                      coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
       }
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(*ref_spaces);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve())
-          error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-        
-        if (it >= NEWTON_MAX_ITER)
-          error ("Newton method did not converge.");
-
-        it++;
-      }
+      bool verbose = true;
+      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Store the result in ref_sln.
-      Solution::vector_to_solutions(coeff_vec, *ref_spaces, Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln));
+      Solution::vector_to_solutions(coeff_vec, *ref_spaces, 
+                Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln));
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver); 
+      OGProjection::project_global(Tuple<Space *>(xvel_space, yvel_space, p_space), 
+                    Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
+                    Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Tuple<Space *>(xvel_space, yvel_space, p_space), Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+      Adapt* adaptivity = new Adapt(Tuple<Space *>(xvel_space, yvel_space, p_space), 
+                          Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
       bool solutions_for_adapt = true;
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), 
+             Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), solutions_for_adapt, 
+             HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
-           Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+           Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space)), 
+           Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
       else 
       {
         info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), 
+                                 THRESHOLD, STRATEGY, MESH_REGULARITY);
 
         if (Space::get_num_dofs(Tuple<Space *>(xvel_space, yvel_space, p_space)) >= NDOF_STOP) 
           done = true;

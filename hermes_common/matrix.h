@@ -22,6 +22,7 @@
 
 #include "common.h"
 #include "error.h"
+#
 
 
 /// Creates a new (full) matrix with m rows and n columns with entries of the type T.
@@ -183,7 +184,11 @@ void lubksb(double **a, int n, int *indx, T *b) {
 }
 
 
+/// Simple dot product.
+double HERMES_API vec_dot(double *r, double *s, int n_dof);
 
+class Vector;
+double HERMES_API vec_dot(Vector *r, Vector *s, int n_dof);
 
 /// Given a positive-definite symmetric matrix a[n][n], this routine constructs its Cholesky
 /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not
@@ -231,9 +236,25 @@ enum EMatrixDumpFormat {
 
 class HERMES_API Matrix {
 public:
-	virtual ~Matrix() { }
-	Matrix() {this->size = 0;}
-	Matrix(int size) {this->size = size;}
+int get_size() 
+{
+  return this->size;
+};
+
+Matrix(int size) 
+{
+  this->size = size;
+};
+
+~Matrix() 
+{
+};
+
+Matrix() 
+{
+  this->size = 0;
+}
+;
 
 	/// allocate the memory for stiffness matrix and right-hand side
 	virtual void alloc() = 0;
@@ -246,8 +267,6 @@ public:
 	/// @param[in] m - the number of row
 	/// @param[in] n - the number of column
 	virtual scalar get(int m, int n) = 0;
-
-	virtual int get_size() {return this->size;};
 
 	/// Zero the matrix
 	virtual void zero() = 0;
@@ -401,9 +420,21 @@ public:
   int length() {return this->size;}
 
 	virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
-
+  
 protected:
 	int size;
 };
+
+/// Calls the required (de)initialization routines of the selected matrix solver.
+HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
+HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
+
+HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
+HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
+
+class Solver;
+HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs = NULL);
+
+
 
 #endif

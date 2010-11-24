@@ -50,7 +50,6 @@ class HERMES_API ScalarView : public View
 public:
 
   void init();
-  ScalarView(const char* title = "ScalarView", DEFAULT_WINDOW_POS);
 #ifndef _MSC_VER
 	ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL);
 #endif
@@ -200,15 +199,9 @@ protected:
   bool is_constant; ///< true if the function to be displayed is constant
 
   // Perspective projection parameters.
-#ifdef _MSC_VER
   static const int fovy;        ///< Field of view in the vertical direction (in degrees).
   static const double znear;  ///< Distance of the near clipping plane of the viewing frustum from the camera.
   static const double zfar;     ///< Distance of the Far clipping plane of the viewing frustum from the camera.
-#else
-	static const int fovy = 50;        ///< Field of view in the vertical direction (in degrees).
-  static const double znear = 0.05;  ///< Distance of the near clipping plane of the viewing frustum from the camera.
-  static const double zfar = 10;     ///< Distance of the Far clipping plane of the viewing frustum from the camera.
-#endif
 
   bool pmode, mode3d, panning;
   double xrot, yrot, xtrans, ytrans, ztrans;
@@ -251,7 +244,7 @@ protected:
 class HERMES_API ScalarView : public View
 {
 public:
-  ScalarView(const char* title = "ScalarView", DEFAULT_WINDOW_POS) {}
+  ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) {}
   virtual ~ScalarView() {}
   void show(MeshFunction* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
             MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL, double dmult = 1.0)

@@ -1,9 +1,6 @@
 #include <hermes2d.h>
 #include <shapeset/shapeset_common.h>
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
 // This test makes sure that the coefficient of 
 // every kernel function in shape funtion are correct.
 // And make sure the parameters will not be changed by 
@@ -62,10 +59,10 @@ int main(int argc, char* argv[])
 
       if (fabs(val_test[n] - val_kernel[n]) > max_allowed_error) {
         printf("n = %d, val_test = %g\n", n, val_test[n]);
-        return ERROR_FAILURE;
+        return ERR_FAILURE;
       }
   }
       printf("Success!\n");
-      return ERROR_SUCCESS;
+      return ERR_SUCCESS;
 }
 

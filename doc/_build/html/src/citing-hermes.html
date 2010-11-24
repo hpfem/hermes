@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Citing Hermes &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../index.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Interactive Web Accessibility" href="web-access.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="web-access.html" title="Interactive Web Accessibility"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Content</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="citing-hermes">
+<h1>Citing Hermes<a class="headerlink" href="#citing-hermes" title="Permalink to this headline">¶</a></h1>
+<p>If you use Hermes for your work, please be so kind to include some of the references below as appropriate.</p>
+<p>Monographs:</p>
+<div class="highlight-python"><pre>@Book{Hermes-book1,
+   author = {P. Solin, K. Segeth, I. Dolezel},
+   title = {Higher-Order Finite Element Methods},
+   publisher = {Chapman &amp; Hall / CRC Press},
+   year = {2003}
+}</pre>
+</div>
+<div class="highlight-python"><pre>@Book{Hermes-book2,
+   author = {P. Solin},
+   title = {Partial Differential Equations and the Finite Element Method},
+   publisher = {J. Wiley &amp; Sons},
+   year = {2005}
+}</pre>
+</div>
+<p>Reference to the Hermes open-source project:</p>
+<div class="highlight-python"><pre>@Manual{Hermes-project,
+   title =  {Hermes - Higher-Order Modular Finite Element System (User's Guide)},
+   author = {P. Solin et al.},
+   url =    {http://hpfem.org/}
+}</pre>
+</div>
+<p>Underlying algorithms (hanging nodes, adaptivity, shape functions):</p>
+<div class="highlight-python"><pre>@Article{Hermes-hanging-nodes,
+  author = {P. Solin, J. Cerveny, I. Dolezel},
+  title = {Arbitrary-Level Hanging Nodes and Automatic Adaptivity in the hp-FEM},
+  journal = {Math. Comput. Simul.},
+  year = {2008},
+  volume = {77},
+  pages = {117 - 132}
+}</pre>
+</div>
+<div class="highlight-python"><pre>@Article{Hermes-adaptivity,
+  author = {P. Solin, D. Andrs, J. Cerveny, M. Simko},
+  title = {PDE-Independent Adaptive hp-FEM Based on Hierarchic Extension of Finite Element Spaces},
+  journal = {J. Comput. Appl. Math.},
+  year = {2010},
+  volume = {233},
+  pages = {3086-3094}
+}</pre>
+</div>
+<div class="highlight-python"><pre>@Article{Hermes-shape-functions,
+  author = {P. Solin, T. Vejchodsky},
+  title = {Higher-Order Finite Elements Based on Generalized Eigenfunctions of the Laplacian},
+  journal = {Int. J. Numer. Methods Engrg},
+  year = {2007},
+  volume = {73},
+  pages = {1374 - 1394}
+}</pre>
+</div>
+<p>Topical papers from various application areas:</p>
+<div class="highlight-python"><pre>@Article{Hermes-multiphysics,
+  author = {P. Solin, L. Dubcova, J. Kruis},
+  title = {Adaptive hp-FEM with Dynamical Meshes for Transient Heat and Moisture Transfer Problems},
+  journal = {J. Comput. Appl. Math},
+  year = {2010},
+  volume = {233},
+  pages = {3103-3112}
+}</pre>
+</div>
+<div class="highlight-python"><pre>@Article{Hermes-solid-mechanics,
+  author = {P. Solin, J. Cerveny, L. Dubcova, D. Andrs},
+  title = {Monolithic Discretization of Linear Thermoelasticity Problems via Adaptive Multimesh hp-FEM},
+  journal = {J. Comput. Appl. Math},
+  status = {published online},
+  doi = {doi 10.1016/j.cam.2009.08.092},
+  year = {2009}
+}</pre>
+</div>
+<div class="highlight-python"><pre>@Article{Hermes-electromagnetics,
+  author = {L. Dubcova, P. Solin, J. Cerveny, P. Kus},
+  title = {Space and Time Adaptive Two-Mesh hp-FEM for Transient Microwave Heating Problems},
+  journal = {Electromagnetics},
+  year = {2010},
+  volume = {30},
+  pages = {23 - 40}
+}</pre>
+</div>
+<div class="highlight-python"><pre>@Article{Hermes-fluid-mechanics,
+  author = {P. Solin, J. Cerveny, L. Dubcova, I. Dolezel},
+  title = {Multi-Mesh hp-FEM for Thermally Conductive Incompressible Flow},
+  journal = {Proceedings of ECCOMAS Conference COUPLED PROBLEMS 2007 (M. Papadrakakis, E. Onate,
+             B. Schrefler Eds.), CIMNE, Barcelona},
+  year = {2007},
+  pages = {677 - 680}
+}</pre>
+</div>
+<p>Other papers that may be still closer to what you need can be found in the <a class="reference external" href="http://hpfem.org/publications/">publications section</a> of the hp-FEM group home page or on <a class="reference external" href="http://hpfem.org/~pavel">Pavel Solin&#8217;s home page</a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="web-access.html"
+                                  title="previous chapter">Interactive Web Accessibility</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="installation.html"
+                                  title="next chapter">Installation</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="web-access.html" title="Interactive Web Accessibility"
+             >previous</a> |</li>
+        <li><a href="../index.html">Content</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

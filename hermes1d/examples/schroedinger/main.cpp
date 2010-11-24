@@ -1,11 +1,15 @@
+#define HERMES_REPORT_ALL
 #include "hermes1d.h"
 
 #include "python_api.h"
 
 #include "h1d_wrapper_api.h"
 
-static int N_eq = 1;
-int N_elem = 40;                         // number of elements
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+
+static int NEQ = 1;
+int NELEM = 40;                           // number of elements
 double A = 0, B = 20;                     // domain end points
 int P_init = 2;                           // initial polynomal degree
 
@@ -66,18 +70,18 @@ double residual(int num, double *x, double *weights,
     return val;
 }
 
-/******************************************************************************/
+
 int main(int argc, char* argv[]) {
-  // create mesh
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
+  // create space
+  Space *space = new Space(A, B, NELEM, P_init, NEQ);
   // you can set the zero dirichlet at the right hand side
-  //mesh.set_bc_right_dirichlet(0, 0);
+  //space.set_bc_right_dirichlet(0, 0);
 
   // variable for the total number of DOF
-  int N_dof = mesh->assign_dofs();
-  printf("ndofs: %d\n", N_dof);
+  int N_dof = space->assign_dofs();
+  printf("ndofs: %d", N_dof);
 
-  // register weak forms
+  // Initialize the FE problem.
   DiscreteProblem *dp1 = new DiscreteProblem();
   dp1->add_matrix_form(0, 0, lhs);
   DiscreteProblem *dp2 = new DiscreteProblem();
@@ -91,8 +95,8 @@ int main(int argc, char* argv[]) {
   CooMatrix *mat2 = new CooMatrix(N_dof);
   double *y_prev = new double[N_dof];
 
-  dp1->assemble_matrix(mesh, mat1);
-  dp2->assemble_matrix(mesh, mat2);
+  dp1->assemble_matrix(space, mat1);
+  dp2->assemble_matrix(space, mat2);
 
   Python p;
 
@@ -107,27 +111,27 @@ int main(int argc, char* argv[]) {
 
   double *res = new double[N_dof];
   E = py2c_double(p.pull("E"));
-  printf("E=%.10f\n", E);
+  printf("E=%.10f", E);
   E = -0.5;
-  dp3->assemble_vector(mesh, res);
+  dp3->assemble_vector(space, res);
   // calculate L2 norm of residual vector
   double res_norm = 0;
   for(int i=0; i<N_dof; i++) res_norm += res[i]*res[i];
   res_norm = sqrt(res_norm);
-  printf("L2 norm of the residual: %f\n", res_norm);
+  printf("L2 norm of the residual: %f", res_norm);
 
 
-  Linearizer l(mesh);
+  Linearizer l(space);
   const char *out_filename = "solution.gp";
   l.plot_solution(out_filename);
 
-  printf("still ok\n");
+  info("still ok");
   if (import_hermes1d__h1d_wrapper__h1d_wrapper())
       throw std::runtime_error("Can't import hermes1d");
-  p.push("mesh",  c2py_Mesh(mesh));
-  printf("2\n");
+  p.push("space",  c2py_Space(space));
+  info("2");
   p.exec("from plot import plot_eigs, plot_file");
-  p.exec("plot_eigs(mesh, eigs)");
-  printf("Done.\n");
+  p.exec("plot_eigs(space, eigs)");
+  info("Done.");
   return 0;
 }

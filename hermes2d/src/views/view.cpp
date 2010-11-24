@@ -534,12 +534,29 @@ void View::wait_for_close()
   view_sync.leave();
 }
 
+// These two includes are needed for the wait_for_draw() function below:
+//#include <csignal>
+#include "Teuchos_stacktrace.hpp"
+
 void View::wait_for_draw()
 {
+  // For some reason, this function removes the signal handlers. So we just
+  // remember them and restore them. Unfortunately, this doesn't work for some
+  // reason:
+  //sighandler_t old_segv, old_abrt;
+  //old_segv = signal(SIGSEGV, SIG_DFL);
+  //old_abrt = signal(SIGABRT, SIG_DFL);
+
   view_sync.enter();
   if (output_id >= 0 && !frame_ready)
     view_sync.wait_drawing_fisnihed();
   view_sync.leave();
+
+  // Restore the old signal handlers -- doesn't work for some reason:
+  //signal(SIGSEGV, old_segv);
+  //signal(SIGABRT, old_abrt);
+  // So we just restore it by calling the original handler:
+  Teuchos::print_stack_on_segfault();
 }
 
 double View::get_tick_count()

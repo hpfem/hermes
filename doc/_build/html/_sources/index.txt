@@ -1,0 +1,95 @@
+.. Hermes2D documentation master file, created by
+   sphinx-quickstart on Fri Oct 30 19:23:04 2009.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+====================
+Hermes Documentation
+====================
+
+Thank you for your interest in Hermes! 
+
+This document is organized as follows: 
+Section 1 contains general information about Hermes, its math background,
+and interactive web accessibility. Section 2 will walk you through its 
+installation on various platforms and related issues. 
+You will also learn how to use Git and Github, and 
+how to contribute to the project if interested. The tutorial itself begins with 
+Section 3 that explains in many incremental steps how 
+Hermes2D is used. Sections 4 and 5 present examples and benchmarks for Hermes3D 
+and Hermes1D. The 3D and 1D codes are not described in great detail since their
+usage is very similar to Hermes2D. 
+
+1. Introduction
+---------------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/about-hermes
+    src/math-background
+    src/web-access
+    src/citing-hermes
+
+2. Getting Started
+------------------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/installation
+    src/matrix_solvers
+    src/first_pull_request
+
+3. Hermes2D
+-----------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/hermes2d/tutorial-1
+    src/hermes2d/tutorial-2
+    src/hermes2d/tutorial-3
+    src/hermes2d/tutorial-4
+    src/hermes2d/tutorial-5
+    src/hermes2d/tutorial-6
+    src/hermes2d/benchmarks
+    src/hermes2d/examples
+    
+4. Hermes3D
+-----------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/hermes3d/benchmarks.rst
+    src/hermes3d/examples.rst
+
+5. Hermes1D
+-----------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/hermes1d/examples.rst
+
+
+
+.. #####
+
+    src/wrappers
+
+    Indices and Tables
+    ==================
+
+    * :ref:`genindex`
+    * :ref:`modindex`
+
+    .. * :ref:`glossary`
+
+    * :ref:`search`
+
+    .. _Hermes: http://www.hpfem.org/hermes
+    .. _FEMhub: http://www.hpfem.org/femhub
+    .. _Agros2D: http://www.hpfem.org/agros2d
+    .. _hp-FEM: http://www.hpfem.org

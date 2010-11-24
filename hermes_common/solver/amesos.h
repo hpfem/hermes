@@ -52,6 +52,8 @@ protected:
 #endif
   EpetraMatrix *m;
   EpetraVector *rhs;
+  
+  bool setup_factorization();
 };
 
 #endif

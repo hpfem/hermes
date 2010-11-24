@@ -43,35 +43,33 @@
 #include <cstring>
 //
 // commonly used functions from hermes_common
+#include "hermes_logging.h"       // logging
 #include "common_time_period.h"   // timing utilities
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
 #include "error.h"
 //.
+#include "tuple.h"
+
+#define HERMES  "Hermes"
 
 // Decide which version of Hermes is being compiled and import
 // the build options from the corresponding config.h file.
 #if defined(H1D_REAL) || defined(H1D_COMPLEX)
-  #define HERMES  "Hermes1D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes1d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
-  #include "../hermes1d/src/h1d_logging.h"
 #elif defined(H2D_REAL) || defined(H2D_COMPLEX)
-  #define HERMES  "Hermes2D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes2d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
-  #include "../hermes2d/src/h2d_logging.h"  
 #elif defined(H3D_REAL) || defined(H3D_COMPLEX)
-  #define HERMES  "Hermes3D"
   #ifndef CONFIG_H_INCLUDED
     #include "../hermes3d/src/config.h"
     #define CONFIG_H_INCLUDED
   #endif
-  #include "../hermes3d/src/h3d_logging.h"  
 #endif
 
 // Error codes
@@ -86,7 +84,7 @@ enum MatrixSolverType
    SOLVER_PETSC, 
    SOLVER_MUMPS,
    SOLVER_PARDISO,
-   SOLVER_NOX,
+   SOLVER_SUPERLU,
    SOLVER_AMESOS,
    SOLVER_AZTECOO
 };
@@ -98,7 +96,7 @@ const std::string MatrixSolverNames[7] = {
   "PETSc",
   "MUMPS",
   "Pardiso",
-  "Trilinos/NOX",
+  "SuperLU",
   "Trilinos/Amesos",
   "Trilinos/AztecOO"
 };
@@ -107,6 +105,7 @@ const std::string MatrixSolverNames[7] = {
 #define PETSC_NOT_COMPILED    HERMES " was not built with PETSC support."
 #define MUMPS_NOT_COMPILED    HERMES " was not built with MUMPS support."
 #define PARDISO_NOT_COMPILED  HERMES " was not built with PARDISO support."
+#define SUPERLU_NOT_COMPILED  HERMES " was not built with SUPERLU support."
 #define NOX_NOT_COMPILED      HERMES " was not built with NOX support."
 #define AMESOS_NOT_COMPILED   HERMES " was not built with AMESOS support."
 #define AZTECOO_NOT_COMPILED  HERMES " was not built with AZTECOO support."
@@ -238,6 +237,16 @@ typedef unsigned long long int uint64;
 #endif
 
 const int HERMES_ANY = -1234;
+/// This defines the edge types used by discontinuous Galerkin weak forms.
+enum DG_EdgeType
+{
+	H2D_DG_BOUNDARY_EDGE = -12345,  ///< This is to be used by weak forms on the boundary. 
+                                    ///< It complements H2D_ANY in that it ensures the forms are evaluated also on non-natural
+                                    ///< boundaries (essential conditions may be enforced weakly in some DG methods).
+	H2D_DG_INNER_EDGE = -1234567    ///< This is to be used by weak forms specifying numerical flux through interior edges.
+                                    ///< Forms with this identifier will receive DiscontinuousFunc representations of shape
+                                    ///< and ext. functions, which they may query for values on either side of given interface.
+};
 
 const int HERMES_DIRICHLET_DOF = -1; // Dirichlet lift is a special DOF with nubmer -1.
 

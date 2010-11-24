@@ -38,6 +38,9 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 
 #endif
 
+#ifndef HAVE_STRCASECMP
+#define strcasecmp strcmp
+#endif
 
 //C99 functions
 #include "compat/c99_functions.h"

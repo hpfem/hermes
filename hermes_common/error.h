@@ -46,11 +46,11 @@
 void HERMES_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
 
 /// Report unrecoverable error (no call stack or location dumped)
-void error(char const *fmt, ...) NORETURN;
+void HERMES_API error_function(char const *fmt, ...) NORETURN;
 
 /// Notify the user about warning (the execution continues), neither location or call stack
 /// is dumped
-void warning(const char *warn, ...);
+void HERMES_API warning(const char *warn, ...);
 
 /// Check that memory allocation was ok, it not, report an error (also dump call stack) and
 /// terminate

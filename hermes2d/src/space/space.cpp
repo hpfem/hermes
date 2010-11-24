@@ -16,7 +16,6 @@
 #include "../h2d_common.h"
 #include "space.h"
 #include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/callstack.h"
 #include "../auto_local_array.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 

@@ -1,5 +1,5 @@
-#define H2D_REPORT_INFO
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 // This example explains how to create multiple spaces over a mesh and use them
@@ -82,10 +82,9 @@ int main(int argc, char* argv[])
 
   // Solve the linear system and if successful, obtain the solutions.
   info("Solving the matrix problem.");
-  if(solver->solve())
-    Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_sln, &v_sln));
-  else
-    error ("Matrix solver failed.\n");
+  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), 
+                                                    Tuple<Solution *>(&u_sln, &v_sln));
+  else error ("Matrix solver failed.\n");
   
   // Visualize the solution.
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));

@@ -240,6 +240,7 @@ static double eval_fn(MSymbol* sym)
     return ((double (*)(double, double)) sym->built_in)(args[0], args[1]);
 
   error("Internal error.");
+  return 0.0;
 }
 
 
@@ -285,8 +286,10 @@ static double factor()
       return sym->data->val;
     }
   }
-  else
+  else {
     serror("syntax error: '%s'", token->text);
+    return 0.0;
+  }
 }
 
 

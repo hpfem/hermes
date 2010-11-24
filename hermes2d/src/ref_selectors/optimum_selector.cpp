@@ -1,6 +1,6 @@
 #include "../h2d_common.h"
 #include "../solution.h"
-#include "../feproblem.h"
+#include "../discrete_problem.h"
 #include "../quad_all.h"
 #include "../element_to_refine.h"
 #include "optimum_selector.h"
@@ -35,7 +35,7 @@ namespace RefinementSelectors {
       case H2D_HP_ANISO_H: return "HP_ANISO_H";
       case H2D_HP_ANISO_P: return "HP_ANISO_P";
       case H2D_HP_ANISO: return "HP_ANISO";
-      default: error("Invalid adapt type %d.", cand_list); return false;
+      default: error("Invalid adapt type %d.", cand_list); return NULL;
     }
   }
 
@@ -277,19 +277,17 @@ namespace RefinementSelectors {
     if (candidates.capacity() < H2DRS_ASSUMED_MAX_CANDS)
       candidates.reserve(H2DRS_ASSUMED_MAX_CANDS);
 
-    //generate all P-candidates (start from intention of generating all possible candidates and restrict it according to the given adapt-type)
+    //generate all P-candidates (start from intention of generating all possible candidates 
+    //and restrict it according to the given adapt-type)
     bool iso_p = false;
     int start_quad_order = quad_order;
     int last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_p_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(max_p_order_v, order_v+H2DRS_MAX_ORDER_INC));
     switch(cand_list) {
       case H2D_H_ISO:
-      case H2D_H_ANISO:
-        last_quad_order = start_quad_order; break; //no P-candidates except the original candidate
-
+      case H2D_H_ANISO: last_quad_order = start_quad_order; break; //no P-candidates except the original candidate
       case H2D_P_ISO:
       case H2D_HP_ISO:
-      case H2D_HP_ANISO_H:
-        iso_p = true; break; //iso change of orders
+      case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
     }
     append_candidates_split(quad_order, last_quad_order, H2D_REFINEMENT_P, tri || iso_p);
 
@@ -302,14 +300,10 @@ namespace RefinementSelectors {
       case H2D_H_ISO:
       case H2D_H_ANISO:
         last_quad_order = start_quad_order = quad_order; break; //no only one candidate will be created
-
       case H2D_P_ISO:
-      case H2D_P_ANISO:
-        last_quad_order = -1; break; //no H-candidate will be generated
-
+      case H2D_P_ANISO: last_quad_order = -1; break; //no H-candidate will be generated
       case H2D_HP_ISO:
-      case H2D_HP_ANISO_H:
-        iso_p = true; break; //iso change of orders
+      case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
     }
     append_candidates_split(start_quad_order, last_quad_order, H2D_REFINEMENT_H, tri || iso_p);
 
@@ -326,9 +320,7 @@ namespace RefinementSelectors {
           last_quad_order_hz = start_quad_order_hz = quad_order;
           last_quad_order_vt = start_quad_order_vt = quad_order;
           break; //only one candidate will be created
-
-        case H2D_HP_ANISO_H:
-          iso_p = true; break; //iso change of orders
+        case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
       }
       if (iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
         int order = std::min(H2D_GET_H_ORDER(start_quad_order_hz), H2D_GET_V_ORDER(start_quad_order_hz));

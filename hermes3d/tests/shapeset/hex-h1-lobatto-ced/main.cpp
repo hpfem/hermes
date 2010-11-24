@@ -263,7 +263,7 @@ bool test_edge_ced(Mesh *mesh, Shapeset *shapeset) {
 						shapeset->get_fn_value(cng_idx[order - 2], hi, -1.0, -1.0, 0)
 					};
 
-					printf("edge = %d, ori = %d, order = %02d, part = %02d (% lf - % lf), (cng_idx = %03d)\n",
+					info("edge = %d, ori = %d, order = %02d, part = %02d (% lf - % lf), (cng_idx = %03d)",
 						iedge, ori, order, part, lo, hi, cng_idx[order - 2]);
 
 					int np = 10;								// number of points to check values in
@@ -280,23 +280,23 @@ bool test_edge_ced(Mesh *mesh, Shapeset *shapeset) {
 
 						double cng_val = shapeset->get_fn_value(cng_idx[order - 2], x, -1.0, -1.0, 0);
 
-						printf(" %lf: ced = % lf | cng = % lf | (%lf) | % lf\n", x,
+						info(" %lf: ced = % lf | cng = % lf | (%lf) | % lf", x,
 							ced_val, cng_val, fabs(ced_val - cng_val), shapeset->get_fn_value(ced_idx, ref_x, -1.0, -1.0, 0));
 
 						if (fabs(ced_val - cng_val) > EPS) {
-							printf("ERROR: constrained value does not fit constraning value.\n");
+							info("ERROR: constrained value does not fit constraning value.");
 							return false;
 						}
 
 
-/*						printf(" %lf: ced = % lf * %lf + %lf * %lf + % lf = % lf | % lf | (%lf)\n", x,
+/*						info(" %lf: ced = % lf * %lf + %lf * %lf + % lf = % lf | % lf | (%lf)", x,
 							vfn[0], shapeset->get_fn_value(shapeset->get_vertex_index(0), x, -1.0, -1.0, 0),
 							vfn[1], shapeset->get_fn_value(shapeset->get_vertex_index(1), x, -1.0, -1.0, 0),
 							val,
 							ced_val,
 							cng_val, fabs(ced_val - cng_val));
 */
-//						printf(" % lf: ced = % lf\n", x, ced_val);
+//						info(" % lf: ced = % lf", x, ced_val);
 
 						x += (hi - lo) / np;
 					}
@@ -315,7 +315,7 @@ bool test_edge_face_ced(Mesh *mesh, Shapeset *shapeset) {
 	int iface = 5; {
 //		for (int ori = 0; ori < RefHex::get_face_orientations(); ori++) {
 		for (int ori = 0; ori < 1; ori++) {
-			printf("face %d, ori = %d\n", iface, ori);
+			info("face %d, ori = %d", iface, ori);
 			// indices of constraining functions
 			int *cng_idx = shapeset->get_face_indices(iface, ori, MAKE_QUAD_ORDER(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER));
 
@@ -325,7 +325,7 @@ bool test_edge_face_ced(Mesh *mesh, Shapeset *shapeset) {
 //			for (int horder = 2; horder <= H3D_MAX_ELEMENT_ORDER; horder++) {			// face functions on hex start with order 2 (in each direction)
 //				for (int vorder = 2; vorder <= H3D_MAX_ELEMENT_ORDER; vorder++) {
 					int order = MAKE_QUAD_ORDER(horder, vorder);
-					printf("order = %d\n", order);
+					info("order = %d", order);
 
 					int fpart = 2; {
 						int epart = 2; {
@@ -339,34 +339,31 @@ bool test_edge_face_ced(Mesh *mesh, Shapeset *shapeset) {
 							/// ???
 							int iedge = 8;
 							int ced_idx = shapeset->get_constrained_edge_face_index(iedge, ori, order, part);
-//							printf("ced_idx = %d\n", ced_idx);
+//							info("ced_idx = %d", ced_idx);
 
 							double lo, hi;
 							get_interval_part(part.fpart, lo, hi);
 							double x0;
 							get_edge_part(part.epart, x0);
 
-							printf(" region = (% lf, % lf), x0 = % lf\n", lo, hi, x0);
+							info(" region = (% lf, % lf), x0 = % lf", lo, hi, x0);
 
 							double vfn[2] = {					// fn. values at vertices
 								shapeset->get_fn_value(cng_idx[fn_idx], lo, x0, 1.0, 0),
 								shapeset->get_fn_value(cng_idx[fn_idx], hi, x0, 1.0, 0),
 							};
 
-//							printf("vfn: ");
+//							info("vfn: ");
 //							for (int t = 0; t < 4; t++)
-//								printf("% lf ", vfn[t]);
-//							printf("\n");
+//								info("% lf ", vfn[t]);
 //
-//							printf("efn: ");
+//							info("efn: ");
 //							for (int t = 0; t < 4; t++)
-//								printf("% lf ", efn[t]);
-//							printf("\n");
+//								info("% lf ", efn[t]);
 
 							int np = 8;
 							double x = lo;								// position on the part
 
-//							printf("\n");
 							double h = 2.0 / np;
 							for (int i = 0; i <= np; i++) {
 								double ref_x = (h * i) - 1.0;			// position on the interval [-1, 1]
@@ -377,37 +374,33 @@ bool test_edge_face_ced(Mesh *mesh, Shapeset *shapeset) {
 									shapeset->get_fn_value(ced_idx, ref_x, -1.0, 1.0, 0);
 
 //								double val = shapeset->get_fn_value(ced_idx, -1.0, ref_x, ref_y, 0);
-								printf("% lf, ", ced_val);
+								info("% lf, ", ced_val);
 
-//								printf(" (% lf) ", shapeset->get_fn_value(ced_edge_idx[1], -1.0, ref_x, ref_y, 0));
+//								info(" (% lf) ", shapeset->get_fn_value(ced_edge_idx[1], -1.0, ref_x, ref_y, 0));
 
-//								printf("\n");
 							}
 
-							printf("\ncing\n");
+							info("\ncing");
 /*
 							np = 8;
 							double y = -1.0;
 							for (int i = 0; i <= np; i++) {
 								x = lo;								// position on the part
-								printf("% lf: ", y);
+								info("% lf: ", y);
 								for (int j = 0; j <= np; j++) {
 									double cng_val = shapeset->get_fn_value(cng_idx[fn_idx], x, y, 1.0, 0);
-									printf("% lf, ", cng_val);
+									info("% lf, ", cng_val);
 									x += (hi - lo) / np;
 								}
-								printf("\n");
 								y += 2.0 / np;
 							}
-							printf("\n");
 */
 							x = lo;
 							for (int i = 0; i <= np; i++) {
 								double cng_val = shapeset->get_fn_value(cng_idx[fn_idx], x, x0, 1.0, 0);
-								printf("% lf, ", cng_val);
+								info("% lf, ", cng_val);
 								x += (hi - lo) / np;
 							}
-							printf("\n");
 
 						}
 					}
@@ -429,10 +422,10 @@ bool test_face_ced(Mesh *mesh, Shapeset *shapeset) {
 	int iface = 5; {
 //		for (int ori = 0; ori < RefHex::get_face_orientations(iface); ori++) {
 		int ori = 7; {
-//			printf("face %d, ori = %d\n", iface, ori);
+//			info("face %d, ori = %d", iface, ori);
 			// indices of constraining functions
 //			int *cng_idx = shapeset->get_face_indices(iface, ori, MAKE_QUAD_ORDER(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER));
-//			printf("------\n");
+//			info("------");
 
 			int fn_idx = 0;
 //			for (int horder = 2; horder <= 10; horder++) {					// face functions on hex start with order 2 (in each direction)
@@ -440,9 +433,9 @@ bool test_face_ced(Mesh *mesh, Shapeset *shapeset) {
 //				for (int vorder = 2; vorder <= 10; vorder++, fn_idx++) {
 				int vorder = 3; {
 					int order = MAKE_QUAD_ORDER(horder, vorder);
-//					printf("order = %d\n", order);
-//					printf("face %d, ori = %d, order = (%d %d)\n", iface, ori, horder, vorder);
-					printf("ori = %d, order = (%d %d)\n", ori, horder, vorder);
+//					info("order = %d", order);
+//					info("face %d, ori = %d, order = (%d %d)", iface, ori, horder, vorder);
+					info("ori = %d, order = (%d %d)", ori, horder, vorder);
 
 					int *cng_idx = shapeset->get_face_indices(iface, ori, order);
 					fn_idx = shapeset->get_num_face_fns(order) - 1;
@@ -458,14 +451,14 @@ bool test_face_ced(Mesh *mesh, Shapeset *shapeset) {
 							part.vert = vpart;
 
 							int ced_idx = shapeset->get_constrained_face_index(iface, ori, order, part);
-//							printf("ced_idx = %d\n", ced_idx);
+//							info("ced_idx = %d", ced_idx);
 
 							double h_lo, h_hi;
 							get_interval_part(part.horz, h_lo, h_hi);
 							double v_lo, v_hi;
 							get_interval_part(part.vert, v_lo, v_hi);
 
-//							printf(" region = (% lf, % lf) x (% lf, % lf)\n", h_lo, h_hi, v_lo, v_hi);
+//							info(" region = (% lf, % lf) x (% lf, % lf)", h_lo, h_hi, v_lo, v_hi);
 
 							double vfn[4] = {					// fn. values at vertices
 								shapeset->get_fn_value(cng_idx[fn_idx], h_lo, v_lo, 1.0, 0),
@@ -519,21 +512,18 @@ bool test_face_ced(Mesh *mesh, Shapeset *shapeset) {
 								efn[3] = shapeset->get_fn_value(edge_fn_idx[3][vorder - 2], h_lo, -1.0, 1.0, 0);
 							}
 #ifdef DEBUG
-//							printf("vfn: ");
+//							info("vfn: ");
 //							for (int t = 0; t < 4; t++)
-//								printf("% lf ", vfn[t]);
-//							printf("\n");
+//								info("% lf ", vfn[t]);
 
-/*							printf("efn: ");
+/*							info("efn: ");
 							for (int t = 0; t < 4; t++)
-								printf("% lf ", efn[t]);
-							printf("\n");
+								info("% lf ", efn[t]);
 */
 #endif
 							int np = 5;								// number of points in one direction (matrix of points np x np)
 							double x, y;								// position on the part
 
-//							printf("\n");
 							y = v_lo;
 							double h = 2.0 / np;
 							for (int i = 0; i <= np; i++) {
@@ -557,42 +547,35 @@ bool test_face_ced(Mesh *mesh, Shapeset *shapeset) {
 									// constraining value
 									double cng_val = shapeset->get_fn_value(cng_idx[fn_idx], x, y, 1.0, 0);
 #ifdef DEBUG
-									printf("% lf, ", ced_val);
-//									printf("% lf == % lf (% lf), ", cng_val, ced_val, fabs(ced_val - cng_val));
+									info("% lf, ", ced_val);
+//									info("% lf == % lf (% lf), ", cng_val, ced_val, fabs(ced_val - cng_val));
 #endif
 									// compare constraining and constrained values
 									if (fabs(ced_val - cng_val) > EPS) {
-										printf("\nERROR: constrained value does not fit constraning value (face = %d, ori = %d, order = (%d, %d), part = (%d, %d)).\n", iface, ori, horder, vorder, hpart, vpart);
+										info("\nERROR: constrained value does not fit constraning value (face = %d, ori = %d, order = (%d, %d), part = (%d, %d)).", iface, ori, horder, vorder, hpart, vpart);
 										return false;
 									}
-
-//									printf("\n");
-
 									x += (h_hi - h_lo) / np;
 								}
-								printf("\n");
 								y += (v_hi - v_lo) / np;
 							}
 
 #ifdef DEBUG
-							printf("\ncing\n");
+							info("\ncing");
 							y = v_lo;
 							for (int i = 0; i <= np; i++) {
 								x = h_lo;								// position on the part
 								for (int j = 0; j <= np; j++) {
 									double cng_val = shapeset->get_fn_value(cng_idx[fn_idx], x, y, 1.0, 0);
-									printf("% lf, ", cng_val);
+									info("% lf, ", cng_val);
 									x += (h_hi - h_lo) / np;
 								}
-								printf("\n");
 								y += (v_hi - v_lo) / np;
 							}
 #endif
 
-//							printf(".");
 						}
 					}
-//					printf("\n");
 				}
 			}
 		}
@@ -607,7 +590,7 @@ bool test_face_ced_0(Mesh *mesh, Shapeset *shapeset) {
 //		for (int ori = 0; ori < RefHex::get_face_orientations(); ori++) {
 //		for (int ori = 0; ori < 2; ori++) {
 		int ori = 0; {
-			printf("face %d, ori = %d\n", iface, ori);
+			info("face %d, ori = %d", iface, ori);
 			// indices of constraining functions
 //			int *cng_idx = shapeset->get_face_indices(iface, ori, MAKE_QUAD_ORDER(H3D_MAX_ELEMENT_ORDER, H3D_MAX_ELEMENT_ORDER));
 
@@ -622,7 +605,7 @@ bool test_face_ced_0(Mesh *mesh, Shapeset *shapeset) {
 //			for (int horder = 2; horder <= H3D_MAX_ELEMENT_ORDER; horder++) {			// face functions on hex start with order 2 (in each direction)
 //				for (int vorder = 2; vorder <= H3D_MAX_ELEMENT_ORDER; vorder++) {
 					int order = MAKE_QUAD_ORDER(horder, vorder);
-					printf("order = %d\n", order);
+					info("order = %d", order);
 
 					int vpart = 1; {
 						int hpart = 1; {
@@ -633,14 +616,14 @@ bool test_face_ced_0(Mesh *mesh, Shapeset *shapeset) {
 							part.vert = vpart;
 
 							int ced_idx = shapeset->get_constrained_face_index(iface, ori, order, part);
-//							printf("ced_idx = %d\n", ced_idx);
+//							info("ced_idx = %d", ced_idx);
 
 							double h_lo, h_hi;
 							get_interval_part(part.horz, h_lo, h_hi);
 							double v_lo, v_hi;
 							get_interval_part(part.vert, v_lo, v_hi);
 
-							printf(" region = (% lf, % lf) x (% lf, % lf)\n", h_lo, h_hi, v_lo, v_hi);
+							info(" region = (% lf, % lf) x (% lf, % lf)", h_lo, h_hi, v_lo, v_hi);
 
 							double vfn[4] = {					// fn. values at vertices
 								shapeset->get_fn_value(cng_idx[fn_idx], -1.0, h_lo, v_lo, 0),
@@ -678,17 +661,13 @@ bool test_face_ced_0(Mesh *mesh, Shapeset *shapeset) {
 								shapeset->get_fn_value(edge_fn_idx[3][horder - 2], -1.0, h_lo, -1.0, 0)
 							};
 
-//							printf("vfn: ");
+//							info("vfn: ");
 //							for (int t = 0; t < 4; t++)
-//								printf("% lf ", vfn[t]);
-//							printf("\n");
+//								info("% lf ", vfn[t]);
 //
-//							printf("efn: ");
+//							info("efn: ");
 //							for (int t = 0; t < 4; t++)
-//								printf("% lf ", efn[t]);
-//							printf("\n");
-
-							printf("\n");
+//								info("% lf ", efn[t]);
 
 							int np = 5;
 							double h = 2.0 / np;
@@ -711,43 +690,39 @@ bool test_face_ced_0(Mesh *mesh, Shapeset *shapeset) {
 										shapeset->get_fn_value(ced_idx, -1.0, ref_x, ref_y, 0);
 
 //									double val = shapeset->get_fn_value(ced_idx, -1.0, ref_x, ref_y, 0);
-									printf("% lf, ", ced_val);
+									info("% lf, ", ced_val);
 
-//									printf(" (% lf) ", shapeset->get_fn_value(ced_edge_idx[1], -1.0, ref_x, ref_y, 0));
-//									printf("\n");
+//									info(" (% lf) ", shapeset->get_fn_value(ced_edge_idx[1], -1.0, ref_x, ref_y, 0));
 
 //									x += (h_hi - h_lo) / np;
 //									ref_x += (h_hi - h_lo) / np;
 								}
-								printf("\n");
 //								y += (v_hi - v_lo) / np;
 //								ref_y += (v_hi - v_lo) / np;
 							}
 
-							printf("\ncing\n");
+							info("\ncing");
 
 							double y = v_lo;
 							for (int i = 0; i <= np; i++) {
 								double x = h_lo;								// position on the part
 								for (int j = 0; j <= np; j++) {
 									double cng_val = shapeset->get_fn_value(cng_idx[fn_idx], -1.0, x, y, 0);
-									printf("% lf, ", cng_val);
+									info("% lf, ", cng_val);
 									x += (h_hi - h_lo) / np;
 								}
-								printf("\n");
 								y += (v_hi - v_lo) / np;
 							}
 /*
-							printf("---\n");
+							info("---");
 							y = -1.0;
 							for (int i = 0; i <= np; i++) {
 								x = -1.0;								// position on the part
 								for (int j = 0; j <= 2 * np; j++) {
 									double cng_val = shapeset->get_fn_value(cng_idx[fn_idx], -1.0, x, y, 0);
-									printf("% lf, ", cng_val);
+									info("% lf, ", cng_val);
 									x += 2.0 / (2 * np);
 								}
-								printf("\n");
 								y += 2.0 / (np);
 							}
 */
@@ -776,9 +751,9 @@ bool test_match(Shapeset *shapeset) {
 //				for (int vorder = 2; vorder <= 10; vorder++, fn_idx++) {
 				int vorder = 4; {
 					int order = MAKE_QUAD_ORDER(horder, vorder);
-//					printf("order = %d\n", order);
-//					printf("face %d, ori = %d, order = (%d %d)\n", iface, ori, horder, vorder);
-					printf("ori = %d, order = (%d %d)\n", ori, horder, vorder);
+//					info("order = %d", order);
+//					info("face %d, ori = %d, order = (%d %d)", iface, ori, horder, vorder);
+					info("ori = %d, order = (%d %d)", ori, horder, vorder);
 
 					int *face_fn[] = {
 						shapeset->get_face_indices(0, ori, order),
@@ -789,7 +764,6 @@ bool test_match(Shapeset *shapeset) {
 							int np = 5;								// number of points in one direction (matrix of points np x np)
 							double x, y;								// position on the part
 
-//							printf("\n");
 							double h = 2.0 / np;
 							for (int i = 0; i <= np; i++) {
 								double y = (h * i) - 1.0;				// position on the interval [-1, 1]
@@ -801,15 +775,13 @@ bool test_match(Shapeset *shapeset) {
 										shapeset->get_fn_value(face_fn[0][fn_idx], -1.0, x, y, 0),
 										shapeset->get_fn_value(face_fn[1][fn_idx], x, y, 1.0, 0)
 									};
-//									printf("% lf, ", ced_val);
-//									printf("% lf == % lf (% lf), ", val[0], val[1], fabs(val[0] - val[1]));
-									printf("% lf == % lf, ", val[0], val[1]);
+//									info("% lf, ", ced_val);
+//									info("% lf == % lf (% lf), ", val[0], val[1], fabs(val[0] - val[1]));
+									info("% lf == % lf, ", val[0], val[1]);
 								}
-								printf("\n");
 							}
 
-//							printf(".");
-//					printf("\n");
+//							info(".");
 				}
 			}
 
@@ -849,7 +821,7 @@ int main(int argc, char *argv[]) {
 			mesh.ugh();
 
 			// test
-			printf("pos = %d, %d\n", i, j);
+			info("pos = %d, %d", i, j);
 
 //			res = test_edge_ced(&mesh, &shapeset) ? ERR_SUCCESS : ERR_FAILURE;
 //			res = test_edge_face_ced(&mesh, &shapeset) ? ERR_SUCCESS : ERR_FAILURE;

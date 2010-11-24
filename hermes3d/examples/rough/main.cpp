@@ -1,6 +1,6 @@
-#define H3D_REPORT_WARN
-#define H3D_REPORT_INFO
-#define H3D_REPORT_VERBOSE
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
 #include <hermes3d.h>
 #include "rough.h"

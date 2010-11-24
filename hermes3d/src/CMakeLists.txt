@@ -43,17 +43,19 @@ set(SRC
 	transform.cpp
 	traverse.cpp
 	weakform.cpp
-  adapt/adapt.cpp
+        adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
 	adapt/h1proj.cpp
 	adapt/h1projipol.cpp
-	${HERMES_COMMON_DIR}/common_time_period.cpp
+  ${HERMES_COMMON_DIR}/logging.cpp
+  ${HERMES_COMMON_DIR}/hermes_logging.cpp
+  ${HERMES_COMMON_DIR}/common_time_period.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
-  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
+  ${HERMES_COMMON_DIR}/trace.cpp
   ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 
   ${HERMES_COMMON_DIR}/solver/epetra.cpp 
@@ -63,6 +65,7 @@ set(SRC
   ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
   ${HERMES_COMMON_DIR}/solver/petsc.cpp 
   ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
+  ${HERMES_COMMON_DIR}/solver/superlu.cpp
   ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
   ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
   ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
@@ -99,6 +102,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_LIBRARIES}
+      ${SUPERLU_LIBRARY}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
       ${ADDITIONAL_LIBS}        
@@ -184,13 +188,14 @@ macro(BUILD_LIB_ALL LIB FLAGS)
 		COMMAND if exist ${SOURCE_DEBUG_FILE} copy /Y ${SOURCE_DEBUG_FILE} ${TARGET_DIR}
 		COMMAND if exist ${SOURCE_RELEASE_FILE} copy /Y ${SOURCE_RELEASE_FILE} ${TARGET_DIR})
 	unset(TARGET_DIR)
+	set_target_properties(${LIB} PROPERTIES COMPILE_FLAGS ${FLAGS})
 endmacro(BUILD_LIB_ALL)
 
 # install library
 if(H3D_REAL)
 	if(MSVC)
-		set(MSVC_DLL_DEFINES "-DEXPORT_HERMES_DLL")
-		BUILD_LIB_ALL(${HERMES_REAL_BIN} "${MSVC_DLL_DEFINES} -DH3D_REAL")	
+		BUILD_LIB_ALL(${HERMES_REAL_BIN} "-D H3D_REAL -DEXPORT_HERMES_DLL")	
+		
 	else(MSVC)
 		install(TARGETS ${HERMES_REAL_BIN} LIBRARY DESTINATION lib)
 	endif(MSVC)
@@ -198,8 +203,7 @@ endif(H3D_REAL)
 
 if(H3D_COMPLEX)
 	if(MSVC)
-		set(MSVC_DLL_DEFINES "-DEXPORT_HERMES_DLL")
-		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "${MSVC_DLL_DEFINES} -DH3D_COMPLEX")	
+		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "-D H3D_COMPLEX -DEXPORT_HERMES_DLL")	
 	else(MSVC)
 		install(TARGETS ${HERMES_CPLX_BIN} LIBRARY DESTINATION lib)
 	endif(MSVC)
