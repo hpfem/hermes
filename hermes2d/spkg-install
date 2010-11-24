@@ -1,34 +1,16 @@
-if [ "$SAGE_LOCAL" = "" ]; then
-   echo "SAGE_LOCAL undefined ... exiting";
-   echo "Maybe run 'sage -sh'?"
+#! /bin/sh
+
+if [ "$SPKG_LOCAL" = "" ]; then
+   echo "SPKG_LOCAL undefined ... exiting";
    exit 1
 fi
 
-PACKAGE_NAME=hermes
+set -e
 
 # Set the hermes2d build options:
-python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)\nset(WITH_TESTS no)\nset(REPORT_WITH_LOGO no)\nset(WITH_BENCHMARKS no)"' > CMake.vars
+#python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)\nset(WITH_TESTS no)\nset(REPORT_WITH_LOGO no)\nset(WITH_BENCHMARKS no)"' > CMake.vars
 
-PY_VER=`python -c "import sys;print '%d.%d' % sys.version_info[:2]"`
-echo "Detected Python version: $PY_VER"
-
-cmake -DCMAKE_INSTALL_PREFIX="$SAGE_LOCAL" \
-    -DPYTHON_INCLUDE_PATH="$SAGE_LOCAL/include/python$PY_VER" \
-    -DPYTHON_LIBRARY="$SAGE_LOCAL/lib/python2.6/config/libpython2.6.dll.a" \
-    .
-if [ $? -ne 0 ]; then
-   echo "Error configuring $PACKAGE_NAME."
-   exit 1
-fi
+cmake -DCMAKE_INSTALL_PREFIX="$SPKG_LOCAL" .
 
 make
-if [ $? -ne 0 ]; then
-   echo "Error building $PACKAGE_NAME."
-   exit 1
-fi
-
 make install
-if [ $? -ne 0 ]; then
-   echo "Error installing $PACKAGE_NAME."
-   exit 1
-fi
