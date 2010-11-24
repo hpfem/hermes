@@ -12,5 +12,5 @@ def test_basic():
     e.set_boundary_values([1, 5])
     e.set_boundary_markers_derivative([2, 4])
     e.set_boundary_derivatives([1, 5])
-
-    #phi = e.calculate()
+    phi = e.calculate()
+    print phi

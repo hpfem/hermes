@@ -2,6 +2,7 @@ from numpy cimport ndarray
 from libcpp.vector cimport vector
 
 cimport electrostatics_defs
+from hermes2d.hermes2d cimport Solution
 
 cdef vector[int] array2vector_int(a):
     cdef vector[int] v
@@ -53,3 +54,8 @@ cdef class Electrostatics:
 
     def set_boundary_derivatives(self, bc_der):
         self.thisptr.set_boundary_derivatives(array2vector_double(bc_der))
+
+    def calculate(self):
+        s = Solution()
+        r = self.thisptr.calculate(s.getptr())
+        return r, s

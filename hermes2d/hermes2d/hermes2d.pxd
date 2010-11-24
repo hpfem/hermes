@@ -4,4 +4,5 @@ cdef class MeshFunction:
     cdef hermes2d_defs.MeshFunction *thisptr
 
 cdef class Solution(MeshFunction):
-    pass
+
+    cdef hermes2d_defs.Solution *getptr(self)

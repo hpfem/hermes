@@ -7,7 +7,9 @@ cdef class MeshFunction:
     pass
 
 cdef class Solution(MeshFunction):
-    pass
+
+    cdef hermes2d_defs.Solution *getptr(self):
+        return <hermes2d_defs.Solution *>(self.thisptr)
 
 cdef class Linearizer:
     """

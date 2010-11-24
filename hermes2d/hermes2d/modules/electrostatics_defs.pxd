@@ -1,6 +1,8 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
 
+from hermes2d.hermes2d_defs cimport Solution
+
 cdef extern from "electrostatics.h":
 
     cdef cppclass Electrostatics:
@@ -14,5 +16,4 @@ cdef extern from "electrostatics.h":
         void set_boundary_values(vector[double] &bc_val)
         void set_boundary_markers_derivative(vector[int] &bdy_markers_der)
         void set_boundary_derivatives(vector[double] &bc_der)
-        #bool calculate(Solution* phi)
-
+        bool calculate(Solution* phi)
