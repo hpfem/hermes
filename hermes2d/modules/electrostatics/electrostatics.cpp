@@ -167,6 +167,12 @@ bool Electrostatics::calculate(Solution* phi)
           this->init_p);
   int ndof = Space::get_num_dofs(this->space);
   info("ndof = %d", ndof);
+  /*
+  BaseView b("", new WinGeom(0, 0, 400, 400));
+  b.show(this->space);
+  View::wait();
+  */
+
 
   // Initialize the weak formulation.
   WeakForm wf;
