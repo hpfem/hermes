@@ -1,7 +1,10 @@
+import sys
+sys.path.append("../../../")
+
 from hermes2d.modules.electrostatics import Electrostatics
 from hermes2d.hermes2d import Linearizer
 
-def test_basic():
+def main():
     e = Electrostatics()
     e.set_mesh_filename("domain.mesh")
     e.set_initial_mesh_refinement(2)
@@ -19,3 +22,7 @@ def test_basic():
     l.process_solution(sln)
     v = l.get_vertices()
     t = l.get_triangles()
+    print v
+
+if __name__ == "__main__":
+    main()
