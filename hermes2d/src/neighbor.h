@@ -222,6 +222,8 @@ public:
   ///
   int get_quad_np();
   
+  /// Get the precalculated shapeset on the central element.
+  PrecalcShapeset * get_pss() {return this->central_pss;}
 /*** Methods for getting geometry and integration data. ***/
   
   /// Initialize the geometry data for the active segment.
@@ -331,6 +333,40 @@ public:
 
   /// Function that sets the variable ignore_errors. See the variable description.
   void set_ignore_errors(bool value) {this->ignore_errors = value;};
+
+  /// Functionality for caching of NeighborSearch instances.
+  struct MainKey
+  {
+    int space_seq, mesh_seq, element_id, isurf;
+    MainKey(int space_seq, int mesh_seq, int element_id, int isurf) : space_seq(space_seq), mesh_seq(mesh_seq), element_id(element_id), isurf(isurf) {};
+  };
+  
+  struct MainCompare
+  {
+    bool operator()(MainKey a, MainKey b) const
+    {
+      if (a.space_seq < b.space_seq)
+        return true;
+      else if (a.space_seq > b.space_seq) 
+        return false;
+      else
+        if (a.mesh_seq < b.mesh_seq)
+          return true;
+        else if (a.mesh_seq > b.mesh_seq) 
+          return false;
+        else 
+          if (a.element_id < b.element_id)
+            return true;
+          else if (a.element_id > b.element_id) 
+            return false;
+          else
+            return (a.isurf < b.isurf);
+    }
+  };
+
+  /// Two caches of NeighborSearch class instances.
+  static std::map<MainKey, NeighborSearch*, MainCompare> main_cache_m;
+  static std::map<MainKey, NeighborSearch*, MainCompare> main_cache_n;
 
 private:  
   
@@ -497,8 +533,8 @@ private:
   };
 
   std::map<Key, Geom<double>*, Compare> cache_e;
-  std::map<Key, double*, Compare> cache_jwt;  
-  
+  std::map<Key, double*, Compare> cache_jwt; 
+
 public:
   /// This class represents the extended shapeset, consisting of shape functions from both the central element and 
   /// current neighbor element, extended by zero to the union of these elements.

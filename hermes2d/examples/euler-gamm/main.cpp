@@ -175,6 +175,7 @@ int main(int argc, char* argv[])
   // Volumetric linear forms.
   // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
   // First flux.
+  /*
   wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
   wf.add_vector_form(1,callback(linear_form_1_0_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1,callback(linear_form_1_1_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
@@ -203,7 +204,8 @@ int main(int argc, char* argv[])
   wf.add_vector_form(3,callback(linear_form_3_1_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3,callback(linear_form_3_2_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3,callback(linear_form_3_3_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  
+  */
+
   // Volumetric linear forms coming from the time discretization.
   wf.add_vector_form(0,linear_form, linear_form_order, HERMES_ANY, &prev_rho);
   wf.add_vector_form(1,linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
@@ -330,6 +332,7 @@ int main(int argc, char* argv[])
     // Determine the time step & if it changes, set the flag to re-assemble the matrix.
     rhs_only = true;
     double *solution_vector = solver->get_solution();
+    double min_condition = 0;
     Element *e;
     for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
           if (((e) = mesh.get_element_fast(_id))->used) \
@@ -347,11 +350,18 @@ int main(int argc, char* argv[])
       
       double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
       
-      if(TAU > condition)
-      {
-        TAU = condition;
-        rhs_only = false;
-      }
+      if(condition < min_condition || min_condition == 0.)
+        min_condition = condition;
+    }
+    if(TAU > min_condition)
+    {
+      TAU = min_condition;
+      rhs_only = false;
+    }
+    if(TAU < min_condition * 0.9)
+    {
+      TAU = min_condition;
+      rhs_only = false;
     }
 
     // Copy the solutions into the previous time level ones.
