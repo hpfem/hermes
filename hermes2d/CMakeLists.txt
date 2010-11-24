@@ -284,6 +284,7 @@ if(WITH_PYTHON)
   find_package(NumPy REQUIRED)
   find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  set(PYTHON_INSTALL_PATH lib/python/site-packages)
   add_subdirectory(hermes2d)
 endif(WITH_PYTHON)
 
