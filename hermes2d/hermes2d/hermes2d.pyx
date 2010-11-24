@@ -8,6 +8,12 @@ cdef class MeshFunction:
 
 cdef class Solution(MeshFunction):
 
+    def __cinit__(self):
+        self.thisptr = new hermes2d_defs.Solution()
+
+    def __dealloc__(self):
+        del self.thisptr
+
     cdef hermes2d_defs.Solution *getptr(self):
         return <hermes2d_defs.Solution *>(self.thisptr)
 

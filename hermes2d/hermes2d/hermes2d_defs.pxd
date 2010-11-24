@@ -14,7 +14,7 @@ cdef extern from "hermes2d.h":
         #c_Mesh* get_mesh()
         scalar get_pt_value(double x, double y)
 
-    cdef cppclass Solution:
+    cdef cppclass Solution(MeshFunction):
         #void set_zero(c_Mesh *m)
         #void set_const(c_Mesh *m, scalar c)
         void copy(Solution *s)
