@@ -1,10 +1,10 @@
 from hermes2d import Linearizer, Solution
 
-def sln2png(sln, filename):
+def sln2png(sln, filename, offscreen=False):
     """
     Creates a nice png image of the Solution sln.
     """
-    plot_sln_mayavi(sln)
+    plot_sln_mayavi(sln, offscreen=offscreen)
     from enthought.mayavi.mlab import savefig
     savefig(filename)
 
