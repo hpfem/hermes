@@ -675,11 +675,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         }
         else  // Assemble inner edges (in discontinuous Galerkin discretization):
         {
-          // The following variables will be used to search for neighbors of the currently assembled element on 
-          // the u- and v- meshes and work with the produced elemental neighborhoods.
-          NeighborSearch *nbs_u = NULL;
-          NeighborSearch *nbs_v = NULL;
-          
           if (mat != NULL)
           {
             // assemble inner surface bilinear forms ///////////////////////////////////
@@ -704,15 +699,39 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               // Assemble DG inner surface matrix form - a single mesh version (all functions are defined on the
               // same mesh, with the same neighborhood of active element.
               
+              // The following variables will be used to search for neighbors of the currently assembled element on 
+              // the u- and v- meshes and work with the produced elemental neighborhoods.
               // Find all neighbors of active element across active edge and partition it into segements
               // shared by the active element and distinct neighbors.
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
-              nbs_v->set_active_edge(isurf);
-              nbs_v->attach_pss(fv, &(refmap[m]));
+              NeighborSearch::MainKey nbs_key_m(spaces[m]->get_seq(), spaces[m]->get_mesh()->get_seq(), e[m]->id, isurf);
+              if (NeighborSearch::main_cache_m[nbs_key_m] == NULL)
+              {
+                NeighborSearch::main_cache_m[nbs_key_m] = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+                NeighborSearch::main_cache_m[nbs_key_m]->set_active_edge(isurf);
+                PrecalcShapeset *fv_for_main_cache = new PrecalcShapeset(fv->get_shapeset());
+                fv_for_main_cache->set_active_element(e[m]);
+                fv_for_main_cache->set_transform(refmap[m].get_transform());
+                RefMap *rm_for_main_cache = new RefMap();
+                rm_for_main_cache->set_active_element(e[m]);
+                rm_for_main_cache->set_transform(refmap[m].get_transform());
+                NeighborSearch::main_cache_m[nbs_key_m]->attach_pss(fv_for_main_cache, rm_for_main_cache);
+              }
+              NeighborSearch *nbs_v = NeighborSearch::main_cache_m[nbs_key_m];
               
-              nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
-              nbs_u->set_active_edge(isurf);
-              nbs_u->attach_pss(fu, &(refmap[n]));
+              NeighborSearch::MainKey nbs_key_n(spaces[n]->get_seq(), spaces[n]->get_mesh()->get_seq(), e[n]->id, isurf);
+              if (NeighborSearch::main_cache_n[nbs_key_n] == NULL)
+              {
+                NeighborSearch::main_cache_n[nbs_key_n] = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
+                NeighborSearch::main_cache_n[nbs_key_n]->set_active_edge(isurf);
+                PrecalcShapeset *fu_for_main_cache = new PrecalcShapeset(fu->get_shapeset());
+                fu_for_main_cache->set_active_element(e[n]);
+                fu_for_main_cache->set_transform(refmap[n].get_transform());
+                RefMap *rn_for_main_cache = new RefMap();
+                rn_for_main_cache->set_active_element(e[n]);
+                rn_for_main_cache->set_transform(refmap[n].get_transform());
+                NeighborSearch::main_cache_n[nbs_key_n]->attach_pss(fu_for_main_cache, rn_for_main_cache);
+              }
+              NeighborSearch *nbs_u = NeighborSearch::main_cache_n[nbs_key_n];
               
               // Go through each segment of the active edge. If the active segment has already
               // been processed (when the neighbor element was assembled), it is skipped.
@@ -767,11 +786,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                           nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof);
                 }
               }
-              
-              // This automatically restores the transformations pushed to the attached PrecalcShapesets fu/fv, so that
-              // they are ready for any further form evaluation.
-              delete nbs_u;
-              delete nbs_v;
             }  
           }
           
@@ -796,9 +810,21 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               
               // Find all neighbors of active element across active edge and partition it into segements
               // shared by the active element and distinct neighbors.
-              nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
-              nbs_v->set_active_edge(isurf, false);
-              nbs_v->attach_pss(fv, &(refmap[m]));
+              NeighborSearch::MainKey nbs_key_m(spaces[m]->get_seq(), spaces[m]->get_mesh()->get_seq(), e[m]->id, isurf);
+              if (NeighborSearch::main_cache_m[nbs_key_m] == NULL)
+              {
+                NeighborSearch::main_cache_m[nbs_key_m] = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+                NeighborSearch::main_cache_m[nbs_key_m]->set_active_edge(isurf, false);
+                PrecalcShapeset *fv_for_main_cache = new PrecalcShapeset(fv->get_shapeset());
+                fv_for_main_cache->set_active_element(e[m]);
+                fv_for_main_cache->set_transform(refmap[m].get_transform());
+                RefMap *rm_for_main_cache = new RefMap();
+                rm_for_main_cache->set_active_element(e[m]);
+                rm_for_main_cache->set_transform(refmap[m].get_transform());
+                NeighborSearch::main_cache_m[nbs_key_m]->attach_pss(fv_for_main_cache, rm_for_main_cache);
+              }
+              NeighborSearch *nbs_v = NeighborSearch::main_cache_m[nbs_key_m];
+              
               
               // Go through each segment of the active edge. Do not skip if the segment has already been 
               // processed.
@@ -817,10 +843,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   rhs->add(am->dof[i], val);
                 }
               }
-              
-              // This automatically restores the transformations pushed to the attached PrecalcShapeset fv, so that
-              // it is ready for any further form evaluation.
-              delete nbs_v;
             }
           }
         }
@@ -1577,6 +1599,16 @@ Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_incre
     ref_spaces->push_back(coarse[i]->dup(ref_mesh));
     (*ref_spaces)[i]->copy_orders(coarse[i], order_increase);
   }
+  // DG related : free the already unneeded entries from cache of NeighborSearch class instances.
+  Element *el;
+  for(int i = 0; i < ref_spaces->size(); i++)
+    for_all_active_elements(el, (*ref_spaces)[i]->get_mesh())
+      for(int j = 0; j < el->get_num_surf(); j++)
+      {
+        NeighborSearch::MainKey key((*ref_spaces)[i]->get_seq(), (*ref_spaces)[i]->get_mesh()->get_seq(), el->id, j);
+        NeighborSearch::main_cache_m.erase(key);
+        NeighborSearch::main_cache_n.erase(key);
+      }
   return ref_spaces;
 }
 
@@ -1589,6 +1621,16 @@ Space* construct_refined_space(Space* coarse, int order_increase)
   ref_mesh->refine_all_elements();
   Space* ref_space = coarse->dup(ref_mesh);
   ref_space->copy_orders(coarse, order_increase);
+
+  // DG related : free the already unneeded entries from cache of NeighborSearch class instances.
+  Element *el;
+  for_all_active_elements(el, ref_space->get_mesh())
+    for(int j = 0; j < el->get_num_surf(); j++)
+    {
+      NeighborSearch::MainKey key(ref_space->get_seq(), ref_space->get_mesh()->get_seq(), el->id, j);
+      NeighborSearch::main_cache_m.erase(key);
+      NeighborSearch::main_cache_n.erase(key);
+    }
   return ref_space;
 }
 

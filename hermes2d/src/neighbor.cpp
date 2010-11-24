@@ -1,7 +1,13 @@
 #include "neighbor.h"
 
 
-int NeighborSearch::max_neighbors = 2;
+int NeighborSearch::max_neighbors = 1;
+
+std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_m = 
+  *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>(); 
+
+std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_n = 
+  *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>();
 
 NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) : 
   central_el(el), central_pss(NULL), central_rm(NULL),
