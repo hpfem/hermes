@@ -1,4 +1,4 @@
-from hermes2d.modules.electrostatics import Electrostatics
+from hermes2d.modules.electrostatics.electrostatics import Electrostatics
 from hermes2d.hermes2d import Linearizer
 
 def test_basic():
