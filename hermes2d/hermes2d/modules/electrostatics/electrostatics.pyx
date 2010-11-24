@@ -25,8 +25,8 @@ cdef class Electrostatics:
     def __dealloc__(self):
         del self.thisptr
 
-    def set_mesh_filename(self, filename):
-        return self.thisptr.set_mesh_filename(filename)
+    def set_mesh_str(self, mesh):
+        self.thisptr.set_mesh_str(mesh)
 
     def set_initial_mesh_refinement(self, int init_ref_num):
         self.thisptr.set_initial_mesh_refinement(init_ref_num)
