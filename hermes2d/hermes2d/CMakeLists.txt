@@ -11,6 +11,11 @@ install(TARGETS hermes2d
             ARCHIVE DESTINATION ${PY_PATH}
             LIBRARY DESTINATION ${PY_PATH}
         )
+install(TARGETS numpy_utils
+            RUNTIME DESTINATION ${PY_PATH}
+            ARCHIVE DESTINATION ${PY_PATH}
+            LIBRARY DESTINATION ${PY_PATH}
+        )
 install(FILES __init__.py plot.py
     DESTINATION ${PY_PATH}
     )
