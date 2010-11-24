@@ -107,8 +107,8 @@ Stopping criteria
 There are two basic stopping criteria that should be combined 
 for safety:
 
-* Checking whether the (vector) norm of the coefficient vector $\bfY_{n+1}$ is sufficiently close to zero.
-* Checking whether the (vector) norm of $\bfY_{n+1} - \bfY_{n}$ is sufficiently close to zero.
+* Checking whether the (Euclidean) norm of the residual vector $\bfF(\bfY_{n+1})$ is sufficiently close to zero.
+* Checking whether the norm of $\bfY_{n+1} - \bfY_{n}$ is sufficiently close to zero.
 
 If just one of these two criteria is used, the Newton's method may finish prematurely.
 
