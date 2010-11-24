@@ -94,7 +94,7 @@ inline Ord upwind_flux(Ord u_cent, Ord u_neib, Ord a_dot_n)
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-  return BC_NONE;
+  return BC_NATURAL;
 }
 // Function values for Dirichlet boundary conditions.
 template<typename Real, typename Scalar>

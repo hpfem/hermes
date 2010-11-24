@@ -228,6 +228,8 @@ int main(int argc, char* argv[])
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
   for(int ts = 1; ts <= num_time_steps; ts++)
   {
+    TIME += TAU;
+
     info("---- Time step %d:", ts);
 
     // Periodic global derefinements.
@@ -267,6 +269,9 @@ int main(int argc, char* argv[])
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
                       coeff_vec, matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+        delete xvel_ref_sln.get_mesh();
+        delete yvel_ref_sln.get_mesh();
+        delete p_ref_sln.get_mesh();
       }
 
       // Newton's loop on the fine mesh.
@@ -283,7 +288,7 @@ int main(int argc, char* argv[])
       info("Projecting reference solution on coarse mesh.");
       OGProjection::project_global(Tuple<Space *>(xvel_space, yvel_space, p_space), 
                     Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
-                    Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver); 
+                    Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver, Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm) );
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -319,9 +324,8 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
+      delete [] coeff_vec;
     }
     while (done == false);
 
