@@ -1,4 +1,5 @@
 from hermes2d.modules.electrostatics import Electrostatics
+from hermes2d.hermes2d import Linearizer
 
 def test_basic():
     e = Electrostatics()
@@ -12,5 +13,9 @@ def test_basic():
     e.set_boundary_values([1, 5])
     e.set_boundary_markers_derivative([2, 4])
     e.set_boundary_derivatives([1, 5])
-    phi = e.calculate()
-    print phi
+    r, sln = e.calculate()
+    assert r is True
+    l = Linearizer()
+    l.process_solution(sln)
+    v = l.get_vertices()
+    t = l.get_triangles()

@@ -26,7 +26,7 @@ cdef class Linearizer:
 
     Example::
 
-        In [40]: l = Linearizer(sln)
+        In [40]: l = Linearizer()
 
         In [44]: l.process_solution(sln)
         Linearizer: 5519 verts, 10847 tris in 0.05 sec
