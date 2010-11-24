@@ -12,9 +12,6 @@ int main(int argc, char* argv[])
   // Open configuration file.
   FILE* f = fopen(argv[1], "r");
   if(f == NULL) error("Cannot open file %s.", argv[1]);
-  // Mesh filename.
-  //char *mesh_filename = new char[200];
-  //if(!Get(f, mesh_filename)) error("Could not read mesh filename.");
   // Number of initial uniform mesh refinements.
   int init_ref_num;
   if(!Get(f, &init_ref_num)) error("Could not read number of initial mesh refinements.");

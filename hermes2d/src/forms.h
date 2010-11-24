@@ -380,7 +380,7 @@ Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order);
 template<typename T>
 class ExtData {
 public:
-	int nf;			  			// number of functions in 'fn' array
+	int nf;			  		// number of functions in 'fn' array
 	Func<T>** fn;				// array of pointers to functions
 
 	ExtData() {

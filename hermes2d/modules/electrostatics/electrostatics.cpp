@@ -1,5 +1,17 @@
 #include "electrostatics.h"
 
+// FIXME: Because of callbacks that depend on global variables
+// we need to define this here, but it is a temporary solution.
+// Like this, one cannot have two instances of the Electrostatics
+// module -- their global variables would interfere with each other.
+std::vector<int> _global_mat_markers;
+std::vector<double> _global_permittivity_array;
+std::vector<double> _global_charge_density_array;
+std::vector<int> _global_bdy_markers_val;
+std::vector<double> _global_bc_val;
+std::vector<int> _global_bdy_markers_der;
+std::vector<double> _global_bc_der;
+
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
@@ -8,6 +20,7 @@ template<typename Real, typename Scalar>
 Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
                      Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  int marker = e->marker;
   return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
 }
 
@@ -15,6 +28,7 @@ template<typename Real, typename Scalar>
 Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
                    Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  int marker = e->marker;
   return int_v<Real, Scalar>(n, wt, v);
 }
 
@@ -22,6 +36,7 @@ template<typename Real, typename Scalar>
 Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
+  int marker = e->marker;
   return int_v<Real, Scalar>(n, wt, v);
 }
 
@@ -44,7 +59,7 @@ Electrostatics::~Electrostatics()
   delete this->space;
 }
 
-// Set mesh
+// Set mesh via a string. See electrostatics.h for an example of such string.
 void Electrostatics::set_mesh_str(const std::string &mesh)
 {
     this->mesh_str = mesh;
@@ -66,24 +81,22 @@ void Electrostatics::set_initial_poly_degree(int p)
 void Electrostatics::set_material_markers(const std::vector<int> &mat_markers)
 {
     this->mat_markers = mat_markers;
+    _global_mat_markers = mat_markers;
 }
 
 // Set permittivity array.
 void Electrostatics::set_permittivity_array(const std::vector<double> &p_array)
 {
     this->permittivity_array = p_array;
+    _global_permittivity_array = p_array;
 }
 
 // Set charge density array.
 void Electrostatics::set_charge_density_array(const std::vector<double> &cd_array)
 {
     this->charge_density_array = cd_array;
+    _global_charge_density_array = cd_array;
 }
-
-std::vector<int> _global_bdy_markers_val;
-std::vector<int> _global_bdy_markers_der;
-std::vector<double> _global_bc_val;
-std::vector<double> _global_bc_der;
 
 // Set VALUE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
@@ -114,6 +127,7 @@ void Electrostatics::set_boundary_derivatives(const std::vector<double> &bc_der)
     _global_bc_der = bc_der;
 }
 
+// Look up an integer number in an array.
 bool index(const std::vector<int> &array, int x, int &i_out)
 {
     for (int i=0; i < array.size(); i++)
