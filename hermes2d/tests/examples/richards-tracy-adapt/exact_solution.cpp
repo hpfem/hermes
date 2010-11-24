@@ -44,7 +44,7 @@ double exact_sol(double x, double z, double& dhdx, double& dhdz) {
   for (int i=1; i >= 0; i++) {
     double lambda = i*M_PI/L ;
     double gamma = 1/c*(beta*beta + lambda*lambda) ;
-    double tmp = pow(-1,i)*lambda/gamma*sin(lambda*z)*exp(-gamma*TIME) ;
+    double tmp = pow((double)-1,(double)i)*lambda/gamma*sin(lambda*z)*exp(-gamma*TIME) ;
     sum += tmp ;
     if (fabs(1/c*lambda/gamma * exp(-gamma*TIME)) < reps*reps && i > 100) break;
   }  
@@ -67,7 +67,7 @@ double exact_sol(double x, double z, double& dhdx, double& dhdz) {
   for (int i=1; i >= 0; i++) {
     double lambda = i*M_PI/L;
     double gamma = 1/c*(beta*beta + lambda*lambda);
-    double tmp  = pow(-1,i)*i*exp(-gamma*TIME)*lambda*lambda*cos(lambda*z)/gamma;
+    double tmp  = pow((double)-1,(double)i)*i*exp(-gamma*TIME)*lambda*lambda*cos(lambda*z)/gamma;
     sum2 += tmp;
     if (fabs(lambda*lambda*exp(-gamma*TIME)/gamma) < reps*reps && i > 100) break;
   }
