@@ -1,4 +1,19 @@
+from numpy cimport ndarray
+from libcpp.vector cimport vector
+
 cimport electrostatics_defs
+
+cdef vector[int] array2vector_int(a):
+    cdef vector[int] v
+    for i in range(len(a)):
+        v.push_back(a[i])
+    return v
+
+cdef vector[int] array2vector_double(a):
+    cdef vector[int] v
+    for i in range(len(a)):
+        v.push_back(a[i])
+    return v
 
 cdef class Electrostatics:
     cdef electrostatics_defs.Electrostatics *thisptr
@@ -17,3 +32,6 @@ cdef class Electrostatics:
 
     def set_initial_poly_degree(self, int p):
         self.thisptr.set_initial_poly_degree(p)
+
+    def set_material_markers(self, mat_markers):
+        self.thisptr.set_material_markers(array2vector_int(mat_markers))
