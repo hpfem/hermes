@@ -73,7 +73,7 @@ double bc_energy(double y)
   double rho_v_x = bc_density_vel_x(y);
   double rho_v_y = bc_density_vel_y(y);
   double pressure = bc_pressure(y);
-  return pressure/(KAPPA - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 }
 
 // Calculates energy from other quantities.
