@@ -147,13 +147,13 @@ Scalar f_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 double f_x(int i, double w0, double w1, double w3, double w4)
 {
   if(i == 0)
-    return f_1_0<double>(w0,w1,w3,w4);
+    return f_1_0<double>(w0, w1, w3, w4);
   if(i == 1)
-    return f_1_1<double>(w0,w1,w3,w4);
+    return f_1_1<double>(w0, w1, w3, w4);
   if(i == 2)
-    return f_1_2<double>(w0,w1,w3,w4);
+    return f_1_2<double>(w0, w1, w3, w4);
   if(i == 3)
-    return f_1_3<double>(w0,w1,w3,w4);
+    return f_1_3<double>(w0, w1, w3, w4);
 }
 
 ///////////////////////////////////////////////////
@@ -549,31 +549,21 @@ Ord linear_form_order(int n, double *wt, Func<Ord> *ue[], Func<Ord> *v, Geom<Ord
 double linear_form_interface(int element, int n, double *wt, Func<double> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  double w01, w02, w11, w12, w21, w22, w31, w32;
   double w_l[4], w_r[4];
   for (int i = 0; i < n; i++) 
   {
-    w01 = ext->fn[0]->get_val_central(i);
-    w02 = ext->fn[0]->get_val_neighbor(i);
+    w_l[0] = ext->fn[0]->get_val_central(i);
+    w_r[0] = ext->fn[0]->get_val_neighbor(i);
     
-    w11 = ext->fn[1]->get_val_central(i);
-    w12 = ext->fn[1]->get_val_neighbor(i);
+    w_l[1] = ext->fn[1]->get_val_central(i);
+    w_r[1] = ext->fn[1]->get_val_neighbor(i);
 
-    w21 = ext->fn[2]->get_val_central(i);
-    w22 = ext->fn[2]->get_val_neighbor(i);
+    w_l[2] = ext->fn[2]->get_val_central(i);
+    w_r[2] = ext->fn[2]->get_val_neighbor(i);
 
-    w31 = ext->fn[3]->get_val_central(i);
-    w32 = ext->fn[3]->get_val_neighbor(i);
+    w_l[3] = ext->fn[3]->get_val_central(i);
+    w_r[3] = ext->fn[3]->get_val_neighbor(i);
 
-    w_l[0] = w01;
-    w_l[1] = w11;
-    w_l[2] = w21;
-    w_l[3] = w31;
-
-    w_r[0] = w02;
-    w_r[1] = w12;
-    w_r[2] = w22;
-    w_r[3] = w32;
 
     result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
@@ -724,7 +714,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
       // Intersection state calculation (marked with an underscore1 (_1)).
       double sound_speed_1 = sound_speed_l + (num_flux.R/num_flux.c_v) * (w_l[1]/w_l[0] - velocity_x_b);
-      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
+      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0], w_l[1], w_l[2], w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
       double velocity_x_1 = velocity_x_b;
       double velocity_y_1 = w_l[2] / w_l[0];
 
@@ -735,7 +725,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
       // Calculation of the state for inflow/outlow velocities above the local speed of sound.
       double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * sound_speed_l / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l,2*num_flux.c_v / num_flux.R) * w_l[0];
+      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l, 2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
       double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
@@ -791,13 +781,13 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     {
       // These calculations are the same as above.
       double p_b = bc_pressure(e->y[i]);
-      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3]),(1/num_flux.kappa));
-      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
+      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0], w_l[1], w_l[2], w_l[3]), (1/num_flux.kappa));
+      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
       double velocity_y_b = w_l[2] / w_l[0];
       double energy_b = calc_energy<double>(rho_b, velocity_x_b*rho_b, velocity_y_b*rho_b, p_b);
 
-      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]),2*num_flux.c_v / num_flux.R) * w_l[0];
+      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]) / (2+num_flux.R/num_flux.c_v);
+      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]), 2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
       double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;

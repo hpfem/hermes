@@ -147,13 +147,13 @@ Scalar f_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 double f_x(int i, double w0, double w1, double w3, double w4)
 {
   if(i == 0)
-    return f_1_0<double>(w0,w1,w3,w4);
+    return f_1_0<double>(w0, w1, w3, w4);
   if(i == 1)
-    return f_1_1<double>(w0,w1,w3,w4);
+    return f_1_1<double>(w0, w1, w3, w4);
   if(i == 2)
-    return f_1_2<double>(w0,w1,w3,w4);
+    return f_1_2<double>(w0, w1, w3, w4);
   if(i == 3)
-    return f_1_3<double>(w0,w1,w3,w4);
+    return f_1_3<double>(w0, w1, w3, w4);
 }
 
 ///////////////////////////////////////////////////
@@ -575,7 +575,7 @@ double linear_form_interface(int element, int n, double *wt, Func<double> *ue[],
     w_r[2] = w22;
     w_r[3] = w32;
 
-    result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+    result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element, w_l, w_r, e->nx[i], e->ny[i]);
   }
   return result * TAU;
 }
@@ -602,7 +602,7 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 // One function used for all the components.
 double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
-  return int_u_v<double,double>(n, wt, ext->fn[0], v);
+  return int_u_v<double, double>(n, wt, ext->fn[0], v);
 }
 
 // Surface linear forms representing the solid part of the boundary.
@@ -626,7 +626,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     /* Auxiliary state.
     double sound_speed_l = calc_sound_speed(w01, w11, w21, w31);
     double sound_speed_b = sound_speed_l + (num_flux.R/num_flux.c_v) * w11 / (2*w01);
-    double rho_b = std::pow((sound_speed_b*sound_speed_b*w01/(num_flux.kappa*calc_pressure<double>(w01,w11,w21,w31))),num_flux.c_v/num_flux.R) * w01;
+    double rho_b = std::pow((sound_speed_b*sound_speed_b*w01/(num_flux.kappa*calc_pressure<double>(w01, w11, w21, w31))), num_flux.c_v/num_flux.R) * w01;
     double p_b = rho_b * sound_speed_b * sound_speed_b / num_flux.kappa;
     */
     double p_b = calc_pressure(w01, w11, w21, w31);
@@ -652,7 +652,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     w_l[2] = w_r[2] = w21;
     w_l[3] = w_r[3] = w31;
 
-    result += wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+    result += wt[i] * v->val[i] * num_flux.numerical_flux_i(element, w_l, w_r, e->nx[i], e->ny[i]);
     */
 
     result -= wt[i] * v->val[i] * flux[element];
@@ -724,7 +724,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
       // Intersection state calculation (marked with an underscore1 (_1)).
       double sound_speed_1 = sound_speed_l + (num_flux.R/num_flux.c_v) * (w_l[1]/w_l[0] - velocity_x_b);
-      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
+      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0], w_l[1], w_l[2], w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
       double velocity_x_1 = velocity_x_b;
       double velocity_y_1 = w_l[2] / w_l[0];
 
@@ -735,7 +735,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
       // Calculation of the state for inflow/outlow velocities above the local speed of sound.
       double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * sound_speed_l / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l,2*num_flux.c_v / num_flux.R) * w_l[0];
+      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l, 2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
       double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
@@ -791,13 +791,13 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     {
       // These calculations are the same as above.
       double p_b = bc_pressure(e->y[i]);
-      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3]),(1/num_flux.kappa));
-      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
+      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0], w_l[1], w_l[2], w_l[3]), (1/num_flux.kappa));
+      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
       double velocity_y_b = w_l[2] / w_l[0];
       double energy_b = calc_energy<double>(rho_b, velocity_x_b*rho_b, velocity_y_b*rho_b, p_b);
 
-      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]),2*num_flux.c_v / num_flux.R) * w_l[0];
+      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]) / (2+num_flux.R/num_flux.c_v);
+      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]), 2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
       double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
@@ -851,7 +851,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     }
     */
     
-    result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+    result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element, w_l, w_r, e->nx[i], e->ny[i]);
   }
   return result * TAU;
 }
