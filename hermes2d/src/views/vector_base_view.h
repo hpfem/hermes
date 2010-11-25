@@ -72,7 +72,7 @@ protected:
 class HERMES_API VectorBaseView : public VectorView
 {
 public:
-  VectorBaseView(char* title = "BaseView", DEFAULT_WINDOW_POS) {}
+  VectorBaseView(char* title = "BaseView", WinGeom* wg = NULL) {}
   virtual ~VectorBaseView() {}
   void show(Space* space)
      { verbose("VectorBaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }

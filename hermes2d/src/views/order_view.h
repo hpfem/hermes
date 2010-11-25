@@ -74,7 +74,7 @@ protected:
 class HERMES_API OrderView : public View
 {
 public:
-  OrderView(const char* title = "OrderView", WinGeom* wg) {}
+  OrderView(const char* title = "OrderView", WinGeom* wg = NULL) {}
   void show(Space* space)
      { verbose("OrderView: Hermes2D compiled without OpenGL support, skipping visualization."); }
   void load_data(const char* filename) {}
