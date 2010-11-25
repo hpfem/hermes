@@ -77,10 +77,10 @@ void Electrostatics::set_initial_poly_degree(int p)
 }
 
 // Set material markers, and check compatibility with mesh file.
-void Electrostatics::set_material_markers(const std::vector<int> &mat_markers)
+void Electrostatics::set_material_markers(const std::vector<int> &m_markers)
 {
-    this->mat_markers = mat_markers;
-    _global_mat_markers = mat_markers;
+    this->mat_markers = m_markers;
+    _global_mat_markers = m_markers;
 }
 
 // Set permittivity array.
@@ -165,33 +165,37 @@ bool Electrostatics::calculate(Solution* phi)
 {
   /* SANITY CHECKS */
 
-  // Check whether Dirichlet and Neumann boundary markers are 
+  // Check whether Dirichlet boundary markers are 
   // all nonnegative and mutually distinct.
   int n_bc_val = this->bdy_markers_val.size();
-  int n_bc_der = this->bdy_markers_der.size();
   for (int i=0; i < n_bc_val; i++) {
     // Making sure that they are positive (>= 1).
     if (this->bdy_markers_val[i] <= 0) error("Boundary markers need to be positive.");
     // Making sure that Dirichlet markers are mutually distinct.
-    for (int j=i+1; i < n_bc_val; j++) {
-      if(this->bdy_markers_val[i] == this->bdy_markers_val[j]) error("Duplicated boundary marker.");
+    for (int j=i+1; j < n_bc_val; j++) {
+      if(this->bdy_markers_val[i] == this->bdy_markers_val[j]) 
+        error("Duplicated Dirichlet boundary marker %d.", this->bdy_markers_val[i]);
     }
     // Cross-checking with the array of Neumann markers
     int dummy_idx;
     if (index(this->bdy_markers_der, this->bdy_markers_val[i], dummy_idx)) error("Mismatched boundary markers.");
   }
+  // Check whether Neumann boundary markers are 
+  // all nonnegative and mutually distinct.
+  int n_bc_der = this->bdy_markers_der.size(); 
   for (int i=0; i < n_bc_der; i++) {
     // Making sure that they are positive (>= 1).
     if(this->bdy_markers_der[i] <= 0) error("Boundary markers need to be positive.");
     // Making sure that Neumann markers are mutually distinct.
-    for (int j=i+1; i < n_bc_der; j++) {
-      if(this->bdy_markers_der[i] == this->bdy_markers_der[j]) error("Duplicated boundary marker.");
+    for (int j=i+1; j < n_bc_der; j++) {
+      if(this->bdy_markers_der[i] == this->bdy_markers_der[j]) 
+        error("Duplicated Neumann boundary marker %d.", this->bdy_markers_der[i]);
     }
     // Cross-checking with the array of Dirichlet markers.
     int dummy_idx;
     if (index(this->bdy_markers_val, this->bdy_markers_der[i], dummy_idx)) error("Mismatched boundary markers.");
   }
- 
+
   // Sanity check of material markers and material constants.
   int n_mat_markers = this->mat_markers.size();
   if (n_mat_markers != this->permittivity_array.size()) error("Wrong number of permittivities.");
@@ -201,10 +205,45 @@ bool Electrostatics::calculate(Solution* phi)
     if(this->mat_markers[i] < 0) error("Material markers must be nonnegative.");
   }
 
-  /* CREATING THE PERMUTATION ARRAYS mat_permut[] and bc_permut[] */
+  /* CREATE THE PERMUTATION ARRAY mat_permut[] */
+
+  // Get maximum material marker.
+  int max_mat_marker = -1;
+  for (int i=0; i < n_mat_markers; i++) {
+    if (this->mat_markers[i] > max_mat_marker) max_mat_marker = this->mat_markers[i];
+  }
+  // Create the permutation array and initiate it with minus ones.
+  for (int i=0; i < max_mat_marker+1; i++) this->mat_permut.push_back(-1);
+  // Fill it.
+  for (int i=0; i < n_mat_markers; i++) this->mat_permut[this->mat_markers[i]] = i;
+
+  /* CREATE THE PERMUTATION ARRAY bc_permut[] */
+
+  // Get maximum boundary marker.
+  int max_bdy_marker = -1;
+  for (int i=0; i < n_bc_val; i++) {
+    if (this->bdy_markers_val[i] > max_bdy_marker) max_bdy_marker = this->bdy_markers_val[i];
+  }
+  for (int i=0; i < n_bc_der; i++) {
+    if (this->bdy_markers_der[i] > max_bdy_marker) max_bdy_marker = this->bdy_markers_der[i];
+  }
+  // Create the permutation array and initiate it with minus ones.
+  for (int i=0; i < max_bdy_marker+1; i++) this->bc_permut.push_back(-1);
+  // Fill in Dirichlet boundary markers.
+  for (int i=0; i < n_bc_val; i++) this->bc_permut[this->bdy_markers_val[i]] = i;
+  // Fill in Neumann boundary markers.
+  for (int i=0; i < n_bc_der; i++) this->bc_permut[this->bdy_markers_der[i]] = i;
 
 
-  /* BEGIN THE COMPUTATION */
+  //test:
+  printf("mat_permut = ");
+  for (int i=0; i < max_mat_marker+1; i++) printf("%d ", this->mat_permut[i]);
+  printf("\nbc_permut = ");
+  for (int i=0; i < max_bdy_marker+1; i++) printf("%d ", this->bc_permut[i]);
+
+
+
+  /* BEGIN THE COMPUTATION ARRAY bc_permut */
 
   // Load the mesh.
   H2DReader mloader;
