@@ -83,8 +83,14 @@ public:
 
   void invalidate_matrix() { have_matrix = false; }
 
+  void set_fvm() {this->is_fvm = true;}  
+
 protected:
   WeakForm* wf;
+
+  // If the problem has only constant test functions, there is no need for order calculation, 
+  // which saves time.
+  bool is_fvm;
 
   bool is_linear;
 

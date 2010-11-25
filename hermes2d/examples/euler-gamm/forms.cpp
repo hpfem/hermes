@@ -147,13 +147,13 @@ Scalar f_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 double f_x(int i, double w0, double w1, double w3, double w4)
 {
   if(i == 0)
-    return f_1_0<double>(w0,w1,w3,w4);
+    return f_1_0<double>(w0, w1, w3, w4);
   if(i == 1)
-    return f_1_1<double>(w0,w1,w3,w4);
+    return f_1_1<double>(w0, w1, w3, w4);
   if(i == 2)
-    return f_1_2<double>(w0,w1,w3,w4);
+    return f_1_2<double>(w0, w1, w3, w4);
   if(i == 3)
-    return f_1_3<double>(w0,w1,w3,w4);
+    return f_1_3<double>(w0, w1, w3, w4);
 }
 
 ///////////////////////////////////////////////////
@@ -267,7 +267,7 @@ Scalar bilinear_form_0_0_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * v->val[i];
-  return result / TAU;
+  return result;
 }
 
 template<typename Real, typename Scalar>
@@ -276,7 +276,7 @@ Scalar bilinear_form_1_1_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * v->val[i];
-  return result / TAU;
+  return result;
 }
 
 template<typename Real, typename Scalar>
@@ -285,7 +285,7 @@ Scalar bilinear_form_2_2_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * v->val[i];
-  return result / TAU;
+  return result;
 }
 
 template<typename Real, typename Scalar>
@@ -294,7 +294,7 @@ Scalar bilinear_form_3_3_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * v->val[i];
-  return result / TAU;
+  return result;
 }
 
 // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
@@ -307,7 +307,7 @@ Scalar linear_form_0_1(int n, double *wt, Func<Real> *ue[], Func<Real> *v, Geom<
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -316,7 +316,7 @@ Scalar linear_form_0_2(int n, double *wt, Func<Real> *ue[], Func<Real> *v, Geom<
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -325,7 +325,7 @@ Scalar linear_form_1_0_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * A_1_1_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -334,7 +334,7 @@ Scalar linear_form_1_0_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * A_2_1_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -343,7 +343,7 @@ Scalar linear_form_1_1_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[1]->val[i] * A_1_1_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -352,7 +352,7 @@ Scalar linear_form_1_1_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[1]->val[i] * A_2_1_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -361,7 +361,7 @@ Scalar linear_form_1_2_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[2]->val[i] * A_1_1_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -370,7 +370,7 @@ Scalar linear_form_1_2_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[2]->val[i] * A_2_1_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -379,7 +379,7 @@ Scalar linear_form_1_3_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[3]->val[i] * A_1_1_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -388,7 +388,7 @@ Scalar linear_form_1_3_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[3]->val[i] * A_2_1_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -397,7 +397,7 @@ Scalar linear_form_2_0_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * A_1_2_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -406,7 +406,7 @@ Scalar linear_form_2_0_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * A_2_2_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -415,7 +415,7 @@ Scalar linear_form_2_1_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[1]->val[i] * A_1_2_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -424,7 +424,7 @@ Scalar linear_form_2_1_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[1]->val[i] * A_2_2_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -433,7 +433,7 @@ Scalar linear_form_2_2_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[2]->val[i] * A_1_2_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -442,7 +442,7 @@ Scalar linear_form_2_2_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[2]->val[i] * A_2_2_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -451,7 +451,7 @@ Scalar linear_form_2_3_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[3]->val[i] * A_1_2_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -460,7 +460,7 @@ Scalar linear_form_2_3_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[3]->val[i] * A_2_2_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -469,7 +469,7 @@ Scalar linear_form_3_0_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * A_1_3_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -478,7 +478,7 @@ Scalar linear_form_3_0_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[0]->val[i] * A_2_3_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -487,7 +487,7 @@ Scalar linear_form_3_1_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[1]->val[i] * A_1_3_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -496,7 +496,7 @@ Scalar linear_form_3_1_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[1]->val[i] * A_2_3_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -505,7 +505,7 @@ Scalar linear_form_3_2_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[2]->val[i] * A_1_3_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -514,7 +514,7 @@ Scalar linear_form_3_2_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[2]->val[i] * A_2_3_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -523,7 +523,7 @@ Scalar linear_form_3_3_first_flux(int n, double *wt, Func<Real> *ue[], Func<Real
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[3]->val[i] * A_1_3_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-  return result;
+  return result * TAU;
 }
 
 template<typename Real, typename Scalar>
@@ -532,7 +532,7 @@ Scalar linear_form_3_3_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * ext->fn[3]->val[i] * A_2_3_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-  return result;
+  return result * TAU;
 }
 
 // This is a hack, because of the difficult forms that are used, we supply this artificial integration order. 
@@ -549,35 +549,25 @@ Ord linear_form_order(int n, double *wt, Func<Ord> *ue[], Func<Ord> *v, Geom<Ord
 double linear_form_interface(int element, int n, double *wt, Func<double> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   double result = 0;
-  double w01, w02, w11, w12, w21, w22, w31, w32;
   double w_l[4], w_r[4];
   for (int i = 0; i < n; i++) 
   {
-    w01 = ext->fn[0]->get_val_central(i);
-    w02 = ext->fn[0]->get_val_neighbor(i);
+    w_l[0] = ext->fn[0]->get_val_central(i);
+    w_r[0] = ext->fn[0]->get_val_neighbor(i);
     
-    w11 = ext->fn[1]->get_val_central(i);
-    w12 = ext->fn[1]->get_val_neighbor(i);
+    w_l[1] = ext->fn[1]->get_val_central(i);
+    w_r[1] = ext->fn[1]->get_val_neighbor(i);
 
-    w21 = ext->fn[2]->get_val_central(i);
-    w22 = ext->fn[2]->get_val_neighbor(i);
+    w_l[2] = ext->fn[2]->get_val_central(i);
+    w_r[2] = ext->fn[2]->get_val_neighbor(i);
 
-    w31 = ext->fn[3]->get_val_central(i);
-    w32 = ext->fn[3]->get_val_neighbor(i);
+    w_l[3] = ext->fn[3]->get_val_central(i);
+    w_r[3] = ext->fn[3]->get_val_neighbor(i);
 
-    w_l[0] = w01;
-    w_l[1] = w11;
-    w_l[2] = w21;
-    w_l[3] = w31;
-
-    w_r[0] = w02;
-    w_r[1] = w12;
-    w_r[2] = w22;
-    w_r[3] = w32;
 
     result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
-  return result;
+  return result * TAU;
 }
 
 
@@ -602,7 +592,7 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 // One function used for all the components.
 double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
-  return int_u_v<double,double>(n, wt, ext->fn[0], v) / TAU;
+  return int_u_v<double,double>(n, wt, ext->fn[0], v);
 }
 
 // Surface linear forms representing the solid part of the boundary.
@@ -657,7 +647,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
 
     result -= wt[i] * v->val[i] * flux[element];
   }
-  return result;
+  return result * TAU;
 }
 
 double bdy_flux_solid_wall_comp_0(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
@@ -724,7 +714,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
       // Intersection state calculation (marked with an underscore1 (_1)).
       double sound_speed_1 = sound_speed_l + (num_flux.R/num_flux.c_v) * (w_l[1]/w_l[0] - velocity_x_b);
-      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
+      double rho_1 = std::pow(sound_speed_1*sound_speed_1*w_l[0]/(num_flux.kappa*calc_pressure(w_l[0], w_l[1], w_l[2], w_l[3])), num_flux.c_v/num_flux.R) * w_l[0];
       double velocity_x_1 = velocity_x_b;
       double velocity_y_1 = w_l[2] / w_l[0];
 
@@ -735,7 +725,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
       // Calculation of the state for inflow/outlow velocities above the local speed of sound.
       double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * sound_speed_l / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l,2*num_flux.c_v / num_flux.R) * w_l[0];
+      double rho_l_star = std::pow(sound_speed_l_star/sound_speed_l, 2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
       double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
@@ -791,13 +781,13 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     {
       // These calculations are the same as above.
       double p_b = bc_pressure(e->y[i]);
-      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0],w_l[1],w_l[2],w_l[3]),(1/num_flux.kappa));
-      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
+      double rho_b = w_l[0] * std::pow(p_b/calc_pressure(w_l[0], w_l[1], w_l[2], w_l[3]), (1/num_flux.kappa));
+      double velocity_x_b = (w_l[1] / w_l[0]) + 2*(num_flux.c_v/num_flux.R)*(calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]) - std::sqrt(num_flux.kappa * p_b / rho_b));
       double velocity_y_b = w_l[2] / w_l[0];
       double energy_b = calc_energy<double>(rho_b, velocity_x_b*rho_b, velocity_y_b*rho_b, p_b);
 
-      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]) / (2+num_flux.R/num_flux.c_v);
-      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0],w_l[1],w_l[2],w_l[3]),2*num_flux.c_v / num_flux.R) * w_l[0];
+      double sound_speed_l_star = num_flux.R/(num_flux.c_v * (2+num_flux.R/num_flux.c_v)) * w_l[1] / w_l[0] + 2 * calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]) / (2+num_flux.R/num_flux.c_v);
+      double rho_l_star = std::pow(sound_speed_l_star/calc_sound_speed<double>(w_l[0], w_l[1], w_l[2], w_l[3]), 2*num_flux.c_v / num_flux.R) * w_l[0];
       double velocity_x_l_star = sound_speed_l_star;
       double velocity_y_l_star = w_l[2] / w_l[0];
       double p_l_star = rho_l_star * sound_speed_l_star * sound_speed_l_star / num_flux.kappa;
@@ -853,7 +843,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     
     result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
-  return result;
+  return result * TAU;
 }
 
 
