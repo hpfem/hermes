@@ -701,37 +701,16 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               
               // The following variables will be used to search for neighbors of the currently assembled element on 
               // the u- and v- meshes and work with the produced elemental neighborhoods.
+
               // Find all neighbors of active element across active edge and partition it into segements
               // shared by the active element and distinct neighbors.
-              NeighborSearch::MainKey nbs_key_m(spaces[m]->get_seq(), spaces[m]->get_mesh()->get_seq(), e[m]->id, isurf);
-              if (NeighborSearch::main_cache_m[nbs_key_m] == NULL)
-              {
-                NeighborSearch::main_cache_m[nbs_key_m] = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
-                NeighborSearch::main_cache_m[nbs_key_m]->set_active_edge(isurf);
-                PrecalcShapeset *fv_for_main_cache = new PrecalcShapeset(fv->get_shapeset());
-                fv_for_main_cache->set_active_element(e[m]);
-                fv_for_main_cache->set_transform(refmap[m].get_transform());
-                RefMap *rm_for_main_cache = new RefMap();
-                rm_for_main_cache->set_active_element(e[m]);
-                rm_for_main_cache->set_transform(refmap[m].get_transform());
-                NeighborSearch::main_cache_m[nbs_key_m]->attach_pss(fv_for_main_cache, rm_for_main_cache);
-              }
-              NeighborSearch *nbs_v = NeighborSearch::main_cache_m[nbs_key_m];
+              NeighborSearch *nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+              nbs_v->set_active_edge(isurf);
+              nbs_v->attach_pss(fv, &(refmap[m]));
               
-              NeighborSearch::MainKey nbs_key_n(spaces[n]->get_seq(), spaces[n]->get_mesh()->get_seq(), e[n]->id, isurf);
-              if (NeighborSearch::main_cache_n[nbs_key_n] == NULL)
-              {
-                NeighborSearch::main_cache_n[nbs_key_n] = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
-                NeighborSearch::main_cache_n[nbs_key_n]->set_active_edge(isurf);
-                PrecalcShapeset *fu_for_main_cache = new PrecalcShapeset(fu->get_shapeset());
-                fu_for_main_cache->set_active_element(e[n]);
-                fu_for_main_cache->set_transform(refmap[n].get_transform());
-                RefMap *rn_for_main_cache = new RefMap();
-                rn_for_main_cache->set_active_element(e[n]);
-                rn_for_main_cache->set_transform(refmap[n].get_transform());
-                NeighborSearch::main_cache_n[nbs_key_n]->attach_pss(fu_for_main_cache, rn_for_main_cache);
-              }
-              NeighborSearch *nbs_u = NeighborSearch::main_cache_n[nbs_key_n];
+              NeighborSearch *nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
+              nbs_u->set_active_edge(isurf);
+              nbs_u->attach_pss(fu, &(refmap[n]));
               
               // Go through each segment of the active edge. If the active segment has already
               // been processed (when the neighbor element was assembled), it is skipped.
@@ -786,12 +765,16 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                           nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof);
                 }
               }
+
+              // This automatically restores the transformations pushed to the attached PrecalcShapesets fu/fv, so that
+              // they are ready for any further form evaluation.
+              delete nbs_u;
+              delete nbs_v;
             }  
           }
           
           if (rhs != NULL)
           {
-            // assemble inner surface linear forms /////////////////////////////////////
             for (unsigned int ww = 0; ww < s->vfsurf.size(); ww++)
             {
               WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
@@ -800,46 +783,40 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               if (vfs->area != H2D_DG_INNER_EDGE) continue;
               
               int m = vfs->i;
-              fv = spss[m];
               am = &(al[m]);
-              
-              surf_pos[isurf].base = trav.get_base();
-              surf_pos[isurf].space_v = spaces[m];
-              
-              // Assemble DG inner surface vector form - a single mesh version.
-              
+
               // Find all neighbors of active element across active edge and partition it into segements
               // shared by the active element and distinct neighbors.
-              NeighborSearch::MainKey nbs_key_m(spaces[m]->get_seq(), spaces[m]->get_mesh()->get_seq(), e[m]->id, isurf);
+              NeighborSearch::MainKey nbs_key_m(e0->id, isurf);
               if (NeighborSearch::main_cache_m[nbs_key_m] == NULL)
               {
-                NeighborSearch::main_cache_m[nbs_key_m] = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
+                NeighborSearch::main_cache_m[nbs_key_m] = new NeighborSearch(e0, this->get_space(0)->get_mesh());
                 NeighborSearch::main_cache_m[nbs_key_m]->set_active_edge(isurf, false);
-                PrecalcShapeset *fv_for_main_cache = new PrecalcShapeset(fv->get_shapeset());
-                fv_for_main_cache->set_active_element(e[m]);
-                fv_for_main_cache->set_transform(refmap[m].get_transform());
+                PrecalcShapeset *fv_for_main_cache = new PrecalcShapeset(pss[0]->get_shapeset());
+                fv_for_main_cache->set_active_element(e0);
+                fv_for_main_cache->set_transform(refmap[0].get_transform());
                 RefMap *rm_for_main_cache = new RefMap();
-                rm_for_main_cache->set_active_element(e[m]);
-                rm_for_main_cache->set_transform(refmap[m].get_transform());
+                rm_for_main_cache->set_active_element(e0);
+                rm_for_main_cache->set_transform(refmap[0].get_transform());
                 NeighborSearch::main_cache_m[nbs_key_m]->attach_pss(fv_for_main_cache, rm_for_main_cache);
               }
               NeighborSearch *nbs_v = NeighborSearch::main_cache_m[nbs_key_m];
-              
-              
+
+              // Assemble DG inner surface vector form - a single mesh version.
               // Go through each segment of the active edge. Do not skip if the segment has already been 
               // processed.
               for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) 
               {
                 nbs_v->set_active_segment(neighbor, false);
-                
-                // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
-                // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
-                // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
+              
+              // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
+              // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
+              // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
                 for (int i = 0; i < am->cnt; i++)       
                 {
                   if (am->dof[i] < 0) continue;
-                  fv->set_active_shape(am->idx[i]); 
-                  scalar val = eval_dg_form(vfs, u_ext, nbs_v, fv, &(refmap[m]), surf_pos+isurf) * am->coef[i];
+                  nbs_v->get_pss()->set_active_shape(am->idx[i]); 
+                  scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
                   rhs->add(am->dof[i], val);
                 }
               }
@@ -1599,16 +1576,7 @@ Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_incre
     ref_spaces->push_back(coarse[i]->dup(ref_mesh));
     (*ref_spaces)[i]->copy_orders(coarse[i], order_increase);
   }
-  // DG related : free the already unneeded entries from cache of NeighborSearch class instances.
-  Element *el;
-  for(int i = 0; i < ref_spaces->size(); i++)
-    for_all_active_elements(el, (*ref_spaces)[i]->get_mesh())
-      for(int j = 0; j < el->get_num_surf(); j++)
-      {
-        NeighborSearch::MainKey key((*ref_spaces)[i]->get_seq(), (*ref_spaces)[i]->get_mesh()->get_seq(), el->id, j);
-        NeighborSearch::main_cache_m.erase(key);
-        NeighborSearch::main_cache_n.erase(key);
-      }
+
   return ref_spaces;
 }
 
@@ -1622,15 +1590,6 @@ Space* construct_refined_space(Space* coarse, int order_increase)
   Space* ref_space = coarse->dup(ref_mesh);
   ref_space->copy_orders(coarse, order_increase);
 
-  // DG related : free the already unneeded entries from cache of NeighborSearch class instances.
-  Element *el;
-  for_all_active_elements(el, ref_space->get_mesh())
-    for(int j = 0; j < el->get_num_surf(); j++)
-    {
-      NeighborSearch::MainKey key(ref_space->get_seq(), ref_space->get_mesh()->get_seq(), el->id, j);
-      NeighborSearch::main_cache_m.erase(key);
-      NeighborSearch::main_cache_n.erase(key);
-    }
   return ref_space;
 }
 
