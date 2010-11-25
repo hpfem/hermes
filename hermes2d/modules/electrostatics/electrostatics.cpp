@@ -8,11 +8,11 @@ std::vector<int> _global_mat_markers;
 std::vector<double> _global_permittivity_array;
 std::vector<double> _global_charge_density_array;
 std::vector<int> _global_bdy_markers_val;
-std::vector<int> _global_bdy_indices_val;
 std::vector<double> _global_bc_val;
 std::vector<int> _global_bdy_markers_der;
-std::vector<int> _global_bdy_indices_der;
 std::vector<double> _global_bc_der;
+std::vector<int> _global_mat_permut;
+std::vector<int> _global_bc_permut;
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
@@ -22,24 +22,61 @@ template<typename Real, typename Scalar>
 Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
                      Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  int marker = e->marker;
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+  int mat_marker = e->marker;
+  double permittivity = _global_permittivity_array[_global_mat_permut[mat_marker]];
+  return permittivity * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
 }
 
 template<typename Real, typename Scalar>
 Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
                    Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  int marker = e->marker;
-  return int_v<Real, Scalar>(n, wt, v);
+  int mat_marker = e->marker;
+  double charge_density = _global_charge_density_array[_global_mat_permut[mat_marker]];
+  return charge_density * int_v<Real, Scalar>(n, wt, v);
 }
 
 template<typename Real, typename Scalar>
 Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  int marker = e->marker;
-  return int_v<Real, Scalar>(n, wt, v);
+  int edge_marker = e->marker;
+  double surf_charge_density = _global_bc_der[_global_bc_permut[edge_marker]];
+  return surf_charge_density * int_v<Real, Scalar>(n, wt, v);
+}
+
+// Look up an integer number in an array.
+bool find_index(const std::vector<int> &array, int x, int &i_out)
+{
+    for (int i=0; i < array.size(); i++)
+        if (array[i] == x) {
+            i_out = i;
+            return true;
+        }
+    return false;
+}
+
+// Boundary condition types.
+// Note: "essential" means that solution value is prescribed.
+BCType bc_types(int marker)
+{
+    if (marker == 0)
+        return BC_NONE;
+    int idx;
+    if (find_index(_global_bdy_markers_val, marker, idx))
+        return BC_ESSENTIAL;
+    if (find_index(_global_bdy_markers_der, marker, idx))
+        return BC_NATURAL;
+    error("Wrong boundary marker");
+}
+
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+{
+    int idx;
+    if (!find_index(_global_bdy_markers_val, ess_bdy_marker, idx))
+        error("marker not found");
+    return _global_bc_val[idx];
 }
 
 // Constructor.
@@ -126,39 +163,6 @@ void Electrostatics::set_boundary_derivatives(const std::vector<double> &bc_der)
     _global_bc_der = bc_der;
 }
 
-// Look up an integer number in an array.
-bool index(const std::vector<int> &array, int x, int &i_out)
-{
-    for (int i=0; i < array.size(); i++)
-        if (array[i] == x) {
-            i_out = i;
-            return true;
-        }
-    return false;
-}
-
-// Boundary condition types.
-// Note: "essential" means that solution value is prescribed.
-BCType bc_types(int marker)
-{
-    if (marker == 0)
-        return BC_NONE;
-    int idx;
-    if (index(_global_bdy_markers_val, marker, idx))
-        return BC_ESSENTIAL;
-    if (index(_global_bdy_markers_der, marker, idx))
-        return BC_NATURAL;
-    error("Wrong boundary marker");
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-    int idx;
-    if (!index(_global_bdy_markers_val, ess_bdy_marker, idx))
-        error("marker not found");
-    return _global_bc_val[idx];
-}
 
 // Solve the problem.
 bool Electrostatics::calculate(Solution* phi) 
@@ -178,7 +182,7 @@ bool Electrostatics::calculate(Solution* phi)
     }
     // Cross-checking with the array of Neumann markers
     int dummy_idx;
-    if (index(this->bdy_markers_der, this->bdy_markers_val[i], dummy_idx)) error("Mismatched boundary markers.");
+    if (find_index(this->bdy_markers_der, this->bdy_markers_val[i], dummy_idx)) error("Mismatched boundary markers.");
   }
   // Check whether Neumann boundary markers are 
   // all nonnegative and mutually distinct.
@@ -193,7 +197,7 @@ bool Electrostatics::calculate(Solution* phi)
     }
     // Cross-checking with the array of Dirichlet markers.
     int dummy_idx;
-    if (index(this->bdy_markers_val, this->bdy_markers_der[i], dummy_idx)) error("Mismatched boundary markers.");
+    if (find_index(this->bdy_markers_val, this->bdy_markers_der[i], dummy_idx)) error("Mismatched boundary markers.");
   }
 
   // Sanity check of material markers and material constants.
@@ -233,17 +237,19 @@ bool Electrostatics::calculate(Solution* phi)
   for (int i=0; i < n_bc_val; i++) this->bc_permut[this->bdy_markers_val[i]] = i;
   // Fill in Neumann boundary markers.
   for (int i=0; i < n_bc_der; i++) this->bc_permut[this->bdy_markers_der[i]] = i;
+  // Define global permutation arrays.
+  _global_mat_permut = this->mat_permut;
+  _global_bc_permut = this->bc_permut;
 
-
-  //test:
+  /*
+  // debug: print permutation arrays
   printf("mat_permut = ");
   for (int i=0; i < max_mat_marker+1; i++) printf("%d ", this->mat_permut[i]);
   printf("\nbc_permut = ");
   for (int i=0; i < max_bdy_marker+1; i++) printf("%d ", this->bc_permut[i]);
+  */
 
-
-
-  /* BEGIN THE COMPUTATION ARRAY bc_permut */
+  /* BEGIN THE COMPUTATION */
 
   // Load the mesh.
   H2DReader mloader;
