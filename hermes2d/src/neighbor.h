@@ -224,6 +224,11 @@ public:
   
   /// Get the precalculated shapeset on the central element.
   PrecalcShapeset * get_pss() {return this->central_pss;}
+
+  /// Get the refmap on the central element.
+  RefMap * get_rm() {return this->central_rm;}
+
+
 /*** Methods for getting geometry and integration data. ***/
   
   /// Initialize the geometry data for the active segment.
@@ -337,30 +342,20 @@ public:
   /// Functionality for caching of NeighborSearch instances.
   struct MainKey
   {
-    int space_seq, mesh_seq, element_id, isurf;
-    MainKey(int space_seq, int mesh_seq, int element_id, int isurf) : space_seq(space_seq), mesh_seq(mesh_seq), element_id(element_id), isurf(isurf) {};
+    int element_id, isurf;
+    MainKey(int element_id, int isurf) : element_id(element_id), isurf(isurf) {};
   };
   
   struct MainCompare
   {
     bool operator()(MainKey a, MainKey b) const
     {
-      if (a.space_seq < b.space_seq)
+      if (a.element_id < b.element_id)
         return true;
-      else if (a.space_seq > b.space_seq) 
+      else if (a.element_id > b.element_id) 
         return false;
       else
-        if (a.mesh_seq < b.mesh_seq)
-          return true;
-        else if (a.mesh_seq > b.mesh_seq) 
-          return false;
-        else 
-          if (a.element_id < b.element_id)
-            return true;
-          else if (a.element_id > b.element_id) 
-            return false;
-          else
-            return (a.isurf < b.isurf);
+        return (a.isurf < b.isurf);
     }
   };
 
