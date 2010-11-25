@@ -74,7 +74,7 @@ double bc_energy(double y)
   double rho_v_x = bc_density_vel_x(y);
   double rho_v_y = bc_density_vel_y(y);
   double pressure = bc_pressure(y);
-  return pressure/(KAPPA - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 }
 
 // Calculates energy from other quantities.
@@ -170,33 +170,57 @@ int main(int argc, char* argv[])
   // First flux.
   /*
   wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
-  wf.add_vector_form(1,callback(linear_form_1_0_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_1_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_2_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_3_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(2,callback(linear_form_2_0_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(2,callback(linear_form_2_1_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(2,callback(linear_form_2_2_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(2,callback(linear_form_2_3_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_0_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_1_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_2_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_3_first_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_2_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_3_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(2, callback(linear_form_2_0_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_1_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_2_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_3_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_0_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_1_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_2_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   // Second flux.
   
   wf.add_vector_form(0,callback(linear_form_0_2),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_0_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_1_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_2_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(1,callback(linear_form_1_3_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(2,callback(linear_form_2_0_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(2,callback(linear_form_2_1_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(2,callback(linear_form_2_2_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-  wf.add_vector_form(2,callback(linear_form_2_3_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_0_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_1_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_2_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form(3,callback(linear_form_3_3_second_flux),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_2_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_3_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(2, callback(linear_form_2_0_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_1_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_2_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_3_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_0_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_1_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_2_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
+                     Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   */
 
   // Volumetric linear forms coming from the time discretization.
@@ -206,22 +230,34 @@ int main(int argc, char* argv[])
   wf.add_vector_form(3,linear_form, linear_form_order, HERMES_ANY, &prev_e);
 
   // Surface linear forms - inner edges coming from the DG formulation.
-  wf.add_vector_form_surf(0,linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1,linear_form_interface_1, linear_form_order, H2D_DG_INNER_EDGE, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2,linear_form_interface_2, linear_form_order, H2D_DG_INNER_EDGE, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3,linear_form_interface_3, linear_form_order, H2D_DG_INNER_EDGE, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, linear_form_interface_1, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, linear_form_interface_2, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, linear_form_interface_3, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Surface linear forms - inlet / outlet edges.
-  wf.add_vector_form_surf(0,bdy_flux_inlet_outlet_comp_0, linear_form_order, 2, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1,bdy_flux_inlet_outlet_comp_1, linear_form_order, 2, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2,bdy_flux_inlet_outlet_comp_2, linear_form_order, 2, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3,bdy_flux_inlet_outlet_comp_3, linear_form_order, 2, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, 2, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, 2, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, 2, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, 2, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Surface linear forms - Solid wall edges.
-  wf.add_vector_form_surf(0,bdy_flux_solid_wall_comp_0, linear_form_order, 1, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1,bdy_flux_solid_wall_comp_1, linear_form_order, 1, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2,bdy_flux_solid_wall_comp_2, linear_form_order, 1, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3,bdy_flux_solid_wall_comp_3, linear_form_order, 1, Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, 1, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, 1, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, 1, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, 1, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -232,13 +268,17 @@ int main(int argc, char* argv[])
   SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
-  //VectorView vview("Velocity", 0, 0, 600, 300);
-  //ScalarView sview("Pressure", 700, 0, 600, 300);
+  //VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
+  //ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
 
-  ScalarView s1("w1", new WinGeom(0, 0, 600, 300));
-  ScalarView s2("w2", new WinGeom(650, 0, 600, 300));
-  ScalarView s3("w3", new WinGeom(0, 350, 600, 300));
-  ScalarView s4("w4", new WinGeom(650, 350, 600, 300));
+  ScalarView s1("w1", new WinGeom(0, 0, 620, 300));
+  s1.fix_scale_width(80);
+  ScalarView s2("w2", new WinGeom(625, 0, 600, 300));
+  s2.fix_scale_width(50);
+  ScalarView s3("w3", new WinGeom(0, 350, 620, 300));
+  s3.fix_scale_width(80);
+  ScalarView s4("w4", new WinGeom(625, 350, 600, 300));
+  s4.fix_scale_width(50);
 
   // Iteration number.
   int iteration = 0;
