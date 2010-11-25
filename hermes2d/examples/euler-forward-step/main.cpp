@@ -262,6 +262,8 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
+  // The FE problem is in fact a FV problem.
+  dp.set_fvm();
 
   // Filters for visualization of pressure and the two components of velocity.
   SimpleFilter pressure(calc_pressure_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
