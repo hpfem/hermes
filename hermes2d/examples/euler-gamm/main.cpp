@@ -32,6 +32,10 @@ double KAPPA = 1.4;         // Kappa.
 
 double t = 0;
 
+// Mesh boundary markers.
+#define BDY_SOLID_WALL 1
+#define BDY_INLET_OUTLET 2
+
 // Numerical flux.
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux(KAPPA);
@@ -141,10 +145,10 @@ int main(int argc, char* argv[])
   mesh.refine_element(1152);
 
   // Initialize spaces with default shapesets.
-  L2Space space_rho(&mesh,P_INIT);
-  L2Space space_rho_v_x(&mesh,P_INIT);
-  L2Space space_rho_v_y(&mesh,P_INIT);
-  L2Space space_e(&mesh,P_INIT);
+  L2Space space_rho(&mesh, P_INIT);
+  L2Space space_rho_v_x(&mesh, P_INIT);
+  L2Space space_rho_v_y(&mesh, P_INIT);
+  L2Space space_e(&mesh, P_INIT);
 
   // Set boundary condition types.
   space_rho.set_bc_types(bc_types);
@@ -173,8 +177,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(3, 3, callback(bilinear_form_3_3_time));
 
   // Volumetric linear forms.
-  // Linear forms coming from the linearization by taking the Eulerian fluxes' 
-  // Jacobian matrices from the previous time step. First flux.
+  // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
+  // First flux.
   /*
   wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
   wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
@@ -203,7 +207,7 @@ int main(int argc, char* argv[])
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   // Second flux.
   
-  wf.add_vector_form(0, callback(linear_form_0_2),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
+  wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
@@ -247,23 +251,23 @@ int main(int argc, char* argv[])
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Surface linear forms - inlet / outlet edges.
-  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, 2, 
+  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, 2, 
+  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, 2, 
+  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, 2, 
+  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Surface linear forms - Solid wall edges.
-  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, 1, 
+  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, BDY_SOLID_WALL, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, 1, 
+  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, BDY_SOLID_WALL, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, 1, 
+  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, BDY_SOLID_WALL, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, 1, 
+  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Initialize the FE problem.
@@ -310,15 +314,13 @@ int main(int argc, char* argv[])
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
 
-  // At the beginning it is necessary to assemble the matrix,
-  // therefore this flag is set to do so.
-  bool rhs_only = false;
   for(t = 0.0; t < 10; t += TAU)
   {
     info("---- Time step %d, time %3.5f.", iteration, t);
 
     iteration++;
 
+    bool rhs_only = (iteration == 1 ? false : true);
     // Assemble stiffness matrix and rhs or just rhs.
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
@@ -338,8 +340,8 @@ int main(int argc, char* argv[])
     std::ofstream out("matrix");
     for(int i = 0; i < matrix->get_size(); i++)
       for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(matrix->get(i,j)) != 0)
-          out << '(' << i << ',' << j << ')' << ':' << matrix->get(i,j) << std::endl;
+        if(std::abs(matrix->get(i, j)) != 0)
+          out << '(' << i << ', ' << j << ')' << ':' << matrix->get(i, j) << std::endl;
     out.close();
 
     out.open("rhs");
@@ -371,8 +373,7 @@ int main(int argc, char* argv[])
       time_der_out << iteration << '\t' << difference << std::endl;
     }
 
-    // Determine the time step & if it changes, set the flag to re-assemble the matrix.
-    rhs_only = true;
+    // Determine the time step.
     double *solution_vector = solver->get_solution();
     double min_condition = 0;
     Element *e;
@@ -396,15 +397,9 @@ int main(int argc, char* argv[])
         min_condition = condition;
     }
     if(TAU > min_condition)
-    {
       TAU = min_condition;
-      rhs_only = false;
-    }
     if(TAU < min_condition * 0.9)
-    {
       TAU = min_condition;
-      rhs_only = false;
-    }
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
@@ -418,7 +413,7 @@ int main(int argc, char* argv[])
     u.reinit();
     w.reinit();
     sview.show(&pressure);
-    vview.show(&u,&w);
+    vview.show(&u, &w);
     */
 
     s1.show(&sln_rho);
