@@ -27,7 +27,7 @@
 #include "base_view.h"
 
 BaseView::BaseView(const char* title, WinGeom* wg)
-        : ScalarView(title, wg)
+        : ScalarView((char*) title, wg)
 {
   pss = NULL;
   sln = NULL;
