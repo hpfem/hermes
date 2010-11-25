@@ -31,13 +31,8 @@ class HERMES_API VectorBaseView : public VectorView
 {
 public:
 
-  VectorBaseView(const char* title = "BaseView", DEFAULT_WINDOW_POS)
-    : VectorView(title, x, y, width, height) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
-
-#ifndef _MSC_VER
-	VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
+  VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
 		: VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
-#endif
 
 	VectorBaseView(char* title, WinGeom* wg = NULL)
     : VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }

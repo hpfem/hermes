@@ -30,7 +30,6 @@
 #define H2D_DEFAULT_Y_POS -1
 #define H2D_DEFAULT_WIDTH 600
 #define H2D_DEFAULT_HEIGHT 400
-#define DEFAULT_WINDOW_POS  int x = H2D_DEFAULT_X_POS, int y = H2D_DEFAULT_Y_POS, int width = H2D_DEFAULT_WIDTH, int height = H2D_DEFAULT_HEIGHT ///< Default size and window position.
 #define H2DV_SCALE_LOG_BASE 1.005 ///< Base of the scale coefficient. Scale = base^{mouse move}.
 
 /// Wait events.

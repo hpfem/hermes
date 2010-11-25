@@ -35,10 +35,7 @@ class HERMES_API StreamView : public View
 {
 public:
 
-  StreamView(const char* title = "StreamView", DEFAULT_WINDOW_POS);
-#ifndef _MSC_VER
-	StreamView(const char* title = "StreamView", WinGeom* wg = NULL);
-#endif
+  StreamView(const char* title = "StreamView", WinGeom* wg = NULL);
   StreamView(char* title, WinGeom* wg = NULL);
   virtual ~StreamView();
 

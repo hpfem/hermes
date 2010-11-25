@@ -8,8 +8,10 @@ std::vector<int> _global_mat_markers;
 std::vector<double> _global_permittivity_array;
 std::vector<double> _global_charge_density_array;
 std::vector<int> _global_bdy_markers_val;
+std::vector<int> _global_bdy_indices_val;
 std::vector<double> _global_bc_val;
 std::vector<int> _global_bdy_markers_der;
+std::vector<int> _global_bdy_indices_der;
 std::vector<double> _global_bc_der;
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
@@ -45,9 +47,6 @@ Electrostatics::Electrostatics()
 {
   init_ref_num = -1;
   init_p = -1;
-  n_mat_markers = -1;
-  n_bc_value = -1;
-  n_bc_derivative = -1;
   mesh = new Mesh();
   space = NULL;
 }
@@ -102,28 +101,28 @@ void Electrostatics::set_charge_density_array(const std::vector<double> &cd_arra
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
-    this->bc_markers_value = bdy_markers_val;
+    this->bdy_markers_val = bdy_markers_val;
     _global_bdy_markers_val = bdy_markers_val;
 }
 
 // Set boundary values.
 void Electrostatics::set_boundary_values(const std::vector<double> &bc_val)
 {
-    this->bc_values = bc_val;
+    this->bc_val = bc_val;
     _global_bc_val = bc_val;
 }
 
 // Set DERIVATIVE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_derivative(const std::vector<int> &bdy_markers_der)
 {
-    this->bc_markers_derivative = bdy_markers_der;
+    this->bdy_markers_der = bdy_markers_der;
     _global_bdy_markers_der = bdy_markers_der;
 }
 
 // Set boundary derivatives.
 void Electrostatics::set_boundary_derivatives(const std::vector<double> &bc_der)
 {
-    this->bc_derivatives = bc_der;
+    this->bc_der = bc_der;
     _global_bc_der = bc_der;
 }
 
@@ -164,6 +163,49 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 // Solve the problem.
 bool Electrostatics::calculate(Solution* phi) 
 {
+  /* SANITY CHECKS */
+
+  // Check whether Dirichlet and Neumann boundary markers are 
+  // all nonnegative and mutually distinct.
+  int n_bc_val = this->bdy_markers_val.size();
+  int n_bc_der = this->bdy_markers_der.size();
+  for (int i=0; i < n_bc_val; i++) {
+    // Making sure that they are positive (>= 1).
+    if (this->bdy_markers_val[i] <= 0) error("Boundary markers need to be positive.");
+    // Making sure that Dirichlet markers are mutually distinct.
+    for (int j=i+1; i < n_bc_val; j++) {
+      if(this->bdy_markers_val[i] == this->bdy_markers_val[j]) error("Duplicated boundary marker.");
+    }
+    // Cross-checking with the array of Neumann markers
+    int dummy_idx;
+    if (index(this->bdy_markers_der, this->bdy_markers_val[i], dummy_idx)) error("Mismatched boundary markers.");
+  }
+  for (int i=0; i < n_bc_der; i++) {
+    // Making sure that they are positive (>= 1).
+    if(this->bdy_markers_der[i] <= 0) error("Boundary markers need to be positive.");
+    // Making sure that Neumann markers are mutually distinct.
+    for (int j=i+1; i < n_bc_der; j++) {
+      if(this->bdy_markers_der[i] == this->bdy_markers_der[j]) error("Duplicated boundary marker.");
+    }
+    // Cross-checking with the array of Dirichlet markers.
+    int dummy_idx;
+    if (index(this->bdy_markers_val, this->bdy_markers_der[i], dummy_idx)) error("Mismatched boundary markers.");
+  }
+ 
+  // Sanity check of material markers and material constants.
+  int n_mat_markers = this->mat_markers.size();
+  if (n_mat_markers != this->permittivity_array.size()) error("Wrong number of permittivities.");
+  if (n_mat_markers != this->charge_density_array.size()) error("Wrong number of charge densities.");
+  // Making sure that they are nonnegative (>= 0).
+  for (int i=0; i < n_mat_markers; i++) {
+    if(this->mat_markers[i] < 0) error("Material markers must be nonnegative.");
+  }
+
+  /* CREATING THE PERMUTATION ARRAYS mat_permut[] and bc_permut[] */
+
+
+  /* BEGIN THE COMPUTATION */
+
   // Load the mesh.
   H2DReader mloader;
   mloader.load_str(this->mesh_str.c_str(), this->mesh);

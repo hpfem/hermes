@@ -22,20 +22,6 @@
 
 //// StreamView /////////////////////////////////////////////////////////////////////////////////////
 
-StreamView::StreamView(const char* title, int x, int y, int width, int height)
-          : View(title, x, y, width, height)
-{
-  lines = false;
-  pmode = false;
-  num_stream = 0;
-  root_x_min = 1e100;
-  root_y_min = 1e100;
-  root_x_max = -1e100;
-  root_y_max = -1e100;
-  root = NULL;
-}
-
-#ifndef _MSC_VER
 StreamView::StreamView(const char* title, WinGeom* wg)
           : View(title, wg)
 {
@@ -48,7 +34,6 @@ StreamView::StreamView(const char* title, WinGeom* wg)
   root_y_max = -1e100;
   root = NULL;
 }
-#endif
 
 StreamView::StreamView(char* title, WinGeom* wg)
           : View(title, wg)

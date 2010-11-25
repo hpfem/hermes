@@ -35,10 +35,7 @@ class HERMES_API VectorView : public View
 {
 public:
 
-  VectorView(const char* title = "VectorView", DEFAULT_WINDOW_POS);
-#ifndef _MSC_VER
-	VectorView(const char* title = "VectorView", WinGeom* wg = NULL);
-#endif
+  VectorView(const char* title = "VectorView", WinGeom* wg = NULL);
   VectorView(char* title, WinGeom* wg = NULL);
 
   void show(MeshFunction* vsln, double eps = HERMES_EPS_NORMAL);

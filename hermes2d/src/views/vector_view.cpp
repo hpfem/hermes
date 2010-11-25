@@ -22,19 +22,6 @@
 
 //// VectorView /////////////////////////////////////////////////////////////////////////////////////
 
-VectorView::VectorView(const char* title, int x, int y, int width, int height)
-          : View(title, x, y, width, height)
-{
-  gx = gy = 0.0;
-  gs = 20.0;
-  hexa = true;
-  mode = 0;
-  lines = false;
-  pmode = false;
-  length_coef = 1.0;
-}
-
-#ifndef _MSC_VER
 VectorView::VectorView(const char* title, WinGeom* wg)
           : View(title, wg)
 {
@@ -46,7 +33,6 @@ VectorView::VectorView(const char* title, WinGeom* wg)
   pmode = false;
   length_coef = 1.0;
 }
-#endif
 
 VectorView::VectorView(char* title, WinGeom* wg)
           : View(title, wg)
