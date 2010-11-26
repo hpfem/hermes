@@ -380,15 +380,14 @@ void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
     
-    scalar* coeffs = new scalar(vec->length());
+    scalar* coeffs = new scalar [vec->length()];
     vec->extract(coeffs);
     // debug
     //printf("coeffs:\n");
     //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
     //printf("\n");
     this->set_coeff_vector(space, coeffs, add_dir_lift);
-    // FIXME: the vector "coeffs" should be freed here but this segfaults
-    //delete [] coeffs;
+    delete [] coeffs;
 }
 
 // using coefficient array (no pss)
@@ -405,6 +404,8 @@ void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
     if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
 
     set_coeff_vector(space, pss, coeffs, add_dir_lift);
+
+    delete pss;
 }
 
 // using pss and coefficient array
@@ -431,17 +432,18 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   type = HERMES_SLN;
   num_dofs = Space::get_num_dofs(space);
 
-  // copy the mesh   TODO: share meshes between solutions
-  mesh = new Mesh;
-  //printf("Copying mesh from Space and setting own_mesh = true.\n");
-  mesh->copy(space->get_mesh());
-  own_mesh = true;
+  // copy the mesh   TODO: share meshes between solutions // WHAT???
+  mesh = space->get_mesh();
 
   // allocate the coefficient arrays
   num_elems = mesh->get_max_element_id();
+  if(elem_orders != NULL)
+    delete [] elem_orders;
   elem_orders = new int[num_elems];
   memset(elem_orders, 0, sizeof(int) * num_elems);
   for (int l = 0; l < num_components; l++) {
+    if(elem_coefs[l] != NULL)
+      delete [] elem_coefs[l];
     elem_coefs[l] = new int[num_elems];
     memset(elem_coefs[l], 0, sizeof(int) * num_elems);
   }
@@ -466,6 +468,8 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
     elem_orders[e->id] = o;
   }
   num_coefs *= num_components;
+  if(mono_coefs != NULL)
+    delete [] mono_coefs;
   mono_coefs = new scalar[num_coefs];
 
   // express the solution on elements as a linear combination of monomials
@@ -511,6 +515,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 
   if(mesh == NULL) error("mesh == NULL.\n");
   init_dxdy_buffer();
+
 }
 
 
@@ -1086,27 +1091,27 @@ void Solution::save(const char* filename, bool compress)
   }
 
   // write header
-  hermes2d_fwrite("H2DS\001\000\000\000", 1, 8, f);
+  hermes_fwrite("H2DS\001\000\000\000", 1, 8, f);
   int ssize = sizeof(scalar);
-  hermes2d_fwrite(&ssize, sizeof(int), 1, f);
-  hermes2d_fwrite(&num_components, sizeof(int), 1, f);
-  hermes2d_fwrite(&num_elems, sizeof(int), 1, f);
-  hermes2d_fwrite(&num_coefs, sizeof(int), 1, f);
+  hermes_fwrite(&ssize, sizeof(int), 1, f);
+  hermes_fwrite(&num_components, sizeof(int), 1, f);
+  hermes_fwrite(&num_elems, sizeof(int), 1, f);
+  hermes_fwrite(&num_coefs, sizeof(int), 1, f);
 
   // write monomial coefficients
-  hermes2d_fwrite(mono_coefs, sizeof(scalar), num_coefs, f);
+  hermes_fwrite(mono_coefs, sizeof(scalar), num_coefs, f);
 
   // write element orders
   char* temp_orders = new char[num_elems];
   for (i = 0; i < num_elems; i++) {
     temp_orders[i] = elem_orders[i];
   }
-  hermes2d_fwrite(temp_orders, sizeof(char), num_elems, f);
+  hermes_fwrite(temp_orders, sizeof(char), num_elems, f);
   delete [] temp_orders;
 
   // write element coef table
   for (i = 0; i < num_components; i++)
-    hermes2d_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
+    hermes_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
 
   // write the mesh
   mesh->save_raw(f);
@@ -1143,7 +1148,7 @@ void Solution::load(const char* filename)
     char magic[4];
     int  ver, ss, nc, ne, nf;
   } hdr;
-  hermes2d_fread(&hdr, sizeof(hdr), 1, f);
+  hermes_fread(&hdr, sizeof(hdr), 1, f);
 
   // some checks
   if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'S')
@@ -1156,7 +1161,7 @@ void Solution::load(const char* filename)
   if (hdr.ss == sizeof(double))
   {
     double* temp = new double[num_coefs];
-    hermes2d_fread(temp, sizeof(double), num_coefs, f);
+    hermes_fread(temp, sizeof(double), num_coefs, f);
 
     #ifndef H2D_COMPLEX
       mono_coefs = temp;
@@ -1172,7 +1177,7 @@ void Solution::load(const char* filename)
     #ifndef H2D_COMPLEX
       warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
       scalar* temp = new double[num_coefs*2];
-      hermes2d_fread(temp, sizeof(scalar), num_coefs*2, f);
+      hermes_fread(temp, sizeof(scalar), num_coefs*2, f);
       mono_coefs = new double[num_coefs];
       for (i = 0; i < num_coefs; i++)
         mono_coefs[i] = temp[2*i];
@@ -1180,7 +1185,7 @@ void Solution::load(const char* filename)
 
     #else
       mono_coefs = new scalar[num_coefs];;
-      hermes2d_fread(mono_coefs, sizeof(scalar), num_coefs, f);
+      hermes_fread(mono_coefs, sizeof(scalar), num_coefs, f);
     #endif
   }
   else
@@ -1189,7 +1194,7 @@ void Solution::load(const char* filename)
   // load element orders
   num_elems = hdr.ne;
   char* temp_orders = new char[num_elems];
-  hermes2d_fread(temp_orders, sizeof(char), num_elems, f);
+  hermes_fread(temp_orders, sizeof(char), num_elems, f);
   elem_orders = new int[num_elems];
   for (i = 0; i < num_elems; i++)
     elem_orders[i] = temp_orders[i];
@@ -1200,7 +1205,7 @@ void Solution::load(const char* filename)
   for (i = 0; i < num_components; i++)
   {
     elem_coefs[i] = new int[num_elems];
-    hermes2d_fread(elem_coefs[i], sizeof(int), num_elems, f);
+    hermes_fread(elem_coefs[i], sizeof(int), num_elems, f);
   }
 
   // load the mesh
@@ -1281,7 +1286,8 @@ scalar Solution::get_ref_value_transformed(Element* e, double xi1, double xi2, i
     else
       error("Getting derivatives of the vector solution: Not implemented yet.");
   }
-
+  error("internal error: reached end of non-void function");
+  return 0;
 }
 
 scalar Solution::get_pt_value(double x, double y, int item)
@@ -1316,7 +1322,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
   }
   else if (type == HERMES_CONST)
   {
-    if (b = 0) return cnst[a];
+    if (b == 0) return cnst[a];
     return 0.0;
   }
   else if (type == HERMES_UNDEF)

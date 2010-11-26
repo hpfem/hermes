@@ -1,0 +1,86 @@
+Space L2 (32)
+-------------
+
+**Git reference:** Tutorial example `32-space-l2 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/32-space-l2>`_. 
+
+We already saw the $L^2$ space in the `Navier-Stokes example 
+<http://hpfem.org/hermes/doc/src/hermes2d/tutorial-3.html#navier-stokes-equations-20>`_ where 
+it was used for pressure to keep the velocity discreetely divergence-free. This example 
+shows how to create an $L^2$ space, visualize 
+finite element basis functions, and perform an orthogonal $L^2$-projection of a continuous 
+function onto the FE space::
+
+    const int INIT_REF_NUM = 1;    // Number of initial uniform mesh refinements.
+    const int P_INIT = 3;          // Polynomial degree of mesh elements.
+
+    // Projected function.
+    scalar F(double x, double y, double& dx, double& dy)
+    {
+      return - pow(x, 4) * pow(y, 5); 
+      dx = 0; // not needed for L2-projection
+      dy = 0; // not needed for L2-projection
+    }
+
+    int main(int argc, char* argv[])
+    {
+      // Load the mesh.
+      Mesh mesh;
+      H2DReader mloader;
+      mloader.load("square.mesh", &mesh);
+
+      // Perform uniform mesh refinements.
+      for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+      // Create an L2 space with default shapeset.
+      L2Space space(&mesh, P_INIT);
+
+      // View basis functions.
+      BaseView bview("BaseView", 0, 0, 600, 500);
+      bview.show(&space);
+      View::wait(H2DV_WAIT_KEYPRESS);
+
+      // Assemble and solve the finite element problem.
+      WeakForm wf_dummy;
+      LinearProblem ls(&wf_dummy, &space);
+      Solution* sln_tmp = new Solution(&mesh, F);
+      Solution sln;
+      project_global(&space, H2D_L2_NORM, sln_tmp, &sln);
+      delete sln_tmp;
+
+      // Visualize the solution.
+      ScalarView view1("Projection", 610, 0, 600, 500);
+      view1.show(&sln);
+
+      // Wait for all views to be closed.
+      View::wait();
+      return 0;
+    }
+
+Sample basis functions:
+
+.. image:: 32/fn0.png
+   :align: center
+   :width: 400
+   :alt: Sample basis function
+
+.. image:: 32/fn1.png
+   :align: center
+   :width: 400
+   :alt: Sample basis function
+
+.. image:: 32/fn2.png
+   :align: center
+   :width: 400
+   :alt: Sample basis function
+
+.. image:: 32/fn3.png
+   :align: center
+   :width: 400
+   :alt: Sample basis function
+
+The projection (note that this is a discontinuous function):
+
+.. image:: 32/sol.png
+   :align: center
+   :width: 400
+   :alt: Projection

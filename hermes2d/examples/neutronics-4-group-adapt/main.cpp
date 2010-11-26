@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 
 #include "hermes2d.h"
 
@@ -79,7 +79,7 @@ const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nod
                                          // their notoriously bad performance.
 const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
                                          // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1e-1;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -233,6 +233,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   SparseMatrix* mat = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
   
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
@@ -253,8 +254,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     if (!solver->solve()) error ("Matrix solver failed.\n");
     
     // Convert coefficients vector into a set of Solution pointers.
-    // for_each_group(g) slptr_new_solution[g]->set_coeff_vector(spaces[g], rhs); 
-    Solution::vector_to_solutions(rhs, spaces, slptr_new_solution);
+    Solution::vector_to_solutions(solver->get_solution(), spaces, slptr_new_solution);
  
     // Update fission sources.
     SimpleFilter new_source(source_fn, mfptr_new_solution);
@@ -367,24 +367,24 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   /* for 1280x800 display */
-  ScalarView view1("Neutron flux 1", 0, 0, 320, 400);
-  ScalarView view2("Neutron flux 2", 330, 0, 320, 400);
-  ScalarView view3("Neutron flux 3", 660, 0, 320, 400);
-  ScalarView view4("Neutron flux 4", 990, 0, 320, 400);
-  OrderView oview1("Mesh for group 1", 0, 450, 320, 500);
-  OrderView oview2("Mesh for group 2", 330, 450, 320, 500);
-  OrderView oview3("Mesh for group 3", 660, 450, 320, 500);
-  OrderView oview4("Mesh for group 4", 990, 450, 320, 500);
+  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 320, 400));
+  ScalarView view2("Neutron flux 2", new WinGeom(330, 0, 320, 400));
+  ScalarView view3("Neutron flux 3", new WinGeom(660, 0, 320, 400));
+  ScalarView view4("Neutron flux 4", new WinGeom(990, 0, 320, 400));
+  OrderView oview1("Mesh for group 1", new WinGeom(0, 450, 320, 500));
+  OrderView oview2("Mesh for group 2", new WinGeom(330, 450, 320, 500));
+  OrderView oview3("Mesh for group 3", new WinGeom(660, 450, 320, 500));
+  OrderView oview4("Mesh for group 4", new WinGeom(990, 450, 320, 500));
 
   /* for adjacent 1280x800 and 1680x1050 displays
-  ScalarView view1("Neutron flux 1", 0, 0, 640, 480);
-  ScalarView view2("Neutron flux 2", 650, 0, 640, 480);
-  ScalarView view3("Neutron flux 3", 1300, 0, 640, 480);
-  ScalarView view4("Neutron flux 4", 1950, 0, 640, 480);
-  OrderView oview1("Mesh for group 1", 1300, 500, 340, 500);
-  OrderView oview2("Mesh for group 2", 1650, 500, 340, 500);
-  OrderView oview3("Mesh for group 3", 2000, 500, 340, 500);
-  OrderView oview4("Mesh for group 4", 2350, 500, 340, 500);
+  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 640, 480));
+  ScalarView view2("Neutron flux 2", new WinGeom(650, 0, 640, 480));
+  ScalarView view3("Neutron flux 3", new WinGeom(1300, 0, 640, 480));
+  ScalarView view4("Neutron flux 4", new WinGeom(1950, 0, 640, 480));
+  OrderView oview1("Mesh for group 1", new WinGeom(1300, 500, 340, 500));
+  OrderView oview2("Mesh for group 2", new WinGeom(1650, 500, 340, 500));
+  OrderView oview3("Mesh for group 3", new WinGeom(2000, 500, 340, 500));
+  OrderView oview4("Mesh for group 4", new WinGeom(2350, 500, 340, 500));
   */
 
   Tuple<ScalarView *> sviews(&view1, &view2, &view3, &view4);

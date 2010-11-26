@@ -63,6 +63,7 @@ void View::init() {
   memset(rendering_frames, 0, FPS_FRAME_SIZE * sizeof(double));
 }
 
+/*
 View::View(const char* title, int x, int y, int width, int height)
   : gl_pallete_tex_id(0)
   , title(title), output_id(-1), output_x(x), output_y(y), output_width(width), output_height(height)
@@ -71,6 +72,7 @@ View::View(const char* title, int x, int y, int width, int height)
 {
   init();
 }
+*/
 
 View::View(const char* title, WinGeom* wg)
   : gl_pallete_tex_id(0),
@@ -534,12 +536,29 @@ void View::wait_for_close()
   view_sync.leave();
 }
 
+// These two includes are needed for the wait_for_draw() function below:
+//#include <csignal>
+#include "Teuchos_stacktrace.hpp"
+
 void View::wait_for_draw()
 {
+  // For some reason, this function removes the signal handlers. So we just
+  // remember them and restore them. Unfortunately, this doesn't work for some
+  // reason:
+  //sighandler_t old_segv, old_abrt;
+  //old_segv = signal(SIGSEGV, SIG_DFL);
+  //old_abrt = signal(SIGABRT, SIG_DFL);
+
   view_sync.enter();
   if (output_id >= 0 && !frame_ready)
     view_sync.wait_drawing_fisnihed();
   view_sync.leave();
+
+  // Restore the old signal handlers -- doesn't work for some reason:
+  //signal(SIGSEGV, old_segv);
+  //signal(SIGABRT, old_abrt);
+  // So we just restore it by calling the original handler:
+  Teuchos::print_stack_on_segfault();
 }
 
 double View::get_tick_count()

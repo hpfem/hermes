@@ -1,66 +1,33 @@
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-//
-// main.cc
-//
-// Testing numerical quadrature
-//
-//
-
-//
-// TODO: test numerical quadrature on faces, edges
-//
-//
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
+//#include <getopt.h>
 #include <hermes3d.h>
-#include "../../../hermes_common/trace.h"
-#include "../../../hermes_common/error.h"
 
-#define ERROR_SUCCESS								0
-#define ERROR_FAILURE								-1
+// Testing numerical quadrature.
+// TODO: Test numerical quadrature on faces, edges.
 
-#define EPSILON										10e-12
+// The error should be smaller than this EPS.
+#define EPS								10e-10F
 
-#define countof(a) 									(sizeof(a)/sizeof(a[0]))
+#define countof(a) (sizeof(a)/sizeof(a[0]))
 
 
 bool testPrint(bool value, const char *msg, bool correct) {
-	printf("%s...", msg);
+	info("%s...", msg);
 	if (value == correct) {
-		printf("OK\n");
+		info("OK.");
 		return true;
 	}
 	else {
-		printf("failed\n");
+		info("failed.");
 		return false;
 	}
 }
 
-//
-// Test quadrature
-//
-
-//
-// 3D
-//
+// Test quadrature.
+// 3D.
 
 typedef
 	double (*fn3d_t)(double x, double y, double z);
@@ -100,9 +67,9 @@ double fn_3d_4(double x, double y, double z) {
 	return pow(x, 4) + pow(y, 2) + pow(z, 3) + x*y*z + x + y + z + 1;
 }
 
-// test 3d quadrature
+// Test 3d quadrature.
 int test_quadrature_3d_tetra(fn3d_t fn, double exact, int min_order, const char *fn_name) {
-	printf("  * f(x,y) = %s", fn_name);
+	info("  * f(x,y) = %s", fn_name);
 
 	// !!! std. quadrature works on std. reference domain !!!
 	QuadStdTetra quad;
@@ -116,19 +83,19 @@ int test_quadrature_3d_tetra(fn3d_t fn, double exact, int min_order, const char 
 		}
 
 		double err = fabs(exact - integral);
-		if (err >= EPSILON) {
-			printf(" ... failed for order %d, integral = %lf, expected = %lf\n", order, integral, exact);
-			return ERROR_FAILURE;
+		if (err >= EPS) {
+			info(" ... failed for order %d, integral = %lf, expected = %lf.", order, integral, exact);
+			return ERR_FAILURE;
 		}
 	}
 
-	printf(" ... OK\n");
+	info(" ... OK.");
 
-	return ERROR_SUCCESS;
+	return ERR_SUCCESS;
 }
 
 int test_quadrature_3d_hex(fn3d_t fn, double exact, int min_h, int min_v, int min_u, const char *fn_name) {
-	printf("  * f(x,y) = %s", fn_name);
+	info("  * f(x,y) = %s", fn_name);
 
 	// !!! std. quadrature works on std. reference domain !!!
 	QuadStdHex quad;
@@ -146,41 +113,39 @@ int test_quadrature_3d_hex(fn3d_t fn, double exact, int min_h, int min_v, int mi
 				}
 
 				double err = fabs(exact - integral);
-//				printf("  * order (h = %d, v = %d, u = %d)", horder, vorder, uorder);
-				if (err >= EPSILON) {
-					printf(" ... failed for order (h = %d, v = %d, u = %d), integral = %lf, expected = %lf (diff = %e)\n",
+				if (err >= EPS) {
+					info(" ... failed for order (h = %d, v = %d, u = %d), integral = %lf, expected = %lf (diff = %e).",
 						horder, vorder, uorder, integral, exact, fabs(integral - exact));
-					return ERROR_FAILURE;
+					return ERR_FAILURE;
 				}
 			}
 		}
 	}
 
-	printf(" ... OK\n");
+	info(" ... OK.");
 
-	return ERROR_SUCCESS;
+	return ERR_SUCCESS;
 }
 
 int test_quadrature_3d_hex_surf(fn3d_t fn, double exact, int min_h, int min_v, int min_u, const char *fn_name) {
-	printf("  * f(x,y) = %s", fn_name);
+	info("  * f(x,y) = %s", fn_name);
 
-	// !!! std. quadrature works on std. reference domain !!!
 	QuadStdHex quad;
 	for (int horder = min_h; horder <= H3D_MAX_QUAD_ORDER; horder++) {
 		for (int vorder = min_v; vorder <= H3D_MAX_QUAD_ORDER; vorder++) {
 			for (int uorder = min_u; uorder <= H3D_MAX_QUAD_ORDER; uorder++) {
-				order2_t face_order[] = {
-					order2_t(vorder, uorder),
-					order2_t(vorder, uorder),
-					order2_t(horder, uorder),
-					order2_t(horder, uorder),
-					order2_t(horder, vorder),
-					order2_t(horder, vorder)
+				Ord2 face_order[] = {
+					Ord2(vorder, uorder),
+					Ord2(vorder, uorder),
+					Ord2(horder, uorder),
+					Ord2(horder, uorder),
+					Ord2(horder, vorder),
+					Ord2(horder, vorder)
 				};
 
 				double integral = 0;
 				for (int face = 0; face < Hex::NUM_FACES; face++) {
-					order2_t order = face_order[face];
+					Ord2 order = face_order[face];
 					int np = quad.get_face_num_points(face, order);
 					QuadPt3D *pt = quad.get_face_points(face, order);
 
@@ -189,28 +154,26 @@ int test_quadrature_3d_hex_surf(fn3d_t fn, double exact, int min_h, int min_v, i
 				}
 
 				double err = fabs(exact - integral);
-//				printf("  * order (h = %d, v = %d, u = %d)", horder, vorder, uorder);
-				if (err >= EPSILON) {
-					printf(" ... failed for order (h = %d, v = %d, u = %d), integral = %lf, expected = %lf (diff = %e)\n",
+				if (err >= EPS) {
+					info(" ... failed for order (h = %d, v = %d, u = %d), integral = %lf, expected = %lf (diff = %e).",
 						horder, vorder, uorder, integral, exact, fabs(integral - exact));
-					return ERROR_FAILURE;
+					return ERR_FAILURE;
 				}
 			}
 		}
 	}
 
-	printf(" ... OK\n");
+	info(" ... OK.");
 
-	return ERROR_SUCCESS;
+	return ERR_SUCCESS;
 }
 
 int test_quadrature_3d() {
-	int ret = ERROR_SUCCESS;
+	int ret = ERR_SUCCESS;
 
-	// hexs ///
+	// Hexs.
 	if (get_quadrature(MODE_HEXAHEDRON) != NULL) {
-		printf("\n");
-		printf("- Testing 3D quadrature (hex) -----\n");
+		info("- Testing 3D quadrature (hex) -----");
 
 		TC3D fn_hex[] = {
 			TC3D(fn_3d_1, 16.0, 2, 2, 2, "x^2 + y^2 + z^2 + x*y*z + x + y + z + 1"),
@@ -220,61 +183,53 @@ int test_quadrature_3d() {
 		};
 
 		for (int i = 0; i < countof(fn_hex); i++) {
-			if ((ret = test_quadrature_3d_hex(fn_hex[i].fn, fn_hex[i].exact, fn_hex[i].min_h_order, fn_hex[i].min_v_order, fn_hex[i].min_u_order, fn_hex[i].fn_name)) != ERROR_SUCCESS)
+			if ((ret = test_quadrature_3d_hex(fn_hex[i].fn, fn_hex[i].exact, fn_hex[i].min_h_order, fn_hex[i].min_v_order, fn_hex[i].min_u_order, fn_hex[i].fn_name)) != ERR_SUCCESS)
 				return ret;
 		}
 
-		printf("\n");
-		printf("- Testing 3D quadrature (hex) - surf -----\n");
+		info("- Testing 3D quadrature (hex) - surf -----");
 
 		TC3D fn_hex_surf[] = {
 			TC3D(fn_3d_1, 64.0, 2, 2, 2, "x^2 + y^2 + z^2 + x*y*z + x + y + z + 1")
 		};
 
 		for (int i = 0; i < countof(fn_hex_surf); i++) {
-			if ((ret = test_quadrature_3d_hex_surf(fn_hex_surf[i].fn, fn_hex_surf[i].exact, fn_hex_surf[i].min_h_order, fn_hex_surf[i].min_v_order, fn_hex_surf[i].min_u_order, fn_hex_surf[i].fn_name)) != ERROR_SUCCESS)
+			if ((ret = test_quadrature_3d_hex_surf(fn_hex_surf[i].fn, fn_hex_surf[i].exact, fn_hex_surf[i].min_h_order, fn_hex_surf[i].min_v_order, fn_hex_surf[i].min_u_order, fn_hex_surf[i].fn_name)) != ERR_SUCCESS)
 				return ret;
 		}
 	}
 
-	// tetras ///
+	// Tetras.
 	if (get_quadrature(MODE_TETRAHEDRON) != NULL) {
-		printf("\n");
-		printf("- Testing 3D quadrature (tetra) -----\n");
+		info("- Testing 3D quadrature (tetra) -----");
 
 		TC3D Funcetra[] = {
 			TC3D(fn_3d_1, 8.0/9.0, 3, 0, 0, "x^2 + y^2 + z^2 + x*y*z + x + y + z + 1")
 		};
 
 		for (int i = 0; i < countof(Funcetra); i++) {
-			if ((ret = test_quadrature_3d_tetra(Funcetra[i].fn, Funcetra[i].exact, Funcetra[i].min_h_order, Funcetra[i].fn_name)) != ERROR_SUCCESS)
+			if ((ret = test_quadrature_3d_tetra(Funcetra[i].fn, Funcetra[i].exact, Funcetra[i].min_h_order, Funcetra[i].fn_name)) != ERR_SUCCESS)
 				return ret;
 		}
 	}
 
-	// TODO: prisms
+	// TODO: Prisms.
 
-	return ERROR_SUCCESS;
+	return ERR_SUCCESS;
 }
 
-//
-// main
-//
-
 int main() {
-	set_verbose(false);
+	int ret = ERR_SUCCESS;
 
-//	TRACE_START("trace.txt");
-	DEBUG_OUTPUT_OFF;
-	SET_VERBOSE_LEVEL(0);
-
-	int ret = ERROR_SUCCESS;
-
-	// test 3D quadrature
-	if ((ret = test_quadrature_3d()) != ERROR_SUCCESS)
-		return ret;
-
-//	TRACE_END;
-
+	// Test 3D quadrature.
+	ret = test_quadrature_3d();
 	return ret;
+if (ret == ERR_SUCCESS) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }

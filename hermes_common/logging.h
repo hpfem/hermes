@@ -25,15 +25,16 @@
 #define HERMES_LOG_FILE_DELIM_SIZE 80
 
 /// Info about a log record. Used for output log function. \internal
-struct HERMES_API HermesLogEventInfo 
+class HERMES_API HermesLogEventInfo 
 {
+public:
   const char code;          ///< An event code character. For defails see event characters, e.g., ::HERMES_EC_ERROR
   const char* log_file;     ///< Log file name.
   const char* src_function; ///< A name of a function/method at which the event was generated.
   const char* src_file;     ///< A source file at which the event was generated.
   const int src_line;       ///< A line in the source file at which the event was generated.
-  HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
-    : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line) {};
+  HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line);
+  
 };
 
 /// Exits the application if the condition is true. \internal

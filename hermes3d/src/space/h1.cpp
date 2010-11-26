@@ -52,6 +52,7 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
       break;
     case MODE_TETRAHEDRON: 
       if (p_init.order < 1) error("P_INIT must be >= 1 in an H1 space on tetrahedra.");
+      else this->set_uniform_order_internal(p_init);
       break;
     default: error("Unknown element type in H1Space::H1Space().");
   }
@@ -209,9 +210,12 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 	int num_fns;
 	if (enode->ced) {
-		assert(enode->edge_ncomponents > 0);
-		unsigned int edge_id = enode->edge_baselist[0].edge_id;
-		num_fns = en_data[edge_id]->n;
+		if(enode->edge_ncomponents <= 0)
+      num_fns = 0;
+    else {
+		  unsigned int edge_id = enode->edge_baselist[0].edge_id;
+		  num_fns = en_data[edge_id]->n;
+    }
 	}
 	else {
 		num_fns = enode->n;

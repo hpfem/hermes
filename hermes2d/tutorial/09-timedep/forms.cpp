@@ -8,7 +8,8 @@ Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func
 template<typename Real, typename Scalar>
 Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  return HEATCAP * RHO * int_u_v<Real, Scalar>(n, wt, ext->fn[0], v) / TAU;
+  Func<Real> *temp_prev = ext->fn[0];
+  return HEATCAP * RHO * int_u_v<Real, Scalar>(n, wt, temp_prev, v) / TAU;
 }
 
 template<typename Real, typename Scalar>

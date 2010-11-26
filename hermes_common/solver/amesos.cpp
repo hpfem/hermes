@@ -31,7 +31,7 @@
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////
 
 AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs)
-  : LinearSolver(), m(m), rhs(rhs)
+  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -51,8 +51,6 @@ AmesosSolver::~AmesosSolver()
   _F_
 #ifdef HAVE_AMESOS
   delete solver;
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
 #endif
 }
 
@@ -91,18 +89,32 @@ bool AmesosSolver::solve()
   assert(m != NULL);
   assert(rhs != NULL);
   
-  TimePeriod tmr;
+  assert(m->size == rhs->size);
+  
+  TimePeriod tmr;  
 
-  Epetra_Vector x(*rhs->std_map);
-
+#if defined(H1D_COMPLEX) || defined(H2D_COMPLEX) || defined (H3D_COMPLEX)
+  error("AmesosSolver::solve() not yet implemented for complex problems");
+#else
   problem.SetOperator(m->mat);
   problem.SetRHS(rhs->vec);
+  Epetra_Vector x(*rhs->std_map);
   problem.SetLHS(&x);
+#endif
 
-  if ((error = solver->SymbolicFactorization()) != 0) return false;
-  if ((error = solver->NumericFactorization()) != 0) return false;
-  if ((error = solver->Solve()) != 0) return false;
+  if (!setup_factorization())
+  {
+    warning("AmesosSolver: LU factorization could not be completed");
+    return false;
+  }
 
+  int status = solver->Solve();
+  if (status != 0) 
+  {
+    error("AmesosSolver: Solution failed.");
+    return false;
+  }
+  
   tmr.tick();
   time = tmr.accumulated();
 
@@ -110,8 +122,52 @@ bool AmesosSolver::solve()
   sln = new scalar[m->size]; MEM_CHECK(sln);
   // copy the solution into sln vector
   memset(sln, 0, m->size * sizeof(scalar));
+  
+#if defined(H1D_COMPLEX) || defined(H2D_COMPLEX) || defined (H3D_COMPLEX)
+#else 
   for (int i = 0; i < m->size; i++) sln[i] = x[i];
+#endif
 
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool AmesosSolver::setup_factorization()
+{
+  _F_
+#ifdef HAVE_AMESOS
+  // Perform both factorization phases for the first time.
+  int eff_fact_scheme;
+  if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
+      solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
+    eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+  else
+    eff_fact_scheme = factorization_scheme;
+  
+  int status;
+  switch(eff_fact_scheme)
+  {
+    case HERMES_FACTORIZE_FROM_SCRATCH:
+      //debug_log("Factorizing symbolically.");
+      status = solver->SymbolicFactorization();
+      if (status != 0)
+      {
+        warning("Symbolic factorization failed.");
+        return false;
+      }
+      
+    case HERMES_REUSE_MATRIX_REORDERING:
+    case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
+      status = solver->NumericFactorization();
+      if (status != 0) 
+      {
+        warning("Numeric factorization failed.");
+        return false;
+      }
+  }
+  
   return true;
 #else
   return false;

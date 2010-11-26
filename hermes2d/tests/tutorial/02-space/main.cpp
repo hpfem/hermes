@@ -18,8 +18,6 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, NULL, NULL, 1);
 
   // new code for the test
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   int n_dof[10], dof_max[10];
   int success = 1;
   // testing all poly degrees between 1 and 10
@@ -44,11 +42,11 @@ int main(int argc, char* argv[])
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

@@ -18,10 +18,6 @@ using namespace RefinementSelectors;
  */
 
 /* global definitions */
-#undef ERROR_SUCCESS
-#undef ERROR_FAILURE
-#define ERROR_SUCCESS 0 ///< Test return code if success.
-#define ERROR_FAILURE -1 ///< Test return code if fails.
 #define delete_not_null(__ptr) if (__ptr != NULL) delete __ptr; ///< Deletes an instance if the pointer is not NULL.
 
 #define H2D_TEST_NOT_DONE -1 ///< Flag: Combination of orders was not tested.
@@ -215,11 +211,11 @@ quit:
   if (test_success)
   {
     info("!Test: Success");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     info("!Test: Failed!");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

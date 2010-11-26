@@ -19,7 +19,7 @@
 #define __HERMES_2D_H
 
 #include "h2d_common.h"
-#include "h2d_logging.h"
+#include "hermes_logging.h"
 
 #include "range.h"
 #include "limit_order.h"
@@ -45,7 +45,7 @@
 #include "trans.h"
 
 #include "weakform.h"
-#include "feproblem.h"
+#include "discrete_problem.h"
 #include "forms.h"
 
 // solvers
@@ -57,6 +57,7 @@
 #include "../hermes_common/solver/pardiso.h"
 #include "../hermes_common/solver/petsc.h"
 #include "../hermes_common/solver/umfpack_solver.h"
+#include "../hermes_common/solver/superlu.h"
 
 // preconditioners
 #include "../hermes_common/solver/precond.h"
@@ -93,9 +94,10 @@
 #include "ref_selectors/hcurl_proj_based_selector.h"
 
 #include "adapt/adapt.h"
-
+#include "neighbor.h"
 #include "ogprojection.h"
 
+#include "numerical_flux.h"
 /**
 
 \mainpage

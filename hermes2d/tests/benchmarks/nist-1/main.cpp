@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   // mloader.load("square_tri.mesh", &mesh);   // triangles
 
   // Perform initial mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
@@ -199,18 +199,16 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   int n_dof_allowed = 810;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

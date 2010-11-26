@@ -4,7 +4,7 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 set(BINARIES) 
 
 macro(ADD_BIN BIN DEFINE)
-	add_executable(${BIN}		hex-matfree.cpp)
+	add_executable(${BIN}		main.cpp)
 	
   set_common_target_properties(${BIN})
 
@@ -22,8 +22,8 @@ ADD_BIN(${PROJECT_NAME}-nln NLN_DIRICHLET)
 foreach(B ${BINARIES})
 	set(BIN ${PROJECT_BINARY_DIR}/${B})
 	
-#	add_test(${B}-1  ${BIN} ${MESHES_DIR}/mesh3d/hex1.mesh3d)
-	add_test(${B}-4  ${BIN} ${MESHES_DIR}/mesh3d/hex4.mesh3d)
-#	add_test(${B}-27 ${BIN} ${MESHES_DIR}/mesh3d/hex27.mesh3d)
+#	add_test(${B}-1  ${BIN} hex1.mesh3d)
+	add_test(${B}-4  ${BIN} hex4.mesh3d)
+#	add_test(${B}-27 ${BIN} hex27.mesh3d)
 endforeach(B)
 

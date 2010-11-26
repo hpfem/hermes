@@ -15,6 +15,18 @@
 
 #include "forms.h"
 
+template<typename T>
+const char* Func<T>::ERR_UNDEFINED_NEIGHBORING_ELEMENTS = "Neighboring elements are not defined and so are not function traces on their interface. "
+                                                          "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
+
+// Explicit template specializations are needed here, general template<T> T DiscontinuousFunc<T>::zero = T(0) doesn't work.
+template<> Ord DiscontinuousFunc<Ord>::zero = Ord(0);
+template<> double DiscontinuousFunc<double>::zero = 0.0;
+#if defined(H3D_COMPLEX) || defined(H2D_COMPLEX)
+  #include <complex>
+  template<> std::complex<double> DiscontinuousFunc<std::complex<double> >::zero = std::complex<double>(0);
+#endif
+
 // Integration order for coordinates, normals and tangents is one
 Geom<Ord>* init_geom_ord()
 {
@@ -56,6 +68,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
 	Geom<double>* e = new Geom<double>;
   e->marker = surf_pos->marker;
+  e->id = rm->get_active_element()->en[surf_pos->surf_num]->id;
 	e->x = rm->get_phys_x(order);
 	e->y = rm->get_phys_y(order);
 	double3 *tan;
@@ -79,7 +92,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 // Initialize integration order for function values and derivatives
 Func<Ord>* init_fn_ord(const int order)
 {
-        Ord *d = new Ord(order);
+  Ord *d = new Ord(order);
 
 	Func<Ord>* f = new Func<Ord>(1, 2);
 	f->val = d;
@@ -106,7 +119,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   int np = quad->get_num_points(order);
   Func<double>* u = new Func<double>(np, nc);
 
-  // H1 or L2 space
+  // H1 or L2 space.
   if (space_type == 0 || space_type == 3)
   {
 		u->val = new double [np];
@@ -148,7 +161,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 #endif
 		}
 	}
-  // Hcurl space
+  // Hcurl space.
 	else if (space_type == 1)
   {
     u->val0 = new double [np];
@@ -167,7 +180,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
       u->curl[i] = ((*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1]) * (dx1[i] - dy0[i]);
     }
 	}
-  // Hdiv space
+  // Hdiv space.
   else if (space_type == 2)
   {
     u->val0 = new double [np];

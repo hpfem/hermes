@@ -20,21 +20,19 @@ int main(int argc, char* argv[])
   HcurlSpace space(&mesh, NULL, NULL, P_INIT);
 
   // Visualize FE basis.
-  VectorBaseView bview("VectorBaseView", 0, 0, 700, 600);
+  VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));
 
   // View::wait(H2DV_WAIT_KEYPRESS);
 
   bool success = true;
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   if (success == true) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }
 

@@ -30,7 +30,10 @@ public:
   // For backward compatibility. Good to be deleted as soon as all the examples etc. use the second one.
   L2Space(Mesh* mesh, int p_init, Shapeset* shapeset = NULL);
 
-  L2Space(Mesh* mesh = NULL, Ord2 p_init = Ord2(1,1), Shapeset* shapeset = NULL);
+  L2Space(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
+	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
+          Shapeset* shapeset = NULL);
+
   virtual ~L2Space();
 
   virtual Space* dup(Mesh* mesh) const;
@@ -67,6 +70,7 @@ protected:
   virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al);
   virtual void get_bubble_assembly_list(Element* e, AsmList* al);
 
+  // FIXME: This function should probably not be used at all.
   virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
 };

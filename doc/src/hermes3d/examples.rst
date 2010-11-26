@@ -1,9 +1,5 @@
-.. _examples-doc:
-
-Hermes3D: Examples
-==================
-
-This is a list of examples which show what you can do with Hermes3D.
+Examples
+========
 
 .. toctree::
     :maxdepth: 2

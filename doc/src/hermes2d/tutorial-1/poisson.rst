@@ -1,0 +1,287 @@
+Poisson Equation (03)
+---------------------
+
+**Git reference:** Tutorial example `03-poisson <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/03-poisson>`_. 
+
+Model problem
+~~~~~~~~~~~~~
+
+Let us solve the Poisson equation
+
+.. math::
+    :label: poisson1
+
+       -\Delta u = CONST_F
+
+on the L-shaped domain $\Omega$ from the previous example,
+equipped with homogeneous (zero) Dirichlet boundary conditions
+
+.. math::
+    :label: poisson2
+
+       u = 0\ \ \  \mbox{on}\  \partial \Omega,
+
+where $CONST_F$ is a real number. The weak formulation 
+is derived in the standard way, first by multiplying equation :eq:`poisson1` with a test
+function $v$, then integrating over the domain $\Omega$, and then applying the Green's
+theorem (integration by parts) to the second derivatives.
+Because of the homogeneous Dirichlet condition :eq:`poisson2`,
+the proper space for the solution is $V = H^1_0(\Omega)$. The weak formulation reads:
+Find $u \in V$ such that
+
+.. math::
+    :label: poissonweak
+
+         \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} = CONST_F \int_\Omega v \;\mbox{d\bfx} \ \ \ \mbox{for all}\ v \in V.
+
+Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$. 
+
+Defining boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hermes recognizes two basic types of boundary conditions: essential and natural. Essential boundary conditions (prescribed values on the boundary) influence the finite element space while natural conditions do not - they are incorporated into boundary integrals in the weak formulation. In the context of elliptic problems, Dirichlet conditions are essential and Neumann/Newton conditions are natural.
+
+Hermes uses two callbacks to specify boundary conditions. First, the function bc_types()
+associates boundary markers with the correct type of boundary condition. For the above problem, 
+we have essential boundary conditions for all boundary markers::
+
+    // Boundary condition types.
+    // Note: "essential" means that solution value is prescribed.
+    BCType bc_types(int marker)
+    {
+      return BC_ESSENTIAL;
+    }
+
+Second, the callback essential_bc_values() defines solution values 
+for essential boundary conditions::
+
+    // Essential (Dirichlet) boundary condition values.
+    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+    {
+      return 0;
+    }
+
+Here 'x' and 'y' are the spatial coordinates and thus one can enter
+non-constant boundary conditions easily.
+
+Note that values for natural boundary conditions are incorporated 
+into the weak forms.
+
+Defining weak forms
+~~~~~~~~~~~~~~~~~~~
+
+The bilinear form $a(u,v)$ and the linear form $l(v)$ are defined using the following
+callbacks::
+
+    // Return the value \int \nabla u \cdot \nabla v dx.
+    template<typename Real, typename Scalar>
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++) result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+      return result;
+    }
+   
+    // Return the value CONST_F \int v dx.
+    template<typename Real, typename Scalar>
+    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++) result += wt[i] * (v->val[i]);
+      return CONST_F * result;
+    }
+
+These callbacks are called by Hermes for each element during the assembly and they must return the 
+values of the bilinear and linear forms for the given arguments. 
+
+Arguments of weak forms
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The arguments of weak forms have the following meaning:
+
+  * *n* ... the number of integration points,
+  * *wt* ... array of integration weights for all integration points,
+  * *u_ext* ... solution values (for nonlinear problems only, to be discussed later),
+  * *u* ... basis function,
+  * *v* ... test function,
+  * *e* ... geometrical information such as physical positions of integration points, tangent and normal vectors to element edges, etc. (to be discussed later),
+  * *ext* ... external data to be passed into the weak forms (to be discussed later).
+
+(All is provided by Hermes automatically.) The reader does not have to worry about the 
+templates for now - they are used by Hermes to 
+automatically determine the number of integration points for each *u* and *v* pair (to be discussed
+later). The above code also reveals how the function values and partial derivatives of the basis and 
+test functions are accessed. Use
+::
+
+    u->val[i]
+
+to access the value of the basis function at i-th integration point,
+::
+
+    v->val[i]
+
+to access the value of the test function at i-th integration point,
+::
+
+    u->dx[i]
+
+to access the x-derivative of the basis function at i-th integration point, etc. 
+Later we will learn how to access the physical coordinates of integration points 
+and other data. 
+
+Using predefined integrals
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In many cases, such as in this one, one can replace the above code with predefined integrals
+that can be found in the file `integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_::
+
+    // Return the value \int \nabla u . \nabla v dx.
+    template<typename Real, typename Scalar>
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+    }
+   
+    // Return the value \int v dx.
+    template<typename Real, typename Scalar>
+    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      return CONST_F * int_v<Real, Scalar>(n, wt, v);
+    }
+
+Predefined integrals like this also exist for the Hcurl, Hdiv and L2 spaces. 
+
+Next let us present a typical sequence of steps that are needed to solve a linear problem.
+
+Loading the mesh
+~~~~~~~~~~~~~~~~
+
+The main.cpp file typically begins with loading the mesh::
+
+    // Load the mesh.
+    Mesh mesh;
+    H2DReader mloader;
+    mloader.load("domain.mesh", &mesh);
+
+Initializing finite element space
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As a second step (after optional a-priori mesh refinements),
+we initialize the FE space::
+
+    // Create an H1 space with default shapeset.
+    H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+    int ndof = Space::get_num_dofs(&space);
+    info("ndof = %d", ndof);
+
+Note that here we used the boundary conditions callbacks bc_types() and 
+essential_bc_values() defined above.
+
+Initializing weak formulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Weak forms need to be registered as follows::
+
+    // Initialize the weak formulation.
+    WeakForm wf();
+    wf.add_matrix_form(callback(bilinear_form));
+    wf.add_vector_form(callback(linear_form));
+
+The reader does not have to worry about the macro *callback()* for the moment, this is 
+related to automatic determination of integration order.
+For more complicated PDE and PDE systems one can add multiple matrix and vector forms.
+One can optimize assembling by indicating that a matrix form is symmetric, associate
+different weak forms with different element material markers, etc. All this will be 
+discussed later.
+
+Initializing discrete problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The weak formulation and space(s) constitute a finite element problem.
+To define it, one needs to create an instance of the DiscreteProblem 
+class::
+
+    // Initialize the FE problem.
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, &space, is_linear);
+
+The third argument "is_linear" is optional. If it is left out, Hermes 
+assumes that the problem is nonlinear. In the nonlinear case, the 
+matrix and vector weak forms are interpreted differently, we will 
+learn about this later. 
+
+Initializing matrix solver
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Next one needs to choose a matrix solver::
+
+    MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
+
+Besides UMFPACK, one can use SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, and
+SOLVER_SUPERLU (and matrix-free SOLVER_NOX for nonlinear problems. this will be discussed
+later). 
+
+After that one needs to create instances of a matrix, vector, and matrix solver 
+as follows:: 
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+Assembling the matrix and vector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The stiffness matrix and load vector are assembled as follows::
+
+    // Assemble the stiffness matrix and right-hand side vector.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    dp.assemble(matrix, rhs);
+
+
+Solving the matrix problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally, the matrix problem is solved via::
+
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve())
+      Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    else
+      error ("Matrix solver failed.\n");
+
+The matrix solver can fail for various reasons -- direct solvers (UMFPACK,
+SUPERLU, MUMPS) may run out of memory if the number of equations is large,
+iterative solvers may fail to converge if the matrix is ill-conditioned.  
+
+Visualizing the solution
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The solution can be visualized via the ScalarView class::
+
+    // Visualize the solution.
+    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+    view.show(&sln);
+
+    // Wait for the view to be closed.
+    View::wait();
+
+The following figure shows the output of this example (again, press '3' for 3D view).
+
+.. image:: 03/poisson.png
+   :align: center
+   :width: 400
+   :height: 350
+   :alt: Solution of the Poisson equation.
+
+Cleaning up
+~~~~~~~~~~~
+
+We finish the main.cpp file with::
+
+    // Clean up.
+    delete solver;
+    delete matrix;
+    delete rhs;

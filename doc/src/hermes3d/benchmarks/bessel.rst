@@ -1,5 +1,3 @@
-.. _benchmark-bessel:
-
 Bessel (Maxwell's Equations)
 ============================
 
@@ -187,8 +185,5 @@ Code for the weak forms:
 
 Solution:
 
-.. image:: bessel-sln.png
+.. image:: bessel/bessel-sln.png
 
-.. seealso:: 
-
-   :ref:`benchmark-layer`

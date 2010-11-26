@@ -24,7 +24,7 @@ class RefMap;
 class DiscreteProblem;
 class Space;
 class MeshFunction;
-struct EdgePos;
+struct SurfPos;
 class Ord;
 
 struct Element;
@@ -92,10 +92,8 @@ public:
 
   bool is_matrix_free() { return is_matfree; }
 
-  int neq;
-
 protected:
-
+  int neq;
   int seq;
   bool is_matfree;
 

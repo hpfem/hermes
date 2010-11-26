@@ -6,18 +6,19 @@
 #ifndef _ITERATOR_H_
 #define _ITERATOR_H_
 
-#include "common.h"
-#include "mesh.h"
 #include <stack>
+#include "hermes1d.h"
 
-class Iterator {
+class Space;
+class Element;
+class HERMES_API Iterator {
 public:
-  Iterator(Mesh *mesh) 
+  Iterator(Space *space) 
   {
-    this->mesh = mesh;
+    this->space = space;
     current_coarse_elem_index = -1;
   }
-  Mesh *mesh;
+  Space *space;
   std::stack <Element*>S;  
   void reset();
   Element *first_active_element();

@@ -22,21 +22,6 @@
 // verbose output by default
 bool verbose = true;
 
-// print out the banner
-void banner() {
-  if (verbose) {
-    printf("\n-------------------------------------------------\n");
-    printf("         This application uses Hermes3D.\n");
-    printf("       Hermes3D is a C++ library for rapid \n");
-    printf("  development of adaptive FEM and hp-FEM solvers\n");
-    printf("      developed by the hp-FEM group at UNR\n");
-    printf("     and distributed under the GPL license.\n");
-    printf("    For more details visit http://hpfem.org/.\n");
-    printf("-------------------------------------------------\n");
-    fflush(stdout);
-  }
-}
-
 void set_verbose(bool verb) {
   verbose = verb;
 }

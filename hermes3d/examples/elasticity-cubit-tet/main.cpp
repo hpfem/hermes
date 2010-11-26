@@ -1,6 +1,6 @@
-#define H3D_REPORT_WARN
-#define H3D_REPORT_INFO
-#define H3D_REPORT_VERBOSE
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
 #include <hermes3d.h>
 
@@ -17,7 +17,7 @@
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 bool solution_output = true;                      // Generate output files (if true).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 

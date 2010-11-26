@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function.h"
 
@@ -119,8 +119,8 @@ int main(int argc, char* argv[])
   Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
   // Initialize views.
-  ScalarView sview("Solution", 0, 0, 500, 400);
-  OrderView oview("Mesh", 520, 0, 450, 400);
+  ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
+  OrderView oview("Mesh", new WinGeom(520, 0, 450, 400));
   oview.show(&space);
   sview.show(&u_prev_time);
   
@@ -140,41 +140,9 @@ int main(int argc, char* argv[])
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
     // Perform Newton's iteration.
-    int it = 1;
-    while (1)
-    {
-      // Obtain the number of degrees of freedom.
-      int ndof = Space::get_num_dofs(&space);
-
-      // Assemble the Jacobian matrix and residual vector.
-      dp.assemble(coeff_vec, matrix, rhs, false);
-
-      // Multiply the residual vector with -1 since the matrix 
-      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-      
-      // Calculate the l2-norm of residual vector.
-      double res_l2_norm = get_l2_norm(rhs);
-
-      // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-      // If l2 norm of the residual vector is within tolerance, or the maximum number 
-      // of iteration has been reached, then quit.
-      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-      // Solve the linear system.
-      if(!solver->solve())
-        error ("Matrix solver failed.\n");
-
-      // Add \deltaY^{n+1} to Y^n.
-      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-      
-      if (it >= NEWTON_MAX_ITER)
-        error ("Newton method did not converge.");
-
-      it++;
-    }
+    bool verbose = true;
+    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);

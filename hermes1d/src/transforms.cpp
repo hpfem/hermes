@@ -88,15 +88,13 @@ void fill_trans_matrices(TransMatrix trans_matrix_left,
     // loop over shape functions on coarse element
     for (int j=0; j < max_fns_num; j++) {
         // backup of projectionmatrix
-        Matrix *mat_left = new DenseMatrix(max_fns_num);
-        Matrix *mat_right = new DenseMatrix(max_fns_num);
-        mat_left->set_zero();
-        mat_right->set_zero();
+        double** mat_left = new_matrix<double>(max_fns_num, max_fns_num);
+        double** mat_right = new_matrix<double>(max_fns_num, max_fns_num);
         for (int r=0; r < max_fns_num; r++) {
-	    for (int s=0; s < max_fns_num; s++) {
-                mat_left->add(r, s, proj_matrix[r][s]);
-                mat_right->add(r, s, proj_matrix[r][s]);
-            }
+          for (int s=0; s < max_fns_num; s++) {
+            mat_left[r][s] += proj_matrix[r][s];
+            mat_right[r][s] += proj_matrix[r][s];
+          }
         }
         // fill right-hand side vectors f_left and f_right for j-th 
         // Lobatto shape function on (-1, 0) and (0, 1), respectively
@@ -112,16 +110,28 @@ void fill_trans_matrices(TransMatrix trans_matrix_left,
           for (int k=0; k < pts_num_right; k++) {
             f_right[i] += phys_weights_right[k] * lobatto(j, phys_x_right[k]) *
                                                   lobatto_right(i, phys_x_right[k]);
-	  }
+          }
         }
+        
         // for each 'j' we get a new column in the 
         // transformation matrices
-        solve_linear_system_dense_lu(mat_left, f_left);
-        solve_linear_system_dense_lu(mat_right, f_right);
+
+        int *indx = new int[max_fns_num];
+        double d;
+        ludcmp(mat_left, max_fns_num, indx, &d);
+        // solve system
+        lubksb(mat_left, max_fns_num, indx, f_left);
+
+        ludcmp(mat_right, max_fns_num, indx, &d);
+        // solve system
+        lubksb(mat_right, max_fns_num, indx, f_right);
+
         for (int i=0; i < max_fns_num; i++) {
             trans_matrix_left[i][j] = f_left[i];
             trans_matrix_right[i][j] = f_right[i];
         }
+        delete [] mat_left;
+        delete [] mat_right;
     }
     /* DEBUG
     for (int i=0; i < n; i++) {
@@ -147,15 +157,15 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   // checking whether elements match
   if (fabs(e->x1 - e_ref_left->x1) > 1e-10 ||
       fabs(e->x2 - e_ref_right->x2) > 1e-10) {
-    printf("e->x1 = %g, e_ref_left->x1 = %g\n", e->x1, e_ref_left->x1); 
-    printf("e->x2 = %g, e_ref_right->x2 = %g\n", e->x2, e_ref_left->x2); 
+    info("e->x1 = %g, e_ref_left->x1 = %g", e->x1, e_ref_left->x1); 
+    info("e->x2 = %g, e_ref_right->x2 = %g", e->x2, e_ref_left->x2); 
     error("Elements mismatched in transform_element_refined()");
   }
   int fns_num_ref_left = e_ref_left->p + 1;
   int fns_num_ref_right = e_ref_right->p + 1;
 
   if (DEBUG_SOLUTION_TRANSFER){
-    printf("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d), (%g, %g, p=%d)\n",
+    info("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d), (%g, %g, p=%d)",
          e->x1, e->x2, e->p, e_ref_left->x1, e_ref_left->x2, e_ref_left->p, 
          e_ref_right->x1, e_ref_right->x2, e_ref_right->p);
   }
@@ -168,9 +178,8 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   //debug
   if (DEBUG_SOLUTION_TRANSFER) {
     for (int i=0; i < fns_num_coarse; i++) {
-      printf("y_prev_loc[%d] = %f\n", i, y_prev_loc[i]);
+      info("y_prev_loc[%d] = %f", i, y_prev_loc[i]);
     }
-    printf("\n");
   }
   if (trans_matrices_initialized == 0) {
     fill_trans_matrices(trans_matrix_left, trans_matrix_right);
@@ -186,9 +195,8 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   //debug
   if (DEBUG_SOLUTION_TRANSFER) {
     for (int i=0; i < fns_num_ref_left; i++) {
-      printf("y_prev_loc_trans_left[%d] = %f\n", i, y_prev_loc_trans_left[i]);
+      info("y_prev_loc_trans_left[%d] = %f", i, y_prev_loc_trans_left[i]);
     }
-    printf("\n");
   }
 
   // transform coefficients on the right son
@@ -202,9 +210,8 @@ void transform_element_refined_forward(int sln, int comp, Element *e, Element *e
   //debug
   if (DEBUG_SOLUTION_TRANSFER) {
     for (int i=0; i < fns_num_ref_right; i++) {
-      printf("y_prev_loc_trans_right[%d] = %f\n", i, y_prev_loc_trans_right[i]);
+      info("y_prev_loc_trans_right[%d] = %f", i, y_prev_loc_trans_right[i]);
     }
-    printf("\n");
   }
 
   // Copying computed coefficients into the elements e_ref_left and e_ref_right.
@@ -244,12 +251,12 @@ void transform_element_unrefined_forward(int sln, int comp, Element *e, Element 
   // checking whether elements match
   if (fabs(e->x1 - e_ref->x1) > 1e-10 ||
       fabs(e->x2 - e_ref->x2) > 1e-10) {
-    printf("e->x1 = %g, e_ref->x1 = %g\n", e->x1, e_ref->x1); 
-    printf("e->x2 = %g, e_ref->x2 = %g\n", e->x2, e_ref->x2); 
+    info("e->x1 = %g, e_ref->x1 = %g", e->x1, e_ref->x1); 
+    info("e->x2 = %g, e_ref->x2 = %g", e->x2, e_ref->x2); 
     error("Elements mismatched in transform_element_unrefined()");
   }
   if (DEBUG_SOLUTION_TRANSFER){
-    printf("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d)\n",
+    info("Solution transfer from (%g, %g, p=%d) -> (%g, %g, p=%d)",
          e->x1, e->x2, e->p, e_ref->x1, e_ref->x2, e_ref->p);
   }
   int fns_num = e->p + 1; 
@@ -272,14 +279,14 @@ void transform_element_unrefined_forward(int comp, Element *e, Element* e_ref)
 // y_prev_ref will be constructed/
 // WARNING: For this to work, element DOF must be assigned correctly 
 // in both the coarse and fine meshes!
-void transfer_solution_forward(Mesh *mesh, Mesh *mesh_ref)
+void transfer_solution_forward(Space *space, Space *space_ref)
 {
-    Iterator *I = new Iterator(mesh);
-    Iterator *I_ref = new Iterator(mesh_ref);
+    Iterator *I = new Iterator(space);
+    Iterator *I_ref = new Iterator(space_ref);
 
-    // simultaneous traversal of 'mesh' and 'mesh_ref'
+    // simultaneous traversal of 'space' and 'space_ref'
     Element *e, *e_ref, *e_ref_left, *e_ref_right;
-    for (int comp=0; comp < mesh->get_n_eq(); comp++) {
+    for (int comp=0; comp < space->get_n_eq(); comp++) {
         I->reset();
         I_ref->reset();
         while ((e = I->next_active_element()) != NULL) {

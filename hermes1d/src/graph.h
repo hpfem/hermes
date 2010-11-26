@@ -16,7 +16,7 @@
 ///  Please note that this is a base class that cannot be instantiated.
 ///  Use MatlabGraph or GnuplotGraph instead.
 ///
-class Graph
+class HERMES_API Graph
 {
 public:
 
@@ -34,6 +34,7 @@ public:
   void set_row_style(int row, const char* color = "k", const char* line = "-", const char* marker = "");
 
   void add_values(int row, double x, double y);
+  void add_values(double x, double y);
   void add_values(int row, int n, double* x, double* y);
   void add_values(int row, int n, double2* xy);
 
@@ -63,9 +64,23 @@ protected:
 };
 
 
+///  Outputs just two numbers per row.
+///
+class HERMES_API SimpleGraph : public Graph
+{
+public:
+
+  SimpleGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL)
+       : Graph(title, x_axis_name, y_axis_name) {}
+
+  virtual void save(const char* filename);
+
+};
+
+
 ///  Outputs a MATLAB graph.
 ///
-class MatlabGraph : public Graph
+class HERMES_API MatlabGraph : public Graph
 {
 public:
   
@@ -79,10 +94,10 @@ public:
 
 ///  Outputs a GNUPLOT graph.
 ///
-class GnuplotGraph : public Graph
+class HERMES_API GnuplotGraph : public Graph
 {
 public:
-  
+  ~GnuplotGraph() {};
   GnuplotGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL)
        : Graph(title, x_axis_name, y_axis_name) {}
         

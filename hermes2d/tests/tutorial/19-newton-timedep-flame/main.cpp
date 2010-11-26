@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -189,8 +189,6 @@ int main(int argc, char* argv[])
   info("Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
   info("Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   double coor_x[8] = {0.0, 8.0, 15.0, 24.0, 30.0, 40.0, 50.0, 60.0};
   double coor_y = 8.0;
   double t_value[8] = {1.000000, 0.850946, 0.624183, 0.524876, 0.696210, 0.964166, 0.998641, 0.001120};
@@ -204,8 +202,8 @@ int main(int argc, char* argv[])
     else
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }
   }
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }

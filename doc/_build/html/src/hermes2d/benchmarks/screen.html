@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Screen (Maxwell’s Equations) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Benchmarks with Known Exact Solution" href="../benchmarks.html" />
+    <link rel="next" title="Hermes2D: Examples" href="../examples.html" />
+    <link rel="prev" title="2-Group Neutronics (Neutronics)" href="neutronics-2-group-adapt.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../examples.html" title="Hermes2D: Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="neutronics-2-group-adapt.html" title="2-Group Neutronics (Neutronics)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" accesskey="U">Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="screen-maxwell-s-equations">
+<h1>Screen (Maxwell&#8217;s Equations)<a class="headerlink" href="#screen-maxwell-s-equations" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Benchmark <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/screen">screen</a>.</p>
+<p>This example solves time-harmonic Maxwell&#8217;s equations. It describes an electromagnetic wave that
+hits a thin screen under the angle of 45 degrees, causing a singularity at the tip of the screen.
+The strength of the singularity makes this example rather difficult.</p>
+<p>Equation solved: Time-harmonic Maxwell&#8217;s equations</p>
+<div class="math" id="equation-screen">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/559fb5420cb5e77f07134493136c0b8c3d56468d.png" alt="\frac{1}{\mu_r} \nabla \times \nabla \times E - \kappa^2 \epsilon_r E = \Phi." /></p>
+</div><p>Domain of interest is the square <img class="math" src="../../../_images/math/cb8db917323e1e95e0532c3ba32188cb435fa88f.png" alt="(-1,1)^2"/> missing the edge that connects the center with
+the midpoint of the left side. It is filled with air:</p>
+<div align="center" class="align-center"><img alt="Computational domain." class="align-center" src="../../../_images/domain2.png" style="width: 490px; height: 490px;" /></div>
+<p>Boundary conditions: Tangential component of solution taken from known exact solution
+(essential BC). See the
+<a class="reference external" href="http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/main.cpp">main.cpp</a> file.</p>
+<p>Exact solution: This is rather complicated in this case - please look into the
+corresponding file
+<a class="reference external" href="http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/exact_sol.cpp">exact_sol.cpp</a>.</p>
+<p>Code for the weak forms:</p>
+<div class="highlight-python"><pre>template&lt;typename Real, typename Scalar&gt;
+Scalar bilinear_form(int n, double *wt, Func&lt;Scalar&gt; *u_ext[], Func&lt;Real&gt; *u, Func&lt;Real&gt; *v, Geom&lt;Real&gt; *e, ExtData&lt;Scalar&gt; *ext)
+{
+  return int_curl_e_curl_f&lt;Real, Scalar&gt;(n, wt, u, v) - int_e_f&lt;Real, Scalar&gt;(n, wt, u, v);
+}</pre>
+</div>
+<p>Solution (real part of <img class="math" src="../../../_images/math/459b08d5235f417c69f0cc0c2d473a4739abdb1f.png" alt="E_1"/>):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/sol1.png" style="width: 510px; height: 470px;" /></div>
+<p>Solution (real part of <img class="math" src="../../../_images/math/f263b4685391e1f4f3ba204a355cc203a29a0653.png" alt="E_2"/>):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/sol2.png" style="width: 510px; height: 470px;" /></div>
+<p>Solution (imaginary part of <img class="math" src="../../../_images/math/459b08d5235f417c69f0cc0c2d473a4739abdb1f.png" alt="E_1"/>):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/sol3.png" style="width: 510px; height: 470px;" /></div>
+<p>Solution (imaginary part of <img class="math" src="../../../_images/math/f263b4685391e1f4f3ba204a355cc203a29a0653.png" alt="E_2"/>):</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/sol4.png" style="width: 510px; height: 470px;" /></div>
+<p>Final mesh (h-FEM with linear elements):</p>
+<div align="center" class="align-center"><img alt="Final mesh (h-FEM with linear elements)." class="align-center" src="../../../_images/mesh-h13.png" style="width: 460px; height: 410px;" /></div>
+<p>Note that the polynomial order indicated corresponds to the tangential components
+of approximation on element interfaces, not to polynomial degrees inside the elements
+(those are one higher).</p>
+<p>Final mesh (h-FEM with quadratic elements):</p>
+<div align="center" class="align-center"><img alt="Final mesh (h-FEM with quadratic elements)." class="align-center" src="../../../_images/mesh-h23.png" style="width: 460px; height: 410px;" /></div>
+<p>Final mesh (hp-FEM):</p>
+<div align="center" class="align-center"><img alt="Final mesh (hp-FEM)." class="align-center" src="../../../_images/mesh-hp3.png" style="width: 460px; height: 410px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof3.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU time convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu3.png" style="width: 600px; height: 400px;" /></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="neutronics-2-group-adapt.html"
+                                  title="previous chapter">2-Group Neutronics (Neutronics)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="../examples.html"
+                                  title="next chapter">Hermes2D: Examples</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../examples.html" title="Hermes2D: Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="neutronics-2-group-adapt.html" title="2-Group Neutronics (Neutronics)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" >Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

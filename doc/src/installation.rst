@@ -1,6 +1,5 @@
-============
-Installation
-============
+Installation - Linux
+====================
 
 Linux Users
 -----------

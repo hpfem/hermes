@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #define DEBUG_ORDER
 #include "hermes2d.h"
 
@@ -115,8 +115,6 @@ int main(int argc, char* argv[])
 
   AbsFilter mag2(&psi_prev_time);
   AbsFilter mag3(&phi_prev_time);
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
   double val = std::abs(mag2.get_pt_value(0.0, 0.0));
@@ -191,10 +189,10 @@ int main(int argc, char* argv[])
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

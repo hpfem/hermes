@@ -1,13 +1,9 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
-
-#include "python_api.h"
-
 #include "h1d_wrapper_api.h"
-
-int N_elem = 2;                         // number of elements
-static int N_eq = 2;
-double A = 0, B = M_PI;                     // domain end points
-int P_init = 7;                           // initial polynomal degree
 
 /*
 This example solves u'' + k^2 u = 0 as an eigenvalue problem, by reducing it to
@@ -35,6 +31,10 @@ We solve A*x = E*B*x, where A, B are matrices composed of 2x2 blocks.
 
 */
 
+int NELEM = 2;                            // Number of elements.
+static int NEQ = 2;
+double A = 0, B = M_PI;                   // Domain end points.
+int P_init = 7;                           // Initial polynomal degree.
 
 double kappa = 1;
 
@@ -82,17 +82,16 @@ double B_00(int num, double *x, double *weights,
 
 /******************************************************************************/
 int main(int argc, char* argv[]) {
-  // create mesh
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
-  // you can set the zero dirichlet at the right hand side
+  // Create mesh, set Dirichlet BC, enumerate basis functions.
+  Mesh *mesh = new Mesh(A, B, NELEM, P_init, NEQ);
   mesh->set_bc_left_dirichlet(0, 0);
   mesh->set_bc_right_dirichlet(0, 0);
 
-  // variable for the total number of DOF
+  // Obtain the number of degrees of freedom.
   int N_dof = mesh->assign_dofs();
-  printf("ndofs: %d\n", N_dof);
+  info("ndofs: %d", N_dof);
 
-  // register weak forms
+  // Initialize the FE problem.
   DiscreteProblem *dp1 = new DiscreteProblem();
   dp1->add_matrix_form(0, 1, A_01);
   dp1->add_matrix_form(1, 0, A_10);
@@ -100,10 +99,11 @@ int main(int argc, char* argv[]) {
   dp2->add_matrix_form(0, 0, B_00);
   dp2->add_matrix_form(1, 1, B_00);
 
+  // Allocate matrices and vector for previous solution.
   CooMatrix *mat1 = new CooMatrix(N_dof);
   CooMatrix *mat2 = new CooMatrix(N_dof);
-  double *y_prev = new double[N_dof];
 
+  // Assemble the Jacobian matrices and residual vectors.
   dp1->assemble_matrix(mesh, mat1);
   dp2->assemble_matrix(mesh, mat2);
 
@@ -114,7 +114,6 @@ int main(int argc, char* argv[]) {
   p.push("B", c2py_CooMatrix(mat2));
   p.exec("from hermes1d.solvers.eigen import solve_eig_numpy, solve_eig_pysparse");
   p.exec("eigs = solve_eig_numpy(A.to_scipy_coo(), B.to_scipy_coo())");
-  //p.exec("eigs = solve_eig_pysparse(A.to_scipy_coo(), B.to_scipy_coo())");
   p.exec("from utils import show_eigs");
   p.exec("show_eigs(eigs)");
 

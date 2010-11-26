@@ -28,17 +28,6 @@
 
 //// MeshView //////////////////////////////////////////////////////////////////////////////////////
 
-MeshView::MeshView(const char* title, int x, int y, int width, int height)
-        : View(title, x, y, width, height)
-{
-  nodes = elems = NULL;
-  b_scale = false;
-  b_ids = false;
-  b_markers = true;
-  b_elem_mrk = false;
-}
-
-#ifndef _MSC_VER
 MeshView::MeshView(const char* title, WinGeom* wg)
         : View(title, wg)
 {
@@ -48,7 +37,6 @@ MeshView::MeshView(const char* title, WinGeom* wg)
   b_markers = true;
   b_elem_mrk = false;
 }
-#endif
 
 MeshView::MeshView(char* title, WinGeom* wg)
         : View(title, wg)

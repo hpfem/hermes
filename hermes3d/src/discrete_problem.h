@@ -50,11 +50,11 @@ public:
 
         // General assembling procedure for nonlinear problems. coeff_vec is the 
         // previous Newton vector.
-	void assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly = false);
+	void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
 
         // Assembling for linear problems. Same as the previous functions, but 
         // does not need the coeff_vector.
-	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
+	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
                       bool rhsonly = false);
 
         // Get the number of unknowns.
@@ -128,14 +128,6 @@ protected:
 	void init_ext_fns(ExtData<scalar> &ud, std::vector<MeshFunction *> &ext, int order,
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
-
-/// Calls the required (de)initialization routines of the selected matrix solver.
-HERMES_API bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[]);
-HERMES_API bool finalize_solution_environment(MatrixSolverType matrix_solver);
-
-HERMES_API Vector*  create_vector(MatrixSolverType matrix_solver);
-HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
-HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs);
 
 HERMES_API Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);

@@ -17,7 +17,6 @@
 #include "space_h1.h"
 #include "../quad_all.h"
 #include "../shapeset/shapeset_h1_all.h"
-#include "../../../hermes_common/callstack.h"
 #include "../../../hermes_common/matrix.h"
 
 double** H1Space::h1_proj_mat = NULL;

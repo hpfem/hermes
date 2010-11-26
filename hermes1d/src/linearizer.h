@@ -6,14 +6,17 @@
 #ifndef _LINEARIZER_H_
 #define _LINEARIZER_H_
 
-#include "common.h"
 #include "legendre.h"
 #include "lobatto.h"
+#include "space.h"
 
-class Linearizer {
+class Element;
+typedef Element* ElemPtr2[2];
+
+class HERMES_API Linearizer {
     public:
-        Linearizer(Mesh *mesh) {
-            this->mesh = mesh;
+        Linearizer(Space *space) {
+            this->space = space;
         }
 
         // evaluate approximate solution at element 'm' at reference
@@ -36,14 +39,14 @@ class Linearizer {
         void plot_trajectory(FILE *f, int comp_x, int comp_y, 
                              int plotting_elem_subdivision=50);
 
-        void get_xy_mesh(int comp, int plotting_elem_subdivision,
+        void get_xy_space(int comp, int plotting_elem_subdivision,
                          double **x, double **y, int *n);
         void get_xy_ref_array(int comp, ElemPtr2* elem_ref_pairs, 
                               int plotting_elem_subdivision,
                               double **x, double **y, int *n);
 
     private:
-        Mesh *mesh;
+        Space *space;
 };
 
 #endif

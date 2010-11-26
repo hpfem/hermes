@@ -43,7 +43,7 @@ double residual_surf_right(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v,
         double dvdx, void *user_data)
 {
-  int comp;     // solution component
+  int comp = 0;     // solution component
   int si = 0;      // solution index (only 0 is relevant for this example)
   return ((u_prev[si][comp] - Val_newton_beta)/Val_newton_alpha) * v; 
 }

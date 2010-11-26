@@ -1,4 +1,4 @@
-#define H2D_REPORT_INFO
+#define HERMES_REPORT_INFO
 #include "hermes2d.h"
 
 // This example shows how to define Neumann boundary conditions. In addition,

@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -91,18 +91,20 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("square.mesh", &basemesh);
 
-  // Initial mesh refinements.
+  // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
   mesh.copy(&basemesh);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d.", ndof);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
-  Solution sln_prev_time(&mesh, init_cond);
+
+  // Convert initial condition into a Solution.
+  Solution sln_prev_time;
+  sln_prev_time.set_exact(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -138,41 +140,9 @@ int main(int argc, char* argv[])
 
   // Newton's loop on the coarse mesh.
   info("Solving on coarse mesh:");
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(&space);
-
-    // Assemble the Jacobian matrix and residual vector.
-    dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-    // Multiply the residual vector with -1 since the matrix 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs_coarse);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-    // If l2 norm of the residual vector is in tolerance, or the maximum number 
-    // of iteration has been hit, then quit.
-    if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system and if successful, obtain the solution.
-    if(!solver_coarse->solve())
-      error ("Matrix solver failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  bool verbose = true;
+  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+      NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
   Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
@@ -196,7 +166,7 @@ int main(int argc, char* argv[])
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(&space, &ref_sln, &sln);
+      OGProjection::project_global(&space, &sln_prev_time, &sln);
     }
 
     // Adaptivity loop:
@@ -218,59 +188,34 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &sln, coeff_vec);
+        OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, coeff_vec);
+        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
+
+      // Now we can deallocate the previous fine mesh.
+      if(as > 1) delete ref_sln.get_mesh();
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(ref_space);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp->assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(ref_space), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve())
-          error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-        
-        if (it >= NEWTON_MAX_ITER)
-          error ("Newton method did not converge.");
-
-        it++;
-      }
+      if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
+	  	        NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Store the result in ref_sln.
       Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
       bool solutions_for_adapt = true;
-      double err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
+      double err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
@@ -290,18 +235,14 @@ int main(int argc, char* argv[])
           as++;
       }
       
-      info("Projecting fine mesh solution on new coarse mesh.");
-        OGProjection::project_global(&space, &ref_sln, &sln);
-
       // Clean up.
       delete solver;
       delete matrix;
       delete rhs;
       delete adaptivity;
-      delete ref_space->get_mesh();
       delete ref_space;
       delete dp;
-
+      delete [] coeff_vec;
     }
     while (done == false);
 
@@ -310,37 +251,35 @@ int main(int argc, char* argv[])
   }
 
   AbsFilter mag2(&sln);
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
   double val = std::abs(mag2.get_pt_value(0.1, 0.1));
   info("Coordinate ( 0.1, 0.1) xvel value = %lf", val);
-  if (fabs(val - (0.655698)) > eps) {
+  if (fabs(val - (0.655529)) > eps) {
     printf("Coordinate ( 0.1, 0.1) xvel value = %lf\n", val);
     success = 0;
   }
 
   val = std::abs(mag2.get_pt_value(0.1, -0.1));
   info("Coordinate ( 0.1, -0.1) xvel value = %lf", val);
-  if (fabs(val - (0.655698)) > eps) {
+  if (fabs(val - (0.655529)) > eps) {
     printf("Coordinate ( 0.1, -0.1) xvel value = %lf\n", val);
     success = 0;
   }
 
   val = std::abs(mag2.get_pt_value(0.2, 0.1));
   info("Coordinate ( 0.2, 0.1) xvel value = %lf", val);
-  if (fabs(val - (0.391485)) > eps) {
+  if (fabs(val - (0.391490)) > eps) {
     printf("Coordinate ( 0.2, 0.1) xvel value = %lf\n", val);
     success = 0;
   }
 
   if (success == 1) {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

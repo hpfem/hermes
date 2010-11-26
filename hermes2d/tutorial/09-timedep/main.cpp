@@ -1,5 +1,5 @@
-#define H2D_REPORT_INFO
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 //  This example shows how to solve a time-dependent PDE discretized

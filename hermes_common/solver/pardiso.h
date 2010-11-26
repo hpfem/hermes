@@ -24,7 +24,8 @@
 #include "solver.h"
 #include "../matrix.h"
 
-class PardisoMatrix : public SparseMatrix {
+class PardisoMatrix : public SparseMatrix 
+{
 public:
   PardisoMatrix();
   virtual ~PardisoMatrix();
@@ -41,17 +42,17 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // PARDISO specific data structures for storing matrix, rhs
-  int *Ap;
-  int *Ai;
-  scalar *Ax;
-
-  static void insert_value(int *Ai, scalar *Ax, int Alen, int idx, scalar value);
-
+  // PARDISO specific data structures for storing the system matrix (CSR format).
+  scalar *Ax;   // Matrix entries (row-wise). 
+  int *Ai;      // Column indices of values in Ax.
+  int *Ap;      // Index to Ax/Ai, where each row starts.
+  int nnz;      // Number of non-zero entries (= Ap[size]).
+  
   friend class PardisoLinearSolver;
 };
 
-class PardisoVector : public Vector {
+class PardisoVector : public Vector 
+{
 public:
   PardisoVector();
   virtual ~PardisoVector();
@@ -67,6 +68,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
+  // PARDISO specific data structures for storing the rhs.
   scalar *v;
 
   friend class PardisoLinearSolver;
@@ -75,7 +77,8 @@ protected:
 /// Encapsulation of PARDISO linear solver
 ///
 /// @ingroup solvers
-class HERMES_API PardisoLinearSolver : public LinearSolver {
+class HERMES_API PardisoLinearSolver : public LinearSolver
+{
 public:
   PardisoLinearSolver(PardisoMatrix *m, PardisoVector *rhs);
   virtual ~PardisoLinearSolver();
@@ -85,6 +88,31 @@ public:
 protected:
   PardisoMatrix *m;
   PardisoVector *rhs;
+  
+  bool inited;
+  bool setup_factorization();
+  bool check_status();
+  
+  // Variables needed on input to the Pardiso driver routine.
+  int solver;     // Type of the solver (sparse direct or multi-recursive iterative).
+  int mtype;      // Type of the matrix.
+  int maxfct;     // Maximum number of numerical factorizations.
+  int mnum;       // Which factorization to use.
+  int msglvl;     // Controls output of statistical information.
+  int err;        // Error flag.
+  int nrhs;       // Number of right hand sides.
+  int num_procs;  // Numbers of processors, value of OMP_NUM_THREADS.
+  int phase;      // Calculation phase (symbolic factorization/numerical factorization/solution).
+  
+  // Internal solver memory pointer pt,
+  //  32-bit: int pt[64]; 
+  //  64-bit: long int pt[64]
+  // void *pt[64] should be OK on both architectures.
+  void *pt[64];
+  
+  // Pardiso control parameters. Consult Pardiso manual for interpretation of individual entries.
+  int    iparm[64];
+  double dparm[64];
 };
 
 #endif /* _PARDISO_SOLVER_H_*/

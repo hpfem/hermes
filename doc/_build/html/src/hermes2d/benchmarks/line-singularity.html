@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Line Singularity (Elliptic) &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../../../index.html" />
+    <link rel="up" title="Hermes2D: Benchmarks with Known Exact Solution" href="../benchmarks.html" />
+    <link rel="next" title="Kellogg (Elliptic)" href="kellogg.html" />
+    <link rel="prev" title="Boundary Layer (Elliptic)" href="layer-boundary.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="kellogg.html" title="Kellogg (Elliptic)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="layer-boundary.html" title="Boundary Layer (Elliptic)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" accesskey="U">Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="line-singularity-elliptic">
+<h1>Line Singularity (Elliptic)<a class="headerlink" href="#line-singularity-elliptic" title="Permalink to this headline">¶</a></h1>
+<p><strong>Git reference:</strong> Benchmark <a class="reference external" href="http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/line-singularity">line-singularity</a>.</p>
+<p>The is another example with anisotropic solution that is suitable for testing
+anisotropic element refinements.</p>
+<p>Equation solved: Poisson equation</p>
+<div class="math" id="equation-line-sing">
+<p><span class="eqno">(1)</span><img src="../../../_images/math/fe34dd71750fdc73b35c63dbed7ac777cd046233.png" alt="-\Delta u = f." /></p>
+</div><p>Domain of interest: Square <img class="math" src="../../../_images/math/ab1c0fa4ad70ba60006a4ef99dd5a6e38c5d5eeb.png" alt="(-1, 1)^2"/>.</p>
+<p>Boundary conditions: Zero Neumann on left edge, Dirichlet given by the
+exact solution on the rest of the boundary.</p>
+<p>Exact solution:</p>
+<div class="math">
+<p><img src="../../../_images/math/70f4edc19b58197523b13a80ac30cbef6f0df6a1.png" alt="u(x,y) = \cos(Ky)\ \ \ \mbox{for}\ x \le 0,\\
+u(x,y) = \cos(Ky) + x^{\alpha}\ \ \ \mbox{for}\ x &gt; 0," /></p>
+</div><p>where <img class="math" src="../../../_images/math/dfb064112b6c94470339f6571f69d07afc1c024c.png" alt="K"/> and <img class="math" src="../../../_images/math/10f32377ac67d94f764f12a15ea987e88c85d3e1.png" alt="\alpha"/> are real constants.</p>
+<p>Right-hand side: Obtained by inserting the exact solution into the equation.
+The corresponding code snippet is shown below:</p>
+<div class="highlight-python"><pre>scalar rhs(scalar x, scalar y)
+{
+  if (x &lt; 0) return fn(x, y)*K*K;
+  else return fn(x, y)*K*K-ALPHA*(ALPHA-1)*pow(x, ALPHA - 2.) - K*K*pow(x, ALPHA);
+}</pre>
+</div>
+<p>Solution for <img class="math" src="../../../_images/math/e6f440078cf25dcd0b071ad862684943903060f3.png" alt="K = \pi/2"/> and <img class="math" src="../../../_images/math/cdeec48aba1b2b6174a18404ace5b2772c4e10cc.png" alt="\alpha = 2.01"/>:</p>
+<div align="center" class="align-center"><img alt="Solution." class="align-center" src="../../../_images/solution2.png" style="width: 600px; height: 400px;" /></div>
+<div class="section" id="comparison-of-h-fem-p-1-h-fem-p-2-and-hp-fem-with-anisotropic-refinements">
+<h2>Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements<a class="headerlink" href="#comparison-of-h-fem-p-1-h-fem-p-2-and-hp-fem-with-anisotropic-refinements" title="Permalink to this headline">¶</a></h2>
+<p>Final mesh (h-FEM, p=1, anisotropic refinements):</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_h1_aniso1.png" style="width: 450px;" /></div>
+<p>Final mesh (h-FEM, p=2, anisotropic refinements):</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_h2_aniso1.png" style="width: 450px;" /></div>
+<p>Final mesh (hp-FEM, h-anisotropic refinements):</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_anisoh.png" style="width: 450px;" /></div>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof_aniso.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu_aniso.png" style="width: 600px; height: 400px;" /></div>
+</div>
+<div class="section" id="hp-fem-with-iso-h-aniso-and-hp-aniso-refinements">
+<h2>hp-FEM with iso, h-aniso and hp-aniso refinements<a class="headerlink" href="#hp-fem-with-iso-h-aniso-and-hp-aniso-refinements" title="Permalink to this headline">¶</a></h2>
+<p>Final mesh (hp-FEM, isotropic refinements):</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_iso1.png" style="width: 450px;" /></div>
+<p>Final mesh (hp-FEM, h-anisotropic refinements):</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_anisoh.png" style="width: 450px;" /></div>
+<p>Final mesh (hp-FEM, hp-anisotropic refinements):</p>
+<div align="center" class="align-center"><img alt="Final mesh." class="align-center" src="../../../_images/mesh_hp_aniso1.png" style="width: 450px;" /></div>
+<p>The following convergence comparisons still correspond to an older
+version of Hermes2D when we did not have anisotropic hp-refinements.
+With those, the convergence of adaptive hp-FEM has improved a lot.
+These results will be updated soon.</p>
+<p>DOF convergence graphs:</p>
+<div align="center" class="align-center"><img alt="DOF convergence graph." class="align-center" src="../../../_images/conv_dof_hp.png" style="width: 600px; height: 400px;" /></div>
+<p>CPU convergence graphs:</p>
+<div align="center" class="align-center"><img alt="CPU convergence graph." class="align-center" src="../../../_images/conv_cpu_hp.png" style="width: 600px; height: 400px;" /></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="../../../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Line Singularity (Elliptic)</a><ul>
+<li><a class="reference external" href="#comparison-of-h-fem-p-1-h-fem-p-2-and-hp-fem-with-anisotropic-refinements">Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements</a></li>
+<li><a class="reference external" href="#hp-fem-with-iso-h-aniso-and-hp-aniso-refinements">hp-FEM with iso, h-aniso and hp-aniso refinements</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="layer-boundary.html"
+                                  title="previous chapter">Boundary Layer (Elliptic)</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="kellogg.html"
+                                  title="next chapter">Kellogg (Elliptic)</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../../../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="kellogg.html" title="Kellogg (Elliptic)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="layer-boundary.html" title="Boundary Layer (Elliptic)"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Content</a> &raquo;</li>
+          <li><a href="../benchmarks.html" >Hermes2D: Benchmarks with Known Exact Solution</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

@@ -4,11 +4,6 @@
 // including the number of elements, the type of elements,
 // and find out if the elements are curvilinear.
 
-#undef ERROR_SUCCESS
-#undef ERROR_FAILURE
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
-
 int main(int argc, char* argv[])
 {
   if (argc < 3)
@@ -17,7 +12,7 @@ int main(int argc, char* argv[])
     printf("number 1 : copy\n ");
     printf("number 2 : copy_base\n ");
     printf("number 3 : copy_refine\n ");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
   // load the mesh file
   Mesh mesh;
@@ -55,7 +50,7 @@ int main(int argc, char* argv[])
     if (mesh.get_max_element_id() != dup.get_max_element_id())
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }break;
 
     // Copies the coarsest elements of another mesh.
@@ -63,7 +58,7 @@ int main(int argc, char* argv[])
     if (mesh.get_num_base_elements() != dup.get_max_element_id())
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }break;
 
     // Copies the refined active elements of another mesh.
@@ -71,7 +66,7 @@ int main(int argc, char* argv[])
     if (mesh.get_max_element_id() != dup.get_max_element_id() + mesh_base_element)
     {
       printf("Failure!\n");
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
     }break;
     default: break;
   }
@@ -94,6 +89,6 @@ int main(int argc, char* argv[])
       printf("\n");
   }
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }
 

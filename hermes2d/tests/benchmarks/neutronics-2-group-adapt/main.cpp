@@ -413,8 +413,6 @@ int main(int argc, char* argv[])
   info("Number of iterations: %d", as);
   info("NDOF: %d, %d", Space::get_num_dofs(&space1), Space::get_num_dofs(&space2));
 
-#define ERROR_SUCCESS                               0
-#define ERROR_FAILURE                               -1
   int n_dof_1 = Space::get_num_dofs(&space1), 
       n_dof_2 = Space::get_num_dofs(&space2);
   int n_dof_1_allowed = 500, 
@@ -443,10 +441,10 @@ int main(int argc, char* argv[])
       && n_iter <= n_iter_allowed
       && error <= error_allowed )   {
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 }

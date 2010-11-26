@@ -1,15 +1,15 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) < (b)) ? (b) : (a))
 
-// Structure that translates mesh input data specified in "neutronics_problem_def.cpp"
-// to format understood by the "Mesh" object from Hermes
-struct MeshData
+// Structure that translates space input data specified in "neutronics_problem_def.cpp"
+// to format understood by the "Space" object from Hermes
+struct SpaceData
 {
 	double *interfaces;
 	int *poly_orders, *material_markers, *subdivisions;
 	int N_macroel;
 	
-	MeshData(bool report=false)
+	SpaceData(bool report=false)
 	{
 		// One macroelement is defined for each cell 
 		N_macroel = N_ASSY * N_CELLS_PER_ASSY;
@@ -48,7 +48,7 @@ struct MeshData
 		}
 	}
 	
-	~MeshData()
+	~SpaceData()
 	{
 		delete [] interfaces;
 		delete [] poly_orders;
@@ -174,10 +174,10 @@ double calc_elem_flux(Element *e, int g, double x1, double x2)
 
 // Calculate sum over all groups of reaction rates specified by cross-section "xsec",
 // integrated between points "x1" and "x2"
-double calc_total_reaction_rate(Mesh* mesh, const double xsec[N_MAT][N_GRP], double x1, double x2)
+double calc_total_reaction_rate(Space* space, const double xsec[N_MAT][N_GRP], double x1, double x2)
 {
 	double rr = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
   	// iterate until an element with at least a part lying within the specified integration range is encountered 
@@ -190,10 +190,10 @@ double calc_total_reaction_rate(Mesh* mesh, const double xsec[N_MAT][N_GRP], dou
 }
 
 // Calculate sum over all groups of neutron flux integrated between points "x1" and "x2"
-double calc_total_flux(Mesh* mesh, double x1, double x2)
+double calc_total_flux(Space* space, double x1, double x2)
 {
 	double rr = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
   	if (e->x2 < x1 || e->x1 > x2) continue;
@@ -204,10 +204,10 @@ double calc_total_flux(Mesh* mesh, double x1, double x2)
 }
 
 // Calculate integral of group-"g" flux between points "x1" and "x2"
-double calc_integrated_flux(Mesh* mesh, int g, double x1, double x2)
+double calc_integrated_flux(Space* space, int g, double x1, double x2)
 {
 	double rr = 0;
-  Iterator *I = new Iterator(mesh);
+  Iterator *I = new Iterator(space);
   Element *e;
   while ((e = I->next_active_element()) != NULL) {
   	if (e->x2 < x1 || e->x1 > x2) continue;
@@ -218,9 +218,9 @@ double calc_integrated_flux(Mesh* mesh, int g, double x1, double x2)
 }	
 
 // Calculates neutron flux and neutron current in all groups at point "x"
-void get_solution_at_point(Mesh *mesh, double x, double flux[N_GRP], double J[N_GRP] )
+void get_solution_at_point(Space *space, double x, double flux[N_GRP], double J[N_GRP] )
 {
-	Iterator *I = new Iterator(mesh);
+	Iterator *I = new Iterator(space);
   Element *e;
   int m;
   

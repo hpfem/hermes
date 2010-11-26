@@ -1,0 +1,7 @@
+clean
+system_sin_adapt
+python plot_solution.py &
+python plot_space.py &
+python plot_error.py &
+python plot_graph.py &
+

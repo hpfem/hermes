@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation of Matrix Solvers &mdash; Hermes2D Documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hermes2D Documentation" href="../index.html" />
+    <link rel="next" title="How to Submit Your First Pull Request" href="first_pull_request.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="first_pull_request.html" title="How to Submit Your First Pull Request"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Content</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation-of-matrix-solvers">
+<h1>Installation of Matrix Solvers<a class="headerlink" href="#installation-of-matrix-solvers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="mumps">
+<h2>Mumps<a class="headerlink" href="#mumps" title="Permalink to this headline">¶</a></h2>
+<p>In preparation.</p>
+</div>
+<div class="section" id="pardiso">
+<h2>Pardiso<a class="headerlink" href="#pardiso" title="Permalink to this headline">¶</a></h2>
+<p>In preparation.</p>
+</div>
+<div class="section" id="petsc">
+<h2>PETSc<a class="headerlink" href="#petsc" title="Permalink to this headline">¶</a></h2>
+<p>In preparation.</p>
+</div>
+<div class="section" id="superlu">
+<h2>SuperLU<a class="headerlink" href="#superlu" title="Permalink to this headline">¶</a></h2>
+<p>In preparation.</p>
+</div>
+<div class="section" id="trilinos">
+<h2>Trilinos<a class="headerlink" href="#trilinos" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
+<p>Download the sources from the <a class="reference external" href="http://trilinos.sandia.gov/download/trilinos-10.4.html">Trilinos page</a> and unpack them in some temporary directory. Go to the trilinos source directory:</p>
+<div class="highlight-python"><pre>mkdir build_dir
+cd build_dir
+wget http://hpfem.org/main/howto/trilinos/do-configure
+chmod +x do-configure
+./do-configure
+make
+sudo make install</pre>
+</div>
+<p>(This places the installation into /opt/packages/trilinos dir. If you do not like this location, change the CMAKE_INSTALL_PREFIX variable to whatever you like.)</p>
+<p>Go to the directory with hermes{1|2|3}d. Create the file CMake.vars:</p>
+<div class="highlight-python"><pre>set(WITH_TRILINOS YES)
+set(TRILINOS_ROOT /opt/packages/trilinos) #(or your modified CMAKE_INSTALL_PREFIX variable)</pre>
+</div>
+<p>And then execute:</p>
+<div class="highlight-python"><pre>cmake .
+make</pre>
+</div>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>In preparation.</p>
+</div>
+<div class="section" id="mac-os">
+<h3>MAC OS<a class="headerlink" href="#mac-os" title="Permalink to this headline">¶</a></h3>
+<p>In preparation.</p>
+</div>
+</div>
+<div class="section" id="umfpack">
+<h2>UMFpack<a class="headerlink" href="#umfpack" title="Permalink to this headline">¶</a></h2>
+<p>In preparation.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Installation of Matrix Solvers</a><ul>
+<li><a class="reference external" href="#mumps">Mumps</a></li>
+<li><a class="reference external" href="#pardiso">Pardiso</a></li>
+<li><a class="reference external" href="#petsc">PETSc</a></li>
+<li><a class="reference external" href="#superlu">SuperLU</a></li>
+<li><a class="reference external" href="#trilinos">Trilinos</a><ul>
+<li><a class="reference external" href="#linux">Linux</a></li>
+<li><a class="reference external" href="#windows">Windows</a></li>
+<li><a class="reference external" href="#mac-os">MAC OS</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#umfpack">UMFpack</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="installation.html"
+                                  title="previous chapter">Installation</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="first_pull_request.html"
+                                  title="next chapter">How to Submit Your First Pull Request</a></p>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="first_pull_request.html" title="How to Submit Your First Pull Request"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="../index.html">Content</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, hp-FEM group at UNR.
+      Last updated on Nov 11, 2010.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

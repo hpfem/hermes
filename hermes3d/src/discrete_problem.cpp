@@ -24,15 +24,7 @@
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/callstack.h"
 
-//  Solvers
-#include "../../hermes_common/solver/solver.h"
-#include "../../hermes_common/solver/umfpack_solver.h"
-#include "../../hermes_common/solver/amesos.h"
-#include "../../hermes_common/solver/pardiso.h"
-#include "../../hermes_common/solver/petsc.h"
-#include "../../hermes_common/solver/mumps.h"
-#include "../../hermes_common/solver/nox.h"
-#include "../../hermes_common/solver/aztecoo.h"
+
 
 DiscreteProblem::FnCache::~FnCache()
 {
@@ -634,7 +626,7 @@ void DiscreteProblem::init_ext_fns(ExtData<scalar> &ext_data, std::vector<MeshFu
   _F_
 
   ext_data.nf = ext.size();
-  mFunc *ext_fn = new mFunc[ext_data.nf];
+  mFunc **ext_fn = new mFunc * [ext_data.nf];
   for (int i = 0; i < ext_data.nf; i++) 
   {
     fn_key_t key(ext[i]->seq, order, ext[i]->get_transform());
@@ -645,7 +637,7 @@ void DiscreteProblem::init_ext_fns(ExtData<scalar> &ext_data, std::vector<MeshFu
       fn_cache.ext.set(key, efn);
     }
     assert(efn != NULL);
-    ext_fn[i] = *efn;
+    ext_fn[i] = efn;
   }
   ext_data.fn = ext_fn;
 }
@@ -655,7 +647,7 @@ void DiscreteProblem::init_ext_fns(ExtData<Ord> &fake_ext_data, std::vector<Mesh
   _F_
 
   fake_ext_data.nf = ext.size();
-  Func<Ord> *fake_ext_fn = new Func<Ord>[fake_ext_data.nf];
+  Func<Ord> **fake_ext_fn = new Func<Ord> *[fake_ext_data.nf];
   
   for (int i = 0; i < fake_ext_data.nf; i++) 
     fake_ext_fn[i] = init_fn_ord(ext[i]->get_fn_order());
@@ -711,7 +703,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   Element *elem = fv->get_active_element();
 
   // Determine the integration order
-  Func<Ord> *oi = new Func<Ord>[wf->neq];
+  Func<Ord> **oi = new Func<Ord> *[wf->neq];
 
   // Order of solutions from the previous Newton iteration.
   if (u_ext != Tuple<Solution *>()) 
@@ -728,8 +720,8 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   }
 
   // Order of shape functions.
-  Func<Ord> ou = init_fn_ord(fu->get_fn_order());
-  Func<Ord> ov = init_fn_ord(fv->get_fn_order());
+  Func<Ord> *ou = init_fn_ord(fu->get_fn_order());
+  Func<Ord> *ov = init_fn_ord(fv->get_fn_order());
 
   // Order of additional external functions.
   ExtData<Ord> fake_ext;
@@ -740,7 +732,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   Geom<Ord> fake_e = init_geom(elem->marker);
 
   // Total order of the matrix form.
-  Ord o = mfv->ord(1, &fake_wt, &oi, &ou, &ov, &fake_e, &fake_ext);
+  Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, &fake_e, &fake_ext);
 
   // Increase due to reference map.
   Ord3 order = ru->get_inv_ref_order();
@@ -752,10 +744,12 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   int ord_idx = order.get_idx();
 
   // Clean up.
-  for (int i = 0; i < wf->neq; i++) free_fn(oi + i);
+  for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
-  free_fn(&ou);
-  free_fn(&ov);
+  free_fn(ou);
+  free_fn(ov);
+  delete ou;
+  delete ov;
 
   // Evaluate the form using the quadrature of the just calculated order.
   Quad3D *quad = get_quadrature(elem->get_mode());
@@ -812,7 +806,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   Element *elem = fv->get_active_element();
 
   // Determine the integration order.
-  Func<Ord> *oi = new Func<Ord>[wf->neq];
+  Func<Ord> **oi = new Func<Ord> * [wf->neq];
 
   // Order of solutions from the previous Newton iteration.
   if (u_ext != Tuple<Solution *>()) 
@@ -829,7 +823,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   }
 
   // Order of the shape function.
-  Func<Ord> ov = init_fn_ord(fv->get_fn_order());
+  Func<Ord> *ov = init_fn_ord(fv->get_fn_order());
 
   // Order of additional external functions.
   ExtData<Ord> fake_ext;
@@ -840,7 +834,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   Geom<Ord> fake_e = init_geom(elem->marker);
 
   // Total order of the vector form.
-  Ord o = vfv->ord(1, &fake_wt, &oi, &ov, &fake_e, &fake_ext);
+  Ord o = vfv->ord(1, &fake_wt, oi, ov, &fake_e, &fake_ext);
 
   // Increase due to reference map.
   Ord3 order = rv->get_inv_ref_order();
@@ -853,9 +847,10 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   int ord_idx = order.get_idx();
 
   // Clean up.
-  for (int i = 0; i < wf->neq; i++) free_fn(oi + i);
+  for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
-  free_fn(&ov);
+  free_fn(ov);
+  delete ov;
 
   // Evaluate the form using the quadrature of the just calculated order.
   Quad3D *quad = get_quadrature(elem->get_mode());
@@ -910,7 +905,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // fu->get_num_components() == 2.
 
   // Determine the integration order.
-  Func<Ord> *oi = new Func<Ord>[wf->neq];
+  Func<Ord> **oi = new Func<Ord> *[wf->neq];
   
   // Order of solutions from the previous Newton iteration.
   if (u_ext != Tuple<Solution *>()) 
@@ -927,8 +922,8 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   }
 
   // Order of the shape functions.
-  Func<Ord> ou = init_fn_ord(fu->get_fn_order());
-  Func<Ord> ov = init_fn_ord(fv->get_fn_order());
+  Func<Ord> *ou = init_fn_ord(fu->get_fn_order());
+  Func<Ord> *ov = init_fn_ord(fv->get_fn_order());
 
   // Order of additional external functions.
   ExtData<Ord> fake_ext;
@@ -939,7 +934,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   Geom<Ord> fake_e = init_geom(surf_pos->marker);
 
   // Total order of the surface matrix form.
-  Ord o = mfs->ord(1, &fake_wt, &oi, &ou, &ov, &fake_e, &fake_ext);
+  Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, &fake_e, &fake_ext);
 
   // Increase due to reference map.
   Ord3 order = ru->get_inv_ref_order();
@@ -953,10 +948,12 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   int ord_idx = face_order.get_idx();
 
   // Clean up.
-  for (int i = 0; i < wf->neq; i++) free_fn(oi + i);
+  for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
-  free_fn(&ou);
-  free_fn(&ov);
+  free_fn(ou);
+  free_fn(ov);
+  delete ou;
+  delete ov;
 
   // Evaluate the form using the quadrature of the just calculated order.
   Quad3D *quad = get_quadrature(fu->get_active_element()->get_mode());
@@ -1011,7 +1008,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   _F_
 
   // Determine the integration order.
-  Func<Ord> *oi = new Func<Ord>[wf->neq];
+  Func<Ord> **oi = new Func<Ord> *[wf->neq];
 
   // Order of solutions from the previous Newton iteration.
   if (u_ext != Tuple<Solution *>()) 
@@ -1028,7 +1025,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   }
 
   // Order of the shape function.
-  Func<Ord> ov = init_fn_ord(fv->get_fn_order());
+  Func<Ord> *ov = init_fn_ord(fv->get_fn_order());
 
   // Order of additional external functions.
   ExtData<Ord> fake_ext;
@@ -1039,7 +1036,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   Geom<Ord> fake_e = init_geom(surf_pos->marker);
 
   // Total order of the surface vector form.
-  Ord o = vfs->ord(1, &fake_wt, &oi, &ov, &fake_e, &fake_ext);
+  Ord o = vfs->ord(1, &fake_wt, oi, ov, &fake_e, &fake_ext);
 
   // Increase due to reference map.
   Ord3 order = rv->get_inv_ref_order();
@@ -1053,9 +1050,10 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   int ord_idx = face_order.get_idx();
  
   // Clean up.
-  for (int i = 0; i < wf->neq; i++) free_fn(oi + i);
+  for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
-  free_fn(&ov);
+  free_fn(ov);
+  delete ov;
 
   // Evaluate the form using the quadrature of the just calculated order.
   Quad3D *quad = get_quadrature(fv->get_active_element()->get_mode());
@@ -1103,172 +1101,6 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// This function is identical in H2D and H3D.
-Vector* create_vector(MatrixSolverType matrix_solver)
-{
-  _F_
-  switch (matrix_solver) 
-  {
-    case SOLVER_AMESOS:
-    case SOLVER_AZTECOO:
-      {
-        return new EpetraVector;
-        break;
-      }
-    case SOLVER_MUMPS: 
-      {
-        return new MumpsVector;
-        break;
-      }
-    case SOLVER_PARDISO: 
-      {
-        return new PardisoVector;
-        break;
-      }
-    case SOLVER_PETSC: 
-      {
-        return new PetscVector;
-        break;
-      }
-    case SOLVER_UMFPACK: 
-      {
-        return new UMFPackVector;
-        break;
-      }
-    default: 
-      error("Unknown matrix solver requested.");
-  }
-}
-
-bool initialize_solution_environment(MatrixSolverType matrix_solver, int argc, char* argv[])
-{
-  int ierr, myid;
-  
-  switch (matrix_solver) 
-  {
-    case SOLVER_PETSC:
-#ifdef WITH_PETSC      
-      ierr = PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL); CHKERRQ(ierr);
-#endif      
-      break;
-    case SOLVER_MUMPS:
-#ifdef WITH_MPI      
-      ierr = MPI_Init(&argc, &argv);
-      return (ierr == MPI_SUCCESS);
-#endif
-      break;
-  }
-  
-  return true;
-}
-
-bool finalize_solution_environment(MatrixSolverType matrix_solver)
-{
-  int ierr;
-  
-  switch (matrix_solver) 
-  {
-    case SOLVER_PETSC:
-#ifdef WITH_PETSC      
-      ierr = PetscFinalize(); CHKERRQ(ierr);
-#endif   
-      break;
-    case SOLVER_MUMPS:
-#ifdef WITH_MPI      
-      ierr = MPI_Finalize();
-      return (ierr == MPI_SUCCESS);
-#endif
-      break;
-  }
-  
-  return true;
-}
-
-// This function is identical in H2D and H3D.
-SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
-{
-  _F_
-  switch (matrix_solver) 
-  {
-    case SOLVER_AMESOS:
-    case SOLVER_AZTECOO:
-      {
-        return new EpetraMatrix;
-        break;
-      }
-    case SOLVER_MUMPS: 
-      {
-        return new MumpsMatrix;
-        break;
-      }
-    case SOLVER_PARDISO: 
-      {
-        return new PardisoMatrix;
-        break;
-      }
-    case SOLVER_PETSC: 
-      {
-        return new PetscMatrix;
-        break;
-      }
-    case SOLVER_UMFPACK: 
-      {
-        return new UMFPackMatrix;
-        break;
-      }
-    default: 
-      error("Unknown matrix solver requested.");
-  }
-}
-
-// This function is identical in H2D and H3D.
-Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
-{
-  _F_
-  switch (matrix_solver) 
-  {
-    case SOLVER_AZTECOO:
-      {
-        return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
-        info("Using AztecOO."); 
-        break;
-      }
-    case SOLVER_AMESOS:
-      {
-        return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
-        info("Using Amesos."); 
-        break;
-      }
-    case SOLVER_MUMPS: 
-      {
-        return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
-        info("Using Mumps."); 
-        break;
-      }
-    case SOLVER_PARDISO: 
-      {
-        return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
-        info("Using Pardiso."); 
-        break;
-      }
-    case SOLVER_PETSC: 
-      {
-        return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
-        info("Using PETSc.");
-        break;
-      }
-    case SOLVER_UMFPACK: 
-      {
-        return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
-        info("Using UMFPack."); 
-        break;
-      }
-    default: 
-      error("Unknown matrix solver requested.");
-  }
-}
-
-// Performs uniform global refinement of a FE space. 
 Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement)
 {
   _F_

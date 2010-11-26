@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 
@@ -230,18 +230,16 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &temp));
 
-#define ERROR_SUCCESS       0
-#define ERROR_FAILURE      -1
   int ndof_allowed = 2000;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
   if (ndof <= ndof_allowed) {      // ndofs was 1903 at the time this test was created
     printf("Success!\n");
-    return ERROR_SUCCESS;
+    return ERR_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 };
 

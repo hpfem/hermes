@@ -1,4 +1,4 @@
-#define H2D_REPORT_INFO
+#define HERMES_REPORT_INFO
 #include "hermes2d.h"
 #include <stdio.h>
 
@@ -17,7 +17,7 @@
 
 int NUMBER_OF_EIGENVALUES = 6;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
+const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
@@ -43,24 +43,30 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 // Write the matrix in Matrix Market format.
 void write_matrix_mm(const char* filename, Matrix* mat) 
 {
+  // Get matrix size.
   int ndof = mat->get_size();
   FILE *out = fopen(filename, "w" );
-  int nz=0;
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
+  if (out == NULL) error("failed to open file for writing.");
+
+  // Calculate the number of nonzeros.
+  int nz = 0;
+  for (int i = 0; i < ndof; i++) {
+    for (int j = 0; j <= i; j++) { 
+      double tmp = mat->get(i, j);
       if (fabs(tmp) > 1e-15) nz++;
     }
   } 
 
+  // Write the matrix in MatrixMarket format
   fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
   fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i+1, j+1, tmp);
+  for (int i = 0; i < ndof; i++) {
+    for (int j = 0; j <= i; j++) { 
+      double tmp = mat->get(i, j);
+      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
     }
   } 
+
   fclose(out);
 }
 
@@ -81,7 +87,7 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d.", ndof);
 
-  // Initialize the weak formulation for the left hand side i.e. H 
+  // Initialize the weak formulation for the left hand side, i.e., H.
   WeakForm wf_left, wf_right;
   wf_left.add_matrix_form(callback(bilinear_form_left));
   wf_right.add_matrix_form(callback(bilinear_form_right));
@@ -89,15 +95,14 @@ int main(int argc, char* argv[])
   // Initialize matrices and matrix solver.
   SparseMatrix* matrix_left = create_matrix(matrix_solver);
   SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Vector* eivec = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_left, eivec);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_left);
 
   // Assemble the matrices.
   bool is_linear = true;
   DiscreteProblem dp_left(&wf_left, &space, is_linear);
-  dp_left.assemble(matrix_left, eivec);
+  dp_left.assemble(matrix_left);
   DiscreteProblem dp_right(&wf_right, &space, is_linear);
-  dp_right.assemble(matrix_right, eivec);
+  dp_right.assemble(matrix_right);
 
   // Write matrix_left in MatrixMarket format.
   write_matrix_mm("mat_left.mtx", matrix_left);

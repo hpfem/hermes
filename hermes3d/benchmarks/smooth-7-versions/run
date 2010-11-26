@@ -1,0 +1,4 @@
+rm *~ 
+./smooth-7-versions $1
+python plot_graph.py &
+

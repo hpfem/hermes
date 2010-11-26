@@ -23,6 +23,7 @@ set(H2D_COMPLEX             YES)
 # Optional parts of the library:
 set(WITH_EXAMPLES           YES)
 set(WITH_BENCHMARKS         YES)
+set(WITH_MODULES            YES)
 set(WITH_TUTORIAL           YES)
 set(WITH_TESTS              YES)
 
@@ -56,6 +57,19 @@ set(WITH_MUMPS              NO)
 # set(MUMPS_ROOT            root/dir/of/mumps/)
 # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
 
+# First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
+# and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
+# for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
+# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or 
+# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if 
+# WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
+# SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
+# header files as the serial library. 
+#
+set(WITH_SUPERLU            NO)
+set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
+set(SUPERLU_MT              NO)
+
 # If PARDISO is enabled, WITH_OPENMP must be set as well (and perhaps some other libraries
 # added to ADDITIONAL_LIBS according to PARDISO user guide).
 #
@@ -86,9 +100,9 @@ set(WITH_HDF5               NO)
 # set(ADDITIONAL_LIBS       -lgfortran -lm)
 
 # Reporting and logging:
-set(REPORT_WITH_LOGO        YES)  #logo will be shown
+set(REPORT_WITH_LOGO        NO)  #logo will be shown
 set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is inteded just for Python wrappers.
+set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is intended just for Python wrappers.
 set(REPORT_ALL              NO)   #do not report all events, just selected ones
 set(REPORT_WARNING          YES)  #warnings will be reported
 set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
@@ -193,11 +207,11 @@ endif(WITH_OPENMP)
 if(NOT MSVC)
   # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
   # FindLAPACK is Fortran-only so Fortran must be enabled as well.
-  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS)
+  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
     enable_language(Fortran)
     find_package(LAPACK REQUIRED)
     add_definitions(-DWITH_BLAS)
-  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS)
+  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 endif(NOT MSVC)  
  
 # Solvers:
@@ -231,13 +245,29 @@ if(WITH_PARDISO)
   find_package(PARDISO REQUIRED) 
 endif(WITH_PARDISO)
 
+if(WITH_SUPERLU)
+  find_package(SUPERLU REQUIRED)
+  include_directories(${SUPERLU_INCLUDE_DIR})
+  if(SUPERLU_MT)
+    set(MT "_MT")
+    add_definitions(-DSLU_MT)
+  endif(SUPERLU_MT)
+endif(WITH_SUPERLU)
+
 include_directories(${HERMES_COMMON_DIR})
 
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
 CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
+CHECK_INCLUDE_FILE("execinfo.h" HAVE_EXECINFO)
+IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(HAVE_CXXABI yes)
+ENDIF()
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(vasprintf HAVE_VASPRINTF)
+CHECK_FUNCTION_EXISTS(strcasecmp HAVE_STRCASECMP)
 
-IF (HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(HAVE_TEUCHOS_STACKTRACE yes)
 ENDIF()
 
@@ -250,10 +280,12 @@ if(WITH_TESTS)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
-  add_subdirectory(python)
-  find_package(PythonLibs REQUIRED)
+  find_package(Python REQUIRED)
   find_package(NumPy REQUIRED)
+  find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  set(PYTHON_INSTALL_PATH lib/python/site-packages)
+  add_subdirectory(hermes2d)
 endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
@@ -263,6 +295,10 @@ endif(WITH_EXAMPLES)
 if(WITH_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif(WITH_BENCHMARKS)
+
+if(WITH_MODULES)
+  add_subdirectory(modules)
+endif(WITH_MODULES)
 
 if(WITH_TUTORIAL)
   add_subdirectory(tutorial)
@@ -300,6 +336,7 @@ message("Versions to build: ${VERS}")
 message("Build with Python: ${WITH_PYTHON}")
 message("Build with examples: ${WITH_EXAMPLES}")
 message("Build with benchmarks: ${WITH_BENCHMARKS}")
+message("Build with modules: ${WITH_MODULES}")
 message("Build with tutorial: ${WITH_TUTORIAL}")
 message("Build with GLUT: ${WITH_GLUT}")
 message("Build with viewer GUI: ${WITH_VIEWER_GUI}")
@@ -309,6 +346,7 @@ message("Build with UMFPACK: ${WITH_UMFPACK}")
 message("Build with PETSC: ${WITH_PETSC}")
 message("Build with PARDISO: ${WITH_PARDISO}")
 message("Build with MUMPS: ${WITH_MUMPS}")
+message("Build with SUPERLU${MT}: ${WITH_SUPERLU}")
 message("Build with TRILINOS: ${WITH_TRILINOS}")
 message("Build with MPI: ${WITH_MPI}")
 message("Build with OPENMP: ${WITH_OPENMP}")

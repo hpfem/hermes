@@ -1,70 +1,126 @@
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-// ********************************************************************
-// This example solves the mathematical pendulum equation 
-// y'' + k**2 * sin(y) = 0 in an interval (A, B), equipped with the 
-// initial conditions y(A) = Init_angle, y'(0) = Init_vel. The 
-// system is decomposed into two first order ODE and solved via 
-// the Newton's method starting from zero initial condition.
-// Note that the method diverges for longer time intervals, 
-// depending on the interval length, number of elements, and 
-// the initial polynomial degree.
+//  This example solves the mathematical pendulum equation. The 
+//  system is decomposed into two first order ODE and solved via 
+//  the Newton's method starting from zero initial condition.
+//  Note that the method diverges for longer time intervals, 
+//  depending on the interval length, number of elements, and 
+//  the initial polynomial degree.
 //
-// Derivation:
-// m*l*u'' = -m*g*sin(u)
-// so:
-// u'' + k^2 * sin(u) = 0
-// with k^2 = g/l
-// so we have to solve a system of two nonlinear second-order equations
-// v' + k^2 sin u = 0
-// u' - v = 0
-// in an interval (0, 2*pi) equipped with Dirichlet bdy conditions
-// u(0) = 0, v(0) = k
-// The approximate (linearized) solution is u(x) = sin(k*x), v(x) = k*cos(k*x)
-
-// General input:
-static int N_eq = 2;
-int N_elem = 1292;          // number of elements
-double A = 0, B = 10;     // domain end points
-int P_init = 1;            // initial polynomal degree
+//  PDE: y'' + k**2 * sin(y) = 0.
+//
+//  Interval: (A, B).
+//
+//  IC: y(A) = Init_angle, y'(0) = Init_vel.
+//
+//  DC: Determined by the IC.
+//
+//  The following parameters can be changed:
+const int NEQ = 2;                      // Number of equations.
+const int NELEM = 1292;                 // Number of elements.
+const double A = 0, B = 10;             // Domain end points.
+const int P_INIT = 1;                   // Polynomial degree.
 double k = 0.5;
 
-// Newton's method
-double NEWTON_TOL = 1e-5;
-int NEWTON_MAXITER = 150;
+// Newton's method.
+double NEWTON_TOL = 1e-5;               // Tolerance.
+int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
-// Boundary conditions
-double Init_angle = M_PI/2.;      // initial angle
-double Init_vel = 0;              // initial velocity
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
-// Weak forms for Jacobi matrix and residual
+// Boundary conditions.
+Tuple<BCSpec *>DIR_BC_LEFT = Tuple<BCSpec *>(new BCSpec(0,M_PI/2.), new BCSpec(1,0));
+Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
+
+// Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
 
-/******************************************************************************/
-int main() {
-  // Create coarse mesh, set Dirichlet BC, enumerate 
-  // basis functions
-  Mesh *mesh = new Mesh(A, B, N_elem, P_init, N_eq);
-  mesh->set_bc_left_dirichlet(0, Init_angle);
-  mesh->set_bc_left_dirichlet(1, Init_vel);
-  printf("N_dof = %d\n", mesh->assign_dofs());
 
-  // Register weak forms
-  DiscreteProblem *dp = new DiscreteProblem();
-  dp->add_matrix_form(0, 0, jacobian_0_0);
-  dp->add_matrix_form(0, 1, jacobian_0_1);
-  dp->add_matrix_form(1, 0, jacobian_1_0);
-  dp->add_matrix_form(1, 1, jacobian_1_1);
-  dp->add_vector_form(0, residual_0);
-  dp->add_vector_form(1, residual_1);
+int main() 
+{
+  // Create space, set Dirichlet BC, enumerate basis functions.
+  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, DIR_BC_RIGHT, P_INIT, NEQ, NEQ);
 
-  // Newton's loop
-  newton(dp, mesh, NULL, NEWTON_TOL, NEWTON_MAXITER);
+  // Enumerate basis functions, info for user.
+  int ndof = Space::get_num_dofs(space);
+  info("ndof: %d", ndof);
 
-  // Plot the solution
-  Linearizer l(mesh);
+  // Initialize the weak formulation.
+  WeakForm wf(2);
+  wf.add_matrix_form(0, 0, jacobian_0_0);
+  wf.add_matrix_form(0, 1, jacobian_0_1);
+  wf.add_matrix_form(1, 0, jacobian_1_0);
+  wf.add_matrix_form(1, 1, jacobian_1_1);
+  wf.add_vector_form(0, residual_0);
+  wf.add_vector_form(1, residual_1);
+
+  // Initialize the FE problem.
+  bool is_linear = false;
+  DiscreteProblem *dp = new DiscreteProblem(&wf, space, is_linear);
+  
+  // Newton's loop.
+  // Fill vector coeff_vec using dof and coeffs arrays in elements.
+  double *coeff_vec = new double[Space::get_num_dofs(space)];
+  get_coeff_vector(space, coeff_vec);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  int it = 1;
+  while (1) 
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = Space::get_num_dofs(space);
+
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble(coeff_vec, matrix, rhs);
+
+    // Calculate the l2-norm of residual vector.
+    double res_l2_norm = get_l2_norm(rhs);
+
+    // Info for user.
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(space), res_l2_norm);
+
+    // If l2 norm of the residual vector is within tolerance, then quit.
+    // NOTE: at least one full iteration forced
+    //       here because sometimes the initial
+    //       residual on fine mesh is too small.
+    if(res_l2_norm < NEWTON_TOL && it > 1) break;
+
+    // Multiply the residual vector with -1 since the matrix 
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+
+    // Solve the linear system.
+    if(!solver->solve())
+      error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+
+    // If the maximum number of iteration has been reached, then quit.
+    if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
+    
+    // Copy coefficients from vector y to elements.
+    set_coeff_vector(coeff_vec, space);
+
+    it++;
+  }
+  
+  // Plot the solution.
+  Linearizer l(space);
   l.plot_solution("solution.gp");
 
-  printf("Done.\n");
-  return 1;
+  // Plot the resulting space.
+  space->plot("space.gp");
+
+  info("Done.");
+  return 0;
 }

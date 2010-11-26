@@ -2,7 +2,9 @@
 # CMake for tests
 #
 add_subdirectory(adapt)
+add_subdirectory(benchmarks)
 add_subdirectory(calc)
+add_subdirectory(examples)
 add_subdirectory(hang-nodes)
 add_subdirectory(judy-templates)
 add_subdirectory(linear-solvers)
@@ -11,6 +13,6 @@ add_subdirectory(mesh-loaders)
 add_subdirectory(orders)
 add_subdirectory(output)
 add_subdirectory(quadrature)
+# This test needs some functions that are not implemented.
 #add_subdirectory(refmap)
 add_subdirectory(shapeset)
-add_subdirectory(timer)

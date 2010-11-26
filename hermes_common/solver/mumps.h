@@ -28,22 +28,34 @@
     #include <mumps_c_types.h>
   #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     #include <dmumps_c.h>
+    typedef scalar mumps_scalar;
+    #define MUMPS_SCALAR(a) SCALAR(a)
+    #define MUMPS_STRUCT    DMUMPS_STRUC_C
   #else
     #include <zmumps_c.h>
+    typedef ZMUMPS_COMPLEX mumps_scalar;
+    #define MUMPS_SCALAR(a) a.r, a.i  
+    #define MUMPS_STRUCT    ZMUMPS_STRUC_C
   #endif
   }
   
   #ifdef WITH_MPI
     #include <mpi.h>
   #endif
+  
 #else
-  struct ZMUMPS_COMPLEX {
-    double r, i;
-  };
+  #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    typedef scalar mumps_scalar;
+    #define MUMPS_SCALAR(a) SCALAR(a)
+  #else
+    typedef struct { double r, i; } mumps_scalar;
+    #define MUMPS_SCALAR(a) a.r, a.i
+  #endif
 #endif
 
 
-class MumpsMatrix : public SparseMatrix {
+class MumpsMatrix : public SparseMatrix 
+{
 public:
   MumpsMatrix();
   virtual ~MumpsMatrix();
@@ -59,17 +71,13 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-  // MUMPS specific data structures for storing matrix, rhs
-  int nnz;				// number of non-zero elements
-  int *irn;				// row indices
-  int *jcn;				// column indices
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  scalar *a;				// matrix entries
-#else
-  ZMUMPS_COMPLEX *a;
-#endif
-  int *ap;
-  int *ai;
+  // MUMPS specific data structures for storing the system matrix (CSC format).
+  int nnz;          // Number of non-zero elements. 
+  int *irn;         // Row indices.
+  int *jcn;         // Column indices.
+  mumps_scalar *Ax; // Matrix entries (column-wise).
+  int *Ai;          // Row indices of values in Ax.
+  int *Ap;          // Index to Ax/Ai, where each column starts.
 
   friend class MumpsSolver;
 };
@@ -95,11 +103,8 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  scalar *v;
-#else
-  ZMUMPS_COMPLEX *v;
-#endif
+  // MUMPS specific data structures for storing the rhs.
+  mumps_scalar *v;
 
   friend class MumpsSolver;
 };
@@ -118,6 +123,18 @@ public:
 protected:
   MumpsMatrix *m;
   MumpsVector *rhs;
+  
+  bool setup_factorization();
+
+#ifdef WITH_MUMPS
+  MUMPS_STRUCT  param;
+  
+  bool check_status();
+  
+  /// (Re)initialize a MUMPS instance.
+  bool reinit();
+  bool inited;
+#endif
 };
 
 #endif

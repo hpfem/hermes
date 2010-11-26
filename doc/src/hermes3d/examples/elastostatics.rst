@@ -1,5 +1,3 @@
-.. _example-elasto-statics:
-
 Elastostatics
 =============
 
@@ -40,7 +38,7 @@ the $3^{rd}$ equation of :eq:`elastostatics` represent the following:
 
 where $1 \le i, j, k, l \le 3$.
 
-.. image:: elasto-statics-domain.png
+.. image:: elastostatics/elasto-statics-domain.png
 
 The domain of interest is an L-shaped beam equipped with 
 zero Dirichlet boundary conditions: $u_1 = u_2 = u_3 = 0$ on all five boundary faces (${\Gamma}_u$) 
@@ -180,8 +178,5 @@ Here is the code for the weak forms:
 
 Solution graph:
 
-.. image:: elasto-statics-sln.png
+.. image:: elastostatics/elasto-statics-sln.png
 
-.. seealso::
-  
-   :ref:`example-heat-conduction`

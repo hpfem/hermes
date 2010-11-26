@@ -1,5 +1,3 @@
-.. _example-heat-conduction:
-
 Heat Conduction
 ===============
 
@@ -25,7 +23,7 @@ The standard heat transfer PDE solved:
 
 Domain of interest: Unit cube $(-1, 1)^3$:
 
-.. image:: heat-cond-domain.png
+.. image:: heat-conduction/heat-cond-domain.png
 
 Right-hand side (load function):
 
@@ -143,14 +141,10 @@ Next, the weak forms above are registered as following:
    wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<ord_t, ord_t>, SYM);
    wf.add_vector_form(linear_form<double, scalar>, linear_form<ord_t, ord_t>, ANY, &sln_prev);
 
-Since the Stiffness matrix does not dependend on the solution, so assembling only need to be done once 
-in the first time step. For all remaining time step it will be the same, and we just need to 
-re-construct the the load vector. The code needed to be implemented. 
+Since the stiffness matrix does not depend on the solution, assembling only needs to be done once 
+in the first time step. For all remaining time steps it will be the same, and we just need to 
+re-construct the load vector. The code needs to be implemented. 
 
 Solution graph:
 
-.. image:: heat-cond-sln.png
-
-.. seealso::
-  
-   :ref:`example-sing-pert`
+.. image:: heat-conduction/heat-cond-sln.png

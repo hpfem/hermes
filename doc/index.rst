@@ -7,13 +7,55 @@
 Hermes Documentation
 ====================
 
-.. toctree::
-    :maxdepth: 2
+Thank you for your interest in Hermes! 
 
-    src/introduction
-    src/installation
-    src/matrix_solvers
+This document is organized as follows: 
+Section 1 contains general information about Hermes, its math background,
+and interactive web accessibility. You will also learn how to use Git and 
+Github, and how to contribute to the project if interested. Section 2 will 
+walk you through its installation on various platforms and related issues. 
+The tutorial itself begins with Section 3 that explains in many incremental 
+steps how Hermes2D is used. Sections 4 and 5 contain examples and benchmarks 
+for Hermes3D and Hermes1D (their usage is practically identical to Hermes2D).
+
+This document is under continuous development and certainly it is not perfect. 
+If you find bugs, typos, dead links or such, help us improve it by reporting them
+through one of the mailing lists for 
+`Hermes1D <http://groups.google.com/group/hermes1d/>`_,
+`Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
+`Hermes3D <http://groups.google.com/group/hermes3d/>`_. 
+
+Thank you in advance for helping us improve Hermes!
+
+1. Introduction
+---------------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/about-hermes
+    src/math-background
+    src/web-access
+    src/citing-hermes
     src/first_pull_request
+
+2. Installation
+---------------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/installation/linux
+    src/installation/mac
+    src/installation/win-cygwin
+    src/installation/win-msvc
+    src/installation/matrix_solvers
+
+3. Hermes2D
+-----------
+
+.. toctree::
+    :maxdepth: 1
 
     src/hermes2d/tutorial-1
     src/hermes2d/tutorial-2
@@ -21,14 +63,27 @@ Hermes Documentation
     src/hermes2d/tutorial-4
     src/hermes2d/tutorial-5
     src/hermes2d/tutorial-6
+    src/hermes2d/tutorial-7
     src/hermes2d/benchmarks
     src/hermes2d/examples
-
-    src/hermes1d/examples.rst
     
+4. Hermes3D
+-----------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/hermes3d/mesh.rst
     src/hermes3d/benchmarks.rst
     src/hermes3d/examples.rst
 
+5. Hermes1D
+-----------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/hermes1d/examples.rst
 
 
 

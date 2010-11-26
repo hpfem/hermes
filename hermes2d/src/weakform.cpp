@@ -15,7 +15,6 @@
 
 #include "h2d_common.h"
 #include "weakform.h"
-#include "../../hermes_common/callstack.h"
 #include "../../hermes_common/matrix.h"
 
 
@@ -83,7 +82,7 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
     error("Invalid equation number.");
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   MatrixFormSurf form = { i, j, area, fn, ord };
@@ -102,7 +101,7 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   int i = 0, j = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   MatrixFormSurf form = { i, j, area, fn, ord };
@@ -155,7 +154,7 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
   _F_
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   VectorFormSurf form = { i, area, fn, ord };
@@ -174,7 +173,7 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
     error("Invalid area number.");
 
   VectorFormSurf form = { i, area, fn, ord };

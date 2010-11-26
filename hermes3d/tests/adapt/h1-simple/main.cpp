@@ -1,40 +1,22 @@
-#define H3D_REPORT_WARN
-#define H3D_REPORT_INFO
-#define H3D_REPORT_VERBOSE
-// This file is part of Hermes3D
-//
-// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
-//
-// Hermes3D is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License,
-// or (at your option) any later version.
-//
-// Hermes3D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes3D; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-// Test to verify that hp-adaptivity works correctly.
-//
-// Starts with linear elements and should find the solution (just using p refinements)
-//
-
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #include "config.h"
 //#include <getopt.h>
 #include <hermes3d.h>
 
+// Test to verify that hp-adaptivity works correctly.
+//
+// Starts with linear elements and should find the solution (just using p refinements).
+//
+
+// The following parameters can be changed:
 int P_INIT_X, P_INIT_Y, P_INIT_Z;       // Initial polynomial degree of all mesh elements taken from the command line arguments passed.
 const double ERR_STOP = 1.0;            // Stopping criterion for adaptivity (rel. error tolerance between the
                                         // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;           // Adaptivity process stops when the number of degrees of freedom grows
                                         // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_NOX, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -46,12 +28,15 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 const double TOLERANCE = 0.001;		                // error tolerance in percent
 const double THRESHOLD = 0.5;		                  // error threshold for element refinement
 
+// The error should be smaller than this epsilon.
+#define EPS								10e-10F
+
+// Problem parameters.
 int m = 2;
 int n = 2;
 int o = 2;
 
-// error should be smaller than this epsilon
-#define EPS								10e-10F
+
 
 double fnc(double x, double y, double z) {
 	return pow(x, m) * pow(y, n) * pow(z, o) + pow(x, 2) * pow(y, 3) - pow(x, 3) * z + pow(z, 4);
@@ -66,7 +51,7 @@ T dfnc(T x, T y, T z) {
 	return -(ddxx + ddyy + ddzz);
 }
 
-// needed for calculation norms and used by visualizator
+// Exact solution.
 double exact_solution(double x, double y, double z, double &dx, double &dy, double &dz) {
 	// u(x, y, z) = pow(x, m) * pow(y, n) * pow(z, o) + pow(x, 2) * pow(y, 3) - pow(x, 3) * z + pow(z, 4)
 	dx = m * pow(x, m-1) * pow(y, n) * pow(z, o) + 2 * x * pow(y, 3) - 3 * pow(x, 2) * z;
@@ -76,46 +61,48 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 	return fnc(x, y, z);
 }
 
-//
-
-BCType bc_types(int marker) {
+// Boundary condition types.
+BCType bc_types(int marker) 
+{
 	return BC_ESSENTIAL;
 }
 
+// Dirichlet boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z) {
 	return fnc(x, y, z);
 }
 
-template<typename f_t, typename res_t>
-res_t bilinear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Func<f_t> *v, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_grad_u_grad_v<f_t, res_t>(n, wt, u, v, e);
+template<typename Real, typename Scalar>
+Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e);
 }
 
-template<typename f_t, typename res_t>
-res_t linear_form(int n, double *wt, Func<res_t> *u_ext[], Func<f_t> *u, Geom<f_t> *e, ExtData<res_t> *data) {
-	return int_F_v<f_t, res_t>(n, wt, dfnc, u, e);
+template<typename Real, typename Scalar>
+Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *data) {
+	return int_F_v<Real, Scalar>(n, wt, dfnc, u, e);
 }
-
-
-// main ///////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **args) 
 {
-	int res = ERR_SUCCESS;
+  // Test variable.
+  int success_test = 1;
 
 	if (argc < 5) error("Not enough parameters.");
 
-	printf("* Loading mesh '%s'\n", args[1]);
+  // Load the mesh.
 	Mesh mesh;
 	H3DReader mloader;
-	if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'\n", args[1]);
+	if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
   
-  P_INIT_X = atoi(args[2]);
-  P_INIT_Y = atoi(args[3]);
-  P_INIT_Z = atoi(args[4]);
-	printf("* Setting the space up with initial polynomial degrees %d, %d, %d.\n", P_INIT_X, P_INIT_Y, P_INIT_Z);
-	H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
+  // Initialize the space according to the
+  // command-line parameters passed.
+  sscanf(args[2], "%d", &P_INIT_X);
+	sscanf(args[3], "%d", &P_INIT_Y);
+	sscanf(args[4], "%d", &P_INIT_Z);
+	Ord3 order(P_INIT_X, P_INIT_Y, P_INIT_Z);
+  H1Space space(&mesh, bc_types, essential_bc_values, order);
 
+  // Initialize the weak formulation.
 	WeakForm wf;
 	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM, HERMES_ANY);
 	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
@@ -138,7 +125,7 @@ int main(int argc, char **args)
   
     out_orders_vtk(ref_space, "space", as);
 	
-	  // Initialize discrete problem.
+	  // Initialize the FE problem.
 	  bool is_linear = true;
 	  DiscreteProblem lp(&wf, ref_space, is_linear);
 		
@@ -167,8 +154,8 @@ int main(int argc, char **args)
     Solution ref_sln(ref_space->get_mesh());
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
     else {
-		  printf("Matrix solver failed.\n");
-		  res = ERR_FAILURE;
+		  info("Matrix solver failed.");
+		  success_test = 0;
 	  }
     
     // Time measurement.
@@ -197,20 +184,15 @@ int main(int argc, char **args)
 		  done = true;
       ExactSolution ex_sln(&mesh, exact_solution);
 		  
-      // Calculation of norms of the solution and the error.
-		  double h1_sln_norm = h1_norm(&sln);
-		  double h1_err_norm = h1_error(&sln, &ex_sln);
-		  printf(" - H1 solution norm: % le\n", h1_sln_norm);
-		  printf(" - H1 error norm: % le\n", h1_err_norm);
-			
-		  double l2_sln_norm = l2_norm(&sln);
-		  double l2_err_norm = l2_error(&sln, &ex_sln);
-		  printf(" - L2 solution norm: % le\n", l2_sln_norm);
-		  printf(" - L2 error norm: % le\n", l2_err_norm);
-			
-      // If the calculated solution is not precise enough, the returned flag will be failure.
-		  if (h1_err_norm > EPS || l2_err_norm > EPS)
-		    res = ERR_FAILURE;
+      // Calculate exact error.
+      info("Calculating exact error.");
+      Adapt *adaptivity = new Adapt(&space, HERMES_H1_NORM);
+      bool solutions_for_adapt = false;
+      double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
+
+      if (err_exact > EPS)
+		    // Calculated solution is not precise enough.
+		    success_test = 0;
 	 
       break;
 	  }	
@@ -223,7 +205,7 @@ int main(int argc, char **args)
     if (Space::get_num_dofs(&space) >= NDOF_STOP)
     {
       done = true;
-      res = ERR_FAILURE;
+      success_test = 0;
     }
 
 	  // Clean up.
@@ -241,6 +223,13 @@ int main(int argc, char **args)
   // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
   finalize_solution_environment(matrix_solver);
   
-  return res;
+  if (success_test) {
+    info("Success!");
+    return ERR_SUCCESS;
+  }
+  else {
+    info("Failure!");
+    return ERR_FAILURE;
+  }
 }
 

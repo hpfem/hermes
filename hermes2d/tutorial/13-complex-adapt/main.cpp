@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -49,7 +49,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -124,7 +124,17 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
+  // Initialize matrix solver.
   initialize_solution_environment(matrix_solver, argc, argv);
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  
+  if (matrix_solver == SOLVER_AZTECOO) {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
   
   // Adaptivity loop:
   int as = 1; 
@@ -140,19 +150,8 @@ int main(int argc, char* argv[])
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    
-    if (matrix_solver == SOLVER_AZTECOO) {
-      ((AztecOOSolver*) solver)->set_solver(iterative_method);
-      ((AztecOOSolver*) solver)->set_precond(preconditioner);
-      // Using default iteration parameters (see solver/aztecoo.h).
-    }
-    
+      
     dp->assemble(matrix, rhs);
-
     // Time measurement.
     cpu_time.tick();
     
@@ -199,10 +198,6 @@ int main(int argc, char* argv[])
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
-    // Clean up.
-    delete solver;
-    delete matrix;
-    delete rhs;
     delete adaptivity;
     if (done == false)
       delete ref_space->get_mesh();
@@ -216,6 +211,10 @@ int main(int argc, char* argv[])
   
   verbose("Total running time: %g s", cpu_time.accumulated());
   
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
   finalize_solution_environment(matrix_solver);
   
   // Show the reference solution - the final result.

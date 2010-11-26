@@ -56,7 +56,7 @@ enum BCType
 ///         in question, while the second is supposed to return the Dirichlet value based on two
 ///         vertex indices and a parameter in the range [0,1], representing the position on the
 ///         edge. The user can set any one of the two callbacks, whichever suits her better. If
-///         both are set, the "EdgePos" one takes precedence.
+///         both are set, the "SurfPos" one takes precedence.
 ///
 ///         If one or more of the BC callbacks are not set, default ones are used. The default
 ///         BC type is BC_NATURAL for the whole boundary (see the function static int

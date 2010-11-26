@@ -1,7 +1,7 @@
-#define H2D_REPORT_WARN
-#define H2D_REPORT_INFO
-#define H2D_REPORT_VERBOSE
-#define H2D_REPORT_FILE "application.log"
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -119,7 +119,9 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Tuple<Space *>(&tspace, &cspace), Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), coeff_vec, matrix_solver);
+  OGProjection::project_global(Tuple<Space *>(&tspace, &cspace), 
+                               Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), 
+                               coeff_vec, matrix_solver);
 
   // Initialize views.
   ScalarView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
@@ -130,7 +132,9 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, t = %g s.", ts, current_time);
 
-    // Perform Newton's iteration.
+    // Perform Newton's iteration. Note that we are not using the 
+    // function solve_newton() now since extra actions are needed
+    // inside the loop.
     int it = 1;
     while (1)
     {
@@ -144,7 +148,8 @@ int main(int argc, char* argv[])
       double res_l2_norm = get_l2_norm(rhs);
 
       // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, 
+           Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.
@@ -160,8 +165,10 @@ int main(int argc, char* argv[])
       if (it >= NEWTON_MAX_ITER)
         error ("Newton method did not converge.");
      
-      // Set current solutions to the latest Newton iterate and reinitialize filters of these solutions.
-      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      // Set current solutions to the latest Newton iterate 
+      // and reinitialize filters of these solutions.
+      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), 
+                                    Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();
@@ -183,9 +190,8 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-//    t_prev_time_1.set_coeff_vector(&tspace, coeff_vec);
-//    c_prev_time_1.set_coeff_vector(&cspace, coeff_vec);
-    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
+    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), 
+                                  Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
     ts++;
   } 

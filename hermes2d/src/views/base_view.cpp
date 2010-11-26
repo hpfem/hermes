@@ -26,25 +26,14 @@
 #include "../h2d_common.h"
 #include "base_view.h"
 
-BaseView::BaseView(const char* title, int x, int y, int width, int height)
-        : ScalarView(title, x, y, width, height)
-{
-  pss = NULL;
-  sln = NULL;
-  show_edges = true;
-  basic_title.assign(title);
-}
-
-#ifndef _MSC_VER
 BaseView::BaseView(const char* title, WinGeom* wg)
-        : ScalarView(title, wg)
+        : ScalarView((char*) title, wg)
 {
   pss = NULL;
   sln = NULL;
   show_edges = true;
   basic_title.assign(title);
 }
-#endif
 
 BaseView::BaseView(char* title, WinGeom* wg)
         : ScalarView(title, wg)

@@ -1,7 +1,6 @@
 #include "hermes2d.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "views/view_support.h"
 
 // This test makes sure that automatic zooming capability of ScalarView works correctly.
 // It also tests displaying constant functions and bounding boxes.
@@ -35,15 +34,14 @@
 
 #include "test_functions.cpp"
 
-#define ERROR_SUCCESS       0
-#define ERROR_FAILURE       -1
+extern void init_glut();
 
 int main(int argc, char* argv[])
 {
   if (argc < 3)
   {
     printf("Please input as this format: zoom-to-fit <function> <domain> \n");
-    return ERROR_FAILURE;
+    return ERR_FAILURE;
   }
 
   // Define dimensions of the various tested views.
@@ -114,12 +112,12 @@ int main(int argc, char* argv[])
       printf("Please set the first argument to a number from 0 to 4: \n");
       for (int i = 0; i < 4; i++)
         printf("%d: %s\n", i, title.c_str());
-      return ERROR_FAILURE;
+      return ERR_FAILURE;
   }
 
   if (fn_id == 4) { // Test manual setting bounds for the displayed range.
 
-    ScalarView view(const_cast<char *>(title.c_str()), screen_width/4, screen_height/4, screen_width/2, screen_width/2);
+    ScalarView view(const_cast<char *>(title.c_str()), new WinGeom(screen_width/4, screen_height/4, screen_width/2, screen_width/2));
     view.set_3d_mode(true);
 
     // Test the behaviour when user enters bigger lower bound.
@@ -139,7 +137,7 @@ int main(int argc, char* argv[])
   } else { // Test model positioning.
 
     for (int i = 0; i < 6; i++) {
-      ScalarView view(const_cast<char *>(title.c_str()), 0, 0, test_dims[i][0], test_dims[i][1]);
+      ScalarView view(const_cast<char *>(title.c_str()), new WinGeom(0, 0, test_dims[i][0], test_dims[i][1]));
       view.set_3d_mode(true);
 
       // Show the function.
@@ -150,7 +148,7 @@ int main(int argc, char* argv[])
       if (!auto_range) {
         char buf[256];
         sprintf(buf, "%s - restricted to (%f,%f)", title.c_str(), range_min, range_max);
-        ScalarView view(buf, 0, 0, test_dims[i][0], test_dims[i][1]);
+        ScalarView view(buf, new WinGeom(0, 0, test_dims[i][0], test_dims[i][1]));
         view.set_min_max_range(range_min, range_max);
         view.set_3d_mode();
         view.show_bounding_box();
@@ -164,5 +162,5 @@ int main(int argc, char* argv[])
   }
 
   printf("Success!\n");
-  return ERROR_SUCCESS;
+  return ERR_SUCCESS;
 }

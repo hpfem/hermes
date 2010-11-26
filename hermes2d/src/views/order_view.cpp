@@ -26,8 +26,8 @@
 #include "../h2d_common.h"
 #include "order_view.h"
 
-OrderView::OrderView(const char* title, int x, int y, int width, int height)
-         : View(title, x, y, width, height)
+OrderView::OrderView(const char* title, WinGeom* wg)
+         : View(title, wg)
 {
   b_scale = true;
   b_orders = false;
@@ -36,6 +36,7 @@ OrderView::OrderView(const char* title, int x, int y, int width, int height)
   scale_box_skip = 9;
 }
 
+/*
 #ifndef _MSC_VER
 OrderView::OrderView(const char* title, WinGeom* wg)
          : View(title, wg)
@@ -47,6 +48,7 @@ OrderView::OrderView(const char* title, WinGeom* wg)
   scale_box_skip = 9;
 }
 #endif
+*/
 
 OrderView::OrderView(char* title, WinGeom* wg)
          : View(title, wg)
