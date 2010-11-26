@@ -25,42 +25,31 @@
 #include "config.h"
 #include "neighbor.h"
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear) : 
+  spaces(spaces), is_linear(is_linear), wf_seq(-1), wf(wf)
 {
   _F_
-  // sanity checks
-  int n = spaces.size();
-  if (n != wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  // Sanity checks.
+  if ( spaces.size() != wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  if (spaces.size() > 0) have_spaces = true;
+  else error("Zero number of spaces in DiscreteProblem.");
 
-  this->wf = wf;
-  this->spaces = spaces;
-  this->is_linear = is_linear;
-
+  // Internal variables settings.
   sp_seq = new int[wf->get_neq()];
   memset(sp_seq, -1, sizeof(int) * wf->get_neq());
-  wf_seq = -1;
 
-  // This is different from H3D.
-  pss = new PrecalcShapeset*[wf->get_neq()];
-  num_user_pss = 0;
-
+  // Matrix related settings.
   matrix_buffer = NULL;
   matrix_buffer_dim = 0;
-
+  have_matrix = false;
   values_changed = true;
   struct_changed = true;
 
-  have_matrix = false;
-
-  this->spaces = Tuple<Space *>();
-  for (int i = 0; i < wf->get_neq(); i++) this->spaces.push_back(spaces[i]);
-  have_spaces = true;
-
-  // initialize precalc shapesets
+  // Initialize precalc shapesets according to spaces provided.
   this->pss = new PrecalcShapeset*[this->wf->get_neq()];
-  for (int i=0; i < n; i++) this->pss[i] = NULL;
+  for (int i = 0; i < wf->get_neq(); i++) this->pss[i] = NULL;
   this->num_user_pss = 0;
-  for (int i = 0; i < n; i++){
+  for (int i = 0; i < wf->get_neq(); i++){
     Shapeset *shapeset = spaces[i]->get_shapeset();
     if (shapeset == NULL) error("Internal in DiscreteProblem::init_spaces().");
     PrecalcShapeset *p = new PrecalcShapeset(shapeset);
@@ -69,11 +58,11 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_li
     this->num_user_pss++;
   }  
 
-  // Create global enumeration of dof and fill the ndof variable
+  // Create global enumeration of dof and fill the ndof variable.
   this->ndof = Space::assign_dofs(this->spaces);
 
   // There is a special function that sets a DiscreteProblem to be FVM.
-  // Purpose is that the constructor looks cleaner and is simpler.
+  // Purpose is that this constructor looks cleaner and is simpler.
   this->is_fvm = false;
 }
 
@@ -156,12 +145,22 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   
   // For DG, the sparse structure is different as we have to account for over-edge calculations.
   bool is_DG = false;
-    for(int i = 0; i < this->wf->mfsurf.size(); i++)
-      if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE)
-      {
-        is_DG = true;
-        break;
-      }
+  for(int i = 0; i < this->wf->mfsurf.size(); i++)
+    if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
+      is_DG = true;
+      break;
+    }
+  for(int i = 0; i < this->wf->vfsurf.size(); i++)
+    if(this->wf->vfsurf[i].area == H2D_DG_INNER_EDGE) {
+      is_DG = true;
+      break;
+    }
+
+  if(is_DG)
+    // We have to empty the cache of NeighborSearch class instances.
+    NeighborSearch::main_cache_m.clear();
+
+        
 
   int ndof = get_num_dofs();
   
@@ -422,7 +421,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         spss[j]->set_active_element(e[i]);
         spss[j]->set_master_transform();
 
-        // This is different in H2D (PrecalcShapeset is not used).
+        // This is different in H3D (PrecalcShapeset is not used).
         refmap[j].set_active_element(e[i]);
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
         
