@@ -156,12 +156,6 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
       break;
     }
 
-  if(is_DG)
-    // We have to empty the cache of NeighborSearch class instances.
-    NeighborSearch::main_cache_m.clear();
-
-        
-
   int ndof = get_num_dofs();
   
   if (mat != NULL)  // mat may be NULL when assembling the rhs for NOX

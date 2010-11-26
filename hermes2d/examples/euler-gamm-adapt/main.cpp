@@ -320,8 +320,10 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
+      // Global polynomial order increase = 0;
+      int order_increase = 0;
       Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e), 0);
+      &space_rho_v_y, &space_e), order_increase);
 
       // Project the previous time level solution onto the new fine mesh.
       info("Projecting the previous time level solution onto the new fine mesh.");
@@ -427,6 +429,12 @@ int main(int argc, char* argv[])
           as++;
       }
 
+      // We have to empty the cache of NeighborSearch class instances. 
+      std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>::iterator it;
+      for(it = NeighborSearch::main_cache_m.begin(); it != NeighborSearch::main_cache_m.end(); it++)
+        delete (*it).second;
+      NeighborSearch::main_cache_m.clear();
+
       // Clean up.
       delete solver;
       delete matrix;
@@ -463,6 +471,11 @@ int main(int argc, char* argv[])
     prev_rho_v_x.copy(&rsln_rho_v_x);
     prev_rho_v_y.copy(&rsln_rho_v_y);
     prev_e.copy(&rsln_e);
+
+    delete rsln_rho.get_mesh(); 
+    delete rsln_rho_v_x.get_mesh(); 
+    delete rsln_rho_v_y.get_mesh();
+    delete rsln_e.get_mesh(); 
 
     // Visualization.
     /*
