@@ -588,6 +588,40 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 {
   return linear_form_interface(3, n, wt, ue, v, e, ext);
 }
+
+// Experimental "vector valued" linear form. Calculates and caches all components, returns the first one.
+double linear_form_interface_vector(int n, double *wt, Func<double> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+{
+  double *result = new double[4];
+  result[0] = result[1] = result[2] = result[3] = 0;
+  double w_l[4], w_r[4];
+  for (int i = 0; i < n; i++) 
+  {
+    w_l[0] = ext->fn[0]->get_val_central(i);
+    w_r[0] = ext->fn[0]->get_val_neighbor(i);
+    
+    w_l[1] = ext->fn[1]->get_val_central(i);
+    w_r[1] = ext->fn[1]->get_val_neighbor(i);
+
+    w_l[2] = ext->fn[2]->get_val_central(i);
+    w_r[2] = ext->fn[2]->get_val_neighbor(i);
+
+    w_l[3] = ext->fn[3]->get_val_central(i);
+    w_r[3] = ext->fn[3]->get_val_neighbor(i);
+
+    double flux[4];
+    num_flux.numerical_flux(flux,w_l,w_r,e->nx[i], e->ny[i]);
+
+    result[0] -= wt[i] * v->val[i] * flux[0] * TAU;
+    result[1] -= wt[i] * v->val[i] * flux[1] * TAU;
+    result[2] -= wt[i] * v->val[i] * flux[2] * TAU;
+    result[3] -= wt[i] * v->val[i] * flux[3] * TAU;
+  }
+  DiscreteProblem::surf_forms_cache[DiscreteProblem::surf_forms_key] = result;
+  return result[0];
+}
+
+
 // Volumetric linear forms. Coming from the time discretization.
 // One function used for all the components.
 double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
@@ -595,6 +629,20 @@ double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<
   return int_u_v<double,double>(n, wt, ext->fn[0], v);
 }
 
+// Experimental "vector valued" linear form. Calculates and caches all components, returns the first one.
+double linear_form_vector(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+{
+  double *result = new double[4];
+  result[0] = result[1] = result[2] = result[3] = 0;
+  
+  result[0] = int_u_v<double,double>(n, wt, ext->fn[0], v);
+  result[1] = int_u_v<double,double>(n, wt, ext->fn[1], v);
+  result[2] = int_u_v<double,double>(n, wt, ext->fn[2], v);
+  result[3] = int_u_v<double,double>(n, wt, ext->fn[3], v);
+
+  DiscreteProblem::vol_forms_cache[DiscreteProblem::vol_forms_key] = result;
+  return result[0];
+}
 // Surface linear forms representing the solid part of the boundary.
 // The flux in the local coordinates is (0, p_b, 0, 0) where p_b stands for pressure on the boundary.
 // The first function does the calculation, the next ones are added to the weakform and they call the first function, asking for
@@ -613,12 +661,6 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
 
     w31 = ext->fn[3]->val[i];
 
-    /* Auxiliary state.
-    double sound_speed_l = calc_sound_speed(w01, w11, w21, w31);
-    double sound_speed_b = sound_speed_l + (num_flux.R/num_flux.c_v) * w11 / (2*w01);
-    double rho_b = std::pow((sound_speed_b*sound_speed_b*w01/(num_flux.kappa*calc_pressure<double>(w01,w11,w21,w31))),num_flux.c_v/num_flux.R) * w01;
-    double p_b = rho_b * sound_speed_b * sound_speed_b / num_flux.kappa;
-    */
     double p_b = calc_pressure(w01, w11, w21, w31);
     
     //Ondrej's code.
@@ -632,18 +674,6 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
     flux_local[3] = 0;
     num_flux.T_rot(mat_rot_inv, -alpha);
     num_flux.dot_vector(flux, mat_rot_inv, flux_local);
-
-    // Mirroring the state
-    /*
-    double w_l[4];
-    double w_r[4];
-    w_l[0] = w_r[0] = w01;
-    w_l[1] = w_r[1] = w11;
-    w_l[2] = w_r[2] = w21;
-    w_l[3] = w_r[3] = w31;
-
-    result += wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
-    */
 
     result -= wt[i] * v->val[i] * flux[element];
   }
@@ -666,6 +696,48 @@ double bdy_flux_solid_wall_comp_3(int n, double *wt, Func<scalar> *ue[], Func<do
 {
   return bdy_flux_solid_wall_comp(3, n, wt, ue, v, e, ext);
 }
+
+
+// Experimental "vector valued" linear form. Calculates and caches all components, returns the first one.
+double bdy_flux_solid_wall_comp_vector(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+{
+  double *result = new double[4];
+  result[0] = result[1] = result[2] = result[3] = 0;
+  double w01, w11, w21, w31;
+  for (int i = 0; i < n; i++) 
+  {
+    w01 = ext->fn[0]->val[i];
+    
+    w11 = ext->fn[1]->val[i];
+
+    w21 = ext->fn[2]->val[i];
+
+    w31 = ext->fn[3]->val[i];
+
+    double p_b = calc_pressure(w01, w11, w21, w31);
+    
+    //Ondrej's code.
+    double flux[4];
+    double alpha = atan2(e->ny[i], e->nx[i]);
+    double mat_rot_inv[4][4];
+    double flux_local[4];
+    flux_local[0] = 0;
+    flux_local[1] = p_b;
+    flux_local[2] = 0;
+    flux_local[3] = 0;
+    num_flux.T_rot(mat_rot_inv, -alpha);
+    num_flux.dot_vector(flux, mat_rot_inv, flux_local);
+
+    result[0] -= wt[i] * v->val[i] * flux[0] * TAU;
+    result[1] -= wt[i] * v->val[i] * flux[1] * TAU;
+    result[2] -= wt[i] * v->val[i] * flux[2] * TAU;
+    result[3] -= wt[i] * v->val[i] * flux[3] * TAU;
+  }
+  
+  DiscreteProblem::surf_forms_cache[DiscreteProblem::surf_forms_key] = result;
+  return result[0];
+}
+
 // Surface linear forms representing the inlet/outlet part of the boundary.
 // For details, see comments in the following function.
 // The first function does the calculation, the next ones are added to the weakform and they call the first function, asking for
@@ -863,4 +935,46 @@ double bdy_flux_inlet_outlet_comp_2(int n, double *wt, Func<scalar> *ue[], Func<
 double bdy_flux_inlet_outlet_comp_3(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   return bdy_flux_inlet_outlet_comp(3, n, wt, ue, v, e, ext);
+}
+
+// Experimental "vector valued" linear form. Calculates and caches all components, returns the first one.
+double bdy_flux_inlet_outlet_comp_vector(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+{
+  double *result = new double[4];
+  result[0] = result[1] = result[2] = result[3] = 0;
+  // Left (inner) state.
+  double w_l[4];
+  // Right (boundary) state.
+  double w_r[4];
+  // Eulerian flux.
+  double flux[4];
+
+  for (int i = 0; i < n; i++) 
+  {
+    // Left (inner) state from the previous time level solution.
+    w_l[0] = ext->fn[0]->val[i];
+    
+    w_l[1] = ext->fn[1]->val[i];
+
+    w_l[2] = ext->fn[2]->val[i];
+
+    w_l[3] = ext->fn[3]->val[i];
+
+    w_r[0] = bc_density(e->y[i]);
+
+    w_r[1] = bc_density_vel_x(e->y[i]);
+
+    w_r[2] = bc_density_vel_y(e->y[i]);
+
+    w_r[3] = bc_energy(e->y[i]);
+    
+    num_flux.numerical_flux(flux,w_l,w_r,e->nx[i], e->ny[i]);
+
+    result[0] -= wt[i] * v->val[i] * flux[0] * TAU;
+    result[1] -= wt[i] * v->val[i] * flux[1] * TAU;
+    result[2] -= wt[i] * v->val[i] * flux[2] * TAU;
+    result[3] -= wt[i] * v->val[i] * flux[3] * TAU;
+  }
+  DiscreteProblem::surf_forms_cache[DiscreteProblem::surf_forms_key] = result;
+  return result[0];
 }
