@@ -24,11 +24,11 @@ double CFL = 0.8;                         // CFL value.
 double TAU = 1E-4;                        // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 5;                 // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 10;                 // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                 // Number of mesh refinements between two unrefinements.
                                           // The mesh is not unrefined unless there has been a refinement since
                                           // last unrefinement.
-const double THRESHOLD = 0.5;             // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.3;             // This is a quantitative parameter of the adapt(...) function and
                                           // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                   // Adaptive strategy:
                                           // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
@@ -51,7 +51,7 @@ const int MESH_REGULARITY = -1;           // Maximum allowed level of hanging no
                                           // their notoriously bad performance.
 const double CONV_EXP = 1.0;              // Default value is 1.0. This parameter influences the selection of
                                           // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;              // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.75;              // Stopping criterion for adaptivity (rel. error tolerance between the
                                           // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;             // Adaptivity process stops when the number of degrees of freedom grows over
                                           // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -282,6 +282,7 @@ int main(int argc, char* argv[])
   int iteration = 0;
   
   // For calculation of the time derivative of the norm of the solution approximation.
+  // Not used yet in the adaptive version.
   double difference;
   double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e))];
@@ -294,7 +295,7 @@ int main(int argc, char* argv[])
   // Output of the approximate time derivative.
   // Not used yet in the adaptive version.
   std::ofstream time_der_out("time_der");
-
+  
   for(t = 0.0; t < 10; t += TAU)
   {
     info("---- Time step %d, time %3.5f.", iteration, t);
@@ -330,13 +331,11 @@ int main(int argc, char* argv[])
       OGProjection::project_global(*ref_spaces, Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
                      Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
 
-      // Deallocate the last refined meshes.
-      if(as > 1)
-      { 
-        delete rsln_rho.get_mesh(); 
-        delete rsln_rho_v_x.get_mesh(); 
+      if(as > 1) {
+        delete rsln_rho.get_mesh();
+        delete rsln_rho_v_x.get_mesh();
         delete rsln_rho_v_y.get_mesh();
-        delete rsln_e.get_mesh(); 
+        delete rsln_e.get_mesh();
       }
 
       // Assemble the reference problem.
@@ -421,6 +420,7 @@ int main(int argc, char* argv[])
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
+        REFINEMENT_COUNT++;
         if (Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
           &space_rho_v_y, &space_e)) >= NDOF_STOP) 
           done = true;
@@ -429,18 +429,16 @@ int main(int argc, char* argv[])
           as++;
       }
 
-      // We have to empty the cache of NeighborSearch class instances. 
-      std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>::iterator it;
-      for(it = NeighborSearch::main_cache_m.begin(); it != NeighborSearch::main_cache_m.end(); it++)
-        delete (*it).second;
-      NeighborSearch::main_cache_m.clear();
+      // We have to empty the cache of NeighborSearch class instances.
+      NeighborSearch::empty_main_caches();
 
       // Clean up.
       delete solver;
       delete matrix;
       delete rhs;
       delete adaptivity;
-      delete ref_spaces;
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i];
       delete dp;
     }
     while (done == false);

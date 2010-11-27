@@ -179,6 +179,7 @@ public:
   static void vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<PrecalcShapeset *> pss, Tuple<bool> add_dir_lift = Tuple<bool>());
   static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, PrecalcShapeset* pss, bool add_dir_lift = true);
 
+  bool own_mesh;
 protected:
 
   /// Converts a coefficient vector into a Solution.
@@ -188,7 +189,6 @@ protected:
 
   solution_type type;
 
-  bool own_mesh;
   bool transform;
 
   void* tables[4][4];   ///< precalculated tables for last four used elements

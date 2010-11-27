@@ -71,6 +71,8 @@ DiscreteProblem::~DiscreteProblem()
   _F_
   free();
   if (sp_seq != NULL) delete [] sp_seq;
+  for(int i = 0; i < num_user_pss; i++)
+    delete pss[i];
   if (pss != NULL) delete [] pss;
 }
 
