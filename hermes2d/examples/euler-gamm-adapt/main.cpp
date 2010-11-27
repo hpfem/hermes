@@ -51,8 +51,10 @@ const int MESH_REGULARITY = -1;           // Maximum allowed level of hanging no
                                           // their notoriously bad performance.
 const double CONV_EXP = 1.0;              // Default value is 1.0. This parameter influences the selection of
                                           // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;              // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.75;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                           // fine mesh and coarse mesh solution in percent).
+const double ERR_STOP_VEL_X = 0.5;        // Special stopping criterion for adaptivity, only second component of solution
+                                          // taken into account.
 const int NDOF_STOP = 100000;             // Adaptivity process stops when the number of degrees of freedom grows over
                                           // this limit. This is mainly to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
@@ -329,7 +331,8 @@ int main(int argc, char* argv[])
       // Project the previous time level solution onto the new fine mesh.
       info("Projecting the previous time level solution onto the new fine mesh.");
       OGProjection::project_global(*ref_spaces, Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-                     Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
+                     Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, 
+                     Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
 
       if(as > 1) {
         delete rsln_rho.get_mesh();
@@ -356,7 +359,8 @@ int main(int argc, char* argv[])
       info("Projecting reference solution on coarse mesh.");
       OGProjection::project_global(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), 
-                     Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), matrix_solver, Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
+                     Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), matrix_solver, 
+                     Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate."); 
@@ -366,10 +370,15 @@ int main(int argc, char* argv[])
                                  Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), 
                                  HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
+      // Second calculation of errors, this time only for the x-component of the velocity.
+      Adapt* adaptivity_velocity_x = new Adapt(&space_rho_v_x, HERMES_L2_NORM);
+      double err_est_rel_total_velocity_x = adaptivity_velocity_x->calc_err_est(&sln_rho_v_x, &rsln_rho_v_x, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+
       // Report results.
-      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%, err_est_rel for horizontal velocity: %g%%", 
         Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total, err_est_rel_total_velocity_x);
 
       // Determine the time step.
       double *solution_vector = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
@@ -413,13 +422,15 @@ int main(int argc, char* argv[])
 
       // If err_est too large, adapt the mesh.
       // Also do at least one refinement at the first time level.
-      if (err_est_rel_total < ERR_STOP && iteration * as > 1) 
+      if (err_est_rel_total < ERR_STOP && iteration * as > 1 && err_est_rel_total_velocity_x < ERR_STOP_VEL_X) 
         done = true;
       else 
       {
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity_velocity_x->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+
         REFINEMENT_COUNT++;
         if (Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
           &space_rho_v_y, &space_e)) >= NDOF_STOP) 
