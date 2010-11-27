@@ -24,7 +24,7 @@ double CFL = 0.8;                         // CFL value.
 double TAU = 1E-4;                        // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 10;                 // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 10;                // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                 // Number of mesh refinements between two unrefinements.
                                           // The mesh is not unrefined unless there has been a refinement since
                                           // last unrefinement.
@@ -51,7 +51,7 @@ const int MESH_REGULARITY = -1;           // Maximum allowed level of hanging no
                                           // their notoriously bad performance.
 const double CONV_EXP = 1.0;              // Default value is 1.0. This parameter influences the selection of
                                           // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.75;              // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.5;              // Stopping criterion for adaptivity (rel. error tolerance between the
                                           // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;             // Adaptivity process stops when the number of degrees of freedom grows over
                                           // this limit. This is mainly to prevent h-adaptivity to go on forever.
