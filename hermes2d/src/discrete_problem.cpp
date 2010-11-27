@@ -25,6 +25,36 @@
 #include "config.h"
 #include "neighbor.h"
 
+std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare> 
+DiscreteProblem::surf_forms_cache = 
+    *new std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>();
+
+std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare> 
+DiscreteProblem::vol_forms_cache = 
+    *new std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>();
+
+DiscreteProblem::SurfVectorFormsKey DiscreteProblem::surf_forms_key = 
+  DiscreteProblem::SurfVectorFormsKey(NULL, 0, 0, 0, 0);
+DiscreteProblem::VolVectorFormsKey DiscreteProblem::vol_forms_key = 
+  DiscreteProblem::VolVectorFormsKey(NULL, 0, 0);
+
+void DiscreteProblem::empty_form_caches()
+{
+  std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>::iterator its;
+  for(its = DiscreteProblem::surf_forms_cache.begin(); its != DiscreteProblem::surf_forms_cache.end(); its++)
+    delete [] (*its).second;
+
+  // This maybe is not needed.
+  DiscreteProblem::surf_forms_cache.clear();
+
+  std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>::iterator itv;
+  for(itv = DiscreteProblem::vol_forms_cache.begin(); itv != DiscreteProblem::vol_forms_cache.end(); itv++)
+    delete [] (*itv).second;
+
+  // This maybe is not needed.
+  DiscreteProblem::vol_forms_cache.clear();
+};
+
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear) : 
   spaces(spaces), is_linear(is_linear), wf_seq(-1), wf(wf)
 {
@@ -562,8 +592,18 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           {
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
-            scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];
-            rhs->add(am->dof[i], val);
+            
+            if(vector_valued_forms) {
+              vol_forms_key = VolVectorFormsKey(vfv->fn, fv->get_active_element()->id, am->idx[i]);
+              if(vol_forms_cache[vol_forms_key] == NULL)
+                rhs->add(am->dof[i], eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i]);
+              else
+                rhs->add(am->dof[i], vol_forms_cache[vol_forms_key][m]);
+            }
+            else {
+              scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];
+              rhs->add(am->dof[i], val);
+            }
           }
         }
       }
@@ -666,8 +706,19 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               {
                 if (am->dof[i] < 0) continue;
                 fv->set_active_shape(am->idx[i]);
-                scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
-                rhs->add(am->dof[i], val);
+                
+                if (vector_valued_forms) {
+                  surf_forms_key = SurfVectorFormsKey(vfs->fn, fv->get_active_element()->id, isurf, am->idx[i], 
+                      fv->get_transform());
+                  if(surf_forms_cache[surf_forms_key] == NULL)
+                    rhs->add(am->dof[i], eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i]);
+                  else
+                    rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                }
+                else {
+                  scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
+                  rhs->add(am->dof[i], val);
+                }
               }
             }
           }
@@ -808,15 +859,26 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               {
                 nbs_v->set_active_segment(neighbor, false);
               
-              // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
-              // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
-              // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
+                // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
+                // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
+                // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
                 for (int i = 0; i < am->cnt; i++)       
                 {
                   if (am->dof[i] < 0) continue;
                   nbs_v->get_pss()->set_active_shape(am->idx[i]); 
-                  scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
-                  rhs->add(am->dof[i], val);
+                  
+                  if(vector_valued_forms) {
+                    surf_forms_key = SurfVectorFormsKey(vfs->fn, nbs_v->get_pss()->get_active_element()->id, isurf, 
+                        nbs_v->get_pss()->get_transform(), am->idx[i]);
+                    if(surf_forms_cache[surf_forms_key] == NULL)
+                      rhs->add(am->dof[i], eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i]);
+                    else
+                      rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                  }
+                  else {
+                    scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
+                    rhs->add(am->dof[i], val);
+                  }
                 }
               }
             }
