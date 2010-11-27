@@ -145,10 +145,10 @@ void Facet::dump() {
 	const char *s_type[] = { "INNER", "OUTER" };
 	const char *s_mode[] = { "TRI", "QUAD" };
 
-	printf("type = %s (%s), [%d, %d], left (elem = %u, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
-	if (type == INNER) printf(" right (elem = %u, face = %d)", right, right_face_num);
+	printf("type = %s (%s), [%d, %d], left (elem = %d, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
+	if (type == INNER) printf(" right (elem = %d, face = %d)", right, right_face_num);
 	else printf(" right (bdr = %u)", right);
-	printf(", ref_mask = %u, sons = [%u, %u, %u, %u], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
+	printf(", ref_mask = %u, sons = [%d, %d, %d, %d], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
 	if (parent != INVALID_IDX) printf("parent = %u", parent);
 	else printf("no parent");
 	printf("\n");
@@ -348,7 +348,7 @@ void Hex::dump() {
 	_F_
 	printf("id = %u (%u, %u, %d), vertices(%u, %u, %u, %u, %u, %u, %u, %u), ", id, active, used, reft,
 		vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
-	printf("sons(%u, %u, %u, %u, %u, %u, %u, %u), ",
+	printf("sons(%d, %d, %d, %d, %d, %d, %d, %d), ",
 		sons[0], sons[1], sons[2], sons[3], sons[4], sons[5], sons[6], sons[7]);
 	printf("marker = %d\n", marker);
 }
