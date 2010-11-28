@@ -90,9 +90,15 @@ public:
   {
     WeakForm::vector_form_val_t vfs;
     int element_id, isurf, shape_fn;
+#ifdef MSVC
     UINT64 sub_idx;
     SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, UINT64 sub_idx) 
       : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
+#else
+    unsigned int sub_idx;
+    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, unsigned int sub_idx) 
+      : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
+#endif
   };
   
   struct SurfVectorFormsKeyCompare
