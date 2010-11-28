@@ -77,7 +77,7 @@ const double T_FINAL = 3.0;
 const double TAU = 0.1;               // Size of the time step.
 const int P_INIT = 3;       	      // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	      // Number of initial refinements.
-const bool MULTIMESH = false;	      // Multimesh?
+const bool MULTIMESH = true;	      // Multimesh?
 const int TIME_DISCR = 1;             // 1 for implicit Euler, 2 for Crank-Nicolson.
 
 /* Nonadaptive solution parameters */
@@ -169,6 +169,8 @@ int main (int argc, char* argv[]) {
   // When nonadaptive solution, refine the mesh.
   basemesh.refine_towards_boundary(TOP_MARKER, REF_INIT);
   basemesh.refine_towards_boundary(BOT_MARKER, REF_INIT - 1);
+  basemesh.refine_all_elements(1);
+  basemesh.refine_all_elements(1);
   Cmesh.copy(&basemesh);
   phimesh.copy(&basemesh);
 
@@ -222,7 +224,7 @@ int main (int argc, char* argv[]) {
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Visualization windows.
-  char title[100];
+  char title[1000];
   ScalarView Cview("Concentration [mol/m3]", new WinGeom(0, 0, 800, 800));
   ScalarView phiview("Voltage [V]", new WinGeom(650, 0, 600, 600));
   OrderView Cordview("C order", new WinGeom(0, 300, 600, 600));
@@ -242,11 +244,14 @@ int main (int argc, char* argv[]) {
   // Translate the resulting coefficient vector into the Solution sln.
   Solution::vector_to_solutions(coeff_vec_coarse, Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_sln, &phi_sln));
 
+  Cview.show(&C_sln);
+  phiview.show(&phi_sln);
+
   // Cleanup after the Newton loop on the coarse mesh.
   delete matrix_coarse;
   delete rhs_coarse;
   delete solver_coarse;
-  delete [] coeff_vec_coarse;
+  delete[] coeff_vec_coarse;
   
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
@@ -265,9 +270,9 @@ int main (int argc, char* argv[]) {
       phi.set_uniform_order(P_INIT);
 
       // Project on globally derefined mesh.
-      info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), 
-                                   Tuple<Solution *>(&C_sln, &phi_sln));
+      //info("Projecting previous fine mesh solution on derefined mesh.");
+      //OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), 
+       //                            Tuple<Solution *>(&C_sln, &phi_sln));
     }
 
     // Adaptivity loop:
@@ -289,11 +294,16 @@ int main (int argc, char* argv[]) {
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_sln, &phi_sln), coeff_vec);
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_sln, &phi_sln), coeff_vec, matrix_solver);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), coeff_vec);
+        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), coeff_vec, matrix_solver);
+        
+        // Now deallocate the previous mesh
+        info("Delallocating the previous mesh");
+        delete C_ref_sln.get_mesh();
+        delete phi_ref_sln.get_mesh();
       }
 
       // Newton's loop on the fine mesh.
@@ -303,6 +313,11 @@ int main (int argc, char* argv[]) {
 
       // Store the result in ref_sln.
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
+      
+      // Projecting reference solution onto the coarse mesh
+      info("Projecting fine mesh solution on coarse mesh.");
+      OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln),
+        matrix_solver);
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -311,7 +326,7 @@ int main (int argc, char* argv[]) {
       Tuple<double> err_est_rel;
       double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&C_sln, &phi_sln), 
                                  Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
 
       // Report results.
       info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
@@ -329,7 +344,10 @@ int main (int argc, char* argv[]) {
       else 
       {
         info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector),
+          THRESHOLD, STRATEGY, MESH_REGULARITY);
+        
+        info("Adapted...");
 
         if (Space::get_num_dofs(Tuple<Space *>(&C, &phi)) >= NDOF_STOP) 
           done = true;
@@ -337,37 +355,41 @@ int main (int argc, char* argv[]) {
           // Increase the counter of performed adaptivity steps.
           as++;
       }
-      
-      info("Projecting fine mesh solution on new coarse mesh.");
-        OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
-
-      // Clean up.
-      delete solver;
-      delete matrix;
-      delete rhs;
-      delete adaptivity;
-      if(done == false)
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
-      delete ref_spaces;
-      delete dp;
 
       // Visualize the solution and mesh.
+      info("Visualization procedures: C");
       char title[100];
       sprintf(title, "Solution[C], time level %d", ts);
       Cview.set_title(title);
-      Cview.show(&C_sln);
+      Cview.show(&C_ref_sln);
       sprintf(title, "Mesh[C], time level %d", ts);
       Cordview.set_title(title);
       Cordview.show(&C);
-
+      
+      info("Visualization procedures: phi");
       sprintf(title, "Solution[phi], time level %d", ts);
       phiview.set_title(title);
-      phiview.show(&phi_sln);
+      phiview.show(&phi_ref_sln);
       sprintf(title, "Mesh[phi], time level %d", ts);
       phiordview.set_title(title);
       phiordview.show(&phi);
 
+
+      // Clean up.
+      info("delete solver");
+      delete solver;
+      info("delete matrix");
+      delete matrix;
+      info("delete rhs");
+      delete rhs;
+      info("delete adaptivity");
+      delete adaptivity;
+      info("delete[] ref_spaces");
+      delete ref_spaces;
+      info("delete dp");
+      delete dp;
+      info("delete[] coeff_vec");
+      delete[] coeff_vec;
     }
     while (done == false);
 
