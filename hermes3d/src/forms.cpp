@@ -286,16 +286,16 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 		memcpy(u->dz2, f->get_dz_values(2), np * sizeof(scalar));
 
     // CURL
-		u->curl0 = new scalar [np]; MEM_CHECK(u->dz0);
-		u->curl1 = new scalar [np]; MEM_CHECK(u->dz1);
-		u->curl2 = new scalar [np]; MEM_CHECK(u->dz2);
+		u->curl0 = new scalar [np]; MEM_CHECK(u->curl0);
+		u->curl1 = new scalar [np]; MEM_CHECK(u->curl1);
+		u->curl2 = new scalar [np]; MEM_CHECK(u->curl2);
 
     for (int i = 0; i < np; i++)
-      u->curl0[i] = (u->dz1[i] * u->dy0[i]) - (u->dz0[i] * u->dy1[i]);
+      u->curl0[i] = u->dy2[i] - u->dz1[i];
     for (int i = 0; i < np; i++)
-      u->curl1[i] = (u->dx1[i] * u->dz0[i]) - (u->dx0[i] * u->dz1[i]);
+      u->curl1[i] = u->dz0[i] - u->dx2[i];
     for (int i = 0; i < np; i++)
-      u->curl2[i] = (u->dy1[i] * u->dx0[i]) - (u->dy0[i] * u->dx1[i]);
+      u->curl2[i] = u->dx1[i] - u->dy0[i];
 	}
 	else {
 		EXIT(HERMES_ERR_NOT_IMPLEMENTED);

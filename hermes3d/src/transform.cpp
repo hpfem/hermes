@@ -93,7 +93,7 @@ Transformable::Transformable() {
 void Transformable::push_transform(int son) {
 	_F_
     assert(element != NULL);
-    if (top >= H3D_STACK_SIZE) EXIT("Too deep transform.");
+    if (top + 1 >= H3D_STACK_SIZE) EXIT("Too deep transform.");
 
 	Trf *mat = stack + (++top);
 	Trf *tr = NULL;

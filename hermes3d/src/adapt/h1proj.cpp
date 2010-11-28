@@ -92,9 +92,10 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 	_F_
 	sln->enable_transform(false);
 
-	calc_projection(split, son + 1, order);
-
 	Ord3 order_rhs = order;
+
+	calc_projection(split, son + 1, order_rhs);
+
 	QuadPt3D *pt = quad->get_points(order_rhs);
 	int np = quad->get_num_points(order_rhs);
 
@@ -170,7 +171,7 @@ double H1Projection::get_error(int split, int son, const Ord3 &order)
 	return error;
 }
 
-void H1Projection::calc_projection(int split, int son, const Ord3 &order)
+void H1Projection::calc_projection(int split, int son, Ord3 &order)
 {
 	_F_
 

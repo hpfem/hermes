@@ -69,8 +69,8 @@ int main(int argc, char **args)
 {
   // Load the mesh.
   Mesh mesh;
-  H3DReader mesh_loader;
-  mesh_loader.load("fichera-corner.mesh3d", &mesh);
+  H3DReader mloader;
+  mloader.load("fichera-corner.mesh3d", &mesh);
 
   // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);

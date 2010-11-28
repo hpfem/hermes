@@ -53,10 +53,11 @@ double H1ProjectionIpol::get_error(int split, int son, const Ord3 &order)
 	_F_
 	sln->enable_transform(false);
 
-	calc_projection(split, son, order);
+	Ord3 order_rhs = order;
+
+  calc_projection(split, son, order_rhs);
 
 	// error
-	Ord3 order_rhs = order;
 	QuadPt3D *pt = quad->get_points(order_rhs);
 	int np = quad->get_num_points(order_rhs);
 
