@@ -215,8 +215,8 @@ public:
 public:
 	Type type;					/// type of the facet
 	ElementMode2D mode;				/// mode of the facet (TRI, QUAD)
-	unsigned int left;				/// ID of an element on the "left"
-	unsigned int right;				/// ID of an element or a boundary on the "right" (depending on the type of the facet)
+	int left;				/// ID of an element on the "left"
+	int right;				/// ID of an element or a boundary on the "right" (depending on the type of the facet)
 
 	signed left_face_num:4;		/// local facet number with respect to left element facet numbering (-1 = not set).
 	signed right_face_num:4;	/// local facet number with respect to right element facet numbering (-1 = not set). Only for INNER facets.
@@ -224,8 +224,8 @@ public:
 	unsigned ractive:1;			/// information for the right is active; 1 - active; 0 - inactive
 	unsigned ref_mask:2;		/// how is the facet divided (0 - not divived, 1 - horz, 2 - vert, 3 - both)
 
-	unsigned int parent;				/// ID of the parent facet
-	unsigned int sons[MAX_SONS];		/// ID of child facets (interpretation depend on ref_mask)
+	unsigned int parent;		/// ID of the parent facet
+	int sons[MAX_SONS];		/// ID of child facets (interpretation depend on ref_mask)
 };
 
 
@@ -354,7 +354,7 @@ public:
 
 protected:
 	unsigned int vtcs[NUM_VERTICES];					// array of vertex indices that build up the hexahedron
-	unsigned int sons[NUM_SONS];						// indices of son elements
+	int sons[NUM_SONS];						// indices of son elements
 
 	friend class Mesh;
 };

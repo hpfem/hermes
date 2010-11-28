@@ -363,6 +363,9 @@ public:
   static std::map<MainKey, NeighborSearch*, MainCompare> main_cache_m;
   static std::map<MainKey, NeighborSearch*, MainCompare> main_cache_n;
 
+  /// Method to empty the above caches.
+  static void empty_main_caches();
+
 private:  
   
   Mesh* mesh;

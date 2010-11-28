@@ -25,42 +25,61 @@
 #include "config.h"
 #include "neighbor.h"
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear)
+std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare> 
+DiscreteProblem::surf_forms_cache = 
+    *new std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>();
+
+std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare> 
+DiscreteProblem::vol_forms_cache = 
+    *new std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>();
+
+DiscreteProblem::SurfVectorFormsKey DiscreteProblem::surf_forms_key = 
+  DiscreteProblem::SurfVectorFormsKey(NULL, 0, 0, 0, 0);
+DiscreteProblem::VolVectorFormsKey DiscreteProblem::vol_forms_key = 
+  DiscreteProblem::VolVectorFormsKey(NULL, 0, 0);
+
+void DiscreteProblem::empty_form_caches()
+{
+  std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>::iterator its;
+  for(its = DiscreteProblem::surf_forms_cache.begin(); its != DiscreteProblem::surf_forms_cache.end(); its++)
+    delete [] (*its).second;
+
+  // This maybe is not needed.
+  DiscreteProblem::surf_forms_cache.clear();
+
+  std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>::iterator itv;
+  for(itv = DiscreteProblem::vol_forms_cache.begin(); itv != DiscreteProblem::vol_forms_cache.end(); itv++)
+    delete [] (*itv).second;
+
+  // This maybe is not needed.
+  DiscreteProblem::vol_forms_cache.clear();
+};
+
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear) : 
+  spaces(spaces), is_linear(is_linear), wf_seq(-1), wf(wf)
 {
   _F_
-  // sanity checks
-  int n = spaces.size();
-  if (n != wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  // Sanity checks.
+  if ( spaces.size() != wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  if (spaces.size() > 0) have_spaces = true;
+  else error("Zero number of spaces in DiscreteProblem.");
 
-  this->wf = wf;
-  this->spaces = spaces;
-  this->is_linear = is_linear;
-
+  // Internal variables settings.
   sp_seq = new int[wf->get_neq()];
   memset(sp_seq, -1, sizeof(int) * wf->get_neq());
-  wf_seq = -1;
 
-  // This is different from H3D.
-  pss = new PrecalcShapeset*[wf->get_neq()];
-  num_user_pss = 0;
-
+  // Matrix related settings.
   matrix_buffer = NULL;
   matrix_buffer_dim = 0;
-
+  have_matrix = false;
   values_changed = true;
   struct_changed = true;
 
-  have_matrix = false;
-
-  this->spaces = Tuple<Space *>();
-  for (int i = 0; i < wf->get_neq(); i++) this->spaces.push_back(spaces[i]);
-  have_spaces = true;
-
-  // initialize precalc shapesets
+  // Initialize precalc shapesets according to spaces provided.
   this->pss = new PrecalcShapeset*[this->wf->get_neq()];
-  for (int i=0; i < n; i++) this->pss[i] = NULL;
+  for (int i = 0; i < wf->get_neq(); i++) this->pss[i] = NULL;
   this->num_user_pss = 0;
-  for (int i = 0; i < n; i++){
+  for (int i = 0; i < wf->get_neq(); i++){
     Shapeset *shapeset = spaces[i]->get_shapeset();
     if (shapeset == NULL) error("Internal in DiscreteProblem::init_spaces().");
     PrecalcShapeset *p = new PrecalcShapeset(shapeset);
@@ -69,11 +88,11 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_li
     this->num_user_pss++;
   }  
 
-  // Create global enumeration of dof and fill the ndof variable
+  // Create global enumeration of dof and fill the ndof variable.
   this->ndof = Space::assign_dofs(this->spaces);
 
   // There is a special function that sets a DiscreteProblem to be FVM.
-  // Purpose is that the constructor looks cleaner and is simpler.
+  // Purpose is that this constructor looks cleaner and is simpler.
   this->is_fvm = false;
 }
 
@@ -82,6 +101,8 @@ DiscreteProblem::~DiscreteProblem()
   _F_
   free();
   if (sp_seq != NULL) delete [] sp_seq;
+  for(int i = 0; i < num_user_pss; i++)
+    delete pss[i];
   if (pss != NULL) delete [] pss;
 }
 
@@ -156,12 +177,16 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   
   // For DG, the sparse structure is different as we have to account for over-edge calculations.
   bool is_DG = false;
-    for(int i = 0; i < this->wf->mfsurf.size(); i++)
-      if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE)
-      {
-        is_DG = true;
-        break;
-      }
+  for(int i = 0; i < this->wf->mfsurf.size(); i++)
+    if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
+      is_DG = true;
+      break;
+    }
+  for(int i = 0; i < this->wf->vfsurf.size(); i++)
+    if(this->wf->vfsurf[i].area == H2D_DG_INNER_EDGE) {
+      is_DG = true;
+      break;
+    }
 
   int ndof = get_num_dofs();
   
@@ -422,7 +447,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         spss[j]->set_active_element(e[i]);
         spss[j]->set_master_transform();
 
-        // This is different in H2D (PrecalcShapeset is not used).
+        // This is different in H3D (PrecalcShapeset is not used).
         refmap[j].set_active_element(e[i]);
         refmap[j].force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
         
@@ -567,8 +592,18 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           {
             if (am->dof[i] < 0) continue;
             fv->set_active_shape(am->idx[i]);
-            scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];
-            rhs->add(am->dof[i], val);
+            
+            if(vector_valued_forms) {
+              vol_forms_key = VolVectorFormsKey(vfv->fn, fv->get_active_element()->id, am->idx[i]);
+              if(vol_forms_cache[vol_forms_key] == NULL)
+                rhs->add(am->dof[i], eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i]);
+              else
+                rhs->add(am->dof[i], vol_forms_cache[vol_forms_key][m]);
+            }
+            else {
+              scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];
+              rhs->add(am->dof[i], val);
+            }
           }
         }
       }
@@ -671,8 +706,19 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               {
                 if (am->dof[i] < 0) continue;
                 fv->set_active_shape(am->idx[i]);
-                scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
-                rhs->add(am->dof[i], val);
+                
+                if (vector_valued_forms) {
+                  surf_forms_key = SurfVectorFormsKey(vfs->fn, fv->get_active_element()->id, isurf, am->idx[i], 
+                      fv->get_transform());
+                  if(surf_forms_cache[surf_forms_key] == NULL)
+                    rhs->add(am->dof[i], eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i]);
+                  else
+                    rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                }
+                else {
+                  scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
+                  rhs->add(am->dof[i], val);
+                }
               }
             }
           }
@@ -813,15 +859,26 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               {
                 nbs_v->set_active_segment(neighbor, false);
               
-              // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
-              // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
-              // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
+                // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
+                // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
+                // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
                 for (int i = 0; i < am->cnt; i++)       
                 {
                   if (am->dof[i] < 0) continue;
                   nbs_v->get_pss()->set_active_shape(am->idx[i]); 
-                  scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
-                  rhs->add(am->dof[i], val);
+                  
+                  if(vector_valued_forms) {
+                    surf_forms_key = SurfVectorFormsKey(vfs->fn, nbs_v->get_pss()->get_active_element()->id, isurf, 
+                        nbs_v->get_pss()->get_transform(), am->idx[i]);
+                    if(surf_forms_cache[surf_forms_key] == NULL)
+                      rhs->add(am->dof[i], eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i]);
+                    else
+                      rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                  }
+                  else {
+                    scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
+                    rhs->add(am->dof[i], val);
+                  }
                 }
               }
             }
