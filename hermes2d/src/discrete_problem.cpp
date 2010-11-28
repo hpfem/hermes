@@ -1651,7 +1651,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 
     // If l2 norm of the residual vector is within tolerance, or the maximum number 
     // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
+    if ((res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) && it > 1) break;
 
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix solver failed.\n");
