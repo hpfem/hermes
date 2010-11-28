@@ -103,7 +103,7 @@ int main(int argc, char **args)
     
   // Solve the linear system. If successful, obtain the solution.
   info("Solving.");
-Solution sln(&mesh);
+  Solution sln(&mesh);
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
