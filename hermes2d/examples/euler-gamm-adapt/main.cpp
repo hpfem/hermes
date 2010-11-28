@@ -22,7 +22,7 @@ using namespace RefinementSelectors;
 #define HERMES_USE_VECTOR_VALUED_FORMS
 
 const int P_INIT = 0;                     // Initial polynomial degree.                      
-const int INIT_REF_NUM = 1;               // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                         // CFL value.
 double TAU = 1E-4;                        // Time step.
 
@@ -167,6 +167,23 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 // Filters.
 #include "filters.cpp"
 
+// Refinement criterion function.
+int criterion(Element * e)
+{
+  if(e->vn[0]->x == 0.5 && e->vn[0]->y == 0)
+    return 0;
+  if(e->vn[1]->x == 0.5 && e->vn[1]->y == 0)
+    return 0;
+  if(e->vn[0]->x == 1.5 && e->vn[0]->y == 0)
+    return 0;
+  if(e->vn[1]->x == 1.5 && e->vn[1]->y == 0)
+    return 0;
+  
+  return -1;
+}
+
+
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -176,7 +193,7 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
-
+  basemesh.refine_by_criterion(criterion, 4);
   mesh.copy(&basemesh);
 
   // Initialize spaces with default shapesets.
@@ -520,8 +537,7 @@ int main(int argc, char* argv[])
       s4.show(&sln_e);
 
       // If err_est too large, adapt the mesh.
-      // Also do at least one refinement at the first time level.
-      if (err_est_rel_total < ERR_STOP && iteration * as > 1 && err_est_rel_total_velocity_x < ERR_STOP_VEL_X) 
+      if (err_est_rel_total < ERR_STOP && err_est_rel_total_velocity_x < ERR_STOP_VEL_X) 
         done = true;
       else 
       {
