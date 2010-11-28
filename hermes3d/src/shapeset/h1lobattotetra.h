@@ -28,7 +28,7 @@
 /// H1 Lobatto shapeset for tetrahedra
 ///
 /// @ingroup shapesets
-class H1ShapesetLobattoTetra : public Shapeset {
+class HERMES_API H1ShapesetLobattoTetra : public Shapeset {
 public:
 	H1ShapesetLobattoTetra();
 	virtual ~H1ShapesetLobattoTetra();

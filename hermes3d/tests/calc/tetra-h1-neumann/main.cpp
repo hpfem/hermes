@@ -123,7 +123,7 @@ int main(int argc, char **args)
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
-		ExactSolution ex_sln(&mesh, exact_solution);
+  ExactSolution ex_sln(&mesh, exact_solution);
 
   // Calculate exact error.
   info("Calculating exact error.");

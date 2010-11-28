@@ -97,11 +97,11 @@ int main(int argc, char **args)
   // Initialize the space according to the
   // command-line parameters passed.
   sscanf(args[2], "%d", &m);
-	sscanf(args[3], "%d", &n);
-	sscanf(args[4], "%d", &o);
-	int mx = maxn(4, m, n, o, 4);
-	Ord3 order(mx, mx, mx);
-	H1Space space(&mesh, bc_types, NULL, order);
+  sscanf(args[3], "%d", &n);
+  sscanf(args[4], "%d", &o);
+  int mx = maxn(4, m, n, o, 4);
+  Ord3 order(mx, mx, mx);
+  H1Space space(&mesh, bc_types, NULL, order);
 
   // Initialize the weak formulation.
   WeakForm wf;
