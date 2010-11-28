@@ -364,10 +364,14 @@ int main(int argc, char* argv[])
   //VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
   //ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
 
-  ScalarView s1("w1", new WinGeom(0, 0, 600, 300));
-  ScalarView s2("w2", new WinGeom(605, 0, 600, 300));
-  ScalarView s3("w3", new WinGeom(0, 350, 600, 300));
-  ScalarView s4("w4", new WinGeom(605, 350, 600, 300));
+  ScalarView s1("w1", new WinGeom(0, 0, 620, 300));
+  s1.fix_scale_width(80);
+  ScalarView s2("w2", new WinGeom(625, 0, 600, 300));
+  s2.fix_scale_width(50);
+  ScalarView s3("w3", new WinGeom(0, 350, 620, 300));
+  s3.fix_scale_width(80);
+  ScalarView s4("w4", new WinGeom(625, 350, 600, 300));
+  s4.fix_scale_width(50);
 
   // Iteration number.
   int iteration = 0;
