@@ -35,48 +35,45 @@ ECopyType parse_copy_type(char *str) {
 
 int main(int argc, char **args) 
 {
-	// Test variable.
-  	int success_test = 1;
+  // Test variable.
+  int success_test = 1;
 
-	if (argc < 2) error("Not enough parameters.");
+  if (argc < 2) error("Not enough parameters.");
 
-	ECopyType copy_type = parse_copy_type(args[1]);
-	if (copy_type == CT_NONE) error("Unknown copy type (%s).\n", args[1]);
+  ECopyType copy_type = parse_copy_type(args[1]);
+  if (copy_type == CT_NONE) error("Unknown copy type (%s).\n", args[1]);
 
-	Mesh mesh;
-	H3DReader mloader;
-	if (!mloader.load(args[2], &mesh)) error("Loading mesh file '%s'.", args[2]);
+  Mesh mesh;
+  H3DReader mloader;
+  if (!mloader.load(args[2], &mesh)) error("Loading mesh file '%s'.", args[2]);
 
-	// Apply refinements.
-	bool ok = true;
-	for (int k = 3; k < argc && ok; k += 2) {
-		int elem_id, reft_id;
-		sscanf(args[k], "%d", &elem_id);
-		reft_id = parse_reft(args[k + 1]);
-		ok = mesh.refine_element(elem_id, reft_id);
-	}
+  // Apply refinements.
+  bool ok = true;
+  for (int k = 3; k < argc && ok; k += 2) {
+    int elem_id, reft_id;
+    sscanf(args[k], "%d", &elem_id);
+    reft_id = parse_reft(args[k + 1]);
+    ok = mesh.refine_element(elem_id, reft_id);
+  }
 
-	if (ok) {
-		Mesh dup;
+  if (ok) {
+    Mesh dup;
+    switch (copy_type) {
+      case CT_COPY:      dup.copy(mesh); break;
+      case CT_COPY_BASE: dup.copy_base(mesh); break;
+      default: break;
+    }
+    dup.dump();
+  }
+  else {
+    warning("Unable to refine a mesh.");
+    success_test = 0;
+  }
 
-		switch (copy_type) {
-			case CT_COPY:      dup.copy(mesh); break;
-			case CT_COPY_BASE: dup.copy_base(mesh); break;
-			default: break;
-		}
-		dup.dump();
-	}
-	else {
-		warning("Unable to refine a mesh.");
-		success_test = 0;
-	}
-
-	if (success_test) {
-    info("Success!");
+  if (success_test) {
     return ERR_SUCCESS;
   }
   else {
-    info("Failure!");
     return ERR_FAILURE;
   }
 }

@@ -196,28 +196,28 @@ int main(int argc, char **args)
   // Test variable.
   int success_test = 1;
 
-	if (argc < 3) error("Not enough parameters.");
+  if (argc < 3) error("Not enough parameters.");
 
   // Load the mesh.
-	Mesh mesh;
+  Mesh mesh;
   H3DReader mloader;
   if (!mloader.load(args[1], &mesh)) error("Loading mesh file '%s'.", args[1]);
 
   // Initialize the space according to the
   // command-line parameters passed.
-	int o;
+  int o;
   sscanf(args[2], "%d", &o);
-	Ord3 order(o, o, o);
-	HcurlSpace space(&mesh, bc_types, NULL, order);
+  Ord3 order(o, o, o);
+  HcurlSpace space(&mesh, bc_types, NULL, order);
 	
-	// Initialize the weak formulation.
-	WeakForm wf;
-	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_UNSYM);
-	wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
-	wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
+  // Initialize the weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_UNSYM);
+  wf.add_matrix_form_surf(bilinear_form_surf<double, scalar>, bilinear_form_surf<Ord, Ord>);
+  wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>);
+  wf.add_vector_form_surf(linear_form_surf<double, scalar>, linear_form_surf<Ord, Ord>);
 
-	// Initialize the FE problem.
+  // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 
@@ -235,7 +235,7 @@ int main(int argc, char **args)
     ((AztecOOSolver*) solver)->set_solver(iterative_method);
     ((AztecOOSolver*) solver)->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
-		}
+  }
 
   // Assemble the linear problem.
   info("Assembling (ndof: %d).", Space::get_num_dofs(&space));
@@ -254,10 +254,10 @@ int main(int argc, char **args)
   Adapt *adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
   bool solutions_for_adapt = false;
   double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
-
+printf("err_exact = %lf", err_exact);
   if (err_exact > EPS)
-		// Calculated solution is not precise enough.
-		success_test = 0;
+    // Calculated solution is not precise enough.
+    success_test = 0;
 
   // Clean up.
   delete matrix;
@@ -272,9 +272,9 @@ int main(int argc, char **args)
     info("Success!");
     return ERR_SUCCESS;
   }
-	else {
+  else {
     info("Failure!");
     return ERR_FAILURE;
-	}
+  }
 }
 
