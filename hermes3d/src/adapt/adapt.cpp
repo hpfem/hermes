@@ -787,7 +787,7 @@ scalar Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Me
 	                                bi_ord);
 
 	// eval the form
-	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);		// FIXME: hex-specific
+	Quad3D *quad = get_quadrature(sln1->get_active_element()->get_mode());
 	QuadPt3D *pt = quad->get_points(order);
 	int np = quad->get_num_points(order);
 
@@ -826,7 +826,7 @@ scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Mes
 	                                bi_ord);
 
 	// eval the form
-	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON); 	// FIXME: hex_specific
+	Quad3D *quad = get_quadrature(rsln1->get_active_element()->get_mode());
 	QuadPt3D *pt = quad->get_points(order);
 	int np = quad->get_num_points(order);
 

@@ -1060,7 +1060,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   int np = quad->get_face_num_points(surf_pos->surf_num, face_order);
   QuadPt3D *pt = quad->get_face_points(surf_pos->surf_num, face_order);
 
-        // Init geometry and jacobian*weights.
+  // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
   if (!fn_cache.e.exists(ord_idx)) {

@@ -431,10 +431,10 @@ void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {
 			for (p = ord.order, row = 0; p >= 0; p--) {
 				z = ord.order ? cos(p * M_PI / ord.order) : 1.0;
 
-				for (q = ord.order; q >= ord.order - p; q--) {
+				for (q = ord.order; q >= (int)ord.order - p; q--) {
 					y = ord.order ? cos(q * M_PI / ord.order) : 1.0;
 
-					for (r = ord.order; r >= ord.order - q + ord.order - p; r--, row++) {
+					for (r = ord.order; r >= (int)ord.order - q + (int)ord.order - p; r--, row++) {
 						x = ord.order ? cos(r * M_PI / ord.order) : 1.0;
 
 						// each row of the matrix contains all the monomials x^i * y^j * z^k

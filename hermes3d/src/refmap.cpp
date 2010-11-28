@@ -386,7 +386,7 @@ void RefMap::calc_face_normal(int iface, const int np, const QuadPt3D *pt, doubl
 		case MODE_TETRAHEDRON: {
 			const int *face_vtx = element->get_face_vertices(iface);
 			Vertex vtx[Tri::NUM_VERTICES];
-			for (int i = 0; i < element->get_num_vertices(); i++)
+			for (int i = 0; i < Tri::NUM_VERTICES; i++)
 				vtx[i] = vertex[face_vtx[i]];
 
 			Point3D v1 = { vtx[1].x - vtx[0].x, vtx[1].y - vtx[0].y, vtx[1].z - vtx[0].z };
@@ -463,9 +463,10 @@ double RefMap::calc_face_const_jacobian(int face) {
 	_F_
 	// this calculates jacobian on faces of tetrahedron
 	// physical triangle
-	const int *face_vtx = element->get_face_vertices(face);
+  unsigned int *face_vtx = new unsigned int[Tri::NUM_VERTICES];
+  element->get_face_vertices(face, face_vtx);
 	Vertex vtx[Tri::NUM_VERTICES];
-	for (int i = 0; i < element->get_num_vertices(); i++)
+	for (int i = 0; i < Tri::NUM_VERTICES; i++)
 		vtx[i] = vertex[face_vtx[i]];
 
 	double3x3 m = {
@@ -473,6 +474,9 @@ double RefMap::calc_face_const_jacobian(int face) {
 		{ (vtx[1].y - vtx[0].y), (vtx[2].y - vtx[0].y), 1.0 },
 		{ (vtx[1].z - vtx[0].z), (vtx[2].z - vtx[0].z), 1.0 }
 	};
+
+  delete [] face_vtx;
+
 	double phys_triangle_surface = 0.5 *
 		sqrt(
 			sqr(m[1][0] * m[2][1] - m[1][1] * m[2][0]) +
