@@ -2,6 +2,8 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+using namespace RefinementSelectors;
+
 //  This example solves the compressible Euler equations using a basic
 //  piecewise-constant finite volume method.
 //
@@ -15,14 +17,51 @@
 //  IC: Constant subsonic state identical to inlet. 
 //
 //  The following parameters can be changed:
-
+ 
 // Experimental caching of vector valued (vector) forms.
 #define HERMES_USE_VECTOR_VALUED_FORMS
 
-const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
-double CFL = 0.8;                                 // CFL value.
-double TAU = 1E-4;                                // Time step.
+const int P_INIT = 0;                     // Initial polynomial degree.                      
+const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.                       
+double CFL = 0.8;                         // CFL value.
+double TAU = 1E-4;                        // Time step.
+
+// Adaptivity.
+const int UNREF_FREQ = 10;                // Every UNREF_FREQth time step the mesh is unrefined.
+int REFINEMENT_COUNT = 0;                 // Number of mesh refinements between two unrefinements.
+                                          // The mesh is not unrefined unless there has been a refinement since
+                                          // last unrefinement.
+const double THRESHOLD = 0.3;             // This is a quantitative parameter of the adapt(...) function and
+                                          // it has different meanings for various adaptive strategies (see below).
+const double THRESHOLD_VEL_X = 0.7;       // Threshold for adaptivity, where only second solution component is taken
+                                          // into account.
+const int STRATEGY = 1;                   // Adaptive strategy:
+                                          // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                          //   error is processed. If more elements have similar errors, refine
+                                          //   all to keep the mesh symmetric.
+                                          // STRATEGY = 1 ... refine all elements whose error is larger
+                                          //   than THRESHOLD times maximum element error.
+                                          // STRATEGY = 2 ... refine all elements whose error is larger
+                                          //   than THRESHOLD.
+                                          // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_H_ANISO;   // Predefined list of element refinement candidates. Possible values are
+                                          // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                          // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                          // See User Documentation for details.
+const int MESH_REGULARITY = -1;           // Maximum allowed level of hanging nodes:
+                                          // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                          // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                          // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                          // Note that regular meshes are not supported, this is due to
+                                          // their notoriously bad performance.
+const double CONV_EXP = 1.0;              // Default value is 1.0. This parameter influences the selection of
+                                          // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.75;             // Stopping criterion for adaptivity (rel. error tolerance between the
+                                          // fine mesh and coarse mesh solution in percent).
+const double ERR_STOP_VEL_X = 0.5;        // Special stopping criterion for adaptivity, only second component of solution
+                                          // taken into account.
+const int NDOF_STOP = 100000;             // Adaptivity process stops when the number of degrees of freedom grows over
+                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 
@@ -128,24 +167,34 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 // Filters.
 #include "filters.cpp"
 
+// Refinement criterion function.
+int criterion(Element * e)
+{
+  if(e->vn[0]->x == 0.5 && e->vn[0]->y == 0)
+    return 0;
+  if(e->vn[1]->x == 0.5 && e->vn[1]->y == 0)
+    return 0;
+  if(e->vn[0]->x == 1.5 && e->vn[0]->y == 0)
+    return 0;
+  if(e->vn[1]->x == 1.5 && e->vn[1]->y == 0)
+    return 0;
+  
+  return -1;
+}
+
+
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
-  Mesh mesh;
+  Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &mesh);
+  mloader.load("GAMM-channel.mesh", &basemesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(1, 1);
-  mesh.refine_element(1053);
-  mesh.refine_element(1054);
-  mesh.refine_element(1087);
-  mesh.refine_element(1088);
-  mesh.refine_element(1117);
-  mesh.refine_element(1118);
-  mesh.refine_element(1151);
-  mesh.refine_element(1152);
+  for (int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
+  basemesh.refine_by_criterion(criterion, 4);
+  mesh.copy(&basemesh);
 
   // Initialize spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -161,6 +210,7 @@ int main(int argc, char* argv[])
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;
+  Solution rsln_rho, rsln_rho_v_x, rsln_rho_v_y, rsln_e;
   sln_rho.set_exact(&mesh, ic_density);
   sln_rho_v_x.set_exact(&mesh, ic_density_vel_x);
   sln_rho_v_y.set_exact(&mesh, ic_density_vel_y);
@@ -174,17 +224,16 @@ int main(int argc, char* argv[])
   WeakForm wf(4);
 
   // Bilinear forms coming from time discretization by explicit Euler's method.
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0_time));
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1_time));
-  wf.add_matrix_form(2, 2, callback(bilinear_form_2_2_time));
-  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3_time));
+  wf.add_matrix_form(0,0,callback(bilinear_form_0_0_time));
+  wf.add_matrix_form(1,1,callback(bilinear_form_1_1_time));
+  wf.add_matrix_form(2,2,callback(bilinear_form_2_2_time));
+  wf.add_matrix_form(3,3,callback(bilinear_form_3_3_time));
 
   // Volumetric linear forms.
-  // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
-  // from the previous time step.
+  // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
   // First flux.
   /*
-  wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
+  wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
   wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
@@ -211,7 +260,7 @@ int main(int argc, char* argv[])
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   // Second flux.
   
-  wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
+  wf.add_vector_form(0,callback(linear_form_0_2),HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
@@ -249,10 +298,10 @@ int main(int argc, char* argv[])
   wf.add_vector_form(3, linear_form_vector, linear_form_order, HERMES_ANY, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 #else
-  wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_rho);
-  wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
-  wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
-  wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_e);
+  wf.add_vector_form(0,linear_form, linear_form_order, HERMES_ANY, &prev_rho);
+  wf.add_vector_form(1,linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
+  wf.add_vector_form(2,linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
+  wf.add_vector_form(3,linear_form, linear_form_order, HERMES_ANY, &prev_e);
 #endif
 
   // Surface linear forms - inner edges coming from the DG formulation.
@@ -296,7 +345,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 #endif
-  
+
   // Surface linear forms - Solid wall edges.
 #ifdef HERMES_USE_VECTOR_VALUED_FORMS
   wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL, 
@@ -318,20 +367,16 @@ int main(int argc, char* argv[])
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 #endif
 
-  // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
-  // The FE problem is in fact a FV problem.
-  dp.set_fvm();
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-  dp.use_vector_valued_forms();
-#endif
-
-
   // Filters for visualization of pressure and the two components of velocity.
   SimpleFilter pressure(calc_pressure_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+
+  // Initialize refinement selector.
+  L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Disable weighting of refinement candidates.
+  selector.set_error_weights(1, 1, 1);
 
   //VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
   //ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
@@ -348,12 +393,8 @@ int main(int argc, char* argv[])
   // Iteration number.
   int iteration = 0;
   
-  // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
   // For calculation of the time derivative of the norm of the solution approximation.
+  // Not used yet in the adaptive version.
   double difference;
   double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e))];
@@ -364,36 +405,179 @@ int main(int argc, char* argv[])
       last_values[i] = 0.;
   
   // Output of the approximate time derivative.
+  // Not used yet in the adaptive version.
   std::ofstream time_der_out("time_der");
-
+  
   for(t = 0.0; t < 10; t += TAU)
   {
     info("---- Time step %d, time %3.5f.", iteration, t);
 
     iteration++;
 
-    bool rhs_only = (iteration == 1 ? false : true);
-    // Assemble stiffness matrix and rhs or just rhs.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
-    dp.assemble(matrix, rhs, rhs_only);
+    // Periodic global derefinements.
+    if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
+      REFINEMENT_COUNT = 0;
+      info("Global mesh derefinement.");
+      mesh.unrefine_all_elements();
+      space_rho.set_uniform_order(P_INIT);
+      space_rho_v_x.set_uniform_order(P_INIT);
+      space_rho_v_y.set_uniform_order(P_INIT);
+      space_e.set_uniform_order(P_INIT);
+    }
 
+    // Adaptivity loop:
+    int as = 1; 
+    bool done = false;
+    do
+    {
+      info("---- Adaptivity step %d:", as);
+
+      // Construct globally refined reference mesh and setup reference space.
+      // Global polynomial order increase = 0;
+      int order_increase = 0;
+      Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), order_increase);
+
+      // Project the previous time level solution onto the new fine mesh.
+      info("Projecting the previous time level solution onto the new fine mesh.");
+      OGProjection::project_global(*ref_spaces, Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
+                     Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, 
+                     Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
+
+      if(as > 1) {
+        delete rsln_rho.get_mesh();
+        delete rsln_rho_v_x.get_mesh();
+        delete rsln_rho_v_y.get_mesh();
+        delete rsln_e.get_mesh();
+      }
+
+      // Assemble the reference problem.
+      info("Solving on reference mesh.");
+      bool is_linear = true;
+      DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+      // The FE problem is in fact a FV problem.
+      dp->set_fvm();
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+      dp->use_vector_valued_forms();
+#endif
+      dp->assemble(matrix, rhs);
+
+      // Solve the linear system of the reference problem. If successful, obtain the solutions.
+      if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
+                                              Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+      else error ("Matrix solver failed.\n");
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), 
+                     Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), matrix_solver, 
+                     Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
+
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate.");
+      Adapt* adaptivity = new Adapt(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
+      bool solutions_for_adapt = true;
+      // Error components.
+      Tuple<double> *error_components = new Tuple<double>(4);
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e),
+                                 Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), solutions_for_adapt, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, error_components) * 100;
+
+      // Report results.
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+        Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+
+      // Determine the time step.
+      double *solution_vector = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e))];
+      OGProjection::project_global(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Tuple<MeshFunction *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), solution_vector, matrix_solver, 
+      Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
+      double min_condition = 0;
+      Element *e;
+      for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
+            if (((e) = mesh.get_element_fast(_id))->used) \
+              if ((e)->active)
+      {
+        AsmList al;
+        space_rho.get_element_assembly_list(e, &al);
+        double rho = solution_vector[al.dof[0]];
+        space_rho_v_x.get_element_assembly_list(e, &al);
+        double v1 = solution_vector[al.dof[0]] / rho;
+        space_rho_v_y.get_element_assembly_list(e, &al);
+        double v2 = solution_vector[al.dof[0]] / rho;
+        space_e.get_element_assembly_list(e, &al);
+        double energy = solution_vector[al.dof[0]];
         
-    // Solve the matrix problem.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e), Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-    else
-    error ("Matrix solver failed.\n");
+        double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
+        
+        if(condition < min_condition || min_condition == 0.)
+          min_condition = condition;
+      }
+      if(TAU > min_condition)
+        TAU = min_condition;
+      if(TAU < min_condition * 0.9)
+        TAU = min_condition;
+
+      delete [] solution_vector;
+
+      // Visualization.
+      s1.show(&sln_rho);
+      s2.show(&sln_rho_v_x);
+      s3.show(&sln_rho_v_y);
+      s4.show(&sln_e);
+
+      // If err_est too large, adapt the mesh.
+      if (err_est_rel_total < ERR_STOP && (*error_components)[1] * 100 < ERR_STOP_VEL_X) 
+        done = true;
+      else 
+      {
+        info("Adapting coarse mesh.");
+        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector), 
+                                 THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+        REFINEMENT_COUNT++;
+        if (Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+          &space_rho_v_y, &space_e)) >= NDOF_STOP) 
+          done = true;
+        else
+          // Increase the counter of performed adaptivity steps.
+          as++;
+      }
+
+      // We have to empty the cache of NeighborSearch class instances.
+      NeighborSearch::empty_main_caches();
+
+// If used, we need to clean the vector valued form caches.
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+      DiscreteProblem::empty_form_caches();
+#endif
+
+      // Clean up.
+      delete solver;
+      delete matrix;
+      delete rhs;
+      delete adaptivity;
+      for(int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i];
+      delete dp;
+    }
+    while (done == false);
 
     // Debugging.
     /*    
     std::ofstream out("matrix");
     for(int i = 0; i < matrix->get_size(); i++)
       for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(matrix->get(i, j)) != 0)
-          out << '(' << i << ', ' << j << ')' << ':' << matrix->get(i, j) << std::endl;
+        if(std::abs(matrix->get(i,j)) != 0)
+          out << '(' << i << ',' << j << ')' << ':' << matrix->get(i,j) << std::endl;
     out.close();
 
     out.open("rhs");
@@ -408,56 +592,16 @@ int main(int argc, char* argv[])
     out.close();
     */
 
-    // Approximate the time derivative of the solution.
-    difference = 0;
-    for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e)); i++)
-    {
-      difference_values[i] = last_values[i] - solver->get_solution()[i];
-      difference += difference_values[i] * difference_values[i];
-      last_values[i] = solver->get_solution()[i];
-    }
-    difference = std::sqrt(difference) / TAU;
-    // Info about the approximate time derivative.
-    if(iteration > 1)
-    {
-      info("Approximate the norm time derivative : %g.", difference);
-      time_der_out << iteration << '\t' << difference << std::endl;
-    }
-
-    // Determine the time step.
-    double *solution_vector = solver->get_solution();
-    double min_condition = 0;
-    Element *e;
-    for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
-          if (((e) = mesh.get_element_fast(_id))->used) \
-            if ((e)->active)
-    {
-      AsmList al;
-      space_rho.get_element_assembly_list(e, &al);
-      double rho = solution_vector[al.dof[0]];
-      space_rho_v_x.get_element_assembly_list(e, &al);
-      double v1 = solution_vector[al.dof[0]] / rho;
-      space_rho_v_y.get_element_assembly_list(e, &al);
-      double v2 = solution_vector[al.dof[0]] / rho;
-      space_e.get_element_assembly_list(e, &al);
-      double energy = solution_vector[al.dof[0]];
-      
-      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
-      
-      if(condition < min_condition || min_condition == 0.)
-        min_condition = condition;
-    }
-    if(TAU > min_condition)
-      TAU = min_condition;
-    if(TAU < min_condition * 0.9)
-      TAU = min_condition;
-
     // Copy the solutions into the previous time level ones.
-    prev_rho.copy(&sln_rho);
-    prev_rho_v_x.copy(&sln_rho_v_x);
-    prev_rho_v_y.copy(&sln_rho_v_y);
-    prev_e.copy(&sln_e);
+    prev_rho.copy(&rsln_rho);
+    prev_rho_v_x.copy(&rsln_rho_v_x);
+    prev_rho_v_y.copy(&rsln_rho_v_y);
+    prev_e.copy(&rsln_e);
+
+    delete rsln_rho.get_mesh(); 
+    delete rsln_rho_v_x.get_mesh(); 
+    delete rsln_rho_v_y.get_mesh();
+    delete rsln_e.get_mesh(); 
 
     // Visualization.
     /*
@@ -465,18 +609,8 @@ int main(int argc, char* argv[])
     u.reinit();
     w.reinit();
     sview.show(&pressure);
-    vview.show(&u, &w);
+    vview.show(&u,&w);
     */
-
-    s1.show(&sln_rho);
-    s2.show(&sln_rho_v_x);
-    s3.show(&sln_rho_v_y);
-    s4.show(&sln_e);
-    
-    // If used, we need to clean the vector valued form caches.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-    DiscreteProblem::empty_form_caches();
-#endif
   }
   
   time_der_out.close();

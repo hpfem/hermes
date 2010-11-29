@@ -49,16 +49,25 @@ private:
   std::string mesh_str;
   int init_ref_num;
   int init_p;
-  int n_mat_markers;
-  std::vector<int> mat_markers;
-  std::vector<double> permittivity_array;
-  std::vector<double> charge_density_array;
-  int n_bc_value;
-  std::vector<int> bc_markers_value;
-  std::vector<double> bc_values;
-  int n_bc_derivative;
-  std::vector<int> bc_markers_derivative;
-  std::vector<double> bc_derivatives;
+  std::vector<int> mat_markers;             // Array of material markers (>= 0).
+                                            // Example: [1, 3, 0] 
+  std::vector<int> mat_permut;              // For a material marker, this array gives 
+                                            // its index in the list of material constants.
+                                            // Example (for the above array): [-1, 0, -1, 1, 2]
+  std::vector<double> permittivity_array;   // Array of corresponding permittivities.
+  std::vector<double> charge_density_array; // Array of corresponding charge densities.
+  std::vector<int> bdy_markers_val;         // Dirichlet boundary markers (>= 1).
+                                            // Example: [3, 4, 1]
+  std::vector<double> bc_val;               // List of Dirichlet boundary values (in the same order)..
+  std::vector<int> bdy_markers_der;         // Neumann boundary markers (>= 1).
+                                            // Example: [2, 5]
+  std::vector<double> bc_der;               // List of Neumann boundary values (in the same order).
+  std::vector<int> bc_permut;               // For any boundary marker (either Dirichlet or Neumann, 
+                                            // this array gives its index in the corresponding list of
+                                            // (either Dirichlet or Neumann) boundary conditions.
+                                            // Example (for the above Dirichlet and Neumann arrays): 
+                                            // [-1, 2, 0, 0, 1, 1]
+
 
   Mesh* mesh;
   H1Space* space;

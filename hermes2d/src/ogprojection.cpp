@@ -8,7 +8,7 @@ void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar*
   // sanity checks
   if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
   for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
-  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
+  if (spaces.size() != n) error("Number of spaces must match number of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
   int ndof = Space::assign_dofs(spaces);
@@ -105,7 +105,7 @@ void OGProjection::project_global(Tuple<Space *> spaces, Tuple<Solution *> sols_
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
   OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
-  
+
   Solution::vector_to_solutions(target_vec, spaces, sols_dest);
   
   delete [] target_vec;

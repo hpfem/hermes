@@ -150,7 +150,7 @@ public:
 #undef H2D_SUBTRACT_IF_NOT_NULL
 
   virtual void free_ord() {
-    delete [] val;
+    delete val;
     val = val0 = val1 = NULL;
     dx = dx0 = dx1 = NULL;
     dy = dy0 = dy1 = NULL;

@@ -703,7 +703,10 @@ static void make_dy_coefs(int mode, int o, scalar* mono, scalar* result)
 
 void Solution::init_dxdy_buffer()
 {
-  if (dxdy_buffer != NULL) delete [] dxdy_buffer;
+  if (dxdy_buffer != NULL) {
+    delete [] dxdy_buffer;
+    dxdy_buffer = NULL;
+  }
   dxdy_buffer = new scalar[num_components * 5 * sqr(11)];
 }
 

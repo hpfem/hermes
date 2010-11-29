@@ -26,6 +26,8 @@
 #include "../forms.h"
 #include "adapt.h"
 #include "h1projipol.h"
+#include "h1proj.h"
+#include "hcurlproj.h"
 #include "../../../hermes_common/matrix.h"
 
 //#define DEBUG_PRINT
@@ -65,6 +67,7 @@ void Adapt::init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms)
 {
 	_F_
 	this->num = sp.size();
+  this->proj_norms = proj_norms;
 
 	this->spaces = new Space *[this->num];
 	for (int i = 0; i < this->num; i++) spaces[i] = sp[i];
@@ -141,16 +144,25 @@ double Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &o
 	_F_
 	ProjKey key(split, son, order);
 	double err;
+  Projection *proj;
 	if (proj_err.lookup(key, err))
 		return err;
 	else {
-		H1ProjectionIpol proj(rsln, e, ss);
-		err = proj.get_error(split, son, order);
-		proj_err.set(key, err);
+    switch (ss->get_type()) {
+      case 1:
+        proj = new H1ProjectionIpol(rsln, e, ss);
+		    err = proj->get_error(split, son, order);
+		    proj_err.set(key, err);
+        break;
+      case 2:
+        proj = new HCurlProjection(rsln, e, ss);
+		    err = proj->get_error(split, son, order);
+		    proj_err.set(key, err);
+        break;
+    }
+    delete proj;
 		return err;
-	}
-
-
+  }
 }
 
 //// optimal refinement search /////////////////////////////////////////////////////////////////////
@@ -775,7 +787,7 @@ scalar Adapt::eval_error(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Me
 	                                bi_ord);
 
 	// eval the form
-	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);		// FIXME: hex-specific
+	Quad3D *quad = get_quadrature(sln1->get_active_element()->get_mode());
 	QuadPt3D *pt = quad->get_points(order);
 	int np = quad->get_num_points(order);
 
@@ -814,7 +826,7 @@ scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Mes
 	                                bi_ord);
 
 	// eval the form
-	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON); 	// FIXME: hex_specific
+	Quad3D *quad = get_quadrature(rsln1->get_active_element()->get_mode());
 	QuadPt3D *pt = quad->get_points(order);
 	int np = quad->get_num_points(order);
 

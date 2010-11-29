@@ -44,40 +44,40 @@ int main(int argc, char* argv[])
     charge_density_array.push_back(tmp);
   }
   // Number of VALUE boundary conditions.
-  int n_bc_value;
-  if(!Get(f, &n_bc_value)) error("Could not read number of VALUE boundary markers.");
-  if(n_bc_value <= 0) error("At least one VALUE boundary marker must be given.");
+  int n_bc_val;
+  if(!Get(f, &n_bc_val)) error("Could not read number of VALUE boundary markers.");
+  if(n_bc_val <= 0) error("At least one VALUE boundary marker must be given.");
   // VALUE boundary markers.
   std::vector<int> bc_markers_value;
-  for (int i = 0; i < n_bc_value; i++) {
+  for (int i = 0; i < n_bc_val; i++) {
     int tmp;
     if(!Get(f, &tmp)) error("Could not read a VALUE boundary marker.");
     bc_markers_value.push_back(tmp);
   }
   // Boundary values (electric potential).
-  std::vector<double> bc_values;
-  for (int i = 0; i < n_bc_value; i++) {
+  std::vector<double> bc_val;
+  for (int i = 0; i < n_bc_val; i++) {
     double tmp;
     if(!Get(f, &tmp)) error("Could not read a boundary value.");
-    bc_values.push_back(tmp);
+    bc_val.push_back(tmp);
   }
   // Number of DERIVATIVE boundary conditions.
-  int n_bc_derivative;
-  if(!Get(f, &n_bc_derivative)) error("Could not read number of DERIVATIVE boundary markers.");
+  int n_bc_der;
+  if(!Get(f, &n_bc_der)) error("Could not read number of DERIVATIVE boundary markers.");
   // DERIVATIVE boundary markers.
-  std::vector<int> bc_markers_derivative;
-  std::vector<double> bc_derivatives;
+  std::vector<int> bc_markers_der;
+  std::vector<double> bc_der;
   // Boundary derivatives.
-  if(n_bc_derivative >= 1) {
-    for (int i = 0; i < n_bc_derivative; i++) {
+  if(n_bc_der >= 1) {
+    for (int i = 0; i < n_bc_der; i++) {
       int tmp;
       if(!Get(f, &tmp)) error("Could not read a DERIVATIVE boundary marker.");
-      bc_markers_derivative.push_back(tmp);
+      bc_markers_der.push_back(tmp);
     }
-    for (int i = 0; i < n_bc_derivative; i++) {
+    for (int i = 0; i < n_bc_der; i++) {
       double tmp;
       if(!Get(f, &tmp)) error("Could not read a boundary derivative.");
-      bc_derivatives.push_back(tmp);
+      bc_der.push_back(tmp);
     }
   }
 
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
   // Set initial polynomial degree of elements.
   E.set_initial_poly_degree(init_p);
 
-  // Set material markers (also checks compatibility with the mesh file).
+  // Set material markers.
   E.set_material_markers(mat_markers);
 
   // Set permittivity array.
@@ -105,17 +105,17 @@ int main(int argc, char* argv[])
   // Set charge density array.
   E.set_charge_density_array(charge_density_array);
 
-  // Set VALUE boundary markers (also check with the mesh file).
+  // Set VALUE boundary markers.
   E.set_boundary_markers_value(bc_markers_value);
 
   // Set boundary values.
-  E.set_boundary_values(bc_values);
+  E.set_boundary_values(bc_val);
 
-  // Set DERIVATIVE boundary markers (also check with the mesh file).
-  E.set_boundary_markers_derivative(bc_markers_derivative);
+  // Set DERIVATIVE boundary markers.
+  E.set_boundary_markers_derivative(bc_markers_der);
 
   // Set boundary derivatives.
-  E.set_boundary_derivatives(bc_derivatives);
+  E.set_boundary_derivatives(bc_der);
 
 
   /*** SOLVE THE PROBLEM ***/

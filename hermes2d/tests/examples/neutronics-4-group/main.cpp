@@ -9,11 +9,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const int INIT_REF_NUM = 2;                               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;                               // Number of initial uniform mesh refinements.
 const int P_INIT_1 = 2,                                   // Initial polynomial degree for approximation of group 1 fluxes.
-          P_INIT_2 = 3,                                   // Initial polynomial degree for approximation of group 2 fluxes.
-          P_INIT_3 = 3,                                   // Initial polynomial degree for approximation of group 3 fluxes.
-          P_INIT_4 = 4;                                   // Initial polynomial degree for approximation of group 4 fluxes.
+          P_INIT_2 = 2,                                   // Initial polynomial degree for approximation of group 2 fluxes.
+          P_INIT_3 = 2,                                   // Initial polynomial degree for approximation of group 3 fluxes.
+          P_INIT_4 = 2;                                   // Initial polynomial degree for approximation of group 4 fluxes.
 const double ERROR_STOP = 1e-5;                           // Tolerance for the eigenvalue.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;    // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                           // SOLVER_MUMPS, and more are coming.
@@ -27,7 +27,7 @@ const char* preconditioner = "jacobi";                    // Name of the precond
 
 
 // Initial eigenvalue approximation.
-double k_eff = 1.140;         
+double k_eff = 1.0;         
 
 // Element markers.
 const int marker_reflector = 1;
@@ -266,6 +266,7 @@ int main(int argc, char* argv[])
   // Main power iteration loop:
   int iter = 1; bool done = false;
   bool rhs_only = false;
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
   do
   {
     info("------------ Power iteration %d:", iter);
@@ -351,13 +352,13 @@ int main(int argc, char* argv[])
   num_iter.test_overshoot(iter, 48);
   
   TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
-  peak.test_equality(max1, Extremum(1.030123,1.665339,5.445262));
-  peak.test_equality(max2, Extremum(2.262864,1.764661,5.445262));
-  peak.test_equality(max3, Extremum(0.335336,1.764661,5.445262));
-  peak.test_equality(max4, Extremum(4.565734,1.151700,5.494142));
-  
-  TestSubject<double> eigenvalue(1e-5);
-  eigenvalue.test_equality(k_eff, 1.140916);
+  peak.test_equality(max1, Extremum(1.020590,1.690169,5.497631));
+  peak.test_equality(max2, Extremum(2.272636,1.807669,5.497631));
+  peak.test_equality(max3, Extremum(0.337387,1.807669,5.497631));
+  peak.test_equality(max4, Extremum(4.600162,1.149095,5.497631));
+                                             
+  TestSubject<double> eigenvalue(1e-5);      
+  eigenvalue.test_equality(k_eff, 1.1407201); 
   
   if (num_iter.passed && peak.passed && eigenvalue.passed) {
     printf("Success!\n");
@@ -365,6 +366,9 @@ int main(int argc, char* argv[])
   }
   else {
     printf("Failure!\n");
+    if (!peak.passed) printf("Peak flux test failed.\n");
+    if (!eigenvalue.passed) printf("Eigenvalue test failed.\n");
+    if (!num_iter.passed) printf("Number of iterations test failed.\n");
     return ERR_FAILURE;
   }
 }

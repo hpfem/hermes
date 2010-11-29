@@ -9,6 +9,31 @@ std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> 
 std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_n = 
   *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>();
 
+void NeighborSearch::empty_main_caches()
+{
+  std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>::iterator it;
+  for(it = NeighborSearch::main_cache_m.begin(); it != NeighborSearch::main_cache_m.end(); it++) {
+    delete (*it).second->central_pss;
+    (*it).second->central_pss = NULL;
+    delete (*it).second->central_rm;
+    (*it).second->central_rm = NULL;
+    delete (*it).second;
+  }
+  // This maybe is not needed.
+  NeighborSearch::main_cache_m.clear();
+
+  for(it = NeighborSearch::main_cache_n.begin(); it != NeighborSearch::main_cache_n.end(); it++) {
+    delete (*it).second->central_pss;
+    (*it).second->central_pss = NULL;
+    delete (*it).second->central_rm;
+    (*it).second->central_rm = NULL;
+    delete (*it).second;
+  }
+  // This maybe is not needed.
+  NeighborSearch::main_cache_n.clear();
+}
+
+
 NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) : 
   central_el(el), central_pss(NULL), central_rm(NULL),
   neighb_el(NULL), neighb_pss(NULL), neighb_rm(NULL),
@@ -405,11 +430,11 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
       central_pss->set_transform(original_central_el_transform);
     
     // Push the central element's transformation to the central pss and refmap.
-    if (neighborhood_type == H2D_DG_GO_DOWN) {
+    if (neighborhood_type == H2D_DG_GO_DOWN)
       for(int i = 0; i < n_trans[active_segment]; i++)
         central_pss->push_transform(transformations[active_segment][i]);
-      central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm()); 
-    }
+    
+    central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm()); 
   }  
   
   if (with_neighbor_pss) // If the extended shapeset is needed...

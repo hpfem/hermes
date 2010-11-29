@@ -3,8 +3,8 @@
 class HERMES_API ScaledScalarView : public ScalarView
 {
 public:
-    ScaledScalarView(const char* title = "ScaledScalarView",
-		     DEFAULT_WINDOW_POS): ScalarView(title, new WinGeom(x, y, width, height)) {
+    ScaledScalarView(const char* title = "ScaledScalarView", WinGeom *wg = NULL)
+                  : ScalarView(title, wg) {
     }
 
     void scale(double sc = 1e3);

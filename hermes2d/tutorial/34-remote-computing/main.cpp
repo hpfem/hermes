@@ -158,8 +158,7 @@ int main(int argc, char* argv[])
   info("Visualizing Linearizer data from file tsln_40.lin.");
 
   // First use ScalarView to read and show the Linearizer data.
-  WinGeom* win_geom_1 = new WinGeom(0, 0, 450, 600);
-  ScalarView sview_1("Saved Linearizer data", win_geom_1);
+  ScalarView sview_1("Saved Linearizer data", new WinGeom(0, 0, 450, 600));
   sview_1.lin.load_data("tsln_40.lin");
   sview_1.set_min_max_range(0,20);
   sview_1.fix_scale_width(3);
@@ -169,8 +168,7 @@ int main(int argc, char* argv[])
 
   Solution sln_from_file;
   sln_from_file.load("tsln_60.dat");
-  WinGeom* win_geom_2 = new WinGeom(460, 0, 450, 600);
-  ScalarView sview_2("Saved Solution data", win_geom_2);
+  ScalarView sview_2("Saved Solution data", new WinGeom(460, 0, 450, 600));
   sview_2.set_min_max_range(0,20);
   sview_2.fix_scale_width(3);
   sview_2.show(&sln_from_file);
@@ -181,8 +179,7 @@ int main(int argc, char* argv[])
   // The NULLs are for bc_types() and essential_bc_values().
   H1Space space_from_file(sln_from_file.get_mesh(), NULL, NULL, p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
-  WinGeom* win_geom_3 = new WinGeom(920, 0, 450, 600);
-  OrderView oview("Saved Solution -> Space", win_geom_3);
+  OrderView oview("Saved Solution -> Space", new WinGeom(920, 0, 450, 600));
   oview.show(&space_from_file);
 
   // Clean up.

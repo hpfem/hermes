@@ -33,7 +33,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // Boundary conditions.
 BCType bc_types(int marker)
 {
-  return BC_NONE;
+  return BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values.

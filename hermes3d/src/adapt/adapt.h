@@ -166,6 +166,7 @@ protected:
 	int max_order;
 	bool aniso;
 	double exponent;			// exponent used in score formula (see get_optimal_refinement())
+  Tuple<ProjNormType> proj_norms;
 
 	// spaces & solutions
 	int num;					// number of spaces to work with

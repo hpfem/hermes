@@ -37,6 +37,8 @@ public:
 
 	virtual double get_error(int split, int son, const Ord3 &order) = 0;
 
+  Shapeset * get_shapeset() { return this->ss; };
+
 protected:
 	Ord3 order;
 	Mesh *mesh;
@@ -52,7 +54,7 @@ protected:
 	double *proj_coef;				// projection coefficients
 
 	Trf *get_trf(int trf);
-	virtual void calc_projection(int split, int son, const Ord3 &order) = 0;
+	virtual void calc_projection(int split, int son, Ord3 &order) = 0;
 
 	// FIXME: Hex-specific
 	static const int NUM_TRF = 27;		// number of all possible transformations

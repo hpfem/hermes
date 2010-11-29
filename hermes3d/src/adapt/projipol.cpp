@@ -54,7 +54,7 @@ void ProjectionIpol::free_proj()
 	delete [] proj;
 }
 
-void ProjectionIpol::calc_projection(int split, int son, const Ord3 &order)
+void ProjectionIpol::calc_projection(int split, int son, Ord3 &order)
 {
 	_F_
 	free_proj();

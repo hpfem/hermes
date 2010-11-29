@@ -83,8 +83,104 @@ public:
 
   void invalidate_matrix() { have_matrix = false; }
 
+  void set_fvm() {this->is_fvm = true;}  
+
+  // Experimental caching of vector valued (vector) forms.
+  struct SurfVectorFormsKey
+  {
+    WeakForm::vector_form_val_t vfs;
+    int element_id, isurf, shape_fn;
+#ifdef MSVC
+    UINT64 sub_idx;
+    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, UINT64 sub_idx) 
+      : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
+#else
+    unsigned int sub_idx;
+    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, unsigned int sub_idx) 
+      : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
+#endif
+  };
+  
+  struct SurfVectorFormsKeyCompare
+  {
+    bool operator()(SurfVectorFormsKey a, SurfVectorFormsKey b) const
+    {
+      if (a.vfs < b.vfs)
+        return true;
+      else if (a.vfs > b.vfs) 
+        return false;
+      else
+          if (a.element_id < b.element_id)
+            return true;
+          else if (a.element_id > b.element_id) 
+            return false;
+          else
+              if (a.isurf < b.isurf)
+                return true;
+              else if (a.isurf > b.isurf) 
+                return false;
+              else
+                  if (a.sub_idx < b.sub_idx)
+                    return true;
+                  else if (a.sub_idx > b.sub_idx) 
+                    return false;
+                  else
+                    return (a.shape_fn < b.shape_fn);
+    }
+  };
+
+  /// Cache of SurfaceVectorForms values.
+  static std::map<SurfVectorFormsKey, double*, SurfVectorFormsKeyCompare> surf_forms_cache;
+
+  /// Static key to surf_forms_cache.
+  static SurfVectorFormsKey surf_forms_key;
+
+  struct VolVectorFormsKey
+  {
+    WeakForm::vector_form_val_t vfv;
+    int element_id, shape_fn;
+    VolVectorFormsKey(WeakForm::vector_form_val_t vfv, int element_id, int shape_fn) 
+      : vfv(vfv), element_id(element_id), shape_fn(shape_fn) {};
+  };
+  
+  struct VolVectorFormsKeyCompare
+  {
+    bool operator()(VolVectorFormsKey a, VolVectorFormsKey b) const
+    {
+      if (a.vfv < b.vfv)
+        return true;
+      else if (a.vfv > b.vfv) 
+        return false;
+      else
+          if (a.element_id < b.element_id)
+            return true;
+          else if (a.element_id > b.element_id) 
+            return false;
+          else
+            return (a.shape_fn < b.shape_fn);
+    }
+  };
+
+  /// Cache of SurfaceVectorForms values.
+  static std::map<VolVectorFormsKey, double*, VolVectorFormsKeyCompare> vol_forms_cache;
+
+  /// Static key to vol_forms_cache.
+  static VolVectorFormsKey vol_forms_key;
+
+  /// Method to empty the above caches.
+  static void empty_form_caches();
+
+  void use_vector_valued_forms() { vector_valued_forms = true; };
+
 protected:
   WeakForm* wf;
+
+  // If the problem has only constant test functions, there is no need for order calculation, 
+  // which saves time.
+  bool is_fvm;
+
+  // Experimental caching of vector valued forms.
+  bool vector_valued_forms;
 
   bool is_linear;
 

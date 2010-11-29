@@ -68,6 +68,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
 	Geom<double>* e = new Geom<double>;
   e->marker = surf_pos->marker;
+  e->id = rm->get_active_element()->en[surf_pos->surf_num]->id;
 	e->x = rm->get_phys_x(order);
 	e->y = rm->get_phys_y(order);
 	double3 *tan;

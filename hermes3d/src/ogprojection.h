@@ -117,7 +117,7 @@ protected:
     Scalar result = 0;
     for (int i = 0; i < n; i++) {
       result += wt[i] * (u->curl0[i] * conj(v->curl0[i]) + u->curl1[i] * conj(v->curl1[i]) + u->curl2[i] * conj(v->curl2[i]));
-      result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+      result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]) + u->val2[i] * conj(v->val2[i]));
     }
     return result;
   }
@@ -129,7 +129,7 @@ protected:
     Scalar result = 0;
     for (int i = 0; i < n; i++) {
       result += wt[i] * (ext->fn[0]->curl0[i] * conj(v->curl0[i]) + ext->fn[0]->curl1[i] * conj(v->curl1[i]) + ext->fn[0]->curl2[i] * conj(v->curl2[i]));
-      result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
+      result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]) + ext->fn[0]->val2[i] * conj(v->val2[i]));
     }
     return result;
   }

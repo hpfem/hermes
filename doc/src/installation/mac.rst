@@ -4,6 +4,12 @@ Mac OS
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+**Known issues**: For some reason tutorial example 34-remote-computing, the 
+corresponding test, and the test views/zoom-to-fit do not compile (as of 
+November 24, 2010). We work on this as time permits, so perhaps you will not 
+have this problem anymore. If you do, please comment out this example and 
+tests in the corresponding CMakeLists.txt files. 
+
 **Step 1**: Make sure you have XCode installed. This should be on the installation 
 disks which came with your Mac. XCode contains the GNU compilers, make 
 and many other things which are required to build Hermes.
