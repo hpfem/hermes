@@ -479,22 +479,20 @@ int main(int argc, char* argv[])
                      Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
 
       // Calculate element errors and total error estimate.
-      info("Calculating error estimate."); 
+      info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(Tuple<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), 
-                                 Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
-
-      // Second calculation of errors, this time only for the x-component of the velocity.
-      Adapt* adaptivity_velocity_x = new Adapt(&space_rho_v_x, HERMES_L2_NORM);
-      double err_est_rel_total_velocity_x = adaptivity_velocity_x->calc_err_est(&sln_rho_v_x, &rsln_rho_v_x, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      bool solutions_for_adapt = true;
+      // Error components.
+      Tuple<double> *error_components = new Tuple<double>(4);
+      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e),
+                                 Tuple<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), solutions_for_adapt, 
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, error_components) * 100;
 
       // Report results.
-      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%, err_est_rel for horizontal velocity: %g%%", 
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
         Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total, err_est_rel_total_velocity_x);
+        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // Determine the time step.
       double *solution_vector = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
@@ -537,14 +535,13 @@ int main(int argc, char* argv[])
       s4.show(&sln_e);
 
       // If err_est too large, adapt the mesh.
-      if (err_est_rel_total < ERR_STOP && err_est_rel_total_velocity_x < ERR_STOP_VEL_X) 
+      if (err_est_rel_total < ERR_STOP && (*error_components)[1] * 100 < ERR_STOP_VEL_X) 
         done = true;
       else 
       {
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
-        done = adaptivity_velocity_x->adapt(&selector, THRESHOLD_VEL_X, STRATEGY, MESH_REGULARITY);
 
         REFINEMENT_COUNT++;
         if (Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 

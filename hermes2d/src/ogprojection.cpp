@@ -8,7 +8,7 @@ void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm* wf, scalar*
   // sanity checks
   if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
   for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
-  if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
+  if (spaces.size() != n) error("Number of spaces must match number of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
   int ndof = Space::assign_dofs(spaces);

@@ -693,10 +693,10 @@ double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns,
 	  double err, nrm;
 					
           err = fabs(eval_error(form[i][j], ord[i][j], sln[i], sln[j], rsln[i], rsln[j]));
-	  nrm = fabs(eval_norm(form[i][j], ord[i][j], rsln[i], rsln[j]));
+          nrm = fabs(eval_norm(form[i][j], ord[i][j], rsln[i], rsln[j]));
 
-	  norms[i] += nrm;
-	  total_norm  += nrm;
+          norms[i] += nrm;
+          total_norm  += nrm;
           total_error += err;
           errors_components[i] += err;
           if(solutions_for_adapt)
