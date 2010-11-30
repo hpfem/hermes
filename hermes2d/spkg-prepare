@@ -9,4 +9,4 @@ fi
 
 cp spkg-install ..
 cd ..
-rm -rf hermes1d hermes3d .git
+rm -rf hermes1d hermes3d doc .git
