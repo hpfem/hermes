@@ -182,8 +182,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Hermes2D'
-copyright = u'2009, hp-FEM group at UNR'
+project = u'Hermes'
+copyright = u'2009-2011, hp-FEM group at UNR'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
