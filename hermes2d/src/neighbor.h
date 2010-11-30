@@ -249,7 +249,8 @@ public:
   ///                               and active segment (which uniquely determines the transformation).
   ///
   /// \param[in] ep Active edge data required by the \c init_geom_surf function.
-  /// \return Pointer to a structure holding the geometry data, either fetched from the cache or freshly constructed.
+  /// \return Pointer to a structure holding the geometry data as well as diameter, id and marker of elements on both
+  ///         sides of the edge.
   ///
   Geom<double>* init_geometry(Geom< double >** ext_cache_e, SurfPos* ep);
   
@@ -277,6 +278,26 @@ public:
   /// \return pointer to the vector of neighboring elements.
   ///
   std::vector<Element*>* get_neighbors() { return &neighbors; }
+  
+  /// Retrieve the central element in the neighborhood defined by current active segment.
+  ///
+  /// \return pointer to the central element.
+  ///
+  Element* get_current_central_element()
+  {
+    ensure_active_segment(this);
+    return central_el;
+  }
+  
+  /// Retrieve the neighbor element in the neighborhood defined by current active segment.
+  ///
+  /// \return pointer to the neighbor of the central element.
+  ///
+  Element* get_current_neighbor_element()
+  {
+    ensure_active_segment(this);
+    return neighb_el;
+  }
   
   /// Get transfomations that must be pushed to a Transormable either on the central or neighbor element in order for
   /// its values from both sides to match.

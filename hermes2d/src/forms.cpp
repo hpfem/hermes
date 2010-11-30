@@ -14,11 +14,10 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "forms.h"
-
-template<typename T>
-const char* Func<T>::ERR_UNDEFINED_NEIGHBORING_ELEMENTS = "Neighboring elements are not defined and so are not function traces on their interface. "
-                                                          "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
-
+/*
+const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS = "Neighboring elements are not defined and so are not function traces on their interface. "
+                                                 "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
+*/
 // Explicit template specializations are needed here, general template<T> T DiscontinuousFunc<T>::zero = T(0) doesn't work.
 template<> Ord DiscontinuousFunc<Ord>::zero = Ord(0);
 template<> double DiscontinuousFunc<double>::zero = 0.0;
@@ -55,7 +54,7 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order)
 {
     Geom<double>* e = new Geom<double>;
     //e->element = rm->get_active_element();
-    e->diam = (rm->get_active_element())->get_diameter();
+    e->diam = rm->get_active_element()->get_diameter();
     e->id = rm->get_active_element()->id;
     e->marker = rm->get_active_element()->marker;
     e->x = rm->get_phys_x(order);
@@ -68,6 +67,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
 	Geom<double>* e = new Geom<double>;
   e->marker = surf_pos->marker;
+  e->diam = rm->get_active_element()->get_diameter();
   e->id = rm->get_active_element()->en[surf_pos->surf_num]->id;
 	e->x = rm->get_phys_x(order);
 	e->y = rm->get_phys_y(order);

@@ -571,7 +571,8 @@ Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos 
   {
     // Do the same as if assembling standard (non-DG) surface forms.
     if (ext_cache_e[eo] == NULL)
-      ext_cache_e[eo] = init_geom_surf(central_rm, ep, eo);
+      ext_cache_e[eo] = new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo), 
+                                                   neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
     return ext_cache_e[eo];
   } 
   else // go-down neighborhood
@@ -579,7 +580,8 @@ Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos 
     // Also take into account the transformations of the central element.
     Key key(eo, active_segment);
     if (cache_e[key] == NULL)
-      cache_e[key] = init_geom_surf(central_rm, ep, eo);
+      cache_e[key] = new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo), 
+                                                neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
     return cache_e[key];
   }    
 }

@@ -84,13 +84,14 @@ inline Ord cos(const Ord &a) { return Ord(a.get_max_order()); }
 inline Ord log(const Ord &a) { return Ord(a.get_max_order()); }
 inline Ord exp(const Ord &a) { return Ord(3 * a.get_order()); }
 
+static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS = 
+  "Neighboring elements are not defined and so are not function traces on their interface. "
+  "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
+  
 // Function
 template<typename T>
 class Func
 {
-protected:
-  static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS;
-
 public:
   const int num_gip; ///< Number of integration points used by this intance.
   const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
@@ -323,8 +324,8 @@ class Geom
 {
 public:
   int marker;       ///< Element/edge marker.
-  int id;           ///< ID number of the element.
-  T diam;           ///< Element diameter.
+  int id;           ///< ID number of the element (undefined for edge).
+  T diam;           ///< Element diameter (for edge, diameter of the parent element).
   //Element *element;   // Active element. NOTE: We used this for some time but
                         // decided against it because (a) it disables automatic
                         // order parsing and (b) if the form is called with T
@@ -333,10 +334,12 @@ public:
 
   T *x, *y;         ///< Coordinates [in physical domain].
   T *nx, *ny;       ///< Normals [in physical domain] (locally oriented
-                    ///< to point outside the element).
-  T *tx, *ty;       ///< Tangents [in physical domain].
+                    ///< to point outside the element). Only for edge 
+                    ///< (undefined for element).
+  T *tx, *ty;       ///< Tangents [in physical domain]. Only for edge.
   int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
                     ///< otherwise 1 (each edge has a unique global normal).
+                    ///< Only for edge.
 
   Geom()
   {
@@ -347,12 +350,41 @@ public:
     tx = ty = NULL;
     diam = 0;
   }
+    
+  virtual ~Geom() { };
 
   void free()
   {
     delete [] tx;    delete [] ty;
     delete [] nx;    delete [] ny;
   }
+  
+  virtual int get_neighbor_marker() const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
+  virtual int get_neighbor_id()     const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
+  virtual T   get_neighbor_diam()   const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
+};
+
+
+/// Small class which contains information about the element on the other side of an interface.
+///
+/// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
+/// instance is also automatically destroyed.
+///
+template<typename T>
+class InterfaceGeom : public Geom<T>
+{
+public:
+  int neighb_marker;
+  int neighb_id;
+  T   neighb_diam;
+  
+  InterfaceGeom(const Geom<T>* geom, int n_marker, int n_id, T n_diam) : 
+      Geom<T>(*geom), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+  { }; // Default (shallow) copy constructor for the base class is being used, i.e. this->x will point to the address of geom->x.
+  
+  virtual int get_neighbor_marker() const { return neighb_marker; }
+  virtual int get_neighbor_id()     const { return neighb_id; }
+  virtual T   get_neighbor_diam()   const { return neighb_diam; }
 };
 
 /// Init element geometry for calculating the integration order.
