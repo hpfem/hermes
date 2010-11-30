@@ -4,18 +4,10 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-// This example uses automatic hp-adaptivity to solve a general 
-// first-order equation.
-//
-//  PDE: y' = f(y, x).
-//
-//  Interval: (A, B).
-//
-//  BC: Dirichlet, y(A) = YA.
-//
-//  Exact solution: y(x) = 1/(x+1).
-//
-//  The following parameters can be changed:
+// This test makes sure that the benchmark "first_order_general_adapt" works correctly.
+
+#define ERROR_SUCCESS                               0
+#define ERROR_FAILURE                               -1
 
 const int NEQ = 1;                      // Number of equations.
 const int NELEM = 5;                    // Number of elements.
@@ -106,6 +98,7 @@ int main()
   Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
   int it = 1;
+  bool success = false;
   while (1) {
     // Obtain the number of degrees of freedom.
     int ndof_coarse = Space::get_num_dofs(space);
@@ -207,7 +200,7 @@ int main()
       for(int i=0; i < ndof; i++) rhs->set(i, -rhs->get(i));
 
       // Solve the linear system.
-      if(!solver->solve())
+      if(!(success = solver->solve()))
         error ("Matrix solver failed.\n");
 
       // Add \deltaY^{n+1} to Y^n.
@@ -294,5 +287,18 @@ int main()
   graph_dof_exact.save("conv_dof_exact.dat");
   graph_cpu_exact.save("conv_cpu_exact.dat");
 
-  return 0;
+  // Test variable.
+  info("ndof = %d.", Space::get_num_dofs(space));
+  if (Space::get_num_dofs(space) > 60) success = false;
+
+  if (success)
+  {
+    info("Success!");
+    return ERROR_SUCCESS;
+  }
+  else
+  {
+    info("Failure!");
+    return ERROR_FAILURE;
+  }
 }

@@ -4,7 +4,7 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
-// This test makes sure that example "first_order_general" works correctly.
+// This test makes sure that example "homogeneous_line" works correctly.
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
@@ -38,7 +38,7 @@ double NEWTON_TOL = 1e-5;               // Tolerance.
 int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 // Boundary conditions.
-Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,1), new BCSpec(0,0), 
+Tuple<BCSpec *> DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,1), new BCSpec(0,0), 
                               new BCSpec(0,0), new BCSpec(0,0));
 Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
 
