@@ -15,9 +15,9 @@
 //
 //  The following parameters can be changed:
 
-int NUMBER_OF_EIGENVALUES = 6;                    // Desired number of eigenvalues.
+int NUMBER_OF_EIGENVALUES = 50;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
+const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
@@ -111,10 +111,12 @@ int main(int argc, char* argv[])
   write_matrix_mm("mat_right.mtx", matrix_right);
 
   // Calling Python eigensolver. Solution will be written to "eivecs.dat".
+  info("Calling Pysparse...");
   char call_cmd[255];
   sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
 	  TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
   system(call_cmd);
+  info("Pysparse finished.");
 
   // Initializing solution vector, solution and ScalarView.
   double* coeff_vec = new double[ndof];
@@ -122,6 +124,7 @@ int main(int argc, char* argv[])
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
   // Reading solution vectors from file and visualizing.
+  double eigenval[NUMBER_OF_EIGENVALUES];
   FILE *file = fopen("eivecs.dat", "r");
   char line [64];                  // Maximum line size.
   fgets(line, sizeof line, file);  // ndof
@@ -131,7 +134,10 @@ int main(int argc, char* argv[])
   int neig = atoi(line);
   if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
-    // Get next eigenvector from the file.
+    // Get next eigenvalue from the file
+    fgets(line, sizeof line, file);  // eigenval
+    eigenval[ieig] = atof(line);            
+    // Get the corresponding eigenvector.
     for (int i = 0; i < ndof; i++) {  
       fgets(line, sizeof line, file);
       coeff_vec[i] = atof(line);
@@ -141,6 +147,9 @@ int main(int argc, char* argv[])
     Solution::vector_to_solution(coeff_vec, &space, &sln);
 
     // Visualize the solution.
+    char title[100];
+    sprintf(title, "Solution %d, val = %g", ieig, eigenval[ieig]);
+    view.set_title(title);
     view.show(&sln);
 
     // Wait for keypress.

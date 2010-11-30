@@ -16,15 +16,17 @@ A = mat_left.to_sss()
 M = mat_right.to_sss()
 k_conv, lmbd, Q, it, itall = jdsym.jdsym(A, M, K, eigenval_num, target_value, jdtol, max_iter, itsolvers.minres)
 NEIG = len(lmbd)
-for lam in lmbd:
-    print lam
+#for lam in lmbd:
+#    print "value:", lam
 eivecfile = open("eivecs.dat", "w")
 N = len(Q[:,0])
 print >> eivecfile, N
 print >> eivecfile, NEIG
 for ieig in range(len(lmbd)):
     eivec = Q[:,ieig]
-    for val in eivec:
+    print >> eivecfile, lmbd[ieig] # printing eigenvalue
+    for val in eivec:              # printing eigenvector
         print >> eivecfile, val
 eivecfile.close()
+
     
