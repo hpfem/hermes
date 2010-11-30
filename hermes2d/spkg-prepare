@@ -8,3 +8,5 @@ if [ "$SPKG_LOCAL" = "" ]; then
 fi
 
 cp spkg-install ..
+cd ..
+rm -rf hermes1d hermes3d .git
