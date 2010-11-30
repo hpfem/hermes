@@ -1,11 +1,13 @@
 #! /bin/sh
 
+set -e
+
 if [ "$SPKG_LOCAL" = "" ]; then
    echo "SPKG_LOCAL undefined ... exiting";
    exit 1
 fi
 
-set -e
+cd hermes2d
 
 # Set the hermes2d build options:
 python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)\nset(WITH_TESTS no)\nset(REPORT_WITH_LOGO no)\nset(WITH_BENCHMARKS no)"' > CMake.vars

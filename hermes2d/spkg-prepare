@@ -1,0 +1,10 @@
+#! /bin/sh
+
+set -e
+
+if [ "$SPKG_LOCAL" = "" ]; then
+   echo "SPKG_LOCAL undefined ... exiting";
+   exit 1
+fi
+
+cp spkg-install ..
