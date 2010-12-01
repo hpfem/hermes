@@ -176,7 +176,7 @@ In the code, this looks as follows::
 Preparation for adaptivity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Initially, we convert initial condition into a Solution::
+At the beginning we convert the initial condition into a Solution::
 
     // Convert initial condition into a Solution.
     Solution sln_prev_time;
@@ -203,5 +203,80 @@ coefficient vector into a Solution::
     // Translate the resulting coefficient vector into the Solution sln.
     Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
 
-Time stepping loop
-~~~~~~~~~~~~~~~~~~
+Time stepping and periodic mesh derefinement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The time stepping loop begins with a periodic global mesh derefinement,
+after which the last reference solution is projected on the globally
+derefined mesh. The derefinement frequency is set by the user via the 
+parameter UNREF_FREQ::
+
+    // Periodic global derefinements.
+    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    {
+      info("Global mesh derefinement.");
+      mesh.copy(&basemesh);
+      space.set_uniform_order(P_INIT);
+
+      // Project on globally derefined mesh.
+      info("Projecting previous fine mesh solution on derefined mesh.");
+      OGProjection::project_global(&space, &sln_prev_time, &sln);
+    }
+
+The code above resets the actual mesh to the basemesh. Alternatively,
+one could just remove a few layers of refinement (this is not so clean 
+from the mathematical point of view but faster in practice). Speed 
+optimization is not the main goal of the present example.
+
+Adaptivity loop
+~~~~~~~~~~~~~~~
+
+The adaptivity loop begins by constructing a globally refined reference 
+mesh::
+
+    // Construct globally refined reference mesh
+    // and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
+
+In the first adaptivity step, a projection of the coarse mesh solution is used as 
+an initial guess for the Newton's method on the reference mesh. Starting with the 
+second adaptivity step, the previous reference mesh solution is projected instead::
+
+    // Calculate initial coefficient vector for Newton on the fine mesh.
+    if (as == 1) {
+      info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
+      OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
+    }
+    else {
+      info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
+      OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
+    }
+
+Next we perform the Newton's loop on the reference mesh::
+
+    // Newton's loop on the fine mesh.
+    info("Solving on fine mesh:");
+    if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
+		      NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+
+    // Store the result in ref_sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+The reference solution is projected on the coarse mesh for error calculation::
+
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+
+With the coarse and reference mesh approximations in hand, the coarse mesh is adapted 
+as usual. At the end of each time step, the reference mesh solution is saved for the 
+next time step::
+
+    // Copy last reference solution into sln_prev_time.
+    sln_prev_time.copy(&ref_sln);
+
+Sample results
+~~~~~~~~~~~~~~
+
+TO BE CONTINUED.
+
