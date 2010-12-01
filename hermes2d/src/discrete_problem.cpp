@@ -712,7 +712,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   if(surf_forms_cache[surf_forms_key] == NULL)
                     rhs->add(am->dof[i], eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i]);
                   else
-                    rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                    rhs->add(am->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
                 }
                 else {
                   scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
@@ -868,11 +868,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   
                   if(vector_valued_forms) {
                     surf_forms_key = SurfVectorFormsKey(vfs->fn, nbs_v->get_pss()->get_active_element()->id, isurf, 
-                        nbs_v->get_pss()->get_transform(), am->idx[i]);
+                        am->idx[i], nbs_v->get_pss()->get_transform());
                     if(surf_forms_cache[surf_forms_key] == NULL)
                       rhs->add(am->dof[i], eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i]);
                     else
-                      rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                      rhs->add(am->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
                   }
                   else {
                     scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
