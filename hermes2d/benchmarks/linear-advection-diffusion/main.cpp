@@ -74,7 +74,7 @@ const int NDOF_STOP = 60000;             // Adaptivity process stops when the nu
                                          // over this limit. This is to prevent h-adaptivity to go on forever.
 
 GalerkinMethod method = CG;
-MatrixSolverType matrix_solver = SOLVER_MUMPS;  
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
 
 // Problem parameters.
 const double EPSILON = 0.01;           // Diffusivity.
@@ -163,12 +163,12 @@ int main(int argc, char* argv[])
   
     if (method != CG_STAB_GLS)
     {
-      if (P_INIT > 1)
+      if (P_INIT + ORDER_INCREASE > 1)
         error("The %s method may be used only with at most 1st order elements.", method_names[method].c_str());
     }
     else
     {
-      if (P_INIT > 2)
+      if (P_INIT + ORDER_INCREASE > 2)
         error("The %s method may be used only with at most 2nd order elements.", method_names[method].c_str());
     }
   }
