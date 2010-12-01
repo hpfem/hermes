@@ -247,23 +247,6 @@ public:
     assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,
                 "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
   }
-
-  /// Destructor.
-  ~DiscontinuousFunc()
-  {
-    /*
-    if(fn_central != NULL)
-    {
-      delete fn_central;
-      fn_central = NULL;
-    }
-    if(fn_neighbor != NULL)
-    {
-      delete fn_neighbor;
-      fn_neighbor = NULL;
-    }
-    */
-  }
   
   // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
   
