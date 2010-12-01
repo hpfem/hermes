@@ -1,0 +1,154 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[      4809,        145]
+NotebookOptionsPosition[      4313,        125]
+NotebookOutlinePosition[      4748,        142]
+CellTagsIndexPosition[      4705,        139]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"DD", "=", 
+   RowBox[{"\[Sqrt]", 
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      RowBox[{"4", " ", 
+       SuperscriptBox["\[Epsilon]", "2"], " ", 
+       SuperscriptBox["\[Pi]", "2"]}]}], ")"}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"m1", "=", 
+   FractionBox[
+    RowBox[{"1", "-", "DD"}], 
+    RowBox[{"2", "\[Epsilon]"}]]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"m2", "=", 
+   FractionBox[
+    RowBox[{"1", "+", "DD"}], 
+    RowBox[{"2", "\[Epsilon]"}]]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.499188384498446*^9, 3.499188494965827*^9}, {
+  3.4991891871787043`*^9, 3.4991891882504473`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"u", "[", 
+   RowBox[{"x_", ",", "y_"}], "]"}], ":=", 
+  FractionBox[
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"Exp", "[", 
+        RowBox[{"m2", "-", "m1"}], "]"}], " ", 
+       RowBox[{"Exp", "[", 
+        RowBox[{"m1", " ", "y"}], "]"}]}], "-", 
+      RowBox[{"Exp", "[", 
+       RowBox[{"m2", " ", "y"}], "]"}]}], ")"}], 
+    RowBox[{"Sin", "[", 
+     RowBox[{"\[Pi]", " ", "x"}], "]"}]}], 
+   RowBox[{
+    RowBox[{"Exp", "[", 
+     RowBox[{"m2", "-", "m1"}], "]"}], "-", "1"}]]}]], "Input",
+ CellChangeTimes->{{3.499188503896237*^9, 3.4991885807150993`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Plot3D", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"u", "[", 
+       RowBox[{"x", ",", "y"}], "]"}], "/.", 
+      RowBox[{"\[Epsilon]", "\[Rule]", "eps"}]}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", "0", ",", "1"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", "0", ",", "1"}], "}"}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"eps", ",", "0.005", ",", "0.5", ",", "0.01"}], "}"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.499188586106312*^9, 3.4991886411760693`*^9}, {
+  3.4991886736236486`*^9, 3.499188767020193*^9}, {3.500115988064846*^9, 
+  3.5001159924010353`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`eps$$ = 0.005, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{
+      Hold[$CellContext`eps$$], 0.005, 0.5, 0.01}}, Typeset`size$$ = {
+    720., {268., 286.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`eps$826$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, "Variables" :> {$CellContext`eps$$ = 0.005}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`eps$$, $CellContext`eps$826$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Plot3D[
+        ReplaceAll[
+         $CellContext`u[$CellContext`x, $CellContext`y], $CellContext`\
+\[Epsilon] -> $CellContext`eps$$], {$CellContext`x, 0, 1}, {$CellContext`y, 0,
+          1}], "Specifications" :> {{$CellContext`eps$$, 0.005, 0.5, 0.01}}, 
+      "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{803., {376., 387.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.499188750114498*^9, 3.499188767989379*^9}, 
+   3.500115921714381*^9, 3.500115993558695*^9}]
+}, Open  ]]
+},
+WindowSize->{1920, 1127},
+WindowMargins->{{0, Automatic}, {25, Automatic}},
+Magnification:>FEPrivate`If[
+  FEPrivate`Equal[FEPrivate`$VersionNumber, 6.], 2., 2. Inherited],
+FrontEndVersion->"7.0 for Linux x86 (64-bit) (November 11, 2008)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[545, 20, 668, 21, 227, "Input"],
+Cell[1216, 43, 630, 20, 121, "Input"],
+Cell[CellGroupData[{
+Cell[1871, 67, 665, 18, 89, "Input"],
+Cell[2539, 87, 1758, 35, 823, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
