@@ -10,6 +10,9 @@ using namespace RefinementSelectors;
 
 // This test makes sure that the example "newton-np-timedep-adapt-system" works correctly.
 
+#define ERROR_SUCCESS                               0
+#define ERROR_FAILURE                               -1
+
 #define SIDE_MARKER 1
 #define TOP_MARKER 2
 #define BOT_MARKER 3
@@ -375,5 +378,5 @@ int main (int argc, char* argv[]) {
     phi_prev_time.copy(&phi_ref_sln);
   }
 
-
+  return ERROR_FAILURE;
 }
