@@ -323,6 +323,7 @@ class Ord2
   {
   public:
     Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
+    Ord2(int order) : order_h(order), order_v(order) {};
     int order_h;
     int order_v;
   };

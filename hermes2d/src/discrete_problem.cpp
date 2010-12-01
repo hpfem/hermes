@@ -267,7 +267,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
                           if(blocks[m][el])
                             mat->pre_add_ij(am->dof[i], an->dof[j]);
                           if(blocks[el][m])
-                            mat->pre_add_ij(an->dof[i], am->dof[j]);
+                            mat->pre_add_ij(an->dof[j], am->dof[i]);
                         }
                   delete an;
                 }
@@ -1475,7 +1475,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
     ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, nbs_v);  
     
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Geom<Ord>* fake_e = init_geom_ord();
+    Element *neighb_el = nbs_v->get_current_neighbor_element();
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
     double fake_wt = 1.0;
 
     // Total order of the matrix form.
@@ -1583,7 +1584,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
     ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, nbs_v);
     
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Geom<Ord>* fake_e = init_geom_ord();
+    Element *neighb_el = nbs_v->get_current_neighbor_element();
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
     double fake_wt = 1.0;
     
     // Total order of the vector form.
