@@ -22,9 +22,9 @@ using namespace RefinementSelectors;
 
 const int INIT_REF_NUM = 2;                // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements.
-const int TIME_DISCR = 2;                  // 1 for implicit Euler, 2 for Crank-Nicolson.
-const double TAU = 
-  TIME_DISCR == 1 ? 0.5 : 0.1;             // Time step (0.5 for implicit Euler, 0.1 for Crank-Nicolson).
+const int TIME_DISCR = 1;                  // 1 for implicit Euler, 2 for Crank-Nicolson.
+const double TAU = 0.1;                    // Time step. Note: The Crank-Nicolson method is known 
+                                           // to have problems with large time steps on coarse meshes. 
 const double T_FINAL = 5.0;                // Time interval length.
 
 // Adaptivity
@@ -40,7 +40,7 @@ const int STRATEGY = 0;                    // Adaptive strategy:
                                            // STRATEGY = 2 ... refine all elements whose error is larger
                                            //   than THRESHOLD.
                                            // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO_H; // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;   // Predefined list of element refinement candidates. Possible values are
                                            // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                            // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                            // See the User Documentation for details.
@@ -52,7 +52,7 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 1.0;               // Default value is 1.0. This parameter influences the selection of
                                            // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;               // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;               // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
   // Convert initial condition into a Solution.
   Solution sln_prev_time;
   sln_prev_time.set_exact(&mesh, init_cond);
+
   // Initialize the weak formulation.
   WeakForm wf;
   if(TIME_DISCR == 1) {
@@ -146,45 +147,19 @@ int main(int argc, char* argv[])
     wf.add_vector_form(callback(F_cranic), HERMES_ANY, &sln_prev_time);
   }
 
-  // Initialize the FE problem.
+  // Initialize the discrete problem.
   bool is_linear = false;
   DiscreteProblem dp_coarse(&wf, &space, is_linear);
-
-  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-  Vector* rhs_coarse = create_vector(matrix_solver);
-  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec_coarse = new scalar[ndof];
-  OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
-
   // Visualize initial condition.
   char title[100];
   ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
-  OrderView ordview("Initial mesh", new WinGeom(450, 0, 400, 350));
+  OrderView ordview("Initial mesh", new WinGeom(450, 0, 410, 350));
   view.show(&sln_prev_time);
   ordview.show(&space);
-
-  // Newton's loop on the coarse mesh.
-  info("Solving on coarse mesh:");
-  bool verbose = true;
-  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
-      NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-
-  // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
-
-  // Cleanup after the Newton loop on the coarse mesh.
-  delete matrix_coarse;
-  delete rhs_coarse;
-  delete solver_coarse;
-  delete [] coeff_vec_coarse;
   
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
@@ -196,11 +171,37 @@ int main(int argc, char* argv[])
       info("Global mesh derefinement.");
       mesh.copy(&basemesh);
       space.set_uniform_order(P_INIT);
-
-      // Project on globally derefined mesh.
-      info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(&space, &sln_prev_time, &sln);
+      ndof = Space::get_num_dofs(&space);
     }
+
+    // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
+    SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+    Vector* rhs_coarse = create_vector(matrix_solver);
+    Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+    scalar* coeff_vec_coarse = new scalar[ndof];
+
+    // Calculate initial coefficient vector for Newton on the coarse mesh.
+    if (ts == 1) { 
+      info("Projecting initial condition to obtain initial vector for the Newton's method.");
+      OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
+    }
+    else {      
+      info("Projecting previous fine mesh solution on coarse mesh.");
+      OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
+    }
+
+    // Newton's loop on the coarse mesh.
+    info("Solving on coarse mesh:");
+    bool verbose = true;
+    if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+        NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
+
+    // Cleanup after the Newton loop on the coarse mesh.
+    delete matrix_coarse;
+    delete rhs_coarse;
+    delete solver_coarse;
+    delete [] coeff_vec_coarse;
 
     // Adaptivity loop:
     bool done = false; int as = 1;
@@ -208,15 +209,17 @@ int main(int argc, char* argv[])
     do {
       info("Time step %d, adaptivity step %d:", ts, as);
 
-      // Construct globally refined reference mesh
-      // and setup reference space.
+      // Construct globally refined reference mesh and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
-      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
-      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+      // Initialize matrix solver.
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
+
+      // Initialize discrete problem on reference mesh.
+      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
