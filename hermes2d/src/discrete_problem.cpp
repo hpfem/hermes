@@ -267,7 +267,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
                           if(blocks[m][el])
                             mat->pre_add_ij(am->dof[i], an->dof[j]);
                           if(blocks[el][m])
-                            mat->pre_add_ij(an->dof[i], am->dof[j]);
+                            mat->pre_add_ij(an->dof[j], am->dof[i]);
                         }
                   delete an;
                 }
