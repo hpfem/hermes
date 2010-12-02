@@ -1,5 +1,5 @@
 # size of of the mesh
-a = 1
+a = 10 
 vertices =
 {
   { -a, -a },    # vertex 0

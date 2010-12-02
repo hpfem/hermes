@@ -14,10 +14,10 @@
 //
 //  The following parameters can be changed:
 
-int NUMBER_OF_EIGENVALUES = 5;                    // Desired number of eigenvalues.
-int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
-double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
+int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalues.
+int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
+double TARGET_VALUE = -10.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
@@ -86,6 +86,15 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Refine the mesh to vertex #4 (intended for use with INIT_REF_NUM = 1).
+  mesh.refine_towards_vertex(8, 3);
+
+  // debug
+  //MeshView mv("", new WinGeom(0, 0, 400, 400));
+  //mv.show(&mesh);
+  //View::wait(HERMES_WAIT_KEYPRESS);
+
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);

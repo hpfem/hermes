@@ -14,7 +14,7 @@ double bilinear_form_left(int n, double *wt, Func<double> *u_ext[], Func<double>
 Ord bilinear_form_left_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
                            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(20);
+  return Ord(30);
 }
 
 template<typename Real, typename Scalar>
