@@ -19,7 +19,11 @@
 // Experimental caching of vector valued (vector) forms.
 #define HERMES_USE_VECTOR_VALUED_FORMS
 
-const int P_INIT = 1;                             // Initial polynomial degree.                      
+// Calculation of approximation of time derivative (and its output).
+// Setting this option to false saves the computation time.
+const bool CALC_TIME_DER = true;
+
+const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
@@ -183,7 +187,7 @@ int main(int argc, char* argv[])
   // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
   // from the previous time step.
   // First flux.
-  // Commented out for FVM.
+  // Unnecessary for FVM.
   if(P_INIT > 0) {
     wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
     wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
@@ -355,16 +359,6 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // For calculation of the time derivative of the norm of the solution approximation.
-  double difference;
-  double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e))];
-  double *last_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e))];
-  for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e)); i++)
-      last_values[i] = 0.;
-  
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
 
@@ -389,45 +383,25 @@ int main(int argc, char* argv[])
     else
     error ("Matrix solver failed.\n");
 
-    // Debugging.
-    /*    
-    std::ofstream out("matrix");
-    for(int i = 0; i < matrix->get_size(); i++)
-      for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(matrix->get(i, j)) != 0)
-          out << '(' << i << ', ' << j << ')' << ':' << matrix->get(i, j) << std::endl;
-    out.close();
-
-    out.open("rhs");
-      for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(rhs->get(j)) != 0)
-          out << '(' << j << ')' << ':' << rhs->get(j) << std::endl;
-    out.close();
-     
-    out.open("sol");
-      for(int j = 0; j < matrix->get_size(); j++)
-        out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
-    out.close();
-    */
-
     // Approximate the time derivative of the solution.
-    difference = 0;
-    for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e)); i++)
-    {
-      difference_values[i] = last_values[i] - solver->get_solution()[i];
-      difference += difference_values[i] * difference_values[i];
-      last_values[i] = solver->get_solution()[i];
-    }
-    difference = std::sqrt(difference) / TAU;
-    // Info about the approximate time derivative.
-    if(iteration > 1)
-    {
-      info("Approximate the norm time derivative : %g.", difference);
-      time_der_out << iteration << '\t' << difference << std::endl;
+    if(CALC_TIME_DER) {
+      Adapt *adapt_for_time_der_calc = new Adapt(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+        &space_rho_v_y, &space_e), Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
+      bool solutions_for_adapt = false;
+      double difference = adapt_for_time_der_calc->calc_err_est(Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
+        Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
+      delete adapt_for_time_der_calc;
+
+      // Info about the approximate time derivative.
+      if(iteration > 1)
+      {
+        info("Approximate the norm time derivative : %g.", difference);
+        time_der_out << iteration << '\t' << difference << std::endl;
+      }
     }
 
-    // Determine the time step.
+    // Determine the time step according to the CFL condition.
+    // Only mean values on an element of each solution component are taken into account.
     double *solution_vector = solver->get_solution();
     double min_condition = 0;
     Element *e;

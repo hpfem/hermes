@@ -17,7 +17,14 @@
 //
 //  The following parameters can be changed:
  
-const int P_INIT = 0;                             // Initial polynomial degree.                      
+// Experimental caching of vector valued (vector) forms.
+#define HERMES_USE_VECTOR_VALUED_FORMS
+
+// Calculation of approximation of time derivative (and its output).
+// Setting this option to false saves the computation time.
+const bool CALC_TIME_DER = true;
+
+const int P_INIT = 1;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
@@ -170,9 +177,11 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(3, 3, callback(bilinear_form_3_3_time));
 
   // Volumetric linear forms.
-  // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
+  // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
+  // from the previous time step.
   // First flux.
-  /*
+  // Unnecessary for FVM.
+  if(P_INIT > 0) {
   wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
   wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
@@ -225,15 +234,36 @@ int main(int argc, char* argv[])
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
                      Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  */
+  }
 
   // Volumetric linear forms coming from the time discretization.
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+  wf.add_vector_form(0, linear_form_vector, linear_form_order, HERMES_ANY, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(1, linear_form_vector, linear_form_order, HERMES_ANY, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(2, linear_form_vector, linear_form_order, HERMES_ANY, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, linear_form_vector, linear_form_order, HERMES_ANY, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#else
   wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_rho);
   wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
   wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
   wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_e);
+#endif
 
   // Surface linear forms - inner edges coming from the DG formulation.
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+  wf.add_vector_form_surf(0, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#else
   wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form_surf(1, linear_form_interface_1, linear_form_order, H2D_DG_INNER_EDGE, 
@@ -242,8 +272,19 @@ int main(int argc, char* argv[])
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form_surf(3, linear_form_interface_3, linear_form_order, H2D_DG_INNER_EDGE, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#endif
 
   // Surface linear forms - inlet / outlet edges.
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#else
   wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, BDY_INLET_OUTLET, 
@@ -252,8 +293,19 @@ int main(int argc, char* argv[])
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_INLET_OUTLET, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#endif
 
   // Surface linear forms - Solid wall edges.
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL, 
+                          Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#else
   wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, BDY_SOLID_WALL, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, BDY_SOLID_WALL, 
@@ -262,12 +314,18 @@ int main(int argc, char* argv[])
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL, 
                           Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+#endif
 
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
-  // The FE problem is in fact a FV problem.
+  // If the FE problem is in fact a FV problem.
+  if(P_INIT == 0)
   dp.set_fvm();
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+  dp.use_vector_valued_forms();
+#endif
+
 
   // Filters for visualization of pressure and the two components of velocity.
   SimpleFilter pressure(calc_pressure_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
@@ -294,16 +352,6 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // For calculation of the time derivative of the norm of the solution approximation.
-  double difference;
-  double *difference_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e))];
-  double *last_values = new double[Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e))];
-  for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e)); i++)
-      last_values[i] = 0.;
-
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
 
@@ -328,45 +376,25 @@ int main(int argc, char* argv[])
     else
     error ("Matrix solver failed.\n");
 
-    // Debugging.
-    /*
-    std::ofstream out("matrix");
-    for(int i = 0; i < matrix->get_size(); i++)
-      for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(matrix->get(i, j)) != 0)
-          out << '(' << i << ', ' << j << ')' << ':' << matrix->get(i, j) << std::endl;
-    out.close();
-
-    out.open("rhs");
-      for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(rhs->get(j)) != 0)
-          out << '(' << j << ')' << ':' << rhs->get(j) << std::endl;
-    out.close();
-     
-    out.open("sol");
-      for(int j = 0; j < matrix->get_size(); j++)
-        out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
-    out.close();
-    */    
-
     // Approximate the time derivative of the solution.
-    difference = 0;
-    for(int i = 0; i < Space::get_num_dofs(Tuple<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e)); i++)
-    {
-      difference_values[i] = last_values[i] - solver->get_solution()[i];
-      difference += difference_values[i] * difference_values[i];
-      last_values[i] = solver->get_solution()[i];
-    }
-    difference = std::sqrt(difference) / TAU;
+    if(CALC_TIME_DER) {
+      Adapt *adapt_for_time_der_calc = new Adapt(Tuple<Space *>(&space_rho, &space_rho_v_x, 
+        &space_rho_v_y, &space_e), Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
+      bool solutions_for_adapt = false;
+      double difference = adapt_for_time_der_calc->calc_err_est(Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
+        Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
+      delete adapt_for_time_der_calc;
+
     // Info about the approximate time derivative.
     if(iteration > 1)
     {
       info("Approximate the   norm time derivative : %g.", difference);
       time_der_out << iteration << '\t' << difference << std::endl;
     }
+    }
     
-    // Determine the time step.
+    // Determine the time step according to the CFL condition.
+    // Only mean values on an element of each solution component are taken into account.
     double *solution_vector = solver->get_solution();
     double min_condition = 0;
     Element *e;
@@ -413,6 +441,11 @@ int main(int argc, char* argv[])
     s2.show(&sln_rho_v_x);
     s3.show(&sln_rho_v_y);
     s4.show(&sln_e);
+    
+    // If used, we need to clean the vector valued form caches.
+#ifdef HERMES_USE_VECTOR_VALUED_FORMS
+    DiscreteProblem::empty_form_caches();
+#endif
   }
   
   time_der_out.close();
