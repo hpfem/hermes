@@ -24,10 +24,69 @@
 
 // TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
+static int num_petsc_objects = 0;
+
+int remove_petsc_object()
+{
+  _F_  
+#ifdef WITH_PETSC  
+  PetscTruth petsc_initialized, petsc_finalized;
+  int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
+  ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
+  if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE) 
+    // This should never happen here.
+    return -1;
+
+  if (--num_petsc_objects == 0)
+  {
+    int ierr = PetscFinalize(); 
+    CHKERRQ(ierr);
+  }
+#endif  
+  return 0;
+}
+
+int add_petsc_object()
+{
+  _F_
+#ifdef WITH_PETSC
+  int ierr;
+  PetscTruth petsc_initialized, petsc_finalized;
+  ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
+  
+  if (petsc_finalized == PETSC_TRUE)
+    error("PETSc cannot be used once it has been finalized. You must restart the application.");
+  
+  ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
+  
+  if (petsc_initialized != PETSC_TRUE)
+  {
+    bool have_args = CommandLineArgs::check();
+    
+    if (have_args)
+      ierr = PetscInitialize(&CommandLineArgs::get_argc(), 
+                             &CommandLineArgs::get_argv(), 
+                             PETSC_NULL, PETSC_NULL);
+    else
+    #ifdef WITH_MPI
+      CommandLineArgs::missing_error();
+    #else
+      ierr = PetscInitializeNoArguments();  
+    #endif
+    
+    CHKERRQ(ierr);
+  }
+  
+  num_petsc_objects++;
+#endif 
+  return 0;
+}
+
 PetscMatrix::PetscMatrix() {
   _F_
 #ifdef WITH_PETSC
   inited = false;
+  add_petsc_object();
 #else
   error(PETSC_NOT_COMPILED);
 #endif
@@ -36,6 +95,7 @@ PetscMatrix::PetscMatrix() {
 PetscMatrix::~PetscMatrix() {
   _F_
   free();
+  remove_petsc_object();
 }
 
 void PetscMatrix::alloc() {
@@ -148,6 +208,7 @@ PetscVector::PetscVector() {
   _F_
 #ifdef WITH_PETSC
   inited = false;
+  add_petsc_object();
 #else
   error(PETSC_NOT_COMPILED);
 #endif
@@ -156,6 +217,7 @@ PetscVector::PetscVector() {
 PetscVector::~PetscVector() {
   _F_
   free();
+  remove_petsc_object();
 }
 
 void PetscVector::alloc(int n) {
@@ -247,6 +309,7 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
 {
   _F_
 #ifdef WITH_PETSC
+  add_petsc_object();
 #else
   error(PETSC_NOT_COMPILED);
 #endif
@@ -255,8 +318,7 @@ PetscLinearSolver::PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs)
 PetscLinearSolver::~PetscLinearSolver() {
   _F_
 #ifdef WITH_PETSC
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
+  remove_petsc_object();
 #endif
 }
 

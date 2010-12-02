@@ -248,7 +248,34 @@ enum DG_EdgeType
                                     ///< and ext. functions, which they may query for values on either side of given interface.
 };
 
-const int HERMES_DIRICHLET_DOF = -1; // Dirichlet lift is a special DOF with nubmer -1.
+const int HERMES_DIRICHLET_DOF = -1; // Dirichlet lift is a special DOF with number -1.
+
+/// This class makes command line arguments available to any other method in Hermes.
+class HERMES_API CommandLineArgs
+{
+  static int m_argc;
+  static char** m_argv;
+  
+  CommandLineArgs() {};
+  
+  public:  
+    static void set(int argc_in, char** argv_in) { 
+      m_argc = argc_in; 
+      m_argv = argv_in; 
+    }
+    static bool check() { 
+      return (m_argc > 0);
+    }
+    static void missing_error() {
+      error("Command line arguments have not been set."); 
+    }
+    static int& get_argc() { 
+      return m_argc; 
+    }
+    static char**& get_argv() { 
+      return m_argv; 
+    }
+};
 
 #endif
 
