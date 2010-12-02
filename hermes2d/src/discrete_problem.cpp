@@ -94,6 +94,8 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_li
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.
   this->is_fvm = false;
+  
+  vector_valued_forms = false;
 }
 
 DiscreteProblem::~DiscreteProblem()
