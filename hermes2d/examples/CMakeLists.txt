@@ -25,3 +25,6 @@ add_subdirectory(richards-tracy-adapt)
 add_subdirectory(richards-seepage-adapt)
 add_subdirectory(euler-gamm-adapt)
 #add_subdirectory(newton-np-timedep-adapt-system/nonadaptive)
+
+# eigenproblems
+add_subdirectory(my_eigenproblem)
