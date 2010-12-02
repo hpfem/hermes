@@ -27,4 +27,4 @@ add_subdirectory(euler-gamm-adapt)
 #add_subdirectory(newton-np-timedep-adapt-system/nonadaptive)
 
 # eigenproblems
-add_subdirectory(my_eigenproblem)
+add_subdirectory(schroedinger-eigen)

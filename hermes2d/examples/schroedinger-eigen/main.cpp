@@ -2,27 +2,32 @@
 #include "hermes2d.h"
 #include <stdio.h>
 
-//  This example solves the eigenproblem for the Laplace operator in 
-//  a square with zero boundary conditions. Python and Pysparse must
-//  be installed. 
+//  This example solves the Schroedinger eigenproblem with a given potential V(x, y)
+//  in a square with zero boundary conditions. Python and Pysparse must be installed. 
 //
-//  PDE: -Laplace u = lambda_k u,
+//  PDE: -Laplace u + V*u = lambda_k u,
 //  where lambda_0, lambda_1, ... are the eigenvalues.
 //
-//  Domain: Square (0, pi)^2.
+//  Domain: Square (-1, 1)^2.
 //
 //  BC:  Homogeneous Dirichlet.
 //
 //  The following parameters can be changed:
 
-int NUMBER_OF_EIGENVALUES = 50;                    // Desired number of eigenvalues.
+int NUMBER_OF_EIGENVALUES = 5;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK
+
+// Problem parameters.
+double V(double x, double y) {
+  double r = sqrt(x*x + y*y);
+  return -1./(0.001 + r*r);
+}
 
 // Boundary condition types.
 // Note: "essential" means that solution value is prescribed.
@@ -53,7 +58,7 @@ void write_matrix_mm(const char* filename, Matrix* mat)
   for (int i = 0; i < ndof; i++) {
     for (int j = 0; j <= i; j++) { 
       double tmp = mat->get(i, j);
-      if (fabs(tmp) > 1e-15) nz++;
+      if (std::abs(tmp) > 1e-15) nz++;
     }
   } 
 
@@ -63,7 +68,7 @@ void write_matrix_mm(const char* filename, Matrix* mat)
   for (int i = 0; i < ndof; i++) {
     for (int j = 0; j <= i; j++) { 
       double tmp = mat->get(i, j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
+      if (std::abs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
     }
   } 
 
@@ -89,7 +94,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation for the left hand side, i.e., H.
   WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(callback(bilinear_form_left));
+  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_left_ord);
   wf_right.add_matrix_form(callback(bilinear_form_right));
 
   // Initialize matrices and matrix solver.
