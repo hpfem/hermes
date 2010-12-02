@@ -41,6 +41,7 @@ int remove_petsc_object()
   {
     int ierr = PetscFinalize(); 
     CHKERRQ(ierr);
+    info("PETSc finalized. No more PETSc usage allowed until application restart.");
   }
 #endif  
   return 0;
