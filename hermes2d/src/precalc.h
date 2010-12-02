@@ -123,16 +123,29 @@ public:
     {
       int index;
       int order;
-      int sub_idx;
+#ifdef _MSC_VER
+      UINT64 sub_idx;
+#else
+      unsigned int sub_idx;
+#endif
       int shapeset_type;
-      
-      Key(int index, int order, int sub_idx, int shapeset_type)
+#ifdef _MSC_VER
+      Key(int index, int order, UINT64 sub_idx, int shapeset_type)
       {
         this->index = index;
         this->order = order;
         this->sub_idx = sub_idx;
         this->shapeset_type = shapeset_type;
       }
+#else
+      Key(int index, int order, unsigned int sub_idx, int shapeset_type)
+      {
+        this->index = index;
+        this->order = order;
+        this->sub_idx = sub_idx;
+        this->shapeset_type = shapeset_type;
+      }
+#endif
     };
     
     /// Functor that compares two PrecalcShapeset keys (needed e.g. to create a std::map indexed by these keys);
