@@ -39,6 +39,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
 
+  own_shapeset = (shapeset == NULL);
 }
 
 Space::~Space()
