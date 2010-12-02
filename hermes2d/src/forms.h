@@ -356,14 +356,32 @@ public:
 template<typename T>
 class InterfaceGeom : public Geom<T>
 {
+private:  
+  const Geom<T>* central_geom;  // The wrapped instance of Geom (representing geometric data for the
+                                // central element).
+  
 public:
   int neighb_marker;
   int neighb_id;
   T   neighb_diam;
   
   InterfaceGeom(const Geom<T>* geom, int n_marker, int n_id, T n_diam) : 
-      Geom<T>(*geom), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
-  { }; // Default (shallow) copy constructor for the base class is being used, i.e. this->x will point to the address of geom->x.
+      Geom<T>(), central_geom(geom), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+  {
+    // Let this class expose the standard Geom interface.
+    this->marker = geom->marker;
+    this->id = geom->id;
+    this->diam = geom->diam;
+    this->x = geom->x;
+    this->y = geom->y;
+    this->tx = geom->tx; 
+    this->ty = geom->ty; 
+    this->nx = geom->nx; 
+    this->ny = geom->ny; 
+    this->orientation = geom->orientation;
+  }
+  
+  ~InterfaceGeom() { delete central_geom; }
   
   virtual int get_neighbor_marker() const { return neighb_marker; }
   virtual int get_neighbor_id()     const { return neighb_id; }
