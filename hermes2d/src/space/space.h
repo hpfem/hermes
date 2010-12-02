@@ -202,6 +202,7 @@ protected:
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
 
   Shapeset* shapeset;
+  bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
   /// FE mesh
   Mesh* mesh;

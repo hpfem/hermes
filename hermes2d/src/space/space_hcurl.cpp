@@ -28,7 +28,11 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
-  if (shapeset == NULL) this->shapeset = new HcurlShapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HcurlShapeset;
+    own_shapeset = true;
+  }
   if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
 
   if (!hcurl_proj_ref++)
@@ -52,7 +56,11 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
                        Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-  if (shapeset == NULL) this->shapeset = new HcurlShapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HcurlShapeset;
+    own_shapeset = true;
+  }
   if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
 
   if (!hcurl_proj_ref++)
@@ -78,6 +86,8 @@ HcurlSpace::~HcurlSpace()
     delete [] hcurl_proj_mat;
     delete [] hcurl_chol_p;
   }
+  if (own_shapeset)
+    delete this->shapeset;
 }
 
 
@@ -91,7 +101,10 @@ Space* HcurlSpace::dup(Mesh* mesh) const
 void HcurlSpace::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 20 && shapeset->get_id() > 9)
+  {
     this->shapeset = shapeset;
+    own_shapeset = false;
+  }
   else
     error("Wrong shapeset type in HcurlSpace::set_shapeset()");
 }

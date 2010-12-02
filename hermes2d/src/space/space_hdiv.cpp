@@ -28,7 +28,11 @@ HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
-  if (shapeset == NULL) this->shapeset = new HdivShapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HdivShapeset;
+    own_shapeset = true;
+  }
   if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
 
   if (!hdiv_proj_ref++)
@@ -52,7 +56,11 @@ HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
                  Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-  if (shapeset == NULL) this->shapeset = new HdivShapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HdivShapeset;
+    own_shapeset = true;
+  }
   if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
 
   if (!hdiv_proj_ref++)
@@ -78,6 +86,8 @@ HdivSpace::~HdivSpace()
     delete [] hdiv_proj_mat;
     delete [] hdiv_chol_p;
   }
+  if (own_shapeset)
+    delete this->shapeset;
 }
 
 
@@ -91,7 +101,10 @@ Space* HdivSpace::dup(Mesh* mesh) const
 void HdivSpace::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 30 && shapeset->get_id() > 19)
+  {
     this->shapeset = shapeset;
+    own_shapeset = false;
+  }
   else
     error("Wrong shapeset type in HdivSpace::set_shapeset()");
 }

@@ -28,7 +28,11 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
     Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
   _F_
-  if (shapeset == NULL) this->shapeset = new H1Shapeset;
+  if (shapeset == NULL) 
+  {
+    this->shapeset = new H1Shapeset;
+    own_shapeset = true;
+  }
 
   if (!h1_proj_ref++)
   {
@@ -52,7 +56,11 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
         : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
   _F_
-  if (shapeset == NULL) this->shapeset = new H1Shapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new H1Shapeset;
+    own_shapeset = true;
+  }
 
   if (!h1_proj_ref++)
   {
@@ -78,12 +86,17 @@ H1Space::~H1Space()
     delete [] h1_proj_mat;
     delete [] h1_chol_p;
   }
+  if (own_shapeset)
+    delete this->shapeset;
 }
 
 void H1Space::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 10)
+  {
     this->shapeset = shapeset;
+    own_shapeset = false;
+  }
   else
     error("Wrong shapeset type in H1Space::set_shapeset()");
 }
