@@ -68,7 +68,8 @@ set(SRC
        views/view.cpp 
        views/view_data.cpp 
        views/view_support.cpp
-       ${HERMES_COMMON_DIR}/logging.cpp       
+       ${HERMES_COMMON_DIR}/common.cpp       
+       ${HERMES_COMMON_DIR}/logging.cpp    
        ${HERMES_COMMON_DIR}/hermes_logging.cpp
        ${HERMES_COMMON_DIR}/common_time_period.cpp
        ${HERMES_COMMON_DIR}/callstack.cpp

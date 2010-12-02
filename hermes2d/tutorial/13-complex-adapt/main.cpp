@@ -124,8 +124,6 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
-  // Initialize matrix solver.
-  initialize_solution_environment(matrix_solver, argc, argv);
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -152,6 +150,7 @@ int main(int argc, char* argv[])
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
       
     dp->assemble(matrix, rhs);
+
     // Time measurement.
     cpu_time.tick();
     
@@ -215,7 +214,6 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
-  finalize_solution_environment(matrix_solver);
   
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");

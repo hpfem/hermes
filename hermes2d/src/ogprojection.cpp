@@ -137,7 +137,7 @@ void OGProjection::project_global(Tuple<Space *> spaces, Tuple< std::pair<WeakFo
                     HERMES_ANY, source_meshfns[i]);
   }
 
-  project_internal(spaces, proj_wf, target_vec);
+  project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
 void OGProjection::project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, MatrixSolverType matrix_solver)

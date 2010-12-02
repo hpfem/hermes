@@ -204,12 +204,15 @@ int get_num_of_neg(MeshFunction *sln)
 /// \param[in,out] mfptr_solution   The same as above, only the type of the pointers is MeshFunction*.
 ///                                 This is needed for the fission source filter, which accepts this type instead of Solution*.
 /// \param[in]  tol           Relative difference between two successive eigenvalue approximations that stops the iteration.
-/// \param[in]  matrix_solver Solver for the resulting matrix problem (one of the available types enumerated in hermes_common/common.h).
+/// \param[in,out] mat        Pointer to a matrix to which the system associated with the power iteration will be assembled.
+/// \param[in,out] rhs        Pointer to a vector to which the right hand sides of the power iteration will be successively assembled.
+/// \param[in]  solver        Solver for the resulting matrix problem (specified by \c mat and \c rhs).
+///
 /// \return  number of iterations needed for convergence within the specified tolerance.
 ///
 int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
                     Tuple<Solution *>& slptr_solution, Tuple<MeshFunction *>& mfptr_solution,
-                    double tol, MatrixSolverType matrix_solver = SOLVER_UMFPACK)
+                    double tol, SparseMatrix *mat, Vector* rhs, Solver *solver)
 {
   // Sanity checks.
   if (slptr_solution.size() != N_GROUPS) 
@@ -223,18 +226,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   bool is_linear = true;
   DiscreteProblem dp(wf, spaces, is_linear);
   int ndof = Space::get_num_dofs(spaces);
-  
-  // Select matrix solver.
-//  Matrix* mat; Vector* rhs; CommonSolver* solver;
-//  init_matrix_solver(matrix_solver, ndof, mat, rhs, solver);
-
-//  initialize_solution_environment(matrix_solver, argc, argv);
-
-  SparseMatrix* mat = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
-  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
-  
+    
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
   // version is created as well.
@@ -245,6 +237,12 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
     mfptr_new_solution.push_back(slptr_new_solution.back());
   }
   
+  // This power iteration will most probably run on a different mesh than the previous one and so will be different
+  // the corresponding algebraic system. We will need to factorize it anew (but then, the L and U factors may be 
+  // reused until the next adaptation changes the mesh again).
+  // TODO: This could be solved more elegantly by defining a function Solver::reinit().
+  solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+  
   bool eigen_done = false; int it = 0;
   do {
     // Assemble the system matrix and rhs for the first time, then just update the rhs using the updated eigenpair.
@@ -252,6 +250,10 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
         
     // Solve the matrix problem to get a new approximation of the eigenvector.
     if (!solver->solve()) error ("Matrix solver failed.\n");
+    
+    // The matrix doesn't change within the power iteration loop, so the first computed LU factorization may be
+    // completely reused in following iterations.
+    solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
     
     // Convert coefficients vector into a set of Solution pointers.
     Solution::vector_to_solutions(solver->get_solution(), spaces, slptr_new_solution);
@@ -280,11 +282,7 @@ int power_iteration(Tuple<Space *>& spaces, WeakForm *wf,
   
   // Free memory.
   for_each_group(g) delete slptr_new_solution[g];
-  delete mat;
-  delete rhs;
-  //solver->free_data();  // FIXME: to be implemented. Default destructor is used now.
-  delete solver;
-
+  
   return it;
 }
 
@@ -355,10 +353,28 @@ int main(int argc, char* argv[])
   wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_vacuum);
   wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
   wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), bc_vacuum);
+    
+  // Initialize the discrete algebraic representation of the problem and its solver.
+  //
+  // Choose one of the available linear algebraic system solvers (possibilities:
+  // SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_SUPERLU,
+  // SOLVER_AMESOS, SOLVER_AZTECOO, depending on which solver libraries you have
+  // installed and enabled in Hermes).
+#ifdef WITH_PETSC  
+  MatrixSolverType matrix_solver = SOLVER_PETSC;
+#else
+  MatrixSolverType matrix_solver = SOLVER_UMFPACK;
+#endif    
+  // Create the matrix and right-hand side vector for the solver.
+  SparseMatrix* mat = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  // Instantiate the solver itself.
+  Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
+  
 
-  // Initialize and solve coarse mesh problem.
+  // Solve the coarse mesh problem.
   info("Coarse mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(spaces));
-  power_iteration(spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_CM);
+  power_iteration(spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_CM, mat, rhs, solver);
   // If SOLVE_ON_COARSE_MESH == true, we will store the results as the first coarse mesh solution;
   // otherwise, we will obtain this solution later by projecting the reference solution on the coarse mesh.
   if (SOLVE_ON_COARSE_MESH) 
@@ -447,6 +463,24 @@ int main(int argc, char* argv[])
       ref_spaces[g]->copy_orders(spaces[g], order_increase);
     }
 
+#ifdef WITH_PETSC    
+    // PETSc assembling is currently slow for larger matrices, so we switch to 
+    // UMFPACK when matrices of order >8000 start to appear.
+    if (Space::get_num_dofs(ref_spaces) > 8000 && matrix_solver != SOLVER_UMFPACK)
+    {
+      // Delete the old solver.
+      delete mat;
+      delete rhs;
+      delete solver;
+      
+      // Create a new one.
+      matrix_solver = SOLVER_UMFPACK;
+      mat = create_matrix(matrix_solver);
+      rhs = create_vector(matrix_solver);
+      solver = create_linear_solver(matrix_solver, mat, rhs);
+    }
+#endif    
+
     // For the first time, project coarse mesh solutions on fine meshes to obtain 
     // a starting point for the fine mesh power iteration.
     scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
@@ -455,14 +489,14 @@ int main(int argc, char* argv[])
       OGProjection::project_global(spaces, 
                      Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
                      Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
-                     mfptr_pow_iter_slns, coeff_vec);
+                     mfptr_pow_iter_slns, coeff_vec, matrix_solver);
       Solution::vector_to_solutions(coeff_vec, spaces, slptr_pow_iter_slns);
     }
     delete coeff_vec;
-
+    
     // Solve the fine mesh problem.
     info("Fine mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(ref_spaces));
-    power_iteration(ref_spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_RM);
+    power_iteration(ref_spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_RM, mat, rhs, solver);
     
     // Store the results.
     for_each_group(g) slptr_fine_slns[g]->copy(slptr_pow_iter_slns[g]);
@@ -471,7 +505,7 @@ int main(int argc, char* argv[])
     if (SOLVE_ON_COARSE_MESH) {
       if (as > 1) {
         info("Coarse mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(spaces));
-        power_iteration(spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_CM);
+        power_iteration(spaces, &wf, mkptr(pow_iter_slns), TOL_PIT_CM, mat, rhs, solver);
         // Store the results.
         for_each_group(g) slptr_coarse_slns[g]->copy(slptr_pow_iter_slns[g]);
       }
@@ -481,7 +515,7 @@ int main(int argc, char* argv[])
       info("Projecting fine mesh solutions on coarse meshes.");
       OGProjection::project_global(spaces,Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
                      Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
-                     mfptr_pow_iter_slns, coeff_vec);
+                     mfptr_pow_iter_slns, coeff_vec, matrix_solver);
       Solution::vector_to_solutions(coeff_vec, spaces, slptr_coarse_slns);
       delete coeff_vec;
     }
@@ -587,6 +621,10 @@ int main(int argc, char* argv[])
     delete spaces[g]; delete meshes[g];
     delete slptr_coarse_slns[g], delete slptr_fine_slns[g]; delete slptr_pow_iter_slns[g];
   }
+  
+  delete mat;
+  delete rhs;
+  delete solver;
 
   graph_dof.save("conv_dof.gp");
   graph_cpu.save("conv_cpu.gp");

@@ -94,9 +94,6 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
-
-  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  initialize_solution_environment(matrix_solver, argc, argv);
   
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -132,8 +129,6 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
-  
-  finalize_solution_environment(matrix_solver);
   
   // Visualize the solution.
   ScalarView view1("Solution", new WinGeom(860, 0, 400, 350));

@@ -124,9 +124,6 @@ int main(int argc, char **args)
   bool is_linear = true;
   DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2), is_linear);
 
-  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  initialize_solution_environment(matrix_solver, argc, args);
-
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -169,9 +166,6 @@ int main(int argc, char **args)
   delete rhs;
   delete solver;
   delete adaptivity;
-
-  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  finalize_solution_environment(matrix_solver);
   
   if (success_test) {
     info("Success!");

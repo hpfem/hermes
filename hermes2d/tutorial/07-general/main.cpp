@@ -118,9 +118,7 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
- 
-  initialize_solution_environment(matrix_solver, argc, argv);
-  
+   
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -153,8 +151,6 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
-  
-  finalize_solution_environment(matrix_solver);
 
   // View the solution and mesh.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
