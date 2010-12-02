@@ -342,7 +342,10 @@ public:
   /// Frees the memory occupied by the internal geometric and jac*wt caches.
   void clear_caches() {
     for (std::map<Key, Geom<double>*, Compare>::iterator it = cache_e.begin(); it != cache_e.end(); it++)
+    {
       (it->second)->free();
+      delete it->second;
+    }
     cache_e.clear();
     
     for (std::map<Key, double*, Compare>::iterator it = cache_jwt.begin(); it != cache_jwt.end(); it++)
