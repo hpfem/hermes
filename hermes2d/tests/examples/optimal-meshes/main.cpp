@@ -72,8 +72,12 @@ int main(int argc, char* argv[])
   Mesh mesh;
   mesh.create(nv, verts, nt, tris, nq, quads, nm, mark);
 
+  // Enter boundary markers 
+  // (If no markers are entered, default is a natural BC).
+  BCTypes bc_types;
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, NULL, P_INIT);
 
   // Set element poly orders.
   space.set_element_order(0, H2D_MAKE_QUAD_ORDER(o0, 1));

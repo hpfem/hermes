@@ -57,8 +57,12 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
 
+  // Enter boundary markers.
+  // (If no markers are entered, default is a natural BC).
+  BCTypes bc_types;
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, NULL, P_INIT);
   info("ndof = %d.", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation.

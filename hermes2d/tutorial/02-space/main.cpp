@@ -46,8 +46,12 @@ int main(int argc, char* argv[])
   // Refine all elements (optional).
   mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  // (If no markers are entered, default is a natural BC).
+  BCTypes bc_types;
+
   // Create an H1 space with default shapeset and natural BC.
-  H1Space space(&mesh, (BCTypes*)NULL, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, NULL, P_INIT);
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));

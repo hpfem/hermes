@@ -41,8 +41,7 @@ double temp_ext(double t) {
 }
 
 // Boundary markers.
-const int BDY_GROUND = 1;
-const int BDY_AIR = 2;
+const int BDY_GROUND = 1, BDY_AIR = 2;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)

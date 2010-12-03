@@ -35,6 +35,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
   this->was_assigned = false;
   this->ndof = 0;
 
+  if(bc_types == NULL) error("BCTypes pointer cannot be NULL in Space::Space().");
   this->set_bc_types_init(bc_types);
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
