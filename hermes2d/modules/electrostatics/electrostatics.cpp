@@ -72,12 +72,12 @@ BCType bc_types(int marker)
 }
 */
 
-void *data;
+void *_global_data;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
-    Electrostatics *self = (Electrostatics *) data;
+    Electrostatics *self = (Electrostatics *) _global_data;
     int idx = self->bc_types.find_index_essential(ess_bdy_marker);
     return _global_bc_val[idx];
 }
@@ -89,6 +89,10 @@ Electrostatics::Electrostatics()
   init_p = -1;
   mesh = new Mesh();
   space = NULL;
+
+  // FIXME: fix these:
+  _global_data = this;
+  _global_bc_types = &(this->bc_types);
 }
 
 // Destructor.
@@ -141,6 +145,13 @@ void Electrostatics::set_charge_density_array(const std::vector<double> &cd_arra
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
+    Tuple<int>  t;
+    (std::vector<int>)t = bdy_markers_val;
+    printf("assigning....");
+    t.print();
+    printf("but:");
+    printf("%d ", bdy_markers_val.size());
+    printf("%d ", bdy_markers_val[0]);
     this->bc_types.add_bc_essential(bdy_markers_val);
 }
 

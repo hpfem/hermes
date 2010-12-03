@@ -214,13 +214,16 @@ scalar essential_bc_values_2(int marker, double x, double y)
 double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
 		   double (*nfn)(MeshFunction*, RefMap*), Tuple<Solution*>& slns1, Tuple<Solution*>& slns2	)
 {
-  Tuple<Solution*>::iterator it1, it2;
   double error = 0.0, norm = 0.0;
 
-  for (it1=slns1.begin(), it2=slns2.begin(); it1 < slns1.end(); it1++, it2++) {
-    assert(it2 < slns2.end());
-    error += sqr(calc_abs_error(efn, *it1, *it2));
-    if (nfn) norm += sqr(calc_norm(nfn, *it2));
+  //for (it1=slns1.begin(), it2=slns2.begin(); it1 < slns1.end(); it1++, it2++) {
+  for (int i=0; i < slns1.size(); i++) {
+    //assert(it2 < slns2.end());
+    assert(i < slns2.size());
+    //error += sqr(calc_abs_error(efn, *it1, *it2));
+    error += sqr(calc_abs_error(efn, slns1[i], slns2[i]));
+    //if (nfn) norm += sqr(calc_norm(nfn, *it2));
+    if (nfn) norm += sqr(calc_norm(nfn, slns2[i]));
   }
 
   return (nfn ? sqrt(error/norm) : sqrt(error));

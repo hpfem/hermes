@@ -587,7 +587,8 @@ void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces
     if(add_dir_lift == Tuple<bool>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
     else
-      solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i]);
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector,
+              add_dir_lift.at(i));
   return;
 }
 
@@ -603,7 +604,8 @@ void Solution::vector_to_solutions(Vector* solution_vector, Tuple<Space*> spaces
     if(add_dir_lift == Tuple<bool>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
     else
-      solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i]);
+      solutions[i]->set_coeff_vector(spaces[i], solution_vector,
+              add_dir_lift.at(i));
   return;
 }
 
@@ -619,7 +621,8 @@ void Solution::vector_to_solutions(scalar* solution_vector, Tuple<Space*> spaces
     if(add_dir_lift == Tuple<bool>())
       solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, true);
     else
-      solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift[i]);
+      solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector,
+              add_dir_lift.at(i));
   return;
 }
 

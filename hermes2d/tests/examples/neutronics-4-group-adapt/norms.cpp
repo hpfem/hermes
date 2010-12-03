@@ -6,6 +6,8 @@ double error_total(	double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*
 										Tuple<Solution*>& slns1, 
 										Tuple<Solution*>& slns2	)
 {
+    /*
+       // FIXME: iterators don't work yet
   Tuple<Solution*>::iterator it1, it2;
   double error = 0.0, norm = 0.0;
 
@@ -13,6 +15,16 @@ double error_total(	double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*
     assert(it2 < slns2.end());
     error += sqr(calc_abs_error(efn, *it1, *it2));
     if (nfn) norm += sqr(calc_norm(nfn, *it2));
+  }
+
+  return (nfn ? sqrt(error/norm) : sqrt(error));
+  */
+  double error = 0.0, norm = 0.0;
+
+  for (int i=0; i < slns1.size(); i++) {
+    assert(i < slns2.size());
+    error += sqr(calc_abs_error(efn, slns1[i], slns2[i]));
+    if (nfn) norm += sqr(calc_norm(nfn, slns2[i]));
   }
 
   return (nfn ? sqrt(error/norm) : sqrt(error));

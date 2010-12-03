@@ -14,30 +14,85 @@
  *  - 2 up to 10 parameters: foo(Tuple<double>(&sln1, &sln2, &sln3));
  *  - more than 10 parameters: Fill the instance similar to STL vector (std::vector). */
 template<typename T>
-class Tuple: public std::vector<T> {
+class Tuple {
 public:
   /// A default constructor. Creates an empty vector.
-  explicit Tuple() {};
+  Tuple() { };
   /// 1 parameter constructor.
   Tuple(const T& a) { this->push_back(a); };
   /// 2 parameters constructor.
-  Tuple(const T& a, const T& b) { std::vector<T>::reserve(2); this->push_back(a); this->push_back(b); };
+  Tuple(const T& a, const T& b) { this->reserve(2); this->push_back(a); this->push_back(b); };
   /// 3 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c) { std::vector<T>::reserve(3); this->push_back(a); this->push_back(b); this->push_back(c); };
+  Tuple(const T& a, const T& b, const T& c) { this->reserve(3); this->push_back(a); this->push_back(b); this->push_back(c); };
   /// 4 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d) { std::vector<T>::reserve(4); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); };
+  Tuple(const T& a, const T& b, const T& c, const T& d) { this->reserve(4); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); };
   /// 5 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e) { std::vector<T>::reserve(5); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e) { this->reserve(5); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); };
   /// 6 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f) { std::vector<T>::reserve(6); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f) { this->reserve(6); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); };
   /// 7 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g) { std::vector<T>::reserve(7); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g) { this->reserve(7); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); };
   /// 8 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h) { std::vector<T>::reserve(8); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h) { this->reserve(8); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); };
   /// 9 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i) { std::vector<T>::reserve(9); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i) { this->reserve(9); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); };
   /// 10 parameters constructor.
-  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { std::vector<T>::reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
+  Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { this->reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
+
+  // FIXME: This doesn't work:
+  /*
+  std::vector<T>::iterator begin() {
+      return this->_v.begin();
+  }
+  std::vector<T>::iterator end() {
+      return this->_v.end();
+  }
+  */
+
+  void push_back(const T& x) {
+      this->_v.push_back(x);
+  }
+
+  T& back() {
+      return this->_v.back();
+  }
+
+  void reserve(const int size) {
+      this->_v.reserve(size);
+  }
+
+  void clear() {
+      this->_v.clear();
+  }
+
+  int size() {
+      return this->_v.size();
+  }
+
+  T& operator[](const int index) {
+      return this->_v[index];
+  }
+
+  const T& operator[](const int index) const {
+      return this->_v[index];
+  }
+
+  T at(const int index) {
+      return this->at(index);
+  }
+
+  Tuple& operator=(const Tuple &other) {
+      this->_v = other._v;
+      return *this;
+  }
+
+  bool operator==(const Tuple &other) const {
+      return this->_v == other._v;
+  }
+
+  bool operator!=(const Tuple &other) const {
+      return this->_v != other._v;
+  }
 
   // Look up an integer number in an array.
   int find_index_slow(const T& x) {
@@ -70,20 +125,20 @@ public:
 
   // Look up an integer number in an array.
   // This prepares a permut array, so subsequent calls are very fast
-  int find_index(int &x, bool throw_exception=true) {
+  int find_index(int x, bool throw_exception=true) {
     if (this->size() == 0)
         return -1;
-    if (this->permut.size() == 0) {
+    if (this->_permut.size() == 0) {
         // Initialize the permut array
         this->_min = this->min();
         this->_max = this->max();
         printf("min: %d, max: %d\n", this->_min, this->_max);
-        for (int i=0; i < this->_max+1; i++) this->permut.push_back(-1);
-        for (int i=0; i < this->size(); i++) this->permut[(*this)[i]] = i;
+        for (int i=0; i < this->_max+1; i++) this->_permut.push_back(-1);
+        for (int i=0; i < this->size(); i++) this->_permut[(*this)[i]] = i;
     }
     int idx;
     if ((this->_min <= x) && (x <= this->_max))
-        idx = this->permut[x];
+        idx = this->_permut[x];
     else
         idx = -1;
     if (idx == -1) {
@@ -105,7 +160,8 @@ public:
   }
 
   private:
-    std::vector<int> permut;
+    std::vector<T> _v;
+    std::vector<int> _permut;
     int _min, _max;
 };
 
