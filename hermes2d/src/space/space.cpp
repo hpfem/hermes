@@ -523,7 +523,10 @@ void Space::set_bc_types(BCTypes* bc_types)
 void Space::set_bc_types_init(BCTypes* bc_types)
 {
   _F_
-  this->bc_types = bc_types;
+  if (bc_types == NULL)
+      this->bc_types = new BCTypes(); // This will use BC_NATURAL by default
+  else
+      this->bc_types = bc_types;
   seq++;
 }
 
