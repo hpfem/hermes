@@ -271,6 +271,8 @@ IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND H
   set(HAVE_TEUCHOS_STACKTRACE yes)
 ENDIF()
 
+# Enable debugging symbols for all files all the time:
+set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
 
