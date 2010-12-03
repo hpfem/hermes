@@ -95,11 +95,9 @@ const double kappa = 1.0e-6;
 const double rho = 1.0;           // Density.
 const double cp = 1.0;            // Heat capacity.
 
-const double PI = acos(-1.0);
 const double normalization_const = 1.0;
 
 const double energy_per_fission = kappa * xsfiss;
-const double PI_ = PI;
 
 // Miscellaneous:
 double TIME = 0.0;                // Current time.
@@ -161,13 +159,13 @@ Real DPHI_FTIME(Real x, Real y) {
 // Heat source.
 template<typename Real>
 Real qT(Real x, Real y) {
-  return CT*DT_FTIME(x,y)*cp*rho*sin((PI_*x)/LX)*sin((PI_*y)/LY)+CT*1/(LX*LX)*(PI_*PI_)*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))+CT*1/(LY*LY)*(PI_*PI_)*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))-(CT*CT)*1/(LX*LX)*(PI_*PI_)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((PI_*x)/LX),2.0)*pow(sin((PI_*y)/LY),2.0)-(CT*CT)*1/(LY*LY)*(PI_*PI_)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((PI_*y)/LY),2.0)*pow(sin((PI_*x)/LX),2.0)-(CF*PHI_FTIME(x,y)*kappa*x*xsfiss*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY);
+  return CT*DT_FTIME(x,y)*cp*rho*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)+CT*1/(LX*LX)*(M_PI*M_PI)*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))+CT*1/(LY*LY)*(M_PI*M_PI)*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))-(CT*CT)*1/(LX*LX)*(M_PI*M_PI)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((M_PI*x)/LX),2.0)*pow(sin((M_PI*y)/LY),2.0)-(CT*CT)*1/(LY*LY)*(M_PI*M_PI)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((M_PI*y)/LY),2.0)*pow(sin((M_PI*x)/LX),2.0)-(CF*PHI_FTIME(x,y)*kappa*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
 }
 
 // Extraneous neutron source.
 template<typename Real>
 Real q(Real x, Real y) {
-  return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*PI_*x*cos((PI_*y)/LY)*sin((PI_*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(PI_*PI_)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*PI_*y*cos((PI_*x)/LX)*sin((PI_*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(PI_*PI_)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY);
+  return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*M_PI*x*cos((M_PI*y)/LY)*sin((M_PI*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*M_PI*y*cos((M_PI*x)/LX)*sin((M_PI*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
 }
 
 // Boundary condition types.
