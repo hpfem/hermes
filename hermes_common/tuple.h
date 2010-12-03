@@ -65,6 +65,12 @@ public:
     return idx;
   }
 
+  void print() {
+    printf("[");
+    for (int i=0; i < this->size(); i++) printf("%d ", (*this)[i]);
+    printf("]\n");
+  }
+
   private:
       std::vector<int> permut;
 };
