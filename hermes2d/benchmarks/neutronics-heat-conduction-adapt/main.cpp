@@ -34,7 +34,7 @@ const int PROJ_TYPE = 1;                   // For the projection of the initial 
                                            // on the initial mesh: 1 = H1 projection, 0 = L2 projection.
 // Time-stepping:
 const double TAU = 0.1;                    // Time step.
-const double T_FINAL = TAU;                // Time interval length.
+const double T_FINAL = 10*TAU;             // Time interval length.
 
 // Adaptivity:
 const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
@@ -133,26 +133,26 @@ Real dxsrem_dT(Real T) {
 // Time dependence of the temperature.
 template<typename Real>
 Real T_FTIME(Real x, Real y) {
-  return 1.0;
+//  return 1.0;
   return 1+tanh(rT*TIME);
 }
 
 template<typename Real>
 Real DT_FTIME(Real x, Real y) {
-  return 0.0;
+//  return 0.0;
   return rT*(1-pow(tanh(rT*TIME),2));
 }
 
 // Time dependence of the neutron flux.
 template<typename Real>
 Real PHI_FTIME(Real x, Real y) {
-  return T_FTIME(x, y);
+//  return T_FTIME(x, y);
   return 1+exp(rF*TIME);
 }
 
 template<typename Real>
 Real DPHI_FTIME(Real x, Real y) {
-  return DT_FTIME(x, y);
+//  return DT_FTIME(x, y);
   return rF*(1+exp(rF*TIME));
 }
 
