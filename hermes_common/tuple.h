@@ -48,6 +48,21 @@ public:
       }
     return false;
   }
+
+  int find_index_fast(int &x) {
+    if (this->permut.size() == 0) {
+        // Initialize the permut array
+        int max = std::max_element(this->begin(), this->end());
+        for (int i=0; i < max+1; i++) this->permut.push_back(-1);
+        for (int i=0; i < this->size(); i++) this->permut[(*this)[i]] = i;
+    }
+    int idx = this->permut[x];
+    if (idx == -1) error("Index not found");
+    return idx;
+  }
+
+  private:
+      std::vector<int> permut;
 };
 
 #endif
