@@ -78,11 +78,16 @@ public:
   }
 
   T at(const int index) {
-      return this->at(index);
+      return this->_v.at(index);
   }
 
   Tuple& operator=(const Tuple &other) {
       this->_v = other._v;
+      return *this;
+  }
+
+  Tuple& operator=(const std::vector<T> &other) {
+      this->_v = other;
       return *this;
   }
 

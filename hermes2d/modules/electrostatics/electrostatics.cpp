@@ -22,7 +22,13 @@ Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func
                      Geom<Real> *e, ExtData<Scalar> *ext)
 {
   int mat_marker = e->marker;
-  double permittivity = _global_permittivity_array[_global_mat_permut[mat_marker]];
+  double permittivity;
+  if (mat_marker < 0) {
+      // This is for Order calculation only:
+      permittivity = 1.0;
+  } else {
+      permittivity = _global_permittivity_array[_global_mat_permut[mat_marker]];
+  }
   return permittivity * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
 }
 
@@ -31,7 +37,13 @@ Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
                    Geom<Real> *e, ExtData<Scalar> *ext)
 {
   int mat_marker = e->marker;
-  double charge_density = _global_charge_density_array[_global_mat_permut[mat_marker]];
+  double charge_density;
+  if (mat_marker < 0) {
+      // This is for Order calculation only:
+      charge_density = 1.0;
+  } else {
+      charge_density = _global_charge_density_array[_global_mat_permut[mat_marker]];
+  }
   return charge_density * int_v<Real, Scalar>(n, wt, v);
 }
 
@@ -40,7 +52,13 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
   int edge_marker = e->marker;
-  double surf_charge_density = _global_bc_der[_global_bc_types->find_index_natural(edge_marker)];
+  double surf_charge_density;
+  if (edge_marker < 0) {
+      // This is for Order calculation only:
+      surf_charge_density = 1.0;
+  } else {
+      surf_charge_density = _global_bc_der[_global_bc_types->find_index_natural(edge_marker)];
+  }
   return surf_charge_density * int_v<Real, Scalar>(n, wt, v);
 }
 
@@ -146,13 +164,15 @@ void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
     Tuple<int>  t;
-    (std::vector<int>)t = bdy_markers_val;
+    t = bdy_markers_val;
     printf("assigning....");
     t.print();
     printf("but:");
     printf("%d ", bdy_markers_val.size());
     printf("%d ", bdy_markers_val[0]);
+    printf("\n");
     this->bc_types.add_bc_essential(bdy_markers_val);
+    printf("-----\n");
 }
 
 // Set boundary values.

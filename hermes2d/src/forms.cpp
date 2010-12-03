@@ -45,7 +45,8 @@ Geom<Ord>* init_geom_ord()
 	e->x = x; e->y = y;
 	e->nx = nx; e->ny = ny;
 	e->tx = tx; e->ty = ty;
-        e->diam = diam;
+    e->diam = diam;
+    e->marker = -9999;
 	return e;
 }
 
