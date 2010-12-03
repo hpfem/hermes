@@ -4,13 +4,11 @@
 // we need to define this here, but it is a temporary solution.
 // Like this, one cannot have two instances of the Electrostatics
 // module -- their global variables would interfere with each other.
-std::vector<int> _global_mat_markers;
+Tuple<int> _global_mat_markers;
 std::vector<double> _global_permittivity_array;
 std::vector<double> _global_charge_density_array;
 std::vector<double> _global_bc_val;
 std::vector<double> _global_bc_der;
-std::vector<int> _global_mat_permut;
-std::vector<int> _global_bc_permut;
 BCTypes* _global_bc_types=NULL;
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
@@ -27,7 +25,7 @@ Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func
       // This is for Order calculation only:
       permittivity = 1.0;
   } else {
-      permittivity = _global_permittivity_array[_global_mat_permut[mat_marker]];
+      permittivity = _global_permittivity_array[_global_mat_markers.find_index(mat_marker)];
   }
   return permittivity * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
 }
@@ -42,7 +40,7 @@ Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
       // This is for Order calculation only:
       charge_density = 1.0;
   } else {
-      charge_density = _global_charge_density_array[_global_mat_permut[mat_marker]];
+      charge_density = _global_charge_density_array[_global_mat_markers.find_index(mat_marker)];
   }
   return charge_density * int_v<Real, Scalar>(n, wt, v);
 }
@@ -202,23 +200,6 @@ bool Electrostatics::calculate(Solution* phi)
   for (int i=0; i < n_mat_markers; i++) {
     if(this->mat_markers[i] < 0) error("Material markers must be nonnegative.");
   }
-
-  /* CREATE THE PERMUTATION ARRAY mat_permut[] */
-
-  // Get maximum material marker.
-  int max_mat_marker = -1;
-  for (int i=0; i < n_mat_markers; i++) {
-    if (this->mat_markers[i] > max_mat_marker) max_mat_marker = this->mat_markers[i];
-  }
-  // Create the permutation array and initiate it with minus ones.
-  for (int i=0; i < max_mat_marker+1; i++) this->mat_permut.push_back(-1);
-  // Fill it.
-  for (int i=0; i < n_mat_markers; i++) this->mat_permut[this->mat_markers[i]] = i;
-
-  /* CREATE THE PERMUTATION ARRAY bc_permut[] */
-
-  // Define global permutation arrays.
-  _global_mat_permut = this->mat_permut;
 
   /* BEGIN THE COMPUTATION */
 
