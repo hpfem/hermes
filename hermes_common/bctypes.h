@@ -87,15 +87,15 @@ public:
   }
 
   int find_index_natural(int marker) {
-      return this->markers_natural.find_index_fast(marker);
+      return this->markers_natural.find_index(marker);
   }
 
   int find_index_essential(int marker) {
-      return this->markers_essential.find_index_fast(marker);
+      return this->markers_essential.find_index(marker);
   }
 
   int find_index_none(int marker) {
-      return this->markers_none.find_index_fast(marker);
+      return this->markers_none.find_index(marker);
   }
 
   void check_consistency() {
@@ -111,13 +111,16 @@ public:
             error("Duplicated Dirichlet boundary marker %d.",
                     this->markers_essential[i]);
         }
+        this->markers_essential.print();
+        this->markers_natural.print();
+        this->markers_none.print();
         // Cross-checking with the array of Neumann and None markers
-        try {
-            int dummy_idx = this->markers_natural.find_index(this->markers_essential[i]);
-            dummy_idx = this->markers_none.find_index(this->markers_essential[i]);
-        } catch (std::runtime_error e) {
-            error("Mismatched boundary markers.");
-        }
+        int dummy_idx = this->markers_natural.find_index(this->markers_essential[i], false);
+        if (dummy_idx != -1)
+            error("Mismatched boundary markers: %d.", this->markers_essential[i]);
+        dummy_idx = this->markers_none.find_index(this->markers_essential[i], false);
+        if (dummy_idx != -1)
+            error("Mismatched boundary markers: %d.", this->markers_essential[i]);
       }
       // Check whether Neumann boundary markers are 
       // all nonnegative and mutually distinct.
@@ -132,13 +135,12 @@ public:
                     this->markers_natural[i]);
         }
         // Cross-checking with the array of Dirichlet and None markers.
-        int dummy_idx;
-        try {
-            int dummy_idx = this->markers_essential.find_index(this->markers_natural[i]);
-            dummy_idx = this->markers_none.find_index(this->markers_natural[i]);
-        } catch (std::runtime_error e) {
-            error("Mismatched boundary markers.");
-        }
+        int dummy_idx = this->markers_essential.find_index(this->markers_natural[i], false);
+        if (dummy_idx != -1)
+            error("Mismatched boundary markers: %d.", this->markers_essential[i]);
+        dummy_idx = this->markers_none.find_index(this->markers_natural[i], false);
+        if (dummy_idx != -1)
+            error("Mismatched boundary markers: %d.", this->markers_essential[i]);
       }
   }
 

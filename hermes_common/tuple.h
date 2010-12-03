@@ -40,7 +40,7 @@ public:
   Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { std::vector<T>::reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
 
   // Look up an integer number in an array.
-  int find_index(const T& x) {
+  int find_index_slow(const T& x) {
     for (int i=0; i < this->size(); i++) {
       if ((*this)[i] == x)
          return i;
@@ -48,20 +48,53 @@ public:
     throw std::runtime_error("Index not found");
   }
 
+  int max() {
+    if (this->size() == 0)
+        throw std::runtime_error("Empty Tuple");
+    int m = (*this)[0];
+    for (int i=1; i < this->size(); i++)
+        if ((*this)[i] > m)
+            m = (*this)[i];
+    return m;
+  }
+
+  int min() {
+    if (this->size() == 0)
+        throw std::runtime_error("Empty Tuple");
+    int m = (*this)[0];
+    for (int i=1; i < this->size(); i++)
+        if ((*this)[i] < m)
+            m = (*this)[i];
+    return m;
+  }
+
   // Look up an integer number in an array.
   // This prepares a permut array, so subsequent calls are very fast
-  int find_index_fast(int &x) {
+  int find_index(int &x, bool throw_exception=true) {
+    if (this->size() == 0)
+        return -1;
     if (this->permut.size() == 0) {
         // Initialize the permut array
-        int max = -1;
-        for (int i=0; i < this->size(); i++)
-            if ((*this)[i] > max)
-                max = (*this)[i];
-        for (int i=0; i < max+1; i++) this->permut.push_back(-1);
+        this->_min = this->min();
+        this->_max = this->max();
+        printf("min: %d, max: %d\n", this->_min, this->_max);
+        for (int i=0; i < this->_max+1; i++) this->permut.push_back(-1);
         for (int i=0; i < this->size(); i++) this->permut[(*this)[i]] = i;
     }
-    int idx = this->permut[x];
-    if (idx == -1) throw std::runtime_error("Index not found");
+    int idx;
+    if ((this->_min <= x) && (x <= this->_max))
+        idx = this->permut[x];
+    else
+        idx = -1;
+    if (idx == -1) {
+        if (throw_exception) {
+            std::ostringstream s;
+            s << "Index '" << x << "' not found";
+            throw std::runtime_error(s.str());
+        }
+        else
+            return -1;
+    }
     return idx;
   }
 
@@ -72,7 +105,8 @@ public:
   }
 
   private:
-      std::vector<int> permut;
+    std::vector<int> permut;
+    int _min, _max;
 };
 
 #endif
