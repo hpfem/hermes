@@ -45,6 +45,8 @@ public:
   // SOlve the problem and return the solution.
   bool calculate(Solution* phi);
 
+  BCTypes bc_types;                         // Associates BC markers with BC boundary types
+
 private:
   std::string mesh_str;
   int init_ref_num;
@@ -56,11 +58,7 @@ private:
                                             // Example (for the above array): [-1, 0, -1, 1, 2]
   std::vector<double> permittivity_array;   // Array of corresponding permittivities.
   std::vector<double> charge_density_array; // Array of corresponding charge densities.
-  std::vector<int> bdy_markers_val;         // Dirichlet boundary markers (>= 1).
-                                            // Example: [3, 4, 1]
   std::vector<double> bc_val;               // List of Dirichlet boundary values (in the same order)..
-  std::vector<int> bdy_markers_der;         // Neumann boundary markers (>= 1).
-                                            // Example: [2, 5]
   std::vector<double> bc_der;               // List of Neumann boundary values (in the same order).
   std::vector<int> bc_permut;               // For any boundary marker (either Dirichlet or Neumann, 
                                             // this array gives its index in the corresponding list of

@@ -7,12 +7,11 @@
 std::vector<int> _global_mat_markers;
 std::vector<double> _global_permittivity_array;
 std::vector<double> _global_charge_density_array;
-std::vector<int> _global_bdy_markers_val;
 std::vector<double> _global_bc_val;
-std::vector<int> _global_bdy_markers_der;
 std::vector<double> _global_bc_der;
 std::vector<int> _global_mat_permut;
 std::vector<int> _global_bc_permut;
+BCTypes* _global_bc_types=NULL;
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
@@ -41,7 +40,7 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
   int edge_marker = e->marker;
-  double surf_charge_density = _global_bc_der[_global_bc_permut[edge_marker]];
+  double surf_charge_density = _global_bc_der[_global_bc_types->find_index_natural(edge_marker)];
   return surf_charge_density * int_v<Real, Scalar>(n, wt, v);
 }
 
@@ -56,6 +55,8 @@ bool find_index(const std::vector<int> &array, int x, int &i_out)
     return false;
 }
 
+/*
+   // DEPRECATED
 // Boundary condition types.
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
@@ -69,13 +70,15 @@ BCType bc_types(int marker)
         return BC_NATURAL;
     error("Wrong boundary marker");
 }
+*/
+
+void *data;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
-    int idx;
-    if (!find_index(_global_bdy_markers_val, ess_bdy_marker, idx))
-        error("marker not found");
+    Electrostatics *self = (Electrostatics *) data;
+    int idx = self->bc_types.find_index_essential(ess_bdy_marker);
     return _global_bc_val[idx];
 }
 
@@ -138,8 +141,7 @@ void Electrostatics::set_charge_density_array(const std::vector<double> &cd_arra
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
-    this->bdy_markers_val = bdy_markers_val;
-    _global_bdy_markers_val = bdy_markers_val;
+    this->bc_types.add_bc_essential(bdy_markers_val);
 }
 
 // Set boundary values.
@@ -152,8 +154,7 @@ void Electrostatics::set_boundary_values(const std::vector<double> &bc_val)
 // Set DERIVATIVE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_derivative(const std::vector<int> &bdy_markers_der)
 {
-    this->bdy_markers_der = bdy_markers_der;
-    _global_bdy_markers_der = bdy_markers_der;
+    this->bc_types.add_bc_natural(bdy_markers_der);
 }
 
 // Set boundary derivatives.
@@ -169,36 +170,7 @@ bool Electrostatics::calculate(Solution* phi)
 {
   /* SANITY CHECKS */
 
-  // Check whether Dirichlet boundary markers are 
-  // all nonnegative and mutually distinct.
-  int n_bc_val = this->bdy_markers_val.size();
-  for (int i=0; i < n_bc_val; i++) {
-    // Making sure that they are positive (>= 1).
-    if (this->bdy_markers_val[i] <= 0) error("Boundary markers need to be positive.");
-    // Making sure that Dirichlet markers are mutually distinct.
-    for (int j=i+1; j < n_bc_val; j++) {
-      if(this->bdy_markers_val[i] == this->bdy_markers_val[j]) 
-        error("Duplicated Dirichlet boundary marker %d.", this->bdy_markers_val[i]);
-    }
-    // Cross-checking with the array of Neumann markers
-    int dummy_idx;
-    if (find_index(this->bdy_markers_der, this->bdy_markers_val[i], dummy_idx)) error("Mismatched boundary markers.");
-  }
-  // Check whether Neumann boundary markers are 
-  // all nonnegative and mutually distinct.
-  int n_bc_der = this->bdy_markers_der.size(); 
-  for (int i=0; i < n_bc_der; i++) {
-    // Making sure that they are positive (>= 1).
-    if(this->bdy_markers_der[i] <= 0) error("Boundary markers need to be positive.");
-    // Making sure that Neumann markers are mutually distinct.
-    for (int j=i+1; j < n_bc_der; j++) {
-      if(this->bdy_markers_der[i] == this->bdy_markers_der[j]) 
-        error("Duplicated Neumann boundary marker %d.", this->bdy_markers_der[i]);
-    }
-    // Cross-checking with the array of Dirichlet markers.
-    int dummy_idx;
-    if (find_index(this->bdy_markers_val, this->bdy_markers_der[i], dummy_idx)) error("Mismatched boundary markers.");
-  }
+  this->bc_types.check_consistency();
 
   // Sanity check of material markers and material constants.
   int n_mat_markers = this->mat_markers.size();
@@ -223,23 +195,8 @@ bool Electrostatics::calculate(Solution* phi)
 
   /* CREATE THE PERMUTATION ARRAY bc_permut[] */
 
-  // Get maximum boundary marker.
-  int max_bdy_marker = -1;
-  for (int i=0; i < n_bc_val; i++) {
-    if (this->bdy_markers_val[i] > max_bdy_marker) max_bdy_marker = this->bdy_markers_val[i];
-  }
-  for (int i=0; i < n_bc_der; i++) {
-    if (this->bdy_markers_der[i] > max_bdy_marker) max_bdy_marker = this->bdy_markers_der[i];
-  }
-  // Create the permutation array and initiate it with minus ones.
-  for (int i=0; i < max_bdy_marker+1; i++) this->bc_permut.push_back(-1);
-  // Fill in Dirichlet boundary markers.
-  for (int i=0; i < n_bc_val; i++) this->bc_permut[this->bdy_markers_val[i]] = i;
-  // Fill in Neumann boundary markers.
-  for (int i=0; i < n_bc_der; i++) this->bc_permut[this->bdy_markers_der[i]] = i;
   // Define global permutation arrays.
   _global_mat_permut = this->mat_permut;
-  _global_bc_permut = this->bc_permut;
 
   /*
   // debug: print permutation arrays
@@ -264,7 +221,7 @@ bool Electrostatics::calculate(Solution* phi)
   for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();
 
   // Create an H1 space with default shapeset.
-  this->space = new H1Space(this->mesh, bc_types, essential_bc_values,
+  this->space = new H1Space(this->mesh, &(this->bc_types), essential_bc_values,
           this->init_p);
   int ndof = Space::get_num_dofs(this->space);
   info("ndof = %d", ndof);
