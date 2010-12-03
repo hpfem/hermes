@@ -161,7 +161,9 @@ void Electrostatics::set_charge_density_array(const std::vector<double> &cd_arra
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
-    this->bc_types.add_bc_essential(bdy_markers_val);
+    Tuple<int> t;
+    t = bdy_markers_val;
+    this->bc_types.add_bc_essential(t);
 }
 
 // Set boundary values.
@@ -174,7 +176,9 @@ void Electrostatics::set_boundary_values(const std::vector<double> &bc_val)
 // Set DERIVATIVE boundary markers (also check with the mesh file).
 void Electrostatics::set_boundary_markers_derivative(const std::vector<int> &bdy_markers_der)
 {
-    this->bc_types.add_bc_natural(bdy_markers_der);
+    Tuple<int> t;
+    t = bdy_markers_der;
+    this->bc_types.add_bc_natural(t);
 }
 
 // Set boundary derivatives.

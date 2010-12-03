@@ -37,7 +37,7 @@ enum BCType
 class HERMES_API BCTypes {
 public:
  
-  void add_bc_natural(std::vector<int> markers) 
+  void add_bc_natural(Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_natural() expects at least one marker.");
@@ -45,7 +45,7 @@ public:
     return;
   };
 
-  void add_bc_essential(std::vector<int> markers) 
+  void add_bc_essential(Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_essential() expects at least one marker.");
@@ -53,7 +53,7 @@ public:
     return;
   };
 
-  void add_bc_none(std::vector<int> markers) 
+  void add_bc_none(Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
