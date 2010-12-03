@@ -513,8 +513,7 @@ scalar default_bc_value_by_edge(SurfPos* surf_pos)
 void Space::set_bc_types(BCTypes* bc_types)
 {
   _F_
-  this->bc_types = bc_types;
-  seq++;
+  this->set_bc_types_init(bc_types);
 
   // since space changed, enumerate basis functions
   this->assign_dofs();
@@ -525,8 +524,10 @@ void Space::set_bc_types_init(BCTypes* bc_types)
   _F_
   if (bc_types == NULL)
       this->bc_types = new BCTypes(); // This will use BC_NATURAL by default
-  else
+  else {
       this->bc_types = bc_types;
+      this->bc_types->check_consistency();
+  }
   seq++;
 }
 
