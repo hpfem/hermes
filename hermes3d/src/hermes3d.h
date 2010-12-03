@@ -21,7 +21,6 @@
 #define _HERMES_3D_
 
 // hermes_common
-//
 #include "../../hermes_common/array.h"
 #include "../../hermes_common/bitarray.h"
 #include "../../hermes_common/map.h"
@@ -29,8 +28,9 @@
 #include "../../hermes_common/mapord.h"
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/utils.h"
-//
-// linear solvers
+#include "../../hermes_common/bctypes.h"
+
+// solvers
 #include "../../hermes_common/solver/solver.h"
 #include "../../hermes_common/solver/umfpack_solver.h"
 #include "../../hermes_common/solver/superlu.h"
@@ -41,7 +41,7 @@
 #include "../../hermes_common/solver/aztecoo.h"
 #include "../../hermes_common/solver/nox.h"
 #include "../../hermes_common/solver/mumps.h"
-//
+
 // preconditioners
 #include "../../hermes_common/solver/precond.h"
 #include "../../hermes_common/solver/precond_ifpack.h"

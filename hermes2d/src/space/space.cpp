@@ -18,7 +18,7 @@
 #include "../../../hermes_common/matrix.h"
 #include "../auto_local_array.h"
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, 
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
         : mesh(mesh), shapeset(shapeset)
 {
@@ -35,7 +35,36 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
   this->was_assigned = false;
   this->ndof = 0;
 
-  this->set_bc_types_init(bc_type_callback);
+  this->set_bc_types_init(bc_types);
+  this->set_essential_bc_values(bc_value_callback_by_coord);
+  this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
+
+  own_shapeset = (shapeset == NULL);
+}
+
+// DEPRECATED
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
+        scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
+        : mesh(mesh), shapeset(shapeset)
+{
+  _F_
+  if (mesh == NULL) error("Space must be initialized with an existing mesh.");
+  warn("Using deprecated callback function BCType (*bc_type_callback)(int).");
+  this->default_tri_order = -1;
+  this->default_quad_order = -1;
+  this->ndata = NULL;
+  this->edata = NULL;
+  this->nsize = esize = 0;
+  this->ndata_allocated = 0;
+  this->mesh_seq = -1;
+  this->seq = 0;
+  this->was_assigned = false;
+  this->ndof = 0;
+
+  BCTypesCallback *bc_types = new BCTypesCallback();
+  bc_types->register_callback(bc_type_callback);
+  this->set_bc_types_init(bc_types);
+  
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
 
@@ -401,7 +430,7 @@ void Space::reset_dof_assignment()
   {
     for (unsigned int i = 0; i < e->nvert; i++)
     {
-      if (e->en[i]->bnd && bc_type_callback(e->en[i]->marker) == BC_ESSENTIAL)
+      if (e->en[i]->bnd && this->bc_types->get_type(e->en[i]->marker) == BC_ESSENTIAL)
       {
         j = e->next_vert(i);
         ndata[e->vn[i]->id].n = BC_ESSENTIAL;
@@ -468,11 +497,6 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
 
-static BCType default_bc_type(int marker)
-{
-  return BC_NATURAL;
-}
-
 static scalar default_bc_value_by_coord(int marker, double x, double y)
 {
   return 0;
@@ -486,23 +510,20 @@ scalar default_bc_value_by_edge(SurfPos* surf_pos)
   return surf_pos->space->bc_value_callback_by_coord(surf_pos->marker, x, y);
 }
 
-
-void Space::set_bc_types(BCType (*bc_type_callback)(int))
+void Space::set_bc_types(BCTypes* bc_types)
 {
   _F_
-  if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
-  this->bc_type_callback = bc_type_callback;
+  this->bc_types = bc_types;
   seq++;
 
   // since space changed, enumerate basis functions
   this->assign_dofs();
 }
 
-void Space::set_bc_types_init(BCType (*bc_type_callback)(int))
+void Space::set_bc_types_init(BCTypes* bc_types)
 {
   _F_
-  if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
-  this->bc_type_callback = bc_type_callback;
+  this->bc_types = bc_types;
   seq++;
 }
 
@@ -525,9 +546,9 @@ void Space::set_essential_bc_values(scalar (*bc_value_callback_by_edge)(SurfPos*
 void Space::copy_callbacks(const Space* space)
 {
   _F_
-  bc_type_callback = space->bc_type_callback;
-  bc_value_callback_by_coord = space->bc_value_callback_by_coord;
-  bc_value_callback_by_edge  = space->bc_value_callback_by_edge;
+  this->bc_types = space->bc_types->dup();
+  this->bc_value_callback_by_coord = space->bc_value_callback_by_coord;
+  this->bc_value_callback_by_edge  = space->bc_value_callback_by_edge;
 }
 
 
@@ -573,7 +594,7 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
     NodeData* nd = &ndata[en->id];
     nd->edge_bc_proj = NULL;
 
-    if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd && bc_type_callback(en->marker) == BC_ESSENTIAL)
+    if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd && this->bc_types->get_type(en->marker) == BC_ESSENTIAL)
     {
       int order = get_edge_order_internal(en);
       surf_pos->marker = en->marker;

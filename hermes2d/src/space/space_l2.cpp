@@ -41,7 +41,7 @@ L2Space::L2Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 }
 
 L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
-  : Space(mesh, shapeset, NULL, NULL, Ord2(p_init, p_init))
+  : Space(mesh, shapeset, (BCTypes*)NULL, NULL, Ord2(p_init, p_init))
 {
   if (shapeset == NULL)
   {

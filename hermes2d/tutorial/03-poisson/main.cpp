@@ -24,13 +24,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double CONST_F = 2.0;  
 
-// Boundary condition types.
-// Note: "essential" means that solution value is prescribed.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
@@ -49,6 +42,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements (optional).
   //mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(Tuple<int>(1, 2, 3, 4));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);

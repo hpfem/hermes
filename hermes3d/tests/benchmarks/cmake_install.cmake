@@ -1,4 +1,4 @@
-# Install script for directory: /home/mazh/hermes/new_repo/hermes/hermes-pull/hermes3d/tests/benchmarks
+# Install script for directory: /home/pavel/hermes/hermes3d/tests/benchmarks
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -29,13 +29,13 @@ ENDIF(NOT CMAKE_INSTALL_COMPONENT)
 
 # Install shared libraries without execute permission?
 IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
-  SET(CMAKE_INSTALL_SO_NO_EXE "0")
+  SET(CMAKE_INSTALL_SO_NO_EXE "1")
 ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  INCLUDE("/home/mazh/hermes/new_repo/hermes/hermes-pull/hermes3d/tests/benchmarks/smooth-7-versions/cmake_install.cmake")
-  INCLUDE("/home/mazh/hermes/new_repo/hermes/hermes-pull/hermes3d/tests/benchmarks/bessel/cmake_install.cmake")
+  INCLUDE("/home/pavel/hermes/hermes3d/tests/benchmarks/smooth-7-versions/cmake_install.cmake")
+  INCLUDE("/home/pavel/hermes/hermes3d/tests/benchmarks/bessel/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 
