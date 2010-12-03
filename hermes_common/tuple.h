@@ -39,15 +39,15 @@ public:
   /// 10 parameters constructor.
   Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { this->reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
 
-  // FIXME: This doesn't work:
-  /*
-  std::vector<T>::iterator begin() {
+  // TODO: Add Tuple<T>::iterator and Tuple<T>::const_iterator embedded classes to complete the support for std iterators.
+  // Hints: http://stackoverflow.com/questions/2844339/c-iterator-and-const-iterator-problem-for-own-container-class
+  
+  typename std::vector<T>::iterator begin() {
       return this->_v.begin();
   }
-  std::vector<T>::iterator end() {
+  typename std::vector<T>::iterator end() {
       return this->_v.end();
   }
-  */
 
   void push_back(const T& x) {
       this->_v.push_back(x);
