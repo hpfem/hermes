@@ -236,6 +236,5 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  // Wait for test functions.
 };
 

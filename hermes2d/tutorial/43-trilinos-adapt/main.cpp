@@ -73,11 +73,9 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 2, BDY_LEFT = 2;
+
 // Essential (Dirichlet) boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
@@ -126,8 +124,12 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   //info("Number of DOF: %d", space.get_num_dofs());
 
   // Initialize the weak formulation.
@@ -197,7 +199,7 @@ int main(int argc, char* argv[])
     Mesh rmesh; rmesh.copy(&mesh); 
     rmesh.refine_all_elements();
     // Reference FE space.
-    H1Space rspace(&rmesh, bc_types, essential_bc_values, P_INIT);
+    H1Space rspace(&rmesh, &bc_types, essential_bc_values, P_INIT);
     int order_increase = 1;
     rspace.copy_orders(&space, order_increase); // increase orders by one
 

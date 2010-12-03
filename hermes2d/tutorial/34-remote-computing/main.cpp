@@ -41,15 +41,8 @@ double temp_ext(double t) {
 }
 
 // Boundary markers.
-int bdy_ground = 1;
-int bdy_air = 2;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == bdy_ground) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
+const int BDY_GROUND = 1;
+const int BDY_AIR = 2;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -69,10 +62,15 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(bdy_air, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(BDY_GROUND);
+  bc_types.add_bc_natural(BDY_AIR);
 
   // Initialize an H1 space with default shepeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
@@ -85,9 +83,9 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
+  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
+  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
 
   // Initialize the FE problem.
   bool is_linear = true;

@@ -44,11 +44,8 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 2, BDY_LEFT = 2;
 
 // Initial condition.
 double init_cond(double x, double y, double &dx, double &dy)
@@ -78,8 +75,12 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, NULL, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 

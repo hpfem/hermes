@@ -33,14 +33,8 @@ const double TAU = 50.0;          // Time step.
 const bool JFNK = true;
 const bool PRECOND = true;
 
-const int BDY_BOTTOM = 1;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == BDY_BOTTOM) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 2, BDY_LEFT = 2;
 
 // Essential (Dirichlet) boundary conditions values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -61,8 +55,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(BDY_BOTTOM);
+  bc_types.add_bc_natural(Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
