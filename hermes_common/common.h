@@ -19,6 +19,7 @@
 // Include
 //
 // common headers
+#include <typeinfo>
 #include <stdexcept>
 #include <cstdarg>
 #include <stdio.h>
