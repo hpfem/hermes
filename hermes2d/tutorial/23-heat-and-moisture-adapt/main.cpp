@@ -48,8 +48,8 @@ const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (r
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;            // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Time step and simulation time.
 const double TAU = 5.*24*60*60;                  // time step: 120 hours

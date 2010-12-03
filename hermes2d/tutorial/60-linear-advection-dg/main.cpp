@@ -17,15 +17,15 @@
 
 const int P_H = 0, P_V = 0;                       // Polynomial degrees of mesh elements in horizontal and vertical directions.
 const int INIT_REF = 1;                           // Number of initial uniform mesh refinements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO,
-                                                  //                SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see hermes_common/solver/aztecoo.h).
+                                                  // preconditioner from IFPACK (see hermes_common/solver/aztecoo.h).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Flux definition.
 #include "fluxes.cpp"
