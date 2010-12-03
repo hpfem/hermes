@@ -153,7 +153,7 @@ Real PHI_FTIME(Real x, Real y) {
 template<typename Real>
 Real DPHI_FTIME(Real x, Real y) {
 //  return DT_FTIME(x, y);
-  return rF*(1+exp(rF*TIME));
+  return rF*exp(rF*TIME);
 }
 
 // Heat source.
