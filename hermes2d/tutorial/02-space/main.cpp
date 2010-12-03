@@ -13,7 +13,7 @@
 // just load the corresponding mesh at the beginning of the
 // main.cpp file.
 
-int P_INIT = 3;
+const int P_INIT = 3;
 
 static char text[] = "\
 Click into the image window and:\n\
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Create an H1 space with default shapeset and natural BC.
-  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
+  H1Space space(&mesh, (BCTypes*)NULL, NULL, P_INIT);
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));

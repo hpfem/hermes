@@ -6,31 +6,28 @@
 //
 // PDE: Poisson equation -Laplace u = f, where f = CONST_F
 //
-// BC: u = 0 on Gamma_4 (edges meeting at the re-entrant corner)
-//     du/dn = CONST_GAMMA_1 on Gamma_1 (bottom edge)
-//     du/dn = CONST_GAMMA_2 on Gamma_2 (top edge, circular arc, and right-most edge)
-//     du/dn = CONST_GAMMA_3 on Gamma_3 (left-most edge)
+// BC: u = 0 on Gamma_inner (edges meeting at the re-entrant corner),
+//     du/dn = CONST_GAMMA_BOTTOM on Gamma_bottom,
+//     du/dn = CONST_GAMMA_OUTER on Gamma_outer,
+//     du/dn = CONST_GAMMA_LEFT on Gamma_left.
 //
 // You can play with the parameters below. For most choices of the four constants,
 // the solution has a singular (infinite) gradient at the re-entrant corner.
 // Therefore we visualize not only the solution but also its gradient.
 
-int P_INIT = 4;                                   // Initial polynomial degree in all elements.
-int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
+const int P_INIT = 4;                             // Initial polynomial degree in all elements.
+const int CORNER_REF_LEVEL = 12;                  // Number of mesh refinements towards the re-entrant corner.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
 // Problem parameters.
-double CONST_F = -1.0;                            // Right-hand side.
-double CONST_GAMMA[3] = {-0.5, 1.0, -0.5};        // Outer normal derivative on Gamma_1,2,3.
-
-// Boundary condition types.
-// Note: "natural" boundary condition means that 
-// the solution value is not prescribed.
-BCType bc_types(int marker)
-{
-  return (marker == 4) ? BC_ESSENTIAL : BC_NATURAL;
-}
+const double CONST_F = -1.0;                      // Right-hand side.
+const double CONST_GAMMA_BOTTOM = -0.5;           // Outer normal derivative on Gamma_1.
+const double CONST_GAMMA_OUTER = 1.0;             // Outer normal derivative on Gamma_2.
+const double CONST_GAMMA_LEFT = -0.5;             // Outer normal derivative on Gamma_3.
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -51,8 +48,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(BDY_INNER);
+  bc_types.add_bc_natural(Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
@@ -60,7 +62,9 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form));
   wf.add_vector_form(callback(linear_form));
-  wf.add_vector_form_surf(callback(linear_form_surf));
+  wf.add_vector_form_surf(callback(linear_form_surf_bottom), BDY_BOTTOM);
+  wf.add_vector_form_surf(callback(linear_form_surf_outer), BDY_OUTER);
+  wf.add_vector_form_surf(callback(linear_form_surf_left), BDY_LEFT);
 
   // Initialize the FE problem.
   bool is_linear = true;

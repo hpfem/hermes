@@ -18,19 +18,16 @@
 // an approximation, Below you can play with the parameters CONST_F,
 // P_INIT, and INIT_REF_NUM.
 
-int P_INIT = 2;                                   // Initial polynomial degree in all elements.
-int INIT_REF_NUM = 2;                             // Number of initial uniform mesh refinements.
+const int P_INIT = 2;                             // Initial polynomial degree in all elements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
 // Problem parameters.
-double CONST_F = -4.0; 
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+const double CONST_F = -4.0; 
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int marker, double x, double y)
@@ -51,8 +48,12 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 

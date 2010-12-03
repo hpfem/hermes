@@ -20,16 +20,18 @@
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform refinements.
-MatrixSolverType matrix_solver = SOLVER_AMESOS;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h).
-const int BDY_VERTICAL = 2;
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+
+// Boundary markers.
+const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
 
 // Problem parameters.
 double a_11(double x, double y) {
@@ -74,13 +76,6 @@ double g_N(double x, double y) {
   return 0;
 }
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == 1) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
-
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
@@ -104,8 +99,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_essential(BDY_HORIZONTAL);
+  bc_types.add_bc_natural(BDY_VERTICAL);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
