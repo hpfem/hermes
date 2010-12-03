@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
   bc_types.add_bc_essential(Tuple<int>(1, 2, 3, 4));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 

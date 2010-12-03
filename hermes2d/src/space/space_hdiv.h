@@ -28,6 +28,14 @@ class HERMES_API HdivSpace : public Space
 {
 public:
   // For backward compatibility.
+  HdivSpace(Mesh* mesh, BCTypes* bc_types,
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 Shapeset* shapeset = NULL);
+  HdivSpace(Mesh* mesh = NULL, BCTypes *bc_types=NULL,
+                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1), 
+                 Shapeset* shapeset = NULL);
+
+  // DEPRECATED
   HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset = NULL);

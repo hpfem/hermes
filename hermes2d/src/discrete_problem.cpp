@@ -627,7 +627,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           // for them it is not important what value (true/false) is set, as it
           // is not read anywhere.
           if(marker > 0)
-            nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL);
+            nat[j] = (spaces[j]->bc_types->get_type(marker) == BC_NATURAL);
           spaces[j]->get_boundary_assembly_list(e[i], isurf, &al[j]);
         }
 

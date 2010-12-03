@@ -194,12 +194,12 @@ public:
   /// \brief Assings the degrees of freedom to all Spaces in the Tuple.
   static int assign_dofs(Tuple<Space*> spaces);
 
-  
+  BCTypes* bc_types;
+
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
 
-  BCTypes* bc_types;
   Shapeset* shapeset;
   bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 

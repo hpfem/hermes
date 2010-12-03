@@ -27,8 +27,12 @@ class HERMES_API H1Space : public Space
 {
 public:
 
-  H1Space(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
-	  BCTypes* bc_types = NULL, Ord2 p_init = Ord2(1,1),
+  H1Space(Mesh* mesh = NULL, BCTypes* bc_types = NULL, scalar
+          (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
+          Shapeset* shapeset = NULL);
+
+  H1Space(Mesh* mesh = NULL, BCTypes* bc_types = NULL, scalar
+          (*bc_value_callback_by_coord)(int, double, double) = NULL, int p_init=1,
           Shapeset* shapeset = NULL);
 
   // For backward compatibility.
