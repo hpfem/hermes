@@ -152,16 +152,10 @@ int main(int argc, char* argv[])
   mesh.refine_element(1152);
 
   // Initialize spaces with default shapesets.
-  L2Space space_rho(&mesh, P_INIT);
-  L2Space space_rho_v_x(&mesh, P_INIT);
-  L2Space space_rho_v_y(&mesh, P_INIT);
-  L2Space space_e(&mesh, P_INIT);
-
-  // Set boundary condition types.
-  space_rho.set_bc_types(bc_types);
-  space_rho_v_x.set_bc_types(bc_types);
-  space_rho_v_y.set_bc_types(bc_types);
-  space_e.set_bc_types(bc_types);
+  L2Space space_rho(&mesh, bc_types, NULL, P_INIT);
+  L2Space space_rho_v_x(&mesh, bc_types, NULL, P_INIT);
+  L2Space space_rho_v_y(&mesh, bc_types, NULL, P_INIT);
+  L2Space space_e(&mesh, bc_types, NULL, P_INIT);
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;

@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Create an H1 space with default shapeset and natural BC.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
