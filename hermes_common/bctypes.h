@@ -80,7 +80,7 @@ public:
   }
 
   // default (if not found) is BC_NATURAL
-  BCType get_type(int marker) {
+  virtual BCType get_type(int marker) {
     if (this->is_essential(marker)) return BC_ESSENTIAL;
     if (this->is_none(marker)) return BC_NONE;
     return BC_NATURAL;
@@ -116,12 +116,14 @@ public:
   };
 
   void register_callback(BCType (*bc_type_callback)(int)) {
-      if (bc_type_callback == NULL) bc_type_callback = default_bc_type;
-      this->bc_type_callback = bc_type_callback;
+      if (bc_type_callback == NULL)
+          this->bc_type_callback = default_bc_type;
+      else
+          this->bc_type_callback = bc_type_callback;
   }
 
   // default (if not found) is BC_NATURAL
-  BCType get_type(int marker) {
+  virtual BCType get_type(int marker) {
     if (this->bc_type_callback == NULL) error("No callback was registered");
     return this->bc_type_callback(marker);
   }
