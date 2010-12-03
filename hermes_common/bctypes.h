@@ -111,9 +111,10 @@ public:
             error("Duplicated Dirichlet boundary marker %d.",
                     this->markers_essential[i]);
         }
-        // Cross-checking with the array of Neumann markers
+        // Cross-checking with the array of Neumann and None markers
         try {
             int dummy_idx = this->markers_natural.find_index(this->markers_essential[i]);
+            dummy_idx = this->markers_none.find_index(this->markers_essential[i]);
         } catch (std::runtime_error e) {
             error("Mismatched boundary markers.");
         }
@@ -130,10 +131,11 @@ public:
             error("Duplicated Neumann boundary marker %d.",
                     this->markers_natural[i]);
         }
-        // Cross-checking with the array of Dirichlet markers.
+        // Cross-checking with the array of Dirichlet and None markers.
         int dummy_idx;
         try {
             int dummy_idx = this->markers_essential.find_index(this->markers_natural[i]);
+            dummy_idx = this->markers_none.find_index(this->markers_natural[i]);
         } catch (std::runtime_error e) {
             error("Mismatched boundary markers.");
         }
