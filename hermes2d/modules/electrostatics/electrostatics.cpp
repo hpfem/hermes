@@ -163,16 +163,7 @@ void Electrostatics::set_charge_density_array(const std::vector<double> &cd_arra
 void Electrostatics::set_boundary_markers_value(const std::vector<int>
             &bdy_markers_val)
 {
-    Tuple<int>  t;
-    t = bdy_markers_val;
-    printf("assigning....");
-    t.print();
-    printf("but:");
-    printf("%d ", bdy_markers_val.size());
-    printf("%d ", bdy_markers_val[0]);
-    printf("\n");
     this->bc_types.add_bc_essential(bdy_markers_val);
-    printf("-----\n");
 }
 
 // Set boundary values.
@@ -228,14 +219,6 @@ bool Electrostatics::calculate(Solution* phi)
 
   // Define global permutation arrays.
   _global_mat_permut = this->mat_permut;
-
-  /*
-  // debug: print permutation arrays
-  printf("mat_permut = ");
-  for (int i=0; i < max_mat_marker+1; i++) printf("%d ", this->mat_permut[i]);
-  printf("\nbc_permut = ");
-  for (int i=0; i < max_bdy_marker+1; i++) printf("%d ", this->bc_permut[i]);
-  */
 
   /* BEGIN THE COMPUTATION */
 

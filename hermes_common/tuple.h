@@ -137,7 +137,6 @@ public:
         // Initialize the permut array
         this->_min = this->min();
         this->_max = this->max();
-        printf("min: %d, max: %d\n", this->_min, this->_max);
         for (int i=0; i < this->_max+1; i++) this->_permut.push_back(-1);
         for (int i=0; i < this->size(); i++) this->_permut[(*this)[i]] = i;
     }

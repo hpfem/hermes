@@ -111,9 +111,12 @@ public:
             error("Duplicated Dirichlet boundary marker %d.",
                     this->markers_essential[i]);
         }
+        /*
+        // Debugging print statements:
         this->markers_essential.print();
         this->markers_natural.print();
         this->markers_none.print();
+        */
         // Cross-checking with the array of Neumann and None markers
         int dummy_idx = this->markers_natural.find_index(this->markers_essential[i], false);
         if (dummy_idx != -1)
