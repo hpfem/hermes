@@ -137,7 +137,7 @@ protected:
     std::set<MeshFunction*> ext_set;
   };
 
-  void get_stages(Tuple< Space* > spaces, Tuple< Solution* > u_ext, 
+  void get_stages(Tuple< Space* > spaces, Tuple< Solution* >& u_ext, 
                   std::vector< WeakForm::Stage >& stages, bool rhsonly);
   bool** get_blocks();
 

@@ -108,7 +108,7 @@ void WeakForm::set_ext_fns(void *fn, Tuple<MeshFunction*> ext)
 /// improves the performance of multi-mesh assembling.
 /// This function is identical in H2D and H3D.
 ///
-void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext, 
+void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *>& u_ext, 
                std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_

@@ -505,17 +505,17 @@ void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
   id = 0;
 
 #ifndef H2D_DISABLE_MULTIMESH_TESTS
-  // Test whether all master mashes have the same number of elements
+  // Test whether all master meshes have the same number of elements.
   int base_elem_num = meshes[0]->get_num_base_elements();
   for (int i = 1; i < n; i++)
     if (base_elem_num != meshes[i]->get_num_base_elements())
       error("Meshes not compatible in Traverse::begin().");
 
-  // Test whether areas of corresponding elements are the same
+  // Test whether areas of corresponding elements are the same.
   double *areas = (double*)malloc(base_elem_num*sizeof(double));
   if (areas == NULL) error("Not enough memory in Traverse::begin().");
-  // read base element areas from the first mesh,
-  // also get minimum element area
+  // Read base element areas from the first mesh,
+  // Also get minimum element area.
   int counter = 0;
   double min_elem_area = 1e30;
   Element* e;
