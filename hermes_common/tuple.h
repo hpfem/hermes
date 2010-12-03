@@ -108,23 +108,31 @@ public:
     throw std::runtime_error("Index not found");
   }
 
+  // Returns maximum of the Tuple<T> in case of T == int.
   int max() {
     if (this->size() == 0)
         throw std::runtime_error("Empty Tuple");
-    int m = (*this)[0];
+    int m;
+    if(typeid((*this)[0]) != typeid(m))
+      throw std::runtime_error("Tuple<T>::max() called and T != int.");
+    m = (int)(*this)[0];
     for (int i=1; i < this->size(); i++)
-        if ((*this)[i] > m)
-            m = (*this)[i];
+        if ((int)(*this)[i] > m)
+            m = (int)(*this)[i];
     return m;
   }
 
+  // Returns minimum of the Tuple<T> in case of T == int.
   int min() {
     if (this->size() == 0)
         throw std::runtime_error("Empty Tuple");
-    int m = (*this)[0];
+     int m;
+    if(typeid((*this)[0]) != typeid(m))
+      throw std::runtime_error("Tuple<T>::max() called and T != int.");
+    m = (int)(*this)[0];
     for (int i=1; i < this->size(); i++)
-        if ((*this)[i] < m)
-            m = (*this)[i];
+        if ((int)(*this)[i] < m)
+            m = (int)(*this)[i];
     return m;
   }
 
@@ -133,15 +141,18 @@ public:
   int find_index(int x, bool throw_exception=true) {
     if (this->size() == 0)
         return -1;
+    int idx;
+    if(typeid((*this)[0]) != typeid(idx))
+      throw std::runtime_error("Tuple<T>::find_index() called and T != int.");
+    
     if (this->_permut.size() == 0) {
         // Initialize the permut array
         this->_min = this->min();
         this->_max = this->max();
-        for (int i=0; i < this->_max+1; i++) this->_permut.push_back(-1);
-        for (int i=0; i < this->size(); i++) this->_permut[(*this)[i]] = i;
+        for (int i=0; i < (int)this->_max+1; i++) this->_permut.push_back(-1);
+        for (int i=0; i < this->size(); i++) this->_permut[(int)(*this)[i]] = i;
     }
-    int idx;
-    if ((this->_min <= x) && (x <= this->_max))
+    if (((int)this->_min <= x) && (x <= (int)this->_max))
         idx = this->_permut[x];
     else
         idx = -1;
