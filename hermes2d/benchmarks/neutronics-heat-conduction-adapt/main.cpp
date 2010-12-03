@@ -34,7 +34,7 @@ const int PROJ_TYPE = 1;                   // For the projection of the initial 
                                            // on the initial mesh: 1 = H1 projection, 0 = L2 projection.
 // Time-stepping:
 const double TAU = 0.1;                    // Time step.
-const double T_FINAL = TAU;                // Time interval length.
+const double T_FINAL = 10*TAU;             // Time interval length.
 
 // Adaptivity:
 const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
@@ -95,11 +95,9 @@ const double kappa = 1.0e-6;
 const double rho = 1.0;           // Density.
 const double cp = 1.0;            // Heat capacity.
 
-const double PI = acos(-1.0);
 const double normalization_const = 1.0;
 
 const double energy_per_fission = kappa * xsfiss;
-const double PI_ = PI;
 
 // Miscellaneous:
 double TIME = 0.0;                // Current time.
@@ -135,39 +133,39 @@ Real dxsrem_dT(Real T) {
 // Time dependence of the temperature.
 template<typename Real>
 Real T_FTIME(Real x, Real y) {
-  return 1.0;
+//  return 1.0;
   return 1+tanh(rT*TIME);
 }
 
 template<typename Real>
 Real DT_FTIME(Real x, Real y) {
-  return 0.0;
+//  return 0.0;
   return rT*(1-pow(tanh(rT*TIME),2));
 }
 
 // Time dependence of the neutron flux.
 template<typename Real>
 Real PHI_FTIME(Real x, Real y) {
-  return T_FTIME(x, y);
+//  return T_FTIME(x, y);
   return 1+exp(rF*TIME);
 }
 
 template<typename Real>
 Real DPHI_FTIME(Real x, Real y) {
-  return DT_FTIME(x, y);
-  return rF*(1+exp(rF*TIME));
+//  return DT_FTIME(x, y);
+  return rF*exp(rF*TIME);
 }
 
 // Heat source.
 template<typename Real>
 Real qT(Real x, Real y) {
-  return CT*DT_FTIME(x,y)*cp*rho*sin((PI_*x)/LX)*sin((PI_*y)/LY)+CT*1/(LX*LX)*(PI_*PI_)*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))+CT*1/(LY*LY)*(PI_*PI_)*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))-(CT*CT)*1/(LX*LX)*(PI_*PI_)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((PI_*x)/LX),2.0)*pow(sin((PI_*y)/LY),2.0)-(CT*CT)*1/(LY*LY)*(PI_*PI_)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((PI_*y)/LY),2.0)*pow(sin((PI_*x)/LX),2.0)-(CF*PHI_FTIME(x,y)*kappa*x*xsfiss*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY);
+  return CT*DT_FTIME(x,y)*cp*rho*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)+CT*1/(LX*LX)*(M_PI*M_PI)*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))+CT*1/(LY*LY)*(M_PI*M_PI)*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))-(CT*CT)*1/(LX*LX)*(M_PI*M_PI)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((M_PI*x)/LX),2.0)*pow(sin((M_PI*y)/LY),2.0)-(CT*CT)*1/(LY*LY)*(M_PI*M_PI)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((M_PI*y)/LY),2.0)*pow(sin((M_PI*x)/LX),2.0)-(CF*PHI_FTIME(x,y)*kappa*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
 }
 
 // Extraneous neutron source.
 template<typename Real>
 Real q(Real x, Real y) {
-  return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*PI_*x*cos((PI_*y)/LY)*sin((PI_*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(PI_*PI_)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*PI_*y*cos((PI_*x)/LX)*sin((PI_*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(PI_*PI_)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((PI_*x)/LX)*sin((PI_*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((PI_*x)/LX)*sin((PI_*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((PI_*x)/LX)*sin((PI_*y)/LY))/(LX*LY);
+  return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*M_PI*x*cos((M_PI*y)/LY)*sin((M_PI*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*M_PI*y*cos((M_PI*x)/LX)*sin((M_PI*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
 }
 
 // Boundary condition types.
@@ -298,41 +296,8 @@ int main(int argc, char* argv[])
   Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
   // Perform Newton's iteration.
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(spaces);
-
-    // Assemble the Jacobian matrix_coarse and residual vector.
-    dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-    // Multiply the residual vector with -1 since the matrix_coarse 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs_coarse);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
-
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
-    // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system.
-    if(!solver_coarse->solve())
-      error ("matrix_coarse solver_coarse failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+    error("Newton's iteration failed.");
   
   // Translate the resulting coefficient vector into the actual solutions. 
   Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
@@ -374,7 +339,7 @@ int main(int argc, char* argv[])
         if (SOLVE_ON_COARSE_MESH) {
           // Newton's loop on the globally derefined meshes.
           scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
-          info("Solving on globally derefined meshes, starting from the latest fine mesh solutions.");
+          info("Projecting previous fine mesh solution to obtain initial vector for Newton's iteration on globally derefined meshes.");
           OGProjection::project_global(spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                          coeff_vec_coarse, matrix_solver, proj_norms);
           
@@ -388,41 +353,8 @@ int main(int argc, char* argv[])
           Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
           // Perform Newton's iteration.
-          int it = 1;
-          while (1)
-          {
-            // Obtain the number of degrees of freedom.
-            int ndof = Space::get_num_dofs(spaces);
-
-            // Assemble the Jacobian matrix_coarse and residual vector.
-            dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-            // Multiply the residual vector with -1 since the matrix_coarse 
-            // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-            for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-            
-            // Calculate the l2-norm of residual vector.
-            double res_l2_norm = get_l2_norm(rhs_coarse);
-
-            // Info for user.
-            info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
-
-            // If l2 norm of the residual vector is within tolerance, or the maximum number 
-            // of iteration has been reached, then quit.
-            if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-            // Solve the linear system.
-            if(!solver_coarse->solve())
-              error ("matrix_coarse solver_coarse failed.\n");
-
-            // Add \deltaY^{n+1} to Y^n.
-            for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-            
-            if (it >= NEWTON_MAX_ITER)
-              error ("Newton method did not converge.");
-
-            it++;
-          }
+          if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+            error("Newton's iteration failed.");
           
           // Translate the resulting coefficient vector into the actual solutions. 
           Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
@@ -471,13 +403,17 @@ int main(int argc, char* argv[])
       // Newton's loop on the refined meshes.
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       if (as == 1) {
-        info("Solving on fine meshes, starting from previous coarse mesh solutions.");
+        info("Projecting coarse mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
                        coeff_vec, matrix_solver, proj_norms);
       } else {
-        info("Solving on fine meshes, starting from previous fine mesh solutions.");
+        info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                        coeff_vec, matrix_solver, proj_norms);
+        
+        // Deallocate the previous fine mesh.
+        delete T_fine.get_mesh();
+        delete phi_fine.get_mesh();
       }
       
       // Initialize the FE problem.
@@ -490,42 +426,9 @@ int main(int argc, char* argv[])
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Perform Newton's iteration.
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(*ref_spaces);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve())
-          error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-        
-        if (it >= NEWTON_MAX_ITER)
-          error ("Newton method did not converge.");
-
-        it++;
-      }
-      
+      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) 
+        error("Newton's iteration failed.");
+            
       // Translate the resulting coefficient vector into the actual solutions. 
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, fine_mesh_solutions);
       delete [] coeff_vec;
@@ -603,41 +506,8 @@ int main(int argc, char* argv[])
             Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
 
             // Perform Newton's iteration.
-            int it = 1;
-            while (1)
-            {
-              // Obtain the number of degrees of freedom.
-              int ndof = Space::get_num_dofs(spaces);
-
-              // Assemble the Jacobian matrix_coarse and residual vector.
-              dp.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-              // Multiply the residual vector with -1 since the matrix_coarse 
-              // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-              for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-              
-              // Calculate the l2-norm of residual vector.
-              double res_l2_norm = get_l2_norm(rhs_coarse);
-
-              // Info for user.
-              info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
-
-              // If l2 norm of the residual vector is within tolerance, or the maximum number 
-              // of iteration has been reached, then quit.
-              if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-              // Solve the linear system.
-              if(!solver_coarse->solve())
-                error ("matrix_coarse solver_coarse failed.\n");
-
-              // Add \deltaY^{n+1} to Y^n.
-              for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-              
-              if (it >= NEWTON_MAX_ITER)
-                error ("Newton method did not converge.");
-
-              it++;
-            }
+            if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+              error("Newton's iteration failed.");
             
             // Translate the resulting coefficient vector into the actual solutions. 
             Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
@@ -654,8 +524,6 @@ int main(int argc, char* argv[])
         }
       }
       delete adaptivity;
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
     }
     while (!done);
