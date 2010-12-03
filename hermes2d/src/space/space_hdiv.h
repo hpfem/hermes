@@ -39,7 +39,7 @@ public:
   HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset = NULL);
-  HdivSpace(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
+  HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1), 
                  Shapeset* shapeset = NULL);
   
