@@ -479,6 +479,10 @@ int main(int argc, char* argv[])
         info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                        coeff_vec, matrix_solver, proj_norms);
+        
+        // Deallocate the previous fine mesh.
+        delete T_fine.get_mesh();
+        delete phi_fine.get_mesh();
       }
       
       // Initialize the FE problem.
@@ -655,8 +659,6 @@ int main(int argc, char* argv[])
         }
       }
       delete adaptivity;
-      for(int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
     }
     while (!done);
