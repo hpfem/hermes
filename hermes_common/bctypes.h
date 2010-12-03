@@ -37,7 +37,7 @@ enum BCType
 class HERMES_API BCTypes {
 public:
  
-  void add_bc_natural(Tuple<int> markers) 
+  void add_bc_natural(std::vector<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_natural() expects at least one marker.");
@@ -45,7 +45,7 @@ public:
     return;
   };
 
-  void add_bc_essential(Tuple<int> markers) 
+  void add_bc_essential(std::vector<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_essential() expects at least one marker.");
@@ -53,7 +53,7 @@ public:
     return;
   };
 
-  void add_bc_none(Tuple<int> markers) 
+  void add_bc_none(std::vector<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
@@ -85,6 +85,54 @@ public:
     if (this->is_none(marker)) return BC_NONE;
     return BC_NATURAL;
   }
+
+  bool find_index_natural(int marker, int &idx) {
+      return this->markers_natural.find_index(marker, idx);
+  }
+
+  bool find_index_essential(int marker, int &idx) {
+      return this->markers_essential.find_index(marker, idx);
+  }
+
+  bool find_index_none(int marker, int &idx) {
+      return this->markers_none.find_index(marker, idx);
+  }
+
+  void check_consistency() {
+      // Check whether Dirichlet boundary markers are 
+      // all nonnegative and mutually distinct.
+      int n_bc_val = this->markers_essential.size();
+      for (int i=0; i < n_bc_val; i++) {
+        // Making sure that they are positive (>= 1).
+        if (this->markers_essential[i] <= 0) error("Boundary markers need to be positive.");
+        // Making sure that Dirichlet markers are mutually distinct.
+        for (int j=i+1; j < n_bc_val; j++) {
+          if(this->markers_essential[i] == this->markers_essential[j]) 
+            error("Duplicated Dirichlet boundary marker %d.",
+                    this->markers_essential[i]);
+        }
+        // Cross-checking with the array of Neumann markers
+        int dummy_idx;
+        if (this->markers_natural.find_index(this->markers_essential[i], dummy_idx)) error("Mismatched boundary markers.");
+      }
+      // Check whether Neumann boundary markers are 
+      // all nonnegative and mutually distinct.
+      int n_bc_der = this->markers_natural.size(); 
+      for (int i=0; i < n_bc_der; i++) {
+        // Making sure that they are positive (>= 1).
+        if(this->markers_natural[i] <= 0) error("Boundary markers need to be positive.");
+        // Making sure that Neumann markers are mutually distinct.
+        for (int j=i+1; j < n_bc_der; j++) {
+          if(this->markers_natural[i] == this->markers_natural[j]) 
+            error("Duplicated Neumann boundary marker %d.",
+                    this->markers_natural[i]);
+        }
+        // Cross-checking with the array of Dirichlet markers.
+        int dummy_idx;
+        if (this->markers_essential.find_index(this->markers_natural[i], dummy_idx)) error("Mismatched boundary markers.");
+      }
+  }
+
 
   BCTypes() {};
   ~BCTypes() {};

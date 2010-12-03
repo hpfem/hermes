@@ -38,6 +38,16 @@ public:
   Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i) { std::vector<T>::reserve(9); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); };
   /// 10 parameters constructor.
   Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { std::vector<T>::reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
+
+  // Look up an integer number in an array.
+  bool find_index(const T& x, int &i_out) {
+    for (int i=0; i < this->size(); i++)
+      if ((*this)[i] == x) {
+         i_out = i;
+         return true;
+      }
+    return false;
+  }
 };
 
 #endif
