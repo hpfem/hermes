@@ -40,24 +40,28 @@ public:
   Tuple(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { std::vector<T>::reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
 
   // Look up an integer number in an array.
-  bool find_index(const T& x, int &i_out) {
-    for (int i=0; i < this->size(); i++)
-      if ((*this)[i] == x) {
-         i_out = i;
-         return true;
-      }
-    return false;
+  int find_index(const T& x) {
+    for (int i=0; i < this->size(); i++) {
+      if ((*this)[i] == x)
+         return i;
+    }
+    throw std::runtime_error("Index not found");
   }
 
+  // Look up an integer number in an array.
+  // This prepares a permut array, so subsequent calls are very fast
   int find_index_fast(int &x) {
     if (this->permut.size() == 0) {
         // Initialize the permut array
-        int max = std::max_element(this->begin(), this->end());
+        int max = -1;
+        for (int i=0; i < this->size(); i++)
+            if ((*this)[i] > max)
+                max = (*this)[i];
         for (int i=0; i < max+1; i++) this->permut.push_back(-1);
         for (int i=0; i < this->size(); i++) this->permut[(*this)[i]] = i;
     }
     int idx = this->permut[x];
-    if (idx == -1) error("Index not found");
+    if (idx == -1) throw std::runtime_error("Index not found");
     return idx;
   }
 
