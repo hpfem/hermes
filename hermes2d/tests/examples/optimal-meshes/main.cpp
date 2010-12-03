@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   mesh.create(nv, verts, nt, tris, nq, quads, nm, mark);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
 
   // Set element poly orders.
   space.set_element_order(0, H2D_MAKE_QUAD_ORDER(o0, 1));

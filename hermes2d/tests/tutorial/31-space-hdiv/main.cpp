@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
   // Create an Hdiv space with default shapeset.
   // (BC types and essential BC values not relevant.)
-  HdivSpace space(&mesh, NULL, NULL, P_INIT);
+  HdivSpace space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
 
   // Visualise the FE basis.
   VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));

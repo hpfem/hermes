@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset,
   // natural BC, and linear elements.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
   // The type of element, mesh_mode = 3 means a triangle element.
   int mesh_mode = 3;
   int n = Space::get_num_dofs(&space);

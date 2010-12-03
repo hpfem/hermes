@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
   //mesh.refine_all_elements();
 
   // create an H1 space with default shapeset
-  H1Space space(&mesh, NULL, NULL, 1);
+  H1Space space(&mesh, (BCTypes*) NULL, NULL, 1);
 
   // new code for the test
   int n_dof[10], dof_max[10];

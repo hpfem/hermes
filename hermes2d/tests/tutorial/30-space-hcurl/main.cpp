@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
   // Create an Hcurl space with default shapeset.
   // (BC types and essential BC values not relevant.)
-  HcurlSpace space(&mesh, NULL, NULL, P_INIT);
+  HcurlSpace space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
 
   // Visualize FE basis.
   VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));

@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &mesh);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
   info("ndof = %d.", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation.

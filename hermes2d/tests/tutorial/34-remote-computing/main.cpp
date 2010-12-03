@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
  
   int p_init = 1;
   // The NULLs are for bc_types() and essential_bc_values().
-  H1Space space_from_file(sln_from_file.get_mesh(), NULL, NULL, p_init);
+  H1Space space_from_file(sln_from_file.get_mesh(), (BCTypes *) NULL, NULL, p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
   WinGeom* win_geom_3 = new WinGeom(920, 0, 450, 600);
   OrderView oview("Saved Solution -> Space", win_geom_3);
