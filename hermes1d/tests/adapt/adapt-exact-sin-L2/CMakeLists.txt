@@ -5,5 +5,6 @@ include (../../CMake.common)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(adapt-exact-sin-L2 ${BIN})
+set_tests_properties(adapt-exact-sin-L2 PROPERTIES COST -21.91)
 
 target_link_libraries(${PROJECT_NAME} ${HERMES_BIN})
