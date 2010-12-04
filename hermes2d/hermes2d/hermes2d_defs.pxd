@@ -5,6 +5,7 @@ cdef extern from "hermes2d.h":
     ctypedef double double3[3]
     ctypedef int int3[3]
     ctypedef int int2[2]
+    ctypedef std::pair<double, double> double_pair
 
     cdef cppclass Function:
         pass
