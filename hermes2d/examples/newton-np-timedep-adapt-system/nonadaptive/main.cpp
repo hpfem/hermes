@@ -164,24 +164,24 @@ int main (int argc, char* argv[]) {
   // generally, the equation system is described:
   if (TIME_DISCR == 1) {  // Implicit Euler.
     wf.add_vector_form(0, callback(Fc_euler), H2D_ANY,
-		  Tuple<MeshFunction*>(&C_prev_time, &C_prev_newton, &phi_prev_newton));
-    wf.add_vector_form(1, callback(Fphi_euler), H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &phi_prev_newton));
+		  Hermes::Tuple<MeshFunction*>(&C_prev_time, &C_prev_newton, &phi_prev_newton));
+    wf.add_vector_form(1, callback(Fphi_euler), H2D_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_newton, &phi_prev_newton));
     wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), H2D_UNSYM, H2D_ANY, &phi_prev_newton);
     wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), H2D_UNSYM, H2D_ANY, &C_prev_newton);
     wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), H2D_UNSYM);
     wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), H2D_UNSYM);
   } else {
     wf.add_vector_form(0, callback(Fc_cranic), H2D_ANY, 
-		  Tuple<MeshFunction*>(&C_prev_time, &C_prev_newton, &phi_prev_newton, &phi_prev_time));
-    wf.add_vector_form(1, callback(Fphi_cranic), H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &phi_prev_newton));
-    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&phi_prev_newton, &phi_prev_time));
-    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), H2D_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &C_prev_time));
+		  Hermes::Tuple<MeshFunction*>(&C_prev_time, &C_prev_newton, &phi_prev_newton, &phi_prev_time));
+    wf.add_vector_form(1, callback(Fphi_cranic), H2D_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_newton, &phi_prev_newton));
+    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), H2D_UNSYM, H2D_ANY, Hermes::Tuple<MeshFunction*>(&phi_prev_newton, &phi_prev_time));
+    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), H2D_UNSYM, H2D_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_newton, &C_prev_time));
     wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), H2D_UNSYM);
     wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), H2D_UNSYM);
   }
 
   // Nonlinear solver
-  NonlinSystem nls(&wf, Tuple<Space*>(&Cspace, &phispace));
+  NonlinSystem nls(&wf, Hermes::Tuple<Space*>(&Cspace, &phispace));
 
   phi_prev_time.set_exact(MULTIMESH ? &phimesh : &Cmesh, voltage_ic);
   C_prev_time.set_exact(&Cmesh, concentration_ic);
@@ -192,8 +192,8 @@ int main (int argc, char* argv[]) {
   // Project the function init_cond() on the FE space
   // to obtain initial coefficient vector for the Newton's method.
   info("Projecting initial conditions to obtain initial vector for the Newton'w method.");
-  nls.project_global(Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time), 
-      Tuple<Solution*>(&C_prev_newton, &phi_prev_newton));
+  nls.project_global(Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time), 
+      Hermes::Tuple<Solution*>(&C_prev_newton, &phi_prev_newton));
   
   
   //VectorView vview("electric field [V/m]", 0, 0, 600, 600);
@@ -207,7 +207,7 @@ int main (int argc, char* argv[]) {
   for (int n = 1; n <= nstep; n++) {
     verbose("\n---- Time step %d ----", n);
     bool verbose = true; // Default is false.
-    if (!nls.solve_newton(Tuple<Solution*>(&C_prev_newton, &phi_prev_newton),
+    if (!nls.solve_newton(Hermes::Tuple<Solution*>(&C_prev_newton, &phi_prev_newton),
         NEWTON_TOL, NEWTON_MAX_ITER, verbose)) 
           error("Newton's method did not converge.");
     sprintf(title, "time step = %i", n);

@@ -11801,8 +11801,8 @@ static char __pyx_doc_8hermes2d_9_hermes2d_5Adapt_set_solutions[] = " Sets coars
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_5Adapt_set_solutions(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_sln_list = 0;
   PyObject *__pyx_v_rsln_list = 0;
-  Tuple<Solution*> __pyx_v_slns;
-  Tuple<Solution*> __pyx_v_rslns;
+  Hermes::Tuple<Solution*> __pyx_v_slns;
+  Hermes::Tuple<Solution*> __pyx_v_rslns;
   Py_ssize_t __pyx_v_i;
   PyObject *__pyx_r = NULL;
   Py_ssize_t __pyx_t_1;

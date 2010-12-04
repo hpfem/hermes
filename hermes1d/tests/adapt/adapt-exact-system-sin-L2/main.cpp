@@ -40,8 +40,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,0), new BCSpec(1,K));
-Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
+Hermes::Tuple<BCSpec *>DIR_BC_LEFT =  Hermes::Tuple<BCSpec *>(new BCSpec(0,0), new BCSpec(1,K));
+Hermes::Tuple<BCSpec *> DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>();
 
 // Exact solution.
 // When changing exact solution, do not 

@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Tuple<int>(OUTER_BDY, STATOR_BDY));
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(OUTER_BDY, STATOR_BDY));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);

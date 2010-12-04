@@ -38,7 +38,7 @@ class SurfPos;
 ///
 class HERMES_API DiscreteProblem {
 public:
-        DiscreteProblem(WeakForm *wf, Tuple<Space *> sp, bool is_linear = false);
+        DiscreteProblem(WeakForm *wf, Hermes::Tuple<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
 	void free();
 
@@ -72,7 +72,7 @@ protected:
 	int ndof;				/// number of DOF
 	int* sp_seq;				/// sequence numbers of spaces
         int wf_seq;
-        Tuple<Space *> spaces;
+        Hermes::Tuple<Space *> spaces;
 
 	scalar** matrix_buffer;		/// buffer for holding square matrix (during assembling)
 	int matrix_buffer_dim;		/// dimension of the matrix held by 'matrix_buffer'
@@ -111,12 +111,12 @@ protected:
 		void free();
 	} fn_cache;
 
-	scalar eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, ShapeFunction *fu,
+	scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv);
-	scalar eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
-	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, ShapeFunction *fu,
+	scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
+	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv, SurfPos *surf_pos);
-	scalar eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
+	scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
 	                 SurfPos *surf_pos);
 
 	sFunc *get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
@@ -129,7 +129,7 @@ protected:
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
-HERMES_API Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement);
+HERMES_API Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase, int refinement);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
 
 #endif /* _DISCRETE_PROBLEM_H_ */

@@ -37,7 +37,7 @@ enum BCType
 class HERMES_API BCTypes {
 public:
  
-  void add_bc_dirichlet(Tuple<int> markers) 
+  void add_bc_dirichlet(Hermes::Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
@@ -45,7 +45,7 @@ public:
     return;
   };
 
-  void add_bc_neumann(Tuple<int> markers) 
+  void add_bc_neumann(Hermes::Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_neumann() expects at least one marker.");
@@ -53,7 +53,7 @@ public:
     return;
   };
 
-  void add_bc_newton(Tuple<int> markers) 
+  void add_bc_newton(Hermes::Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_newton() expects at least one marker.");
@@ -61,7 +61,7 @@ public:
     return;
   };
 
-  void add_bc_none(Tuple<int> markers) 
+  void add_bc_none(Hermes::Tuple<int> markers) 
   {
     int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
@@ -206,10 +206,10 @@ public:
   }
 
   protected:
-    Tuple<int> markers_neumann;
-    Tuple<int> markers_newton;
-    Tuple<int> markers_dirichlet;
-    Tuple<int> markers_none;
+    Hermes::Tuple<int> markers_neumann;
+    Hermes::Tuple<int> markers_newton;
+    Hermes::Tuple<int> markers_dirichlet;
+    Hermes::Tuple<int> markers_none;
 };
 
 static BCType default_bc_type(int marker)

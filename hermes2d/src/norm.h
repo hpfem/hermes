@@ -31,8 +31,8 @@ extern HERMES_API double calc_norm(MeshFunction* sln, int norm_type);
 // function calculating errors between solutions in right and left vectors, returning all necessary parameters
 // returns correct parameters only if the return value is true
 // coarse mesh sln has to be first, then ref_sln
-HERMES_API bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<double> & err_abs, Tuple<double> & norm_vals, 
-      double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<ProjNormType> norms = Tuple<ProjNormType>());
+HERMES_API bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Solution *> right, Hermes::Tuple<double> & err_abs, Hermes::Tuple<double> & norm_vals, 
+      double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::Tuple<ProjNormType> norms = Hermes::Tuple<ProjNormType>());
 
 // helper functions
 // DEPRECATED

@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);

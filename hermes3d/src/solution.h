@@ -125,7 +125,7 @@ public:
 
 	virtual Ord3 get_order();
 
-  static void vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<double> dir = Tuple<double>());
+  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *> solutions, Hermes::Tuple<double> dir = Hermes::Tuple<double>());
   static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, double dir = 1.0);
   
 protected:

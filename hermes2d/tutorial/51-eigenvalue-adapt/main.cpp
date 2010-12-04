@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers. 
   // Note: "essential" means that solution value is prescribed.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
@@ -267,16 +267,16 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
-    Tuple<Space *> spaces;
+    Hermes::Tuple<Space *> spaces;
     for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
         spaces.push_back(&space);
-    Tuple<ProjNormType> proj_norms;
+    Hermes::Tuple<ProjNormType> proj_norms;
     for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
         proj_norms.push_back(HERMES_H1_NORM);
     Adapt* adaptivity = new Adapt(spaces, proj_norms);
     bool solutions_for_adapt = true;
     
-    Tuple<Solution *> slns;
+    Hermes::Tuple<Solution *> slns;
     if (NUMBER_OF_EIGENVALUES > 0) slns.push_back(&sln[0]);
     if (NUMBER_OF_EIGENVALUES > 1) slns.push_back(&sln[1]);
     if (NUMBER_OF_EIGENVALUES > 2) slns.push_back(&sln[2]);
@@ -284,14 +284,14 @@ int main(int argc, char* argv[])
     if (NUMBER_OF_EIGENVALUES > 4) slns.push_back(&sln[4]);
     if (NUMBER_OF_EIGENVALUES > 5) slns.push_back(&sln[5]);
     
-    Tuple<Solution *> ref_slns;
+    Hermes::Tuple<Solution *> ref_slns;
     if (NUMBER_OF_EIGENVALUES > 0) ref_slns.push_back(&ref_sln[0]);
     if (NUMBER_OF_EIGENVALUES > 1) ref_slns.push_back(&ref_sln[1]);
     if (NUMBER_OF_EIGENVALUES > 2) ref_slns.push_back(&ref_sln[2]);
     if (NUMBER_OF_EIGENVALUES > 3) ref_slns.push_back(&ref_sln[3]);
     if (NUMBER_OF_EIGENVALUES > 4) ref_slns.push_back(&ref_sln[4]);
     if (NUMBER_OF_EIGENVALUES > 5) ref_slns.push_back(&ref_sln[5]);
-    Tuple<double> component_errors;
+    Hermes::Tuple<double> component_errors;
     double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &component_errors) * 100;
 
@@ -318,7 +318,7 @@ int main(int argc, char* argv[])
     else
     {
       info("Adapting coarse mesh.");
-      Tuple<RefinementSelectors::Selector *> selectors;
+      Hermes::Tuple<RefinementSelectors::Selector *> selectors;
       for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
         selectors.push_back(&selector);
       done = adaptivity->adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);

@@ -54,7 +54,7 @@ void DiscreteProblem::FnCache::free()
 
 // DiscreteProblem ///////////////////////////////////////////////////////////////////////////////////////
 
-DiscreteProblem::DiscreteProblem(WeakForm *wf, Tuple<Space *> spaces, bool is_linear)
+DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::Tuple<Space *> spaces, bool is_linear)
 {
   _F_
   // sanity checks
@@ -77,7 +77,7 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf, Tuple<Space *> spaces, bool is_li
 
   have_matrix = false;
 
-  this->spaces = Tuple<Space *>();
+  this->spaces = Hermes::Tuple<Space *>();
   for (int i = 0; i < wf->neq; i++) this->spaces.push_back(spaces[i]);
   have_spaces = true;
 
@@ -265,8 +265,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
  
   this->create(mat, rhs, rhsonly);
 
-  // Convert the coefficient vector 'coeff_vec' into solutions Tuple 'u_ext'.
-  Tuple<Solution*> u_ext;
+  // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
+  Hermes::Tuple<Solution*> u_ext;
   for (int i = 0; i < this->wf->neq; i++) 
   {
     if (this->is_linear == false)
@@ -692,7 +692,7 @@ mFunc *DiscreteProblem::get_fn(Solution *fu, int order, RefMap *rm, const int np
   return u;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, ShapeFunction *fu,
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
                             ShapeFunction *fv, RefMap *ru, RefMap *rv)
 {
   _F_
@@ -706,7 +706,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   Func<Ord> **oi = new Func<Ord> *[wf->neq];
 
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -770,7 +770,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc **prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -796,7 +796,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   return res;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv)
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv)
 {
   _F_
   // At this point H2D sets an increase of one if 
@@ -809,7 +809,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   Func<Ord> **oi = new Func<Ord> * [wf->neq];
 
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -871,7 +871,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc ** prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -897,7 +897,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   return res;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, ShapeFunction *fu,
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
                                   ShapeFunction *fv, RefMap *ru, RefMap *rv, SurfPos *surf_pos)
 {
   _F_
@@ -908,7 +908,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   Func<Ord> **oi = new Func<Ord> *[wf->neq];
   
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -974,7 +974,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc **prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -1002,7 +1002,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   return res;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, 
                                   ShapeFunction *fv, RefMap *rv, SurfPos *surf_pos)
 {
   _F_
@@ -1011,7 +1011,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   Func<Ord> **oi = new Func<Ord> *[wf->neq];
 
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -1073,7 +1073,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc **prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Tuple<Solution *>()) 
+  if (u_ext != Hermes::Tuple<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -1101,10 +1101,10 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase, int refinement)
+Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase, int refinement)
 {
   _F_
-  Tuple<Space *> * ref_spaces = new Tuple<Space *>;
+  Hermes::Tuple<Space *> * ref_spaces = new Hermes::Tuple<Space *>;
   for (int i = 0; i < coarse.size(); i++) 
   {
     Mesh* ref_mesh = new Mesh;

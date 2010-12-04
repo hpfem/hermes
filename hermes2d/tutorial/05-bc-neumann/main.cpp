@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_INNER);
-  bc_types.add_bc_neumann(Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
   // (Note that the gradient at the re-entrant
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
-  MagFilter grad(Tuple<MeshFunction *>(&sln, &sln), Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::Tuple<MeshFunction *>(&sln, &sln), Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for the views to be closed.

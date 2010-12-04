@@ -2430,7 +2430,7 @@ void Space::dump() {
 }
 
 // This is identical to H2D.
-int Space::assign_dofs(Tuple<Space*> spaces) 
+int Space::assign_dofs(Hermes::Tuple<Space*> spaces) 
 {
   _F_
   int n = spaces.size();
@@ -2443,7 +2443,7 @@ int Space::assign_dofs(Tuple<Space*> spaces)
   return ndof;
 }
 
-int Space::get_num_dofs(Tuple<Space *> spaces)
+int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
 {
   _F_
   int ndof = 0;

@@ -6,6 +6,8 @@
 #ifndef __HERMES_COMMON_TUPLE_H
 #define __HERMES_COMMON_TUPLE_H
 
+namespace Hermes {
+
 /// A vector of values.
 /** This class is used to pass a variable number of parameters in a type-safe fashion.
  *  \par Suggested Use
@@ -183,5 +185,7 @@ public:
     std::vector<int> _permut;
     int _min, _max;
 };
+
+} // namespace Hermes
 
 #endif

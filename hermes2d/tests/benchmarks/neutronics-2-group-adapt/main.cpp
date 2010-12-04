@@ -201,7 +201,7 @@ scalar essential_bc_values_2(int marker, double x, double y)
 // Functions for calculating errors:
 
 double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
-       double (*nfn)(MeshFunction*, RefMap*), Tuple<Solution*>& slns1, Tuple<Solution*>& slns2  )
+       double (*nfn)(MeshFunction*, RefMap*), Hermes::Tuple<Solution*>& slns1, Hermes::Tuple<Solution*>& slns2  )
 {
   double error = 0.0, norm = 0.0;
 
@@ -259,8 +259,8 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets, declare pointers to them and declare norms in these spaces.
   H1Space space1(&mesh1, bc_types, essential_bc_values_1, P_INIT[0]);
   H1Space space2(&mesh2, bc_types, essential_bc_values_2, P_INIT[1]);
-  Tuple<Space*> spaces(&space1, &space2);
-  Tuple<ProjNormType> norms(HERMES_H1_NORM, HERMES_H1_NORM);
+  Hermes::Tuple<Space*> spaces(&space1, &space2);
+  Hermes::Tuple<ProjNormType> norms(HERMES_H1_NORM, HERMES_H1_NORM);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -276,8 +276,8 @@ int main(int argc, char* argv[])
   // Initialize coarse and reference mesh solutions and declare pointers to them.
   Solution sln1, sln2; 
   Solution ref_sln1, ref_sln2;
-  Tuple<Solution*> slns(&sln1, &sln2);
-  Tuple<Solution*> ref_slns(&ref_sln1, &ref_sln2);
+  Hermes::Tuple<Solution*> slns(&sln1, &sln2);
+  Hermes::Tuple<Solution*> ref_slns(&ref_sln1, &ref_sln2);
   
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
   double error_h1;
   do
   {
-    int ndof = Space::get_num_dofs(Tuple<Space *>(&space1, &space2));
+    int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&space1, &space2));
     if (ndof >= NDOF_STOP) break;
 
     info("!---- Adaptivity step %d ---------------------------------------------", as);
@@ -312,12 +312,12 @@ int main(int argc, char* argv[])
     ref_space1->copy_orders(&space1, order_increase);
     ref_space2->copy_orders(&space2, order_increase);
 
-    int ref_ndof = Space::get_num_dofs(Tuple<Space *>(ref_space1, ref_space2));
+    int ref_ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
 
     // Assemble the reference problem.
     bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, Tuple<Space*>(ref_space1, ref_space2), is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, Hermes::Tuple<Space*>(ref_space1, ref_space2), is_linear);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
     // Solve the linear system associated with the reference problem.
     info("Solving the matrix problem.");
     if(solver->solve()) 
-      Solution::vector_to_solutions(solver->get_solution(), Tuple<Space*>(ref_space1, ref_space2), ref_slns);
+      Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space*>(ref_space1, ref_space2), ref_slns);
     else error ("Matrix solver failed.\n");
     
     delete dp;
@@ -345,7 +345,7 @@ int main(int argc, char* argv[])
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt adaptivity(Tuple<Space*>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt adaptivity(Hermes::Tuple<Space*>(&space1, &space2), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
     if (ADAPTIVITY_NORM == 2) {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(0, 1, callback(biform_0_1));
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
     bool solutions_for_adapt = true;
     double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     
-    Adapt adaptivity_proj(Tuple<Space*>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt adaptivity_proj(Hermes::Tuple<Space*>(&space1, &space2), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
 
     double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns) * 100;
 
@@ -367,13 +367,13 @@ int main(int argc, char* argv[])
 
     // Error w.r.t. the exact solution.
     ExactSolution ex1(&mesh1, exact_flux1), ex2(&mesh2, exact_flux2);
-    DiffFilter err_distrib_1(Tuple<MeshFunction*>(&ex1, &sln1));
-    DiffFilter err_distrib_2(Tuple<MeshFunction*>(&ex2, &sln2));
+    DiffFilter err_distrib_1(Hermes::Tuple<MeshFunction*>(&ex1, &sln1));
+    DiffFilter err_distrib_2(Hermes::Tuple<MeshFunction*>(&ex2, &sln2));
 
     double err_exact_h1_1 = calc_rel_error(&ex1, &sln1, HERMES_H1_NORM) * 100;
     double err_exact_h1_2 = calc_rel_error(&ex2, &sln2, HERMES_H1_NORM) * 100;
 
-    Tuple<Solution*> exslns(&ex1, &ex2);
+    Hermes::Tuple<Solution*> exslns(&ex1, &ex2);
     error_h1 = error_total(error_fn_h1, norm_fn_h1, slns, exslns) * 100;
 
     info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1_1, err_exact_h1_2);
@@ -391,7 +391,7 @@ int main(int argc, char* argv[])
     else 
     {
       info("Adapting coarse mesh.");
-      adaptivity.adapt( Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
+      adaptivity.adapt( Hermes::Tuple<RefinementSelectors::Selector*>(&selector,&selector), 
                         THRESHOLD, STRATEGY, MESH_REGULARITY );
                         
       // Increase the counter of performed adaptivity steps.

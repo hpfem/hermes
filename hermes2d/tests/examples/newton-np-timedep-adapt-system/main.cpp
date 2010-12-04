@@ -148,7 +148,7 @@ int main (int argc, char* argv[]) {
   // Spaces for concentration and the voltage.
   H1Space C(&Cmesh, C_bc_types, C_essential_bc_values, P_INIT);
   H1Space phi(MULTIMESH ? &phimesh : &Cmesh, phi_bc_types, phi_essential_bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(Tuple<Space*>(&C, &phi));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C, &phi));
 
   Solution C_sln, C_ref_sln;
   Solution phi_sln, phi_ref_sln; 
@@ -164,8 +164,8 @@ int main (int argc, char* argv[]) {
   wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM, HERMES_ANY, &C_prev_time);
   wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
   wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
-  wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
-  wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
+  wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
+  wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
 
   // Neumann voltage boundary.
   wf.add_vector_form_surf(1, callback(linear_form_surf_top), TOP_MARKER);
@@ -174,11 +174,11 @@ int main (int argc, char* argv[]) {
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec_coarse = new scalar[ndof];
-  OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<MeshFunction *>(&C_prev_time, &phi_prev_time), coeff_vec_coarse, matrix_solver);
+  OGProjection::project_global(Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<MeshFunction *>(&C_prev_time, &phi_prev_time), coeff_vec_coarse, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, Tuple<Space *>(&C, &phi), is_linear);
+  DiscreteProblem dp_coarse(&wf, Hermes::Tuple<Space *>(&C, &phi), is_linear);
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
@@ -194,7 +194,7 @@ int main (int argc, char* argv[]) {
   while (1)
   {
     // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(Tuple<Space *>(&C, &phi));
+    int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&C, &phi));
 
     // Assemble the Jacobian matrix and residual vector.
     dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
@@ -207,7 +207,7 @@ int main (int argc, char* argv[]) {
     double res_l2_norm = get_l2_norm(rhs_coarse);
 
     // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&C, &phi)), res_l2_norm);
+    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Hermes::Tuple<Space *>(&C, &phi)), res_l2_norm);
 
     // If l2 norm of the residual vector is in tolerance, or the maximum number 
     // of iteration has been hit, then quit.
@@ -227,7 +227,7 @@ int main (int argc, char* argv[]) {
   }
 
   // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solutions(coeff_vec_coarse, Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_sln, &phi_sln));
+  Solution::vector_to_solutions(coeff_vec_coarse, Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
 
   // Cleanup after the Newton loop on the coarse mesh.
   delete matrix_coarse;
@@ -253,7 +253,7 @@ int main (int argc, char* argv[]) {
 
       // Project on globally derefined mesh.
       info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
+      OGProjection::project_global(Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
     }
 
     // Adaptivity loop:
@@ -264,7 +264,7 @@ int main (int argc, char* argv[]) {
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&C, &phi));
+      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&C, &phi));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
@@ -275,11 +275,11 @@ int main (int argc, char* argv[]) {
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_sln, &phi_sln), coeff_vec);
+        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln), coeff_vec);
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), coeff_vec);
+        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), coeff_vec);
       }
 
       // Newton's loop on the fine mesh.
@@ -321,14 +321,14 @@ int main (int argc, char* argv[]) {
       }
 
       // Store the result in ref_sln.
-      Solution::vector_to_solutions(coeff_vec, *ref_spaces, Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
+      Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Tuple<Space *>(&C, &phi), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       bool solutions_for_adapt = true;
-      Tuple<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&C_sln, &phi_sln), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
+      Hermes::Tuple<double> err_est_rel;
+      double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&C_sln, &phi_sln), Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
                                  HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
       // Report results.
@@ -340,7 +340,7 @@ int main (int argc, char* argv[]) {
       info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
       // Report results.
       info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel: %g%%", 
-           Space::get_num_dofs(Tuple<Space *>(&C, &phi)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+           Space::get_num_dofs(Hermes::Tuple<Space *>(&C, &phi)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
@@ -349,7 +349,7 @@ int main (int argc, char* argv[]) {
         info("Adapting the coarse mesh.");
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-        if (Space::get_num_dofs(Tuple<Space *>(&C, &phi)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&C, &phi)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.
@@ -357,7 +357,7 @@ int main (int argc, char* argv[]) {
       }
       
       info("Projecting fine mesh solution on new coarse mesh.");
-        OGProjection::project_global(Tuple<Space *>(&C, &phi), Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Tuple<Solution *>(&C_sln, &phi_sln));
+        OGProjection::project_global(Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
 
       // Clean up.
       delete solver;

@@ -55,7 +55,7 @@ void DiscreteProblem::empty_form_caches()
   DiscreteProblem::vol_forms_cache.clear();
 };
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear) : 
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces, bool is_linear) : 
   spaces(spaces), is_linear(is_linear), wf_seq(-1), wf(wf)
 {
   _F_
@@ -352,8 +352,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
  
   this->create(mat, rhs, rhsonly);
 
-  // Convert the coefficient vector 'coeff_vec' into solutions Tuple 'u_ext'.
-  Tuple<Solution*> u_ext;
+  // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
+  Hermes::Tuple<Solution*> u_ext;
   for (int i = 0; i < this->wf->get_neq(); i++) 
   {
     if (this->is_linear == false)
@@ -1032,7 +1032,7 @@ void DiscreteProblem::delete_cache()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Actual evaluation of volume matrix form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   _F_
@@ -1045,7 +1045,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
     
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
         else oi[i] = init_fn_ord(0);
@@ -1108,7 +1108,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, order);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, order);
       else prev[i] = NULL;
@@ -1134,7 +1134,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 }
 
 // Actual evaluation of volume vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
   // Determine the integration order.
@@ -1147,7 +1147,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
         else oi[i] = init_fn_ord(0);
@@ -1206,7 +1206,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, order);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, order);
       else prev[i] = NULL;
@@ -1233,7 +1233,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 }
 
 // Actual evaluation of surface matrix forms (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -1247,7 +1247,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
         else oi[i] = init_fn_ord(0);
@@ -1313,7 +1313,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, eo);
       else prev[i] = NULL;
@@ -1343,7 +1343,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
 }
 
 // Actual evaluation of surface vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -1357,7 +1357,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
         else oi[i] = init_fn_ord(0);
@@ -1419,7 +1419,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, eo);
       else prev[i] = NULL;
@@ -1445,7 +1445,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
                     // the weights.
 }
 
-scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::Tuple<Solution *> u_ext, 
                                      NeighborSearch* nbs_u, NeighborSearch* nbs_v, 
                                      ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv, 
                                      SurfPos* surf_pos)
@@ -1459,7 +1459,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = nbs_u->init_ext_fn_ord(u_ext[i]);
         else oi[i] = init_fn_ord(0);
@@ -1516,7 +1516,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = nbs_v->init_ext_fn(u_ext[i]);
       else prev[i] = NULL;
@@ -1555,7 +1555,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
 
 // Actual evaluation of surface linear form, just in case using information from neighbors.
 // Used only for inner edges.
-scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::Tuple<Solution *> u_ext, 
                                      NeighborSearch* nbs_v, PrecalcShapeset *fv, RefMap *rv,
                                      SurfPos* surf_pos)
 { 
@@ -1567,7 +1567,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = nbs_v->init_ext_fn_ord(u_ext[i]);
         else oi[i] = init_fn_ord(0);
@@ -1619,7 +1619,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = nbs_v->init_ext_fn(u_ext[i]);
       else prev[i] = NULL;
@@ -1657,10 +1657,10 @@ double get_l2_norm(Vector* vec)
 }
 
 // Performs uniform global refinement of a FE space. 
-Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase)
+Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase)
 {
   _F_
-  Tuple<Space *> * ref_spaces = new Tuple<Space *>;
+  Hermes::Tuple<Space *> * ref_spaces = new Hermes::Tuple<Space *>;
   for (int i = 0; i < coarse.size(); i++) 
   {
     Mesh* ref_mesh = new Mesh;

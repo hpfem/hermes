@@ -63,7 +63,7 @@ res_t hcurl_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<r
 
 // H1 adapt ///////////////////////////////////////////////////////////////////////////////////////
 
-void Adapt::init(Tuple<Space *> sp, Tuple<ProjNormType> proj_norms)
+void Adapt::init(Hermes::Tuple<Space *> sp, Hermes::Tuple<ProjNormType> proj_norms)
 {
 	_F_
 	this->num = sp.size();
@@ -846,7 +846,7 @@ scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Mes
 	return res;
 }
 
-double Adapt::calc_err_internal(Tuple<Solution *> slns, Tuple<Solution *> rslns, unsigned int error_flags, Tuple<double>* component_errors, bool solutions_for_adapt)
+double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt)
 {
 	_F_
 	int i, j, k;

@@ -5,7 +5,7 @@
 // a temporary solution. Like this, one cannot have two instances 
 // of the basic module at the same time -- their global variables 
 // would interfere with each other.
-Tuple<int> _global_mat_markers;
+Hermes::Tuple<int> _global_mat_markers;
 std::vector<double> _global_c1_array;
 std::vector<double> _global_c2_array;
 std::vector<double> _global_c3_array;
@@ -240,7 +240,7 @@ void Basic::set_c5_array(const std::vector<double> &c5_array)
 void Basic::set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet)
 {
     this->bdy_markers_dirichlet = bdy_markers_dirichlet;
-    Tuple<int> t;
+    Hermes::Tuple<int> t;
     t = bdy_markers_dirichlet;
     this->bc_types.add_bc_dirichlet(t);
 }
@@ -256,7 +256,7 @@ void Basic::set_dirichlet_values(const std::vector<double> &bdy_values_dirichlet
 void Basic::set_neumann_markers(const std::vector<int> &bdy_markers_neumann)
 {
     this->bdy_markers_neumann = bdy_markers_neumann;
-    Tuple<int> t;
+    Hermes::Tuple<int> t;
     t = bdy_markers_neumann;
     this->bc_types.add_bc_neumann(t);
 }
@@ -272,7 +272,7 @@ void Basic::set_neumann_values(const std::vector<double> &bdy_values_neumann)
 void Basic::set_newton_markers(const std::vector<int> &bdy_markers_newton)
 {
     this->bdy_markers_newton = bdy_markers_newton;
-    Tuple<int> t;
+    Hermes::Tuple<int> t;
     t = bdy_markers_newton;
     this->bc_types.add_bc_newton(t);
 }

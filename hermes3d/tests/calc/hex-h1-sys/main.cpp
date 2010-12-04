@@ -122,7 +122,7 @@ int main(int argc, char **args)
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2), is_linear);
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&space1, &space2), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -138,14 +138,14 @@ int main(int argc, char **args)
   }
 
   // Assemble the linear problem.
-  info("Assembling (ndof: %d).", Space::get_num_dofs(Tuple<Space *>(&space1, &space2)));
+  info("Assembling (ndof: %d).", Space::get_num_dofs(Hermes::Tuple<Space *>(&space1, &space2)));
   dp.assemble(matrix, rhs);
     
   // Solve the linear system. If successful, obtain the solution.
   info("Solving.");
   Solution sln1(&mesh);
   Solution sln2(&mesh);
-  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&space1, &space2), Tuple<Solution *>(&sln1, &sln2));
+  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(&space1, &space2), Hermes::Tuple<Solution *>(&sln1, &sln2));
   else error ("Matrix solver failed.\n");
     
   ExactSolution ex_sln1(&mesh, exact_sln_fn_1);
@@ -153,9 +153,9 @@ int main(int argc, char **args)
 
   // Calculate exact error.
   info("Calculating exact error.");
-  Adapt *adaptivity = new Adapt(Tuple<Space *>(&space1, &space2), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+  Adapt *adaptivity = new Adapt(Hermes::Tuple<Space *>(&space1, &space2), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
   bool solutions_for_adapt = false;
-  double err_exact = adaptivity->calc_err_exact(Tuple<Solution *>(&sln1, &sln2), Tuple<Solution *>(&ex_sln1, &ex_sln2), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
+  double err_exact = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&sln1, &sln2), Hermes::Tuple<Solution *>(&ex_sln1, &ex_sln2), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS);
 
   if (err_exact > EPS)
 		// Calculated solution is not precise enough.

@@ -161,7 +161,7 @@ int main(int argc, char **args)
 
 	// Initialize discrete problem.
 	bool is_linear = true;
-	DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2, &space3), is_linear);
+	DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&space1, &space2, &space3), is_linear);
 #endif
 	// Time measurement.
 	TimePeriod cpu_time;

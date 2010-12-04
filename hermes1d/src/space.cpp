@@ -405,17 +405,17 @@ Space::Space(double a, double b, int n_base_elem, int p_init, int n_eq, int
   this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
 }
 
-Space::Space(double a, double b, int n_base_elem, Tuple<std::pair<int, double> *> left_boundary_conditions, 
-        Tuple<std::pair<int, double> *> right_boundary_conditions, int p_init, int n_eq, int
+Space::Space(double a, double b, int n_base_elem, Hermes::Tuple<std::pair<int, double> *> left_boundary_conditions, 
+        Hermes::Tuple<std::pair<int, double> *> right_boundary_conditions, int p_init, int n_eq, int
         n_sln, bool print_banner)
 {
   this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
 
   // Assign Dirichlet boundary conditions.
-  if(left_boundary_conditions != Tuple<std::pair<int, double> *>())
+  if(left_boundary_conditions != Hermes::Tuple<std::pair<int, double> *>())
     for(int i = 0; i < left_boundary_conditions.size(); i++)
       this->set_bc_left_dirichlet(left_boundary_conditions.at(i)->first, left_boundary_conditions.at(i)->second);
-  if(right_boundary_conditions != Tuple<std::pair<int, double> *>())
+  if(right_boundary_conditions != Hermes::Tuple<std::pair<int, double> *>())
     for(int i = 0; i < right_boundary_conditions.size(); i++)
       this->set_bc_right_dirichlet(right_boundary_conditions.at(i)->first, right_boundary_conditions.at(i)->second);
   // Assign degrees of freedom.

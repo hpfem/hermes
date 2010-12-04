@@ -244,10 +244,10 @@ int main(int argc, char* argv[])
 
     WeakForm wf1;
     wf1.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
-    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Tuple<MeshFunction*>(&u_prev_time));
+    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time));
     WeakForm wf2;
     wf2.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
-    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Tuple<MeshFunction*>(&u_prev_time, &Y1));
+    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time, &Y1));
 
     // Initialize the FE problem. 
     bool is_linear = false;
