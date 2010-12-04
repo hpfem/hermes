@@ -27,12 +27,12 @@ class HERMES_API OGProjection
 public:
   
   // global orthogonal projection
-  static void project_global(Tuple<Space *> spaces, 
-                              Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, 
+  static void project_global(Hermes::Tuple<Space *> spaces, 
+                              Hermes::Tuple<Solution*> sols_src, Hermes::Tuple<Solution*> sols_dest, 
                               MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
-                              Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());
-  static void project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
-                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Tuple<ProjNormType> proj_norms = Tuple<ProjNormType>());  
+                              Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>());
+  static void project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<MeshFunction *> source_meshfns, 
+                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>());  
   static void project_global(Space* space, 
                               Solution* sol_src, Solution* sol_dest, 
                               MatrixSolverType matrix_solver, ProjNormType proj_norm);
@@ -43,7 +43,7 @@ protected:
   // a special projection weak form, which is different from 
   // the weak form of the PDE. If you supply a weak form of the 
   // PDE, the PDE will just be solved. 
-  static void project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
+  static void project_internal(Hermes::Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   template<typename Real, typename Scalar>
   static Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)

@@ -100,7 +100,7 @@ int main(int argc, char **args)
 
   // Initialize discrete problem.
   bool is_linear = true;
-  DiscreteProblem dp(&wf, Tuple<Space *>(&xdisp, &ydisp, &zdisp), is_linear);
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&xdisp, &ydisp, &zdisp), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -116,7 +116,7 @@ int main(int argc, char **args)
   }
 
   // Assemble stiffness matrix and load vector.
-  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(Tuple<Space *>(&xdisp, &ydisp, &zdisp)));
+  info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(Hermes::Tuple<Space *>(&xdisp, &ydisp, &zdisp)));
   dp.assemble(matrix, rhs);
 
   // Solve the linear system. If successful, obtain the solution.
@@ -125,7 +125,7 @@ int main(int argc, char **args)
   Solution ysln(ydisp.get_mesh());
   Solution zsln(zdisp.get_mesh());
   if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), 
-                      Tuple<Space *>(&xdisp, &ydisp, &zdisp), Tuple<Solution *>(&xsln, &ysln, &zsln));
+                      Hermes::Tuple<Space *>(&xdisp, &ydisp, &zdisp), Hermes::Tuple<Solution *>(&xsln, &ysln, &zsln));
   else error ("Matrix solver failed.\n");
 
   // Output all components of the solution.

@@ -1,7 +1,7 @@
 #include "hermes3d.h"
 
 
-void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver)
+void OGProjection::project_internal(Hermes::Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   int n = spaces.size();
@@ -41,8 +41,8 @@ void OGProjection::project_internal(Tuple<Space *> spaces, WeakForm *proj_wf, sc
 }
 
 
-void OGProjection::project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> source_meshfns, 
-                              scalar* target_vec, MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
+void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<MeshFunction *> source_meshfns, 
+                              scalar* target_vec, MatrixSolverType matrix_solver, Hermes::Tuple<ProjNormType> proj_norms)
 {
   _F_
   int n = spaces.size();  
@@ -54,7 +54,7 @@ void OGProjection::project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> s
   for (int i = 0; i < n; i++) 
   {
     int norm;
-    if (proj_norms == Tuple<ProjNormType>()) norm = HERMES_DEFAULT_PROJ_NORM;
+    if (proj_norms == Hermes::Tuple<ProjNormType>()) norm = HERMES_DEFAULT_PROJ_NORM;
     else norm = proj_norms[i];
     if (norm == HERMES_L2_NORM) 
     {
@@ -97,13 +97,13 @@ void OGProjection::project_global(Tuple<Space *> spaces, Tuple<MeshFunction *> s
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void OGProjection::project_global(Tuple<Space *> spaces, 
-                              Tuple<Solution*> sols_src, Tuple<Solution*> sols_dest, 
-                              MatrixSolverType matrix_solver, Tuple<ProjNormType> proj_norms)
+void OGProjection::project_global(Hermes::Tuple<Space *> spaces, 
+                              Hermes::Tuple<Solution*> sols_src, Hermes::Tuple<Solution*> sols_dest, 
+                              MatrixSolverType matrix_solver, Hermes::Tuple<ProjNormType> proj_norms)
 {
   _F_
   scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
-  Tuple<MeshFunction *> ref_slns_mf;
+  Hermes::Tuple<MeshFunction *> ref_slns_mf;
   for (int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
@@ -118,5 +118,5 @@ void OGProjection::project_global(Space* space,
                               Solution* sol_src, Solution* sol_dest, 
                               MatrixSolverType matrix_solver, ProjNormType proj_norm)
 {
-  project_global(Tuple<Space *>(space), Tuple<Solution *>(sol_src), Tuple<Solution *>(sol_dest), matrix_solver, Tuple<ProjNormType>(proj_norm));
+  project_global(Hermes::Tuple<Space *>(space), Hermes::Tuple<Solution *>(sol_src), Hermes::Tuple<Solution *>(sol_dest), matrix_solver, Hermes::Tuple<ProjNormType>(proj_norm));
 }

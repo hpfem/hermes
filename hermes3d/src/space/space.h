@@ -124,8 +124,8 @@ public:
   /// FE mesh
   Mesh *mesh;
 
-  static int get_num_dofs(Tuple<Space *> spaces);
-  static int assign_dofs(Tuple<Space*> spaces) ;
+  static int get_num_dofs(Hermes::Tuple<Space *> spaces);
+  static int assign_dofs(Hermes::Tuple<Space*> spaces) ;
 
 protected:
   Shapeset *shapeset;
