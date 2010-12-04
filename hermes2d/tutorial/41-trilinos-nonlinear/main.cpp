@@ -45,7 +45,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 2, BDY_LEFT = 2;
+const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
 // Initial condition.
 double init_cond(double x, double y, double &dx, double &dy)

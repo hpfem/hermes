@@ -37,7 +37,7 @@ const double kappa = 0.1;
 const double x1    = 9.0;
 
 // Boundary markers.
-const int BDY_LEFT = 1, BDY_HORIZONTAL = 2, BDY_VERTICAL = 3;
+const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Boundary condition types.
 BCType bc_types(int marker)
@@ -76,8 +76,9 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_essential(BDY_LEFT);
-  bc_types.add_bc_natural(Hermes::Tuple<int>(BDY_HORIZONTAL, BDY_VERTICAL));
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+  bc_types.add_bc_newton(BDY_COOLED);
 
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, essential_bc_values_t, P_INIT);

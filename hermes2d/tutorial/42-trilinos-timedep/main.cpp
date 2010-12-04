@@ -34,7 +34,7 @@ const bool JFNK = true;
 const bool PRECOND = true;
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 2, BDY_LEFT = 2;
+const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
 // Essential (Dirichlet) boundary conditions values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
