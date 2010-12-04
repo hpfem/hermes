@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   mesh.refine_element(1152);
 
   // Initialize boundary condition types and spaces with default shapesets.
-  bc_types.add_bc_natural(Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+  bc_types.add_bc_neumann(Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
   L2Space space_rho(&mesh, &bc_types, NULL, P_INIT);
   L2Space space_rho_v_x(&mesh, &bc_types, NULL, P_INIT);
   L2Space space_rho_v_y(&mesh, &bc_types, NULL, P_INIT);

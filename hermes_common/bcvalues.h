@@ -84,7 +84,7 @@ public:
   void update(BCTypes* bc_types) 
   {
     std::vector<int>::iterator it;
-    for(it = bc_types->markers_essential.begin(); it != bc_types->markers_essential.end(); it++)
+    for(it = bc_types->markers_dirichlet.begin(); it != bc_types->markers_dirichlet.end(); it++)
       if(value_callbacks[*it] == NULL)
         add_zero_function(*it);
   };
