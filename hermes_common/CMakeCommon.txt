@@ -1,0 +1,9 @@
+# This file contains common cmake rules, that are shared in all h1d, h2d and
+# h3d. Only put dimension independent rules here.
+
+# Enable debugging symbols for all files all the time:
+set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
+IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # Stop on first error
+    set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
+ENDIF()

@@ -126,6 +126,8 @@ endif(WITH_PYTHON)
 # end of configuration section
 #---------------------------------------------------------
 
+include(../hermes_common/CMakeCommon.txt)
+
 if(H2D_REAL)
     list(APPEND VERS "real")
 endif(H2D_REAL)
@@ -271,13 +273,6 @@ IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND H
   set(HAVE_TEUCHOS_STACKTRACE yes)
 ENDIF()
 
-# Enable debugging symbols for all files all the time:
-set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
-IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Stop on first error
-    set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
-ENDIF()
-set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
 
