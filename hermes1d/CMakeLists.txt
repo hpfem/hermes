@@ -51,6 +51,8 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 # Location of the common library.
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 
+include(../hermes_common/CMakeCommon.txt)
+
 # For use in the common code.
 set(H1D_REAL YES)
 add_definitions(-DH1D_REAL)

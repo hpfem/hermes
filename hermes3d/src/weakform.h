@@ -190,7 +190,7 @@ private:
 
         Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                           Mesh* m1, Mesh* m2, 
-                          std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext);
+                          std::vector<MeshFunction*>& ext, Tuple<Solution*>& u_ext);
 
 	bool is_in_area_2(int marker, int area) const;
 
