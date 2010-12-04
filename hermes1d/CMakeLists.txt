@@ -66,18 +66,13 @@ if(RELEASE)
         set(HERMES_BIN hermes1d)
 endif(RELEASE)
 
-find_package(PythonLibs REQUIRED)
-find_package(NumPy REQUIRED)
-
 if(WITH_PYTHON)
-    # if the user specified PYTHON_INCLUDE_PATH, let's use that, otherwise let's
-    # try to guess using cmake/FindPythonLibs.cmake
-    if (NOT PYTHON_INCLUDE_PATH)
-        find_package(PythonLibs REQUIRED)
-    endif (NOT PYTHON_INCLUDE_PATH)
-    find_package(NumPy REQUIRED)
-
-    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  find_package(Python REQUIRED)
+  find_package(NumPy REQUIRED)
+  find_package(Cython REQUIRED)
+  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  set(PYTHON_INSTALL_PATH lib/python/site-packages)
+  add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
