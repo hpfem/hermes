@@ -105,8 +105,12 @@ class Space {
         int get_n_active_elem();
 
         void set_n_active_elem(int n);
-        
+
         static int get_num_dofs(Space* space);
+
+        int get_num_dofs() {
+            return Space::get_num_dofs(this);
+        };
 
         void set_n_dof(int n);
 
