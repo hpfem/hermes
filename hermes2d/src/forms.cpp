@@ -46,7 +46,8 @@ Geom<Ord>* init_geom_ord()
 	e->nx = nx; e->ny = ny;
 	e->tx = tx; e->ty = ty;
     e->diam = diam;
-    e->marker = -9999;
+    e->edge_marker = -8888;
+    e->elem_marker = -9999;
 	return e;
 }
 
@@ -57,7 +58,7 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order)
     //e->element = rm->get_active_element();
     e->diam = rm->get_active_element()->get_diameter();
     e->id = rm->get_active_element()->id;
-    e->marker = rm->get_active_element()->marker;
+    e->elem_marker = rm->get_active_element()->marker;
     e->x = rm->get_phys_x(order);
     e->y = rm->get_phys_y(order);
     return e;
@@ -66,13 +67,14 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order)
 // Initialize edge marker, coordinates, tangent and normals
 Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
-	Geom<double>* e = new Geom<double>;
-  e->marker = surf_pos->marker;
+  Geom<double>* e = new Geom<double>;
+  e->edge_marker = surf_pos->marker;
+  e->elem_marker = rm->get_active_element()->marker;
   e->diam = rm->get_active_element()->get_diameter();
   e->id = rm->get_active_element()->en[surf_pos->surf_num]->id;
-	e->x = rm->get_phys_x(order);
-	e->y = rm->get_phys_y(order);
-	double3 *tan;
+  e->x = rm->get_phys_x(order);
+  e->y = rm->get_phys_y(order);
+  double3 *tan;
   tan = rm->get_tangent(surf_pos->surf_num, order);
 
   Quad2D* quad = rm->get_quad_2d();

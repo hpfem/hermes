@@ -306,7 +306,8 @@ template<typename T>
 class Geom
 {
 public:
-  int marker;       ///< Element/edge marker.
+  int elem_marker;       ///< Element marker (for both volumetric and surface forms).
+  int edge_marker;       ///< Edge marker (for surface forms only).
   int id;           ///< ID number of the element (undefined for edge).
   T diam;           ///< Element diameter (for edge, diameter of the parent element).
   //Element *element;   // Active element. NOTE: We used this for some time but
@@ -326,7 +327,8 @@ public:
 
   Geom()
   {
-    marker = 0;
+    elem_marker = -1;
+    edge_marker = -1;
     id = 0;
     x = y = NULL;
     nx = ny = NULL;
@@ -369,7 +371,8 @@ public:
       Geom<T>(), central_geom(geom), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
   {
     // Let this class expose the standard Geom interface.
-    this->marker = geom->marker;
+    this->edge_marker = geom->edge_marker;
+    this->elem_marker = geom->elem_marker;
     this->id = geom->id;
     this->diam = geom->diam;
     this->x = geom->x;

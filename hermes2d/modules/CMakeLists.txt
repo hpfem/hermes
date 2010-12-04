@@ -1,2 +1,2 @@
 # examples
-add_subdirectory(electrostatics)
+add_subdirectory(basic)

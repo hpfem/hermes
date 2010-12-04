@@ -126,7 +126,7 @@ public:
   int min() {
     if (this->size() == 0)
         throw std::runtime_error("Empty Tuple");
-     int m;
+    int m;
     if(typeid((*this)[0]) != typeid(m))
       throw std::runtime_error("Tuple<T>::max() called and T != int.");
     m = (int)(*this)[0];
@@ -139,8 +139,12 @@ public:
   // Look up an integer number in an array.
   // This prepares a permut array, so subsequent calls are very fast
   int find_index(int x, bool throw_exception=true) {
-    if (this->size() == 0)
-        return -1;
+    if (this->size() == 0) {
+      if (throw_exception) {
+        throw std::runtime_error("Empty Tuple");
+      }
+      else return -1;
+    }
     int idx;
     if(typeid((*this)[0]) != typeid(idx))
       throw std::runtime_error("Tuple<T>::find_index() called and T != int.");
