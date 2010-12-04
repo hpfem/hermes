@@ -38,9 +38,9 @@ double NEWTON_TOL = 1e-5;               // Tolerance.
 int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 // Boundary conditions.
-Tuple<BCSpec *> DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,1), new BCSpec(0,0), 
+Hermes::Tuple<BCSpec *> DIR_BC_LEFT =  Hermes::Tuple<BCSpec *>(new BCSpec(0,1), new BCSpec(0,0), 
                               new BCSpec(0,0), new BCSpec(0,0));
-Tuple<BCSpec *> DIR_BC_RIGHT = Tuple<BCSpec *>();
+Hermes::Tuple<BCSpec *> DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>();
 
 //At the end of the line is an indirect boundary condition U(l) = I(l)*Zl see below
 
