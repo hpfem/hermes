@@ -5,7 +5,7 @@
 // the user is not exposed to wesk forms, spaces, solver initialization, and other 
 // technical details. 
 //
-// PDE: -div(c1 \nabla phi) + (c2, c3) \cdot \nabla u + c4 u = c5 
+// PDE: -div(c1 \nabla u) + (c2, c3) \cdot \nabla u + c4 u = c5 
 //      c1 ... equation parameter, element-wise constant
 //      c2 ... equation parameter, element-wise constant
 //      c3 ... equation parameter, element-wise constant

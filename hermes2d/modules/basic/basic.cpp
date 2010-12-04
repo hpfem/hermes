@@ -57,7 +57,7 @@ Scalar linear_form_vol(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
     c5 = -5555.0;
   } else {
     int index = _global_mat_markers.find_index(elem_marker);
-      c5 = _global_c5_array[index];
+    c5 = _global_c5_array[index];
   }
   return c5 * int_v<Real, Scalar>(n, wt, v);
 }
@@ -80,10 +80,10 @@ Scalar bilinear_form_surf_newton(int n, double *wt, Func<Real> *u_ext[], Func<Re
       double_pair newton_pair = _global_bdy_values_newton[_global_bc_types->find_index_newton(edge_marker)];
       const_newton_1 = newton_pair.first;
     }
-    else const_newton_1 = 0;
+    else error("Internal in module Basic: bilinear_form_surf_newton() should not have been called.");
     c1 = _global_c1_array[_global_mat_markers.find_index(elem_marker)];
   }
-  return (-1.0) * c1 * const_newton_1 * int_u_v<Real, Scalar>(n, wt, u, v);
+  return c1 * const_newton_1 * int_u_v<Real, Scalar>(n, wt, u, v);
 }
 
 // Weak form (surface, neumann, right-hand side).
@@ -105,7 +105,7 @@ Scalar linear_form_surf_neumann(int n, double *wt, Func<Real> *u_ext[], Func<Rea
       int index = _global_bc_types->find_index_neumann(edge_marker);
       const_neumann = _global_bdy_values_neumann[index];
     }
-    else const_neumann = 0;
+    else error("Internal in module Basic: linear_form_surf_neumann() should not have been called.");
     c1 = _global_c1_array[_global_mat_markers.find_index(elem_marker)];  
   }
   return c1 * const_neumann * int_v<Real, Scalar>(n, wt, v);
@@ -131,7 +131,7 @@ Scalar linear_form_surf_newton(int n, double *wt, Func<Real> *u_ext[], Func<Real
       double_pair newton_pair = _global_bdy_values_newton[index];
       const_newton_2 = newton_pair.second;
     }
-    else return 0;
+    else error("Internal in module Basic: linear_form_surf_newton() should not have been called.");
     c1 = _global_c1_array[_global_mat_markers.find_index(elem_marker)];  
   }
   return c1 * const_newton_2 * int_v<Real, Scalar>(n, wt, v);
@@ -197,91 +197,94 @@ void Basic::set_initial_poly_degree(int p)
 // Set material markers, and check compatibility with mesh file.
 void Basic::set_material_markers(const std::vector<int> &m_markers)
 {
-    this->mat_markers = m_markers;
-    _global_mat_markers = m_markers;
+  this->mat_markers = m_markers;
+  _global_mat_markers = m_markers;
 }
 
 // Set c1 array.
 void Basic::set_c1_array(const std::vector<double> &c1_array)
 {
-    this->c1_array = c1_array;
-    _global_c1_array = c1_array;
+  int n = c2_array.size();
+  for (int i = 0; i < n; i++) 
+  if (c2_array[i] <= 1e-10) error("The c1 array needs to be positive.");
+  this->c1_array = c1_array;
+  _global_c1_array = c1_array;
 }
 
 // Set c2 array.
 void Basic::set_c2_array(const std::vector<double> &c2_array)
 {
-    this->c2_array = c2_array;
-    _global_c2_array = c2_array;
+  this->c2_array = c2_array;
+  _global_c2_array = c2_array;
 }
 
 // Set c3 array.
 void Basic::set_c3_array(const std::vector<double> &c3_array)
 {
-    this->c3_array = c3_array;
-    _global_c3_array = c3_array;
+  this->c3_array = c3_array;
+  _global_c3_array = c3_array;
 }
 
 // Set c4 array.
 void Basic::set_c4_array(const std::vector<double> &c4_array)
 {
-    this->c4_array = c4_array;
-    _global_c4_array = c4_array;
+  this->c4_array = c4_array;
+  _global_c4_array = c4_array;
 }
 
 // Set c5 array.
 void Basic::set_c5_array(const std::vector<double> &c5_array)
 {
-    this->c5_array = c5_array;
-    _global_c5_array = c5_array;
+  this->c5_array = c5_array;
+  _global_c5_array = c5_array;
 }
 
 // Set Dirichlet boundary markers.
 void Basic::set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet)
 {
-    this->bdy_markers_dirichlet = bdy_markers_dirichlet;
-    Hermes::Tuple<int> t;
-    t = bdy_markers_dirichlet;
-    this->bc_types.add_bc_dirichlet(t);
+  this->bdy_markers_dirichlet = bdy_markers_dirichlet;
+  Hermes::Tuple<int> t;
+  t = bdy_markers_dirichlet;
+  this->bc_types.add_bc_dirichlet(t);
 }
 
 // Set Dirichlet boundary values.
 void Basic::set_dirichlet_values(const std::vector<double> &bdy_values_dirichlet)
 {
-    this->bdy_values_dirichlet = bdy_values_dirichlet;
-    _global_bdy_values_dirichlet = bdy_values_dirichlet;
+  this->bdy_values_dirichlet = bdy_values_dirichlet;
+  _global_bdy_values_dirichlet = bdy_values_dirichlet;
 }
 
 // Set Neumann boundary markers.
 void Basic::set_neumann_markers(const std::vector<int> &bdy_markers_neumann)
 {
-    this->bdy_markers_neumann = bdy_markers_neumann;
-    Hermes::Tuple<int> t;
-    t = bdy_markers_neumann;
-    this->bc_types.add_bc_neumann(t);
+  this->bdy_markers_neumann = bdy_markers_neumann;
+  Hermes::Tuple<int> t;
+  t = bdy_markers_neumann;
+  this->bc_types.add_bc_neumann(t);
 }
 
 // Set Neumann boundary values.
 void Basic::set_neumann_values(const std::vector<double> &bdy_values_neumann)
 {
-    this->bdy_values_neumann = bdy_values_neumann;
-    _global_bdy_values_neumann = bdy_values_neumann;
+  this->bdy_values_neumann = bdy_values_neumann;
+  _global_bdy_values_neumann = bdy_values_neumann;
 }
 
 // Set Newton boundary markers.
 void Basic::set_newton_markers(const std::vector<int> &bdy_markers_newton)
 {
-    this->bdy_markers_newton = bdy_markers_newton;
-    Hermes::Tuple<int> t;
-    t = bdy_markers_newton;
-    this->bc_types.add_bc_newton(t);
+  this->bdy_markers_newton = bdy_markers_newton;
+  Hermes::Tuple<int> t;
+  t = bdy_markers_newton;
+  this->bc_types.add_bc_newton(t);
 }
 
 // Set Newton boundary values.
 void Basic::set_newton_values(const std::vector<double_pair> &bdy_values_newton)
 {
-    this->bdy_values_newton = bdy_values_newton;
-    _global_bdy_values_newton = bdy_values_newton;
+  this->bdy_values_newton = bdy_values_newton;
+  _global_bdy_values_newton = bdy_values_newton;
 }
 
 // Solve the problem.
