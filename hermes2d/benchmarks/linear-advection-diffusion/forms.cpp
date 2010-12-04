@@ -192,7 +192,7 @@ Scalar dg_boundary_liform_advection(int n, double *wt, Func<Real> *u_ext[], Func
   for (int i = 0; i < n; i++) {
     Real x = e->x[i], y = e->y[i];
     Real a_dot_n = calculate_a_dot_v<Real>(x, y, e->nx[i], e->ny[i]);
-    result += -wt[i] * upwind_flux<Real,Scalar>(0, essential_bc_values<Real,Scalar>(e->marker,x,y), a_dot_n) * v->val[i];
+    result += -wt[i] * upwind_flux<Real,Scalar>(0, essential_bc_values<Real,Scalar>(e->edge_marker, x, y), a_dot_n) * v->val[i];
   }
   
   return result;
@@ -245,7 +245,7 @@ Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func
   Real sigma = C_W / e->diam;
   for (int i = 0; i < n; i++)
   {
-    Scalar u_dir = essential_bc_values<Real,Scalar>(e->marker, e->x[i], e->y[i]);
+    Scalar u_dir = essential_bc_values<Real,Scalar>(e->edge_marker, e->x[i], e->y[i]);
     result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]                    // diffusion 
                                   + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i] - u_dir)    
                                   + sigma * ( ( u->val[i] - u_dir ) * v->val[i] ) );                        // boundary penalty

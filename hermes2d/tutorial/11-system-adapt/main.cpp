@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_essential(OUTER_BDY);
+  bc_types.add_bc_dirichlet(OUTER_BDY);
 
   // Create H1 spaces with default shapeset for both displacement components.
   H1Space u_space(&u_mesh, &bc_types, essential_bc_values, P_INIT_U);

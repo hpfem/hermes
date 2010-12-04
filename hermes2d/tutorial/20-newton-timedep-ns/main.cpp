@@ -107,9 +107,9 @@ int main(int argc, char* argv[])
   // Boundary condition types for x-velocity and y-velocity.
   BCTypes xvel_bc_type, yvel_bc_type;
   xvel_bc_type.add_bc_none(BDY_RIGHT);
-  xvel_bc_type.add_bc_essential(Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  xvel_bc_type.add_bc_dirichlet(Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
   yvel_bc_type.add_bc_none(BDY_RIGHT);
-  yvel_bc_type.add_bc_essential(Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  yvel_bc_type.add_bc_dirichlet(Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);

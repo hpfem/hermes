@@ -49,8 +49,8 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_essential(BDY_1);
-  bc_types.add_bc_natural(Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
+  bc_types.add_bc_dirichlet(BDY_1);
+  bc_types.add_bc_neumann(Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
 
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u_space(&mesh, &bc_types, essential_bc_values, P_INIT);

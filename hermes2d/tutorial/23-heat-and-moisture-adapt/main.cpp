@@ -114,9 +114,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes temp_bc_type, moist_bc_type;
-  temp_bc_type.add_bc_essential(BDY_REACTOR_WALL);
-  temp_bc_type.add_bc_natural(Tuple<int>(BDY_SYMMETRY, BDY_EXTERIOR_WALL));
-  moist_bc_type.add_bc_natural(Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL, BDY_EXTERIOR_WALL));
+  temp_bc_type.add_bc_dirichlet(BDY_REACTOR_WALL);
+  temp_bc_type.add_bc_neumann(BDY_SYMMETRY);
+  temp_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
+  moist_bc_type.add_bc_neumann(Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
+  moist_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
 
   // Create H1 spaces with default shapesets.
   H1Space T_space(&T_mesh, &temp_bc_type, essential_bc_values_T, P_INIT);

@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_essential(Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
-  bc_types.add_bc_natural(BDY_BUTTOM);
+  bc_types.add_bc_dirichlet(Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_neumann(BDY_BUTTOM);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);

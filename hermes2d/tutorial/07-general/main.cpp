@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_essential(BDY_HORIZONTAL);
-  bc_types.add_bc_natural(BDY_VERTICAL);
+  bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
+  bc_types.add_bc_neumann(BDY_VERTICAL);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);

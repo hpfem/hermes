@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_essential(BDY_ESSENTIAL);
+  bc_types.add_bc_dirichlet(BDY_ESSENTIAL);
  
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
