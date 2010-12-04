@@ -68,14 +68,14 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
   return norm;
 }
 
-bool calc_errors(Tuple<Solution* > left, Tuple<Solution *> right, Tuple<double> & err_abs, Tuple<double> & norm_vals, 
-                 double & err_abs_total, double & norm_total, double & err_rel_total, Tuple<ProjNormType> norms)
+bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Solution *> right, Hermes::Tuple<double> & err_abs, Hermes::Tuple<double> & norm_vals, 
+                 double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::Tuple<ProjNormType> norms)
 {
   bool default_norms = false;
   // Checks.
   if(left.size() != right.size())
     return false;
-  if (norms != Tuple<ProjNormType>())
+  if (norms != Hermes::Tuple<ProjNormType>())
   {
     if(left.size() != norms.size())
       return false;

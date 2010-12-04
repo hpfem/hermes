@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
   // (Note that the gradient at the re-entrant
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 440, 350));
-  MagFilter grad(Tuple<MeshFunction *>(&phi, &phi), Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::Tuple<MeshFunction *>(&phi, &phi), Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for the views to be closed.

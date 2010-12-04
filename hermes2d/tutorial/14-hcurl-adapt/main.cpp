@@ -95,8 +95,8 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Tuple<int>(BDY_1, BDY_6));
-  bc_types.add_bc_newton(Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_1, BDY_6));
+  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
 
   // Create an Hcurl space with default shapeset.
   HcurlSpace space(&mesh, &bc_types, essential_bc_values, P_INIT);

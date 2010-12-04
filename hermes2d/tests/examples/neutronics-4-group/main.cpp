@@ -57,7 +57,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Source function.
-void source_fn(int n, Tuple<scalar*> values, scalar* out)
+void source_fn(int n, Hermes::Tuple<scalar*> values, scalar* out)
 {
   for (int i = 0; i < n; i++)
   {
@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
   // Solution variables.
   Solution sln1, sln2, sln3, sln4;
   Solution iter1, iter2, iter3, iter4;
-  Tuple<Solution*> solutions(&sln1, &sln2, &sln3, &sln4);
+  Hermes::Tuple<Solution*> solutions(&sln1, &sln2, &sln3, &sln4);
 
   // Define initial conditions.
   info("Setting initial conditions.");
@@ -220,9 +220,9 @@ int main(int argc, char* argv[])
   H1Space space2(&mesh, bc_types, essential_bc_values, P_INIT_2);
   H1Space space3(&mesh, bc_types, essential_bc_values, P_INIT_3);
   H1Space space4(&mesh, bc_types, essential_bc_values, P_INIT_4);
-  Tuple<Space*> spaces(&space1, &space2, &space3, &space4);
+  Hermes::Tuple<Space*> spaces(&space1, &space2, &space3, &space4);
   
-  int ndof = Space::get_num_dofs(Tuple<Space*>(&space1, &space2, &space3, &space4));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&space1, &space2, &space3, &space4));
   info("ndof = %d.", ndof);
   
   // Initialize the weak formulation.
@@ -234,10 +234,10 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(2, 1, callback(biform_2_1));
   wf.add_matrix_form(3, 3, callback(biform_3_3), HERMES_SYM);
   wf.add_matrix_form(3, 2, callback(biform_3_2));
-  wf.add_vector_form(0, callback(liform_0), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_vector_form(1, callback(liform_1), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_vector_form(2, callback(liform_2), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_vector_form(3, callback(liform_3), marker_core, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
+  wf.add_vector_form(0, callback(liform_0), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
+  wf.add_vector_form(1, callback(liform_1), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
+  wf.add_vector_form(2, callback(liform_2), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
+  wf.add_vector_form(3, callback(liform_3), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
   wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_vacuum);
   wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_vacuum);
   wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
@@ -282,8 +282,8 @@ int main(int argc, char* argv[])
     else
       error ("Matrix solver failed.\n");
 
-    SimpleFilter source(source_fn, Tuple<MeshFunction*>(&sln1, &sln2, &sln3, &sln4));
-    SimpleFilter source_prev(source_fn, Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
+    SimpleFilter source(source_fn, Hermes::Tuple<MeshFunction*>(&sln1, &sln2, &sln3, &sln4));
+    SimpleFilter source_prev(source_fn, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
 
     // Compute eigenvalue.
     double k_new = k_eff * (integrate(&source, marker_core) / integrate(&source_prev, marker_core));

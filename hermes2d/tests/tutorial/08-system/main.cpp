@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u_space(&mesh, bc_types, essential_bc_values, P_INIT);
   H1Space v_space(&mesh, bc_types, essential_bc_values, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)));
+  info("ndof = %d.", Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
     // Initialize the FE problem.
     bool is_linear = true;
-    DiscreteProblem dp(&wf, Tuple<Space *>(&u_space, &v_space), is_linear);
+    DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&u_space, &v_space), is_linear);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -115,11 +115,11 @@ int main(int argc, char* argv[])
     // Solve the linear system and if successful, obtain the solutions.
     info("Solving the matrix problem.");
     if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_sln, &v_sln));
+      Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(&u_space, &v_space), Hermes::Tuple<Solution *>(&u_sln, &v_sln));
     else
       error ("Matrix solver failed.\n");
 
-    int ndof = Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space));
+    int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space));
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];

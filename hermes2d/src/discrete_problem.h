@@ -41,11 +41,11 @@ class Vector;
 class Solver;
 
 /// Instantiated template. It is used to create a clean Windows DLL interface.
-HERMES_API_USED_TEMPLATE(Tuple<ProjNormType>);
-HERMES_API_USED_TEMPLATE(Tuple<Space*>);
-HERMES_API_USED_TEMPLATE(Tuple<MeshFunction*>);
-HERMES_API_USED_TEMPLATE(Tuple<Solution*>);
-HERMES_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
+HERMES_API_USED_TEMPLATE(Hermes::Tuple<ProjNormType>);
+HERMES_API_USED_TEMPLATE(Hermes::Tuple<Space*>);
+HERMES_API_USED_TEMPLATE(Hermes::Tuple<MeshFunction*>);
+HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
+HERMES_API_USED_TEMPLATE(Hermes::Tuple<PrecalcShapeset*>);
 
 
 /// Discrete problem class
@@ -55,7 +55,7 @@ HERMES_API_USED_TEMPLATE(Tuple<PrecalcShapeset*>);
 class HERMES_API DiscreteProblem 
 {
 public:
-  DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear = false);
+  DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces, bool is_linear = false);
   virtual ~DiscreteProblem();
   void free();
 
@@ -187,7 +187,7 @@ protected:
   int ndof;
   int *sp_seq;
   int wf_seq;
-  Tuple<Space *> spaces;
+  Hermes::Tuple<Space *> spaces;
 
   scalar** matrix_buffer;                /// buffer for holding square matrix (during assembling)
   int matrix_buffer_dim;                 /// dimension of the matrix held by 'matrix_buffer'
@@ -218,26 +218,26 @@ protected:
   void init_cache();
   void delete_cache();
 
-  scalar eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, 
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
-  scalar eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, 
          PrecalcShapeset *fv, RefMap *rv);
-  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Hermes::Tuple<Solution *> u_ext, 
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
-  scalar eval_form(WeakForm::VectorFormSurf *vfv, Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::Tuple<Solution *> u_ext, 
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
 
   // Evaluation of forms, discontinuous Galerkin case.
-  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> sln, 
+  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::Tuple<Solution *> sln, 
                       NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
                       SurfPos* ep);
-  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> sln,
+  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::Tuple<Solution *> sln,
                       NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
                       SurfPos* ep);
 };
 
 // Create globally refined space.
-HERMES_API Tuple<Space *>* construct_refined_spaces(Tuple<Space *> coarse, int order_increase = 1);
+HERMES_API Hermes::Tuple<Space *>* construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase = 1);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
 HERMES_API double get_l2_norm(Vector* vec); 

@@ -3,8 +3,8 @@
 // function used to combine the contributions from solution components to the total error 
 double error_total( double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), 
                     double (*nfn)(MeshFunction*, RefMap*), 
-                    Tuple<Solution*>& slns1, 
-                    Tuple<Solution*>& slns2 )
+                    Hermes::Tuple<Solution*>& slns1, 
+                    Hermes::Tuple<Solution*>& slns2 )
 {
   double error = 0.0, norm = 0.0;
 

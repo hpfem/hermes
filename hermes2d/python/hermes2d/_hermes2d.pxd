@@ -316,13 +316,13 @@ cdef extern from "hermes2d.h":
     ctypedef enum c_SelOption "RefinementSelectors::SelOption":
         pass
 
-    ctypedef struct c_H1SpaceTuple "Tuple<Space*>":
+    ctypedef struct c_H1SpaceTuple "Hermes::Tuple<Space*>":
         void (* push_back)(c_H1Space*)
 
-    ctypedef struct c_L2SpaceTuple "Tuple<Space*>":
+    ctypedef struct c_L2SpaceTuple "Hermes::Tuple<Space*>":
         void (* push_back)(c_L2Space*)
 
-    ctypedef struct c_SolutionTuple "Tuple<Solution*>":
+    ctypedef struct c_SolutionTuple "Hermes::Tuple<Solution*>":
         void (* push_back)(c_Solution*)
 
     ctypedef struct c_ProjBasedSelector "RefinementSelectors::ProjBasedSelector":

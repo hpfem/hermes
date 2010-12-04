@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
   temp_bc_type.add_bc_dirichlet(BDY_REACTOR_WALL);
   temp_bc_type.add_bc_neumann(BDY_SYMMETRY);
   temp_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
-  moist_bc_type.add_bc_neumann(Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
+  moist_bc_type.add_bc_neumann(Hermes::Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
   moist_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
 
   // Create H1 spaces with default shapesets.
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&T_space, &M_space));
+      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&T_space, &M_space));
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
@@ -210,28 +210,28 @@ int main(int argc, char* argv[])
 
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
       if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                              Tuple<Solution *>(&T_fine, &M_fine));
+                                              Hermes::Tuple<Solution *>(&T_fine, &M_fine));
       else error ("Matrix solver failed.\n");
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Tuple<Space *>(&T_space, &M_space), Tuple<Solution *>(&T_fine, &M_fine), 
-                     Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
+      OGProjection::project_global(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
+                     Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate."); 
-      Adapt* adaptivity = new Adapt(Tuple<Space *>(&T_space, &M_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&T_coarse, &M_coarse), 
-                                 Tuple<Solution *>(&T_fine, &M_fine), 
+      double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), 
+                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
                                  HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+        Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
       
       // Show new coarse meshes and solutions.
       char title[100];
@@ -250,9 +250,9 @@ int main(int argc, char* argv[])
       else 
       {
         info("Adapting coarse mesh.");
-        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+        done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.
