@@ -173,54 +173,41 @@ In the code, this looks as follows::
       return result;
     }
 
-Preparation for adaptivity
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Problems with the Crank-Nicolson method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-At the beginning we convert the initial condition into a Solution::
+Note that in this example, the Crank-Nicolson method fails after the first mesh coarsening 
+when TAU = 0.5 while the implicit Euler time discretization can handle this time 
+step without any problems. We spent lots of time investigating this issue but we were
+unable to find a bug in the code or in the math. Unless we misunderstand the Crank-Nicolson 
+method. If you have any comment to this, please let us know. We found in the literature 
+that the C-N method can fail when a large time step is used on a coarse mesh. So when 
+using this method here, do not increase TAU over 0.1.
+
+Starting the computation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+After reading mesh, defining boundary conditions, and initializing
+FE space, we convert the initial condition into a Solution::
 
     // Convert initial condition into a Solution.
     Solution sln_prev_time;
     sln_prev_time.set_exact(&mesh, init_cond);
 
-In order to obtain an initial vector for the Newton's method, we have to project the 
-initial condition on the FE space::
-
-    // Project the initial condition on the FE space to obtain initial
-    // coefficient vector for the Newton's method.
-    info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    scalar* coeff_vec_coarse = new scalar[ndof];
-    OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
-
-Next we perform the Newton's method on the coarse mesh and translate the resulting 
-coefficient vector into a Solution::
-
-    // Newton's loop on the coarse mesh.
-    info("Solving on coarse mesh:");
-    bool verbose = true;
-    if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
-        NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-
-    // Translate the resulting coefficient vector into the Solution sln.
-    Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
-
 Time stepping and periodic mesh derefinement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The time stepping loop begins with a periodic global mesh derefinement,
-after which the last reference solution is projected on the globally
-derefined mesh. The derefinement frequency is set by the user via the 
+The time stepping loop begins with a periodic global mesh derefinement.
+The derefinement frequency is set by the user via the 
 parameter UNREF_FREQ::
 
-    // Periodic global derefinements.
+    // Periodic global derefinement.
     if (ts > 1 && ts % UNREF_FREQ == 0) 
     {
       info("Global mesh derefinement.");
       mesh.copy(&basemesh);
       space.set_uniform_order(P_INIT);
-
-      // Project on globally derefined mesh.
-      info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(&space, &sln_prev_time, &sln);
+      ndof = Space::get_num_dofs(&space);
     }
 
 The code above resets the actual mesh to the basemesh. Alternatively,
@@ -228,22 +215,56 @@ one could just remove a few layers of refinement (this is not so clean
 from the mathematical point of view but faster in practice). Speed 
 optimization is not the main goal of the present example.
 
+First time step only: solve on coarse mesh
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+At the beginning of the first time step, we solve the nonlinear problem 
+on the coarse mesh::
+
+    // The following is done only in the first time step, 
+    // when the nonlinear problem was never solved before.
+    if (ts == 1) {
+      // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
+      SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+      Vector* rhs_coarse = create_vector(matrix_solver);
+      Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+      scalar* coeff_vec_coarse = new scalar[ndof];
+
+      // Calculate initial coefficient vector for Newton on the coarse mesh.
+      info("Projecting initial condition to obtain coefficient vector on coarse mesh.");
+      OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
+
+      // Newton's loop on the coarse mesh.
+      info("Solving on coarse mesh:");
+      bool verbose = true;
+      if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+          NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+      Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
+
+      // Cleanup after the Newton loop on the coarse mesh.
+      delete matrix_coarse;
+      delete rhs_coarse;
+      delete solver_coarse;
+      delete [] coeff_vec_coarse;
+    }
+
 Adaptivity loop
 ~~~~~~~~~~~~~~~
 
 The adaptivity loop begins by constructing a globally refined reference 
-mesh::
+space::
 
     // Construct globally refined reference mesh
     // and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-In the first adaptivity step, a projection of the coarse mesh solution is used as 
-an initial guess for the Newton's method on the reference mesh. Starting with the 
-second adaptivity step, the previous reference mesh solution is projected instead::
+In the first adaptivity step of the first time step, a projection of the coarse mesh 
+solution is used as an initial guess for the Newton's method on the reference mesh. 
+After that, the last reference mesh solution is projected, so that we lose as little
+solution information as possible::
 
     // Calculate initial coefficient vector for Newton on the fine mesh.
-    if (as == 1) {
+    if (ts == 1 && as == 1) {
       info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
       OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
     }
@@ -278,5 +299,38 @@ next time step::
 Sample results
 ~~~~~~~~~~~~~~
 
-TO BE CONTINUED.
+Initial condition and initial mesh:
+
+.. image:: 22/1.png
+   :align: center
+   :width: 800
+   :alt: Sample screenshot
+
+Solution and mesh at t = 0.5:
+
+.. image:: 22/2.png
+   :align: center
+   :width: 800
+   :alt: Sample screenshot
+
+Solution and mesh at t = 1.0:
+
+.. image:: 22/3.png
+   :align: center
+   :width: 800
+   :alt: Sample screenshot
+
+Solution and mesh at t = 1.5:
+
+.. image:: 22/4.png
+   :align: center
+   :width: 800
+   :alt: Sample screenshot
+
+Solution and mesh at t = 2.0:
+
+.. image:: 22/5.png
+   :align: center
+   :width: 800
+   :alt: Sample screenshot
 
