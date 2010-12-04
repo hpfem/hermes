@@ -2325,10 +2325,6 @@ void Space::update_constraints()
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
 
-static BCType default_bc_type(int marker) {
-	return BC_ESSENTIAL;
-}
-
 static scalar default_bc_value_by_coord(int ess_bdy_marker, double x, double y, double z) {
 	return 0.0;
 }

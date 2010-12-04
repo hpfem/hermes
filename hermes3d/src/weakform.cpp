@@ -196,7 +196,7 @@ void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *>& u_ext,
 ///
 WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2, 
-                                      std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext)
+                                      std::vector<MeshFunction*>& ext, Tuple<Solution*>& u_ext)
 {
   _F_
   // first create a list of meshes the form uses
