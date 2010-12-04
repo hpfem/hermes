@@ -172,10 +172,6 @@ add_custom_command(
 )
 
 
-add_custom_target(test-quick
-	COMMAND   /usr/bin/ctest -E \"hnnd|qorder|lobatto|hex-h1-1face\"
-)
-
 message("\nConfiguration results:")
 message("----------------------")
 message("Build with Python: ${WITH_PYTHON}")
