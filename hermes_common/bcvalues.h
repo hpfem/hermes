@@ -45,7 +45,7 @@ protected:
 public:
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
-  void add_function(value_callback callback, Tuple<int> markers) 
+  void add_function(value_callback callback, Hermes::Tuple<int> markers) 
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
@@ -58,7 +58,7 @@ public:
   };
 
   /// The same as add_function(), only supplies the default (zero) functions.
-  void add_zero_function(Tuple<int> markers) 
+  void add_zero_function(Hermes::Tuple<int> markers) 
   {
     if(markers.size() == 0)
       error("BCValues::add_zero_function() called without any boundary markers specified.");

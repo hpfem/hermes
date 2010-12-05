@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
   C.set_time_step(tau);
 
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e;
-  bool success = C.calculate(Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  bool success = C.calculate(Hermes::Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   if (!success) error("Computation failed.");
 
   // Wait for the views to be closed.

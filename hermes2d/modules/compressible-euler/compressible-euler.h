@@ -59,7 +59,7 @@ public:
   void set_solid_wall_marker(int marker);
 
   // Solve the problem and return the solution.
-  bool calculate(Tuple<Solution*> sln);
+  bool calculate(Hermes::Tuple<Solution*> sln);
 
   // This class associates BC markers with BC boundary types.
   // Only default in the current implementation.
@@ -118,7 +118,7 @@ private:
   Mesh* mesh;
 
   // Finite element space;
-  Tuple<Space*>* spaces;
+  Hermes::Tuple<Space*>* spaces;
 
 };
 

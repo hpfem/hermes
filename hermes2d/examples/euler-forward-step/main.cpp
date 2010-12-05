@@ -48,12 +48,6 @@ double t = 0;
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux(KAPPA);
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
-
 // Inlet/outlet boundary conditions.
 double bc_density(double y)
 {
@@ -140,12 +134,14 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("ffs.mesh", &mesh);
 
-
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Boundary condition types;
+  BCTypes bc_types;
+
   // Initialize boundary condition types and spaces with default shapesets.
-  bc_types.add_bc_natural(Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
   L2Space space_rho(&mesh, &bc_types, NULL, P_INIT);
   L2Space space_rho_v_x(&mesh, &bc_types, NULL, P_INIT);
   L2Space space_rho_v_y(&mesh, &bc_types, NULL, P_INIT);
@@ -177,59 +173,59 @@ int main(int argc, char* argv[])
   // First flux.
   // Unnecessary for FVM.
   if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
-  wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_x));
+    wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_x));
 
   wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_2_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_3_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(2, callback(linear_form_2_0_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(2, callback(linear_form_2_1_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(2, callback(linear_form_2_2_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(2, callback(linear_form_2_3_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_0_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_1_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_2_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   // Second flux.
   
-  wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_y));
+    wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_2_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_3_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(2, callback(linear_form_2_0_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(2, callback(linear_form_2_1_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(2, callback(linear_form_2_2_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(2, callback(linear_form_2_3_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_0_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_1_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_2_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
 
   // Volumetric linear forms coming from the time discretization.
@@ -314,6 +310,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = true;
+  
   DiscreteProblem dp(&wf, Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
   // If the FE problem is in fact a FV problem.

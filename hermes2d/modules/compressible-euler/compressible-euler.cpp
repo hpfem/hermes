@@ -145,7 +145,7 @@ bool CompressibleEuler::all_set()
 }
 
 // Solve the problem.
-bool CompressibleEuler::calculate(Tuple<Solution*> sln) 
+bool CompressibleEuler::calculate(Hermes::Tuple<Solution*> sln) 
 {
   // Initial check.
   if(!all_set())
@@ -159,7 +159,7 @@ bool CompressibleEuler::calculate(Tuple<Solution*> sln)
   for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();
 
   // Create L2 spaces with default shapesets.
-  this->spaces = new Tuple<Space*>();
+  this->spaces = new Hermes::Tuple<Space*>();
   this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
   this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
   this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
@@ -194,70 +194,70 @@ bool CompressibleEuler::calculate(Tuple<Solution*> sln)
   // First flux.
   // Unnecessary for FVM.
   if(init_p.order_h > 0 || init_p.order_v > 0) {
-    wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_x));
+    wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_x));
     wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_2_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_3_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(2, callback(linear_form_2_0_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(2, callback(linear_form_2_1_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(2, callback(linear_form_2_2_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(2, callback(linear_form_2_3_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_0_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_1_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_2_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     // Second flux.
     
-    wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Tuple<MeshFunction*>(&prev_rho_v_y));
+    wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_2_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_3_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(2, callback(linear_form_2_0_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(2, callback(linear_form_2_1_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(2, callback(linear_form_2_2_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(2, callback(linear_form_2_3_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_0_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_1_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_2_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                       Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
 
   // Volumetric linear forms coming from the time discretization.
   if(use_vector_valued_forms) {
     wf.add_vector_form(0, linear_form_vector, linear_form_order, HERMES_ANY, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(1, linear_form_vector, linear_form_order, HERMES_ANY, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(2, linear_form_vector, linear_form_order, HERMES_ANY, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, linear_form_vector, linear_form_order, HERMES_ANY, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
   else {
     wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_rho);
@@ -269,67 +269,67 @@ bool CompressibleEuler::calculate(Tuple<Solution*> sln)
   // Surface linear forms - inner edges coming from the DG formulation.
   if(use_vector_valued_forms) {
     wf.add_vector_form_surf(0, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(1, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(2, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(3, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
   else {
     wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(1, linear_form_interface_1, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(2, linear_form_interface_2, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(3, linear_form_interface_3, linear_form_order, H2D_DG_INNER_EDGE, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
 
   // Surface linear forms - inlet / outlet edges.
   if(use_vector_valued_forms) {
     wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_vector, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_vector, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_vector, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_vector, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
   else {
     wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, inlet_outlet_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
   
   // Surface linear forms - Solid wall edges.
   if(use_vector_valued_forms) {
     wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_vector, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_vector, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_vector, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_vector, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
   else {
     wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, solid_wall_marker, 
-                            Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+                            Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   }
 
   // Initialize the FE problem.
@@ -345,9 +345,9 @@ bool CompressibleEuler::calculate(Tuple<Solution*> sln)
     dp.use_vector_valued_forms();
 
   // Filters for visualization of pressure and the two components of velocity.
-  SimpleFilter pressure(calc_pressure_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter u(calc_u_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter w(calc_w_func, Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter pressure(calc_pressure_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter u(calc_u_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter w(calc_w_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
   ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
 
@@ -387,16 +387,16 @@ bool CompressibleEuler::calculate(Tuple<Solution*> sln)
     // Solve the matrix problem.
     info("Solving the matrix problem.");
     if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), *spaces, Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+      Solution::vector_to_solutions(solver->get_solution(), *spaces, Hermes::Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
     else
     error ("Matrix solver failed.\n");
 
     // Approximate the time derivative of the solution.
     if(calculate_time_derivative_approximation) {
-      Adapt *adapt_for_time_der_calc = new Adapt(*spaces, Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
+      Adapt *adapt_for_time_der_calc = new Adapt(*spaces, Hermes::Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
       bool solutions_for_adapt = false;
-      double difference = adapt_for_time_der_calc->calc_err_est(Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-        Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / tau;
+      double difference = adapt_for_time_der_calc->calc_err_est(Hermes::Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
+        Hermes::Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / tau;
       delete adapt_for_time_der_calc;
 
       // Info about the approximate time derivative.
