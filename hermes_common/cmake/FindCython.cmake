@@ -5,12 +5,13 @@
 # This finds the "cython" executable in your PATH, and then in some standard
 # paths:
 FIND_FILE(CYTHON_BIN cython /usr/bin /usr/local/bin)
+SET(CYTHON_FLAGS --cplus --fatal-errors)
 
 SET(Cython_FOUND FALSE)
 IF (CYTHON_BIN)
     # Try to run Cython, to make sure it works:
     execute_process(
-        COMMAND ${CYTHON_BIN} ${CMAKE_MODULE_PATH}/cython_test.pyx
+        COMMAND ${CYTHON_BIN} ${CYTHON_FLAGS} ${CMAKE_MODULE_PATH}/cython_test.pyx
         RESULT_VARIABLE CYTHON_RESULT
         OUTPUT_QUIET
         ERROR_QUIET
@@ -61,7 +62,7 @@ macro(CYTHON_ADD_MODULE_PYX name)
     add_custom_command(
         OUTPUT ${name}.cpp
         COMMAND ${CYTHON_BIN}
-        ARGS --cplus -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+        ARGS ${CYTHON_FLAGS} -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
         DEPENDS ${DEPENDS}
         COMMENT "Cythonizing ${name}.pyx")
 endmacro(CYTHON_ADD_MODULE_PYX)
