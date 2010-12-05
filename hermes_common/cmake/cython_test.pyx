@@ -4,6 +4,9 @@ from numpy cimport ndarray
 # Test that libcpp module is present:
 from libcpp.vector cimport vector
 
+# Test the math library:
+from libc.math cimport sin, cos, atan2
+
 # Test that templates work:
 cdef vector[int] array2vector_int(a):
     cdef vector[int] v
