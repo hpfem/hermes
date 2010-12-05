@@ -151,11 +151,12 @@ int main(int argc, char* argv[])
   mesh.refine_element(1151);
   mesh.refine_element(1152);
 
-  // Initialize spaces with default shapesets.
-  L2Space space_rho(&mesh, bc_types, NULL, P_INIT);
-  L2Space space_rho_v_x(&mesh, bc_types, NULL, P_INIT);
-  L2Space space_rho_v_y(&mesh, bc_types, NULL, P_INIT);
-  L2Space space_e(&mesh, bc_types, NULL, P_INIT);
+  // Initialize boundary condition types and spaces with default shapesets.
+  bc_types.add_bc_natural(Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+  L2Space space_rho(&mesh, &bc_types, NULL, P_INIT);
+  L2Space space_rho_v_x(&mesh, &bc_types, NULL, P_INIT);
+  L2Space space_rho_v_y(&mesh, &bc_types, NULL, P_INIT);
+  L2Space space_e(&mesh, &bc_types, NULL, P_INIT);
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;

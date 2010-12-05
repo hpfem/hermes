@@ -162,10 +162,11 @@ int main(int argc, char* argv[])
  
   // Enter boundary markers.
   BCTypes bc_types_null;
+  BCValues bc_values_null;
 
   int p_init = 1;
   // The NULLs are for bc_types() and essential_bc_values().
-  H1Space space_from_file(sln_from_file.get_mesh(), &bc_types_null, NULL, p_init);
+  H1Space space_from_file(sln_from_file.get_mesh(), &bc_types_null, &bc_values_null, p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
   WinGeom* win_geom_3 = new WinGeom(920, 0, 450, 600);
   OrderView oview("Saved Solution -> Space", win_geom_3);

@@ -17,6 +17,7 @@
 #define __H2D_SPACE_H
 
 #include "../../../hermes_common/bctypes.h"
+#include "../../../hermes_common/bcvalues.h"
 #include "../mesh.h"
 #include "../traverse.h"
 #include "../shapeset/shapeset.h"
@@ -94,6 +95,9 @@ class Ord2;
 class HERMES_API Space
 {
 public:
+  // TODO: After successful testing, this will be the one constructor.
+  Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init);
+
   // Constructor.
   Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, 
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
@@ -115,6 +119,8 @@ public:
   void set_bc_types_init(BCTypes *bc_types);
   /// DEPRECATED
   void set_bc_types_init(BCType (*bc_type_callback)(int marker));
+  /// Sets the BC values, checks according to bc_types and sets default values (zero BC) where appropriate.
+  void set_essential_bc_values(BCValues *bc_values);
   /// Sets the BC values callback function, which takes absolute boundary coordinates.
   void set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y));
   /// Sets the BC values callback function, which takes parametric edge position.
@@ -195,6 +201,7 @@ public:
   static int assign_dofs(Hermes::Tuple<Space*> spaces);
 
   BCTypes* bc_types;
+  BCValues* bc_values;
 
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.

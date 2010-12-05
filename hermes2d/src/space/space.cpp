@@ -18,6 +18,33 @@
 #include "../../../hermes_common/matrix.h"
 #include "../auto_local_array.h"
 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init)
+        : mesh(mesh), shapeset(shapeset)
+{
+  _F_
+  if (mesh == NULL) error("Space must be initialized with an existing mesh.");
+  this->default_tri_order = -1;
+  this->default_quad_order = -1;
+  this->ndata = NULL;
+  this->edata = NULL;
+  this->nsize = esize = 0;
+  this->ndata_allocated = 0;
+  this->mesh_seq = -1;
+  this->seq = 0;
+  this->was_assigned = false;
+  this->ndof = 0;
+
+  if(bc_types == NULL) error("BCTypes pointer cannot be NULL in Space::Space().");
+  this->set_bc_types_init(bc_types);
+  this->set_essential_bc_values(bc_values);
+
+  // This will not be needed once we get rid of the old Space constructors etc.
+  this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
+
+  own_shapeset = (shapeset == NULL);
+}
+
+
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, 
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
         : mesh(mesh), shapeset(shapeset)
@@ -39,6 +66,8 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
   this->set_bc_types_init(bc_types);
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
+
+  this->bc_values = NULL;
 
   own_shapeset = (shapeset == NULL);
 }
@@ -68,6 +97,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
   
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
+  this->bc_values = NULL;
 
   own_shapeset = (shapeset == NULL);
 }
@@ -508,7 +538,10 @@ scalar default_bc_value_by_edge(SurfPos* surf_pos)
   double x, y;
   Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
   nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
-  return surf_pos->space->bc_value_callback_by_coord(surf_pos->marker, x, y);
+  if(surf_pos->space->bc_values != NULL)
+    return surf_pos->space->bc_values->calculate(surf_pos->marker, x, y);
+  else
+    return surf_pos->space->bc_value_callback_by_coord(surf_pos->marker, x, y);
 }
 
 void Space::set_bc_types(BCTypes* bc_types)
@@ -531,6 +564,17 @@ void Space::set_bc_types_init(BCTypes* bc_types)
   }
   seq++;
 }
+
+void Space::set_essential_bc_values(BCValues* bc_values)
+{
+  _F_
+  if (bc_values == NULL)
+    return;
+  this->bc_values = bc_values;
+  this->bc_values->check_consistency(this->bc_types);
+  this->bc_values->update(this->bc_types);
+}
+
 
 void Space::set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int, double, double))
 {

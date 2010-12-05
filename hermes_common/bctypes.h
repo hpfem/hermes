@@ -210,6 +210,8 @@ public:
     Hermes::Tuple<int> markers_newton;
     Hermes::Tuple<int> markers_dirichlet;
     Hermes::Tuple<int> markers_none;
+  
+    friend class BCValues;
 };
 
 static BCType default_bc_type(int marker)

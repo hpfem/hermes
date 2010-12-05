@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
 
   // create an H1 space with default shapeset
-  H1Space space(&mesh, &bc_types, NULL, 1);
+  H1Space space(&mesh, &bc_types, (BCValues*) NULL, 1);
 
   // new code for the test
   int n_dof[10], dof_max[10];

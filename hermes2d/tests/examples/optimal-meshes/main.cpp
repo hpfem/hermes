@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, (BCValues *) NULL, P_INIT);
 
   // Set element poly orders.
   space.set_element_order(0, H2D_MAKE_QUAD_ORDER(o0, 1));

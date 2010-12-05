@@ -23,6 +23,32 @@ double** H1Space::h1_proj_mat = NULL;
 double*  H1Space::h1_chol_p   = NULL;
 int      H1Space::h1_proj_ref = 0;
 
+H1Space::H1Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset)
+    : Space(mesh, shapeset, bc_types, bc_values, p_init)
+{
+  _F_
+  if (shapeset == NULL) 
+  {
+    this->shapeset = new H1Shapeset;
+    own_shapeset = true;
+  }
+
+  if (!h1_proj_ref++)
+  {
+    // FIXME: separate projection matrices for different shapesets
+    precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
+  }
+  proj_mat = h1_proj_mat;
+  chol_p   = h1_chol_p;
+
+  // set uniform poly order in elements
+  if (p_init.order_h < 1 || p_init.order_v < 1) error("P_INIT must be >=  1 in an H1 space.");
+  else this->set_uniform_order_internal(p_init);
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
 H1Space::H1Space(Mesh* mesh, BCTypes* bc_types, scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, p_init)
 {

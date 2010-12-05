@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &mesh);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
+  H1Space space(&mesh, (BCTypes *) NULL, (BCValues*) NULL, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf_dummy;

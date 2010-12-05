@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &yvel_bc_type, NULL, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &yvel_bc_type, (BCValues *) NULL, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
