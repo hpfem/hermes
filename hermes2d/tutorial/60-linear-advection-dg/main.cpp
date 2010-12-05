@@ -58,24 +58,6 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  mesh.refine_element(0, 1);
-  mesh.refine_element(2);
-  mesh.refine_element(3);
-  mesh.refine_element(5, 2);
-  mesh.refine_element(6); 
-  mesh.refine_element(7, 1);
-  mesh.refine_element(8, 1); 
-  mesh.refine_element(14);
-  mesh.refine_element(15);
-  mesh.refine_element(16);
-  mesh.refine_element(17);
-  mesh.refine_element(19);
-  mesh.refine_element(20);
-  mesh.refine_element(42);
-  mesh.refine_element(43);
-  mesh.refine_element(44);
-  mesh.refine_element(45);
-  mesh.refine_element(13, 1);
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
   
   // Create an L2 space with default shapeset.
