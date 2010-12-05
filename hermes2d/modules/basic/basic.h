@@ -22,7 +22,7 @@
 
 typedef std::pair<double, double> double_pair;
 
-class Basic {
+class HERMES_API Basic {
 public:
   Basic();
 
