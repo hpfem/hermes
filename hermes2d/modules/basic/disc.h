@@ -20,6 +20,7 @@ int Get(FILE *f, unsigned long int *what);
 int Get(FILE *f, float *what);
 int Get(FILE *f, double *what);
 int Get(FILE *f, long double *what);
+int Get(FILE *f, bool *what);
 
 // second part
 

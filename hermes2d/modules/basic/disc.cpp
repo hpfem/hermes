@@ -109,6 +109,16 @@ int Get(FILE *f, long double *what) {
   return 1;
 }
 
+// bool:
+int Get(FILE *f, bool *what) {
+  char str[255];
+  if(!Get(f, str)) return 0;
+  int value = atoi(str);
+  if(value == 1) *what = true;
+  else *what = false;
+  return 1;
+}
+
 // second part
 // int Get(FILE *f, int FieldLength, type **Field);
 
