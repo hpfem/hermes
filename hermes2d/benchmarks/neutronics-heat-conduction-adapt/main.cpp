@@ -10,15 +10,15 @@ using namespace RefinementSelectors;
 
 // Neutronics/heat conduction test case (adaptive).
 //
-// Author: Damien Lebrun-Grandie (Texas A&M University).
+// Authors: Damien Lebrun-Grandie (Texas A&M University, USA),
+//          Milan Hanus (University of West Bohemia, Pilsen, Czech Rep.).
+// PDEs:
 //
-// PDE:
+// 1/v d/dt phi = div(D grad phi) + (nu Sigma_f - Sigma_r(T)) phi + q
 //
-// 1/v d/dt phi = div(D grad phi) + nu Sigma_f phi_1 + q
+// rho c_p d/dt T = div(k(T) grad T) + kappa Sigma_f phi + qT
 //
-// rho c_p d/dt T = div(k grad T) + kappa Sigma_f phi + qT
-//
-// Domain: rectangle (Lx, Ly).
+// Domain: rectangle (LX, LY).
 //
 // BC: homogeneous Dirichlet.
 //
@@ -27,17 +27,17 @@ using namespace RefinementSelectors;
 const bool SOLVE_ON_COARSE_MESH = false;   // true... Newton is done on coarse mesh in every adaptivity step.
                                            // false...Newton is done on coarse mesh only once, then projection
                                            //         of the fine mesh solution to coarse mesh is used.
-const int INIT_GLOB_REF_NUM = 2;           // Number of initial uniform mesh refinements.
+const int INIT_GLOB_REF_NUM = 1;           // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;            // Number of initial refinements towards boundary.
-const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements
+const int P_INIT = 1;                      // Initial polynomial degree of all mesh elements
 const int PROJ_TYPE = 1;                   // For the projection of the initial condition.
                                            // on the initial mesh: 1 = H1 projection, 0 = L2 projection.
 // Time-stepping:
-const double TAU = 0.1;                    // Time step.
-const double T_FINAL = 10*TAU;             // Time interval length.
+const double TAU = 0.01;                   // Time step.
+const double T_FINAL = 1000*TAU;           // Time interval length.
 
 // Adaptivity:
-const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
+const int UNREF_FREQ = 10;                 // Every UNREF_FREQ time step the mesh is unrefined.
 const double THRESHOLD = 0.3;              // This is a quantitative parameter of the adapt(...) function and
                                            // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                    // Adaptive strategy:
@@ -63,12 +63,11 @@ const double CONV_EXP = 1.0;               // Default value is 1.0. This paramet
                                            // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const int MAX_P = 6;                       // Maximum polynomial order allowed in hp-adaptivity
                                            // had to be limited due to complicated integrals.
-const double ERR_STOP = 0.001;             // Stopping criterion for hp-adaptivity
+const double ERR_STOP = 100*TAU;           // Stopping criterion for hp-adaptivity
                                            // (relative error between reference and coarse solution in percent).
 const int NDOF_STOP = 100000;              // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
-const int ORDER_INCREASE = 1;              // The two following parameters are used in the constructor of the class RefSystem
-const int REFINEMENT = 1;                  //   Default values are 1
+const int ORDER_INCREASE = 1;              // Increase in approximation order associated with the global refinement.
 
 
 // Newton's method:
@@ -81,6 +80,7 @@ const int NEWTON_MAX_ITER = 100;           // Maximum allowed number of Newton i
 // (depending on which optional solver libraries you have installed and enabled in hermes2d/CMake.vars).
 MatrixSolverType matrix_solver_coarse = SOLVER_UMFPACK;  
 MatrixSolverType matrix_solver_fine = SOLVER_UMFPACK;
+
 // Problem parameters.
 const double CT = 1.0;
 const double CF = 1.0;
@@ -89,23 +89,19 @@ const double rF = 0.25;
 const double LX = 100.0;          // Domain sizes in the x and y dimensions.
 const double LY = 100.0;
 const double invvel = 2.0e-4;     // Inverse of neutron velocity.
-const double xsdiff = 1.268;      // Diffusion coefficient.
+const double xsdiff = 1.268;      // Neutron diffusion coefficient.
 const double Tref = 0.0;
 
 const double nu = 2.41;           // Number of neutrons emitted per fission event.
 const double xsfiss = 0.00191244; // Fission cross section.
-const double kappa = 1.0e-6;
-const double rho = 1.0;           // Density.
-const double cp = 1.0;            // Heat capacity.
-
-const double normalization_const = 1.0;
-
-const double energy_per_fission = kappa * xsfiss;
+const double kappa = 1.0e-6;      // Energy per fission.
+const double rho = 1.0;           // Fuel density.
+const double cp = 1.0;            // Fuel heat capacity.
 
 // Miscellaneous:
 double TIME = 0.0;                // Current time.
 
-// Thermal conductivity depends on temperature
+// Thermal conductivity dependence on temperature.
 const  double k0 = 3.0e-3;
 const  double k1 = 2.0e-4;
 template<typename Real>
@@ -113,13 +109,13 @@ Real k(Real T) {
   return k0 + k1 * (T - Tref);
 }
 
-// Derivative of the thermal conductivity
+// Derivative of the thermal conductivity of fuel with respect to temperature.
 template<typename Real>
 Real dk_dT(Real T) {
   return k1;
 }
 
-// Removal cross section depends on temperature
+// Removal cross section dependence on temperature.
 const double xsa_ref = 0.0349778;
 const double doppler_coeff = 1.0e-5;
 template<typename Real>
@@ -398,11 +394,11 @@ int main(int argc, char* argv[])
       
       // Visualize intermediate solutions and mesh during adaptivity.  
       view_T.show(&T_coarse);
-      sprintf(title, "T (fine mesh), t = %g s, adapt step %d", TIME, as);
+      sprintf(title, "T (coarse mesh), t = %g s, adapt step %d", TIME, as);
       view_T.set_title(title);
       
       view_phi.show(&phi_coarse);
-      sprintf(title, "phi (fine mesh), t = %g s, adapt step %d", TIME, as);
+      sprintf(title, "phi (coarse mesh), t = %g s, adapt step %d", TIME, as);
       view_phi.set_title(title);
       
       ordview_T_coarse.show(&space_T);
