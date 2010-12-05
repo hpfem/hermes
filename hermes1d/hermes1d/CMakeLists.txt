@@ -1,3 +1,8 @@
+include_directories(${PROJECT_BINARY_DIR}/src)
+
+cython_add_module(cython_utils)
+cython_add_module(numpy_utils)
+
 add_subdirectory(h1d_wrapper)
 add_subdirectory(fekete)
 

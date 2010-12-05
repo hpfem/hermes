@@ -7,8 +7,9 @@ add_subdirectory(laplace_bc_newton2)
 add_subdirectory(neutronics)
 
 if(WITH_PYTHON)
-  add_subdirectory(schroedinger)
-  add_subdirectory(system_sin_eigen)
+#  FIXME: not adapted to the latest API
+#  add_subdirectory(schroedinger)
+#  add_subdirectory(system_sin_eigen)
 endif(WITH_PYTHON)
 
 add_subdirectory(system_car_model)

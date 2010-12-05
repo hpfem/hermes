@@ -3,15 +3,18 @@
 # file for the exact terms).
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-from math cimport sin, cos, sqrt
+from libc.math cimport sin, cos, sqrt
 
 from numpy import empty, array
 from numpy cimport ndarray
 
-from hermes_common._hermes_common cimport c2numpy_double, delete, PY_NEW, \
-    numpy2c_double_inplace, numpy2c_int_inplace, Matrix
+# FIXME:
+#from hermes_common._hermes_common cimport c2numpy_double, delete, PY_NEW, \
+#    numpy2c_double_inplace, numpy2c_int_inplace, Matrix
 
 cimport hermes1d
+from hermes1d.cython_utils cimport PY_NEW
+from hermes1d.numpy_utils cimport c2numpy_double
 from hermes1d.fekete._fekete cimport get_gauss_points_phys, int_f2, \
         int_f2_f2
 
@@ -31,12 +34,9 @@ cdef class Element:
         return self.thisptr.x2
 
     def get_coeffs(self, int comp=0):
-        from numpy import empty
-        cdef double *coeffs_array
-        cdef int n
-        coeffs = empty((self.p+1,), dtype="double")
-        numpy2c_double_inplace(coeffs, &coeffs_array, &n)
-        self.thisptr.get_coeffs(0, comp, coeffs_array)
+        cdef ndarray[double, mode="c"] coeffs = \
+                empty((self.p+1,), dtype="double")
+        self.thisptr.get_coeffs(0, comp, &coeffs[0])
         return coeffs
 
 cdef api object c2py_Element(hermes1d.Element *h):
@@ -50,33 +50,30 @@ cdef class Mesh:
     def __init__(self, *args):
         cdef double a, b
         cdef int n_elem, p_init, eq_num, n
-        cdef double *pts_array
-        cdef int *p_array, *m_array, *div_array
+        cdef ndarray[double, mode="c"] pts
+        cdef ndarray[int, mode="c"] p
+        cdef ndarray[int, mode="c"] m
+        cdef ndarray[int, mode="c"] div
         if len(args) == 5:
             a, b, n_elem, p_init, eq_num = args
-            self.thisptr = new hermes1d.Mesh(a, b, n_elem, p_init, eq_num,
+            self.thisptr = new hermes1d.Space(a, b, n_elem, p_init, eq_num,
                     1, 0)
         elif len(args) == 4:
             a, b, n_elem, p_init = args
             eq_num = 1
-            self.thisptr = new hermes1d.Mesh(a, b, n_elem, p_init, eq_num,
+            self.thisptr = new hermes1d.Space(a, b, n_elem, p_init, eq_num,
                     1, 0)
         elif len(args) == 2:
-            pts, p = args
-            pts = array(pts, dtype="double")
-            p = array(p, dtype="int32")
+            pts = array(args[0], dtype="double")
+            p = array(args[1], dtype="int32")
             if not (len(pts) == len(p) + 1):
                 raise ValueError("len(pts) must be equal to len(p) + 1")
             n_elem = len(p)
             m = array([1]*len(p), dtype="int32")
             div = array([1]*len(p), dtype="int32")
             eq_num = 1
-            numpy2c_double_inplace(pts, &pts_array, &n)
-            numpy2c_int_inplace(p, &p_array, &n)
-            numpy2c_int_inplace(m, &m_array, &n)
-            numpy2c_int_inplace(div, &div_array, &n)
-            self.thisptr = new hermes1d.Mesh(n_elem, pts_array, p_array,
-                    m_array, div_array, eq_num, 1, 0)
+            self.thisptr = new hermes1d.Space(n_elem, &pts[0], &p[0],
+                    &m[0], &div[0], eq_num, 1, 0)
         else:
             raise ValueError("Don't understand the arguments")
         self.delptr = True
@@ -85,11 +82,9 @@ cdef class Mesh:
         if self.delptr:
             del self.thisptr
 
-    def set_coeff_vector(self, sol, int comp):
-        cdef double *Y
-        cdef int n
-        numpy2c_double_inplace(sol, &Y, &n)
-        self.thisptr.set_coeff_vector(Y, comp)
+    def set_coeff_vector(self, ndarray[double, mode="c"] sol not None,
+            int comp):
+        self.thisptr.set_coeff_vector(&sol[0], comp)
 
     def assign_dofs(self):
         return self.thisptr.assign_dofs()
@@ -153,7 +148,7 @@ cdef class Mesh:
         return Mesh(pts, orders)
 
 
-cdef api object c2py_Mesh(hermes1d.Mesh *h):
+cdef api object c2py_Mesh(hermes1d.Space *h):
     cdef Mesh n
     n = <Mesh>PY_NEW(Mesh)
     n.thisptr = h
@@ -185,7 +180,7 @@ cdef class Linearizer:
         cdef double *y
         cdef int n
         self.mesh.set_coeff_vector(sol, comp)
-        self.thisptr.get_xy_mesh(comp, plotting_elem_subdivision,
+        self.thisptr.get_xy_space(comp, plotting_elem_subdivision,
                 &x, &y, &n)
         x_numpy = c2numpy_double(x, n)
         y_numpy = c2numpy_double(y, n)
@@ -326,9 +321,9 @@ class FESolution:
             e = I._next_active_element()
         return coeffs
 
-def calc_error_estimate(int norm, Mesh mesh, Mesh mesh_ref, int sln=0):
+def calc_err_est(int norm, Mesh mesh, Mesh mesh_ref, int sln=0):
     cdef ndarray[double] err_array = empty(mesh.get_n_active_elem())
-    err_total = hermes1d.calc_error_estimate(norm, mesh.thisptr,
+    err_total = hermes1d.calc_err_est(norm, mesh.thisptr,
             mesh_ref.thisptr, &(err_array[0]), sln)
     return err_total, err_array
 
@@ -362,16 +357,17 @@ cdef void fn(int n, double x[], double f[], double dfdx[]):
         if dfdx != NULL:
             dfdx[i] = _A.eval_dfdx(x[i])
 
-def assemble_projection_matrix_rhs(Mesh mesh, Matrix A,
-    ndarray[double, mode="c"] rhs, f, projection_type=None):
-    cdef int prj_type
-    if projection_type == "L2":
-        prj_type = hermes1d.H1D_L2_ortho_global
-    elif projection_type == "H1":
-        prj_type = hermes1d.H1D_H1_ortho_global
-    else:
-        raise ValueError("Unknown projection type")
-    global _A
-    _A = f
-    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.thisptr,
-        &(rhs[0]), &fn, prj_type)
+# FIXME:
+#def assemble_projection_matrix_rhs(Mesh mesh, Matrix A,
+#    ndarray[double, mode="c"] rhs, f, projection_type=None):
+#    cdef int prj_type
+#    if projection_type == "L2":
+#        prj_type = hermes1d.H1D_L2_ortho_global
+#    elif projection_type == "H1":
+#        prj_type = hermes1d.H1D_H1_ortho_global
+#    else:
+#        raise ValueError("Unknown projection type")
+#    global _A
+#    _A = f
+#    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.thisptr,
+#        &(rhs[0]), &fn, prj_type)

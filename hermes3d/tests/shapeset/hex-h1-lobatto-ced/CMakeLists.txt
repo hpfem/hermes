@@ -11,7 +11,7 @@ set_common_target_properties(${PROJECT_NAME})
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(hex-h1-lobbatto-shapeset-ced-1 ${BIN})
-set_tests_properties(hex-h1-lobbatto-shapeset-ced-1 PROPERTIES LABELS long)
+set_tests_properties(hex-h1-lobbatto-shapeset-ced-1 PROPERTIES LABELS slow)
 
 endif(WITH_HEX)
 

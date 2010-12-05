@@ -274,10 +274,6 @@ add_custom_command(
 #)
 
 
-add_custom_target(test-quick
-	COMMAND   /usr/bin/ctest -LE long
-)
-
 # -- package --------
 
 set(CPACK_PACKAGE_VERSION_MAJOR "0")

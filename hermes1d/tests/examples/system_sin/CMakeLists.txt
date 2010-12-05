@@ -5,5 +5,6 @@ include (../../CMake.common)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(example-system_sin ${BIN})
+set_tests_properties(example-system_sin PROPERTIES COST -0.00224)
 
 target_link_libraries(${PROJECT_NAME} ${HERMES_BIN})

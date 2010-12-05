@@ -295,9 +295,6 @@ if(WITH_UTIL)
   add_subdirectory(util)
 endif(WITH_UTIL)
 
-add_custom_target(test COMMAND ctest)
-add_custom_target(test-quick COMMAND ctest -LE slow -j9)
-
 # Documentation
 # This doesn't work yet:
 #add_subdirectory(doc)

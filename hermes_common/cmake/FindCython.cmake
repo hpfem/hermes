@@ -5,12 +5,13 @@
 # This finds the "cython" executable in your PATH, and then in some standard
 # paths:
 FIND_FILE(CYTHON_BIN cython /usr/bin /usr/local/bin)
+SET(CYTHON_FLAGS --cplus --fatal-errors)
 
 SET(Cython_FOUND FALSE)
 IF (CYTHON_BIN)
     # Try to run Cython, to make sure it works:
     execute_process(
-        COMMAND ${CYTHON_BIN} -V
+        COMMAND ${CYTHON_BIN} ${CYTHON_FLAGS} ${CMAKE_MODULE_PATH}/cython_test.pyx
         RESULT_VARIABLE CYTHON_RESULT
         OUTPUT_QUIET
         ERROR_QUIET
@@ -18,6 +19,9 @@ IF (CYTHON_BIN)
     if (CYTHON_RESULT EQUAL 0)
         # Only if cython exits with the return code 0, we know that all is ok:
         SET(Cython_FOUND TRUE)
+        SET(Cython_Compilation_Failed FALSE)
+    else (CYTHON_RESULT EQUAL 0)
+        SET(Cython_Compilation_Failed TRUE)
     endif (CYTHON_RESULT EQUAL 0)
 ENDIF (CYTHON_BIN)
 
@@ -28,7 +32,11 @@ IF (Cython_FOUND)
 	ENDIF (NOT Cython_FIND_QUIETLY)
 ELSE (Cython_FOUND)
 	IF (Cython_FIND_REQUIRED)
-		MESSAGE(FATAL_ERROR "Could not find Cython")
+        if(Cython_Compilation_Failed)
+            MESSAGE(FATAL_ERROR "Your Cython version is too old. Please upgrade Cython.")
+        else(Cython_Compilation_Failed)
+            MESSAGE(FATAL_ERROR "Could not find Cython. Please install Cython.")
+        endif(Cython_Compilation_Failed)
 	ENDIF (Cython_FIND_REQUIRED)
 ENDIF (Cython_FOUND)
 
@@ -54,7 +62,7 @@ macro(CYTHON_ADD_MODULE_PYX name)
     add_custom_command(
         OUTPUT ${name}.cpp
         COMMAND ${CYTHON_BIN}
-        ARGS --cplus -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+        ARGS ${CYTHON_FLAGS} -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
         DEPENDS ${DEPENDS}
         COMMENT "Cythonizing ${name}.pyx")
 endmacro(CYTHON_ADD_MODULE_PYX)

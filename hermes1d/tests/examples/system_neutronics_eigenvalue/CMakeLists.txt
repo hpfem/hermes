@@ -5,5 +5,6 @@ include (../../CMake.common)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(example-system_neutronics_eigenvalue ${BIN})
+set_tests_properties(example-system_neutronics_eigenvalue PROPERTIES WILL_FAIL TRUE)
 
 target_link_libraries(${PROJECT_NAME} ${HERMES_BIN})
