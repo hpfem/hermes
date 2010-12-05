@@ -75,9 +75,12 @@ const int REFINEMENT = 1;                  //   Default values are 1
 const double NEWTON_TOL_COARSE = 1.0e-6;   // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 5.0e-6;     // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 100;           // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
+// Linear system solvers for the coarse and refined problems, respectively.
+// Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK, SOLVER_SUPERLU
+// (depending on which optional solver libraries you have installed and enabled in hermes2d/CMake.vars).
+MatrixSolverType matrix_solver_coarse = SOLVER_UMFPACK;  
+MatrixSolverType matrix_solver_fine = SOLVER_UMFPACK;
 // Problem parameters.
 const double CT = 1.0;
 const double CF = 1.0;
@@ -301,19 +304,25 @@ int main(int argc, char* argv[])
   info("Solving on coarse meshes.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
   OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
-                 coeff_vec_coarse, matrix_solver, proj_norms);
-  bool verbose = true; // Default is false.
+                 coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+   
+  // Indicate to all DiscreteProblem constructors that we solve a non-linear problem.
+  bool is_linear = false;                 
   
   // Initialize the FE problem.
-  bool is_linear = false;
   DiscreteProblem dp_coarse(&wf, spaces, is_linear);
 
-  // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
-  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-  Vector* rhs_coarse = create_vector(matrix_solver);
-  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
+  // Setup the solvers for the coarse and fine mesh calculations, respectively.
+  SparseMatrix* matrix_coarse = create_matrix(matrix_solver_coarse);
+  Vector* rhs_coarse = create_vector(matrix_solver_coarse);
+  Solver* solver_coarse = create_linear_solver(matrix_solver_coarse, matrix_coarse, rhs_coarse);
+  SparseMatrix* matrix_fine = create_matrix(matrix_solver_fine);
+  Vector* rhs_fine = create_vector(matrix_solver_fine);
+  Solver* solver_fine = create_linear_solver(matrix_solver_fine, matrix_fine, rhs_fine);
+  
   // Perform Newton's iteration.
+  info("Newton's solve on the initial coarse meshes.");
+  bool verbose = true;
   if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
     error("Newton's iteration failed.");
   
@@ -321,9 +330,6 @@ int main(int argc, char* argv[])
   Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
 
   delete [] coeff_vec_coarse;
-  delete rhs_coarse;
-  delete matrix_coarse;
-  delete solver_coarse;
   
   // Time stepping loop:
   int nstep = (int)(T_FINAL/TAU + 0.5);
@@ -359,32 +365,25 @@ int main(int argc, char* argv[])
           scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
           info("Projecting previous fine mesh solution to obtain initial vector for Newton's iteration on globally derefined meshes.");
           OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                         coeff_vec_coarse, matrix_solver, proj_norms);
-          
+                         coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+
           // Initialize the FE problem.
-          bool is_linear = false;
           DiscreteProblem dp_coarse(&wf, spaces, is_linear);
 
-          // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
-          SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-          Vector* rhs_coarse = create_vector(matrix_solver);
-          Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
           // Perform Newton's iteration.
+          info("Newton's solve on globally derefined meshes.");
+          bool verbose = true;
           if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
             error("Newton's iteration failed.");
           
           // Translate the resulting coefficient vector into the actual solutions. 
           Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
           delete [] coeff_vec_coarse;
-          delete rhs_coarse;
-          delete matrix_coarse;
-          delete solver_coarse;
         } 
         else {
-          // Projection onto the globally derefined meshes.
-          info("Projecting the latest fine mesh solution onto globally derefined meshes.");
-          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
+        // Projection onto the globally derefined meshes.
+          info("Projecting fine mesh solutions from previous time step onto globally derefined meshes.");
+          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
         }
       } 
     }
@@ -416,18 +415,18 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(spaces);
+      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(spaces, ORDER_INCREASE);
 
       // Newton's loop on the refined meshes.
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
-                       coeff_vec, matrix_solver, proj_norms);
+                       coeff_vec, matrix_solver_fine, proj_norms);
       } else {
         info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                       coeff_vec, matrix_solver, proj_norms);
+                       coeff_vec, matrix_solver_fine, proj_norms);
         
         // Deallocate the previous fine mesh.
         delete T_fine.get_mesh();
@@ -435,24 +434,43 @@ int main(int argc, char* argv[])
       }
       
       // Initialize the FE problem.
-      bool is_linear = false;
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
 
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
       // Perform Newton's iteration.
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) 
+      info("Newton's solve on fine meshes.");
+      bool verbose = true;
+      if (!solve_newton(coeff_vec, &dp, solver_fine, matrix_fine, rhs_fine, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) 
         error("Newton's iteration failed.");
             
       // Translate the resulting coefficient vector into the actual solutions. 
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, fine_mesh_solutions);
       delete [] coeff_vec;
-      delete rhs;
-      delete matrix;
-      delete solver;
+      
+      if (SOLVE_ON_COARSE_MESH) {        
+        // Newton's loop on the new coarse meshes.
+        scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
+        info("Projecting fine mesh solutions back onto coarse mesh to obtain initial vector for following Newton's iteration.");
+        OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+                        coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+        
+        // Initialize the FE problem.
+        DiscreteProblem dp_coarse(&wf, spaces, is_linear);
+
+        // Perform Newton's iteration.
+        info("Newton's solve on coarse meshes.");
+        bool verbose = true;
+        if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+          error("Newton's iteration failed.");
+        
+        // Translate the resulting coefficient vector into the actual solutions. 
+        Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
+        delete [] coeff_vec_coarse;
+      } 
+      else {
+        // Projection onto the new coarse meshes.
+        info("Projecting fine mesh solutions back onto coarse meshes.");
+        OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
+      }
 
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
@@ -505,42 +523,8 @@ int main(int argc, char* argv[])
         info("Adapting the coarse meshes.");
         done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
         if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true; 
-        
-        if (!done) {
-          if (SOLVE_ON_COARSE_MESH) {        
-            // Newton's loop on the new coarse meshes.
-            scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
-            info("Solving on coarse meshes, starting from the latest fine mesh solutions.");
-            OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                           coeff_vec_coarse, matrix_solver, proj_norms);
-            
-            // Initialize the FE problem.
-            bool is_linear = false;
-            DiscreteProblem dp_coarse(&wf, spaces, is_linear);
-
-            // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
-            SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-            Vector* rhs_coarse = create_vector(matrix_solver);
-            Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
-            // Perform Newton's iteration.
-            if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
-              error("Newton's iteration failed.");
-            
-            // Translate the resulting coefficient vector into the actual solutions. 
-            Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
-            delete [] coeff_vec_coarse;
-            delete rhs_coarse;
-            delete matrix_coarse;
-            delete solver_coarse;
-          } 
-          else {
-            // Projection onto the new coarse meshes.
-            info("Projecting the latest fine mesh solution onto new coarse meshes.");
-            OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
-          }
-        }
       }
+      
       delete adaptivity;
       delete ref_spaces;
     }
@@ -551,7 +535,15 @@ int main(int argc, char* argv[])
     phi_prev_time.copy(&phi_fine);
   }
   
+  delete rhs_coarse;
+  delete matrix_coarse;
+  delete solver_coarse;
+  delete rhs_fine;
+  delete matrix_fine;
+  delete solver_fine;
+  
   // Wait for all views to be closed.
   View::wait();
+
   return 0;
 }
