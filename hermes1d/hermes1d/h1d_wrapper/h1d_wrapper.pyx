@@ -3,7 +3,7 @@
 # file for the exact terms).
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-from math cimport sin, cos, sqrt
+from libc.math cimport sin, cos, sqrt
 
 from numpy import empty, array
 from numpy cimport ndarray
