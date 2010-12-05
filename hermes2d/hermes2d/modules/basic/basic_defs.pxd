@@ -1,12 +1,12 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
+from libcpp.pair cimport pair
 
-from hermes2d.hermes2d_defs cimport double_pair
 from hermes2d.hermes2d_defs cimport Solution
 
 cdef extern from "basic.h":
 
-    cdef cppclass Electrostatics:
+    cdef cppclass Basic:
         void set_mesh_str(char *mesh)
         void set_initial_mesh_refinement(int init_ref_num)
         void set_initial_poly_degree(int p)
@@ -21,5 +21,5 @@ cdef extern from "basic.h":
         void set_neumann_markers(vector[int] &bdy_markers_neumann)
         void set_neumann_values(vector[double] &bdy_values_neumann)
         void set_newton_markers(vector[int] &bdy_markers_newton)
-        void set_newton_values(vector[double_pair] &bdy_values_newton)
+        void set_newton_values(vector[pair[double, double]] &bdy_values_newton)
         bool calculate(Solution* phi)

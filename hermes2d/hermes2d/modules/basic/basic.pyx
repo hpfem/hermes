@@ -1,8 +1,8 @@
 from numpy cimport ndarray
 from libcpp.vector cimport vector
+from libcpp.pair cimport pair
 
 cimport basic_defs
-from hermes2d.hermes2d cimport double_pair
 from hermes2d.hermes2d cimport Solution
 
 cdef vector[int] array2vector_int(a):
@@ -17,13 +17,14 @@ cdef vector[double] array2vector_double(a):
         v.push_back(a[i])
     return v
 
-cdef vector[double_pair] array2vector_double_pair(a):
-    cdef vector[double_pair] v
+cdef vector[pair[double, double]] array2vector_double_pair(a):
+    cdef vector[pair[double, double]] v
     for i in range(len(a)):
-        v.push_back(a[i])
+        p1, p2 = a[i]
+        v.push_back(pair[double, double](p1, p2))
     return v
 
-cdef class basic:
+cdef class Basic:
     cdef basic_defs.Basic *thisptr
 
     def __init__(self):
@@ -74,7 +75,7 @@ cdef class basic:
     def set_newton_markers(self, bdy_markers_newton):
         self.thisptr.set_newton_markers(array2vector_int(bdy_markers_newton))
 
-    def set_neumann_values(self, bdy_values_newton):
+    def set_newton_values(self, bdy_values_newton):
         self.thisptr.set_newton_values(array2vector_double_pair(bdy_values_newton))
 
     def calculate(self):
