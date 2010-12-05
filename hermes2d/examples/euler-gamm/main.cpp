@@ -23,7 +23,7 @@
 // Setting this option to false saves the computation time.
 const bool CALC_TIME_DER = true;
 
-const int P_INIT = 0;                             // Initial polynomial degree.                      
+const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
 const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
@@ -182,8 +182,9 @@ int main(int argc, char* argv[])
   // from the previous time step.
   // First flux.
   // Unnecessary for FVM.
-  if(P_INIT > 0) {
+  if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
     wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&prev_rho_v_x));
+    
     wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
                        Hermes::Tuple<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
@@ -319,9 +320,11 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = true;
+  
   DiscreteProblem dp(&wf, Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
+  
   // If the FE problem is in fact a FV problem.
-  if(P_INIT == 0)
+  if(P_INIT.order_h == 0 && P_INIT.order_v == 0)
     dp.set_fvm();
 #ifdef HERMES_USE_VECTOR_VALUED_FORMS
   dp.use_vector_valued_forms();
