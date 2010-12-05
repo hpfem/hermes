@@ -132,40 +132,58 @@ Real dxsrem_dT(Real T) {
 
 // Time dependence of the temperature.
 template<typename Real>
-Real T_FTIME(Real x, Real y) {
+Real T_FTIME() {
 //  return 1.0;
   return 1+tanh(rT*TIME);
 }
 
 template<typename Real>
-Real DT_FTIME(Real x, Real y) {
+Real DT_FTIME() {
 //  return 0.0;
   return rT*(1-pow(tanh(rT*TIME),2));
 }
 
 // Time dependence of the neutron flux.
 template<typename Real>
-Real PHI_FTIME(Real x, Real y) {
-//  return T_FTIME(x, y);
-  return 1+exp(rF*TIME);
+Real PHI_FTIME() {
+  return T_FTIME<Real>();
+//  return 1+exp(rF*TIME);
 }
 
 template<typename Real>
-Real DPHI_FTIME(Real x, Real y) {
-//  return DT_FTIME(x, y);
-  return rF*exp(rF*TIME);
+Real DPHI_FTIME() {
+  return DT_FTIME<Real>();
+//  return rF*exp(rF*TIME);
 }
 
 // Heat source.
 template<typename Real>
 Real qT(Real x, Real y) {
-  return CT*DT_FTIME(x,y)*cp*rho*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)+CT*1/(LX*LX)*(M_PI*M_PI)*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))+CT*1/(LY*LY)*(M_PI*M_PI)*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(k0-k1*(Tref-CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))-(CT*CT)*1/(LX*LX)*(M_PI*M_PI)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((M_PI*x)/LX),2.0)*pow(sin((M_PI*y)/LY),2.0)-(CT*CT)*1/(LY*LY)*(M_PI*M_PI)*(T_FTIME(x,y)*T_FTIME(x,y))*k1*pow(cos((M_PI*y)/LY),2.0)*pow(sin((M_PI*x)/LX),2.0)-(CF*PHI_FTIME(x,y)*kappa*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
+  Real dTdt = DT_FTIME<Real>();
+  Real Tt = T_FTIME<Real>();
+  Real PHIt = PHI_FTIME<Real>();
+  
+  Real PI_sqr = sqr(M_PI);
+  Real sx = sin((M_PI*x)/LX);
+  Real sy = sin((M_PI*y)/LY);
+  
+  return cp*CT*dTdt*rho*sx*sy - (CF*kappa*PHIt*x*xsfiss*y*sx*sy)/(LX*LY) - (-((CT*PI_sqr*Tt*sx*sy)/sqr(LX)) - (CT*PI_sqr*Tt*sx*sy)/sqr(LY)) * (k0 + k1*(-Tref + CT*Tt*sx*sy));
 }
 
 // Extraneous neutron source.
 template<typename Real>
 Real q(Real x, Real y) {
-  return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*M_PI*x*cos((M_PI*y)/LY)*sin((M_PI*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*M_PI*y*cos((M_PI*x)/LX)*sin((M_PI*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
+  Real PHIt = PHI_FTIME<Real>();
+  Real dPHIdt = DPHI_FTIME<Real>();
+  Real Tt = T_FTIME<Real>();
+  
+  Real PI_sqr = sqr(M_PI);
+  Real sx = sin((M_PI*x)/LX);
+  Real sy = sin((M_PI*y)/LY);
+  
+  return (CF*dPHIdt*invvel*x*y*sx*sy)/(LX*LY) - xsdiff*((2*CF*PHIt*M_PI*x*cos((M_PI*y)/LY)*sx)/(LX*sqr(LY)) + (2*CF*PHIt*M_PI*y*cos((M_PI*x)/LX)*sy)/(sqr(LX)*LY) - 
+         (CF*PHIt*PI_sqr*x*y*sx*sy)/(LX*pow(LY,3)) - (CF*PHIt*PI_sqr*x*y*sx*sy)/(pow(LX,3)*LY)) - 
+         (CF*PHIt*x*y*sx*sy*(nu*xsfiss-xsa_ref*(1 + doppler_coeff*(-sqrt(Tref) + sqrt(CT*Tt*sx*sy)))))/(LX*LY);
 }
 
 // Boundary condition types.
