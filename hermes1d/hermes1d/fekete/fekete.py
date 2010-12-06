@@ -420,7 +420,7 @@ class Function(h1d_wrapper.Function):
             rhs = AVector(n_dof)
             assemble_projection_matrix_rhs(m, A, rhs, self,
                     projection_type="L2")
-            coeffs = solve(A.to_scipy_csc().todense(), rhs)
+            coeffs = solve(A.to_scipy_csc().todense(), rhs.to_numpy())
             self._fe_sol = FESolution(m, coeffs)
 
     def get_values_in_element(self, n, x):
@@ -466,7 +466,7 @@ class Function(h1d_wrapper.Function):
             rhs = AVector(n_dof)
             assemble_projection_matrix_rhs(m, A, rhs, self,
                     projection_type=proj_type)
-            coeffs = solve(A.to_scipy_csc().todense(), rhs)
+            coeffs = solve(A.to_scipy_csc().todense(), rhs.to_numpy())
             return FESolution(m, coeffs).to_discrete_function()
         else:
             raise ValueError("Unknown projection type")
