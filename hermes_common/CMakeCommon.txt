@@ -6,6 +6,15 @@ set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Stop on first error
 #    set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
+
+    # Disable the "unused variable/parameters/functions" warnings (as those are
+    # not really problematic, it doesn't cause any harm):
+    set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
+
+    # Enable all warnings:
+    set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
+
+
 ENDIF()
 
 
