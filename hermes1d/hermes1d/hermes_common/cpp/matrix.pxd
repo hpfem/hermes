@@ -7,7 +7,7 @@ cdef extern from "../../hermes_common/matrix.h":
         pass
 
     cdef cppclass Vector:
-        pass
+        int length()
 
 cdef extern from "../../hermes_common/solver/umfpack_solver.h":
 
@@ -18,5 +18,4 @@ cdef extern from "../../hermes_common/solver/umfpack_solver.h":
         int get_nnz()
 
     cdef cppclass UMFPackVector(Vector):
-        pass
-
+        double *get_c_array()

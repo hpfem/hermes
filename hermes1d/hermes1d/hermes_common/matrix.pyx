@@ -2,7 +2,7 @@ from numpy_utils cimport c2numpy_double_inplace, c2numpy_int_inplace
 
 cdef class Matrix:
 
-    def get_size(self):
+    cpdef int get_size(self):
         return self.thisptr.get_size()
 
 cdef class SparseMatrix(Matrix):
@@ -72,3 +72,10 @@ cdef class AVector(Vector):
 
     def __dealloc__(self):
         del self.thisptr
+
+    cdef matrix.UMFPackVector* as_UMFPackVector(self):
+        return <matrix.UMFPackVector*> self.thisptr
+
+    def to_numpy(self):
+        cdef matrix.UMFPackVector *this = self.as_UMFPackVector()
+        return c2numpy_double_inplace(this.get_c_array(), this.length())

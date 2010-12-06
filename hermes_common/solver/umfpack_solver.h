@@ -78,6 +78,10 @@ public:
   virtual void add(int n, int *idx, scalar *y);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
+  scalar *get_c_array() {
+      return this->v;
+  }
+
 protected:
   //UMFPack specific data structures for storing the rhs.
   scalar *v;
