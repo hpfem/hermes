@@ -34,11 +34,17 @@ void NeighborSearch::empty_main_caches()
 }
 
 
-NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) : 
-  central_el(el), central_pss(NULL), central_rm(NULL),
-  neighb_el(NULL), neighb_pss(NULL), neighb_rm(NULL),
-  mesh(mesh), supported_shapes(NULL), quad(&g_quad_2d_std),
-  ignore_visited_segments(true)
+NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
+  supported_shapes(NULL),
+  mesh(mesh),
+  central_el(el),
+  neighb_el(NULL),
+  central_rm(NULL),
+  neighb_rm(NULL),
+  central_pss(NULL),
+  neighb_pss(NULL),
+  ignore_visited_segments(true),
+  quad(&g_quad_2d_std)
 {
   transformations.reserve(NeighborSearch::max_neighbors * 2);
   for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
@@ -65,7 +71,7 @@ NeighborSearch::~NeighborSearch()
   clear_supported_shapes();
   clear_neighbor_pss();
   detach_pss();
-  for(int i = 0; i < transformations.size(); i++)
+  for(unsigned int i = 0; i < transformations.size(); i++)
     delete [] transformations.at(i);
   transformations.clear();
   n_trans.clear();
@@ -690,20 +696,22 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
 int NeighborSearch::get_neighb_edge_number(int segment)
 {
-  ensure_active_edge(this);
-	if(segment >= neighbor_edges.size())
+    ensure_active_edge(this);
+	if( (unsigned) segment >= neighbor_edges.size())
 		error("given number is bigger than actual number of neighbors ");
 	else
 		return neighbor_edges[segment].local_num_of_edge;
+    return 0;
 }
 
 int NeighborSearch::get_neighb_edge_orientation(int segment)
 {
-  ensure_active_edge(this);
-	if(segment >= neighbor_edges.size())
+    ensure_active_edge(this);
+	if( (unsigned) segment >= neighbor_edges.size())
 		error("given number is bigger than actual number of neighbors ");
 	else
 		return neighbor_edges[segment].orientation;
+    return 0;
 }
 
 

@@ -197,7 +197,7 @@ int Shapeset::get_constrained_face_index(int face, int ori, Ord2 order, Part par
 
 void Shapeset::free_constrained_combinations() {
 	_F_
-	for (int i = ced_comb.first(); i != INVALID_IDX; i = ced_comb.next(i))
+	for (unsigned int i = ced_comb.first(); i != INVALID_IDX; i = ced_comb.next(i))
 		delete ced_comb.get(i);
 	ced_id.remove_all();
 	ced_key.remove_all();

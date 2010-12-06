@@ -442,8 +442,11 @@ inline Ord3 operator*(const int c, const Ord3 &a) {
 }
 
 inline Ord3 max(Ord3 a, Ord3 b) {
+    /*
+    // FIXME: this is always false, due to limited range of the a.typy datatype
 	if (a.type == 7) return b;
 	if (b.type == 7) return a;
+    */
 
 	assert(a.type == b.type);
 	switch (a.type) {

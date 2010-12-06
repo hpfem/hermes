@@ -38,7 +38,7 @@ CompressibleEuler::~CompressibleEuler()
   if(mesh != NULL)
     delete this->mesh;
   if(spaces != NULL) {
-    for(int i = 0; i < spaces->size(); i++)
+    for(unsigned int i = 0; i < spaces->size(); i++)
       delete (*this->spaces)[i];
     delete spaces;
   }

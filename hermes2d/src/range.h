@@ -23,7 +23,7 @@ class Range { ///< Range of values.
   bool empty_range; ///< True if range is empty.
 public:
   Range() : empty_range(true) {};
-  Range(const T& lower_bound, const T& upper_bound) : empty_range(lower_bound > upper_bound), lower_bound(lower_bound), upper_bound(upper_bound) {};
+  Range(const T& lower_bound, const T& upper_bound) : lower_bound(lower_bound), upper_bound(upper_bound), empty_range(lower_bound > upper_bound) {};
   bool empty() const { return empty_range; }; ///< Returns true if range is empty.
   const T& lower() const { return lower_bound; }; ///< Returns lower bound.
   const T& upper() const { return upper_bound; }; ///< Returns upper bound.

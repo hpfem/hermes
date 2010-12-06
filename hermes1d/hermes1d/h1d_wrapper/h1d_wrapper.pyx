@@ -8,9 +8,7 @@ from libc.math cimport sin, cos, sqrt
 from numpy import empty, array
 from numpy cimport ndarray
 
-# FIXME:
-#from hermes_common._hermes_common cimport c2numpy_double, delete, PY_NEW, \
-#    numpy2c_double_inplace, numpy2c_int_inplace, Matrix
+from hermes_common.matrix cimport Matrix
 
 cimport hermes1d
 from hermes1d.cython_utils cimport PY_NEW
@@ -357,17 +355,16 @@ cdef void fn(int n, double x[], double f[], double dfdx[]):
         if dfdx != NULL:
             dfdx[i] = _A.eval_dfdx(x[i])
 
-# FIXME:
-#def assemble_projection_matrix_rhs(Mesh mesh, Matrix A,
-#    ndarray[double, mode="c"] rhs, f, projection_type=None):
-#    cdef int prj_type
-#    if projection_type == "L2":
-#        prj_type = hermes1d.H1D_L2_ortho_global
-#    elif projection_type == "H1":
-#        prj_type = hermes1d.H1D_H1_ortho_global
-#    else:
-#        raise ValueError("Unknown projection type")
-#    global _A
-#    _A = f
-#    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.thisptr,
-#        &(rhs[0]), &fn, prj_type)
+def assemble_projection_matrix_rhs(Mesh mesh, Matrix A,
+    ndarray[double, mode="c"] rhs, f, projection_type=None):
+    cdef int prj_type
+    if projection_type == "L2":
+        prj_type = hermes1d.H1D_L2_ortho_global
+    elif projection_type == "H1":
+        prj_type = hermes1d.H1D_H1_ortho_global
+    else:
+        raise ValueError("Unknown projection type")
+    global _A
+    _A = f
+    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.thisptr,
+        &(rhs[0]), &fn, prj_type)

@@ -31,8 +31,8 @@ public:
 
 private:
   WeakForm* wf;
-  bool is_linear;
   Space* space;
+  bool is_linear;
 };
 
 // return coefficients for all shape functions on the element m,

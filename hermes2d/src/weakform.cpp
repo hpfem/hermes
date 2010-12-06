@@ -38,16 +38,12 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
     error("\"sym\" must be -1, 0 or 1.");
   if (sym < 0 && i == j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
   if (mfvol.size() > 100)
     warn("Large number of forms (> 100). Is this the intent?");
 
-  MatrixFormVol form = { i, j, sym, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
   mfvol.push_back(form);
   seq++;
 }
@@ -63,16 +59,12 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
     error("\"sym\" must be -1, 0 or 1.");
   if (sym < 0 && i == j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
   if (mfvol.size() > 100)
     warn("Large number of forms (> 100). Is this the intent?");
 
-  MatrixFormVol form = { i, j, sym, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
   mfvol.push_back(form);
   seq++;
 }
@@ -82,14 +74,11 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
     error("Invalid equation number.");
-  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
+          H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  MatrixFormSurf form = { i, j, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  MatrixFormSurf form = { i, j, area, fn, ord, ext.as_std_vector() };
   mfsurf.push_back(form);
   seq++;
 }
@@ -101,14 +90,11 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   int i = 0, j = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
+          H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  MatrixFormSurf form = { i, j, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  MatrixFormSurf form = { i, j, area, fn, ord, ext.as_std_vector() };
   mfsurf.push_back(form);
   seq++;
 }
@@ -118,14 +104,10 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
   _F_
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormVol form = { i, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  VectorFormVol form = { i, area, fn, ord, ext.as_std_vector() };
   vfvol.push_back(form);
   seq++;
 }
@@ -137,14 +119,10 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int 
   int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != HERMES_ANY && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormVol form = { i, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  VectorFormVol form = { i, area, fn, ord, ext.as_std_vector() };
   vfvol.push_back(form);
   seq++;
 }
@@ -154,14 +132,11 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
   _F_
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
-  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
+          H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormSurf form = { i, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  VectorFormSurf form = { i, area, fn, ord, ext.as_std_vector() };
   vfsurf.push_back(form);
   seq++;
 }
@@ -173,14 +148,11 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function. 
-  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area != H2D_DG_INNER_EDGE && area < 0 && -area > areas.size())
+  if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
+          H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormSurf form = { i, area, fn, ord };
-  if (ext.size() != 0) {
-    int nx = ext.size(); 
-    for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
-  }
+  VectorFormSurf form = { i, area, fn, ord, ext.as_std_vector() };
   vfsurf.push_back(form);
   seq++;
 }

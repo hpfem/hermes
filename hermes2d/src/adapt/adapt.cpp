@@ -36,8 +36,12 @@ using namespace std;
 #define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
-Adapt::Adapt(Hermes::Tuple< Space* > spaces_, Hermes::Tuple<ProjNormType> proj_norms) : num_act_elems(-1), 
-                                                                        have_coarse_solutions(false), have_reference_solutions(false), have_errors(false) 
+Adapt::Adapt(Hermes::Tuple< Space* > spaces_, Hermes::Tuple<ProjNormType>
+        proj_norms) :
+    num_act_elems(-1),
+    have_errors(false),
+    have_coarse_solutions(false),
+    have_reference_solutions(false)
 {
   // sanity check
   if (proj_norms.size() > 0 && spaces_.size() != proj_norms.size()) 

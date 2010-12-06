@@ -73,7 +73,7 @@ static void* new_block(int size)
 static void free_mem()
 {
   // dump all blocks at once - no need to walk through the linked lists etc.
-  for (int i = 0; i < pages.size(); i++)
+  for (unsigned int i = 0; i < pages.size(); i++)
     free(pages[i]);
 }
 

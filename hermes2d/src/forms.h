@@ -223,9 +223,10 @@ public:
   /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
   ///
   DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false) :
-    Func<T>(fn->num_gip, fn->nc), 
-    fn_central(NULL), fn_neighbor(NULL),
-    reverse_neighbor_side(reverse) 
+    Func<T>(fn->num_gip, fn->nc),
+    reverse_neighbor_side(reverse),
+    fn_central(NULL),
+    fn_neighbor(NULL)
   { 
     assert_msg(fn != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
     if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
@@ -239,9 +240,9 @@ public:
   ///
   DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) : 
     Func<T>(fn_c->num_gip, fn_c->nc),
+    reverse_neighbor_side(reverse),
     fn_central(fn_c),
-    fn_neighbor(fn_n),
-    reverse_neighbor_side(reverse)
+    fn_neighbor(fn_n)
   { 
     assert_msg(fn_c != NULL && fn_n != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
     assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,

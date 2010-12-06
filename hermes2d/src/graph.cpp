@@ -110,7 +110,7 @@ void SimpleGraph::save(const char* filename)
   FILE* f = fopen(filename, "w");
   if (f == NULL) error("Error writing to %s.", filename);
 
-  for (int i = 0; i < rows.size(); i++)
+  for (unsigned int i = 0; i < rows.size(); i++)
   {
     int rsize = rows[i].data.size();
     for (int j = 0; j < rsize; j++)

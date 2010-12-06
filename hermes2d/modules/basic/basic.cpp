@@ -140,7 +140,7 @@ Scalar linear_form_surf_newton(int n, double *wt, Func<Real> *u_ext[], Func<Real
 // Look up an integer number in an array.
 bool find_index(const std::vector<int> &array, int x, int &i_out)
 {
-  for (int i=0; i < array.size(); i++)
+  for (unsigned int i=0; i < array.size(); i++)
     if (array[i] == x) {
       i_out = i;
       return true;
@@ -295,7 +295,7 @@ bool ModuleBasic::calculate(Solution* phi)
   this->bc_types.check_consistency();
 
   // Sanity check of material markers and material constants.
-  int n_mat_markers = this->mat_markers.size();
+  unsigned int n_mat_markers = this->mat_markers.size();
   if (n_mat_markers != this->c1_array.size()) error("Wrong length of c1 array.");
   if (n_mat_markers != this->c2_array.size()) error("Wrong length of c2 array.");
   if (n_mat_markers != this->c3_array.size()) error("Wrong length of c3 array.");
@@ -303,7 +303,7 @@ bool ModuleBasic::calculate(Solution* phi)
   if (n_mat_markers != this->c5_array.size()) error("Wrong length of c5 array.");
 
   // Making sure that material markers are nonnegative (>= 0).
-  for (int i = 0; i < n_mat_markers; i++) {
+  for (unsigned int i = 0; i < n_mat_markers; i++) {
     if(this->mat_markers[i] < 0) error("Material markers must be nonnegative.");
   }
 
@@ -339,10 +339,10 @@ bool ModuleBasic::calculate(Solution* phi)
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form_vol));
   wf.add_vector_form(callback(linear_form_vol));
-  for (int i=0; i < this->bdy_values_neumann.size(); i++) {
+  for (unsigned int i=0; i < this->bdy_values_neumann.size(); i++) {
     wf.add_vector_form_surf(callback(linear_form_surf_neumann), this->bdy_markers_neumann[i]);
   }
-  for (int i=0; i < this->bdy_values_newton.size(); i++) {
+  for (unsigned int i=0; i < this->bdy_values_newton.size(); i++) {
     wf.add_matrix_form_surf(callback(bilinear_form_surf_newton), this->bdy_markers_newton[i]);
     wf.add_vector_form_surf(callback(linear_form_surf_newton), this->bdy_markers_newton[i]);
   }

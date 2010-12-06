@@ -4,11 +4,11 @@
 void OGProjection::project_internal(Hermes::Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
-  int n = spaces.size();
+  unsigned int n = spaces.size();
 
   // sanity checks
   if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
-  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
+  for (unsigned int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
   if (spaces.size() != n) error("Number of spaces must matchnumber of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
@@ -104,7 +104,7 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces,
   _F_
   scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
   Hermes::Tuple<MeshFunction *> ref_slns_mf;
-  for (int i = 0; i < sols_src.size(); i++) 
+  for (unsigned int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
   OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);

@@ -79,7 +79,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
     }
 
     // volumetric bilinear forms
-    for (int ww = 0; ww < this->wf->matrix_forms_vol.size(); ww++) {
+    for (unsigned int ww = 0; ww < this->wf->matrix_forms_vol.size(); ww++) {
 	    WeakForm::MatrixFormVol *mfv = &this->wf->matrix_forms_vol[ww];
 	    if (e->marker == mfv->marker ||  mfv->marker == ANY) {
   	    int c_i = mfv->i;  
@@ -110,7 +110,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
               //truncating
               if (fabs(val_ij) < 1e-12) val_ij = 0.0; 
               // add the result to the matrix
-              if (val_ij != 0) 
+              if (val_ij != 0) {
                 if(pos_j != -1) {
                   if(!rhsonly) {
                     mat->add(pos_i, pos_j, val_ij);
@@ -124,13 +124,14 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
                   if(this->is_linear && rhs != NULL)
                     rhs->add(pos_i, -val_ij * e->coeffs[c_j][c_j][j]);
             }
+            }
           }
         }
       }
     }
 
     // volumetric part of residual
-    for (int ww = 0; ww < this->wf->vector_forms_vol.size(); ww++) {
+    for (unsigned int ww = 0; ww < this->wf->vector_forms_vol.size(); ww++) {
       WeakForm::VectorFormVol *vfv = &this->wf->vector_forms_vol[ww];
       int c_i = vfv->i;  
       // loop over test functions (rows)
@@ -150,9 +151,10 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
           // add the contribution to the residual vector
           if (val_i != 0 && rhs != NULL) rhs->add(pos_i, val_i);
           if (DEBUG_MATRIX)
-	          if (val_i != 0)
+	          if (val_i != 0) {
 	            info("Adding to residual pos %d value %g (comp %d)", 
                   pos_i, val_i, c_i);
+              }
         }
       }
     }
@@ -189,7 +191,7 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy
   }
 
   // surface bilinear forms
-  for (int ww = 0; ww < this->wf->matrix_forms_surf.size(); ww++) {
+  for (unsigned int ww = 0; ww < this->wf->matrix_forms_surf.size(); ww++) {
     WeakForm::MatrixFormSurf *mfs = &this->wf->matrix_forms_surf[ww];
     if (mfs->bdy_index != bdy_index) continue;
     int c_i = mfs->i;  
@@ -219,7 +221,7 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy
           // truncating
           if(fabs(val_ij_surf) < 1e-12) val_ij_surf = 0.0; 
           // add the result to the matrix
-          if (val_ij_surf != 0) 
+          if (val_ij_surf != 0) {
             if(pos_j != -1) {
               if(!rhsonly) {
                 mat->add(pos_i, pos_j, val_ij_surf);
@@ -232,13 +234,14 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy
             else
               if(this->is_linear && rhs != NULL)
                   rhs->add(pos_i, -val_ij_surf);
+          }
         }
       }
     }
   }
 
   // surface part of residual
-  for (int ww = 0; ww < this->wf->vector_forms_surf.size(); ww++)
+  for (unsigned int ww = 0; ww < this->wf->vector_forms_surf.size(); ww++)
   {
     WeakForm::VectorFormSurf *vfs = &this->wf->vector_forms_surf[ww];
     if (vfs->bdy_index != bdy_index) continue;
@@ -375,10 +378,14 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
     for(int i = 0; i < ndof; i++) res_norm_squared += f_orig->get(i)*f_orig->get(i);
 
     // If residual norm less than 'tol_jfnk', break
-    if (verbose) info("Residual norm: %.15f", sqrt(res_norm_squared));
+    if (verbose) {
+        info("Residual norm: %.15f", sqrt(res_norm_squared));
+    }
     if(res_norm_squared < tol_jfnk*tol_jfnk) break;
 
-    if (verbose) info("JFNK iteration: %d", jfnk_iter_num);
+    if (verbose) {
+        info("JFNK iteration: %d", jfnk_iter_num);
+    }
 
     // right-hand side is negative residual
     // (rhs stays unchanged through the CG loop)
@@ -422,8 +429,10 @@ void jfnk_cg(DiscreteProblem *dp, Space *space,
       for (int i=0; i < ndof; i++) p->set(i, r->get(i) + beta*p->get(i));
     }
     // check whether CG converged
-    if (verbose) info("CG (JFNK) made %d iteration(s) (tol = %g)", 
+    if (verbose) {
+        info("CG (JFNK) made %d iteration(s) (tol = %g)",
            iter_current, sqrt(tol_current_squared));
+    }
     if(tol_current_squared > matrix_solver_tol*matrix_solver_tol) {
       error("CG (JFNK) did not converge.");
     }

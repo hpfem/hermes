@@ -130,7 +130,7 @@ Space::~Space() {
 	_F_
 	free_data_tables();
 
-	for (int i = fi_data.first(); i != INVALID_IDX; i = fi_data.next(i))
+	for (unsigned int i = fi_data.first(); i != INVALID_IDX; i = fi_data.next(i))
 		delete fi_data[i];
 	fi_data.remove_all();
 }
@@ -904,7 +904,7 @@ void Space::find_constraints()
 		unsigned int fid = open[idx];
 		Facet *facet = mesh->facets[fid];
 
-		if (facet->left != INVALID_IDX) {
+		if ((unsigned) facet->left != INVALID_IDX) {
 			Element *e = mesh->elements[facet->left];
 			for (int iface = 0; iface < e->get_num_faces(); iface++) {
 				unsigned int fid = mesh->get_facet_id(e, iface);
@@ -915,7 +915,7 @@ void Space::find_constraints()
 			}
 		}
 
-		if (facet->type == Facet::INNER && facet->right != INVALID_IDX) {
+		if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->right != INVALID_IDX) {
 			Element *e = mesh->elements[facet->right];
 			for (int iface = 0; iface < e->get_num_faces(); iface++) {
 				unsigned int fid = mesh->get_facet_id(e, iface);
@@ -2199,7 +2199,7 @@ int Space::assign_dofs(int first_dof, int stride) {
 		delete fn_data[i];
 	fn_data.remove_all();
 
-	for (int i = fi_data.first(); i != INVALID_IDX; i = fi_data.next(i))
+	for (unsigned int i = fi_data.first(); i != INVALID_IDX; i = fi_data.next(i))
 		delete fi_data[i];
 	fi_data.remove_all();
 
@@ -2239,7 +2239,7 @@ void Space::uc_dep(unsigned int eid)
 			unsigned int parent_id = facet->parent;
 			if (parent_id != INVALID_IDX) {
 				Facet *parent = mesh->facets[parent_id];
-				if (!uc_deps.is_set(parent->left) && parent->left != INVALID_IDX) {
+				if (!uc_deps.is_set(parent->left) && (unsigned) parent->left != INVALID_IDX) {
 					deps[idep++] = parent->left;
 					uc_deps.set(parent->left);
 				}
@@ -2249,16 +2249,17 @@ void Space::uc_dep(unsigned int eid)
 			unsigned int parent_id = facet->parent;
 			if (parent_id != INVALID_IDX) {
 				Facet *parent = mesh->facets[parent_id];
-				if (parent->type == Facet::INNER && (parent->left == INVALID_IDX || parent->right == INVALID_IDX)) {
+				if (parent->type == Facet::INNER && ((unsigned) parent->left ==
+                            INVALID_IDX || (unsigned) parent->right == INVALID_IDX)) {
 					// CED -> take the value from the other side (i.e. constraining one)
-					if (facet->left == eid) {
-						if (!uc_deps.is_set(parent->right) && parent->right != INVALID_IDX) {
+					if ((unsigned) facet->left == eid) {
+						if (!uc_deps.is_set(parent->right) && (unsigned) parent->right != INVALID_IDX) {
 							deps[idep++] = parent->right;
 							uc_deps.set(parent->right);
 						}
 					}
 					else {
-						if (!uc_deps.is_set(parent->left) && parent->left != INVALID_IDX) {
+						if (!uc_deps.is_set(parent->left) && (unsigned) parent->left != INVALID_IDX) {
 							deps[idep++] = parent->left;
 							uc_deps.set(parent->left);
 						}
@@ -2266,14 +2267,14 @@ void Space::uc_dep(unsigned int eid)
 				}
 				else {
 					// no CED, take tha parent element
-					if (facet->left == eid) {
-						if (!uc_deps.is_set(parent->left) && parent->left != INVALID_IDX) {
+					if ((unsigned) facet->left == eid) {
+						if (!uc_deps.is_set(parent->left) && (unsigned) parent->left != INVALID_IDX) {
 							deps[idep++] = parent->left;
 							uc_deps.set(parent->left);
 						}
 					}
 					else {
-						if (!uc_deps.is_set(parent->right) && parent->right != INVALID_IDX) {
+						if (!uc_deps.is_set(parent->right) && (unsigned) parent->right != INVALID_IDX) {
 							deps[idep++] = parent->right;
 							uc_deps.set(parent->right);
 						}
@@ -2447,7 +2448,7 @@ int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
 {
   _F_
   int ndof = 0;
-  for (int i=0; i<spaces.size(); i++) {
+  for (unsigned int i=0; i<spaces.size(); i++) {
     ndof += spaces[i]->get_num_dofs();
   }
   return ndof;

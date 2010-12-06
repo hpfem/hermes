@@ -307,11 +307,12 @@ void VectorView::on_display()
       bool shift = hexa && (s & 1);
 
       // if there are two points with min y-coordinate, switch to the next segment
-      if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1]))
+      if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1])) {
         if (tvert[l1][1] == tvert[l2][1])
           {l1 = l2; l2 = r2;}
         else if (tvert[r1][1] == tvert[r2][1])
           {r1 = r2; r2 = l2;}
+      }
 
       // slope of the left and right segment
       ml = (tvert[l1][0] - tvert[l2][0])/(tvert[l1][1] - tvert[l2][1]);

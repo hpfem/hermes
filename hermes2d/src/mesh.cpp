@@ -724,7 +724,7 @@ void Mesh::unrefine_all_elements(bool keep_initial_refinements)
   }
 
   // unrefine the found elements
-  for (int i = 0; i < list.size(); i++)
+  for (unsigned int i = 0; i < list.size(); i++)
     unrefine_element(list[i]);
 }
 

@@ -559,7 +559,7 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
-      for(int i = 0; i < ref_spaces->size(); i++)
+      for(unsigned int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i];
       delete dp;
     }

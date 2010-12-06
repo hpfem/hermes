@@ -67,10 +67,15 @@ namespace RefinementSelectors {
     }
   }
 
-  OptimumSelector::OptimumSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range<int>& vertex_order, const Range<int>& edge_bubble_order)
-    : Selector(max_order), cand_list(cand_list)
-    , conv_exp(conv_exp), shapeset(shapeset)
-    , opt_symmetric_mesh(true), opt_apply_exp_dof(false) {
+  OptimumSelector::OptimumSelector(CandList cand_list, double conv_exp, int
+          max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
+          Range<int>& edge_bubble_order) :
+      Selector(max_order),
+      opt_symmetric_mesh(true),
+      opt_apply_exp_dof(false),
+      cand_list(cand_list),
+      conv_exp(conv_exp),
+      shapeset(shapeset) {
     error_if(shapeset == NULL, "Shapeset is NULL.");
 
     //build shape indices

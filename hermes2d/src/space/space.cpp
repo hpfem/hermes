@@ -19,7 +19,7 @@
 #include "../auto_local_array.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init)
-        : mesh(mesh), shapeset(shapeset)
+        : shapeset(shapeset), mesh(mesh)
 {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
@@ -47,7 +47,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, 
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
-        : mesh(mesh), shapeset(shapeset)
+        : shapeset(shapeset), mesh(mesh)
 {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
@@ -75,7 +75,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
 // DEPRECATED
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
-        : mesh(mesh), shapeset(shapeset)
+        : shapeset(shapeset), mesh(mesh)
 {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
@@ -728,7 +728,7 @@ int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
 {
   _F_
   int ndof = 0;
-  for (int i=0; i<spaces.size(); i++) {
+  for (unsigned int i=0; i<spaces.size(); i++) {
     ndof += spaces[i]->get_num_dofs();
   }
   return ndof;
