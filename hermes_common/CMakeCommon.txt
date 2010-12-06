@@ -16,6 +16,9 @@ IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # not really problematic, it doesn't cause any harm):
     set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
 
+    # Disable all switch warnings for now (until all code is fixed)
+    set(CMAKE_CXX_FLAGS "-Wno-switch-enum -Wno-switch -Wno-switch-default ${CMAKE_CXX_FLAGS}")
+
     # Enable all warnings:
     set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
 
