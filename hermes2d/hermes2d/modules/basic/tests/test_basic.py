@@ -17,7 +17,7 @@ def test_basic():
     e.set_neumann_markers([1, 3])
     e.set_neumann_values([0, 0])
     e.set_newton_markers([2])
-    e.set_newton_values([1])
+    e.set_newton_values([1, 1])
     r, sln = e.calculate()
     assert r is True
     l = Linearizer()
