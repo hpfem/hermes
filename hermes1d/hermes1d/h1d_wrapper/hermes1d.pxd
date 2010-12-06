@@ -64,6 +64,8 @@ cdef extern from "hermes1d.h":
 
     int H1D_L2_ortho_global
     int H1D_H1_ortho_global
-    ctypedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[])
+    ctypedef int(*ExactFunction)(int n, double x[], double f[], double dfdx[],
+            void *data)
     void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A,
-            Vector *rhs, ExactFunction fn, int projection_type) except +
+            Vector *rhs, ExactFunction fn, int projection_type,
+            void *data) except +
