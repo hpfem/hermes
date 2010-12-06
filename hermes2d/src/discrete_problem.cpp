@@ -55,12 +55,13 @@ void DiscreteProblem::empty_form_caches()
   DiscreteProblem::vol_forms_cache.clear();
 };
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_linear) : 
-  spaces(spaces), is_linear(is_linear), wf_seq(-1), wf(wf)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces,
+        bool is_linear) :
+  wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
 {
   _F_
   // Sanity checks.
-  if ( spaces.size() != wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  if ( spaces.size() != (unsigned) wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
   if (spaces.size() > 0) have_spaces = true;
   else error("Zero number of spaces in DiscreteProblem.");
 
@@ -94,6 +95,8 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Tuple<Space *> spaces, bool is_li
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.
   this->is_fvm = false;
+  
+  vector_valued_forms = false;
 }
 
 DiscreteProblem::~DiscreteProblem()
@@ -176,12 +179,12 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   
   // For DG, the sparse structure is different as we have to account for over-edge calculations.
   bool is_DG = false;
-  for(int i = 0; i < this->wf->mfsurf.size(); i++)
+  for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++)
     if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
-  for(int i = 0; i < this->wf->vfsurf.size(); i++)
+  for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++)
     if(this->wf->vfsurf[i].area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
@@ -267,7 +270,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
                           if(blocks[m][el])
                             mat->pre_add_ij(am->dof[i], an->dof[j]);
                           if(blocks[el][m])
-                            mat->pre_add_ij(an->dof[i], am->dof[j]);
+                            mat->pre_add_ij(an->dof[j], am->dof[i]);
                         }
                   delete an;
                 }
@@ -350,8 +353,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
  
   this->create(mat, rhs, rhsonly);
 
-  // Convert the coefficient vector 'coeff_vec' into solutions Tuple 'u_ext'.
-  Tuple<Solution*> u_ext;
+  // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
+  Hermes::Tuple<Solution*> u_ext;
   for (int i = 0; i < this->wf->get_neq(); i++) 
   {
     if (this->is_linear == false)
@@ -394,7 +397,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
-  wf->get_stages(spaces, this->is_linear ? NULL : u_ext, stages, rhsonly);
+  wf->get_stages(spaces, u_ext, stages, rhsonly);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -608,7 +611,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       }
 
       // assemble surface integrals now: loop through surfaces of the element.
-      for (unsigned int isurf = 0; isurf < e0->get_num_surf(); isurf++)
+      for (int isurf = 0; isurf < e0->get_num_surf(); isurf++)
       {
         // H3D is freeing a fn_cache at this point
 
@@ -625,7 +628,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           // for them it is not important what value (true/false) is set, as it
           // is not read anywhere.
           if(marker > 0)
-            nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL);
+            nat[j] = (spaces[j]->bc_types->get_type(marker) == BC_NATURAL);
           spaces[j]->get_boundary_assembly_list(e[i], isurf, &al[j]);
         }
 
@@ -712,7 +715,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   if(surf_forms_cache[surf_forms_key] == NULL)
                     rhs->add(am->dof[i], eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i]);
                   else
-                    rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                    rhs->add(am->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
                 }
                 else {
                   scalar val = eval_form(vfs, u_ext, fv, &(refmap[m]), surf_pos + isurf) * am->coef[i];
@@ -868,11 +871,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   
                   if(vector_valued_forms) {
                     surf_forms_key = SurfVectorFormsKey(vfs->fn, nbs_v->get_pss()->get_active_element()->id, isurf, 
-                        nbs_v->get_pss()->get_transform(), am->idx[i]);
+                        am->idx[i], nbs_v->get_pss()->get_transform());
                     if(surf_forms_cache[surf_forms_key] == NULL)
                       rhs->add(am->dof[i], eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i]);
                     else
-                      rhs->add(am->dof[i], surf_forms_cache[surf_forms_key][m]);
+                      rhs->add(am->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
                   }
                   else {
                     scalar val = eval_dg_form(vfs, u_ext, nbs_v, nbs_v->get_pss(), nbs_v->get_rm(), surf_pos+isurf) * am->coef[i];
@@ -963,7 +966,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext
 ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 {  
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
-  for(int j = 0; j < ext.size(); j++)
+  for(unsigned int j = 0; j < ext.size(); j++)
     ext_fns[j] = nbs->init_ext_fn(ext[j]);
   
   ExtData<scalar>* ext_data = new ExtData<scalar>;
@@ -977,7 +980,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext,
 ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 { 
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
-  for (int j = 0; j < ext.size(); j++)
+  for (unsigned int j = 0; j < ext.size(); j++)
     fake_ext_fns[j] = nbs->init_ext_fn_ord(ext[j]);
   
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -1030,7 +1033,7 @@ void DiscreteProblem::delete_cache()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Actual evaluation of volume matrix form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   _F_
@@ -1043,7 +1046,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
     
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
         else oi[i] = init_fn_ord(0);
@@ -1106,7 +1109,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, order);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i] = init_fn(u_ext[i], rv, order);
       else prev[i] = NULL;
@@ -1132,7 +1135,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 }
 
 // Actual evaluation of volume vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
   // Determine the integration order.
@@ -1145,7 +1148,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
         else oi[i] = init_fn_ord(0);
@@ -1204,7 +1207,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, order);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, order);
       else prev[i] = NULL;
@@ -1231,7 +1234,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 }
 
 // Actual evaluation of surface matrix forms (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -1245,7 +1248,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
         else oi[i] = init_fn_ord(0);
@@ -1311,7 +1314,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, eo);
       else prev[i] = NULL;
@@ -1341,7 +1344,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
 }
 
 // Actual evaluation of surface vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, 
                         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -1355,7 +1358,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
         else oi[i] = init_fn_ord(0);
@@ -1417,7 +1420,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = init_fn(u_ext[i], rv, eo);
       else prev[i] = NULL;
@@ -1443,7 +1446,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
                     // the weights.
 }
 
-scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::Tuple<Solution *> u_ext, 
                                      NeighborSearch* nbs_u, NeighborSearch* nbs_v, 
                                      ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv, 
                                      SurfPos* surf_pos)
@@ -1457,7 +1460,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = nbs_u->init_ext_fn_ord(u_ext[i]);
         else oi[i] = init_fn_ord(0);
@@ -1475,7 +1478,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
     ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, nbs_v);  
     
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Geom<Ord>* fake_e = init_geom_ord();
+    Element *neighb_el = nbs_v->get_current_neighbor_element();
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
     double fake_wt = 1.0;
 
     // Total order of the matrix form.
@@ -1513,7 +1517,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = nbs_v->init_ext_fn(u_ext[i]);
       else prev[i] = NULL;
@@ -1552,7 +1556,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Tuple<Soluti
 
 // Actual evaluation of surface linear form, just in case using information from neighbors.
 // Used only for inner edges.
-scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::Tuple<Solution *> u_ext, 
                                      NeighborSearch* nbs_v, PrecalcShapeset *fv, RefMap *rv,
                                      SurfPos* surf_pos)
 { 
@@ -1564,7 +1568,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, wf->get_neq());
     //for (int i = 0; i < wf->get_neq(); i++) oi[i] = init_fn_ord(u_ext[i]->get_fn_order() + inc);
-    if (u_ext != Tuple<Solution *>()) {
+    if (u_ext != Hermes::Tuple<Solution *>()) {
       for (int i = 0; i < wf->get_neq(); i++) {
         if (u_ext[i] != NULL) oi[i] = nbs_v->init_ext_fn_ord(u_ext[i]);
         else oi[i] = init_fn_ord(0);
@@ -1583,7 +1587,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
     ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, nbs_v);
     
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Geom<Ord>* fake_e = init_geom_ord();
+    Element *neighb_el = nbs_v->get_current_neighbor_element();
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
     double fake_wt = 1.0;
     
     // Total order of the vector form.
@@ -1615,7 +1620,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Tuple<Soluti
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, wf->get_neq());
   //for (int i = 0; i < wf->get_neq(); i++) prev[i]  = init_fn(u_ext[i], rv, eo);
-  if (u_ext != Tuple<Solution *>()) {
+  if (u_ext != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->get_neq(); i++) {
       if (u_ext[i] != NULL) prev[i]  = nbs_v->init_ext_fn(u_ext[i]);
       else prev[i] = NULL;
@@ -1653,11 +1658,11 @@ double get_l2_norm(Vector* vec)
 }
 
 // Performs uniform global refinement of a FE space. 
-Tuple<Space *> * construct_refined_spaces(Tuple<Space *> coarse, int order_increase)
+Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase)
 {
   _F_
-  Tuple<Space *> * ref_spaces = new Tuple<Space *>;
-  for (int i = 0; i < coarse.size(); i++) 
+  Hermes::Tuple<Space *> * ref_spaces = new Hermes::Tuple<Space *>;
+  for (unsigned int i = 0; i < coarse.size(); i++) 
   {
     Mesh* ref_mesh = new Mesh;
     ref_mesh->copy(coarse[i]->get_mesh());

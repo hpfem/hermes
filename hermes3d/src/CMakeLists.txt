@@ -49,6 +49,7 @@ set(SRC
 	adapt/h1proj.cpp
 	adapt/hcurlproj.cpp
 	adapt/h1projipol.cpp
+  ${HERMES_COMMON_DIR}/common.cpp
   ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/hermes_logging.cpp
   ${HERMES_COMMON_DIR}/common_time_period.cpp

@@ -64,7 +64,7 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf_)
   this->init(wf_);
 }
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf_, Tuple<Space*> sp)
+DiscreteProblem::DiscreteProblem(WeakForm* wf_, Hermes::Tuple<Space*> sp)
 {
   this->init(wf_);
   this->init_spaces(sp);
@@ -95,7 +95,7 @@ DiscreteProblem::~DiscreteProblem()
 void DiscreteProblem::free_spaces()
 {
   // free spaces, making sure that duplicated ones do not get deleted twice
-  if (this->spaces != Tuple<Space *>())
+  if (this->spaces != Hermes::Tuple<Space *>())
   {
     for (int i = 0; i < this->wf->neq; i++) {
       // this loop skipped if there is only one space
@@ -110,12 +110,12 @@ void DiscreteProblem::free_spaces()
         this->spaces[i] = NULL;
       }
     }
-    this->spaces = Tuple<Space *>();
+    this->spaces = Hermes::Tuple<Space *>();
   }
 }
 
 // Should not be called by the user.
-void DiscreteProblem::init_spaces(Tuple<Space*> spaces)
+void DiscreteProblem::init_spaces(Hermes::Tuple<Space*> spaces)
 {
   int n = spaces.size();
   if (n != this->wf->neq)
@@ -148,16 +148,16 @@ void DiscreteProblem::init_space(Space* s)
 {
   if (this->wf->neq != 1)
     error("Do not call init_space() for PDE systems, call init_spaces() instead.");
-  this->init_spaces(Tuple<Space*>(s));
+  this->init_spaces(Hermes::Tuple<Space*>(s));
 }
 
 // Obsolete. Should be removed after FeProblem is removed.
-void DiscreteProblem::set_spaces(Tuple<Space*>spaces)
+void DiscreteProblem::set_spaces(Hermes::Tuple<Space*>spaces)
 {
   this->init_spaces(spaces);
 }
 
-void DiscreteProblem::set_pss(Tuple<PrecalcShapeset*> pss)
+void DiscreteProblem::set_pss(Hermes::Tuple<PrecalcShapeset*> pss)
 {
   warn("Call to deprecated function DiscreteProblem::set_pss().");
   int n = pss.size();
@@ -170,7 +170,7 @@ void DiscreteProblem::set_pss(Tuple<PrecalcShapeset*> pss)
 
 void DiscreteProblem::set_pss(PrecalcShapeset* pss)
 {
-  this->set_pss(Tuple<PrecalcShapeset*>(pss));
+  this->set_pss(Hermes::Tuple<PrecalcShapeset*>(pss));
 }
 
 void DiscreteProblem::copy(DiscreteProblem* sys)
@@ -201,7 +201,7 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
     error("Before assemble(), you need to initialize spaces.");
   if (this->wf == NULL) 
 		error("this->wf = NULL in DiscreteProblem::assemble().");
-  if (this->spaces == Tuple<Space*>()) 
+  if (this->spaces == Hermes::Tuple<Space*>()) 
 		error("this->spaces is empty in DiscreteProblem::assemble().");
   int n = this->wf->neq;
   for (int i = 0; i < n; i++) 
@@ -247,8 +247,8 @@ void DiscreteProblem::assemble(Vector* init_vec, Matrix* mat_ext, Vector* dir_ex
   }
   else rhs_ext->set_zero();
 
-  // If init_vec != NULL, convert it to a Tuple of solutions u_ext.
-  Tuple<Solution*> u_ext = Tuple<Solution*>();
+  // If init_vec != NULL, convert it to a Hermes::Tuple of solutions u_ext.
+  Hermes::Tuple<Solution*> u_ext = Hermes::Tuple<Solution*>();
   for (int i = 0; i < wf->neq; i++) {
     if (init_vec != NULL) {
       u_ext.push_back(new Solution(spaces[i]->get_mesh()));
@@ -630,7 +630,7 @@ void DiscreteProblem::delete_cache()
 //// evaluation of forms, general case ///////////////////////////////////////////////////////////
 
 // Actual evaluation of volume Jacobian form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *> sln, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> sln, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   // Determine the integration order.
@@ -639,7 +639,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   // Order of solutions from the previous iteration level.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
       else oi[i] = init_fn_ord(0);
@@ -702,7 +702,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
   // Function values and values of external functions.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) prev[i] = init_fn(sln[i], rv, order);
       else prev[i] = NULL;
@@ -728,7 +728,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Tuple<Solution *
 
 
 // Actual evaluation of volume vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *> sln, PrecalcShapeset *fv, RefMap *rv)
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> sln, PrecalcShapeset *fv, RefMap *rv)
 {
   // Determine the integration order.
   int inc = (fv->get_num_components() == 2) ? 1 : 0;
@@ -736,7 +736,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   // Order of solutions from the previous iteration level.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
       else oi[i] = init_fn_ord(0);
@@ -795,7 +795,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
   // Function values and values of external functions.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, order);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) prev[i]  = init_fn(sln[i], rv, order);
       else prev[i] = NULL;
@@ -822,7 +822,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Tuple<Solution *
 }
 
 // Actual evaluation of surface Jacobian form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution *> sln, 
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> sln, 
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, EdgePos* ep)
 {
   // Determine the integration order.
@@ -831,7 +831,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // Order of solutions from the previous iteration level.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) oi[i] = init_fn_ord(sln[i]->get_edge_fn_order(ep->edge) + inc);
       else oi[i] = init_fn_ord(0);
@@ -896,7 +896,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
   // Function values and values of external functions.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, eo);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) prev[i]  = init_fn(sln[i], rv, eo);
       else prev[i] = NULL;
@@ -927,7 +927,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Tuple<Solution 
 
 
 // Actual evaluation of surface vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution *> sln, 
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> sln, 
                         PrecalcShapeset *fv, RefMap *rv, EdgePos* ep)
 {
   // Determine the integration order.
@@ -936,7 +936,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   // Order of solutions from the previous iteration level.
   AUTOLA_OR(Func<Ord>*, oi, wf->neq);
   //for (int i = 0; i < wf->neq; i++) oi[i] = init_fn_ord(sln[i]->get_fn_order() + inc);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) oi[i] = init_fn_ord(sln[i]->get_edge_fn_order(ep->edge) + inc);
       else oi[i] = init_fn_ord(0);
@@ -997,7 +997,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Tuple<Solution 
   // Function values and values of external functions.
   AUTOLA_OR(Func<scalar>*, prev, wf->neq);
   //for (int i = 0; i < wf->neq; i++) prev[i]  = init_fn(sln[i], rv, eo);
-  if (sln != Tuple<Solution *>()) {
+  if (sln != Hermes::Tuple<Solution *>()) {
     for (int i = 0; i < wf->neq; i++) {
       if (sln[i] != NULL) prev[i]  = init_fn(sln[i], rv, eo);
       else prev[i] = NULL;
@@ -1150,7 +1150,7 @@ int DiscreteProblem::assign_dofs()
   if (this->wf == NULL) error("this->wf = NULL in DiscreteProblem::assign_dofs().");
 
   // assigning dofs to each space
-  if (this->spaces == Tuple<Space *>()) error("this->spaces is empty in DiscreteProblem::assign_dofs().");
+  if (this->spaces == Hermes::Tuple<Space *>()) error("this->spaces is empty in DiscreteProblem::assign_dofs().");
   int ndof = 0;
   for (int i = 0; i < this->wf->neq; i++) {
     if (this->spaces[i] == NULL) error("this->spaces[%d] is NULL in assign_dofs().", i);
@@ -1166,8 +1166,8 @@ int DiscreteProblem::assign_dofs()
 // a special projection weak form, which is different from 
 // the weak form of the PDE. If you supply a weak form of the 
 // PDE, the PDE will just be solved. 
-void project_internal(Tuple<Space *> spaces, WeakForm *wf, 
-                      Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+void project_internal(Hermes::Tuple<Space *> spaces, WeakForm *wf, 
+                      Hermes::Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
 {
   int n = spaces.size();
 
@@ -1204,7 +1204,7 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf,
   solver.solve(&mat, rhs);
 
   // If the user wants the resulting Solutions.
-  if (target_slns != Tuple<Solution *>()) {
+  if (target_slns != Hermes::Tuple<Solution *>()) {
     for (int i=0; i < target_slns.size(); i++) {
       if (target_slns[i] != NULL) target_slns[i]->set_coeff_vector(spaces[i], rhs);
     }
@@ -1227,8 +1227,8 @@ void project_internal(Tuple<Space *> spaces, WeakForm *wf,
 }
 
 // global orthogonal projection
-void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunction*> source_meshfns, 
-                    Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+void project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<int> proj_norms, Hermes::Tuple<MeshFunction*> source_meshfns, 
+                    Hermes::Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
 {
   int n = spaces.size();  
 
@@ -1238,7 +1238,7 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   for (int i = 0; i < 100; i++) found[i] = 0;
   for (int i = 0; i < n; i++) {
     int norm;
-    if (proj_norms == Tuple<int>()) norm = 1;
+    if (proj_norms == Hermes::Tuple<int>()) norm = 1;
     else norm = proj_norms[i];
     if (norm == 0) {
       found[i] = 1;
@@ -1269,14 +1269,14 @@ void project_global(Tuple<Space *> spaces, Tuple<int> proj_norms, Tuple<MeshFunc
   project_internal(spaces, proj_wf, target_slns, target_vec, is_complex);
 }
 
-void project_global(Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
-                    vector_forms_tuple_t proj_liforms, Tuple<MeshFunction*> source_meshfns, 
-                    Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
+void project_global(Hermes::Tuple<Space *> spaces, matrix_forms_tuple_t proj_biforms, 
+                    vector_forms_tuple_t proj_liforms, Hermes::Tuple<MeshFunction*> source_meshfns, 
+                    Hermes::Tuple<Solution*> target_slns, Vector* target_vec, bool is_complex)
 {
   int n = spaces.size();
   matrix_forms_tuple_t::size_type n_biforms = proj_biforms.size();
   if (n_biforms == 0)
-    error("Please use the simpler version of project_global with the argument Tuple<int> proj_norms if you do not provide your own projection norm.");
+    error("Please use the simpler version of project_global with the argument Hermes::Tuple<int> proj_norms if you do not provide your own projection norm.");
   if (n_biforms != proj_liforms.size())
     error("Mismatched numbers of projection forms in project_global().");
   if (n != n_biforms)
@@ -1317,7 +1317,7 @@ void project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* m
   /// TODO
 }
 
-int get_num_dofs(Tuple<Space *> spaces)
+int get_num_dofs(Hermes::Tuple<Space *> spaces)
 {
   int ndof = 0;
   for (int i=0; i<spaces.size(); i++) {
@@ -1331,7 +1331,7 @@ int DiscreteProblem::get_num_dofs()
   // sanity checks
   if (this->wf == NULL) error("this->wf is NULL in DiscreteProblem::get_num_dofs().");
   if (this->wf->neq == 0) error("this->wf->neq is 0 in DiscreteProblem::get_num_dofs().");
-  if (this->spaces == Tuple<Space *>()) error("this->spaces is empty in DiscreteProblem::get_num_dofs().");
+  if (this->spaces == Hermes::Tuple<Space *>()) error("this->spaces is empty in DiscreteProblem::get_num_dofs().");
 
   int ndof = 0;
   for (int i = 0; i < this->wf->neq; i++) {
@@ -1399,7 +1399,7 @@ double get_l2_norm_cplx(Vector* vec)
 }
 
 // Basic Newton's method, takes a coefficient vector and returns a coefficient vector. 
-bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 
+bool solve_newton(Hermes::Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 
                   MatrixSolverType matrix_solver, double newton_tol, 
                   int newton_max_iter, bool verbose, bool is_complex) 
 {
@@ -1474,13 +1474,13 @@ bool solve_newton(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
 // mesh, and finally solves the fine mesh problem using Newton.
 // So, this is not suitable for time-dependent problems.
 // Feel free to adjust this function for more advanced applications.
-HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *coeff_vec, 
-                        MatrixSolverType matrix_solver, Tuple<int>proj_norms, 
-                        Tuple<Solution *> target_slns, Tuple<Solution *> target_ref_slns, 
-                        Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 
-                        Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
+HERMES_API bool solve_newton_adapt(Hermes::Tuple<Space *> spaces, WeakForm* wf, Vector *coeff_vec, 
+                        MatrixSolverType matrix_solver, Hermes::Tuple<int>proj_norms, 
+                        Hermes::Tuple<Solution *> target_slns, Hermes::Tuple<Solution *> target_ref_slns, 
+                        Hermes::Tuple<WinGeom *> sln_win_geom, Hermes::Tuple<WinGeom *> mesh_win_geom, 
+                        Hermes::Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
                         double newton_tol_coarse, double newton_tol_fine, int newton_max_iter, 
-                        bool verbose, Tuple<ExactSolution *> exact_slns, 
+                        bool verbose, Hermes::Tuple<ExactSolution *> exact_slns, 
                         bool is_complex)
 {
   // Time measurement.
@@ -1523,7 +1523,7 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
   OrderView*  o_view[H2D_MAX_COMPONENTS];
   for (int i = 0; i < num_comps; i++) {
     char* title = (char*)malloc(100*sizeof(char));
-    if (sln_win_geom != Tuple<WinGeom *>() && sln_win_geom[i] != NULL) {
+    if (sln_win_geom != Hermes::Tuple<WinGeom *>() && sln_win_geom[i] != NULL) {
       if (num_comps == 1) sprintf(title, "Solution", i); 
       else sprintf(title, "Solution[%d]", i); 
       switch (proj_norms[i]) {
@@ -1548,7 +1548,7 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
       s_view[i] = NULL;
       v_view[i] = NULL;
     }
-    if (mesh_win_geom != Tuple<WinGeom *>() && mesh_win_geom[i] != NULL) {
+    if (mesh_win_geom != Hermes::Tuple<WinGeom *>() && mesh_win_geom[i] != NULL) {
       if (num_comps == 1) sprintf(title, "Mesh", i); 
       else sprintf(title, "Mesh[%d]", i); 
       o_view[i] = new OrderView(title, mesh_win_geom[i]);
@@ -1567,8 +1567,8 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
   }
 
   // Temporary coarse and reference mesh solutions, and reference spaces.
-  Tuple<Solution *> slns = Tuple<Solution *>();
-  Tuple<Solution *> ref_slns = Tuple<Solution *>();
+  Hermes::Tuple<Solution *> slns = Hermes::Tuple<Solution *>();
+  Hermes::Tuple<Solution *> ref_slns = Hermes::Tuple<Solution *>();
   for (int i = 0; i < num_comps; i++) {
     slns.push_back(new Solution);
     ref_slns.push_back(new Solution);
@@ -1578,8 +1578,8 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
   for (int i = 0; i < num_comps; i++) slns[i]->set_coeff_vector(spaces[i], coeff_vec);
     
   // FIXME: this needs to be solved more elegantly.
-  Tuple<MeshFunction*> slns_mf = Tuple<MeshFunction*>();
-  Tuple<MeshFunction*> ref_slns_mf = Tuple<MeshFunction*>();
+  Hermes::Tuple<MeshFunction*> slns_mf = Hermes::Tuple<MeshFunction*>();
+  Hermes::Tuple<MeshFunction*> ref_slns_mf = Hermes::Tuple<MeshFunction*>();
   for (int i = 0; i < num_comps; i++) {
     slns_mf.push_back((MeshFunction*)slns[i]);
     ref_slns_mf.push_back((MeshFunction*)ref_slns[i]);
@@ -1610,8 +1610,8 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
 
     // Construct globally refined reference mesh(es)
     // and setup reference space(s).
-    Tuple<Space *> ref_spaces = Tuple<Space *>();
-    Tuple<Mesh *> ref_meshes = Tuple<Mesh *>();
+    Hermes::Tuple<Space *> ref_spaces = Hermes::Tuple<Space *>();
+    Hermes::Tuple<Mesh *> ref_meshes = Hermes::Tuple<Mesh *>();
     for (int i = 0; i < num_comps; i++) {
       ref_meshes.push_back(new Mesh());
       Mesh *ref_mesh = ref_meshes.back();
@@ -1625,11 +1625,11 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
     // Calculate initial coefficient vector for Newton on the fine mesh.
     if (as == 1) {
       info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
-      project_global(ref_spaces, proj_norms, slns_mf, Tuple<Solution*>(), coeff_vec, is_complex);
+      project_global(ref_spaces, proj_norms, slns_mf, Hermes::Tuple<Solution*>(), coeff_vec, is_complex);
     }
     else {
       info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
-      project_global(ref_spaces, proj_norms, ref_slns_mf, Tuple<Solution*>(), coeff_vec, is_complex);
+      project_global(ref_spaces, proj_norms, ref_slns_mf, Hermes::Tuple<Solution*>(), coeff_vec, is_complex);
     }
 
     // Newton's method on fine mesh
@@ -1751,17 +1751,17 @@ HERMES_API bool solve_newton_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector *
   project_global(spaces, proj_norms, ref_slns_mf, NULL, coeff_vec, is_complex);
 
   // If the user wants, give him the coarse mesh solutions.
-  if (target_slns != Tuple<Solution *>()) {
-    if (slns.size() != target_slns.size()) error("Mismatched solution Tuple length in solve_newton_adapt().");
+  if (target_slns != Hermes::Tuple<Solution *>()) {
+    if (slns.size() != target_slns.size()) error("Mismatched solution Hermes::Tuple length in solve_newton_adapt().");
     for (int i = 0; i < num_comps; i++) {
       target_slns[i]->copy(slns[i]);
     }
   }
 
   // If the user wants, give him the reference mesh solutions.
-  if (target_ref_slns != Tuple<Solution *>()) {
+  if (target_ref_slns != Hermes::Tuple<Solution *>()) {
     if (ref_slns.size() != target_ref_slns.size()) 
-      error("Mismatched reference solution Tuple length in solve_newton_adapt().");
+      error("Mismatched reference solution Hermes::Tuple length in solve_newton_adapt().");
     for (int i = 0; i < num_comps; i++) {
       target_ref_slns[i]->copy(ref_slns[i]);
     }

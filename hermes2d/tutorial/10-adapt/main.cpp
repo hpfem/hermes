@@ -58,22 +58,18 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Boundary markers.
+const int OUTER_BDY = 1, STATOR_BDY = 2;
 
 // Problem parameters.
-const int OMEGA_1 = 1;
-const int OMEGA_2 = 2;
-const int STATOR_BDY = 2;
+const int MATERIAL_1 = 1;
+const int MATERIAL_2 = 2;
 const double EPS_1 = 1.0;       // Relative electric permittivity in Omega_1.
 const double EPS_2 = 10.0;      // Relative electric permittivity in Omega_2.
 const double VOLTAGE = 50.0;    // Voltage on the stator.
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -91,13 +87,17 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("motor.mesh", &mesh);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(OUTER_BDY, STATOR_BDY));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(biform1), HERMES_SYM, OMEGA_1);
-  wf.add_matrix_form(callback(biform2), HERMES_SYM, OMEGA_2);
+  wf.add_matrix_form(callback(biform1), HERMES_SYM, MATERIAL_1);
+  wf.add_matrix_form(callback(biform2), HERMES_SYM, MATERIAL_2);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -165,7 +165,8 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

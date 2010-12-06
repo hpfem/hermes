@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -130,18 +130,18 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_UNSYM, HERMES_ANY);
     wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
     wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                       Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                       Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
   }
   else {
     wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                  HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                  HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
     wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
     wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   bool is_linear;
   if (NEWTON) is_linear = false;
   else is_linear = true;
-  DiscreteProblem dp(&wf, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -161,14 +161,14 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    OGProjection::project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
-                   Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+    OGProjection::project_global(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                   Hermes::Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
                    coeff_vec, 
                    matrix_solver, 
-                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+                   Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
     // Update time-dependent essential BC are used.
     if (TIME <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+      update_essential_bc_values(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
     }
 
     if (NEWTON) 
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
         double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, or the maximum number 
         // of iteration has been reached, then quit.
@@ -222,14 +222,14 @@ int main(int argc, char* argv[])
       }
   
       // Update previous time level solutions.
-      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
     else {
       // Linear solve.
       info("Assembling and solving linear problem.");
       dp.assemble(matrix, rhs, false);
       if(solver->solve()) 
-        Solution::vector_to_solutions(solver->get_solution(), Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+        Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       else 
         error ("Matrix solver failed.\n");
     }

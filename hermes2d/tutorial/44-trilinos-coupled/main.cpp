@@ -37,15 +37,15 @@ const double kappa = 0.1;
 const double x1    = 9.0;
 
 // Boundary markers.
-int bdy_left = 1;
+const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Boundary condition types.
 BCType bc_types(int marker)
-  { return (marker == bdy_left) ? BC_ESSENTIAL : BC_NATURAL; }
+  { return (marker == BDY_LEFT) ? BC_ESSENTIAL : BC_NATURAL; }
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_t(int ess_bdy_marker, double x, double y)
-  { return (ess_bdy_marker == bdy_left) ? 1.0 : 0; }
+  { return (ess_bdy_marker == BDY_LEFT) ? 1.0 : 0; }
 
 scalar essential_bc_values_c(int ess_bdy_marker, double x, double y)
   { return 0; }
@@ -74,10 +74,16 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+  bc_types.add_bc_newton(BDY_COOLED);
+
   // Create H1 spaces with default shapesets.
-  H1Space* t_space = new H1Space(&mesh, bc_types, essential_bc_values_t, P_INIT);
-  H1Space* c_space = new H1Space(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = Space::get_num_dofs(Tuple<Space *>(t_space, c_space));
+  H1Space* t_space = new H1Space(&mesh, &bc_types, essential_bc_values_t, P_INIT);
+  H1Space* c_space = new H1Space(&mesh, &bc_types, essential_bc_values_c, P_INIT);
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(t_space, c_space));
   info("ndof = %d.", ndof);
 
   // Define initial conditions.
@@ -91,9 +97,9 @@ int main(int argc, char* argv[])
   c_iter.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
-  DXDYFilter omega(omega_fn, Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
-  DXDYFilter omega_dt(omega_dt_fn, Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
-  DXDYFilter omega_dc(omega_dc_fn, Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega_dt(omega_dt_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega_dc(omega_dc_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
 
   // Initialize visualization.
   ScalarView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
@@ -114,23 +120,23 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(precond_1_1));
   }
   wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Project the functions "t_iter" and "c_iter" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Tuple<Space *>(t_space, c_space), Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
+  OGProjection::project_global(Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
     coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
 
   // Initialize finite element problem.
-  DiscreteProblem dp(&wf, Tuple<Space*>(t_space, c_space));
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space*>(t_space, c_space));
 
   // Initialize NOX solver and preconditioner.
   NoxSolver solver(&dp);
@@ -156,7 +162,7 @@ int main(int argc, char* argv[])
     solver.set_init_sln(coeff_vec);
     if (solver.solve())
     {
-      Solution::vector_to_solutions(solver.get_solution(), Tuple<Space *>(t_space, c_space), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      Solution::vector_to_solutions(solver.get_solution(), Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",
@@ -168,7 +174,7 @@ int main(int argc, char* argv[])
       cpu_time.tick(HERMES_SKIP);
 
       // Visualization.
-      DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+      DXDYFilter omega_view(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
       rview.set_min_max_range(0.0,2.0);
       rview.show(&omega_view);
       cpu_time.tick(HERMES_SKIP);

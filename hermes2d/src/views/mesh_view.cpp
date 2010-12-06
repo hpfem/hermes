@@ -136,7 +136,8 @@ void MeshView::on_display()
     int mrk = b_markers ? edges[i][2] : 0;
 
     if (!edges[i][2] &&
-        (tvert[edges[i][0]][1] == tvert[edges[i][1]][1] && tvert[edges[i][0]][0] < tvert[edges[i][1]][0] ||
+        ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
+          tvert[edges[i][0]][0] < tvert[edges[i][1]][0]) ||
          tvert[edges[i][0]][1] < tvert[edges[i][1]][1])) continue;
 
     float* color = get_marker_color(mrk);

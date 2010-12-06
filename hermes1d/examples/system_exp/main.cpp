@@ -29,8 +29,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,exp(A)), new BCSpec(1, exp(-A)));
-Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,exp(B)), new BCSpec(1, exp(-B)));
+Hermes::Tuple<BCSpec *>DIR_BC_LEFT =  Hermes::Tuple<BCSpec *>(new BCSpec(0,exp(A)), new BCSpec(1, exp(-A)));
+Hermes::Tuple<BCSpec *>DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>(new BCSpec(0,exp(B)), new BCSpec(1, exp(-B)));
 
 // Function f_0(x).
 double f_0(double x) {

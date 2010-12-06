@@ -172,11 +172,11 @@ public:
   typedef enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } solution_type;
 
   /// Passes solution components calculated from solution vector as Solutions.
-  static void vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<bool> add_dir_lift = Tuple<bool>());
+  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *> solutions, Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
   static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, bool add_dir_lift = true);
-  static void vector_to_solutions(Vector* vec, Tuple<Space *> spaces, Tuple<Solution*> solutions, Tuple<bool> add_dir_lift = Tuple<bool>());
+  static void vector_to_solutions(Vector* vec, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
   static void vector_to_solution(Vector* vec, Space* space, Solution* solution, bool add_dir_lift = true);
-  static void vector_to_solutions(scalar* solution_vector, Tuple<Space *> spaces, Tuple<Solution *> solutions, Tuple<PrecalcShapeset *> pss, Tuple<bool> add_dir_lift = Tuple<bool>());
+  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *> solutions, Hermes::Tuple<PrecalcShapeset *> pss, Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
   static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, PrecalcShapeset* pss, bool add_dir_lift = true);
 
   bool own_mesh;

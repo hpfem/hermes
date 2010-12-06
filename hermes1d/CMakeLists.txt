@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
 
-set(WITH_PYTHON no)
+set(WITH_PYTHON yes)
 set(DEBUG yes)
 set(RELEASE no)
 set(WITH_EXAMPLES yes)
@@ -51,6 +51,8 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 # Location of the common library.
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 
+include(../hermes_common/CMakeCommon.txt)
+
 # For use in the common code.
 set(H1D_REAL YES)
 add_definitions(-DH1D_REAL)
@@ -64,18 +66,13 @@ if(RELEASE)
         set(HERMES_BIN hermes1d)
 endif(RELEASE)
 
-find_package(PythonLibs REQUIRED)
-find_package(NumPy REQUIRED)
-
 if(WITH_PYTHON)
-    # if the user specified PYTHON_INCLUDE_PATH, let's use that, otherwise let's
-    # try to guess using cmake/FindPythonLibs.cmake
-    if (NOT PYTHON_INCLUDE_PATH)
-        find_package(PythonLibs REQUIRED)
-    endif (NOT PYTHON_INCLUDE_PATH)
-    find_package(NumPy REQUIRED)
-
-    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  find_package(Python REQUIRED)
+  find_package(NumPy REQUIRED)
+  find_package(Cython REQUIRED)
+  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  set(PYTHON_INSTALL_PATH lib/python/site-packages)
+  add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
@@ -174,10 +171,6 @@ add_custom_command(
 	COMMAND   ${DOXYGEN_BINARY} ${DOXYGEN_CONFIG_FILE}
 )
 
-
-add_custom_target(test-quick
-	COMMAND   /usr/bin/ctest -E \"hnnd|qorder|lobatto|hex-h1-1face\"
-)
 
 message("\nConfiguration results:")
 message("----------------------")

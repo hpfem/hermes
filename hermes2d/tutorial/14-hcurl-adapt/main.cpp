@@ -57,8 +57,8 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double mu_r   = 1.0;
@@ -68,14 +68,9 @@ const double lambda = 1.0;
 // Bessel functions, exact solution, and weak forms.
 #include "forms.cpp"
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == 1 || marker == 6)
-    return BC_ESSENTIAL; // perfect conductor
-  else
-    return BC_NATURAL;   // impedance
-}
+// Boundary markers.
+const int BDY_1 = 1, BDY_6 = 6;  // perfect conductor
+const int BDY_2 = 2, BDY_3 = 3, BDY_4 = 4, BDY_5 = 5; // impedance
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -98,8 +93,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_1, BDY_6));
+  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
+
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

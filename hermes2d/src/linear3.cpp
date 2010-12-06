@@ -532,13 +532,13 @@ void Vectorizer::save_data(const char* filename)
 
   if (fwrite("H2DV\001\000\000\000", 1, 8, f) != 8 ||
       fwrite(&nv, sizeof(int), 1, f) != 1 ||
-      fwrite(verts, sizeof(double4), nv, f) != nv ||
+      fwrite(verts, sizeof(double4), nv, f) != (unsigned) nv ||
       fwrite(&nt, sizeof(int), 1, f) != 1 ||
-      fwrite(tris, sizeof(int3), nt, f) != nt ||
+      fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
       fwrite(&ne, sizeof(int), 1, f) != 1 ||
-      fwrite(edges, sizeof(int3), ne, f) != ne ||
+      fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne ||
       fwrite(&nd, sizeof(int), 1, f) != 1 ||
-      fwrite(dashes, sizeof(int2), nd, f) != nd)
+      fwrite(dashes, sizeof(int2), nd, f) != (unsigned) nd)
   {
     error("Error writing data to %s", filename);
   }
@@ -567,7 +567,7 @@ void Vectorizer::load_data(const char* filename)
     if (fread(&n, sizeof(int), 1, f) != 1) \
       error("Error reading the number of " what " from %s", filename); \
     lin_init_array(array, type, c, n); \
-    if (fread(array, sizeof(type), n, f) != n) \
+    if (fread(array, sizeof(type), n, f) != (unsigned) n) \
       error("Error reading " what " from %s", filename);
 
   read_array(verts, double4, nv, cv, "vertices");

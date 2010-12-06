@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
     // copy the file into the buffer:
     size_t result = fread(buffer, 1, size, file);
-    error_if(result != size, "reading error");
+    error_if(result != (unsigned) size, "reading error");
 
     fclose(file);
 

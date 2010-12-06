@@ -17,7 +17,7 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int NUMBER_OF_EIGENVALUES = 5;              // Desired number of eigenvalues. Maximum is 6.
+const int NUMBER_OF_EIGENVALUES = 6;              // Desired number of eigenvalues. Maximum is 6.
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of 
@@ -51,15 +51,11 @@ const double ERR_STOP = 0.001;                    // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary condition types.
-// Note: "essential" means that solution value is prescribed.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -107,8 +103,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers. 
+  // Note: "essential" means that solution value is prescribed.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation for the left hand side i.e. H 
   WeakForm wf_left, wf_right;
@@ -119,22 +120,22 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview_1("Eigen 1", new WinGeom(0, 0, 350, 250));
+  ScalarView sview_1("", new WinGeom(0, 0, 350, 250));
   sview_1.show_mesh(false);
   sview_1.fix_scale_width(60);
-  ScalarView sview_2("Eigen 2", new WinGeom(360, 0, 350, 250));
+  ScalarView sview_2("", new WinGeom(360, 0, 350, 250));
   sview_2.show_mesh(false);
   sview_2.fix_scale_width(60);
-  ScalarView sview_3("Eigen 3", new WinGeom(720, 0, 350, 250));
+  ScalarView sview_3("", new WinGeom(720, 0, 350, 250));
   sview_3.show_mesh(false);
   sview_3.fix_scale_width(60);
-  ScalarView sview_4("Eigen 4", new WinGeom(0, 305, 350, 250));
+  ScalarView sview_4("", new WinGeom(0, 305, 350, 250));
   sview_4.show_mesh(false);
   sview_4.fix_scale_width(60);
-  ScalarView sview_5("Eigen 5", new WinGeom(360, 305, 350, 250));
+  ScalarView sview_5("", new WinGeom(360, 305, 350, 250));
   sview_5.show_mesh(false);
   sview_5.fix_scale_width(60);
-  ScalarView sview_6("Eigen 6", new WinGeom(720, 305, 350, 250));
+  ScalarView sview_6("", new WinGeom(720, 305, 350, 250));
   sview_6.show_mesh(false);
   sview_6.fix_scale_width(60);
   OrderView  oview("Polynomial orders", new WinGeom(1080, 0, 410, 350));
@@ -184,17 +185,20 @@ int main(int argc, char* argv[])
     cpu_time.tick(HERMES_SKIP);
 
     // Calling Python eigensolver. Solution will be written to "eivecs.dat".
+    info("Calling Pysparse...");
     char call_cmd[255];
     sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
 	    TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
     system(call_cmd);
+    info("Pysparse finished.");
 
     // Initializing solution vector, solution and ScalarView.
     double* ref_coeff_vec = new double[ref_ndof];
     Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
-    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+    //ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
     // Reading solution vectors from file and visualizing.
+    double eigenval[NUMBER_OF_EIGENVALUES];
     FILE *file = fopen("eivecs.dat", "r");
     char line [64];                  // Maximum line size.
     fgets(line, sizeof line, file);  // ref_ndof
@@ -204,7 +208,10 @@ int main(int argc, char* argv[])
     int neig = atoi(line);
     if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
     for (int ieig = 0; ieig < NUMBER_OF_EIGENVALUES; ieig++) {
-      // Get next eigenvector from the file.
+      // Get next eigenvalue from the file
+      fgets(line, sizeof line, file);  // eigenval
+      eigenval[ieig] = atof(line);            
+      // Get the corresponding eigenvector.
       for (int i = 0; i < ref_ndof; i++) {  
         fgets(line, sizeof line, file);
         ref_coeff_vec[i] = atof(line);
@@ -224,26 +231,52 @@ int main(int argc, char* argv[])
     // this needs to be changed to take into account all eigenvectors.
 
     // View the coarse mesh solution and polynomial orders.
-    if (NUMBER_OF_EIGENVALUES > 0) sview_1.show(&(sln[0]));
-    if (NUMBER_OF_EIGENVALUES > 1) sview_2.show(&(sln[1]));
-    if (NUMBER_OF_EIGENVALUES > 2) sview_3.show(&(sln[2]));
-    if (NUMBER_OF_EIGENVALUES > 3) sview_4.show(&(sln[3]));
-    if (NUMBER_OF_EIGENVALUES > 4) sview_5.show(&(sln[4]));
-    if (NUMBER_OF_EIGENVALUES > 5) sview_6.show(&(sln[5]));
+    
+    char title[100];
+    if (NUMBER_OF_EIGENVALUES > 0) {
+      sprintf(title, "Solution 0, val = %g", eigenval[0]);
+      sview_1.set_title(title);
+      sview_1.show(&(sln[0]));
+    }
+    if (NUMBER_OF_EIGENVALUES > 1) {
+      sprintf(title, "Solution 1, val = %g", eigenval[1]);
+      sview_2.set_title(title);
+      sview_2.show(&(sln[1]));
+    }
+    if (NUMBER_OF_EIGENVALUES > 2) {
+      sprintf(title, "Solution 2, val = %g", eigenval[2]);
+      sview_3.set_title(title);
+      sview_3.show(&(sln[2]));
+    }
+    if (NUMBER_OF_EIGENVALUES > 3) {
+      sprintf(title, "Solution 3, val = %g", eigenval[3]);
+      sview_4.set_title(title);
+      sview_4.show(&(sln[3]));
+    }
+    if (NUMBER_OF_EIGENVALUES > 4) {
+      sprintf(title, "Solution 4, val = %g", eigenval[4]);
+      sview_5.set_title(title);
+      sview_5.show(&(sln[4]));
+    }
+    if (NUMBER_OF_EIGENVALUES > 5) {
+      sprintf(title, "Solution 5, val = %g", eigenval[5]);
+      sview_6.set_title(title);
+      sview_6.show(&(sln[5]));
+    }
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
-    Tuple<Space *> spaces;
+    Hermes::Tuple<Space *> spaces;
     for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
         spaces.push_back(&space);
-    Tuple<ProjNormType> proj_norms;
+    Hermes::Tuple<ProjNormType> proj_norms;
     for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
         proj_norms.push_back(HERMES_H1_NORM);
     Adapt* adaptivity = new Adapt(spaces, proj_norms);
     bool solutions_for_adapt = true;
     
-    Tuple<Solution *> slns;
+    Hermes::Tuple<Solution *> slns;
     if (NUMBER_OF_EIGENVALUES > 0) slns.push_back(&sln[0]);
     if (NUMBER_OF_EIGENVALUES > 1) slns.push_back(&sln[1]);
     if (NUMBER_OF_EIGENVALUES > 2) slns.push_back(&sln[2]);
@@ -251,25 +284,25 @@ int main(int argc, char* argv[])
     if (NUMBER_OF_EIGENVALUES > 4) slns.push_back(&sln[4]);
     if (NUMBER_OF_EIGENVALUES > 5) slns.push_back(&sln[5]);
     
-    Tuple<Solution *> ref_slns;
+    Hermes::Tuple<Solution *> ref_slns;
     if (NUMBER_OF_EIGENVALUES > 0) ref_slns.push_back(&ref_sln[0]);
     if (NUMBER_OF_EIGENVALUES > 1) ref_slns.push_back(&ref_sln[1]);
     if (NUMBER_OF_EIGENVALUES > 2) ref_slns.push_back(&ref_sln[2]);
     if (NUMBER_OF_EIGENVALUES > 3) ref_slns.push_back(&ref_sln[3]);
     if (NUMBER_OF_EIGENVALUES > 4) ref_slns.push_back(&ref_sln[4]);
     if (NUMBER_OF_EIGENVALUES > 5) ref_slns.push_back(&ref_sln[5]);
-    Tuple<double> component_errors;
+    Hermes::Tuple<double> component_errors;
     double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &component_errors) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d\n.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
-    if (NUMBER_OF_EIGENVALUES > 0) info("err_est_rel[0]: %g%%\n", component_errors[0] * 100);
-    if (NUMBER_OF_EIGENVALUES > 1) info("err_est_rel[1]: %g%%\n", component_errors[1] * 100);
-    if (NUMBER_OF_EIGENVALUES > 2) info("err_est_rel[2]: %g%%\n", component_errors[2] * 100);
-    if (NUMBER_OF_EIGENVALUES > 3) info("err_est_rel[3]: %g%%\n", component_errors[3] * 100);
-    if (NUMBER_OF_EIGENVALUES > 4) info("err_est_rel[4]: %g%%\n", component_errors[4] * 100);
-    if (NUMBER_OF_EIGENVALUES > 5) info("err_est_rel[5]: %g%%\n", component_errors[5] * 100);
+    info("ndof_coarse: %d, ndof_fine: %d.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    if (NUMBER_OF_EIGENVALUES > 0) info("err_est_rel[0]: %g%%", component_errors[0] * 100);
+    if (NUMBER_OF_EIGENVALUES > 1) info("err_est_rel[1]: %g%%", component_errors[1] * 100);
+    if (NUMBER_OF_EIGENVALUES > 2) info("err_est_rel[2]: %g%%", component_errors[2] * 100);
+    if (NUMBER_OF_EIGENVALUES > 3) info("err_est_rel[3]: %g%%", component_errors[3] * 100);
+    if (NUMBER_OF_EIGENVALUES > 4) info("err_est_rel[4]: %g%%", component_errors[4] * 100);
+    if (NUMBER_OF_EIGENVALUES > 5) info("err_est_rel[5]: %g%%", component_errors[5] * 100);
    
     // Time measurement.
     cpu_time.tick();
@@ -285,7 +318,7 @@ int main(int argc, char* argv[])
     else
     {
       info("Adapting coarse mesh.");
-      Tuple<RefinementSelectors::Selector *> selectors;
+      Hermes::Tuple<RefinementSelectors::Selector *> selectors;
       for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
         selectors.push_back(&selector);
       done = adaptivity->adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);

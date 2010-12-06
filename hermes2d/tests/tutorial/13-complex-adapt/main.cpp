@@ -106,8 +106,6 @@ int main(int argc, char* argv[])
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
-
-  initialize_solution_environment(matrix_solver, argc, argv);
   
   // Adaptivity loop:
   int as = 1; 
@@ -194,8 +192,6 @@ int main(int argc, char* argv[])
   while (done == false);
   
   verbose("Total running time: %g s", cpu_time.accumulated());
-  
-  finalize_solution_environment(matrix_solver);
   
   int ndof = Space::get_num_dofs(&space);
 

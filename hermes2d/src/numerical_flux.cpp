@@ -12,6 +12,7 @@ double NumericalFlux::f_x(int i, double w0, double w1, double w3, double w4)
         return w1/w0 * (w4 + (kappa - 1.) * (w4 - (w1*w1+w3*w3)/(2*w0)));
 
     error("Invalid index.");
+    return 0.0;
 }
 
 double NumericalFlux::f_z(int i, double w0, double w1, double w3, double w4)
@@ -26,6 +27,7 @@ double NumericalFlux::f_z(int i, double w0, double w1, double w3, double w4)
         return w3/w0 * (w4 + (kappa - 1.) * (w4 - (w1*w1+w3*w3)/(2*w0)));
 
     error("Invalid index.");
+    return 0.0;
 }
 
 double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double w4)
@@ -74,6 +76,7 @@ double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double 
 
     printf("i=%d, j=%d;\n", i, j);
     error("Invalid index.");
+    return 0.0;
 }
 
 double NumericalFlux::A_z(int i, int j, double w0, double w1, double w3, double w4)
@@ -121,6 +124,7 @@ double NumericalFlux::A_z(int i, int j, double w0, double w1, double w3, double 
         return w3/w0 + (kappa - 1.) * w3/w0;
 
     error("Invalid index.");
+    return 0.0;
 }
 
 double NumericalFlux::matrix_R(int i, int j, double w0, double w1, double w3, double w4)
@@ -170,6 +174,7 @@ double NumericalFlux::matrix_R(int i, int j, double w0, double w1, double w3, do
 
     printf("i=%d, j=%d;\n", i, j);
     error("Invalid index.");
+    return 0.0;
 }
 
 double NumericalFlux::matrix_R_inv(int i, int j, double w0, double w1, double w3, double w4)
@@ -274,6 +279,7 @@ double NumericalFlux::matrix_D_minus(int i, int j, double w0, double w1, double 
 
     printf("i=%d, j=%d;\n", i, j);
     error("Invalid index.");
+    return 0.0;
 }
 
 // multiplies two matrices

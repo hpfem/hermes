@@ -1,0 +1,6 @@
+add_subdirectory(adapt-exact-quadr-H1)
+add_subdirectory(adapt-exact-quadr-L2)
+add_subdirectory(adapt-exact-sin-H1)
+add_subdirectory(adapt-exact-sin-L2)
+add_subdirectory(adapt-exact-system-sin-H1)
+add_subdirectory(adapt-exact-system-sin-L2)

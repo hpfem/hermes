@@ -161,14 +161,11 @@ int main(int argc, char **args)
 
 	// Initialize discrete problem.
 	bool is_linear = true;
-	DiscreteProblem dp(&wf, Tuple<Space *>(&space1, &space2, &space3), is_linear);
+	DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&space1, &space2, &space3), is_linear);
 #endif
 	// Time measurement.
 	TimePeriod cpu_time;
 	cpu_time.tick();
-
-	// Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-	initialize_solution_environment(matrix_solver, argc, args);
   
 	// Set up the solver, matrix, and rhs according to the solver selection.
 	SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -287,9 +284,6 @@ int main(int argc, char **args)
 	delete matrix;
 	delete rhs;
 	delete solver;
-
-	// Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-	finalize_solution_environment(matrix_solver);
 
 #ifdef WITH_PETSC
 	mat.free();

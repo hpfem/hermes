@@ -3,7 +3,10 @@
 # file for the exact terms).
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-from hermes_common._hermes_common cimport c_Matrix
+# FIXME:
+#from hermes_common._hermes_common cimport c_Matrix
+
+from hermes_common.cpp.matrix cimport Matrix
 
 cdef extern from "hermes1d.h":
 
@@ -20,10 +23,10 @@ cdef extern from "hermes1d.h":
         double get_solution_deriv(double x_phys, int comp)
         void get_coeffs(int sln, int comp, double coeffs[])
 
-    cdef cppclass Mesh:
-        Mesh(double a, double b, int n_elem, int p_init, int n_eq, int
+    cdef cppclass Space:
+        Space(double a, double b, int n_elem, int p_init, int n_eq, int
                 n_sln, int print_banner)
-        Mesh(int n_macro_elem, double *pts_array, int *p_array, int *m_array,
+        Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array,
              int *div_array, int n_eq, int n_sln, int print_banner)
         void create(double A, double B, int n)
         int get_n_base_elems()
@@ -35,35 +38,35 @@ cdef extern from "hermes1d.h":
         void set_coeff_vector(double *y, int sln)
         void get_coeff_vector(double *y, int sln)
         void plot(char* filename)
-        Mesh *replicate()
+        Space *replicate()
         void reference_refinement(int start_elem_id, int elem_num)
         int get_n_active_elem()
         int get_num_dofs()
 
     cdef cppclass Linearizer:
-        Linearizer(Mesh *mesh)
+        Linearizer(Space *mesh)
         void plot_solution(char *out_filename,
                 int plotting_elem_subdivision)
-        void get_xy_mesh(int comp, int plotting_elem_subdivision,
+        void get_xy_space(int comp, int plotting_elem_subdivision,
                 double **x, double **y, int *n)
 
     cdef cppclass Iterator:
-        Iterator(Mesh *mesh)
+        Iterator(Space *mesh)
         void reset()
         Element *first_active_element()
         Element *next_active_element()
         Element *last_active_element()
 
-    double calc_error_estimate(int norm, Mesh* mesh, Mesh* mesh_ref,
+    double calc_err_est(int norm, Space* mesh, Space* mesh_ref,
                        double *err_array, int sln)
-    double calc_solution_norm(int norm, Mesh* mesh)
+    double calc_solution_norm(int norm, Space* mesh)
 
     void adapt(int norm, int adapt_type, double threshold,
                double *err_squared_array,
-               Mesh* &mesh, Mesh* &mesh_ref)
+               Space* &mesh, Space* &mesh_ref)
 
     int H1D_L2_ortho_global
     int H1D_H1_ortho_global
     ctypedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[])
-    void assemble_projection_matrix_rhs(Mesh *mesh, c_Matrix *A, double *rhs,
+    void assemble_projection_matrix_rhs(Space *space, Matrix *A, double *rhs,
             ExactFunction fn, int projection_type) except +

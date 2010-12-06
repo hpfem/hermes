@@ -100,10 +100,10 @@ void SimpleGraph::save(const char* filename)
   FILE* f = fopen(filename, "w");
   if (f == NULL) error("Error writing to %s.", filename);
 
-  for (int i = 0; i < rows.size(); i++)
+  for (unsigned int i = 0; i < rows.size(); i++)
   {
-    int rsize = rows[i].data.size();
-    for (int j = 0; j < rsize; j++)
+    unsigned int rsize = rows[i].data.size();
+    for (unsigned int j = 0; j < rsize; j++)
       fprintf(f, "%.14g  %.14g\n", rows[i].data[j].x, rows[i].data[j].y);
   }
 
@@ -116,7 +116,7 @@ void SimpleGraph::save(const char* filename)
 
 void MatlabGraph::save(const char* filename)
 {
-  int i, j, k;
+  unsigned int i, j, k;
   
   if (!rows.size()) error("No data rows defined.");
   
@@ -135,7 +135,7 @@ void MatlabGraph::save(const char* filename)
   for (i = 0; i < rows.size(); i++)
   {
     fprintf(f, "[");
-    int rsize = rows[i].data.size();
+    unsigned int rsize = rows[i].data.size();
     for (k = 0; k < 2; k++)
     {
       for (j = 0; j < rsize; j++)
@@ -216,7 +216,7 @@ static void get_style_types(std::string line, std::string mark, std::string col,
 
 void GnuplotGraph::save(const char* filename)
 {
-  int i, j, k;
+  unsigned int i, j, k;
   
   if (!rows.size()) error("No data rows defined.");
 
@@ -273,7 +273,7 @@ void GnuplotGraph::save(const char* filename)
   
   for (i = 0; i < rows.size(); i++)
   {
-    int rsize = rows[i].data.size();
+    unsigned int rsize = rows[i].data.size();
     for (j = 0; j < rsize; j++)
       fprintf(f, "%.14g  %.14g\n", rows[i].data[j].x, rows[i].data[j].y);
     fprintf(f, "e\n");

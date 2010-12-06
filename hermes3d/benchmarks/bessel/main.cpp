@@ -96,10 +96,7 @@ int main(int argc, char **args)
   ExactSolution exact_sol(&mesh, exact);
 
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
-
-  // Initialize the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  initialize_solution_environment(matrix_solver, argc, args);
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact; 
   
   // Adaptivity loop. 
   int as = 1; 
@@ -206,9 +203,6 @@ int main(int argc, char **args)
     // Increase the counter of performed adaptivity steps.
     as++;
   } while (!done);
-
-  // Properly terminate the solver in the case of SOLVER_PETSC or SOLVER_MUMPS.
-  finalize_solution_environment(matrix_solver);
 
   return 0;
 }

@@ -19,12 +19,36 @@
 #include "../quad_all.h"
 #include "../shapeset/shapeset_l2_all.h"
 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, 
+	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+    bc_types, bc_value_callback_by_coord, p_init)
+{
+  if (shapeset == NULL)
+  {
+    this->shapeset = new L2Shapeset;
+    own_shapeset = true;
+  }
+  ldata = NULL;
+  lsize = 0;
+
+  // set uniform poly order in elements
+  if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an L2 space.");
+  else this->set_uniform_order_internal(p_init);
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
 
 L2Space::L2Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
 	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
     bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-  if (shapeset == NULL) this->shapeset = new L2Shapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new L2Shapeset;
+    own_shapeset = true;
+  }
   ldata = NULL;
   lsize = 0;
 
@@ -37,9 +61,13 @@ L2Space::L2Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 }
 
 L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
-  : Space(mesh, shapeset, NULL, NULL, Ord2(p_init, p_init))
+  : Space(mesh, shapeset, new BCTypes(), new BCValues(), Ord2(p_init, p_init))
 {
-  if (shapeset == NULL) this->shapeset = new L2Shapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new L2Shapeset;
+    own_shapeset = true;
+  }
   ldata = NULL;
   lsize = 0;
 
@@ -54,6 +82,8 @@ L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
 L2Space::~L2Space()
 {
   ::free(ldata);
+  if (own_shapeset)
+    delete this->shapeset;
 }
 
 
@@ -67,7 +97,10 @@ Space* L2Space::dup(Mesh* mesh) const
 void L2Space::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 40 && shapeset->get_id() > 29)
+  {
     this->shapeset = shapeset;
+    own_shapeset = false;
+  }
   else
     error("Wrong shapeset type in L2Space::set_shapeset()");
 }

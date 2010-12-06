@@ -78,7 +78,8 @@ UMFPackMatrix::~UMFPackMatrix() {
 void UMFPackMatrix::alloc() {
   _F_
   assert(pages != NULL);
-  assert(size > 0);
+  if (size <= 0)
+      error("UMFPack failed, matrix size must be greater than 0");
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];

@@ -28,22 +28,18 @@ const bool JFNK = false;         // true = Jacobian-free method (for NOX),
                                  // false = Newton (for NOX).
 const bool PRECOND = true;      // Preconditioning by jacobian in case of JFNK (for NOX),
                                  // default ML preconditioner in case of Newton.
-                                 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h)
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_ESSENTIAL = 1;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -83,9 +79,13 @@ int main(int argc, char **argv)
 
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_ESSENTIAL);
  
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
@@ -105,9 +105,7 @@ int main(int argc, char **argv)
   // Initialize the linear FE problem.
   bool is_linear = true;
   DiscreteProblem dp1(&wf1, &space, is_linear);
-  
-  initialize_solution_environment(matrix_solver, argc, argv);
-  
+    
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -134,9 +132,7 @@ int main(int argc, char **argv)
   delete(matrix);
   delete(rhs);
   delete(solver);
-  
-  finalize_solution_environment(matrix_solver);
-  
+    
   // CPU time needed by UMFpack.
   double time1 = cpu_time.tick().last();
 

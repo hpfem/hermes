@@ -19,6 +19,8 @@ Click into the image window and:\n\
   press 'q' to quit.\n\
   Also see help - click into the image window and press F1.\n";
 
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
 int main(int argc, char* argv[])
 {
@@ -39,7 +41,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, 4);    // Four refinements towards vertex no. 3.
 
   // Refine towards boundary (optional).
-  mesh.refine_towards_boundary(2, 4);  // Four refinements towards boundary with marker 2.
+  mesh.refine_towards_boundary(BDY_OUTER, 4);  // Four refinements towards boundary with marker 2.
 
   // Refine individual elements (optional).
   mesh.refine_element(86, 0);          // 0... isotropic refinement.

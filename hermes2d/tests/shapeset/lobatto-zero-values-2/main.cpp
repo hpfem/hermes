@@ -13,9 +13,13 @@ int main(int argc, char* argv[])
   // We load the mesh on a triangle [-1,-1][1,-1][-1,1] domain.
   mloader.load("ref_triangle.mesh", &mesh);            
 
+  // Enter boundary markers.
+  // (If no markers are entered, default is a natural BC).
+  BCTypes bc_types;
+
   // Create an H1 space with default shapeset,
   // natural BC, and linear elements.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
   // The type of element, mesh_mode = 3 means a triangle element.
   int mesh_mode = 3;
   int n = Space::get_num_dofs(&space);

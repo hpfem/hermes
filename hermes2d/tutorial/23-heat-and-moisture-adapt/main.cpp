@@ -48,8 +48,8 @@ const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (r
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;            // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Time step and simulation time.
 const double TAU = 5.*24*60*60;                  // time step: 120 hours
@@ -75,24 +75,17 @@ const double REACTOR_START_TIME = 3600*24;   // (seconds) how long does the reac
                                              // need to warm up linearly from TEMP_INITIAL
                                              // to TEMP_REACTOR_MAX
 // Materials and boundary markers.
-const int MARKER_SYMMETRY = 1;               
-const int MARKER_REACTOR_WALL = 2;           
-const int MARKER_EXTERIOR_WALL = 5;          
+const int BDY_SYMMETRY = 1;               
+const int BDY_REACTOR_WALL = 2;           
+const int BDY_EXTERIOR_WALL = 5;          
 
 // Physical time in seconds.
 double CURRENT_TIME = 0.0;
 
-// Boundary condition types.
-BCType temp_bc_type(int marker)
-  { return (marker == MARKER_REACTOR_WALL) ? BC_ESSENTIAL : BC_NATURAL; }
-
-BCType moist_bc_type(int marker)
-  { return BC_NATURAL; }
-
 // Essential (Dirichlet) boundary condition values for T.
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 {
-  if (ess_bdy_marker == MARKER_REACTOR_WALL)
+  if (ess_bdy_marker == BDY_REACTOR_WALL)
   {
     double current_reactor_temperature = TEMP_REACTOR_MAX;
     if (CURRENT_TIME < REACTOR_START_TIME) {
@@ -119,9 +112,17 @@ int main(int argc, char* argv[])
   T_mesh.copy(&basemesh);
   M_mesh.copy(&basemesh);
 
+  // Enter boundary markers.
+  BCTypes temp_bc_type, moist_bc_type;
+  temp_bc_type.add_bc_dirichlet(BDY_REACTOR_WALL);
+  temp_bc_type.add_bc_neumann(BDY_SYMMETRY);
+  temp_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
+  moist_bc_type.add_bc_neumann(Hermes::Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
+  moist_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
+
   // Create H1 spaces with default shapesets.
-  H1Space T_space(&T_mesh, temp_bc_type, essential_bc_values_T, P_INIT);
-  H1Space M_space(MULTI ? &M_mesh : &T_mesh, moist_bc_type, NULL, P_INIT);
+  H1Space T_space(&T_mesh, &temp_bc_type, essential_bc_values_T, P_INIT);
+  H1Space M_space(MULTI ? &M_mesh : &T_mesh, &moist_bc_type, (BCValues *) NULL, P_INIT);
 
   // Define constant initial conditions.
   info("Setting initial conditions.");
@@ -137,10 +138,10 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 0, callback(bilinear_form_sym_1_0));
   wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &T_prev);
   wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &M_prev);
-  wf.add_matrix_form_surf(0, 0, callback(bilinear_form_surf_0_0_ext), MARKER_EXTERIOR_WALL);
-  wf.add_matrix_form_surf(1, 1, callback(bilinear_form_surf_1_1_ext), MARKER_EXTERIOR_WALL);
-  wf.add_vector_form_surf(0, callback(linear_form_surf_0_ext), MARKER_EXTERIOR_WALL);
-  wf.add_vector_form_surf(1, callback(linear_form_surf_1_ext), MARKER_EXTERIOR_WALL);
+  wf.add_matrix_form_surf(0, 0, callback(bilinear_form_surf_0_0_ext), BDY_EXTERIOR_WALL);
+  wf.add_matrix_form_surf(1, 1, callback(bilinear_form_surf_1_1_ext), BDY_EXTERIOR_WALL);
+  wf.add_vector_form_surf(0, callback(linear_form_surf_0_ext), BDY_EXTERIOR_WALL);
+  wf.add_vector_form_surf(1, callback(linear_form_surf_1_ext), BDY_EXTERIOR_WALL);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -193,7 +194,7 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&T_space, &M_space));
+      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&T_space, &M_space));
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
@@ -209,28 +210,28 @@ int main(int argc, char* argv[])
 
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
       if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                              Tuple<Solution *>(&T_fine, &M_fine));
+                                              Hermes::Tuple<Solution *>(&T_fine, &M_fine));
       else error ("Matrix solver failed.\n");
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Tuple<Space *>(&T_space, &M_space), Tuple<Solution *>(&T_fine, &M_fine), 
-                     Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
+      OGProjection::project_global(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
+                     Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate."); 
-      Adapt* adaptivity = new Adapt(Tuple<Space *>(&T_space, &M_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
-      double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&T_coarse, &M_coarse), 
-                                 Tuple<Solution *>(&T_fine, &M_fine), 
+      double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), 
+                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
                                  HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+        Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
       
       // Show new coarse meshes and solutions.
       char title[100];
@@ -249,9 +250,9 @@ int main(int argc, char* argv[])
       else 
       {
         info("Adapting coarse mesh.");
-        done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+        done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (Space::get_num_dofs(Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.

@@ -60,8 +60,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Tuple<BCSpec *>DIR_BC_LEFT =  Tuple<BCSpec *>(new BCSpec(0,0));
-Tuple<BCSpec *>DIR_BC_RIGHT = Tuple<BCSpec *>(new BCSpec(0,0));
+Hermes::Tuple<BCSpec *>DIR_BC_LEFT =  Hermes::Tuple<BCSpec *>(new BCSpec(0,0));
+Hermes::Tuple<BCSpec *>DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>(new BCSpec(0,0));
 
 // Function f(x).
 double f(double x) 
@@ -101,6 +101,7 @@ double quantity_of_interest(Space *space, double x)
   }
 
   error("computation of quantity of interest failed.");
+  return 0.0;
 }
 
 int main() 

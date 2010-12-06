@@ -66,12 +66,17 @@ void ScalarView::init()
 }
 
 #ifndef _MSC_VER
-ScalarView::ScalarView(const char* title, WinGeom* wg)
-           : View(title, wg)
-           , show_element_info(false), element_id_widget(0)
-           , vertex_nodes(0), node_pixel_radius(10), pointed_vertex_node(NULL),
-             pointed_node_widget(0), selected_node_widget(0), node_widget_vert_cnt(32),
-             allow_node_selection(false)
+ScalarView::ScalarView(const char* title, WinGeom* wg) :
+    View(title, wg),
+    vertex_nodes(0),
+    pointed_vertex_node(NULL),
+    allow_node_selection(false),
+    pointed_node_widget(0),
+    selected_node_widget(0),
+    node_pixel_radius(10),
+    node_widget_vert_cnt(32),
+    element_id_widget(0),
+    show_element_info(false)
 #ifdef ENABLE_VIEWER_GUI
            , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
 #endif
@@ -80,12 +85,17 @@ ScalarView::ScalarView(const char* title, WinGeom* wg)
 }
 #endif
 
-ScalarView::ScalarView(char* title, WinGeom* wg)
-  : View(title, wg),
-             show_element_info(false), element_id_widget(0),
-             vertex_nodes(0), node_pixel_radius(10), pointed_vertex_node(NULL),
-             pointed_node_widget(0), selected_node_widget(0), node_widget_vert_cnt(32),
-             allow_node_selection(false)
+ScalarView::ScalarView(char* title, WinGeom* wg) :
+    View(title, wg),
+    vertex_nodes(0),
+    pointed_vertex_node(NULL),
+    allow_node_selection(false),
+    pointed_node_widget(0),
+    selected_node_widget(0),
+    node_pixel_radius(10),
+    node_widget_vert_cnt(32),
+    element_id_widget(0),
+    show_element_info(false)
 #ifdef ENABLE_VIEWER_GUI
            , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
 #endif

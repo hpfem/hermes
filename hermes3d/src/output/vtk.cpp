@@ -101,7 +101,7 @@ OutputQuadTetra::~OutputQuadTetra()
 {
 	_F_
 #ifdef WITH_HEX
-	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 #endif
 }
@@ -149,7 +149,7 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 #endif
 }
@@ -234,9 +234,9 @@ public:
 Linearizer::~Linearizer()
 {
 	_F_
-	for (int i = points.first(); i != INVALID_IDX; i = points.next(i))
+	for (unsigned int i = points.first(); i != INVALID_IDX; i = points.next(i))
 		delete points[i];
-	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		delete [] cells[i]->idx;
 		delete cells[i];
 	}
@@ -301,7 +301,7 @@ void FileFormatter::write(FILE *file, const char *name)
 	Array<Vertex *> &points = lin->get_points();
 	Array<Linearizer::Cell *> &cells = lin->get_cells();
 	int sz_cells = 0;
-	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
 		switch (cell->type) {
 			case Linearizer::Cell::Hex: sz_cells += Hex::NUM_VERTICES; break;
@@ -320,14 +320,14 @@ void FileFormatter::write(FILE *file, const char *name)
 	fprintf(file, "\n");
 	fprintf(file, "DATASET UNSTRUCTURED_GRID\n");
 	fprintf(file, "POINTS %ld %s\n", points.count(), "float");
-	for (int i = points.first(); i != INVALID_IDX; i = points.next(i)) {
+	for (unsigned int i = points.first(); i != INVALID_IDX; i = points.next(i)) {
 		Vertex *v = points[i];
 		fprintf(file, "%e %e %e\n", v->x, v->y, v->z);
 	}
 
 	fprintf(file, "\n");
 	fprintf(file, "CELLS %ld %d\n", cells.count(), sz_cells);
-	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
 
 		fprintf(file, "%d", cell->n);
@@ -338,7 +338,7 @@ void FileFormatter::write(FILE *file, const char *name)
 
 	fprintf(file, "\n");
 	fprintf(file, "CELL_TYPES %ld\n", cells.count());
-	for (int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
+	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
 
 		int vtk_type = 0;
@@ -358,7 +358,7 @@ void FileFormatter::write(FILE *file, const char *name)
 			// point data
 			fprintf(file, "POINT_DATA %ld\n", pt_data0.count());
 			fprintf(file, "VECTORS %s %s\n", name, "float");
-			for (int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
+			for (unsigned int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
 				fprintf(file, "%e %e %e\n", pt_data0[i], pt_data1[i], pt_data2[i]);
 		}
 		else {
@@ -366,7 +366,7 @@ void FileFormatter::write(FILE *file, const char *name)
 			fprintf(file, "POINT_DATA %ld\n", pt_data0.count());
 			fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 			fprintf(file, "LOOKUP_TABLE %s\n", "default");
-			for (int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
+			for (unsigned int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
 				fprintf(file, "%e\n", pt_data0[i]);
 		}
 	}
@@ -375,7 +375,7 @@ void FileFormatter::write(FILE *file, const char *name)
 		fprintf(file, "CELL_DATA %ld\n", cell_data.count());
 		fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 		fprintf(file, "LOOKUP_TABLE %s\n", "default");
-		for (int i = cell_data.first(); i != INVALID_IDX; i = cell_data.next(i))
+		for (unsigned int i = cell_data.first(); i != INVALID_IDX; i = cell_data.next(i))
 			fprintf(file, "%e\n", cell_data[i]);
 	}
 }

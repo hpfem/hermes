@@ -72,8 +72,8 @@ const double ERR_STOP = 0.01;                     // Stopping criterion for adap
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double D_u = 1;
@@ -83,8 +83,8 @@ const double LAMBDA = 1;
 const double KAPPA = 1;
 const double K = 100;
 
-// Boundary condition types.
-BCType bc_types(int marker) { return BC_ESSENTIAL; }
+// Boundary markers.
+const int OUTER_BDY = 1;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y) { return 0;}
@@ -113,9 +113,13 @@ int main(int argc, char* argv[])
   // Initial mesh refinements in the v_mesh towards the boundary.
   if (MULTI == true) v_mesh.refine_towards_boundary(1, INIT_REF_BDY);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(OUTER_BDY);
+
   // Create H1 spaces with default shapeset for both displacement components.
-  H1Space u_space(&u_mesh, bc_types, essential_bc_values, P_INIT_U);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, bc_types, essential_bc_values, P_INIT_V);
+  H1Space u_space(&u_mesh, &bc_types, essential_bc_values, P_INIT_U);
+  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types, essential_bc_values, P_INIT_V);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -156,7 +160,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&u_space, &v_space));
+    Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&u_space, &v_space));
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -174,7 +178,7 @@ int main(int argc, char* argv[])
     
     // Solve the linear system of the reference problem. If successful, obtain the solutions.
     if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                            Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
+                                            Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     else error ("Matrix solver failed.\n");
   
     // Time measurement.
@@ -182,8 +186,8 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(Tuple<Space *>(&u_space, &v_space), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
-                   Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    OGProjection::project_global(Hermes::Tuple<Space *>(&u_space, &v_space), Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
+                   Hermes::Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     s_view_0.show(&u_sln); 
@@ -193,18 +197,18 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(Tuple<Space *>(&u_space, &v_space), Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
     
     // Calculate error estimate for each solution component and the total error estimate.
-    Tuple<double> err_est_rel;
+    Hermes::Tuple<double> err_est_rel;
     bool solutions_for_adapt = true;
-    double err_est_rel_total = adaptivity->calc_err_est(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
                                HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
-    Tuple<double> err_exact_rel;
+    Hermes::Tuple<double> err_exact_rel;
     solutions_for_adapt = false;
-    double err_exact_rel_total = adaptivity->calc_err_exact(Tuple<Solution *>(&u_sln, &v_sln), Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
+    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
                                  HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
 
     // Time measurement.
@@ -218,15 +222,15 @@ int main(int argc, char* argv[])
          v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
     info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
-         Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
+         Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
     info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.add_values(Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)), err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
+    graph_dof_exact.add_values(Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)), err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
     graph_cpu_exact.save("conv_cpu_exact.dat");
@@ -237,17 +241,17 @@ int main(int argc, char* argv[])
     else 
     {
       info("Adapting coarse mesh.");
-      done = adaptivity->adapt(Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+      done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
                                THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (Space::get_num_dofs(Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete solver;
     delete matrix;
     delete rhs;
     delete adaptivity;
-    for(int i = 0; i < ref_spaces->size(); i++)
+    for(unsigned int i = 0; i < ref_spaces->size(); i++)
       delete (*ref_spaces)[i]->get_mesh();
     delete ref_spaces;
     delete dp;

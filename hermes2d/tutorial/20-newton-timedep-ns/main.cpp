@@ -57,34 +57,22 @@ const double NEWTON_TOL = 1e-3;      // Stopping criterion for the Newton's meth
 const int NEWTON_MAX_ITER = 10;      // Maximum allowed number of Newton iterations.
 const double H = 5;                  // Domain height (necessary to define the parabolic
                                      // velocity profile at inlet).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-int bdy_bottom = 1;
-int bdy_right  = 2;
-int bdy_top = 3;
-int bdy_left = 4;
-int bdy_obstacle = 5;
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
+const int BDY_OBSTACLE = 5;
 
 // Current time (used in weak forms).
 double TIME = 0;
 
-// Boundary condition types for x-velocity.
-BCType xvel_bc_type(int marker) {
-  if (marker == bdy_right) return BC_NONE;
-  else return BC_ESSENTIAL;
-}
-
-// Boundary condition types for y-velocity.
-BCType yvel_bc_type(int marker) {
-  if (marker == bdy_right) return BC_NONE;
-  else return BC_ESSENTIAL;
-}
-
 // Essential (Dirichlet) boundary condition values for x-velocity.
 scalar essential_bc_values_xvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == bdy_left) 
+  if (ess_bdy_marker == BDY_LEFT) 
 {
     // Time-dependent parabolic profile at inlet.
     double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); // Peak value VEL_INLET at y = H/2.
@@ -112,13 +100,20 @@ int main(int argc, char* argv[])
 
   // Initial mesh refinements.
   mesh.refine_all_elements();
-  mesh.refine_towards_boundary(bdy_obstacle, 4, false);
-  mesh.refine_towards_boundary(bdy_top, 4, true);     // '4' is the number of levels,
-  mesh.refine_towards_boundary(bdy_bottom, 4, true);  // 'true' stands for anisotropic refinements.
+  mesh.refine_towards_boundary(BDY_OBSTACLE, 4, false);
+  mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
+  mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
+
+  // Boundary condition types for x-velocity and y-velocity.
+  BCTypes xvel_bc_type, yvel_bc_type;
+  xvel_bc_type.add_bc_none(BDY_RIGHT);
+  xvel_bc_type.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  yvel_bc_type.add_bc_none(BDY_RIGHT);
+  yvel_bc_type.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
   // Spaces for velocity components and pressure.
-  H1Space xvel_space(&mesh, xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, yvel_bc_type, NULL, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &yvel_bc_type, (BCValues *) NULL, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
@@ -126,7 +121,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -156,18 +151,18 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_UNSYM, HERMES_ANY);
     wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
     wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                       Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
-                       Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                       Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
   }
   else {
     wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                  HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
     wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_UNSYM, HERMES_ANY, Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+                  HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
     wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
     wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
     wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
@@ -178,7 +173,7 @@ int main(int argc, char* argv[])
   bool is_linear;
   if (NEWTON) is_linear = false;
   else is_linear = true;
-  DiscreteProblem dp(&wf, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -196,13 +191,13 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    OGProjection::project_global(Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
-                   Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+    OGProjection::project_global(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                   Hermes::Tuple<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
                    coeff_vec, matrix_solver, 
-                   Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+                   Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:
@@ -216,7 +211,7 @@ int main(int argc, char* argv[])
     // Update time-dependent essential BC are used.
     if (TIME <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+      update_essential_bc_values(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
     }
 
     if (NEWTON) 
@@ -228,8 +223,8 @@ int main(int argc, char* argv[])
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.
-      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
-                                    Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                                    Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
     else {
       // Linear solve.
@@ -237,8 +232,8 @@ int main(int argc, char* argv[])
       dp.assemble(matrix, rhs, false);
       if(solver->solve()) 
         Solution::vector_to_solutions(solver->get_solution(), 
-                  Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
-                  Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+                  Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                  Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       else 
         error ("Matrix solver failed.\n");
     }

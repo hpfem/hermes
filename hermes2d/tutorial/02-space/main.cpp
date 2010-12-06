@@ -13,7 +13,7 @@
 // just load the corresponding mesh at the beginning of the
 // main.cpp file.
 
-int P_INIT = 3;
+const int P_INIT = 3;
 
 static char text[] = "\
 Click into the image window and:\n\
@@ -46,8 +46,15 @@ int main(int argc, char* argv[])
   // Refine all elements (optional).
   mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  // (If no markers are entered, default is a natural BC).
+  BCTypes bc_types;
+
+  // Enter Dirichlet boundary values (default is zero).
+  BCValues bc_values;
+
   // Create an H1 space with default shapeset and natural BC.
-  H1Space space(&mesh, NULL, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));

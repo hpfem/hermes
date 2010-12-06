@@ -1,0 +1,11 @@
+Schroedinger solver
+-------------------
+
+You need to enable Python, see the main readme file (../../README) for detailed
+instructions how to do that.
+
+Then run:
+
+./schroedinger
+
+and a matplotlib window will popup with the solution.

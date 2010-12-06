@@ -10,7 +10,37 @@
 #include "../../hermes_common/matrix.h"
 #include "weakform.h"
 
-// Function type used in calculation of the right hand side of the projection linear system.
+/*
+    Returns the values of the function in f[] and derivatives in dfdx[].
+
+    This function type is used in calculation of the right hand side of the
+    projection linear system.
+
+    For all physical 'x' in x[]. If dfdx == NULL, don't return the derivative.
+
+    This function is completely general and must work for any number of points
+    'n'. Typically, this function is being called on each element, in which
+    case the x[] are Gauss integratin points::
+
+        ExactFunction f = <initialize it>;
+        double x[10] = <initialize Gauss points>;
+        double val[10], dfdx[10];
+        f(10, x, val, dfdx);
+
+    If you want to get just a value and derivative at a point, call it like::
+
+        ExactFunction f = <initialize it>;
+        double x = 3.15;
+        double val, dfdx;
+        f(1, &x, &val, &dfdx);
+
+    or if you only need the value::
+
+        ExactFunction f = <initialize it>;
+        double x = 3.15;
+        double val;
+        f(1, &x, &val, NULL);
+*/
 typedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[]);
 
 class HERMES_API OGProjection
@@ -110,4 +140,11 @@ protected:
   // a reference mesh onto a coarse one.
   static void ref_mesh_fn(int n, double x[], double f[], double dfdx[]);
 };
+
+#define H1D_L2_ortho_global 0
+#define H1D_H1_ortho_global 1
+
+void assemble_projection_matrix_rhs(Space *space, Matrix *A, double *rhs,
+        ExactFunction fn, int projection_type=H1D_L2_ortho_global);
+
 #endif

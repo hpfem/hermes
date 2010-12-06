@@ -41,7 +41,7 @@ WeakForm::~WeakForm()
 }
 
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, int area,
-                               Tuple<MeshFunction*> ext)
+                               Hermes::Tuple<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq || j < 0 || j >= neq) error("Invalid equation number.");
@@ -50,52 +50,44 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_o
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 	if (mfvol.size() > 100) warning("Large number of forms (> 100). Is this the intent?");
 
-	MatrixFormVol form = { i, j, sym, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
 	mfvol.push_back(form);
 }
 
 void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area, 
-                                    Tuple<MeshFunction*> ext)
+                                    Hermes::Tuple<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq || j < 0 || j >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	MatrixFormSurf form = { i, j, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	MatrixFormSurf form = { i, j, area, fn, ord, ext.as_std_vector() };
 	mfsurf.push_back(form);
 }
 
 void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
-                               Tuple<MeshFunction*> ext)
+                               Hermes::Tuple<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	VectorFormVol form = { i, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	VectorFormVol form = { i, area, fn, ord, ext.as_std_vector() };
 	vfvol.push_back(form);
 }
 
 void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
-                                    Tuple<MeshFunction*> ext)
+                                    Hermes::Tuple<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	VectorFormSurf form = { i, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	VectorFormSurf form = { i, area, fn, ord, ext.as_std_vector() };
 	vfsurf.push_back(form);
 }
 
-void WeakForm::set_ext_fns(void *fn, Tuple<MeshFunction*> ext)
+void WeakForm::set_ext_fns(void *fn, Hermes::Tuple<MeshFunction*> ext)
 {
 	EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 }
@@ -108,7 +100,7 @@ void WeakForm::set_ext_fns(void *fn, Tuple<MeshFunction*> ext)
 /// improves the performance of multi-mesh assembling.
 /// This function is identical in H2D and H3D.
 ///
-void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext, 
+void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *>& u_ext, 
                std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
@@ -196,7 +188,7 @@ void WeakForm::get_stages(Tuple<Space *> spaces, Tuple<Solution *> u_ext,
 ///
 WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2, 
-                                      std::vector<MeshFunction*>& ext, std::vector<Solution*>& u_ext)
+                                      std::vector<MeshFunction*>& ext, Hermes::Tuple<Solution*>& u_ext)
 {
   _F_
   // first create a list of meshes the form uses
@@ -234,9 +226,9 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
   }
 
   // update and return the stage
-  for (int i = 0; i < ext.size(); i++)
+  for (unsigned int i = 0; i < ext.size(); i++)
     s->ext_set.insert(ext[i]);
-  for (int i = 0; i < u_ext.size(); i++)
+  for (unsigned int i = 0; i < u_ext.size(); i++)
     if (u_ext[i] != NULL)
       s->ext_set.insert(u_ext[i]);
   
@@ -271,7 +263,7 @@ bool **WeakForm::get_blocks()
 
 //// areas /////////////////////////////////////////////////////////////////////////////////////////
 
-int WeakForm::def_area(Tuple<int> area_markers)
+int WeakForm::def_area(Hermes::Tuple<int> area_markers)
 {
 	_F_
 	Area newarea;

@@ -1,1 +1,1 @@
-cython_add_module_compile(_fekete)
+cython_add_module(_fekete)

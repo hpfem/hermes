@@ -33,7 +33,7 @@
 LinearProblem::LinearProblem() : DiscreteProblem() {};
 LinearProblem::LinearProblem(WeakForm* wf_) : DiscreteProblem(wf_) {};
 LinearProblem::LinearProblem(WeakForm* wf_, Space* s_) : DiscreteProblem(wf_, s_) {};
-LinearProblem::LinearProblem(WeakForm* wf_, Tuple<Space*> spaces_) : DiscreteProblem(wf_, spaces_) {};
+LinearProblem::LinearProblem(WeakForm* wf_, Hermes::Tuple<Space*> spaces_) : DiscreteProblem(wf_, spaces_) {};
 LinearProblem::~LinearProblem() {};
 
 void LinearProblem::assemble(Matrix* mat_ext, Vector* rhs_ext, bool rhsonly, bool is_complex)
@@ -53,8 +53,8 @@ void LinearProblem::assemble(Matrix* mat_ext, Vector* rhs_ext, bool rhsonly, boo
 
 // Solve a typical linear problem (without automatic adaptivity).
 // Feel free to adjust this function for more advanced applications.
-bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
-                  Tuple<Solution *> solutions, Vector* coeff_vec, bool is_complex) 
+bool solve_linear(Hermes::Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_solver, 
+                  Hermes::Tuple<Solution *> solutions, Vector* coeff_vec, bool is_complex) 
 {
   // Initialize the linear problem.
   LinearProblem lp(wf, spaces);
@@ -99,12 +99,12 @@ bool solve_linear(Tuple<Space *> spaces, WeakForm* wf, MatrixSolverType matrix_s
 
 // Solve a typical linear problem using automatic adaptivity.
 // Feel free to adjust this function for more advanced applications.
-bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 
-                        MatrixSolverType matrix_solver, Tuple<int> proj_norms, 
-                        Tuple<Solution *> slns, Tuple<Solution *> ref_slns, 
-                        Tuple<WinGeom *> sln_win_geom, Tuple<WinGeom *> mesh_win_geom, 
-                        Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
-                        bool verbose, Tuple<ExactSolution *> exact_slns, bool is_complex) 
+bool solve_linear_adapt(Hermes::Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec, 
+                        MatrixSolverType matrix_solver, Hermes::Tuple<int> proj_norms, 
+                        Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> ref_slns, 
+                        Hermes::Tuple<WinGeom *> sln_win_geom, Hermes::Tuple<WinGeom *> mesh_win_geom, 
+                        Hermes::Tuple<RefinementSelectors::Selector *> selectors, AdaptivityParamType* apt,
+                        bool verbose, Hermes::Tuple<ExactSolution *> exact_slns, bool is_complex) 
 {
   // sanity checks
   if (spaces.size() != selectors.size()) 
@@ -149,7 +149,7 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
   OrderView*  o_view[H2D_MAX_COMPONENTS];
   for (int i = 0; i < num_comps; i++) {
     char* title = (char*)malloc(100*sizeof(char));
-    if (sln_win_geom != Tuple<WinGeom *>() && sln_win_geom[i] != NULL) {
+    if (sln_win_geom != Hermes::Tuple<WinGeom *>() && sln_win_geom[i] != NULL) {
       if (num_comps == 1) sprintf(title, "Solution", i); 
       else sprintf(title, "Solution[%d]", i); 
       switch (proj_norms[i]) {
@@ -174,7 +174,7 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
       s_view[i] = NULL;
       v_view[i] = NULL;
     }
-    if (mesh_win_geom != Tuple<WinGeom *>() && mesh_win_geom[i] != NULL) {
+    if (mesh_win_geom != Hermes::Tuple<WinGeom *>() && mesh_win_geom[i] != NULL) {
       if (num_comps == 1) sprintf(title, "Mesh", i); 
       else sprintf(title, "Mesh[%d]", i); 
       o_view[i] = new OrderView(title, mesh_win_geom[i]);
@@ -185,9 +185,9 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
 
-  // Conversion from Tuple<Solution *> to Tuple<MeshFunction *>
+  // Conversion from Hermes::Tuple<Solution *> to Hermes::Tuple<MeshFunction *>
   // so that project_global() below compiles. 
-  Tuple<MeshFunction *> ref_slns_mf;
+  Hermes::Tuple<MeshFunction *> ref_slns_mf;
   for (int i = 0; i < num_comps; i++) {
     ref_slns_mf.push_back((MeshFunction*)ref_slns[i]);
   }
@@ -202,8 +202,8 @@ bool solve_linear_adapt(Tuple<Space *> spaces, WeakForm* wf, Vector* coeff_vec,
 
     // Construct globally refined reference mesh(es)
     // and setup reference space(s).
-    Tuple<Space *> ref_spaces;
-    Tuple<Mesh *> ref_meshes;
+    Hermes::Tuple<Space *> ref_spaces;
+    Hermes::Tuple<Mesh *> ref_meshes;
     for (int i = 0; i < num_comps; i++) {
       ref_meshes.push_back(new Mesh());
       Mesh *ref_mesh = ref_meshes.back();

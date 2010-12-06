@@ -1,6 +1,6 @@
 // definition of reaction rate omega
 
-void omega_fn(int n, Tuple<scalar*> values, Tuple<scalar*> dx, Tuple<scalar*> dy,
+void omega_fn(int n, Hermes::Tuple<scalar*> values, Hermes::Tuple<scalar*> dx, Hermes::Tuple<scalar*> dy,
                       scalar* out, scalar* outdx, scalar* outdy)
 {
   for (int i = 0; i < n; i++)
@@ -16,7 +16,7 @@ void omega_fn(int n, Tuple<scalar*> values, Tuple<scalar*> dx, Tuple<scalar*> dy
   }
 }
 
-void omega_dt_fn(int n, Tuple<scalar*> values, Tuple<scalar*> dx, Tuple<scalar*> dy,
+void omega_dt_fn(int n, Hermes::Tuple<scalar*> values, Hermes::Tuple<scalar*> dx, Hermes::Tuple<scalar*> dy,
                         scalar* out, scalar* outdx, scalar* outdy)
 {
   for (int i = 0; i < n; i++)
@@ -32,7 +32,7 @@ void omega_dt_fn(int n, Tuple<scalar*> values, Tuple<scalar*> dx, Tuple<scalar*>
   }
 }
 
-void omega_dc_fn(int n, Tuple<scalar*> values, Tuple<scalar*> dx, Tuple<scalar*> dy,
+void omega_dc_fn(int n, Hermes::Tuple<scalar*> values, Hermes::Tuple<scalar*> dx, Hermes::Tuple<scalar*> dy,
                         scalar* out, scalar* outdx, scalar* outdy)
 {
   for (int i = 0; i < n; i++)

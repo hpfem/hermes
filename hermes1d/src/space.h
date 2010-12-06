@@ -76,8 +76,8 @@ class Space {
         // All elements will have the same (zero) marker.
         Space(double a, double b, int n_base_elem, int p_init=1, int n_eq=1, int
                 n_sln=1, bool print_banner=true);
-        Space(double a, double b, int n_base_elem, Tuple<std::pair<int, double> *> left_boundary_conditions = Tuple<std::pair<int, double> *>(), 
-          Tuple<std::pair<int, double> *> right_boundary_conditions = Tuple<std::pair<int, double> *>(), int p_init=1, int n_eq=1, int
+        Space(double a, double b, int n_base_elem, Hermes::Tuple<std::pair<int, double> *> left_boundary_conditions = Hermes::Tuple<std::pair<int, double> *>(), 
+          Hermes::Tuple<std::pair<int, double> *> right_boundary_conditions = Hermes::Tuple<std::pair<int, double> *>(), int p_init=1, int n_eq=1, int
           n_sln=1, bool print_banner=true);
         // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements
@@ -105,8 +105,12 @@ class Space {
         int get_n_active_elem();
 
         void set_n_active_elem(int n);
-        
+
         static int get_num_dofs(Space* space);
+
+        int get_num_dofs() {
+            return Space::get_num_dofs(this);
+        };
 
         void set_n_dof(int n);
 

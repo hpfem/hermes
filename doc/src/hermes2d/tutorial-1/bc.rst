@@ -1,8 +1,35 @@
 Boundary Conditions (04, 05, 06)
 --------------------------------
 
-Dirichlet BC
-~~~~~~~~~~~~
+Linking boundary markers with boundary condition types
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hermes recognizes four types of boundary conditions. These are
+
+* Dirichlet, such as $u = \mbox{const}$,
+* Neumann, such as $\partial u/\partial n = \mbox{const}$ where $n$ is a unit outer normal vector to the boundary, 
+* Newton, such as $\mbox{const}_1 u + \partial u/\partial n = \mbox{const}_2$, 
+* None (solution on that part of the boundary is unknown but Hermes will not attempt to evaluate any surface integrals on it).
+
+Nonconstant values (functions of spatial variables $x$, $y$ and time $t$) are possible for all types. 
+
+In the code, the user has to create an instance of the class BCTypes and use its methods::
+ 
+    void BCTypes::add_bc_dirichlet(Hermes::Tuple<int> markers);
+    void BCTypes::add_bc_neumann(Hermes::Tuple<int> markers);
+    void BCTypes::add_bc_newton(Hermes::Tuple<int> markers);
+    void BCTypes::add_bc_none(Hermes::Tuple<int> markers);
+
+If a marker is not linked to any type, then the default is Neumann. For a single 
+marker, the Tuple reduces to a single integer::
+
+    void BCTypes::add_bc_dirichlet(int marker);
+    void BCTypes::add_bc_neumann(int marker);
+    void BCTypes::add_bc_newton(int marker);
+    void BCTypes::add_bc_none(int marker);
+
+Nonzero Dirichlet BC (example 04)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet>`_. 
 
@@ -41,10 +68,10 @@ For the values $CONST_F = -4$ and P_INIT = 5, the output is shown below:
    :height: 350
    :alt: Solution of the Dirichlet problem.
 
-Mathematics of Dirichlet BC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mathematics of nonzero Dirichlet BC
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Mathematically, Dirichlet conditions in Hermes are handled 
+Mathematically, nonzero Dirichlet conditions in Hermes are handled 
 as follows: The user chooses the so-called Dirichlet lift 
 function $G$ that matches the prescribed values on all parts 
 of the Dirichlet boundary. The Dirichlet lift is nothing 
@@ -82,8 +109,8 @@ P. Solin: Partial Differential Equations and the Finite Element Methods,
 J. Wiley & Sons, 2005.
 
 
-Neumann BC
-~~~~~~~~~~
+Neumann BC (example 05)
+~~~~~~~~~~~~~~~~~~~~~~~
 
 **Git reference:** Tutorial example `05-bc-neumann <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann>`_. 
 
@@ -180,20 +207,8 @@ shown in the following figures:
 
    <hr style="clear: both; visibility: hidden;">
 
-Tuples
-~~~~~~
-
-Above we first met Tuple - a construction designed to avoid variable argument 
-lists. The first Tuple is used to pass a pair of pointers to the same MeshFunction,
-and the next Tuple says that the vector components for the magnitude calculation 
-are the x- and y- partial derivatives. The class Solution that represents a piecewise-polynomial
-finite element function on a Mesh, is descendant of a more general class MeshFunction
-that can represent constants, general functions given via an analytic formula, 
-finite element solutions, etc. 
-
-
-Newton BC
-~~~~~~~~~
+Newton BC (example 06)
+~~~~~~~~~~~~~~~~~~~~~~
 
 **Git reference:** Tutorial example `06-bc-newton <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton>`_. 
 
@@ -239,8 +254,6 @@ The following code snippet contains the linear and bilinear forms:
     {
       return T0 * H * int_v<Real, Scalar>(n, wt, v);
     }
-
-  
 
 Here, $T_0$ is the exterior temperature, and $H$ is the heat flux.
 The above forms are registered using::

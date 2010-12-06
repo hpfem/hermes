@@ -24,11 +24,70 @@ double** HcurlSpace::hcurl_proj_mat = NULL;
 double*  HcurlSpace::hcurl_chol_p   = NULL;
 int      HcurlSpace::hcurl_proj_ref = 0;
 
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types,
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 Shapeset* shapeset) : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, Ord2(p_init, p_init))
+{
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HcurlShapeset;
+    own_shapeset = true;
+  }
+  if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
+
+  if (!hcurl_proj_ref++)
+  {
+    precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
+  }
+
+  proj_mat = hcurl_proj_mat;
+  chol_p   = hcurl_chol_p;
+
+  // set uniform poly order in elements
+  if (p_init < 0) error("P_INIT must be >= 0 in an Hcurl space.");
+  else this->set_uniform_order_internal(Ord2(p_init, p_init));
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types,
+		       scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init,
+                       Shapeset* shapeset)
+          : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, p_init)
+{
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HcurlShapeset;
+    own_shapeset = true;
+  }
+  if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
+
+  if (!hcurl_proj_ref++)
+  {
+    precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
+  }
+
+  proj_mat = hcurl_proj_mat;
+  chol_p   = hcurl_chol_p;
+
+  // set uniform poly order in elements
+  if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an Hcurl space.");
+  else this->set_uniform_order_internal(p_init);
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
 HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
-  if (shapeset == NULL) this->shapeset = new HcurlShapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HcurlShapeset;
+    own_shapeset = true;
+  }
   if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
 
   if (!hcurl_proj_ref++)
@@ -52,7 +111,11 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
                        Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
-  if (shapeset == NULL) this->shapeset = new HcurlShapeset;
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HcurlShapeset;
+    own_shapeset = true;
+  }
   if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
 
   if (!hcurl_proj_ref++)
@@ -78,12 +141,16 @@ HcurlSpace::~HcurlSpace()
     delete [] hcurl_proj_mat;
     delete [] hcurl_chol_p;
   }
+  if (own_shapeset)
+    delete this->shapeset;
 }
 
 
 Space* HcurlSpace::dup(Mesh* mesh) const
 {
-  HcurlSpace* space = new HcurlSpace(mesh, bc_type_callback, bc_value_callback_by_coord, Ord2(0,0), shapeset);
+ // FIXME:
+  HcurlSpace* space = new HcurlSpace(mesh, this->bc_types,
+          this->bc_value_callback_by_coord, Ord2(0,0), this->shapeset);
   space->copy_callbacks(this);
   return space;
 }
@@ -91,7 +158,10 @@ Space* HcurlSpace::dup(Mesh* mesh) const
 void HcurlSpace::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 20 && shapeset->get_id() > 9)
+  {
     this->shapeset = shapeset;
+    own_shapeset = false;
+  }
   else
     error("Wrong shapeset type in HcurlSpace::set_shapeset()");
 }
@@ -131,7 +201,7 @@ void HcurlSpace::assign_edge_dofs()
       int ndofs = get_edge_order_internal(en) + 1;
       ndata[en->id].n = ndofs;
 
-      if (en->bnd && bc_type_callback(en->marker) == BC_ESSENTIAL)
+      if (en->bnd && this->bc_types->get_type(en->marker) == BC_ESSENTIAL)
       {
         ndata[en->id].dof = -1;
       }

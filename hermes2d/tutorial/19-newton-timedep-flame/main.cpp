@@ -29,8 +29,8 @@ const double TAU = 0.5;                // Time step.
 const double T_FINAL = 60.0;           // Time interval length.
 const double NEWTON_TOL = 1e-4;        // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 50;        // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants.
 const double Le    = 1.0;
@@ -40,25 +40,21 @@ const double kappa = 0.1;
 const double x1    = 9.0;
 
 // Boundary markers.
-int bdy_left = 1;
-
-// Boundary conditions.
-BCType bc_types(int marker)
-  { return (marker == bdy_left) ? BC_ESSENTIAL : BC_NATURAL; }
+const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_t(int ess_bdy_marker, double x, double y)
-  { return (ess_bdy_marker == bdy_left) ? 1.0 : 0; }
+{ return (ess_bdy_marker == BDY_LEFT) ? 1.0 : 0; }
 
 scalar essential_bc_values_c(int ess_bdy_marker, double x, double y)
-  { return 0; }
+{ return 0; }
 
 // Initial conditions.
 scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
-  { return (x <= x1) ? 1.0 : exp(x1 - x); }
+{ return (x <= x1) ? 1.0 : exp(x1 - x); }
 
 scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
-  { return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
+{ return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
 
 // Weak forms, definition of reaction rate omega.
 # include "forms.cpp"
@@ -73,10 +69,16 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+  bc_types.add_bc_newton(BDY_COOLED);
+
   // Create H1 spaces with default shapesets.
-  H1Space tspace(&mesh, bc_types, essential_bc_values_t, P_INIT);
-  H1Space cspace(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace));
+  H1Space tspace(&mesh, &bc_types, essential_bc_values_t, P_INIT);
+  H1Space cspace(&mesh, &bc_types, essential_bc_values_c, P_INIT);
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 
   // Previous time level solutions.
@@ -89,9 +91,9 @@ int main(int argc, char* argv[])
   t_prev_newton.set_exact(&mesh, temp_ic); c_prev_newton.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
-  DXDYFilter omega(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  DXDYFilter omega_dt(omega_dt_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  DXDYFilter omega_dc(omega_dc_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilter omega(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilter omega_dt(omega_dt_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilter omega_dc(omega_dc_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -101,14 +103,14 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
   wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
   wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, Tuple<Space *>(&tspace, &cspace), is_linear);
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&tspace, &cspace), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -119,8 +121,8 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Tuple<Space *>(&tspace, &cspace), 
-                               Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), 
+  OGProjection::project_global(Hermes::Tuple<Space *>(&tspace, &cspace), 
+                               Hermes::Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), 
                                coeff_vec, matrix_solver);
 
   // Initialize views.
@@ -149,7 +151,7 @@ int main(int argc, char* argv[])
 
       // Info for user.
       info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, 
-           Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
+           Space::get_num_dofs(Hermes::Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.
@@ -167,8 +169,8 @@ int main(int argc, char* argv[])
      
       // Set current solutions to the latest Newton iterate 
       // and reinitialize filters of these solutions.
-      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), 
-                                    Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&tspace, &cspace), 
+                                    Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();
@@ -177,7 +179,7 @@ int main(int argc, char* argv[])
     };
 
     // Visualization.
-    DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    DXDYFilter omega_view(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
     rview.set_min_max_range(0.0,2.0);
     char title[100];
     sprintf(title, "Reaction rate, t = %g", current_time);
@@ -190,8 +192,8 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), 
-                                  Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
+    Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&tspace, &cspace), 
+                                  Hermes::Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
     ts++;
   } 

@@ -49,7 +49,7 @@ Scalar liform_euler_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, G
   Scalar result = 0;
   Func<Scalar>* phi_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++)
-    result = result = wt[i] * (phi_prev_time->val[i] / TAU) * v->val[i];
+    result = result + wt[i] * (phi_prev_time->val[i] / TAU) * v->val[i];
 
   return result;
 }

@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, bc_types, essential_bc_values_t, P_INIT);
   H1Space* c_space = new H1Space(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = Space::get_num_dofs(Tuple<Space *>(t_space, c_space));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(t_space, c_space));
   info("ndof = %d.", ndof);
 
   // Define initial conditions.
@@ -83,9 +83,9 @@ int main(int argc, char* argv[])
   c_iter.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
-  DXDYFilter omega(omega_fn, Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
-  DXDYFilter omega_dt(omega_dt_fn, Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
-  DXDYFilter omega_dc(omega_dc_fn, Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega_dt(omega_dt_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega_dc(omega_dc_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
 
   // Initialize weak formulation.
   WeakForm wf(2, JFNK ? true : false);
@@ -103,23 +103,23 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(precond_1_1));
   }
   wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Project the functions "t_iter" and "c_iter" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Tuple<Space *>(t_space, c_space), Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
+  OGProjection::project_global(Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
     coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
 
   // Initialize finite element problem.
-  DiscreteProblem dp(&wf, Tuple<Space*>(t_space, c_space));
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space*>(t_space, c_space));
 
   // Initialize NOX solver and preconditioner.
   NoxSolver solver(&dp);
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     solver.set_init_sln(coeff_vec);
     if (solver.solve())
     {
-      Solution::vector_to_solutions(solver.get_solution(), Tuple<Space *>(t_space, c_space), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      Solution::vector_to_solutions(solver.get_solution(), Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",

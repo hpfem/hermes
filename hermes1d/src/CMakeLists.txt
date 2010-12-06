@@ -7,9 +7,11 @@ set(SRC
     lobatto.cpp legendre.cpp
     discrete_problem.cpp solution.cpp space.cpp
     ogprojection.cpp
+    ogprojection2.cpp
     linearizer.cpp quad_std.cpp transforms.cpp
     adapt.cpp graph.cpp h1_polys.cpp
     weakform.cpp
+  ${HERMES_COMMON_DIR}/common.cpp
   ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/hermes_logging.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp

@@ -1,6 +1,6 @@
 #add_executable(${PROJECT_NAME} main.cpp)
 
-# Each tutorial can define the particular hermes library to link with, or not
+# Each module can define the particular hermes library to link with, or not
 # define anything, in which case the "real" version will be used if hermes was
 # built with "real" support, otherwise the "complex" version will be used:
 if(NOT DEFINED HERMES)
@@ -11,7 +11,7 @@ if(NOT DEFINED HERMES)
     endif(H2D_REAL)
 endif(NOT DEFINED HERMES)
 
-# Should debugging information be included for the tutorial?
+# Should debugging information be included for the module?
 if(DEBUG)
   set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS "-g")
 endif(DEBUG)

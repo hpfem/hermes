@@ -11,7 +11,20 @@ Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<R
 }
 
 template<typename Real, typename Scalar>
-Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar linear_form_surf_bottom(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  return CONST_GAMMA[e->marker - 1] * int_v<Real, Scalar>(n, wt, v);
+  return CONST_GAMMA_BOTTOM * int_v<Real, Scalar>(n, wt, v);
 }
+
+template<typename Real, typename Scalar>
+Scalar linear_form_surf_outer(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  return CONST_GAMMA_OUTER * int_v<Real, Scalar>(n, wt, v);
+}
+
+template<typename Real, typename Scalar>
+Scalar linear_form_surf_left(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  return CONST_GAMMA_LEFT * int_v<Real, Scalar>(n, wt, v);
+}
+

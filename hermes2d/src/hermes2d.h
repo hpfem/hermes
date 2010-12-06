@@ -18,6 +18,26 @@
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
+// hermes_common
+// solvers
+#include "../hermes_common/solver/amesos.h"
+#include "../hermes_common/solver/aztecoo.h"
+#include "../hermes_common/solver/epetra.h"
+#include "../hermes_common/solver/mumps.h"
+#include "../hermes_common/solver/nox.h"
+#include "../hermes_common/solver/pardiso.h"
+#include "../hermes_common/solver/petsc.h"
+#include "../hermes_common/solver/umfpack_solver.h"
+#include "../hermes_common/solver/superlu.h"
+
+// preconditioners
+#include "../hermes_common/solver/precond.h"
+#include "../hermes_common/solver/precond_ifpack.h"
+#include "../hermes_common/solver/precond_ml.h"
+
+// boundary conditions
+#include "../hermes_common/bctypes.h"
+
 #include "h2d_common.h"
 #include "hermes_logging.h"
 
@@ -47,22 +67,6 @@
 #include "weakform.h"
 #include "discrete_problem.h"
 #include "forms.h"
-
-// solvers
-#include "../hermes_common/solver/amesos.h"
-#include "../hermes_common/solver/aztecoo.h"
-#include "../hermes_common/solver/epetra.h"
-#include "../hermes_common/solver/mumps.h"
-#include "../hermes_common/solver/nox.h"
-#include "../hermes_common/solver/pardiso.h"
-#include "../hermes_common/solver/petsc.h"
-#include "../hermes_common/solver/umfpack_solver.h"
-#include "../hermes_common/solver/superlu.h"
-
-// preconditioners
-#include "../hermes_common/solver/precond.h"
-#include "../hermes_common/solver/precond_ifpack.h"
-#include "../hermes_common/solver/precond_ml.h"
 
 #include "integrals_h1.h"
 #include "integrals_hcurl.h"

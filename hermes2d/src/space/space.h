@@ -16,6 +16,8 @@
 #ifndef __H2D_SPACE_H
 #define __H2D_SPACE_H
 
+#include "../../../hermes_common/bctypes.h"
+#include "../../../hermes_common/bcvalues.h"
 #include "../mesh.h"
 #include "../traverse.h"
 #include "../shapeset/shapeset.h"
@@ -23,44 +25,32 @@
 #include "../precalc.h"
 #include "../quad_all.h"
 
-
-// Possible return values for bc_type_callback():
-enum BCType
-{
-  BC_ESSENTIAL, ///< Essential (Dirichlet) BC.
-  BC_NATURAL,   ///< Natural (Neumann, Newton) BC.
-  BC_NONE       ///< Hermes will not attempt to evaluate any boundary
-                ///< integrals on this part of the boundary.
-};
-
-
 /// \brief Represents a finite element space over a domain.
 ///
 /// The Space class represents a finite element space over a domain defined by 'mesh', spanned
 /// by basis functions constructed using 'shapeset'. It serves as a base class for H1Space,
-/// HcurlSpace and L2Space, since most of the functionality is common for all the spaces.
+/// HcurlSpace, HhivSpace and L2Space, since most of the functionality is common for all these spaces.
 ///
 /// There are four main functions the Space class provides:
 /// <ol>
-///    <li> It handles the Dirichlet boundary conditions. The user sets a callback determining
+///    <li> It handles the Dirichlet (essential) boundary conditions. The user provides a pointer 
+///         to an instance of the BCTypes class that determines
 ///         which markers represent the Dirichlet part of the boundary (by returning BC_ESSENTIAL)
 ///         and which markers represent the Neumann and Newton parts (BC_NATURAL). It is also
 ///         possible to return the value BC_NONE, which supresses all BC processing on such part
-///         of the boundary. The callback is set by the function set_bc_types().
+///         of the boundary. The pointer to BCTypes is set by the function set_bc_types().
 ///
-///         On Dirichlet edges the Space class calls another callback, set by either of the two
-///         functions set_essential_bc_values(). The obtained scalar values are projected onto the available
+///         On Dirichlet edges the Space class calls a callback set_essential_bc_values(). The 
+///         obtained scalar values are projected onto the available
 ///         edge shape functions on each edge. This way the Dirichlet lift is obtained, which
-///         matches as closely as possible the user-defined boundary data. Two kinds of value
+///         matches as closely as possible the user-defined boundary data. Two types of value
 ///         callback functions are defined: the first provides the absolute coordinates on the edge
 ///         in question, while the second is supposed to return the Dirichlet value based on two
-///         vertex indices and a parameter in the range [0,1], representing the position on the
-///         edge. The user can set any one of the two callbacks, whichever suits her better. If
+///         vertex indices and a parameter in the range [0, 1], representing the position on the
+///         edge. The user can set any one of the two callbacks, whichever suits him/her better. If
 ///         both are set, the "SurfPos" one takes precedence.
 ///
-///         If one or more of the BC callbacks are not set, default ones are used. The default
-///         BC type is BC_NATURAL for the whole boundary (see the function static int
-///         default_bc_type(int marker) in space.cpp). The default BC value is zero for all
+///         The default BC type is BC_NATURAL for the whole boundary. The default BC value is zero for all
 ///         markers.
 ///
 ///    <li> It stores element polynomial degrees, or 'orders'. All active elements need to have
@@ -105,18 +95,32 @@ class Ord2;
 class HERMES_API Space
 {
 public:
+  // TODO: After successful testing, this will be the one constructor.
+  Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init);
+
+  // Constructor.
+  Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, 
+        scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
+
+  // DEPRECATED: Constructor that uses a callback to set boundary conditions types.
   Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
   
   virtual ~Space();
   virtual void free();
 
-  /// Sets the BC types callback function. Calls assign_dofs() since the 
+  /// Sets the BCTypes variable. Calls assign_dofs() since the 
   /// Space changes. The user can call this when changing BC types at runtime. 
+  void set_bc_types(BCTypes *bc_types);
+  /// DEPRECATED 
   void set_bc_types(BCType (*bc_type_callback)(int marker));
-  /// Sets the BC types callback function; does not call assign_dofs(). To be 
+  /// Sets the BCTypes variable; does not call assign_dofs(). To be 
   /// used in constructor of the Space class only.
+  void set_bc_types_init(BCTypes *bc_types);
+  /// DEPRECATED
   void set_bc_types_init(BCType (*bc_type_callback)(int marker));
+  /// Sets the BC values, checks according to bc_types and sets default values (zero BC) where appropriate.
+  void set_essential_bc_values(BCValues *bc_values);
   /// Sets the BC values callback function, which takes absolute boundary coordinates.
   void set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y));
   /// Sets the BC values callback function, which takes parametric edge position.
@@ -170,7 +174,9 @@ public:
   virtual Space* dup(Mesh* mesh) const = 0;
 
   /// Returns true if the space is ready for computation, false otherwise.
-  bool is_up_to_date() const { return was_assigned && mesh_seq == mesh->get_seq(); }
+  bool is_up_to_date() const {
+      return was_assigned && mesh_seq == (int) mesh->get_seq();
+  }
 
   /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
   void distribute_orders(Mesh* mesh, int* parents);
@@ -191,17 +197,20 @@ public:
   void update_essential_bc_values();
 
   /// \brief Returns the number of basis functions contained in the spaces.
-  static int get_num_dofs(Tuple<Space *> spaces);
+  static int get_num_dofs(Hermes::Tuple<Space *> spaces);
 
-  /// \brief Assings the degrees of freedom to all Spaces in the Tuple.
-  static int assign_dofs(Tuple<Space*> spaces);
+  /// \brief Assings the degrees of freedom to all Spaces in the Hermes::Tuple.
+  static int assign_dofs(Hermes::Tuple<Space*> spaces);
 
-  
+  BCTypes* bc_types;
+  BCValues* bc_values;
+
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
 
   Shapeset* shapeset;
+  bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
   /// FE mesh
   Mesh* mesh;
@@ -239,7 +248,7 @@ protected:
       Node* base;
       int part;
     };
-    NodeData() : edge_bc_proj(NULL), dof(0) {}
+    NodeData() : dof(0), edge_bc_proj(NULL) {}
   };
 
   struct ElementData
@@ -303,7 +312,6 @@ protected: //debugging support
 
 public:
 
-  BCType (*bc_type_callback)(int);
   scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y);
   scalar (*bc_value_callback_by_edge)(SurfPos* surf_pos);
 
@@ -316,13 +324,14 @@ public:
 };
 
 // updating time-dependent essential (Dirichlet) boundary conditions
-extern HERMES_API void update_essential_bc_values(Tuple<Space*> spaces);  // multiple spaces
+extern HERMES_API void update_essential_bc_values(Hermes::Tuple<Space*> spaces);  // multiple spaces
 extern HERMES_API void update_essential_bc_values(Space *s);    // one space
 
 class Ord2
   {
   public:
     Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
+    Ord2(int order) : order_h(order), order_v(order) {};
     int order_h;
     int order_v;
   };

@@ -8,31 +8,27 @@
 // many other things, also stationary heat transfer in a homogeneous linear
 // material).
 //
-// BC: u = T1 ... fixed temperature on Gamma_3 (Dirichlet)
-//     du/dn = 0 ... insulated wall on Gamma_2 and Gamma_4 (Neumann)
-//     du/dn = H*(u - T0) ... heat flux on Gamma_1 (Newton)
+// BC: u = T1 ... fixed temperature on Gamma_left (Dirichlet)
+//     du/dn = 0 ... insulated wall on Gamma_outer and Gamma_inner (Neumann)
+//     du/dn = H*(u - T0) ... heat flux on Gamma_bottom (Newton)
 //
 // Note that the last BC can be written in the form  du/dn - H*u = -h*T0.
 //
 // The following parameters can be changed:
 
-int P_INIT = 6;                                   // Uniform polynomial degree of all mesh elements.
-int UNIFORM_REF_LEVEL = 2;                        // Number of initial uniform mesh refinements.
-int CORNER_REF_LEVEL = 12;                        // Number of mesh refinements towards the re-entrant corner.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
-// Problem parameters.
-double T1 = 30.0;            // Prescribed temperature on Gamma_3.
-double T0 = 20.0;            // Outer temperature on Gamma_1.
-double H  = 0.05;            // Heat flux on Gamma_1.
+const int P_INIT = 6;                             // Uniform polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int CORNER_REF_LEVEL = 12;                  // Number of mesh refinements towards the re-entrant corner.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int NEWTON_BDY = 1;
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
-// Boundary condition types.
-BCType bc_types(int marker)
-  { return (marker == 3) ? BC_ESSENTIAL : BC_NATURAL; }
+// Problem parameters.
+const double T1 = 30.0;       // Prescribed temperature on Gamma_left.
+const double T0 = 20.0;       // Outer temperature on Gamma_bottom.
+const double H  = 0.05;       // Heat flux on Gamma_bottom.
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -49,19 +45,25 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
+  for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_OUTER, BDY_INNER));
+  bc_types.add_bc_newton(BDY_BOTTOM);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form));
-  wf.add_matrix_form_surf(callback(bilinear_form_surf), NEWTON_BDY);
-  wf.add_vector_form_surf(callback(linear_form_surf), NEWTON_BDY);
+  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_BOTTOM);
+  wf.add_vector_form_surf(callback(linear_form_surf), BDY_BOTTOM);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -94,8 +96,8 @@ int main(int argc, char* argv[])
   // (Note that the gradient at the re-entrant
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
-  MagFilter grad(Tuple<MeshFunction *>(&sln, &sln), 
-                 Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::Tuple<MeshFunction *>(&sln, &sln), 
+                 Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for all views to be closed.

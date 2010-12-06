@@ -249,7 +249,8 @@ public:
   ///                               and active segment (which uniquely determines the transformation).
   ///
   /// \param[in] ep Active edge data required by the \c init_geom_surf function.
-  /// \return Pointer to a structure holding the geometry data, either fetched from the cache or freshly constructed.
+  /// \return Pointer to a structure holding the geometry data as well as diameter, id and marker of elements on both
+  ///         sides of the edge.
   ///
   Geom<double>* init_geometry(Geom< double >** ext_cache_e, SurfPos* ep);
   
@@ -277,6 +278,26 @@ public:
   /// \return pointer to the vector of neighboring elements.
   ///
   std::vector<Element*>* get_neighbors() { return &neighbors; }
+  
+  /// Retrieve the central element in the neighborhood defined by current active segment.
+  ///
+  /// \return pointer to the central element.
+  ///
+  Element* get_current_central_element()
+  {
+    ensure_active_segment(this);
+    return central_el;
+  }
+  
+  /// Retrieve the neighbor element in the neighborhood defined by current active segment.
+  ///
+  /// \return pointer to the neighbor of the central element.
+  ///
+  Element* get_current_neighbor_element()
+  {
+    ensure_active_segment(this);
+    return neighb_el;
+  }
   
   /// Get transfomations that must be pushed to a Transormable either on the central or neighbor element in order for
   /// its values from both sides to match.
@@ -321,7 +342,10 @@ public:
   /// Frees the memory occupied by the internal geometric and jac*wt caches.
   void clear_caches() {
     for (std::map<Key, Geom<double>*, Compare>::iterator it = cache_e.begin(); it != cache_e.end(); it++)
+    {
       (it->second)->free();
+      delete it->second;
+    }
     cache_e.clear();
     
     for (std::map<Key, double*, Compare>::iterator it = cache_jwt.begin(); it != cache_jwt.end(); it++)
@@ -379,7 +403,7 @@ private:
                                                   ///< (in a go-down neighborhood; stored row-wise for each neighbor) 
                                                   ///< or of the neighbor to the central element (go-up).
   std::vector<int> n_trans;                       ///< Number of transforms stored in each row of \c transformations.
-  int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the 
+  unsigned int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the 
                                                   ///< assembly, before transforms from \c transformations are pushed
                                                   ///< to it.
                                                   

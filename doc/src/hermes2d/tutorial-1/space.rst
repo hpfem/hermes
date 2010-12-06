@@ -60,8 +60,15 @@ of the example 02-space::
       H2DReader mloader;
       mloader.load("domain.mesh", &mesh);
 
+      // Enter boundary markers.
+      // (If no markers are entered, default is a natural BC).
+      BCTypes bc_types;
+
+      // Enter Dirichlet boundary values (default is zero).
+      BCValues bc_values;
+
       // Create an H1 space with default shapeset and natural BC.
-      H1Space space(&mesh, NULL, NULL, P_INIT);
+      H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
       // View FE basis functions.
       BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
@@ -72,17 +79,20 @@ of the example 02-space::
       return 0;
     }
 
-Initializing a space
+Initializing a Space
 ~~~~~~~~~~~~~~~~~~~~
 
 An instance of H1Space is initialized with four arguments: 
 
-* Pointer to a mesh, 
-* function providing boundary condition types for all boundary markers 
-  (NULL means natural boundary conditions on the entire boundary),
-* function providing values of essential (i.e., Dirichlet) boundary conditions for all 
-  essential boundary markers (NULL here since all BC are natural),
-* uniform initial polynomial degree of all mesh elements.
+* Pointer to a mesh. 
+* Pointer to class BCTypes that links boundary markers to boundary condition types.
+  If a marker is not linked to any type, then the default is Neumann. This does not 
+  really matter in this example since no PDE is solved. Usage of the BCTypes class 
+  will be explained in more detail in the tutorial examples 04, 05 and 06. 
+* Pointer to class BCValues that provides values of Dirichlet boundary conditions. 
+  Again this does not matter in this example since no PDE is solved, and details will
+  be given in the tutorial examples 04, 05 and 06.
+* Uniform initial polynomial degree of all mesh elements.
 
 Setting element orders individually
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

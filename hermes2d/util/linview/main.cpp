@@ -9,9 +9,12 @@ class LinView : public Base
 {
 public:
 
-  LinView(int width, int height, int n, char** names)
-    : current(0), num(n), names(names),
-      Base("LinView", new WinGeom(0, 0, width, height)) {}
+  LinView(int width, int height, int n, char** names) :
+      Base("LinView", new WinGeom(0, 0, width, height)),
+      num(n),
+      current(0),
+      names(names) {
+  }
 
   void switch_to(int n)
   {
@@ -232,8 +235,9 @@ int main(int argc, char* argv[])
         usleep(100000); // bad intel GL driver
         linview.save_screenshot(filename, options.hq);
       }
-      else
+      else {
         info("%s already exists: skipping", filename);
+      }
     }
   }
 

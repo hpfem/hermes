@@ -216,20 +216,7 @@ endif(WITH_GLUT)
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${HERMES_COMMON_DIR})
 
-include(CheckIncludeFile)
-CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
-CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
-CHECK_INCLUDE_FILE("execinfo.h" HAVE_EXECINFO)
-IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(HAVE_CXXABI yes)
-ENDIF()
-include(CheckFunctionExists)
-CHECK_FUNCTION_EXISTS(vasprintf HAVE_VASPRINTF)
-CHECK_FUNCTION_EXISTS(strcasecmp HAVE_STRCASECMP)
-
-IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(HAVE_TEUCHOS_STACKTRACE yes)
-ENDIF()
+include(../hermes_common/CMakeCommon.txt)
 
 #
 add_subdirectory(src)
@@ -286,10 +273,6 @@ add_custom_command(
 #	COMMAND   ${DOXYGEN_BINARY} ${DOXYGEN_CONFIG_FILE}
 #)
 
-
-add_custom_target(test-quick
-	COMMAND   /usr/bin/ctest -LE long
-)
 
 # -- package --------
 

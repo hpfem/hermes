@@ -50,7 +50,7 @@ Scalar int_F_e_f(int n, double *wt, double (*F)(int marker, Real x, Real y), Fun
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (*F)(e->marker, e->x[i], e->y[i]) * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+    result += wt[i] * (*F)(e->elem_marker, e->x[i], e->y[i]) * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
   return result;
 }
 

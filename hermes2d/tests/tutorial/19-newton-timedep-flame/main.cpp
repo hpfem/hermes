@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets.
   H1Space tspace(&mesh, bc_types, essential_bc_values_t, P_INIT);
   H1Space cspace(&mesh, bc_types, essential_bc_values_c, P_INIT);
-  int ndof = Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 
   // Previous time level solutions.
@@ -73,9 +73,9 @@ int main(int argc, char* argv[])
   t_prev_newton.set_exact(&mesh, temp_ic); c_prev_newton.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
-  DXDYFilter omega(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  DXDYFilter omega_dt(omega_dt_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  DXDYFilter omega_dc(omega_dc_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilter omega(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilter omega_dt(omega_dt_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilter omega_dc(omega_dc_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -85,14 +85,14 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
   wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
   wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-                     Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+                     Hermes::Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, Tuple<Space *>(&tspace, &cspace), is_linear);
+  DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&tspace, &cspace), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Tuple<Space *>(&tspace, &cspace), Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), coeff_vec, matrix_solver);
+  OGProjection::project_global(Hermes::Tuple<Space *>(&tspace, &cspace), Hermes::Tuple<MeshFunction *>(&t_prev_newton, &c_prev_newton), coeff_vec, matrix_solver);
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
       double res_l2_norm = get_l2_norm(rhs);
 
       // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Hermes::Tuple<Space *>(&tspace, &cspace)), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
         error ("Newton method did not converge.");
      
       // Set current solutions to the latest Newton iterate and reinitialize filters of these solutions.
-      Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&tspace, &cspace), Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     };
 
     // Visualization.
-    DXDYFilter omega_view(omega_fn, Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    DXDYFilter omega_view(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_newton, &c_prev_newton));
 
     // Update current time.
     current_time += TAU;
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);
     c_prev_time_2.copy(&c_prev_time_1);
-    Solution::vector_to_solutions(coeff_vec, Tuple<Space *>(&tspace, &cspace), Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
+    Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&tspace, &cspace), Hermes::Tuple<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
     ts++;
   } 

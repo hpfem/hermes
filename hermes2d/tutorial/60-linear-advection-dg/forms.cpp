@@ -55,7 +55,7 @@ Scalar linear_form_boundary(int n, double *wt, Func<Real> *u_ext[], Func<Real> *
   for (int i = 0; i < n; i++) {
     Real x = e->x[i], y = e->y[i];
     Real a_dot_n = calculate_a_dot_v<Real>(x, y, e->nx[i], e->ny[i]);
-    result += -wt[i] * upwind_flux<Real,Scalar>(0, g<Real,Scalar>(e->marker,x,y), a_dot_n) * v->val[i];
+    result += -wt[i] * upwind_flux<Real,Scalar>(0, g<Real,Scalar>(e->edge_marker,x,y), a_dot_n) * v->val[i];
   }
   
   return result;

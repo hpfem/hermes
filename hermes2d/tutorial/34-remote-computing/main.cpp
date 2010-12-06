@@ -21,8 +21,8 @@ const int P_INIT = 4;                             // Polynomial degree of all me
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
 const double TAU = 300.0;                         // Time step in seconds.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double T_INIT = 10;        // Temperature of the ground (also initial temperature).
@@ -41,15 +41,7 @@ double temp_ext(double t) {
 }
 
 // Boundary markers.
-int bdy_ground = 1;
-int bdy_air = 2;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == bdy_ground) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
+const int BDY_GROUND = 1, BDY_AIR = 2;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -69,10 +61,15 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(bdy_air, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_GROUND);
+  bc_types.add_bc_newton(BDY_AIR);
 
   // Initialize an H1 space with default shepeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
@@ -85,9 +82,9 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
+  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
+  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -177,7 +174,7 @@ int main(int argc, char* argv[])
  
   int p_init = 1;
   // The NULLs are for bc_types() and essential_bc_values().
-  H1Space space_from_file(sln_from_file.get_mesh(), NULL, NULL, p_init);
+  H1Space space_from_file(sln_from_file.get_mesh(), (BCTypes *) NULL, (BCValues *) NULL, p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
   OrderView oview("Saved Solution -> Space", new WinGeom(920, 0, 450, 600));
   oview.show(&space_from_file);
