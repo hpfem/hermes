@@ -5,7 +5,7 @@ from numpy.linalg import solve
 from hermes1d.h1d_wrapper.h1d_wrapper import (assemble_projection_matrix_rhs,
         Mesh, FESolution, Function as Function2)
 from hermes1d.fekete.fekete import Function, Mesh1D
-from hermes1d.hermes_common.matrix import CSCMatrix
+from hermes1d.hermes_common.matrix import CSCMatrix, AVector
 
 class FunctionSin(Function2):
 
@@ -28,14 +28,14 @@ def test_l2_h1_proj_run():
     orders = [3]*(len(pts)-1)
     m = Mesh(pts, orders)
     n_dof = m.assign_dofs()
-    A = CooMatrix(n_dof)
-    rhs = empty(n_dof)
+    A = CSCMatrix(n_dof)
+    rhs = AVector(n_dof)
     assemble_projection_matrix_rhs(m, A, rhs, f_sin, projection_type="L2")
-    x = solve(A.to_scipy_coo().todense(), rhs)
+    x = solve(A.to_scipy_csc().todense(), rhs)
     sol_l2 = FESolution(m, x).to_discrete_function()
     A = CooMatrix(n_dof)
     assemble_projection_matrix_rhs(m, A, rhs, f_sin, projection_type="H1")
-    x = solve(A.to_scipy_coo().todense(), rhs)
+    x = solve(A.to_scipy_csc().todense(), rhs)
     sol_h1 = FESolution(m, x).to_discrete_function()
     sol_l2.plot(False)
     sol_h1.plot(False)
