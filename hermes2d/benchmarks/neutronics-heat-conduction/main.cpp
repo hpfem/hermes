@@ -139,17 +139,6 @@ Real q(Real x, Real y) {
          (CF*PHIt*x*y*sx*sy*(nu*xsfiss-xsa_ref*(1 + doppler_coeff*(-sqrt(Tref) + sqrt(CT*Tt*sx*sy)))))/(LX*LY);
 }
 
-// Boundary condition types.
-BCType bc_types_T(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-BCType bc_types_phi(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 {
