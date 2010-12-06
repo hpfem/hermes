@@ -10,10 +10,10 @@ from pylab import plot, show, savefig, grid, gca, legend, figure, title, \
 from hermes1d import Mesh
 from hermes1d.solvers.eigen import solve_eig_numpy, solve_eig_pysparse, \
         solve_eig_scipy
-from hermes1d.h1d_wrapper.h1d_wrapper import FESolution, calc_error_estimate, \
+from hermes1d.h1d_wrapper.h1d_wrapper import FESolution, calc_err_est, \
         calc_solution_norm, adapt
 from hermes1d.fekete.fekete import Function, Mesh1D
-from hermes_common._hermes_common import CooMatrix
+from hermes1d.hermes_common.matrix import CSCMatrix
 
 from _forms import assemble_schroedinger
 from plot import plot_eigs, plot_file
@@ -151,10 +151,10 @@ def solve_schroedinger(mesh, l=0, Z=1, eqn_type="R", eig_num=4):
     """
     # TODO: return the eigenfunctions as FESolutions
     N_dof = mesh.assign_dofs()
-    A = CooMatrix(N_dof)
-    B = CooMatrix(N_dof)
+    A = CSCMatrix(N_dof)
+    B = CSCMatrix(N_dof)
     assemble_schroedinger(mesh, A, B, l=l, Z=Z, eqn_type=eqn_type)
-    eigs = solve_eig_scipy(A.to_scipy_coo(), B.to_scipy_coo())
+    eigs = solve_eig_scipy(A.to_scipy_csc(), B.to_scipy_csc())
     eigs = eigs[:eig_num]
     energies = [E for E, eig in eigs]
     #print energies
