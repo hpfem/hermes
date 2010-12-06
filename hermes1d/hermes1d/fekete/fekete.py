@@ -412,15 +412,15 @@ class Function(h1d_wrapper.Function):
         if self._fe_sol is None:
             from hermes1d.h1d_wrapper.h1d_wrapper import \
                     (assemble_projection_matrix_rhs, Mesh, FESolution)
-            from hermes_common._hermes_common import CooMatrix
+            from hermes1d.hermes_common.matrix import CSCMatrix, AVector
             pts, orders = self._mesh.get_mesh_data()
             m = Mesh(pts, orders)
             n_dof = m.assign_dofs()
-            A = CooMatrix(n_dof)
-            rhs = empty(n_dof)
+            A = CSCMatrix(n_dof)
+            rhs = AVector(n_dof)
             assemble_projection_matrix_rhs(m, A, rhs, self,
                     projection_type="L2")
-            coeffs = solve(A.to_scipy_coo().todense(), rhs)
+            coeffs = solve(A.to_scipy_csc().todense(), rhs)
             self._fe_sol = FESolution(m, coeffs)
 
     def get_values_in_element(self, n, x):
@@ -458,15 +458,15 @@ class Function(h1d_wrapper.Function):
         elif proj_type in ["L2", "H1"]:
             from hermes1d.h1d_wrapper.h1d_wrapper import \
                     (assemble_projection_matrix_rhs, Mesh, FESolution)
-            from hermes_common._hermes_common import CooMatrix
+            from hermes1d.hermes_common.matrix import CSCMatrix, AVector
             pts, orders = mesh.get_mesh_data()
             m = Mesh(pts, orders)
             n_dof = m.assign_dofs()
-            A = CooMatrix(n_dof)
-            rhs = empty(n_dof)
+            A = CSCMatrix(n_dof)
+            rhs = AVector(n_dof)
             assemble_projection_matrix_rhs(m, A, rhs, self,
                     projection_type=proj_type)
-            coeffs = solve(A.to_scipy_coo().todense(), rhs)
+            coeffs = solve(A.to_scipy_csc().todense(), rhs)
             return FESolution(m, coeffs).to_discrete_function()
         else:
             raise ValueError("Unknown projection type")

@@ -5,7 +5,7 @@ from numpy.linalg import solve
 from hermes1d.h1d_wrapper.h1d_wrapper import (assemble_projection_matrix_rhs,
         Mesh, FESolution, Function as Function2)
 from hermes1d.fekete.fekete import Function, Mesh1D
-from hermes_common._hermes_common import CooMatrix
+from hermes1d.hermes_common.matrix import CSCMatrix
 
 class FunctionSin(Function2):
 

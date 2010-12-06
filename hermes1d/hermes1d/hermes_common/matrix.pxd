@@ -7,11 +7,11 @@ cdef class SparseMatrix(Matrix):
 
     cdef matrix.SparseMatrix* as_SparseMatrix(self)
 
-cdef class UMFPackMatrix(SparseMatrix):
+cdef class CSCMatrix(SparseMatrix):
     pass
 
 cdef class Vector:
     cdef matrix.Vector *thisptr
 
-cdef class UMFPackVector(Vector):
+cdef class AVector(Vector):
     pass
