@@ -70,11 +70,10 @@ const double k = 1.0;
 // Exact solution.
 #include "exact_solution.cpp"
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
 
 // Unit tangential vectors to the boundary. 
 double2 tau[5] = { { 0, 0}, { 1, 0 },  { 0, 1 }, { -1, 0 }, { 0, -1 } };
@@ -102,10 +101,14 @@ int main(int argc, char* argv[])
   // mloader.load("screen-tri.mesh", &mesh);  // triangles
 
   // Perform initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

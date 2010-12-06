@@ -78,12 +78,6 @@ const double GN_TOP = 3.0;
 const double GN_RIGHT = 2.0;
 const double GN_BOTTOM = 1.0;
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
-
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
@@ -101,10 +95,14 @@ int main(int argc, char* argv[])
   mloader.load("battery.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

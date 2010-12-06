@@ -7,7 +7,6 @@
 #include "math.h"
 #include <iostream>
 
-
 // Neutronics/heat conduction test case.
 //
 // Author: Damien Lebrun-Grandie (Texas A&M University).
@@ -112,13 +111,9 @@ Real q(Real x, Real y) {
 invvel*CF*rF*exp(rF*TIME)*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY-xsdiff*(-CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)/(LX*LX*LX)*PI*PI*sin(y/LY*PI)*x*y/LY+2.0*CF*(1.0+exp(rF*TIME))*cos(x/LX*PI)/(LX*LX)*PI*sin(y/LY*PI)*y/LY)-xsdiff*(-CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)/(LY*LY*LY)*PI*PI*x/LX*y+2.0*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*cos(y/LY*PI)/(LY*LY)*PI*x/LX)+(xsa_ref+doppler_coeff*(sqrt(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI))-sqrt(Tref)))*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY-nu*xsfiss*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY;
 }
 
-// Boundary condition types.
-BCType bc_types_T(int marker)
-{
-  //return BC_ESSENTIAL;
-  return BC_NATURAL;
-}
- 
+// Boundary markers.
+const int BDY_NEUMANN_T = 1; 
+const int BDY_NEUMANN_phi = 1; 
 
 // Dirichlet boundary condition values
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
@@ -126,13 +121,6 @@ scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
   return Tref;
 }
 
-
-BCType bc_types_phi(int marker)
-{
-  //return BC_ESSENTIAL;
-  return BC_NATURAL;
-}
- 
 scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
 {
   return 0.0;
@@ -161,9 +149,15 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
+  // Enter boundary markers.
+  BCTypes bc_types_T;
+  bc_types_T.add_bc_neumann(BDY_NEUMANN_T);
+  BCTypes bc_types_phi;
+  bc_types_phi.add_bc_neumann(BDY_NEUMANN_phi);
+
   // Create H1 spaces with default shapesets.
-  H1Space space_T(&mesh, bc_types_T, essential_bc_values_T, P_INIT);
-  H1Space space_phi(&mesh, bc_types_phi, essential_bc_values_phi, P_INIT);
+  H1Space space_T(&mesh, &bc_types_T, essential_bc_values_T, P_INIT);
+  H1Space space_phi(&mesh, &bc_types_phi, essential_bc_values_phi, P_INIT);
   Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
 
   // Exact solutions for error evaluation.

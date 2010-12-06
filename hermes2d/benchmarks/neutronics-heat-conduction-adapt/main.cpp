@@ -168,16 +168,9 @@ Real q(Real x, Real y) {
   return -xsdiff*((CF*1/(LY*LY)*PHI_FTIME(x,y)*M_PI*x*cos((M_PI*y)/LY)*sin((M_PI*x)/LX)*2.0)/LX-(CF*1/(LY*LY*LY)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LX)-xsdiff*((CF*1/(LX*LX)*PHI_FTIME(x,y)*M_PI*y*cos((M_PI*x)/LX)*sin((M_PI*y)/LY)*2.0)/LY-(CF*1/(LX*LX*LX)*PHI_FTIME(x,y)*(M_PI*M_PI)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/LY)+(CF*DPHI_FTIME(x,y)*invvel*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY)+(CF*PHI_FTIME(x,y)*x*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)*(xsa_ref-doppler_coeff*(sqrt(Tref)-sqrt(CT*T_FTIME(x,y)*sin((M_PI*x)/LX)*sin((M_PI*y)/LY)))))/(LX*LY)-(CF*PHI_FTIME(x,y)*nu*x*xsfiss*y*sin((M_PI*x)/LX)*sin((M_PI*y)/LY))/(LX*LY);
 }
 
-// Boundary condition types.
-BCType bc_types_T(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-BCType bc_types_phi(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_DIRICHLET_T = 1;
+const int BDY_DIRICHLET_phi = 1;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
@@ -216,9 +209,15 @@ int main(int argc, char* argv[])
   mesh_T.copy(&basemesh);
   mesh_phi.copy(&basemesh);
 
+  // Enter boundary markers.
+  BCTypes bc_types_T;
+  bc_types_T.add_bc_dirichlet(BDY_DIRICHLET_T);
+  BCTypes bc_types_phi;
+  bc_types_phi.add_bc_dirichlet(BDY_DIRICHLET_phi);
+
   // Create H1 spaces with default shapesets.
-  H1Space space_T(&mesh_T, bc_types_T, essential_bc_values_T, P_INIT);
-  H1Space space_phi(&mesh_phi, bc_types_phi, essential_bc_values_phi, P_INIT);
+  H1Space space_T(&mesh_T, &bc_types_T, essential_bc_values_T, P_INIT);
+  H1Space space_phi(&mesh_phi, &bc_types_phi, essential_bc_values_phi, P_INIT);
   Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
   int ndof = Space::get_num_dofs(spaces); 
  
