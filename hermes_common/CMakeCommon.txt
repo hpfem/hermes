@@ -4,8 +4,13 @@
 # Enable debugging symbols for all files all the time:
 set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Stop on first error
-#    set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
+    # Stop on first error (sometimes gcc doesn't print all the possible
+    # candidates when a function signature is wrong if this is enabled, so we
+    # leave it disabled by default):
+    # set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
+
+    # All warnings are errors
+    set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
 
     # Disable the "unused variable/parameters/functions" warnings (as those are
     # not really problematic, it doesn't cause any harm):
