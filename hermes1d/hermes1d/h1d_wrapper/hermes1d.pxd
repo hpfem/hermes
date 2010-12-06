@@ -6,6 +6,8 @@
 # FIXME:
 #from hermes_common._hermes_common cimport c_Matrix
 
+from hermes_common.cpp.matrix cimport Matrix
+
 cdef extern from "hermes1d.h":
 
     ctypedef double double4[4]
@@ -66,6 +68,5 @@ cdef extern from "hermes1d.h":
     int H1D_L2_ortho_global
     int H1D_H1_ortho_global
     ctypedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[])
-    # FIXME:
-    #void assemble_projection_matrix_rhs(Mesh *mesh, c_Matrix *A, double *rhs,
-    #        ExactFunction fn, int projection_type) except +
+    void assemble_projection_matrix_rhs(Space *space, Matrix *A, double *rhs,
+            ExactFunction fn, int projection_type) except +
