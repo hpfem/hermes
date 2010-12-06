@@ -101,6 +101,7 @@ double quantity_of_interest(Space *space, double x)
   }
 
   error("computation of quantity of interest failed.");
+  return 0.0;
 }
 
 int main() 

@@ -261,6 +261,7 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
     default: 
       error("Unknown matrix solver requested.");
   }
+  return NULL;
 }
 
 // This function is identical in H2D and H3D.
@@ -322,6 +323,7 @@ Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vec
     default: 
       error("Unknown matrix solver requested.");
   }
+  return NULL;
 }
 
 Vector* create_vector(MatrixSolverType matrix_solver)
@@ -363,4 +365,5 @@ Vector* create_vector(MatrixSolverType matrix_solver)
     default: 
       error("Unknown matrix solver requested.");
   }
+  return NULL;
 }

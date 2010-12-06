@@ -9,6 +9,7 @@ double get_ctrl_alpha(double t)
     }
   }
   error("Internal: time interval not found in get_ctrl_alpha().");
+  return 0.0;
 }
 
 double get_ctrl_zeta(double t) 
@@ -22,6 +23,7 @@ double get_ctrl_zeta(double t)
     }
   }
   error("Internal: time interval not found in get_ctrl_zeta().");
+  return 0.0;
 }
 
 double jacobian_0_0(int num, double *x, double *weights,
