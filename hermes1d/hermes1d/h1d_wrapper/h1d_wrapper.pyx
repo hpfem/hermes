@@ -11,8 +11,8 @@ from numpy cimport ndarray
 from hermes1d.hermes_common.matrix cimport SparseMatrix, Vector
 
 cimport hermes1d
-from hermes1d.cython_utils cimport PY_NEW
-from hermes1d.numpy_utils cimport c2numpy_double
+from hermes1d.hermes_common.cython_utils cimport PY_NEW
+from hermes1d.hermes_common.numpy_utils cimport c2numpy_double
 from hermes1d.fekete._fekete cimport get_gauss_points_phys, int_f2, \
         int_f2_f2
 
