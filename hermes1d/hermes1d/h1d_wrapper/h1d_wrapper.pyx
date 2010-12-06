@@ -8,7 +8,7 @@ from libc.math cimport sin, cos, sqrt
 from numpy import empty, array
 from numpy cimport ndarray
 
-from hermes_common.matrix cimport Matrix, Vector
+from hermes_common.matrix cimport SparseMatrix, Vector
 
 cimport hermes1d
 from hermes1d.cython_utils cimport PY_NEW
@@ -355,7 +355,7 @@ cdef void fn(int n, double x[], double f[], double dfdx[]):
         if dfdx != NULL:
             dfdx[i] = _A.eval_dfdx(x[i])
 
-def assemble_projection_matrix_rhs(Mesh mesh, Matrix A, Vector rhs,
+def assemble_projection_matrix_rhs(Mesh mesh, SparseMatrix A, Vector rhs,
     f, projection_type=None):
     cdef int prj_type
     if projection_type == "L2":
@@ -366,5 +366,5 @@ def assemble_projection_matrix_rhs(Mesh mesh, Matrix A, Vector rhs,
         raise ValueError("Unknown projection type")
     global _A
     _A = f
-    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.thisptr,
+    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.getptr(),
             rhs.thisptr, &fn, prj_type)

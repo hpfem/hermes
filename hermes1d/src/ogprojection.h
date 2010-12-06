@@ -144,7 +144,7 @@ protected:
 #define H1D_L2_ortho_global 0
 #define H1D_H1_ortho_global 1
 
-void assemble_projection_matrix_rhs(Space *space, Matrix *A, Vector *rhs,
+void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, Vector *rhs,
         ExactFunction fn, int projection_type=H1D_L2_ortho_global);
 
 #endif
