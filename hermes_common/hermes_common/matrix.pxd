@@ -1,11 +1,11 @@
-cimport hermes_common.cpp.matrix
+from cpp cimport matrix
 
 cdef class Matrix:
-    cdef hermes_common.cpp.matrix.Matrix *thisptr
+    cdef matrix.Matrix *thisptr
 
 cdef class SparseMatrix(Matrix):
 
-    cdef hermes_common.cpp.matrix.SparseMatrix *getptr(self)
+    cdef matrix.SparseMatrix *getptr(self)
 
 cdef class Vector:
-    cdef hermes_common.cpp.matrix.Vector *thisptr
+    cdef matrix.Vector *thisptr

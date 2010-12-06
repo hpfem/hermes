@@ -8,7 +8,7 @@ from libc.math cimport sin, cos, sqrt
 from numpy import empty, array
 from numpy cimport ndarray
 
-from hermes_common.matrix cimport SparseMatrix, Vector
+from hermes1d.hermes_common.matrix cimport SparseMatrix, Vector
 
 cimport hermes1d
 from hermes1d.cython_utils cimport PY_NEW
