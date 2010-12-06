@@ -35,19 +35,19 @@ DiscreteProblem::FnCache::~FnCache()
 void DiscreteProblem::FnCache::free()
 {
   _F_
-  for (int i = jwt.first(); i != INVALID_IDX; i = jwt.next(i))
+  for (unsigned int i = jwt.first(); i != INVALID_IDX; i = jwt.next(i))
     delete [] jwt[i];
   jwt.remove_all();
-  for (int i = e.first(); i != INVALID_IDX; i = e.next(i))
+  for (unsigned int i = e.first(); i != INVALID_IDX; i = e.next(i))
     free_geom(&e[i]);
   e.remove_all();
-  for (int i = fn.first(); i != INVALID_IDX; i = fn.next(i))
+  for (unsigned int i = fn.first(); i != INVALID_IDX; i = fn.next(i))
     free_fn(fn[i]);
   fn.remove_all();
-  for (int i = ext.first(); i != INVALID_IDX; i = ext.next(i))
+  for (unsigned int i = ext.first(); i != INVALID_IDX; i = ext.next(i))
     delete ext[i];
   ext.remove_all();
-  for (int i = sln.first(); i != INVALID_IDX; i = sln.next(i))
+  for (unsigned int i = sln.first(); i != INVALID_IDX; i = sln.next(i))
     free_fn(sln[i]);
   sln.remove_all();
 }
@@ -325,7 +325,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     {
       // find a non-NULL e[i]
       Element *e0;
-      for (int i = 0; i < s->idx.size(); i++)
+      for (unsigned int i = 0; i < s->idx.size(); i++)
         if ((e0 = e[i]) != NULL) break;
       if (e0 == NULL) continue;
 
@@ -337,7 +337,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in 
       // trav.get_next_state(...).
       memset(isempty, 0, sizeof(bool) * wf->neq);
-      for (int i = 0; i < s->idx.size(); i++)
+      for (unsigned int i = 0; i < s->idx.size(); i++)
       {
         int j = s->idx[i];
         if (e[i] == NULL) 
@@ -491,7 +491,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       }
 
       // assemble surface integrals now: loop through surfaces of the element
-      for (unsigned int isurf = 0; isurf < e0->get_num_surf(); isurf++)
+      for (int isurf = 0; isurf < e0->get_num_surf(); isurf++)
       {
         fn_cache.free();  // This is not in H2D.
 
@@ -500,7 +500,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         int marker = surf_pos[isurf].marker;
 
         // obtain the list of shape functions which are nonzero on this surface
-        for (int i = 0; i < s->idx.size(); i++) 
+        for (unsigned int i = 0; i < s->idx.size(); i++) 
         {
           if (e[i] == NULL) continue;
           int j = s->idx[i];
@@ -1105,7 +1105,7 @@ Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse,
 {
   _F_
   Hermes::Tuple<Space *> * ref_spaces = new Hermes::Tuple<Space *>;
-  for (int i = 0; i < coarse.size(); i++) 
+  for (unsigned int i = 0; i < coarse.size(); i++) 
   {
     Mesh* ref_mesh = new Mesh;
     ref_mesh->copy(*coarse[i]->get_mesh());

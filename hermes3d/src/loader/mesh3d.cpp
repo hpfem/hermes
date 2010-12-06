@@ -300,10 +300,10 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 		}
 
 		// check if all "outer" faces have defined boundary condition
-		for (int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
+		for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
 			Facet *facet = mesh->facets.get(i);
 
-			if ((facet->left == INVALID_IDX) || (facet->right == INVALID_IDX)) {
+			if (((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
 				fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
 				throw E_READ_ERROR;
 			}
@@ -331,7 +331,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save vertices
 	fprintf(file, "# vertices\n");
 	fprintf(file, "%ld\n", mesh->vertices.count());
-	for (int i = mesh->vertices.first(); i != INVALID_IDX; i = mesh->vertices.next(i)) {
+	for (unsigned int i = mesh->vertices.first(); i != INVALID_IDX; i = mesh->vertices.next(i)) {
 		Vertex *v = mesh->vertices[i];
 		fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
 	}
@@ -339,7 +339,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// elements
 	Array<Element *> tet, hex, pri;
-	for (int i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
+	for (unsigned int i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
 		Element *elem = mesh->elements[i];
 		if (elem->active) {
 			switch (elem->get_mode()) {
@@ -353,7 +353,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save tetras
 	fprintf(file, "# tetras\n");
 	fprintf(file, "%ld\n", tet.count());
-	for (int i = tet.first(); i != INVALID_IDX; i = tet.next(i)) {
+	for (unsigned int i = tet.first(); i != INVALID_IDX; i = tet.next(i)) {
 		unsigned int vtcs[Tetra::NUM_VERTICES];
 		tet[i]->get_vertices(vtcs);
 		fprintf(file, "%u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
@@ -363,7 +363,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save hexes
 	fprintf(file, "# hexes\n");
 	fprintf(file, "%ld\n", hex.count());
-	for (int i = hex.first(); i != INVALID_IDX; i = hex.next(i)) {
+	for (unsigned int i = hex.first(); i != INVALID_IDX; i = hex.next(i)) {
 		unsigned int vtcs[Hex::NUM_VERTICES];
 		hex[i]->get_vertices(vtcs);
 		fprintf(file, "%u %u %u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
@@ -373,7 +373,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// save prisms
 	fprintf(file, "# prisms\n");
 	fprintf(file, "%ld\n", pri.count());
-	for (int i = pri.first(); i != INVALID_IDX; i = pri.next(i)) {
+	for (unsigned int i = pri.first(); i != INVALID_IDX; i = pri.next(i)) {
 		unsigned int vtcs[Prism::NUM_VERTICES];
 		pri[i]->get_vertices(vtcs);
 		fprintf(file, "%u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
@@ -382,7 +382,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// boundaries
 	Array<Facet *> tri_facets, quad_facets;
-	for (int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
+	for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
 		Facet *facet = mesh->facets.get(i);
 		if (facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
 			switch (facet->type) {
@@ -395,7 +395,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// tris
 	fprintf(file, "# tris\n");
 	fprintf(file, "%ld\n", tri_facets.count());
-	for (int i = tri_facets.first(); i != INVALID_IDX; i = tri_facets.next(i)) {
+	for (unsigned int i = tri_facets.first(); i != INVALID_IDX; i = tri_facets.next(i)) {
 		Facet *facet = tri_facets[i];
 		Boundary *bnd = mesh->boundaries[facet->right];
 		Element *elem = mesh->elements[facet->left];
@@ -410,7 +410,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	// quads
 	fprintf(file, "# quads\n");
 	fprintf(file, "%ld\n", quad_facets.count());
-	for (int i = quad_facets.first(); i != INVALID_IDX; i = quad_facets.next(i)) {
+	for (unsigned int i = quad_facets.first(); i != INVALID_IDX; i = quad_facets.next(i)) {
 		Facet *facet = quad_facets[i];
 		Boundary *bnd = mesh->boundaries[facet->right];
 		Element *elem = mesh->elements[facet->left];

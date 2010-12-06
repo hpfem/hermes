@@ -722,19 +722,19 @@ Mesh::~Mesh() {
 
 void Mesh::free() {
 	_F_
-	for (int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i))
+	for (unsigned int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i))
 		delete vertices[i];
 	vertices.remove_all();
 
-	for (int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i))
+	for (unsigned int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i))
 		delete boundaries[i];
 	boundaries.remove_all();
 
-	for (int i = elements.first(); i != INVALID_IDX; i = elements.next(i))
+	for (unsigned int i = elements.first(); i != INVALID_IDX; i = elements.next(i))
 		delete elements[i];
 	elements.remove_all();
 
-	for (int i = facets.first(); i != INVALID_IDX; i = facets.next(i))
+	for (unsigned int i = facets.first(); i != INVALID_IDX; i = facets.next(i))
 		delete facets.get(i);
 	facets.remove_all();
 
@@ -748,15 +748,15 @@ void Mesh::copy(const Mesh &mesh) {
 	free();
 
 	// copy vertices
-	for (int i = mesh.vertices.first(); i != INVALID_IDX; i = mesh.vertices.next(i))
+	for (unsigned int i = mesh.vertices.first(); i != INVALID_IDX; i = mesh.vertices.next(i))
 		this->vertices.set(i, mesh.vertices[i]->copy());
 
 	// copy boundaries
-	for (int i = mesh.boundaries.first(); i != INVALID_IDX; i = mesh.boundaries.next(i))
+	for (unsigned int i = mesh.boundaries.first(); i != INVALID_IDX; i = mesh.boundaries.next(i))
 		this->boundaries.set(i, mesh.boundaries[i]->copy());
 
 	// copy elements, facets and edges
-	for (int i = mesh.elements.first(); i != INVALID_IDX; i = mesh.elements.next(i)) {
+	for (unsigned int i = mesh.elements.first(); i != INVALID_IDX; i = mesh.elements.next(i)) {
 		Element *e = mesh.elements[i];
 		this->elements.set(i, e->copy());
 
@@ -812,12 +812,12 @@ void Mesh::copy(const Mesh &mesh) {
 		Facet *facet = mesh.facets[fid];
 
 		unsigned int *face_idxs = new unsigned int[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
-		if (facet->left != INVALID_IDX) {
+		if ((unsigned) facet->left != INVALID_IDX) {
 			Element *left_e = mesh.elements[facet->left];
 			int nvtcs = left_e->get_face_vertices(facet->left_face_num, face_idxs);
 			this->facets.set(face_idxs + 0, nvtcs, facet->copy());
 		}
-		else if (facet->right != INVALID_IDX && facet->type == Facet::INNER) {
+		else if ((unsigned) facet->right != INVALID_IDX && facet->type == Facet::INNER) {
 			Element *right_e = mesh.elements[facet->right];
 			int nvtcs = right_e->get_face_vertices(facet->right_face_num, face_idxs);
 			this->facets.set(face_idxs + 0, nvtcs, facet->copy());
@@ -911,28 +911,28 @@ unsigned int Mesh::get_edge_id(Element *e, int edge_num) const {
 void Mesh::dump() {
 	_F_
 	printf("Vertices (count = %lu)\n", vertices.count());
-	for (int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
+	for (unsigned int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
 		Vertex *v = vertices[i];
 		printf("  id = %d, ", i);
 		v->dump();
 	}
 
 	printf("Elements (count = %lu)\n", elements.count());
-	for (int i = elements.first(); i != INVALID_IDX; i = elements.next(i)) {
+	for (unsigned int i = elements.first(); i != INVALID_IDX; i = elements.next(i)) {
 		Element *e = elements[i];
 		printf("  ");
 		e->dump();
 	}
 
 	printf("Boundaries (count = %lu)\n", boundaries.count());
-	for (int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i)) {
+	for (unsigned int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i)) {
 		Boundary *b = boundaries[i];
 		printf("  ");
 		b->dump();
 	}
 
 	printf("Facets (count = %u)\n", facets.count());
-	for (int i = facets.first(); i != INVALID_IDX; i = facets.next(i)) {
+	for (unsigned int i = facets.first(); i != INVALID_IDX; i = facets.next(i)) {
 		Facet *f = facets.get(i);
 		printf("  id = %d, ", i);
 		f->dump();
@@ -1682,8 +1682,8 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 	assert(facet->mode == MODE_QUAD);
 
 	//	if (is_compatible_quad_refinement(facet, face_refinement)) {
-	if (facet->left == parent_elem->id) facet->set_left_info(eid, iface);
-	else if (facet->right == parent_elem->id) facet->set_right_info(eid, iface);
+	if ((unsigned) facet->left == parent_elem->id) facet->set_left_info(eid, iface);
+	else if ((unsigned) facet->right == parent_elem->id) facet->set_right_info(eid, iface);
 	else assert(false); // Refining facet that does not face with appropriate element/boundary
 
 	return true;
@@ -1696,7 +1696,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
 	assert(facet->mode == MODE_QUAD);
-	if (facet->type == Facet::INNER && facet->left == parent_elem->id) {
+	if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->left == parent_elem->id) {
 		// refine to the left
 		if (facet->ref_mask == H3D_REFT_FACE_NONE || facet->ref_mask == face_refinement) {
 			facet->lactive = false;
@@ -1774,7 +1774,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		else
 			EXIT("Trying to apply incompatible face refinement to element #%d.", parent_elem->id);
 	}
-	else if (facet->type == Facet::INNER && facet->right == parent_elem->id) {
+	else if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->right == parent_elem->id) {
 		// refine to the right (with element)
 		if (facet->ref_mask == H3D_REFT_FACE_NONE || facet->ref_mask == face_refinement) {
 			facet->ractive = false;
@@ -1890,7 +1890,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 	assert(facet->mode == MODE_QUAD);
 
 	//	if (is_compatible_quad_refinement(facet, face_refinement)) {
-	if (facet->type == Facet::INNER && facet->left == parent_elem->id) {
+	if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->left == parent_elem->id) {
 		// refine to the left
 		if (facet->ref_mask == H3D_REFT_FACE_NONE || facet->ref_mask == H3D_REFT_QUAD_BOTH) {
 			// no refinement OR the same type of the refinement on the right side
@@ -1946,7 +1946,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 			child_facets[0]->parent = child_facets[3]->parent = get_facet_id(elements[lower_facet->right], lower_facet->right_face_num);
 		}
 	}
-	else if (facet->type == Facet::INNER && facet->right == parent_elem->id) {
+	else if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->right == parent_elem->id) {
 		// refine to the right (with element)
 		if (facet->ref_mask == H3D_REFT_FACE_NONE || facet->ref_mask == H3D_REFT_QUAD_BOTH) {
 			// no refinement OR the same type of the refinement on the left side
@@ -2187,14 +2187,14 @@ unsigned int Mesh::get_facing_facet(unsigned int fid, unsigned int elem_id) {
 	Facet *facet = facets[fid];
 
 	if (facet != NULL) {
-		if (elem_id == facet->left) {
+		if (elem_id == (unsigned) facet->left) {
 			while (!facet->ractive && facet->parent != INVALID_IDX) {
 				fid = facet->parent;
 				facet = facets[fid];
 			}
 			return fid;
 		}
-		else if (elem_id == facet->right) {
+		else if (elem_id == (unsigned) facet->right) {
 			while (!facet->lactive && facet->parent != INVALID_IDX) {
 				fid = facet->parent;
 				facet = facets[fid];

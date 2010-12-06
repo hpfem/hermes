@@ -115,10 +115,10 @@ OutputQuadTetra::OutputQuadTetra() {
 OutputQuadTetra::~OutputQuadTetra() {
 	_F_
 #ifdef WITH_TETRA
-	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 
-	for (int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
+	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
 		delete[] subdiv_modes[i];
 #endif
 }
@@ -221,10 +221,10 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
+	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
 		delete[] tables[i];
 
-	for (int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
+	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
 		delete[] subdiv_modes[i];
 #endif
 }
@@ -835,7 +835,7 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 
 	fprintf(this->out_file, "$Nodes\n");
 	fprintf(this->out_file, "%ld\n", out_vtcs.count());
-	for (int i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
+	for (unsigned int i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
 		Vertex *v = out_vtcs[i];
 		fprintf(this->out_file, "%d %lf %lf %lf\n", i + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
 		delete v;																		// we no longer need the vertex data

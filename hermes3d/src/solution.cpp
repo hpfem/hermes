@@ -410,7 +410,7 @@ public:
 
 	~mono_lu_init() {
 		for (int m = 0; m <= 2; m++)
-			for (int i = mat[m].first(); i != INVALID_IDX; i = mat[m].next(i)) {
+			for (unsigned int i = mat[m].first(); i != INVALID_IDX; i = mat[m].next(i)) {
 					delete [] mat[m][i];
 					delete [] perm[m][i];
 				}
@@ -584,7 +584,7 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<double> dir)
 {
   assert(spaces.size() == solutions.size());
-  for(int i = 0; i < solutions.size(); i++)
+  for(unsigned int i = 0; i < solutions.size(); i++)
     if(dir == Hermes::Tuple<double>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector);
     else

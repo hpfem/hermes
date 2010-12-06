@@ -50,9 +50,7 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_o
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 	if (mfvol.size() > 100) warning("Large number of forms (> 100). Is this the intent?");
 
-	MatrixFormVol form = { i, j, sym, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
 	mfvol.push_back(form);
 }
 
@@ -63,9 +61,7 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 	if (i < 0 || i >= neq || j < 0 || j >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	MatrixFormSurf form = { i, j, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	MatrixFormSurf form = { i, j, area, fn, ord, ext.as_std_vector() };
 	mfsurf.push_back(form);
 }
 
@@ -76,9 +72,7 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 	if (i < 0 || i >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	VectorFormVol form = { i, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	VectorFormVol form = { i, area, fn, ord, ext.as_std_vector() };
 	vfvol.push_back(form);
 }
 
@@ -89,9 +83,7 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
 	if (i < 0 || i >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	VectorFormSurf form = { i, area, fn, ord };
-	int nx = ext.size();
-	for (int i = 0; i < nx; i++) form.ext.push_back(ext[i]);
+	VectorFormSurf form = { i, area, fn, ord, ext.as_std_vector() };
 	vfsurf.push_back(form);
 }
 
@@ -234,9 +226,9 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
   }
 
   // update and return the stage
-  for (int i = 0; i < ext.size(); i++)
+  for (unsigned int i = 0; i < ext.size(); i++)
     s->ext_set.insert(ext[i]);
-  for (int i = 0; i < u_ext.size(); i++)
+  for (unsigned int i = 0; i < u_ext.size(); i++)
     if (u_ext[i] != NULL)
       s->ext_set.insert(u_ext[i]);
   
