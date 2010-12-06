@@ -36,37 +36,6 @@ Find $u \in V$ such that
 
 Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$. 
 
-Defining boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Hermes recognizes two basic types of boundary conditions: essential and natural. Essential boundary conditions (prescribed values on the boundary) influence the finite element space while natural conditions do not - they are incorporated into boundary integrals in the weak formulation. In the context of elliptic problems, Dirichlet conditions are essential and Neumann/Newton conditions are natural.
-
-Hermes uses two callbacks to specify boundary conditions. First, the function bc_types()
-associates boundary markers with the correct type of boundary condition. For the above problem, 
-we have essential boundary conditions for all boundary markers::
-
-    // Boundary condition types.
-    // Note: "essential" means that solution value is prescribed.
-    BCType bc_types(int marker)
-    {
-      return BC_ESSENTIAL;
-    }
-
-Second, the callback essential_bc_values() defines solution values 
-for essential boundary conditions::
-
-    // Essential (Dirichlet) boundary condition values.
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-    {
-      return 0;
-    }
-
-Here 'x' and 'y' are the spatial coordinates and thus one can enter
-non-constant boundary conditions easily.
-
-Note that values for natural boundary conditions are incorporated 
-into the weak forms.
-
 Defining weak forms
 ~~~~~~~~~~~~~~~~~~~
 
@@ -164,19 +133,44 @@ The main.cpp file typically begins with loading the mesh::
     H2DReader mloader;
     mloader.load("domain.mesh", &mesh);
 
+
+
+Setting zero Dirichlet boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To assign zero Dirichlet boundary conditions to the boundary, the user first has to 
+say that all boundary markers, in this case BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER,
+will be Dirichlet::
+
+    // Enter boundary markers.
+    BCTypes bc_types;
+    bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+
+Do not worry about the complicated-looking Tuple, this is just to enter a set of several
+boundary markers (in fact positive integers) without using variable-length arrays.
+
+After this, the user has to create an instance of the class BCValues 
+to provide values for all Dirichlet boundary conditions. To impose
+zero Dirichlet conditions, it is enough to declare::
+
+    // Enter Dirichlet boundary values (default is zero).
+    BCValues bc_values;
+
+The treatment of nonzero Dirichlet and other boundary conditions 
+will be explained in more detail, and illustrated on examples, in 
+the following tutorial examples 04, 05 and 06. Now let's proceed
+to the finite element space. 
+
 Initializing finite element space
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As a second step (after optional a-priori mesh refinements),
-we initialize the FE space::
+As a next step, we initialize the FE space in the same way as in the previous tutorial 
+example 02::
 
     // Create an H1 space with default shapeset.
-    H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+    H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
     int ndof = Space::get_num_dofs(&space);
     info("ndof = %d", ndof);
-
-Note that here we used the boundary conditions callbacks bc_types() and 
-essential_bc_values() defined above.
 
 Initializing weak formulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

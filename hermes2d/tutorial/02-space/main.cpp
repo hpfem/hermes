@@ -49,6 +49,8 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   // (If no markers are entered, default is a natural BC).
   BCTypes bc_types;
+
+  // Enter Dirichlet boundary values (default is zero).
   BCValues bc_values;
 
   // Create an H1 space with default shapeset and natural BC.
