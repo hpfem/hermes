@@ -180,9 +180,9 @@ int power_iteration(Hermes::Tuple<Space *>& spaces, WeakForm *wf,
                     double tol, MatrixSolverType matrix_solver = SOLVER_UMFPACK)
 {
   // Sanity checks.
-  if (slptr_solution.size() != N_GROUPS) 
+  if (slptr_solution.size() != (unsigned) N_GROUPS) 
     error("Wrong number of power iteration solutions for the given number of energy groups.");
-  if (spaces.size() != N_GROUPS) 
+  if (spaces.size() != (unsigned) N_GROUPS) 
     error("Spaces and solutions supplied to power_iteration do not match."); 
   if (slptr_solution.size() != mfptr_solution.size()) 
     error("Number of Solutions and corresponding MeshFunctions supplied to power_iteration does not match."); 

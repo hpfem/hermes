@@ -107,6 +107,7 @@ inline int get_material(double x, double y)
   if (x >= c && x <= b && y >= a && y <= c) return 1;
   if (x >= c && x <= b && y >= c && y <= b) return 2;
   if (x >= a && x <= c && y >= c && y <= b) return 3;
+  return -1;
 }
 
 double Q1(double x, double y)
@@ -205,7 +206,7 @@ double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*)
 {
   double error = 0.0, norm = 0.0;
 
-  for (int i=0; i < slns1.size(); i++) {
+  for (unsigned int i=0; i < slns1.size(); i++) {
     error += sqr(calc_abs_error(efn, slns1[i], slns2[i]));
     if (nfn) norm += sqr(calc_norm(nfn, slns2[i]));
   }

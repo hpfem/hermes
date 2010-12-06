@@ -110,9 +110,14 @@ class HERMES_API GnuplotGraph : public Graph
 {
 public:
  
-  GnuplotGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL, 
-               double lines_width = 1.0, const std::string& terminal_str = default_terminal)
-       : Graph(title, x_axis_name, y_axis_name), legend_pos(), lw(lines_width), terminal_str(terminal_str) {}
+  GnuplotGraph(const char* title = NULL, const char* x_axis_name = NULL, const
+          char* y_axis_name = NULL, double lines_width = 1.0, const
+          std::string& terminal_str = default_terminal) :
+      Graph(title, x_axis_name, y_axis_name),
+      legend_pos(),
+      terminal_str(terminal_str),
+      lw(lines_width) {
+  }
 
   virtual void save(const char* filename);
 

@@ -55,12 +55,13 @@ void DiscreteProblem::empty_form_caches()
   DiscreteProblem::vol_forms_cache.clear();
 };
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces, bool is_linear) : 
-  spaces(spaces), is_linear(is_linear), wf_seq(-1), wf(wf)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces,
+        bool is_linear) :
+  wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
 {
   _F_
   // Sanity checks.
-  if ( spaces.size() != wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  if ( spaces.size() != (unsigned) wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
   if (spaces.size() > 0) have_spaces = true;
   else error("Zero number of spaces in DiscreteProblem.");
 
@@ -178,12 +179,12 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   
   // For DG, the sparse structure is different as we have to account for over-edge calculations.
   bool is_DG = false;
-  for(int i = 0; i < this->wf->mfsurf.size(); i++)
+  for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++)
     if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
-  for(int i = 0; i < this->wf->vfsurf.size(); i++)
+  for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++)
     if(this->wf->vfsurf[i].area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
@@ -610,7 +611,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
       }
 
       // assemble surface integrals now: loop through surfaces of the element.
-      for (unsigned int isurf = 0; isurf < e0->get_num_surf(); isurf++)
+      for (int isurf = 0; isurf < e0->get_num_surf(); isurf++)
       {
         // H3D is freeing a fn_cache at this point
 
@@ -965,7 +966,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext
 ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 {  
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
-  for(int j = 0; j < ext.size(); j++)
+  for(unsigned int j = 0; j < ext.size(); j++)
     ext_fns[j] = nbs->init_ext_fn(ext[j]);
   
   ExtData<scalar>* ext_data = new ExtData<scalar>;
@@ -979,7 +980,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext,
 ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 { 
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
-  for (int j = 0; j < ext.size(); j++)
+  for (unsigned int j = 0; j < ext.size(); j++)
     fake_ext_fns[j] = nbs->init_ext_fn_ord(ext[j]);
   
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -1661,7 +1662,7 @@ Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse,
 {
   _F_
   Hermes::Tuple<Space *> * ref_spaces = new Hermes::Tuple<Space *>;
-  for (int i = 0; i < coarse.size(); i++) 
+  for (unsigned int i = 0; i < coarse.size(); i++) 
   {
     Mesh* ref_mesh = new Mesh;
     ref_mesh->copy(coarse[i]->get_mesh());

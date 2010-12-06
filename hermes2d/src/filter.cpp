@@ -183,7 +183,7 @@ SimpleFilter::SimpleFilter(void (*filter_fn)(int n, Hermes::Tuple<scalar*> value
 	this->num = solutions.size();
 	if(num > 10)
 		error("Attempt to create an instance of Filter with more than 10 MeshFunctions."); 
-	if(items.size() != num)
+	if(items.size() != (unsigned) num)
 		if(items.size() > 0)
 			error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
 
@@ -340,7 +340,7 @@ static void magnitude_fn(int n, Hermes::Tuple<scalar*> values, scalar* result)
   for (int i = 0; i < n; i++)
 	{
 		result[i] = 0;
-		for(int j = 0; j < values.size(); j++)
+		for(unsigned int j = 0; j < values.size(); j++)
 			result[i] += sqr(values.at(j)[i]);
 		result[i] = sqrt(result[i]);
 	}
@@ -371,7 +371,7 @@ DiffFilter::DiffFilter(Hermes::Tuple<MeshFunction*> solutions, Hermes::Tuple<int
 static void sum_fn(int n, Hermes::Tuple<scalar*> values, scalar* result)
 {
   for (int i = 0; i < n; i++)
-		for (int j = 0; j < values.size(); j++)
+		for (unsigned int j = 0; j < values.size(); j++)
 			result[i] += values.at(j)[i];
 };
 

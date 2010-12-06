@@ -154,6 +154,7 @@ double f_x(int i, double w0, double w1, double w3, double w4)
     return f_1_2<double>(w0, w1, w3, w4);
   if(i == 3)
     return f_1_3<double>(w0, w1, w3, w4);
+  return 0.0;
 }
 
 ///////////////////////////////////////////////////

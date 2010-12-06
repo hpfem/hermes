@@ -3,11 +3,11 @@
 void OGProjection::project_internal(Hermes::Tuple<Space *> spaces, WeakForm* wf, scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
-  int n = spaces.size();
+  unsigned int n = spaces.size();
 
   // sanity checks
   if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
-  for (int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
+  for (unsigned int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
   if (spaces.size() != n) error("Number of spaces must match number of projected functions in project_internal().");
 
   // this is needed since spaces may have their DOFs enumerated only locally.
@@ -101,7 +101,7 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<S
   
   scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
   Hermes::Tuple<MeshFunction *> ref_slns_mf;
-  for (int i = 0; i < sols_src.size(); i++) 
+  for (unsigned int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
   OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
@@ -116,8 +116,8 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple< 
                     scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
-  int n = spaces.size();
-  int n_biforms = proj_biforms.size();
+  unsigned int n = spaces.size();
+  unsigned int n_biforms = proj_biforms.size();
   if (n_biforms == 0)
     error("Please use the simpler version of project_global with the argument Hermes::Tuple<ProjNormType> proj_norms if you do not provide your own projection norm.");
   if (n_biforms != proj_liforms.size())
@@ -131,7 +131,7 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple< 
 
   // Define projection weak form.
   WeakForm* proj_wf = new WeakForm(n);
-  for (int i = 0; i < n; i++) {
+  for (unsigned int i = 0; i < n; i++) {
     proj_wf->add_matrix_form(i, i, proj_biforms[i].first, proj_biforms[i].second);
     proj_wf->add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second,
                     HERMES_ANY, source_meshfns[i]);

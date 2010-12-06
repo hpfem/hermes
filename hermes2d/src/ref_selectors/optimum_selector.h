@@ -97,7 +97,7 @@ namespace RefinementSelectors {
       /** \param[in] split A refinement, see the enum RefinementTypes.
        *  \param[in] order_elems Encoded orders for all element of candidate. If triangle, a vertical order has to be equal to the horizontal one. Unused elements of the array can be ignored. */
       Cand(const int split, const int order_elems[4])
-        : split(split), dofs(-1), score(0) {
+        : dofs(-1), split(split), score(0) {
           p[0] = order_elems[0];
           p[1] = order_elems[1];
           p[2] = order_elems[2];
@@ -111,7 +111,7 @@ namespace RefinementSelectors {
        *  \param[in] order_elem2 Encoded order of the third element of the candidate, if any. If triangle, a vertical order has to be equal to the horizontal one.
        *  \param[in] order_elem3 Encoded order of the fourth element of the candidate, if any. If triangle, a vertical order has to be equal to the horizontal one. */
       Cand(const int split, const int order_elem0, const int order_elem1 = 0, const int order_elem2 = 0, const int order_elem3 = 0)
-        : split(split), dofs(-1), score(0) {
+        : dofs(-1), split(split), score(0) {
           p[0] = order_elem0;
           p[1] = order_elem1;
           p[2] = order_elem2;

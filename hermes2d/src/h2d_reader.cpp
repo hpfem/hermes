@@ -360,7 +360,7 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
   int i;
   Nurbs* nurbs = new Nurbs;
 
-  if (curve == NULL || curve->n < 0 || curve->n != 3 && curve->n != 5)
+  if (curve == NULL || curve->n < 0 || (curve->n != 3 && curve->n != 5))
     error("Invalid curve #%d.", id);
   bool circle = (curve->n == 3);
   nurbs->arc = circle;

@@ -144,7 +144,7 @@ void ElementToRefineStream::write_bytes(const void* integer_ptr, int num_bytes) 
 }
 
 int ElementToRefineStream::read_bytes(int num_bytes) {
-  error_if(num_bytes > sizeof(int), "Requested number of bytes (%d) exceedes size of integer (%d)", num_bytes, sizeof(int));
+  error_if((unsigned) num_bytes > sizeof(int), "Requested number of bytes (%d) exceedes size of integer (%d)", num_bytes, sizeof(int));
   int shift = 0, result = 0;
   uint8_t buffer;
   for(int i = 0; i < num_bytes; i++) {
@@ -157,7 +157,7 @@ int ElementToRefineStream::read_bytes(int num_bytes) {
   }
 
   //expand sign
-  if ((buffer & 0x80) != 0 && num_bytes < sizeof(int)) {
+  if ((buffer & 0x80) != 0 && (unsigned) num_bytes < sizeof(int)) {
     int sign = -1 << (num_bytes * 8);
     result |= sign;
   }

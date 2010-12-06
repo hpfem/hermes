@@ -59,7 +59,7 @@ public:
       return this->_v.back();
   }
 
-  void reserve(const int size) {
+  void reserve(const unsigned int size) {
       this->_v.reserve(size);
   }
 
@@ -67,7 +67,7 @@ public:
       this->_v.clear();
   }
 
-  int size() {
+  unsigned int size() {
       return this->_v.size();
   }
 
@@ -101,6 +101,10 @@ public:
       return this->_v != other._v;
   }
 
+  std::vector<T> as_std_vector() const {
+      return this->_v;
+  }
+
   // Look up an integer number in an array.
   int find_index_slow(const T& x) {
     for (int i=0; i < this->size(); i++) {
@@ -118,7 +122,7 @@ public:
     if(typeid((*this)[0]) != typeid(m))
       throw std::runtime_error("Tuple<T>::max() called and T != int.");
     m = (int)(*this)[0];
-    for (int i=1; i < this->size(); i++)
+    for (unsigned int i=1; i < this->size(); i++)
         if ((int)(*this)[i] > m)
             m = (int)(*this)[i];
     return m;
@@ -132,7 +136,7 @@ public:
     if(typeid((*this)[0]) != typeid(m))
       throw std::runtime_error("Tuple<T>::max() called and T != int.");
     m = (int)(*this)[0];
-    for (int i=1; i < this->size(); i++)
+    for (unsigned int i=1; i < this->size(); i++)
         if ((int)(*this)[i] < m)
             m = (int)(*this)[i];
     return m;
@@ -156,7 +160,7 @@ public:
         this->_min = this->min();
         this->_max = this->max();
         for (int i=0; i < (int)this->_max+1; i++) this->_permut.push_back(-1);
-        for (int i=0; i < this->size(); i++) this->_permut[(int)(*this)[i]] = i;
+        for (unsigned int i=0; i < this->size(); i++) this->_permut[(int)(*this)[i]] = i;
     }
     if (((int)this->_min <= x) && (x <= (int)this->_max))
         idx = this->_permut[x];

@@ -92,7 +92,7 @@ protected: // node selection
     bool selected; ///< true if the node is selected
     TwBar* tw_bar; ///< a pointer to a gui window (CTwBar*) (GUI only).
     VertexNodeInfo() {}; ///< An empty default constructor to limit time
-    VertexNodeInfo(int id, float x, float y) : id(id), x(x), y(y), selected(false), tw_bar(NULL) {};
+    VertexNodeInfo(int id, float x, float y) : x(x), y(y), id(id), selected(false), tw_bar(NULL) {};
   };
   HERMES_API_USED_STL_VECTOR(VertexNodeInfo);
   std::vector<VertexNodeInfo> vertex_nodes; ///< Vertex nodes. Sorted accordin to the X-axis.
@@ -118,8 +118,8 @@ protected: //element nfo
     float x, y; ///< location of center [in physical coordinates]
     float width, height; ///< width, height of AABB [in physical coordinates]
     int id; ///< element ID
-    ElementInfo() : x(0), y(0), id(-1), width(0), height(0) {};
-    ElementInfo(int id, float x, float y, float width, float height) : x(x), y(y), id(id), width(width), height(height) {};
+    ElementInfo() : x(0), y(0), width(0), height(0), id(-1) {};
+    ElementInfo(int id, float x, float y, float width, float height) : x(x), y(y), width(width), height(height), id(id) {};
   };
   HERMES_API_USED_STL_VECTOR(ElementInfo);
   std::vector<ElementInfo> element_infos; ///< Element info.

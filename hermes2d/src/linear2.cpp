@@ -72,7 +72,7 @@ Orderizer::Orderizer()
   {
     for (int j = 0; j <= 10; j++)
     {
-      assert(p < sizeof(buffer)-5);
+      assert((unsigned) p < sizeof(buffer)-5);
       if (i == j)
           sprintf(buffer+p, "%d", i);
       else
@@ -212,15 +212,15 @@ void Orderizer::save_data(const char* filename)
 
   if (fwrite("H2DO\001\000\000\000", 1, 8, f) != 8 ||
       fwrite(&nv, sizeof(int), 1, f) != 1 ||
-      fwrite(verts, sizeof(double3), nv, f) != nv ||
+      fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
       fwrite(&nt, sizeof(int), 1, f) != 1 ||
-      fwrite(tris, sizeof(int3), nt, f) != nt ||
+      fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
       fwrite(&ne, sizeof(int), 1, f) != 1 ||
-      fwrite(edges, sizeof(int3), ne, f) != ne ||
+      fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne ||
       fwrite(&nl, sizeof(int), 1, f) != 1 ||
-      fwrite(lvert, sizeof(int), nl, f) != nl ||
-      fwrite(lbox, sizeof(double2), nl, f) != nl ||
-      fwrite(orders, sizeof(int), nl, f) != nl)
+      fwrite(lvert, sizeof(int), nl, f) != (unsigned) nl ||
+      fwrite(lbox, sizeof(double2), nl, f) != (unsigned) nl ||
+      fwrite(orders, sizeof(int), nl, f) != (unsigned) nl)
   {
     error("Error writing data to %s", filename);
   }
@@ -249,7 +249,7 @@ void Orderizer::load_data(const char* filename)
     if (fread(&n, sizeof(int), 1, f) != 1) \
       error("Error reading the number of " what " from %s", filename); \
     lin_init_array(array, type, c, n); \
-    if (fread(array, sizeof(type), n, f) != n) \
+    if (fread(array, sizeof(type), n, f) != (unsigned) n) \
       error("Error reading " what " from %s", filename);
 
   read_array(verts, double3, nv, cv,  "vertices");
@@ -258,11 +258,11 @@ void Orderizer::load_data(const char* filename)
   read_array(lvert, int,     nl, cl1, "label vertices");
 
   lin_init_array(lbox, double2, cl3, nl);
-  if (fread(lbox, sizeof(double2), nl, f) != nl)
+  if (fread(lbox, sizeof(double2), nl, f) != (unsigned) nl)
     error("Error reading label bounding boxes from %s", filename);
 
   AUTOLA_OR(int, orders, nl);
-  if (fread(orders, sizeof(int), nl, f) != nl)
+  if (fread(orders, sizeof(int), nl, f) != (unsigned) nl)
     error("Error reading element orders from %s", filename);
 
   lin_init_array(ltext, char*, cl2, nl);

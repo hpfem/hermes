@@ -74,10 +74,15 @@ View::View(const char* title, int x, int y, int width, int height)
 }
 */
 
-View::View(const char* title, WinGeom* wg)
-  : gl_pallete_tex_id(0),
-    title(title), output_id(-1), vertices_min_x(0), vertices_max_x(0), vertices_min_y(0), vertices_max_y(0),
-    view_not_reset(true)
+View::View(const char* title, WinGeom* wg) :
+    view_not_reset(true),
+    vertices_min_x(0),
+    vertices_max_x(0),
+    vertices_min_y(0),
+    vertices_max_y(0),
+    title(title),
+    output_id(-1),
+    gl_pallete_tex_id(0)
 {
   if (wg == NULL) {
     output_x = H2D_DEFAULT_X_POS;
@@ -95,10 +100,15 @@ View::View(const char* title, WinGeom* wg)
   init();
 }
 
-View::View(char* title, WinGeom* wg)
-  : gl_pallete_tex_id(0),
-    title(title), output_id(-1), vertices_min_x(0), vertices_max_x(0), vertices_min_y(0), vertices_max_y(0),
-    view_not_reset(true)
+View::View(char* title, WinGeom* wg) :
+    view_not_reset(true),
+    vertices_min_x(0),
+    vertices_max_x(0),
+    vertices_min_y(0),
+    vertices_max_y(0),
+    title(title),
+    output_id(-1),
+    gl_pallete_tex_id(0)
 {
   if (wg == NULL) {
     output_x = H2D_DEFAULT_X_POS;

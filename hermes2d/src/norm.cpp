@@ -93,7 +93,7 @@ bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Solution *> right
   err_rel_total = 0;
   
   // Calculation.
-  for(int i = 0; i < left.size(); i++)
+  for(unsigned int i = 0; i < left.size(); i++)
   {
     err_abs.push_back(calc_abs_error(left[i], right[i], default_norms ? HERMES_H1_NORM : norms[i]));
     norm_vals.push_back(calc_norm(right[i], default_norms ? HERMES_H1_NORM : norms[i]));

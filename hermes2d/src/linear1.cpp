@@ -448,11 +448,12 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
         split = (!finite(err) || err > max*4*eps) ? 3 : 0;
 
         // decide whether to split horizontally or vertically only
-        if (level > 0 && split)
+        if (level > 0 && split) {
           if (herr > 5*verr)
             split = 1; // h-split
           else if (verr > 5*herr)
             split = 2; // v-split
+        }
       }
 
       // also decide whether to split because of the curvature
@@ -710,13 +711,14 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     Node* node;
     for_all_vertex_nodes(node, mesh)
     {
-      if (id2id[node->id] < 0 && node->ref != TOP_LEVEL_REF)
+      if (id2id[node->id] < 0 && node->ref != TOP_LEVEL_REF) {
         if (node->p1 < 0)
           id2id[node->id] = get_vertex(node->id, node->id, node->x, node->y, 0);
         else if (id2id[node->p1] >= 0 && id2id[node->p2] >= 0)
           id2id[node->id] = get_vertex(id2id[node->p1], id2id[node->p2], node->x, node->y, 0);
         else
           finished = false;
+      }
     }
   }
   while (!finished);
@@ -847,11 +849,11 @@ void Linearizer::save_data(const char* filename)
 
   if (fwrite("H2DL\001\000\000\000", 1, 8, f) != 8 ||
       fwrite(&nv, sizeof(int), 1, f) != 1 ||
-      fwrite(verts, sizeof(double3), nv, f) != nv ||
+      fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
       fwrite(&nt, sizeof(int), 1, f) != 1 ||
-      fwrite(tris, sizeof(int3), nt, f) != nt ||
+      fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
       fwrite(&ne, sizeof(int), 1, f) != 1 ||
-      fwrite(edges, sizeof(int3), ne, f) != ne)
+      fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne)
   {
     error("Error writing data to %s", filename);
   }
@@ -880,7 +882,7 @@ void Linearizer::load_data(const char* filename)
     if (fread(&n, sizeof(int), 1, f) != 1) \
       error("Error reading the number of " what " from %s", filename); \
     lin_init_array(array, type, c, n); \
-    if (fread(array, sizeof(type), n, f) != n) \
+    if (fread(array, sizeof(type), n, f) != (unsigned) n) \
       error("Error reading " what " from %s", filename);
 
   read_array(verts, double3, nv, cv, "vertices");

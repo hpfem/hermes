@@ -39,47 +39,48 @@ public:
  
   void add_bc_dirichlet(Hermes::Tuple<int> markers) 
   {
-    int n = markers.size();
+    unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
-    for (int i = 0; i < n; i++) this->markers_dirichlet.push_back(markers[i]);    
+    for (unsigned int i = 0; i < n; i++) this->markers_dirichlet.push_back(markers[i]);    
     return;
   };
 
   void add_bc_neumann(Hermes::Tuple<int> markers) 
   {
-    int n = markers.size();
+    unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_neumann() expects at least one marker.");
-    for (int i = 0; i < n; i++) this->markers_neumann.push_back(markers[i]);
+    for (unsigned int i = 0; i < n; i++)
+        this->markers_neumann.push_back(markers[i]);
     return;
   };
 
   void add_bc_newton(Hermes::Tuple<int> markers) 
   {
-    int n = markers.size();
+    unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_newton() expects at least one marker.");
-    for (int i = 0; i < n; i++) this->markers_newton.push_back(markers[i]);
+    for (unsigned int i = 0; i < n; i++) this->markers_newton.push_back(markers[i]);
     return;
   };
 
   void add_bc_none(Hermes::Tuple<int> markers) 
   {
-    int n = markers.size();
+    unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
-    for (int i = 0; i < n; i++) this->markers_none.push_back(markers[i]);    
+    for (unsigned int i = 0; i < n; i++) this->markers_none.push_back(markers[i]);    
     return;
   };
 
   bool is_natural(int marker) {
     bool found = false;
-    for (int i = 0; i < this->markers_neumann.size(); i++) 
+    for (unsigned int i = 0; i < this->markers_neumann.size(); i++) 
       if (this->markers_neumann[i] == marker) found = true;
-    for (int i = 0; i < this->markers_newton.size(); i++) 
+    for (unsigned int i = 0; i < this->markers_newton.size(); i++) 
       if (this->markers_newton[i] == marker) found = true;
     return found;
   }
 
   bool is_essential(int marker) {
-    for (int i = 0; i < this->markers_dirichlet.size(); i++) 
+    for (unsigned int i = 0; i < this->markers_dirichlet.size(); i++) 
       if (this->markers_dirichlet[i] == marker) return true;
     return false;
   }

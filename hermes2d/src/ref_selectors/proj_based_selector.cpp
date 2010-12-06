@@ -8,10 +8,14 @@
 
 namespace RefinementSelectors {
   
-  ProjBasedSelector::ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range<int>& vertex_order, const Range<int>& edge_bubble_order)
-    : OptimumSelector(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order)
-    , error_weight_h(H2DRS_DEFAULT_ERR_WEIGHT_H), error_weight_p(H2DRS_DEFAULT_ERR_WEIGHT_P), error_weight_aniso(H2DRS_DEFAULT_ERR_WEIGHT_ANISO)
-    , warn_uniform_orders(false)
+  ProjBasedSelector::ProjBasedSelector(CandList cand_list, double conv_exp, int
+          max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
+          Range<int>& edge_bubble_order) :
+      OptimumSelector(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order),
+      warn_uniform_orders(false),
+      error_weight_h(H2DRS_DEFAULT_ERR_WEIGHT_H),
+      error_weight_p(H2DRS_DEFAULT_ERR_WEIGHT_P),
+      error_weight_aniso(H2DRS_DEFAULT_ERR_WEIGHT_ANISO)
   {
     //clean svals initialization state
     std::fill(cached_shape_vals_valid, cached_shape_vals_valid + H2D_NUM_MODES, false);

@@ -583,7 +583,7 @@ void Solution::set_zero_2(Mesh* mesh)
 void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
-  for(int i = 0; i < solutions.size(); i++)
+  for(unsigned int i = 0; i < solutions.size(); i++)
     if(add_dir_lift == Hermes::Tuple<bool>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
     else
@@ -600,7 +600,7 @@ void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solutio
 void Solution::vector_to_solutions(Vector* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
-  for(int i = 0; i < solutions.size(); i++)
+  for(unsigned int i = 0; i < solutions.size(); i++)
     if(add_dir_lift == Hermes::Tuple<bool>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
     else
@@ -617,7 +617,7 @@ void Solution::vector_to_solution(Vector* solution_vector, Space* space, Solutio
 void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<PrecalcShapeset *> pss, Hermes::Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
-  for(int i = 0; i < solutions.size(); i++)
+  for(unsigned int i = 0; i < solutions.size(); i++)
     if(add_dir_lift == Hermes::Tuple<bool>())
       solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, true);
     else

@@ -403,7 +403,7 @@ private:
                                                   ///< (in a go-down neighborhood; stored row-wise for each neighbor) 
                                                   ///< or of the neighbor to the central element (go-up).
   std::vector<int> n_trans;                       ///< Number of transforms stored in each row of \c transformations.
-  int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the 
+  unsigned int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the 
                                                   ///< assembly, before transforms from \c transformations are pushed
                                                   ///< to it.
                                                   
