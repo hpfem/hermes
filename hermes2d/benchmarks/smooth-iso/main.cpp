@@ -66,11 +66,8 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_DIRICHLET = 1;
 
 // Essential (Dirichlet) boundary conditions.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -94,8 +91,12 @@ int main(int argc, char* argv[])
     else mesh.refine_element(0, 0);
   }
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   if (is_p_aniso(CAND_LIST))
     space.set_element_order(0, H2D_MAKE_QUAD_ORDER(P_INIT, P_INIT));
 

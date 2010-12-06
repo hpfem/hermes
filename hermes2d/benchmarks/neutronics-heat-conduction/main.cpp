@@ -6,7 +6,6 @@
 #include <cmath>
 #include <iostream>
 
-
 // Neutronics/heat conduction test case.
 //
 // Authors: Damien Lebrun-Grandie (Texas A&M University, USA),
@@ -103,6 +102,9 @@ Real PHI_FTIME() {
   return 1+exp(rF*TIME);
 }
 
+// Boundary markers.
+const int BDY_DIRICHLET = 1; 
+
 template<typename Real>
 Real DPHI_FTIME() {
 //  return DT_FTIME<Real>();
@@ -144,7 +146,7 @@ scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 {
   return 0.0;
 }
- 
+
 scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
 {
   return 0.0;
@@ -175,7 +177,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(1);
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
   // Create H1 spaces with default shapesets.
   H1Space space_T(&mesh, &bc_types, essential_bc_values_T, P_INIT);
