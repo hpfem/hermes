@@ -145,14 +145,14 @@ Real DT_FTIME() {
 // Time dependence of the neutron flux.
 template<typename Real>
 Real PHI_FTIME() {
-  return T_FTIME<Real>();
-//  return 1+exp(rF*TIME);
+//  return T_FTIME<Real>();
+  return 1+exp(rF*TIME);
 }
 
 template<typename Real>
 Real DPHI_FTIME() {
-  return DT_FTIME<Real>();
-//  return rF*exp(rF*TIME);
+//  return DT_FTIME<Real>();
+  return rF*exp(rF*TIME);
 }
 
 // Heat source.

@@ -84,14 +84,14 @@ Real DT_FTIME() {
 // Time dependence of the neutron flux.
 template<typename Real>
 Real PHI_FTIME() {
-  return T_FTIME<Real>();
-//  return 1+exp(rF*TIME);
+//  return T_FTIME<Real>();
+  return 1+exp(rF*TIME);
 }
 
 template<typename Real>
 Real DPHI_FTIME() {
-  return DT_FTIME<Real>();
-//  return rF*exp(rF*TIME);
+//  return DT_FTIME<Real>();
+  return rF*exp(rF*TIME);
 }
 
 // Heat source.
@@ -273,52 +273,52 @@ int main(int argc, char* argv[])
  
   int success = 1;
   double eps = 1e-5;
-  if (fabs(T_prev_time.get_pt_value(0.0, 0.0) - 0.000003) > eps) {
+  if (fabs(T_prev_time.get_pt_value(0.0, 0.0) - 0.000000) > eps) {
     info("Coordinate (  0,  0) T value = %lf\n", T_prev_time.get_pt_value(0.0, 0.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(25.0, 25.0) - 1.024857) > eps) {
+  if (fabs(T_prev_time.get_pt_value(25.0, 25.0) - 1.024859) > eps) {
     printf("Coordinate ( 25, 25) T value = %lf\n", T_prev_time.get_pt_value(25.0, 25.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(75.0, 25.0) - 1.024857) > eps) {
+  if (fabs(T_prev_time.get_pt_value(75.0, 25.0) - 1.024859) > eps) {
     printf("Coordinate ( 75, 25) T value = %lf\n", T_prev_time.get_pt_value(75.0, 25.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(25.0, 75.0) - 1.024857) > eps) {
+  if (fabs(T_prev_time.get_pt_value(25.0, 75.0) - 1.024859) > eps) {
     printf("Coordinate ( 25, 75) T value = %lf\n", T_prev_time.get_pt_value(25.0, 75.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(75.0, 75.0) - 1.024857) > eps) {
+  if (fabs(T_prev_time.get_pt_value(75.0, 75.0) - 1.024859) > eps) {
     printf("Coordinate ( 75, 75) T value = %lf\n", T_prev_time.get_pt_value(75.0, 75.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(0.0, 0.0) - 0.000001) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(0.0, 0.0) - 0.000000) > eps) {
     printf("Coordinate (  0,  0) phi value = %lf\n", phi_prev_time.get_pt_value(0.0, 0.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(25.0, 25.0) - 0.411964) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(25.0, 25.0) - 0.411794) > eps) {
     printf("Coordinate ( 25, 25) phi value = %lf\n", phi_prev_time.get_pt_value(25.0, 25.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(75.0, 25.0) - 1.247029) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(75.0, 25.0) - 1.235474) > eps) {
     printf("Coordinate ( 75, 25) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 25.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(25.0, 75.0) - 1.247029) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(25.0, 75.0) - 1.235474) > eps) {
     printf("Coordinate ( 25, 75) phi value = %lf\n", phi_prev_time.get_pt_value(25.0, 75.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(75.0, 75.0) - 3.758740) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(75.0, 75.0) - 3.706641) > eps) {
     printf("Coordinate ( 75, 75) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 75.0));
     success = 0;
   }
