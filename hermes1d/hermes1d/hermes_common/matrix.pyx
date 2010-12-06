@@ -3,20 +3,24 @@ cdef class Matrix:
 
 cdef class SparseMatrix(Matrix):
 
-    #def __cinit__(self):
-    #    self.thisptr = new matrix.SparseMatrix()
+    cdef matrix.SparseMatrix* as_SparseMatrix(self):
+        return <matrix.SparseMatrix*> self.thisptr
 
-    #def __dealloc__(self):
-    #    del self.thisptr
+cdef class UMFPackMatrix(SparseMatrix):
 
-    cdef matrix.SparseMatrix *getptr(self):
-        return <matrix.SparseMatrix *>(self.thisptr)
+    def __cinit__(self):
+        self.thisptr = new matrix.UMFPackMatrix()
+
+    def __dealloc__(self):
+        del self.thisptr
 
 cdef class Vector:
-
-    #def __cinit__(self):
-    #    self.thisptr = new matrix.Vector()
-
-    #def __dealloc__(self):
-    #    del self.thisptr
     pass
+
+cdef class UMFPackVector(Vector):
+
+    def __cinit__(self):
+        self.thisptr = new matrix.UMFPackVector()
+
+    def __dealloc__(self):
+        del self.thisptr

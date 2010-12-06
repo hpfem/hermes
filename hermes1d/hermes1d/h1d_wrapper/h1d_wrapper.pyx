@@ -366,5 +366,5 @@ def assemble_projection_matrix_rhs(Mesh mesh, SparseMatrix A, Vector rhs,
         raise ValueError("Unknown projection type")
     global _A
     _A = f
-    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.getptr(),
+    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.as_SparseMatrix(),
             rhs.thisptr, &fn, prj_type)
