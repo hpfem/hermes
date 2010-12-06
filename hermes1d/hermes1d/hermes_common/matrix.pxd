@@ -8,7 +8,8 @@ cdef class SparseMatrix(Matrix):
     cdef matrix.SparseMatrix* as_SparseMatrix(self)
 
 cdef class CSCMatrix(SparseMatrix):
-    pass
+
+    cdef matrix.UMFPackMatrix* as_UMFPackMatrix(self)
 
 cdef class Vector:
     cdef matrix.Vector *thisptr
