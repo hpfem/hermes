@@ -25,7 +25,7 @@ const double T_FINAL = 10.0;               // Time interval length.
 const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
 const double THRESHOLD = 0.3;              // This is a quantitative parameter of the adapt(...) function and
                                            // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 0;                    // Adaptive strategy:
+const int STRATEGY = 1;                    // Adaptive strategy:
                                            // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                            //   error is processed. If more elements have similar errors, refine
                                            //   all to keep the mesh symmetric.
@@ -52,14 +52,19 @@ const double ERR_STOP = 0.01;              // Stopping criterion for hp-adaptivi
                                            // (relative error between reference and coarse solution in percent).
 const int NDOF_STOP = 10000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
+const int ORDER_INCREASE = 1;              // Increase in approximation order associated with the global refinement.
 
 
 // Newton's method:
-const double NEWTON_TOL_COARSE = 1.0e-2;          // Stopping criterion for Newton on coarse mesh.
-const double NEWTON_TOL_FINE = 5.0e-2;            // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS
-                                                  // and more are coming.
+const double NEWTON_TOL_COARSE = 1.0e-2;   // Stopping criterion for Newton on coarse mesh.
+const double NEWTON_TOL_FINE = 5.0e-2;     // Stopping criterion for Newton on fine mesh.
+const int NEWTON_MAX_ITER = 20;            // Maximum allowed number of Newton iterations.
+
+// Linear system solvers for the coarse and refined problems, respectively.
+// Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK, SOLVER_SUPERLU
+// (depending on which optional solver libraries you have installed and enabled in hermes2d/CMake.vars).
+MatrixSolverType matrix_solver_coarse = SOLVER_UMFPACK;  
+MatrixSolverType matrix_solver_fine = SOLVER_UMFPACK;
 
 // Problem parameters.
 const double CT = 1.0;
@@ -69,24 +74,19 @@ const double rF = 0.25;
 const double LX = 100.0;          // Domain sizes in the x and y dimensions.
 const double LY = 100.0;
 const double invvel = 2.0e-4;     // Inverse of neutron velocity.
-const double xsdiff = 1.268;      // Diffusion coefficient.
-const double Tref = 0.0;          // Temperature at boundary.
+const double xsdiff = 1.268;      // Neutron diffusion coefficient.
+const double Tref = 0.0;
 
 const double nu = 2.41;           // Number of neutrons emitted per fission event.
 const double xsfiss = 0.00191244; // Fission cross section.
-const double kappa = 1.0e-6;
-const double rho = 1.0;           // Density.
-const double cp = 1.0;            // Heat capacity.
-
-const double PI = acos(-1.0);
-const double normalization_const = 1.0;
-
-const double energy_per_fission = kappa * xsfiss;
+const double kappa = 1.0e-6;      // Energy per fission.
+const double rho = 1.0;           // Fuel density.
+const double cp = 1.0;            // Fuel heat capacity.
 
 // Miscellaneous:
 double TIME = 0.0;                // Current time.
 
-// Thermal conductivity depends on temperature
+// Thermal conductivity dependence on temperature.
 const  double k0 = 3.0e-3;
 const  double k1 = 2.0e-4;
 template<typename Real>
@@ -94,40 +94,80 @@ Real k(Real T) {
   return k0 + k1 * (T - Tref);
 }
 
-// Derivative of the thermal conductivity
+// Derivative of the thermal conductivity of fuel with respect to temperature.
 template<typename Real>
 Real dk_dT(Real T) {
   return k1;
 }
 
-// Removal cross section depends on temperature
+// Removal cross section dependence on temperature.
 const double xsa_ref = 0.0349778;
 const double doppler_coeff = 1.0e-5;
 template<typename Real>
 Real xsrem(Real T) {
-  return xsa_ref + doppler_coeff * (sqrt(T+1.0e-10) - sqrt(Tref));
-  //return xsa_ref + doppler_coeff * (sqrt(T) - sqrt(Tref));
+  return xsa_ref + doppler_coeff * (sqrt(T) - sqrt(Tref));
 }
 
-// Derivative of the removal cross section with respect to temperature
+// Derivative of the removal cross section with respect to temperature.
 template<typename Real>
 Real dxsrem_dT(Real T) {
-  return doppler_coeff / (2*sqrt(T+1.0e-10));
-  //return doppler_coeff / (2*sqrt(T));
+  return doppler_coeff / (2*sqrt(T));
+}
+
+// Time dependence of the temperature.
+template<typename Real>
+Real T_FTIME() {
+//  return 1.0;
+  return 1+tanh(rT*TIME);
+}
+
+template<typename Real>
+Real DT_FTIME() {
+//  return 0.0;
+  return rT*(1-pow(tanh(rT*TIME),2));
+}
+
+// Time dependence of the neutron flux.
+template<typename Real>
+Real PHI_FTIME() {
+  return T_FTIME<Real>();
+//  return 1+exp(rF*TIME);
+}
+
+template<typename Real>
+Real DPHI_FTIME() {
+  return DT_FTIME<Real>();
+//  return rF*exp(rF*TIME);
 }
 
 // Heat source.
 template<typename Real>
 Real qT(Real x, Real y) {
-  return
-rho*cp*CT*(1.0-pow(tanh(rT*TIME),2.0))*rT*sin(x/LX*PI)*sin(y/LY*PI)-k1*CT*CT*pow(1.0+tanh(rT*TIME),2.0)*pow(cos(x/LX*PI),2.0)/(LX*LX)*PI*PI*pow(sin(y/LY*PI),2.0)+(k0+k1*(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI)-Tref))*CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)/(LX*LX)*PI*PI*sin(y/LY*PI)-k1*CT*CT*pow(1.0+tanh(rT*TIME),2.0)*pow(sin(x/LX*PI),2.0)*pow(cos(y/LY*PI),2.0)/(LY*LY)*PI*PI+(k0+k1*(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI)-Tref))*CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI)/(LY*LY)*PI*PI-normalization_const*energy_per_fission*xsfiss*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY;
+  Real dTdt = DT_FTIME<Real>();
+  Real Tt = T_FTIME<Real>();
+  Real PHIt = PHI_FTIME<Real>();
+  
+  Real PI_sqr = sqr(M_PI);
+  Real sx = sin((M_PI*x)/LX);
+  Real sy = sin((M_PI*y)/LY);
+  
+  return cp*CT*dTdt*rho*sx*sy - (CF*kappa*PHIt*x*xsfiss*y*sx*sy)/(LX*LY) - (-((CT*PI_sqr*Tt*sx*sy)/sqr(LX)) - (CT*PI_sqr*Tt*sx*sy)/sqr(LY)) * (k0 + k1*(-Tref + CT*Tt*sx*sy));
 }
 
 // Extraneous neutron source.
 template<typename Real>
 Real q(Real x, Real y) {
-  return 
-invvel*CF*rF*exp(rF*TIME)*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY-xsdiff*(-CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)/(LX*LX*LX)*PI*PI*sin(y/LY*PI)*x*y/LY+2.0*CF*(1.0+exp(rF*TIME))*cos(x/LX*PI)/(LX*LX)*PI*sin(y/LY*PI)*y/LY)-xsdiff*(-CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)/(LY*LY*LY)*PI*PI*x/LX*y+2.0*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*cos(y/LY*PI)/(LY*LY)*PI*x/LX)+(xsa_ref+doppler_coeff*(sqrt(CT*(1.0+tanh(rT*TIME))*sin(x/LX*PI)*sin(y/LY*PI))-sqrt(Tref)))*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY-nu*xsfiss*CF*(1.0+exp(rF*TIME))*sin(x/LX*PI)*sin(y/LY*PI)*x/LX*y/LY;
+  Real PHIt = PHI_FTIME<Real>();
+  Real dPHIdt = DPHI_FTIME<Real>();
+  Real Tt = T_FTIME<Real>();
+  
+  Real PI_sqr = sqr(M_PI);
+  Real sx = sin((M_PI*x)/LX);
+  Real sy = sin((M_PI*y)/LY);
+  
+  return (CF*dPHIdt*invvel*x*y*sx*sy)/(LX*LY) - xsdiff*((2*CF*PHIt*M_PI*x*cos((M_PI*y)/LY)*sx)/(LX*sqr(LY)) + (2*CF*PHIt*M_PI*y*cos((M_PI*x)/LX)*sy)/(sqr(LX)*LY) - 
+         (CF*PHIt*PI_sqr*x*y*sx*sy)/(LX*pow(LY,3)) - (CF*PHIt*PI_sqr*x*y*sx*sy)/(pow(LX,3)*LY)) - 
+         (CF*PHIt*x*y*sx*sy*(nu*xsfiss-xsa_ref*(1 + doppler_coeff*(-sqrt(Tref) + sqrt(CT*Tt*sx*sy)))))/(LX*LY);
 }
 
 // Boundary condition types.
@@ -144,7 +184,7 @@ BCType bc_types_phi(int marker)
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 {
-  return Tref;
+  return 0.0;
 }
  
 scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
@@ -153,7 +193,7 @@ scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
 }
 
 // Weak forms.
-# include "forms.cpp"
+#include "forms.cpp"
 
 // Exact solutions.
 #include "exact_solution.cpp"
@@ -225,62 +265,34 @@ int main(int argc, char* argv[])
   info("Solving on coarse meshes.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
   OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
-                 coeff_vec_coarse, matrix_solver, proj_norms);
-  bool verbose = true; // Default is false.
+                 coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+  
+  // Indicate to all DiscreteProblem constructors that we solve a non-linear problem.
+  bool is_linear = false;                 
   
   // Initialize the FE problem.
-  bool is_linear = false;
   DiscreteProblem dp_coarse(&wf, spaces, is_linear);
 
-  // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
-  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-  Vector* rhs_coarse = create_vector(matrix_solver);
-  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
+  // Setup the solvers for the coarse and fine mesh calculations, respectively.
+  SparseMatrix* matrix_coarse = create_matrix(matrix_solver_coarse);
+  Vector* rhs_coarse = create_vector(matrix_solver_coarse);
+  Solver* solver_coarse = create_linear_solver(matrix_solver_coarse, matrix_coarse, rhs_coarse);
+  //solver_coarse->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING);
+  SparseMatrix* matrix_fine = create_matrix(matrix_solver_fine);
+  Vector* rhs_fine = create_vector(matrix_solver_fine);
+  Solver* solver_fine = create_linear_solver(matrix_solver_fine, matrix_fine, rhs_fine);
+  //solver_fine->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING);
+  
   // Perform Newton's iteration.
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(spaces);
-
-    // Assemble the Jacobian matrix_coarse and residual vector.
-    dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-    // Multiply the residual vector with -1 since the matrix_coarse 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs_coarse);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
-
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
-    // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system.
-    if(!solver_coarse->solve())
-      error ("matrix_coarse solver_coarse failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  info("Newton's solve on the initial coarse meshes.");
+  bool verbose = false;
+  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+    error("Newton's iteration failed.");
   
   // Translate the resulting coefficient vector into the actual solutions. 
   Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
 
   delete [] coeff_vec_coarse;
-  delete rhs_coarse;
-  delete matrix_coarse;
-  delete solver_coarse;
   
   // Time stepping loop:
   int nstep = (int)(T_FINAL/TAU + 0.5);
@@ -306,67 +318,27 @@ int main(int argc, char* argv[])
         if (SOLVE_ON_COARSE_MESH) {
           // Newton's loop on the globally derefined meshes.
           scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
-          info("Solving on globally derefined meshes, starting from the latest fine mesh solutions.");
+          info("Projecting previous fine mesh solution to obtain initial vector for Newton's iteration on globally derefined meshes.");
           OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                         coeff_vec_coarse, matrix_solver, proj_norms);
+                         coeff_vec_coarse, matrix_solver_coarse, proj_norms);
           
           // Initialize the FE problem.
-          bool is_linear = false;
           DiscreteProblem dp_coarse(&wf, spaces, is_linear);
 
-          // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
-          SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-          Vector* rhs_coarse = create_vector(matrix_solver);
-          Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
           // Perform Newton's iteration.
-          int it = 1;
-          while (1)
-          {
-            // Obtain the number of degrees of freedom.
-            int ndof = Space::get_num_dofs(spaces);
-
-            // Assemble the Jacobian matrix_coarse and residual vector.
-            dp_coarse.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-            // Multiply the residual vector with -1 since the matrix_coarse 
-            // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-            for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-            
-            // Calculate the l2-norm of residual vector.
-            double res_l2_norm = get_l2_norm(rhs_coarse);
-
-            // Info for user.
-            info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
-
-            // If l2 norm of the residual vector is within tolerance, or the maximum number 
-            // of iteration has been reached, then quit.
-            if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-            // Solve the linear system.
-            if(!solver_coarse->solve())
-              error ("matrix_coarse solver_coarse failed.\n");
-
-            // Add \deltaY^{n+1} to Y^n.
-            for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-            
-            if (it >= NEWTON_MAX_ITER)
-              error ("Newton method did not converge.");
-
-            it++;
-          }
+          info("Newton's solve on globally derefined meshes.");
+          bool verbose = false; // Default is false.
+          if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+            error("Newton's iteration failed.");
           
           // Translate the resulting coefficient vector into the actual solutions. 
           Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
           delete [] coeff_vec_coarse;
-          delete rhs_coarse;
-          delete matrix_coarse;
-          delete solver_coarse;
         } 
         else {
-          // Projection onto the globally derefined meshes.
-          info("Projecting the latest fine mesh solution onto globally derefined meshes.");
-          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
+        // Projection onto the globally derefined meshes.
+          info("Projecting fine mesh solutions from previous time step onto globally derefined meshes.");
+          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
         }
       } 
     }
@@ -381,72 +353,62 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(spaces);
+      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(spaces, ORDER_INCREASE);
 
       // Newton's loop on the refined meshes.
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       if (as == 1) {
-        info("Solving on fine meshes, starting from previous coarse mesh solutions.");
+        info("Projecting coarse mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
-                       coeff_vec, matrix_solver, proj_norms);
+                       coeff_vec, matrix_solver_fine, proj_norms);
       } else {
-        info("Solving on fine meshes, starting from previous fine mesh solutions.");
+        info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                       coeff_vec, matrix_solver, proj_norms);
+                       coeff_vec, matrix_solver_fine, proj_norms);
+        
+        // Deallocate the previous fine mesh.
+        delete T_fine.get_mesh();
+        delete phi_fine.get_mesh();
       }
       
       // Initialize the FE problem.
-      bool is_linear = false;
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
 
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
       // Perform Newton's iteration.
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(*ref_spaces);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL_FINE || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve())
-          error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-        
-        if (it >= NEWTON_MAX_ITER)
-          error ("Newton method did not converge.");
-
-        it++;
-      }
-      
+      info("Newton's solve on fine meshes.");
+      bool verbose = false;
+      if (!solve_newton(coeff_vec, &dp, solver_fine, matrix_fine, rhs_fine, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) 
+        error("Newton's iteration failed.");
+            
       // Translate the resulting coefficient vector into the actual solutions. 
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, fine_mesh_solutions);
       delete [] coeff_vec;
-      delete rhs;
-      delete matrix;
-      delete solver;
+      
+      if (SOLVE_ON_COARSE_MESH) {        
+        // Newton's loop on the new coarse meshes.
+        scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
+        info("Projecting fine mesh solutions back onto coarse mesh to obtain initial vector for following Newton's iteration.");
+        OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+                        coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+        
+        // Initialize the FE problem.
+        DiscreteProblem dp_coarse(&wf, spaces, is_linear);
+
+        // Perform Newton's iteration.
+        info("Newton's solve on coarse meshes.");
+        bool verbose = false;
+        if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+          error("Newton's iteration failed.");
+        
+        // Translate the resulting coefficient vector into the actual solutions. 
+        Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
+        delete [] coeff_vec_coarse;
+      } 
+      else {
+        // Projection onto the new coarse meshes.
+        info("Projecting fine mesh solutions back onto coarse meshes.");
+        OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
+      }
 
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
@@ -475,78 +437,9 @@ int main(int argc, char* argv[])
         info("Adapting the coarse meshes.");
         done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
         if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true; 
-        
-        if (!done) {
-          if (SOLVE_ON_COARSE_MESH) {        
-            // Newton's loop on the new coarse meshes.
-            scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
-            info("Solving on coarse meshes, starting from the latest fine mesh solutions.");
-            OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                           coeff_vec_coarse, matrix_solver, proj_norms);
-            
-            // Initialize the FE problem.
-            bool is_linear = false;
-            DiscreteProblem dp_coarse(&wf, spaces, is_linear);
-
-            // Set up the solver_coarse, matrix_coarse, and rhs_coarse according to the solver_coarse selection.
-            SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-            Vector* rhs_coarse = create_vector(matrix_solver);
-            Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
-            // Perform Newton's iteration.
-            int it = 1;
-            while (1)
-            {
-              // Obtain the number of degrees of freedom.
-              int ndof = Space::get_num_dofs(spaces);
-
-              // Assemble the Jacobian matrix_coarse and residual vector.
-              dp.assemble(coeff_vec_coarse, matrix_coarse, rhs_coarse, false);
-
-              // Multiply the residual vector with -1 since the matrix_coarse 
-              // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-              for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
-              
-              // Calculate the l2-norm of residual vector.
-              double res_l2_norm = get_l2_norm(rhs_coarse);
-
-              // Info for user.
-              info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(spaces), res_l2_norm);
-
-              // If l2 norm of the residual vector is within tolerance, or the maximum number 
-              // of iteration has been reached, then quit.
-              if (res_l2_norm < NEWTON_TOL_COARSE || it > NEWTON_MAX_ITER) break;
-
-              // Solve the linear system.
-              if(!solver_coarse->solve())
-                error ("matrix_coarse solver_coarse failed.\n");
-
-              // Add \deltaY^{n+1} to Y^n.
-              for (int i = 0; i < ndof; i++) coeff_vec_coarse[i] += solver_coarse->get_solution()[i];
-              
-              if (it >= NEWTON_MAX_ITER)
-                error ("Newton method did not converge.");
-
-              it++;
-            }
-            
-            // Translate the resulting coefficient vector into the actual solutions. 
-            Solution::vector_to_solutions(coeff_vec_coarse, spaces, coarse_mesh_solutions);
-            delete [] coeff_vec_coarse;
-            delete rhs_coarse;
-            delete matrix_coarse;
-            delete solver_coarse;
-          } 
-          else {
-            // Projection onto the new coarse meshes.
-            info("Projecting the latest fine mesh solution onto new coarse meshes.");
-            OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver, proj_norms); 
-          }
-        }
       }
+      
       delete adaptivity;
-      for(unsigned int i = 0; i < ref_spaces->size(); i++)
-        delete (*ref_spaces)[i]->get_mesh();
       delete ref_spaces;
     }
     while (!done);

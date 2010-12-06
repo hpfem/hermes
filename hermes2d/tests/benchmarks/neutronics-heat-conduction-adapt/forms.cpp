@@ -4,7 +4,7 @@ Scalar jac_TT(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func<Rea
 {
   Scalar result = 0.0;
   Func<Scalar>* T_prev_newton = u_ext[0];
-//   Func<Scalar>* T_prev_newton = ext->fn[0];
+  
   for (int i = 0; i < n; i++)
     result += wt[i] * (rho * cp * uj->val[i] * ui->val[i] / TAU
             + dk_dT(T_prev_newton->val[i]) * uj->val[i] * (T_prev_newton->dx[i] * ui->dx[i]
@@ -16,7 +16,7 @@ Scalar jac_TT(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func<Rea
 
 Ord jac_TT_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(10);
+  return Ord(30);
 }
 
 
@@ -31,7 +31,7 @@ Scalar jac_Tphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func<R
 
 Ord jac_Tphi_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(10);
+  return Ord(30);
 }
 
 template<typename Real, typename Scalar>
@@ -41,9 +41,7 @@ Scalar res_T(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *ui, Geom<Real
   Func<Scalar>* T_prev_newton = u_ext[0];
   Func<Scalar>* phi_prev_newton = u_ext[1];
   Func<Scalar>* T_prev_time = ext->fn[0];
-//   Func<Scalar>* T_prev_newton = ext->fn[0];
-//   Func<Scalar>* phi_prev_newton = ext->fn[1];
-//   Func<Scalar>* T_prev_time = ext->fn[2];
+  
   for (int i = 0; i < n; i++)
     result += wt[i] * (rho * cp * (T_prev_newton->val[i] - T_prev_time->val[i]) / TAU * ui->val[i]
             + k(T_prev_newton->val[i]) * (T_prev_newton->dx[i] * ui->dx[i]
@@ -64,7 +62,7 @@ Scalar jac_phiphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func
 {
   Scalar result = 0.0;
   Func<Scalar>* T_prev_newton = u_ext[0];
-//  Func<Scalar>* T_prev_newton = ext->fn[0];
+  
   for (int i = 0; i < n; i++)
     result += wt[i] * (invvel * uj->val[i] * ui->val[i] / TAU
             + xsdiff * (uj->dx[i] * ui->dx[i]
@@ -76,7 +74,7 @@ Scalar jac_phiphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func
 
 Ord jac_phiphi_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(10);
+  return Ord(30);
 }
 
 template<typename Real, typename Scalar>
@@ -85,8 +83,7 @@ Scalar jac_phiT(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func<R
   Scalar result = 0.0;
   Func<Scalar>* T_prev_newton = u_ext[0];
   Func<Scalar>* phi_prev_newton = u_ext[1];
-//   Func<Scalar>* T_prev_newton = ext->fn[0];
-//   Func<Scalar>* phi_prev_newton = ext->fn[1];
+  
   for (int i = 0; i < n; i++)
     result += wt[i] * (dxsrem_dT(T_prev_newton->val[i]) * uj->val[i] * phi_prev_newton->val[i] * ui->val[i]);
   return result;
@@ -94,7 +91,7 @@ Scalar jac_phiT(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *uj, Func<R
 
 Ord jac_phiT_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(10);
+  return Ord(30);
 }
 
 template<typename Real, typename Scalar>
@@ -104,9 +101,6 @@ Scalar res_phi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *ui, Geom<Re
   Func<Scalar>* T_prev_newton = u_ext[0];
   Func<Scalar>* phi_prev_newton = u_ext[1];
   Func<Scalar>* phi_prev_time = ext->fn[0];
-//   Func<Scalar>* T_prev_newton = ext->fn[0];
-//   Func<Scalar>* phi_prev_newton = ext->fn[1];
-//   Func<Scalar>* phi_prev_time = ext->fn[2];
   
   for (int i = 0; i < n; i++)
     result += wt[i] * (invvel * (phi_prev_newton->val[i] - phi_prev_time->val[i]) / TAU * ui->val[i]
