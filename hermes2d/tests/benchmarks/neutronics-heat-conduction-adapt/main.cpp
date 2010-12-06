@@ -13,16 +13,16 @@ using namespace RefinementSelectors;
 const bool SOLVE_ON_COARSE_MESH = false;   // true... Newton is done on coarse mesh in every adaptivity step.
                                            // false...Newton is done on coarse mesh only once, then projection
                                            //         of the fine mesh solution to coarse mesh is used.
-const int INIT_GLOB_REF_NUM = 2;           // Number of initial uniform mesh refinements.
+const int INIT_GLOB_REF_NUM = 1;           // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;            // Number of initial refinements towards boundary.
-const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements
+const int P_INIT = 1;                      // Initial polynomial degree of all mesh elements
 
 // Time-stepping:
 const double TAU = 0.1;                    // Time step.
 const double T_FINAL = 10.0;               // Time interval length.
 
 // Adaptivity:
-const int UNREF_FREQ = 1;                  // Every UNREF_FREQ time step the mesh is unrefined.
+const int UNREF_FREQ = 10;                 // Every UNREF_FREQ time step the mesh is unrefined.
 const double THRESHOLD = 0.3;              // This is a quantitative parameter of the adapt(...) function and
                                            // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                    // Adaptive strategy:
@@ -34,7 +34,7 @@ const int STRATEGY = 1;                    // Adaptive strategy:
                                            // STRATEGY = 2 ... refine all elements whose error is larger
                                            //   than THRESHOLD.
                                            // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO;   // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ISO;     // Predefined list of element refinement candidates. Possible values are
                                            // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                            // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                            // See User Documentation for details.
