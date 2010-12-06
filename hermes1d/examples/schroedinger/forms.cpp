@@ -87,43 +87,34 @@ double rhs_rR(int num, double *x, double *weights,
     return val;
 }
 
-static DiscreteProblem *dp1 = NULL;
-static DiscreteProblem *dp2 = NULL;
-static int _equation_type = -1;
-
 /*
    Assembles the discrete problem A*x = E*B*x
 */
-void assemble_schroedinger(Mesh *mesh, Matrix *A, Matrix *B, int _l, int _Z,
-        int equation_type)
+void assemble_schroedinger(Space *mesh, SparseMatrix *A, SparseMatrix *B,
+        int _l, int _Z, int equation_type)
 {
     import__forms();
     l = _l;
     Z = _Z;
-    if (_equation_type == -1) {
-        // Initialize the problem
-        dp1 = new DiscreteProblem();
-        dp2 = new DiscreteProblem();
-        if (equation_type == eqn_type_R) {
-            dp1->add_matrix_form(0, 0, lhs_R);
-            dp2->add_matrix_form(0, 0, rhs_R);
-        } else if (equation_type == eqn_type_rR) {
-            dp1->add_matrix_form(0, 0, lhs_rR);
-            dp2->add_matrix_form(0, 0, rhs_rR);
-        } else
-            throw std::runtime_error("Unknown equation type");
-        _equation_type = equation_type;
-    } else {
-        // Make sanity checks
-        if (_equation_type != equation_type)
-            throw std::runtime_error("Equation types mismatch");
-    }
+    // Initialize the problem
+    WeakForm wf1;
+    WeakForm wf2;
+    if (equation_type == eqn_type_R) {
+        wf1.add_matrix_form(0, 0, lhs_R);
+        wf2.add_matrix_form(0, 0, rhs_R);
+    } else if (equation_type == eqn_type_rR) {
+        wf1.add_matrix_form(0, 0, lhs_rR);
+        wf2.add_matrix_form(0, 0, rhs_rR);
+    } else
+        throw std::runtime_error("Unknown equation type");
+    DiscreteProblem dp1(&wf1, mesh);
+    DiscreteProblem dp2(&wf2, mesh);
 
     int N_dof = mesh->assign_dofs();
     printf("Assembling A, B. ndofs: %d\n", N_dof);
-    dp1->assemble_matrix(mesh, A);
+    dp1.assemble(NULL, A);
     printf(" A is done.\n");
-    dp2->assemble_matrix(mesh, B);
+    dp2.assemble(NULL, B);
     printf(" B is done.\n");
     printf("  Done assembling.\n");
 }

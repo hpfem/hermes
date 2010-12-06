@@ -1,21 +1,23 @@
-from cpp cimport matrix
+from hermes1d.hermes_common.cpp.matrix cimport (Matrix as cMatrix,
+        SparseMatrix as cSparseMatrix, UMFPackMatrix as cUMFPackMatrix,
+        UMFPackVector as cUMFPackVector, Vector as cVector)
 
 cdef class Matrix:
-    cdef matrix.Matrix *thisptr
+    cdef cMatrix *thisptr
 
     cpdef int get_size(self)
 
 cdef class SparseMatrix(Matrix):
 
-    cdef matrix.SparseMatrix* as_SparseMatrix(self)
+    cdef cSparseMatrix* as_SparseMatrix(self)
 
 cdef class CSCMatrix(SparseMatrix):
 
-    cdef matrix.UMFPackMatrix* as_UMFPackMatrix(self)
+    cdef cUMFPackMatrix* as_UMFPackMatrix(self)
 
 cdef class Vector:
-    cdef matrix.Vector *thisptr
+    cdef cVector *thisptr
 
 cdef class AVector(Vector):
 
-    cdef matrix.UMFPackVector* as_UMFPackVector(self)
+    cdef cUMFPackVector* as_UMFPackVector(self)

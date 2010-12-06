@@ -1,4 +1,4 @@
-cdef extern from "../../hermes_common/matrix.h":
+cdef extern from "matrix.h":
 
     cdef cppclass Matrix:
         int get_size()
@@ -9,7 +9,7 @@ cdef extern from "../../hermes_common/matrix.h":
     cdef cppclass Vector:
         int length()
 
-cdef extern from "../../hermes_common/solver/umfpack_solver.h":
+cdef extern from "solver/umfpack_solver.h":
 
     cdef cppclass UMFPackMatrix(SparseMatrix):
         int *get_Ap()

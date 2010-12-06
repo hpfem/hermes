@@ -1,5 +1,5 @@
 from hermes1d.h1d_wrapper.h1d_wrapper cimport Mesh
-from hermes_common._hermes_common cimport Matrix
+from hermes1d.hermes_common.matrix cimport SparseMatrix
 
 from numpy import array, empty, linspace
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -7,15 +7,18 @@ from h5py import File
 
 cimport cython
 
+from forms cimport (eqn_type_R, eqn_type_rR, assemble_schroedinger as
+        cassemble_schroedinger)
+
 s = None
 
-def assemble_schroedinger(Mesh mesh, Matrix A, Matrix B, l=0, Z=1,
+def assemble_schroedinger(Mesh mesh, SparseMatrix A, SparseMatrix B, l=0, Z=1,
         eqn_type=None):
     cdef int equation_type
     if eqn_type == "R":
-        equation_type = c_eqn_type_R
+        equation_type = eqn_type_R
     elif eqn_type == "rR":
-        equation_type = c_eqn_type_rR
+        equation_type = eqn_type_rR
     else:
         raise ValueError("Unknown equation type")
 
@@ -25,7 +28,8 @@ def assemble_schroedinger(Mesh mesh, Matrix A, Matrix B, l=0, Z=1,
     global s
     s = InterpolatedUnivariateSpline(r, zeff)
 
-    c_assemble_schroedinger(mesh.thisptr, A.thisptr, B.thisptr, l, Z,
+    cassemble_schroedinger(mesh.thisptr, A.as_SparseMatrix(),
+            B.as_SparseMatrix(), l, Z,
             equation_type)
 
 cdef api double Z_eff(double x):

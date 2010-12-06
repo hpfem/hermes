@@ -7,8 +7,8 @@ cdef class Matrix:
 
 cdef class SparseMatrix(Matrix):
 
-    cdef matrix.SparseMatrix* as_SparseMatrix(self):
-        return <matrix.SparseMatrix*> self.thisptr
+    cdef cSparseMatrix* as_SparseMatrix(self):
+        return <cSparseMatrix*> self.thisptr
 
 cdef class CSCMatrix(SparseMatrix):
     """
@@ -16,20 +16,20 @@ cdef class CSCMatrix(SparseMatrix):
     """
 
     def __cinit__(self):
-        self.thisptr = new matrix.UMFPackMatrix()
+        self.thisptr = new cUMFPackMatrix()
 
     def __dealloc__(self):
         del self.thisptr
 
-    cdef matrix.UMFPackMatrix* as_UMFPackMatrix(self):
-        return <matrix.UMFPackMatrix*> self.thisptr
+    cdef cUMFPackMatrix* as_UMFPackMatrix(self):
+        return <cUMFPackMatrix*> self.thisptr
 
     @property
     def IA(self):
         """
         Returns (row, col, data) arrays.
         """
-        cdef matrix.UMFPackMatrix *this = self.as_UMFPackMatrix()
+        cdef cUMFPackMatrix *this = self.as_UMFPackMatrix()
         return c2numpy_int_inplace(this.get_Ai(), this.get_nnz())
 
     @property
@@ -37,7 +37,7 @@ cdef class CSCMatrix(SparseMatrix):
         """
         Returns (row, col, data) arrays.
         """
-        cdef matrix.UMFPackMatrix *this = self.as_UMFPackMatrix()
+        cdef cUMFPackMatrix *this = self.as_UMFPackMatrix()
         return c2numpy_int_inplace(this.get_Ap(), self.get_size()+1)
 
     @property
@@ -45,7 +45,7 @@ cdef class CSCMatrix(SparseMatrix):
         """
         Returns (row, col, data) arrays.
         """
-        cdef matrix.UMFPackMatrix *this = self.as_UMFPackMatrix()
+        cdef cUMFPackMatrix *this = self.as_UMFPackMatrix()
         return c2numpy_double_inplace(this.get_Ax(), this.get_nnz())
 
     def to_scipy_csc(self):
@@ -68,14 +68,14 @@ cdef class AVector(Vector):
     """
 
     def __cinit__(self):
-        self.thisptr = new matrix.UMFPackVector()
+        self.thisptr = new cUMFPackVector()
 
     def __dealloc__(self):
         del self.thisptr
 
-    cdef matrix.UMFPackVector* as_UMFPackVector(self):
-        return <matrix.UMFPackVector*> self.thisptr
+    cdef cUMFPackVector* as_UMFPackVector(self):
+        return <cUMFPackVector*> self.thisptr
 
     def to_numpy(self):
-        cdef matrix.UMFPackVector *this = self.as_UMFPackVector()
+        cdef cUMFPackVector *this = self.as_UMFPackVector()
         return c2numpy_double_inplace(this.get_c_array(), this.length())
