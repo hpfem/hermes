@@ -22,11 +22,11 @@
 
 typedef std::pair<double, double> double_pair;
 
-class HERMES_API Basic {
+class HERMES_API ModuleBasic {
 public:
-  Basic();
+  ModuleBasic();
 
-  ~Basic();
+  ~ModuleBasic();
 
   // Set mesh as a string (see example at the end of this file).
   void set_mesh_str(const std::string &mesh);

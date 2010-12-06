@@ -6,7 +6,7 @@ from hermes2d.hermes2d_defs cimport Solution
 
 cdef extern from "basic.h":
 
-    cdef cppclass Basic:
+    cdef cppclass ModuleBasic:
         void set_mesh_str(char *mesh)
         void set_initial_mesh_refinement(int init_ref_num)
         void set_initial_poly_degree(int p)

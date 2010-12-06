@@ -1,1 +1,1 @@
-from basic import Basic
+from basic import ModuleBasic

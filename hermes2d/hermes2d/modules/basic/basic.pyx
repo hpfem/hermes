@@ -24,11 +24,11 @@ cdef vector[pair[double, double]] array2vector_double_pair(a):
         v.push_back(pair[double, double](p1, p2))
     return v
 
-cdef class Basic:
-    cdef basic_defs.Basic *thisptr
+cdef class ModuleBasic:
+    cdef basic_defs.ModuleBasic *thisptr
 
     def __init__(self):
-        self.thisptr = new basic_defs.Basic()
+        self.thisptr = new basic_defs.ModuleBasic()
 
     def __dealloc__(self):
         del self.thisptr
