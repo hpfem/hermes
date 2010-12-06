@@ -184,9 +184,13 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(1);
+
   // Create H1 spaces with default shapesets.
-  H1Space space_T(&mesh, bc_types_T, essential_bc_values_T, P_INIT);
-  H1Space space_phi(&mesh, bc_types_phi, essential_bc_values_phi, P_INIT);
+  H1Space space_T(&mesh, &bc_types, essential_bc_values_T, P_INIT);
+  H1Space space_phi(&mesh, &bc_types, essential_bc_values_phi, P_INIT);
   Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
 
   // Exact solutions for error evaluation.
@@ -195,9 +199,13 @@ int main(int argc, char* argv[])
 
   // Initialize solution views (their titles will be2 updated in each time step).
   ScalarView sview_T("", new WinGeom(0, 0, 500, 400));
+  sview_T.fix_scale_width(50);
   ScalarView sview_phi("", new WinGeom(0, 500, 500, 400));
+  sview_phi.fix_scale_width(50);
   ScalarView sview_T_exact("", new WinGeom(550, 0, 500, 400));
+  sview_T_exact.fix_scale_width(50);
   ScalarView sview_phi_exact("", new WinGeom(550, 500, 500, 400));
+  sview_phi_exact.fix_scale_width(50);
   char title[100]; // Character array to store the title for an actual view and time step.
 
   // Solutions in the previous time step.

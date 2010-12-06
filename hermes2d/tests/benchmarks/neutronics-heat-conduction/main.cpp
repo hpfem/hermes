@@ -124,17 +124,6 @@ Real q(Real x, Real y) {
          (CF*PHIt*x*y*sx*sy*(nu*xsfiss-xsa_ref*(1 + doppler_coeff*(-sqrt(Tref) + sqrt(CT*Tt*sx*sy)))))/(LX*LY);
 }
 
-// Boundary condition types.
-BCType bc_types_T(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-BCType bc_types_phi(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
 {
@@ -169,9 +158,13 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(1);
+
   // Create H1 spaces with default shapesets.
-  H1Space space_T(&mesh, bc_types_T, essential_bc_values_T, P_INIT);
-  H1Space space_phi(&mesh, bc_types_phi, essential_bc_values_phi, P_INIT);
+  H1Space space_T(&mesh, &bc_types, essential_bc_values_T, P_INIT);
+  H1Space space_phi(&mesh, &bc_types, essential_bc_values_phi, P_INIT);
   Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
 
   // Exact solutions for error evaluation.
