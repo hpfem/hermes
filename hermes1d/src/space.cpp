@@ -413,10 +413,10 @@ Space::Space(double a, double b, int n_base_elem, Hermes::Tuple<std::pair<int, d
 
   // Assign Dirichlet boundary conditions.
   if(left_boundary_conditions != Hermes::Tuple<std::pair<int, double> *>())
-    for(int i = 0; i < left_boundary_conditions.size(); i++)
+    for(unsigned int i = 0; i < left_boundary_conditions.size(); i++)
       this->set_bc_left_dirichlet(left_boundary_conditions.at(i)->first, left_boundary_conditions.at(i)->second);
   if(right_boundary_conditions != Hermes::Tuple<std::pair<int, double> *>())
-    for(int i = 0; i < right_boundary_conditions.size(); i++)
+    for(unsigned int i = 0; i < right_boundary_conditions.size(); i++)
       this->set_bc_right_dirichlet(right_boundary_conditions.at(i)->first, right_boundary_conditions.at(i)->second);
   // Assign degrees of freedom.
   this->assign_dofs();
