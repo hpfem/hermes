@@ -10,7 +10,7 @@ IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
 
     # All warnings are errors
-    set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
+    #set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
 
     # Disable the "unused variable/parameters/functions" warnings (as those are
     # not really problematic, it doesn't cause any harm):
