@@ -29,23 +29,69 @@
 /// the function representing them.
 class HERMES_API BCValues {
 public:
+  BCValues(double* t) : t(t) {};
   BCValues() {};
   ~BCValues() {};
 
 protected:
-  /// Type of the function representing the BC.
+  /// Type of the function representing the BC. Non-time_dependent.
   typedef scalar (*value_callback)(double, double);
 
-  /// Storage of the functions. 
+  /// Type of the function representing the BC. time_dependent.
+  typedef scalar (*value_callback_time)(double, double, double);
+
+  /// Storage of functions. 
   std::map<int, value_callback> value_callbacks;
+  std::map<int, value_callback_time> value_callbacks_time;
 
-  /// Default (zero) function.
-  static scalar default_callback(double x, double y) { return 0; };
+  /// Registering which condition is time-dependent.
+  std::map<int, bool> is_time_dep;
 
+  /// Storage of 1D constants. 
+  std::map<int, scalar> value_constants;
+
+  /// Storage of zeroes.
+  /// This is needed, so that we are able to check, if the zero has been set by user, or
+  /// if it is put there by a call to map<>::operator[].
+  std::map<int, bool> value_zeroes;
+
+  /// Current time. In the case of time_dependency.
+  double* t;
+  
 public:
+  /// This function checks that there is either a function, or a value defined on one part
+  /// of the boudnary (one marker), if there are both, it gives an error.
+  void check(int marker)
+  {
+    bool have_function = is_time_dep[marker] ? value_callbacks_time[marker] != NULL : value_callbacks[marker] != NULL;
+    bool have_both_function_types = !is_time_dep[marker] ? value_callbacks_time[marker] != NULL : value_callbacks[marker] != NULL;
+    if(have_function && have_both_function_types)
+      error("Attempt to define more than one description of the Dirichlet BC \
+               on the same part of the boundary.");
+
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(have_function && (value_constants[marker] != NULL || value_zeroes[marker]))
+#else
+    if(have_function && (value_constants[marker] != std::complex<double>(NULL, NULL) || value_zeroes[marker]))
+#endif
+      error("Attempt to define more than one description of the Dirichlet BC \
+               on the same part of the boundary.");
+    // Cleanup if everything is okay.
+    if(value_callbacks[marker] == NULL)
+      value_callbacks.erase(marker);
+    if(value_callbacks_time[marker] == NULL)
+      value_callbacks_time.erase(marker);
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(value_constants[marker] == NULL && !value_zeroes[marker])
+#else
+    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker])
+#endif
+      value_constants.erase(marker);
+  }
+
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
-  void add_function(value_callback callback, Hermes::Tuple<int> markers) 
+  void add_function(Hermes::Tuple<int> markers, value_callback callback) 
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
@@ -55,18 +101,68 @@ public:
       if(!(value_callbacks.insert(std::pair<int, value_callback>(markers[i], callback))).second)
         error("Attempt to define more than one function representing the Dirichlet BC \
                on the same part of the boundary.");
+      check(markers[i]);
+    }
   };
 
-  /// The same as add_function(), only supplies the default (zero) functions.
-  void add_zero_function(Hermes::Tuple<int> markers) 
+  /// Adds the function callback to represent the Dirichlet BC on the parts of
+  /// the boundary marked with markers.
+  void add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback) 
   {
     if(markers.size() == 0)
-      error("BCValues::add_zero_function() called without any boundary markers specified.");
+      error("BCValues::add_function() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++) {
-      if(value_callbacks[markers[i]] != NULL)
+      /// If we find out that there is already a function present describing the Dirichlet
+      /// BC on this part of the boundary, return an error, otherwise store the function.
+      if(!(value_callbacks_time.insert(std::pair<int, value_callback_time>(markers[i], callback))).second)
         error("Attempt to define more than one function representing the Dirichlet BC \
-              on the same part of the boundary.");
-      value_callbacks.insert(std::pair<int, value_callback>(markers[i], BCValues::default_callback));
+               on the same part of the boundary.");
+      check(markers[i]);
+      is_time_dep[markers[i]] = true;
+    }
+  };
+
+  /// The same as add_function(), only supplies a 1D constant.
+  void add_const(Hermes::Tuple<int> markers, scalar value) 
+  {
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(value == NULL) {
+#else
+    if(value == std::complex<double>(NULL, NULL)) {
+#endif
+      this->add_zero(markers);
+      return;
+    }
+    if(markers.size() == 0)
+      error("BCValues::add_const() called without any boundary markers specified.");
+    for(int i = 0; i < markers.size(); i++) {
+      /// If we find out that there is already a value present describing the Dirichlet
+      /// BC on this part of the boundary, return an error, otherwise store the value.
+      if(!(value_constants.insert(std::pair<int, scalar>(markers[i], value))).second)
+        error("Attempt to define more than one value representing the Dirichlet BC \
+               on the same part of the boundary.");
+      check(markers[i]);
+    }
+  };
+
+  /// The same as add_const(), only supplies a zero.
+  void add_zero(Hermes::Tuple<int> markers) 
+  {
+    if(markers.size() == 0)
+      error("BCValues::add_const() called without any boundary markers specified.");
+    for(int i = 0; i < markers.size(); i++) {
+      /// If we find out that there is already a value present describing the Dirichlet
+      /// BC on this part of the boundary, return an error, otherwise store the value.
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(!(value_constants.insert(std::pair<int, scalar>(markers[i], 0))).second)
+#else
+      if(!(value_constants.insert(std::pair<int, scalar>(markers[i], std::complex<double>(0, 0)))).second)
+#endif
+        error("Attempt to define more than one value representing the Dirichlet BC \
+               on the same part of the boundary.");
+      value_zeroes.insert(std::pair<int, bool>(markers[i], true));
+
+      check(markers[i]);
     }
   };
 
@@ -74,9 +170,14 @@ public:
   /// part of the boundary.
   void check_consistency(BCTypes* bc_types) 
   {
-    std::map<int, value_callback>::iterator it;
-    for(it = value_callbacks.begin(); it != value_callbacks.end(); it++)
-      if(!bc_types->is_essential(it->first))
+    std::map<int, value_callback>::iterator it_func;
+    for(it_func = value_callbacks.begin(); it_func != value_callbacks.end(); it_func++)
+      if(!bc_types->is_essential(it_func->first))
+        error("BCTypes and BCValues incompatible.");
+
+    std::map<int, scalar>::iterator it_value;
+    for(it_value = value_constants.begin(); it_value != value_constants.end(); it_value++)
+      if(!bc_types->is_essential(it_value->first))
         error("BCTypes and BCValues incompatible.");
   };
 
@@ -84,18 +185,74 @@ public:
   void update(BCTypes* bc_types) 
   {
     std::vector<int>::iterator it;
-    for(it = bc_types->markers_dirichlet.begin(); it != bc_types->markers_dirichlet.end(); it++)
-      if(value_callbacks[*it] == NULL)
-        add_zero_function(*it);
+    for(it = bc_types->markers_dirichlet.begin(); it != bc_types->markers_dirichlet.end(); it++) {
+      bool have_function = is_time_dep[*it] ? value_callbacks_time[*it] != NULL : value_callbacks[*it] != NULL;
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+      if(!have_function && (value_constants[*it] == NULL && !value_zeroes[*it]))
+#else
+      if(!have_function && (value_constants[*it] == std::complex<double>(NULL, NULL) && !value_zeroes[*it]))
+#endif
+        add_zero(*it);
+    }
   };
+
+  /// This function returns a boolean value meaning that on this part of the boundary, the prescribed
+  /// Dirichlet condition is constant.
+  /// ! This function, as the rest of the class, does not check that this marker is really used in the
+  /// problem description the user solves.
+  bool is_const(int marker)
+  {
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(value_constants[marker] == NULL && !value_zeroes[marker]) {
+#else
+    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker]) {
+#endif
+      value_constants.erase(marker);
+      return false;
+    }
+    return true;
+  }
 
   /// Main function that returns the value.
   scalar calculate(int marker, double x, double y)
   {
-    if(value_callbacks[marker] == NULL)
-      error("Attempt to retrieve a value of a function representing the Dirichlet BC without \
+    if(is_time_dep[marker]) {
+      if(value_callbacks_time[marker] == NULL)
+        error("Attempt to retrieve a value of a function representing the Dirichlet BC without \
+              this being set up for the current Space.");
+      return value_callbacks_time[marker](x, y, *this->t);
+    }
+    else {
+      if(value_callbacks[marker] == NULL)
+        error("Attempt to retrieve a value of a function representing the Dirichlet BC without \
+              this being set up for the current Space.");
+      return value_callbacks[marker](x, y);
+    }
+  }
+
+  /// An overloaded member for constant Dirichlet BCs.
+  scalar calculate(int marker)
+  {
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(value_constants[marker] == NULL && !value_zeroes[marker])
+#else
+    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker])
+#endif
+      error("Attempt to retrieve a value of a value representing the Dirichlet BC without \
             this being set up for the current Space.");
-    return value_callbacks[marker](x, y);
+    return value_constants[marker]; 
+  }
+
+  /// Duplicates this instance.
+  virtual BCValues *dup() {
+      BCValues *bv = new BCValues();
+      bv->is_time_dep = this->is_time_dep;
+      bv->t = this->t;
+      bv->value_callbacks = this->value_callbacks;
+      bv->value_callbacks_time = this->value_callbacks_time;
+      bv->value_constants = this->value_constants;
+      bv->value_zeroes = this->value_zeroes;
+      return bv;
   }
 };
 
