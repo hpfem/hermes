@@ -27,12 +27,6 @@ const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 // Problem parameters.
 const double CONST_F = 2.0;  
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 

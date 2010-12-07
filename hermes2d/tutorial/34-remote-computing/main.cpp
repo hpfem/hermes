@@ -171,8 +171,8 @@ int main(int argc, char* argv[])
   info("Visualizing Mesh and Orders extracted from the Solution.");
  
   int p_init = 1;
-  // The NULLs are for bc_types() and essential_bc_values().
-  H1Space space_from_file(sln_from_file.get_mesh(), (BCTypes *) NULL, (BCValues *) NULL, p_init);
+
+  H1Space space_from_file(sln_from_file.get_mesh(), &bc_types, &bc_values, p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
   OrderView oview("Saved Solution -> Space", new WinGeom(920, 0, 450, 600));
   oview.show(&space_from_file);

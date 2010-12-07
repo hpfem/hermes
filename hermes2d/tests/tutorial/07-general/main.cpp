@@ -5,19 +5,21 @@
 // are made, but it is easy to fix (see below).
 
 const int P_INIT = 2;             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 1;       // Number of initial uniform refinements
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;//SOLVER_AZTECOO;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform refinements.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
-const int BDY_VERTICAL = 2;
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
 
-// Problem parameters
+// Boundary markers.
+const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
+
+// Problem parameters.
 double a_11(double x, double y) {
   if (y > 0) return 1 + x*x + y*y;
   else return 1;
@@ -60,17 +62,8 @@ double g_N(double x, double y) {
   return 0;
 }
 
-/********** Boundary conditions ***********/
-
-// Boundary condition types
-BCType bc_types(int marker)
-{
-  if (marker == 1) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
-
-// Dirichlet boundary condition values
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(double x, double y)
 {
   return g_D(x, y);
 }
@@ -142,8 +135,18 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Create an H1 space.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
+  bc_types.add_bc_neumann(BDY_VERTICAL);
+
+  BCValues bc_values;
+  bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;

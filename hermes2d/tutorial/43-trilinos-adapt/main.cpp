@@ -79,7 +79,7 @@ const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 // Essential (Dirichlet) boundary conditions.
 scalar essential_bc_values(double x, double y)
 {
-  return fn(x, y);
+  return fn(x,y);
 }
 
 // Right-hand side.

@@ -43,8 +43,8 @@ const double ERR_STOP = 1.0;     // Stopping criterion for adaptivity (rel. erro
                                  // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;     // Adaptivity process stops when the number of degrees of freedom grows over
                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double D_u = 1;
@@ -54,11 +54,8 @@ const double LAMBDA = 1;
 const double KAPPA = 1;
 const double K = 100;
 
-// Boundary condition types.
-BCType bc_types(int marker) { return BC_ESSENTIAL; }
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y) { return 0;}
+// Boundary markers.
+const int OUTER_BDY = 1;
 
 // Exact solution.
 #include "exact_solution.cpp"
@@ -80,9 +77,17 @@ int main(int argc, char* argv[])
   // Initial mesh refinements in the v_mesh towards the boundary.
   if (MULTI == true) v_mesh.refine_towards_boundary(1, INIT_REF_BDY);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(OUTER_BDY);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(OUTER_BDY);
+
   // Create H1 spaces with default shapeset for both displacement components.
-  H1Space u_space(&u_mesh, bc_types, essential_bc_values, P_INIT_U);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, bc_types, essential_bc_values, P_INIT_V);
+  H1Space u_space(&u_mesh, &bc_types, &bc_values, P_INIT_U);
+  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types, &bc_values, P_INIT_V);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
