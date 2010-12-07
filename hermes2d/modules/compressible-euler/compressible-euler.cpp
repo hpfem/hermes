@@ -160,10 +160,10 @@ bool CompressibleEuler::calculate(Hermes::Tuple<Solution*> sln)
 
   // Create L2 spaces with default shapesets.
   this->spaces = new Hermes::Tuple<Space*>();
-  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
-  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
-  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
-  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, NULL, this->init_p));
+  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, (BCValues*) NULL, this->init_p));
+  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, (BCValues*) NULL, this->init_p));
+  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, (BCValues*) NULL, this->init_p));
+  this->spaces->push_back(new L2Space(this->mesh, this->bc_types, (BCValues*) NULL, this->init_p));
   
   int ndof = Space::get_num_dofs(*(this->spaces));
   info("ndof = %d", ndof);
