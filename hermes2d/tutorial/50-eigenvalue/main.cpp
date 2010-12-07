@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
   // Reading solution vectors from file and visualizing.
-  double eigenval[NUMBER_OF_EIGENVALUES];
+  double* eigenval = new double[NUMBER_OF_EIGENVALUES];
   FILE *file = fopen("eivecs.dat", "r");
   char line [64];                  // Maximum line size.
   fgets(line, sizeof line, file);  // ndof
