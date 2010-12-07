@@ -48,12 +48,6 @@ double temp_ext(double t) {
   return T_INIT + 10. * sin(2*M_PI*t/FINAL_TIME);
 }
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return T_INIT;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -73,8 +67,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_GROUND);
   bc_types.add_bc_newton(BDY_AIR);
 
-  // Initialize an H1 space with default shepeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_const(BDY_GROUND, T_INIT);
+
+  // Initialize an H1 space with default shapeset.
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  

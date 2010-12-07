@@ -58,10 +58,10 @@ scalar init_cond(double x, double y, double& dx, double& dy)
 }
 
 // Boundary markers.
-const int BDY_ESSENTIAL = 1;
+const int BDY_DIRICHLET = 1;
 
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values(double x, double y)
 {
   double dx, dy;
   return dir_lift(x, y, dx, dy);
@@ -86,14 +86,18 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_ESSENTIAL, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_ESSENTIAL);
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation
   WeakForm wf;

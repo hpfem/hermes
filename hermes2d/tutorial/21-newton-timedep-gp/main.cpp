@@ -49,13 +49,7 @@ scalar init_cond(double x, double y, scalar& dx, scalar& dy)
 }
 
 // Boundary markers.
-const int BDY_ESSENTIAL_1 = 1, BDY_ESSENTIAL_2 = 2, BDY_ESSENTIAL_3 = 3, BDY_ESSENTIAL_4 = 4;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
- return 0;
-}
+const int BDY_DIRICHLET_1 = 1, BDY_DIRICHLET_2 = 2, BDY_DIRICHLET_3 = 3, BDY_DIRICHLET_4 = 4;
 
 // Weak forms.
 #include "forms.cpp"
@@ -72,10 +66,14 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_ESSENTIAL_1, BDY_ESSENTIAL_2, BDY_ESSENTIAL_3, BDY_ESSENTIAL_4));
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
