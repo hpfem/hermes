@@ -98,7 +98,7 @@ public:
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
-    for(unsigned int i = 0; i < markers.size(); i++)
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a function present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the function.
       if(!(value_callbacks.insert(std::pair<int, value_callback>(markers[i], callback))).second)
