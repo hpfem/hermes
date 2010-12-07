@@ -54,8 +54,8 @@ const double ERR_STOP = 1e-4;                     // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Exact solution.
 static double fn(double x, double y)
@@ -70,23 +70,10 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
-int bdy_top = 3;
-int bdy_bottom = 1;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == bdy_bottom)
-    return BC_ESSENTIAL;
-  else
-    return BC_NATURAL;
-}
-
-// Essential(Dirichlet) boundary conditions.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
 
 // Weak forms.
 #include "forms.cpp"
@@ -104,16 +91,23 @@ int main(int argc, char* argv[])
     else mesh.refine_element(0, 1);
   }
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_BOTTOM);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_BOTTOM);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
-  if (is_p_aniso(CAND_LIST))
-    space.set_element_order(0, H2D_MAKE_QUAD_ORDER(1, P_INIT));
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_vector_form(callback(linear_form));
-  wf.add_vector_form_surf(callback(linear_form_surf), bdy_top);
+  wf.add_vector_form_surf(callback(linear_form_surf), BDY_TOP);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

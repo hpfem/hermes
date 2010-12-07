@@ -27,6 +27,13 @@ class HERMES_API L2Space : public Space
 {
 public:
 
+  L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init,
+          Shapeset* shapeset = NULL);
+
+  L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init,
+          Shapeset* shapeset = NULL);
+
+  // all the following constructors are DEPRECATED.
   // For backward compatibility. Good to be deleted as soon as all the examples etc. use the second one.
   L2Space(Mesh* mesh, int p_init, Shapeset* shapeset = NULL);
 

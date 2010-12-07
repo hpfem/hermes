@@ -70,12 +70,6 @@ const int BDY_RIGHT = 2;
 const int BDY_TOP = 3;
 const int BDY_LEFT = 4;
 
-// Essential(Dirichlet) boundary conditions.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -91,8 +85,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_BOTTOM);
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_BOTTOM);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

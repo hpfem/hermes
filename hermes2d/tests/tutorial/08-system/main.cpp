@@ -12,19 +12,12 @@ const double f_1  = 1e4;                                   // external force in 
 const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // first Lame constant
 const double mu = E / (2*(1 + nu));                        // second Lame constant
 const int P_INIT = 8;                                      // Initial polynomial degree of all elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                           // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                           // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary marker (external force).
-const int GAMMA_3_BDY = 3;
 
-// Boundary condition types.
-BCType bc_types(int marker)
-  { return (marker == 1) ? BC_ESSENTIAL : BC_NATURAL; }
-
-// Function values for Dirichlet boundary conditions.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-  { return 0; }
+// Boundary markers.
+const int BDY_1 = 1, BDY_2 = 2, BDY_3 = 3, BDY_4 = 4, BDY_5 = 5;
 
 // Bilinear forms.
 template<typename Real, typename Scalar>
@@ -73,10 +66,18 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("sample.mesh", &mesh);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_1);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
+
+  // Enter Dirichlet boundary values;
+  BCValues bc_values;
+  bc_values.add_zero(BDY_1);
 
   // Create x- and y- displacement space using the default H1 shapeset.
-  H1Space u_space(&mesh, bc_types, essential_bc_values, P_INIT);
-  H1Space v_space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space u_space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space v_space(&mesh, &bc_types, &bc_values, P_INIT);
   info("ndof = %d.", Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
@@ -84,8 +85,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // Note that only one symmetric part is
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms.
-  wf.add_vector_form_surf(0, callback(linear_form_surf_0), GAMMA_3_BDY);
-  wf.add_vector_form_surf(1, callback(linear_form_surf_1), GAMMA_3_BDY);
+  wf.add_vector_form_surf(0, callback(linear_form_surf_0), BDY_3);
+  wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_3);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10

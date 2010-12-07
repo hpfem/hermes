@@ -37,6 +37,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
   if(bc_types == NULL) error("BCTypes pointer cannot be NULL in Space::Space().");
   this->set_bc_types_init(bc_types);
   this->set_essential_bc_values(bc_values);
+  this->bc_value_callback_by_coord = NULL;
 
   // This will not be needed once we get rid of the old Space constructors etc.
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
@@ -538,10 +539,10 @@ scalar default_bc_value_by_edge(SurfPos* surf_pos)
   double x, y;
   Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
   nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
-  if(surf_pos->space->bc_values != NULL)
-    return surf_pos->space->bc_values->calculate(surf_pos->marker, x, y);
-  else
+  if(surf_pos->space->bc_value_callback_by_coord != NULL)
     return surf_pos->space->bc_value_callback_by_coord(surf_pos->marker, x, y);
+  else
+    return surf_pos->space->bc_values->calculate(surf_pos->marker, x, y);
 }
 
 void Space::set_bc_types(BCTypes* bc_types)
@@ -568,9 +569,9 @@ void Space::set_bc_types_init(BCTypes* bc_types)
 void Space::set_essential_bc_values(BCValues* bc_values)
 {
   _F_
+  this->bc_values = bc_values;
   if (bc_values == NULL)
     return;
-  this->bc_values = bc_values;
   this->bc_values->check_consistency(this->bc_types);
   this->bc_values->update(this->bc_types);
 }
@@ -596,6 +597,8 @@ void Space::copy_callbacks(const Space* space)
 {
   _F_
   this->bc_types = space->bc_types->dup();
+  if(space->bc_values != NULL)
+    this->bc_values = space->bc_values->dup();
   this->bc_value_callback_by_coord = space->bc_value_callback_by_coord;
   this->bc_value_callback_by_edge  = space->bc_value_callback_by_edge;
 }

@@ -187,11 +187,11 @@ const int BDY_FLUX = 1;
 const int BDY_GAMMA = 2;
 const int BDY_SYMMETRY = 3;
 
-scalar essential_bc_values_1(int marker, double x, double y)
+scalar essential_bc_values_1(double x, double y)
 {
   return g1_D(x, y);
 }
-scalar essential_bc_values_2(int marker, double x, double y)
+scalar essential_bc_values_2(double x, double y)
 {
   return g2_D(x, y);
 }
@@ -283,9 +283,16 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(BDY_SYMMETRY);
   bc_types.add_bc_newton(BDY_GAMMA);
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values_1;
+  bc_values_1.add_function(BDY_FLUX, essential_bc_values_1);
+
+  BCValues bc_values_2;
+  bc_values_2.add_function(BDY_FLUX, essential_bc_values_2);
+
   // Create H1 space with default shapesets.
-  H1Space space1(&mesh1, &bc_types, essential_bc_values_1, P_INIT[0]);
-  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, &bc_types, essential_bc_values_2, P_INIT[1]);
+  H1Space space1(&mesh1, &bc_types, &bc_values_1, P_INIT[0]);
+  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, &bc_types, &bc_values_2, P_INIT[1]);
 
   // Initialize the weak formulation.
   WeakForm wf(2);

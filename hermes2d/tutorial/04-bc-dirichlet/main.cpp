@@ -30,7 +30,7 @@ const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 const double CONST_F = -4.0; 
 
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int marker, double x, double y)
+scalar essential_bc_values(double x, double y)
 {
   return (-CONST_F/4.0)*(x*x + y*y);
 }
@@ -52,8 +52,12 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_function(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), essential_bc_values);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 

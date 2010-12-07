@@ -1,51 +1,35 @@
 #include "hermes2d.h"
 
-// This test makes sure that example 05-bc-neumann works correctly.
-// CAUTION: This test will fail when any changes to the shapeset
-// are made, but it is easy to fix (see below).
+// This example shows how to define Neumann boundary conditions. In addition,
+// you will see how a Filter is used to visualize gradient of the solution
+//
+// PDE: Poisson equation -Laplace u = f, where f = CONST_F
+//
+// BC: u = 0 on Gamma_inner (edges meeting at the re-entrant corner),
+//     du/dn = CONST_GAMMA_BOTTOM on Gamma_bottom,
+//     du/dn = CONST_GAMMA_OUTER on Gamma_outer,
+//     du/dn = CONST_GAMMA_LEFT on Gamma_left.
+//
+// You can play with the parameters below. For most choices of the four constants,
+// the solution has a singular (infinite) gradient at the re-entrant corner.
+// Therefore we visualize not only the solution but also its gradient.
 
-double CONST_F = -1.0;        // right-hand side
-double CONST_GAMMA[3] = {-0.5, 1.0, -0.5}; // outer normal derivative on Gamma_1,2,3
+const int P_INIT = 4;                             // Initial polynomial degree in all elements.
+const int CORNER_REF_LEVEL = 3;                  // Number of mesh refinements towards the re-entrant corner.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-int CORNER_REF_LEVEL = 3;                         // number of mesh refinements towards the re-entrant corner.
-int P_INIT = 4;                                   // Initial polynomial degree in all elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
-// boundary condition types
-// Note: natural means Neumann, Newton, or any other type of condition
-// where the solution value is not prescribed.
-BCType bc_types(int marker)
-{
-  return (marker == 4) ? BC_ESSENTIAL : BC_NATURAL;
-}
+// Problem parameters.
+const double CONST_F = -1.0;                      // Right-hand side.
+const double CONST_GAMMA_BOTTOM = -0.5;           // Outer normal derivative on Gamma_1.
+const double CONST_GAMMA_OUTER = 1.0;             // Outer normal derivative on Gamma_2.
+const double CONST_GAMMA_LEFT = -0.5;             // Outer normal derivative on Gamma_3.
 
-// function values for Dirichlet boundary markers
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return CONST_F*int_v<Real, Scalar>(n, wt, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return CONST_GAMMA[e->edge_marker - 1] * int_v<Real, Scalar>(n, wt, v);
-}
+// Weak forms.
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -57,14 +41,27 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
-  // Create an H1 space.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_INNER);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_INNER);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form));
   wf.add_vector_form(callback(linear_form));
-  wf.add_vector_form_surf(callback(linear_form_surf));
+  wf.add_vector_form_surf(callback(linear_form_surf_bottom), BDY_BOTTOM);
+  wf.add_vector_form_surf(callback(linear_form_surf_outer), BDY_OUTER);
+  wf.add_vector_form_surf(callback(linear_form_surf_left), BDY_LEFT);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10

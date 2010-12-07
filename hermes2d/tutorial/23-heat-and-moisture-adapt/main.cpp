@@ -83,18 +83,14 @@ const int BDY_EXTERIOR_WALL = 5;
 double CURRENT_TIME = 0.0;
 
 // Essential (Dirichlet) boundary condition values for T.
-scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values_T(double x, double y, double time)
 {
-  if (ess_bdy_marker == BDY_REACTOR_WALL)
-  {
-    double current_reactor_temperature = TEMP_REACTOR_MAX;
-    if (CURRENT_TIME < REACTOR_START_TIME) {
-      current_reactor_temperature = TEMP_INITIAL +
-        (CURRENT_TIME/REACTOR_START_TIME)*(TEMP_REACTOR_MAX - TEMP_INITIAL);
-    }
-    return current_reactor_temperature;
+  double current_reactor_temperature = TEMP_REACTOR_MAX;
+  if (time < REACTOR_START_TIME) {
+    current_reactor_temperature = TEMP_INITIAL +
+      (time/REACTOR_START_TIME)*(TEMP_REACTOR_MAX - TEMP_INITIAL);
   }
-  else return 0;
+  return current_reactor_temperature;
 }
 
 // Weak forms.
@@ -120,8 +116,12 @@ int main(int argc, char* argv[])
   moist_bc_type.add_bc_neumann(Hermes::Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
   moist_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values(&CURRENT_TIME);
+  bc_values.add_timedep_function(BDY_REACTOR_WALL, essential_bc_values_T);
+
   // Create H1 spaces with default shapesets.
-  H1Space T_space(&T_mesh, &temp_bc_type, essential_bc_values_T, P_INIT);
+  H1Space T_space(&T_mesh, &temp_bc_type, &bc_values, P_INIT);
   H1Space M_space(MULTI ? &M_mesh : &T_mesh, &moist_bc_type, (BCValues *) NULL, P_INIT);
 
   // Define constant initial conditions.

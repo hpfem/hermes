@@ -26,7 +26,13 @@ int main(int argc, char* argv[])
 
   // Create an Hcurl space with default shapeset.
   // (BC types and essential BC values not relevant.)
-  HcurlSpace space(&mesh, (BCTypes *) NULL, NULL, P_INIT);
+  // Enter boundary markers.
+  BCTypes bc_types;
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+
+  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Visualize FE basis.
   VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));

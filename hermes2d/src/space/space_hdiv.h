@@ -27,6 +27,10 @@
 class HERMES_API HdivSpace : public Space
 {
 public:
+
+  HdivSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset = NULL);
+  HdivSpace(Mesh* mesh, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset = NULL);
+
   // For backward compatibility.
   HdivSpace(Mesh* mesh, BCTypes* bc_types,
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 

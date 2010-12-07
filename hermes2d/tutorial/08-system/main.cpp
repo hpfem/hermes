@@ -30,10 +30,6 @@ const double f_1  = 1e4;                                   // External force in 
 const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
 const double mu = E / (2*(1 + nu));                        // Second Lame constant.
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-  { return 0; }
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -52,9 +48,13 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_1);
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
 
+  // Enter Dirichlet boundary values;
+  BCValues bc_values;
+  bc_values.add_zero(BDY_1);
+
   // Create x- and y- displacement space using the default H1 shapeset.
-  H1Space u_space(&mesh, &bc_types, essential_bc_values, P_INIT);
-  H1Space v_space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space u_space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space v_space(&mesh, &bc_types, &bc_values, P_INIT);
   info("ndof = %d.", Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.

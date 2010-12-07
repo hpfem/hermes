@@ -30,10 +30,6 @@ const double T1 = 30.0;       // Prescribed temperature on Gamma_left.
 const double T0 = 20.0;       // Outer temperature on Gamma_bottom.
 const double H  = 0.05;       // Heat flux on Gamma_bottom.
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-  { return T1; }
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -54,8 +50,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_OUTER, BDY_INNER));
   bc_types.add_bc_newton(BDY_BOTTOM);
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_const(BDY_LEFT, T1);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
