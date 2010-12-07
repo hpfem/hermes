@@ -77,14 +77,14 @@ double CURRENT_TIME = 0.0;
 
 // Essential (Dirichlet) boundary condition values for T.
 scalar essential_bc_values_T(double x, double y, double time)
-  {
-    double current_reactor_temperature = TEMP_REACTOR_MAX;
+{
+  double current_reactor_temperature = TEMP_REACTOR_MAX;
   if (time < REACTOR_START_TIME) {
-      current_reactor_temperature = TEMP_INITIAL +
-      (time/REACTOR_START_TIME)*(TEMP_REACTOR_MAX - TEMP_INITIAL);
-    }
-    return current_reactor_temperature;
+    current_reactor_temperature = TEMP_INITIAL +
+    (time/REACTOR_START_TIME)*(TEMP_REACTOR_MAX - TEMP_INITIAL);
   }
+  return current_reactor_temperature;
+}
 
 // Weak forms.
 #include "forms.cpp"
