@@ -27,6 +27,9 @@
 class HERMES_API HcurlSpace : public Space
 {
 public:
+  HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset = NULL);
+  HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset = NULL);
+
   // For backward compatibility.
   HcurlSpace(Mesh* mesh, BCTypes* bc_types,
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
