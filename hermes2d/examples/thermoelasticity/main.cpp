@@ -72,24 +72,16 @@ const double g = 9.81;
 const double alpha = 13e-6;              // See http://hyperphysics.phy-astr.gsu.edu/hbase/tables/thexp.html.
 
 //  Boundary markers.
-const int marker_bottom = 1;
-const int marker_sides = 2;
-const int marker_top = 3;
-const int marker_holes = 4;
-
-// Boundary condition types.
-BCType bc_types_x(int marker)
-  { return (marker == marker_bottom) ? BC_ESSENTIAL : BC_NATURAL; }
-
-BCType bc_types_y(int marker)
-  { return (marker == marker_bottom) ? BC_ESSENTIAL : BC_NATURAL; }
-
-BCType bc_types_t(int marker)
-  { return (marker == marker_holes) ? BC_ESSENTIAL : BC_NATURAL; }
+const int BDY_BOTTOM = 1;
+const int BDY_SIDES = 2;
+const int BDY_TOP = 3;
+const int BDY_HOLES = 4;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values_temp(int ess_bdy_marker, double x, double y)
-  { return TEMP_INNER; }
+{ 
+  return TEMP_INNER; 
+}
 
 // Weak forms.
 #include "forms.cpp"
@@ -109,10 +101,19 @@ int main(int argc, char* argv[])
   ymesh.copy(&xmesh);                  // Ydisp will share master mesh with xdisp.
   tmesh.copy(&xmesh);                  // Temp will share master mesh with xdisp.
 
+  // Enter boundary markers.
+  BCTypes bc_types_x_y;
+  bc_types_x_y.add_bc_dirichlet(BDY_BOTTOM);
+  bc_types_x_y.add_bc_neumann(Hermes::Tuple<int>(BDY_SIDES, BDY_TOP, BDY_HOLES));
+
+  BCTypes bc_types_t;
+  bc_types_t.add_bc_dirichlet(BDY_HOLES);
+  bc_types_t.add_bc_neumann(Hermes::Tuple<int>(BDY_SIDES, BDY_TOP, BDY_BOTTOM)); 
+
   // Create H1 spaces with default shapesets.
-  H1Space xdisp(&xmesh, bc_types_x, NULL, P_INIT_DISP);
-  H1Space ydisp(MULTI ? &ymesh : &xmesh, bc_types_y, NULL, P_INIT_DISP);
-  H1Space temp(MULTI ? &tmesh : &xmesh, bc_types_t, essential_bc_values_temp, P_INIT_TEMP);
+  H1Space xdisp(&xmesh, &bc_types_x_y, (BCValues*) NULL, P_INIT_DISP);
+  H1Space ydisp(MULTI ? &ymesh : &xmesh, &bc_types_x_y, (BCValues*) NULL, P_INIT_DISP);
+  H1Space temp(MULTI ? &tmesh : &xmesh, &bc_types_t, essential_bc_values_temp, P_INIT_TEMP);
 
   // Initialize the weak formulation.
   WeakForm wf(3);

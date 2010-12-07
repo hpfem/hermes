@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &mesh);
 
   // Perform uniform mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Create an L2 space with default shapeset.
   L2Space space(&mesh, P_INIT);

@@ -40,9 +40,9 @@ double KAPPA = 1.4;         // Kappa.
 
 double t = 0;
 
-// Mesh boundary markers.
-#define BDY_SOLID_WALL 1
-#define BDY_INLET_OUTLET 2
+// Boundary markers.
+const int BDY_SOLID_WALL = 1;
+const int BDY_INLET_OUTLET = 2;
 
 // Numerical flux.
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h

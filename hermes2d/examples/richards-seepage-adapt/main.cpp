@@ -145,17 +145,12 @@ bool is_in_mat_3(double x, double y) {
 #endif
 
 // Boundary markers.
-int BDY_1 = 1;
-int BDY_3 = 3;
-int BDY_4 = 4;
-int BDY_6 = 6;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == BDY_3) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
+const int BDY_1 = 1;
+const int BDY_2 = 2;
+const int BDY_3 = 3;
+const int BDY_4 = 4;
+const int BDY_5 = 5;
+const int BDY_6 = 6;
 
 // Initial condition.
 double init_cond(double x, double y, double& dx, double& dy) {
@@ -188,15 +183,21 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(3, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_3, INIT_REF_NUM_BDY);
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_3);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_5));
+  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_1, BDY_4, BDY_6));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Create an H1 space for the initial coarse mesh solution.
-  H1Space init_space(&basemesh, bc_types, essential_bc_values, P_INIT);
+  H1Space init_space(&basemesh, &bc_types, essential_bc_values, P_INIT);
 
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

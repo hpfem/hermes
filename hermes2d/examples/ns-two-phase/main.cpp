@@ -33,28 +33,8 @@ const int P_INIT_YVEL = 2;
 const int P_INIT_PRESS = 1;
 const int P_INIT_LSET = 1;
 
-// Initial conditions for velocity, pressure, and level-set function.
-BCType xvel_bc_types(int marker)
-{ 
-/*  if (marker == 1) return BC_ESSENTIAL; 
-  else return BC_NONE;*/
-    return BC_ESSENTIAL;
-}
-
-
-BCType yvel_bc_types(int marker)
-{ 
-/*  if ((marker == 2) || (marker == 3)) return BC_ESSENTIAL; 
-  else return BC_NONE;*/
-     return BC_ESSENTIAL;
-}
-
-
-BCType lset_bc_types(int marker)
-{ 
-//  return BC_NONE; 
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_DIRICHLET = 1;
 
 scalar essential_bc_values_lset(int essential_marker, double x, double y)
 {
@@ -62,12 +42,6 @@ scalar essential_bc_values_lset(int essential_marker, double x, double y)
   if ((marker == 1) && (x > 0.5)) return -0.5;
   if ((marker == 2) || (marker == 3)) return 0.5 - x;*/
   return 0.0;
-}
-
-
-BCType press_bc_types(int marker)
-{ 
-  return BC_NONE;
 }
 
 // Weak forms.
@@ -191,11 +165,16 @@ int main(int argc, char* argv[])
   mesh2.refine_all_elements();
   mesh2.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
   // Spaces for velocities and pressure.
-  H1Space xvel(&mesh1, xvel_bc_types, NULL, P_INIT_XVEL);
-  H1Space yvel(&mesh1, yvel_bc_types, NULL, P_INIT_YVEL);
-  H1Space press(&mesh1, press_bc_types, NULL, P_INIT_PRESS);
-  H1Space lset(&mesh2, xvel_bc_types, essential_bc_values_lset, P_INIT_LSET);
+  H1Space xvel(&mesh1, &bc_types, (BCValues*) NULL, P_INIT_XVEL);
+  H1Space yvel(&mesh1, &bc_types, (BCValues*) NULL, P_INIT_YVEL);
+  H1Space press(&mesh1, (BCTypes *) NULL, (BCValues*) NULL, P_INIT_PRESS);
+  H1Space lset(&mesh2, &bc_types, essential_bc_values_lset, P_INIT_LSET);
+
   int ndof_1 = xvel.Space::get_num_dofs();
   int ndof_2 = yvel.Space::get_num_dofs();
   int ndof_3 = press.Space::get_num_dofs();

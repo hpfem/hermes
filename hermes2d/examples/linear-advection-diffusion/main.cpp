@@ -62,17 +62,12 @@ const double B1 = 1., B2 = 1.;           // Advection direction, div(B) = 0.
 
 // Boundary markers.
 const int BDY_LAYER = 2;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+const int BDY_REST = 1;
 
 // Essemtial (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
-    if (ess_bdy_marker == 1) return 1;
+    if (ess_bdy_marker == BDY_REST) return 1;
     else return 2 - pow(x, 0.1) - pow(y, 0.1);
 }
 
@@ -91,8 +86,12 @@ int main(int argc, char* argv[])
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_LAYER, INIT_REF_NUM_BDY);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_LAYER, BDY_REST));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

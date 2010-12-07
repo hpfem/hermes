@@ -87,12 +87,8 @@ double SIGMA_A_3 = SIGMA_T_3 - SIGMA_S_3;
 double SIGMA_A_4 = SIGMA_T_4 - SIGMA_S_4;
 double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == 1) return BC_NATURAL;
-  else return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_NEUMANN = 1;
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(int ess_bdy_marker, double x, double y)
@@ -111,10 +107,14 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial uniform mesh refinement.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NEUMANN));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
