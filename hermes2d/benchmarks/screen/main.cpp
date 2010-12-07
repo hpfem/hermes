@@ -79,10 +79,25 @@ const int BDY_LEFT = 4;
 double2 tau[5] = { { 0, 0}, { 1, 0 },  { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
 // Essential boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values_top(double x, double y)
 {
   scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[ess_bdy_marker][0] + exact1(x, y, dx, dy)*tau[ess_bdy_marker][1];
+  return exact0(x, y, dx, dy)*tau[3][0] + exact1(x, y, dx, dy)*tau[3][1];
+}
+scalar essential_bc_values_right(double x, double y)
+{
+  scalar dx, dy;
+  return exact0(x, y, dx, dy)*tau[2][0] + exact1(x, y, dx, dy)*tau[2][1];
+}
+scalar essential_bc_values_bottom(double x, double y)
+{
+  scalar dx, dy;
+  return exact0(x, y, dx, dy)*tau[1][0] + exact1(x, y, dx, dy)*tau[1][1];
+}
+scalar essential_bc_values_left(double x, double y)
+{
+  scalar dx, dy;
+  return exact0(x, y, dx, dy)*tau[4][0] + exact1(x, y, dx, dy)*tau[4][1];
 }
 
 // Weak forms.
@@ -107,8 +122,15 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_TOP, essential_bc_values_top);
+  bc_values.add_function(BDY_RIGHT, essential_bc_values_right);
+  bc_values.add_function(BDY_BOTTOM, essential_bc_values_bottom);
+  bc_values.add_function(BDY_LEFT, essential_bc_values_left);
+
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
