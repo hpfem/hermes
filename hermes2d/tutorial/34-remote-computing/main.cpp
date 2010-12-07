@@ -43,12 +43,6 @@ double temp_ext(double t) {
 // Boundary markers.
 const int BDY_GROUND = 1, BDY_AIR = 2;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return T_INIT;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -68,8 +62,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_GROUND);
   bc_types.add_bc_newton(BDY_AIR);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_const(BDY_GROUND, T_INIT);
+
   // Initialize an H1 space with default shepeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
@@ -173,8 +171,8 @@ int main(int argc, char* argv[])
   info("Visualizing Mesh and Orders extracted from the Solution.");
  
   int p_init = 1;
-  // The NULLs are for bc_types() and essential_bc_values().
-  H1Space space_from_file(sln_from_file.get_mesh(), (BCTypes *) NULL, (BCValues *) NULL, p_init);
+
+  H1Space space_from_file(sln_from_file.get_mesh(), &bc_types, &bc_values, p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
   OrderView oview("Saved Solution -> Space", new WinGeom(920, 0, 450, 600));
   oview.show(&space_from_file);

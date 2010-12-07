@@ -36,65 +36,27 @@ const double ERR_STOP = 0.1;      // Stopping criterion for adaptivity (rel. err
                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;      // Adaptivity process stops when the number of degrees of freedom grows
                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Problem parameters.
+double a_11(double x, double y) { if (y > 0) return 1 + x*x + y*y; else return 1;}
+double a_22(double x, double y) { if (y > 0) return 1; else return 1 + x*x + y*y;}
+double a_12(double x, double y) { return 1; }
+double a_21(double x, double y) { return 1;}
+double a_1(double x, double y) { return 0.0;}
+double a_2(double x, double y) { return 0.0;}
+double a_0(double x, double y) { return 0.0;}
+double rhs(double x, double y) { return 1 + x*x + y*y;}
+double g_D(double x, double y) { return -cos(M_PI*x);}
+double g_N(double x, double y) { return 0;}
 
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
 const int BDY_NEUMANN = 2;
 
-// Problem parameters.
-double a_11(double x, double y) {
-  if (y > 0) return 1 + x*x + y*y;
-  else return 1;
-}
-
-double a_22(double x, double y) {
-  if (y > 0) return 1;
-  else return 1 + x*x + y*y;
-}
-
-double a_12(double x, double y) {
-  return 1;
-}
-
-double a_21(double x, double y) {
-  return 1;
-}
-
-double a_1(double x, double y) {
-  return 0.0;
-}
-
-double a_2(double x, double y) {
-  return 0.0;
-}
-
-double a_0(double x, double y) {
-  return 0.0;
-}
-
-double rhs(double x, double y) {
-  return 1 + x*x + y*y;
-}
-
-double g_D(double x, double y) {
-  return -cos(M_PI*x);
-}
-
-double g_N(double x, double y) {
-  return 0;
-}
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == 1) return BC_ESSENTIAL;
-  else return BC_NATURAL;
-}
-
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values(double x, double y)
 {
   return g_D(x, y);
 }
@@ -116,8 +78,17 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

@@ -47,13 +47,7 @@ Real dlam_du(Real u)
 }
 
 // Boundary markers.
-const int BDY_ESSENTIAL = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int marker, double x, double y)
-{
-  return 0;
-}
+const int BDY_DIRICHLET = 1;
 
 // Weak forms.
 #include "forms.cpp"
@@ -71,10 +65,14 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_ESSENTIAL);
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
   // Initialize the weak formulation.

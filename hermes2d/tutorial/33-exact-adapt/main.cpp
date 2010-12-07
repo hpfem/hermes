@@ -61,8 +61,15 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
 
+  
+  // Enter boundary markers.
+  BCTypes bc_types;
+  
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+ 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, (BCTypes *) NULL, (BCValues*) NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf_dummy;

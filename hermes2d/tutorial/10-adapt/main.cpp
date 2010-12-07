@@ -71,12 +71,6 @@ const double EPS_1 = 1.0;       // Relative electric permittivity in Omega_1.
 const double EPS_2 = 10.0;      // Relative electric permittivity in Omega_2.
 const double VOLTAGE = 50.0;    // Voltage on the stator.
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return (ess_bdy_marker == STATOR_BDY) ? VOLTAGE : 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -91,8 +85,13 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(OUTER_BDY, STATOR_BDY));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_const(STATOR_BDY, VOLTAGE);
+  bc_values.add_const(OUTER_BDY, 0.0);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

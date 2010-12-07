@@ -35,8 +35,8 @@ const double CONV_EXP = 1.0;      // Default value is 1.0. This parameter influe
                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;      // Adaptivity process stops when the number of degrees of freedom grows
                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // This function can be modified.
 scalar f(double x, double y, double& dx, double& dy)
@@ -57,14 +57,15 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
 
+  
   // Enter boundary markers.
-  // (If no markers are entered, default is a natural BC).
   BCTypes bc_types;
+  
+  // Enter Dirichlet boundary values.
   BCValues bc_values;
-
+ 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation.
   WeakForm wf;

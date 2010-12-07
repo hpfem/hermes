@@ -30,6 +30,9 @@ public:
   H1Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init = Ord2(1,1),
           Shapeset* shapeset = NULL);
 
+  H1Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init = 1,
+          Shapeset* shapeset = NULL);
+
   H1Space(Mesh* mesh = NULL, BCTypes* bc_types = NULL, scalar
           (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
           Shapeset* shapeset = NULL);

@@ -30,8 +30,8 @@ const double T_FINAL = 2*TAU + 1e-4;        // Time interval length.
 const int TIME_DISCR = 2;        // 1 for implicit Euler, 2 for Crank-Nicolson.
 const double NEWTON_TOL = 1e-5;  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100; // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants
 const double H = 1;              // Planck constant 6.626068e-34.
@@ -48,17 +48,8 @@ scalar init_cond(double x, double y, scalar& dx, scalar& dy)
   return val;
 }
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
- return 0;
-}
+// Boundary markers.
+const int BDY_DIRICHLET_1 = 1, BDY_DIRICHLET_2 = 2, BDY_DIRICHLET_3 = 3, BDY_DIRICHLET_4 = 4;
 
 // Weak forms.
 #include "forms.cpp"
@@ -73,8 +64,16 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 

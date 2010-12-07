@@ -44,7 +44,7 @@ double TIME = 0.0;
 
 const double SIGMA = 1.0;
 const double ALPHA = 0.0;
-const double GAMMA = 1 - 1/sqrt(2);
+const double GAMMA = 1 - 1/sqrt((double)2);
 enum TimeDiscretization {IE, SDIRK};
 TimeDiscretization method = SDIRK;
 
@@ -71,12 +71,6 @@ double dir_lift(double x, double y, double& dx, double& dy) {
 
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition markers.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
 
 // Heat sources (forcing term in accordance with exact solution).
 template<typename Real>
@@ -134,9 +128,13 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+  
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);

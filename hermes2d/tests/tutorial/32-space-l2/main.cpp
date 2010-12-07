@@ -4,8 +4,8 @@
 
 const int INIT_REF_NUM = 1;    // Number of initial uniform mesh refinements.
 const int P_INIT = 3;          // Polynomial degree of mesh elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Projected function.
 scalar F(double x, double y, double& dx, double& dy)
@@ -25,11 +25,15 @@ int main(int argc, char* argv[])
   // Perform uniform mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Create an L2 space with default shapeset.
-  L2Space space(&mesh, P_INIT);
+  // Enter boundary markers.
+  BCTypes bc_types;
 
-  // View basis functions.
-  BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+
+  // Create an L2 space with default shapeset.
+  L2Space space(&mesh, &bc_types, &bc_values, P_INIT);
+
 
   // Assemble and solve the finite element problem.
   WeakForm wf_dummy;
@@ -39,12 +43,6 @@ int main(int argc, char* argv[])
   Solution sln_exact(&mesh, F);
 
   OGProjection::project_global(&space, &sln_exact, &sln, matrix_solver, HERMES_L2_NORM);
-
-  // Visualize the solution.
-  ScalarView view1("Projection", new WinGeom(610, 0, 600, 500));
-
-  // It will "Exception: SegFault" if we do not use View::wait() or View::close(). 
-  view1.close();
 
   bool success = true;
 

@@ -33,28 +33,18 @@ const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows
                                          // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Boundary markers.
+const int OUTER_BDY = 1, STATOR_BDY = 2;
 
 // Problem parameters.
-const int OMEGA_1 = 1;
-const int OMEGA_2 = 2;
-const int STATOR_BDY = 2;
+const int MATERIAL_1 = 1;
+const int MATERIAL_2 = 2;
 const double EPS_1 = 1.0;                // Relative electric permittivity in Omega_1.
 const double EPS_2 = 10.0;               // Relative electric permittivity in Omega_2.
 const double VOLTAGE = 50.0;             // Voltage on the stator.
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return (ess_bdy_marker == STATOR_BDY) ? VOLTAGE : 0.0;
-}
 
 // Weak forms.
 #include "forms.cpp"
@@ -66,13 +56,22 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("motor.mesh", &mesh);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(OUTER_BDY, STATOR_BDY));
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_const(STATOR_BDY, VOLTAGE);
+  bc_values.add_const(OUTER_BDY, 0.0);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(biform1), HERMES_SYM, OMEGA_1);
-  wf.add_matrix_form(callback(biform2), HERMES_SYM, OMEGA_2);
+  wf.add_matrix_form(callback(biform1), HERMES_SYM, MATERIAL_1);
+  wf.add_matrix_form(callback(biform2), HERMES_SYM, MATERIAL_2);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;

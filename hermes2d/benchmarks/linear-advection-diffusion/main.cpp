@@ -81,18 +81,13 @@ const double EPSILON = 0.01;           // Diffusivity.
 const double B1 = 0., B2 = 1.;         // Advection direction, div(B) = 0.
 
 // Boundary markers.
-const int NONZERO_DIRICHLET = 1;
-const int BOUNDARY_LAYER = 2;
-
-// Boundary markers.
 const int BDY_NONZERO_DIRICHLET = 1, BDY_LAYER = 2, BDY_RIGHT_LEFT = 3;
 
 // Essential (Dirichlet) boundary condition values.
 template<typename Real, typename Scalar>
-Scalar essential_bc_values(int ess_bdy_marker, Real x, Real y)
+Scalar essential_bc_values(Real x, Real y)
 {
-    if (ess_bdy_marker == BDY_NONZERO_DIRICHLET) return sin(M_PI*x);
-    else return 0;
+    return sin(M_PI*x);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,19 +131,26 @@ int main(int argc, char* argv[])
   else
     bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NONZERO_DIRICHLET, BDY_LAYER, BDY_RIGHT_LEFT));
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  if (method != DG) {
+    bc_values.add_function(BDY_NONZERO_DIRICHLET, essential_bc_values);
+    bc_values.add_zero(Hermes::Tuple<int>(BDY_LAYER, BDY_RIGHT_LEFT));
+  }
+
   // Create a space and refinement selector appropriate for the selected discretization method.
   Space *space;
   ProjBasedSelector *selector;
   ProjNormType norm;
   if (method != DG)
   {
-    space = new H1Space(&mesh, &bc_types, essential_bc_values, P_INIT);
+    space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
     selector = new H1ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
     norm = HERMES_H1_NORM;  // WARNING: In order to compare the errors with DG, L2 norm should be here.
   }
   else
   {
-    space = new L2Space(&mesh, &bc_types, NULL, Ord2(P_INIT));
+    space = new L2Space(&mesh, &bc_types, &bc_values, Ord2(P_INIT));
     selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
     norm = HERMES_L2_NORM;
   }
@@ -201,8 +203,10 @@ int main(int argc, char* argv[])
       wf.add_matrix_form_surf(callback(dg_interface_biform_advection), H2D_DG_INNER_EDGE);
       wf.add_matrix_form_surf(callback(dg_interface_biform_diffusion), H2D_DG_INNER_EDGE);
       wf.add_matrix_form_surf(callback(dg_boundary_biform_advection));
-      wf.add_matrix_form_surf(callback(dg_boundary_biform_diffusion));
-      wf.add_vector_form_surf(callback(dg_boundary_liform_advection));
+      wf.add_matrix_form_surf(callback(dg_boundary_biform_diffusion_1), 1);
+      wf.add_matrix_form_surf(callback(dg_boundary_biform_diffusion_2), 2);
+      wf.add_vector_form_surf(callback(dg_boundary_liform_advection_1), 1);
+      wf.add_vector_form_surf(callback(dg_boundary_liform_advection_2), 2);
       break;
   }
   
