@@ -29,8 +29,8 @@
 /// the function representing them.
 class HERMES_API BCValues {
 public:
-  BCValues(double* t) : t(t) {};
-  BCValues() {};
+  BCValues(double* t) : t(t) { t_set = true; };
+  BCValues() { t_set = false; };
   ~BCValues() {};
 
 protected:
@@ -57,6 +57,9 @@ protected:
 
   /// Current time. In the case of time_dependency.
   double* t;
+
+  /// Info flag that t has been set.
+  bool t_set;
   
 public:
   /// This function checks that there is either a function, or a value defined on one part
@@ -217,6 +220,9 @@ public:
   scalar calculate(int marker, double x, double y)
   {
     if(is_time_dep[marker]) {
+      if(!t_set)
+        error("Attempt to retrieve a value of a time-dependent function representing the Dirichlet BC without \
+              time set up for the current Space.");
       if(value_callbacks_time[marker] == NULL)
         error("Attempt to retrieve a value of a function representing the Dirichlet BC without \
               this being set up for the current Space.");
@@ -248,6 +254,7 @@ public:
       BCValues *bv = new BCValues();
       bv->is_time_dep = this->is_time_dep;
       bv->t = this->t;
+      bv->t_set = this->t_set;
       bv->value_callbacks = this->value_callbacks;
       bv->value_callbacks_time = this->value_callbacks_time;
       bv->value_constants = this->value_constants;
