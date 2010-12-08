@@ -27,8 +27,15 @@
 class HERMES_API HcurlSpace : public Space
 {
 public:
+  // Constructors for problems without Dirichlet BC.
+  HcurlSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset = NULL);
+  HcurlSpace(Mesh* mesh, BCTypes* bc_types, Ord2 p_init, Shapeset* shapeset = NULL);
+
   HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset = NULL);
   HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset = NULL);
+
+  // Common code for the constructors.
+  void init(Shapeset* shapeset, Ord2 p_init);
 
   // For backward compatibility.
   HcurlSpace(Mesh* mesh, BCTypes* bc_types,

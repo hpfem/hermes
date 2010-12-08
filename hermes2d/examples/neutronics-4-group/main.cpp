@@ -68,12 +68,6 @@ const int marker_core = 2;
 const int BDY_VACUUM = 1;
 const int BDY_SYM = 2;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
 // Physical data of the problem for the 4 energy groups.
 #include "physical_parameters.cpp"
 // Weak forms.
@@ -150,10 +144,10 @@ int main(int argc, char* argv[])
   bc_types.add_bc_newton(BDY_VACUUM);
 
   // Create H1 spaces with default shapesets.
-  H1Space space1(&mesh, &bc_types, essential_bc_values, P_INIT_1);
-  H1Space space2(&mesh, &bc_types, essential_bc_values, P_INIT_2);
-  H1Space space3(&mesh, &bc_types, essential_bc_values, P_INIT_3);
-  H1Space space4(&mesh, &bc_types, essential_bc_values, P_INIT_4);
+  H1Space space1(&mesh, &bc_types, P_INIT_1);
+  H1Space space2(&mesh, &bc_types, P_INIT_2);
+  H1Space space3(&mesh, &bc_types, P_INIT_3);
+  H1Space space4(&mesh, &bc_types, P_INIT_4);
   Hermes::Tuple<Space*> spaces(&space1, &space2, &space3, &space4);
   
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&space1, &space2, &space3, &space4));

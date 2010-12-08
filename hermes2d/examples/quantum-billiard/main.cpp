@@ -61,12 +61,6 @@ scalar init_cond_phi(double x, double y, scalar& dx, scalar& dy)
   return val;
 }
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
- return 0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -84,9 +78,13 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space.
-  H1Space* phi_space = new H1Space(&mesh, &bc_types, essential_bc_values, P_INIT);
-  H1Space* psi_space = new H1Space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space* phi_space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space* psi_space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(phi_space, psi_space));
   info("ndof = %d.", ndof);
 

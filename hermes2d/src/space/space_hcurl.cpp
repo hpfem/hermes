@@ -24,34 +24,7 @@ double** HcurlSpace::hcurl_proj_mat = NULL;
 double*  HcurlSpace::hcurl_chol_p   = NULL;
 int      HcurlSpace::hcurl_proj_ref = 0;
 
-HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset) 
-  : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
-{
-  if (shapeset == NULL)
-  {
-    this->shapeset = new HcurlShapeset;
-    own_shapeset = true;
-  }
-  if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
-
-  if (!hcurl_proj_ref++)
-  {
-    precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
-  }
-
-  proj_mat = hcurl_proj_mat;
-  chol_p   = hcurl_chol_p;
-
-  // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an Hcurl space.");
-  else this->set_uniform_order_internal(Ord2(p_init, p_init));
-
-  // enumerate basis functions
-  this->assign_dofs();
-}
-
-HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset)
-  : Space(mesh, shapeset, bc_types, bc_values, p_init)
+void HcurlSpace::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
   {
@@ -74,6 +47,30 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types, BCValues* bc_values, Ord2
 
   // enumerate basis functions
   this->assign_dofs();
+}
+
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset) 
+  : Space(mesh, shapeset, bc_types, (BCValues*) NULL, Ord2(p_init, p_init))
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types, Ord2 p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, bc_types, (BCValues*) NULL, p_init)
+{
+  init(shapeset, p_init);
+}
+
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset) 
+  : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, bc_types, bc_values, p_init)
+{
+  init(shapeset, p_init);
 }
 
 // All the following constructors are DEPRECATED!

@@ -15,8 +15,8 @@ const int P_INIT_1 = 2,                                   // Initial polynomial 
           P_INIT_3 = 2,                                   // Initial polynomial degree for approximation of group 3 fluxes.
           P_INIT_4 = 2;                                   // Initial polynomial degree for approximation of group 4 fluxes.
 const double ERROR_STOP = 1e-5;                           // Tolerance for the eigenvalue.
-const MatrixSolverType matrix_solver = SOLVER_UMFPACK;    // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                          // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";                // Name of the iterative method employed by AztecOO (ignored
                                                           // by the other solvers). 
                                                           // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -34,27 +34,13 @@ const int marker_reflector = 1;
 const int marker_core = 2;
 
 // Boundary markers.
-const int bc_vacuum = 1;
-const int bc_sym = 2;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
+const int BDY_VACUUM = 1;
+const int BDY_SYM = 2;
 
 // Physical data of the problem for the 4 energy groups.
 #include "physical_parameters.cpp"
 // Weak forms.
 #include "forms.cpp"
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Source function.
 void source_fn(int n, Hermes::Tuple<scalar*> values, scalar* out)
@@ -215,11 +201,16 @@ int main(int argc, char* argv[])
   iter3.set_const(&mesh, 1.00);
   iter4.set_const(&mesh, 1.00);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_neumann(BDY_SYM);
+  bc_types.add_bc_newton(BDY_VACUUM);
+
   // Create H1 spaces with default shapesets.
-  H1Space space1(&mesh, bc_types, essential_bc_values, P_INIT_1);
-  H1Space space2(&mesh, bc_types, essential_bc_values, P_INIT_2);
-  H1Space space3(&mesh, bc_types, essential_bc_values, P_INIT_3);
-  H1Space space4(&mesh, bc_types, essential_bc_values, P_INIT_4);
+  H1Space space1(&mesh, &bc_types, P_INIT_1);
+  H1Space space2(&mesh, &bc_types, P_INIT_2);
+  H1Space space3(&mesh, &bc_types, P_INIT_3);
+  H1Space space4(&mesh, &bc_types, P_INIT_4);
   Hermes::Tuple<Space*> spaces(&space1, &space2, &space3, &space4);
   
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&space1, &space2, &space3, &space4));
@@ -238,10 +229,10 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, callback(liform_1), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
   wf.add_vector_form(2, callback(liform_2), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
   wf.add_vector_form(3, callback(liform_3), marker_core, Hermes::Tuple<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_vacuum);
-  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_vacuum);
-  wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
-  wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), bc_vacuum);
+  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), BDY_VACUUM);
+  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), BDY_VACUUM);
+  wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), BDY_VACUUM);
+  wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), BDY_VACUUM);
 
   // Initialize the FE problem.
   bool is_linear = true;

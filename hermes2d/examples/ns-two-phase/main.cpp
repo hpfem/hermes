@@ -36,14 +36,6 @@ const int P_INIT_LSET = 1;
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
 
-scalar essential_bc_values_lset(int essential_marker, double x, double y)
-{
-/*  if ((marker == 1) && (x < 0.5)) return 0.5;
-  if ((marker == 1) && (x > 0.5)) return -0.5;
-  if ((marker == 2) || (marker == 3)) return 0.5 - x;*/
-  return 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -169,11 +161,15 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
+
   // Spaces for velocities and pressure.
-  H1Space xvel(&mesh1, &bc_types, (BCValues*) NULL, P_INIT_XVEL);
-  H1Space yvel(&mesh1, &bc_types, (BCValues*) NULL, P_INIT_YVEL);
-  H1Space press(&mesh1, (BCTypes *) NULL, (BCValues*) NULL, P_INIT_PRESS);
-  H1Space lset(&mesh2, &bc_types, essential_bc_values_lset, P_INIT_LSET);
+  H1Space xvel(&mesh1, &bc_types, P_INIT_XVEL);
+  H1Space yvel(&mesh1, &bc_types, P_INIT_YVEL);
+  H1Space press(&mesh1, (BCTypes *) NULL, P_INIT_PRESS);
+  H1Space lset(&mesh2, &bc_types, &bc_values, P_INIT_LSET);
 
   int ndof_1 = xvel.Space::get_num_dofs();
   int ndof_2 = yvel.Space::get_num_dofs();

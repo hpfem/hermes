@@ -86,13 +86,6 @@ const double J = 0.0000033333;
 const int BDY_DIRICHLET = 2;
 const int BDY_NEUMANN = 1;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-//  return 0;
-  return cplx(0.0,0.0);
-}
-
 // Geometry of the load.
 bool in_load(double x, double y)
 {
@@ -150,8 +143,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
   bc_types.add_bc_neumann(BDY_NEUMANN);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
+
   // Create an Hcurl space.
-  HcurlSpace space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

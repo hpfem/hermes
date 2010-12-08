@@ -28,7 +28,7 @@ set(WITH_TUTORIAL           YES)
 set(WITH_TESTS              YES)
 
 # Optional functionality:
-set(WITH_PYTHON             NO)
+set(WITH_PYTHON             YES)
 set(WITH_GLUT               YES)
 set(WITH_VIEWER_GUI         NO)
 set(WITH_UTIL               YES)
