@@ -18,8 +18,11 @@ int main(int argc, char* argv[])
   // (If no markers are entered, default is a natural BC).
   BCTypes bc_types;
 
-  // create an H1 space with default shapeset
-  H1Space space(&mesh, &bc_types, (BCValues*) NULL, 1);
+  // Enter Dirichlet boundary values (default is zero).
+  BCValues bc_values;
+
+  // Create an H1 space with default shapeset and natural BC.
+  H1Space space(&mesh, &bc_types, &bc_values, 1);
 
   // new code for the test
   int n_dof[10], dof_max[10];

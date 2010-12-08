@@ -179,7 +179,7 @@ int main(int argc, char* args[])
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM_LEFT, BDY_REST));
   
   // Create an L2 space.
-  L2Space space(&mesh, &bc_types, NULL, Ord2(P_INIT_H, P_INIT_V));
+  L2Space space(&mesh, &bc_types, Ord2(P_INIT_H, P_INIT_V));
   
   // Initialize refinement selector.
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

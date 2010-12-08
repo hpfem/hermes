@@ -72,12 +72,6 @@ const double lambda = 1.0;
 const int BDY_1 = 1, BDY_6 = 6;  // perfect conductor
 const int BDY_2 = 2, BDY_3 = 3, BDY_4 = 4, BDY_5 = 5; // impedance
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
 int main(int argc, char* argv[])
 {
   // Time measurement
@@ -98,8 +92,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_1, BDY_6));
   bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_1, BDY_6));
+
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

@@ -86,9 +86,6 @@ const double K = 100;
 // Boundary markers.
 const int OUTER_BDY = 1;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y) { return 0;}
-
 // Exact solution.
 #include "exact_solution.cpp"
 
@@ -117,9 +114,13 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(OUTER_BDY);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(OUTER_BDY);
+
   // Create H1 spaces with default shapeset for both displacement components.
-  H1Space u_space(&u_mesh, &bc_types, essential_bc_values, P_INIT_U);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types, essential_bc_values, P_INIT_V);
+  H1Space u_space(&u_mesh, &bc_types, &bc_values, P_INIT_U);
+  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types, &bc_values, P_INIT_V);
 
   // Initialize the weak formulation.
   WeakForm wf(2);

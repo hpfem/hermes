@@ -69,33 +69,27 @@ const int BDY_OUTER = 2;
 double TIME = 0;
 
 // Essential (Dirichlet) boundary condition values for x-velocity.
-scalar essential_bc_values_xvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == BDY_INNER) {
-    // Time-dependent surface velocity of inner circle.
-    double velocity;
-    if (TIME <= STARTUP_TIME) velocity = VEL * TIME/STARTUP_TIME;
-    else velocity = VEL;
-    double alpha = atan2(x, y);
-    double xvel = velocity*cos(alpha);
-    //printf("%g %g xvel = %g\n", x, y, xvel);
-    return xvel; 
-  }
-  else return 0;
+scalar essential_bc_values_xvel(double x, double y, double time) {
+  // Time-dependent surface velocity of inner circle.
+  double velocity;
+  if (time <= STARTUP_TIME) velocity = VEL * time/STARTUP_TIME;
+  else velocity = VEL;
+  double alpha = atan2(x, y);
+  double xvel = velocity*cos(alpha);
+  //printf("%g %g xvel = %g\n", x, y, xvel);
+  return xvel; 
 }
 
 // Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == BDY_INNER) {
-    // Time-dependent surface velocity of inner circle.
-    double velocity;
-    if (TIME <= STARTUP_TIME) velocity = VEL * TIME/STARTUP_TIME;
-    else velocity = VEL;
-    double alpha = atan2(x, y);
-    double yvel = -velocity*sin(alpha);
-    //printf("%g %g yvel = %g\n", x, y, yvel);
-    return yvel; 
-  }
-  else return 0;
+scalar essential_bc_values_yvel(double x, double y, double time) {
+  // Time-dependent surface velocity of inner circle.
+  double velocity;
+  if (time <= STARTUP_TIME) velocity = VEL * time/STARTUP_TIME;
+  else velocity = VEL;
+  double alpha = atan2(x, y);
+  double yvel = -velocity*sin(alpha);
+  //printf("%g %g yvel = %g\n", x, y, yvel);
+  return yvel; 
 }
 
 // Weak forms.
@@ -151,13 +145,22 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_INNER, BDY_OUTER));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_xvel(&TIME);
+  bc_values_xvel.add_timedep_function(BDY_INNER, essential_bc_values_xvel);
+  bc_values_xvel.add_zero(BDY_OUTER);
+
+  BCValues bc_values_yvel(&TIME);
+  bc_values_yvel.add_timedep_function(BDY_INNER, essential_bc_values_yvel);
+  bc_values_yvel.add_zero(BDY_OUTER);
+
   // Create spaces with default shapesets. 
-  H1Space xvel_space(&mesh, &bc_types, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &bc_types, essential_bc_values_yvel, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &bc_types, &bc_values_xvel, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &bc_types, &bc_values_yvel, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, (BCTypes *) NULL, (BCValues*) NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, (BCTypes *) NULL, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.

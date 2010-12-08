@@ -24,6 +24,58 @@ double** HdivSpace::hdiv_proj_mat = NULL;
 double*  HdivSpace::hdiv_chol_p   = NULL;
 int      HdivSpace::hdiv_proj_ref = 0;
 
+void HdivSpace::init(Shapeset* shapeset, Ord2 p_init)
+{
+  if (shapeset == NULL)
+  {
+    this->shapeset = new HdivShapeset;
+    own_shapeset = true;
+  }
+  if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
+
+  if (!hdiv_proj_ref++)
+  {
+    precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
+  }
+
+  proj_mat = hdiv_proj_mat;
+  chol_p   = hdiv_chol_p;
+
+  // set uniform poly order in elements
+  if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an Hdiv space.");
+  else this->set_uniform_order_internal(p_init);
+
+  // enumerate basis functions
+  this->assign_dofs();
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, bc_types, (BCValues*) NULL, Ord2(p_init, p_init))
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, Ord2 p_init, Shapeset* shapeset)
+   : Space(mesh, shapeset, bc_types, (BCValues*) NULL, p_init)
+{
+  init(shapeset, p_init);
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset)
+   : Space(mesh, shapeset, bc_types, bc_values, p_init)
+{
+  init(shapeset, p_init);
+}
+
+
+
+// the following constructors are DEPRECATED.
 HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types,
                  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, Ord2(p_init, p_init))
@@ -281,8 +333,27 @@ scalar* HdivSpace::get_bc_projection(SurfPos* surf_pos, int order)
     {
       double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
       surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
-      rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
+      // If the "old" callbacks are used.
+      if(surf_pos->space->bc_value_callback_by_coord != NULL)
+        rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
                          * (bc_value_callback_by_edge(surf_pos)) * el;
+      // If BCValues class is used.
+      else {
+        // If the BC on this part of the boundary is constant.
+        if(bc_values->is_const(surf_pos->marker))
+          rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
+          * (bc_values->calculate(surf_pos->marker)) * el;
+        // If the BC is not constant.
+        else {
+          // Find out the (x,y) coordinate.
+          double x, y;
+          Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
+          nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
+          // Calculate.
+          rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
+            * (bc_values->calculate(surf_pos->marker, x, y)) * el;
+        }
+      }
     }
   }
 

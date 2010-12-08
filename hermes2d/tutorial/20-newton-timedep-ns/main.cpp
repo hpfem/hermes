@@ -71,21 +71,11 @@ const int BDY_OBSTACLE = 5;
 double TIME = 0;
 
 // Essential (Dirichlet) boundary condition values for x-velocity.
-scalar essential_bc_values_xvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == BDY_LEFT) 
-{
-    // Time-dependent parabolic profile at inlet.
-    double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); // Peak value VEL_INLET at y = H/2.
-    if (TIME <= STARTUP_TIME) return val_y * TIME/STARTUP_TIME;
-    else return val_y;
-  }
-  else return 0;
-}
-
-// Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(int ess_bdy_marker, double x, double y) 
-{
-  return 0;
+scalar essential_bc_values_xvel(double x, double y, double time) {
+  // Time-dependent parabolic profile at inlet.
+  double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); // Peak value VEL_INLET at y = H/2.
+  if (time <= STARTUP_TIME) return val_y * time/STARTUP_TIME;
+  else return val_y;
 }
 
 // Weak forms.
@@ -111,9 +101,17 @@ int main(int argc, char* argv[])
   yvel_bc_type.add_bc_none(BDY_RIGHT);
   yvel_bc_type.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_x(&TIME);
+  bc_values_x.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
+  bc_values_x.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
+  
+  BCValues bc_values_y;
+  bc_values_y.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+
   // Spaces for velocity components and pressure.
-  H1Space xvel_space(&mesh, &xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &yvel_bc_type, (BCValues *) NULL, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &xvel_bc_type, &bc_values_x, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &yvel_bc_type, &bc_values_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else

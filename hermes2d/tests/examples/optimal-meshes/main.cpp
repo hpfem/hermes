@@ -19,6 +19,10 @@ scalar init_cond(double x, double y, double& dx, double& dy)
   return (x - x*x) * exp(x);
 }
 
+// Boundary markers.
+const int BDY_LEFT_RIGHT = 1;
+const int BDY_TOP_BOTTOM = 2;
+
 int main(int argc, char* argv[])
 {
   // Read the command-line arguments.
@@ -72,12 +76,12 @@ int main(int argc, char* argv[])
   Mesh mesh;
   mesh.create(nv, verts, nt, tris, nq, quads, nm, mark);
 
-  // Enter boundary markers 
-  // (If no markers are entered, default is a natural BC).
+  // Enter boundary markers.
   BCTypes bc_types;
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, (BCValues *) NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, P_INIT);
 
   // Set element poly orders.
   space.set_element_order(0, H2D_MAKE_QUAD_ORDER(o0, 1));

@@ -188,17 +188,6 @@ Real q(Real x, Real y) {
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
- 
-scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -229,9 +218,13 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
+
   // Create H1 spaces with default shapesets.
-  H1Space space_T(&mesh_T, &bc_types, essential_bc_values_T, P_INIT);
-  H1Space space_phi(&mesh_phi, &bc_types, essential_bc_values_phi, P_INIT);
+  H1Space space_T(&mesh_T, &bc_types, &bc_values, P_INIT);
+  H1Space space_phi(&mesh_phi, &bc_types, &bc_values, P_INIT);
 
   Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
   int ndof = Space::get_num_dofs(spaces); 

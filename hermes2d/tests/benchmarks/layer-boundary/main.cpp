@@ -55,8 +55,8 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double K = 1e2;
@@ -64,17 +64,8 @@ const double K = 1e2;
 // Exact solution
 #include "exact_solution.cpp"
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
+// Boundary markers.
+const int BDY_DIRICHLET = 1;
 
 // Weak forms.
 #include "forms.cpp"
@@ -88,10 +79,18 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(1, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_REF_NUM_BDY);
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

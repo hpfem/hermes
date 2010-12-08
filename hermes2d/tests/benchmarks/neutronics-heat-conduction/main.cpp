@@ -16,8 +16,8 @@ const double T_FINAL = 10.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double CT = 1.0;
@@ -88,6 +88,9 @@ Real PHI_FTIME() {
   return 1+exp(rF*TIME);
 }
 
+// Boundary markers.
+const int BDY_DIRICHLET = 1; 
+
 template<typename Real>
 Real DPHI_FTIME() {
 //  return DT_FTIME<Real>();
@@ -124,17 +127,6 @@ Real q(Real x, Real y) {
          (CF*PHIt*x*y*sx*sy*(nu*xsfiss-xsa_ref*(1 + doppler_coeff*(-sqrt(Tref) + sqrt(CT*Tt*sx*sy)))))/(LX*LY);
 }
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
- 
-scalar essential_bc_values_phi(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -160,11 +152,15 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(1);
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
 
   // Create H1 spaces with default shapesets.
-  H1Space space_T(&mesh, &bc_types, essential_bc_values_T, P_INIT);
-  H1Space space_phi(&mesh, &bc_types, essential_bc_values_phi, P_INIT);
+  H1Space space_T(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space_phi(&mesh, &bc_types, &bc_values, P_INIT);
   Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
 
   // Exact solutions for error evaluation.

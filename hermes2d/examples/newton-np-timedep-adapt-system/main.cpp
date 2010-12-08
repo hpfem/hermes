@@ -128,17 +128,6 @@ const int BYD_SIDE = 1;
 const int BYD_TOP = 2;
 const int BYD_BOT = 3;
 
-// Diricleht Boundary conditions for Poisson equation.
-scalar C_essential_bc_values(int ess_bdy_marker, double x, double y) {
-  return 0;
-}
-
-// Diricleht Boundary conditions for Poisson equation.
-scalar phi_essential_bc_values(int ess_bdy_marker, double x, double y) {
-  return ess_bdy_marker == BYD_TOP ? VOLTAGE : 0.0;
-}
-
-
 scalar voltage_ic(double x, double y, double &dx, double &dy) {
   // y^2 function for the domain.
   //return (y+100e-6) * (y+100e-6) / (40000e-12);
@@ -173,9 +162,17 @@ int main (int argc, char* argv[]) {
   phi_bc_types.add_bc_neumann(BYD_SIDE);
   phi_bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BYD_TOP, BYD_BOT));
 
+  // Enter Dirichlet boundary values.
+  BCValues phi_bc_values;
+  phi_bc_values.add_const(BYD_TOP, VOLTAGE);
+  phi_bc_values.add_zero(BYD_BOT);
+
+  BCValues C_bc_values;
+  C_bc_values.add_zero(Hermes::Tuple<int>(BYD_SIDE, BYD_TOP, BYD_BOT));
+
   // Spaces for concentration and the voltage.
-  H1Space C(&Cmesh, &C_bc_types, C_essential_bc_values, P_INIT);
-  H1Space phi(MULTIMESH ? &phimesh : &Cmesh, &phi_bc_types, phi_essential_bc_values, P_INIT);
+  H1Space C(&Cmesh, &C_bc_types, &C_bc_values, P_INIT);
+  H1Space phi(MULTIMESH ? &phimesh : &Cmesh, &phi_bc_types, &phi_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C, &phi));
 
   Solution C_sln, C_ref_sln;

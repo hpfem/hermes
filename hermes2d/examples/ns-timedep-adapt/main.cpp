@@ -102,20 +102,11 @@ const int BDY_LEFT = 4;
 const int BDY_OBSTACLE = 5;
 
 // Boundary condition values for x-velocity
-scalar essential_bc_values_xvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == BDY_LEFT) {
-    // time-dependent inlet velocity (parabolic profile)
-    double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); //parabolic profile with peak VEL_INLET at y = H/2
-    if (TIME <= STARTUP_TIME) return val_y * TIME/STARTUP_TIME;
-    else return val_y;
-  }
-  else return 0;
-}
-
-// Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(int ess_bdy_marker, double x, double y) 
-{
-  return 0;
+scalar essential_bc_values_xvel(double x, double y, double time) {
+  // time-dependent inlet velocity (parabolic profile)
+  double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); //parabolic profile with peak VEL_INLET at y = H/2
+  if (time <= STARTUP_TIME) return val_y * time/STARTUP_TIME;
+  else return val_y;
 }
 
 // Weak forms
@@ -152,13 +143,21 @@ int main(int argc, char* argv[])
   bc_types.add_bc_none(BDY_RIGHT);
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_xvel(&TIME);
+  bc_values_xvel.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
+  bc_values_xvel.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
+
+  BCValues bc_values_yvel;
+  bc_values_yvel.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+
   // Create spaces with default shapesets. 
-  H1Space xvel_space(&mesh, &bc_types, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &bc_types, essential_bc_values_yvel, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &bc_types, &bc_values_xvel, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &bc_types, &bc_values_yvel, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, (BCTypes *) NULL, (BCValues*) NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, (BCTypes *) NULL, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.

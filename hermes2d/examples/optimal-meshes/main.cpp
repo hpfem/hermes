@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 

@@ -62,20 +62,8 @@ const int marker_reflector = 1;
 const int marker_core = 2;
 
 // Boundary markers.
-const int bc_vacuum = 1;
-const int bc_sym = 2;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
+const int BDY_VACUUM = 1;
+const int BDY_SYM = 2;
 
 // Power iteration control.
 
@@ -388,9 +376,14 @@ int main(int argc, char* argv[])
   // Define a macro for easier manipulation with Solution*/MeshFunction* pairs.
   #define mkptr(a) slptr_##a, mfptr_##a
   
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_neumann(BDY_SYM);
+  bc_types.add_bc_newton(BDY_VACUUM);
+  
   // Create the approximation spaces with the default shapeset.
   Hermes::Tuple<Space *> spaces;
-  for_each_group(g) spaces.push_back(new H1Space(meshes[g], bc_types, essential_bc_values, P_INIT[g]));
+  for_each_group(g) spaces.push_back(new H1Space(meshes[g], &bc_types, P_INIT[g]));
 
   // Initialize the weak formulation.
   WeakForm wf(N_GROUPS);
@@ -405,10 +398,10 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, callback(liform_1), marker_core, mfptr_pow_iter_slns);
   wf.add_vector_form(2, callback(liform_2), marker_core, mfptr_pow_iter_slns);
   wf.add_vector_form(3, callback(liform_3), marker_core, mfptr_pow_iter_slns);
-  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_vacuum);
-  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_vacuum);
-  wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), bc_vacuum);
-  wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), bc_vacuum);
+  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), BDY_VACUUM);
+  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), BDY_VACUUM);
+  wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), BDY_VACUUM);
+  wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), BDY_VACUUM);
 
   // Initialize and solve coarse mesh problem.
   info("Coarse mesh power iteration, %d + %d + %d + %d = %d ndof:", report_num_dofs(spaces));

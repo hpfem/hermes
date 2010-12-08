@@ -79,8 +79,12 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 

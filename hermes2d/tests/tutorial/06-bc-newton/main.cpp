@@ -14,15 +14,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
                                                   // SOLVER_MUMPS, and more are coming.
 
 // Boundary markers.
-const int NEWTON_BDY = 1;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-  { return (marker == 3) ? BC_ESSENTIAL : BC_NATURAL; }
-
-// Function values for essential(Dirichlet) boundary markers.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-  { return T1; }
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
 template<typename Real, typename Scalar>
 Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -57,14 +49,26 @@ int main(int argc, char* argv[])
   for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
-  // Create an H1 space.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_OUTER, BDY_INNER));
+  bc_types.add_bc_newton(BDY_BOTTOM);
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_const(BDY_LEFT, T1);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form));
-  wf.add_matrix_form_surf(callback(bilinear_form_surf), NEWTON_BDY);
-  wf.add_vector_form_surf(callback(linear_form_surf), NEWTON_BDY);
+  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_BOTTOM);
+  wf.add_vector_form_surf(callback(linear_form_surf), BDY_BOTTOM);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10

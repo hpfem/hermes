@@ -96,32 +96,14 @@ const std::string USE_ADAPTIVE("adapt");
 
 
 /*** Boundary types and conditions ***/
-
-// Poisson takes Dirichlet and Neumann boundaries
-BCType phi_bc_types(int marker) {
-  return (marker == SIDE_MARKER || (marker == TOP_MARKER && VOLT_BOUNDARY == 2)) 
-    ? BC_NATURAL : BC_ESSENTIAL;
-}
-
-// Nernst-Planck takes Neumann boundaries
-BCType C_bc_types(int marker) {
-  return BC_NATURAL;
-}
-
-// Diricleht Boundary conditions for Poisson equation.
-scalar C_essential_bc_values(int ess_bdy_marker, double x, double y) {
-  return 0;
-}
-
-// Diricleht Boundary conditions for Poisson equation.
-scalar phi_essential_bc_values(int ess_bdy_marker, double x, double y) {
-  return ess_bdy_marker == TOP_MARKER ? VOLTAGE : 0.0;
-}
-
 template<class Real, class Scalar>
 Scalar linear_form_surf_top(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
   return -E_FIELD * int_v<Real, Scalar>(n, wt, v);
 }
+// Boundary markers.
+const int BYD_SIDE = 1;
+const int BYD_TOP = 2;
+const int BYD_BOT = 3;
 
 scalar voltage_ic(double x, double y, double &dx, double &dy) {
   // y^2 function for the domain.
@@ -145,9 +127,23 @@ int main (int argc, char* argv[]) {
   Cmesh.copy(&basemesh);
   phimesh.copy(&basemesh);
 
+  // Enter Neumann boundary markers for Nernst-Planck.
+  BCTypes C_bc_types;
+  C_bc_types.add_bc_neumann(Hermes::Tuple<int>(BYD_SIDE, BYD_TOP, BYD_BOT));
+
+  // Enter Dirichlet and Neumann boundary markers for Poisson.
+  BCTypes phi_bc_types;
+  phi_bc_types.add_bc_neumann(BYD_SIDE);
+  phi_bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BYD_TOP, BYD_BOT));
+
+  // Enter Dirichlet boundary values.
+  BCValues phi_bc_values;
+  phi_bc_values.add_const(BYD_TOP, VOLTAGE);
+  phi_bc_values.add_zero(BYD_BOT);
+
   // Spaces for concentration and the voltage.
-  H1Space C(&Cmesh, C_bc_types, C_essential_bc_values, P_INIT);
-  H1Space phi(MULTIMESH ? &phimesh : &Cmesh, phi_bc_types, phi_essential_bc_values, P_INIT);
+  H1Space C(&Cmesh, &C_bc_types, P_INIT);
+  H1Space phi(MULTIMESH ? &phimesh : &Cmesh, &phi_bc_types, &phi_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C, &phi));
 
   Solution C_sln, C_ref_sln;

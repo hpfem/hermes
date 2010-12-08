@@ -9,14 +9,11 @@ int P_INIT = 2;                                   // Initial polynomial degree i
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
                                                   // SOLVER_MUMPS, and more are coming.
 
-// boundary condition type (essential = Dirichlet).
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
 
-// function values for essential(Dirichlet) boundary markers.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(double x, double y)
 {
   return (-CONST_F/4.0)*(x*x + y*y);
 }
@@ -45,8 +42,18 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
   mesh.refine_all_elements();
 
-  // Create an H1 space.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_function(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), essential_bc_values);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;

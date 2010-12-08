@@ -42,13 +42,6 @@ const double x1    = 9.0;
 // Boundary markers.
 const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values_t(int ess_bdy_marker, double x, double y)
-{ return (ess_bdy_marker == BDY_LEFT) ? 1.0 : 0; }
-
-scalar essential_bc_values_c(int ess_bdy_marker, double x, double y)
-{ return 0; }
-
 // Initial conditions.
 scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
 { return (x <= x1) ? 1.0 : exp(x1 - x); }
@@ -75,9 +68,16 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(BDY_NEUMANN);
   bc_types.add_bc_newton(BDY_COOLED);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_t;
+  bc_values_t.add_const(BDY_LEFT, 1.0);
+
+  BCValues bc_values_c;
+  bc_values_c.add_zero(BDY_LEFT);
+
   // Create H1 spaces with default shapesets.
-  H1Space tspace(&mesh, &bc_types, essential_bc_values_t, P_INIT);
-  H1Space cspace(&mesh, &bc_types, essential_bc_values_c, P_INIT);
+  H1Space tspace(&mesh, &bc_types, &bc_values_t, P_INIT);
+  H1Space cspace(&mesh, &bc_types, &bc_values_c, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 

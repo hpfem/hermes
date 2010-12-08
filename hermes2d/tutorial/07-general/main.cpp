@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(BDY_VERTICAL);
 
   BCValues bc_values;
-  bc_values.add_function(essential_bc_values, BDY_HORIZONTAL);
+  bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);

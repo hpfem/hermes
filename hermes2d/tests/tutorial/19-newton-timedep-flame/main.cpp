@@ -14,8 +14,8 @@ const double TAU = 0.5;                // Time step.
 const double T_FINAL = 60.0;           // Time interval length.
 const double NEWTON_TOL = 1e-4;        // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 50;        // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants.
 const double Le    = 1.0;
@@ -25,17 +25,7 @@ const double kappa = 0.1;
 const double x1    = 9.0;
 
 // Boundary markers.
-int bdy_left = 1;
-
-// Boundary conditions.
-BCType bc_types(int marker)
-  { return (marker == bdy_left) ? BC_ESSENTIAL : BC_NATURAL; }
-
-scalar essential_bc_values_t(int ess_bdy_marker, double x, double y)
-  { return (ess_bdy_marker == bdy_left) ? 1.0 : 0; }
-
-scalar essential_bc_values_c(int ess_bdy_marker, double x, double y)
-  { return 0; }
+const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Initial conditions.
 scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
@@ -57,9 +47,22 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+  bc_types.add_bc_newton(BDY_COOLED);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_t;
+  bc_values_t.add_const(BDY_LEFT, 1.0);
+
+  BCValues bc_values_c;
+  bc_values_c.add_zero(BDY_LEFT);
+
   // Create H1 spaces with default shapesets.
-  H1Space tspace(&mesh, bc_types, essential_bc_values_t, P_INIT);
-  H1Space cspace(&mesh, bc_types, essential_bc_values_c, P_INIT);
+  H1Space tspace(&mesh, &bc_types, &bc_values_t, P_INIT);
+  H1Space cspace(&mesh, &bc_types, &bc_values_c, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 

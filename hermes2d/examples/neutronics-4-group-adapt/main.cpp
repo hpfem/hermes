@@ -97,12 +97,6 @@ const int marker_core = 2;
 const int BDY_VACUUM = 1;
 const int BDY_SYM = 2;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
 // Power iteration control.
 
 double k_eff = 1.0;         // Initial eigenvalue approximation.
@@ -293,7 +287,6 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Use multimesh, i.e. create one mesh for each energy group.
-  
   Hermes::Tuple<Mesh *> meshes;
   for_each_group(g) meshes.push_back(new Mesh());
   
@@ -333,7 +326,7 @@ int main(int argc, char* argv[])
   
   // Create the approximation spaces with the default shapeset.
   Hermes::Tuple<Space *> spaces;
-  for_each_group(g) spaces.push_back(new H1Space(meshes[g], &bc_types, essential_bc_values, P_INIT[g]));
+  for_each_group(g) spaces.push_back(new H1Space(meshes[g], &bc_types, P_INIT[g]));
 
   // Initialize the weak formulation.
   WeakForm wf(N_GROUPS);
