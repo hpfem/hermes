@@ -24,34 +24,7 @@ double** HdivSpace::hdiv_proj_mat = NULL;
 double*  HdivSpace::hdiv_chol_p   = NULL;
 int      HdivSpace::hdiv_proj_ref = 0;
 
-HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset)
-  : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
-{
-  if (shapeset == NULL)
-  {
-    this->shapeset = new HdivShapeset;
-    own_shapeset = true;
-  }
-  if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
-
-  if (!hdiv_proj_ref++)
-  {
-    precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
-  }
-
-  proj_mat = hdiv_proj_mat;
-  chol_p   = hdiv_chol_p;
-
-  // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an Hdiv space.");
-  else this->set_uniform_order_internal(Ord2(p_init, p_init));
-
-  // enumerate basis functions
-  this->assign_dofs();
-}
-
-HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset)
-   : Space(mesh, shapeset, bc_types, bc_values, p_init)
+void HdivSpace::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
   {
@@ -74,6 +47,30 @@ HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, BCValues* bc_values, Ord2 p_
 
   // enumerate basis functions
   this->assign_dofs();
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, bc_types, (BCValues*) NULL, Ord2(p_init, p_init))
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, Ord2 p_init, Shapeset* shapeset)
+   : Space(mesh, shapeset, bc_types, (BCValues*) NULL, p_init)
+{
+  init(shapeset, p_init);
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset)
+  : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset)
+   : Space(mesh, shapeset, bc_types, bc_values, p_init)
+{
+  init(shapeset, p_init);
 }
 
 

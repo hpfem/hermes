@@ -19,8 +19,7 @@
 #include "../quad_all.h"
 #include "../shapeset/shapeset_l2_all.h"
 
-L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
-    bc_types, bc_values, p_init)
+void L2Space::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
   {
@@ -38,23 +37,28 @@ L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init
   this->assign_dofs();
 }
 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+    bc_types, (BCValues*) NULL, p_init)
+{
+  init(shapeset, p_init);
+}
+
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+    bc_types, (BCValues*) NULL, p_init)
+{
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+    bc_types, bc_values, p_init)
+{
+  init(shapeset, p_init);
+}
+
 L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset): Space(mesh, shapeset, 
     bc_types, bc_values, p_init)
 {
-  if (shapeset == NULL)
-  {
-    this->shapeset = new L2Shapeset;
-    own_shapeset = true;
-  }
-  ldata = NULL;
-  lsize = 0;
-
-  // set uniform poly order in elements
-  if (p_init < 0) error("P_INIT must be >= 0 in an L2 space.");
-  else this->set_uniform_order_internal(Ord2(p_init, p_init));
-
-  // enumerate basis functions
-  this->assign_dofs();
+  init(shapeset, Ord2(p_init, p_init));
 }
 
 
