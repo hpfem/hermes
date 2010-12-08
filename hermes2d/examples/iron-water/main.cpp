@@ -74,19 +74,6 @@ const int WATER_1 = 1;
 const int WATER_2 = 2;
 const int IRON = 3;
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == 1) return BC_NATURAL;
-  else return BC_ESSENTIAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -98,10 +85,19 @@ int main(int argc, char* argv[])
   if (!mloader.load("iron-water.e", &mesh)) error("ExodusII mesh load failed.");
 
   // Perform initial uniform mesh refinement.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(WATER_2, IRON));
+  bc_types.add_bc_neumann(WATER_1); 
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(WATER_2, IRON));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation
   WeakForm wf;

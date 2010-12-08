@@ -29,10 +29,11 @@ def plot_sln_mayavi(sln, offscreen=False, show_scale=True):
         # the off screen rendering properly works only with VTK-5.2 or above:
         mlab.options.offscreen = True
     mlab.clf()
+    mlab.figure(bgcolor=(1, 1, 1), fgcolor=(0, 0, 0))
     s = mlab.triangular_mesh(x, y, z, triangles, scalars=t)
     mlab.view(0, 0)
     mlab.view(distance=4)
-    mlab.view(focalpoint=(.25,0,0))
+    mlab.view(focalpoint=(.35,0,0))
     mlab.colorbar(title="Solution", orientation="vertical")
 
     #mlab.move(right=-1.0, up=-10.0)

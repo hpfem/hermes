@@ -31,48 +31,26 @@ const double NEWTON_TOL = 1e-3;      // Stopping criterion for the Newton's meth
 const int NEWTON_MAX_ITER = 10;      // Maximum allowed number of Newton iterations.
 const double H = 5;                  // Domain height (necessary to define the parabolic
                                      // velocity profile at inlet).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-int bdy_bottom = 1;
-int bdy_right  = 2;
-int bdy_top = 3;
-int bdy_left = 4;
-int bdy_obstacle = 5;
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
+const int BDY_OBSTACLE = 5;
 
 // Current time (used in weak forms).
 double TIME = 0;
 
-// Boundary condition types for x-velocity.
-BCType xvel_bc_type(int marker) {
-  if (marker == bdy_right) return BC_NONE;
-  else return BC_ESSENTIAL;
-}
-
-// Boundary condition types for y-velocity.
-BCType yvel_bc_type(int marker) {
-  if (marker == bdy_right) return BC_NONE;
-  else return BC_ESSENTIAL;
-}
-
 // Essential (Dirichlet) boundary condition values for x-velocity.
-scalar essential_bc_values_xvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == bdy_left) 
-{
+scalar essential_bc_values_xvel(double x, double y, double time) {
     // Time-dependent parabolic profile at inlet.
     double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); // Peak value VEL_INLET at y = H/2.
-    if (TIME <= STARTUP_TIME) return val_y * TIME/STARTUP_TIME;
+  if (time <= STARTUP_TIME) return val_y * time/STARTUP_TIME;
     else return val_y;
   }
-  else return 0;
-}
-
-// Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(int ess_bdy_marker, double x, double y) 
-{
-  return 0;
-}
 
 // Weak forms.
 #include "forms.cpp"
@@ -86,13 +64,28 @@ int main(int argc, char* argv[])
 
   // Initial mesh refinements.
   mesh.refine_all_elements();
-  mesh.refine_towards_boundary(bdy_obstacle, 4, false);
-  mesh.refine_towards_boundary(bdy_top, 4, true);     // '4' is the number of levels,
-  mesh.refine_towards_boundary(bdy_bottom, 4, true);  // 'true' stands for anisotropic refinements.
+  mesh.refine_towards_boundary(BDY_OBSTACLE, 4, false);
+  mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
+  mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
+
+  // Boundary condition types for x-velocity and y-velocity.
+  BCTypes xvel_bc_type, yvel_bc_type;
+  xvel_bc_type.add_bc_none(BDY_RIGHT);
+  xvel_bc_type.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  yvel_bc_type.add_bc_none(BDY_RIGHT);
+  yvel_bc_type.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_x(&TIME);
+  bc_values_x.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
+  bc_values_x.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
+  
+  BCValues bc_values_y;
+  bc_values_y.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
   // Spaces for velocity components and pressure.
-  H1Space xvel_space(&mesh, xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, yvel_bc_type, NULL, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &xvel_bc_type, &bc_values_x, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &yvel_bc_type, &bc_values_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else

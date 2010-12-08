@@ -78,18 +78,9 @@ const double c = 1 / sqrt(e_0 * mu_0);
 const double kappa  = 2 * M_PI * freq * sqrt(e_0 * mu_0);
 const double J = 0.0000033333;
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  if (marker == 2) return BC_ESSENTIAL; // perfect conductor BC
-  else return BC_NATURAL;               // impedance BC
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
+//  Boundary markers.
+const int BDY_DIRICHLET = 2;
+const int BDY_NEUMANN = 1;
 
 // Geometry of the load.
 bool in_load(double x, double y)
@@ -144,8 +135,17 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
+
   // Create an Hcurl space.
-  HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

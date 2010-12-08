@@ -48,13 +48,16 @@ void f_sin(int n, double x[], double f[], double dfdx[])
     }
 }
 
-void f_unimplemented(int n, double x[], double f[], double dfdx[])
+int f_unimplemented(int n, double x[], double f[], double dfdx[],
+        void* data)
 {
     error("Internal error: you need to implement _f");
+    return 1;
 }
 
 
 ExactFunction _f = f_unimplemented;
+void *_data = NULL;
 
 double L2_projection_liform(int num, double *x, double *weights, 
                 double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
@@ -63,7 +66,8 @@ double L2_projection_liform(int num, double *x, double *weights,
 {
     // Value of the projected function at gauss points:
     double* f = new double[num];
-    _f(num, x, f, NULL);
+    if (_f(num, x, f, NULL, _data) == 1)
+        throw std::runtime_error("Funtion '_f' failed.");
     double val = 0;
     for (int i=0; i<num; i++) {
         val += weights[i] * (f[i] * v[i]);
@@ -80,7 +84,8 @@ double H1_projection_liform(int num, double *x, double *weights,
     // Value of the projected function at gauss points:
     double* f = new double[num];
     double* dfdx = new double[num];
-    _f(num, x, f, dfdx);
+    if (_f(num, x, f, dfdx, _data) == 1)
+        throw std::runtime_error("Funtion '_f' failed.");
     double val = 0;
     for (int i=0; i<num; i++) {
         val += weights[i] * (f[i] * v[i] + dfdx[i] * dvdx[i]);
@@ -93,7 +98,7 @@ double H1_projection_liform(int num, double *x, double *weights,
 } // anonymous namespace
 
 void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, Vector *rhs,
-        ExactFunction fn, int projection_type)
+        ExactFunction fn, int projection_type, void *data)
 {
   WeakForm* wf = new WeakForm;
   if (projection_type == H1D_L2_ortho_global) {
@@ -108,6 +113,7 @@ void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, Vector *rhs,
   DiscreteProblem *dp1 = new DiscreteProblem(wf, space);
 
   _f = fn;
+  _data = data;
   int N_dof = space->assign_dofs();
   info("Assembling projection linear system. ndofs: %d", N_dof);
   dp1->assemble(NULL, A, rhs);

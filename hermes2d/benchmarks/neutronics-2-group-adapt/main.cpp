@@ -183,23 +183,15 @@ static double exact_flux2(double x, double y, double& dx, double& dy)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Boundary conditions:
 
-const int bc_flux = 1;
-const int bc_gamma = 2;
-const int bc_symmetry = 3;
+const int BDY_FLUX = 1;
+const int BDY_GAMMA = 2;
+const int BDY_SYMMETRY = 3;
 
-BCType bc_types(int marker)
-{
-	if (marker == bc_flux)
-  	return BC_ESSENTIAL;
-  else
-  	return BC_NATURAL;
-}
-
-scalar essential_bc_values_1(int marker, double x, double y)
+scalar essential_bc_values_1(double x, double y)
 {
   return g1_D(x, y);
 }
-scalar essential_bc_values_2(int marker, double x, double y)
+scalar essential_bc_values_2(double x, double y)
 {
   return g2_D(x, y);
 }
@@ -285,9 +277,22 @@ int main(int argc, char* argv[])
   else // Use just one mesh for both groups.
     for (int i = 0; i < INIT_REF_NUM[0]; i++) mesh1.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_FLUX);
+  bc_types.add_bc_neumann(BDY_SYMMETRY);
+  bc_types.add_bc_newton(BDY_GAMMA);
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values_1;
+  bc_values_1.add_function(BDY_FLUX, essential_bc_values_1);
+
+  BCValues bc_values_2;
+  bc_values_2.add_function(BDY_FLUX, essential_bc_values_2);
+
   // Create H1 space with default shapesets.
-  H1Space space1(&mesh1, bc_types, essential_bc_values_1, P_INIT[0]);
-  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, bc_types, essential_bc_values_2, P_INIT[1]);
+  H1Space space1(&mesh1, &bc_types, &bc_values_1, P_INIT[0]);
+  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, &bc_types, &bc_values_2, P_INIT[1]);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -297,8 +302,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
   wf.add_vector_form(0, liform_0, liform_0_ord);
   wf.add_vector_form(1, liform_1, liform_1_ord);
-  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), bc_gamma);
-  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), bc_gamma);
+  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), BDY_GAMMA);
+  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), BDY_GAMMA);
   
   // Initialize coarse and reference mesh solutions and pointers to them.
   Solution sln1, sln2; 

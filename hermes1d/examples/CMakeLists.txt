@@ -8,7 +8,8 @@ add_subdirectory(neutronics)
 
 if(WITH_PYTHON)
 #  FIXME: not adapted to the latest API
-#  add_subdirectory(schroedinger)
+    add_subdirectory(schroedinger)
+    #add_subdirectory(dirac)
 #  add_subdirectory(system_sin_eigen)
 endif(WITH_PYTHON)
 

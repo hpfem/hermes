@@ -25,23 +25,24 @@
         ExactFunction f = <initialize it>;
         double x[10] = <initialize Gauss points>;
         double val[10], dfdx[10];
-        f(10, x, val, dfdx);
+        f(10, x, val, dfdx, NULL);
 
     If you want to get just a value and derivative at a point, call it like::
 
         ExactFunction f = <initialize it>;
         double x = 3.15;
         double val, dfdx;
-        f(1, &x, &val, &dfdx);
+        f(1, &x, &val, &dfdx, NULL);
 
     or if you only need the value::
 
         ExactFunction f = <initialize it>;
         double x = 3.15;
         double val;
-        f(1, &x, &val, NULL);
+        f(1, &x, &val, NULL, NULL);
 */
-typedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[]);
+typedef int(*ExactFunction)(int n, double x[], double f[], double dfdx[],
+        void *data);
 
 class HERMES_API OGProjection
 {
@@ -138,13 +139,15 @@ protected:
   
   // ExactFunction used in the case of projecting solution defined on 
   // a reference mesh onto a coarse one.
-  static void ref_mesh_fn(int n, double x[], double f[], double dfdx[]);
+  static int ref_mesh_fn(int n, double x[], double f[], double dfdx[],
+          void *data);
 };
 
 #define H1D_L2_ortho_global 0
 #define H1D_H1_ortho_global 1
 
-void assemble_projection_matrix_rhs(Space *space, Matrix *A, double *rhs,
-        ExactFunction fn, int projection_type=H1D_L2_ortho_global);
+void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A, Vector *rhs,
+        ExactFunction fn, int projection_type=H1D_L2_ortho_global,
+        void *data=NULL);
 
 #endif

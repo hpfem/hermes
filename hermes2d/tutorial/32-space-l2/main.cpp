@@ -29,15 +29,21 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &mesh);
 
   // Perform uniform mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
 
   // Create an L2 space with default shapeset.
-  L2Space space(&mesh, P_INIT);
+  L2Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // View basis functions.
   BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
   bview.show(&space);
-//  View::wait(H2DV_WAIT_KEYPRESS);
+  // View::wait(H2DV_WAIT_KEYPRESS);
 
   // Assemble and solve the finite element problem.
   WeakForm wf_dummy;

@@ -60,8 +60,8 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 50000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double e_0  = 8.8541878176 * 1e-12;
@@ -71,20 +71,34 @@ const double k = 1.0;
 // Exact solution.
 #include "exact_solution.cpp"
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
 
 // Unit tangential vectors to the boundary. 
 double2 tau[5] = { { 0, 0}, { 1, 0 },  { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
 // Essential boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values_top(double x, double y)
 {
   scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[ess_bdy_marker][0] + exact1(x, y, dx, dy)*tau[ess_bdy_marker][1];
+  return exact0(x, y, dx, dy)*tau[3][0] + exact1(x, y, dx, dy)*tau[3][1];
+}
+scalar essential_bc_values_right(double x, double y)
+{
+  scalar dx, dy;
+  return exact0(x, y, dx, dy)*tau[2][0] + exact1(x, y, dx, dy)*tau[2][1];
+}
+scalar essential_bc_values_bottom(double x, double y)
+{
+  scalar dx, dy;
+  return exact0(x, y, dx, dy)*tau[1][0] + exact1(x, y, dx, dy)*tau[1][1];
+}
+scalar essential_bc_values_left(double x, double y)
+{
+  scalar dx, dy;
+  return exact0(x, y, dx, dy)*tau[4][0] + exact1(x, y, dx, dy)*tau[4][1];
 }
 
 // Weak forms.
@@ -105,8 +119,19 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_TOP, essential_bc_values_top);
+  bc_values.add_function(BDY_RIGHT, essential_bc_values_right);
+  bc_values.add_function(BDY_BOTTOM, essential_bc_values_bottom);
+  bc_values.add_function(BDY_LEFT, essential_bc_values_left);
+
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, bc_types, essential_bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

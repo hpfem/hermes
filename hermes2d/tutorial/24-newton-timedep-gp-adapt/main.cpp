@@ -89,12 +89,6 @@ scalar init_cond(double x, double y, scalar& dx, scalar& dy)
 // Boundary markers.
 const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
 // Weak forms.
 # include "forms.cpp"
 
@@ -113,8 +107,12 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
   // Initialize coarse and reference mesh solution.
@@ -135,66 +133,60 @@ int main(int argc, char* argv[])
     wf.add_vector_form(callback(F_cranic), HERMES_ANY, &sln_prev_time);
   }
 
-  // Initialize the FE problem.
+  // Initialize the discrete problem.
   bool is_linear = false;
   DiscreteProblem dp_coarse(&wf, &space, is_linear);
 
-  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-  Vector* rhs_coarse = create_vector(matrix_solver);
-  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
-  // Create a selector which will select optimal candidate.
+  // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec_coarse = new scalar[ndof];
-  OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
-
-  // Show the projection of the initial condition.
+  // Visualize initial condition.
   char title[100];
-  ScalarView magview("Projection of initial condition", new WinGeom(0, 0, 440, 350));
-  magview.fix_scale_width(60);
-  Solution init_proj;
-//  init_proj->set_coeff_vector(space, coeff_vec_coarse);
-  Solution::vector_to_solution(coeff_vec_coarse, &space, &init_proj);
-  AbsFilter mag(&init_proj);
-  magview.show(&mag);
-//  delete init_proj;
-  OrderView ordview("Initial mesh", new WinGeom(450, 0, 400, 350));
+  ScalarView view("Initial condition", new WinGeom(0, 0, 450, 350));
+  view.fix_scale_width(70);
+  view.show(&sln_prev_time);
+  OrderView ordview("Initial mesh", new WinGeom(455, 0, 410, 350));
+  ordview.fix_scale_width(10);
   ordview.show(&space);
 
-  // Newton's loop on the coarse mesh.
-  info("Solving on coarse mesh:");
-  bool verbose = true;
-  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
-      NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-
-  // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
-
-  // Cleanup after the Newton loop on the coarse mesh.
-  delete matrix_coarse;
-  delete rhs_coarse;
-  delete solver_coarse;
-  delete [] coeff_vec_coarse;
-  
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
   for(int ts = 1; ts <= num_time_steps; ts++)
   {
-    // Periodic global derefinements.
+    // Periodic global derefinement.
     if (ts > 1 && ts % UNREF_FREQ == 0) 
     {
       info("Global mesh derefinement.");
       mesh.copy(&basemesh);
       space.set_uniform_order(P_INIT);
+      ndof = Space::get_num_dofs(&space);
+    }
 
-      // Project on globally derefined mesh.
-      info("Projecting previous fine mesh solution on derefined mesh.");
-      OGProjection::project_global(&space, &sln_prev_time, &sln);
+    // The following is done only in the first time step, 
+    // when the nonlinear problem was never solved before.
+    if (ts == 1) {
+      // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
+      SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
+      Vector* rhs_coarse = create_vector(matrix_solver);
+      Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
+      scalar* coeff_vec_coarse = new scalar[ndof];
+
+      // Calculate initial coefficient vector for Newton on the coarse mesh.
+      info("Projecting initial condition to obtain coefficient vector on coarse mesh.");
+      OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
+
+      // Newton's loop on the coarse mesh.
+      info("Solving on coarse mesh:");
+      bool verbose = true;
+      if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+          NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+      Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
+
+      // Cleanup after the Newton loop on the coarse mesh.
+      delete matrix_coarse;
+      delete rhs_coarse;
+      delete solver_coarse;
+      delete [] coeff_vec_coarse;
     }
 
     // Adaptivity loop:
@@ -203,23 +195,25 @@ int main(int argc, char* argv[])
     do {
       info("Time step %d, adaptivity step %d:", ts, as);
 
-      // Construct globally refined reference mesh
-      // and setup reference space.
+      // Construct globally refined reference mesh and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
-      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
-      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+      // Initialize matrix solver.
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
+
+      // Initialize discrete problem on reference mesh.
+      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
-      if (as == 1) {
-        info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
+      if (ts == 1 && as == 1) {
+        info("Projecting coarse mesh solution to obtain coefficient vector on fine mesh.");
         OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
       }
       else {
-        info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
+        info("Projecting last fine mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
       }
 
@@ -228,6 +222,7 @@ int main(int argc, char* argv[])
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
+      bool verbose = true;
       if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
 	  	        NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
@@ -235,7 +230,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
       // Project the fine mesh solution onto the coarse mesh.
-      info("Projecting reference solution on coarse mesh.");
+      info("Projecting fine mesh solution on coarse mesh for error estimation.");
       OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
       // Calculate element errors and total error estimate.
@@ -274,14 +269,15 @@ int main(int argc, char* argv[])
     }
     while (done == false);
 
-      // Visualize the solution and mesh.
-      char title[100];
-      sprintf(title, "Solution, time level %d", ts);
-      magview.set_title(title);
-      magview.show(&sln);
-      sprintf(title, "Mesh, time level %d", ts);
-      ordview.set_title(title);
-      ordview.show(&space);
+    // Visualize the solution and mesh.
+    char title[100];
+    sprintf(title, "Solution, time %g", ts*TAU);
+    view.set_title(title);
+    view.show_mesh(false);
+    view.show(&sln);
+    sprintf(title, "Mesh, time %g", ts*TAU);
+    ordview.set_title(title);
+    ordview.show(&space);
 
     // Copy last reference solution into sln_prev_time.
     sln_prev_time.copy(&ref_sln);

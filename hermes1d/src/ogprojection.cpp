@@ -47,7 +47,7 @@ double OGProjection::L2_projection_liform(int num, double *x, double *weights,
 {
   // Value of the projected function at gauss points:
   double* f = new double[num];
-  fn(num, x, f, NULL);
+  fn(num, x, f, NULL, NULL);
   double val = 0;
   for (int i=0; i<num; i++) {
     val += weights[i] * (f[i] * v[i]);
@@ -111,7 +111,7 @@ double OGProjection::H1_projection_liform(int num, double *x, double *weights,
   // Value of the projected function at gauss points:
   double* f = new double[num];
   double* dfdx = new double[num];
-  fn(num, x, f, dfdx);
+  fn(num, x, f, dfdx, NULL);
   double val = 0;
   for (int i=0; i<num; i++) {
       val += weights[i] * (f[i] * v[i] + dfdx[i] * dvdx[i]);
@@ -280,7 +280,8 @@ void OGProjection::project_global(Space *space, ExactFunction fun, int sln_to_sa
   return;
 }
 
-void OGProjection::ref_mesh_fn(int n, double x[], double f[], double dfdx[])
+int OGProjection::ref_mesh_fn(int n, double x[], double f[], double dfdx[],
+        void *data)
 {
   // Check.
   if(OGProjection::ref_space == NULL)
@@ -301,5 +302,5 @@ void OGProjection::ref_mesh_fn(int n, double x[], double f[], double dfdx[])
       }
     } 
   }
-  return;
+  return 0;
 }

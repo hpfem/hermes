@@ -29,12 +29,6 @@ const double CONST_GAMMA_BOTTOM = -0.5;           // Outer normal derivative on 
 const double CONST_GAMMA_OUTER = 1.0;             // Outer normal derivative on Gamma_2.
 const double CONST_GAMMA_LEFT = -0.5;             // Outer normal derivative on Gamma_3.
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -53,8 +47,12 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_INNER);
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
 
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_INNER);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 

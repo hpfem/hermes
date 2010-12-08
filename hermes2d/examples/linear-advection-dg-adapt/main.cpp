@@ -88,19 +88,15 @@ inline Ord upwind_flux(Ord u_cent, Ord u_neib, Ord a_dot_n)
   return a_dot_n * (u_cent + u_neib); 
 }
 
+// Boundary markers.
+const int BDY_BOTTOM_LEFT = 1;
+const int BDY_REST = 2;
 
-// Boundary conditions.
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
 // Function values for Dirichlet boundary conditions.
 template<typename Real, typename Scalar>
 Scalar g(int ess_bdy_marker, Real x, Real y)
 {
-  if (ess_bdy_marker == 1) return 1; else return 0;
+  if (ess_bdy_marker == BDY_BOTTOM_LEFT) return 1; else return 0;
 }
 
 template<typename Real>
@@ -177,9 +173,13 @@ int main(int argc, char* args[])
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM_LEFT, BDY_REST));
   
   // Create an L2 space.
-  L2Space space(&mesh, bc_types, NULL, Ord2(P_INIT_H, P_INIT_V));
+  L2Space space(&mesh, &bc_types, Ord2(P_INIT_H, P_INIT_V));
   
   // Initialize refinement selector.
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

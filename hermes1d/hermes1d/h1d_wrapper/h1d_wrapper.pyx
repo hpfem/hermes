@@ -4,15 +4,15 @@
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
 from libc.math cimport sin, cos, sqrt
+import traceback
 
 from numpy import empty, array
 from numpy cimport ndarray
 
-from hermes_common.matrix cimport Matrix
-
+from hermes1d.hermes_common.matrix cimport SparseMatrix, Vector
 cimport hermes1d
-from hermes1d.cython_utils cimport PY_NEW
-from hermes1d.numpy_utils cimport c2numpy_double
+from hermes1d.hermes_common.cython_utils cimport PY_NEW
+from hermes1d.hermes_common.numpy_utils cimport c2numpy_double
 from hermes1d.fekete._fekete cimport get_gauss_points_phys, int_f2, \
         int_f2_f2
 
@@ -342,21 +342,26 @@ cdef void fn_sin(int n, double x[], double f[], double dfdx[]):
 
 cdef class Function:
 
-    cpdef double eval_f(self, double x):
-        pass
+    cpdef double eval_f(self, double x) except *:
+        return 0
 
-    cpdef double eval_dfdx(self, double x):
-        pass
+    cpdef double eval_dfdx(self, double x) except *:
+        return 0
 
-cdef Function _A=None
-cdef void fn(int n, double x[], double f[], double dfdx[]):
-    for i in range(n):
-        f[i] = _A.eval_f(x[i])
-        if dfdx != NULL:
-            dfdx[i] = _A.eval_dfdx(x[i])
+cdef int fn(int n, double x[], double f[], double dfdx[], void *data):
+    cdef Function func = <Function> data
+    try:
+        for i in range(n):
+            f[i] = func.eval_f(x[i])
+            if dfdx != NULL:
+                dfdx[i] = func.eval_dfdx(x[i])
+    except:
+        traceback.print_exc()
+        return 1
+    return 0
 
-def assemble_projection_matrix_rhs(Mesh mesh, Matrix A,
-    ndarray[double, mode="c"] rhs, f, projection_type=None):
+def assemble_projection_matrix_rhs(Mesh mesh, SparseMatrix A, Vector rhs,
+    f, projection_type=None):
     cdef int prj_type
     if projection_type == "L2":
         prj_type = hermes1d.H1D_L2_ortho_global
@@ -364,7 +369,6 @@ def assemble_projection_matrix_rhs(Mesh mesh, Matrix A,
         prj_type = hermes1d.H1D_H1_ortho_global
     else:
         raise ValueError("Unknown projection type")
-    global _A
-    _A = f
-    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.thisptr,
-        &(rhs[0]), &fn, prj_type)
+    cdef Function func = f
+    hermes1d.assemble_projection_matrix_rhs(mesh.thisptr, A.as_SparseMatrix(),
+            rhs.thisptr, &fn, prj_type, <void *>func)

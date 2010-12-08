@@ -185,14 +185,28 @@ Scalar dg_boundary_biform_advection(int n, double *wt, Func<Real> *u_ext[], Func
 }
 
 template<typename Real, typename Scalar>
-Scalar dg_boundary_liform_advection(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar dg_boundary_liform_advection_1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   
   for (int i = 0; i < n; i++) {
     Real x = e->x[i], y = e->y[i];
     Real a_dot_n = calculate_a_dot_v<Real>(x, y, e->nx[i], e->ny[i]);
-    result += -wt[i] * upwind_flux<Real,Scalar>(0, essential_bc_values<Real,Scalar>(e->edge_marker, x, y), a_dot_n) * v->val[i];
+    result += -wt[i] * upwind_flux<Real,Scalar>(0, essential_bc_values<Real,Scalar>(x, y), a_dot_n) * v->val[i];
+  }
+  
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar dg_boundary_liform_advection_2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  
+  for (int i = 0; i < n; i++) {
+    Real x = e->x[i], y = e->y[i];
+    Real a_dot_n = calculate_a_dot_v<Real>(x, y, e->nx[i], e->ny[i]);
+    result += -wt[i] * upwind_flux<Real,Scalar>(0, 0, a_dot_n) * v->val[i];
   }
   
   return result;
@@ -239,13 +253,28 @@ Ord dg_interface_biform_diffusion(int n, double *wt, Func<Ord> *u_ext[], Func<Or
 }
 
 template<typename Real, typename Scalar>
-Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar dg_boundary_biform_diffusion_1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Real sigma = C_W / e->diam;
   for (int i = 0; i < n; i++)
   {
-    Scalar u_dir = essential_bc_values<Real,Scalar>(e->edge_marker, e->x[i], e->y[i]);
+    Scalar u_dir = essential_bc_values<Real,Scalar>(e->x[i], e->y[i]);
+    result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]                    // diffusion 
+                                  + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i] - u_dir)    
+                                  + sigma * ( ( u->val[i] - u_dir ) * v->val[i] ) );                        // boundary penalty
+  }
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar dg_boundary_biform_diffusion_2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  Real sigma = C_W / e->diam;
+  for (int i = 0; i < n; i++)
+  {
+    Scalar u_dir = Scalar(0);
     result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]                    // diffusion 
                                   + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i] - u_dir)    
                                   + sigma * ( ( u->val[i] - u_dir ) * v->val[i] ) );                        // boundary penalty
@@ -254,7 +283,13 @@ Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func
 }
 
 template<>
-Ord dg_boundary_biform_diffusion(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+Ord dg_boundary_biform_diffusion_1(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+{
+  return Ord(20);   // Not neccessary to be that high - just a safe enough setting for testing.
+}
+
+template<>
+Ord dg_boundary_biform_diffusion_2(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
   return Ord(20);   // Not neccessary to be that high - just a safe enough setting for testing.
 }

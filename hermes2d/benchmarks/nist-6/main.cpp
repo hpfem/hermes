@@ -62,14 +62,11 @@ const double EPSILON = 1e-1;
 // Exact solution.
 #include "exact_solution.cpp"
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_DIRICHLET = 1;
 
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values(double x, double y)
 {
   return fn(x, y);
 }
@@ -85,10 +82,18 @@ int main(int argc, char* argv[])
   mloader.load("square_quad.mesh", &mesh);
 
   // Perform initial mesh refinement.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

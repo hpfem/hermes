@@ -15,29 +15,26 @@ const int INIT_BDY_REF_NUM = 5;                   // Number of initial refinemen
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 7;                    // Maximum allowed number of Newton iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Thermal conductivity (temperature-dependent)
 // Note: for any u, this function has to be positive.
 template<typename Real>
-Real lam(Real u) { return 1 + pow(u, 4); }
+Real lam(Real u) 
+{ 
+  return 1 + pow(u, 4); 
+}
 
 // Derivative of the thermal conductivity with respect to 'u'.
 template<typename Real>
-Real dlam_du(Real u) { return 4*pow(u, 3); }
-
-// Boundary condition types.
-BCType bc_types(int marker)
+Real dlam_du(Real u) 
 {
-  return BC_ESSENTIAL;
+  return 4*pow(u, 3); 
 }
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int marker, double x, double y)
-{
-  return 0;
-}
+// Boundary markers.
+const int BDY_DIRICHLET = 1;
 
 // Weak forms.
 #include "forms.cpp"
@@ -53,8 +50,16 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1,INIT_BDY_REF_NUM);
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(BDY_DIRICHLET);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
   // Initialize the weak formulation.

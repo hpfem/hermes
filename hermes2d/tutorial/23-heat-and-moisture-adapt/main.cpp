@@ -44,7 +44,7 @@ const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nod
                                          // their notoriously bad performance.
 const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
                                          // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;             // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.3;             // Stopping criterion for adaptivity (rel. error tolerance between the
                                          // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;            // Adaptivity process stops when the number of degrees of freedom grows over
                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -83,18 +83,14 @@ const int BDY_EXTERIOR_WALL = 5;
 double CURRENT_TIME = 0.0;
 
 // Essential (Dirichlet) boundary condition values for T.
-scalar essential_bc_values_T(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values_T(double x, double y, double time)
 {
-  if (ess_bdy_marker == BDY_REACTOR_WALL)
-  {
-    double current_reactor_temperature = TEMP_REACTOR_MAX;
-    if (CURRENT_TIME < REACTOR_START_TIME) {
-      current_reactor_temperature = TEMP_INITIAL +
-        (CURRENT_TIME/REACTOR_START_TIME)*(TEMP_REACTOR_MAX - TEMP_INITIAL);
-    }
-    return current_reactor_temperature;
+  double current_reactor_temperature = TEMP_REACTOR_MAX;
+  if (time < REACTOR_START_TIME) {
+    current_reactor_temperature = TEMP_INITIAL +
+      (time/REACTOR_START_TIME)*(TEMP_REACTOR_MAX - TEMP_INITIAL);
   }
-  else return 0;
+  return current_reactor_temperature;
 }
 
 // Weak forms.
@@ -120,8 +116,12 @@ int main(int argc, char* argv[])
   moist_bc_type.add_bc_neumann(Hermes::Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
   moist_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values(&CURRENT_TIME);
+  bc_values.add_timedep_function(BDY_REACTOR_WALL, essential_bc_values_T);
+
   // Create H1 spaces with default shapesets.
-  H1Space T_space(&T_mesh, &temp_bc_type, essential_bc_values_T, P_INIT);
+  H1Space T_space(&T_mesh, &temp_bc_type, &bc_values, P_INIT);
   H1Space M_space(MULTI ? &M_mesh : &T_mesh, &moist_bc_type, (BCValues *) NULL, P_INIT);
 
   // Define constant initial conditions.
@@ -215,12 +215,14 @@ int main(int argc, char* argv[])
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
+      OGProjection::project_global(Hermes::Tuple<Space *>(&T_space, &M_space), 
+                     Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
                      Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate."); 
-      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), 
+                          Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
@@ -231,18 +233,8 @@ int main(int argc, char* argv[])
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
-      
-      // Show new coarse meshes and solutions.
-      char title[100];
-      sprintf(title, "Temperature, t = %g days", CURRENT_TIME/3600./24);
-      T_sln_view.set_title(title);
-      T_sln_view.show(&T_coarse);
-      sprintf(title, "Moisture, t = %g days", CURRENT_TIME/3600./24);
-      M_sln_view.set_title(title);
-      M_sln_view.show(&M_coarse);
-      T_order_view.show(&T_space);
-      M_order_view.show(&M_space);
+        Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)), 
+                            Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
@@ -275,7 +267,17 @@ int main(int argc, char* argv[])
     // Update time.
     CURRENT_TIME += TAU;
 
-    
+    // Show new coarse meshes and solutions.
+    char title[100];
+    sprintf(title, "Temperature, t = %g days", CURRENT_TIME/3600./24);
+    T_sln_view.set_title(title);
+    T_sln_view.show(&T_coarse);
+    sprintf(title, "Moisture, t = %g days", CURRENT_TIME/3600./24);
+    M_sln_view.set_title(title);
+    M_sln_view.show(&M_coarse);
+    T_order_view.show(&T_space);
+    M_order_view.show(&M_space);
+
     // Save fine mesh solutions for the next time step.
     T_prev.copy(&T_fine);
     M_prev.copy(&M_fine);

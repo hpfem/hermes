@@ -48,10 +48,6 @@ using namespace RefinementSelectors;
   - BC 1: \f$\frac{d\phi}{dn} = 0\f$
  */
 
-#define SIDE_MARKER 1
-#define TOP_MARKER 2
-#define BOT_MARKER 3
-
 // Parameters to tweak the amount of output to the console.
 #define NOSCREENSHOT
 
@@ -127,26 +123,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 
 /*** Boundary types and conditions ***/
 
-// Poisson takes Dirichlet and Neumann boundaries
-BCType phi_bc_types(int marker) {
-  return (marker == SIDE_MARKER ) ? BC_NATURAL : BC_ESSENTIAL;
-}
-
-// Nernst-Planck takes Neumann boundaries
-BCType C_bc_types(int marker) {
-  return BC_NATURAL;
-}
-
-// Diricleht Boundary conditions for Poisson equation.
-scalar C_essential_bc_values(int ess_bdy_marker, double x, double y) {
-  return 0;
-}
-
-// Diricleht Boundary conditions for Poisson equation.
-scalar phi_essential_bc_values(int ess_bdy_marker, double x, double y) {
-  return ess_bdy_marker == TOP_MARKER ? VOLTAGE : 0.0;
-}
-
+// Boundary markers.
+const int BYD_SIDE = 1;
+const int BYD_TOP = 2;
+const int BYD_BOT = 3;
 
 scalar voltage_ic(double x, double y, double &dx, double &dy) {
   // y^2 function for the domain.
@@ -160,23 +140,39 @@ scalar concentration_ic(double x, double y, double &dx, double &dy) {
 
 int main (int argc, char* argv[]) {
 
-
   // Load the mesh file.
   Mesh Cmesh, phimesh, basemesh;
   H2DReader mloader;
   mloader.load("small.mesh", &basemesh);
   
   // When nonadaptive solution, refine the mesh.
-  basemesh.refine_towards_boundary(TOP_MARKER, REF_INIT);
-  basemesh.refine_towards_boundary(BOT_MARKER, REF_INIT - 1);
+  basemesh.refine_towards_boundary(BYD_TOP, REF_INIT);
+  basemesh.refine_towards_boundary(BYD_BOT, REF_INIT - 1);
   basemesh.refine_all_elements(1);
   basemesh.refine_all_elements(1);
   Cmesh.copy(&basemesh);
   phimesh.copy(&basemesh);
 
+  // Enter Neumann boundary markers for Nernst-Planck.
+  BCTypes C_bc_types;
+  C_bc_types.add_bc_neumann(Hermes::Tuple<int>(BYD_SIDE, BYD_TOP, BYD_BOT));
+
+  // Enter Dirichlet and Neumann boundary markers for Poisson.
+  BCTypes phi_bc_types;
+  phi_bc_types.add_bc_neumann(BYD_SIDE);
+  phi_bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BYD_TOP, BYD_BOT));
+
+  // Enter Dirichlet boundary values.
+  BCValues phi_bc_values;
+  phi_bc_values.add_const(BYD_TOP, VOLTAGE);
+  phi_bc_values.add_zero(BYD_BOT);
+
+  BCValues C_bc_values;
+  C_bc_values.add_zero(Hermes::Tuple<int>(BYD_SIDE, BYD_TOP, BYD_BOT));
+
   // Spaces for concentration and the voltage.
-  H1Space C(&Cmesh, C_bc_types, C_essential_bc_values, P_INIT);
-  H1Space phi(MULTIMESH ? &phimesh : &Cmesh, phi_bc_types, phi_essential_bc_values, P_INIT);
+  H1Space C(&Cmesh, &C_bc_types, &C_bc_values, P_INIT);
+  H1Space phi(MULTIMESH ? &phimesh : &Cmesh, &phi_bc_types, &phi_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C, &phi));
 
   Solution C_sln, C_ref_sln;

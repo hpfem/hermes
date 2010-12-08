@@ -38,7 +38,20 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual int get_matrix_size() const;
   virtual double get_fill_in() const;
-  
+
+  int *get_Ap() {
+      return this->Ap;
+  }
+  int *get_Ai() {
+      return this->Ai;
+  }
+  scalar *get_Ax() {
+      return this->Ax;
+  }
+  int get_nnz() {
+      return this->nnz;
+  }
+
 protected:
   // UMFPack specific data structures for storing the system matrix (CSC format).
   scalar *Ax;   // Matrix entries (column-wise).
@@ -64,6 +77,10 @@ public:
   virtual void add(int idx, scalar y);
   virtual void add(int n, int *idx, scalar *y);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+
+  scalar *get_c_array() {
+      return this->v;
+  }
 
 protected:
   //UMFPack specific data structures for storing the rhs.

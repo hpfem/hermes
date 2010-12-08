@@ -3,10 +3,7 @@
 # file for the exact terms).
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-# FIXME:
-#from hermes_common._hermes_common cimport c_Matrix
-
-from hermes_common.cpp.matrix cimport Matrix
+from hermes1d.hermes_common.cpp.matrix cimport SparseMatrix, Vector
 
 cdef extern from "hermes1d.h":
 
@@ -67,6 +64,8 @@ cdef extern from "hermes1d.h":
 
     int H1D_L2_ortho_global
     int H1D_H1_ortho_global
-    ctypedef void(*ExactFunction)(int n, double x[], double f[], double dfdx[])
-    void assemble_projection_matrix_rhs(Space *space, Matrix *A, double *rhs,
-            ExactFunction fn, int projection_type) except +
+    ctypedef int(*ExactFunction)(int n, double x[], double f[], double dfdx[],
+            void *data)
+    void assemble_projection_matrix_rhs(Space *space, SparseMatrix *A,
+            Vector *rhs, ExactFunction fn, int projection_type,
+            void *data) except +

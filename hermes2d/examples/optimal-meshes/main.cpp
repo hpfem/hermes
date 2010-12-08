@@ -55,11 +55,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
 double K = 10.0;
 
 // Boundary markers.
-const int NEWTON_BDY = 1;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-  { return BC_NATURAL; }
+const int BDY_LEFT_RIGHT = 1;
+const int BDY_TOP_BOTTOM = 2;
 
 // Exact solution.
 #include "exact_solution.cpp"
@@ -75,10 +72,14 @@ int main(int argc, char* argv[])
   mloader.load("square_2_elem.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
+  for(int i = 0; i < UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
+
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bc_types, NULL, P_INIT);
+  H1Space space(&mesh, &bc_types, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 

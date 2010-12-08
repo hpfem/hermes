@@ -16,11 +16,17 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPA
                                                   // SOLVER_MUMPS, and more are coming.
 
 // Problem constants
-cplx C = cplx(1./(30 * sqrt(3)), 0.0);
+cplx C = cplx(1./(30 * sqrt((double)3)), 0.0);
 cplx C2 = cplx(200., 0.);
 
 // Imaginary unit.
 scalar ii = cplx(0.0, 1.0);
+
+// Boundary markers.
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
 
 // Initial condition for Psi.
 scalar init_cond_psi(double x, double y, scalar& dx, scalar& dy)
@@ -40,18 +46,6 @@ scalar init_cond_phi(double x, double y, scalar& dx, scalar& dy)
   return val;
 }
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_ESSENTIAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
- return 0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -65,9 +59,17 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create an H1 space.
-  H1Space* phi_space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-  H1Space* psi_space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
+  H1Space* phi_space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space* psi_space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(phi_space, psi_space));
   info("ndof = %d.", ndof);
 

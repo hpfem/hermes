@@ -29,18 +29,7 @@ const double kappa = 0.1;
 const double x1    = 9.0;
 
 // Boundary markers.
-int bdy_left = 1;
-
-// Boundary condition types.
-BCType bc_types(int marker)
-  { return (marker == bdy_left) ? BC_ESSENTIAL : BC_NATURAL; }
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values_t(int ess_bdy_marker, double x, double y)
-  { return (ess_bdy_marker == bdy_left) ? 1.0 : 0; }
-
-scalar essential_bc_values_c(int ess_bdy_marker, double x, double y)
-  { return 0; }
+const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Initial conditions.
 scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
@@ -66,9 +55,23 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
+  // Enter boundary markers.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_LEFT);
+  bc_types.add_bc_neumann(BDY_NEUMANN);
+  bc_types.add_bc_newton(BDY_COOLED);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_t;
+  bc_values_t.add_const(BDY_LEFT, 1.0);
+  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
+
+  BCValues bc_values_c;
+  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+
   // Create H1 spaces with default shapesets.
-  H1Space* t_space = new H1Space(&mesh, bc_types, essential_bc_values_t, P_INIT);
-  H1Space* c_space = new H1Space(&mesh, bc_types, essential_bc_values_c, P_INIT);
+  H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);
+  H1Space* c_space = new H1Space(&mesh, &bc_types, &bc_values_c, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(t_space, c_space));
   info("ndof = %d.", ndof);
 

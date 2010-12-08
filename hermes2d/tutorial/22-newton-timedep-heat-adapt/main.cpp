@@ -29,7 +29,7 @@ const double TAU = 0.5;                    // Time step. Note: The Crank-Nicolso
 const double T_FINAL = 2.0;                // Time interval length.
 
 // Adaptivity
-const int UNREF_FREQ = 1;                  // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 1;                  // Every UNREF_FREQth time step the mesh is derefined.
 const double THRESHOLD = 0.3;              // This is a quantitative parameter of the adapt(...) function and
                                            // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                    // Adaptive strategy:
@@ -93,10 +93,10 @@ scalar init_cond(double x, double y, double& dx, double& dy)
 }
 
 // Boundary markers.
-const int BDY_ESSENTIAL = 1;
+const int BDY_DIRICHLET = 1;
 
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values(double x, double y)
 {
   double dx, dy;
   return dir_lift(x, y, dx, dy);
@@ -125,10 +125,14 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_ESSENTIAL);
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
   // Initialize coarse and reference mesh solution.
@@ -153,7 +157,7 @@ int main(int argc, char* argv[])
   bool is_linear = false;
   DiscreteProblem dp_coarse(&wf, &space, is_linear);
 
-  // Create a selector which will select optimal candidate.
+  // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Visualize initial condition.

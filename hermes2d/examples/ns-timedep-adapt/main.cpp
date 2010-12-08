@@ -91,47 +91,23 @@ const int NEWTON_MAX_ITER = 20;      // Maximum allowed number of Newton iterati
 const double H = 5;                  // Domain height (necessary to define the parabolic
                                      // velocity profile at inlet)
 
-// Boundary markers.
-int bdy_bottom = 1;
-int bdy_right  = 2;
-int bdy_top = 3;
-int bdy_left = 4;
-int bdy_obstacle = 5;
-
 // Current time (defined as global since needed in weak forms)
 double TIME = 0;
 
-// Boundary condition types for x-velocity
-BCType xvel_bc_type(int marker) {
-  if (marker == bdy_right) return BC_NONE;
-  else return BC_ESSENTIAL;
-}
+// Boundary markers.
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
+const int BDY_OBSTACLE = 5;
 
 // Boundary condition values for x-velocity
-scalar essential_bc_values_xvel(int ess_bdy_marker, double x, double y) {
-  if (ess_bdy_marker == bdy_left) {
-    // time-dependent inlet velocity (parabolic profile)
-    double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); //parabolic profile with peak VEL_INLET at y = H/2
-    if (TIME <= STARTUP_TIME) return val_y * TIME/STARTUP_TIME;
-    else return val_y;
-  }
-  else return 0;
+scalar essential_bc_values_xvel(double x, double y, double time) {
+  // time-dependent inlet velocity (parabolic profile)
+  double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); //parabolic profile with peak VEL_INLET at y = H/2
+  if (time <= STARTUP_TIME) return val_y * time/STARTUP_TIME;
+  else return val_y;
 }
-
-// Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(int ess_bdy_marker, double x, double y) 
-{
-  return 0;
-}
-
-// Boundary condition types for y-velocity
-BCType yvel_bc_type(int marker) {
-  if (marker == bdy_right) return BC_NONE;
-  else return BC_ESSENTIAL;
-}
-
-BCType p_bc_type(int marker)
-  { return BC_NONE; }
 
 // Weak forms
 #include "forms.cpp"
@@ -157,22 +133,35 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
-  basemesh.refine_towards_boundary(bdy_obstacle, INIT_REF_NUM_BDY, false); // 'true' stands for anisotropic refinements,
-  basemesh.refine_towards_boundary(bdy_top, INIT_REF_NUM_BDY, true);       // 'false' for isotropic.
-  basemesh.refine_towards_boundary(bdy_bottom, INIT_REF_NUM_BDY, true);
+  basemesh.refine_towards_boundary(BDY_OBSTACLE, INIT_REF_NUM_BDY, false); // 'true' stands for anisotropic refinements,
+  basemesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY, true);       // 'false' for isotropic.
+  basemesh.refine_towards_boundary(BDY_BOTTOM, INIT_REF_NUM_BDY, true);
   mesh.copy(&basemesh);
 
+  // Enter boundary markers for x-velocity and y-velocity.
+  BCTypes bc_types;
+  bc_types.add_bc_none(BDY_RIGHT);
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+
+  // Enter Dirichlet boundary values.
+  BCValues bc_values_xvel(&TIME);
+  bc_values_xvel.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
+  bc_values_xvel.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
+
+  BCValues bc_values_yvel;
+  bc_values_yvel.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+
   // Create spaces with default shapesets. 
-  H1Space* xvel_space = new H1Space(&mesh, xvel_bc_type, essential_bc_values_xvel, P_INIT_VEL);
-  H1Space* yvel_space = new H1Space(&mesh, yvel_bc_type, essential_bc_values_yvel, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &bc_types, &bc_values_xvel, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &bc_types, &bc_values_yvel, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space* p_space = new L2Space(&mesh, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space* p_space = new H1Space(&mesh, p_bc_type, NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, (BCTypes *) NULL, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space));
+  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -236,9 +225,9 @@ int main(int argc, char* argv[])
     if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
       mesh.copy(&basemesh);
-      xvel_space->set_uniform_order(P_INIT_VEL);
-      yvel_space->set_uniform_order(P_INIT_VEL);
-      p_space->set_uniform_order(P_INIT_PRESSURE);
+      xvel_space.set_uniform_order(P_INIT_VEL);
+      yvel_space.set_uniform_order(P_INIT_VEL);
+      p_space.set_uniform_order(P_INIT_PRESSURE);
     }
 
     // Adaptivity loop:
@@ -249,7 +238,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space));
+      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
 
@@ -286,13 +275,13 @@ int main(int argc, char* argv[])
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space), 
+      OGProjection::project_global(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
                     Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
                     Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver, Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm) );
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space), 
+      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
                           Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
       bool solutions_for_adapt = true;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), 
@@ -301,7 +290,7 @@ int main(int argc, char* argv[])
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
-           Space::get_num_dofs(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space)), 
+           Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), 
            Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
@@ -312,7 +301,7 @@ int main(int argc, char* argv[])
         done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-        if (Space::get_num_dofs(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.
@@ -343,7 +332,7 @@ int main(int argc, char* argv[])
     pview.show(&p_prev_time);
   }
 
-  ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(xvel_space, yvel_space, p_space));
+  ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d", ndof);
 
   // Wait for all views to be closed.
