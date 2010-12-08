@@ -259,8 +259,10 @@ int main(int argc, char* argv[])
       else
         error ("Matrix solver failed.\n");
     }
-    delete [] coeff_vec;
   }
+  // Clean up.
+  delete [] coeff_vec;
+  
   info("Coordinate ( 0.1, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.1, 0.0));
   info("Coordinate ( 0.5, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.5, 0.0));
   info("Coordinate ( 0.9, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.9, 0.0));
