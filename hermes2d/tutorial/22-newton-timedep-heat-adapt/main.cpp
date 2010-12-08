@@ -29,7 +29,7 @@ const double TAU = 0.5;                    // Time step. Note: The Crank-Nicolso
 const double T_FINAL = 2.0;                // Time interval length.
 
 // Adaptivity
-const int UNREF_FREQ = 1;                  // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 1;                  // Every UNREF_FREQth time step the mesh is derefined.
 const double THRESHOLD = 0.3;              // This is a quantitative parameter of the adapt(...) function and
                                            // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                    // Adaptive strategy:
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
   bool is_linear = false;
   DiscreteProblem dp_coarse(&wf, &space, is_linear);
 
-  // Create a selector which will select optimal candidate.
+  // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Visualize initial condition.
