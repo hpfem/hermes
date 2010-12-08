@@ -141,11 +141,8 @@ int main (int argc, char* argv[]) {
   phi_bc_values.add_const(BYD_TOP, VOLTAGE);
   phi_bc_values.add_zero(BYD_BOT);
 
-  BCValues C_bc_values;
-  C_bc_values.add_zero(Hermes::Tuple<int>(BYD_SIDE, BYD_TOP, BYD_BOT));
-
   // Spaces for concentration and the voltage.
-  H1Space C(&Cmesh, &C_bc_types, &C_bc_values, P_INIT);
+  H1Space C(&Cmesh, &C_bc_types, P_INIT);
   H1Space phi(MULTIMESH ? &phimesh : &Cmesh, &phi_bc_types, &phi_bc_values, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C, &phi));
 
