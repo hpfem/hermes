@@ -142,10 +142,10 @@ int main(int argc, char* argv[])
 
   // Initialize boundary condition types and spaces with default shapesets.
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
-  L2Space space_rho(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
-  L2Space space_rho_v_x(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
-  L2Space space_rho_v_y(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
-  L2Space space_e(&mesh, &bc_types, (BCValues*) NULL, P_INIT);
+  L2Space space_rho(&mesh, &bc_types, P_INIT);
+  L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
+  L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);
+  L2Space space_e(&mesh, &bc_types, P_INIT);
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;

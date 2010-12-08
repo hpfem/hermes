@@ -160,9 +160,9 @@ double init_cond(double x, double y, double& dx, double& dy) {
 }
 
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+scalar essential_bc_values(double x, double y, double time)
 {
-  if (STARTUP_TIME > TIME) return -y + H_INIT + TIME/STARTUP_TIME*H_ELEVATION;
+  if (STARTUP_TIME > time) return -y + H_INIT + time/STARTUP_TIME*H_ELEVATION;
   else return -y + H_INIT + H_ELEVATION;
 }
 
@@ -191,13 +191,17 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_5));
   bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_1, BDY_4, BDY_6));
 
+  // Enter Dirichlet boundary values.
+  BCValues bc_values(&TIME);
+  bc_values.add_timedep_function(BDY_3, essential_bc_values);
+
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Create an H1 space for the initial coarse mesh solution.
-  H1Space init_space(&basemesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space init_space(&basemesh, &bc_types, &bc_values, P_INIT);
 
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

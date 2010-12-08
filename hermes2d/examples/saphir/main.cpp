@@ -90,12 +90,6 @@ double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 // Boundary markers.
 const int BDY_NEUMANN = 1;
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0.0;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -114,7 +108,7 @@ int main(int argc, char* argv[])
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NEUMANN));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bc_types, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf;

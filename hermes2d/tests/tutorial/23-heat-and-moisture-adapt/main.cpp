@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
   // Create H1 spaces with default shapesets.
   H1Space T_space(&T_mesh, &temp_bc_type, &bc_values, P_INIT);
-  H1Space M_space(MULTI ? &M_mesh : &T_mesh, &moist_bc_type, (BCValues *) NULL, P_INIT);
+  H1Space M_space(MULTI ? &M_mesh : &T_mesh, &moist_bc_type, P_INIT);
 
   // Define constant initial conditions.
   info("Setting initial conditions.");
