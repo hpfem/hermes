@@ -70,6 +70,7 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
+// Boundary markers.
 const int BDY_BOTTOM = 1;
 const int BDY_RIGHT = 2;
 const int BDY_TOP = 3;

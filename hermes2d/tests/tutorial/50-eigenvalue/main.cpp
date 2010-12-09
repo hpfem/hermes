@@ -124,6 +124,28 @@ int main(int argc, char* argv[])
   fclose(file);
 
   delete [] coeff_vec;
-  // wait for test functions. 
-};
+
+  info("ndof = %d", ndof);
+  info("Coordinate ( 0.5, 0.5) value = %lf", sln.get_pt_value(0.5, 0.5));
+  info("Coordinate ( 1.0, 0.5) value = %lf", sln.get_pt_value(1.0, 0.5));
+  info("Coordinate ( 1.5, 0.5) value = %lf", sln.get_pt_value(1.5, 0.5));
+  info("Coordinate ( 2.0, 0.5) value = %lf", sln.get_pt_value(2.0, 0.5));
+
+  double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
+  double coor_y = 0.5;
+  double t_value[4] = {0.001018, 0.396296, 0.633004, 0.495077};
+  for (int i = 0; i < 4; i++)
+  {
+    if ((t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) < 1E-6)
+    {
+      printf("Success!\n");
+    }
+    else
+    {
+      printf("Failure!\n");
+      return ERR_FAILURE;
+    }
+  }
+  return ERR_SUCCESS;
+}
 

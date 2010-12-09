@@ -169,6 +169,12 @@ int main(int argc, char* argv[])
         solver.get_num_iters(), solver.get_residual());
       info(" Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
         solver.get_num_lin_iters(), solver.get_achieved_tol());
+
+      // Time measurement.
+      cpu_time.tick();
+
+      // Skip visualization time.
+      cpu_time.tick(HERMES_SKIP);
     }
     else
       error("NOX failed on coarse mesh.");
@@ -176,10 +182,11 @@ int main(int argc, char* argv[])
     // Create uniformly refined reference mesh.
     Mesh rmesh; rmesh.copy(&mesh); 
     rmesh.refine_all_elements();
-    // Reference FE space.
-    H1Space rspace(&rmesh, bc_types, essential_bc_values, P_INIT);
+
+    // Create reference FE space.
+    H1Space rspace(&rmesh, &bc_types, &bc_values, P_INIT);
     int order_increase = 1;
-    rspace.copy_orders(&space, order_increase); // increase orders by one
+    rspace.copy_orders(&space, order_increase); // Increase orders by one.
 
     // Initialize FE problem on reference mesh.
     DiscreteProblem ref_dp(&wf, &rspace);

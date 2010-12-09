@@ -70,6 +70,7 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
+// Boundary markers.
 const int BDY_BOTTOM = 1;
 const int BDY_RIGHT = 2;
 const int BDY_TOP = 3;
@@ -84,12 +85,6 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("square_quad.mesh", &mesh);
-
-  // Avoid zero ndof situation.
-  if (P_INIT == 1) {
-    if (is_hp(CAND_LIST)) P_INIT++;
-    else mesh.refine_element(0, 1);
-  }
 
   // Enter boundary markers.
   BCTypes bc_types;
