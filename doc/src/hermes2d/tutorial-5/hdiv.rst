@@ -24,12 +24,18 @@ its basis functions:
       // Initial mesh refinement.
       for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+      // Enter boundary markers (default is Neumann boundary).
+      BCTypes bc_types;
+
+      // Enter Dirichlet boundary values (not relevant here).
+      BCValues bc_values;
+
       // Create an Hdiv space with default shapeset.
       // (BC types and essential BC values not relevant.)
-      HdivSpace space(&mesh, NULL, NULL, P_INIT);
+      HdivSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
       // Visualise the FE basis.
-      VectorBaseView bview("BaseView", 0, 0, 700, 600);
+      VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));
       bview.show(&space);
 
       // Wait for all views to be closed.

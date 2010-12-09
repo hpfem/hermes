@@ -20,12 +20,16 @@ In `example 02-space <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1.html#s
       // Initial mesh refinement.
       for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-      // Create an Hcurl space with default shapeset.
-      // (BC types and essential BC values not relevant.)
-      HcurlSpace space(&mesh, NULL, NULL, P_INIT);
+      // Enter boundary markers (default is Neumann boundary).
+      BCTypes bc_types;
+
+      // Enter Dirichlet boundary values (not relevant here).
+      BCValues bc_values;
+
+      HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
 
       // Visualize FE basis.
-      VectorBaseView bview("BaseView", 0, 0, 700, 600);
+      VectorBaseView bview("VectorBaseView", new WinGeom(0, 0, 700, 600));
       bview.show(&space);
 
       // Wait for all views to be closed.

@@ -11,8 +11,8 @@ into the previous sections.
    tutorial-5/hcurl
    tutorial-5/hdiv
    tutorial-5/l2
-   tutorial-5/adapt-exact
-   tutorial-5/remote-computing
+   tutorial-5/adapt_exact
+   tutorial-5/remote_computing
 
 
 
