@@ -32,7 +32,7 @@ The parameter TARGET_VALUE is specific to the PySparse library::
 Weak forms
 ~~~~~~~~~~
 
-The wesk form on the right- and left-hand side are standard::
+The weak forms on the right- and left-hand side are standard::
 
     template<typename Real, typename Scalar>
     Scalar bilinear_form_left(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
