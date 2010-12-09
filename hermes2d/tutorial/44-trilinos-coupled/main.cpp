@@ -19,7 +19,7 @@ using Teuchos::rcp;
 
 const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
 const int P_INIT = 2;               // Initial polynomial degree of all mesh elements.
-const bool JFNK = true;            // true = jacobian-free method,
+const bool JFNK = true;             // true = jacobian-free method,
                                     // false = Newton
 const int PRECOND = 2;              // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
                                     // or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
@@ -72,10 +72,9 @@ int main(int argc, char* argv[])
   // Enter Dirichlet boundary values.
   BCValues bc_values_t;
   bc_values_t.add_const(BDY_LEFT, 1.0);
-  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
 
   BCValues bc_values_c;
-  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values_c.add_zero(BDY_LEFT);
 
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);
@@ -122,12 +121,13 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
                      Hermes::Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
-  // Project the functions "t_iter" and "c_iter" on the FE space 
+  // Project the functions "t_prev_time_1" and "c_prev_time_1" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
-    coeff_vec);
+  OGProjection::project_global(Hermes::Tuple<Space *>(t_space, c_space), 
+                                       Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
+                                       coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
@@ -159,7 +159,8 @@ int main(int argc, char* argv[])
     solver.set_init_sln(coeff_vec);
     if (solver.solve())
     {
-      Solution::vector_to_solutions(solver.get_solution(), Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      Solution::vector_to_solutions(solver.get_solution(), Hermes::Tuple<Space *>(t_space, c_space), 
+                Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",

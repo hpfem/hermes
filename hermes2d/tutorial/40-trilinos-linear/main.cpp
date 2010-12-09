@@ -22,12 +22,12 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 1;      // Number of initial uniform mesh refinements.
-const int P_INIT = 2;            // Initial polynomial degree of all mesh elements.
-const bool JFNK = false;         // true = Jacobian-free method (for NOX),
-                                 // false = Newton (for NOX).
-const bool PRECOND = true;      // Preconditioning by jacobian in case of JFNK (for NOX),
-                                 // default ML preconditioner in case of Newton.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const bool JFNK = false;                          // true = Jacobian-free method (for NOX),
+                                                  // false = Newton (for NOX).
+const bool PRECOND = true;                        // Preconditioning by jacobian in case of JFNK (for NOX),
+                                                  // default ML preconditioner in case of Newton.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -100,13 +100,13 @@ int main(int argc, char **argv)
 
   // Initialize weak formulation.
   WeakForm wf1;
-  wf1.add_matrix_form(callback(bilinear_form));
+  wf1.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf1.add_vector_form(callback(linear_form));
 
   // Initialize the solution.
   Solution sln1;
   
-  // Initialize the linear FE problem.
+  // Initialize the linear discrete problem.
   bool is_linear = true;
   DiscreteProblem dp1(&wf1, &space, is_linear);
     
@@ -156,26 +156,14 @@ int main(int argc, char **argv)
   wf2.add_vector_form(callback(residual_form));
   
   // Initialize DiscreteProblem.
-  DiscreteProblem dp2(&wf2, &space);
+  is_linear = false;
+  DiscreteProblem dp2(&wf2, &space, is_linear);
   
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
 
   // Set initial vector for NOX.
-  bool projected_ic;    
-  // Set the initial vector to zero. Alternatively, you can obtain 
-  // an initial vector by projecting init_cond() on the FE space, see below.
-  /* 
-  EpetraVector* coeff_vec = new EpetraVector();
-  coeff_vec->alloc(ndof);
-  coeff_vec->zero();
-  projected_ic = false;
-  */
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the NOX solver.
-  
   info("Projecting to obtain initial vector for the Newton's method.");
-  projected_ic = true;
   scalar* coeff_vec = new scalar[ndof] ;
   Solution* init_sln = new ExactSolution(&mesh, init_cond);
   OGProjection::project_global(&space, init_sln, coeff_vec);
@@ -189,8 +177,7 @@ int main(int argc, char **argv)
   NoxSolver nox_solver(&dp2);
   nox_solver.set_init_sln(coeff_vec);
   
-  if (!projected_ic)  delete  coeff_vec;
-  else  delete [] coeff_vec;
+  delete coeff_vec;
 
   // Choose preconditioning.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -204,13 +191,6 @@ int main(int argc, char **argv)
   Solution sln2;
   if (nox_solver.solve())
   {
-    // debug
-    /*
-    int ndof = space.get_num_dofs();
-    printf("nox vector: ");
-    for (int i=0; i<ndof; i++) printf("%g ", coeffs[i]);
-    printf("\n");
-    */
     Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln2);
 
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
@@ -225,19 +205,16 @@ int main(int argc, char **argv)
 
   // Show the NOX solution.
   ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
-  //view2.set_min_max_range(0, 2);
   view2.show(&sln2);
 
   // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  Adapt adaptivity(&space, HERMES_H1_NORM);
-  bool solutions_for_adapt = false;
-  double rel_err_1 = adaptivity.calc_err_exact(&sln1, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+  double rel_err_1 = calc_abs_error(&sln1, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  double rel_err_2 = adaptivity.calc_err_exact(&sln2, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+  double rel_err_2 = calc_abs_error(&sln2, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
-
+ 
   // Wait for all views to be closed.
   View::wait();
   

@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   // Initialize the finite element problem.
   DiscreteProblem dp(&wf, &space);
 
-  // Project the function "titer" on the FE space 
+  // Project the function "t_prev_time" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solution on the FE mesh.");
   scalar* coeff_vec = new scalar[ndof];
