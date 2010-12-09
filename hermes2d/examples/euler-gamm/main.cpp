@@ -145,11 +145,11 @@ int main(int argc, char* argv[])
   mesh.refine_element(1151);
   mesh.refine_element(1152);
 
-  // Boundary condition types;
+  // Enter boundary markers.  
   BCTypes bc_types;
-
-  // Initialize boundary condition types and spaces with default shapesets.
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+
+  // Create L2 spaces with default shapesets.
   L2Space space_rho(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);

@@ -82,12 +82,6 @@ const int BDY_INLET_OUTLET = 2;
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux(KAPPA);
 
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
-
 // Inlet/outlet boundary conditions.
 double bc_density(double y)
 {
@@ -196,11 +190,11 @@ int main(int argc, char* argv[])
   basemesh.refine_by_criterion(criterion, 4);
   mesh.copy(&basemesh);
 
-  // Boundary condition types;
+  // Enter boundary markers.
   BCTypes bc_types;
-
-  // Initialize boundary condition types and spaces with default shapesets.
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+
+  // Create L2 spaces with default shapesets.
   L2Space space_rho(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);

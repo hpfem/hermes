@@ -145,6 +145,8 @@ int main(int argc, char* argv[])
   TimePeriod cpu_time;
   cpu_time.tick();
 
+  Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
+
   // Adaptivity loop:
   int as = 1;
   bool done = false;
@@ -192,7 +194,7 @@ int main(int argc, char* argv[])
 
     // Initializing solution vector, solution and ScalarView.
     double* ref_coeff_vec = new double[ref_ndof];
-    Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
+    //Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
     //ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
     // Reading solution vectors from file and visualizing.

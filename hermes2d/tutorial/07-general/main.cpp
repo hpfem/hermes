@@ -8,13 +8,13 @@
 //  can be defined manually.
 //
 //  PDE: -d/dx(a_11(x,y)du/dx) - d/dx(a_12(x,y)du/dy) - d/dy(a_21(x,y)du/dx) - d/dy(a_22(x,y)du/dy)
-//       + a_1(x,y)du/dx + a_21(x,y)du/dy + a_0(x,y)u = rhs(x,y)
+//       + a_1(x,y)du/dx + a_2(x,y)du/dy + a_0(x,y)u = rhs(x,y)
 //
 //  Domain: arbitrary
 //
 //  BC:  Dirichlet for boundary marker 1: u = g_D(x,y)
 //       Natural for any other boundary marker:   (a_11(x,y)*nu_1 + a_21(x,y)*nu_2) * dudx
-//                                              + (a_12(x,y)*nu_1 + s_22(x,y)*nu_2) * dudy = g_N(x,y)
+//                                              + (a_12(x,y)*nu_1 + a_22(x,y)*nu_2) * dudy = g_N(x,y)
 //
 //  The following parameters can be changed:
 

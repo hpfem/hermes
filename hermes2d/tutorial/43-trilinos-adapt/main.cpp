@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Enter boundary markers.
   BCTypes bc_types;
