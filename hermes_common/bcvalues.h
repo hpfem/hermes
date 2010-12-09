@@ -73,9 +73,9 @@ public:
                on the same part of the boundary.");
 
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(have_function && (value_constants[marker] != NULL || value_zeroes[marker]))
+    if(have_function && (value_constants[marker] != 0 || value_zeroes[marker]))
 #else
-    if(have_function && (value_constants[marker] != std::complex<double>(NULL, NULL) || value_zeroes[marker]))
+    if(have_function && (value_constants[marker] != std::complex<double>(0, 0) || value_zeroes[marker]))
 #endif
       error("Attempt to define more than one description of the Dirichlet BC \
                on the same part of the boundary.");
@@ -85,9 +85,9 @@ public:
     if(value_callbacks_time[marker] == NULL)
       value_callbacks_time.erase(marker);
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value_constants[marker] == NULL && !value_zeroes[marker])
+    if(value_constants[marker] == 0 && !value_zeroes[marker])
 #else
-    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker])
+    if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker])
 #endif
       value_constants.erase(marker);
   }
@@ -129,16 +129,16 @@ public:
   void add_const(Hermes::Tuple<int> markers, scalar value) 
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value == NULL) {
+    if(value == 0) {
 #else
-    if(value == std::complex<double>(NULL, NULL)) {
+    if(value == std::complex<double>(0, 0)) {
 #endif
       this->add_zero(markers);
       return;
     }
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
-    for(int i = 0; i < markers.size(); i++) {
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
       if(!(value_constants.insert(std::pair<int, scalar>(markers[i], value))).second)
@@ -153,7 +153,7 @@ public:
   {
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
-    for(int i = 0; i < markers.size(); i++) {
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
@@ -191,9 +191,9 @@ public:
     for(it = bc_types->markers_dirichlet.begin(); it != bc_types->markers_dirichlet.end(); it++) {
       bool have_function = is_time_dep[*it] ? value_callbacks_time[*it] != NULL : value_callbacks[*it] != NULL;
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-      if(!have_function && (value_constants[*it] == NULL && !value_zeroes[*it]))
+      if(!have_function && (value_constants[*it] == 0 && !value_zeroes[*it]))
 #else
-      if(!have_function && (value_constants[*it] == std::complex<double>(NULL, NULL) && !value_zeroes[*it]))
+      if(!have_function && (value_constants[*it] == std::complex<double>(0, 0) && !value_zeroes[*it]))
 #endif
         add_zero(*it);
     }
@@ -206,9 +206,9 @@ public:
   bool is_const(int marker)
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value_constants[marker] == NULL && !value_zeroes[marker]) {
+    if(value_constants[marker] == 0 && !value_zeroes[marker]) {
 #else
-    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker]) {
+    if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker]) {
 #endif
       value_constants.erase(marker);
       return false;
@@ -240,9 +240,9 @@ public:
   scalar calculate(int marker)
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value_constants[marker] == NULL && !value_zeroes[marker])
+    if(value_constants[marker] == 0 && !value_zeroes[marker])
 #else
-    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker])
+    if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker])
 #endif
       error("Attempt to retrieve a value of a value representing the Dirichlet BC without \
             this being set up for the current Space.");
