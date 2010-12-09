@@ -73,10 +73,10 @@ const double C_TOP = 1.0;
 const double C_RIGHT = 2.0;
 const double C_BOTTOM = 3.0;
 
-const double GN_LEFT = 0.0;
-const double GN_TOP = 3.0;
-const double GN_RIGHT = 2.0;
-const double GN_BOTTOM = 1.0;
+const double G_N_LEFT = 0.0;
+const double G_N_TOP = 3.0;
+const double G_N_RIGHT = 2.0;
+const double G_N_BOTTOM = 1.0;
 
 // Weak forms.
 #include "forms.cpp"
@@ -89,11 +89,12 @@ int main(int argc, char* argv[])
   mloader.load("battery.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
+  bc_types.add_bc_neumann(BDY_LEFT);
+  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;
@@ -108,6 +109,15 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(callback(biform3), HERMES_SYM, OMEGA_3);
   wf.add_matrix_form(callback(biform4), HERMES_SYM, OMEGA_4);
   wf.add_matrix_form(callback(biform5), HERMES_SYM, OMEGA_5);
+
+  wf.add_matrix_form_surf(bilinear_form_surf_right, bilinear_form_ord, BDY_RIGHT);
+  wf.add_matrix_form_surf(bilinear_form_surf_top, bilinear_form_ord, BDY_TOP);
+  wf.add_matrix_form_surf(bilinear_form_surf_bottom, bilinear_form_ord, BDY_BOTTOM);
+
+  wf.add_vector_form_surf(callback(linear_form_surf_left), BDY_LEFT);
+  wf.add_vector_form_surf(callback(linear_form_surf_right), BDY_RIGHT);
+  wf.add_vector_form_surf(callback(linear_form_surf_top), BDY_TOP);
+  wf.add_vector_form_surf(callback(linear_form_surf_bottom), BDY_BOTTOM);
 
   wf.add_vector_form(callback(linear_form_1), OMEGA_1);
   wf.add_vector_form(callback(linear_form_2), OMEGA_2);
