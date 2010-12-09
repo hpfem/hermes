@@ -64,10 +64,9 @@ int main(int argc, char* argv[])
   // Enter Dirichlet boundary values.
   BCValues bc_values_t;
   bc_values_t.add_const(BDY_LEFT, 1.0);
-  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
-
+  
   BCValues bc_values_c;
-  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values_t.add_zero(BDY_LEFT);
 
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);

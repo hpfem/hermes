@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
     Mesh rmesh; rmesh.copy(&mesh); 
     rmesh.refine_all_elements();
     // Reference FE space.
-    H1Space rspace(&rmesh, bc_types, essential_bc_values, P_INIT);
+    H1Space rspace(&rmesh, &bc_types, &bc_values, P_INIT);
     int order_increase = 1;
     rspace.copy_orders(&space, order_increase); // increase orders by one
 

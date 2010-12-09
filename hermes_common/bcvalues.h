@@ -138,7 +138,7 @@ public:
     }
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
-    for(int i = 0; i < markers.size(); i++) {
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
       if(!(value_constants.insert(std::pair<int, scalar>(markers[i], value))).second)
@@ -153,7 +153,7 @@ public:
   {
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
-    for(int i = 0; i < markers.size(); i++) {
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
