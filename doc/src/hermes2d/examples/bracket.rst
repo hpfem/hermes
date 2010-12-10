@@ -23,9 +23,7 @@ The dimensions are L = 0.7 m, T = 0.1 m and the force $f = 10^3$ N.
 
 Then we solve on the uniformly refined mesh and either project 
 the solution on the coarse mesh, or solve on the coarse mesh,
-to obtain the pair of solutions needed for error estimation:
-
-::
+to obtain the pair of solutions needed for error estimation::
 
     // Assemble and solve the fine mesh problem.
     info("Solving on fine mesh.");
