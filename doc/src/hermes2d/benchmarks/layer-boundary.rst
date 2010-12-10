@@ -3,13 +3,16 @@ Boundary Layer (Elliptic)
 
 **Git reference:** Benchmark `layer-boundary <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/layer-boundary>`_.
 
-This example is a singularly perturbed problem with known exact solution that exhibits a thin boundary layer, that 
-the reader can use to perform various experiments with adaptivity for problems with boundary layers. The sample 
-numerical results presented below imply that:
+This example is a singularly perturbed problem with known exact solution that exhibits a thin boundary layer 
+The reader can use it to perform various experiments with adaptivity. The sample numerical results presented 
+below imply that:
 
-* one should always use anisotropically refined meshes for problems with boundary layers,
-* hp-FEM is vastly superior to h-FEM with linear and quadratic elements, 
-* one should use not only spatially anisotropic elements, but also polynomial anisotropy (different polynomial orders in each direction) for problems in boundary layers. 
+* One should always use anisotropically refined meshes for problems with boundary layers.
+* hp-FEM is vastly superior to h-FEM with linear and quadratic elements. 
+* One should use not only spatially anisotropic elements, but also polynomial anisotropy (different polynomial orders in each direction) for problems in boundary layers. 
+
+Model problem
+~~~~~~~~~~~~~
 
 Equation solved: Poisson equation 
 
@@ -20,7 +23,10 @@ Equation solved: Poisson equation
 
 Domain of interest: Square $(-1, 1)^2$.
 
-Exact solution: 
+Boundary conditions: zero Dirichlet.
+
+Exact solution
+~~~~~~~~~~~~~~
 
 .. math::
 
@@ -68,14 +74,16 @@ is the code snippet with both the exact solution and the right-hand side:
       return -(dduhat_dxx(x)*uhat(y) + uhat(x)*dduhat_dxx(y)) + K*K*uhat(x)*uhat(y);
     }
 
-The weak forms are very simple and they are defined as follows. The only thing worth mentioning 
-here is that we integrate the non-polynomial right-hand side with a very high order for accuracy:
+Weak forms
+~~~~~~~~~~
 
-::
+The weak forms are very simple and they are defined as follows. The only thing worth mentioning 
+here is that we integrate the non-polynomial right-hand side with a very high order for accuracy::
 
     // Weak forms.
     template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) + K*K * int_u_v<Real, Scalar>(n, wt, u, v);
     }
@@ -92,9 +100,8 @@ here is that we integrate the non-polynomial right-hand side with a very high or
       return 24;
     }
 
-The numerical results follow:
-
-Solution:
+Sample solution
+~~~~~~~~~~~~~~~
 
 .. image:: benchmark-layer-boundary/solution.png
    :align: center
@@ -105,8 +112,8 @@ Solution:
 Below we present a series of convergence comparisons. Note that the error plotted
 is the true approximate error calculated wrt. the exact solution given above.
 
-Isotropic refinements
-~~~~~~~~~~~~~~~~~~~~~
+Convergence comparison for isotropic refinements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let us first compare the performance of h-FEM (p=1), h-FEM (p=2) and hp-FEM with **isotropic** refinements:
 
@@ -150,8 +157,8 @@ CPU convergence graphs:
    :height: 400
    :alt: CPU convergence graph.
 
-Anisotropic refinements
-~~~~~~~~~~~~~~~~~~~~~~~
+Convergence comparison for anisotropic refinements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next we compare the performance of h-FEM (p=1), h-FEM (p=2) and hp-FEM with **anisotropic** refinements:
 

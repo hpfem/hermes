@@ -7,6 +7,9 @@ This example solves time-harmonic Maxwell's equations. It describes an electroma
 hits a thin screen under the angle of 45 degrees, causing a singularity at the tip of the screen.
 The strength of the singularity makes this example rather difficult. 
 
+Model problem
+~~~~~~~~~~~~~
+
 Equation solved: Time-harmonic Maxwell's equations
 
 .. math::
@@ -23,15 +26,22 @@ the midpoint of the left side. It is filled with air:
    :height: 490
    :alt: Computational domain.
 
-Boundary conditions: Tangential component of solution taken from known exact solution 
+Boundary conditions
+~~~~~~~~~~~~~~~~~~~
+
+Tangential component of solution taken from known exact solution 
 (essential BC). See the 
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/main.cpp>`_ file.
 
-Exact solution: This is rather complicated in this case - please look into the 
-corresponding file 
-`exact_sol.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/exact_sol.cpp>`_.
+Exact solution 
+~~~~~~~~~~~~~~
 
-Code for the weak forms:
+This is rather complicated in this case - please look into the 
+corresponding file 
+`exact_solution.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/screen/exact_solution.cpp>`_.
+
+Weak forms
+~~~~~~~~~~
 
 ::
 
@@ -41,7 +51,10 @@ Code for the weak forms:
       return int_curl_e_curl_f<Real, Scalar>(n, wt, u, v) - int_e_f<Real, Scalar>(n, wt, u, v);
     }
 
-Solution (real part of $E_1$):
+Sample solution
+~~~~~~~~~~~~~~~
+
+Real part of $E_1$:
 
 .. image:: benchmark-screen/sol1.png
    :align: center
@@ -49,7 +62,7 @@ Solution (real part of $E_1$):
    :height: 470
    :alt: Solution.
 
-Solution (real part of $E_2$):
+Real part of $E_2$:
 
 .. image:: benchmark-screen/sol2.png
    :align: center
@@ -57,7 +70,7 @@ Solution (real part of $E_2$):
    :height: 470
    :alt: Solution.
 
-Solution (imaginary part of $E_1$):
+Imaginary part of $E_1$:
 
 .. image:: benchmark-screen/sol3.png
    :align: center
@@ -65,13 +78,16 @@ Solution (imaginary part of $E_1$):
    :height: 470
    :alt: Solution.
 
-Solution (imaginary part of $E_2$):
+Imaginary part of $E_2$:
 
 .. image:: benchmark-screen/sol4.png
    :align: center
    :width: 510
    :height: 470
    :alt: Solution.
+
+Convergence comparisons
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Final mesh (h-FEM with linear elements):
 
