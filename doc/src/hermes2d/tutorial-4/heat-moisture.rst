@@ -153,8 +153,8 @@ Assembling and solving the reference mesh problem
                                             Hermes::Tuple<Solution *>(&T_fine, &M_fine));
     else error ("Matrix solver failed.\n");
 
-Projecting reference solution on coartse meshes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Projecting reference solution on coarse meshes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -164,7 +164,7 @@ Projecting reference solution on coartse meshes
                    Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
                    Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
-Registering custom norms for error calculation
+Registering custom forms for error calculation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We could base the adaptivity on $H^1$-norm errors in the temperature

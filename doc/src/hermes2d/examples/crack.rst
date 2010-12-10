@@ -3,10 +3,9 @@ Crack (Linear Elasticity)
 
 **Git reference:** Example `crack <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/crack>`_.
 
-The example employs the adaptive multimesh hp-FEM to solve the 
-equations of linear elasticity. The domain contains two horizontal 
-cracks causing strong singularities at their corners. Each
-displacement component is approximated on an individual mesh.
+This example employs the adaptive multimesh hp-FEM to solve
+equations of linear elasticity that we already saw in the tutorial example
+`08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -297,3 +296,8 @@ The same comparison in terms of CPU time:
    :height: 400
    :alt: CPU convergence graph.
 
+In this example the difference between the multimesh *hp*-FEM and the single-mesh
+version was not extremely large since the two elasticity equations are very 
+strongly coupled and have singularities at the same points. 
+To see more significant differences, look at the tutorial 
+example `11-adapt-system <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/tutorial-2/multimesh-example.html>`_.
