@@ -5,6 +5,9 @@ Interior Layer (Elliptic)
 
 This example has a smooth solution that exhibits a steep interior layer.
 
+Model problem
+~~~~~~~~~~~~~
+
 Equation solved: Poisson equation 
 
 .. math::
@@ -25,7 +28,8 @@ Right-hand side:
     \frac{9}{4} (2x - 2.5)^2 \frac{S}{u t^3} +
     18 \frac{S}{ut}.
 
-Exact solution:
+Exact solution
+~~~~~~~~~~~~~~
 
 .. math::
     :label: layer-interior-exact
@@ -37,9 +41,7 @@ becomes difficult for adaptive algorithms, and at the same time the advantage of
 adaptive $hp$-FEM over adaptive low-order FEM becomes more significant. We will 
 use $S = 60$ in the following.
 
-Code for the exact solution and the weak forms:
-
-::
+In the code::
 
     // Exact solution.
     static double fn(double x, double y)
@@ -56,21 +58,36 @@ Code for the exact solution and the weak forms:
       return fn(x, y);
     }
     
-    // Boundary condition types.
-    BCType bc_types(int marker)
-    {
-      return BC_ESSENTIAL;
-    }
-    
+Boundary conditions
+~~~~~~~~~~~~~~~~~~~
+
+Nonconstant Dirichlet, dictated by the choice of the exact solution::
+
     // Essential (Dirichlet) boundary condition values.
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+    scalar essential_bc_values(double x, double y)
     {
       return fn(x, y);
     }
+
+The callback is registered as follows::
+
+    // Enter boundary markers.
+    BCTypes bc_types;
+    bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+    // Enter Dirichlet boudnary values.
+    BCValues bc_values;
+    bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+
+Weak forms
+~~~~~~~~~~
     
+::
+
     // Bilinear form for the Poisson equation.
     template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
@@ -94,13 +111,17 @@ Code for the exact solution and the weak forms:
       return -int_F_v<Real, Scalar>(n, wt, rhs, v, e);
     }
 
-Solution:
+Sample solution
+~~~~~~~~~~~~~~~
 
 .. image:: benchmark-layer-interior/sol_3d_view.png
    :align: center
    :width: 600
    :height: 400
    :alt: Solution.
+
+Convergence comparison
+~~~~~~~~~~~~~~~~~~~~~~
 
 Final mesh (h-FEM with linear elements):
 

@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_LEFT);
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
 
-  // Enter Dirichlet boudnary values.
+  // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_zero(BDY_LEFT);
 

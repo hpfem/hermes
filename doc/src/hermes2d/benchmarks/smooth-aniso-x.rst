@@ -6,6 +6,9 @@ Smooth-aniso-x (Elliptic)
 We show that one should use (spatially as well as polynomially) anisotropic refinements for solutions 
 containing anisotropy. 
 
+Model problem
+~~~~~~~~~~~~~
+
 Equation solved: Poisson equation 
 
 .. math::
@@ -22,22 +25,46 @@ Right-hand side:
  
     f(x, y) = \sin(x).
 
-Boundary conditions: Zero Dirichlet on the left and right edges, zero Neumann on the rest of the boundary.
+Boundary conditions: Zero Dirichlet on the left edge, zero Neumann on the top and bottom edges.
+Nonzero Neumann $\partial u / \partial n = -1$ on the right edge.
 
-Exact solution:
+In the code::
+
+    // Enter boundary markers.
+    BCTypes bc_types;
+    bc_types.add_bc_dirichlet(BDY_LEFT);
+    bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
+
+    // Enter Dirichlet boundary values.
+    BCValues bc_values;
+    bc_values.add_zero(BDY_LEFT);
+
+The nonzero Neumann yields a surface linear form on the right edge::
+
+    template<typename Real, typename Scalar>
+    Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      return -int_v<Real, Scalar>(n, wt, v);
+    }
+
+Exact solution
+~~~~~~~~~~~~~~
 
 .. math::
     :label: sin-exact
 
     u(x, y) = \sin(x).
 
-Solution:
+As an image:
 
 .. image:: benchmark-smooth-aniso-x/sol_3d_view.png
    :align: center
    :width: 600
    :height: 400
    :alt: Solution.
+
+Convergence comparisons
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Below we show meshes obtained using various types of adaptivity. 
 Note the tremendous differences in their performance. The meshes do not correspond to 

@@ -1,10 +1,13 @@
-2-Group Neutronics (Neutronics)
--------------------------------
+Two-Group Neutronics (Neutronics)
+---------------------------------
 
 **Git reference:** Benchmark `neutronics-2-group-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt>`_.
 
 This benchmark uses automatic adaptivity to solve a system of weakly coupled elliptic PDEs describing diffusion of neutrons through given medium.
 It employs the simple (yet often used in practice) two-group approximation by which all neutrons are divided into two distinct groups according to their energy (speed). This leads to the system of two equations shown below.
+
+Model problem
+~~~~~~~~~~~~~
 
 Equations solved:
 
@@ -24,9 +27,10 @@ Domain of interest:
    :height: 400
    :alt: Computational domain.
 
-Piecewise constant material properties for the four regions of the domain (reactor core) and each energy group are specified by the following code:
+Material properties
+~~~~~~~~~~~~~~~~~~~
 
-::
+Piecewise constant material properties for the four regions of the domain (reactor core) and each energy group are specified by the following code::
 
   const double D[4][2]  = { {1.12, 0.6},
                             {1.2, 0.5},
@@ -55,7 +59,10 @@ Piecewise constant material properties for the four regions of the domain (react
                                  { 0.014, 0.0 } } 
                              };
                              
-Boundary conditions: Typical conditions for nuclear reactor core calculations are used:
+Boundary conditions
+~~~~~~~~~~~~~~~~~~~
+
+Typical conditions for nuclear reactor core calculations are used:
 
 * zero Neumann on left and top edge (axes of symmetry),
 * zero Dirichlet on bottom edge (neutron-inert medium around the reactor core),
@@ -67,9 +74,10 @@ Boundary conditions: Typical conditions for nuclear reactor core calculations ar
   
 where the *reflector albedo* :math:`\gamma` is given by the exact solution and is equal for both groups to 8.
 
-Exact solution: Quite complicated, see the code below.
+Exact solution 
+~~~~~~~~~~~~~~
 
-::
+Quite complicated, see the code below::
 
   static double exact_flux1(double x, double y, double& dx, double& dy)
   {
@@ -88,10 +96,11 @@ Exact solution: Quite complicated, see the code below.
   }
 
 
-Right-hand side: Obtained by inserting the exact solution into the equation.
-The corresponding code snippet is shown below:
+Right-hand side
+~~~~~~~~~~~~~~~
 
-::
+Obtained by inserting the exact solution into the equation.
+The corresponding code snippet is shown below::
 
   double Q1(double x, double y)
   {
@@ -126,7 +135,8 @@ The corresponding code snippet is shown below:
 
 where the function *get_material* is used to obtain the material marker given the physical coordinates (see 
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt/main.cpp>`_). 
-The following picture shows the two right-hand side functions (distribution of neutron sources/sinks) - :math:`Q_1` is plotted on the left, :math:`Q_2` on the right.
+The following picture shows the two right-hand side functions (distribution of neutron sources/sinks) - :math:`Q_1` 
+is plotted on the left, :math:`Q_2` on the right.
 
 .. image:: benchmark-neutronics-2-group-adapt/rhs.png
    :align: center
@@ -134,6 +144,9 @@ The following picture shows the two right-hand side functions (distribution of n
    :height: 275
    :alt: Right-hand side.
    
+Weak formulation
+~~~~~~~~~~~~~~~~
+
 Weak formulation of the present two-group neutron diffusion problem with fixed source terms may be derived from the general multigroup formulation shown in the `4-Group Neutronics <http://hpfem.org/hermes/doc/src/hermes2d/examples.html#group-neutronics>`_ example. Concerning its implementation (see the file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/benchmarks/neutronics-2-group-adapt/forms.cpp>`_), it is worth noticing that we manually define a higher integration order for the volumetric linear forms to correctly integrate the non-polynomial source terms, although we may set it lower for the group-1 equations than for the group-2 equations as :math:`Q_1` is much smoother than :math:`Q_2`:
 
 ::
@@ -148,6 +161,8 @@ Weak formulation of the present two-group neutron diffusion problem with fixed s
     return Ord(30+v->val[0].get_order()); 
   }
 
+Sample results
+~~~~~~~~~~~~~~
 
 The following figures show the computed distributions of neutron flux for both neutron groups.
 

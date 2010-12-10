@@ -6,6 +6,9 @@ L-Shape (Elliptic)
 This is a standard adaptivity benchmark whose exact solution is smooth but
 contains singular gradient in a re-entrant corner. 
 
+Model problem
+~~~~~~~~~~~~~
+
 Equation solved: Laplace equation 
 
 .. math::
@@ -21,7 +24,8 @@ Domain of interest:
    :height: 470
    :alt: Computational domain.
 
-Exact solution:
+Exact solution
+~~~~~~~~~~~~~~
 
 .. math::
     :label: lshape-exact
@@ -30,9 +34,7 @@ Exact solution:
 
 where $r(x,y) = \sqrt{x^2 + y^2}$ and $a(x,y) = \mbox{atan}(x/y)$. 
 
-Code for the exact solution, bundary conditions, and weak forms:
-
-::
+In the code::
 
     // Exact solution.
     static double fn(double x, double y)
@@ -52,32 +54,52 @@ Code for the exact solution, bundary conditions, and weak forms:
       return fn(x, y);
     }
 
-    // Boundary condition types.
-    BCType bc_types(int marker)
-    {
-      return BC_ESSENTIAL;
-    }
+Boundary conditions
+~~~~~~~~~~~~~~~~~~~
+
+These are nonconstant Dirichlet, so we first define a callback::  
 
     // Essential (Dirichlet) boundary condition values.
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+    scalar essential_bc_values(double x, double y)
     {
       return fn(x, y);
     }
 
+The callback is registered in BCValues::
+
+    // Enter boundary markers.
+    BCTypes bc_types;
+    bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+    // Enter Dirichlet boudnary values.
+    BCValues bc_values;
+    bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+
+
+Weak forms
+~~~~~~~~~~
+
+::
+
     // Bilinear form corresponding to the Laplace equation.
     template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
 
-Solution:
+Sample solution
+~~~~~~~~~~~~~~~
 
 .. image:: benchmark-lshape/sol_3d_view.png
    :align: center
    :width: 600
    :height: 400
    :alt: Solution.
+
+Convergence comparisons
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Final mesh (h-FEM with linear elements):
 

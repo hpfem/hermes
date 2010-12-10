@@ -1,10 +1,13 @@
-Kellogg (Elliptic)
+NIST-11 (Elliptic)
 ------------------
 
-**Git reference:** Benchmark `kellogg <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/kellogg>`_.
+**Git reference:** Benchmark `nist-11 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-11>`_.
 
 The solution to this elliptic problems contains a severe singularity that poses a challenge to 
 adaptive methods. 
+
+Model problem
+~~~~~~~~~~~~~
 
 Equation solved:
 
@@ -21,9 +24,10 @@ Right-hand side: $f(x,y) = 0$.
 
 Boundary conditions: Dirichlet given by exact solution. 
 
-Exact solution: Quite complicated, see the code below.
+Exact solution
+~~~~~~~~~~~~~~
 
-::
+Quite complicated, see the code below::
 
     // Problem constants.
     const double R = 161.4476387975881;      // Equation parameter.
@@ -59,7 +63,8 @@ Exact solution: Quite complicated, see the code below.
       return pow(r, TAU) * mu;
     }
 
-The weak forms are as follows:
+Weak forms
+~~~~~~~~~~
 
 ::
 
@@ -77,37 +82,41 @@ The weak forms are as follows:
     }
 
 
-Solution:
+Sample solution
+~~~~~~~~~~~~~~~
 
-.. image:: benchmark-kellogg/solution.png
+.. image:: nist-11/solution.png
    :align: center
    :width: 600
    :alt: Solution.
 
+Convergence comparisons
+~~~~~~~~~~~~~~~~~~~~~~~
+
 Final mesh (h-FEM with linear elements):
 
-.. image:: benchmark-kellogg/mesh-h1.png
+.. image:: nist-11/mesh-h1.png
    :align: center
    :width: 600
    :alt: Mesh.
 
 Final mesh (h-FEM with quadratic elements):
 
-.. image:: benchmark-kellogg/mesh-h2.png
+.. image:: nist-11/mesh-h2.png
    :align: center
    :width: 600
    :alt: Mesh.
 
 Final mesh (hp-FEM):
 
-.. image:: benchmark-kellogg/mesh-hp.png
+.. image:: nist-11/mesh-hp.png
    :align: center
    :width: 600
    :alt: Mesh.
 
 DOF convergence graphs:
 
-.. image:: benchmark-kellogg/conv_dof.png
+.. image:: nist-11/conv_dof.png
    :align: center
    :width: 600
    :height: 400
@@ -115,7 +124,7 @@ DOF convergence graphs:
 
 CPU time convergence graphs:
 
-.. image:: benchmark-kellogg/conv_cpu.png
+.. image:: nist-11/conv_cpu.png
    :align: center
    :width: 600
    :height: 400
