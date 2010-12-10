@@ -11,7 +11,7 @@ Let us solve the Poisson equation
 .. math::
     :label: poisson1
 
-       -\Delta u = CONST_F
+       -\Delta u = C
 
 on the L-shaped domain $\Omega$ from the previous example,
 equipped with homogeneous (zero) Dirichlet boundary conditions
@@ -21,7 +21,7 @@ equipped with homogeneous (zero) Dirichlet boundary conditions
 
        u = 0\ \ \  \mbox{on}\  \partial \Omega,
 
-where $CONST_F$ is a real number. The weak formulation 
+where $C$ is a real number. The weak formulation 
 is derived in the standard way, first by multiplying equation :eq:`poisson1` with a test
 function $v$, then integrating over the domain $\Omega$, and then applying the Green's
 theorem (integration by parts) to the second derivatives.
@@ -32,7 +32,7 @@ Find $u \in V$ such that
 .. math::
     :label: poissonweak
 
-         \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} = CONST_F \int_\Omega v \;\mbox{d\bfx} \ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} = C \int_\Omega v \;\mbox{d\bfx} \ \ \ \mbox{for all}\ v \in V.
 
 Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$. 
 
@@ -51,13 +51,13 @@ callbacks::
       return result;
     }
    
-    // Return the value CONST_F \int v dx.
+    // Return the value C \int v dx.
     template<typename Real, typename Scalar>
     Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
       for (int i = 0; i < n; i++) result += wt[i] * (v->val[i]);
-      return CONST_F * result;
+      return C * result;
     }
 
 These callbacks are called by Hermes for each element during the assembly and they must return the 
@@ -116,7 +116,7 @@ that can be found in the file `integrals_h1.h <http://git.hpfem.org/hermes.git/b
     template<typename Real, typename Scalar>
     Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      return CONST_F * int_v<Real, Scalar>(n, wt, v);
+      return C * int_v<Real, Scalar>(n, wt, v);
     }
 
 Predefined integrals like this also exist for the Hcurl, Hdiv and L2 spaces. 
@@ -132,8 +132,6 @@ The main.cpp file typically begins with loading the mesh::
     Mesh mesh;
     H2DReader mloader;
     mloader.load("domain.mesh", &mesh);
-
-
 
 Setting zero Dirichlet boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -151,10 +149,11 @@ boundary markers (in fact positive integers) without using variable-length array
 
 After this, the user has to create an instance of the class BCValues 
 to provide values for all Dirichlet boundary conditions. To impose
-zero Dirichlet conditions, it is enough to declare::
+zero Dirichlet conditions, one declares::
 
-    // Enter Dirichlet boundary values (default is zero).
+    // Enter Dirichlet boundary values.
     BCValues bc_values;
+    bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
 
 The treatment of nonzero Dirichlet and other boundary conditions 
 will be explained in more detail, and illustrated on examples, in 
