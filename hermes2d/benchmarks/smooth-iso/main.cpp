@@ -91,7 +91,6 @@ int main(int argc, char* argv[])
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);

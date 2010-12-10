@@ -137,7 +137,7 @@ Setting zero Dirichlet boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To assign zero Dirichlet boundary conditions to the boundary, the user first has to 
-say that all boundary markers, in this case BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER,
+say that all boundary markers, in this case BDY_BOTTOM, BDY_OUTER, BDY_LEFT, and BDY_INNER
 will be Dirichlet::
 
     // Enter boundary markers.
@@ -147,13 +147,13 @@ will be Dirichlet::
 Do not worry about the complicated-looking Tuple, this is just to enter a set of several
 boundary markers (in fact positive integers) without using variable-length arrays.
 
-After this, the user has to create an instance of the class BCValues 
-to provide values for all Dirichlet boundary conditions. To impose
-zero Dirichlet conditions, one declares::
+After this, create an instance of the class BCValues 
+and provide values for all Dirichlet boundary conditions. To impose
+zero Dirichlet conditions, which is a default for each marker, it is enough 
+to write::
 
     // Enter Dirichlet boundary values.
     BCValues bc_values;
-    bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
 
 The treatment of nonzero Dirichlet and other boundary conditions 
 will be explained in more detail, and illustrated on examples, in 

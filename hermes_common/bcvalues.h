@@ -195,7 +195,15 @@ public:
 #else
       if(!have_function && (value_constants[*it] == std::complex<double>(0, 0) && !value_zeroes[*it]))
 #endif
+      {
+        if(is_time_dep[*it])
+          value_callbacks_time.erase(*it);
+        else
+           value_callbacks.erase(*it);
+        value_constants.erase(*it);
+        value_zeroes.erase(*it);
         add_zero(*it);
+      }
     }
   };
 

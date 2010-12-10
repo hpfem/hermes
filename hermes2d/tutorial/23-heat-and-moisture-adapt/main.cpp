@@ -21,6 +21,7 @@ const bool MULTI = true;                 // MULTI = true  ... use multi-mesh,
                                          // Note: In the single mesh option, the meshes are
                                          // forced to be geometrically the same but the
                                          // polynomial degrees can still vary.
+const int UNREF_FREQ = 1;                // Every UNREF_FREQth time step the mesh is derefined.
 const double THRESHOLD = 0.3;            // This is a quantitative parameter of the adapt(...) function and
                                          // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                  // Adaptive strategy:
@@ -178,7 +179,7 @@ int main(int argc, char* argv[])
         (int) (CURRENT_TIME + TAU) / (3600*24), (int) (CURRENT_TIME + TAU) / (3600*24*364));
 
     // Uniform mesh derefinement.
-    if (ts > 1) {
+    if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
       T_mesh.copy(&basemesh);
       M_mesh.copy(&basemesh);
@@ -196,13 +197,15 @@ int main(int argc, char* argv[])
       // Construct globally refined reference mesh and setup reference space.
       Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&T_space, &M_space));
 
+      // Initialize matrix solver.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
       // Assemble the reference problem.
       info("Solving on reference mesh.");
       bool is_linear = true;
       DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
       dp->assemble(matrix, rhs);
 
       // Now we can deallocate the previous fine meshes.
@@ -219,17 +222,20 @@ int main(int argc, char* argv[])
                      Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
                      Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
-      // Calculate element errors and total error estimate.
-      info("Calculating error estimate."); 
+      // Registering custom forms for error calculation.
       Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), 
                           Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
+
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate."); 
+      bool solutions_for_adapt = true;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), 
-                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), solutions_for_adapt,
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

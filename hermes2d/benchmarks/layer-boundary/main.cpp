@@ -81,9 +81,8 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
-  // Enter Dirichlet boudnary values.
+  // Enter zero Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);

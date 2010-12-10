@@ -35,7 +35,6 @@ In the code::
 
     // Enter Dirichlet boudnary values.
     BCValues bc_values;
-    bc_values.add_zero(BDY_DIRICHLET);
 
 Exact solution
 ~~~~~~~~~~~~~~

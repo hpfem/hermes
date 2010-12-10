@@ -515,12 +515,29 @@ int main(int argc, char* argv[])
       delete ref_spaces;
     }
     while (!done);
+        
+    // Visualize final adapted mesh and solutions in current time step.
+    view_T.show(&T_coarse);
+    sprintf(title, "T (coarse mesh), t = %g s, final mesh", TIME);
+    view_T.set_title(title);
+    
+    view_phi.show(&phi_coarse);
+    sprintf(title, "phi (coarse mesh), t = %g s, final mesh", TIME);
+    view_phi.set_title(title);
+    
+    ordview_T_coarse.show(&space_T);
+    sprintf(title, "T mesh (coarse), t = %g, final mesh", TIME);
+    ordview_T_coarse.set_title(title);
+    
+    ordview_phi_coarse.show(&space_phi);
+    sprintf(title, "phi mesh (coarse), t = %g, final mesh", TIME);
+    ordview_phi_coarse.set_title(title);
 
     // Make the fine mesh solution at current time level the previous time level solution in the following time step.
     T_prev_time.copy(&T_fine);
     phi_prev_time.copy(&phi_fine);
   }
-  
+   
   delete rhs_coarse;
   delete matrix_coarse;
   delete solver_coarse;

@@ -1,0 +1,4 @@
+rm *~ 
+./stabilized-advection-diffusion
+python plot_graph.py &
+
