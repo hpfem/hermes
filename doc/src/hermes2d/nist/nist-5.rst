@@ -6,50 +6,97 @@ NIST-5 (Elliptic)
 Model problem
 ~~~~~~~~~~~~~
 
-This is a heat conduction problem in nonhomogeneous materials. This example with anisotropic solution that is suitable for testing 
-anisotropic element refinements. The geometry is shown below:
+This is a heat conduction problem in a nonhomogeneous material. It comes with an anisotropic solution and
+multiple singularities. The following sketch shows the geometry and different materials:
 
 .. image:: nist-5/battery_domain.png
    :align: center
-   :height: 400
-   :width: 500
+   :width: 250
    :alt: Domain.
 
 Equation solved: 
 
 .. math::
 
-    -\frac{\partial }{\partial x}(p(x, y)\frac{\partial u}{\partial x})
-    -\frac{\partial }{\partial y}(q(x, y)\frac{\partial u}{\partial y}) = f(x, y), 
+    -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
+    -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f(x, y).
+
+Boundary conditions are zero Neumann on left edge, Newton on the rest of the boundary:
 
 .. math::
 
-    p(x, y)\frac{\partial u}{\partial x} - q(x, y)\frac{\partial u}{\partial y} = g_{left}(x, y) on \Gamma_{left},
+    p(x, y)\frac{\partial u}{\partial x}\nu_1 + q(x, y)\frac{\partial u}{\partial y}\nu_2 = g_{left}(x, y) \ \mbox{on} \  \Gamma_{left},
 
 .. math::
 
-    p(x, y)\frac{\partial u}{\partial x} - q(x, y)\frac{\partial u}{\partial y} + c(x, y)u = g_{right}(x, y) on \Gamma_{right},
+    p(x, y)\frac{\partial u}{\partial x}\nu_1 + q(x, y)\frac{\partial u}{\partial y}\nu_2 + c(x, y)u = g_{right}(x, y) \ \mbox{on} \ \Gamma_{right},
 
 .. math::
 
-    p(x, y)\frac{\partial u}{\partial x} - q(x, y)\frac{\partial u}{\partial y} + c(x, y)u = g_{top}(x, y) on \Gamma_{top},
+    p(x, y)\frac{\partial u}{\partial x}\nu_1 + q(x, y)\frac{\partial u}{\partial y}\nu_2 + c(x, y)u = g_{top}(x, y) \ \mbox{on} \ \Gamma_{top},
 
 .. math::
 
-    p(x, y)\frac{\partial u}{\partial x} - q(x, y)\frac{\partial u}{\partial y} + c(x, y)u = g_{bottom}(x, y) on \Gamma_{bottom}.
+    p(x, y)\frac{\partial u}{\partial x}\nu_1 + q(x, y)\frac{\partial u}{\partial y}\nu_2 + c(x, y)u = g_{bottom}(x, y) \ \mbox{on} \ \Gamma_{bottom}.
 
-Here $p(x, y)$, $q(x, y)$ and right hand side f(x, y) are constant coefficient functions in different materials.
 
-Domain of interest: Square $(0, 8.4) x (0, 24)$.
+Here $p(x, y)$, $q(x, y)$ and the right hand side $f(x, y)$ are constant coefficient functions in different materials.
 
-Boundary conditions: Zero Neumann on left edge, Newton(mixed) on the rest of the boundary.
+Domain of interest: Square $(0, 8.4) \times (0, 24)$.
 
 Exact solution: Unknown. 
 
-Weak forms
-~~~~~~~~~~
+Material parameters
+~~~~~~~~~~~~~~~~~~~
 
 ::
+
+    // Problem parameters.
+    const int OMEGA_1 = 1;
+    const int OMEGA_2 = 2;
+    const int OMEGA_3 = 3;
+    const int OMEGA_4 = 4;
+    const int OMEGA_5 = 5;
+
+    const double P_1 = 25.0;
+    const double P_2 = 7.0;
+    const double P_3 = 5.0;
+    const double P_4 = 0.2;
+    const double P_5 = 0.05;
+
+    const double Q_1 = 25.0;
+    const double Q_2 = 0.8;
+    const double Q_3 = 0.0001;
+    const double Q_4 = 0.2;
+    const double Q_5 = 0.05;
+
+    const double F_1 = 0.0;
+    const double F_2 = 1.0;
+    const double F_3 = 1.0;
+    const double F_4 = 0.0;
+    const double F_5 = 0.0;
+
+Boundary condition parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    // Boundary condition coefficients for the four sides.
+    const double C_LEFT = 0.0;
+    const double C_TOP = 1.0;
+    const double C_RIGHT = 2.0;
+    const double C_BOTTOM = 3.0;
+
+    const double G_N_LEFT = 0.0;
+    const double G_N_TOP = 3.0;
+    const double G_N_RIGHT = 2.0;
+    const double G_N_BOTTOM = 1.0;
+
+
+Weak forms - bilinear volumetric
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here biformN() refers to the material N::
 
     // Weak forms
     template<typename Real, typename Scalar>
@@ -91,6 +138,7 @@ Weak forms
         result += wt[i] * (P_4 * u->dx[i] * v->dx[i] + Q_4 * u->dy[i] * v->dy[i]);
       return result;
     }
+
     template<typename Real, typename Scalar>
     Scalar biform5(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
                    Geom<Real> *e, ExtData<Scalar> *ext)
@@ -100,6 +148,11 @@ Weak forms
         result += wt[i] * (P_5 * u->dx[i] * v->dx[i] + Q_5 * u->dy[i] * v->dy[i]);
       return result;
     }
+
+Weak forms - linear volumetric
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
 
     template<typename Real, typename Scalar>
     Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -130,6 +183,12 @@ Weak forms
     {
       return F_5 * int_v<Real, Scalar>(n, wt, v);
     }
+
+Weak forms - bilinear surface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is one surface bilinear form per Newton boundary, their names should be 
+self-explanatory::
 
     template<typename Real, typename Scalar>
     Scalar bilinear_form_surf_right(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
@@ -173,6 +232,11 @@ Weak forms
       return result;
     }
 
+Weak forms - linear surface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
     template<typename Real, typename Scalar>
     Scalar linear_form_surf_left(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
@@ -199,11 +263,6 @@ Weak forms
 
 Sample solution
 ~~~~~~~~~~~~~~~
-
-.. image:: nist-5/solution-2d.png
-   :align: center
-   :width: 340
-   :height: 400
 
 .. image:: nist-5/solution-3d.png
    :align: center
