@@ -1,3 +1,5 @@
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 // This is a simple generic module for a linear second-order PDE based on the Hermes 
@@ -73,11 +75,45 @@ public:
   // Set Newton boundary value pairs.
   void set_newton_values(const std::vector<double_pair> &bdy_values_newton);
 
+  // Sanity check of material markers and material constants.
+  void materials_sanity_check();
+
+  // Setting mesh.
+  void set_mesh(Mesh* m);
+
   // Solve the problem and return the solution.
-  bool calculate(Solution* phi);
+  bool calculate(double &assembly_time, double &solver_time);
 
   // This class associates BC markers with BC boundary types.
   BCTypes bc_types;
+
+  // Get mesh string.
+  const char* get_mesh_string();
+
+  // Clear mesh string.
+  void clear_mesh_string();
+
+  // Get solution.
+  Solution* get_solution();
+
+  // Get mesh.
+  Mesh* get_mesh();
+
+  // Get space.
+  Space* get_space();
+
+  // Get weak forms.
+  WeakForm* get_weak_forms();
+
+  // Set matrix solver.
+  void set_matrix_solver(std::string solver_name);
+
+  // Get matrix solver.
+  MatrixSolverType get_matrix_solver();
+
+  // Perform basic sanity checks, create mesh, perform 
+  // uniform refinements, create space, register weak forms.
+  void create_mesh_space_forms();
 
 private:
   std::string mesh_str;
@@ -105,12 +141,21 @@ private:
                                                // Therefore we introduce a bc_permut array that for any 
                                                // boundary marker gives its index in the list of boundary 
                                                // conditions. 
+  MatrixSolverType matrix_solver;              // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, 
+                                               // SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, 
+                                               // SOLVER_SUPERLU, SOLVER_UMFPACK.
 
   // Finite element mesh.
   Mesh* mesh;
 
   // Finite element space;
   H1Space* space;
+
+  // Weak form.
+  WeakForm* wf;
+
+  // Solution.
+  Solution* sln;
 };
 
 /* Mesh string example. This is the mesh from the Hermes tutorial example 01-mesh,

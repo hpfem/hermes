@@ -17,10 +17,6 @@ std::vector<double_pair> _global_bdy_values_newton;
 BCTypes* _global_bc_types = NULL;
 void *_global_data;
 
-// Matrix solver.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
 // Weak form (volumetric, left-hand side).
 template<typename Real, typename Scalar>
 Scalar bilinear_form_vol(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
@@ -163,6 +159,8 @@ ModuleBasic::ModuleBasic()
   init_p = -1;
   mesh = new Mesh();
   space = NULL;
+  sln = new Solution();
+  wf = NULL;
 
   // FIXME: these global arrays need to be removed.
   _global_data = this;
@@ -176,7 +174,8 @@ ModuleBasic::~ModuleBasic()
   delete this->space;
 }
 
-// Set mesh via a string. See basic.h for an example of such a string.
+// Set mesh via a string. 
+// See basic.h for an example of such a string.
 void ModuleBasic::set_mesh_str(const std::string &mesh)
 {
     this->mesh_str = mesh;
@@ -287,31 +286,102 @@ void ModuleBasic::set_newton_values(const std::vector<double_pair> &bdy_values_n
   _global_bdy_values_newton = bdy_values_newton;
 }
 
-// Solve the problem.
-bool ModuleBasic::calculate(Solution* phi) 
+// Sanity check of material markers and material constants.
+void ModuleBasic::materials_sanity_check()
+{
+  if (this->mat_markers.size() != this->c1_array.size()) error("Wrong length of c1 array.");
+  if (this->mat_markers.size() != this->c2_array.size()) error("Wrong length of c2 array.");
+  if (this->mat_markers.size() != this->c3_array.size()) error("Wrong length of c3 array.");
+  if (this->mat_markers.size() != this->c4_array.size()) error("Wrong length of c4 array.");
+  if (this->mat_markers.size() != this->c5_array.size()) error("Wrong length of c5 array.");
+
+  // Making sure that material markers are nonnegative (>= 0).
+  for (unsigned int i = 0; i < this->mat_markers.size(); i++) {
+    if(this->mat_markers[i] < 0) error("Material markers must be nonnegative.");
+  }
+}
+
+// Get mesh string.
+const char* ModuleBasic::get_mesh_string() 
+{
+  return this->mesh_str.c_str();
+}
+
+// Clear mesh string.
+void ModuleBasic::clear_mesh_string() 
+{
+  this->mesh_str.clear();
+}
+
+Solution* ModuleBasic::get_solution() 
+{
+  return this->sln;
+}
+
+// Set mesh.
+void ModuleBasic::set_mesh(Mesh* m) 
+{
+  this->mesh = m;
+}
+
+// Get mesh.
+Mesh* ModuleBasic::get_mesh() 
+{
+  return this->mesh;
+}
+
+// Get space.
+Space* ModuleBasic::get_space() 
+{
+  return this->space;
+}
+
+// Get weak forms.
+WeakForm* ModuleBasic::get_weak_forms() 
+{
+  return this->wf;
+}
+
+// Set matrix solver.
+void ModuleBasic::set_matrix_solver(std::string solver_name)
+{
+  bool found = false;
+  if (solver_name == "amesos" ) {this->matrix_solver = SOLVER_AMESOS;  found = true;}
+  if (solver_name == "aztecoo") {this->matrix_solver = SOLVER_AZTECOO; found = true;}
+  if (solver_name == "mumps"  ) {this->matrix_solver = SOLVER_MUMPS;   found = true;}
+  if (solver_name == "pardiso") {this->matrix_solver = SOLVER_PARDISO; found = true;}
+  if (solver_name == "petsc"  ) {this->matrix_solver = SOLVER_PETSC;   found = true;}
+  if (solver_name == "superlu") {this->matrix_solver = SOLVER_SUPERLU; found = true;}
+  if (solver_name == "umfpack") {this->matrix_solver = SOLVER_UMFPACK; found = true;}
+  if (!found) {
+    warn("Possible matrix solvers: amesos, aztecoo, mumps, pardiso, petsc, superlu, umfpack.");
+    error("Unknown matrix solver %s.", solver_name.c_str());
+  }
+}
+
+MatrixSolverType ModuleBasic::get_matrix_solver()
+{
+  return this->matrix_solver;
+}
+
+void ModuleBasic::create_mesh_space_forms() 
 {
   /* SANITY CHECKS */
 
+  // Consistency check of boundary conditions.
   this->bc_types.check_consistency();
 
   // Sanity check of material markers and material constants.
-  unsigned int n_mat_markers = this->mat_markers.size();
-  if (n_mat_markers != this->c1_array.size()) error("Wrong length of c1 array.");
-  if (n_mat_markers != this->c2_array.size()) error("Wrong length of c2 array.");
-  if (n_mat_markers != this->c3_array.size()) error("Wrong length of c3 array.");
-  if (n_mat_markers != this->c4_array.size()) error("Wrong length of c4 array.");
-  if (n_mat_markers != this->c5_array.size()) error("Wrong length of c5 array.");
-
-  // Making sure that material markers are nonnegative (>= 0).
-  for (unsigned int i = 0; i < n_mat_markers; i++) {
-    if(this->mat_markers[i] < 0) error("Material markers must be nonnegative.");
-  }
+  this->materials_sanity_check();
 
   /* BEGIN THE COMPUTATION */
 
   // Load the mesh.
   H2DReader mloader;
-  mloader.load_str(this->mesh_str.c_str(), this->mesh);
+  mloader.load_str(this->get_mesh_string(), this->mesh);
+
+  // Clear the mesh string.
+  this->clear_mesh_string();
 
   // Debug.
   /*
@@ -336,20 +406,36 @@ bool ModuleBasic::calculate(Solution* phi)
   */
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_vol));
-  wf.add_vector_form(callback(linear_form_vol));
+  this->wf = new WeakForm();
+  this->wf->add_matrix_form(callback(bilinear_form_vol));
+  this->wf->add_vector_form(callback(linear_form_vol));
   for (unsigned int i=0; i < this->bdy_values_neumann.size(); i++) {
-    wf.add_vector_form_surf(callback(linear_form_surf_neumann), this->bdy_markers_neumann[i]);
+    this->wf->add_vector_form_surf(callback(linear_form_surf_neumann), this->bdy_markers_neumann[i]);
   }
   for (unsigned int i=0; i < this->bdy_values_newton.size(); i++) {
-    wf.add_matrix_form_surf(callback(bilinear_form_surf_newton), this->bdy_markers_newton[i]);
-    wf.add_vector_form_surf(callback(linear_form_surf_newton), this->bdy_markers_newton[i]);
+    this->wf->add_matrix_form_surf(callback(bilinear_form_surf_newton), this->bdy_markers_newton[i]);
+    this->wf->add_vector_form_surf(callback(linear_form_surf_newton), this->bdy_markers_newton[i]);
   }
+}
+
+// Solve the problem.
+bool ModuleBasic::calculate(double &assembly_time, double &solver_time) 
+{
+  // Reset times.
+  assembly_time = -1;
+  solver_time = -1;
+
+  // Begin assembly time measurement.
+  TimePeriod cpu_time_assembly;
+  cpu_time_assembly.tick();
+
+  // Perform basic sanity checks, create mesh, perform 
+  // uniform refinements, create space, register weak forms.
+  this->create_mesh_space_forms();
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(&wf, this->space, is_linear);
+  DiscreteProblem dp(this->get_weak_forms(), this->get_space(), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -360,10 +446,22 @@ bool ModuleBasic::calculate(Solution* phi)
   info("Assembling the stiffness matrix and right-hand side vector.");
   dp.assemble(matrix, rhs);
 
+  // End assembly time measurement.
+  cpu_time_assembly.tick();
+  assembly_time = cpu_time_assembly.accumulated();
+
+  // Begin solver time measurement.
+  TimePeriod cpu_time_solver;
+  cpu_time_solver.tick();
+
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
-  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), this->space, phi);
+  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), this->space, this->sln);
   else error ("Matrix solver failed.\n");
+
+  // End solver time measurement.
+  cpu_time_solver.tick();
+  solver_time = cpu_time_solver.accumulated();
 
   // Clean up.
   delete solver;
