@@ -13,6 +13,7 @@ problems to adaptivity algorithms.
 .. toctree::
    :maxdepth: 2
 
+   nist/nist-5
    nist/nist-10
    nist/nist-11
 

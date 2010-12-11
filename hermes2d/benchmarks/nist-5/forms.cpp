@@ -1,13 +1,4 @@
-template<typename Real, typename Scalar>
-Scalar biform1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-               Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (P_1 * u->dx[i] * v->dx[i] + Q_1 * u->dy[i] * v->dy[i]);
-  return result;
-}
-
+// Weak forms
 template<typename Real, typename Scalar>
 Scalar bilinear_form_surf_left(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
                                Geom<Real> *e, ExtData<Scalar> *ext)
@@ -120,6 +111,16 @@ template<typename Real, typename Scalar>
 Scalar linear_form_surf_bottom(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   return G_N_BOTTOM * int_v<Real, Scalar>(n, wt, v);
+}
+
+template<typename Real, typename Scalar>
+Scalar biform1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
+               Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (P_1 * u->dx[i] * v->dx[i] + Q_1 * u->dy[i] * v->dy[i]);
+  return result;
 }
 
 template<typename Real, typename Scalar>
