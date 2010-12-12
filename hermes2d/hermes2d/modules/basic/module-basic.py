@@ -18,7 +18,7 @@ def main():
     e.set_c4_array([0])
     e.set_c5_array([1])
     e.set_dirichlet_markers([4])
-    e.set_dirichlet_values([0])
+    e.set_dirichlet_values([4], [0])
     e.set_neumann_markers([1, 3])
     e.set_neumann_values([0, 0])
     e.set_newton_markers([2])

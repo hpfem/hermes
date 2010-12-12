@@ -67,8 +67,8 @@ cdef class ModuleBasic:
     def set_dirichlet_markers(self, bdy_markers_dirichlet):
         self.thisptr.set_dirichlet_markers(array2vector_int(bdy_markers_dirichlet))
 
-    def set_dirichlet_values(self, bdy_values_dirichlet):
-        self.thisptr.set_dirichlet_values(array2vector_double(bdy_values_dirichlet))
+    def set_dirichlet_values(self,  bdy_markers_dirichlet, bdy_values_dirichlet):
+        self.thisptr.set_dirichlet_values(array2vector_int(bdy_markers_dirichlet), array2vector_double(bdy_values_dirichlet))
 
     def set_neumann_markers(self, bdy_markers_neumann):
         self.thisptr.set_neumann_markers(array2vector_int(bdy_markers_neumann))
@@ -96,7 +96,10 @@ cdef class ModuleBasic:
         return s
 
     #def get_space(self):
-    #    return self.thisptr.get_space()
+    #    s = Space()
+    #    self.thisptr.get_space(s.getptr()) 
+    #    return s
+    
 
     def calculate(self):
         success = self.thisptr.calculate()

@@ -15,7 +15,7 @@ std::vector<double> _global_bdy_values_dirichlet;
 std::vector<double> _global_bdy_values_neumann;
 std::vector<double_pair> _global_bdy_values_newton;
 BCTypes* _global_bc_types = NULL;
-void *_global_data;
+BCValues* _global_bc_values = NULL;
 
 // Weak form (volumetric, left-hand side).
 template<typename Real, typename Scalar>
@@ -28,6 +28,7 @@ Scalar bilinear_form_vol(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, 
     // This is for Order calculation only:
     c1 = c2 = c3 = c4 = -5555.0;
   } else {
+    // FIXME: these global arrays need to be removed.
     int index = _global_mat_markers.find_index(elem_marker);
     c1 = _global_c1_array[index];
     c2 = _global_c2_array[index];
@@ -52,6 +53,7 @@ Scalar linear_form_vol(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
     // This is for Order calculation only:
     c5 = -5555.0;
   } else {
+    // FIXME: these global arrays need to be removed.
     int index = _global_mat_markers.find_index(elem_marker);
     c5 = _global_c5_array[index];
   }
@@ -72,11 +74,13 @@ Scalar bilinear_form_surf_newton(int n, double *wt, Func<Real> *u_ext[], Func<Re
     const_newton_1 = -5555.0;
     c1 = -5555.0;
   } else {
+    // FIXME: these global arrays need to be removed.
     if (_global_bdy_values_newton.size() > 0) {
       double_pair newton_pair = _global_bdy_values_newton[_global_bc_types->find_index_newton(edge_marker)];
       const_newton_1 = newton_pair.first;
     }
     else error("Internal in ModuleBasic: bilinear_form_surf_newton() should not have been called.");
+    // FIXME: these global arrays need to be removed.
     c1 = _global_c1_array[_global_mat_markers.find_index(elem_marker)];
   }
   return c1 * const_newton_1 * int_u_v<Real, Scalar>(n, wt, u, v);
@@ -97,11 +101,13 @@ Scalar linear_form_surf_neumann(int n, double *wt, Func<Real> *u_ext[], Func<Rea
     const_neumann = -5555.0;
     c1 = -5555.0;
   } else {
+    // FIXME: these global arrays need to be removed.
     if (_global_bdy_values_neumann.size() > 0) {
       int index = _global_bc_types->find_index_neumann(edge_marker);
       const_neumann = _global_bdy_values_neumann[index];
     }
     else error("Internal in ModuleBasic: linear_form_surf_neumann() should not have been called.");
+    // FIXME: these global arrays need to be removed.
     c1 = _global_c1_array[_global_mat_markers.find_index(elem_marker)];  
   }
   return c1 * const_neumann * int_v<Real, Scalar>(n, wt, v);
@@ -122,12 +128,14 @@ Scalar linear_form_surf_newton(int n, double *wt, Func<Real> *u_ext[], Func<Real
     const_newton_2 = -5555.0;
     c1 = -5555.0;
   } else {
+    // FIXME: these global arrays need to be removed.
     if (_global_bdy_values_newton.size() > 0) {
       int index = _global_bc_types->find_index_newton(edge_marker);
       double_pair newton_pair = _global_bdy_values_newton[index];
       const_newton_2 = newton_pair.second;
     }
     else error("Internal in ModuleBasic: linear_form_surf_newton() should not have been called.");
+    // FIXME: these global arrays need to be removed.
     c1 = _global_c1_array[_global_mat_markers.find_index(elem_marker)];  
   }
   return c1 * const_newton_2 * int_v<Real, Scalar>(n, wt, v);
@@ -144,14 +152,6 @@ bool find_index(const std::vector<int> &array, int x, int &i_out)
   return false;
 }
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  ModuleBasic *self = (ModuleBasic *) _global_data;
-  int idx = self->bc_types.find_index_dirichlet(ess_bdy_marker);
-  return _global_bdy_values_dirichlet[idx];
-}
-
 // Constructor.
 ModuleBasic::ModuleBasic()
 {
@@ -165,8 +165,8 @@ ModuleBasic::ModuleBasic()
   solver_time = 0;
 
   // FIXME: these global arrays need to be removed.
-  _global_data = this;
   _global_bc_types = &(this->bc_types);
+  _global_bc_values = &(this->bc_values);
 }
 
 // Destructor.
@@ -199,6 +199,7 @@ void ModuleBasic::set_initial_poly_degree(int p)
 void ModuleBasic::set_material_markers(const std::vector<int> &m_markers)
 {
   this->mat_markers = m_markers;
+  // FIXME: these global arrays need to be removed.
   _global_mat_markers = m_markers;
 }
 
@@ -209,6 +210,7 @@ void ModuleBasic::set_c1_array(const std::vector<double> &c1_array)
   for (int i = 0; i < n; i++) 
   if (c2_array[i] <= 1e-10) error("The c1 array needs to be positive.");
   this->c1_array = c1_array;
+  // FIXME: these global arrays need to be removed.
   _global_c1_array = c1_array;
 }
 
@@ -216,6 +218,7 @@ void ModuleBasic::set_c1_array(const std::vector<double> &c1_array)
 void ModuleBasic::set_c2_array(const std::vector<double> &c2_array)
 {
   this->c2_array = c2_array;
+  // FIXME: these global arrays need to be removed.
   _global_c2_array = c2_array;
 }
 
@@ -223,6 +226,7 @@ void ModuleBasic::set_c2_array(const std::vector<double> &c2_array)
 void ModuleBasic::set_c3_array(const std::vector<double> &c3_array)
 {
   this->c3_array = c3_array;
+  // FIXME: these global arrays need to be removed.
   _global_c3_array = c3_array;
 }
 
@@ -230,6 +234,7 @@ void ModuleBasic::set_c3_array(const std::vector<double> &c3_array)
 void ModuleBasic::set_c4_array(const std::vector<double> &c4_array)
 {
   this->c4_array = c4_array;
+  // FIXME: these global arrays need to be removed.
   _global_c4_array = c4_array;
 }
 
@@ -237,23 +242,29 @@ void ModuleBasic::set_c4_array(const std::vector<double> &c4_array)
 void ModuleBasic::set_c5_array(const std::vector<double> &c5_array)
 {
   this->c5_array = c5_array;
+  // FIXME: these global arrays need to be removed.
   _global_c5_array = c5_array;
 }
 
 // Set Dirichlet boundary markers.
 void ModuleBasic::set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet)
 {
-  this->bdy_markers_dirichlet = bdy_markers_dirichlet;
+  //this->bdy_markers_dirichlet = bdy_markers_dirichlet;
   Hermes::Tuple<int> t;
   t = bdy_markers_dirichlet;
   this->bc_types.add_bc_dirichlet(t);
 }
 
 // Set Dirichlet boundary values.
-void ModuleBasic::set_dirichlet_values(const std::vector<double> &bdy_values_dirichlet)
+void ModuleBasic::set_dirichlet_values(const std::vector<int> &bdy_markers_dirichlet,
+                                       const std::vector<double> &bdy_values_dirichlet)
 {
-  this->bdy_values_dirichlet = bdy_values_dirichlet;
-  _global_bdy_values_dirichlet = bdy_values_dirichlet;
+  Hermes::Tuple<int> tm;
+  tm = bdy_markers_dirichlet;
+  Hermes::Tuple<double> tv;
+  tv = bdy_values_dirichlet;
+  if (tm.size() != tv.size()) error("Mismatched numbers of Dirichlet boundary markers and values.");
+  for (unsigned int i = 0; i < tm.size(); i++) this->bc_values.add_const(tm[i], tv[i]);
 }
 
 // Set Neumann boundary markers.
@@ -269,6 +280,7 @@ void ModuleBasic::set_neumann_markers(const std::vector<int> &bdy_markers_neuman
 void ModuleBasic::set_neumann_values(const std::vector<double> &bdy_values_neumann)
 {
   this->bdy_values_neumann = bdy_values_neumann;
+  // FIXME: these global arrays need to be removed.
   _global_bdy_values_neumann = bdy_values_neumann;
 }
 
@@ -285,6 +297,7 @@ void ModuleBasic::set_newton_markers(const std::vector<int> &bdy_markers_newton)
 void ModuleBasic::set_newton_values(const std::vector<double_pair> &bdy_values_newton)
 {
   this->bdy_values_newton = bdy_values_newton;
+  // FIXME: these global arrays need to be removed.
   _global_bdy_values_newton = bdy_values_newton;
 }
 
@@ -401,7 +414,7 @@ void ModuleBasic::create_mesh_space_forms()
   for (int i = 0; i < this->init_ref_num; i++) this->mesh->refine_all_elements();
 
   // Create an H1 space with default shapeset.
-  this->space = new H1Space(this->mesh, &(this->bc_types), essential_bc_values, this->init_p);
+  this->space = new H1Space(this->mesh, &(this->bc_types), &(this->bc_values), this->init_p);
   int ndof = Space::get_num_dofs(this->space);
   info("ndof = %d", ndof);
 

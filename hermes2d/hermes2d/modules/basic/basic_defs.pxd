@@ -3,7 +3,9 @@ from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
 from hermes2d.hermes2d_defs cimport Solution
-#from hermes2d.hermes2d_defs cimport Space
+
+# FIXME; Space needs wrapping
+# from hermes2d.hermes2d_defs cimport Space
 
 cdef extern from "basic.h":
 
@@ -19,7 +21,7 @@ cdef extern from "basic.h":
         void set_c4_array(vector[double] &c4_array)
         void set_c5_array(vector[double] &c5_array)
         void set_dirichlet_markers(vector[int] &bdy_markers_dirichlet)
-        void set_dirichlet_values(vector[double] &bdy_values_dirichlet)
+        void set_dirichlet_values(vector[int] &bdy_markers_dirichlet, vector[double] &bdy_values_dirichlet)
         void set_neumann_markers(vector[int] &bdy_markers_neumann)
         void set_neumann_values(vector[double] &bdy_values_neumann)
         void set_newton_markers(vector[int] &bdy_markers_newton)
@@ -27,5 +29,5 @@ cdef extern from "basic.h":
         double get_assembly_time()
         double get_solver_time()
         void get_solution(Solution* s)
-        #Space* get_space()
+        #void get_space(Space* s)
         bool calculate()

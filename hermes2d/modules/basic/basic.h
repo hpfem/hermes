@@ -61,7 +61,8 @@ public:
   void set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet);
 
   // Set Dirichlet boundary values.
-  void set_dirichlet_values(const std::vector<double> &bdy_values_dirichlet);
+  void set_dirichlet_values(const std::vector<int> &bdy_markers_dirichlet, 
+                            const std::vector<double> &bdy_values_dirichlet);
 
   // Set Neumann boundary markers.
   void set_neumann_markers(const std::vector<int> &bdy_markers_neumann);
@@ -89,6 +90,9 @@ public:
 
   // This class associates BC markers with BC boundary types.
   BCTypes bc_types;
+
+  // This class provides values for Dirichlet (essential) BC markers.
+  BCValues bc_values;
 
   // Get mesh string.
   const char* get_mesh_string();
