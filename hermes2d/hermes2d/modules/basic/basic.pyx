@@ -4,6 +4,7 @@ from libcpp.pair cimport pair
 
 cimport basic_defs
 from hermes2d.hermes2d cimport Solution
+from hermes2d.hermes2d cimport Space
 
 cdef vector[int] array2vector_int(a):
     cdef vector[int] v
@@ -41,6 +42,9 @@ cdef class ModuleBasic:
 
     def set_initial_poly_degree(self, int p):
         self.thisptr.set_initial_poly_degree(p)
+
+    def set_matrix_solver(self, solver_name):
+        self.thisptr.set_matrix_solver(solver_name)
 
     def set_material_markers(self, mat_markers):
         self.thisptr.set_material_markers(array2vector_int(mat_markers))
@@ -80,7 +84,20 @@ cdef class ModuleBasic:
         vvv = array2vector_double_pair(bdy_values_newton)
         self.thisptr.set_newton_values(vvv)
 
+    def get_assembly_time(self):
+        return self.thisptr.get_assembly_time()
+
+    def get_solver_time(self):
+        return self.thisptr.get_solver_time()
+
+    def get_solution(self):
+        return self.thisptr.get_solution()
+
+    def get_space(self):
+        return self.thisptr.get_space()
+
     def calculate(self):
-        s = Solution()
-        r = self.thisptr.calculate(s.getptr())
-        return r, s
+        success = self.thisptr.calculate()
+        return success
+
+    

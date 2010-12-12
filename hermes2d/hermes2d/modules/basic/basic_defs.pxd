@@ -1,14 +1,17 @@
 from libcpp cimport bool
+from libcpp cimport double
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
 from hermes2d.hermes2d_defs cimport Solution
+from hermes2d.hermes2d_defs cimport Space
 
 cdef extern from "basic.h":
 
     cdef cppclass ModuleBasic:
         void set_mesh_str(char *mesh)
         void set_initial_mesh_refinement(int init_ref_num)
+        void set_matrix_solver(char *meshsolver_name)
         void set_initial_poly_degree(int p)
         void set_material_markers(vector[int] &mat_markers)
         void set_c1_array(vector[double] &c1_array)
@@ -22,4 +25,8 @@ cdef extern from "basic.h":
         void set_neumann_values(vector[double] &bdy_values_neumann)
         void set_newton_markers(vector[int] &bdy_markers_newton)
         void set_newton_values(vector[pair[double, double]] &bdy_values_newton)
-        bool calculate(Solution* phi)
+        double get_assembly_time()
+        double get_solver_time()
+        Solution* get_solution()
+        Space* get_space()
+        bool calculate()
