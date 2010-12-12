@@ -187,11 +187,11 @@ int main(int argc, char* argv[])
   double assembly_time, solver_time;
 
   // Solve.
-  bool success = B.calculate(assembly_time, solver_time);
+  bool success = B.calculate();
   info("=====================");
   info("Computation finished.");
-  info("assembly time: %g s", assembly_time);
-  info("solver time: %g s", solver_time);
+  info("assembly time: %g s", B.get_assembly_time());
+  info("solver time: %g s", B.get_solver_time());
   if (!success) error("Computation failed.");
 
   /*** SHOW THE SOLUTION, GRADIENT, and SPACE ***/

@@ -82,7 +82,7 @@ public:
   void set_mesh(Mesh* m);
 
   // Solve the problem and return the solution.
-  bool calculate(double &assembly_time, double &solver_time);
+  bool calculate();
 
   // This class associates BC markers with BC boundary types.
   BCTypes bc_types;
@@ -114,6 +114,13 @@ public:
   // Perform basic sanity checks, create mesh, perform 
   // uniform refinements, create space, register weak forms.
   void create_mesh_space_forms();
+
+  // Get assembly time.
+  double get_assembly_time();
+
+  // Get solver time.
+  double get_solver_time();
+
 
 private:
   std::string mesh_str;
@@ -156,6 +163,9 @@ private:
 
   // Solution.
   Solution* sln;
+
+  // Assembly and solver times.
+  double assembly_time, solver_time;
 };
 
 /* Mesh string example. This is the mesh from the Hermes tutorial example 01-mesh,

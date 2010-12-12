@@ -161,6 +161,8 @@ ModuleBasic::ModuleBasic()
   space = NULL;
   sln = new Solution();
   wf = NULL;
+  assembly_time = 0;
+  solver_time = 0;
 
   // FIXME: these global arrays need to be removed.
   _global_data = this;
@@ -364,6 +366,16 @@ MatrixSolverType ModuleBasic::get_matrix_solver()
   return this->matrix_solver;
 }
 
+double ModuleBasic::get_assembly_time()
+{
+  return this->assembly_time;
+}
+
+double ModuleBasic::get_solver_time()
+{
+  return this->solver_time;
+}
+
 void ModuleBasic::create_mesh_space_forms() 
 {
   /* SANITY CHECKS */
@@ -419,12 +431,8 @@ void ModuleBasic::create_mesh_space_forms()
 }
 
 // Solve the problem.
-bool ModuleBasic::calculate(double &assembly_time, double &solver_time) 
+bool ModuleBasic::calculate() 
 {
-  // Reset times.
-  assembly_time = -1;
-  solver_time = -1;
-
   // Begin assembly time measurement.
   TimePeriod cpu_time_assembly;
   cpu_time_assembly.tick();
@@ -448,7 +456,7 @@ bool ModuleBasic::calculate(double &assembly_time, double &solver_time)
 
   // End assembly time measurement.
   cpu_time_assembly.tick();
-  assembly_time = cpu_time_assembly.accumulated();
+  this->assembly_time = cpu_time_assembly.accumulated();
 
   // Begin solver time measurement.
   TimePeriod cpu_time_solver;
@@ -461,7 +469,7 @@ bool ModuleBasic::calculate(double &assembly_time, double &solver_time)
 
   // End solver time measurement.
   cpu_time_solver.tick();
-  solver_time = cpu_time_solver.accumulated();
+  this->solver_time = cpu_time_solver.accumulated();
 
   // Clean up.
   delete solver;
