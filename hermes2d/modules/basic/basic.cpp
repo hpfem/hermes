@@ -315,9 +315,9 @@ void ModuleBasic::clear_mesh_string()
   this->mesh_str.clear();
 }
 
-Solution* ModuleBasic::get_solution() 
+void ModuleBasic::get_solution(Solution* s) 
 {
-  return this->sln;
+  s->copy(this->sln);
 }
 
 // Set mesh.
@@ -326,23 +326,13 @@ void ModuleBasic::set_mesh(Mesh* m)
   this->mesh = m;
 }
 
-// Get mesh.
-Mesh* ModuleBasic::get_mesh() 
-{
-  return this->mesh;
-}
-
+/* FIXME - WE ALSO NEED TO EXPORT SPACE FOR VISUALIZATION
 // Get space.
-Space* ModuleBasic::get_space() 
+void ModuleBasic::get_space(Space* s) 
 {
-  return this->space;
+  s = this->space.dup();
 }
-
-// Get weak forms.
-WeakForm* ModuleBasic::get_weak_forms() 
-{
-  return this->wf;
-}
+*/
 
 // Set matrix solver.
 void ModuleBasic::set_matrix_solver(std::string solver_name)
@@ -443,7 +433,7 @@ bool ModuleBasic::calculate()
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(this->get_weak_forms(), this->get_space(), is_linear);
+  DiscreteProblem dp(this->wf, this->space, is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);

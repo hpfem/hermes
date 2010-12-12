@@ -94,16 +94,12 @@ public:
   void clear_mesh_string();
 
   // Get solution.
-  Solution* get_solution();
+  void get_solution(Solution *s);
 
-  // Get mesh.
-  Mesh* get_mesh();
-
+  /* FIXME - WE ALSO NEED TO EXPORT SPACE FOR VISUALIZATION
   // Get space.
-  Space* get_space();
-
-  // Get weak forms.
-  WeakForm* get_weak_forms();
+  void get_space(Space* s);
+  */
 
   // Set matrix solver.
   void set_matrix_solver(std::string solver_name);
@@ -122,7 +118,7 @@ public:
   double get_solver_time();
 
 
-private:
+protected:
   std::string mesh_str;
   int init_ref_num;
   int init_p;

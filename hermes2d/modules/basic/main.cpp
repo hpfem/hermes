@@ -197,21 +197,24 @@ int main(int argc, char* argv[])
   /*** SHOW THE SOLUTION, GRADIENT, and SPACE ***/
 
   // Solution.
-  Solution* sln = B.get_solution();
+  Solution sln;
+  B.get_solution(&sln);
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
   view.show_mesh(false);
-  view.show(sln);
+  view.show(&sln);
 
   // Gradient magnitude.
   ScalarView gradview("Gradient", new WinGeom(445, 0, 440, 350));
-  MagFilter grad(Hermes::Tuple<MeshFunction *>(sln, sln), Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::Tuple<MeshFunction *>(&sln, &sln), Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show_mesh(false);
   gradview.show(&grad);
 
+  /* FIXME - WE ALSO NEED TO COPY SPACE
   // Space.
   Space* space = B.get_space();
   OrderView oview("Mesh", new WinGeom(890, 0, 440, 350));
   oview.show(space);
+  */
 
   // Wait for the views to be closed.
   View::wait();

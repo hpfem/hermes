@@ -1,10 +1,9 @@
 from libcpp cimport bool
-from libcpp cimport double
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
 from hermes2d.hermes2d_defs cimport Solution
-from hermes2d.hermes2d_defs cimport Space
+#from hermes2d.hermes2d_defs cimport Space
 
 cdef extern from "basic.h":
 
@@ -27,6 +26,6 @@ cdef extern from "basic.h":
         void set_newton_values(vector[pair[double, double]] &bdy_values_newton)
         double get_assembly_time()
         double get_solver_time()
-        Solution* get_solution()
-        Space* get_space()
+        void get_solution(Solution* s)
+        #Space* get_space()
         bool calculate()

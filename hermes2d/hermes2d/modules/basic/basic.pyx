@@ -4,7 +4,7 @@ from libcpp.pair cimport pair
 
 cimport basic_defs
 from hermes2d.hermes2d cimport Solution
-from hermes2d.hermes2d cimport Space
+#from hermes2d.hermes2d cimport Space
 
 cdef vector[int] array2vector_int(a):
     cdef vector[int] v
@@ -91,10 +91,12 @@ cdef class ModuleBasic:
         return self.thisptr.get_solver_time()
 
     def get_solution(self):
-        return self.thisptr.get_solution()
+        s = Solution()
+        self.thisptr.get_solution(s.getptr()) 
+        return s
 
-    def get_space(self):
-        return self.thisptr.get_space()
+    #def get_space(self):
+    #    return self.thisptr.get_space()
 
     def calculate(self):
         success = self.thisptr.calculate()
