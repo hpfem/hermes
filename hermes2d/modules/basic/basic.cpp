@@ -315,7 +315,7 @@ void ModuleBasic::clear_mesh_string()
   this->mesh_str.clear();
 }
 
-void ModuleBasic::get_solution(Solution* s) 
+void ModuleBasic::get_solution(Solution* s)
 {
   s->copy(this->sln);
 }
@@ -326,13 +326,18 @@ void ModuleBasic::set_mesh(Mesh* m)
   this->mesh = m;
 }
 
-/* FIXME - WE ALSO NEED TO EXPORT SPACE FOR VISUALIZATION
-// Get space.
-void ModuleBasic::get_space(Space* s) 
+// Get mesh.
+Mesh* ModuleBasic::get_mesh() 
 {
-  s = this->space.dup();
+  return this->mesh;
 }
-*/
+
+// Get space.
+void ModuleBasic::get_space(H1Space* s) 
+{
+  s->dup(this->space->get_mesh());
+  s->copy_orders(this->space);
+}
 
 // Set matrix solver.
 void ModuleBasic::set_matrix_solver(std::string solver_name)

@@ -81,6 +81,9 @@ public:
   // Setting mesh.
   void set_mesh(Mesh* m);
 
+  // Get mesh.
+  Mesh* get_mesh();
+
   // Solve the problem and return the solution.
   bool calculate();
 
@@ -96,10 +99,8 @@ public:
   // Get solution.
   void get_solution(Solution *s);
 
-  /* FIXME - WE ALSO NEED TO EXPORT SPACE FOR VISUALIZATION
   // Get space.
-  void get_space(Space* s);
-  */
+  void get_space(H1Space* s);
 
   // Set matrix solver.
   void set_matrix_solver(std::string solver_name);

@@ -209,12 +209,15 @@ int main(int argc, char* argv[])
   gradview.show_mesh(false);
   gradview.show(&grad);
 
-  /* FIXME - WE ALSO NEED TO COPY SPACE
   // Space.
-  Space* space = B.get_space();
+  BCTypes bctypes;
+  BCValues bcvalues;
+  Mesh m;
+  H1Space space(B.get_mesh(), &bctypes, &bcvalues, 1); // FIXME: this is a hack since constructor 
+                                                       // to Space needs some mesh. The mesh is not used.
+  B.get_space(&space);
   OrderView oview("Mesh", new WinGeom(890, 0, 440, 350));
-  oview.show(space);
-  */
+  oview.show(&space);
 
   // Wait for the views to be closed.
   View::wait();
