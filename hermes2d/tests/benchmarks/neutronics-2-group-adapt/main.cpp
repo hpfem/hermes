@@ -35,46 +35,46 @@ using namespace RefinementSelectors;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Adaptivity control:
 
-const int P_INIT[2] = {1, 1};               // Initial polynomial orders for the individual solution components.
-const int INIT_REF_NUM[2] = {1, 1};         // Initial uniform mesh refinement for the individual solution components.
-const int STRATEGY = 1;                     // Adaptive strategy:
-                                            // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                            //   error is processed. If more elements have similar errors, refine
-                                            //   all to keep the mesh symmetric.
-                                            // STRATEGY = 1 ... refine all elements whose error is larger
-                                            //   than THRESHOLD times maximum element error.
-                                            // STRATEGY = 2 ... refine all elements whose error is larger
-                                            //   than THRESHOLD.
-                                            // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const bool MULTIMESH = true;                // true = use multi-mesh, false = use single-mesh.
-                                            // Note: in the single mesh option, the meshes are forced to be geometrically
-                                            // the same but the polynomial degrees can still vary.
-const double THRESHOLD_MULTI = 0.3;         // error threshold for element refinement (multi-mesh)
-const double THRESHOLD_SINGLE = 0.7;        // error threshold for element refinement (single-mesh)                                         
-const CandList CAND_LIST = H2D_HP_ISO;      // Predefined list of element refinement candidates. Possible values are
-                                            // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                            // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                            // See User Documentation for details.
-const int MESH_REGULARITY = -1;             // Maximum allowed level of hanging nodes:
-                                            // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                            // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                            // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                            // Note that regular meshes are not supported, this is due to
-                                            // their notoriously bad performance.
-const double CONV_EXP = 1.0;                // Default value is 1.0. This parameter influences the selection of
-                                            // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                // Stopping criterion for adaptivity (rel. error tolerance between the
-                                            // reference and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;               // Adaptivity process stops when the number of degrees of freedom grows over
-                                            // this limit. This is mainly to prevent h-adaptivity to go on forever.
-const int MAX_ADAPT_NUM = 60;               // Adaptivity process stops when the number of adaptation steps grows over
-                                            // this limit.
-const int ADAPTIVITY_NORM = 2;              // Specifies the norm used by H1Adapt to calculate the error and norm.
-                                            // ADAPTIVITY_NORM = 0 ... H1 norm.
-                                            // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
-                                            // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+const int P_INIT[2] = {1, 1};                     // Initial polynomial orders for the individual solution components.
+const int INIT_REF_NUM[2] = {1, 1};               // Initial uniform mesh refinement for the individual solution components.
+const int STRATEGY = 1;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const bool MULTIMESH = true;                      // true = use multi-mesh, false = use single-mesh.
+                                                  // Note: in the single mesh option, the meshes are forced to be geometrically
+                                                  // the same but the polynomial degrees can still vary.
+const double THRESHOLD_MULTI = 0.3;               // error threshold for element refinement (multi-mesh)
+const double THRESHOLD_SINGLE = 0.7;              // error threshold for element refinement (single-mesh)                                         
+const CandList CAND_LIST = H2D_HP_ISO;            // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                                  // See User Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
+                                                  // candidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // reference and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
+                                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
+const int MAX_ADAPT_NUM = 60;                     // Adaptivity process stops when the number of adaptation steps grows over
+                                                  // this limit.
+const int ADAPTIVITY_NORM = 2;                    // Specifies the norm used by H1Adapt to calculate the error and norm.
+                                                  // ADAPTIVITY_NORM = 0 ... H1 norm.
+                                                  // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
+                                                  // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Variables used for reporting of results
 const int ERR_PLOT = 0;         // Row in the convergence graphs for exact errors .
