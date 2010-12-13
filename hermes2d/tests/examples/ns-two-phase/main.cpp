@@ -325,14 +325,17 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
+  BCTypes bc_types_press;
+  bc_types_press.add_bc_none(BDY_DIRICHLET);
+
   // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_zero(BDY_DIRICHLET);
 
   // Spaces for velocities and pressure.
-  H1Space xvel(&mesh1, &bc_types, P_INIT_XVEL);
-  H1Space yvel(&mesh1, &bc_types, P_INIT_YVEL);
-  H1Space press(&mesh1, (BCTypes *) NULL, P_INIT_PRESS);
+  H1Space xvel(&mesh1, &bc_types, &bc_values, P_INIT_XVEL);
+  H1Space yvel(&mesh1, &bc_types, &bc_values, P_INIT_YVEL);
+  H1Space press(&mesh1, &bc_types_press, P_INIT_PRESS);
   H1Space lset(&mesh2, &bc_types, &bc_values, P_INIT_LSET);
 
   int ndof_1 = xvel.Space::get_num_dofs();

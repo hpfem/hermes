@@ -32,34 +32,34 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                // Number of initial uniform mesh refinements. 
-const int INIT_BDY_REF_NUM_INNER = 2;      // Number of initial mesh refinements towards boundary. 
-const int INIT_BDY_REF_NUM_OUTER = 2;      // Number of initial mesh refinements towards boundary. 
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements. 
+const int INIT_BDY_REF_NUM_INNER = 2;             // Number of initial mesh refinements towards boundary. 
+const int INIT_BDY_REF_NUM_OUTER = 2;             // Number of initial mesh refinements towards boundary. 
 
-//#define STOKES                     // If this is defined, Stokes problem is solved, otherwise N-S.
-#define PRESSURE_IN_L2               // If this is defined, the pressure is approximated using
-                                     // discontinuous L2 elements (making the velocity discreetely
-                                     // divergence-free, more accurate than using a continuous
-                                     // pressure approximation). Otherwise the standard continuous
-                                     // elements are used. The results are striking - check the
-                                     // tutorial for comparisons.
-const bool NEWTON = true;            // If NEWTON == true then the Newton's iteration is performed.
-                                     // in every time step. Otherwise the convective term is linearized
-                                     // using the velocities from the previous time step.
-const int P_INIT_VEL = 2;            // Initial polynomial degree for velocity components.
-const int P_INIT_PRESSURE = 1;       // Initial polynomial degree for pressure.
-                                     // Note: P_INIT_VEL should always be greater than
-                                     // P_INIT_PRESSURE because of the inf-sup condition.
-const double RE = 5000.0;            // Reynolds number.
-const double VEL = 0.1;              // Surface velocity of inner circle.
-const double STARTUP_TIME = 1.0;     // During this time, surface velocity of the inner circle increases 
-                                     // gradually from 0 to VEL, then it stays constant.
-const double TAU = 10.0;             // Time step.
-const double T_FINAL = 3600.0;       // Time interval length.
-const double NEWTON_TOL = 1e-5;      // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 10;      // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+//#define STOKES                                  // If this is defined, Stokes problem is solved, otherwise N-S.
+#define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
+                                                  // discontinuous L2 elements (making the velocity discreetely
+                                                  // divergence-free, more accurate than using a continuous
+                                                  // pressure approximation). Otherwise the standard continuous
+                                                  // elements are used. The results are striking - check the
+                                                  // tutorial for comparisons.
+const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
+                                                  // in every time step. Otherwise the convective term is linearized
+                                                  // using the velocities from the previous time step.
+const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
+const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
+                                                  // Note: P_INIT_VEL should always be greater than
+                                                  // P_INIT_PRESSURE because of the inf-sup condition.
+const double RE = 5000.0;                         // Reynolds number.
+const double VEL = 0.1;                           // Surface velocity of inner circle.
+const double STARTUP_TIME = 1.0;                  // During this time, surface velocity of the inner circle increases 
+                                                  // gradually from 0 to VEL, then it stays constant.
+const double TAU = 10.0;                          // Time step.
+const double T_FINAL = 3600.0;                    // Time interval length.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_INNER = 1;
@@ -145,6 +145,9 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_INNER, BDY_OUTER));
 
+  BCTypes bc_types_p;
+  bc_types_p.add_bc_none(Hermes::Tuple<int>(BDY_INNER, BDY_OUTER));
+
   // Enter Dirichlet boundary values.
   BCValues bc_values_xvel(&TIME);
   bc_values_xvel.add_timedep_function(BDY_INNER, essential_bc_values_xvel);
@@ -160,7 +163,7 @@ int main(int argc, char* argv[])
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, (BCTypes *) NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, &bc_types_p, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.

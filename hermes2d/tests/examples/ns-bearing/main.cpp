@@ -120,6 +120,9 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_INNER, BDY_OUTER));
 
+  BCTypes bc_types_p;
+  bc_types_p.add_bc_none(Hermes::Tuple<int>(BDY_INNER, BDY_OUTER));
+
   // Enter Dirichlet boundary values.
   BCValues bc_values_xvel(&TIME);
   bc_values_xvel.add_timedep_function(BDY_INNER, essential_bc_values_xvel);
@@ -135,7 +138,7 @@ int main(int argc, char* argv[])
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, (BCTypes *) NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, &bc_types_p, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
