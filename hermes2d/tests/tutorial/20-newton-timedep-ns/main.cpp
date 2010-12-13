@@ -8,30 +8,30 @@ using namespace RefinementSelectors;
 
 // This test makes sure that example 20-newton-timedep-ns works correctly.
 
-#define PRESSURE_IN_L2               // If this is defined, the pressure is approximated using
-                                     // discontinuous L2 elements (making the velocity discreetely
-                                     // divergence-free, more accurate than using a continuous
-                                     // pressure approximation). Otherwise the standard continuous
-                                     // elements are used. The results are striking - check the
-                                     // tutorial for comparisons.
-const bool NEWTON = true;            // If NEWTON == true then the Newton's iteration is performed.
-                                     // in every time step. Otherwise the convective term is linearized
-                                     // using the velocities from the previous time step.
-const int P_INIT_VEL = 2;            // Initial polynomial degree for velocity components.
-const int P_INIT_PRESSURE = 1;       // Initial polynomial degree for pressure.
-                                     // Note: P_INIT_VEL should always be greater than
-                                     // P_INIT_PRESSURE because of the inf-sup condition.
-const double RE = 200.0;             // Reynolds number.
-const double VEL_INLET = 1.0;        // Inlet velocity (reached after STARTUP_TIME).
-const double STARTUP_TIME = 1.0;     // During this time, inlet velocity increases gradually
-                                     // from 0 to VEL_INLET, then it stays constant.
-const double TAU = 0.1;              // Time step.
-const double T_FINAL = 0.21;         // Time interval length.
-const double NEWTON_TOL = 1e-3;      // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 10;      // Maximum allowed number of Newton iterations.
-const double H = 5;                  // Domain height (necessary to define the parabolic
-                                     // velocity profile at inlet).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+#define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
+                                                  // discontinuous L2 elements (making the velocity discreetely
+                                                  // divergence-free, more accurate than using a continuous
+                                                  // pressure approximation). Otherwise the standard continuous
+                                                  // elements are used. The results are striking - check the
+                                                  // tutorial for comparisons.
+const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
+                                                  // in every time step. Otherwise the convective term is linearized
+                                                  // using the velocities from the previous time step.
+const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
+const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
+                                                  // Note: P_INIT_VEL should always be greater than
+                                                  // P_INIT_PRESSURE because of the inf-sup condition.
+const double RE = 200.0;                          // Reynolds number.
+const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
+const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
+                                                  // from 0 to VEL_INLET, then it stays constant.
+const double TAU = 0.1;                           // Time step.
+const double T_FINAL = 0.21;                      // Time interval length.
+const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
+const double H = 5;                               // Domain height (necessary to define the parabolic
+                                                  // velocity profile at inlet).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.

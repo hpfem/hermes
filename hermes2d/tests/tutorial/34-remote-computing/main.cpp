@@ -10,16 +10,16 @@ const int P_INIT = 4;                             // Polynomial degree of all me
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
 const double TAU = 300.0;                         // Time step in seconds.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double T_INIT = 10;        // Temperature of the ground (also initial temperature).
-const double ALPHA = 10;         // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;       // Thermal conductivity of the material.
-const double HEATCAP = 1e6;      // Heat capacity.
-const double RHO = 3000;         // Material density.
-const double FINAL_TIME = 18000; // Length of time interval (24 hours) in seconds.
+const double T_INIT = 10;                         // Temperature of the ground (also initial temperature).
+const double ALPHA = 10;                          // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e5;                        // Thermal conductivity of the material.
+const double HEATCAP = 1e6;                       // Heat capacity.
+const double RHO = 3000;                          // Material density.
+const double FINAL_TIME = 18000;                  // Length of time interval (24 hours) in seconds.
 
 // Global time variable.
 double TIME = 0;

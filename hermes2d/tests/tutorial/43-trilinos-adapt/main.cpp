@@ -9,42 +9,42 @@ using namespace RefinementSelectors;
 
 // This test makes sure that example 43-trilinos-adapt works correctly.
 
-const int P_INIT = 2;                    // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 1;              // Number of initial uniform mesh refinements.
-const bool JFNK = true;                  // true = jacobian-free method,
-                                         // false = Newton.
-const bool PRECOND = true;               // Preconditioning by jacobian in case of jfnk,
-                                         // default ML proconditioner in case of Newton.
-const double THRESHOLD = 0.3;            // This is a quantitative parameter of the adapt(...) function and
-                                         // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 0;                  // Adaptive strategy:
-                                         // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                         //   error is processed. If more elements have similar errors, refine
-                                         //   all to keep the mesh symmetric.
-                                         // STRATEGY = 1 ... refine all elements whose error is larger
-                                         //   than THRESHOLD times maximum element error.
-                                         // STRATEGY = 2 ... refine all elements whose error is larger
-                                         //   than THRESHOLD.
-                                         // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const int P_INIT = 2;                      // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                // Number of initial uniform mesh refinements.
+const bool JFNK = true;                    // true = jacobian-free method,
+                                           // false = Newton.
+const bool PRECOND = true;                 // Preconditioning by jacobian in case of jfnk,
+                                           // default ML proconditioner in case of Newton.
+const double THRESHOLD = 0.3;              // This is a quantitative parameter of the adapt(...) function and
+                                           // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 0;                    // Adaptive strategy:
+                                           // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                           //   error is processed. If more elements have similar errors, refine
+                                           //   all to keep the mesh symmetric.
+                                           // STRATEGY = 1 ... refine all elements whose error is larger
+                                           //   than THRESHOLD times maximum element error.
+                                           // STRATEGY = 2 ... refine all elements whose error is larger
+                                           //   than THRESHOLD.
+                                           // More adaptive strategies can be created in adapt_ortho_h1.cpp.
 const CandList CAND_LIST = H2D_HP_ANISO_H; // Predefined list of element refinement candidates. Possible values are
-                                         // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                         // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                         // See User Documentation for details.
-const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nodes:
-                                         // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                         // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                         // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                         // Note that regular meshes are not supported, this is due to
-                                         // their notoriously bad performance.
-const double CONV_EXP = 0.5;             // Default value is 1.0. This parameter influences the selection of
-                                         // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;             // Stopping criterion for adaptivity (rel. error tolerance between the
-                                         // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows
-                                         // over this limit. This is to prevent h-adaptivity to go on forever.
+                                           // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                           // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                           // See User Documentation for details.
+const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging nodes:
+                                           // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                           // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                           // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                           // Note that regular meshes are not supported, this is due to
+                                           // their notoriously bad performance.
+const double CONV_EXP = 0.5;               // Default value is 1.0. This parameter influences the selection of
+                                           // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 1.0;               // Stopping criterion for adaptivity (rel. error tolerance between the
+                                           // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
+                                           // over this limit. This is to prevent h-adaptivity to go on forever.
 
 // Problem parameters.
-double SLOPE = 60;                       // Slope of the layer inside the domain
+double SLOPE = 60;                         // Slope of the layer inside the domain
 
 // Exact solution.
 static double fn(double x, double y)

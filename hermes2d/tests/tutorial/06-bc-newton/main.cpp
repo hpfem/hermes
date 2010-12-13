@@ -4,14 +4,14 @@
 // CAUTION: This test will fail when any changes to the shapeset
 // are made, but it is easy to fix (see below).
 
-double T1 = 30.0;            // prescribed temperature on Gamma_3.
-double T0 = 20.0;            // outer temperature on Gamma_1.
-double H  = 0.05;            // heat flux on Gamma_1.
-int UNIFORM_REF_LEVEL = 1;   // number of initial uniform mesh refinements.
-int CORNER_REF_LEVEL = 3;    // number of mesh refinements towards the re-entrant corner.
-int P_INIT = 6;              // Uniform polynomial degree of all mesh elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+double T1 = 30.0;                                 // prescribed temperature on Gamma_3.
+double T0 = 20.0;                                 // outer temperature on Gamma_1.
+double H  = 0.05;                                 // heat flux on Gamma_1.
+int UNIFORM_REF_LEVEL = 1;                        // number of initial uniform mesh refinements.
+int CORNER_REF_LEVEL = 3;                         // number of mesh refinements towards the re-entrant corner.
+int P_INIT = 6;                                   // Uniform polynomial degree of all mesh elements.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
