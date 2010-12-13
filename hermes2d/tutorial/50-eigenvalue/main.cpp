@@ -21,7 +21,7 @@ const int INIT_REF_NUM = 3;                       // Number of initial mesh refi
 const double TARGET_VALUE = 2.0;                  // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 const double TOL = 1e-10;                         // Pysparse parameter: Error tolerance.
 const int MAX_ITER = 1000;                        // PySparse parameter: Maximum number of iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.

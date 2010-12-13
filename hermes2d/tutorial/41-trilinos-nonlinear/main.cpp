@@ -24,16 +24,19 @@
 
 using namespace Teuchos;
 
-const int INIT_REF_NUM = 2;       // Number of initial uniform mesh refinements.
-const int P_INIT = 3;             // Initial polynomial degree of all mesh elements.
-const double NEWTON_TOL = 1e-6;   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;  // Maximum allowed number of Newton iterations.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 
-const bool JFNK = false;          // true = jacobian-free method,
-                                  // false = Newton.
-const int PRECOND = 2;            // Preconditioning by jacobian (1) or approximation of jacobian (2)
-                                  // in case of JFNK,
-                                  // Default ML proconditioner in case of Newton.
+const bool JFNK = false;                          // true = jacobian-free method,
+                                                  // false = Newton.
+const int PRECOND = 2;                            // Preconditioning by jacobian (1) or approximation of jacobian (2)
+                                                  // in case of JFNK,
+                                                  // Default ML proconditioner in case of Newton.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -41,8 +44,6 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;

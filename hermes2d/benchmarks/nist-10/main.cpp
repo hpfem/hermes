@@ -54,8 +54,8 @@ const double ERR_STOP = 0.0001;                   // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
 const double K = M_PI/2;

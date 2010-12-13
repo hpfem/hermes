@@ -4,6 +4,21 @@
 
 using namespace RefinementSelectors;
 
+//  This is the fifth in the series of NIST benchmarks with unknown exact solutions.
+//
+//  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
+//                          NIST Report 7668, February 2010.
+//
+//  PDE: -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
+//       -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f.
+//
+//  Known exact solution: unknow.
+//
+//  Domain: square (0, 8.4)x(0, 24), see the file "battery.mesh".
+//
+//  BC: Zero Neumann on left edge, Newton on the rest of the boundary:
+//
+//  The following parameters can be changed:
 
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
@@ -33,8 +48,8 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const int OMEGA_1 = 1;

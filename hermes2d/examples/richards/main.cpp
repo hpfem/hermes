@@ -25,16 +25,16 @@
 // If this is defined, use van Genuchten's constitutive relations, otherwise use Gardner's.
 //#define CONSTITUTIVE_GENUCHTEN
 
-const int INIT_GLOB_REF_NUM = 3;       // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 0;        // Number of initial refinements towards boundary.
-const int P_INIT = 3;                  // Initial polynomial degree.
-const double TAU = 5e-3;               // Time step.
-const double T_FINAL = 0.4;            // Time interval length.
-const int TIME_INTEGRATION = 1;        // 1... implicit Euler, 2... Crank-Nicolson.
-const double NEWTON_TOL = 1e-6;        // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;       // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary.
+const int P_INIT = 3;                             // Initial polynomial degree.
+const double TAU = 5e-3;                          // Time step.
+const double T_FINAL = 0.4;                       // Time interval length.
+const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // For the definition of initial condition.
 int Y_POWER = 10;

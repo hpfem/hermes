@@ -6,19 +6,19 @@
 // CAUTION: This test will fail when any changes to the shapeset
 // are made, but it is easy to fix (see below).
 
-const int P_INIT = 3;            // initial polynomial degree in elements
-const int INIT_REF_NUM = 0;      // number of initial uniform refinements
-const double TAU = 200.0;        // time step in seconds
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+const int P_INIT = 3;                             // initial polynomial degree in elements
+const int INIT_REF_NUM = 0;                       // number of initial uniform refinements
+const double TAU = 200.0;                         // time step in seconds
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants
-const double T_INIT = 10;        // temperature of the ground (also initial temperature)
-const double ALPHA = 10;         // heat flux coefficient for Newton's boundary condition
-const double LAMBDA = 1e5;       // thermal conductivity of the material
-const double HEATCAP = 1e6;      // heat capacity
-const double RHO = 3000;         // material density
-const double FINAL_TIME = 2100;  // length of time interval (24 hours) in seconds
+const double T_INIT = 10;                         // temperature of the ground (also initial temperature)
+const double ALPHA = 10;                          // heat flux coefficient for Newton's boundary condition
+const double LAMBDA = 1e5;                        // thermal conductivity of the material
+const double HEATCAP = 1e6;                       // heat capacity
+const double RHO = 3000;                          // material density
+const double FINAL_TIME = 2100;                   // length of time interval (24 hours) in seconds
 
 // Global variable.
 double TIME = 0;

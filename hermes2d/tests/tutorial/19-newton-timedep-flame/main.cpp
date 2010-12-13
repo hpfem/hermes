@@ -8,13 +8,13 @@ using namespace RefinementSelectors;
 
 // This test makes sure that example 19-newton-timedep-flame works correctly.
 
-const int INIT_REF_NUM = 2;            // Number of initial uniform mesh refinements.
-const int P_INIT = 1;                  // Initial polynomial degree.
-const double TAU = 0.5;                // Time step.
-const double T_FINAL = 60.0;           // Time interval length.
-const double NEWTON_TOL = 1e-4;        // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 50;        // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 1;                             // Initial polynomial degree.
+const double TAU = 0.5;                           // Time step.
+const double T_FINAL = 60.0;                      // Time interval length.
+const double NEWTON_TOL = 1e-4;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants.

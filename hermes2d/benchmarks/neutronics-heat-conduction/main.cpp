@@ -30,25 +30,25 @@ const double T_FINAL = 10.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double CT = 1.0;
 const double CF = 1.0;
 const double rT = 1.0;
 const double rF = 0.25;
-const double LX = 100.0;          // Domain sizes in the x and y dimensions.
+const double LX = 100.0;                          // Domain sizes in the x and y dimensions.
 const double LY = 100.0;
-const double invvel = 2.0e-4;     // Inverse of neutron velocity.
-const double xsdiff = 1.268;      // Neutron diffusion coefficient.
+const double invvel = 2.0e-4;                     // Inverse of neutron velocity.
+const double xsdiff = 1.268;                      // Neutron diffusion coefficient.
 const double Tref = 0.0;
 
-const double nu = 2.41;           // Number of neutrons emitted per fission event.
-const double xsfiss = 0.00191244; // Fission cross section.
-const double kappa = 1.0e-6;      // Energy per fission.
-const double rho = 1.0;           // Fuel density.
-const double cp = 1.0;            // Fuel heat capacity.
+const double nu = 2.41;                           // Number of neutrons emitted per fission event.
+const double xsfiss = 0.00191244;                 // Fission cross section.
+const double kappa = 1.0e-6;                      // Energy per fission.
+const double rho = 1.0;                           // Fuel density.
+const double cp = 1.0;                            // Fuel heat capacity.
 
 // Miscellaneous:
 double TIME = 0.0;                                    // Current time.
