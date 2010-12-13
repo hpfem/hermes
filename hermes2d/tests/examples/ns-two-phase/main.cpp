@@ -28,7 +28,8 @@ const double CONV_EXP = 1.0;
 const double THRESHOLD = 0.3;
 const bool MULTI = true; 
 const int STRATEGY = 1; 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const int P_INIT_XVEL = 2;
 const int P_INIT_YVEL = 2;

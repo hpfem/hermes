@@ -7,13 +7,13 @@
 
 // This test makes sure that example "quantum-billiard" works correctly.
 
-const int INIT_REF_NUM = 5;         // Number of initial uniform refinements.
-const int P_INIT = 1;               // Initial polynomial degree.
-const double TAU = 0.05;            // Time step.
-const double T_FINAL = 10;         // Time interval length.
-const int TIME_DISCR = 2;           // 1 for implicit Euler, 2 for Crank-Nicolson.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform refinements.
+const int P_INIT = 1;                             // Initial polynomial degree.
+const double TAU = 0.05;                          // Time step.
+const double T_FINAL = 10;                        // Time interval length.
+const int TIME_DISCR = 2;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants
 cplx C = cplx(1./(30 * sqrt((double)3)), 0.0);
