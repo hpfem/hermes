@@ -47,9 +47,10 @@ const int P_INIT_1 = 4,                           // Initial polynomial degree f
           P_INIT_3 = 4,                           // Initial polynomial degree for approximation of group 3 fluxes.
           P_INIT_4 = 4;                           // Initial polynomial degree for approximation of group 4 fluxes.
 const double ERROR_STOP = 1e-5;                   // Tolerance for the eigenvalue.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AZTECOO, SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  //  SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-const char* iterative_method = "bicgstab";              // Name of the iterative method employed by AztecOO (ignored
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
