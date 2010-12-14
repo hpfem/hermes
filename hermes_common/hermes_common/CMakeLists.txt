@@ -5,6 +5,7 @@ cython_add_module_pyx(matrix)
 add_python_library(matrix matrix.cpp)
 target_link_libraries(matrix ${HERMES_BIN})
 
+# FIXME: this is dimension dependent:
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d/hermes_common/)
 install(TARGETS numpy_utils
             RUNTIME DESTINATION ${PY_PATH}
