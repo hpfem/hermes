@@ -12,6 +12,7 @@ install(TARGETS numpy_utils
             ARCHIVE DESTINATION ${PY_PATH}
             LIBRARY DESTINATION ${PY_PATH}
         )
-install(FILES __init__.py
+# This is needed, so that cmake doesn't install the symbolic link instead:
+install(FILES ${PROJECT_SOURCE_DIR}/../hermes_common/hermes_common/__init__.py
     DESTINATION ${PY_PATH}
     )
