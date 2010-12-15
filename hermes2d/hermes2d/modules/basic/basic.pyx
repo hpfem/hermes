@@ -80,7 +80,6 @@ cdef class ModuleBasic:
         self.thisptr.set_newton_markers(array2vector_int(bdy_markers_newton))
 
     def set_newton_values(self, bdy_values_newton):
-        print "bdy_markers_newton:", bdy_values_newton
         vvv = array2vector_double_pair(bdy_values_newton)
         self.thisptr.set_newton_values(vvv)
 

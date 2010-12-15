@@ -1,5 +1,8 @@
 #include "logging.h"
 #include "Teuchos_stacktrace.hpp"
+#ifdef WIN32 //Windows platform
+	#include <Windows.h>
+#endif
 
 void hermes_exit_if(bool cond, int code) {
   if (cond)

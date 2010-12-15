@@ -16,8 +16,10 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #endif
 
 // Windows DLL export/import definitions
-#if defined(WIN32) || defined(_WINDOWS)
-
+// Visual Studio 10 throws an error : 
+// Compiler Error C2252 - cannot explicitly instantiate template in current scope
+// if attempted to instantiate the templates => only for older versions.
+#if (defined(WIN32) || defined(_WINDOWS)) && _MSC_VER < 1600
   #if defined(EXPORT_HERMES_DLL)
   // when building DLL (target project defines this macro)
     #define HERMES_API __declspec(dllexport)
