@@ -19,6 +19,7 @@ problems to adaptivity algorithms.
    nist/nist-5
    nist/nist-6
    nist/nist-7
+   nist/nist-8
    nist/nist-10
    nist/nist-11
 
