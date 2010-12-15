@@ -100,9 +100,10 @@ set(WITH_HDF5               NO)
 # set(ADDITIONAL_LIBS       -lgfortran -lm)
 
 # Reporting and logging:
-set(REPORT_WITH_LOGO        NO)  #logo will be shown
+set(REPORT_WITH_LOGO        NO)   #logo will be shown
 set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is intended just for Python wrappers.
+set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
+                                  #The runtime control is intended just for Python wrappers.
 set(REPORT_ALL              NO)   #do not report all events, just selected ones
 set(REPORT_WARNING          YES)  #warnings will be reported
 set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
