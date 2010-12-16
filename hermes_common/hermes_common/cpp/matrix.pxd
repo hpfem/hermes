@@ -19,3 +19,11 @@ cdef extern from "solver/umfpack_solver.h":
 
     cdef cppclass UMFPackVector(Vector):
         double *get_c_array()
+
+cdef extern from "matrix_csc.h":
+
+    cdef cppclass CSCMatrix(UMFPackMatrix):
+        pass
+
+    cdef cppclass AVector(UMFPackVector):
+        pass
