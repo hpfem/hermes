@@ -93,44 +93,4 @@ CPU convergence graphs:
    :height: 400
    :alt: CPU convergence graph.
 
-hp-FEM with iso, h-aniso and hp-aniso refinements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Final mesh (hp-FEM, isotropic refinements):
-
-.. image:: nist-4/mesh_hp_iso.png
-   :align: center
-   :width: 450
-   :alt: Final mesh.
-
-Final mesh (hp-FEM, h-anisotropic refinements):
-
-.. image:: nist-4/mesh_hp_anisoh.png
-   :align: center
-   :width: 450
-   :alt: Final mesh.
-
-Final mesh (hp-FEM, hp-anisotropic refinements):
-
-.. image:: nist-4/mesh_hp_aniso.png
-   :align: center
-   :width: 450
-   :alt: Final mesh.
-
-DOF convergence graphs:
-
-.. image:: nist-4/conv_dof_hp.png
-   :align: center
-   :width: 600
-   :height: 400
-   :alt: DOF convergence graph.
-
-CPU convergence graphs:
-
-.. image:: nist-4/conv_cpu_hp.png
-   :align: center
-   :width: 600
-   :height: 400
-   :alt: CPU convergence graph.
-
 
