@@ -1,9 +1,9 @@
 # size of of the mesh
-a = 10 
+a = 1.5707963267948966
 vertices =
 {
-  { -a, -a },    # vertex 0
-  { a, -a },    # vertex 1
+  { -a, -a },  # vertex 0
+  { a, -a },   # vertex 1
   { a, a },    # vertex 2
   { -a, a }    # vertex 3
 }
