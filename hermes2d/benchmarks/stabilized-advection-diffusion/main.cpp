@@ -150,6 +150,8 @@ int main(int argc, char* argv[])
     space = new L2Space(&mesh, bc_types, NULL, Ord2(P_INIT));
     selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
     norm = HERMES_L2_NORM;
+    // Disable weighting of refinement candidates.
+    //selector->set_error_weights(1, 1, 1);
   }
 
   // Initialize the weak formulation.
@@ -341,6 +343,7 @@ int main(int argc, char* argv[])
   // Wait for all views to be closed.
   View::wait();
   
+  delete ref_space->get_mesh();
   delete ref_space;
   return 0;
 }

@@ -224,10 +224,14 @@ template<typename Real, typename Scalar>
 Scalar dg_interface_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
-  Real sigma = 2 * C_W / (e->diam + e->get_neighbor_diam());
+  //Real sigma = 2 * C_W / (e->diam + e->get_neighbor_diam());
+  Real edge_len = sqrt(sqr(e->x[0] - e->x[n-1]) + sqr(e->y[0] - e->y[n-1]));
+  Real sigma = C_W * EPSILON / edge_len;
   for (int i = 0; i < n; i++)
-    result += wt[i] * EPSILON * ( -AVG_GRAD(u) * JUMP(v) + theta * AVG_GRAD(v) * JUMP(u)  // diffusion
-                                 + sigma * JUMP(u) * JUMP(v)  );                          // interior discontinuity penalization
+  {
+    result += wt[i] * EPSILON * ( -AVG_GRAD(u) * JUMP(v) + theta * AVG_GRAD(v) * JUMP(u) ); // diffusion
+    result += wt[i] * sigma * JUMP(u) * JUMP(v);                          // interior discontinuity penalization
+  }
   return result;
 }
 
@@ -236,19 +240,22 @@ Ord dg_interface_biform_diffusion(int n, double *wt, Func<Ord> *u_ext[], Func<Or
 {
   int i = 0;
   return AVG_GRAD(u) * JUMP(v) + theta * AVG_GRAD(v) * JUMP(u) + JUMP(u) * JUMP(v);
+  //return Ord(20);
 }
 
 template<typename Real, typename Scalar>
 Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
-  Real sigma = C_W / e->diam;
+  //Real sigma = C_W * EPSILON / e->diam;
+  Real edge_len = sqrt(sqr(e->x[0] - e->x[n-1]) + sqr(e->y[0] - e->y[n-1]));
+  Real sigma = C_W * EPSILON / edge_len;
   for (int i = 0; i < n; i++)
   {
     Scalar u_dir = essential_bc_values<Real,Scalar>(e->edge_marker, e->x[i], e->y[i]);
     result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]                    // diffusion 
-                                  + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i] - u_dir)    
-                                  + sigma * ( ( u->val[i] - u_dir ) * v->val[i] ) );                        // boundary penalty
+                                  + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i] - u_dir) );   
+    result += wt[i] * sigma * ( u->val[i] - u_dir ) * v->val[i];                        // boundary penalty
   }
   return result;
 }
