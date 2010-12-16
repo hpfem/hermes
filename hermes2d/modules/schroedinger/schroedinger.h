@@ -40,7 +40,8 @@ public:
         this->potential = NULL;
     }
 
-    ~ModuleSchroedinger();
+    ~ModuleSchroedinger() {
+    }
 
     void set_potential(Potential *potential) {
         this->potential = potential;

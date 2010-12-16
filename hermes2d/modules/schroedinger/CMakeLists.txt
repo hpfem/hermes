@@ -1,3 +1,5 @@
+add_subdirectory(oscillator)
+
 project(module-schroedinger)
 
 set(SRC
