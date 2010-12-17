@@ -11,4 +11,7 @@ int main(int argc, char* argv[])
 
     CSCMatrix A, B;
     m.assemble(A, B);
+    EigenSolver es(A, B);
+    es.solve();
+    es.print_eigenvalues();
 }

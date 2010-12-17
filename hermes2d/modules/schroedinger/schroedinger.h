@@ -55,4 +55,22 @@ private:
     Potential *potential;
 };
 
+class HERMES_API EigenSolver {
+public:
+    EigenSolver(const Matrix &A, const Matrix &B) {
+        this->A = &A;
+        this->B = &B;
+    }
+
+    void solve() {
+    }
+
+    void print_eigenvalues() {
+    }
+
+private:
+    const Matrix *A;
+    const Matrix *B;
+};
+
 #endif
