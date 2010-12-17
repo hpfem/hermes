@@ -5,9 +5,9 @@
 
 class HERMES_API EigenSolver {
 public:
-    EigenSolver(const Matrix &A, const Matrix &B) {
-        this->A = &A;
-        this->B = &B;
+    EigenSolver(const RCP<Matrix> &A, const RCP<Matrix> &B) {
+        this->A = A;
+        this->B = B;
     }
 
     void solve() {
@@ -17,8 +17,7 @@ public:
     }
 
 private:
-    const Matrix *A;
-    const Matrix *B;
+    RCP<Matrix> A, B;
 };
 
 #endif

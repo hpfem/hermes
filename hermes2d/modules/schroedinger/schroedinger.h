@@ -38,13 +38,13 @@ class PotentialHarmonicOscillator: public Potential {
 class HERMES_API ModuleSchroedinger {
 public:
     ModuleSchroedinger() {
-        this->potential = NULL;
+        this->potential = null;
     }
 
     ~ModuleSchroedinger() {
     }
 
-    void set_potential(Potential *potential) {
+    void set_potential(const RCP<Potential> &potential) {
         this->potential = potential;
     }
 
@@ -53,7 +53,7 @@ public:
     }
 
 private:
-    Potential *potential;
+    RCP<Potential> potential;
 };
 
 #endif
