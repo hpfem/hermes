@@ -18,12 +18,11 @@
 //  The following parameters can be changed:
 
 int NUMBER_OF_EIGENVALUES = 5;                    // Desired number of eigenvalues.
-int P_INIT_X = 2;                                   // Uniform polynomial degree of mesh elements.
-int P_INIT_Y = 2;                                   // Uniform polynomial degree of mesh elements.
-int P_INIT_Z = 2;                                   // Uniform polynomial degree of mesh elements.
+int P_INIT_X = 2;                                 // Uniform polynomial degree of mesh elements.
+int P_INIT_Y = 2;                                 // Uniform polynomial degree of mesh elements.
+int P_INIT_Z = 2;                                 // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
-double TARGET_VALUE = 3.0;
-// PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
+double TARGET_VALUE = 3.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
@@ -42,10 +41,13 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
   return 0;
 }
 
-// Weak forms.
+// Potential.
 double V( double x, double y, double z){
-  return 0.0; //-1./sqrt(x*x + y*y + z*z);
+  return 0.0; 
+  //return -1./sqrt(x*x + y*y + z*z);
 }
+
+// Weak forms.
 #include "forms.cpp"
 
 // Write the matrix in Matrix Market format.
