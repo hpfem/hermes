@@ -176,10 +176,11 @@ is to first push them to your Github fork and then send
 a pull request to the Hermes network. To push your 
 changes, type::
 
-    git push git@github.com:your_name/hermes.git
+    git push git@github.com:your_name/hermes.git test-1:test-1
 
-Now you can go back to your Github account, click on 
-"Commits" and you should see your changes there. 
+This will push your local branch test-1 to a branch of the 
+same name at Github. Now you can go back to your Github account, 
+click on "Commits" and you should see your changes there. 
 
 Send a Pull Request
 -------------------
