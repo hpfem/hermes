@@ -49,7 +49,7 @@ public:
     }
 
     // Solve the problem and return the solution.
-    void assemble(const RCP<Matrix> &A, const RCP<Matrix> &B) {
+    void assemble(const Ptr<Matrix> &A, const Ptr<Matrix> &B) {
     }
 
 private:
