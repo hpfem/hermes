@@ -2,6 +2,7 @@
 #define __H2D_SCHROEDINGER_H
 
 #include "hermes2d.h"
+#include "eigensolver.h"
 
 class Potential {
     public:
@@ -53,24 +54,6 @@ public:
 
 private:
     Potential *potential;
-};
-
-class HERMES_API EigenSolver {
-public:
-    EigenSolver(const Matrix &A, const Matrix &B) {
-        this->A = &A;
-        this->B = &B;
-    }
-
-    void solve() {
-    }
-
-    void print_eigenvalues() {
-    }
-
-private:
-    const Matrix *A;
-    const Matrix *B;
 };
 
 #endif
