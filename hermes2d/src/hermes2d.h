@@ -34,6 +34,9 @@
 #include "../hermes_common/solver/precond_ifpack.h"
 #include "../hermes_common/solver/precond_ml.h"
 
+// RCP
+#include "../hermes_common/Teuchos_RCP.hpp"
+
 // boundary conditions
 #include "../hermes_common/bctypes.h"
 
