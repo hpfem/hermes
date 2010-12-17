@@ -48,7 +48,8 @@ public:
     }
 
     // Solve the problem and return the solution.
-    void assemble(const Matrix &A, const Matrix &B);
+    void assemble(const Matrix &A, const Matrix &B) {
+    }
 
 private:
     Potential *potential;
