@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 
     RCP<CSCMatrix> A = rcp(new CSCMatrix());
     RCP<CSCMatrix> B = rcp(new CSCMatrix());
-    //m.assemble(A, B);
+    m.assemble(A, B);
     EigenSolver es(A, B);
     es.solve();
     es.print_eigenvalues();
