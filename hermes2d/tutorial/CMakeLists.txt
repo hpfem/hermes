@@ -39,5 +39,6 @@ endif(WITH_TRILINOS)
 
 add_subdirectory(50-eigenvalue)
 add_subdirectory(51-eigenvalue-adapt)
+add_subdirectory(52-eigenvalue-h2p)
 add_subdirectory(60-linear-advection-dg)
 
