@@ -4,7 +4,6 @@ project(module-schroedinger)
 
 set(SRC
     schroedinger.cpp
-    forms.cpp
     )
 
 include_directories(${hermes2d_SOURCE_DIR}/src)
