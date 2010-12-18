@@ -51,6 +51,9 @@ void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
     Mesh mesh;
     H2DReader mloader;
     mloader.load("domain.mesh", &mesh);
+    mesh.refine_all_elements();
+    mesh.refine_all_elements();
+    mesh.refine_all_elements();
 
     BCTypes bc_types;
     bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT,
