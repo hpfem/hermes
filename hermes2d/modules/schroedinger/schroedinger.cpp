@@ -53,7 +53,7 @@ void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
     mloader.load("domain.mesh", &mesh);
 
     BCTypes bc_types;
-    bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT,
+    bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT,
                 BDY_TOP, BDY_LEFT));
     BCValues bc_values;
     bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT,
