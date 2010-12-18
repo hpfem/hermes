@@ -11,6 +11,7 @@ public:
     }
 
     void solve() {
+        printf("Solving the system A * x = lambda * B * x\n");
     }
 
     void print_eigenvalues() {
