@@ -72,6 +72,9 @@ if(WITH_PYTHON)
   find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
   set(PYTHON_INSTALL_PATH lib/python/site-packages)
+  # This is needed to make hermes_common working properly:
+  SET(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/hermes_common)
+
   add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 

@@ -90,41 +90,81 @@ Sample solution
    :width: 600
    :alt: Solution.
 
-Convergence comparisons
-~~~~~~~~~~~~~~~~~~~~~~~
+Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Final mesh (h-FEM with linear elements):
+Final mesh (h-FEM, p=1, anisotropic refinements):
 
-.. image:: nist-11/mesh-h1.png
+.. image:: nist-11/mesh_h1_aniso.png
    :align: center
-   :width: 600
-   :alt: Mesh.
+   :width: 450
+   :alt: Final mesh.
 
-Final mesh (h-FEM with quadratic elements):
+Final mesh (h-FEM, p=2, anisotropic refinements):
 
-.. image:: nist-11/mesh-h2.png
+.. image:: nist-11/mesh_h2_aniso.png
    :align: center
-   :width: 600
-   :alt: Mesh.
+   :width: 450
+   :alt: Final mesh.
 
-Final mesh (hp-FEM):
+Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-11/mesh-hp.png
+.. image:: nist-11/mesh_hp_anisoh.png
    :align: center
-   :width: 600
-   :alt: Mesh.
+   :width: 450
+   :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-11/conv_dof.png
+.. image:: nist-11/conv_dof_aniso.png
    :align: center
    :width: 600
    :height: 400
    :alt: DOF convergence graph.
 
-CPU time convergence graphs:
+CPU convergence graphs:
 
-.. image:: nist-11/conv_cpu.png
+.. image:: nist-11/conv_cpu_aniso.png
+   :align: center
+   :width: 600
+   :height: 400
+   :alt: CPU convergence graph.
+
+hp-FEM with iso, h-aniso and hp-aniso refinements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Final mesh (hp-FEM, isotropic refinements):
+
+.. image:: nist-11/mesh_hp_iso.png
+   :align: center
+   :width: 450
+   :alt: Final mesh.
+
+Final mesh (hp-FEM, h-anisotropic refinements):
+
+.. image:: nist-11/mesh_hp_anisoh.png
+   :align: center
+   :width: 450
+   :alt: Final mesh.
+
+Final mesh (hp-FEM, hp-anisotropic refinements):
+
+.. image:: nist-11/mesh_hp_aniso.png
+   :align: center
+   :width: 450
+   :alt: Final mesh.
+
+DOF convergence graphs:
+
+.. image:: nist-11/conv_dof_hp.png
+   :align: center
+   :width: 600
+   :height: 400
+   :alt: DOF convergence graph.
+
+CPU convergence graphs:
+
+.. image:: nist-11/conv_cpu_hp.png
    :align: center
    :width: 600
    :height: 400
