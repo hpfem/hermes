@@ -48,7 +48,7 @@ public:
         this->potential = potential;
     }
 
-    void assemble(const Ptr<Matrix> &A, const Ptr<Matrix> &B);
+    void assemble(const Ptr<SparseMatrix> &A, const Ptr<SparseMatrix> &B);
 
 private:
     RCP<Potential> potential;

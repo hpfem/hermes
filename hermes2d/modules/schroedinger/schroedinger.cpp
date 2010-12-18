@@ -38,8 +38,16 @@ Scalar bilinear_form_right(int n, double *wt, Func<Scalar> *u_ext[],
 } // anonymous namespace
 
 
-void ModuleSchroedinger::assemble(const Ptr<Matrix> &A, const Ptr<Matrix> &B)
+void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
+        const Ptr<SparseMatrix> &B)
 {
+
+    const int BDY_BOTTOM = 1;
+    const int BDY_RIGHT = 2;
+    const int BDY_TOP = 3;
+    const int BDY_LEFT = 4;
+    int P_INIT = 2;
+
     Mesh mesh;
     H2DReader mloader;
     mloader.load("domain.mesh", &mesh);
@@ -61,6 +69,6 @@ void ModuleSchroedinger::assemble(const Ptr<Matrix> &A, const Ptr<Matrix> &B)
     wf_right.add_matrix_form(callback(bilinear_form_right));
     DiscreteProblem dp_left(&wf_left, &space, true);
     DiscreteProblem dp_right(&wf_right, &space, true);
-    dp_left.assemble(A);
-    dp_right.assemble(A);
+    dp_left.assemble(A.getRawPtr());
+    dp_right.assemble(B.getRawPtr());
 }
