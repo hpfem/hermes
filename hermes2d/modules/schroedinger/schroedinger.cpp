@@ -61,7 +61,7 @@ void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
 
     H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
     int ndof = Space::get_num_dofs(&space);
-    info("ndof: %d.", ndof);
+    printf("ndof: %d\n", ndof);
 
     global_potential = this->potential;
     WeakForm wf_left, wf_right;
