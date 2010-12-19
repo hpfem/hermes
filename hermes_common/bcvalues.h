@@ -124,7 +124,7 @@ public:
     if(this->markers_conversion == NULL)
         error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
     Hermes::Tuple<int> markers_to_pass;
-    for(int i = 0; i < markers.size(); i++)
+    for(unsigned int i = 0; i < markers.size(); i++)
       markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
     add_function(markers_to_pass, callback);
   }
@@ -152,7 +152,7 @@ public:
     if(this->markers_conversion == NULL)
         error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
     Hermes::Tuple<int> markers_to_pass;
-    for(int i = 0; i < markers.size(); i++)
+    for(unsigned int i = 0; i < markers.size(); i++)
       markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
     add_timedep_function(markers_to_pass, callback);
   }
@@ -186,7 +186,7 @@ public:
     if(this->markers_conversion == NULL)
         error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
     Hermes::Tuple<int> markers_to_pass;
-    for(int i = 0; i < markers.size(); i++)
+    for(unsigned int i = 0; i < markers.size(); i++)
       markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
     add_const(markers_to_pass, value);
   }
@@ -218,7 +218,7 @@ public:
     if(this->markers_conversion == NULL)
         error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
     Hermes::Tuple<int> markers_to_pass;
-    for(int i = 0; i < markers.size(); i++)
+    for(unsigned int i = 0; i < markers.size(); i++)
       markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
     add_zero(markers_to_pass);
   }

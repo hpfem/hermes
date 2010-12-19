@@ -16,6 +16,7 @@
 #include "h2d_common.h"
 #include "mesh_lexer.h"
 #include "mesh_parser.h"
+#include <sstream>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -391,9 +392,9 @@ static void list(MItem* parent)
       it->next = item_string_marker();
       if(token->type == MT_NUMBER) {
         parent->marker->append(" ");
-        char buffer[10];
-        itoa((int)token->value, buffer, 10);
-        parent->marker->append(buffer);
+	std::ostringstream sin;
+	sin << token->value;
+        parent->marker->append(sin.str());
       }
       else
         parent->marker->append(token->text);

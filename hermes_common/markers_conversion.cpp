@@ -70,13 +70,13 @@ std::string MarkersConversion::get_user_boundary_marker(int internal_marker)
 int MarkersConversion::get_internal_element_marker(std::string user_marker) 
 {
   if(conversion_table_for_element_markers_inverse->find(user_marker) == conversion_table_for_element_markers_inverse->end())
-    error("MarkersConversions class asked for a non existing marker %s", user_marker);
+    error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
   return conversion_table_for_element_markers_inverse->find(user_marker)->second;
 }
 int MarkersConversion::get_internal_boundary_marker(std::string user_marker) 
 {
   if(conversion_table_for_boundary_markers_inverse->find(user_marker) == conversion_table_for_boundary_markers_inverse->end())
-    error("MarkersConversions class asked for a non existing marker %s", user_marker);
+    error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
   return conversion_table_for_boundary_markers_inverse->find(user_marker)->second;
 }
 
