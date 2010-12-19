@@ -30,7 +30,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_GROUND = 1, BDY_AIR = 2;
+const int BDY_GROUND = 1;
+const std::string BDY_AIR = "Boundary air";
 
 // Problem parameters.
 const double T_INIT = 10;          // Temperature of the ground (also initial temperature).
@@ -53,9 +54,12 @@ double temp_ext(double t) {
 
 int main(int argc, char* argv[])
 {
+  // Conversion tables for user-supplied string markers.
+  MarkersConversion markers_conversion;
+
   // Load the mesh.
-  Mesh mesh;
-  H2DReader mloader;
+  Mesh mesh(&markers_conversion);
+  H2DReader mloader(&markers_conversion);
   mloader.load("cathedral.mesh", &mesh);
 
   // Perform initial mesh refinements.
@@ -63,12 +67,12 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
-  BCTypes bc_types;
+  BCTypes bc_types(&markers_conversion);
   bc_types.add_bc_dirichlet(BDY_GROUND);
   bc_types.add_bc_newton(BDY_AIR);
 
   // Enter Dirichlet boundary values.
-  BCValues bc_values;
+  BCValues bc_values(&markers_conversion);
   bc_values.add_const(BDY_GROUND, T_INIT);
 
   // Initialize an H1 space with default shapeset.
@@ -83,7 +87,7 @@ int main(int argc, char* argv[])
   tsln.set_const(&mesh, T_INIT);
 
   // Initialize weak formulation.
-  WeakForm wf;
+  WeakForm wf(1, false, &markers_conversion);
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
   wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);

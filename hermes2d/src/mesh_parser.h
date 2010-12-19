@@ -19,9 +19,10 @@
 
 struct MItem
 {
-  int n; ///< -1..numeric value, otherwise list of length n
+  int n; ///< -1..numeric value, -2..string marker, otherwise list of length n
   union { double val; MItem* list; };
   MItem* next; ///< next item in the list this MItem is part of
+  std::string* marker; ///< marker (boundary or element)
 };
 
 typedef double (MSymbolFunc1)(double);
@@ -45,5 +46,7 @@ MSymbol* mesh_parser_find_symbol(const char* name);
 bool mesh_parser_get_doubles(MItem* list, int n, ...);
 bool mesh_parser_get_ints(MItem* list, int n, ...);
 
+// Drops all allocated std::strings in mesh parsing.
+void mitem_drop_string_markers(MItem* ms);
 
 #endif

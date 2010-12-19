@@ -16,22 +16,33 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #endif
 
 // Windows DLL export/import definitions
-// Visual Studio 10 throws an error : 
-// Compiler Error C2252 - cannot explicitly instantiate template in current scope
-// if attempted to instantiate the templates => only for older versions.
-#if (defined(WIN32) || defined(_WINDOWS)) && _MSC_VER < 1600
-  #if defined(EXPORT_HERMES_DLL)
-  // when building DLL (target project defines this macro)
-    #define HERMES_API __declspec(dllexport)
-    #define HERMES_API_USED_TEMPLATE(__implementation) template class HERMES_API __implementation
-  #else  
-  // when using the DLL by a client project
-    #define HERMES_API __declspec(dllimport)
+// TODO : Try out with older versions of Visual Studio (or other compilers) that the first version works.
+
+#if defined(WIN32) || defined(_WINDOWS)
+  // Visual Studio 2010.
+  #if _MSC_VER >= 1600
+    #if defined(EXPORT_HERMES_DLL)
+      // when building DLL (target project defines this macro)
+      #define HERMES_API __declspec(dllexport)
+    #else  
+      // when using the DLL by a client project
+      #define HERMES_API __declspec(dllimport)
+    #endif
     #define HERMES_API_USED_TEMPLATE(__implementation)
-    //#define HERMES_API_USED_TEMPLATE(__implementation) extern template class HERMES_API __implementation
+    #define HERMES_API_USED_STL_VECTOR(__type)
+  #else
+    #if defined(EXPORT_HERMES_DLL)
+      // when building DLL (target project defines this macro)
+      #define HERMES_API __declspec(dllexport)
+      #define HERMES_API_USED_TEMPLATE(__implementation) template class HERMES_API __implementation
+    #else  
+      // when using the DLL by a client project
+      #define HERMES_API __declspec(dllimport)
+      #define HERMES_API_USED_TEMPLATE(__implementation)
+    #endif
+    #define HERMES_API_USED_STL_VECTOR(__type) HERMES_API_USED_TEMPLATE(std::allocator<__type>); HERMES_API_USED_TEMPLATE(std::vector<__type>)
   #endif
-  #define HERMES_API_USED_STL_VECTOR(__type) HERMES_API_USED_TEMPLATE(std::allocator<__type>); HERMES_API_USED_TEMPLATE(std::vector<__type>)
-  
+
 #else 
 
   #define HERMES_API

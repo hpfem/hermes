@@ -23,6 +23,7 @@
 #include "common.h"
 #include "tuple.h"
 #include "error.h"
+#include "markers_conversion.h"
 
 // Types of boundary conditions.
 enum BCType
@@ -45,12 +46,33 @@ public:
     return;
   };
 
+  void add_bc_dirichlet(Hermes::Tuple<std::string> markers)
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++) this->markers_dirichlet.push_back(markers_conversion->get_internal_boundary_marker(markers[i]));    
+    return;
+  }
+
   void add_bc_neumann(Hermes::Tuple<int> markers) 
   {
     unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_neumann() expects at least one marker.");
     for (unsigned int i = 0; i < n; i++)
         this->markers_neumann.push_back(markers[i]);
+    return;
+  };
+
+  void add_bc_neumann(Hermes::Tuple<std::string> markers) 
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_neumann() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++)
+        this->markers_neumann.push_back(markers_conversion->get_internal_boundary_marker(markers[i]));
     return;
   };
 
@@ -62,11 +84,31 @@ public:
     return;
   };
 
+  void add_bc_newton(Hermes::Tuple<std::string> markers) 
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_newton() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++) this->markers_newton.push_back(markers_conversion->get_internal_boundary_marker(markers[i]));
+    return;
+  };
+
   void add_bc_none(Hermes::Tuple<int> markers) 
   {
     unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
     for (unsigned int i = 0; i < n; i++) this->markers_none.push_back(markers[i]);    
+    return;
+  };
+
+  void add_bc_none(Hermes::Tuple<std::string> markers) 
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++) this->markers_none.push_back(markers_conversion->get_internal_boundary_marker(markers[i]));    
     return;
   };
 
@@ -194,7 +236,10 @@ public:
   }
 
 
-  BCTypes() {};
+  BCTypes(MarkersConversion* markers_conversion = NULL) 
+  {
+    this->markers_conversion = markers_conversion;
+  };
   ~BCTypes() {};
 
   virtual BCTypes *dup() {
@@ -212,6 +257,8 @@ public:
     Hermes::Tuple<int> markers_dirichlet;
     Hermes::Tuple<int> markers_none;
   
+    MarkersConversion* markers_conversion;
+
     friend class BCValues;
 };
 
@@ -243,6 +290,7 @@ public:
   virtual BCTypes *dup() {
       BCTypesCallback *bc = new BCTypesCallback();
       bc->bc_type_callback = this->bc_type_callback;
+      bc->markers_conversion = this->markers_conversion;
       return bc;
   }
 

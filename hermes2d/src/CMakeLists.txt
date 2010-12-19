@@ -90,6 +90,7 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
        ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
        ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
+       ${HERMES_COMMON_DIR}/markers_conversion.cpp
        )
 
 include(PickRealOrCplxLibs)

@@ -32,7 +32,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary markers.
-const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
+const int BDY_HORIZONTAL = 1;
+const std::string BDY_VERTICAL = "boundary marker 2";
 
 // Problem parameters.
 double a_11(double x, double y) {
@@ -92,20 +93,23 @@ int main(int argc, char* argv[])
   TimePeriod cpu_time;
   cpu_time.tick();
 
+  // Conversion tables for user-supplied string markers.
+  MarkersConversion markers_conversion;
+
   // Load the mesh.
   Mesh mesh;
-  H2DReader mloader;
+  H2DReader mloader(&markers_conversion);
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Enter boundary markers.
-  BCTypes bc_types;
+  BCTypes bc_types(&markers_conversion);
   bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
   bc_types.add_bc_neumann(BDY_VERTICAL);
 
-  BCValues bc_values;
+  BCValues bc_values(&markers_conversion);
   bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
 
   // Create an H1 space with default shapeset.
@@ -114,7 +118,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
+  WeakForm wf(1, false, &markers_conversion);
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
