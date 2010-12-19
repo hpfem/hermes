@@ -20,12 +20,13 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-WeakForm::WeakForm(int neq, bool mat_free)
+WeakForm::WeakForm(int neq, bool mat_free, MarkersConversion* markers_conversion)
 {
   _F_
   this->neq = neq;
   seq = 0;
   this->is_matfree = mat_free;
+  this->markers_conversion = markers_conversion;
 }
 
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
@@ -48,6 +49,17 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
   seq++;
 }
 
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
+                               matrix_form_ord_t ord, SymFlag sym, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_matrix_form(i, j, fn, ord, sym, markers_conversion->get_internal_element_marker(area), ext);
+  return;
+}
+
+
 // single equation case
 void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, int area, Hermes::Tuple<MeshFunction*>ext)
 {
@@ -69,6 +81,17 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
   seq++;
 }
 
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_matrix_form(matrix_form_val_t fn, 
+                               matrix_form_ord_t ord, SymFlag sym, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_matrix_form(fn, ord, sym, markers_conversion->get_internal_element_marker(area), ext);
+  return;
+}
+
+
 void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
@@ -81,6 +104,15 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
   MatrixFormSurf form = { i, j, area, fn, ord, ext.as_std_vector() };
   mfsurf.push_back(form);
   seq++;
+}
+
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_matrix_form_surf(i, j, fn, ord, markers_conversion->get_internal_boundary_marker(area), ext);
+  return;
 }
 
 // single equation case
@@ -99,6 +131,15 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   seq++;
 }
 
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_matrix_form_surf(fn, ord, markers_conversion->get_internal_boundary_marker(area), ext);
+  return;
+}
+
 void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
@@ -110,6 +151,15 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
   VectorFormVol form = { i, area, fn, ord, ext.as_std_vector() };
   vfvol.push_back(form);
   seq++;
+}
+
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_vector_form(i, fn, ord, markers_conversion->get_internal_element_marker(area), ext);
+  return;
 }
 
 // single equation case
@@ -127,6 +177,15 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int 
   seq++;
 }
 
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_vector_form(fn, ord, markers_conversion->get_internal_element_marker(area), ext);
+  return;
+}
+
 void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
@@ -140,6 +199,16 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
   vfsurf.push_back(form);
   seq++;
 }
+
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_vector_form_surf(i, fn, ord, markers_conversion->get_internal_boundary_marker(area), ext);
+  return;
+}
+
 
 // single equation case
 void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
@@ -155,6 +224,15 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   VectorFormSurf form = { i, area, fn, ord, ext.as_std_vector() };
   vfsurf.push_back(form);
   seq++;
+}
+
+// A wrapper utilizing the MarkersConversion class.
+void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  add_vector_form_surf(fn, ord, markers_conversion->get_internal_boundary_marker(area), ext);
+  return;
 }
 
 void WeakForm::set_ext_fns(void* fn, Hermes::Tuple<MeshFunction*>ext)

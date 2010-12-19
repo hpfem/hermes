@@ -22,8 +22,9 @@
 
 extern unsigned g_mesh_seq;
 
-H2DReader::H2DReader()
+H2DReader::H2DReader(MarkersConversion* markers_conversion)
 {
+  this->markers_conversion = markers_conversion;
 }
 
 H2DReader::~H2DReader()
@@ -525,6 +526,7 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
       error("File %s: invalid vertex #%d.", filename, i);
   }
   mesh->ntopvert = n;
+  mitem_drop_string_markers(sym->data);
 
   //// elements ////////////////////////////////////////////////////////////////
 
@@ -549,23 +551,57 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
     for (j = 0; j < nv-1; j++)
       if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
         error("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
-
-    // create triangle/quad
+    
     Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
-    if (nv == 4)
-    {
-      check_triangle(i, v0, v1, v2);
-      mesh->create_triangle(idx[3], v0, v1, v2, NULL);
+    int marker;
+    
+    // If we are dealing with a string as a marker.
+    if(elem->marker->size() > 0) {
+      if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+      // Number of vertices + the marker is 1 bigger than in the previous context.
+      nv += 1;
+      // This functions check if the user-supplied marker on this element has been
+      // already used, and if not, inserts it in the appropriate structure.
+      markers_conversion->insert_element_marker(markers_conversion->min_element_marker_unused, *elem->marker);
+      marker = markers_conversion->get_internal_element_marker(*elem->marker);
     }
-    else
-    {
-      Node *v3 = &mesh->nodes[idx[3]];
-      check_quad(i, v0, v1, v2, v3);
-      mesh->create_quad(idx[4], v0, v1, v2, v3, NULL);
+    else {
+      if(nv == 4) {
+        // If we have some string-labeled boundary markers.
+        if(markers_conversion != NULL) {
+          // We need to make sure that the internal markers do not collide.
+          markers_conversion->check_element_marker(idx[3]);
+          markers_conversion->insert_element_marker(idx[3], "");
+        }
+        marker = idx[3];
+      }
+      else {
+        // If we have some string-labeled boundary markers.
+        if(markers_conversion != NULL) {
+          // We need to make sure that the internal markers do not collide.
+          markers_conversion->check_element_marker(idx[4]);
+          markers_conversion->insert_element_marker(idx[4], "");
+        }
+        marker = idx[4];
+      }
     }
+    
+    if(nv == 4) {
+        check_triangle(i, v0, v1, v2);
+        mesh->create_triangle(marker, v0, v1, v2, NULL);
+      }
+      else {
+        Node *v3 = &mesh->nodes[idx[3]];
+        check_quad(i, v0, v1, v2, v3);
+        mesh->create_quad(marker, v0, v1, v2, v3, NULL);
+      }
+
     mesh->nactive++;
   }
   mesh->nbase = n;
+
+  mitem_drop_string_markers(sym->data);
 
   //// boundaries //////////////////////////////////////////////////////////////
 
@@ -580,15 +616,39 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
     for (i = 0; i < n; i++, triple = triple->next)
     {
       int v1, v2, marker;
-      if (!mesh_parser_get_ints(triple, 3, &v1, &v2, &marker))
+      if (!mesh_parser_get_ints(triple, triple->n, &v1, &v2, &marker))
         error("File %s: invalid boundary data #%d.", filename, i);
 
       en = mesh->peek_edge_node(v1, v2);
       if (en == NULL)
         error("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
-      en->marker = marker;
+      
+      int marker_to_set;
 
-      if (marker > 0)
+      // If we are dealing with a string as a marker.
+      if(triple->marker->size() > 0) {
+        if(this->markers_conversion == NULL)
+          error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+        // This functions check if the user-supplied marker on this element has been
+        // already used, and if not, inserts it in the appropriate structure.
+        markers_conversion->insert_boundary_marker(markers_conversion->min_boundary_marker_unused, *triple->marker);
+        marker_to_set = markers_conversion->get_internal_boundary_marker(*triple->marker);
+      }
+      else {
+        // If we have some string-labeled boundary markers.
+        if(markers_conversion != NULL) {
+          // We need to make sure that the internal markers do not collide.
+          markers_conversion->check_boundary_marker(marker);
+          markers_conversion->insert_boundary_marker(marker, "");
+        }
+        marker_to_set = marker;
+      }
+
+      en->marker = marker_to_set;
+
+      // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
+      // for the inner edges.
+      if (marker_to_set > 0)
       {
         mesh->nodes[v1].bnd = 1;
         mesh->nodes[v2].bnd = 1;
@@ -602,6 +662,7 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
     if (en->ref < 2 && en->marker == 0)
       warn("Boundary edge node does not have a boundary marker");
 
+  mitem_drop_string_markers(sym->data);
   //// curves //////////////////////////////////////////////////////////////////
 
   sym = mesh_parser_find_symbol("curves");
@@ -682,6 +743,7 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
 
   mesh_parser_free();
   mesh->seq = g_mesh_seq++;
+
 
   return true;
 }

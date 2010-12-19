@@ -78,8 +78,13 @@ static void free_mem()
 }
 
 static inline MItem* new_item()
-  { MItem* it = (MItem*) new_block(sizeof(MItem));
-    it->next = NULL; return it; }
+{
+  std::string* str= new std::string;
+  MItem* it = (MItem*) new_block(sizeof(MItem));
+  it->next = NULL; 
+  it->marker = str;
+  return it; 
+}
 
 static inline MSymbol* new_symbol()
   { return (MSymbol*) new_block(sizeof(MSymbol)); }
@@ -208,6 +213,7 @@ static void init_symbols()
 
 
 static MItem* item();
+static MItem* item_string_marker();
 static MItem* expression();
 
 
@@ -374,6 +380,29 @@ static void list(MItem* parent)
     it = it->next;
   };
 
+  if (follows(MT_SEMICOL))
+  {
+    bool one_word_processed = false;
+    while(!follows(MT_END))
+    {
+      next_token();
+      if(follows(MT_END))
+        break;
+      it->next = item_string_marker();
+      if(token->type == MT_NUMBER) {
+        parent->marker->append(" ");
+        char buffer[10];
+        itoa((int)token->value, buffer, 10);
+        parent->marker->append(buffer);
+      }
+      else
+        parent->marker->append(token->text);
+      if(!one_word_processed++)
+        parent->marker->append(" ");
+      it = it->next;
+    }
+  }
+
   if (!follows(MT_END)) serror("'}' expected.");
   next_token();
 }
@@ -390,6 +419,14 @@ static MItem* item()
   }
   else
     return expression();
+}
+
+static MItem* item_string_marker()
+{
+  MItem* it = new_item();
+  it->n = -2;
+  it->next = NULL;
+  return it;
 }
 
 
@@ -473,4 +510,18 @@ bool mesh_parser_get_ints(MItem* list, int n, ...)
   }
   va_end(ap);
   return true;
+}
+
+void mitem_drop_string_markers(MItem* mi)
+{
+  if(mi->n < 1)
+    delete mi->marker;
+  else {
+    for(int i = 0; i < mi->n; i++) {
+      MItem* mi_pass = &mi->list[0];
+      for(int j = 0; j < i; j++)
+        mi_pass = mi_pass->next;
+      mitem_drop_string_markers(mi_pass);
+    }
+  }
 }
