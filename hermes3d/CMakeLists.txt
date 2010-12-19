@@ -28,16 +28,17 @@ option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
 option(WITH_HDF5     "Enable support for HDF5" NO)
 
 # Reporting and logging:
-set(REPORT_WITH_LOGO        YES)  #logo will be shown
-set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is inteded just for Python wrappers.
-set(REPORT_ALL              NO)   #do not report all events, just selected ones
-set(REPORT_WARNING          YES)  #warnings will be reported
-set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
-set(REPORT_INFO             YES)  #info will be reported
-set(REPORT_VERBOSE          NO)   #info details will not be reported
-set(REPORT_TRACE            NO)   #code execution tracing will not be reported
-set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+set(HERMES_REPORT_WITH_LOGO        YES)  #logo will be shown
+set(HERMES_REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+set(HERMES_REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
+                                  #The runtime control is intended just for Python wrappers.
+set(HERMES_REPORT_ALL              NO)   #do not report all events, just selected ones
+set(HERMES_REPORT_WARNING          YES)  #warnings will be reported
+set(HERMES_REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+set(HERMES_REPORT_INFO             YES)  #info will be reported
+set(HERMES_REPORT_VERBOSE          NO)   #info details will not be reported
+set(HERMES_REPORT_TRACE            NO)   #code execution tracing will not be reported
+set(HERMES_REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
 #set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
 
 option(WITH_OPENMP   "Build with OpenMP support" NO)
