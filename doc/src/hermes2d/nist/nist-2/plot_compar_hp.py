@@ -10,17 +10,17 @@ pylab.ylabel("Error [%]")
 data = numpy.loadtxt("conv_dof_est_hp_iso.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="hp-FEM (iso)")
+semilogy(x, y, "-s", label="hp-FEM (iso)")
 
 data = numpy.loadtxt("conv_dof_est_hp_anisoh.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="hp-FEM (aniso h)")
+semilogy(x, y, "-s", label="hp-FEM (aniso h)")
 
 data = numpy.loadtxt("conv_dof_est_hp_aniso.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="hp-FEM (aniso hp)")
+semilogy(x, y, "-s", label="hp-FEM (aniso hp)")
 
 legend()
 
@@ -34,17 +34,17 @@ pylab.ylabel("Error [%]")
 data = numpy.loadtxt("conv_cpu_est_hp_iso.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="hp-FEM (iso)")
+semilogy(x, y, "-s", label="hp-FEM (iso)")
 
 data = numpy.loadtxt("conv_cpu_est_hp_anisoh.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="hp-FEM (aniso h)")
+semilogy(x, y, "-s", label="hp-FEM (aniso h)")
 
 data = numpy.loadtxt("conv_cpu_est_hp_aniso.dat")
 x = data[:, 0]
 y = data[:, 1]
-loglog(x, y, "-s", label="hp-FEM (aniso hp)")
+semilogy(x, y, "-s", label="hp-FEM (aniso hp)")
 
 legend()
 
