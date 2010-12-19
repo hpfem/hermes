@@ -33,7 +33,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 
 // Boundary markers.
 const int BDY_HORIZONTAL = 1;
-const std::string BDY_VERTICAL = "boundary marker 2";
+const std::string BDY_VERTICAL = "Boundary vertical";
 
 // Problem parameters.
 double a_11(double x, double y) {
@@ -118,7 +118,8 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf(1, false, &markers_conversion);
+  bool matrix_free = false;
+  WeakForm wf(1, matrix_free, &markers_conversion);
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);

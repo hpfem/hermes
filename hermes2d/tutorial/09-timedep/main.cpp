@@ -87,7 +87,8 @@ int main(int argc, char* argv[])
   tsln.set_const(&mesh, T_INIT);
 
   // Initialize weak formulation.
-  WeakForm wf(1, false, &markers_conversion);
+  bool matrix_free = false;
+  WeakForm wf(1, matrix_free, &markers_conversion);
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
   wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
