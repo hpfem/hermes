@@ -1,4 +1,4 @@
-Using material and boundary markers in weak forms (35)
+Using Material and Boundary Markers in Weak Forms (35)
 ------------------------------------------------------
 
 **Git reference:** Tutorial example `35-markers <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/35-markers>`_. 
@@ -7,13 +7,12 @@ The reader knows from before that individual weak form can be defined and
 registered for each material marker, as well as for each boundary marker.  
 In some situations, however, it might be useful to access the material 
 and/or boundary markers from inside the weak forms. We created this 
-(a bit artificial) example to illustrate this. 
+(a bit artificial) example to illustrate it. 
 
 The equation solved is::
 
 .. math::
-
-    -\mbox{div}(a(x,y) \nabla u) = f \ \ \ \mbox{in}\ \Omega
+    \mbox{div}(a(x,y) \nabla u) = f \ \ \ \mbox{in}\ \Omega
 
 where $\Omega$ is a square domain subdivided into four 
 identical quadrants. The parameter $a(x,y)$ is constant 
