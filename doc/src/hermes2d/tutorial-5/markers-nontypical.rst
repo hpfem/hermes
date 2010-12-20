@@ -1,7 +1,7 @@
 Using Material and Boundary Markers in Weak Forms (35)
 ------------------------------------------------------
 
-**Git reference:** Tutorial example `35-markers <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/35-markers>`_. 
+**Git reference:** Tutorial example `36-markers-nontypical <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/36-markers-nontypical>`_. 
 
 The reader knows from before that individual weak form can be defined and 
 registered for each material marker, as well as for each boundary marker.  
