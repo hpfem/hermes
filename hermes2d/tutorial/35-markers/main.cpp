@@ -75,8 +75,12 @@ const double A_SW = 2.0;
 
 // Boundary markers.
 const int BDY_BOTTOM = 1;
-const int BDY_VERTICAL = 2;
-const int BDY_TOP = 3;
+const std::string BDY_VERTICAL_SE = "Boundary marker 2";
+const std::string BDY_VERTICAL_NE = "Boundary marker 20";
+const std::string BDY_VERTICAL_NW = "Boundary marker 21";
+const std::string BDY_VERTICAL_SW = "Boundary marker 22";
+const int BDY_TOP_NE = 3;
+const int BDY_TOP_NW = 30;
 
 // Weak forms.
 #include "forms.cpp"
@@ -91,7 +95,8 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_VERTICAL, BDY_TOP));
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_TOP_NE, BDY_TOP_NW));
+  bc_types.add_bc_neumann(Hermes::Tuple<std::string>(BDY_VERTICAL_SE,BDY_VERTICAL_NE, BDY_VERTICAL_NW, BDY_VERTICAL_SW));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
@@ -102,9 +107,19 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_vol));
+  wf.add_matrix_form(bilinear_form_vol_SE, bilinear_form_vol_Ord, HERMES_UNSYM, SOUTH_EAST);
+  wf.add_matrix_form(bilinear_form_vol_NE, bilinear_form_vol_Ord, HERMES_UNSYM, NORTH_EAST);
+  wf.add_matrix_form(bilinear_form_vol_NW, bilinear_form_vol_Ord, HERMES_UNSYM, NORTH_WEST);
+  wf.add_matrix_form(bilinear_form_vol_SW, bilinear_form_vol_Ord, HERMES_UNSYM, SOUTH_WEST);
+
   wf.add_vector_form(callback(linear_form_vol));
-  wf.add_vector_form_surf(callback(linear_form_surf));
+
+  wf.add_vector_form_surf(linear_form_surf_VERTICAL_SE, linear_form_surf_Ord, BDY_VERTICAL_SE);
+  wf.add_vector_form_surf(linear_form_surf_VERTICAL_NE, linear_form_surf_Ord, BDY_VERTICAL_NE);
+  wf.add_vector_form_surf(linear_form_surf_VERTICAL_NW, linear_form_surf_Ord, BDY_VERTICAL_NW);
+  wf.add_vector_form_surf(linear_form_surf_VERTICAL_SW, linear_form_surf_Ord, BDY_VERTICAL_SW);
+  wf.add_vector_form_surf(linear_form_surf_TOP_NE, linear_form_surf_Ord, BDY_TOP_NE);
+  wf.add_vector_form_surf(linear_form_surf_TOP_NW, linear_form_surf_Ord, BDY_TOP_NW);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
