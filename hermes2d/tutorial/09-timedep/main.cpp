@@ -54,12 +54,9 @@ double temp_ext(double t) {
 
 int main(int argc, char* argv[])
 {
-  // Conversion tables for user-supplied string markers.
-  MarkersConversion markers_conversion;
-
   // Load the mesh.
-  Mesh mesh(&markers_conversion);
-  H2DReader mloader(&markers_conversion);
+  Mesh mesh;
+  H2DReader mloader;
   mloader.load("cathedral.mesh", &mesh);
 
   // Perform initial mesh refinements.
@@ -67,12 +64,12 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
-  BCTypes bc_types(&markers_conversion);
+  BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_GROUND);
   bc_types.add_bc_newton(BDY_AIR);
 
   // Enter Dirichlet boundary values.
-  BCValues bc_values(&markers_conversion);
+  BCValues bc_values;
   bc_values.add_const(BDY_GROUND, T_INIT);
 
   // Initialize an H1 space with default shapeset.
@@ -88,7 +85,7 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   bool matrix_free = false;
-  WeakForm wf(1, matrix_free, &markers_conversion);
+  WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
   wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
   wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);

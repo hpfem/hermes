@@ -92,6 +92,10 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces,
   // Create global enumeration of dof and fill the ndof variable.
   this->ndof = Space::assign_dofs(this->spaces);
 
+  // Update the weak formulation with the user-supplied string markers
+  // according to the conversion table contained in the mesh.
+  this->wf->update_markers_acc_to_conversion(spaces[0]->get_mesh()->markers_conversion);
+
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.
   this->is_fvm = false;

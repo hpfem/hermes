@@ -18,7 +18,6 @@
 
 #include "h2d_common.h"
 #include "curved.h"
-#include "markers_conversion.h"
 
 struct Element;
 class HashTable;
@@ -156,7 +155,7 @@ class HERMES_API Mesh : public HashTable
 {
 public:
 
-  Mesh(MarkersConversion* markers_conversion = NULL);
+  Mesh();
   ~Mesh() { 
     //printf("Calling Mesh::free() in ~Mesh().\n");
     free(); 
@@ -327,11 +326,66 @@ protected:
   void refine_quad_to_triangles(Element* e);
   void refine_element_to_triangles(int id);
 
+  class MarkersConversion
+  {
+  public:
+    MarkersConversion();
+    ~MarkersConversion();
+
+    // Info about the maximum markers used so far, used in determining
+    // of the internal marker for a user-supplied std::string identification for 
+    // the purpose of disambiguity.
+    // 
+    int min_boundary_marker_unused;
+    int min_element_marker_unused;
+  
+    // Function inserting a marker into conversion_table_for_element_markers.
+    // This function controls if this user_marker x internal_marker is already 
+    // present, and if not, it inserts the std::pair.
+    void insert_element_marker(int internal_marker, std::string user_marker);
+    // An analogy for boundary markers.
+    void insert_boundary_marker(int internal_marker, std::string user_marker);
+
+    // Lookup functions.
+    // Find a user marker for this internal marker.
+    std::string get_user_element_marker(int internal_marker);
+    // An analogy for boundary markers.
+    std::string get_user_boundary_marker(int internal_marker);
+
+    // Find an internal marker for this user_marker.
+    int get_internal_element_marker(std::string user_marker);
+    // An analogy for boundary markers.
+    int get_internal_boundary_marker(std::string user_marker);
+
+    // Make sure that the internal markers do not collide.
+    // This function is called whenever user supplies his own integral label.
+    // This is done with respect to the task to preserve user-supplied integral markers.
+    void check_boundary_marker(int marker);
+    // An analogy for element markers.
+    void check_element_marker(int marker);
+
+  private:
+    // Conversion tables between the std::string markers the user sets and
+    // the markers used internally as members of Elements, Nodes.
+    std::map<int, std::string>* conversion_table_for_element_markers;
+    std::map<int, std::string>* conversion_table_for_boundary_markers;
+
+    // Inverse tables, so that it is possible to search using either
+    // the internal representation, or the user std::string value.
+    std::map<std::string, int>* conversion_table_for_element_markers_inverse;
+    std::map<std::string, int>* conversion_table_for_boundary_markers_inverse;
+
+  };
+
   MarkersConversion* markers_conversion;
 
   friend class H2DReader;
+  friend class BCTypes;
+  friend class BCValues;
+  friend class WeakForm;
+  friend class Space;
+  friend class DiscreteProblem;
 };
-
 
 // helper macros for easy iteration through all elements, nodes etc. in a mesh
 #define for_all_elements(e, mesh) \

@@ -17,7 +17,6 @@
 #define _H2D_READER_H_
 
 #include "mesh_loader.h"
-#include "../../hermes_common/markers_conversion.h"
 
 
 /// Mesh loader from Hermes2D format
@@ -26,7 +25,7 @@
 class HERMES_API H2DReader : public MeshLoader
 {
 public:
-  H2DReader(MarkersConversion* markers_conversion = NULL);
+  H2DReader();
   virtual ~H2DReader();
 
   virtual bool load(const char *file_name, Mesh *mesh);
@@ -45,8 +44,6 @@ protected:
 
 	void save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first);
 	void save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs);
-  
-  MarkersConversion* markers_conversion;
 };
 
 #endif

@@ -57,7 +57,7 @@ class HERMES_API WeakForm
 {
 public:
 
-  WeakForm(int neq = 1, bool mat_free = false, MarkersConversion* matrix_conversion = NULL);
+  WeakForm(int neq = 1, bool mat_free = false);
 
   // general case
   typedef scalar (*matrix_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi, Func<double> *vj, Geom<double> *e, ExtData<scalar> *);
@@ -101,7 +101,6 @@ public:
   void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, 
 			std::string area, Hermes::Tuple<MeshFunction*>ext = Hermes::Tuple<MeshFunction*>()); // single equation case
 
-
   void set_ext_fns(void* fn, Hermes::Tuple<MeshFunction*>ext = Hermes::Tuple<MeshFunction*>());
 
   /// Returns the number of equations
@@ -138,6 +137,15 @@ protected:
   std::vector<MatrixFormSurf> mfsurf;
   std::vector<VectorFormVol>  vfvol;
   std::vector<VectorFormSurf> vfsurf;
+
+  // These members are used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, MatrixFormVol>  mfvol_string_temp;
+  std::map<std::string, MatrixFormSurf> mfsurf_string_temp;
+  std::map<std::string, VectorFormVol>  vfvol_string_temp;
+  std::map<std::string, VectorFormSurf> vfsurf_string_temp;
+  
+  // Function which according to the conversion table provided, updates the above members.
+  void update_markers_acc_to_conversion(Mesh::MarkersConversion* markers_conversion);
 
   struct Stage
   {
@@ -180,8 +188,6 @@ private:
                     std::vector<MeshFunction*>& ext, Hermes::Tuple<Solution*>& u_ext);
 
   bool is_in_area_2(int marker, int area) const;
-
-  MarkersConversion* markers_conversion;
 };
 
 #endif
