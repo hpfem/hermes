@@ -29,14 +29,12 @@
 /// the function representing them.
 class HERMES_API BCValues {
 public:
-  BCValues(double* t, MarkersConversion* markers_conversion = NULL) : t(t) { 
+  BCValues(double* t) : t(t) { 
     t_set = true;
-    this->markers_conversion = markers_conversion;
   };
-  BCValues(MarkersConversion* markers_conversion = NULL) 
+  BCValues() 
   { 
     t_set = false; 
-    this->markers_conversion = markers_conversion;
   };
   ~BCValues() {};
 
@@ -49,27 +47,33 @@ protected:
 
   /// Storage of functions. 
   std::map<int, value_callback> value_callbacks;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, value_callback> value_callbacks_string_temp;
+
   std::map<int, value_callback_time> value_callbacks_time;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, value_callback_time> value_callbacks_time_string_temp;
 
   /// Registering which condition is time-dependent.
   std::map<int, bool> is_time_dep;
 
   /// Storage of 1D constants. 
   std::map<int, scalar> value_constants;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, scalar> value_constants_string_temp;
 
   /// Storage of zeroes.
   /// This is needed, so that we are able to check, if the zero has been set by user, or
   /// if it is put there by a call to map<>::operator[].
   std::map<int, bool> value_zeroes;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, bool> value_zeroes_string_temp;
 
   /// Current time. In the case of time_dependency.
   double* t;
 
   /// Info flag that t has been set.
   bool t_set;
-
-  /// MarkersConversion instance.
-  MarkersConversion* markers_conversion;
   
 public:
   /// This function checks that there is either a function, or a value defined on one part
@@ -118,23 +122,21 @@ public:
     }
   };
 
-  // A wrapper utilizing the MarkersConversion class.
+  // A wrapper utilizing the Mesh::MarkersConversion class.
   void add_function(Hermes::Tuple<std::string> markers, value_callback callback)
   {
-    if(this->markers_conversion == NULL)
-        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
-    Hermes::Tuple<int> markers_to_pass;
+    if(markers.size() == 0)
+      error("BCValues::add_function() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++)
-      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
-    add_function(markers_to_pass, callback);
-  }
+      this->value_callbacks_string_temp.insert(std::pair<std::string, value_callback>(markers[i], callback));
+  };
     
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
   void add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback) 
   {
     if(markers.size() == 0)
-      error("BCValues::add_function() called without any boundary markers specified.");
+      error("BCValues::add_timedep_function() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a function present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the function.
@@ -146,16 +148,14 @@ public:
     }
   };
 
-  // A wrapper utilizing the MarkersConversion class.
+  // A wrapper utilizing the Mesh::MarkersConversion class.
   void add_timedep_function(Hermes::Tuple<std::string> markers, value_callback_time callback)
   {
-    if(this->markers_conversion == NULL)
-        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
-    Hermes::Tuple<int> markers_to_pass;
+     if(markers.size() == 0)
+      error("BCValues::add_timedep_function() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++)
-      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
-    add_timedep_function(markers_to_pass, callback);
-  }
+      this->value_callbacks_time_string_temp.insert(std::pair<std::string, value_callback_time>(markers[i], callback));
+  };
 
   /// The same as add_function(), only supplies a 1D constant.
   void add_const(Hermes::Tuple<int> markers, scalar value) 
@@ -180,22 +180,28 @@ public:
     }
   };
 
-  // A wrapper utilizing the MarkersConversion class.
+  // A wrapper utilizing the Mesh::MarkersConversion class.
   void add_const(Hermes::Tuple<std::string> markers, scalar value)
   {
-    if(this->markers_conversion == NULL)
-        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
-    Hermes::Tuple<int> markers_to_pass;
+    #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(value == 0) {
+    #else
+        if(value == std::complex<double>(0, 0)) {
+    #endif
+          this->add_zero(markers);
+          return;
+        }
+    if(markers.size() == 0)
+      error("BCValues::add_const() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++)
-      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
-    add_const(markers_to_pass, value);
-  }
+      this->value_constants_string_temp.insert(std::pair<std::string, scalar>(markers[i], value));
+  };
 
   /// The same as add_const(), only supplies a zero.
   void add_zero(Hermes::Tuple<int> markers) 
   {
     if(markers.size() == 0)
-      error("BCValues::add_const() called without any boundary markers specified.");
+      error("BCValues::add_zero() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
@@ -212,16 +218,14 @@ public:
     }
   };
 
-  // A wrapper utilizing the MarkersConversion class.
+  // A wrapper utilizing the Mesh::MarkersConversion class.
   void add_zero(Hermes::Tuple<std::string> markers)
   {
-    if(this->markers_conversion == NULL)
-        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
-    Hermes::Tuple<int> markers_to_pass;
+    if(markers.size() == 0)
+      error("BCValues::add_zero() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++)
-      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
-    add_zero(markers_to_pass);
-  }
+      value_zeroes_string_temp.insert(std::pair<std::string, bool>(markers[i], true));
+  };
 
   /// Checks whether all functions representing Dirichlet BCs are really set on a Dirichlet
   /// part of the boundary.
@@ -321,9 +325,10 @@ public:
       bv->value_callbacks_time = this->value_callbacks_time;
       bv->value_constants = this->value_constants;
       bv->value_zeroes = this->value_zeroes;
-      bv->markers_conversion = this->markers_conversion;
       return bv;
   }
+
+  friend class Space;
 };
 
 #endif

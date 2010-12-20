@@ -20,29 +20,15 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 
 #if defined(WIN32) || defined(_WINDOWS)
   // Visual Studio 2010.
-  #if _MSC_VER >= 1600
-    #if defined(EXPORT_HERMES_DLL)
-      // when building DLL (target project defines this macro)
-      #define HERMES_API __declspec(dllexport)
-    #else  
-      // when using the DLL by a client project
-      #define HERMES_API __declspec(dllimport)
-    #endif
-    #define HERMES_API_USED_TEMPLATE(__implementation)
-    #define HERMES_API_USED_STL_VECTOR(__type)
-  #else
-    #if defined(EXPORT_HERMES_DLL)
-      // when building DLL (target project defines this macro)
-      #define HERMES_API __declspec(dllexport)
-      #define HERMES_API_USED_TEMPLATE(__implementation) template class HERMES_API __implementation
-    #else  
-      // when using the DLL by a client project
-      #define HERMES_API __declspec(dllimport)
-      #define HERMES_API_USED_TEMPLATE(__implementation)
-    #endif
-    #define HERMES_API_USED_STL_VECTOR(__type) HERMES_API_USED_TEMPLATE(std::allocator<__type>); HERMES_API_USED_TEMPLATE(std::vector<__type>)
+  #if defined(EXPORT_HERMES_DLL)
+    // when building DLL (target project defines this macro)
+    #define HERMES_API __declspec(dllexport)
+  #else  
+    // when using the DLL by a client project
+    #define HERMES_API __declspec(dllimport)
   #endif
-
+  #define HERMES_API_USED_TEMPLATE(__implementation)
+  #define HERMES_API_USED_STL_VECTOR(__type)
 #else 
 
   #define HERMES_API

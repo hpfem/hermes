@@ -389,17 +389,17 @@ static void list(MItem* parent)
       next_token();
       if(follows(MT_END))
         break;
+      if(one_word_processed++)
+        parent->marker->append(" ");
       it->next = item_string_marker();
       if(token->type == MT_NUMBER) {
-        parent->marker->append(" ");
-	std::ostringstream sin;
-	sin << token->value;
+	      std::ostringstream sin;
+	      sin << token->value;
         parent->marker->append(sin.str());
       }
       else
         parent->marker->append(token->text);
-      if(!one_word_processed++)
-        parent->marker->append(" ");
+
       it = it->next;
     }
   }

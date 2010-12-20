@@ -21,7 +21,8 @@ care of the rest.
 The domain in this example is defined via four macroelements -- two
 quadrilaterals and two curvilinear triangles. The elements are enumerated from 0 to 3. 
 One also needs to enumerate all mesh vertices and assign markers to all boundary edges. 
-Boundary markers are used to link boundary conditions with the boundary edges. 
+Boundary markers can be positive integers or strings, and they are used to link 
+boundary conditions with the boundary edges. 
 
 Hermes2D mesh file format
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,8 +55,7 @@ of all mesh vertices (in any order). For the above geometry it looks like this::
       { a*b, a*b }  # vertex 7
     }
 
-The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra number denoting the element (material) marker. Element markers allow you to use different material parameters in areas with different material parameters. Moreover, Hermes allows you to assign different weak formulations to those areas, which can be very useful for some types of multiphysics problems. If the domain is composed of only one material, as the above geometry, all elements may be assigned a zero marker:
-::
+The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra nonnegative integer or string denoting the element (material) marker. Element markers make it possible to use different equation parameters in subdomains. In Hermes one can assign different weak forms to those subdomains, or access the element and boundary markers from indise of weak forms. If the domain is composed of only one material, as the above geometry, all elements may be assigned a zero marker for simplicity::
 
     elements =
     {
@@ -65,12 +65,22 @@ The variable ``elements`` defines all elements in the mesh via zero-based indice
       { 2, 3, 6, 5, 0 }   # quad 3
     }
 
+If we wanted to use a string material marker, we would do something like::
+
+    elements =
+    {
+      { 0, 1, 4, 3; Material A },  # quad 0
+      { 3, 4, 7; Material A },     # tri 1
+      { 3, 7, 6; Material A },     # tri 2
+      { 2, 3, 6, 5; Material A }   # quad 3
+    }
+
+
 The last mandatory variable, ``boundaries``, defines boundary markers for all
 boundary edges. By default, all edges have zero markers. Only those with
 positive markers are considered to be part of the domain boundary and can be
 assigned a boundary condition, as we will see later. An edge is identified by
-three numbers: two vertex indices and its marker. For the above geometry, we have
-::
+three numbers: two vertex indices and its marker. For the above geometry, we have::
 
     boundaries =
     {
@@ -84,6 +94,26 @@ three numbers: two vertex indices and its marker. For the above geometry, we hav
       { 5, 2, 3 }
     }
 
+If we wanted to use strings as markers, we could do::
+
+    boundaries =
+    {
+      { 0, 1; Boundary bottom },
+      { 1, 4; Boundary outer },
+      { 3, 0; Boundary inner },
+      { 4, 7; Boundary outer },
+      { 7, 6; Boundary outer },
+      { 2, 3; Boundary inner },
+      { 6, 5; Boundary outer },
+      { 5, 2; Boundary left }
+    }
+
+For historical reasons, most Hermes examples are based on integer markers. 
+String markers are used in tutorial examples 
+`07-general <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/general.html>`_ 
+and `09-timedep <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/timedep.html>`_
+for illustration.
+
 Finally, the mesh file can also include the variable ``curves`` which lists all
 curved edges.  Each curved edge is described by one NURBS curve, defined by its
 degree, control points and knot vector. Simplified syntax is available for
@@ -92,26 +122,8 @@ circular arcs.
 NURBS curves
 ~~~~~~~~~~~~
 
-Every NURBS curve is defined by its degree, control points with weights and the
-knot vector. The degree $d$ is a positive integer, usually 1, 2, 3 or 5. Lines
-and polylines are of degree 1, circles have degree 2 and free-form curves are
-of degree 3 or 5. The control points $p_i$, $i = 0 \ldots n$, are the main tool for changing the
-shape of the curve. A curve of degree $d$ must have at least $d+1$ control
-points. In Hermes, the endpoints of the edge are always assumed to be the
-first and last control points and therefore only the inner control points are
-listed in the mesh file. There is a weight $w_i \geq 0$ for every control point,
-that influences the shape of the curve in its vicinity. If $w_i = 0$ then 
-$p_i$ has no effect on the shape.  As $w_i$ increases, the curve is pulled 
-towards $p_i$.
-
-The knot vector is a sequence of $m+1$ values that determines how much and
-where the control points influence the shape. The relation $m = n+d+1$ must
-hold. The sequence is nondecreasing, $t_i \leq t_{i+1}$, and divides the whole
-interval $[0,1]$ into smaller intervals which determine the area of influence
-of the control points. Since the curve has to start and end at the edge
-vertices, the knot vector in Hermes always starts with $d+1$ zeros and ends
-with $d+1$ ones. Only the inner knots are listed in the above definition of the
-variable ``curves``, where $knots$ is a simple list of real values. 
+For the treatment of full-featured Non-Uniform Rational B-Splines (NURBS)
+boundaries see example `37-nurbs <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/nurbs.html>`_. To simplify the most common case of a curved boundary, Hermes has a special format for circular arcs.
 
 Circular arcs
 ~~~~~~~~~~~~~

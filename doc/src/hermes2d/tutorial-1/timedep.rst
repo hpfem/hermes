@@ -74,20 +74,24 @@ The corresponding weak formulation is
 
      \int_{\Omega} c \varrho\frac{T^{n+1}}{\tau}v + \int_{\Omega} \lambda \nabla T^{n+1}\cdot \nabla v + \int_{\Gamma_{air}} \alpha \lambda T^{n+1}v = \int_{\Omega} c \varrho\frac{T^{n}}{\tau}v + \int_{\Gamma_{air}} \alpha \lambda T_{ext}(t^{n+1})v.
 
-The implementation starts by defining boundary condition types::
+In this example we use string boundary markers::
 
-    BCType bc_types(int marker)
-    {
-      if (marker == bdy_ground) return BC_ESSENTIAL;
-      else return BC_NATURAL;
-    }
+    // Boundary markers.
+    const std::string BDY_GROUND = "Boundary ground";
+    const std::string BDY_AIR = "Boundary air";
 
-and values::
+Boundary condition types are defined using the BCTypes class::
 
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-    {
-      if (ess_bdy_marker == bdy_ground) return T_INIT;
-    }
+    // Enter boundary markers.
+    BCTypes bc_types;
+    bc_types.add_bc_dirichlet(BDY_GROUND);
+    bc_types.add_bc_newton(BDY_AIR);
+
+Values for Dirichlet boundary conditions are set via the BCValues class::
+
+    // Enter Dirichlet boundary values.
+    BCValues bc_values;
+    bc_values.add_const(BDY_GROUND, T_INIT);
 
 Then the space for the temperature $T$ is set up::
 
@@ -154,9 +158,9 @@ The weak forms are registered as follows::
     // Initialize weak formulation.
     WeakForm wf;
     wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-    wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, bdy_air);
+    wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
     wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-    wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, bdy_air);
+    wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
 
 Notice how the previous time level solution 'tsln' is registered. A few lines above
 we saw how it is accessed from inside the weak form:: 

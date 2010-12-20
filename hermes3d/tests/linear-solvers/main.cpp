@@ -52,7 +52,8 @@ bool read_n_nums(char *row, int n, double values[]) {
   return (i == n);
 }
 
-int read_matrix_and_rhs(char *file_name, int &n, Array<MatrixEntry> &mat, Array<scalar> &rhs) {
+int read_matrix_and_rhs(char *file_name, int &n, 
+                        Array<MatrixEntry> &mat, Array<scalar> &rhs) {
 #ifndef H3D_COMPLEX
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return ERR_FAILURE;
@@ -104,7 +105,8 @@ int read_matrix_and_rhs(char *file_name, int &n, Array<MatrixEntry> &mat, Array<
   return ERR_SUCCESS;
 }
 
-void build_matrix(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs, SparseMatrix *mat,
+void build_matrix(int n, Array<MatrixEntry> &ar_mat, 
+                  Array<scalar> &ar_rhs, SparseMatrix *mat,
                   Vector *rhs) {
   mat->prealloc(n);
   for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
