@@ -1,3 +1,5 @@
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 // This is a simple generic module for a linear second-order PDE based on the Hermes 
@@ -59,7 +61,8 @@ public:
   void set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet);
 
   // Set Dirichlet boundary values.
-  void set_dirichlet_values(const std::vector<double> &bdy_values_dirichlet);
+  void set_dirichlet_values(const std::vector<int> &bdy_markers_dirichlet, 
+                            const std::vector<double> &bdy_values_dirichlet);
 
   // Set Neumann boundary markers.
   void set_neumann_markers(const std::vector<int> &bdy_markers_neumann);
@@ -73,13 +76,54 @@ public:
   // Set Newton boundary value pairs.
   void set_newton_values(const std::vector<double_pair> &bdy_values_newton);
 
+  // Sanity check of material markers and material constants.
+  void materials_sanity_check();
+
+  // Setting mesh.
+  void set_mesh(Mesh* m);
+
+  // Get mesh.
+  Mesh* get_mesh();
+
   // Solve the problem and return the solution.
-  bool calculate(Solution* phi);
+  bool calculate();
 
   // This class associates BC markers with BC boundary types.
   BCTypes bc_types;
 
-private:
+  // This class provides values for Dirichlet (essential) BC markers.
+  BCValues bc_values;
+
+  // Get mesh string.
+  const char* get_mesh_string();
+
+  // Clear mesh string.
+  void clear_mesh_string();
+
+  // Get solution.
+  void get_solution(Solution *s);
+
+  // Get space.
+  void get_space(H1Space* s);
+
+  // Set matrix solver.
+  void set_matrix_solver(std::string solver_name);
+
+  // Get matrix solver.
+  MatrixSolverType get_matrix_solver();
+
+  // Perform basic sanity checks, create mesh, perform 
+  // uniform refinements, create space, register weak forms.
+  void create_mesh_space_forms();
+
+  // Get assembly time.
+  double get_assembly_time();
+
+  // Get solver time.
+  double get_solver_time();
+
+
+protected:
   std::string mesh_str;
   int init_ref_num;
   int init_p;
@@ -105,12 +149,24 @@ private:
                                                // Therefore we introduce a bc_permut array that for any 
                                                // boundary marker gives its index in the list of boundary 
                                                // conditions. 
+  MatrixSolverType matrix_solver;              // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, 
+                                               // SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, 
+                                               // SOLVER_SUPERLU, SOLVER_UMFPACK.
 
   // Finite element mesh.
   Mesh* mesh;
 
   // Finite element space;
   H1Space* space;
+
+  // Weak form.
+  WeakForm* wf;
+
+  // Solution.
+  Solution* sln;
+
+  // Assembly and solver times.
+  double assembly_time, solver_time;
 };
 
 /* Mesh string example. This is the mesh from the Hermes tutorial example 01-mesh,

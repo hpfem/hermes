@@ -8,6 +8,9 @@ This  example shows how to use Trilinos for time-dependent PDE problems.
 The NOX solver is employed, either using Newton's method or JFNK, and with or without 
 preconditioning,
 
+Model problem
+~~~~~~~~~~~~~
+
 We solve a linear heat transfer equation 
 
 .. math::
@@ -22,6 +25,9 @@ edge and the rest of the boundary has a Newton boundary condition
 Here $c$ is heat capacity, $\varrho$ material density, $\lambda$ thermal conductivity of the 
 material, $T_{ext}$ exterior temperature, and $\alpha$ heat transfer coefficient. 
 
+Defining constant initial condition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 After creating the finite element space as usual, we define a constant initial 
 condition::
 
@@ -29,30 +35,36 @@ condition::
     Solution t_prev_time;
     t_prev_time.set_const(&mesh, TEMP_INIT);
 
+Registering weak forms
+~~~~~~~~~~~~~~~~~~~~~~
+
 Next we register weak forms for the Jacobian and residual::
 
     // Initialize the weak formulation.
     WeakForm wf(1, JFNK ? true : false);
     wf.add_matrix_form(callback(jacobian));
     wf.add_matrix_form_surf(callback(jacobian_surf));
-    wf.add_vector_form(callback(residual), H2D_ANY, &t_prev_time);
+    wf.add_vector_form(callback(residual), HERMES_ANY, &t_prev_time);
     wf.add_vector_form_surf(callback(residual_surf));
 
-Then we initialize the FeProblem class, obtain initial coefficient vector
+Initializations
+~~~~~~~~~~~~~~~
+
+Then we initialize the DiscreteProblem class, obtain initial coefficient vector
 coeff_vec by projecting the initial condition on the finite element space, 
 initialize the NOX solver, and set preconditioner::
 
     // Initialize the finite element problem.
-    FeProblem fep(&wf, &space);
+    DiscreteProblem dp(&wf, &space);
 
-    // Project the function "titer" on the FE space 
+    // Project the function "t_prev_time" on the FE space 
     // in order to obtain initial vector for NOX. 
     info("Projecting initial solution on the FE mesh.");
-    Vector* coeff_vec = new AVector(ndof);
-    project_global(&space, H2D_H1_NORM, &t_prev_time, &t_prev_time, coeff_vec);
+    scalar* coeff_vec = new scalar[ndof];
+    OGProjection::project_global(&space, &t_prev_time, coeff_vec);
 
     // Initialize NOX solver.
-    NoxSolver solver(&fep);
+    NoxSolver solver(&dp);
 
     // Select preconditioner.
     RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -62,21 +74,22 @@ initialize the NOX solver, and set preconditioner::
       else solver.set_precond("ML");
     }
 
+Time stepping
+~~~~~~~~~~~~~
+
 Note that the initial coefficient vector was not provided to NOX yet, 
 this needs to be done in each time step. The time stepping loop is as follows::
 
+    // Time stepping loop:
+    double total_time = 0.0;
     for (int ts = 1; total_time <= 2000.0; ts++)
     {
       info("---- Time step %d, t = %g s", ts, total_time += TAU);
 
-      info("Assembling by FeProblem, solving by NOX.");
-      solver.set_init_sln(coeff_vec->get_c_array());
-      bool solved = solver.solve();
-      if (solved)
-      {
-        double *coeffs = solver.get_solution_vector();
-        t_prev_time.set_coeff_vector(&space, coeffs, ndof);
-      }
+      info("Assembling by DiscreteProblem, solving by NOX.");
+      solver.set_init_sln(coeff_vec);
+      if (solver.solve())
+        Solution::vector_to_solution(solver.get_solution(), &space, &t_prev_time);
       else
         error("NOX failed.");
 
@@ -88,3 +101,13 @@ this needs to be done in each time step. The time stepping loop is as follows::
       info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
         solver.get_num_lin_iters(), solver.get_achieved_tol());
     }
+
+Sample results
+~~~~~~~~~~~~~~
+
+You should see the following result:
+
+.. image:: 42/1.png
+   :align: center
+   :width: 400
+   :alt: Sample result

@@ -15,40 +15,41 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 
-const int P_INIT = 1;                    // Initial polynomial degrees.
-const bool MULTI = true;                 // MULTI = true  ... use multi-mesh,
-                                         // MULTI = false ... use single-mesh.
-                                         // Note: In the single mesh option, the meshes are
-                                         // forced to be geometrically the same but the
-                                         // polynomial degrees can still vary.
-const double THRESHOLD = 0.3;            // This is a quantitative parameter of the adapt(...) function and
-                                         // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 1;                  // Adaptive strategy:
-                                         // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                         //   error is processed. If more elements have similar errors, refine
-                                         //   all to keep the mesh symmetric.
-                                         // STRATEGY = 1 ... refine all elements whose error is larger
-                                         //   than THRESHOLD times maximum element error.
-                                         // STRATEGY = 2 ... refine all elements whose error is larger
-                                         //   than THRESHOLD.
-                                         // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO; // Predefined list of element refinement candidates. Possible values are
-                                         // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                         // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                         // See User Documentation for details.
-const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nodes:
-                                         // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                         // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                         // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                         // Note that regular meshes are not supported, this is due to
-                                         // their notoriously bad performance.
-const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
-                                         // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.3;             // Stopping criterion for adaptivity (rel. error tolerance between the
-                                         // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;            // Adaptivity process stops when the number of degrees of freedom grows over
-                                         // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+const int P_INIT = 1;                             // Initial polynomial degrees.
+const bool MULTI = true;                          // MULTI = true  ... use multi-mesh,
+                                                  // MULTI = false ... use single-mesh.
+                                                  // Note: In the single mesh option, the meshes are
+                                                  // forced to be geometrically the same but the
+                                                  // polynomial degrees can still vary.
+const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
+const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+                                                  // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 1;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                                  // See User Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
+                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.3;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
+                                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Time step and simulation time.
@@ -178,7 +179,7 @@ int main(int argc, char* argv[])
         (int) (CURRENT_TIME + TAU) / (3600*24), (int) (CURRENT_TIME + TAU) / (3600*24*364));
 
     // Uniform mesh derefinement.
-    if (ts > 1) {
+    if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
       T_mesh.copy(&basemesh);
       M_mesh.copy(&basemesh);
@@ -196,13 +197,15 @@ int main(int argc, char* argv[])
       // Construct globally refined reference mesh and setup reference space.
       Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&T_space, &M_space));
 
+      // Initialize matrix solver.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
       // Assemble the reference problem.
       info("Solving on reference mesh.");
       bool is_linear = true;
       DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
       dp->assemble(matrix, rhs);
 
       // Now we can deallocate the previous fine meshes.
@@ -219,17 +222,20 @@ int main(int argc, char* argv[])
                      Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
                      Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
-      // Calculate element errors and total error estimate.
-      info("Calculating error estimate."); 
+      // Registering custom forms for error calculation.
       Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), 
                           Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
+
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate."); 
+      bool solutions_for_adapt = true;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), 
-                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), solutions_for_adapt,
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

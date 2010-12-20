@@ -8,66 +8,66 @@ using namespace RefinementSelectors;
 
 // This test makes sure that example "ns-timedep-adapt" works correctly.
 
-const int INIT_REF_NUM = 0;              // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 3;          // Number of initial mesh refinements towards boundary.
-#define PRESSURE_IN_L2                   // If this is defined, the pressure is approximated using
-                                         // discontinuous L2 elements (making the velocity discreetely
-                                         // divergence-free, more accurate than using a continuous
-                                         // pressure approximation). Otherwise the standard continuous
-                                         // elements are used. The results are striking - check the
-                                         // tutorial for comparisons.
-const int P_INIT_VEL = 2;                // Initial polynomial degree for velocity components
-const int P_INIT_PRESSURE = 1;           // Initial polynomial degree for pressure
-                                         // Note: P_INIT_VEL should always be greater than
-                                         // P_INIT_PRESSURE because of the inf-sup condition
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 3;                   // Number of initial mesh refinements towards boundary.
+#define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
+                                                  // discontinuous L2 elements (making the velocity discreetely
+                                                  // divergence-free, more accurate than using a continuous
+                                                  // pressure approximation). Otherwise the standard continuous
+                                                  // elements are used. The results are striking - check the
+                                                  // tutorial for comparisons.
+const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components
+const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure
+                                                  // Note: P_INIT_VEL should always be greater than
+                                                  // P_INIT_PRESSURE because of the inf-sup condition
 
 // Adaptivity
-const int UNREF_FREQ = 1;        // Every UNREF_FREQth time step the mesh is unrefined.
-const double THRESHOLD = 0.3;    // This is a quantitative parameter of the adapt(...) function and
-                                 // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 1;          // Adaptive strategy:
-                                 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                 //   error is processed. If more elements have similar errors, refine
-                                 //   all to keep the mesh symmetric.
-                                 // STRATEGY = 1 ... refine all elements whose error is larger
-                                 //   than THRESHOLD times maximum element error.
-                                 // STRATEGY = 2 ... refine all elements whose error is larger
-                                 //   than THRESHOLD.
-                                 // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;  // Predefined list of element refinement candidates. Possible values are
-                                         // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                         // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                         // See the Used Documentation for details.
-const int MESH_REGULARITY = -1;          // Maximum allowed level of hanging nodes:
-                                         // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                         // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                         // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                         // Note that regular meshes are not supported, this is due to
-                                         // their notoriously bad performance.
-const double CONV_EXP = 1.0;             // Default value is 1.0. This parameter influences the selection of
-                                         // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 5.0;             // Stopping criterion for adaptivity (rel. error tolerance between the
-                                         // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;             // Adaptivity process stops when the number of degrees of freedom grows over
-                                         // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+                                                  // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 1;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                                  // See the Used Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
+                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 5.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
+                                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters
-const double RE = 200.0;             // Reynolds number.
-const double VEL_INLET = 1.0;        // Inlet velocity (reached after STARTUP_TIME).
-const double STARTUP_TIME = 1.0;     // During this time, inlet velocity increases gradually
-                                     // from 0 to VEL_INLET, then it stays constant.
-const double TAU = 0.01;             // Time step.
-const double T_FINAL = 2*TAU + 1e-4; // Time interval length.
+const double RE = 200.0;                          // Reynolds number.
+const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
+const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
+                                                  // from 0 to VEL_INLET, then it stays constant.
+const double TAU = 0.01;                          // Time step.
+const double T_FINAL = 2*TAU + 1e-4;              // Time interval length.
 
 // Newton's method
-const double NEWTON_TOL = 0.05;      // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 20;            // Maximum allowed number of Newton iterations.
+const double NEWTON_TOL = 0.05;                   // Stopping criterion for Newton on fine mesh.
+const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
 
 // Geometry
-const double H = 5;                  // Domain height (necessary to define the parabolic
-                                     // velocity profile at inlet)
+const double H = 5;                               // Domain height (necessary to define the parabolic
+                                                  // velocity profile at inlet)
 
 // Current time (defined as global since needed in weak forms)
 double TIME = 0;

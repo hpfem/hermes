@@ -24,10 +24,10 @@ int main(int argc, char* argv[])
   // Initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Enter boundary markers (default is Neumann boundary).
   BCTypes bc_types;
 
-  // Enter Dirichlet boundary values.
+  // Enter Dirichlet boundary values (not relevant here).
   BCValues bc_values;
 
   // Create an Hdiv space with default shapeset.

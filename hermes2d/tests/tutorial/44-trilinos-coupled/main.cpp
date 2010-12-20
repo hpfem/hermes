@@ -9,17 +9,17 @@ using Teuchos::rcp;
 
 // This test makes sure that example 44-trilinos-coupled works correctly.
 
-const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
-const int P_INIT = 2;               // Initial polynomial degree of all mesh elements.
-const bool JFNK = true;             // true = jacobian-free method,
-                                    // false = Newton
-const int PRECOND = 2;              // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
-                                    // or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
-                                    // in case of jfnk,
-                                    // default Ifpack proconditioner in case of Newton.
-const double TAU = 0.05;            // Time step.
+const int INIT_REF_NUM = 2;                 // Number of initial uniform mesh refinements.
+const int P_INIT = 2;                       // Initial polynomial degree of all mesh elements.
+const bool JFNK = true;                     // true = jacobian-free method,
+                                            // false = Newton
+const int PRECOND = 2;                      // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
+                                            // or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
+                                            // in case of jfnk,
+                                            // default Ifpack proconditioner in case of Newton.
+const double TAU = 0.05;                    // Time step.
 const double T_FINAL = 2*TAU + 1e-4;        // Time interval length.
-const bool TRILINOS_OUTPUT = true;  // Display more details about nonlinear and linear solvers.
+const bool TRILINOS_OUTPUT = true;          // Display more details about nonlinear and linear solvers.
 
 // Problem parameters.
 const double Le    = 1.0;
@@ -64,10 +64,9 @@ int main(int argc, char* argv[])
   // Enter Dirichlet boundary values.
   BCValues bc_values_t;
   bc_values_t.add_const(BDY_LEFT, 1.0);
-  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
 
   BCValues bc_values_c;
-  bc_values_t.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values_c.add_zero(BDY_LEFT);
 
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);

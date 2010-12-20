@@ -4,6 +4,21 @@
 
 using namespace RefinementSelectors;
 
+//  This is the fifth in the series of NIST benchmarks with unknown exact solutions.
+//
+//  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
+//                          NIST Report 7668, February 2010.
+//
+//  PDE: -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
+//       -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f.
+//
+//  Known exact solution: unknow.
+//
+//  Domain: square (0, 8.4)x(0, 24), see the file "battery.mesh".
+//
+//  BC: Zero Neumann on left edge, Newton on the rest of the boundary:
+//
+//  The following parameters can be changed:
 
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
@@ -33,8 +48,8 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const int OMEGA_1 = 1;
@@ -73,10 +88,10 @@ const double C_TOP = 1.0;
 const double C_RIGHT = 2.0;
 const double C_BOTTOM = 3.0;
 
-const double GN_LEFT = 0.0;
-const double GN_TOP = 3.0;
-const double GN_RIGHT = 2.0;
-const double GN_BOTTOM = 1.0;
+const double G_N_LEFT = 0.0;
+const double G_N_TOP = 3.0;
+const double G_N_RIGHT = 2.0;
+const double G_N_BOTTOM = 1.0;
 
 // Weak forms.
 #include "forms.cpp"
@@ -89,11 +104,12 @@ int main(int argc, char* argv[])
   mloader.load("battery.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
+  bc_types.add_bc_neumann(BDY_LEFT);
+  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;
@@ -108,6 +124,15 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(callback(biform3), HERMES_SYM, OMEGA_3);
   wf.add_matrix_form(callback(biform4), HERMES_SYM, OMEGA_4);
   wf.add_matrix_form(callback(biform5), HERMES_SYM, OMEGA_5);
+
+  wf.add_matrix_form_surf(bilinear_form_surf_right, bilinear_form_ord, BDY_RIGHT);
+  wf.add_matrix_form_surf(bilinear_form_surf_top, bilinear_form_ord, BDY_TOP);
+  wf.add_matrix_form_surf(bilinear_form_surf_bottom, bilinear_form_ord, BDY_BOTTOM);
+
+  wf.add_vector_form_surf(callback(linear_form_surf_left), BDY_LEFT);
+  wf.add_vector_form_surf(callback(linear_form_surf_right), BDY_RIGHT);
+  wf.add_vector_form_surf(callback(linear_form_surf_top), BDY_TOP);
+  wf.add_vector_form_surf(callback(linear_form_surf_bottom), BDY_BOTTOM);
 
   wf.add_vector_form(callback(linear_form_1), OMEGA_1);
   wf.add_vector_form(callback(linear_form_2), OMEGA_2);
@@ -181,7 +206,8 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

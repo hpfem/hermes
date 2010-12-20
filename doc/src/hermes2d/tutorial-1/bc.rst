@@ -37,30 +37,42 @@ Suppose that we would like to modify the boundary conditions for
 example 03-poisson as follows:
 
 .. math::
-         u(x,y) = -\frac{CONST_F}{4}(x^2 + y^2)\,\ \mbox{on}\,\ \partial \Omega.
+         u(x,y) = -\frac{C}{4}(x^2 + y^2)\,\ \mbox{on}\,\ \partial \Omega.
 
-This is done by defining
-
-::
-
-    BCType bc_types(int marker)
-    {
-      return BC_ESSENTIAL;
-    }
-
-and setting the essential BC values callback to return the value of the Dirichlet BC::
+This is done by defining a callback::
 
     scalar essential_bc_values(int ess_bdy_marker, double x, double y)
     {
-      return (-CONST_F/4)*(x*x + y*y);
+      return (-C/4)*(x*x + y*y);
     }
+
+The callback is registered as follows::
+
+    // Enter Dirichlet boudnary values.
+    BCValues bc_values;
+    bc_values.add_function(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), essential_bc_values);
+
+   
+Defining constant, nonconstant, and time-dependent boundary values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The BCValues class enables registering constants, functions of space, and 
+functions of space and time::
+
+  void BCValues::add_zero(Hermes::Tuple<int> markers);
+  void BCValues::add_const(Hermes::Tuple<int> markers, scalar value);
+  void BCValues::add_function(Hermes::Tuple<int> markers, value_callback callback);
+  void BCValues::add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback); 
+
+Sample results
+~~~~~~~~~~~~~~
 
 It is easy to see that the solution to this problem is the function
 
 .. math::
-         u(x,y) = -\frac{CONST_F}{4}(x^2 + y^2). 
+         u(x,y) = -\frac{C}{4}(x^2 + y^2). 
 
-For the values $CONST_F = -4$ and P_INIT = 5, the output is shown below:
+For the values $C = -4$ and P_INIT = 5, the output is shown below:
 
 .. image:: 04/dirichlet.png
    :align: center
@@ -72,13 +84,11 @@ Mathematics of nonzero Dirichlet BC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Mathematically, nonzero Dirichlet conditions in Hermes are handled 
-as follows: The user chooses the so-called Dirichlet lift 
-function $G$ that matches the prescribed values on all parts 
-of the Dirichlet boundary. The Dirichlet lift is nothing 
-else than the function that one uses inside the callback 
-essential_bc_values(). The function $G$ can be chosen in 
-many different ways, but it is easy to prove that this does 
-not matter.
+as follows: The user defines some function (or constant) on the 
+Dirichlet boundary. Hermes then creates a Dirichlet lift $G$, which is 
+a continuous function that satisfies the Dirichlet boundary conditions
+but descends continuously to zero within the layer of elements that 
+are adjacent to the Dirichlet boundary. 
 
 Next, the solution $u$ to the original weak problem 
 
@@ -120,13 +130,13 @@ will have the form
 .. math::
     :nowrap:
 
-    \begin{eqnarray*}   -\Delta u = CONST_F,\ \ \ \ \ &&u = 0\,\ \mbox{on}\,\ \Gamma_4,\\                            &&\dd{u}{n} = C_1\,\ \mbox{on}\,\ \Gamma_1,\\                            &&\dd{u}{n} = C_2\,\ \mbox{on}\,\ \Gamma_2,\\                            &&\dd{u}{n} = C_3\,\ \mbox{on}\,\ \Gamma_3. \end{eqnarray*}
+    \begin{eqnarray*}   -\Delta u = C,\ \ \ \ \ &&u = 0\,\ \mbox{on}\,\ \Gamma_4,\\                            &&\dd{u}{n} = C_1\,\ \mbox{on}\,\ \Gamma_1,\\                            &&\dd{u}{n} = C_2\,\ \mbox{on}\,\ \Gamma_2,\\                            &&\dd{u}{n} = C_3\,\ \mbox{on}\,\ \Gamma_3. \end{eqnarray*}
 
 where $\Gamma_1 \dots \Gamma_4$ correspond to the edges marked $1 \dots 4$. Now, the weak formulation contains some surface integrals:
 
 .. math::
 
-    \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} =   CONST_F\int_\Omega v \;\mbox{d\bfx}   + C_1\int_{\Gamma_1} \!v \;\mbox{d}l   + C_2\int_{\Gamma_2} \!v \;\mbox{d}l   + C_3\int_{\Gamma_3} \!v \;\mbox{d}l
+    \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} =   C\int_\Omega v \;\mbox{d\bfx}   + C_1\int_{\Gamma_1} \!v \;\mbox{d}l   + C_2\int_{\Gamma_2} \!v \;\mbox{d}l   + C_3\int_{\Gamma_3} \!v \;\mbox{d}l
 
 
 In Hermes, all forms in the standard weak formulation $a(u,v) = l(v)$

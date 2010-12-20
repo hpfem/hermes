@@ -15,13 +15,13 @@
 //
 //  The following parameters can be changed:
 
-int NUMBER_OF_EIGENVALUES = 50;                    // Desired number of eigenvalues.
-int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
+const int NUMBER_OF_EIGENVALUES = 50;             // Desired number of eigenvalues.
+const int P_INIT = 4;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
-double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
-double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
-int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+const double TARGET_VALUE = 2.0;                  // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
+const double TOL = 1e-10;                         // Pysparse parameter: Error tolerance.
+const int MAX_ITER = 1000;                        // PySparse parameter: Maximum number of iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
@@ -90,10 +90,9 @@ int main(int argc, char* argv[])
   wf_left.add_matrix_form(callback(bilinear_form_left));
   wf_right.add_matrix_form(callback(bilinear_form_right));
 
-  // Initialize matrices and matrix solver.
+  // Initialize matrices.
   SparseMatrix* matrix_left = create_matrix(matrix_solver);
   SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_left);
 
   // Assemble the matrices.
   bool is_linear = true;
@@ -133,7 +132,7 @@ int main(int argc, char* argv[])
   if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
     // Get next eigenvalue from the file
-    fgets(line, sizeof line, file);  // eigenval
+    fgets(line, sizeof line, file);
     eigenval[ieig] = atof(line);            
     // Get the corresponding eigenvector.
     for (int i = 0; i < ndof; i++) {  

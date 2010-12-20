@@ -76,7 +76,8 @@ const double NEWTON_TOL_FINE = 5.0e-6;     // Stopping criterion for Newton on f
 const int NEWTON_MAX_ITER = 100;           // Maximum allowed number of Newton iterations.
 
 // Linear system solvers for the coarse and refined problems, respectively.
-// Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK, SOLVER_SUPERLU
+// Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+// SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 // (depending on which optional solver libraries you have installed and enabled in hermes2d/CMake.vars).
 MatrixSolverType matrix_solver_coarse = SOLVER_UMFPACK;  
 MatrixSolverType matrix_solver_fine = SOLVER_UMFPACK;
@@ -515,12 +516,29 @@ int main(int argc, char* argv[])
       delete ref_spaces;
     }
     while (!done);
+        
+    // Visualize final adapted mesh and solutions in current time step.
+    view_T.show(&T_coarse);
+    sprintf(title, "T (coarse mesh), t = %g s, final mesh", TIME);
+    view_T.set_title(title);
+    
+    view_phi.show(&phi_coarse);
+    sprintf(title, "phi (coarse mesh), t = %g s, final mesh", TIME);
+    view_phi.set_title(title);
+    
+    ordview_T_coarse.show(&space_T);
+    sprintf(title, "T mesh (coarse), t = %g, final mesh", TIME);
+    ordview_T_coarse.set_title(title);
+    
+    ordview_phi_coarse.show(&space_phi);
+    sprintf(title, "phi mesh (coarse), t = %g, final mesh", TIME);
+    ordview_phi_coarse.set_title(title);
 
     // Make the fine mesh solution at current time level the previous time level solution in the following time step.
     T_prev_time.copy(&T_fine);
     phi_prev_time.copy(&phi_fine);
   }
-  
+   
   delete rhs_coarse;
   delete matrix_coarse;
   delete solver_coarse;

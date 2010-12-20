@@ -18,6 +18,7 @@
 
 #include "h2d_common.h"
 #include "curved.h"
+#include "markers_conversion.h"
 
 struct Element;
 class HashTable;
@@ -155,7 +156,7 @@ class HERMES_API Mesh : public HashTable
 {
 public:
 
-  Mesh();
+  Mesh(MarkersConversion* markers_conversion = NULL);
   ~Mesh() { 
     //printf("Calling Mesh::free() in ~Mesh().\n");
     free(); 
@@ -243,6 +244,9 @@ public:
   /// splits of quads.
   void refine_towards_boundary(int marker, int depth, bool aniso = true);
 
+  // Wrapper function utilizing the class MarkersConversion.
+  void refine_towards_boundary(std::string marker, int depth, bool aniso = true);
+
   /// Regularizes the mesh by refining elements with hanging nodes of
   /// degree more than 'n'. As a result, n-irregular mesh is obtained.
   /// If n = 0, completely regular mesh is created. In this case, however,
@@ -322,6 +326,8 @@ protected:
 
   void refine_quad_to_triangles(Element* e);
   void refine_element_to_triangles(int id);
+
+  MarkersConversion* markers_conversion;
 
   friend class H2DReader;
 };

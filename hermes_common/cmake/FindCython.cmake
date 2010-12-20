@@ -5,7 +5,7 @@
 # This finds the "cython" executable in your PATH, and then in some standard
 # paths:
 FIND_FILE(CYTHON_BIN cython /usr/bin /usr/local/bin)
-SET(CYTHON_FLAGS --cplus --fatal-errors)
+SET(CYTHON_FLAGS --cplus --fast-fail)
 
 SET(Cython_FOUND FALSE)
 IF (CYTHON_BIN)
@@ -33,6 +33,7 @@ IF (Cython_FOUND)
 ELSE (Cython_FOUND)
 	IF (Cython_FIND_REQUIRED)
         if(Cython_Compilation_Failed)
+            MESSAGE(STATUS "Found CYTHON: ${CYTHON_BIN}")
             MESSAGE(FATAL_ERROR "Your Cython version is too old. Please upgrade Cython.")
         else(Cython_Compilation_Failed)
             MESSAGE(FATAL_ERROR "Could not find Cython. Please install Cython.")

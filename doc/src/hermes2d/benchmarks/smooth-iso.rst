@@ -6,6 +6,9 @@ Smooth-iso (Elliptic)
 We show that it is a very bad idea to approximate smooth solutions using low-order 
 elements.
 
+Model problem
+~~~~~~~~~~~~~
+
 Equation solved: Poisson equation 
 
 .. math::
@@ -24,16 +27,24 @@ Right-hand side:
 
 Boundary conditions: Zero Dirichlet. 
 
-Exact solution:
+In the code::
+
+    // Enter boundary markers.
+    BCTypes bc_types;
+    bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+
+    // Enter Dirichlet boudnary values.
+    BCValues bc_values;
+
+Exact solution
+~~~~~~~~~~~~~~
 
 .. math::
     :label: smooth-iso-exact
 
     u(x, y) = \sin(x)\sin(y).
 
-Code for the exact solution and the weak forms:
-
-::
+In the code::
 
     // Exact solution.
     static double fn(double x, double y)
@@ -48,21 +59,15 @@ Code for the exact solution and the weak forms:
       return fn(x, y);
     }
 
-    // Boundary condition types.
-    BCType bc_types(int marker)
-    {
-      return BC_ESSENTIAL;
-    }
+Weak forms
+~~~~~~~~~~
 
-    // Essential (Dirichlet) boundary conditions.
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-    {
-      return 0;
-    }
+::
 
     // Weak forms.
     template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
@@ -74,18 +79,23 @@ Code for the exact solution and the weak forms:
     }
 
     template<typename Real, typename Scalar>
-    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return int_F_v<Real, Scalar>(n, wt, rhs, v, e);
     }
 
-Solution:
+Sample solution
+~~~~~~~~~~~~~~~
 
 .. image:: benchmark-smooth-iso/sol_3d_view.png
    :align: center
    :width: 500
    :height: 300
    :alt: Solution.
+
+Convergence comparisons
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Below we show meshes obtained using various types of adaptivity. 
 Note the tremendous differences in their performance. The meshes do not correspond to 

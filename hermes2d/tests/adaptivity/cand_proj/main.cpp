@@ -44,8 +44,8 @@ using namespace RefinementSelectors;
 #define H2D_TEST_SUCCESS 0x00 ///< Flag: Combination of orders was tested successfully.
 #define H2D_CAND_FAILED 0x01  ///< Flag: Appropriate candidates have non-zero error.
 #define H2D_RSLN_FAILED 0x02  ///< Flag: failure of the condition of equality between ref. solution failed and the polynom.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC,
-                                                  // SOLVER_MUMPS, and more are coming.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 /* global variables */
 Mesh* mesh = NULL; ///< Mesh used by the test.

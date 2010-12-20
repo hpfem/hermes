@@ -10,8 +10,8 @@
 
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Polynomial degree of mesh elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Projected function.
 scalar F(double x, double y, double& dx, double& dy)
@@ -31,10 +31,10 @@ int main(int argc, char* argv[])
   // Perform uniform mesh refinements.
   for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Enter boundary markers (default is Neumann boundary).
   BCTypes bc_types;
 
-  // Enter Dirichlet boundary values.
+  // Enter Dirichlet boundary values (not relevant here).
   BCValues bc_values;
 
   // Create an L2 space with default shapeset.

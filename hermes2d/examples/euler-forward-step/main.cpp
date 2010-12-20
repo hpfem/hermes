@@ -28,8 +28,8 @@ const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
 double P_EXT = 1.0;         // Exterior pressure (dimensionless).

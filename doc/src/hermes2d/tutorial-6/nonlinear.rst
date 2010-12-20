@@ -7,7 +7,10 @@ Trilinos - Nonlinear (41)
 The purpose of this example is to show how to use Trilinos for nonlinear PDE problems. It 
 compares performance of the Newton's method in Hermes (assembling via the DiscreteProblem 
 class and matrix problem solution via UMFpack) with the performance of the Trilinos/NOX 
-solver (using the Hermes FeProblem class to assemble discrete problems).
+solver (using the Hermes DiscreteProblem class to assemble discrete problems).
+
+Model problem
+~~~~~~~~~~~~~
 
 This example is concerned with the nonlinear equation 
 
@@ -20,28 +23,39 @@ where
     k(u) = (1 + u_x^2 + u_y^2)^{-0.5}.
 
 
-Boundary conditions are chosen zero Dirichlet and a manufactured exact 
-solution has the form 
+Boundary conditions are chosen zero Dirichlet.
+
+Manufactured exact solution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We have manufactured an exact solution has the form 
 
 .. math::
     u(x, y) = (x - x^2) (y - y^2).
+
+Again, we do not find it necessary to discuss the Hermes/UMFpack part.
+
+Calculating initial condition for NOX
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Trilinos part starts by projecting the function init_cond() on the finite 
 element space to generate an initial coefficient vector for the Newton's method::
 
     // Project the initial condition on the FE space.
     info("Projecting initial condition on the FE space.");
-    // The NULL pointer means that we do not want the projection result as a Solution.
     sln_tmp = new Solution(&mesh, init_cond);
-    project_global(&space, H2D_H1_NORM, sln_tmp, NULL, coeff_vec);
+    OGProjection::project_global(&space, sln_tmp, coeff_vec, matrix_solver);
     delete sln_tmp;
 
 Note that since init_cond() is zero in this case, we could have just set the initial
-coefficient vector to zero as in example 40, but we want to keep the example more general.
+coefficient vector to zero, but we want to keep the example more general.
+
+Initializating weak forms for Newton or JFNK
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next we initialize the weak formulation (matrix form added only if needed), initialize
-the FeProblem class, initialize the NOX solver and supply an initial coefficient vector, 
-set preconditioner, and call the NOX solver to assemble and solve the discrete problem::
+the DiscreteProblem class, initialize the NOX solver and supply an initial coefficient vector, 
+set preconditioner::
 
     // Initialize the weak formulation for Trilinos.
     WeakForm wf2(1, JFNK ? true : false);
@@ -49,13 +63,18 @@ set preconditioner, and call the NOX solver to assemble and solve the discrete p
     if (JFNK && PRECOND == 2) wf2.add_matrix_form(callback(precond_form_nox), HERMES_SYM);
     wf2.add_vector_form(callback(residual_form_nox));
 
-    // Initialize FeProblem.
-    FeProblem fep(&wf2, &space);
+Initializing DiscreteProblem, NOX, and preconditioner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Then we initialize the DiscreteProblem class, NOX solver, and set preconditioner::
+
+    // Initialize DiscreteProblem.
+    DiscreteProblem dp2(&wf2, &space);
 
     // Initialize the NOX solver with the vector "coeff_vec".
     info("Initializing NOX.");
-    NoxSolver nox_solver(&fep);
-    nox_solver.set_init_sln(coeff_vec->get_c_array());
+    NoxSolver nox_solver(&dp2);
+    nox_solver.set_init_sln(coeff_vec);
 
     // Choose preconditioning.
     RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -65,9 +84,35 @@ set preconditioner, and call the NOX solver to assemble and solve the discrete p
       else nox_solver.set_precond("ML");
     }
 
-    // Solve the matrix problem using NOX.
-    info("Assembling by FeProblem, solving by NOX.");
-    bool solved = nox_solver.solve();
+Calling NOX
+~~~~~~~~~~~
+
+Next we call the NOX solver to assemble and solve the discrete problem::
+
+    // Solve the nonlinear problem using NOX.
+    info("Assembling by DiscreteProblem, solving by NOX.");
+    Solution sln2;
+    if (nox_solver.solve())
+    {
+      Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln2);
+      info("Number of nonlin iterations: %d (norm of residual: %g)", 
+           nox_solver.get_num_iters(), nox_solver.get_residual());
+      info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
+           nox_solver.get_num_lin_iters(), nox_solver.get_achieved_tol());
+    }
+    else
+      error("NOX failed.");
+
 
 The solution coefficient vector is extracted from NOX as in example 40, and 
 a Solution is created and visualized as usual.
+
+Sample results
+~~~~~~~~~~~~~~
+
+You should see the following result:
+
+.. image:: 41/1.png
+   :align: center
+   :width: 800
+   :alt: Sample result

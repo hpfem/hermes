@@ -11,44 +11,46 @@ As usual, the adaptivity algorithm expects a pair of solutions on the
 coarse and globally refined meshes. So the adaptivity loop begins with 
 refining the coarse mesh::
 
-    // Construct globally refined reference mesh
-    // and setup reference space.
-    Mesh *ref_mesh = new Mesh();
-    ref_mesh->copy(space.get_mesh());
-    ref_mesh->refine_all_elements();
-    Space* ref_space = space.dup(ref_mesh);
-    int order_increase = 1;
-    ref_space->copy_orders(&space, order_increase);
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = construct_refined_space(&space);
 
 Instead of calculating a solution on the fine mesh, we set the exact 
 function::
 
     // Assign the function f() to the fine mesh.
-    sln_fine.set_exact(ref_mesh, f);
+    info("Assigning f() to the reference mesh.");
+    bool is_linear = true;
+    ref_sln.set_exact(ref_space->get_mesh(), f);
 
 The coarse mesh solution is obtained by projecting 'sln_fine'::
 
-    // Project the function f() on the coarse mesh.
-    project_global(&space, H2D_H1_NORM, &sln_file, &sln_coarse);
+    // Project the fine mesh solution onto the coarse mesh.
+    info("Projecting reference solution on coarse mesh.");
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
 Error estimates are calculated as usual::
 
     // Calculate element errors and total error estimate.
-    info("Calculating error.");
-    Adapt hp(&space, H2D_H1_NORM);
-    hp.set_solutions(&sln_coarse, &sln_fine);
-    double err_est_rel = hp.calc_elem_errors(H2D_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    info("Calculating exact error."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    // Note: the error estimate is now equal to the exact error.
+    bool solutions_for_adapt = true;
+    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
 Mesh adaptation is standard as well::
 
-    // If err_est too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
-    else {
+    // If err_exact_rel too large, adapt the mesh.
+    if (err_exact_rel < ERR_STOP) done = true;
+    else 
+    {
       info("Adapting coarse mesh.");
-      done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-
-      if (get_num_dofs(&space) >= NDOF_STOP) done = true;
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
     }
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
 Sample solution and mesh are shown below:
 

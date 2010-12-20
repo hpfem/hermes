@@ -23,21 +23,21 @@ using namespace RefinementSelectors;
 //
 //  BC:  homogeneous Dirichlet everywhere on the boundary.
 
-const int INIT_REF_NUM = 2;      // Number of initial uniform refinements.
-const int P_INIT = 4;            // Initial polynomial degree.
-const double TAU = 0.005;        // Time step.
-const double T_FINAL = 2*TAU + 1e-4;        // Time interval length.
-const int TIME_DISCR = 2;        // 1 for implicit Euler, 2 for Crank-Nicolson.
-const double NEWTON_TOL = 1e-5;  // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100; // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+const int INIT_REF_NUM = 2;                       // Number of initial uniform refinements.
+const int P_INIT = 4;                             // Initial polynomial degree.
+const double TAU = 0.005;                         // Time step.
+const double T_FINAL = 2*TAU + 1e-4;              // Time interval length.
+const int TIME_DISCR = 2;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants
-const double H = 1;              // Planck constant 6.626068e-34.
-const double M = 1;              // Mass of boson.
-const double G = 1;              // Coupling constant.
-const double OMEGA = 1;          // Frequency.
+const double H = 1;                               // Planck constant 6.626068e-34.
+const double M = 1;                               // Mass of boson.
+const double G = 1;                               // Coupling constant.
+const double OMEGA = 1;                           // Frequency.
 
 // Initial conditions.
 scalar init_cond(double x, double y, scalar& dx, scalar& dy)

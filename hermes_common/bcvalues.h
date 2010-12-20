@@ -29,8 +29,15 @@
 /// the function representing them.
 class HERMES_API BCValues {
 public:
-  BCValues(double* t) : t(t) { t_set = true; };
-  BCValues() { t_set = false; };
+  BCValues(double* t, MarkersConversion* markers_conversion = NULL) : t(t) { 
+    t_set = true;
+    this->markers_conversion = markers_conversion;
+  };
+  BCValues(MarkersConversion* markers_conversion = NULL) 
+  { 
+    t_set = false; 
+    this->markers_conversion = markers_conversion;
+  };
   ~BCValues() {};
 
 protected:
@@ -60,6 +67,9 @@ protected:
 
   /// Info flag that t has been set.
   bool t_set;
+
+  /// MarkersConversion instance.
+  MarkersConversion* markers_conversion;
   
 public:
   /// This function checks that there is either a function, or a value defined on one part
@@ -73,9 +83,9 @@ public:
                on the same part of the boundary.");
 
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(have_function && (value_constants[marker] != NULL || value_zeroes[marker]))
+    if(have_function && (value_constants[marker] != 0 || value_zeroes[marker]))
 #else
-    if(have_function && (value_constants[marker] != std::complex<double>(NULL, NULL) || value_zeroes[marker]))
+    if(have_function && (value_constants[marker] != std::complex<double>(0, 0) || value_zeroes[marker]))
 #endif
       error("Attempt to define more than one description of the Dirichlet BC \
                on the same part of the boundary.");
@@ -85,9 +95,9 @@ public:
     if(value_callbacks_time[marker] == NULL)
       value_callbacks_time.erase(marker);
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value_constants[marker] == NULL && !value_zeroes[marker])
+    if(value_constants[marker] == 0 && !value_zeroes[marker])
 #else
-    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker])
+    if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker])
 #endif
       value_constants.erase(marker);
   }
@@ -108,6 +118,17 @@ public:
     }
   };
 
+  // A wrapper utilizing the MarkersConversion class.
+  void add_function(Hermes::Tuple<std::string> markers, value_callback callback)
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    Hermes::Tuple<int> markers_to_pass;
+    for(unsigned int i = 0; i < markers.size(); i++)
+      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
+    add_function(markers_to_pass, callback);
+  }
+    
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
   void add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback) 
@@ -125,20 +146,31 @@ public:
     }
   };
 
+  // A wrapper utilizing the MarkersConversion class.
+  void add_timedep_function(Hermes::Tuple<std::string> markers, value_callback_time callback)
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    Hermes::Tuple<int> markers_to_pass;
+    for(unsigned int i = 0; i < markers.size(); i++)
+      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
+    add_timedep_function(markers_to_pass, callback);
+  }
+
   /// The same as add_function(), only supplies a 1D constant.
   void add_const(Hermes::Tuple<int> markers, scalar value) 
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value == NULL) {
+    if(value == 0) {
 #else
-    if(value == std::complex<double>(NULL, NULL)) {
+    if(value == std::complex<double>(0, 0)) {
 #endif
       this->add_zero(markers);
       return;
     }
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
-    for(int i = 0; i < markers.size(); i++) {
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
       if(!(value_constants.insert(std::pair<int, scalar>(markers[i], value))).second)
@@ -148,12 +180,23 @@ public:
     }
   };
 
+  // A wrapper utilizing the MarkersConversion class.
+  void add_const(Hermes::Tuple<std::string> markers, scalar value)
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    Hermes::Tuple<int> markers_to_pass;
+    for(unsigned int i = 0; i < markers.size(); i++)
+      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
+    add_const(markers_to_pass, value);
+  }
+
   /// The same as add_const(), only supplies a zero.
   void add_zero(Hermes::Tuple<int> markers) 
   {
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
-    for(int i = 0; i < markers.size(); i++) {
+    for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
@@ -168,6 +211,17 @@ public:
       check(markers[i]);
     }
   };
+
+  // A wrapper utilizing the MarkersConversion class.
+  void add_zero(Hermes::Tuple<std::string> markers)
+  {
+    if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+    Hermes::Tuple<int> markers_to_pass;
+    for(unsigned int i = 0; i < markers.size(); i++)
+      markers_to_pass.push_back(this->markers_conversion->get_internal_boundary_marker(markers[i]));
+    add_zero(markers_to_pass);
+  }
 
   /// Checks whether all functions representing Dirichlet BCs are really set on a Dirichlet
   /// part of the boundary.
@@ -191,11 +245,19 @@ public:
     for(it = bc_types->markers_dirichlet.begin(); it != bc_types->markers_dirichlet.end(); it++) {
       bool have_function = is_time_dep[*it] ? value_callbacks_time[*it] != NULL : value_callbacks[*it] != NULL;
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-      if(!have_function && (value_constants[*it] == NULL && !value_zeroes[*it]))
+      if(!have_function && (value_constants[*it] == 0 && !value_zeroes[*it]))
 #else
-      if(!have_function && (value_constants[*it] == std::complex<double>(NULL, NULL) && !value_zeroes[*it]))
+      if(!have_function && (value_constants[*it] == std::complex<double>(0, 0) && !value_zeroes[*it]))
 #endif
+      {
+        if(is_time_dep[*it])
+          value_callbacks_time.erase(*it);
+        else
+           value_callbacks.erase(*it);
+        value_constants.erase(*it);
+        value_zeroes.erase(*it);
         add_zero(*it);
+      }
     }
   };
 
@@ -206,9 +268,9 @@ public:
   bool is_const(int marker)
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value_constants[marker] == NULL && !value_zeroes[marker]) {
+    if(value_constants[marker] == 0 && !value_zeroes[marker]) {
 #else
-    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker]) {
+    if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker]) {
 #endif
       value_constants.erase(marker);
       return false;
@@ -240,9 +302,9 @@ public:
   scalar calculate(int marker)
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    if(value_constants[marker] == NULL && !value_zeroes[marker])
+    if(value_constants[marker] == 0 && !value_zeroes[marker])
 #else
-    if(value_constants[marker] == std::complex<double>(NULL, NULL) && !value_zeroes[marker])
+    if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker])
 #endif
       error("Attempt to retrieve a value of a value representing the Dirichlet BC without \
             this being set up for the current Space.");
@@ -259,8 +321,10 @@ public:
       bv->value_callbacks_time = this->value_callbacks_time;
       bv->value_constants = this->value_constants;
       bv->value_zeroes = this->value_zeroes;
+      bv->markers_conversion = this->markers_conversion;
       return bv;
   }
 };
 
 #endif
+

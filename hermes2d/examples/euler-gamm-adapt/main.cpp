@@ -21,56 +21,56 @@ using namespace RefinementSelectors;
 // Experimental caching of vector valued (vector) forms.
 #define HERMES_USE_VECTOR_VALUED_FORMS
 
-const int P_INIT = 0;                     // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.                       
-double CFL = 0.8;                         // CFL value.
-double TAU = 1E-4;                        // Time step.
+const int P_INIT = 0;                             // Initial polynomial degree.                      
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
+double CFL = 0.8;                                 // CFL value.
+double TAU = 1E-4;                                // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 10;                // Every UNREF_FREQth time step the mesh is unrefined.
-int REFINEMENT_COUNT = 0;                 // Number of mesh refinements between two unrefinements.
-                                          // The mesh is not unrefined unless there has been a refinement since
-                                          // last unrefinement.
-const double THRESHOLD = 0.3;             // This is a quantitative parameter of the adapt(...) function and
-                                          // it has different meanings for various adaptive strategies (see below).
-const double THRESHOLD_VEL_X = 0.7;       // Threshold for adaptivity, where only second solution component is taken
-                                          // into account.
-const int STRATEGY = 1;                   // Adaptive strategy:
-                                          // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                          //   error is processed. If more elements have similar errors, refine
-                                          //   all to keep the mesh symmetric.
-                                          // STRATEGY = 1 ... refine all elements whose error is larger
-                                          //   than THRESHOLD times maximum element error.
-                                          // STRATEGY = 2 ... refine all elements whose error is larger
-                                          //   than THRESHOLD.
-                                          // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;   // Predefined list of element refinement candidates. Possible values are
-                                          // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                          // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                          // See User Documentation for details.
-const int MESH_REGULARITY = -1;           // Maximum allowed level of hanging nodes:
-                                          // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                          // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                          // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                          // Note that regular meshes are not supported, this is due to
-                                          // their notoriously bad performance.
-const double CONV_EXP = 1.0;              // Default value is 1.0. This parameter influences the selection of
-                                          // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.75;             // Stopping criterion for adaptivity (rel. error tolerance between the
-                                          // fine mesh and coarse mesh solution in percent).
-const double ERR_STOP_VEL_X = 0.5;        // Special stopping criterion for adaptivity, only second component of solution
-                                          // taken into account.
-const int NDOF_STOP = 100000;             // Adaptivity process stops when the number of degrees of freedom grows over
-                                          // this limit. This is mainly to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_SUPERLU, SOLVER_AMESOS, SOLVER_AZTECOO
+const int UNREF_FREQ = 10;                        // Every UNREF_FREQth time step the mesh is unrefined.
+int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
+                                                  // The mesh is not unrefined unless there has been a refinement since
+                                                  // last unrefinement.
+const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+                                                  // it has different meanings for various adaptive strategies (see below).
+const double THRESHOLD_VEL_X = 0.7;               // Threshold for adaptivity, where only second solution component is taken
+                                                  // into account.
+const int STRATEGY = 1;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                                  // See User Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
+                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.75;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const double ERR_STOP_VEL_X = 0.5;                // Special stopping criterion for adaptivity, only second component of solution
+                                                  // taken into account.
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
+                                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
-double P_EXT = 2.5;         // Exterior pressure (dimensionless).
-double RHO_EXT = 1.0;       // Inlet density (dimensionless).   
-double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
-double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
-double KAPPA = 1.4;         // Kappa.
+double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
+double RHO_EXT = 1.0;                             // Inlet density (dimensionless).   
+double V1_EXT = 1.25;                             // Inlet x-velocity (dimensionless).
+double V2_EXT = 0.0;                              // Inlet y-velocity (dimensionless).
+double KAPPA = 1.4;                               // Kappa.
 
 double t = 0;
 
@@ -81,12 +81,6 @@ const int BDY_INLET_OUTLET = 2;
 // Numerical flux.
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux(KAPPA);
-
-// Boundary condition types.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
 
 // Inlet/outlet boundary conditions.
 double bc_density(double y)
@@ -196,11 +190,11 @@ int main(int argc, char* argv[])
   basemesh.refine_by_criterion(criterion, 4);
   mesh.copy(&basemesh);
 
-  // Boundary condition types;
+  // Enter boundary markers.
   BCTypes bc_types;
-
-  // Initialize boundary condition types and spaces with default shapesets.
   bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+
+  // Create L2 spaces with default shapesets.
   L2Space space_rho(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);

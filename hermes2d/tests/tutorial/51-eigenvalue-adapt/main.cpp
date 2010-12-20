@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 const int NUMBER_OF_EIGENVALUES = 6;              // Desired number of eigenvalues.
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial mesh refinements.
-double TARGET_VALUE = 2.0;                       // PySparse parameter: Eigenvalues in the vicinity of 
+double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of 
                                                   // this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
@@ -40,7 +40,7 @@ const double ERR_STOP = 0.001;                    // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
@@ -112,6 +112,8 @@ int main(int argc, char* argv[])
   TimePeriod cpu_time;
   cpu_time.tick();
 
+  Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
+
   // Adaptivity loop:
   int as = 1;
   bool done = false;
@@ -158,7 +160,6 @@ int main(int argc, char* argv[])
 
     // Initializing solution vector, solution and ScalarView.
     double* ref_coeff_vec = new double[ref_ndof];
-    Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
 
     // Reading solution vectors from file and visualizing.
     FILE *file = fopen("eivecs.dat", "r");
@@ -235,5 +236,25 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-};
+  info("Coordinate ( 0.5, 0.5) value = %lf", sln[5].get_pt_value(0.5, 0.5));
+  info("Coordinate ( 1.0, 0.5) value = %lf", sln[5].get_pt_value(1.0, 0.5));
+  info("Coordinate ( 1.5, 0.5) value = %lf", sln[5].get_pt_value(1.5, 0.5));
+  info("Coordinate ( 2.0, 0.5) value = %lf", sln[5].get_pt_value(2.0, 0.5));
 
+  double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
+  double coor_y = 0.5;
+  double t_value[4] = {0.154053, -0.178300, -0.530477, -0.313066};
+  for (int i = 0; i < 4; i++)
+  {
+    if ((t_value[i] - sln[5].get_pt_value(coor_x[i], coor_y)) < 1E-6)
+    {
+      printf("Success!\n");
+    }
+    else
+    {
+      printf("Failure!\n");
+      return ERR_FAILURE;
+    }
+  }
+  return ERR_SUCCESS;
+}

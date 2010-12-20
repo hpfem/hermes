@@ -125,11 +125,11 @@ double Element::get_diameter() const
 
 unsigned g_mesh_seq = 0;
 
-
-Mesh::Mesh() : HashTable()
+Mesh::Mesh(MarkersConversion* markers_conversion) : HashTable()
 {
   nbase = nactive = ntopvert = ninitial = 0;
   seq = g_mesh_seq++;
+  this->markers_conversion = markers_conversion;
 }
 
 
@@ -689,6 +689,14 @@ void Mesh::refine_towards_boundary(int marker, int depth, bool aniso)
     refine_by_criterion(rtb_criterion, 1);
     delete [] rtb_vert;
   }
+}
+
+
+void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso)
+{
+  if(this->markers_conversion == NULL)
+        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
+  this->refine_towards_boundary(this->markers_conversion->get_internal_boundary_marker(marker), depth, aniso);
 }
 
 

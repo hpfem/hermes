@@ -10,7 +10,7 @@ const int INIT_REF_NUM = 0;                       // Number of initial mesh refi
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
@@ -124,6 +124,28 @@ int main(int argc, char* argv[])
   fclose(file);
 
   delete [] coeff_vec;
-  // wait for test functions. 
-};
+
+  info("ndof = %d", ndof);
+  info("Coordinate ( 0.5, 0.5) value = %lf", sln.get_pt_value(0.5, 0.5));
+  info("Coordinate ( 1.0, 0.5) value = %lf", sln.get_pt_value(1.0, 0.5));
+  info("Coordinate ( 1.5, 0.5) value = %lf", sln.get_pt_value(1.5, 0.5));
+  info("Coordinate ( 2.0, 0.5) value = %lf", sln.get_pt_value(2.0, 0.5));
+
+  double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
+  double coor_y = 0.5;
+  double t_value[4] = {0.001018, 0.396296, 0.633004, 0.495077};
+  for (int i = 0; i < 4; i++)
+  {
+    if ((t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) < 1E-6)
+    {
+      printf("Success!\n");
+    }
+    else
+    {
+      printf("Failure!\n");
+      return ERR_FAILURE;
+    }
+  }
+  return ERR_SUCCESS;
+}
 

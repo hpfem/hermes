@@ -8,20 +8,21 @@
 //  can be defined manually.
 //
 //  PDE: -d/dx(a_11(x,y)du/dx) - d/dx(a_12(x,y)du/dy) - d/dy(a_21(x,y)du/dx) - d/dy(a_22(x,y)du/dy)
-//       + a_1(x,y)du/dx + a_21(x,y)du/dy + a_0(x,y)u = rhs(x,y)
+//       + a_1(x,y)du/dx + a_2(x,y)du/dy + a_0(x,y)u = rhs(x,y)
 //
 //  Domain: arbitrary
 //
 //  BC:  Dirichlet for boundary marker 1: u = g_D(x,y)
 //       Natural for any other boundary marker:   (a_11(x,y)*nu_1 + a_21(x,y)*nu_2) * dudx
-//                                              + (a_12(x,y)*nu_1 + s_22(x,y)*nu_2) * dudy = g_N(x,y)
+//                                              + (a_12(x,y)*nu_1 + a_22(x,y)*nu_2) * dudy = g_N(x,y)
 //
 //  The following parameters can be changed:
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform refinements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -31,7 +32,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary markers.
-const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
+const int BDY_HORIZONTAL = 1;
+const std::string BDY_VERTICAL = "Boundary vertical";
 
 // Problem parameters.
 double a_11(double x, double y) {
@@ -91,20 +93,23 @@ int main(int argc, char* argv[])
   TimePeriod cpu_time;
   cpu_time.tick();
 
+  // Conversion tables for user-supplied string markers.
+  MarkersConversion markers_conversion;
+
   // Load the mesh.
   Mesh mesh;
-  H2DReader mloader;
+  H2DReader mloader(&markers_conversion);
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Enter boundary markers.
-  BCTypes bc_types;
+  BCTypes bc_types(&markers_conversion);
   bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
   bc_types.add_bc_neumann(BDY_VERTICAL);
 
-  BCValues bc_values;
+  BCValues bc_values(&markers_conversion);
   bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
 
   // Create an H1 space with default shapeset.
@@ -113,7 +118,8 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
+  bool matrix_free = false;
+  WeakForm wf(1, matrix_free, &markers_conversion);
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);

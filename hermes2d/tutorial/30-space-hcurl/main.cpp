@@ -24,12 +24,10 @@ int main(int argc, char* argv[])
   // Initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Create an Hcurl space with default shapeset.
-  // (BC types and essential BC values not relevant.)
-  // Enter boundary markers.
+  // Enter boundary markers (default is Neumann boundary).
   BCTypes bc_types;
 
-  // Enter Dirichlet boundary values.
+  // Enter Dirichlet boundary values (not relevant here).
   BCValues bc_values;
 
   HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);

@@ -10,8 +10,10 @@ shows how to create an $L^2$ space, visualize
 finite element basis functions, and perform an orthogonal $L^2$-projection of a continuous 
 function onto the FE space::
 
-    const int INIT_REF_NUM = 1;    // Number of initial uniform mesh refinements.
-    const int P_INIT = 3;          // Polynomial degree of mesh elements.
+    const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+    const int P_INIT = 3;                             // Polynomial degree of mesh elements.
+    MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
+                                                      // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
     // Projected function.
     scalar F(double x, double y, double& dx, double& dy)
@@ -29,26 +31,33 @@ function onto the FE space::
       mloader.load("square.mesh", &mesh);
 
       // Perform uniform mesh refinements.
-      for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+      for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+      // Enter boundary markers (default is Neumann boundary).
+      BCTypes bc_types;
+
+      // Enter Dirichlet boundary values (not relevant here).
+      BCValues bc_values;
 
       // Create an L2 space with default shapeset.
-      L2Space space(&mesh, P_INIT);
+      L2Space space(&mesh, &bc_types, &bc_values, P_INIT);
 
       // View basis functions.
-      BaseView bview("BaseView", 0, 0, 600, 500);
+      BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
       bview.show(&space);
-      View::wait(H2DV_WAIT_KEYPRESS);
+      // View::wait(H2DV_WAIT_KEYPRESS);
 
       // Assemble and solve the finite element problem.
       WeakForm wf_dummy;
-      LinearProblem ls(&wf_dummy, &space);
-      Solution* sln_tmp = new Solution(&mesh, F);
+
+      // Initialize the exact and projected solution.
       Solution sln;
-      project_global(&space, H2D_L2_NORM, sln_tmp, &sln);
-      delete sln_tmp;
+      Solution sln_exact(&mesh, F);
+
+      OGProjection::project_global(&space, &sln_exact, &sln, matrix_solver, HERMES_L2_NORM);
 
       // Visualize the solution.
-      ScalarView view1("Projection", 610, 0, 600, 500);
+      ScalarView view1("Projection", new WinGeom(610, 0, 600, 500));
       view1.show(&sln);
 
       // Wait for all views to be closed.

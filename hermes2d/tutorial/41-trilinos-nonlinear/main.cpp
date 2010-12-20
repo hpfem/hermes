@@ -24,16 +24,19 @@
 
 using namespace Teuchos;
 
-const int INIT_REF_NUM = 2;       // Number of initial uniform mesh refinements.
-const int P_INIT = 3;             // Initial polynomial degree of all mesh elements.
-const double NEWTON_TOL = 1e-6;   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;  // Maximum allowed number of Newton iterations.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 
-const bool JFNK = false;          // true = jacobian-free method,
-                                  // false = Newton.
-const int PRECOND = 2;            // Preconditioning by jacobian (1) or approximation of jacobian (2)
-                                  // in case of JFNK,
-                                  // Default ML proconditioner in case of Newton.
+const bool JFNK = false;                          // true = jacobian-free method,
+                                                  // false = Newton.
+const int PRECOND = 2;                            // Preconditioning by jacobian (1) or approximation of jacobian (2)
+                                                  // in case of JFNK,
+                                                  // Default ML proconditioner in case of Newton.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -41,8 +44,6 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
   wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_UNSYM, HERMES_ANY);
   wf1.add_vector_form(callback(residual_form_hermes), HERMES_ANY);
 
-  // Initialize the FE problem.
+  // Initialize the discrete problem.
   bool is_linear = false;
   DiscreteProblem dp1(&wf1, &space, is_linear);
   
@@ -108,7 +109,7 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the solution.
-  Solution sln_hermes;
+  Solution sln1;
 
   if (matrix_solver == SOLVER_AZTECOO) 
   {
@@ -162,8 +163,8 @@ int main(int argc, char* argv[])
     it++;
   }
 
-  // Translate the resulting coefficient vector into the Solution sln_hermes.
-  Solution::vector_to_solution(coeff_vec, &space, &sln_hermes);
+  // Translate the resulting coefficient vector into the Solution sln1.
+  Solution::vector_to_solution(coeff_vec, &space, &sln1);
 
   // Cleanup.
   delete(matrix);
@@ -171,7 +172,7 @@ int main(int argc, char* argv[])
   delete(solver);
 
   // CPU time needed by UMFpack
-  double umf_time = cpu_time.tick().last();
+  double time1 = cpu_time.tick().last();
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -180,7 +181,6 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space.
   info("Projecting initial condition on the FE space.");
-  // The NULL pointer means that we do not want the projection result as a Solution.
   sln_tmp = new Solution(&mesh, init_cond);
   OGProjection::project_global(&space, sln_tmp, coeff_vec, matrix_solver);
   delete sln_tmp;
@@ -210,12 +210,12 @@ int main(int argc, char* argv[])
     else nox_solver.set_precond("ML");
   }
 
-  // Solve the matrix problem using NOX.
+  // Solve the nonlinear problem using NOX.
   info("Assembling by DiscreteProblem, solving by NOX.");
-  Solution sln_nox;
+  Solution sln2;
   if (nox_solver.solve())
   {
-    Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln_nox);
+    Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln2);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
          nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -225,23 +225,21 @@ int main(int argc, char* argv[])
     error("NOX failed.");
 
   // CPU time needed by NOX.
-  double nox_time = cpu_time.tick().last();
+  double time2 = cpu_time.tick().last();
 
   // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  Adapt adaptivity(&space, HERMES_H1_NORM);
-  bool solutions_for_adapt = false;
-  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
-  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-  info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
+  double rel_err_1 = calc_abs_error(&sln1, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
+  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
+  double rel_err_2 = calc_abs_error(&sln2, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
+  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Show both solutions.
   ScalarView view1("Solution 1", new WinGeom(0, 0, 500, 400));
-  view1.show(&sln_hermes);
+  view1.show(&sln1);
   ScalarView view2("Solution 2", new WinGeom(510, 0, 500, 400));
-  view2.show(&sln_nox);
+  view2.show(&sln2);
 
   // Wait for all views to be closed.
   View::wait();

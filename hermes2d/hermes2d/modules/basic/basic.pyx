@@ -4,6 +4,7 @@ from libcpp.pair cimport pair
 
 cimport basic_defs
 from hermes2d.hermes2d cimport Solution
+#from hermes2d.hermes2d cimport Space
 
 cdef vector[int] array2vector_int(a):
     cdef vector[int] v
@@ -42,6 +43,9 @@ cdef class ModuleBasic:
     def set_initial_poly_degree(self, int p):
         self.thisptr.set_initial_poly_degree(p)
 
+    def set_matrix_solver(self, solver_name):
+        self.thisptr.set_matrix_solver(solver_name)
+
     def set_material_markers(self, mat_markers):
         self.thisptr.set_material_markers(array2vector_int(mat_markers))
 
@@ -63,8 +67,8 @@ cdef class ModuleBasic:
     def set_dirichlet_markers(self, bdy_markers_dirichlet):
         self.thisptr.set_dirichlet_markers(array2vector_int(bdy_markers_dirichlet))
 
-    def set_dirichlet_values(self, bdy_values_dirichlet):
-        self.thisptr.set_dirichlet_values(array2vector_double(bdy_values_dirichlet))
+    def set_dirichlet_values(self,  bdy_markers_dirichlet, bdy_values_dirichlet):
+        self.thisptr.set_dirichlet_values(array2vector_int(bdy_markers_dirichlet), array2vector_double(bdy_values_dirichlet))
 
     def set_neumann_markers(self, bdy_markers_neumann):
         self.thisptr.set_neumann_markers(array2vector_int(bdy_markers_neumann))
@@ -76,11 +80,28 @@ cdef class ModuleBasic:
         self.thisptr.set_newton_markers(array2vector_int(bdy_markers_newton))
 
     def set_newton_values(self, bdy_values_newton):
-        print "bdy_markers_newton:", bdy_values_newton
         vvv = array2vector_double_pair(bdy_values_newton)
         self.thisptr.set_newton_values(vvv)
 
-    def calculate(self):
+    def get_assembly_time(self):
+        return self.thisptr.get_assembly_time()
+
+    def get_solver_time(self):
+        return self.thisptr.get_solver_time()
+
+    def get_solution(self):
         s = Solution()
-        r = self.thisptr.calculate(s.getptr())
-        return r, s
+        self.thisptr.get_solution(s.getptr()) 
+        return s
+
+    #def get_space(self):
+    #    s = Space()
+    #    self.thisptr.get_space(s.getptr()) 
+    #    return s
+    
+
+    def calculate(self):
+        success = self.thisptr.calculate()
+        return success
+
+    

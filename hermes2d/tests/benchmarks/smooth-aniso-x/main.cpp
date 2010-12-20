@@ -54,8 +54,8 @@ const double ERR_STOP = 1e-4;                     // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Exact solution.
 static double fn(double x, double y)
@@ -70,6 +70,7 @@ static double fndd(double x, double y, double& dx, double& dy)
   return fn(x, y);
 }
 
+// Boundary markers.
 const int BDY_BOTTOM = 1;
 const int BDY_RIGHT = 2;
 const int BDY_TOP = 3;

@@ -26,7 +26,8 @@ const double CONV_EXP = 1.0;
 const double THRESHOLD = 0.3;
 const bool MULTI = true; 
 const int STRATEGY = 1; 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const int P_INIT_XVEL = 2;
 const int P_INIT_YVEL = 2;
@@ -161,14 +162,17 @@ int main(int argc, char* argv[])
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
+  BCTypes bc_types_press;
+  bc_types_press.add_bc_none(BDY_DIRICHLET);
+
   // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_zero(BDY_DIRICHLET);
 
   // Spaces for velocities and pressure.
-  H1Space xvel(&mesh1, &bc_types, P_INIT_XVEL);
-  H1Space yvel(&mesh1, &bc_types, P_INIT_YVEL);
-  H1Space press(&mesh1, (BCTypes *) NULL, P_INIT_PRESS);
+  H1Space xvel(&mesh1, &bc_types, &bc_values, P_INIT_XVEL);
+  H1Space yvel(&mesh1, &bc_types, &bc_values, P_INIT_YVEL);
+  H1Space press(&mesh1, &bc_types_press, P_INIT_PRESS);
   H1Space lset(&mesh2, &bc_types, &bc_values, P_INIT_LSET);
 
   int ndof_1 = xvel.Space::get_num_dofs();

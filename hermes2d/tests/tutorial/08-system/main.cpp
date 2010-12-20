@@ -12,7 +12,7 @@ const double f_1  = 1e4;                                   // external force in 
 const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // first Lame constant
 const double mu = E / (2*(1 + nu));                        // second Lame constant
 const int P_INIT = 8;                                      // Initial polynomial degree of all elements.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                            // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 

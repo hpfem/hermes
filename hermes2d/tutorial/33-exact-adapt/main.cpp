@@ -39,7 +39,7 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_AZTECOO,
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // This function can be modified.
@@ -81,7 +81,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Scalar potential Phi", new WinGeom(0, 0, 600, 300));
+  ScalarView sview("Scalar potential Phi", new WinGeom(0, 0, 610, 300));
+  sview.fix_scale_width(40);
   sview.show_mesh(false);
   OrderView  oview("Mesh", new WinGeom(620, 0, 600, 300));
 
@@ -98,8 +99,8 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
+    // Assign the function f() to the fine mesh.
+    info("Assigning f() to the reference mesh.");
     bool is_linear = true;
     ref_sln.set_exact(ref_space->get_mesh(), f);
 
@@ -119,7 +120,8 @@ int main(int argc, char* argv[])
     Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
     // Note: the error estimate is now equal to the exact error.
     bool solutions_for_adapt = true;
-    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 
