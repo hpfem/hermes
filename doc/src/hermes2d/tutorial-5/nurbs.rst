@@ -22,7 +22,34 @@ selected on line 15 in main.cpp::
     //const char* mesh_file = "domain-2.mesh";          // Two control points.
     //const char* mesh_file = "domain-3.mesh";          // Three control points.
 
-**Example of a NURBS with one inner control point**
+General description of NURBS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every NURBS curve is defined by its degree, control points with weights and the
+knot vector. The degree $d$ is a positive integer, usually 1, 2, 3 or 5. Lines
+and polylines are of degree 1, circles have degree 2 and free-form curves are
+of degree 3 or 5. The control points $p_i$, $i = 0 \ldots n$, are the main tool for changing the
+shape of the curve. A curve of degree $d$ must have at least $d+1$ control
+points. In Hermes, the endpoints of the edge are always assumed to be the
+first and last control points and therefore only the inner control points are
+listed in the mesh file. There is a weight $w_i \geq 0$ for every control point,
+that influences the shape of the curve in its vicinity. If $w_i = 0$ then 
+$p_i$ has no effect on the shape.  As $w_i$ increases, the curve is pulled 
+towards $p_i$.
+
+The knot vector is a sequence of $m+1$ values that determines how much and
+where the control points influence the shape. The relation $m = n+d+1$ must
+hold. The sequence is nondecreasing, $t_i \leq t_{i+1}$, and divides the whole
+interval $[0,1]$ into smaller intervals which determine the area of influence
+of the control points. Since the curve has to start and end at the edge
+vertices, the knot vector in Hermes always starts with $d+1$ zeros and ends
+with $d+1$ ones. Only the inner knots are listed in the above definition of the
+variable ``curves``, where $knots$ is a simple list of real values. 
+
+Examples
+~~~~~~~~
+
+**One inner control point**
 
 Snippet from the file domain-1.mesh::
 
@@ -49,7 +76,7 @@ Result:
    :width: 500
    :alt: NURBS with one control point.
 
-**Example of a NURBS with two inner control points**
+**Two inner control points**
 
 Snippet from the file domain-3.mesh::
 
@@ -77,7 +104,7 @@ Result:
    :alt: NURBS with two control points.
 
 
-**Example of a NURBS with three inner control points**
+**Three inner control points**
 
 Snippet from the file domain-2.mesh::
 

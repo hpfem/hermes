@@ -122,26 +122,8 @@ circular arcs.
 NURBS curves
 ~~~~~~~~~~~~
 
-Every NURBS curve is defined by its degree, control points with weights and the
-knot vector. The degree $d$ is a positive integer, usually 1, 2, 3 or 5. Lines
-and polylines are of degree 1, circles have degree 2 and free-form curves are
-of degree 3 or 5. The control points $p_i$, $i = 0 \ldots n$, are the main tool for changing the
-shape of the curve. A curve of degree $d$ must have at least $d+1$ control
-points. In Hermes, the endpoints of the edge are always assumed to be the
-first and last control points and therefore only the inner control points are
-listed in the mesh file. There is a weight $w_i \geq 0$ for every control point,
-that influences the shape of the curve in its vicinity. If $w_i = 0$ then 
-$p_i$ has no effect on the shape.  As $w_i$ increases, the curve is pulled 
-towards $p_i$.
-
-The knot vector is a sequence of $m+1$ values that determines how much and
-where the control points influence the shape. The relation $m = n+d+1$ must
-hold. The sequence is nondecreasing, $t_i \leq t_{i+1}$, and divides the whole
-interval $[0,1]$ into smaller intervals which determine the area of influence
-of the control points. Since the curve has to start and end at the edge
-vertices, the knot vector in Hermes always starts with $d+1$ zeros and ends
-with $d+1$ ones. Only the inner knots are listed in the above definition of the
-variable ``curves``, where $knots$ is a simple list of real values. 
+For the treatment of full-featured Non-Uniform Rational B-Splines (NURBS)
+boundaries see example `37-nurbs <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/nurbs.html>`_. To simplify the most common case of a curved boundary, Hermes has a special format for circular arcs.
 
 Circular arcs
 ~~~~~~~~~~~~~
