@@ -153,7 +153,7 @@ void RefMap::calc_inv_ref_map(int order)
   {
     jac[i] = (m[i][0][0] * m[i][1][1] - m[i][0][1] * m[i][1][0]);
     double ij = 1.0 / jac[i];
-    error_if(!finite(ij), "1/jac[%d] is inifinity when calculating inv. ref. map for order %d (jac=%g)", i, order);
+    error_if(!finite(ij), "1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac=%g)", i, order);
     assert_msg(ij == ij, "1/jac[%d] is NaN when calculating inv. ref. map for order %d (jac=%g)", i, order);
 
     // invert and transpose the matrix

@@ -15,6 +15,7 @@ into the previous sections.
    tutorial-5/remote_computing
    tutorial-5/markers-typical
    tutorial-5/markers-nontypical
+   tutorial-5/nurbs
 
 
 

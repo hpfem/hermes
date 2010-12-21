@@ -30,6 +30,7 @@ add_subdirectory(33-exact-adapt)
 add_subdirectory(34-remote-computing)
 add_subdirectory(35-markers-typical)
 add_subdirectory(36-markers-nontypical)
+add_subdirectory(37-nurbs)
 
 if(WITH_TRILINOS)
   add_subdirectory(40-trilinos-linear)
