@@ -8,6 +8,9 @@ to define curved boundary edges. Recall that simplified
 format is available for circular arcs, as was shown 
 in example 03-poisson. 
 
+Solved is a simple Poisson equation with constant right-hand
+side and homogeneous Dirichlet boundary conditions.
+
 The domain is a rectangle (0,2) x (0, 1) whose upper
 edge is a NURBS curve. There are three mesh files
 in this example: domain-1.mesh (one control point),
@@ -19,8 +22,7 @@ selected on line 15 in main.cpp::
     //const char* mesh_file = "domain-2.mesh";          // Two control points.
     //const char* mesh_file = "domain-3.mesh";          // Three control points.
 
-Example of a NURBS with one control point
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example of a NURBS with one inner control point**
 
 Snippet from the file domain-1.mesh::
 
@@ -47,8 +49,7 @@ Result:
    :width: 500
    :alt: NURBS with one control point.
 
-Example of a NURBS with two control points
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example of a NURBS with two inner control points**
 
 Snippet from the file domain-3.mesh::
 
@@ -76,8 +77,7 @@ Result:
    :alt: NURBS with two control points.
 
 
-Example of a NURBS with three control points
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example of a NURBS with three inner control points**
 
 Snippet from the file domain-2.mesh::
 
