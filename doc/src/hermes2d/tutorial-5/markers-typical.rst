@@ -1,4 +1,4 @@
-Using Material and Boundary Markers in Weak Forms (35)
+Using Material and Boundary Markers: Typical Way (35)
 ------------------------------------------------------
 
 **Git reference:** Tutorial example `35-markers-typical <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/35-markers-typical>`_. 
@@ -6,10 +6,10 @@ Using Material and Boundary Markers in Weak Forms (35)
 This example shows how to solve a problem with complex area / boundary
 properties using the typical approach -- to define an individual weak form 
 for each element and boundary marker and register them separately.
-The equation solved is::
+The equation solved is
 
 .. math::
-    \mbox{div}(a(x,y) \nabla u) = f \ \ \ \mbox{in}\ \Omega
+         - \nabla \cdot (a(x,y) \nabla u) = f \ \ \ \mbox{in}\ \Omega
 
 where $\Omega$ is a square domain subdivided into four 
 identical quadrants. The parameter $a(x,y)$ is constant 

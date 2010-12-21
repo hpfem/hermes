@@ -30,7 +30,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_GROUND = 1;
+const std::string BDY_GROUND = "Boundary ground";
 const std::string BDY_AIR = "Boundary air";
 
 // Problem parameters.

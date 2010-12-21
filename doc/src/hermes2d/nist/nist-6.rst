@@ -1,5 +1,5 @@
 NIST-6 (Elliptic)
-------------------
+-----------------
 
 **Git reference:** Benchmark `nist-6 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-6>`_.
 
@@ -19,7 +19,7 @@ Domain of interest: Square $(-1, 1)^2$.
 Boundary conditions: Dirichlet given by the exact solution.
 
 Exact solution
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. math::
 
