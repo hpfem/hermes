@@ -1,6 +1,5 @@
 #define HERMES_REPORT_ALL
 #include "hermes2d.h"
-//#include "../../../hermes_common/array.h"
 
 // This example shows how to solve a matrix problem Ax = b in Hermes. 
 // The matrix and the right-hand side vector are first read from a file 
@@ -9,6 +8,8 @@
 //
 // Possible solvers: petsc, petsc-block, umfpack, umfpack-block, pardiso, pardiso-block, 
 //                   aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block
+//
+// Sample usage: "matrix-solvers umfpack linsys-N.txt" where N = 1, 2, 3.
 
 // Include helpers.
 #include "helpers.cpp"
