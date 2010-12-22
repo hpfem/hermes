@@ -7,7 +7,8 @@
 // and then solved using a LinearSolver.
 //
 // Possible solvers: petsc, petsc-block, umfpack, umfpack-block, pardiso, pardiso-block, 
-//                   aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block
+//                   aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block,
+//                   superlu, superlu-block.
 //
 // Sample usage: "matrix-solvers umfpack linsys-N.txt" where N = 1, 2, 3.
 
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
   // Check number of command-line parameters.
   if (argc < 3) {
     warn("Possible solvers are: petsc, petsc-block, umfpack, umfpack-block, \
-pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block");
+pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.");
     error("Not enough parameters: Provide a solver and an input file with a matrix and vector.");
   }
 
@@ -189,9 +190,33 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
     error("Hermes was not built with MUMPS support.");
 #endif
   }  
+  else if (strcasecmp(argv[1], "superlu") == 0) {
+#ifdef WITH_SUPERLU
+    SuperLUMatrix mat;
+    SuperLUVector rhs;
+    build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
+
+    SuperLUSolver solver(&mat, &rhs);
+    solve(solver, n);
+#else
+    error("Hermes was not built with SuperLU support.");
+#endif
+  }
+  else if (strcasecmp(argv[1], "superlu-block") == 0) {
+#ifdef WITH_SUPERLU
+    SuperLUMatrix mat;
+    SuperLUVector rhs;
+    build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
+
+    SuperLUSolver solver(&mat, &rhs);
+    solve(solver, n);
+#else
+    error("Hermes was not built with SuperLU support.");
+#endif
+  }  
   else {
     warn("Possible solvers are: petsc, petsc-block, umfpack, umfpack-block, \
-pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block");
+pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.");
     error("Unknown matrix solver.");
   }
 

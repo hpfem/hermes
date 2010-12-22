@@ -16,6 +16,7 @@ into the previous sections.
    tutorial-5/markers-typical
    tutorial-5/markers-nontypical
    tutorial-5/nurbs
+   tutorial-5/matrix_solvers
 
 
 
