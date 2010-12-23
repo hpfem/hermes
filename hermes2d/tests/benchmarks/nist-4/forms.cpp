@@ -7,11 +7,9 @@ Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Fu
 template<typename Real>
 Real rhs(Real x, Real y)
 {
-  Real a = (-ALPHA * pow((x - X_LOC), 2) - ALPHA*pow((y - Y_LOC), 2));
-  Real b = (2 * ALPHA * x - ALPHA);
-  Real c = (2 * ALPHA * y - ALPHA);
-
-  return exp(a) * pow(b,2) - 2 * ALPHA * exp(a) + exp(a) * pow(c,2) - 2 * ALPHA * exp(a);
+  Real a_P = (-ALPHA_P * pow((x - X_LOC), 2) - ALPHA_P * pow((y - Y_LOC), 2));
+  
+  return 4 * exp(a_P) * ALPHA_P * (ALPHA_P * (x - X_LOC) * (x - X_LOC) + ALPHA_P * (y - Y_LOC) * (y - Y_LOC) - 1);
 }
 
 template<typename Real, typename Scalar>

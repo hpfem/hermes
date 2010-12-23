@@ -1,16 +1,14 @@
 static double fn(double x, double y)
 {
-  return exp(-ALPHA*(pow((x - X_LOC), 2) + pow((y - Y_LOC), 2)));
+  return exp(-ALPHA_P * (pow((x - X_LOC), 2) + pow((y - Y_LOC), 2)));
 }
 
 static double fndd(double x, double y, double& dx, double& dy)
 {
-  double a = (-ALPHA * pow((x - X_LOC), 2) - ALPHA * pow((y - Y_LOC), 2));
-  double b = (2 * ALPHA * x - ALPHA);
-  double c = (2 * ALPHA * y - ALPHA);
+  double a = -ALPHA_P * ( (x - X_LOC) * (x - X_LOC) + (y - Y_LOC) * (y - Y_LOC));
 
-  dx = -exp(a)*b;
-  dy = -exp(a)*c;
+  dx = -exp(a) * (2 * ALPHA_P * (x - X_LOC));
+  dy = -exp(a) * (2 * ALPHA_P * (y - Y_LOC));
 
   return fn(x, y);
 }

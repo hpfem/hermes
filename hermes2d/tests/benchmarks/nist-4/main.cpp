@@ -60,8 +60,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.                      
-double ALPHA = 1000;      // This problem has and exponential peak in the interior of the domain.
-double X_LOC = 0.5;       // (X_LOC, Y_LOC) is the location of the peak, and ALPHA determines the strenghth of the peak.
+double ALPHA_P = 1000;      // This problem has and exponential peak in the interior of the domain.
+double X_LOC = 0.5;         // (X_LOC, Y_LOC) is the location of the peak, and ALPHA determines the strenghth of the peak.
 double Y_LOC = 0.5;
 
  
