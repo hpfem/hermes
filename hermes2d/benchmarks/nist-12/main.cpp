@@ -116,7 +116,8 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  sview.fix_scale_width(50);
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
