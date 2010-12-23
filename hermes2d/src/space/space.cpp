@@ -39,7 +39,8 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
   // Before adding, update the boundary variables with the user-supplied string markers
   // according to the conversion table contained in the mesh.
   this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
-  this->update_markers_acc_to_conversion(bc_values, mesh->markers_conversion);
+  if(bc_values != NULL)
+    this->update_markers_acc_to_conversion(bc_values, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
   this->set_essential_bc_values(bc_values);
   this->bc_value_callback_by_coord = NULL;
@@ -99,6 +100,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
 
   BCTypesCallback *bc_types = new BCTypesCallback();
   bc_types->register_callback(bc_type_callback);
+  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
   
   this->set_essential_bc_values(bc_value_callback_by_coord);
