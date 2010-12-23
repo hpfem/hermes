@@ -47,7 +47,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -55,15 +55,18 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.                      
-double OMEGA = 3*M_PI/2;     //useful information about parameters will go here 
-double X_w = 0;              //
-double Y_w = -3/4;
-double R_0 = 3/4;
-double ALPHA_w = 200;
-double X_p = sqrt((double)5)/4;
-double Y_p = -1/4;
-double ALPHA_p = 1000;
-double EPSILON = 1/100;
+const double OMEGA_C = 3.0 * M_PI / 2.0;
+
+const double X_W = 0.0;             
+const double Y_W = -3.0 / 4.0;
+const double R_0 = 3.0 / 4.0;
+const double ALPHA_W = 200.0;
+
+const double X_P = -sqrt(5.0) / 4.0;
+const double Y_P = -1.0 / 4.0;
+const double ALPHA_P = 1000.0;
+
+const double EPSILON = 1.0 / 100.0;
 
  
 // Exact solution.
