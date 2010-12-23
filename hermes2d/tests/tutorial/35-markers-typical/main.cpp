@@ -105,11 +105,6 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
-  sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
-
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu;
 
@@ -151,10 +146,6 @@ int main(int argc, char* argv[])
     Solution sln;
     info("Projecting reference solution on the coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
-
-    // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
-    oview.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
@@ -204,7 +195,7 @@ int main(int argc, char* argv[])
 
   printf("ndof allowed = %d\n", 210);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 210) {      // ndofs was 206 at the time this test was created
+  if (ndof < 210) {      // ndofs was 208 at the time this test was created
     printf("Success!\n");
     return ERR_SUCCESS;
   }
