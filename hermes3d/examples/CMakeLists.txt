@@ -13,6 +13,7 @@ if(WITH_HEX)
 	endif(H3D_REAL)
 	if(H3D_COMPLEX)
 		add_subdirectory(rough)
+		add_subdirectory(maxwell-ring)
 	endif(H3D_COMPLEX)
 endif(WITH_HEX)
 
