@@ -15,6 +15,22 @@
 // Include helpers.
 #include "helpers.cpp"
 
+// Solve the matrix problem.
+void solve(Solver &solver, int n) {
+  if (solver.solve()) {
+    scalar *sln = solver.get_solution();
+    info("Matrix solve successful.");
+    printf("Solution vector: ");
+    for (int i = 0; i < n; i++) {
+      printf("%g ", sln[i]);
+    }
+    printf("\n");
+  }
+  else {
+    info("Matrix solver failed.");
+  }
+}
+
 // Main function
 int main(int argc, char *argv[]) {
 

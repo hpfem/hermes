@@ -163,18 +163,3 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<VectorEntry> &a
   rhs->finish();
 }
 
-// Solve the matrix problem.
-void solve(Solver &solver, int n) {
-  if (solver.solve()) {
-    scalar *sln = solver.get_solution();
-    info("Matrix solve successful.");
-    printf("Solution vector: ");
-    for (int i = 0; i < n; i++) {
-      printf("%g ", sln[i]);
-    }
-    printf("\n");
-  }
-  else {
-    info("Matrix solver failed.");
-  }
-}

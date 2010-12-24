@@ -39,6 +39,7 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
   Array<VectorEntry> ar_rhs;           // Right-hand side in coordinate format.
 
   // Read matrix and rhs from file.
+  info("Reading matrix from file %s.", argv[2]);
   if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs))
     error("Failed to read the matrix and rhs.");
 
@@ -60,6 +61,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       if (sln[2] == 3) printf("%g ", sln[2]);
       else return ERR_FAILURE; 
       printf("\n");
+    }
+    else {
+      info("PETSc solver failed.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with PETSc support.");
@@ -84,6 +89,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       else return ERR_FAILURE; 
       printf("\n");
     }
+    else {
+      info("PETSc solver failed.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with PETSc support.");
 #endif
@@ -106,6 +115,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       if (sln[2] == 3) printf("%g ", sln[2]);
       else return ERR_FAILURE; 
       printf("\n");
+    }
+    else {
+      info("UMFpack solver failed.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with UMFpack support.");
@@ -130,6 +143,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       else return ERR_FAILURE; 
       printf("\n");
     }
+    else {
+      info("UMFpack solver failed.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with UMFpack support.");
 #endif
@@ -152,6 +169,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       if (sln[2] == 3) printf("%g ", sln[2]);
       else return ERR_FAILURE; 
       printf("\n");
+    }
+    else {
+      info("Pardiso solver failed.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with PARDISO support.");
@@ -176,6 +197,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       else return ERR_FAILURE; 
       printf("\n");
     }
+    else {
+      info("Pardiso solver failed.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with PARDISO support.");
 #endif
@@ -198,6 +223,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       if (sln[2] == 3) printf("%g ", sln[2]);
       else return ERR_FAILURE; 
       printf("\n");
+    }
+    else {
+      info("AztecOO solver failed.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with Trilinos support.");
@@ -222,6 +251,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       else return ERR_FAILURE; 
       printf("\n");
     }
+    else {
+      info("AztecOO solver failed.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with Trilinos support.");
 #endif
@@ -234,18 +267,26 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
 
     if (AmesosSolver::is_available("Klu")) {
       AmesosSolver solver("Klu", &mat, &rhs);
-    if (solver.solve()) {
-      scalar *sln = solver.get_solution();
-      info("Matrix solve successful.");
-      printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
-      printf("\n");
+      if (solver.solve()) {
+        scalar *sln = solver.get_solution();
+        info("Matrix solve successful.");
+        printf("Solution vector: ");
+        if (sln[0] == 4) printf("%g ", sln[0]);
+        else return ERR_FAILURE; 
+        if (sln[1] == 2) printf("%g ", sln[1]);
+        else return ERR_FAILURE; 
+        if (sln[2] == 3) printf("%g ", sln[2]);
+        else return ERR_FAILURE; 
+        printf("\n");
+      }
+      else {
+        info("Amesos solver failed.");
+        return ERR_FAILURE;
+      }
     }
+    else {
+      info("Amesos solver failed - Klu not available.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with Trilinos support.");
@@ -259,19 +300,27 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
 
     if (AmesosSolver::is_available("Klu")) {
       AmesosSolver solver("Klu", &mat, &rhs);
-    if (solver.solve()) {
-      scalar *sln = solver.get_solution();
-      info("Matrix solve successful.");
-      printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
-      printf("\n");
+      if (solver.solve()) {
+        scalar *sln = solver.get_solution();
+        info("Matrix solve successful.");
+        printf("Solution vector: ");
+        if (sln[0] == 4) printf("%g ", sln[0]);
+        else return ERR_FAILURE; 
+        if (sln[1] == 2) printf("%g ", sln[1]);
+        else return ERR_FAILURE; 
+        if (sln[2] == 3) printf("%g ", sln[2]);
+        else return ERR_FAILURE; 
+        printf("\n");
+      }
+      else {
+        info("Amesos solver failed.");
+        return ERR_FAILURE;
+      }
     }
-    } 
+    else {
+      info("Amesos solver failed - Klu not available.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with Amesos support.");
 #endif
@@ -294,6 +343,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       if (sln[2] == 3) printf("%g ", sln[2]);
       else return ERR_FAILURE; 
       printf("\n");
+    } 
+    else {
+      info("Mumps solver failed.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with MUMPS support.");
@@ -318,6 +371,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       else return ERR_FAILURE; 
       printf("\n");
     }
+    else {
+      info("Mumps solver failed.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with MUMPS support.");
 #endif
@@ -341,6 +398,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       else return ERR_FAILURE; 
       printf("\n");
     }
+    else {
+      info("SuperLU solver failed.");
+      return ERR_FAILURE;
+    }
 #else
     error("Hermes was not built with SuperLU support.");
 #endif
@@ -363,6 +424,10 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       if (sln[2] == 3) printf("%g ", sln[2]);
       else return ERR_FAILURE; 
       printf("\n");
+    }
+    else {
+      info("SuperLU solver failed.");
+      return ERR_FAILURE;
     }
 #else
     error("Hermes was not built with SuperLU support.");
