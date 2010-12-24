@@ -3,9 +3,9 @@
 
 // This test makes sure that example 37-nurbs works correctly.
 
-const char* mesh_file = "domain-1.mesh";          // One control point.
-//const char* mesh_file = "domain-2.mesh";          // Two control points.
-//const char* mesh_file = "domain-3.mesh";          // Three control points.
+const char* mesh_file_1 = "domain-1.mesh";          // One control point.
+const char* mesh_file_2 = "domain-2.mesh";          // Two control points.
+const char* mesh_file_3 = "domain-3.mesh";          // Three control points.
 
 // The following parameters can be also changed:
 
@@ -25,10 +25,20 @@ const double CONST_F = 1.0;
 
 int main(int argc, char* argv[])
 {
+  // Check number of command-line parameters.
+  if (argc < 2) {
+    error("Not enough parameters.");
+  }
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load(mesh_file, &mesh);
+  if (strcasecmp(argv[1], "1") == 0)
+    mloader.load(mesh_file_1, &mesh);
+  if (strcasecmp(argv[1], "2") == 0)
+    mloader.load(mesh_file_2, &mesh);
+  if (strcasecmp(argv[1], "3") == 0)
+    mloader.load(mesh_file_3, &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -85,7 +95,23 @@ int main(int argc, char* argv[])
 
   double coor_x[4] = {0.3, 0.7, 1.3, 1.7};
   double coor_y = 0.5;
+
   double value[4] = {0.102569, 0.167907, 0.174203, 0.109630};
+  if (strcasecmp(argv[1], "2") == 0)
+  {
+    value[0] = 0.062896; 
+    value[1] = 0.096658;
+    value[2] = 0.114445;
+    value[3] = 0.081221;
+  }
+  if (strcasecmp(argv[1], "3") == 0)
+  {
+    value[0] = 0.048752; 
+    value[1] = 0.028585;
+    value[2] = 0.028585;
+    value[3] = 0.048752;
+  }
+
   for (int i = 0; i < 4; i++)
   {
     if ((value[i] - sln.get_pt_value(coor_x[i], coor_y)) < 1E-6) 
