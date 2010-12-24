@@ -220,8 +220,8 @@ H1ShapesetLobattoHex::H1ShapesetLobattoHex() : Shapeset(1)
 {
 	_F_
 #ifdef WITH_HEX
-	type = H1;
-	mode = MODE_HEXAHEDRON;
+	type = HERMES_H1_SPACE;
+	mode = HERMES_MODE_HEX;
 	num_components = 1;
 
 	// fn, dx, dy, dz will be calculated on-the-fly

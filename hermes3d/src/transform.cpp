@@ -98,9 +98,9 @@ void Transformable::push_transform(int son) {
 	Trf *mat = stack + (++top);
 	Trf *tr = NULL;
 	switch (element->get_mode()) {
-		case MODE_TETRAHEDRON: tr = tetra_trf + son; break;
-		case MODE_HEXAHEDRON:  tr = hex_trf + son; break;
-		case MODE_PRISM:       tr = prism_trf + son; break;
+		case HERMES_MODE_TET: tr = tetra_trf + son; break;
+		case HERMES_MODE_HEX:  tr = hex_trf + son; break;
+		case HERMES_MODE_PRISM:       tr = prism_trf + son; break;
 		default: EXIT(HERMES_ERR_UNKNOWN_MODE);
 	}
 

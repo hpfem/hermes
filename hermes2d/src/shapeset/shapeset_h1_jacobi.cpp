@@ -4263,5 +4263,5 @@ H1ShapesetJacobi::H1ShapesetJacobi()
 
   comb_table = NULL;
 
-  set_mode(H2D_MODE_TRIANGLE);
+  set_mode(HERMES_MODE_TRIANGLE);
 }

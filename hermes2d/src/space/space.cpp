@@ -330,7 +330,7 @@ int Space::get_edge_order(Element* e, int edge)
 int Space::get_edge_order_internal(Node* en)
 {
   _F_
-  assert(en->type == H2D_TYPE_EDGE);
+  assert(en->type == HERMES_TYPE_EDGE);
   Element** e = en->elem;
   int o1 = 1000, o2 = 1000;
   assert(e[0] != NULL || e[1] != NULL);
@@ -619,8 +619,8 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
   int component = get_type() == 2 ? 1 : 0;
 
   Quad1DStd quad1d;
-  //shapeset->set_mode(H2D_MODE_TRIANGLE);
-  shapeset->set_mode(H2D_MODE_QUAD);
+  //shapeset->set_mode(HERMES_MODE_TRIANGLE);
+  shapeset->set_mode(HERMES_MODE_QUAD);
   for (int i = 0; i < n; i++)
   {
     for (int j = i; j < n; j++)
@@ -715,7 +715,7 @@ void Space::free_extra_data()
   for_all_nodes(n, mesh)
   {
     NodeData* nd = &ndata[n->id];
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       printf("vert node id=%d ref=%d bnd=%d x=%g y=%g dof=%d n=%d ",
              n->id, n->ref, n->bnd, n->x, n->y, nd->dof, nd->n);

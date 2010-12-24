@@ -86,8 +86,8 @@ static shape_fn_t *refmap_tetra_dz_table[] = { refmap_tetra_dz };
 RefMapShapesetTetra::RefMapShapesetTetra() : Shapeset(4)
 {
 #ifdef WITH_TETRA
-	type = H1;
-	mode = MODE_TETRAHEDRON;
+	type = HERMES_H1_SPACE;
+	mode = HERMES_MODE_TET;
 	num_components = 1;
 
 	// fn values are calculated by the tables
@@ -192,8 +192,8 @@ RefMapShapesetHex::RefMapShapesetHex() : Shapeset(5)
 {
 	_F_
 #ifdef WITH_HEX
-	type = H1;
-	mode = MODE_HEXAHEDRON;
+	type = HERMES_H1_SPACE;
+	mode = HERMES_MODE_HEX;
 	num_components = 1;
 
 	// nothing is tabelated

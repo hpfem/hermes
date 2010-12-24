@@ -27,7 +27,7 @@
 #include "../quad.h"
 #include "../order.h"
 
-#include "../../../hermes_common/bitarray.h"
+#include "../../../hermes_common/bitjudyarray.h"
 #include "../../../hermes_common/bctypes.h"
 
 /// @defgroup spaces Spaces
@@ -280,10 +280,10 @@ protected:
     void dump(int id);
   };
 
-  ArrayPtr<VertexData> vn_data;		/// Vertex node hash table
-  ArrayPtr<EdgeData> en_data;		/// Edge node hash table
-  ArrayPtr<FaceData> fn_data;		/// Face node hash table
-  ArrayPtr<ElementData> elm_data;		/// Element node hash table
+  JudyArrayPtr<VertexData> vn_data;		/// Vertex node hash table
+  JudyArrayPtr<EdgeData> en_data;		/// Edge node hash table
+  JudyArrayPtr<FaceData> fn_data;		/// Face node hash table
+  JudyArrayPtr<ElementData> elm_data;		/// Element node hash table
 
   void set_order_recurrent(unsigned int eid, Ord3 order);
 
@@ -335,7 +335,7 @@ protected:
     };
 
     FaceInfo(ElementMode2D mode, unsigned int elem_id, int face) {
-      this->type = mode == MODE_QUAD;
+      this->type = mode == HERMES_MODE_QUAD;
       this->elem_id = elem_id;
       this->face = face;
       this->h_part = this->v_part = 0;
@@ -358,15 +358,15 @@ protected:
   void fc_face_right(unsigned int fid);
   /// @param[in] idx - ID of the element
   void fc_element(unsigned int idx);
-  BitArray face_ced;
+  BitJudyArray face_ced;
 
   // update constraints
   void uc_element(unsigned int idx);
   void uc_face(unsigned int eid, int iface);
   void uc_dep(unsigned int eid);
-  BitArray uc_deps;
+  BitJudyArray uc_deps;
 
-  Array<FaceInfo *> fi_data;
+  JudyArray<FaceInfo *> fi_data;
 
   VertexData *create_vertex_node_data(unsigned int vid, bool ced);
   EdgeData *create_edge_node_data(unsigned int eid, bool ced);

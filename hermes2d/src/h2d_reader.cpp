@@ -199,7 +199,7 @@ void H2DReader::load_stream(FILE *f, Mesh *mesh)
     Node* node = mesh->nodes.add();
     assert(node->id == i);
     node->ref = TOP_LEVEL_REF;
-    node->type = H2D_TYPE_VERTEX;
+    node->type = HERMES_TYPE_VERTEX;
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;
@@ -516,7 +516,7 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
     Node* node = mesh->nodes.add();
     assert(node->id == i);
     node->ref = TOP_LEVEL_REF;
-    node->type = H2D_TYPE_VERTEX;
+    node->type = HERMES_TYPE_VERTEX;
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;

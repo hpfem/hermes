@@ -23,7 +23,7 @@
 #include "h3d_common.h"
 #include "weakform.h"
 #include "tuple.h"
-#include "../../hermes_common/array.h"
+#include "../../hermes_common/judyarray.h"
 #include "../../hermes_common/solver/solver.h"
 
 class Space;
@@ -101,8 +101,8 @@ protected:
 	};
 
 	struct FnCache {
-		Array<double *> jwt;			// jacobian x weight
-		Array<Geom<double> > e;		// geometries
+		JudyArray<double *> jwt;			// jacobian x weight
+		JudyArray<Geom<double> > e;		// geometries
 		Map<fn_key_t, sFunc*> fn;		// shape functions
 		Map<fn_key_t, mFunc*> ext;		// external functions
 		Map<fn_key_t, mFunc*> sln;		// sln from prev iter

@@ -85,7 +85,7 @@ public:
   void dump_info(int quad, const char* filename); // debug
 
   /// Returns the polynomial order of the active shape function on given edge. 
-  virtual int get_edge_fn_order(int edge) { return make_edge_order(mode, edge, shapeset->get_order(index)); }
+  virtual int get_edge_fn_order(int edge) { return h2d_make_edge_order(mode, edge, shapeset->get_order(index)); }
   
 protected:
 

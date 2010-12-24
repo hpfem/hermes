@@ -952,7 +952,7 @@ static QuadPt2D *std_tables_2d_tri[] = {
 };
 
 QuadStdTri::QuadStdTri() {
-	mode = MODE_TRIANGLE;
+	mode = HERMES_MODE_TRIANGLE;
 	max_order = H3D_MAX_QUAD_ORDER_TRI;
 
 	//
@@ -4164,7 +4164,7 @@ static QuadPt3D *std_tables_3d_tet[] = {
 QuadStdTetra::QuadStdTetra() {
 	_F_
 #ifdef WITH_TETRA
-	mode = MODE_TETRAHEDRON;
+	mode = HERMES_MODE_TET;
 
 	max_order = H3D_MAX_QUAD_ORDER_TETRA;
 	max_edge_order = H3D_MAX_QUAD_ORDER_TETRA;
@@ -4181,7 +4181,7 @@ QuadStdTetra::QuadStdTetra() {
 	assert(ref_vtcs != NULL);
 
 	// edge points
-	edge_tables = new Array<QuadPt3D *>[Tetra::NUM_EDGES];
+	edge_tables = new JudyArray<QuadPt3D *>[Tetra::NUM_EDGES];
 	for (int iedge = 0; iedge < Tetra::NUM_EDGES; iedge++) {
 		const int *tet_edge_vtcs = RefTetra::get_edge_vertices(iedge);
 		assert(tet_edge_vtcs != NULL);
@@ -4207,7 +4207,7 @@ QuadStdTetra::QuadStdTetra() {
 
 
 	// face points
-	face_tables = new Array<QuadPt3D *>[Tetra::NUM_FACES];
+	face_tables = new JudyArray<QuadPt3D *>[Tetra::NUM_FACES];
 	for (int order = 0; order <= quad_std_tri.get_max_order(); order++) {
 		Ord3 o(order);
 		unsigned int oi = o.get_idx();
@@ -4291,7 +4291,7 @@ QuadStdTetra::~QuadStdTetra() {
 QuadStdHex::QuadStdHex() {
 	_F_
 #ifdef WITH_HEX
-	mode = MODE_HEXAHEDRON;
+	mode = HERMES_MODE_HEX;
 
 	max_edge_order = H3D_MAX_QUAD_ORDER;
 	max_face_order = Ord2(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER);
@@ -4306,7 +4306,7 @@ QuadStdHex::QuadStdHex() {
 			}
 
 	// faces
-	face_tables = new Array<QuadPt3D *>[Hex::NUM_FACES];
+	face_tables = new JudyArray<QuadPt3D *>[Hex::NUM_FACES];
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER; i++)
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++) {
 			Ord2 m(i, j);
@@ -4320,7 +4320,7 @@ QuadStdHex::QuadStdHex() {
 
 	const Point3D *ref_vtcs = RefHex::get_vertices();
 	assert(ref_vtcs != NULL);
-	edge_tables = new Array<QuadPt3D *>[Hex::NUM_EDGES];
+	edge_tables = new JudyArray<QuadPt3D *>[Hex::NUM_EDGES];
 	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
 		const int *hex_edge_vtcs = RefHex::get_edge_vertices(iedge);
 		assert(hex_edge_vtcs != NULL);
@@ -4457,7 +4457,7 @@ void QuadStdHex::calc_face_table(int face, const Ord2 &order) {
 Ord3 QuadStdHex::lower_order_same_accuracy(const Ord3 &order) {
 	_F_
 #ifdef WITH_HEX
-	assert(order.type == MODE_HEXAHEDRON);
+	assert(order.type == HERMES_MODE_HEX);
 	Ord3 ord = order;
 	(ord.x % 2) ? ord.x-- : ord.x;
 	(ord.y % 2) ? ord.y-- : ord.y;
@@ -4476,7 +4476,7 @@ Ord3 QuadStdHex::lower_order_same_accuracy(const Ord3 &order) {
 QuadStdPrism::QuadStdPrism() {
 	_F_
 #ifdef WITH_PRISM
-	mode = MODE_PRISM;
+	mode = HERMES_MODE_PRISM;
 	max_order = MAKE_PRISM_ORDER(H3D_MAX_QUAD_ORDER_TRI, H3D_MAX_QUAD_ORDER);
 	max_edge_order = H3D_MAX_QUAD_ORDER;
 	// FIXME: some faces have triangles, some have quads

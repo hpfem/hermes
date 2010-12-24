@@ -111,7 +111,7 @@ public:
 
   Quad2DLin()
   {
-    mode = H2D_MODE_TRIANGLE;
+    mode = HERMES_MODE_TRIANGLE;
     max_order[0]  = max_order[1]  = 1;
     num_tables[0] = num_tables[1] = 2;
     tables = lin_tables;

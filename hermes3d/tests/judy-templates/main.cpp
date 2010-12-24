@@ -20,12 +20,12 @@ bool testPrint(bool value, const char *msg, bool correct) {
 }
 
 //
-// Test Array template
+// Test JudyArray template
 //
 
-int testArrayInt() {
-	info("- Testing Array<int>-----");
-	Array<int> int_array;
+int testJudyArrayInt() {
+	info("- Testing JudyArray<int>-----");
+	JudyArray<int> int_array;
 	bool r;
 	unsigned int idx;
 
@@ -119,10 +119,10 @@ struct Point {
 	}
 };
 
-int testArrayStruct() {
-	info("- Testing Array<struct>-----");
+int testJudyArrayStruct() {
+	info("- Testing JudyArray<struct>-----");
 
-	Array<Point> pt_array;
+	JudyArray<Point> pt_array;
 	bool r;
 	unsigned int idx;
 
@@ -203,28 +203,28 @@ int testArrayStruct() {
 }
 
 // test array templates (with int and with struct)
-int testArray() {
+int testJudyArray() {
 	int ret;
 
 	// test the array of ints
-	if ((ret = testArrayInt()) != 0)
+	if ((ret = testJudyArrayInt()) != 0)
 		return ret;
 
 	// test the array of structs
-	if ((ret = testArrayStruct()) != 0)
+	if ((ret = testJudyArrayStruct()) != 0)
 		return ret;
 
 	return 0;
 }
 
 //
-// Test ArrayPtr template
+// Test JudyArrayPtr template
 //
 
-int testArrayPtrStruct() {
-	info("- Testing ArrayPtr<struct>-----");
+int testJudyArrayPtrStruct() {
+	info("- Testing JudyArrayPtr<struct>-----");
 
-	ArrayPtr<Point> ptr_array;
+	JudyArrayPtr<Point> ptr_array;
 	bool r;
 	unsigned int idx;
 
@@ -493,14 +493,14 @@ int testMapHS() {
 
 
 // test bit array
-int testBitArray() {
-	BitArray bit_array;
+int testBitJudyArray() {
+	BitJudyArray bit_array;
 	bool r;
 	unsigned int count;
 	unsigned int index, value;
 	unsigned int mem_used;
 
-	info("- Testing BitArray -----");
+	info("- Testing BitJudyArray -----");
 
 	// first set a value in the empty array
 	r = bit_array.set(1);
@@ -557,7 +557,7 @@ int testBitArray() {
 		return -1;
 
 	// COPY
-	BitArray dup;
+	BitJudyArray dup;
 	r = dup.copy(&bit_array);
 	if (!testPrint(r, "  * Making copy of the array", true))
 		return -1;
@@ -597,10 +597,10 @@ int main() {
 	int ret = 0;
 
 	// test JudyV
-	if ((ret = testArray()) != 0)
+	if ((ret = testJudyArray()) != 0)
 		return ret;
 
-	if ((ret = testArrayPtrStruct()) != 0)
+	if ((ret = testJudyArrayPtrStruct()) != 0)
 		return ret;
 
 	// test Map
@@ -616,7 +616,7 @@ int main() {
 		return ret;
 
 	// test Judy1
-	if ((ret = testBitArray()) != 0)
+	if ((ret = testBitJudyArray()) != 0)
 		return ret;
 
 	return ret;

@@ -91,7 +91,7 @@ protected:
 OutputQuadTetra::OutputQuadTetra()
 {
 #ifdef WITH_TETRA
-	mode = MODE_TETRAHEDRON;
+	mode = HERMES_MODE_TET;
 #else
 	EXIT(H3D_ERR_TETRA_NOT_COMPILED);
 #endif
@@ -140,7 +140,7 @@ protected:
 OutputQuadHex::OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	mode = MODE_HEXAHEDRON;
+	mode = HERMES_MODE_HEX;
 #else
 	EXIT(H3D_ERR_HEX_NOT_COMPILED);
 #endif
@@ -207,10 +207,10 @@ public:
 		EType type;		// type of the cell
 	};
 
-	Array<Vertex *> &get_points() { return points; }
-	Array<Cell *> &get_cells() { return cells; }
-	Array<double> &get_cell_data() { return cell_data; }
-	Array<double> &get_point_data(int idx = 0) { return pt_data[idx]; }
+	JudyArray<Vertex *> &get_points() { return points; }
+	JudyArray<Cell *> &get_cells() { return cells; }
+	JudyArray<double> &get_cell_data() { return cell_data; }
+	JudyArray<double> &get_point_data(int idx = 0) { return pt_data[idx]; }
 
 	int add_point(double x, double y, double z);
 	/// Adding cells prepared by VtkOuputEngine (0-based indexing)
@@ -225,10 +225,10 @@ public:
 
 public:
 	Map<double3, int> vertex_id;					// mapping: CEDKey => ced function index
-	Array<Vertex *> points;
-	Array<Cell *> cells;
-	Array<double> cell_data;
-	Array<double> pt_data[3];
+	JudyArray<Vertex *> points;
+	JudyArray<Cell *> cells;
+	JudyArray<double> cell_data;
+	JudyArray<double> pt_data[3];
 };
 
 Linearizer::~Linearizer()
@@ -298,8 +298,8 @@ void FileFormatter::write(FILE *file, const char *name)
 	fprintf(file, "ASCII\n");
 
 	// dataset
-	Array<Vertex *> &points = lin->get_points();
-	Array<Linearizer::Cell *> &cells = lin->get_cells();
+	JudyArray<Vertex *> &points = lin->get_points();
+	JudyArray<Linearizer::Cell *> &cells = lin->get_cells();
 	int sz_cells = 0;
 	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
 		Linearizer::Cell *cell = cells[i];
@@ -312,10 +312,10 @@ void FileFormatter::write(FILE *file, const char *name)
 		}
 		sz_cells++;
 	}
-	Array<double> &cell_data = lin->get_cell_data();
-	Array<double> &pt_data0 = lin->get_point_data(0);
-	Array<double> &pt_data1 = lin->get_point_data(1);
-	Array<double> &pt_data2 = lin->get_point_data(2);
+	JudyArray<double> &cell_data = lin->get_cell_data();
+	JudyArray<double> &pt_data0 = lin->get_point_data(0);
+	JudyArray<double> &pt_data1 = lin->get_point_data(1);
+	JudyArray<double> &pt_data2 = lin->get_point_data(2);
 
 	fprintf(file, "\n");
 	fprintf(file, "DATASET UNSTRUCTURED_GRID\n");
@@ -481,7 +481,7 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 
 		int id;
 		switch (mode) {
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				for (int i = 0; i < divs[order.z]; i++) {
 					for (int j = 0; j < divs[order.y]; j++) {
 						for (int o = 0; o < divs[order.x]; o++) {
@@ -503,11 +503,11 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 				}
 				break;
 
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
 				break;
 
-			case MODE_PRISM:
+			case HERMES_MODE_PRISM:
 				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
@@ -554,7 +554,7 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 	Mesh *mesh = NULL;
 	Mesh *meshes[] = { fn1->get_mesh(), fn2->get_mesh(), fn3->get_mesh() };
 	bool unimesh = false;	// FIXME: do not build union mesh if the meshes are the same
-	if (meshes[0]->elements[1]->get_mode() == MODE_TETRAHEDRON)
+	if (meshes[0]->elements[1]->get_mode() == HERMES_MODE_TET)
 		unimesh = false;
 
 	// construct an union mesh
@@ -607,7 +607,7 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 
 		int id;
 		switch (mode) {
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				for (int i = 0; i < divs[order.z]; i++) {
 					for (int j = 0; j < divs[order.y]; j++) {
 						for (int o = 0; o < divs[order.x]; o++) {
@@ -629,11 +629,11 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 				}
 				break;
 
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
 				break;
 
-			case MODE_PRISM:
+			case HERMES_MODE_PRISM:
 				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
@@ -692,11 +692,11 @@ void VtkOutputEngine::out(Mesh *mesh)
 
 		int id;
 		switch (element->get_mode()) {
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, vtx_pt);
 				break;
 
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
 				break;
 
@@ -739,10 +739,10 @@ void VtkOutputEngine::out_bc_vtk(Mesh *mesh, const char *name)
 
 			int id;
 			switch (facet->mode) {
-				case MODE_TRIANGLE:
+				case HERMES_MODE_TRIANGLE:
 					id = l.add_cell(Vtk::Linearizer::Cell::Tri, Tri::NUM_VERTICES, vtx_pt);
 					break;
-				case MODE_QUAD:
+				case HERMES_MODE_QUAD:
 					id = l.add_cell(Vtk::Linearizer::Cell::Quad, Quad::NUM_VERTICES, vtx_pt);
 					break;
 				default:
@@ -784,7 +784,7 @@ void VtkOutputEngine::out_orders_vtk(Space *space, const char *name)
 
 		int id;
 		switch (element->get_mode()) {
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
 					unsigned int fvtcs[Quad::NUM_VERTICES];
 					element->get_face_vertices(iface, fvtcs);
@@ -817,7 +817,7 @@ void VtkOutputEngine::out_orders_vtk(Space *space, const char *name)
 				}
 				break;
 
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
 				l.set_cell_data(id, ord.order);
 				break;
@@ -853,11 +853,11 @@ void VtkOutputEngine::out_elem_markers(Mesh *mesh, const char *name)
 
 		int id;
 		switch (element->get_mode()) {
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, vtx_pt);
 				break;
 
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
 				break;
 

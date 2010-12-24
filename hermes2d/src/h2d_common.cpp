@@ -15,17 +15,17 @@
 
 #include "h2d_common.h"
 
-HERMES_API const std::string get_quad_order_str(const int quad_order) {
+HERMES_API const std::string h2d_get_quad_order_str(const int quad_order) {
   std::stringstream str;
   str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
   return str.str();
 }
 
-HERMES_API int make_edge_order(int mode, int edge, int encoded_order)
+HERMES_API int h2d_make_edge_order(int mode, int edge, int encoded_order)
 {
   assert(edge < 4);
   
-  if (mode == H2D_MODE_TRIANGLE || edge == 0 || edge == 2)
+  if (mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2)
     return H2D_GET_H_ORDER(encoded_order);
   else
     return H2D_GET_V_ORDER(encoded_order);

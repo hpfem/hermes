@@ -29,8 +29,8 @@ struct MItem;
 ///
 /// There are are two variants of this structure, depending on the value of
 /// the member 'type':
-/// <ol> <li> H2D_TYPE_VERTEX -- vertex node. Has physical coordinates x, y.
-///      <li> H2D_TYPE_EDGE   -- edge node. Only stores edge marker and two element pointers.
+/// <ol> <li> HERMES_TYPE_VERTEX -- vertex node. Has physical coordinates x, y.
+///      <li> HERMES_TYPE_EDGE   -- edge node. Only stores edge marker and two element pointers.
 /// </ol>
 ///
 struct HERMES_API Node
@@ -58,7 +58,7 @@ struct HERMES_API Node
   int p1, p2; ///< parent id numbers
   Node* next_hash; ///< next node in hash synonym list
 
-  bool is_constrained_vertex() const { assert(type == H2D_TYPE_VERTEX); return ref <= 3 && !bnd; }
+  bool is_constrained_vertex() const { assert(type == HERMES_TYPE_VERTEX); return ref <= 3 && !bnd; }
 
   void ref_element(Element* e = NULL);
   void unref_element(HashTable* ht, Element* e = NULL);
@@ -111,7 +111,7 @@ struct HERMES_API Element
   bool is_triangle() const { return nvert == 3; }
   bool is_quad() const { return nvert == 4; }
   bool is_curved() const { return cm != NULL; }
-  int  get_mode() const { return is_triangle() ? H2D_MODE_TRIANGLE : H2D_MODE_QUAD; }
+  int  get_mode() const { return is_triangle() ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; }
   int get_num_surf() {return nvert; }
 
   // helper functions to obtain the index of the next or previous vertex/edge

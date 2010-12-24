@@ -34,23 +34,23 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
   _F_ 
   if (shapeset == NULL) {
     switch (p_init.type) {
-      case MODE_TETRAHEDRON: this->shapeset = new H1ShapesetLobattoTetra; break;
-      case MODE_HEXAHEDRON:  this->shapeset = new H1ShapesetLobattoHex; break;
-      //case MODE_PRISM: this->shapeset = new H1ShapesetLobattoPrism; break;
+      case HERMES_MODE_TET: this->shapeset = new H1ShapesetLobattoTetra; break;
+      case HERMES_MODE_HEX:  this->shapeset = new H1ShapesetLobattoHex; break;
+      //case HERMES_MODE_PRISM: this->shapeset = new H1ShapesetLobattoPrism; break;
       default: error("Unknown element type in H1Space::H1Space().");
     }
   }
-  this->type = H1;
+  this->type = HERMES_H1_SPACE;
 
   // set uniform poly order in elements
   switch (p_init.type) {
-    case MODE_HEXAHEDRON: 
+    case HERMES_MODE_HEX: 
       if (p_init.x < 1 || p_init.y < 1 || p_init.z < 1) {
         error("P_INIT must be >= 1 in all directions in an H1 space on hexahedra.");
       }
       else this->set_uniform_order_internal(p_init);
       break;
-    case MODE_TETRAHEDRON: 
+    case HERMES_MODE_TET: 
       if (p_init.order < 1) error("P_INIT must be >= 1 in an H1 space on tetrahedra.");
       else this->set_uniform_order_internal(p_init);
       break;
@@ -101,25 +101,25 @@ int H1Space::get_edge_ndofs(Ord1 order)
 int H1Space::get_face_ndofs(Ord2 order) 
 {
   switch (order.type) {
-    case MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
-    case MODE_QUAD: return (order.x - 1) * (order.y - 1);
+    case HERMES_MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
+    case HERMES_MODE_QUAD: return (order.x - 1) * (order.y - 1);
     default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
   }
 }
 
 int H1Space::get_element_ndofs(Ord3 order) {
   switch (order.type) {
-    case MODE_TETRAHEDRON: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
-    case MODE_HEXAHEDRON: return (order.x - 1) * (order.y - 1) * (order.z - 1);
+    case HERMES_MODE_TET: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
+    case HERMES_MODE_HEX: return (order.x - 1) * (order.y - 1) * (order.z - 1);
     default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
   }
 }
 
 void H1Space::assign_dofs_internal() {
 	_F_
-	BitArray init_vertices;
-	BitArray init_edges;
-	BitArray init_faces;
+	BitJudyArray init_vertices;
+	BitJudyArray init_edges;
+	BitJudyArray init_faces;
 
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
 		Element *e = mesh->elements[idx];

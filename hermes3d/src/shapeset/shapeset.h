@@ -267,7 +267,7 @@ protected:
 
 	Map<CEDKey, CEDComb *> ced_comb;			// mapping: CEDKey => CEDComb
 	Map<CEDKey, int> ced_id;					// mapping: CEDKey => ced function index
-	Array<CEDKey> ced_key;						// indexing: index => CEDKey
+	JudyArray<CEDKey> ced_key;						// indexing: index => CEDKey
 	int ced_idx;								// ced index to assing
 
 	CEDComb *get_ced_comb(const CEDKey &key);
@@ -286,7 +286,7 @@ public:
 	inline scalar get_dz_product(int idx1, int idx2) { return get_product_val(idx1, idx2, dz_prods); }
 
 protected:
-	Array<int> fnidx2idx;				// mapping from fn index to a array index
+	JudyArray<int> fnidx2idx;				// mapping from fn index to a array index
 	double *fn_prods;					// products of fn. values, dx, dy, dz
 	double *dx_prods;
 	double *dy_prods;

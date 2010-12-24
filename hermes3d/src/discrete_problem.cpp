@@ -737,8 +737,8 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   // Increase due to reference map.
   Ord3 order = ru->get_inv_ref_order();
   switch (order.type) {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   int ord_idx = order.get_idx();
@@ -840,8 +840,8 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   Ord3 order = rv->get_inv_ref_order();
   switch (order.type) 
   {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   int ord_idx = order.get_idx();
@@ -940,8 +940,8 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
   Ord3 order = ru->get_inv_ref_order();
   switch (order.type) 
   {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   Ord2 face_order = order.get_face_order(surf_pos->surf_num);
@@ -1042,8 +1042,8 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   Ord3 order = rv->get_inv_ref_order();
   switch (order.type) 
   {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   Ord2 face_order = order.get_face_order(surf_pos->surf_num);

@@ -182,7 +182,7 @@ namespace RefinementSelectors {
     //retrieve transformations
     Trf* trfs = NULL;
     int num_noni_trfs = 0;
-    if (mode == H2D_MODE_TRIANGLE) {
+    if (mode == HERMES_MODE_TRIANGLE) {
       trfs = tri_trf;
       num_noni_trfs = H2D_TRF_TRI_NUM;
     }
@@ -199,7 +199,7 @@ namespace RefinementSelectors {
       cached_shape_vals_valid[mode] = true;
 
       //issue a warning if ortho values are defined and the selected cand_list might benefit from that but it cannot because elements do not have uniform orders
-      if (!warn_uniform_orders && mode == H2D_MODE_QUAD && !cached_shape_ortho_vals[mode][H2D_TRF_IDENTITY].empty()) {
+      if (!warn_uniform_orders && mode == HERMES_MODE_QUAD && !cached_shape_ortho_vals[mode][H2D_TRF_IDENTITY].empty()) {
         warn_uniform_orders = true;
         if (cand_list == H2D_H_ISO || cand_list == H2D_H_ANISO || cand_list == H2D_P_ISO || cand_list == H2D_HP_ISO || cand_list == H2D_HP_ANISO_H) {
           warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(cand_list));
@@ -284,7 +284,7 @@ namespace RefinementSelectors {
 
     //calculate for all orders
     double sub_area_corr_coef = 1.0 / num_sub;
-    OrderPermutator order_perm(info.min_quad_order, info.max_quad_order, mode == H2D_MODE_TRIANGLE || info.uniform_orders);
+    OrderPermutator order_perm(info.min_quad_order, info.max_quad_order, mode == HERMES_MODE_TRIANGLE || info.uniform_orders);
     do {
       int quad_order = order_perm.get_quad_order();
       int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);

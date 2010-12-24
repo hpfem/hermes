@@ -77,8 +77,8 @@ public:
 	virtual void set_output_precision(int p) { output_precision = p; }
 
 protected:
-	Array<int> subdiv_num;
-	Array<int *> subdiv_modes;
+	JudyArray<int> subdiv_num;
+	JudyArray<int *> subdiv_modes;
 	int output_precision;
 
 	virtual void calculate_view_points(Ord3 order) = 0;
@@ -103,7 +103,7 @@ protected:
 OutputQuadTetra::OutputQuadTetra() {
 	_F_
 #ifdef WITH_TETRA
-	mode = MODE_TETRAHEDRON;
+	mode = HERMES_MODE_TET;
 	max_order = H3D_MAX_QUAD_ORDER;
 
 	output_precision = 1;
@@ -144,7 +144,7 @@ void OutputQuadTetra::calculate_view_points(Ord3 order) {
 	subdiv_modes[orderidx] = new int[subdiv_num[orderidx]];
 	MEM_CHECK(subdiv_modes[orderidx]);
 	for (int i = 0; i < subdiv_num[orderidx]; i++)
-		subdiv_modes[orderidx][i] = MODE_TETRAHEDRON;
+		subdiv_modes[orderidx][i] = HERMES_MODE_TET;
 
 	// compute the table of points recursively
 	tables[orderidx] = new QuadPt3D[np[orderidx]];
@@ -190,7 +190,7 @@ void OutputQuadTetra::recursive_division(const Point3D *tv, QuadPt3D *table, int
 //// OutputQuadHex ////////////////////////////////////////////////////////////////////////////////
 
 int get_principal_order(Ord3 order) {
-	assert(order.type == MODE_HEXAHEDRON);
+	assert(order.type == HERMES_MODE_HEX);
 	return std::max(order.x, std::max(order.y, order.z));
 }
 
@@ -210,7 +210,7 @@ protected:
 OutputQuadHex::OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	mode = MODE_HEXAHEDRON;
+	mode = HERMES_MODE_HEX;
 	max_order = H3D_MAX_QUAD_ORDER;
 	output_precision = 0;
 #else
@@ -244,7 +244,7 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 	MEM_CHECK(subdiv_modes[o]);
 	// the new subelements are hexahedra only
 	for (int i = 0; i < subdiv_num[o]; i++)
-		subdiv_modes[o][i] = MODE_HEXAHEDRON;
+		subdiv_modes[o][i] = HERMES_MODE_HEX;
 
 	// compute the table of points recursively
 	tables[o] = new QuadPt3D[np[o]];
@@ -325,9 +325,9 @@ void GmshOutputEngine::dump_scalars(int mode, int num_pts, Point3D *pts, double 
 	_F_
 	const char *id;
 	switch (mode) {
-		case MODE_TETRAHEDRON: id = "SS"; break;
-		case MODE_HEXAHEDRON: id = "SH"; break;
-		case MODE_PRISM: EXIT("Unsupported mode."); break;
+		case HERMES_MODE_TET: id = "SS"; break;
+		case HERMES_MODE_HEX: id = "SH"; break;
+		case HERMES_MODE_PRISM: EXIT("Unsupported mode."); break;
 		default: EXIT("Invalid mode."); break;
 	}
 
@@ -349,9 +349,9 @@ void GmshOutputEngine::dump_vectors(int mode, int num_pts, Point3D *pts, double 
 	_F_
 	const char *id;
 	switch (mode) {
-		case MODE_TETRAHEDRON: id = "VS"; break;
-		case MODE_HEXAHEDRON: id = "VH"; break;
-		case MODE_PRISM: EXIT("Unsupported mode."); break;
+		case HERMES_MODE_TET: id = "VS"; break;
+		case HERMES_MODE_HEX: id = "VH"; break;
+		case HERMES_MODE_PRISM: EXIT("Unsupported mode."); break;
 		default: EXIT("Invalid mode."); break;
 	}
 
@@ -421,9 +421,9 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 		// FIXME: get order from the space
 		Ord3 order;
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = Ord3(1); break;
-			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
-			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			case HERMES_MODE_TET: order = Ord3(1); break;
+			case HERMES_MODE_HEX: order = Ord3(1, 1, 1); break;
+			case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 
@@ -450,9 +450,9 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 		for (int i = 0; i < subdiv_num; i++) {
 			int np;
 			switch (mode) {
-				case MODE_TETRAHEDRON: np = Tetra::NUM_VERTICES; break;
-				case MODE_HEXAHEDRON: np = Hex::NUM_VERTICES; break;
-				case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+				case HERMES_MODE_TET: np = Tetra::NUM_VERTICES; break;
+				case HERMES_MODE_HEX: np = Hex::NUM_VERTICES; break;
+				case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 				default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 			}
 
@@ -516,9 +516,9 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 		// FIXME: get order from the space
 		Ord3 order;
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = Ord3(1); break;
-			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
-			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			case HERMES_MODE_TET: order = Ord3(1); break;
+			case HERMES_MODE_HEX: order = Ord3(1, 1, 1); break;
+			case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 
@@ -553,9 +553,9 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 		for (int i = 0; i < subdiv_num; i++) {
 			int np;
 			switch (mode) {
-				case MODE_TETRAHEDRON: np = Tetra::NUM_VERTICES; break;
-				case MODE_HEXAHEDRON: np = Hex::NUM_VERTICES; break;
-				case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+				case HERMES_MODE_TET: np = Tetra::NUM_VERTICES; break;
+				case HERMES_MODE_HEX: np = Hex::NUM_VERTICES; break;
+				case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 				default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 			}
 
@@ -622,17 +622,17 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		element->get_vertices(vtcs);
 
 		switch (element->get_mode()) {
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				fprintf(this->out_file, "%u 4 0 %u %u %u %u\n",
 					element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 				break;
 
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				fprintf(this->out_file, "%u 5 0 %u %u %u %u %u %u %u %u\n",
 					element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
 				break;
 
-			case MODE_PRISM:
+			case HERMES_MODE_PRISM:
 				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
@@ -669,11 +669,11 @@ void GmshOutputEngine::out(Mesh *mesh) {
 			unsigned int *vtcs = new unsigned int[nv];
 			element->get_face_vertices(iface, vtcs);
 			switch (element->get_face_mode(iface)) {
-				case MODE_TRIANGLE:
+				case HERMES_MODE_TRIANGLE:
 					fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
 					break;
 
-				case MODE_QUAD:
+				case HERMES_MODE_QUAD:
 					fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					break;
 			}
@@ -727,11 +727,11 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 			if (facet->type == Facet::INNER) continue;
 
 			switch (facet->mode) {
-				case MODE_TRIANGLE:
+				case HERMES_MODE_TRIANGLE:
 					fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
 					break;
 
-				case MODE_QUAD:
+				case HERMES_MODE_QUAD:
 					fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					break;
 
@@ -759,11 +759,11 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 			Boundary *bnd = mesh->boundaries[facet->right];
 			int marker = bnd->marker;
 			switch (facet->mode) {
-				case MODE_TRIANGLE:
+				case HERMES_MODE_TRIANGLE:
 					fprintf(this->out_file, "%u 3 %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker);
 					break;
 
-				case MODE_QUAD:
+				case HERMES_MODE_QUAD:
 					fprintf(this->out_file, "%u 4 %d %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker, marker);
 					break;
 
@@ -786,8 +786,8 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	fprintf(this->out_file, "$EndMeshFormat\n");
 
 	// HEX specific
-	Array<Vertex *> out_vtcs;	// vertices
-	Array<int> vtx_pt;			// mapping from mesh vertex id to output vertex id
+	JudyArray<Vertex *> out_vtcs;	// vertices
+	JudyArray<int> vtx_pt;			// mapping from mesh vertex id to output vertex id
 	MapHSOrd face_pts;			// id of points on faces
 	MapHSOrd ctr_pts;			// id of points in the center
 
@@ -885,7 +885,7 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
 	id = 1;
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		assert(mesh->elements[idx]->get_mode() == MODE_HEXAHEDRON);			// HEX-specific
+		assert(mesh->elements[idx]->get_mode() == HERMES_MODE_HEX);			// HEX-specific
 		// get order from the space
 		Ord3 order = space->get_element_order(idx);
 

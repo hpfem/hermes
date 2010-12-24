@@ -208,7 +208,7 @@ static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_
 static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
 {
   _F_
-  if (e->get_mode() == H2D_MODE_QUAD)
+  if (e->get_mode() == HERMES_MODE_QUAD)
     calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
   else
     calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
@@ -288,7 +288,7 @@ static void precalculate_cholesky_projection_matrices_bubble()
 {
   _F_
   // *** triangles ***
-  ref_map_pss.set_mode(H2D_MODE_TRIANGLE);
+  ref_map_pss.set_mode(HERMES_MODE_TRIANGLE);
   int order = ref_map_shapeset.get_max_order();
 
   // calculate projection matrix of maximum order
@@ -301,7 +301,7 @@ static void precalculate_cholesky_projection_matrices_bubble()
   choldc(bubble_proj_matrix_tri, nb, bubble_tri_p);
 
   // *** quads ***
-  ref_map_pss.set_mode(H2D_MODE_QUAD);
+  ref_map_pss.set_mode(HERMES_MODE_QUAD);
   order = ref_map_shapeset.get_max_order();
   order = H2D_MAKE_QUAD_ORDER(order, order);
 

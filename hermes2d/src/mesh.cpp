@@ -22,7 +22,7 @@
 
 void Node::ref_element(Element* e)
 {
-  if (type == H2D_TYPE_EDGE)
+  if (type == HERMES_TYPE_EDGE)
   {
     // store the element pointer in a free slot of 'elem'
     if (elem[0] == NULL) elem[0] = e;
@@ -35,7 +35,7 @@ void Node::ref_element(Element* e)
 
 void Node::unref_element(HashTable* ht, Element* e)
 {
-  if (type == H2D_TYPE_VERTEX)
+  if (type == HERMES_TYPE_VERTEX)
   {
     if (!--ref) ht->remove_vertex_node(id);
   }
@@ -875,7 +875,7 @@ void Mesh::create(int nv, double2* verts, int nt, int4* tris,
     Node* node = nodes.add();
     assert(node->id == i);
     node->ref = TOP_LEVEL_REF;
-    node->type = H2D_TYPE_VERTEX;
+    node->type = HERMES_TYPE_VERTEX;
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;
@@ -998,7 +998,7 @@ void Mesh::copy_base(Mesh* mesh)
     Node* node = &(mesh->nodes[i]);
     if (node->ref < TOP_LEVEL_REF) break;
     Node* newnode = nodes.add();
-    assert(newnode->id == i && node->type == H2D_TYPE_VERTEX);
+    assert(newnode->id == i && node->type == HERMES_TYPE_VERTEX);
     memcpy(newnode, node, sizeof(Node));
     newnode->ref = TOP_LEVEL_REF;
   }
@@ -1059,7 +1059,7 @@ void Mesh::copy_converted(Mesh* mesh)
   for(int i = 0; i < nodes.get_size(); i++)
   {
     Node& node = nodes[i];
-    if (node.type == H2D_TYPE_EDGE) { //process only edge nodes
+    if (node.type == HERMES_TYPE_EDGE) { //process only edge nodes
       for(int k = 0; k < 2; k++)
         node.elem[k] = NULL;
     }
@@ -1728,7 +1728,7 @@ void Mesh::save_raw(FILE* f)
     unsigned bits = n->ref | (n->type << 29) | (n->bnd << 30) | (n->used << 31);
     output(bits, unsigned);
 
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       output(n->x, double);
       output(n->y, double);
@@ -1829,7 +1829,7 @@ void Mesh::load_raw(FILE* f)
     n->type = (bits >> 29) & 0x1;
     n->bnd  = (bits >> 30) & 0x1;
 
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       input(n->x, double);
       input(n->y, double);

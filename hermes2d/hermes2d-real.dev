@@ -118,7 +118,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit8]
-FileName=src\array.h
+FileName=..\hermes_common\array.h
 CompileCpp=1
 Folder=hermes2d
 Compile=1

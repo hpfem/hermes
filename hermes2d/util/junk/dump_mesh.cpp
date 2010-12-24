@@ -10,9 +10,9 @@ void dump_mesh(Mesh* mesh)
   for_all_nodes(n, mesh)
   {
     printf("id=%2d type=%s ref=%d bnd=%d p1=%2d p2=%2d ", n->id,
-           (n->type == TYPE_VERTEX) ? "vert" : "edge", n->ref, n->bnd, n->p1, n->p2);
+           (n->type == HERMES_TYPE_VERTEX) ? "vert" : "edge", n->ref, n->bnd, n->p1, n->p2);
 
-    if (n->type == TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
       printf("x=%g y=%g\n", n->x, n->y);
     else
       printf("mrk=%d elem0=%d elem1=%d\n", n->marker,

@@ -19,7 +19,7 @@
 #include "../h2d_common.h"
 
 
-#define H2D_CHECK_MODE      assert(mode == H2D_MODE_TRIANGLE || mode == H2D_MODE_QUAD)
+#define H2D_CHECK_MODE      assert(mode == HERMES_MODE_TRIANGLE || mode == HERMES_MODE_QUAD)
 #define H2D_CHECK_VERTEX    assert(vertex >= 0 && vertex < nvert)
 #define H2D_CHECK_EDGE      assert(edge >= 0 && edge < nvert)
 #define H2D_CHECK_ORDER(o)  assert((o) >= 0 && (o) <= max_order)
@@ -44,8 +44,8 @@ enum FunctionExpansionIndex {
 /// mechanisms for the calculation and storage of constrained shape functions.
 ///
 /// The class returns shape function values for both triangles and quads, depending on
-/// what mode it is in. Use the function set_mode() to switch between H2D_MODE_TRIANGLE and
-/// H2D_MODE_QUAD.
+/// what mode it is in. Use the function set_mode() to switch between HERMES_MODE_TRIANGLE and
+/// HERMES_MODE_QUAD.
 ///
 /// Each shape function is assigned a unique number - 'index'. For standard shape functions,
 /// index is positive and not greater than the value returned by get_max_index(). Negative
@@ -75,12 +75,12 @@ public:
 
   ~Shapeset() { free_constrained_edge_combinations(); }
 
-  /// Selects H2D_MODE_TRIANGLE or H2D_MODE_QUAD.
+  /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.
   void set_mode(int mode)
   {
     H2D_CHECK_MODE;
     this->mode = mode;
-    nvert = (mode == H2D_MODE_TRIANGLE) ? 3 : 4;
+    nvert = (mode == HERMES_MODE_TRIANGLE) ? 3 : 4;
   }
 
   /// Returns the current mode.
@@ -118,7 +118,7 @@ public:
     H2D_CHECK_ORDER(H2D_GET_H_ORDER(order));
     H2D_CHECK_ORDER(H2D_GET_V_ORDER(order));
     int index = order;
-    if (mode == H2D_MODE_QUAD) //tables of bubble indices are transposed
+    if (mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
       index = H2D_MAKE_QUAD_ORDER(H2D_GET_V_ORDER(order), H2D_GET_H_ORDER(order));
     return bubble_indices[mode][index];
   }

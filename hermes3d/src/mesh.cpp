@@ -17,7 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../../hermes_common/bitarray.h"
+#include "../../hermes_common/bitjudyarray.h"
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/error.h"
 
@@ -780,7 +780,7 @@ void Mesh::copy(const Mesh &mesh) {
 			const int *edge = e->get_face_edges(iface);
 
 			switch (e->get_mode()) {
-				case MODE_HEXAHEDRON:
+				case HERMES_MODE_HEX:
 					// horz
 					if (emp[edge[1]] != INVALID_IDX && emp[edge[3]] != INVALID_IDX) {
 						unsigned int edge_vtx[Edge::NUM_VERTICES] = { emp[edge[1]], emp[edge[3]] };
@@ -799,8 +799,8 @@ void Mesh::copy(const Mesh &mesh) {
 					}
 					break;
 
-				case MODE_TETRAHEDRON:
-				case MODE_PRISM:
+				case HERMES_MODE_TET:
+				case HERMES_MODE_PRISM:
 					break;
 			}
 		}
@@ -1016,7 +1016,7 @@ Hex *Mesh::add_hex(unsigned int vtcs[]) {
 			facet->set_right_info(hex->id, i);
 		}
 		else {
-			Facet *fct = new Facet(MODE_QUAD);
+			Facet *fct = new Facet(HERMES_MODE_QUAD);
 			MEM_CHECK(fct);
 			fct->set_left_info(hex->id, i);
 			facets.set(facet_idxs + 0, nvtcs, fct);
@@ -1190,9 +1190,9 @@ bool Mesh::can_refine_element(unsigned int eid, int reft) const {
 	Element *elem = elements.get(eid);
 	assert(elem != NULL);
 	switch (elem->get_mode()) {
-		case MODE_HEXAHEDRON: can_refine = can_refine_hex((Hex *) elem, reft); break;
-		case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-		case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		case HERMES_MODE_HEX: can_refine = can_refine_hex((Hex *) elem, reft); break;
+		case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 	}
 
@@ -1302,9 +1302,9 @@ bool Mesh::refine_element(unsigned int id, int refinement) {
 	assert(elem != NULL);
 	if (can_refine_element(id, refinement)) {
 		switch (elem->get_mode()) {
-			case MODE_HEXAHEDRON: refined = refine_hex((Hex *) elem, refinement); break;
-			case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			case HERMES_MODE_HEX: refined = refine_hex((Hex *) elem, refinement); break;
+			case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 
@@ -1679,7 +1679,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 
 	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
-	assert(facet->mode == MODE_QUAD);
+	assert(facet->mode == HERMES_MODE_QUAD);
 
 	//	if (is_compatible_quad_refinement(facet, face_refinement)) {
 	if ((unsigned) facet->left == parent_elem->id) facet->set_left_info(eid, iface);
@@ -1695,7 +1695,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 
 	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
-	assert(facet->mode == MODE_QUAD);
+	assert(facet->mode == HERMES_MODE_QUAD);
 	if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->left == parent_elem->id) {
 		// refine to the left
 		if (facet->ref_mask == H3D_REFT_FACE_NONE || facet->ref_mask == face_refinement) {
@@ -1887,7 +1887,7 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 
 	unsigned int fid = get_facet_id(parent_elem, iface);
 	Facet *facet = facets.get(fid);
-	assert(facet->mode == MODE_QUAD);
+	assert(facet->mode == HERMES_MODE_QUAD);
 
 	//	if (is_compatible_quad_refinement(facet, face_refinement)) {
 	if ((unsigned) facet->type == Facet::INNER && (unsigned) facet->left == parent_elem->id) {
@@ -2049,7 +2049,7 @@ Facet *Mesh::add_quad_facet(Facet::Type type, unsigned int left_elem, int left_i
 	}
 	else {
 		// create new facet
-		facet = new Facet(MODE_QUAD);
+		facet = new Facet(HERMES_MODE_QUAD);
 		MEM_CHECK(facet);
 		facet->type = type;
 		facet->set_left_info(left_elem, left_iface);
@@ -2323,8 +2323,8 @@ void Mesh::check_elem_oris()
 		refmap.set_active_element(e);
 
 		Ord3 ord;
-		if (e->get_mode() == MODE_HEXAHEDRON) ord = Ord3(1, 1, 1);
-		else if (e->get_mode() == MODE_TETRAHEDRON) ord = Ord3(2);
+		if (e->get_mode() == HERMES_MODE_HEX) ord = Ord3(1, 1, 1);
+		else if (e->get_mode() == HERMES_MODE_TET) ord = Ord3(2);
 		else warning(HERMES_ERR_NOT_IMPLEMENTED);
 		Quad3D *quad = get_quadrature(e->get_mode());
 		int np = quad->get_num_points(ord);

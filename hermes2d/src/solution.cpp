@@ -81,7 +81,7 @@ public:
 
   Quad2DCheb()
   {
-    mode = H2D_MODE_TRIANGLE;
+    mode = HERMES_MODE_TRIANGLE;
     max_order[0]  = max_order[1]  = 10;
     num_tables[0] = num_tables[1] = 11;
     tables = cheb_tab;

@@ -22,7 +22,7 @@
 
 #include "h3d_common.h"
 #include "order.h"
-#include "../../hermes_common/array.h"
+#include "../../hermes_common/judyarray.h"
 #include "../../hermes_common/error.h"
 
 /// @defgroup quadratures Numerical quadratures
@@ -153,7 +153,7 @@ public:
 	ElementMode2D get_mode() const { return mode; }
 
 protected:
-	/// mode of quadratures (MODE_TRIANGLE, MODE_QUAD)
+	/// mode of quadratures (HERMES_MODE_TRIANGLE, HERMES_MODE_QUAD)
 	ElementMode2D mode;
 	/// maximal order for integration (interpretation depened on the mode)
 	int max_order;
@@ -200,20 +200,20 @@ public:
 	ElementMode3D get_mode() const { return mode; }
 
 protected:
-	/// mode of quadratures (MODE_TETRAHEDRON, MODE_HEXAHEDRON, MODE_PRISM)
+	/// mode of quadratures (HERMES_MODE_TET, HERMES_MODE_HEX, HERMES_MODE_PRISM)
 	ElementMode3D mode;
 	/// maximal order for integration (interpretation depends on the mode)
 	Ord1 max_edge_order;
 	Ord2 max_face_order;
 	Ord3 max_order;
 
-	Array<QuadPt3D *> tables;
-	Array<QuadPt3D *> *edge_tables;
-	Array<QuadPt3D *> *face_tables;
+	JudyArray<QuadPt3D *> tables;
+	JudyArray<QuadPt3D *> *edge_tables;
+	JudyArray<QuadPt3D *> *face_tables;
 	QuadPt3D *vertex_table;
-	Array<int> np;
-	Array<int> np_edge;
-	Array<int> np_face;
+	JudyArray<int> np;
+	JudyArray<int> np_edge;
+	JudyArray<int> np_face;
 	int np_vertex;
 };
 

@@ -19,7 +19,7 @@ HERMES_API std::ostream& operator<<(std::ostream& stream, const ElementToRefine&
   for(int i = 0; i < num_sons; i++) {
     if (i > 0)
       stream << " ";
-    stream << get_quad_order_str(elem_ref.p[i]);
+    stream << h2d_get_quad_order_str(elem_ref.p[i]);
   }
   stream << "]";
   return stream;

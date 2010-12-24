@@ -53,7 +53,7 @@ bool read_n_nums(char *row, int n, double values[]) {
 }
 
 int read_matrix_and_rhs(char *file_name, int &n, 
-                        Array<MatrixEntry> &mat, Array<scalar> &rhs) {
+                        JudyArray<MatrixEntry> &mat, JudyArray<scalar> &rhs) {
 #ifndef H3D_COMPLEX
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return ERR_FAILURE;
@@ -105,8 +105,8 @@ int read_matrix_and_rhs(char *file_name, int &n,
   return ERR_SUCCESS;
 }
 
-void build_matrix(int n, Array<MatrixEntry> &ar_mat, 
-                  Array<scalar> &ar_rhs, SparseMatrix *mat,
+void build_matrix(int n, JudyArray<MatrixEntry> &ar_mat, 
+                  JudyArray<scalar> &ar_rhs, SparseMatrix *mat,
                   Vector *rhs) {
   mat->prealloc(n);
   for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
@@ -128,7 +128,7 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat,
   rhs->finish();
 }
 
-void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<scalar> &ar_rhs,
+void build_matrix_block(int n, JudyArray<MatrixEntry> &ar_mat, JudyArray<scalar> &ar_rhs,
                         SparseMatrix *matrix, Vector *rhs) {
   matrix->prealloc(n);
   for (int i = 0; i < n; i++)
@@ -189,8 +189,8 @@ int main(int argc, char *argv[]) {
 #endif
 
   int n;
-  Array<MatrixEntry> ar_mat;
-  Array<scalar> ar_rhs;
+  JudyArray<MatrixEntry> ar_mat;
+  JudyArray<scalar> ar_rhs;
 
   if (read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs) != ERR_SUCCESS)
     error("Failed to read the matrix and rhs.");

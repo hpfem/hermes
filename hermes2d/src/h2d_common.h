@@ -21,49 +21,30 @@
 // H2D-specific includes.
 #include <Judy.h>
 #include "auto_local_array.h"
-#include "tuple.h"
+//#include "tuple.h"
 
 
 // H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
 
-enum // node types
-{
-  H2D_TYPE_VERTEX = 0,
-  H2D_TYPE_EDGE = 1
-};
-
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
-
-
-// 2D element modes
-enum ElementMode2D {
-	H2D_MODE_TRIANGLE = 0,
-	H2D_MODE_QUAD = 1
-};
 
 // how many bits the order number takes
 const int H2D_ORDER_BITS = 5;
 const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
-const int H2D_DEFAULT_PROJ_TYPE = 1;
 
 // macros for combining quad horizontal and vertical orders
 #define H2D_MAKE_QUAD_ORDER(h_order, v_order) (((v_order) << H2D_ORDER_BITS) + (h_order))
 #define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
 #define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
 
-extern HERMES_API const std::string get_quad_order_str(const int quad_order); ///< Returns string representation of the quad order: used for debugging purposses.
-extern HERMES_API int make_edge_order(int edge, int encoded_order, int mode); ///< Returns the correct axial order for given edge.
+extern HERMES_API const std::string h2d_get_quad_order_str(const int quad_order); ///< Returns string representation of the quad order: used for debugging purposses.
+extern HERMES_API int h2d_make_edge_order(int edge, int encoded_order, int mode); ///< Returns the correct axial order for given edge.
 
 // Enabling second derivatives in weak forms. Turned off by default. Second
 // derivatives are employed, among others, by stabilization methods for
 // transport equations. For usage see the example linear-convection-diffusion.
 #define H2D_SECOND_DERIVATIVES_ENABLED
-
-/* python support */
-/// Throws an exception std::runtime_error. Used by Python wrappers.
-/** \param[in] text A text (a cause) of the exception. */
-extern HERMES_API void throw_exception(char *text);
 
 /* Uncomment this line to disable internal mesh compatibility 
    tests in Traverse:begin(). */ 

@@ -31,7 +31,7 @@
 QuadChebTetra::QuadChebTetra() {
 	_F_
 #ifdef WITH_TETRA
-	mode = MODE_TETRAHEDRON;
+	mode = HERMES_MODE_TET;
 
 	max_edge_order = 10;
 	max_face_order = Ord2(10);
@@ -72,7 +72,7 @@ QuadChebTetra::~QuadChebTetra() {
 QuadChebHex::QuadChebHex() {
 	_F_
 #ifdef WITH_HEX
-	mode = MODE_HEXAHEDRON;
+	mode = HERMES_MODE_HEX;
 
 	max_edge_order = 10;
 	max_face_order = Ord2(10, 10);

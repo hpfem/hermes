@@ -16,7 +16,7 @@
 #ifndef __H2D_HASH_H
 #define __H2D_HASH_H
 
-#include "array.h"
+#include "../../hermes_common/array.h"
 
 struct Node;
 

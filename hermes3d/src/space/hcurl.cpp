@@ -33,7 +33,7 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
   _F_
   // FIXME: this will fail if the mesh contains tetrahedra. 
   if (shapeset == NULL) this->shapeset = new HcurlShapesetLobattoHex;
-  this->type = Hcurl;
+  this->type = HERMES_HCURL_SPACE;
 
   // set uniform poly order in elements
   this->set_uniform_order_internal(p_init);
@@ -73,16 +73,16 @@ int HcurlSpace::get_edge_ndofs(Ord1 order) {
 
 int HcurlSpace::get_face_ndofs(Ord2 order) {
 	switch (order.type) {
-		case MODE_QUAD: return (order.x + 1) * order.y + order.x * (order.y + 1);
-		case MODE_TRIANGLE: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
+		case HERMES_MODE_QUAD: return (order.x + 1) * order.y + order.x * (order.y + 1);
+		case HERMES_MODE_TRIANGLE: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
 		default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
 	}
 }
 
 int HcurlSpace::get_element_ndofs(Ord3 order) {
 	switch (order.type) {
-		case MODE_HEXAHEDRON: return (order.x + 1) * order.y * order.z + order.x * (order.y + 1) * order.z + order.x * order.y * (order.z + 1);
-		case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
+		case HERMES_MODE_HEX: return (order.x + 1) * order.y * order.z + order.x * (order.y + 1) * order.z + order.x * order.y * (order.z + 1);
+		case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
 		default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
 	}
 }
@@ -91,8 +91,8 @@ int HcurlSpace::get_element_ndofs(Ord3 order) {
 
 void HcurlSpace::assign_dofs_internal() {
 	_F_
-	BitArray init_edges;
-	BitArray init_faces;
+	BitJudyArray init_edges;
+	BitJudyArray init_faces;
 
 	// edge dofs
 	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {

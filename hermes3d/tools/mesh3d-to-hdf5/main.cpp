@@ -68,7 +68,7 @@ bool save_vertices(hid_t parent_group_id, Mesh *mesh) {
 
 // Elements ////
 
-bool save_hex(hid_t parent_group_id, Array<Element *> &elems) {
+bool save_hex(hid_t parent_group_id, JudyArray<Element *> &elems) {
 	herr_t status;
 
 	// create main group
@@ -102,7 +102,7 @@ bool save_hex(hid_t parent_group_id, Array<Element *> &elems) {
 	status = H5Gclose(group_id);		// close the group
 }
 
-bool save_tetra(hid_t parent_group_id, Array<Element *> &elems) {
+bool save_tetra(hid_t parent_group_id, JudyArray<Element *> &elems) {
 	herr_t status;
 
 	// create main group
@@ -136,7 +136,7 @@ bool save_tetra(hid_t parent_group_id, Array<Element *> &elems) {
 	status = H5Gclose(group_id);		// close the group
 }
 
-bool save_prism(hid_t parent_group_id, Array<Element *> &elems) {
+bool save_prism(hid_t parent_group_id, JudyArray<Element *> &elems) {
 	herr_t status;
 
 	// create main group
@@ -185,13 +185,13 @@ bool save_elements(hid_t parent_group_id, Mesh *mesh) {
     H5Sclose(dataspace_id);
 
     ///
-	Array<Element *> tet, hex, pri;
+	JudyArray<Element *> tet, hex, pri;
     for (int i = 0; i < count; i++) {
     	Element *elem = mesh->elements[i];
     	switch (elem->get_mode()) {
-    		case MODE_TETRAHEDRON: tet.add(elem); break;
-    		case MODE_HEXAHEDRON: hex.add(elem); break;
-    		case MODE_PRISM: pri.add(elem); break;
+    		case HERMES_MODE_TET: tet.add(elem); break;
+    		case HERMES_MODE_HEX: hex.add(elem); break;
+    		case HERMES_MODE_PRISM: pri.add(elem); break;
     	}
     }
 
@@ -204,7 +204,7 @@ bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 
 // BC ////
 
-bool save_tri_bc(hid_t parent_group_id, Array<Boundary *> &bcs) {
+bool save_tri_bc(hid_t parent_group_id, JudyArray<Boundary *> &bcs) {
 	herr_t status;
 
 	// create main group
@@ -245,7 +245,7 @@ bool save_tri_bc(hid_t parent_group_id, Array<Boundary *> &bcs) {
 	status = H5Gclose(group_id);		// close the group
 }
 
-bool save_quad_bc(hid_t parent_group_id, Array<Boundary *> &bcs) {
+bool save_quad_bc(hid_t parent_group_id, JudyArray<Boundary *> &bcs) {
 	herr_t status;
 
 	// create main group
@@ -304,12 +304,12 @@ bool save_bc(hid_t parent_group_id, Mesh *mesh) {
 
     ///
     ///
-	Array<Boundary *> tri, quad;
+	JudyArray<Boundary *> tri, quad;
     for (int i = 0; i < count; i++) {
     	Boundary *bnd = mesh->boundaries[i];
     	switch (bnd->get_mode()) {
-    		case MODE_TRIANGLE: tri.add(bnd); break;
-    		case MODE_QUAD: quad.add(bnd); break;
+    		case HERMES_MODE_TRIANGLE: tri.add(bnd); break;
+    		case HERMES_MODE_QUAD: quad.add(bnd); break;
     	}
     }
 
