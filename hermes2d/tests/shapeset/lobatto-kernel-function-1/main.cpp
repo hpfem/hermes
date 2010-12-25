@@ -16,9 +16,9 @@ int main(int argc, char* argv[])
   double max_allowed_error = 1e-15;
   double x = -1.0;
 
-  double val_kernel[max_test_poly_degree];
+  double* val_kernel = new double[max_test_poly_degree];
   memset (val_kernel, 0, sizeof(double));
-  double val_test[max_test_poly_degree];
+  double* val_test = new double[max_test_poly_degree];
   memset (val_test, 0, sizeof(double));
 
   // For future use it is convenient to docompose 
