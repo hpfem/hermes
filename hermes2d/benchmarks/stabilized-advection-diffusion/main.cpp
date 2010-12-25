@@ -159,17 +159,19 @@ int main(int argc, char* argv[])
     
   if (method != CG && method != DG)
   {
-    if (CAND_LIST != H2D_H_ISO && CAND_LIST != H2D_H_ANISO)
+    if (STRATEGY > -1 && CAND_LIST != H2D_H_ISO && CAND_LIST != H2D_H_ANISO)
       error("The %s method may be used only with h-refinement.", method_names[method].c_str());
   
+    int eff_order = (STRATEGY == -1) ? P_INIT : P_INIT + ORDER_INCREASE;
+    
     if (method != CG_STAB_GLS)
     {
-      if (P_INIT + ORDER_INCREASE > 1)
+      if (eff_order > 1)
         error("The %s method may be used only with at most 1st order elements.", method_names[method].c_str());
     }
     else
     {
-      if (P_INIT + ORDER_INCREASE > 2)
+      if (eff_order > 2)
         error("The %s method may be used only with at most 2nd order elements.", method_names[method].c_str());
     }
   }
@@ -235,18 +237,21 @@ int main(int argc, char* argv[])
   // Adaptivity loop:
   int as = 1; 
   bool done = false;
-  Space* ref_space;
+  Space* actual_sln_space;
   do
   {
     info("---- Adaptivity step %d:", as);
 
-    // Construct globally refined reference mesh and setup reference space.
-    ref_space = construct_refined_space(space, ORDER_INCREASE);
+    if (STRATEGY == -1)
+      actual_sln_space = space;
+    else
+      // Construct globally refined reference mesh and setup reference space.
+      actual_sln_space = construct_refined_space(space, ORDER_INCREASE);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, actual_sln_space, is_linear);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -254,7 +259,7 @@ int main(int argc, char* argv[])
     
     // Solve the linear system of the reference problem. 
     // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), actual_sln_space, &ref_sln);
     else error ("Matrix solver failed.\n");
 
     // Project the fine mesh solution onto the coarse mesh.
@@ -264,9 +269,9 @@ int main(int argc, char* argv[])
     // Time measurement.
     cpu_time.tick();
   
-    // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
-    oview.show(space);
+    // View the fine mesh solution and polynomial orders.
+    sview.show(&ref_sln);
+    oview.show(actual_sln_space);
 
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
@@ -281,7 +286,7 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(space), Space::get_num_dofs(ref_space));
+    info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(space), Space::get_num_dofs(actual_sln_space));
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
@@ -298,16 +303,12 @@ int main(int argc, char* argv[])
     graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est too large, adapt the mesh.
-    if (err_exact_rel < ERR_STOP) done = true;
+    if (err_exact_rel < ERR_STOP || STRATEGY == -1) done = true;  // Do not adapt.
     else 
     {
       info("Adapting coarse mesh.");
-      if (STRATEGY >= 0)
-        done = adaptivity->adapt(selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      else // Do not adapt.
-        done = true;
-        
-      
+      done = adaptivity->adapt(selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+ 
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
@@ -318,33 +319,27 @@ int main(int argc, char* argv[])
     
     if(done == false) 
     {
-      delete ref_space->get_mesh();
-      delete ref_space;
+      delete actual_sln_space->get_mesh();
+      delete actual_sln_space;
     }
     delete dp;
     
   }
   while (done == false);
   
+  if (actual_sln_space != space)
+    delete space;
+  delete actual_sln_space->get_mesh();
+  delete actual_sln_space;
   delete solver;
   delete matrix;
   delete rhs;
-  
-  delete space;
   delete selector;
   
   verbose("Total running time: %g s", cpu_time.accumulated());
-
-  // Show the reference solution - the final result.
-  sview.set_title("Fine mesh solution");
-  sview.show_mesh(false);
-  sview.show(&ref_sln);
-  oview.show(ref_space);
   
   // Wait for all views to be closed.
   View::wait();
   
-  delete ref_space->get_mesh();
-  delete ref_space;
   return 0;
 }
