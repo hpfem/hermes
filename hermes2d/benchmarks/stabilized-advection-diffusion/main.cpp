@@ -204,6 +204,7 @@ int main(int argc, char* argv[])
       wf.add_matrix_form_surf(callback(dg_boundary_biform_advection));
       wf.add_matrix_form_surf(callback(dg_boundary_biform_diffusion));
       wf.add_vector_form_surf(callback(dg_boundary_liform_advection));
+      wf.add_vector_form_surf(callback(dg_boundary_liform_diffusion));
       break;
   }
   
