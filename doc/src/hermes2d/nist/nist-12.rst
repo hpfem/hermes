@@ -18,7 +18,7 @@ Equation solved:
 
        -\Delta u = f.
 
-Domain of interest: L-shaped domain $(-1,1) \times (-1,1)\(0,1) \times (-1,0)$.
+Domain of interest: L-shaped domain $(-1,1) x (-1,1) \ (0,1) x (-1,0)$.
 
 Right-hand side
 ~~~~~~~~~~~~~~~

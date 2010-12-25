@@ -54,12 +54,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -81,12 +81,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -108,12 +108,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -135,12 +135,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -162,12 +162,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -189,12 +189,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -216,12 +216,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -243,12 +243,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -271,12 +271,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
         scalar *sln = solver.get_solution();
         info("Matrix solve successful.");
         printf("Solution vector: ");
-        if (sln[0] == 4) printf("%g ", sln[0]);
-        else return ERR_FAILURE; 
-        if (sln[1] == 2) printf("%g ", sln[1]);
-        else return ERR_FAILURE; 
-        if (sln[2] == 3) printf("%g ", sln[2]);
-        else return ERR_FAILURE; 
+        if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+        else {printf("Failed. \n");  return ERR_FAILURE;} 
+        if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+        else {printf("Failed. \n");  return ERR_FAILURE;} 
+        if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+        else {printf("Failed. \n");  return ERR_FAILURE;} 
         printf("\n");
       }
       else {
@@ -304,12 +304,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
         scalar *sln = solver.get_solution();
         info("Matrix solve successful.");
         printf("Solution vector: ");
-        if (sln[0] == 4) printf("%g ", sln[0]);
-        else return ERR_FAILURE; 
-        if (sln[1] == 2) printf("%g ", sln[1]);
-        else return ERR_FAILURE; 
-        if (sln[2] == 3) printf("%g ", sln[2]);
-        else return ERR_FAILURE; 
+        if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+        else {printf("Failed. \n");  return ERR_FAILURE;} 
+        if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+        else {printf("Failed. \n");  return ERR_FAILURE;} 
+        if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+        else {printf("Failed. \n");  return ERR_FAILURE;} 
         printf("\n");
       }
       else {
@@ -336,12 +336,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     } 
     else {
@@ -363,12 +363,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -390,12 +390,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
@@ -417,12 +417,12 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
       scalar *sln = solver.get_solution();
       info("Matrix solve successful.");
       printf("Solution vector: ");
-      if (sln[0] == 4) printf("%g ", sln[0]);
-      else return ERR_FAILURE; 
-      if (sln[1] == 2) printf("%g ", sln[1]);
-      else return ERR_FAILURE; 
-      if (sln[2] == 3) printf("%g ", sln[2]);
-      else return ERR_FAILURE; 
+      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
+      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
+      else {printf("Failed. \n");  return ERR_FAILURE;} 
       printf("\n");
     }
     else {
