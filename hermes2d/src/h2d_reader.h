@@ -36,9 +36,7 @@ public:
   // Old mesh format:
   void load_stream(FILE *f, Mesh *mesh);
   // New mesh format:
-  bool load_internal(FILE *f, Mesh *mesh, const char* filename);
-
-  bool load_internal_filename(const char *filename, Mesh *mesh);
+  bool load_internal(std::istream &is, Mesh *mesh, const char *filename);
 
 protected:
 	Nurbs* load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2);

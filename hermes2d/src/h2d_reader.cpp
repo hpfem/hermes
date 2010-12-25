@@ -163,10 +163,8 @@ void H2DReader::load_old(const char* filename, Mesh *mesh)
 
 void H2DReader::load_str(const char* mesh_str, Mesh *mesh)
 {
-  // open the mesh file
-  FILE* f = fmemopen((char*)mesh_str, strlen(mesh_str), "r");
-  if (f == NULL) error("Could not create the read buffer");
-  this->load_internal(f, mesh, "");
+  std::istringstream s(mesh_str);
+  this->load_internal(s, mesh, "");
 }
 
 /*
@@ -475,11 +473,8 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
 
 bool H2DReader::load(const char *filename, Mesh *mesh)
 {
-  int i, j, k, n;
-  Node* en;
-  bool debug = false;
-
-  return this->load_internal_filename(filename, mesh);
+  std::ifstream s(filename);
+  return this->load_internal(s, mesh, filename);
 }
 
 std::string read_file(std::istream &is)
@@ -489,18 +484,8 @@ std::string read_file(std::istream &is)
     return s.str();
 }
 
-bool H2DReader::load_internal_filename(const char *filename, Mesh *mesh)
-{
-    std::ifstream in(filename);
-    std::string mesh_str = read_file(in);
-    std::cout << "XXX output" + mesh_str + "\n";
-    FILE* f = fmemopen((void *) (mesh_str.c_str()), mesh_str.length(), "r");
-    if (f == NULL) error("Could not create the read buffer");
-    this->load_internal(f, mesh, "");
-    return true;
-}
-
-bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
+bool H2DReader::load_internal(std::istream &is, Mesh *mesh,
+        const char *filename)
 {
   int i, j, k, n;
   Node* en;
@@ -509,6 +494,11 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
   mesh->free();
 
   // parse the file
+  // the internal mesh_parser_init only works with C FILE, so we create the
+  // FILE handle from istream using fmemopen.
+  std::string mesh_str = read_file(is);
+  FILE* f = fmemopen((void *) (mesh_str.c_str()), mesh_str.length(), "r");
+  if (f == NULL) error("Could not create the read buffer");
   mesh_parser_init(f, filename);
   mesh_parser_run(debug);
   fclose(f);
