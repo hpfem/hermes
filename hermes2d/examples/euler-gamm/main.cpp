@@ -328,7 +328,6 @@ int main(int argc, char* argv[])
   dp.use_vector_valued_forms();
 #endif
 
-
   // Filters for visualization of pressure and the two components of velocity.
   SimpleFilter pressure(calc_pressure_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter u(calc_u_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
