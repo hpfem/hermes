@@ -35,14 +35,14 @@ const std::string method_names[6] =
   "discontinuous Galerkin"
 };
 
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT = 0;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements. 
-const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary. If INIT_BDY_REF_NUM == 0, 
+const int INIT_BDY_REF_NUM = 2;                   // Number of initial refinements towards boundary. If INIT_BDY_REF_NUM == 0, 
                                                   // the first solution will be performed on a mesh (INIT_REF_NUM + 1) times 
                                                   // globally refined.
-const int ORDER_INCREASE = 0;                     // Order increase for the refined space. If no change of order is allowed 
+const int ORDER_INCREASE = 1;                     // Order increase for the refined space. If no change of order is allowed 
                                                   // (not even for computing the reference solution), set to 0.
-const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = -1... dont perform adaptive refinement
@@ -54,7 +54,7 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
@@ -71,7 +71,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 
-GalerkinMethod method = CG;
+GalerkinMethod method = DG;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK. 
 
@@ -142,8 +142,8 @@ int main(int argc, char* argv[])
   if (method != DG)
   {
     space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-    selector = new H1ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-    norm = HERMES_H1_NORM;  // WARNING: In order to compare the errors with DG, L2 norm should be here.
+    selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+    norm = HERMES_L2_NORM;  // WARNING: In order to compare the errors with DG, L2 norm should be here.
   }
   else
   {
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
     norm = HERMES_L2_NORM;
     // Disable weighting of refinement candidates.
-    //selector->set_error_weights(1, 1, 1);
+    selector->set_error_weights(1, 1, 1);
   }
 
   // Initialize the weak formulation.
