@@ -117,14 +117,17 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   int nc = fu->get_num_components();
   ESpaceType space_type = fu->get_space_type();
   Quad2D* quad = fu->get_quad_2d();
-  if (nc == 1) fu->set_quad_order(order, H2D_FN_ALL);
-  else fu->set_quad_order(order);
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED  
+  if (space_type == 0) fu->set_quad_order(order, H2D_FN_ALL);
+  else
+#endif    
+    fu->set_quad_order(order);
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
   Func<double>* u = new Func<double>(np, nc);
 
-  // H1 or L2 space.
-  if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) {
+  // H1 space.
+  if (space_type == HERMES_H1_SPACE) {
     u->val = new double [np];
     u->dx  = new double [np];
     u->dy  = new double [np];
@@ -166,29 +169,29 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 #endif
 
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-    for (int i = 0; i < np; i++, m++, mm++) {
+    for (int i = 0; i < np; i++, m++, mm++)
 #else
-      for (int i = 0; i < np; i++, m++)
+    for (int i = 0; i < np; i++, m++) 
 #endif
-      {
-        u->val[i] = fn[i];
-        u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
-        u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
+    {
+      u->val[i] = fn[i];
+      u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
+      u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
 
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-        double axx = (sqr((*m)[0][0]) + sqr((*m)[1][0]));
-        double ayy = (sqr((*m)[0][1]) + sqr((*m)[1][1]));
-        double axy = 2.0 * ((*m)[0][0]*(*m)[0][1] + (*m)[1][0]*(*m)[1][1]);
-        double ax = (*mm)[0][0] + (*mm)[2][0];
-        double ay = (*mm)[0][1] + (*mm)[2][1];
-        u->laplace[i] = ( dx[i] * ax + dy[i] * ay + dxx[i] * axx + dxy[i] * axy + dyy[i] * ayy );
+      double axx = (sqr((*m)[0][0]) + sqr((*m)[1][0]));
+      double ayy = (sqr((*m)[0][1]) + sqr((*m)[1][1]));
+      double axy = 2.0 * ((*m)[0][0]*(*m)[0][1] + (*m)[1][0]*(*m)[1][1]);
+      double ax = (*mm)[0][0] + (*mm)[2][0];
+      double ay = (*mm)[0][1] + (*mm)[2][1];
+      u->laplace[i] = ( dx[i] * ax + dy[i] * ay + dxx[i] * axx + dxy[i] * axy + dyy[i] * ayy );
 #endif
-      }
-		}
+    }
+    
     m -= np;
     if(rm->is_jacobian_const())
       delete [] m;
-	}
+  }
   // Hcurl space.
   else if (space_type == HERMES_HCURL_SPACE)
   {
@@ -230,7 +233,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     m -= np;
     if(rm->is_jacobian_const())
       delete [] m;
-	}
+  }
   // Hdiv space.
   // WARNING: This needs checking as it was never used.
   else if (space_type == HERMES_HDIV_SPACE)
@@ -272,6 +275,51 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     if(rm->is_jacobian_const())
       delete [] m;
   }
+  // L2 Space.
+  else if (space_type == HERMES_L2_SPACE)
+  {
+    // Same as for H1, except that we currently do not have 
+    // second derivatives of L2 shape functions for triangles.
+    u->val = new double [np];
+    u->dx  = new double [np];
+    u->dy  = new double [np];
+
+    double *fn = fu->get_fn_values();
+    double *dx = fu->get_dx_values();
+    double *dy = fu->get_dy_values();
+    
+    double2x2 *m;
+    if(rm->is_jacobian_const()) {
+      m = new double2x2[np];
+      double2x2 const_inv_ref_map;
+      
+      const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
+      const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
+      const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
+      const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
+
+      for(int i = 0; i < np; i++) {
+        m[i][0][0] = const_inv_ref_map[0][0];
+        m[i][0][1] = const_inv_ref_map[0][1];
+        m[i][1][0] = const_inv_ref_map[1][0];
+        m[i][1][1] = const_inv_ref_map[1][1];
+      }
+
+    }
+    else
+      m = rm->get_inv_ref_map(order);
+
+    for (int i = 0; i < np; i++, m++)
+    {
+      u->val[i] = fn[i];
+      u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
+      u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
+    }
+		
+    m -= np;
+    if(rm->is_jacobian_const())
+      delete [] m;
+	}
   else
     error("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
 
