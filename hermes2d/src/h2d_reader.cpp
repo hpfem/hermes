@@ -19,6 +19,7 @@
 #include <map>
 #include "hash.h"
 #include "mesh_parser.h"
+#include <iostream>
 
 extern unsigned g_mesh_seq;
 
@@ -478,11 +479,26 @@ bool H2DReader::load(const char *filename, Mesh *mesh)
   Node* en;
   bool debug = false;
 
-  // open the mesh file
-  FILE* f = fopen(filename, "r");
-  return this->load_internal(f, mesh, filename);
+  return this->load_internal_filename(filename, mesh);
 }
 
+std::string read_file(std::istream &is)
+{
+    std::ostringstream s;
+    s << is.rdbuf();
+    return s.str();
+}
+
+bool H2DReader::load_internal_filename(const char *filename, Mesh *mesh)
+{
+    std::ifstream in(filename);
+    std::string mesh_str = read_file(in);
+    std::cout << "XXX output" + mesh_str + "\n";
+    FILE* f = fmemopen((void *) (mesh_str.c_str()), mesh_str.length(), "r");
+    if (f == NULL) error("Could not create the read buffer");
+    this->load_internal(f, mesh, "");
+    return true;
+}
 
 bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
 {

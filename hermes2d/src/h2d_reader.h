@@ -38,6 +38,8 @@ public:
   // New mesh format:
   bool load_internal(FILE *f, Mesh *mesh, const char* filename);
 
+  bool load_internal_filename(const char *filename, Mesh *mesh);
+
 protected:
 	Nurbs* load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2);
   Nurbs* load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p1, int &p2);
