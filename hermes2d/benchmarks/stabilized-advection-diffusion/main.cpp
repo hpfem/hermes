@@ -261,75 +261,81 @@ int main(int argc, char* argv[])
     // If successful, obtain the solution.
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), actual_sln_space, &ref_sln);
     else error ("Matrix solver failed.\n");
-
-    // Project the fine mesh solution onto the coarse mesh.
-    info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(space, &ref_sln, &sln, matrix_solver, norm); 
-
-    // Time measurement.
-    cpu_time.tick();
-  
+    
+    // Instantiate adaptivity and error calculation driver. Space is used only for adaptivity, it is ignored when 
+    // STRATEGY == -1 and only the exact error is calculated by this object.
+    Adapt* adaptivity = new Adapt(space, norm);
+    
+    // Calculate and report exact error.
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&ref_sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    info("ndof_fine: %d, err_exact_rel: %g%%", Space::get_num_dofs(actual_sln_space), err_exact_rel);
+    
     // View the fine mesh solution and polynomial orders.
     sview.show(&ref_sln);
     oview.show(actual_sln_space);
-
+    
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
 
-    // Calculate element errors and total error estimate.
-    info("Calculating error estimate."); 
-    Adapt* adaptivity = new Adapt(space, norm);
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
-    
-    // Calculate exact error.
-    bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
+    if (STRATEGY == -1) done = true;  // Do not adapt.
+    else
+    {  
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(space, &ref_sln, &sln, matrix_solver, norm); 
 
-    // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(space), Space::get_num_dofs(actual_sln_space));
-    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate."); 
+      bool solutions_for_adapt = true;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-    // Time measurement.
-    cpu_time.tick();
-    
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(Space::get_num_dofs(space), err_est_rel);
-    graph_dof.save("conv_dof_est.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(Space::get_num_dofs(space), err_exact_rel);
-    graph_dof_exact.save("conv_dof_exact.dat");
-    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
-    graph_cpu_exact.save("conv_cpu_exact.dat");
+      // Report results.
+      info("ndof_coarse: %d, err_est_rel: %g%%", Space::get_num_dofs(space), err_est_rel);
 
-    // If err_est too large, adapt the mesh.
-    if (err_exact_rel < ERR_STOP || STRATEGY == -1) done = true;  // Do not adapt.
-    else 
-    {
-      info("Adapting coarse mesh.");
-      done = adaptivity->adapt(selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
- 
-      // Increase the counter of performed adaptivity steps.
-      if (done == false)  as++;
+      // Time measurement.
+      cpu_time.tick();
+      
+      // Add entry to DOF and CPU convergence graphs.
+      graph_dof.add_values(Space::get_num_dofs(space), err_est_rel);
+      graph_dof.save("conv_dof_est.dat");
+      graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
+      graph_cpu.save("conv_cpu_est.dat");
+      graph_dof_exact.add_values(Space::get_num_dofs(space), err_exact_rel);
+      graph_dof_exact.save("conv_dof_exact.dat");
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+      graph_cpu_exact.save("conv_cpu_exact.dat");
+
+      // If err_est too large, adapt the mesh.
+      if (err_exact_rel < ERR_STOP) done = true;
+      else 
+      {
+        info("Adapting coarse mesh.");
+        done = adaptivity->adapt(selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+  
+        // Increase the counter of performed adaptivity steps.
+        if (done == false)  as++;
+      }
+      if (Space::get_num_dofs(space) >= NDOF_STOP) done = true;
+      
+      if(done == false) 
+      {
+        delete actual_sln_space->get_mesh();
+        delete actual_sln_space;
+      }
     }
-    if (Space::get_num_dofs(space) >= NDOF_STOP) done = true;
-
+    
     // Clean up.
     delete adaptivity;
-    
-    if(done == false) 
-    {
-      delete actual_sln_space->get_mesh();
-      delete actual_sln_space;
-    }
     delete dp;
-    
   }
   while (done == false);
   
-  if (actual_sln_space != space)
+  if (space != actual_sln_space) 
+  {
     delete space;
-  delete actual_sln_space->get_mesh();
+    delete actual_sln_space->get_mesh();
+  }
   delete actual_sln_space;
   delete solver;
   delete matrix;
