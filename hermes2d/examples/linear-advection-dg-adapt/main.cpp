@@ -33,7 +33,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;           // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
                                                   // H2D_HP_ANISO_P, H2D_HP_ANISO. See User Documentation for details.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
@@ -252,7 +252,7 @@ int main(int argc, char* args[])
     
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);  
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_L2_NORM);  
 
     // Time measurement.
     cpu_time.tick();
