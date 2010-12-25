@@ -132,7 +132,11 @@ inline Real calculate_a_dot_v(Real x, Real y, Real vx, Real vy)
 template<typename Real, typename Scalar>
 inline Scalar upwind_flux(Real u_cent, Real u_neib, Real a_dot_n)
 {
-  return a_dot_n * (a_dot_n >= 0 ? u_cent : u_neib); 
+  Scalar eff_val;
+  if (a_dot_n > 0) eff_val = u_cent;
+  else if (a_dot_n < 0) eff_val = u_neib;
+  else eff_val = 0.5*(u_cent + u_neib);
+  return a_dot_n * eff_val;
 }
 
 template<>
