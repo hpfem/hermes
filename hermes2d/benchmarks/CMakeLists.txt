@@ -15,6 +15,7 @@ add_subdirectory(nonsym-check)
 # Benchmarks from Bill Mitchell's NIST report.
 add_subdirectory(nist-01)
 add_subdirectory(nist-02)
+add_subdirectory(nist-03)
 add_subdirectory(nist-04)
 add_subdirectory(nist-05)
 add_subdirectory(nist-06)
