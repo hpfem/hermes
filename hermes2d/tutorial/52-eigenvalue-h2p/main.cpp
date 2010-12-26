@@ -94,8 +94,8 @@ int main(int argc, char* argv[])
     Element* elem=mesh.get_element(id);
     for(int i=0;i<4;i++){
       Node* node= elem->vn[i];
-      if ( node->x == 0.0 and node->y == 1.0) 
-	vertex_id_nucleus=node->id;
+      if ( node->x == 0.0 && node->y == 1.0) 
+	      vertex_id_nucleus=node->id;
     }
   }
   if (vertex_id_nucleus == -1)

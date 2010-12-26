@@ -374,7 +374,7 @@ int main(int argc, char* argv[])
 
       // Add entries to convergence graphs.
       graph_time_err_est.add_values(ts*TAU, err_est_rel);
-      graph_time_err_est.save("time_error_est.dat");
+      graph_time_err_est.save("time_err_est.dat");
       graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
       graph_time_dof.save("time_dof.dat");
       graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());

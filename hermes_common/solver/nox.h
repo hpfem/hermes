@@ -88,7 +88,7 @@ public:
 
 protected:
 #ifdef HAVE_NOX
-  Teuchos::RCP<NoxProblemInterface> interface;
+  Teuchos::RCP<NoxProblemInterface> interface_;
 #endif
   int num_iters;
   double residual;

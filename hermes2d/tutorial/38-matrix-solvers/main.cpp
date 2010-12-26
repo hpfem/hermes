@@ -131,7 +131,7 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
-#ifdef WITH_TRILINOS
+#if defined WITH_TRILINOS && defined HAVE_AZTECOO
     EpetraMatrix mat;
     EpetraVector rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
@@ -143,7 +143,7 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo-block") == 0) {
-#ifdef WITH_TRILINOS
+#if defined WITH_TRILINOS && defined HAVE_AZTECOO
     EpetraMatrix mat;
     EpetraVector rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
@@ -155,7 +155,7 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
 #endif
   }
   else if (strcasecmp(argv[1], "amesos") == 0) {
-#ifdef WITH_TRILINOS
+#if defined WITH_TRILINOS && defined HAVE_AMESOS
     EpetraMatrix mat;
     EpetraVector rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
@@ -169,7 +169,7 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
 #endif
   }
   else if (strcasecmp(argv[1], "amesos-block") == 0) {
-#ifdef WITH_TRILINOS
+#if defined WITH_TRILINOS && defined HAVE_AMESOS
     EpetraMatrix mat;
     EpetraVector rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
