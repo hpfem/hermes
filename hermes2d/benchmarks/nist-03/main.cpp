@@ -11,7 +11,34 @@ using namespace RefinementSelectors;
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
-
+//
+//  PDE: Linear elasticity coupled system of two equations given below
+//
+//  -E \frac{1-nu^2}{1-2*nu} \frac{\partial^{2} u}{\partial x^{2}} - E\frac{1-nu^2}{2-2*nu} \frac{\partial^{2} u}{\partial y^{2}} 
+//  -E \frac{1-nu^2}{(1-2*nu)(2-2*nu)} \frac{\partial^{2} v}{\partial x \partial y} = F_{x}
+//
+//  -E \frac{1-nu^2}{2-2*nu} \frac{\partial^{2} v}{\partial x^{2}} - E\frac{1-nu^2}{1-2*nu} \frac{\partial^{2} v}{\partial y^{2}} 
+//  -E \frac{1-nu^2}{(1-2*nu)(2-2*nu)} \frac{\partial^{2} u}{\partial x \partial y} = F_{y}
+//
+//  where F_{x} = F_{y} = 0.
+//
+//  Known exact solution for mode 1: 
+//  u(x, y) = \frac{1}{2G} r^{\lambda}[(k - Q(\lambda + 1))cos(\lambda \theta) - \lambda cos((\lambda - 2) \theta)]
+//  v(x, y) = \frac{1}{2G} r^{\lambda}[(k + Q(\lambda + 1))sin(\lambda \theta) + \lambda sin((\lambda - 2) \theta)]
+//  here \lambda = 0.5444837367825, Q = 0.5430755788367.
+//
+//  Known exact solution for mode 2: 
+//  u(x, y) =  \frac{1}{2G} r^{\lambda}[(k - Q(\lambda + 1))sin(\lambda \theta) - \lambda sin((\lambda - 2) \theta)]
+//  v(x, y) = -\frac{1}{2G} r^{\lambda}[(k + Q(\lambda + 1))cos(\lambda \theta) + \lambda cos((\lambda - 2) \theta)]
+//  here \lambda = 0.9085291898461, Q = -0.2189232362488.
+//
+//  See functions fn() and fndd() in "exact_solution.cpp".
+//
+//  Domain: square (-1, 1)^2, with a slit from (0, 0) to (1, 0).
+//
+//  BC:  Dirichlet, given by exact solution.
+//
+//  The following parameters can be changed:
 
 const int P_INIT_U = 1;                           // Initial polynomial degree for u.
 const int P_INIT_V = 1;                           // Initial polynomial degree for v.
@@ -45,7 +72,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -53,7 +80,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double E = 1.0;                             // Young modulus for steel: 200 GPa.
+const double E = 1.0;                             // Young modulus.
 const double nu = 0.3;                            // Poisson ratio.
 const double k = 3 - 4 * nu;
 const double G = E / (2.0 * (1 + nu));
