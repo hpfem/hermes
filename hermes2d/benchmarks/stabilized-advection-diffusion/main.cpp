@@ -45,7 +45,7 @@ const int ORDER_INCREASE = 1;                     // Order increase for the refi
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
-                                                  // STRATEGY = -1... dont perform adaptive refinement
+                                                  // STRATEGY = -1... do not refine.
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -253,9 +253,6 @@ int main(int argc, char* argv[])
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, actual_sln_space, is_linear);
     dp->assemble(matrix, rhs);
-
-    // Time measurement.
-    cpu_time.tick();
     
     // Solve the linear system of the reference problem. 
     // If successful, obtain the solution.
@@ -270,6 +267,9 @@ int main(int argc, char* argv[])
     bool solutions_for_adapt = false;
     double err_exact_rel = adaptivity->calc_err_exact(&ref_sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     info("ndof_fine: %d, err_exact_rel: %g%%", Space::get_num_dofs(actual_sln_space), err_exact_rel);
+
+    // Time measurement.
+    cpu_time.tick();
     
     // View the fine mesh solution and polynomial orders.
     sview.show(&ref_sln);
@@ -306,6 +306,9 @@ int main(int argc, char* argv[])
       graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
       graph_cpu_exact.save("conv_cpu_exact.dat");
 
+      // Skip graphing time.
+      cpu_time.tick(HERMES_SKIP);
+      
       // If err_est too large, adapt the mesh.
       if (err_exact_rel < ERR_STOP) done = true;
       else 
