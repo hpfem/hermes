@@ -87,7 +87,7 @@ void RefMap::set_active_element(Element *e) {
 
 	reset_transform();
 
-	is_const_jacobian = mode == MODE_TETRAHEDRON;
+	is_const_jacobian = mode == HERMES_MODE_TET;
 
 	int nvertices = element->get_num_vertices();
 
@@ -105,16 +105,16 @@ void RefMap::set_active_element(Element *e) {
 
 	// calculate the order of the reference map
 	switch (mode) {
-		case MODE_TETRAHEDRON: ref_order = Ord3(0); break;
-		case MODE_HEXAHEDRON:  ref_order = Ord3(1, 1, 1); break;
-		case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		case HERMES_MODE_TET: ref_order = Ord3(0); break;
+		case HERMES_MODE_HEX:  ref_order = Ord3(1, 1, 1); break;
+		case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 	}
 
 	// calculate the order of the inverse reference map
 	switch (mode) {
-		case MODE_TETRAHEDRON: inv_ref_order = Ord3(0); break;
-		case MODE_HEXAHEDRON:  inv_ref_order = Ord3(1, 1, 1); break;
-		case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		case HERMES_MODE_TET: inv_ref_order = Ord3(0); break;
+		case HERMES_MODE_HEX:  inv_ref_order = Ord3(1, 1, 1); break;
+		case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 	}
 
 	// constant inverse reference map
@@ -383,7 +383,7 @@ void RefMap::calc_face_normal(int iface, const int np, const QuadPt3D *pt, doubl
 	//   e.g. to take a normal from ref. domain and transform it to the physical one
 	int t_dir_1, t_dir_2; //directions of tangents ot the reference face such that t_dir_1 x t_dir_2 = outer normal
 	switch (element->get_mode()) {
-		case MODE_TETRAHEDRON: {
+		case HERMES_MODE_TET: {
 			const int *face_vtx = element->get_face_vertices(iface);
 			Vertex vtx[Tri::NUM_VERTICES];
 			for (int i = 0; i < Tri::NUM_VERTICES; i++)
@@ -400,7 +400,7 @@ void RefMap::calc_face_normal(int iface, const int np, const QuadPt3D *pt, doubl
 			}
 			} break;
 
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			switch (iface) {
 				case 0: t_dir_1 = 2; t_dir_2 = 1; break;
 				case 1: t_dir_1 = 1; t_dir_2 = 2; break;
@@ -420,7 +420,7 @@ void RefMap::calc_face_normal(int iface, const int np, const QuadPt3D *pt, doubl
 			}
 			break;
 
-		case MODE_PRISM:
+		case HERMES_MODE_PRISM:
 			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 	}
 

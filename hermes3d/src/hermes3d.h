@@ -21,8 +21,8 @@
 #define _HERMES_3D_
 
 // hermes_common
-#include "../../hermes_common/array.h"
-#include "../../hermes_common/bitarray.h"
+#include "../../hermes_common/judyarray.h"
+#include "../../hermes_common/bitjudyarray.h"
 #include "../../hermes_common/map.h"
 #include "../../hermes_common/maphs.h"
 #include "../../hermes_common/mapord.h"

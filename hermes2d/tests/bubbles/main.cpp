@@ -121,7 +121,7 @@ void show_fail_matrix(int** fail_matrix, const std::string& space_name, const in
 /// Test
 bool test() {
   bool failed = false;
-  shapeset->set_mode(H2D_MODE_QUAD);
+  shapeset->set_mode(HERMES_MODE_QUAD);
 
   //report name
   info("!Space: %s", space_name.c_str());

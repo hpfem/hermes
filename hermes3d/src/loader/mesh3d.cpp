@@ -338,14 +338,14 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	fprintf(file, "\n");
 
 	// elements
-	Array<Element *> tet, hex, pri;
+	JudyArray<Element *> tet, hex, pri;
 	for (unsigned int i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
 		Element *elem = mesh->elements[i];
 		if (elem->active) {
 			switch (elem->get_mode()) {
-				case MODE_TETRAHEDRON: tet.add(elem); break;
-				case MODE_HEXAHEDRON: hex.add(elem); break;
-				case MODE_PRISM: pri.add(elem); break;
+				case HERMES_MODE_TET: tet.add(elem); break;
+				case HERMES_MODE_HEX: hex.add(elem); break;
+				case HERMES_MODE_PRISM: pri.add(elem); break;
 			}
 		}
 	}
@@ -381,13 +381,13 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 	fprintf(file, "\n");
 
 	// boundaries
-	Array<Facet *> tri_facets, quad_facets;
+	JudyArray<Facet *> tri_facets, quad_facets;
 	for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
 		Facet *facet = mesh->facets.get(i);
 		if (facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
 			switch (facet->type) {
-				case MODE_TRIANGLE: tri_facets.add(facet); break;
-				case MODE_QUAD: quad_facets.add(facet); break;
+				case HERMES_MODE_TRIANGLE: tri_facets.add(facet); break;
+				case HERMES_MODE_QUAD: quad_facets.add(facet); break;
 			}
 		}
 	}

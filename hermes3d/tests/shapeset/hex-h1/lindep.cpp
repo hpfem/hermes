@@ -33,7 +33,7 @@
 // l2 product
 double l2_product(ShapeFunction *fu, ShapeFunction *fv) {
 	_F_
-	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);
+	Quad3D *quad = get_quadrature(HERMES_MODE_HEX);
 
 	Ord3 o = fu->get_fn_order() + fv->get_fn_order() + Ord3(1, 1, 1);
 

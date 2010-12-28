@@ -103,9 +103,9 @@ protected:
 
 	/// Indices of vertex shape functions on reference element, indexing: [vertex shape fn index]
 	int *vertex_indices;
-	Array<int *> edge_indices[Hex::NUM_EDGES][NUM_EDGE_ORIS];
-	Array<int *> face_indices[Hex::NUM_FACES][NUM_FACE_ORIS];
-	Array<int *> bubble_indices;
+	JudyArray<int *> edge_indices[Hex::NUM_EDGES][NUM_EDGE_ORIS];
+	JudyArray<int *> face_indices[Hex::NUM_FACES][NUM_FACE_ORIS];
+	JudyArray<int *> bubble_indices;
 
 	void compute_edge_indices(int edge, int ori, Ord1 order);
 	void compute_face_indices(int face, int ori, Ord2 order);

@@ -169,7 +169,7 @@ double Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &o
 
 static inline int ndofs_elem(const Ord3 &order)
 {
-	assert(order.type == MODE_HEXAHEDRON);
+	assert(order.type == HERMES_MODE_HEX);
 	return (order.x + 1) * (order.y + 1) * (order.z + 1);
 }
 
@@ -761,8 +761,8 @@ Ord3 Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMa
 	Ord o = mf_ord(1, &fake_wt, NULL, ou, ov, &fake_e, NULL);
 	Ord3 order = ru->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+		case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+		case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
 

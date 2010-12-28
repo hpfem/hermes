@@ -30,7 +30,7 @@
 #define CHECK_EDGE_ORDER(o)  		assert((o) >= 0 && (o) <= max_edge_order)
 
 #define CHECK_FACE(face)			assert(face >= 0 && face < 6)
-#define CHECK_FACE_MODE(mode)		assert(mode == MODE_QUAD)
+#define CHECK_FACE_MODE(mode)		assert(mode == HERMES_MODE_QUAD)
 #define CHECK_FACE_ORI(ori)	      	assert(ori >= 0 || ori <= 8)
 #define CHECK_FACE_ORDER(o)  		assert((o) >= 0 && (o) <= max_face_order)
 

@@ -23,8 +23,8 @@ using namespace RefinementSelectors;
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *  \section s_res Results
- *   - DOFs: unknow yet
- *   - Adaptivity steps: none
+ *   - DOFs: 2928
+ *   - Adaptivity steps: 21
  */
 
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
@@ -60,16 +60,18 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.                      
-double OMEGA = 3*M_PI/2;     //useful information about parameters will go here 
-double X_w = 0;              //
-double Y_w = -3/4;
-double R_0 = 3/4;
-double ALPHA_w = 200;
-double X_p = sqrt((double)5.0)/4;
-double Y_p = -1/4;
-double ALPHA_p = 1000;
-double EPSILON = 1/100;
+const double OMEGA_C = 3.0 * M_PI / 2.0;
 
+const double X_W = 0.0;
+const double Y_W = -3.0 / 4.0;
+const double R_0 = 3.0 / 4.0;
+const double ALPHA_W = 200.0;
+
+const double X_P = -sqrt(5.0) / 4.0;
+const double Y_P = -1.0 / 4.0;
+const double ALPHA_P = 1000.0;
+
+const double EPSILON = 1.0 / 100.0;
  
 // Exact solution.
 #include "exact_solution.cpp"
@@ -213,7 +215,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 660;
+  int n_dof_allowed = 2930;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

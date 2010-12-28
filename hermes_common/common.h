@@ -114,8 +114,15 @@ const std::string MatrixSolverNames[7] = {
 #define IFPACK_NOT_COMPILED   HERMES " was not built with IFPACK support."
 #define ML_NOT_COMPILED       HERMES " was not built with ML support."
 
+// Spaces.
+enum ESpaceType {
+	HERMES_H1_SPACE = 1,
+	HERMES_HCURL_SPACE = 2,
+	HERMES_HDIV_SPACE = 3,
+	HERMES_L2_SPACE = 4
+};
 
-// Projection norms:
+// Projection norms.
 enum ProjNormType
 {
   HERMES_L2_NORM, 
@@ -124,14 +131,6 @@ enum ProjNormType
   HERMES_HCURL_NORM, 
   HERMES_HDIV_NORM
 };
-
-// Default HERMES projection norm is the H1 norm.
-const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
-
-inline int sqr(int x) { return x*x; }
-inline double sqr(double x) { return x*x; }
-inline double magn(double x) { return fabs(x); }
-inline double conj(double a) {  return a; }
 
 #if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
 
@@ -187,6 +186,132 @@ inline double conj(double a) {  return a; }
   #define SCALAR(a)     (a)
 
 #endif
+
+enum // node types
+{
+  HERMES_TYPE_VERTEX = 0,
+  HERMES_TYPE_EDGE = 1
+};
+
+// 1D element modes
+enum ElementMode1D {
+	HERMES_MODE_LINE = 0
+};
+
+// 2D element modes
+enum ElementMode2D {
+	HERMES_MODE_TRIANGLE = 0,
+	HERMES_MODE_QUAD = 1
+};
+
+// 3D element modes
+enum ElementMode3D {
+	HERMES_MODE_TET = 0,
+	HERMES_MODE_HEX = 1,
+	HERMES_MODE_PRISM = 2
+};
+
+// Points and vectors.
+struct HERMES_API Point1D {
+	double x;		// coordinates of a point
+};
+
+struct HERMES_API Point2D {
+	double x, y;		// coordinates of a point
+};
+
+struct HERMES_API Point3D {
+	double x, y, z;		// coordinates of a point
+};
+
+inline double dot_product(const Point3D &a, const Point3D &b) { return a.x * b.x + a.y * b.y + a.z * b.z;}
+
+inline Point3D cross_product(Point3D a, Point3D b) {
+	Point3D r = {
+		a.y * b.z - a.z * b.y,
+		a.z * b.x - a.x * b.z,
+		a.x * b.y - a.y * b.x
+	};
+	return r;
+}
+
+inline Point3D lin_comb(Point3D a, double coef_a, Point3D b, double coef_b) {
+	Point3D r = {
+		coef_a * a.x + coef_b * b.x,
+		coef_a * a.y + coef_b * b.y,
+		coef_a * a.z + coef_b * b.z,
+	};
+	return r;
+}
+
+inline double norm(const Point3D &pt) { return sqrt(dot_product(pt, pt)); }
+
+inline Point3D normalize(const Point3D &pt) {
+	double n = norm(pt);
+	Point3D res = { pt.x / n, pt.y / n, pt.z / n };
+	return res;
+}
+
+
+struct Vector3D {
+	scalar x, y, z;		// coordinates of a point
+
+	Vector3D() {
+		x = y = z = 0;
+	}
+
+	Vector3D(double x, double y, double z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+
+	void set(double x, double y, double z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+
+	scalar dot_product(Vector3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
+	scalar dot_product(Point3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
+	double norm() { return sqrt(REAL(dot_product(*this)));};
+	void cross_product(Vector3D a, Vector3D b) {
+		x = a.y * b.z - a.z * b.y;
+		y = a.z * b.x - a.x * b.z;
+		z = a.x * b.y - a.y * b.x;
+	}
+	void cross_product(Point3D a, Vector3D b) {
+		x = a.y * b.z - a.z * b.y;
+		y = a.z * b.x - a.x * b.z;
+		z = a.x * b.y - a.y * b.x;
+	}
+	void cross_product(Vector3D a, Point3D b) {
+		x = a.y * b.z - a.z * b.y;
+		y = a.z * b.x - a.x * b.z;
+		z = a.x * b.y - a.y * b.x;
+	}
+
+	void normalize(){
+		double n = norm();
+		x /= n;
+		y /= n;
+		z /= n;
+	}
+
+	void subtract(Vector3D b){
+		x -= b.x;
+		y -= b.y;
+		z -= b.z;
+	}
+};
+
+// Default HERMES projection norm is the H1 norm.
+const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
+
+inline int sqr(int x) { return x*x; }
+inline double sqr(double x) { return x*x; }
+inline double magn(double x) { return fabs(x); }
+inline double conj(double a) {  return a; }
 
 #ifdef WITH_BLAS         // always true for Hermes3D
 // BLAS-related functions
@@ -277,6 +402,12 @@ class HERMES_API CommandLineArgs
       return m_argv; 
     }
 };
+
+/* python support */
+/// Throws an exception std::runtime_error. Used by Python wrappers.
+/** \param[in] text A text (a cause) of the exception. */
+extern HERMES_API void throw_exception(char *text);
+
 
 #endif
 

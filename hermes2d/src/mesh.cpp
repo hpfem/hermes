@@ -22,7 +22,7 @@
 
 void Node::ref_element(Element* e)
 {
-  if (type == H2D_TYPE_EDGE)
+  if (type == HERMES_TYPE_EDGE)
   {
     // store the element pointer in a free slot of 'elem'
     if (elem[0] == NULL) elem[0] = e;
@@ -35,7 +35,7 @@ void Node::ref_element(Element* e)
 
 void Node::unref_element(HashTable* ht, Element* e)
 {
-  if (type == H2D_TYPE_VERTEX)
+  if (type == HERMES_TYPE_VERTEX)
   {
     if (!--ref) ht->remove_vertex_node(id);
   }
@@ -125,11 +125,11 @@ double Element::get_diameter() const
 
 unsigned g_mesh_seq = 0;
 
-Mesh::Mesh(MarkersConversion* markers_conversion) : HashTable()
+Mesh::Mesh() : HashTable()
 {
   nbase = nactive = ntopvert = ninitial = 0;
   seq = g_mesh_seq++;
-  this->markers_conversion = markers_conversion;
+  this->markers_conversion = new Mesh::MarkersConversion;
 }
 
 
@@ -875,7 +875,7 @@ void Mesh::create(int nv, double2* verts, int nt, int4* tris,
     Node* node = nodes.add();
     assert(node->id == i);
     node->ref = TOP_LEVEL_REF;
-    node->type = H2D_TYPE_VERTEX;
+    node->type = HERMES_TYPE_VERTEX;
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;
@@ -970,6 +970,7 @@ void Mesh::copy(const Mesh* mesh)
   ntopvert = mesh->ntopvert;
   ninitial = mesh->ninitial;
   seq = mesh->seq;
+  markers_conversion = mesh->markers_conversion;
 }
 
 
@@ -997,7 +998,7 @@ void Mesh::copy_base(Mesh* mesh)
     Node* node = &(mesh->nodes[i]);
     if (node->ref < TOP_LEVEL_REF) break;
     Node* newnode = nodes.add();
-    assert(newnode->id == i && node->type == H2D_TYPE_VERTEX);
+    assert(newnode->id == i && node->type == HERMES_TYPE_VERTEX);
     memcpy(newnode, node, sizeof(Node));
     newnode->ref = TOP_LEVEL_REF;
   }
@@ -1058,7 +1059,7 @@ void Mesh::copy_converted(Mesh* mesh)
   for(int i = 0; i < nodes.get_size(); i++)
   {
     Node& node = nodes[i];
-    if (node.type == H2D_TYPE_EDGE) { //process only edge nodes
+    if (node.type == HERMES_TYPE_EDGE) { //process only edge nodes
       for(int k = 0; k < 2; k++)
         node.elem[k] = NULL;
     }
@@ -1727,7 +1728,7 @@ void Mesh::save_raw(FILE* f)
     unsigned bits = n->ref | (n->type << 29) | (n->bnd << 30) | (n->used << 31);
     output(bits, unsigned);
 
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       output(n->x, double);
       output(n->y, double);
@@ -1828,7 +1829,7 @@ void Mesh::load_raw(FILE* f)
     n->type = (bits >> 29) & 0x1;
     n->bnd  = (bits >> 30) & 0x1;
 
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       input(n->x, double);
       input(n->y, double);
@@ -1922,4 +1923,120 @@ void Mesh::load_raw(FILE* f)
 
   #undef input
   seq++;
+}
+
+
+Mesh::MarkersConversion::MarkersConversion()
+{
+  conversion_table_for_element_markers = new std::map<int, std::string>;
+  conversion_table_for_boundary_markers = new std::map<int, std::string>;
+  conversion_table_for_element_markers_inverse = new std::map<std::string, int>;
+  conversion_table_for_boundary_markers_inverse = new std::map<std::string, int>;
+
+  min_boundary_marker_unused = 1;
+  min_element_marker_unused = 0;
+}
+
+Mesh::MarkersConversion::~MarkersConversion()
+{
+  delete conversion_table_for_element_markers;
+  delete conversion_table_for_boundary_markers;
+  delete conversion_table_for_element_markers_inverse;
+  delete conversion_table_for_boundary_markers_inverse;
+}
+
+void Mesh::MarkersConversion::insert_element_marker(int internal_marker, std::string user_marker)
+{
+    // First a check that the string value is not already present.
+  if(user_marker != "")
+    if(conversion_table_for_element_markers_inverse->find(user_marker) != conversion_table_for_element_markers_inverse->end())
+      return;
+  if(conversion_table_for_element_markers->size() == 0 || conversion_table_for_element_markers->find(internal_marker) == conversion_table_for_element_markers->end()) {
+    conversion_table_for_element_markers->insert(std::pair<int, std::string>(internal_marker, user_marker));
+    conversion_table_for_element_markers_inverse->insert(std::pair<std::string, int>(user_marker, internal_marker));
+    if(user_marker != "")
+      this->min_element_marker_unused++;
+  }
+  return;
+}
+
+void Mesh::MarkersConversion::insert_boundary_marker(int internal_marker, std::string user_marker)
+{
+  // First a check that the string value is not already present.
+  if(user_marker != "")
+    if(conversion_table_for_boundary_markers_inverse->find(user_marker) != conversion_table_for_boundary_markers_inverse->end())
+      return;
+  if(conversion_table_for_boundary_markers->size() == 0 || conversion_table_for_boundary_markers->find(internal_marker) == conversion_table_for_boundary_markers->end()) {
+    conversion_table_for_boundary_markers->insert(std::pair<int, std::string>(internal_marker, user_marker));
+    conversion_table_for_boundary_markers_inverse->insert(std::pair<std::string, int>(user_marker, internal_marker));
+    if(user_marker != "")
+      this->min_boundary_marker_unused++;
+  }
+  return;
+}
+
+std::string Mesh::MarkersConversion::get_user_element_marker(int internal_marker) 
+{
+  if(conversion_table_for_element_markers->find(internal_marker) == conversion_table_for_element_markers->end())
+    error("MarkersConversions class asked for a non existing marker %d", internal_marker);
+  return conversion_table_for_element_markers->find(internal_marker)->second;
+}
+std::string Mesh::MarkersConversion::get_user_boundary_marker(int internal_marker) 
+{
+  if(conversion_table_for_boundary_markers->find(internal_marker) == conversion_table_for_boundary_markers->end())
+    error("MarkersConversions class asked for a non existing marker %d", internal_marker);
+  return conversion_table_for_boundary_markers->find(internal_marker)->second;
+}
+
+int Mesh::MarkersConversion::get_internal_element_marker(std::string user_marker) 
+{
+  if(conversion_table_for_element_markers_inverse->find(user_marker) == conversion_table_for_element_markers_inverse->end())
+    error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
+  return conversion_table_for_element_markers_inverse->find(user_marker)->second;
+}
+int Mesh::MarkersConversion::get_internal_boundary_marker(std::string user_marker) 
+{
+  if(conversion_table_for_boundary_markers_inverse->find(user_marker) == conversion_table_for_boundary_markers_inverse->end())
+    error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
+  return conversion_table_for_boundary_markers_inverse->find(user_marker)->second;
+}
+
+void Mesh::MarkersConversion::check_boundary_marker(int marker)
+{
+  // This marker is already present.
+  if(conversion_table_for_boundary_markers->find(marker) != conversion_table_for_boundary_markers->end())
+    // If the present boundary marker is a different one (user-supplied string).
+    if(conversion_table_for_boundary_markers->find(marker)->second != "")
+    {
+      // We have to reassign the markers.
+      std::string temp_user_marker = conversion_table_for_boundary_markers->find(marker)->second;
+      conversion_table_for_boundary_markers->erase(marker);
+      conversion_table_for_boundary_markers_inverse->erase(temp_user_marker);
+      insert_boundary_marker(this->min_boundary_marker_unused, temp_user_marker);
+    }
+  // Now we need to check if the variable min_boundary_marker_unused does not collide with
+  // this marker, because we will need to raise the variable if it does as
+  // we are about to insert this user-supplied integer marker.
+  if(marker == min_boundary_marker_unused)
+    min_boundary_marker_unused++;
+}
+
+void Mesh::MarkersConversion::check_element_marker(int marker)
+{
+  // This marker is already present.
+  if(conversion_table_for_element_markers->find(marker) != conversion_table_for_element_markers->end())
+    // If the present element marker is a different one (user-supplied string).
+    if(conversion_table_for_element_markers->find(marker)->second != "")
+    {
+      // We have to reassign the markers.
+      std::string temp_user_marker = conversion_table_for_element_markers->find(marker)->second;
+      conversion_table_for_element_markers->erase(marker);
+      conversion_table_for_element_markers_inverse->erase(temp_user_marker);
+      insert_element_marker(this->min_element_marker_unused, temp_user_marker);
+    }
+  // Now we need to check if the variable min_element_marker_unused does not collide with
+  // this marker, because we will need to raise the variable if it does as
+  // we are about to insert this user-supplied integer marker.
+  if(marker == min_element_marker_unused)
+    min_element_marker_unused++;
 }

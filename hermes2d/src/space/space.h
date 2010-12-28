@@ -304,6 +304,10 @@ protected: //debugging support
   /// the DOFs have been assigned.
   virtual void post_assign() {}
 
+  // Function which according to the conversion table provided, updates the members in BCTypes.
+  void update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion);
+  void update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion);
+
   HERMES_API_USED_STL_VECTOR(void*);
   std::vector<void*> extra_data;
   void free_extra_data();

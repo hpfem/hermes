@@ -22,9 +22,8 @@
 
 extern unsigned g_mesh_seq;
 
-H2DReader::H2DReader(MarkersConversion* markers_conversion)
+H2DReader::H2DReader()
 {
-  this->markers_conversion = markers_conversion;
 }
 
 H2DReader::~H2DReader()
@@ -200,7 +199,7 @@ void H2DReader::load_stream(FILE *f, Mesh *mesh)
     Node* node = mesh->nodes.add();
     assert(node->id == i);
     node->ref = TOP_LEVEL_REF;
-    node->type = H2D_TYPE_VERTEX;
+    node->type = HERMES_TYPE_VERTEX;
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;
@@ -517,7 +516,7 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
     Node* node = mesh->nodes.add();
     assert(node->id == i);
     node->ref = TOP_LEVEL_REF;
-    node->type = H2D_TYPE_VERTEX;
+    node->type = HERMES_TYPE_VERTEX;
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;
@@ -557,31 +556,29 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
     
     // If we are dealing with a string as a marker.
     if(elem->marker->size() > 0) {
-      if(this->markers_conversion == NULL)
-        error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
       // Number of vertices + the marker is 1 bigger than in the previous context.
       nv += 1;
       // This functions check if the user-supplied marker on this element has been
       // already used, and if not, inserts it in the appropriate structure.
-      markers_conversion->insert_element_marker(markers_conversion->min_element_marker_unused, *elem->marker);
-      marker = markers_conversion->get_internal_element_marker(*elem->marker);
+      mesh->markers_conversion->insert_element_marker(mesh->markers_conversion->min_element_marker_unused, *elem->marker);
+      marker = mesh->markers_conversion->get_internal_element_marker(*elem->marker);
     }
     else {
       if(nv == 4) {
         // If we have some string-labeled boundary markers.
-        if(markers_conversion != NULL) {
+        if(mesh->markers_conversion != NULL) {
           // We need to make sure that the internal markers do not collide.
-          markers_conversion->check_element_marker(idx[3]);
-          markers_conversion->insert_element_marker(idx[3], "");
+          mesh->markers_conversion->check_element_marker(idx[3]);
+          mesh->markers_conversion->insert_element_marker(idx[3], "");
         }
         marker = idx[3];
       }
       else {
         // If we have some string-labeled boundary markers.
-        if(markers_conversion != NULL) {
+        if(mesh->markers_conversion != NULL) {
           // We need to make sure that the internal markers do not collide.
-          markers_conversion->check_element_marker(idx[4]);
-          markers_conversion->insert_element_marker(idx[4], "");
+          mesh->markers_conversion->check_element_marker(idx[4]);
+          mesh->markers_conversion->insert_element_marker(idx[4], "");
         }
         marker = idx[4];
       }
@@ -627,19 +624,17 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
 
       // If we are dealing with a string as a marker.
       if(triple->marker->size() > 0) {
-        if(this->markers_conversion == NULL)
-          error("MarkersConversion class has to be used if string boundary/area markers are to be used.");
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        markers_conversion->insert_boundary_marker(markers_conversion->min_boundary_marker_unused, *triple->marker);
-        marker_to_set = markers_conversion->get_internal_boundary_marker(*triple->marker);
+        mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, *triple->marker);
+        marker_to_set = mesh->markers_conversion->get_internal_boundary_marker(*triple->marker);
       }
       else {
         // If we have some string-labeled boundary markers.
-        if(markers_conversion != NULL) {
+        if(mesh->markers_conversion != NULL) {
           // We need to make sure that the internal markers do not collide.
-          markers_conversion->check_boundary_marker(marker);
-          markers_conversion->insert_boundary_marker(marker, "");
+          mesh->markers_conversion->check_boundary_marker(marker);
+          mesh->markers_conversion->insert_boundary_marker(marker, "");
         }
         marker_to_set = marker;
       }

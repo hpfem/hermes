@@ -19,7 +19,7 @@ namespace RefinementSelectors {
     for(int i = 0; i < num_sons; i++) {
       if (i > 0)
         stream << " ";
-      stream << get_quad_order_str(cand.p[i]);
+      stream << h2d_get_quad_order_str(cand.p[i]);
     }
     stream << "]";
     return stream;
@@ -79,8 +79,8 @@ namespace RefinementSelectors {
     error_if(shapeset == NULL, "Shapeset is NULL.");
 
     //build shape indices
-    build_shape_indices(H2D_MODE_TRIANGLE, vertex_order, edge_bubble_order);
-    build_shape_indices(H2D_MODE_QUAD, vertex_order, edge_bubble_order);
+    build_shape_indices(HERMES_MODE_TRIANGLE, vertex_order, edge_bubble_order);
+    build_shape_indices(HERMES_MODE_QUAD, vertex_order, edge_bubble_order);
   }
 
   void OptimumSelector::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices) {
@@ -100,7 +100,7 @@ namespace RefinementSelectors {
     std::vector<ShapeInx> &indices = shape_indices[mode];
     int* next_order = this->next_order_shape[mode];
     int& max_shape_inx = this->max_shape_inx[mode];
-    int num_edges = (mode == H2D_MODE_QUAD) ? 4 : 3;
+    int num_edges = (mode == HERMES_MODE_QUAD) ? 4 : 3;
     shapeset->set_mode(mode);
     bool &has_vertex = has_vertex_shape[mode];
     bool &has_edge = has_edge_shape[mode];
@@ -136,7 +136,7 @@ namespace RefinementSelectors {
       //edge functions
       if (edge_bubble_order.is_in_closed(i)) {
         //edge functions
-        if (mode == H2D_MODE_QUAD) {
+        if (mode == HERMES_MODE_QUAD) {
           for (int j = 0; j < num_edges; j++) {
             int inx = shapeset->get_edge_index(j, 0, i);
             if (inx >= 0) {
@@ -161,7 +161,7 @@ namespace RefinementSelectors {
         }
 
         //bubble functions
-        if (mode == H2D_MODE_QUAD) {
+        if (mode == HERMES_MODE_QUAD) {
           //NOTE: shapeset returns a set of all possible bubble functions and it is not possible to identify which is the smallest
           // order of an element which contains this function, e.g., in a case of a Hcurl and an element of an order 1/1, it returns
           // a list that contains a function of poly-order 2/0. Also, order of indices is not given.
@@ -383,17 +383,17 @@ namespace RefinementSelectors {
             const int central = 3; //central triangle
             c.dofs = 0;
             for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++) {
-              c.dofs += calc_num_shapes(H2D_MODE_TRIANGLE, H2D_GET_H_ORDER(c.p[j]), H2DRS_ORDER_ANY, H2DST_ANY);
+              c.dofs += calc_num_shapes(HERMES_MODE_TRIANGLE, H2D_GET_H_ORDER(c.p[j]), H2DRS_ORDER_ANY, H2DST_ANY);
               if (j != central)
-                c.dofs -= calc_num_shapes(H2D_MODE_TRIANGLE, std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[central])), H2DRS_ORDER_ANY, H2DST_TRI_EDGE) / 3; //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
+                c.dofs -= calc_num_shapes(HERMES_MODE_TRIANGLE, std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[central])), H2DRS_ORDER_ANY, H2DST_TRI_EDGE) / 3; //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
             }
-            if (has_vertex_shape[H2D_MODE_TRIANGLE])
+            if (has_vertex_shape[HERMES_MODE_TRIANGLE])
               c.dofs -= 3*3; //every vertex functions of vertices which create the middle triangle is added 3-times
           }
           break;
 
         case H2D_REFINEMENT_P:
-          c.dofs = calc_num_shapes(H2D_MODE_TRIANGLE, H2D_GET_H_ORDER(c.p[0]), H2DRS_ORDER_ANY, H2DST_ANY);
+          c.dofs = calc_num_shapes(HERMES_MODE_TRIANGLE, H2D_GET_H_ORDER(c.p[0]), H2DRS_ORDER_ANY, H2DST_ANY);
           break;
 
         default:
@@ -405,33 +405,33 @@ namespace RefinementSelectors {
         case H2D_REFINEMENT_H:
           c.dofs = 0;
           for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
-            c.dofs += calc_num_shapes(H2D_MODE_QUAD, H2D_GET_H_ORDER(c.p[j]), H2D_GET_V_ORDER(c.p[j]), H2DST_ANY);
+            c.dofs += calc_num_shapes(HERMES_MODE_QUAD, H2D_GET_H_ORDER(c.p[j]), H2D_GET_V_ORDER(c.p[j]), H2DST_ANY);
           for(int j = 0; j < 2; j++) { //shared edge functions
-            c.dofs -= calc_num_shapes(H2D_MODE_QUAD, H2DRS_ORDER_ANY, std::min(H2D_GET_V_ORDER(c.p[2*j]), H2D_GET_V_ORDER(c.p[2*j + 1])), H2DST_VERT_EDGE) / 2; //shared vertical edge functions: every edge is twice there
-            c.dofs -= calc_num_shapes(H2D_MODE_QUAD, std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[j^3])), H2DRS_ORDER_ANY, H2DST_HORIZ_EDGE) / 2; //shared horizontal edge functions: every edge is twice there
+            c.dofs -= calc_num_shapes(HERMES_MODE_QUAD, H2DRS_ORDER_ANY, std::min(H2D_GET_V_ORDER(c.p[2*j]), H2D_GET_V_ORDER(c.p[2*j + 1])), H2DST_VERT_EDGE) / 2; //shared vertical edge functions: every edge is twice there
+            c.dofs -= calc_num_shapes(HERMES_MODE_QUAD, std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[j^3])), H2DRS_ORDER_ANY, H2DST_HORIZ_EDGE) / 2; //shared horizontal edge functions: every edge is twice there
           }
-          if (has_vertex_shape[H2D_MODE_QUAD])
+          if (has_vertex_shape[HERMES_MODE_QUAD])
             c.dofs -= 4 + 3; //edge vertex + central vertex
           break;
 
         case H2D_REFINEMENT_ANISO_H:
-          c.dofs = calc_num_shapes(H2D_MODE_QUAD, H2D_GET_H_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[0]), H2DST_ANY);
-          c.dofs += calc_num_shapes(H2D_MODE_QUAD, H2D_GET_H_ORDER(c.p[1]), H2D_GET_V_ORDER(c.p[1]), H2DST_ANY);
-          c.dofs -= calc_num_shapes(H2D_MODE_QUAD, std::min(H2D_GET_H_ORDER(c.p[0]), H2D_GET_H_ORDER(c.p[1])), H2DRS_ORDER_ANY, H2DST_HORIZ_EDGE) / 2; //shared edge functions
-          if (has_vertex_shape[H2D_MODE_QUAD])
+          c.dofs = calc_num_shapes(HERMES_MODE_QUAD, H2D_GET_H_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[0]), H2DST_ANY);
+          c.dofs += calc_num_shapes(HERMES_MODE_QUAD, H2D_GET_H_ORDER(c.p[1]), H2D_GET_V_ORDER(c.p[1]), H2DST_ANY);
+          c.dofs -= calc_num_shapes(HERMES_MODE_QUAD, std::min(H2D_GET_H_ORDER(c.p[0]), H2D_GET_H_ORDER(c.p[1])), H2DRS_ORDER_ANY, H2DST_HORIZ_EDGE) / 2; //shared edge functions
+          if (has_vertex_shape[HERMES_MODE_QUAD])
             c.dofs -= 2; //shared vertex functions
           break;
 
         case H2D_REFINEMENT_ANISO_V:
-          c.dofs = calc_num_shapes(H2D_MODE_QUAD, H2D_GET_H_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[0]), H2DST_ANY);
-          c.dofs += calc_num_shapes(H2D_MODE_QUAD, H2D_GET_H_ORDER(c.p[1]), H2D_GET_V_ORDER(c.p[1]), H2DST_ANY);
-          c.dofs -= calc_num_shapes(H2D_MODE_QUAD, H2DRS_ORDER_ANY, std::min(H2D_GET_V_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[1])), H2DST_VERT_EDGE) / 2; //shared edge functions
-          if (has_vertex_shape[H2D_MODE_QUAD])
+          c.dofs = calc_num_shapes(HERMES_MODE_QUAD, H2D_GET_H_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[0]), H2DST_ANY);
+          c.dofs += calc_num_shapes(HERMES_MODE_QUAD, H2D_GET_H_ORDER(c.p[1]), H2D_GET_V_ORDER(c.p[1]), H2DST_ANY);
+          c.dofs -= calc_num_shapes(HERMES_MODE_QUAD, H2DRS_ORDER_ANY, std::min(H2D_GET_V_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[1])), H2DST_VERT_EDGE) / 2; //shared edge functions
+          if (has_vertex_shape[HERMES_MODE_QUAD])
             c.dofs -= 2; //shared vertex functions
           break;
 
         case H2D_REFINEMENT_P:
-          c.dofs = calc_num_shapes(H2D_MODE_QUAD, H2D_GET_H_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[0]), H2DST_ANY);
+          c.dofs = calc_num_shapes(HERMES_MODE_QUAD, H2D_GET_H_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[0]), H2DST_ANY);
           break;
 
         default:
@@ -523,9 +523,9 @@ namespace RefinementSelectors {
 
     //set shapeset mode
     if (element->is_triangle())
-      shapeset->set_mode(H2D_MODE_TRIANGLE);
+      shapeset->set_mode(HERMES_MODE_TRIANGLE);
     else
-      shapeset->set_mode(H2D_MODE_QUAD);
+      shapeset->set_mode(HERMES_MODE_QUAD);
 
     //set orders
     set_current_order_range(element);

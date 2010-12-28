@@ -90,7 +90,6 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
        ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
        ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
-       ${HERMES_COMMON_DIR}/markers_conversion.cpp
        )
 
 include(PickRealOrCplxLibs)
@@ -126,7 +125,10 @@ macro(LIBRARY_SETTINGS BIN)
       ${SUPERLU_LIBRARY}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
-      ${ADDITIONAL_LIBS}        
+	  ${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
+      ${ADDITIONAL_LIBS}
+      ${PYTHON_LIBRARIES}
+      ${EXODUSII_LIBRARY}
   )
 endmacro(LIBRARY_SETTINGS)
 

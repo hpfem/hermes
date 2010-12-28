@@ -248,8 +248,8 @@ void Space::copy_orders(const Space &space, int inc) {
 
 		Ord3 order;
 		switch (cmesh->elements[eid]->get_mode()) {
-			case MODE_TETRAHEDRON: order = oo + Ord3(inc); break;
-			case MODE_HEXAHEDRON: order = oo + Ord3(inc, inc, inc); break;
+			case HERMES_MODE_TET: order = oo + Ord3(inc); break;
+			case HERMES_MODE_HEX: order = oo + Ord3(inc, inc, inc); break;
 			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 		order.limit();
@@ -270,7 +270,7 @@ void Space::enforce_minimum_rule() {
 		Ord3 elm_order = elem_node->order;
 
 		switch (elem->get_mode()) {
-			case MODE_TETRAHEDRON:
+			case HERMES_MODE_TET:
 				// on faces
 				for (int iface = 0; iface < elem->get_num_faces(); iface++) {
 					unsigned int fidx = mesh->get_facet_id(elem, iface);
@@ -293,7 +293,7 @@ void Space::enforce_minimum_rule() {
 				}
 				break;
 
-			case MODE_HEXAHEDRON:
+			case HERMES_MODE_HEX:
 				// on faces
 				for (int iface = 0; iface < elem->get_num_faces(); iface++) {
 					unsigned int fidx = mesh->get_facet_id(elem, iface);
@@ -885,8 +885,8 @@ void Space::find_constraints()
 	face_ced.free();
 
 	// modified breadth-first search
-	Array<unsigned int> open;
-	BitArray elms;
+	JudyArray<unsigned int> open;
+	BitJudyArray elms;
 
 	// first include all base elements
 	FOR_ALL_BASE_ELEMENTS(eid, mesh) {
@@ -1168,7 +1168,7 @@ Space::BaseFaceComponent *Space::merge_baselist(BaseFaceComponent *l1, int n1, B
 ///
 void Space::calc_vertex_vertex_ced(unsigned int vtx1, unsigned int vtx2) {
 	_F_
-	if (type == Hcurl || type == Hdiv || type == L2) return;
+	if (type == HERMES_HCURL_SPACE || type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	assert(vtx1 != INVALID_IDX);
 	assert(vtx2 != INVALID_IDX);
@@ -1214,7 +1214,7 @@ void Space::calc_vertex_vertex_ced(unsigned int vtx1, unsigned int vtx2) {
 ///
 void Space::calc_mid_vertex_vertex_ced(unsigned int mid, unsigned int vtx1, unsigned int vtx2, unsigned int vtx3, unsigned int vtx4) {
 	_F_
-	if (type == Hcurl || type == Hdiv || type == L2) return;
+	if (type == HERMES_HCURL_SPACE || type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	assert(vtx1 != INVALID_IDX);
 	assert(vtx2 != INVALID_IDX);
@@ -1263,7 +1263,7 @@ void Space::calc_mid_vertex_vertex_ced(unsigned int mid, unsigned int vtx1, unsi
 
 void Space::calc_vertex_edge_ced(unsigned int vtx, unsigned int eid, int ori, int part) {
 	_F_
-	if (type == Hcurl || type == Hdiv || type == L2) return;
+	if (type == HERMES_HCURL_SPACE || type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc vertex/edge #%ld\n", vtx);
 
@@ -1365,7 +1365,7 @@ void Space::calc_vertex_edge_ced(unsigned int vtx, unsigned int eid, int ori, in
 
 void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, unsigned int eid, int ori, int part) {
 	_F_
-	if (type == Hcurl || type == Hdiv || type == L2) return;
+	if (type == HERMES_HCURL_SPACE || type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc mid vertex/edge #%ld, [%ld | %ld]\n", vtx, eid, fmp);
 
@@ -1529,7 +1529,7 @@ void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, unsigne
 /// @param ori - the orientation of the constraining facet
 void Space::calc_vertex_face_ced(unsigned int vtx, unsigned int fid, int ori, int iface, int hpart, int vpart) {
 	_F_
-	if (type == Hcurl || type == Hdiv || type == L2) return;
+	if (type == HERMES_HCURL_SPACE || type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc vertex/face #%ld\n", vtx);
 
@@ -1590,7 +1590,7 @@ void Space::calc_vertex_face_ced(unsigned int vtx, unsigned int fid, int ori, in
 /// @param[in] part - part of the edge
 void Space::calc_edge_edge_ced(unsigned int seid, unsigned int eid, int ori, int epart, int part) {
 	_F_
-	if (type == Hdiv || type == L2) return;
+	if (type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc edge/edge #%ld, #%ld\n", seid, eid);
 
@@ -1670,7 +1670,7 @@ void Space::calc_edge_edge_ced(unsigned int seid, unsigned int eid, int ori, int
 
 void Space::calc_mid_edge_edge_ced(unsigned int meid, unsigned int eid[], int ori[], int epart, int part) {
 	_F_
-	if (type == Hdiv || type == L2) return;
+	if (type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc mid edge/edge #%ld\n", meid);
 
@@ -1737,7 +1737,7 @@ void Space::calc_mid_edge_edge_ced(unsigned int meid, unsigned int eid[], int or
 /// @param[in] epart - edge part
 void Space::calc_edge_face_ced(unsigned int mid_eid, unsigned int eid[], unsigned int fid, int ori, int iface, int part_ori, int fpart, int epart) {
 	_F_
-	if (type == Hdiv || type == L2) return;
+	if (type == HERMES_HDIV_SPACE || type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc edge/face #%ld\n", mid_eid);
 
@@ -1801,7 +1801,7 @@ void Space::calc_edge_face_ced(unsigned int mid_eid, unsigned int eid[], unsigne
 /// @param[in] vpart - vertical part
 void Space::calc_face_face_ced(unsigned int sfid, unsigned int fid, int ori, int hpart, int vpart) {
 	_F_
-	if (type == L2) return;
+	if (type == HERMES_L2_SPACE) return;
 
 	PRINTF("calc face/face #%ld\n", sfid);
 
@@ -1862,14 +1862,14 @@ void Space::uc_face(unsigned int eid, int iface) {
 
 			// faces
 			sub_fid[0] = mesh->get_facet_id(4, vtcs[0], vtcs[1], emp[0], emp[1]);
-			sub_fi[0] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[0] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = fi->h_part;
 			sfi->v_part = get_lower_part(fi->v_part);
 			fi_data[sub_fid[0]] = sfi;
 
 			sub_fid[1] = mesh->get_facet_id(4, emp[1], emp[0], vtcs[2], vtcs[3]);
-			sub_fi[1] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[1] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = fi->h_part;
 			sfi->v_part = get_higher_part(fi->v_part);
@@ -1924,14 +1924,14 @@ void Space::uc_face(unsigned int eid, int iface) {
 
 			// faces
 			sub_fid[0] = mesh->get_facet_id(4, vtcs[0], emp[0], emp[1], vtcs[3]);
-			sub_fi[0] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[0] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = get_lower_part(fi->h_part);
 			sfi->v_part = fi->v_part;
 			fi_data[sub_fid[0]] = sfi;
 
 			sub_fid[1] = mesh->get_facet_id(4, emp[0], vtcs[1], vtcs[2], emp[1]);
-			sub_fi[1] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[1] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = get_higher_part(fi->h_part);
 			sfi->v_part = fi->v_part;
@@ -1988,28 +1988,28 @@ void Space::uc_face(unsigned int eid, int iface) {
 
 			// faces
 			sub_fid[0] = mesh->get_facet_id(4, vtcs[0], emp[0], fmp, emp[3]);
-			sub_fi[0] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[0] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = get_lower_part(fi->h_part);
 			sfi->v_part = get_lower_part(fi->v_part);
 			fi_data[sub_fid[0]] = sfi;
 
 			sub_fid[1] = mesh->get_facet_id(4, emp[0], vtcs[1], emp[1], fmp);
-			sub_fi[1] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[1] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = get_higher_part(fi->h_part);
 			sfi->v_part = get_lower_part(fi->v_part);
 			fi_data[sub_fid[1]] = sfi;
 
 			sub_fid[2] = mesh->get_facet_id(4, fmp, emp[1], vtcs[2], emp[2]);
-			sub_fi[2] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[2] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = get_higher_part(fi->h_part);
 			sfi->v_part = get_higher_part(fi->v_part);
 			fi_data[sub_fid[2]] = sfi;
 
 			sub_fid[3] = mesh->get_facet_id(4, emp[3], fmp, emp[2], vtcs[3]);
-			sub_fi[3] = sfi = new FaceInfo(MODE_QUAD, fi->elem_id, fi->face);
+			sub_fi[3] = sfi = new FaceInfo(HERMES_MODE_QUAD, fi->elem_id, fi->face);
 			MEM_CHECK(sfi);
 			sfi->h_part = get_lower_part(fi->h_part);
 			sfi->v_part = get_higher_part(fi->v_part);
@@ -2158,12 +2158,12 @@ void Space::uc_element(unsigned int idx) {
 		if (face_ced.is_set(fid)) {
 			if (!fi_data.exists(fid)) {
 				switch (facet->mode) {
-					case MODE_QUAD:
-						fi_data[fid] = new FaceInfo(MODE_QUAD, idx, iface);
+					case HERMES_MODE_QUAD:
+						fi_data[fid] = new FaceInfo(HERMES_MODE_QUAD, idx, iface);
 						MEM_CHECK(fi_data[fid]);
 						break;
 
-					case MODE_TRIANGLE:
+					case HERMES_MODE_TRIANGLE:
 						EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 						break;
 

@@ -26,8 +26,8 @@ class MeshLoader;
 
 #include "h3d_common.h"
 
-#include "../../hermes_common/array.h"
-#include "../../hermes_common/arrayptr.h"
+#include "../../hermes_common/judyarray.h"
+#include "../../hermes_common/judyarrayptr.h"
 #include "../../hermes_common/mapord.h"
 
 /// Iterates over all mesh vertex indices.
@@ -313,7 +313,7 @@ public:
 	virtual ~Hex();
 
 	//
-	virtual ElementMode3D get_mode() const { return MODE_HEXAHEDRON; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_HEX; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -328,7 +328,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual ElementMode2D get_face_mode(int face_num) const { return MODE_QUAD; }
+	virtual ElementMode2D get_face_mode(int face_num) const { return HERMES_MODE_QUAD; }
 	virtual int get_num_face_vertices(int face_num) const { return Quad::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Quad::NUM_EDGES; }
 
@@ -376,7 +376,7 @@ public:
 	virtual ~Tetra();
 
 	//
-	virtual ElementMode3D get_mode() const { return MODE_TETRAHEDRON; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_TET; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -391,7 +391,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual ElementMode2D get_face_mode(int face_num) const { return MODE_TRIANGLE; }
+	virtual ElementMode2D get_face_mode(int face_num) const { return HERMES_MODE_TRIANGLE; }
 	virtual int get_num_face_vertices(int face_num) const  { return Tri::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Tri::NUM_EDGES; }
 	// FIXME
@@ -433,7 +433,7 @@ public:
 	virtual ~Prism();
 
 	//
-	virtual ElementMode3D get_mode() const { return MODE_PRISM; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_PRISM; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -635,10 +635,10 @@ public:
 	void ugh();
 
 	// data
-        Array<Vertex *>   vertices;
+        JudyArray<Vertex *>   vertices;
 	MapOrd<Edge>      edges;
-	Array<Element *>  elements;
-	Array<Boundary *> boundaries;
+	JudyArray<Element *>  elements;
+	JudyArray<Boundary *> boundaries;
 	MapOrd<Facet *>   facets;
 
 protected:

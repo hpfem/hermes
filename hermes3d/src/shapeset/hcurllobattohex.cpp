@@ -192,8 +192,8 @@ HcurlShapesetLobattoHex::HcurlShapesetLobattoHex() : Shapeset(3)
 {
 	_F_
 #ifdef WITH_HEX
-	type = Hcurl;
-	mode = MODE_HEXAHEDRON;
+	type = HERMES_HCURL_SPACE;
+	mode = HERMES_MODE_HEX;
 
 	num_components = 3;
 

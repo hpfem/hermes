@@ -36,7 +36,7 @@ class NoxSolver;
 class IfpackPrecond;
 class MlPrecond;
 
-class EpetraMatrix : public SparseMatrix {
+class HERMES_API EpetraMatrix : public SparseMatrix {
 public:
   EpetraMatrix();
 #ifdef HAVE_EPETRA
@@ -79,7 +79,7 @@ protected:
 };
 
 
-class EpetraVector : public Vector {
+class HERMES_API EpetraVector : public Vector {
 public:
   EpetraVector();
 #ifdef HAVE_EPETRA

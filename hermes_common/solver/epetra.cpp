@@ -179,9 +179,11 @@ void EpetraMatrix::add(int m, int n, scalar v)
     int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n);
     if (ierr != 0) error("Failed to insert into Epetra matrix");
 #else
-    int ierr = mat->SumIntoGlobalValues(m, 1, &std::real(v), &n);
+    double v_r = std::real<double>(v);
+    int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n);
     assert(ierr == 0);
-    ierr = mat_im->SumIntoGlobalValues(m, 1, &std::imag(v), &n);
+    double v_i = std::imag<double>(v);
+    ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n);
     assert(ierr == 0);
 #endif
   }

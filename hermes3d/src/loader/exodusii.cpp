@@ -139,8 +139,8 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 			elem->get_face_vertices(iface, vtcs);
 
 			switch (elem->get_face_mode(iface)) {
-				case MODE_TRIANGLE: mesh->add_tri_boundary(vtcs, sid); break;
-				case MODE_QUAD: mesh->add_quad_boundary(vtcs, sid); break;
+				case HERMES_MODE_TRIANGLE: mesh->add_tri_boundary(vtcs, sid); break;
+				case HERMES_MODE_QUAD: mesh->add_quad_boundary(vtcs, sid); break;
 				default: warning("Unknown type of face"); break;
 			}
       delete [] vtcs;

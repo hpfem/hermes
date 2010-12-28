@@ -16762,7 +16762,7 @@ static int* leg_index_to_order[2] =
 
 static void check_leg_tri(Shapeset* shapeset)
 {
-  shapeset->set_mode(H2D_MODE_TRIANGLE);
+  shapeset->set_mode(HERMES_MODE_TRIANGLE);
   for (int i = 1; i <= 10; i++)
   {
     int nb = shapeset->get_num_bubbles(i);
@@ -16830,7 +16830,7 @@ HcurlShapesetLegendre::HcurlShapesetLegendre()
   comb_table = NULL;
 
   check_leg_tri(this);
-  set_mode(H2D_MODE_TRIANGLE);
+  set_mode(HERMES_MODE_TRIANGLE);
 }
 
 //#endif

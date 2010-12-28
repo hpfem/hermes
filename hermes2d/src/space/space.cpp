@@ -35,6 +35,12 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
   this->ndof = 0;
 
   if(bc_types == NULL) error("BCTypes pointer cannot be NULL in Space::Space().");
+
+  // Before adding, update the boundary variables with the user-supplied string markers
+  // according to the conversion table contained in the mesh.
+  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
+  if(bc_values != NULL)
+    this->update_markers_acc_to_conversion(bc_values, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
   this->set_essential_bc_values(bc_values);
   this->bc_value_callback_by_coord = NULL;
@@ -94,6 +100,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
 
   BCTypesCallback *bc_types = new BCTypesCallback();
   bc_types->register_callback(bc_type_callback);
+  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
   
   this->set_essential_bc_values(bc_value_callback_by_coord);
@@ -323,7 +330,7 @@ int Space::get_edge_order(Element* e, int edge)
 int Space::get_edge_order_internal(Node* en)
 {
   _F_
-  assert(en->type == H2D_TYPE_EDGE);
+  assert(en->type == HERMES_TYPE_EDGE);
   Element** e = en->elem;
   int o1 = 1000, o2 = 1000;
   assert(e[0] != NULL || e[1] != NULL);
@@ -612,8 +619,8 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
   int component = get_type() == 2 ? 1 : 0;
 
   Quad1DStd quad1d;
-  //shapeset->set_mode(H2D_MODE_TRIANGLE);
-  shapeset->set_mode(H2D_MODE_QUAD);
+  //shapeset->set_mode(HERMES_MODE_TRIANGLE);
+  shapeset->set_mode(HERMES_MODE_QUAD);
   for (int i = 0; i < n; i++)
   {
     for (int j = i; j < n; j++)
@@ -708,7 +715,7 @@ void Space::free_extra_data()
   for_all_nodes(n, mesh)
   {
     NodeData* nd = &ndata[n->id];
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       printf("vert node id=%d ref=%d bnd=%d x=%g y=%g dof=%d n=%d ",
              n->id, n->ref, n->bnd, n->x, n->y, nd->dof, nd->n);
@@ -749,6 +756,41 @@ int Space::assign_dofs(Hermes::Tuple<Space*> spaces)
   }
 
   return ndof;
+}
+
+void Space::update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion)
+{
+  for(unsigned int i = 0; i < bc_types->markers_neumann_string_temp.size(); i++)
+    bc_types->markers_neumann.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_neumann_string_temp[i]));
+
+  for(unsigned int i = 0; i < bc_types->markers_newton_string_temp.size(); i++)
+    bc_types->markers_newton.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_newton_string_temp[i]));
+
+  for(unsigned int i = 0; i < bc_types->markers_dirichlet_string_temp.size(); i++)
+    bc_types->markers_dirichlet.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_dirichlet_string_temp[i]));
+
+  for(unsigned int i = 0; i < bc_types->markers_none_string_temp.size(); i++)
+    bc_types->markers_none.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_none_string_temp[i]));
+
+}
+
+void Space::update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion)
+{    
+  std::map<std::string, BCValues::value_callback>::iterator it;
+  for(it = bc_values->value_callbacks_string_temp.begin(); it != bc_values->value_callbacks_string_temp.end(); it++)
+    bc_values->add_function(markers_conversion->get_internal_boundary_marker(it->first), it->second);
+    
+  std::map<std::string, BCValues::value_callback_time>::iterator it_time;
+  for(it_time = bc_values->value_callbacks_time_string_temp.begin(); it_time != bc_values->value_callbacks_time_string_temp.end(); it_time++)
+    bc_values->add_timedep_function(markers_conversion->get_internal_boundary_marker(it_time->first), it_time->second);
+    
+  std::map<std::string, scalar>::iterator it_scalar;
+  for(it_scalar = bc_values->value_constants_string_temp.begin(); it_scalar != bc_values->value_constants_string_temp.end(); it_scalar++)
+    bc_values->add_const(markers_conversion->get_internal_boundary_marker(it_scalar->first), it_scalar->second);
+
+  std::map<std::string, bool>::iterator it_zero;
+  for(it_zero = bc_values->value_zeroes_string_temp.begin(); it_zero != bc_values->value_zeroes_string_temp.end(); it_zero++)
+    bc_values->add_zero(markers_conversion->get_internal_boundary_marker(it_zero->first));
 }
 
 // updating time-dependent essential BC

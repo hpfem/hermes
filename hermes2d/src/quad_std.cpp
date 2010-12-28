@@ -2487,7 +2487,7 @@ static int quad_pt_ref = 0;
 
 Quad2DStd::Quad2DStd()
 {
-  mode = H2D_MODE_TRIANGLE;
+  mode = HERMES_MODE_TRIANGLE;
 
   ref_vert[0][0][0] = -1.0;
   ref_vert[0][0][1] = -1.0;

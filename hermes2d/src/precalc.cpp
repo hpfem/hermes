@@ -49,9 +49,9 @@ PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss)
 
 void PrecalcShapeset::update_max_index()
 {
-  shapeset->set_mode(H2D_MODE_TRIANGLE);
+  shapeset->set_mode(HERMES_MODE_TRIANGLE);
   max_index[0] = shapeset->get_max_index();
-  shapeset->set_mode(H2D_MODE_QUAD);
+  shapeset->set_mode(HERMES_MODE_QUAD);
   max_index[1] = shapeset->get_max_index();
 }
 

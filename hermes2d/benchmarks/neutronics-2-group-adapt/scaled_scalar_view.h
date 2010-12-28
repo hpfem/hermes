@@ -3,7 +3,7 @@
 class HERMES_API ScaledScalarView : public ScalarView
 {
 public:
-    ScaledScalarView(const char* title = "ScaledScalarView", WinGeom *wg = NULL)
+    ScaledScalarView(char* title = "ScaledScalarView", WinGeom *wg = NULL)
                   : ScalarView(title, wg) {
     }
 

@@ -806,9 +806,9 @@ int main(int argc, char *argv[]) {
 	int i = 0;
 	int j = 0;
 			// build the mesh
-			Array<Vertex *> vertices;
-			Array<Element *> elements;
-			Array<Boundary *> boundaries;
+			JudyArray<Vertex *> vertices;
+			JudyArray<Element *> elements;
+			JudyArray<Boundary *> boundaries;
 			MapOrd<Facet *> facets;
 
 			for (int k = 0; k < countof(vtcs); k++)

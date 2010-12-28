@@ -20,8 +20,8 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 
-#include "../../../hermes_common/array.h"
-#include "../../../hermes_common/arrayptr.h"
+#include "../../../hermes_common/judyarray.h"
+#include "../../../hermes_common/judyarrayptr.h"
 #include "../../../hermes_common/mapord.h"
 
 typedef
@@ -30,15 +30,15 @@ typedef
 
 // 2D element modes
 enum ElementMode2D {
-	MODE_TRIANGLE = 0,
-	MODE_QUAD = 1
+	HERMES_MODE_TRIANGLE = 0,
+	HERMES_MODE_QUAD = 1
 };
 
 // 3D element modes
 enum ElementMode3D {
-	MODE_TETRAHEDRON = 0,
-	MODE_HEXAHEDRON = 1,
-	MODE_PRISM = 2
+	HERMES_MODE_TET = 0,
+	HERMES_MODE_HEX = 1,
+	HERMES_MODE_PRISM = 2
 };
 
 
@@ -83,7 +83,7 @@ public:
 
 	uint vtcs[NUM_VERTICES];
 
-	virtual ElementMode3D get_mode() const { return MODE_TETRAHEDRON; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_TET; }
 	virtual uint *get_vertices() { return vtcs; }
 };
 
@@ -97,7 +97,7 @@ public:
 
 	uint vtcs[NUM_VERTICES];
 
-	virtual ElementMode3D get_mode() const { return MODE_HEXAHEDRON; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_HEX; }
 	virtual uint *get_vertices() { return vtcs; }
 };
 
@@ -111,7 +111,7 @@ public:
 
 	uint vtcs[NUM_VERTICES];
 
-	virtual ElementMode3D get_mode() const { return MODE_PRISM; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_PRISM; }
 	virtual uint *get_vertices() { return vtcs; }
 };
 
@@ -164,7 +164,7 @@ public:
 	virtual ~BoundaryTri();
 
 	virtual Boundary *copy();
-	virtual ElementMode2D get_mode() const { return MODE_TRIANGLE; }
+	virtual ElementMode2D get_mode() const { return HERMES_MODE_TRIANGLE; }
 	virtual uint *get_vertices() { return vtcs; }
 
 protected:
@@ -184,7 +184,7 @@ public:
 	virtual ~BoundaryQuad();
 
 	virtual Boundary *copy();
-	virtual ElementMode2D get_mode() const { return MODE_QUAD; }
+	virtual ElementMode2D get_mode() const { return HERMES_MODE_QUAD; }
 	virtual uint *get_vertices() { return vtcs; }
 
 protected:
@@ -214,10 +214,10 @@ public:
 	Boundary *add_quad_boundary(uint vtcs[], int marker);
 
 	// data
-	Array<Vertex *>   vertices;
+	JudyArray<Vertex *>   vertices;
 //	MapOrd<Edge>      edges;
-	Array<Element *>  elements;
-	Array<Boundary *> boundaries;
+	JudyArray<Element *>  elements;
+	JudyArray<Boundary *> boundaries;
 	MapOrd<Facet *>   facets;
 
 protected:

@@ -260,9 +260,9 @@ void View::pre_display()
   if (b_help) draw_help();
   else if (b_scale) scale_dispatch();
 
-  //draw current rendring time
+  //draw current rendering time
 # ifdef _DEBUG
-  draw_fps();
+  //draw_fps();
 # endif
 
   //wait to finish
@@ -374,12 +374,12 @@ void View::draw_fps()
   glVertex2i(output_width - (width_px + 2*edge_thickness), height_px + 2*edge_thickness);
   glEnd();
 
-  //render text
+  // render text
   glDisable(GL_BLEND);
   glColor3f(1.0f, 0.0f, 0.0f);
   glRasterPos2i(output_width - (width_px + edge_thickness), edge_thickness + height_px);
-  // If the following line is uncommented, timing information is printed into the image.
-  //glutBitmapString(font, buffer);
+  // iming information is printed into the image.
+  glutBitmapString(font, buffer);
 }
 
 void View::on_reshape(int width, int height)

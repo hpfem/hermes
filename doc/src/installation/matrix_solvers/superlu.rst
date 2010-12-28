@@ -13,6 +13,13 @@ library.
 Linux
 ~~~~~
 
+**Via Synaptic:**
+
+SuperLU is available in Ubuntu via the Synaptic Package Manager, just install
+packages libsuperlu3 and libsuperlu3-dev.
+
+**From Source:**
+
 Sequential
 ``````````
 Download the software package from the `solvers repository`_ and unpack 

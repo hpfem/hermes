@@ -4797,8 +4797,8 @@ H1ShapesetLobattoTetra::H1ShapesetLobattoTetra() : Shapeset(2)
 {
 	_F_
 #ifdef WITH_TETRA
-	type = H1;
-	mode = MODE_TETRAHEDRON;
+	type = HERMES_H1_SPACE;
+	mode = HERMES_MODE_TET;
 	num_components = 1;
 
 	// fn values are calculated by the tables

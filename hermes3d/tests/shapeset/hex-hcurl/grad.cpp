@@ -30,7 +30,7 @@
 
 void hcurl_int_vol(RealFunction *fu, double3 result) {
 	_F_
-/*	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);
+/*	Quad3D *quad = get_quadrature(HERMES_MODE_HEX);
 
 	Ord3 o = quad->get_max_order();
 
@@ -55,7 +55,7 @@ void hcurl_int_vol(RealFunction *fu, double3 result) {
 
 void hcurl_int_surf(RealFunction *fu, double3 result) {
 	_F_
-/*	Quad3D *quad = get_quadrature(MODE_HEXAHEDRON);
+/*	Quad3D *quad = get_quadrature(HERMES_MODE_HEX);
 
 	Point3D norm[] = {
 		{ -1.0,  0.0,  0.0 },
