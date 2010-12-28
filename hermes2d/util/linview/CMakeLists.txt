@@ -27,19 +27,7 @@ macro(LINVIEW_SETTINGS VIEW)
     set(FLAGS "${FLAGS} -DWHATVIEW=${VIEW}")
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${FLAGS})
         
-    # Do we need JUDY and GLUT libraries here?
-    target_link_libraries(  ${PROJECT_NAME} 
-      ${HERMES_REAL_BIN}
-      ${PYTHON_LIBRARIES}
-      ${PETSC_LIBRARIES}
-      ${UMFPACK_LIBRARIES}
-      ${PARDISO_LIBRARY}
-      ${MUMPS_LIBRARIES}
-      ${TRILINOS_LIBRARIES}
-      ${LAPACK_LIBRARIES} 
-      ${EXODUSII_LIBRARY} 
-      ${HDF5_LIBRARY}
-    )
+    target_link_libraries(${PROJECT_NAME} ${HERMES_REAL_BIN})
     add_dependencies(${PROJECT_NAME} ${HERMES_REAL_BIN})
 endmacro(LINVIEW_SETTINGS)
 

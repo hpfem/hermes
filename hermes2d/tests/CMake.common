@@ -36,18 +36,5 @@ include_directories(${hermes2d_SOURCE_DIR}/src)
 include(PickRealOrCplxLibs)
 PICK_REAL_OR_CPLX_LIBS(${HERMES} ${PROJECT_NAME})
 
-# Do we need JUDY and GLUT libraries here?
-target_link_libraries(  ${PROJECT_NAME} 
-  ${HERMES}
-  ${PYTHON_LIBRARIES}
-  ${PETSC_LIBRARIES}
-  ${UMFPACK_LIBRARIES}
-  ${PARDISO_LIBRARY}
-  ${MUMPS_LIBRARIES}
-  ${SUPERLU_LIBRARY}
-  ${TRILINOS_LIBRARIES}
-  ${LAPACK_LIBRARIES} 
-  ${EXODUSII_LIBRARY} 
-  ${HDF5_LIBRARY}
-)
+target_link_libraries(${PROJECT_NAME} ${HERMES})
 add_dependencies(${PROJECT_NAME} ${HERMES})
