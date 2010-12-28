@@ -186,15 +186,15 @@ int main (int argc, char* argv[]) {
   WeakForm wf(2);
   // Add the bilinear and linear forms.
   if (TIME_DISCR == 1) {  // Implicit Euler.
-  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM, HERMES_ANY, &phi_prev_time);
-  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM, HERMES_ANY, &C_prev_time);
+  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM);
+  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM);
   wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
   wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
   wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
   wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
   } else {
-    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&phi_prev_time));
-    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time));
+    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_UNSYM);
+    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_UNSYM);
     wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_UNSYM);
     wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_UNSYM);
     wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
@@ -307,13 +307,24 @@ int main (int argc, char* argv[]) {
       if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
 	  	      NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
+
       // Store the result in ref_sln.
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
+      sprintf(title, "Solution[C], time level %d, REFERENCE SOLUTION", ts);
+      Cview.set_title(title);
+      Cview.show(&C_ref_sln);
+      //View::wait(HERMES_WAIT_KEYPRESS);
       
       // Projecting reference solution onto the coarse mesh
       info("Projecting fine mesh solution on coarse mesh.");
       OGProjection::project_global(Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
         matrix_solver);
+
+      sprintf(title, "Solution[C], time level %d, PROJECTED COARSE SOLUTION", ts);
+      Cview.set_title(title);
+      Cview.show(&C_sln);
+      //View::wait(HERMES_WAIT_KEYPRESS);
+
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
