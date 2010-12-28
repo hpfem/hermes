@@ -1,0 +1,65 @@
+#!/bin/bash
+
+process_dir() {
+    local -a subdirs=()
+    local -a pngs=()
+    
+    echo "Scanning directory: $1"
+
+    # Scan the directory, process bitmaps and collect subdirs.
+    for file in "$1"/*; do
+        if [[ -f "$file" ]]; then
+            if [ ${file: -4} == ".bmp" ]; then
+                echo converting "$file" ...                 
+                png="${file%.bmp}.png"                    
+                if convert "$file" -transparent "#ffffff" bmp.to.png ; then
+                    mv bmp.to.png "$png"
+                    convert "$png" -trim "$png"
+                    pngs+=("$png")
+                else                                    
+                    echo 'error in converting to transparent png' 1>&2
+                    exit 1
+                fi                                        
+            fi
+        elif [[ -d "$file" ]]; then
+          subdirs+=("$file")
+        fi
+    done
+    
+    # Very simplistic - if there are just two bitmaps in the directory, we 
+    # assume that one has a slash in its name, which separates the method 
+    # identifier and number of DOFs. This one is supposed to contain mesh and
+    # polynomial orders distribution, the other contains the solution plot. 
+    # These two bitmaps are placed side by side, with appropriate label.
+    
+    cnt=${#pngs[@]}
+
+    if (( cnt == 2 )); then
+        if [[ "${pngs[0]}" == *-* ]]; then
+          mesh=${pngs[0]}
+          sln=${pngs[1]}
+        else
+          mesh=${pngs[1]}
+          sln=${pngs[0]}
+        fi
+
+        montage -label "\nSolution" "${sln}"\
+                -label "\nMesh and polynomial orders (${mesh: -9:5} DOF)" "${mesh}"\
+                -tile x1 -geometry +36+24 -gravity south -pointsize 16\
+                "$1/sln_and_mesh.png"
+        convert "$1/sln_and_mesh.png" -trim "$1/sln_and_mesh.png"
+    fi
+    
+    # Now go through the subdirs.
+    for d in "${subdirs[@]}"; do
+      process_dir "$d"
+    done
+}
+
+clear
+if [[ -z "$1" ]]; then
+    read -p "Please enter a directory for me to scan " dir
+else
+    dir="$1"
+fi
+process_dir "$dir"
