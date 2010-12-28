@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 24-newton-timedep-gp-adapt works correctly.
+// This test makes sure that example 25-newton-timedep-gp-adapt works correctly.
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform refinements.
 const int P_INIT = 2;                             // Initial polynomial degree.

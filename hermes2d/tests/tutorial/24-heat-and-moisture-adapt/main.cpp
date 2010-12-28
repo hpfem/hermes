@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 23-heat-and-moisture-adapt works correctly.
+// This test makes sure that example 24-heat-and-moisture-adapt works correctly.
 
 const int P_INIT = 1;                             // Initial polynomial degrees.
 const bool MULTI = true;                          // MULTI = true  ... use multi-mesh,

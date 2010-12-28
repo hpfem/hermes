@@ -7,21 +7,7 @@
 
 using namespace RefinementSelectors;
 
-//  This example uses the Newton's method to solve a nonlinear complex-valued
-//  time-dependent PDE (the Gross-Pitaevski equation describing the behavior
-//  of Einstein-Bose quantum gases). For time-discretization one can use either
-//  the first-order implicit Euler method or the second-order Crank-Nicolson
-//  method.
-//
-//  PDE: non-stationary complex Gross-Pitaevski equation
-//  describing resonances in Bose-Einstein condensates.
-//
-//  ih \partial \psi/\partial t = -h^2/(2m) \Delta \psi +
-//  g \psi |\psi|^2 + 1/2 m \omega^2 (x^2 + y^2) \psi.
-//
-//  Domain: square (-1, 1)^2.
-//
-//  BC:  homogeneous Dirichlet everywhere on the boundary.
+// This test makes sure that example 22-newton-timedep-gp works correctly.
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform refinements.
 const int P_INIT = 4;                             // Initial polynomial degree.

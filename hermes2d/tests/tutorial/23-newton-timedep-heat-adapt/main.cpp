@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 22-newton-timedep-heat-adapt works correctly.
+// This test makes sure that example 23-newton-timedep-heat-adapt works correctly.
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.

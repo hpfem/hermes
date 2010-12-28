@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 20-newton-timedep-ns works correctly.
+// This test makes sure that example 21-newton-timedep-ns works correctly.
 
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely

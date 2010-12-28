@@ -19,6 +19,7 @@ add_subdirectory(12-general-adapt)
 add_subdirectory(14-hcurl-adapt)
 
 # nonlinear problems
+add_subdirectory(15-picard)
 add_subdirectory(16-newton-1)
 add_subdirectory(17-newton-2)
 add_subdirectory(18-newton-adapt)
@@ -54,3 +55,8 @@ endif(WITH_TRILINOS)
 # eigenproblems
 add_subdirectory(50-eigenvalue)
 add_subdirectory(51-eigenvalue-adapt)
+add_subdirectory(52-eigenvalue-h2p)
+
+# DG
+add_subdirectory(60-linear-advection-dg)
+

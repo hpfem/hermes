@@ -7,7 +7,7 @@
 
 using namespace RefinementSelectors;
 
-//  This test makes sure that example 17-newton-elliptic-adapt works correctly.
+//  This test makes sure that example 18-newton-elliptic-adapt works correctly.
 
 const int P_INIT = 1;                             // Initial polynomial degree.
 const int INIT_GLOB_REF_NUM = 1;                  // Number of initial uniform mesh refinements.

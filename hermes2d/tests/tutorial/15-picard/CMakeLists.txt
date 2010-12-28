@@ -1,7 +1,7 @@
-project(tutorial-17-newton-elliptic-2)
+project(tutorial-15-picard)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (../../../examples/CMake.common)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
-add_test(tutorial-17-newton-elliptic-2 ${BIN})
+add_test(tutorial-15-picard ${BIN})

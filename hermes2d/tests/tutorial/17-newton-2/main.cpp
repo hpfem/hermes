@@ -7,7 +7,7 @@
 
 using namespace RefinementSelectors;
 
-//  This test makes sure that example 16-newton-elliptic-2 works correctly.
+//  This test makes sure that example 17-newton-elliptic-2 works correctly.
 
 const int P_INIT = 2;                             // Initial polynomial degree
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method
