@@ -11,7 +11,8 @@ add_subdirectory(waveguide)
 # Fluid mechanics
 add_subdirectory(linear-advection-diffusion)
 add_subdirectory(linear-advection-dg-adapt)
-add_subdirectory(euler-gamm)
+add_subdirectory(euler-gamm-explicit)
+add_subdirectory(euler-gamm-implicit)
 add_subdirectory(euler-forward-step)
 add_subdirectory(euler-gamm-adapt)
 

@@ -47,6 +47,11 @@ HERMES_API_USED_TEMPLATE(Hermes::Tuple<MeshFunction*>);
 HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
 HERMES_API_USED_TEMPLATE(Hermes::Tuple<PrecalcShapeset*>);
 
+#define NEWTON_WATCH_RESIDUAL 0x01      // A flag that enables the residual norm
+                                            // as the stop condition in Newton's iteration.
+#define NEWTON_WATCH_INCREMENTS 0x02 // A flag that enables the solution difference norm
+                                            // as the stop condition in Newton's iteration.
+
 
 /// Discrete problem class
 ///
@@ -242,7 +247,11 @@ HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1)
 
 HERMES_API double get_l2_norm(Vector* vec); 
 
+// New interface, still in developement
+//HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+//		     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose, unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
+
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose);
+           Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose);
 
 #endif

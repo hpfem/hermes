@@ -512,9 +512,9 @@ double Adapt::eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
                                  MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2)
 {
   RefMap *rv1 = sln1->get_refmap();
-  RefMap *rv2 = sln1->get_refmap();
+  RefMap *rv2 = sln2->get_refmap();
   RefMap *rrv1 = rsln1->get_refmap();
-  RefMap *rrv2 = rsln1->get_refmap();
+  RefMap *rrv2 = rsln2->get_refmap();
 
   // determine the integration order
   int inc = (rsln1->get_num_components() == 2) ? 1 : 0;
@@ -578,7 +578,7 @@ double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
                                 MeshFunction *rsln1, MeshFunction *rsln2)
 {
   RefMap *rrv1 = rsln1->get_refmap();
-  RefMap *rrv2 = rsln1->get_refmap();
+  RefMap *rrv2 = rsln2->get_refmap();
 
   // determine the integration order
   int inc = (rsln1->get_num_components() == 2) ? 1 : 0;

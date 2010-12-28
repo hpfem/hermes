@@ -126,6 +126,14 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 // Filters.
 #include "filters.cpp"
 
+// Filter for entropy which uses the constants defined above.
+static void calc_entropy_estimate_func(int n, Hermes::Tuple<scalar*> scalars, scalar* result)
+{
+  for (int i = 0; i < n; i++)
+    result[i] = std::log((calc_pressure(scalars.at(0)[i], scalars.at(1)[i], scalars.at(2)[i], scalars.at(3)[i]) / P_EXT)
+    / pow((scalars.at(0)[i] / RHO_EXT), KAPPA));
+};
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -332,18 +340,13 @@ int main(int argc, char* argv[])
   SimpleFilter pressure(calc_pressure_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter u(calc_u_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
   SimpleFilter w(calc_w_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter Mach_number(calc_Mach_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::Tuple<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
-  //VectorView vview("Velocity", new WinGeom(0, 0, 600, 300));
-  //ScalarView sview("Pressure", new WinGeom(700, 0, 600, 300));
-
-  ScalarView s1("w1", new WinGeom(0, 0, 620, 300));
-  s1.fix_scale_width(80);
-  ScalarView s2("w2", new WinGeom(625, 0, 600, 300));
-  s2.fix_scale_width(50);
-  ScalarView s3("w3", new WinGeom(0, 350, 620, 300));
-  s3.fix_scale_width(80);
-  ScalarView s4("w4", new WinGeom(625, 350, 600, 300));
-  s4.fix_scale_width(50);
+  ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
+  ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
+  ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
+  VectorView vview("Velocity", new WinGeom(700, 400, 600, 300));
 
   // Iteration number.
   int iteration = 0;
@@ -382,7 +385,7 @@ int main(int argc, char* argv[])
       Adapt *adapt_for_time_der_calc = new Adapt(Hermes::Tuple<Space *>(&space_rho, &space_rho_v_x, 
         &space_rho_v_y, &space_e), Hermes::Tuple<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
       bool solutions_for_adapt = false;
-      double difference = adapt_for_time_der_calc->calc_err_est(Hermes::Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
+      double difference = iteration == 1 ? 0 : adapt_for_time_der_calc->calc_err_est(Hermes::Tuple<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
         Hermes::Tuple<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
       delete adapt_for_time_der_calc;
 
@@ -430,19 +433,16 @@ int main(int argc, char* argv[])
     prev_e.copy(&sln_e);
 
     // Visualization.
-    /*
     pressure.reinit();
     u.reinit();
     w.reinit();
-    sview.show(&pressure);
+    Mach_number.reinit();
+    entropy_estimate.reinit();
+    pressure_view.show(&pressure);
+    entropy_production_view.show(&entropy_estimate);
+    Mach_number_view.show(&Mach_number);
     vview.show(&u, &w);
-    */
 
-    s1.show(&sln_rho);
-    s2.show(&sln_rho_v_x);
-    s3.show(&sln_rho_v_y);
-    s4.show(&sln_e);
-    
     // If used, we need to clean the vector valued form caches.
 #ifdef HERMES_USE_VECTOR_VALUED_FORMS
     DiscreteProblem::empty_form_caches();
