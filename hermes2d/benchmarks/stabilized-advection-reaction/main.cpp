@@ -58,8 +58,7 @@ const std::string method_names[4] =
 const DiscretizationMethod method = DG_UPWIND;
 
 const int INIT_REF = 0;                           // Number of initial uniform mesh refinements.
-const int P_INIT_H = 0, P_INIT_V = 0;             // Initial polynomial degrees of mesh elements in vertical and horizontal
-                                                  // directions.
+const int P_INIT = 0;                             // Initial polynomial degrees of mesh elements.
 const double THRESHOLD = 0.20;                    // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -72,7 +71,7 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY =  2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ISO;          // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ISO;            // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
                                                   // H2D_HP_ANISO_P, H2D_HP_ANISO. See User Documentation for details.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
@@ -81,14 +80,14 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
-const int ORDER_INCREASE = 1;                                                  
-const double ERR_STOP = 1.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const int ORDER_INCREASE = 1;                     // Difference in polynomial orders of the coarse and the reference spaces.
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
                                                   // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
-                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
+const int NDOF_STOP = 22222;                      // Adaptivity process stops when the number of degrees of freedom grows
+                                                  // over this limit.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -156,8 +155,17 @@ Real F(Real x, Real y)
 // Weak forms.
 #include "forms.cpp"
 
-// Integral over the specified boundary edge.
-double bdry_integral(MeshFunction* sln, int marker)
+// Exact solution.
+#include "exact.h"
+
+// Weighting function for the target functional (weighted outflow integral).
+double weight_fn(double x, double y)
+{
+  return sin(M_PI*x*0.5);
+}
+
+// Weighted integral over the specified boundary edge.
+double bdry_integral(MeshFunction* sln, int marker, double (*weight_fn_ptr)(double,double))
 {
   Quad2D* quad = &g_quad_2d_std;
   sln->set_quad_2d(quad);
@@ -194,13 +202,74 @@ double bdry_integral(MeshFunction* sln, int marker)
         {
           double beta_dot_n = dot2<double>( t[i][1],-t[i][0],fn_a<double>(x[i],y[i]),fn_b<double>(x[i],y[i]) );
           // Weights sum up to two on every edge, therefore the division by two must be present.
-          integral += 0.5 * pt[i][2] * t[i][2] * sin(M_PI*x[i]*0.5) * z[i] * beta_dot_n; 
+          integral += 0.5 * pt[i][2] * t[i][2] * (*weight_fn_ptr)(x[i],y[i]) * z[i] * beta_dot_n; 
         } 
       }
     }
   }
   
   return integral;
+}
+
+// Construct a string representing the program options.
+void make_str_from_program_options(std::stringstream& str)
+{ 
+  switch (method)
+  {
+    case CG:
+      str << "cg";
+      break;
+    case CG_STAB_SUPG:
+      str << "supg";
+      break;
+    case DG_UPWIND:
+      str << "dg-upwind";
+      break;
+    case DG_JUMP_STAB:
+      str << "dg-jump-stab";
+      break;
+  }
+  
+  if (STRATEGY > -1)
+  {
+    switch (CAND_LIST) 
+    {
+      case H2D_H_ANISO:
+      case H2D_H_ISO:
+        str << "_h" << P_INIT;
+        break;
+      case H2D_P_ANISO:
+      case H2D_P_ISO:
+        str << "_p" << INIT_REF;
+        break;
+      default:
+        str << "_hp";
+        break;
+    }
+    switch (CAND_LIST) 
+    {
+      case H2D_H_ANISO:
+      case H2D_P_ANISO:
+      case H2D_HP_ANISO:
+        str << "_aniso";
+        break;
+      case H2D_H_ISO:
+      case H2D_P_ISO:
+      case H2D_HP_ISO:
+        str << "_iso";
+        break;
+      case H2D_HP_ANISO_H:
+        str << "_anisoh";
+        break;
+      case H2D_HP_ANISO_P:
+        str << "_anisop";
+        break;
+    }
+  }
+  else
+  {
+    str << "_h-" << INIT_REF << "_p-" << P_INIT;
+  }
 }
 
 int main(int argc, char* args[])
@@ -229,7 +298,7 @@ int main(int argc, char* args[])
     bc_vals.add_const(BDY_NONZERO_CONSTANT_INFLOW, 1.0);
     bc_vals.add_function(BDY_VARYING_INFLOW, fn_g<double>);
     
-    space = new H1Space(&mesh, &bc_types, &bc_vals, Ord2(P_INIT_H, P_INIT_V));
+    space = new H1Space(&mesh, &bc_types, &bc_vals, Ord2(P_INIT, P_INIT));
     norm = HERMES_L2_NORM;
     //norm = HERMES_H1_NORM;
     
@@ -244,7 +313,7 @@ int main(int argc, char* args[])
   {
     // All boundaries are treated as natural, enforcing the Dirichlet conditions in a weak sense.
     bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NONZERO_CONSTANT_INFLOW, BDY_ZERO_INFLOW, BDY_VARYING_INFLOW, BDY_OUTFLOW));
-    space = new L2Space(&mesh, &bc_types, Ord2(P_INIT_H, P_INIT_V));
+    space = new L2Space(&mesh, &bc_types, Ord2(P_INIT, P_INIT));
     norm = HERMES_L2_NORM;
     
     if (STRATEGY > -1)
@@ -292,11 +361,12 @@ int main(int argc, char* args[])
   //sview.set_min_max_range(0, 1);
   
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est;
-
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_ex, graph_cpu_ex, graph_dof_outfl, graph_cpu_outfl;
+  
   // Time measurement.
-  TimePeriod cpu_time;
+  TimePeriod cpu_time, clk_time;
   cpu_time.tick();
+  clk_time.tick();
   
   // Setup data structures for solving the discrete algebraic problem.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -309,7 +379,10 @@ int main(int argc, char* args[])
     ((AztecOOSolver*) solver)->set_solver(iterative_method);
     ((AztecOOSolver*) solver)->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
-  }    
+  }
+  
+  // Load the exact solution evaluated at the Gauss-Kronrod quadrature points.
+  SemiAnalyticSolution exact_sln("exact/sol_GaussKronrod50.map");
   
   int as = 1; bool done = false;
   char title[128];
@@ -362,7 +435,7 @@ int main(int argc, char* args[])
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), actual_sln_space, &ref_sln);
     else error ("Matrix solver failed.\n");
     
-    // Skip visualization time.
+    // Process the intermediate solution, but don't accumulate cpu time.
     cpu_time.tick();
     
     // View the intermediate solution.
@@ -373,13 +446,19 @@ int main(int argc, char* args[])
     oview.set_title(title);
     oview.show(actual_sln_space);
     
-    cpu_time.tick(HERMES_SKIP);
+    // Calculate relative error w.r.t. exact solution.
+    info("Calculating relative L2 error w.r.t. exact solution.");
+    double err_exact_rel = exact_sln.get_l2_rel_err(&ref_sln);
+    info("Relative L2 error w.r.t. exact solution: %g%%", err_exact_rel*100);
     
     // Calculate integral along the outflow boundary (top side of the rectangle).
-    double outflow = bdry_integral(&ref_sln, BDY_OUTFLOW);
+    double outflow = bdry_integral(&ref_sln, BDY_OUTFLOW, &weight_fn);
+    double err_outflow = abs(outflow - 0.246500343856481)/0.246500343856481;
     info("Integrated outflow: %f, relative error w.r.t. the ref. value (~0.2465): %g%%", 
-         outflow, 100*(outflow - 0.246500343856481)/0.246500343856481);
+         outflow, 100*err_outflow);
     
+    cpu_time.tick(HERMES_SKIP);
+         
     if (STRATEGY == -1) done = true;  // Do not adapt.
     else
     {
@@ -392,25 +471,31 @@ int main(int argc, char* args[])
       Adapt* adaptivity = new Adapt(space, norm);
       bool solutions_for_adapt = true;
       double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
+                          
+      int ndof_fine = Space::get_num_dofs(actual_sln_space);
+      int ndof_coarse = Space::get_num_dofs(space);
   
       // Report results.
-      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-          Space::get_num_dofs(space), Space::get_num_dofs(actual_sln_space), err_est_rel);
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
+           ndof_coarse, ndof_fine, err_est_rel*100);
 
-      // Skip graphing time.
+      // Get current time, use it in convergence graphs, and skip the graphing time.
       cpu_time.tick();
+      double t = cpu_time.accumulated();
 
       // Add entry to DOF and CPU convergence graphs.
-      graph_dof_est.add_values(Space::get_num_dofs(space), err_est_rel);
-      graph_dof_est.save("conv_dof_est.dat");
-      graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
-      graph_cpu_est.save("conv_cpu_est.dat");
+      graph_dof_est.add_values(ndof_fine, err_est_rel);
+      graph_cpu_est.add_values(t, err_est_rel);
+      graph_dof_ex.add_values(ndof_fine, err_exact_rel);
+      graph_cpu_ex.add_values(t, err_exact_rel);
+      graph_dof_outfl.add_values(ndof_fine, err_outflow);
+      graph_cpu_outfl.add_values(t, err_outflow);
       
       cpu_time.tick(HERMES_SKIP);
 
       // If err_est_rel too large, adapt the mesh.
-      if (err_est_rel < ERR_STOP) done = true;
+      if (err_est_rel*100 < ERR_STOP) done = true;
       else 
       {
         info("Adapting the coarse mesh.");
@@ -443,19 +528,44 @@ int main(int argc, char* args[])
   delete matrix;
   delete rhs;
   
-  info("Total running time: %g s", cpu_time.accumulated());
+  clk_time.tick();
+  info("Total running time: %g s", clk_time.accumulated());
+  info("Total cpu time: %g s", cpu_time.accumulated());
   
   // Wait for keyboard or mouse input.
   View::wait();
-   
+  
+  // Save convergence graphs.
+  std::stringstream str;
+  make_str_from_program_options(str);
+  
+  std::stringstream fdest, fcest, fdex, fcex, fdoutfl, fcoutfl;
+  fdest << "conv_dof_est_" << str.str() << ".dat";
+  fcest << "conv_cpu_est_" << str.str() << ".dat";
+  fdex << "conv_dof_ex_" << str.str() << ".dat";
+  fcex << "conv_cpu_ex_" << str.str() << ".dat";
+  fdoutfl << "conv_dof_outfl_" << str.str() << ".dat";
+  fcoutfl << "conv_cpu_outfl_" << str.str() << ".dat";
+  
+  graph_dof_est.save(fdest.str().c_str());
+  graph_cpu_est.save(fcest.str().c_str());
+  graph_dof_ex.save(fdex.str().c_str());
+  graph_cpu_ex.save(fcex.str().c_str());
+  graph_dof_outfl.save(fdoutfl.str().c_str());
+  graph_cpu_outfl.save(fcoutfl.str().c_str());
+  
   // Save the final solution in 100x100 points of the domain for comparison with the semi-analytic solution.
   double y = 0.0, step = 0.01;
   int npts = int(1./step+0.5);
   double *res = new double [npts*npts];
   double *p = res;
-  std::ofstream fs("out.dat");
+  std::stringstream sssln;
+  sssln << "sln_" << str.str() << ".dat";
+  std::ofstream fs(sssln.str().c_str());
+  info("Saving final solution to %s", sssln.str().c_str());
   for (int i = 0; i < npts; i++, y+=step)
   {
+    std::cout << "."; std::cout.flush(); 
     double x = 0.0;
     for (int j = 0; j < npts; j++, x+=step)
       *p++ = ref_sln.get_pt_value(x, y);    
@@ -472,7 +582,7 @@ int main(int argc, char* args[])
     delete actual_sln_space->get_mesh();
     delete selector;
   }
-  delete actual_sln_space;
+  delete actual_sln_space; 
   
   return 0;
 }
