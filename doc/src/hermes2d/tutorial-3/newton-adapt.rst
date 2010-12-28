@@ -1,8 +1,8 @@
-Newton's Method and Adaptivity (17)
+Newton's Method and Adaptivity (18)
 -----------------------------------
 
-**Git reference:** Tutorial example `17-newton-elliptic-adapt 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/17-newton-elliptic-adapt>`_.
+**Git reference:** Tutorial example `18-newton-adapt 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/18-newton-adapt>`_.
 
 We still keep the simple model problem
 
@@ -156,17 +156,17 @@ following convergence comparison:
 
 Convergence in the number of DOF (with and without Newton solve on the new coarse mesh):
 
-.. image:: 17/conv_dof_compar.png
+.. image:: 18/conv_dof_compar.png
    :align: center
    :width: 600
    :height: 400
-   :alt: DOF convergence graph for tutorial example 17.
+   :alt: DOF convergence graph for tutorial example 18.
 
 Convergence in CPU time (with and without Newton solve on coarse mesh):
 
-.. image:: 17/conv_cpu_compar.png
+.. image:: 18/conv_cpu_compar.png
    :align: center
    :width: 600
    :height: 400
-   :alt: CPU convergence graph for tutorial example 17.
+   :alt: CPU convergence graph for tutorial example 18.
 

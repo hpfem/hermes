@@ -1,15 +1,15 @@
 Tutorial Part III (Nonlinear Problems)
 ======================================
 
-In this chapter we explain how to use the Newton's
-method to solve nonlinear partial differential equations. 
-After that we show how this is done in Hermes, using 
-a sequence of model problems with increasing level of 
-complexity.
+In this chapter we illustrate how to use the Picard's 
+and Newton's methods to solve nonlinear problems, 
+using a series of examples with an increasing level 
+of complexity.
 
 .. toctree::
     :maxdepth: 2
 
+    tutorial-3/picard 
     tutorial-3/newton  
     tutorial-3/const-ic 
     tutorial-3/general-ic 

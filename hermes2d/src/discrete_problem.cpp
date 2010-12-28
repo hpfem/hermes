@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#define HERMES_REPORT_ALL
+
 #include "h2d_common.h"
 #include "limit_order.h"
 #include "discrete_problem.h"

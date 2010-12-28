@@ -1,8 +1,8 @@
-Gross-Pitaevski Equation (21)
+Gross-Pitaevski Equation (22)
 -----------------------------
 
-**Git reference:** Tutorial example `21-newton-timedep-gp 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/21-newton-timedep-gp>`_.
+**Git reference:** Tutorial example `22-newton-timedep-gp 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/22-newton-timedep-gp>`_.
 
 In this example we use the Newton's method to solve the nonlinear complex-valued 
 time-dependent Gross-Pitaevski equation. This equation describes the ground state of 
@@ -144,21 +144,21 @@ Sample results
 
 Snapshot 1:
 
-.. image:: 21/sol_1.png
+.. image:: 22/sol_1.png
    :align: center
    :width: 600
    :alt: solution
 
 Snapshot 2:
 
-.. image:: 21/sol_2.png
+.. image:: 22/sol_2.png
    :align: center
    :width: 600
    :alt: solution
 
 Snapshot 3:
 
-.. image:: 21/sol_3.png
+.. image:: 22/sol_3.png
    :align: center
    :width: 600
    :alt: solution

@@ -1,20 +1,16 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function.h"
 
 using namespace RefinementSelectors;
 
-//  This example shows an introductory application of the Newton's
-//  method to a nonlinear elliptic problem. We use zero Dirichlet boundary
-//  conditions and a constant initial guess for the Newton's method.
-//  The treatment of nonzero Dirichlet BC and a more general initial guess
-//  will be shown in the next example newton-elliptic-2.
+//  This example uses the Picard's method to solve a nonlinear problem.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, - div[lambda(u)grad u] = 0
+//  conductivity, -div[lambda(u)grad u] = rhs
+//
+//  Picard's linearization: -div[lambda(u^n)grad u^{n+1}] = rhs
 //
 //  Domain: unit square (-10,10)^2
 //
@@ -25,8 +21,8 @@ using namespace RefinementSelectors;
 const int P_INIT = 2;                             // Initial polynomial degree.
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 5;                   // Number of initial refinements towards boundary.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const double PICARD_TOL = 1e-6;                   // Stopping criterion for the Picard's method.
+const int MAX_PICARD_ITER_NUM = 100;              // Maximum allowed number of Picard iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -39,11 +35,11 @@ Real lam(Real u)
   return 1 + pow(u, 4); 
 }
 
-// Derivative of the thermal conductivity with respect to 'u'.
+// Right-hand side (can be a general function of 'x' and 'y').
 template<typename Real>
-Real dlam_du(Real u) 
-{ 
-  return 4*pow(u, 3); 
+Real rhs(Real x, Real y)
+{
+  return 1.0;
 }
 
 // Boundary markers.
@@ -61,7 +57,7 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(1,INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -75,13 +71,20 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
+  // Declare solutions.
+  Solution sln, *sln_prev;
+
+  // Initialize previous iteration solution for the Picard method.
+  sln_prev = new Solution();
+  sln_prev->set_const(&mesh, INIT_COND_CONST);
+
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
-  wf.add_vector_form(callback(res), HERMES_ANY);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_UNSYM, HERMES_ANY, sln_prev);
+  wf.add_vector_form(callback(linear_form), HERMES_ANY);
 
   // Initialize the FE problem.
-  bool is_linear = false;
+  bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -89,38 +92,46 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Initialize the solution.
-  Solution sln;
+  // Picard's iteration.
+  double rel_err;
+  int iter_count = 0;
+  while (true) {
+    // Assemble the stiffness matrix and right-hand side.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    dp.assemble(matrix, rhs);
 
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the Newton's method.
-  info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)];
-  Solution* init_sln = new Solution();
-  init_sln->set_const(&mesh, INIT_COND_CONST);
-  OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver);
-  delete init_sln;
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    else error ("Matrix solver failed.\n");
 
-  // Perform Newton's iteration.
-  bool verbose = true;
-  if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    double rel_error = calc_abs_error(sln_prev, &sln, HERMES_H1_NORM) 
+                       / calc_norm(&sln, HERMES_H1_NORM) * 100;
+    info("Relative error: %g%%", rel_error);
 
-  // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solution(coeff_vec, &space, &sln);
+    // Stopping criterion.
+    if (rel_error < PICARD_TOL || iter_count >= MAX_PICARD_ITER_NUM) break;
 
-  // Cleanup.
-  delete [] coeff_vec;
-  delete matrix;
-  delete rhs;
-  delete solver;
+    // Saving solution for the next iteration;
+    sln_prev->copy(&sln);
+   
+    iter_count++;
+  }
+
+  if (iter_count >= MAX_PICARD_ITER_NUM) warn("Picard's iteration did not converge.");
+  else info("Picard's iteration needed %d steps.", iter_count);
 
   // Visualise the solution and mesh.
   ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));
   s_view.show_mesh(false);
   s_view.show(&sln);
-  OrderView o_view("Mesh", new WinGeom(450, 0, 400, 350));
+  OrderView o_view("Mesh", new WinGeom(450, 0, 420, 350));
   o_view.show(&space);
+
+  // Cleanup.
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   // Wait for all views to be closed.
   View::wait();

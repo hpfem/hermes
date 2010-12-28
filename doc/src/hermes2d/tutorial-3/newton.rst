@@ -1,7 +1,11 @@
-The Newton's Method
--------------------
+Newton's Method
+---------------
 
-Consider a simple nonlinear model problem of the form 
+The Newton's method is more powerful but also more 
+demanding than the Picard's method, and therefore 
+we will begin at a slower pace. 
+
+We'll stay with the model problem from the previous section::
 
 .. math::
     :label: newton0
@@ -16,7 +20,7 @@ everything on the left-hand side. The corresponding discrete problem has the for
     \int_{\Omega} \lambda(u)\nabla u(\bfx) \cdot \nabla v_i(\bfx)\, \mbox{d}\bfx 
     - \int_{\Omega} f(\bfx)v_i(\bfx) \, \mbox{d}\bfx = 0\ \ \ \mbox{for all} \ i = 1, 2, \ldots, N, 
 
-where $v_i$ are the standard test functions and
+where $v_i$ are the test functions and
 
 .. math::
 
