@@ -3,5 +3,5 @@ if(NOT H2D_REAL)
 endif(NOT H2D_REAL)
 project(stabilized-advection-reaction)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp exact.cpp)
 include (../CMake.common)
