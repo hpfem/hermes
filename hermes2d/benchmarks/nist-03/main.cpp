@@ -40,15 +40,9 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int P_INIT_U = 1;                           // Initial polynomial degree for u.
-const int P_INIT_V = 1;                           // Initial polynomial degree for v.
-const int INIT_REF_BDY = 5;                       // Number of initial boundary refinements
+const int P_INIT_U = 6;                           // Initial polynomial degree for u.
+const int P_INIT_V = 6;                           // Initial polynomial degree for v.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
-const bool MULTI = false;                         // MULTI = true  ... use multi-mesh,
-                                                  // MULTI = false ... use single-mesh.
-                                                  // Note: In the single mesh option, the meshes are
-                                                  // forced to be geometrically the same but the
-                                                  // polynomial degrees can still vary.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -72,7 +66,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -86,12 +80,6 @@ const double k = 3 - 4 * nu;
 const double G = E / (2.0 * (1 + nu));
 const double lambda = 0.5444837367825;            // Mode 1.
 const double Q = 0.5430755788367;
-//const double lambda = 0.9085291898461;          // Mode 2.
-//const double Q = -0.2189232362488;
-
-const double A = -E * (1 - nu * nu)/(1 - 2 * nu);
-const double B = -E * (1 - nu * nu)/(2 - 2 * nu);
-const double C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
 
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
@@ -143,14 +131,17 @@ int main(int argc, char* argv[])
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
-  wf.add_matrix_form(1, 0, callback(bilinear_form_1_0), HERMES_SYM);
+  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
 
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  Solution u_sln, v_sln;
+  Solution u_ref_sln, v_ref_sln;
 
   // Initialize exact solutions.
   ExactSolution u_exact(&u_mesh, u_fndd);
   ExactSolution v_exact(&v_mesh, v_fndd);
+
+  // Initialize refinement selector.
+  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
   ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 440, 350));
@@ -174,21 +165,22 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&u_space, &v_space));
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    dp->assemble(matrix, rhs);
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&u_space, &v_space), is_linear);
+    dp.assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
 
     // Solve the linear system of the reference problem. If successful, obtain the solution.
-    Solution u_ref_sln, v_ref_sln;
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(&u_space, &v_space),
                                                       Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     else error ("Matrix solver failed.\n");
 
@@ -196,7 +188,6 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Project the fine mesh solution onto the coarse mesh.
-    Solution u_sln, v_sln;
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(Hermes::Tuple<Space *>(&u_space, &v_space), 
                                  Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
@@ -210,21 +201,26 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), 
+                                  Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    adaptivity->set_error_form(0, 0, callback(bilinear_form_0_0));
+    adaptivity->set_error_form(0, 1, callback(bilinear_form_0_1));
+    adaptivity->set_error_form(1, 1, callback(bilinear_form_1_1));
     
-    // Calculate error estimate for each solution component and the total error estimate.
+   // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
     bool solutions_for_adapt = true;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
                                Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
                                HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
+
     // Calculate exact error for each solution component and the total exact error.
     Hermes::Tuple<double> err_exact_rel;
     solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
                                  Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_exact_rel) * 100;
 
     // Time measurement.
     cpu_time.tick();
@@ -232,12 +228,17 @@ int main(int argc, char* argv[])
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
          u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
+
     info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
+
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
          v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
+
     info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
+
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
+
     info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
@@ -266,10 +267,10 @@ int main(int argc, char* argv[])
     delete matrix;
     delete rhs;
     delete adaptivity;
-    for(unsigned int i = 0; i < ref_spaces->size(); i++)
-      delete (*ref_spaces)[i]->get_mesh();
+    if(done == false)
+      for(unsigned int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i]->get_mesh();
     delete ref_spaces;
-    delete dp;
     
     // Increase counter.
     as++;
