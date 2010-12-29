@@ -40,8 +40,8 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int P_INIT_U = 6;                           // Initial polynomial degree for u.
-const int P_INIT_V = 6;                           // Initial polynomial degree for v.
+const int P_INIT_U = 2;                           // Initial polynomial degree for u.
+const int P_INIT_V = 2;                           // Initial polynomial degree for v.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -78,8 +78,12 @@ const double E = 1.0;                             // Young modulus.
 const double nu = 0.3;                            // Poisson ratio.
 const double k = 3 - 4 * nu;
 const double G = E / (2.0 * (1 + nu));
-const double lambda = 0.5444837367825;            // Mode 1.
+//const double lambda = 0.5444837367825;            // Mode 1.
 const double Q = 0.5430755788367;
+
+// TEMPORARY: if forms.cpp.bracket is used:
+const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
+const double mu = E / (2*(1 + nu));
 
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
@@ -117,10 +121,8 @@ int main(int argc, char* argv[])
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
   // Enter Dirichlet boundary values.
-  BCValues bc_values_u;
+  BCValues bc_values_u, bc_values_v;
   bc_values_u.add_function(BDY_DIRICHLET, essential_bc_values_u);
-
-  BCValues bc_values_v;
   bc_values_v.add_function(BDY_DIRICHLET, essential_bc_values_v);
 
   // Create H1 spaces with default shapeset for both displacement components.
@@ -152,8 +154,7 @@ int main(int argc, char* argv[])
   OrderView  o_view_1("Mesh[1]", new WinGeom(1330, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est, 
-              graph_dof_exact, graph_cpu_exact;
+  SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
 
   // Adaptivity loop:
   int as = 1; 
@@ -173,14 +174,14 @@ int main(int argc, char* argv[])
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(&u_space, &v_space), is_linear);
-    dp.assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+    dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
 
     // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(&u_space, &v_space),
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces,
                                                       Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln));
     else error ("Matrix solver failed.\n");
 
@@ -203,16 +204,17 @@ int main(int argc, char* argv[])
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), 
                                   Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
-    adaptivity->set_error_form(0, 0, callback(bilinear_form_0_0));
-    adaptivity->set_error_form(0, 1, callback(bilinear_form_0_1));
-    adaptivity->set_error_form(1, 1, callback(bilinear_form_1_1));
+    adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
+    adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
+    adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
+    adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
     
-   // Calculate error estimate for each solution component and the total error estimate.
+    // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
     bool solutions_for_adapt = true;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
                                Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
 
 
     // Calculate exact error for each solution component and the total exact error.
@@ -220,7 +222,7 @@ int main(int argc, char* argv[])
     solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
                                  Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_exact_rel) * 100;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_exact_rel) * 100;
 
     // Time measurement.
     cpu_time.tick();
