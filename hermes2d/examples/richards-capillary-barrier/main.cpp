@@ -239,8 +239,8 @@ int main(int argc, char* argv[])
   SimpleGraph graph_time_err_est, graph_time_err_exact, graph_time_dof, graph_time_cpu;
  
   // Visualize the projection and mesh.
-  ScalarView view("Initial condition", new WinGeom(0, 0, 600, 350));
-  OrderView ordview("Initial mesh", new WinGeom(610, 0, 600, 350));
+  ScalarView view("Initial condition", new WinGeom(0, 0, 620, 350));
+  OrderView ordview("Initial mesh", new WinGeom(630, 0, 600, 350));
   view.show(&sln_prev_time);
   ordview.show(&space);
 
