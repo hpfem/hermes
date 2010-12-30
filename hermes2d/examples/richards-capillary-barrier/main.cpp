@@ -86,14 +86,14 @@ double TIME = 0;                                  // Global time variable initia
 double H_INIT = -50.0;                            // Initial pressure head.
 double H_ELEVATION = 10.0;
 
-const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64} ; 
-const double ALPHA_vals[4] = {0.01, 1.0, 0.01, 0.01} ;
-const double N_vals[4] = {2.5, 2.0, 1.23, 2.5} ;
-const double M_vals[4] = {0.864, 0.626, 0.187, 0.864} ;
+const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64}; 
+const double ALPHA_vals[4] = {0.01, 1.0, 0.01, 0.01};
+const double N_vals[4] = {2.5, 2.0, 1.23, 2.5};
+const double M_vals[4] = {0.864, 0.626, 0.187, 0.864};
 
-const double THETA_R_vals[4] = {0.064, 0.0, 0.089, 0.064} ;
-const double THETA_S_vals[4] = {0.14, 0.43, 0.43, 0.24} ;
-const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1} ;
+const double THETA_R_vals[4] = {0.064, 0.0, 0.089, 0.064};
+const double THETA_S_vals[4] = {0.14, 0.43, 0.43, 0.24};
+const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 
 bool USE_CONSTITUTIVE_TABLE = true;		  // If true, all constitutive functions are precalculated into a table, 
                                                   // which improves performance. If not desired, set -1.
@@ -104,7 +104,7 @@ double ddKdhh_TABLE[4][1500000];
 double C_TABLE[4][1500000];
 double dCdh_TABLE[4][1500000];
 bool CONSTITUTIVE_TABLES_READY = false;
-double*** POLYNOMIALS ;                           // Polynomial approximation of the K(h) function close to saturation 
+double*** POLYNOMIALS;                            // Polynomial approximation of the K(h) function close to saturation 
                                                   // (this function has singularity in its second derivative).
 const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) function approximated by polynomials.
 const int NUM_OF_INSIDE_PTS = 0;
@@ -192,57 +192,6 @@ int main(int argc, char* argv[])
   // Solutions for the time stepping and the Newton's method.
   Solution sln, ref_sln, sln_prev_time, sln_prev_iter;
   
-  /* NOT NEEDED AT THIS LEVEL BUT DO NOT REMOVE
-  // Adapt mesh to represent initial condition with given accuracy.
-  info("Mesh adaptivity to an exact function:");
-
-  // Initialize views.
-  char title_init[200];
-  sprintf(title_init, "Projection of initial condition");
-  ScalarView* view_init = new ScalarView(title_init, new WinGeom(0, 0, 410, 300));
-  sprintf(title_init, "Initial mesh");
-  OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
-  view_init->fix_scale_width(80);
-  int as = 1; bool done = false;
-  do
-  {
-    // Setup space for the reference solution.
-    Space *rspace = construct_refined_space(&init_space);
-
-    // Assign the function f() to the fine mesh.
-    ref_sln.set_exact(rspace->get_mesh(), init_cond);
-
-    // Project the function f() on the coarse mesh.
-    OGProjection::project_global(&init_space, &ref_sln, &sln_prev_time, matrix_solver);
-
-    // Calculate element errors and total error estimate.
-    Adapt adaptivity(&init_space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity.calc_err_est(&sln_prev_time, &ref_sln, solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-
-    info("Step %d, ndof %d, proj_error %g%%", as, Space::get_num_dofs(&init_space), err_est_rel);
-
-    // If err_est_rel too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
-    else {
-      double to_be_processed = 0;
-      done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY, to_be_processed);
-
-      if (Space::get_num_dofs(&init_space) >= NDOF_STOP) done = true;
-
-      view_init->show(&sln_prev_time);
-      char title_init[100];
-      sprintf(title_init, "Initial mesh, step %d", as);
-      ordview_init->set_title(title_init);
-      ordview_init->show(&init_space);
-    }
-    as++;
-  }
-  while (done == false);
-  */  
-
-  // This is instead of the commented-out block of code.
   // Assign the function f() to the fine mesh.
   sln_prev_time.set_exact(&mesh, init_cond);
   sln_prev_iter.set_exact(&mesh, init_cond);
@@ -251,14 +200,14 @@ int main(int argc, char* argv[])
   WeakForm wf;
   if (ITERATION_METHOD == 1) {
     if (TIME_INTEGRATION == 1) {
-      info("Registering forms for the Newton's method (implicit Euler in time).\n");
+      info("Registering forms for the Newton's method (implicit Euler in time).");
       wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
 	                 &sln_prev_time);
       wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, HERMES_ANY, 
 			 &sln_prev_time);
     }
     else {
-      info("Registering forms for the Newton's method (Crank-Nicolson in time).\n");
+      info("Registering forms for the Newton's method (Crank-Nicolson in time).");
       wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
       		         &sln_prev_time);
       wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, HERMES_ANY, 
@@ -267,14 +216,14 @@ int main(int argc, char* argv[])
   }
   else {
     if (TIME_INTEGRATION == 1) {
-      info("Registering forms for the Picard's's method (implicit Euler in time).\n");
+      info("Registering forms for the Picard's method (implicit Euler in time).");
       wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_UNSYM, HERMES_ANY, 
 	                 &sln_prev_iter);
       wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
 			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
     }
     else {
-      info("Registering forms for the Picard's's method (Crank-Nicolson in time).\n");
+      info("Registering forms for the Picard's method (Crank-Nicolson in time).");
       error("Not implemented yet.");
       wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_UNSYM, HERMES_ANY, 
 	                 &sln_prev_iter);
@@ -287,8 +236,8 @@ int main(int argc, char* argv[])
   SimpleGraph graph_time_err_est, graph_time_err_exact, graph_time_dof, graph_time_cpu;
  
   // Visualize the projection and mesh.
-  ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
-  OrderView ordview("Initial mesh", new WinGeom(450, 0, 400, 350));
+  ScalarView view("Initial condition", new WinGeom(0, 0, 600, 350));
+  OrderView ordview("Initial mesh", new WinGeom(610, 0, 600, 350));
   view.show(&sln_prev_time);
   ordview.show(&space);
 
@@ -347,24 +296,24 @@ int main(int argc, char* argv[])
         Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
         // Perform Newton's iteration.
-        info("Solving nonlinear problem:");
+        info("Performing Newton's iteretion:");
         bool verbose = true;
 
         double damping_coeff = 1.0 ;
         int i_err ;
         int save_global_max_iter =  NEWTON_MAX_ITER; 
-        for ( ; ; ) {
+        while(true) {
           bool success = solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
                                       NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff);
 	  if (success == false) {
-            // This would deserve a comment. 
+            // ...
 	    damping_coeff *= 0.75;
 	    NEWTON_MAX_ITER = NEWTON_MAX_ITER * 1/damping_coeff * 1.15;   
 	  }
 	  else break;
         }
       
-        // This would deserve a commnet.
+        // ...
         NEWTON_MAX_ITER = save_global_max_iter;
         damping_coeff = 1.0;
 
@@ -387,20 +336,26 @@ int main(int argc, char* argv[])
         else {
           info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
           OGProjection::project_global(ref_space, &ref_sln, &sln_prev_iter, matrix_solver);
-          //delete ref_sln.get_mesh();  // Not sure whether I can remove this.
+          //delete ref_sln.get_mesh();  // Not sure whether we can remove this.
         }
 
+        // This puts both sln_prev_iter and sln_prev_iter on the same reference mesh.
+        sln_prev_time.copy(&sln_prev_iter);
+
         // Perform Picard iteration on the reference mesh.
+        info("Performing Picard's iteretion:");
         bool verbose = true;
         bool success = solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                                     PICARD_MAX_ITER, verbose); 
         if (!success) error("Picard's iteration did not converge.");
+        ref_sln.copy(&sln_prev_iter);
       }
 
       /*** ADAPTIVITY ***/
 
       // Project the fine mesh solution on the coarse mesh.
       info("Projecting fine mesh solution on coarse mesh for error calculation.");
+      if(space.get_mesh() == NULL) error("it is NULL");
       OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
       // Calculate element errors.

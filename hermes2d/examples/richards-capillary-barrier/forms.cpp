@@ -139,17 +139,19 @@ Ord bilinear_form_picard_euler_ord(int n, double *wt, Func<Ord> *u_ext[], Func<O
 }
 
 // Right-hand side for implicit Euler.
-double linear_form_picard_euler(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+double linear_form_picard_euler(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
+                                Geom<double> *e, ExtData<double> *ext)
 {
   int elem_marker = e->elem_marker;
   double result = 0;
-  Func<double>* h_prev_picard = u_ext[0];
-  Func<double>* h_prev_time = u_ext[1];
+  Func<double>* h_prev_picard = ext->fn[0];
+  Func<double>* h_prev_time = ext->fn[1];
   for (int i = 0; i < n; i++) result += wt[i] * C(h_prev_picard->val[i], elem_marker) * h_prev_time->val[i] * v->val[i];
   return result;
 }
 
-Ord linear_form_picard_euler_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+Ord linear_form_picard_euler_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                                 Geom<Ord> *e, ExtData<Ord> *ext)
 {
   return Ord(30);
 }

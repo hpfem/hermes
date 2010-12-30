@@ -1,7 +1,7 @@
 #define HERMES_REPORT_ALL
 
 bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                 MatrixSolverType matrix_solver, double PICARD_TOL, int MAX_PICARD_ITER_NUM, bool verbose) 
+                  MatrixSolverType matrix_solver, double PICARD_TOL, int MAX_PICARD_ITER_NUM, bool verbose) 
 {
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -14,21 +14,19 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
   bool is_linear = true;
   DiscreteProblem dp(wf, space, is_linear);
 
-  int i_err;
   int iter_count = 0;
   while (true) {
     // Assemble the stiffness matrix and right-hand side.
-    info("Assembling the stiffness matrix and right-hand side vector.");
     dp.assemble(matrix, rhs);
 
     // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), space, &sln_new);
     else error ("Matrix solver failed.\n");
 
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM) 
                        / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
-    info("Relative error: %g%%", rel_error);
+    if (verbose) info("---- Picard iter %d, ndof %d, rel. error %g%%", 
+                 iter_count+1, Space::get_num_dofs(space), rel_error);
 
     // Stopping criterion.
     if (rel_error < PICARD_TOL) {
