@@ -32,7 +32,7 @@ using namespace RefinementSelectors;
 #define CONSTITUTIVE_GENUCHTEN
 
 // Select Newton or Picard.
-const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.
+const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
 
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
