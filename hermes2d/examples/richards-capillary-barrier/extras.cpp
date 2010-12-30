@@ -1,5 +1,10 @@
 #define HERMES_REPORT_ALL
 
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+
 bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
                   MatrixSolverType matrix_solver, double PICARD_TOL, int MAX_PICARD_ITER_NUM, bool verbose) 
 {
@@ -51,49 +56,106 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
   }
 }
 
-// this procedure should be moved into constitutive_genuchten.cpp
-double precalculate_constitutive_values()
+// Look for a file with precalculated constitutive relations. 
+// If found, read it. If not, create it. 
+bool get_constitutive_tables(const char* tables_filename, int method)
 {
-  info("Precalculating constitutive relations.");
+  bool file_found;
+  ifstream inFile;
+
+  // NOTE: The order of tables is important!
+  inFile.open(tables_filename);
+  if (inFile) {
+    info("File with precalculated constitutive tables found, reading.");
+    // Reading K.
+    info("Reading K(h).");
+    for (int j=0; j<4; j++) {
+      for (int i=0; i< 1500000; i++) {
+        inFile >> K_TABLE[j][i];
+      }
+    }
+    // Reading dKdh.
+    info("Reading dKdh(h).");
+    for (int j=0; j<4; j++) {
+      for (int i=0; i< 1500000; i++) {
+        inFile >> dKdh_TABLE[j][i];
+      }
+    }
+    // Reading C(h).
+    info("Reading C(h).");
+    for (int j=0; j<4; j++) {
+      for (int i=0; i< 1500000; i++) {
+        inFile >> C_TABLE[j][i];
+      }
+    }
+    // If Picard, stop here.
+    if (method != 1) {
+      inFile.close();    
+      return true;
+    }
+    // Reading ddKdhh.
+    info("Reading ddKdhh(h).");
+    for (int j=0; j<4; j++) {
+      for (int i=0; i< 1500000; i++) {
+        inFile >> ddKdhh_TABLE[j][i];
+      }
+    }
+    // Reading dCdh(h).
+    info("Reading dCdh(h).");
+    for (int j=0; j<4; j++) {
+      for (int i=0; i< 1500000; i++) {
+        inFile >> dCdh_TABLE[j][i];
+      }
+    }
+    // Closing input file and returning.
+    inFile.close();
+    return true;
+  }
+
+  /*** TABLES DATA FILE WAS NOT FOUND, CREATING ***/
+
+  info("File %s with precalculated constitutive tables not found, creating.", tables_filename);
   info("This will take some time, but it is worthwhile.");
-  
-  info("Precalculating K(h).");
+  FILE* f = fopen(tables_filename, "w");
+  if (f == NULL) error("Could not open file %s for writing.", tables_filename);
+  // Calculate and save K(h).
+  info("Calculating and saving K(h).");
   for (int j=0; j<4; j++) {
     for (int i=0; i< 1500000; i++) {
-      K_TABLE[j][i] = K(-0.01*i, j);
+      fprintf(f, "%15.10f ", K_TABLE[j][i] = K(-0.01*i, j));
     }
   }
-  
-  info("Precalculating dKdh(h).");
+  // Calculate and save dKdh(h).
+  info("Calculating and saving dKdh(h).");
   for (int j=0; j<4; j++) {
     for (int i=0; i< 1500000; i++) {
-      dKdh_TABLE[j][i] = dKdh(-0.01*i, j);
+      fprintf(f, "%15.10f ", dKdh_TABLE[j][i] = dKdh(-0.01*i, j));
     }
   }
-  
-  info("Precalculating ddKdhh(h).");
+  // Calculate and save C(h).
+  info("Calculating and saving C(h).");
   for (int j=0; j<4; j++) {
     for (int i=0; i< 1500000; i++) {
-      ddKdhh_TABLE[j][i] = ddKdhh(-0.01*i, j);
+      fprintf(f, "%15.10f ", C_TABLE[j][i] = C(-0.01*i, j));
     }
   }
-  
-  info("Precalculating function C(h).");
+  // Calculate and save ddKdhh(h).
+  info("Calculating and saving ddKdhh(h).");
   for (int j=0; j<4; j++) {
     for (int i=0; i< 1500000; i++) {
-      C_TABLE[j][i] = C(-0.01*i, j);
+      fprintf(f, "%15.10f ", ddKdhh_TABLE[j][i] = ddKdhh(-0.01*i, j));
     }
   }
-   
-  info("Precalculating function dCdh(h).");
+  // Calculate and save dCdh(h).
+  info("Calculating and saving dCdh(h).");
   for (int j=0; j<4; j++) {
     for (int i=0; i< 1500000; i++) {
-      dCdh_TABLE[j][i] = dCdh(-0.01*i, j);
+      fprintf(f, "%15.10f ", dCdh_TABLE[j][i] = dCdh(-0.01*i, j));
     }
   }
-   
-  CONSTITUTIVE_TABLES_READY = true;
-  return 0;
+      
+  fclose(f);
+  return true;
 }
 
 //initialize polynomial approximation of the strange LOCO functions close to a full saturation

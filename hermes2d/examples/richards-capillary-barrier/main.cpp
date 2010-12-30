@@ -32,9 +32,9 @@ using namespace RefinementSelectors;
 #define CONSTITUTIVE_GENUCHTEN
 
 // Select Newton or Picard.
-const int ITERATION_METHOD = 1;		          // 1 = Newton, 2 = Picard.
+const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.
 
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refinements towards the top edge.
 const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
@@ -52,7 +52,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;          // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See the User Documentation for details.
@@ -64,7 +64,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -79,7 +79,8 @@ const double PICARD_TOL = 0.0015;                 // Stopping criterion for Pica
 int PICARD_MAX_ITER = 23;                         // Maximum allowed number of Picard iterations.
 
 // Problem parameters.
-const double TAU = 5e-1;                          // Time step.
+const char* TABLES_FILENAME = "tables.txt";       // Filename for constitutive tables.
+const double TAU = 1e-1;                          // Time step.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 double TIME = 0;                                  // Global time variable initialized with first time step.
@@ -157,7 +158,9 @@ int main(int argc, char* argv[])
 
   // Either use exact constitutive relations (slow) or precalculate 
   // their polynomial approximations (faster).
-  if (USE_CONSTITUTIVE_TABLE == true) precalculate_constitutive_values();
+  if (USE_CONSTITUTIVE_TABLE == true) {
+    CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
+  }
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -198,7 +201,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  if (ITERATION_METHOD == 1) {
+  if (ITERATIVE_METHOD == 1) {
     if (TIME_INTEGRATION == 1) {
       info("Registering forms for the Newton's method (implicit Euler in time).");
       wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
@@ -272,7 +275,7 @@ int main(int argc, char* argv[])
 
       // Next we need to calculate the reference solution.
       // Newton's method:
-      if(ITERATION_METHOD == 1) {
+      if(ITERATIVE_METHOD == 1) {
         scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
      
         // Calculate initial coefficient vector for Newton on the fine mesh.
