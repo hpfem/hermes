@@ -4,18 +4,22 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+
 using namespace RefinementSelectors;
 
 //  This example uses adaptivity with dynamical meshes to solve
 //  the time-dependent Richard's equation. The time discretization 
-//  is backward Euler or Crank-Nicolson, and the Newton's method 
-//  is applied to solve the nonlinear problem in each time step. 
+//  is backward Euler or Crank-Nicolson, and the nonlinear solver 
+//  in each time step is either Newton or Picard. 
 //
 //  PDE: C(h)dh/dt - div(K(h)grad(h)) - (dK/dh)*(dh/dy) = 0
 //  where K(h) = K_S*exp(alpha*h)                          for h < 0,
 //        K(h) = K_S                                       for h >= 0,
 //        C(h) = alpha*(theta_s - theta_r)*exp(alpha*h)    for h < 0,
 //        C(h) = alpha*(theta_s - theta_r)                 for h >= 0.
+//
+//  Picard's linearization: C(h^n)dh^{n+1}/dt - div(K(h^n)grad(h^{n+1})) - (dK/dh(h^n))*(dh^{n+1}/dy) = 0
+//  Newton's method is more involved, see the file forms.cpp.
 //
 //  Domain: rectangle (0, 8) x (0, 6.5).
 //
@@ -25,14 +29,17 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 // If this is defined, use van Genuchten's constitutive relations, otherwise use Gardner's.
-// #define CONSTITUTIVE_GENUCHTEN
+#define CONSTITUTIVE_GENUCHTEN
 
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+// Select Newton or Picard.
+const int ITERATION_METHOD = 1;		          // 1 = Newton, 2 = Picard.
+
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refinements towards the top edge.
-const int TIME_INTEGRATION = 2;                   // 1... implicit Euler, 2... Crank-Nicolson.
+const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
 
-// Adaptivity
+// Adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -45,7 +52,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_H_ANISO;          // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See the User Documentation for details.
@@ -57,87 +64,59 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Newton's method
-const double NEWTON_TOL = 0.0005;                 // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
+
+// Newton's and Picard's methods.
+const double NEWTON_TOL = 0.0015;                 // Stopping criterion for Newton on fine mesh.
+int NEWTON_MAX_ITER = 23;                         // Maximum allowed number of Newton iterations.
+const double PICARD_TOL = 0.0015;                 // Stopping criterion for Picard on fine mesh.
+int PICARD_MAX_ITER = 23;                         // Maximum allowed number of Picard iterations.
 
 // Problem parameters.
-const double TAU = 5e-3;                          // Time step.
-const double STARTUP_TIME = 1.1e-2;               // Start-up time for time-dependent Dirichlet boundary condition.
-const double T_FINAL = 5.0;                       // Time interval length.
+const double TAU = 5e-1;                          // Time step.
+const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
+const double T_FINAL = 1000.0;                    // Time interval length.
 double TIME = 0;                                  // Global time variable initialized with first time step.
-double H_INIT = -9.5;                             // Initial pressure head.
-double H_ELEVATION = 5.2;
+double H_INIT = -50.0;                            // Initial pressure head.
+double H_ELEVATION = 10.0;
 
-double K_S_1 = 0.108;
-double K_S_3 = 0.0048;
-double K_S_2 = 0.0168;
-double K_S_4 = 1.061;
+const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64} ; 
+const double ALPHA_vals[4] = {0.01, 1.0, 0.01, 0.01} ;
+const double N_vals[4] = {2.5, 2.0, 1.23, 2.5} ;
+const double M_vals[4] = {0.864, 0.626, 0.187, 0.864} ;
 
-double ALPHA_1 = 0.01;
-double ALPHA_3 = 0.005;
-double ALPHA_2 = 0.01;
-double ALPHA_4 = 0.05;
+const double THETA_R_vals[4] = {0.064, 0.0, 0.089, 0.064} ;
+const double THETA_S_vals[4] = {0.14, 0.43, 0.43, 0.24} ;
+const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1} ;
 
-double THETA_R_1 = 0.1020;
-double THETA_R_2 = 0.09849;
-double THETA_R_3 = 0.08590;
-double THETA_R_4 = 0.08590;
+bool USE_CONSTITUTIVE_TABLE = true;		  // If true, all constitutive functions are precalculated into a table, 
+                                                  // which improves performance. If not desired, set -1.
+const int MATERIAL_COUNT = 4;
+double K_TABLE[4][1500000];                       // Four materials, 15000 values.
+double dKdh_TABLE[4][1500000];
+double ddKdhh_TABLE[4][1500000];
+double C_TABLE[4][1500000];
+double dCdh_TABLE[4][1500000];
+bool CONSTITUTIVE_TABLES_READY = false;
+double*** POLYNOMIALS ;                           // Polynomial approximation of the K(h) function close to saturation 
+                                                  // (this function has singularity in its second derivative).
+const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) function approximated by polynomials.
+const int NUM_OF_INSIDE_PTS = 0;
+int POLYNOMIALS_READY = -1;
+const int X_OUTPUT = -1;
 
-double THETA_S_1 = 0.4570;
-double THETA_S_2 = 0.4510;
-double THETA_S_3 = 0.4650;
-double THETA_S_4 = 0.5650;
-
-double N_1 = 1.982;
-double N_2 = 1.632; 
-double N_3 = 5.0;
-double N_4 = 5.0;
-
-double M_1 = 0.49546;
-double M_2 = 0.38726;
-double M_3 = 0.8;
-double M_4 = 0.8;
-
-double Q_MAX_VALUE = 0.07;                        // Maximum value, used in function q_function(); 
-double q_function() {
-  if (STARTUP_TIME > TIME) return Q_MAX_VALUE * TIME / STARTUP_TIME;
-  else return Q_MAX_VALUE;
-}
-
-double STORATIVITY = 0.05;
+int POLYNOMIALS_ALLOCATED = -1;
 
 // Global variables for forms.
-double K_S, ALPHA, THETA_R, THETA_S, N, M;
+double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
 
-// Material properties.
-bool is_in_mat_1(double x, double y) {
-  if (y >= -0.5) return true;
-  else return false; 
-}
-
-bool is_in_mat_2(double x, double y) {
-  if (y >= -1.0 && y < -0.5) return true;
-  else return false; 
-}
-
-bool is_in_mat_4(double x, double y) {
-  if (x >= 1.0 && x <= 3.0 && y >= -2.5 && y < -1.5) return true;
-  else return false; 
-}
-
-bool is_in_mat_3(double x, double y) {
-  if (!is_in_mat_1(x, y) && !is_in_mat_2(x, y) && !is_in_mat_4(x, y)) return true;
-  else return false; 
-}
-
+// Choose here which constitutive relations should be used.
 #ifdef CONSTITUTIVE_GENUCHTEN
 #include "constitutive_genuchten.cpp"
 #else
@@ -149,32 +128,41 @@ const int BDY_1 = 1;
 const int BDY_2 = 2;
 const int BDY_3 = 3;
 const int BDY_4 = 4;
-const int BDY_5 = 5;
-const int BDY_6 = 6;
 
 // Initial condition.
 double init_cond(double x, double y, double& dx, double& dy) {
   dx = 0;
-  dy = -1;
-  return -y + H_INIT;
+  dy = 0;
+  return H_INIT;
 }
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(double x, double y, double time)
 {
-  if (STARTUP_TIME > time) return -y + H_INIT + time/STARTUP_TIME*H_ELEVATION;
-  else return -y + H_INIT + H_ELEVATION;
+  if (time < STARTUP_TIME)
+    return H_INIT + time/STARTUP_TIME*(H_ELEVATION-H_INIT);
+  else 
+    return H_ELEVATION;
 }
 
 // Weak forms.
 #include "forms.cpp"
 
+// Additional functionality.
+#include "extras.cpp"
+
+// Main function.
 int main(int argc, char* argv[])
 {
+
+  // Either use exact constitutive relations (slow) or precalculate 
+  // their polynomial approximations (faster).
+  if (USE_CONSTITUTIVE_TABLE == true) precalculate_constitutive_values();
+
   // Time measurement.
   TimePeriod cpu_time;
-
   cpu_time.tick();
+
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
@@ -183,32 +171,28 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_3, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_3);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_5));
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_1, BDY_4, BDY_6));
+  bc_types.add_bc_dirichlet(BDY_1);
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values(&TIME);
-  bc_values.add_timedep_function(BDY_3, essential_bc_values);
+  bc_values.add_timedep_function(BDY_1, essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
-  // Create an H1 space for the initial coarse mesh solution.
-  H1Space init_space(&basemesh, &bc_types, &bc_values, P_INIT);
-
   // Create a selector which will select optimal candidate.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Solutions for the time stepping and the Newton's method.
-  Solution sln, ref_sln, sln_prev_time;
+  Solution sln, ref_sln, sln_prev_time, sln_prev_iter;
   
+  /* NOT NEEDED AT THIS LEVEL BUT DO NOT REMOVE
   // Adapt mesh to represent initial condition with given accuracy.
   info("Mesh adaptivity to an exact function:");
 
@@ -256,35 +240,47 @@ int main(int argc, char* argv[])
     as++;
   }
   while (done == false);
-  
+  */  
+
+  // This is instead of the commented-out block of code.
+  // Assign the function f() to the fine mesh.
+  sln_prev_time.set_exact(&mesh, init_cond);
+  sln_prev_iter.set_exact(&mesh, init_cond);
+
   // Initialize the weak formulation.
   WeakForm wf;
-  if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
-                       &sln_prev_time);
-    wf.add_matrix_form_surf(jac_form_surf_1_euler, jac_form_surf_1_ord, BDY_1);
-    wf.add_matrix_form_surf(jac_form_surf_4_euler, jac_form_surf_4_ord, BDY_4);
-    wf.add_matrix_form_surf(jac_form_surf_6_euler, jac_form_surf_6_ord, BDY_6);
-    wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, HERMES_ANY, 
-                       &sln_prev_time);
-    wf.add_vector_form_surf(res_form_surf_1_euler, res_form_surf_1_ord, BDY_1); 
-    wf.add_vector_form_surf(res_form_surf_4_euler, res_form_surf_4_ord, BDY_4);
-    wf.add_vector_form_surf(res_form_surf_6_euler, res_form_surf_6_ord, BDY_6);
+  if (ITERATION_METHOD == 1) {
+    if (TIME_INTEGRATION == 1) {
+      info("Registering forms for the Newton's method (implicit Euler in time).\n");
+      wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+	                 &sln_prev_time);
+      wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, HERMES_ANY, 
+			 &sln_prev_time);
+    }
+    else {
+      info("Registering forms for the Newton's method (Crank-Nicolson in time).\n");
+      wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+      		         &sln_prev_time);
+      wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, HERMES_ANY, 
+			 &sln_prev_time);
+    }
   }
   else {
-    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
-                       &sln_prev_time);
-    wf.add_matrix_form_surf(jac_form_surf_1_cranic, jac_form_surf_1_ord, BDY_1);
-    wf.add_matrix_form_surf(jac_form_surf_4_cranic, jac_form_surf_4_ord, BDY_4);
-    wf.add_matrix_form_surf(jac_form_surf_6_cranic, jac_form_surf_6_ord, BDY_6); 
-    wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, HERMES_ANY, 
-                       &sln_prev_time);
-    wf.add_vector_form_surf(res_form_surf_1_cranic, res_form_surf_1_ord, BDY_1, 
-			    &sln_prev_time);
-    wf.add_vector_form_surf(res_form_surf_4_cranic, res_form_surf_4_ord, BDY_4, 
-			    &sln_prev_time);
-    wf.add_vector_form_surf(res_form_surf_6_cranic, res_form_surf_6_ord, BDY_6, 
-			    &sln_prev_time);
+    if (TIME_INTEGRATION == 1) {
+      info("Registering forms for the Picard's's method (implicit Euler in time).\n");
+      wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_UNSYM, HERMES_ANY, 
+	                 &sln_prev_iter);
+      wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
+			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
+    }
+    else {
+      info("Registering forms for the Picard's's method (Crank-Nicolson in time).\n");
+      error("Not implemented yet.");
+      wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_UNSYM, HERMES_ANY, 
+	                 &sln_prev_iter);
+      wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
+			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
+    }
   }
 
   // Error estimate and discrete problem size as a function of physical time.
@@ -319,42 +315,89 @@ int main(int argc, char* argv[])
     int as = 1;
     do
     {
-      info("---- Time step %d, adaptivity step %d:", ts, as);
+      info("---- Time step %d, simulation time %lf, adaptivity step %d:", ts, TIME, as);
 
       // Construct globally refined reference mesh
       // and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
-      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
+      // Next we need to calculate the reference solution.
+      // Newton's method:
+      if(ITERATION_METHOD == 1) {
+        scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
      
-      // Calculate initial coefficient vector for Newton on the fine mesh.
-      if (as == 1 && ts == 1) {
-        info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &sln_prev_time, coeff_vec, matrix_solver);
+        // Calculate initial coefficient vector for Newton on the fine mesh.
+        if (as == 1 && ts == 1) {
+          info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
+          OGProjection::project_global(ref_space, &sln_prev_time, coeff_vec, matrix_solver);
+        }
+        else {
+          info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
+          OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
+          delete ref_sln.get_mesh();
+        }
+
+        // Initialize the FE problem.
+        bool is_linear = false;
+        DiscreteProblem dp(&wf, ref_space, is_linear);
+
+        // Set up the solver, matrix, and rhs according to the solver selection.
+        SparseMatrix* matrix = create_matrix(matrix_solver);
+        Vector* rhs = create_vector(matrix_solver);
+        Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+        // Perform Newton's iteration.
+        info("Solving nonlinear problem:");
+        bool verbose = true;
+
+        double damping_coeff = 1.0 ;
+        int i_err ;
+        int save_global_max_iter =  NEWTON_MAX_ITER; 
+        for ( ; ; ) {
+          bool success = solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+                                      NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff);
+	  if (success == false) {
+            // This would deserve a comment. 
+	    damping_coeff *= 0.75;
+	    NEWTON_MAX_ITER = NEWTON_MAX_ITER * 1/damping_coeff * 1.15;   
+	  }
+	  else break;
+        }
+      
+        // This would deserve a commnet.
+        NEWTON_MAX_ITER = save_global_max_iter;
+        damping_coeff = 1.0;
+
+        // Translate the resulting coefficient vector 
+        // into the desired reference solution. 
+        Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+
+        // Cleanup.
+        delete [] coeff_vec;
+        delete solver;
+        delete matrix;
+        delete rhs;
       }
       else {
-        info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
-        delete ref_sln.get_mesh();
+        // Calculate initial condition for Picard on the fine mesh.
+        if (as == 1 && ts == 1) {
+          info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
+          OGProjection::project_global(ref_space, &sln_prev_time, &sln_prev_iter, matrix_solver);
+        }
+        else {
+          info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
+          OGProjection::project_global(ref_space, &ref_sln, &sln_prev_iter, matrix_solver);
+          //delete ref_sln.get_mesh();  // Not sure whether I can remove this.
+        }
+
+        // Perform Picard iteration on the reference mesh.
+        bool verbose = true;
+        bool success = solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
+                                    PICARD_MAX_ITER, verbose); 
+        if (!success) error("Picard's iteration did not converge.");
       }
 
-      // Initialize the FE problem.
-      bool is_linear = false;
-      DiscreteProblem dp(&wf, ref_space, is_linear);
-
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-      // Perform Newton's iteration.
-      info("Solving nonlinear problem:");
-      bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-
-      // Translate the resulting coefficient vector into the actual solutions. 
-      Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+      /*** ADAPTIVITY ***/
 
       // Project the fine mesh solution on the coarse mesh.
       info("Projecting fine mesh solution on coarse mesh for error calculation.");
@@ -375,7 +418,7 @@ int main(int argc, char* argv[])
 
       // Add entries to convergence graphs.
       graph_time_err_est.add_values(ts*TAU, err_est_rel);
-      graph_time_err_est.save("time_err_est.dat");
+      graph_time_err_est.save("time_error_est.dat");
       graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
       graph_time_dof.save("time_dof.dat");
       graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
@@ -393,11 +436,6 @@ int main(int argc, char* argv[])
         as++;
       }
 
-      // Cleanup.
-      delete [] coeff_vec;
-      delete solver;
-      delete matrix;
-      delete rhs;
       delete adaptivity;
       delete ref_space;
     }
@@ -411,6 +449,13 @@ int main(int argc, char* argv[])
     sprintf(title, "Mesh, time level %d", ts);
     ordview.set_title(title);
     ordview.show(&space);
+    
+    // Save complete Solution.
+    char* filename = new char[100];
+    sprintf(filename, "outputs/tsln_%f.dat", TIME);
+    bool compress = false;   // Gzip compression not used as it only works on Linux.
+    sln.save(filename, compress);
+    info("Complete Solution saved to file %s.", filename);
 
     // Copy new time level solution into sln_prev_time.
     sln_prev_time.copy(&ref_sln);

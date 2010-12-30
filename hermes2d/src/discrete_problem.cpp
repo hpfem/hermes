@@ -1695,7 +1695,7 @@ Space* construct_refined_space(Space* coarse, int order_increase)
 
 // Perform Newton's iteration.
 bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-                  Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose)
+                  Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose, double damping_coeff)
 {
   int it = 1;
   while (1)
@@ -1724,7 +1724,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
     if(!solver->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += damping_coeff * solver->get_solution()[i];
 
     it++;
   }

@@ -35,8 +35,9 @@ add_subdirectory(quantum-billiard)
 
 # Richards
 add_subdirectory(richards)
-add_subdirectory(richards-tracy-adapt)
+add_subdirectory(richards-capillary-barrier)
 add_subdirectory(richards-seepage-adapt)
+add_subdirectory(richards-tracy-adapt)
 
 # Eigenproblems
 add_subdirectory(schroedinger-eigen)
