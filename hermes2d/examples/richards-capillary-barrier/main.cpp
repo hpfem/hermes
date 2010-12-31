@@ -33,7 +33,7 @@ using namespace RefinementSelectors;
 #define CONSTITUTIVE_GENUCHTEN                    // Van Genuchten or Gardner.
 
 // Methods.
-const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.
+const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
 // Elements orders and initial refinements.
@@ -81,7 +81,7 @@ const double PICARD_TOL = 1e-5;                   // Stopping criterion for Pica
 int PICARD_MAX_ITER = 20;                         // Maximum allowed number of Picard iterations.
 
 // Time stepping and such.
-double TAU = 1e-1;                                // Time step.
+double TAU = 5e-1;                                // Time step.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 double TIME = TAU;                                // Global time variable initialized with first time step.

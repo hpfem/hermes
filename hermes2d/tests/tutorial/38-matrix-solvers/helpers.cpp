@@ -112,13 +112,13 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat,
                   Vector *rhs) {
   mat->prealloc(n);
   for (int i = 0; i < ar_mat.get_size(); i++) {
-    MatrixEntry &me = ar_mat.get_item(i);
+    MatrixEntry &me = ar_mat.get(i);
     mat->pre_add_ij(me.m, me.n);
   }
 
   mat->alloc();
   for (int i = 0; i < ar_mat.get_size(); i++ ) {
-    MatrixEntry &me = ar_mat.get_item(i);
+    MatrixEntry &me = ar_mat.get(i);
     mat->add(me.m, me.n, me.value);
   }
   mat->finish();
@@ -147,7 +147,7 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<VectorEntry> &a
     rows[i] = i;
   }
   for (int i = 0; i < ar_mat.get_size(); i++) {
-    MatrixEntry &me = ar_mat.get_item(i);
+    MatrixEntry &me = ar_mat.get(i);
     mat[me.m][me.n] = me.value;
   }
   matrix->add(n, n, mat, rows, cols);
@@ -156,7 +156,7 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<VectorEntry> &a
   rhs->alloc(n);
   scalar *rs = new scalar[n];
   for (int i = 0; i < ar_rhs.get_size(); i++) {
-    VectorEntry &ve = ar_rhs.get_item(i);
+    VectorEntry &ve = ar_rhs.get(i);
     rs[ve.m] = ve.value;
   }
   rhs->add(n, rows, rs);
