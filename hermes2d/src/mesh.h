@@ -230,7 +230,8 @@ public:
   /// receives a pointer to an element to be considered.
   /// It must return -1 if the element is not to be refined, 0 if it
   /// should be refined uniformly, 1 if it is a quad and should be split
-  /// horizontally or 2 if it is a quad and should be split vertically.
+  /// horizontally, 2 if it is a quad and should be split vertically,
+  /// and 3 if it is a triangle and should be split into three quads.
   void refine_by_criterion(int (*criterion)(Element* e), int depth);
 
   /// Performs repeated refinements of elements containing the given vertex.
@@ -241,7 +242,7 @@ public:
   /// boundary marked by 'marker'. Elements touching both by an edge or
   /// by a vertex are refined. 'aniso' allows or disables anisotropic
   /// splits of quads.
-  void refine_towards_boundary(int marker, int depth, bool aniso = true);
+  void refine_towards_boundary(int marker, int depth, bool aniso = true, bool tria_to_quad = true);
 
   // Wrapper function utilizing the class MarkersConversion.
   void refine_towards_boundary(std::string marker, int depth, bool aniso = true);
@@ -304,7 +305,7 @@ protected:
   Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm);
   Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm);
 
-  void refine_triangle(Element* e);
+  void refine_triangle_to_triangles(Element* e);
   void refine_quad(Element* e, int refinement);
   void unrefine_element_internal(Element* e);
 

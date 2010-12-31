@@ -40,8 +40,9 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
     error("Only off-diagonal forms can be antisymmetric.");
   if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
-  if (mfvol.size() > 100)
+  if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
+  }
 
   MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
   mfvol.push_back(form);
@@ -59,9 +60,9 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
     error("\"sym\" must be -1, 0 or 1.");
   if (sym < 0 && i == j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (mfvol.size() > 100)
+  if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
-
+  }
   MatrixFormVol form = { i, j, sym, 0, fn, ord, ext.as_std_vector() };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;
@@ -81,9 +82,9 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
     error("Only off-diagonal forms can be antisymmetric.");
   if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
-  if (mfvol.size() > 100)
+  if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
-
+  }
   MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
   mfvol.push_back(form);
   seq++;
@@ -100,9 +101,9 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn,
     error("\"sym\" must be -1, 0 or 1.");
   if (sym < 0 && i == j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (mfvol.size() > 100)
+  if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
-
+  }
   MatrixFormVol form = { i, j, sym, 0, fn, ord, ext.as_std_vector() };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;

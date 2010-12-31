@@ -394,7 +394,9 @@ int RefMap::calc_inv_ref_order()
     if ((fabs((exact1 - result1) / exact1) < 1e-8) &&
         (fabs((exact2 - result2) / exact2) < 1e-8)) break;
   }
-  if (o >= 10) warn("Element #%d is too distorted (iro ~ %d).", element->id, o);
+  if (o >= 10) {
+    warn("Element #%d is too distorted (iro ~ %d).", element->id, o);
+  }
   return o;
 }
 
