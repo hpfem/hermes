@@ -75,8 +75,7 @@ public:
   /// Removes all elements from the array.
   void free()
   {
-    for (unsigned i = 0; i < pages.size(); i++)
-      delete [] pages[i];
+    for (unsigned i = 0; i < pages.size(); i++) delete [] pages[i];
     pages.clear();
     unused.clear();
     size = nitems = 0;
@@ -92,7 +91,7 @@ public:
     this->append_only = append_only;
   }
   
-  /// Wrapper function for srd::vector::add() for compatibility purposes.
+  /// Wrapper function for std::vector::add() for compatibility purposes.
   int add(TYPE item) {
     TYPE* ptr = this->add();
     *ptr = item;
@@ -165,10 +164,8 @@ public:
   {
     nitems = 0;
     for (int i = start; i < size; i++)
-      if (get(i).used)
-        nitems++;
-      else
-        unused.push_back(i);
+      if (get(i).used) nitems++;
+      else unused.push_back(i);
   }
 
   /// Adds an unused item at the end of the array and skips its ID forever.
