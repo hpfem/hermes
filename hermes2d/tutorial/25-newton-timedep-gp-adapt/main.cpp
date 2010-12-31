@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
       delete [] coeff_vec_coarse;
     }
 
-    // Adaptivity loop:
+    // Adaptivity loop. Note: sln_prev_time must not be changed during spatial adaptivity. 
     bool done = false; int as = 1;
     double err_est;
     do {

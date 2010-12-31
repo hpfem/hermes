@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Solutions for the time stepping and adaptivity.
-  Solution u_prev_time, sln, ref_sln;
+  Solution sln_prev_time, sln, ref_sln;
 
   // Initialize views.
   char title_init[200];
@@ -179,19 +179,19 @@ int main(int argc, char* argv[])
   OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
   view_init->fix_scale_width(80);
 
-  // Initialize u_prev_time.
+  // Initialize sln_prev_time.
   // Note: only if adaptivity to initial condition is not done.
-  u_prev_time.set_exact(&basemesh, init_cond);
+  sln_prev_time.set_exact(&basemesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
-    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &sln_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
-    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &sln_prev_time);
   }
 
   // Error estimate and discrete problem size as a function of physical time.
@@ -251,7 +251,8 @@ int main(int argc, char* argv[])
       space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop (in space):
+    // Spatial adaptivity loop. Note; sln_prev_timemust not be changed during 
+    // spatial adaptivity.
     bool done = false;
     int as = 1;
     do
@@ -359,8 +360,8 @@ int main(int argc, char* argv[])
     ordview.set_title(title);
     ordview.show(&space);
 
-    // Copy new time level solution into u_prev_time.
-    u_prev_time.copy(&ref_sln);
+    // Copy new time level solution into sln_prev_time.
+    sln_prev_time.copy(&ref_sln);
   }
 
   // Wait for all views to be closed.

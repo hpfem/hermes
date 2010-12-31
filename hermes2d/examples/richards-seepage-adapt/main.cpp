@@ -209,9 +209,6 @@ int main(int argc, char* argv[])
   // Solutions for the time stepping and the Newton's method.
   Solution sln, ref_sln, sln_prev_time;
   
-  // Adapt mesh to represent initial condition with given accuracy.
-  info("Mesh adaptivity to an exact function:");
-
   // Initialize views.
   char title_init[200];
   sprintf(title_init, "Projection of initial condition");
@@ -219,6 +216,9 @@ int main(int argc, char* argv[])
   sprintf(title_init, "Initial mesh");
   OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
   view_init->fix_scale_width(80);
+
+  // Adapt mesh to represent initial condition with given accuracy.
+  info("Mesh adaptivity to an exact function:");
   int as = 1; bool done = false;
   do
   {
@@ -314,7 +314,8 @@ int main(int argc, char* argv[])
       space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop (in space):
+    // Spatial adaptivity loop. Note; sln_prev_time must not be changed 
+    // during spatial adaptivity.
     bool done = false;
     int as = 1;
     do
