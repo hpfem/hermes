@@ -427,10 +427,10 @@ int main(int argc, char* argv[])
 
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time %g (hours)", ts*TAU*24);
+    sprintf(title, "Solution, time %g (days)", ts*TAU);
     view.set_title(title);
     view.show(&sln);
-    sprintf(title, "Mesh, time %g (hours)", ts*TAU*24);
+    sprintf(title, "Mesh, time %g (days)", ts*TAU);
     ordview.set_title(title);
     ordview.show(&space);
     
