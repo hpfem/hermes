@@ -79,7 +79,7 @@ const double PICARD_TOL = 1e-5;                   // Stopping criterion for Pica
 int PICARD_MAX_ITER = 20;                         // Maximum allowed number of Picard iterations.
 
 // Time stepping and such.
-double TAU = 5e-1;                                // Time step.
+double TAU = 5.0;                                 // Time step (in days).
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 double TIME = TAU;                                // Global time variable initialized with first time step.
@@ -310,16 +310,12 @@ int main(int argc, char* argv[])
         double damping_coeff = 1.0;
         while (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
                              NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff)) {
-          static int failures = 0;
-          if (failures >= 10) 
-            error("Newton's method did not converge, even with substantial reduction of time step.");
           // Restore solution from the beginning of time step.
           for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
           // Reducing time step to 50%.
-          warn("Reducing time step size from %g to %g for the rest of this time step.", TAU, TAU *= 0.5);
+          info("Reducing time step size from %g to %g for the rest of this time step.", TAU, TAU * 0.5);
           TAU *= 0.5;
           // Counting failures.
-	  failures++;
         }  
         // Delete the saved coefficient vector.
         delete [] save_coeff_vec;
@@ -353,16 +349,12 @@ int main(int argc, char* argv[])
         bool success, verbose = true;
         while(!solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                             PICARD_MAX_ITER, verbose)) {
-          static int failures = 0;
-          if (failures >= 10) 
-            error("Newton's method did not converge, even with substantial reduction of time step.");
           // Restore solution from the beginning of time step.
           sln_prev_iter.copy(&sln_prev_time);
           // Reducing time step to 50%.
-          warn("Reducing time step size from %g to %g for the rest of this time step", TAU, TAU *= 0.5);
+          info("Reducing time step size from %g to %g for the rest of this time step", TAU, TAU * 0.5);
           TAU *= 0.5;
           // Counting failures.
-	  failures++;
         } 
 
         ref_sln.copy(&sln_prev_iter);
@@ -438,7 +430,7 @@ int main(int argc, char* argv[])
 
     // Restore time step if it was reduced during adaptivity.
     if (fabs(save_tau - TAU) > 1e-12) {
-      warn("Restoring time step from %g to %g.", TAU, save_tau);
+      info("Restoring time step from %g to %g.", TAU, save_tau);
       TAU = save_tau;
     }
   }
