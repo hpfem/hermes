@@ -14,7 +14,7 @@ double K(double h, int layer)
 {
   double value ;
   int location ;
-  if (h > LOW_LIMIT && h < 0 && POLYNOMIALS_READY > 0){
+  if (h > LOW_LIMIT && h < 0 && POLYNOMIALS_READY == true){
 // 	  double tmp=0.0;
 // 	  for (int i=0; i<8; i++){
 // 	    tmp += POLYNOMIALS[0][layer][i]*pow(h,i) ;
@@ -28,7 +28,7 @@ double K(double h, int layer)
   }
   else
   {
-    if (USE_CONSTITUTIVE_TABLE < 0 || !CONSTITUTIVE_TABLES_READY || h < -15000.0)  {
+    if (CONSTITUTIVE_TABLES_READY == false || h < -15000.0)  {
       ALPHA = ALPHA_vals[layer] ;
       N = N_vals[layer] ;
       M = M_vals[layer] ;
@@ -57,12 +57,12 @@ double dKdh(double h, int layer)
   double value ;
   int location ;
   
-  if (h > LOW_LIMIT && h < 0 && POLYNOMIALS_READY > 0){
+  if (h > LOW_LIMIT && h < 0 && POLYNOMIALS_READY == true){
     return horner(POLYNOMIALS[layer][1], h, (5+NUM_OF_INSIDE_PTS));
   }
   else
   {
-    if (USE_CONSTITUTIVE_TABLE < 0 || !CONSTITUTIVE_TABLES_READY || h < -15000.0)  {
+    if (CONSTITUTIVE_TABLES_READY == false || h < -15000.0)  {
       ALPHA = ALPHA_vals[layer] ;
       N = N_vals[layer] ;
       M = M_vals[layer] ;
@@ -106,12 +106,12 @@ double ddKdhh(double h, int layer)
 //     }
   
   
-  if (h > LOW_LIMIT && h < 0 && POLYNOMIALS_READY > 0){
+  if (h > LOW_LIMIT && h < 0 && POLYNOMIALS_READY == true){
     return horner(POLYNOMIALS[layer][2], h, (4+NUM_OF_INSIDE_PTS));
   }
   else
   {
-    if (USE_CONSTITUTIVE_TABLE < 0 || !CONSTITUTIVE_TABLES_READY || h < -15000.0)  {
+    if (CONSTITUTIVE_TABLES_READY == false || h < -15000.0)  {
       ALPHA = ALPHA_vals[layer] ;
       N = N_vals[layer] ;
       M = M_vals[layer] ;
@@ -180,7 +180,7 @@ double C(double h, int layer)
   int location ;
   double value ;
   
-  if (USE_CONSTITUTIVE_TABLE < 0 || !CONSTITUTIVE_TABLES_READY || h < -15000.0)  {
+  if (CONSTITUTIVE_TABLES_READY == false || h < -15000.0)  {
     ALPHA = ALPHA_vals[layer] ;
     N = N_vals[layer] ;
     M = M_vals[layer] ;
@@ -209,7 +209,7 @@ double dCdh(double h, int layer)
   int location ;
   double value ;
     
-  if (USE_CONSTITUTIVE_TABLE < 0 || !CONSTITUTIVE_TABLES_READY || h < -15000.0)  {
+  if (CONSTITUTIVE_TABLES_READY == false|| h < -15000.0)  {
     ALPHA = ALPHA_vals[layer] ;
     N = N_vals[layer] ;
     M = M_vals[layer] ;

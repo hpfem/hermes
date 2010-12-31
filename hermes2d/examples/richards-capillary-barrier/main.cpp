@@ -76,13 +76,13 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Newton's and Picard's methods.
 const double NEWTON_TOL = 0.0015;                 // Stopping criterion for Newton on fine mesh.
-int NEWTON_MAX_ITER = 23;                         // Maximum allowed number of Newton iterations.
+int NEWTON_MAX_ITER = 20;                         // Maximum allowed number of Newton iterations.
 const double PICARD_TOL = 0.0015;                 // Stopping criterion for Picard on fine mesh.
-int PICARD_MAX_ITER = 23;                         // Maximum allowed number of Picard iterations.
+int PICARD_MAX_ITER = 20;                         // Maximum allowed number of Picard iterations.
 
 // Problem parameters.
 const char* TABLES_FILENAME = "tables.txt";       // Filename for constitutive tables.
-const double TAU = 1e-1;                          // Time step.
+double TAU = 1e-1;                                // Time step.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 double TIME = 0;                                  // Global time variable initialized with first time step.
@@ -98,8 +98,7 @@ const double THETA_R_vals[4] = {0.064, 0.0, 0.089, 0.064};
 const double THETA_S_vals[4] = {0.14, 0.43, 0.43, 0.24};
 const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 
-bool USE_CONSTITUTIVE_TABLE = true;		  // If true, all constitutive functions are precalculated into a table, 
-                                                  // which improves performance. If not desired, set -1.
+// Precalculation of constitutive tables.
 const int MATERIAL_COUNT = 4;
 double K_TABLE[4][1500000];                       // Four materials, 15000 values.
 double dKdh_TABLE[4][1500000];
@@ -111,10 +110,8 @@ double*** POLYNOMIALS;                            // Polynomial approximation of
                                                   // (this function has singularity in its second derivative).
 const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) function approximated by polynomials.
 const int NUM_OF_INSIDE_PTS = 0;
-int POLYNOMIALS_READY = -1;
-const int X_OUTPUT = -1;
-
-int POLYNOMIALS_ALLOCATED = -1;
+bool POLYNOMIALS_READY = false;
+bool POLYNOMIALS_ALLOCATED = false;
 
 // Global variables for forms.
 double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
@@ -160,9 +157,7 @@ int main(int argc, char* argv[])
 
   // Either use exact constitutive relations (slow) or precalculate 
   // their polynomial approximations (faster).
-  if (USE_CONSTITUTIVE_TABLE == true) {
-    CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
-  }
+  CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -275,6 +270,7 @@ int main(int argc, char* argv[])
       // Construct globally refined reference mesh
       // and setup reference space.
       Space* ref_space = construct_refined_space(&space);
+      ndof = Space::get_num_dofs(ref_space);
 
       // Next we need to calculate the reference solution.
       // Newton's method:
@@ -301,27 +297,35 @@ int main(int argc, char* argv[])
         Vector* rhs = create_vector(matrix_solver);
         Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-        // Perform Newton's iteration.
-        info("Performing Newton's iteretion:");
-        bool verbose = true;
-
-        double damping_coeff = 1.0 ;
-        int i_err ;
-        int save_global_max_iter =  NEWTON_MAX_ITER; 
-        while(true) {
-          bool success = solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-                                      NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff);
-	  if (success == false) {
-            // ...
-	    damping_coeff *= 0.75;
-	    NEWTON_MAX_ITER = NEWTON_MAX_ITER * 1/damping_coeff * 1.15;   
-	  }
-	  else break;
-        }
+        // Perform Newton's iteration on the reference mesh. If necessary, 
+        // reduce time step to make it converge, but then restore time step 
+        // size to its original value.
+        info("Performing Newton's iteration:");
+        bool success, verbose = true;
+        double save_tau = TAU;
+        double* save_coeff_vec = new double[ndof];
+        for (int i=0; i < ndof; i++) save_coeff_vec[i] = coeff_vec[i];
+        double damping_coeff = 1.0;
+        while (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+                                 NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff)) {
+          static int failures = 0;
+          if (failures >= 10) 
+            error("Newton's method did not converge, even with substantial reduction of time step.");
+          // Restore solution from the beginning of time step.
+          for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
+          // Reducing time step to 50%.
+          warn("Reducing time step size from %g to %g.", TAU, TAU *= 0.5);
+          TAU *= 0.5;
+          // Counting failures.
+	  failures++;
+        }  
       
-        // ...
-        NEWTON_MAX_ITER = save_global_max_iter;
-        damping_coeff = 1.0;
+        // Restore time step and delete save_coeff_vec.
+        if (fabs(save_tau - TAU) > 1e-12) {
+          warn("Restoring time step from %g to %g.", TAU, save_tau);
+        }
+        TAU = save_tau;
+        delete [] save_coeff_vec;
 
         // Translate the resulting coefficient vector 
         // into the desired reference solution. 
@@ -342,18 +346,37 @@ int main(int argc, char* argv[])
         else {
           info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
           OGProjection::project_global(ref_space, &ref_sln, &sln_prev_iter, matrix_solver);
-          //delete ref_sln.get_mesh();
         }
 
         // This puts both sln_prev_iter and sln_prev_iter on the same reference mesh.
         sln_prev_time.copy(&sln_prev_iter);
 
-        // Perform Picard iteration on the reference mesh.
-        info("Performing Picard's iteretion:");
-        bool verbose = true;
-        bool success = solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
-                                    PICARD_MAX_ITER, verbose); 
-        if (!success) error("Picard's iteration did not converge.");
+        // Perform Picard iteration on the reference mesh. If necessary, 
+        // reduce time step to make it converge, but then restore time step 
+        // size to its original value.
+        info("Performing Picard's iteration:");
+        bool success, verbose = true;
+        double save_tau = TAU;
+        while(!solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
+                            PICARD_MAX_ITER, verbose)) {
+          static int failures = 0;
+          if (failures >= 10) 
+            error("Newton's method did not converge, even with substantial reduction of time step.");
+          // Restore solution from the beginning of time step.
+          sln_prev_iter.copy(&sln_prev_time);
+          // Reducing time step to 50%.
+          warn("Reducing time step size from %g to %g.", TAU, TAU *= 0.5);
+          TAU *= 0.5;
+          // Counting failures.
+	  failures++;
+        } 
+
+        // Restore time step.
+        if (fabs(save_tau - TAU) > 1e-12) {
+          warn("Restoring time step from %g to %g.", TAU, save_tau);
+        }
+        TAU = save_tau;
+
         ref_sln.copy(&sln_prev_iter);
       }
 
