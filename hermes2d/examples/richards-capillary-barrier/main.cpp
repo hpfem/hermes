@@ -74,9 +74,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Newton's and Picard's methods.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for Newton on fine mesh.
-int NEWTON_MAX_ITER = 20;                         // Maximum allowed number of Newton iterations.
+int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of Newton iterations.
 const double PICARD_TOL = 1e-5;                   // Stopping criterion for Picard on fine mesh.
-int PICARD_MAX_ITER = 20;                         // Maximum allowed number of Picard iterations.
+int PICARD_MAX_ITER = 10;                         // Maximum allowed number of Picard iterations.
 
 // Time stepping and such.
 double TAU = 5.0;                                 // Time step (in days).
@@ -154,6 +154,16 @@ scalar essential_bc_values(double x, double y, double time)
 // Main function.
 int main(int argc, char* argv[])
 {
+  // Points to be used for polynomial approximation of K(h).
+  double* points = new double[NUM_OF_INSIDE_PTS];
+
+  // The van Genuchten + Mualem K(h) function is approximated by polynomials close to zero.
+  info("Initializing polynomial approximation of K(h) close to its full saturation in range (%g, 0).", LOW_LIMIT);
+  for (int i=0; i < MATERIAL_COUNT; i++) {
+    info("Processing layer %d", i);
+    init_polynomials(6 + NUM_OF_INSIDE_PTS, LOW_LIMIT, points, NUM_OF_INSIDE_PTS, i);
+  }
+  POLYNOMIALS_READY = true;
 
   // Either use exact constitutive relations (slow) or precalculate 
   // their polynomial approximations (faster).
@@ -397,9 +407,6 @@ int main(int argc, char* argv[])
     }
     while (!done);
 
-    // Updating time step. Note that TAU might have been reduced during adaptivity.
-    TIME += TAU;
-
     // Add entries to convergence graphs.
     graph_time_err_est.add_values(TIME, err_est_rel);
     graph_time_err_est.save("time_error_est.dat");
@@ -427,6 +434,9 @@ int main(int argc, char* argv[])
     // Copy new reference level solution into sln_prev_time.
     // This starts new time step.
     sln_prev_time.copy(&ref_sln);
+
+    // Updating time step. Note that TAU might have been reduced during adaptivity.
+    TIME += TAU;
 
     // Restore time step if it was reduced during adaptivity.
     if (fabs(save_tau - TAU) > 1e-12) {
