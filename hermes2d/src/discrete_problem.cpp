@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_WARN
 
 #include "h2d_common.h"
 #include "limit_order.h"
@@ -1696,7 +1697,8 @@ Space* construct_refined_space(Space* coarse, int order_increase)
 
 // Perform Newton's iteration.
 bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-                  Vector* rhs, double newton_tol, int newton_max_iter, bool verbose, double damping_coeff)
+                  Vector* rhs, double newton_tol, int newton_max_iter, bool verbose, 
+                  double damping_coeff, double max_allowed_residual_norm)
 {
   int it = 1;
   while (1)
@@ -1717,6 +1719,16 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
     // Info for user.
     if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, ndof, res_l2_norm);
 
+    // If maximum alloed residual norm is exceeded, fail.
+    if (res_l2_norm > max_allowed_residual_norm) {
+      if (verbose) {
+        info("Current residual norm: %g", res_l2_norm);
+        info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
+        info("Newton solve not successful, returning false.");
+      }
+      return false;
+    }
+
     // If l2 norm of the residual vector is within tolerance, or the maximum number 
     // of iteration has been reached, then quit.
     if ((res_l2_norm < newton_tol || it > newton_max_iter) && it > 1) break;
@@ -1730,7 +1742,10 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
     it++;
   }
 
-  if (it >= newton_max_iter) return false;
+  if (it >= newton_max_iter) {
+    if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
+    return false;
+  }
 
   return true;
 }
@@ -1777,6 +1792,7 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
       delete matrix;
       delete rhs;
       delete solver;
+      if (verbose) info("Maximum allowed number of Picard iterations exceeded, returning false.");
       return false;
     }
     

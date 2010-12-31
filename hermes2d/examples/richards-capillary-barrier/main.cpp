@@ -34,6 +34,12 @@ using namespace RefinementSelectors;
 const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
+// Adaptive time stepping.
+double TAU = 5.0;                                 // Time step (in days).
+double TIMESTEP_DEC = 0.5;                        // Timestep decrease ratio after unsuccessful nonlinear solve.
+double TIMESTEP_INC = 1.1;                        // Timestep increase ratio after successful nonlinear solve.
+double TAU_MIN = 0.01;                            // Computation will stop if time step drops below this value.
+
 // Elements orders and initial refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
@@ -78,8 +84,7 @@ int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of N
 const double PICARD_TOL = 1e-5;                   // Stopping criterion for Picard on fine mesh.
 int PICARD_MAX_ITER = 10;                         // Maximum allowed number of Picard iterations.
 
-// Time stepping and such.
-double TAU = 5.0;                                 // Time step (in days).
+// Times.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 double TIME = TAU;                                // Global time variable initialized with first time step.
@@ -243,7 +248,8 @@ int main(int argc, char* argv[])
   }
 
   // Error estimate and discrete problem size as a function of physical time.
-  SimpleGraph graph_time_err_est, graph_time_err_exact, graph_time_dof, graph_time_cpu;
+  SimpleGraph graph_time_err_est, graph_time_err_exact, 
+    graph_time_dof, graph_time_cpu, graph_time_step;
  
   // Visualize the projection and mesh.
   ScalarView view("Initial condition", new WinGeom(0, 0, 630, 350));
@@ -272,9 +278,6 @@ int main(int argc, char* argv[])
     bool done = false;
     int as = 1;
     double err_est_rel;
-    // Save time step so that it can be restored after the adaptivity loop,
-    // if it needs to be reduced during adaptivity.
-    double save_tau = TAU;
     do
     {
       info("---- Time step %d, time %g (days), adaptivity step %d:", ts, TIME, as);
@@ -312,7 +315,7 @@ int main(int argc, char* argv[])
         // Perform Newton's iteration on the reference mesh. If necessary, 
         // reduce time step to make it converge, but then restore time step 
         // size to its original value.
-        info("Performing Newton's iteration:");
+        info("Performing Newton's iteration (tau = %g):", TAU);
         bool success, verbose = true;
         double* save_coeff_vec = new double[ndof];
         // Save coefficient vector.
@@ -323,9 +326,11 @@ int main(int argc, char* argv[])
           // Restore solution from the beginning of time step.
           for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
           // Reducing time step to 50%.
-          info("Reducing time step size from %g to %g for the rest of this time step.", TAU, TAU * 0.5);
-          TAU *= 0.5;
-          // Counting failures.
+          info("Reducing time step size from %g to %g for the rest of this time step.", 
+               TAU, TAU * TIMESTEP_DEC);
+          TAU *= TIMESTEP_DEC;
+          // If TAU less than the prescribed minimum, stop.
+          if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
         }  
         // Delete the saved coefficient vector.
         delete [] save_coeff_vec;
@@ -349,22 +354,22 @@ int main(int argc, char* argv[])
         else {
           info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
           OGProjection::project_global(ref_space, &ref_sln, &sln_prev_iter, matrix_solver);
-          //delete ref_sln.get_mesh();
         }
 
         // Perform Picard iteration on the reference mesh. If necessary, 
         // reduce time step to make it converge, but then restore time step 
         // size to its original value.
-        info("Performing Picard's iteration:");
+        info("Performing Picard's iteration (tau = %g):", TAU);
         bool success, verbose = true;
         while(!solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                             PICARD_MAX_ITER, verbose)) {
           // Restore solution from the beginning of time step.
           sln_prev_iter.copy(&sln_prev_time);
           // Reducing time step to 50%.
-          info("Reducing time step size from %g to %g for the rest of this time step", TAU, TAU * 0.5);
-          TAU *= 0.5;
-          // Counting failures.
+          info("Reducing time step size from %g to %g for the rest of this time step", TAU, TAU * TIMESTEP_DEC);
+          TAU *= TIMESTEP_DEC;
+          // If TAU less than the prescribed minimum, stop.
+          if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
         } 
 
         ref_sln.copy(&sln_prev_iter);
@@ -407,13 +412,15 @@ int main(int argc, char* argv[])
     }
     while (!done);
 
-    // Add entries to convergence graphs.
+    // Add entries to graphs.
     graph_time_err_est.add_values(TIME, err_est_rel);
     graph_time_err_est.save("time_error_est.dat");
     graph_time_dof.add_values(TIME, Space::get_num_dofs(&space));
     graph_time_dof.save("time_dof.dat");
     graph_time_cpu.add_values(TIME, cpu_time.accumulated());
     graph_time_cpu.save("time_cpu.dat");
+    graph_time_step.add_values(TIME, TAU);
+    graph_time_step.save("time_step_history.dat");
 
     // Visualize the solution and mesh.
     char title[100];
@@ -429,7 +436,7 @@ int main(int argc, char* argv[])
     sprintf(filename, "outputs/tsln_%f.dat", TIME);
     bool compress = false;   // Gzip compression not used as it only works on Linux.
     sln.save(filename, compress);
-    info("Complete Solution saved to file %s.", filename);
+    info("Solution at time %g saved to file %s.", TIME, filename);
 
     // Copy new reference level solution into sln_prev_time.
     // This starts new time step.
@@ -438,11 +445,9 @@ int main(int argc, char* argv[])
     // Updating time step. Note that TAU might have been reduced during adaptivity.
     TIME += TAU;
 
-    // Restore time step if it was reduced during adaptivity.
-    if (fabs(save_tau - TAU) > 1e-12) {
-      info("Restoring time step from %g to %g.", TAU, save_tau);
-      TAU = save_tau;
-    }
+    // Increase time step.
+    info("Increasing TAU from %g to %g.", TAU, TAU * TIMESTEP_INC);
+    TAU *= TIMESTEP_INC;
   }
 
   // Wait for all views to be closed.
