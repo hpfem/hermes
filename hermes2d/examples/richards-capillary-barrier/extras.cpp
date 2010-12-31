@@ -6,7 +6,8 @@
 using namespace std;
 
 bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                  MatrixSolverType matrix_solver, double PICARD_TOL, int MAX_PICARD_ITER_NUM, bool verbose) 
+                  MatrixSolverType matrix_solver, double picard_tol, 
+                  int picard_max_iter, bool verbose) 
 {
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -34,7 +35,7 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
                  iter_count+1, Space::get_num_dofs(space), rel_error);
 
     // Stopping criterion.
-    if (rel_error < PICARD_TOL) {
+    if (rel_error < picard_tol) {
       sln_prev_iter->copy(&sln_new);
       delete matrix;
       delete rhs;
@@ -42,7 +43,7 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
       return true;
     }
     
-    if (iter_count >= MAX_PICARD_ITER_NUM) {
+    if (iter_count >= picard_max_iter) {
       delete matrix;
       delete rhs;
       delete solver;

@@ -18,7 +18,8 @@ using namespace RefinementSelectors;
 //        C(h) = alpha*(theta_s - theta_r)*exp(alpha*h)    for h < 0,
 //        C(h) = alpha*(theta_s - theta_r)                 for h >= 0.
 //
-//  Picard's linearization: C(h^n)dh^{n+1}/dt - div(K(h^n)grad(h^{n+1})) - (dK/dh(h^n))*(dh^{n+1}/dy) = 0
+//  Picard's linearization: C(h^k)dh^{k+1}/dt - div(K(h^k)grad(h^{k+1})) - (dK/dh(h^k))*(dh^{k+1}/dy) = 0
+//                          Note: the index 'k' does not refer to time stepping.
 //  Newton's method is more involved, see the file forms.cpp.
 //
 //  Domain: rectangle (0, 8) x (0, 6.5).
@@ -28,16 +29,17 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-// If this is defined, use van Genuchten's constitutive relations, otherwise use Gardner's.
-#define CONSTITUTIVE_GENUCHTEN
+// Constitutive relations.
+#define CONSTITUTIVE_GENUCHTEN                    // Van Genuchten or Gardner.
 
-// Select Newton or Picard.
-const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
+// Methods.
+const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.
+const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
+// Elements orders and initial refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refinements towards the top edge.
-const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
 
 // Adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -265,6 +267,7 @@ int main(int argc, char* argv[])
     // Adaptivity loop (in space):
     bool done = false;
     int as = 1;
+    double err_est_rel;
     do
     {
       info("---- Time step %d, simulation time %lf, adaptivity step %d:", ts, TIME, as);
@@ -339,7 +342,7 @@ int main(int argc, char* argv[])
         else {
           info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
           OGProjection::project_global(ref_space, &ref_sln, &sln_prev_iter, matrix_solver);
-          //delete ref_sln.get_mesh();  // Not sure whether we can remove this.
+          //delete ref_sln.get_mesh();
         }
 
         // This puts both sln_prev_iter and sln_prev_iter on the same reference mesh.
@@ -367,20 +370,12 @@ int main(int argc, char* argv[])
       bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                    HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%", 
         Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
-
-      // Add entries to convergence graphs.
-      graph_time_err_est.add_values(ts*TAU, err_est_rel);
-      graph_time_err_est.save("time_error_est.dat");
-      graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
-      graph_time_dof.save("time_dof.dat");
-      graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
-      graph_time_cpu.save("time_cpu.dat");
 
       // If space_err_est too large, adapt the mesh.
       if (err_est_rel < ERR_STOP) done = true;
@@ -399,12 +394,20 @@ int main(int argc, char* argv[])
     }
     while (!done);
 
+    // Add entries to convergence graphs.
+    graph_time_err_est.add_values(ts*TAU, err_est_rel);
+    graph_time_err_est.save("time_error_est.dat");
+    graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
+    graph_time_dof.save("time_dof.dat");
+    graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
+    graph_time_cpu.save("time_cpu.dat");
+
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time level %d", ts);
+    sprintf(title, "Solution, time %g (hours)", ts*TAU*24);
     view.set_title(title);
     view.show(&sln);
-    sprintf(title, "Mesh, time level %d", ts);
+    sprintf(title, "Mesh, time %g (hours)", ts*TAU*24);
     ordview.set_title(title);
     ordview.show(&space);
     

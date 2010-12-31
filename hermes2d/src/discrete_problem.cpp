@@ -1695,7 +1695,7 @@ Space* construct_refined_space(Space* coarse, int order_increase)
 
 // Perform Newton's iteration.
 bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-                  Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose, double damping_coeff)
+                  Vector* rhs, double newton_tol, int newton_max_iter, bool verbose, double damping_coeff)
 {
   int it = 1;
   while (1)
@@ -1718,7 +1718,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 
     // If l2 norm of the residual vector is within tolerance, or the maximum number 
     // of iteration has been reached, then quit.
-    if ((res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) && it > 1) break;
+    if ((res_l2_norm < newton_tol || it > newton_max_iter) && it > 1) break;
 
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix solver failed.\n");
@@ -1729,7 +1729,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
     it++;
   }
 
-  if (it >= NEWTON_MAX_ITER) return false;
+  if (it >= newton_max_iter) return false;
 
   return true;
 }
