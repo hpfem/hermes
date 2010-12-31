@@ -17,6 +17,11 @@
 #define __HERMES_ARRAY_H
 
 #include <vector>
+#include <limits.h>
+
+#ifndef INVALID_IDX
+  #define INVALID_IDX      INT_MAX
+#endif
 
 /// \brief A generic, inflatable array.
 ///
@@ -140,6 +145,71 @@ public:
     unused.push_back(id);
     nitems--;
   }
+
+  // Iterators
+
+  /// Get the first index that is present and is equal to or greater than the passed \c idx.
+  /// Typically used to begin an iteration over all indices present in the array.
+  /// \param[in] idx Optional, default value \c 0 (finds the first present index).
+  /// \return
+  /// 	\li First index present in the array that is equal or greater than the passed \c idx (if found),
+  /// 	\li \c INVALID_IDX (if not found).
+  int first(int idx = 0) {
+    int index = idx;
+    while (get(index).used == false) {
+      index++; 
+      if (index >= nitems) return INVALID_IDX;
+    }
+    return index;
+  }
+
+  /// Get the first index that is present and is greater than the passed \c idx.
+  /// Typically used to continue an iteration over all indices present in the array.
+  /// \param[in] idx Index whose succesor we want to find. Optional, default value \c 0.
+  /// \return
+  /// 	\li First idx present in the array that is greater than the passed \c idx (if found),
+  /// 	\li \c INVALID_IDX (if not found).
+  int next(int idx = 0) {
+    int index = idx + 1;
+    while (get(index).used == false) {
+      index++; 
+      if (index >= nitems) return INVALID_IDX;
+    }
+    return index;
+  }
+
+  /// Get the last index present in the array that is equal to or less than the passed \c idx.
+  /// Typically used to begin a reverse iteration over all indices present in the array.
+  /// \param[in] idx Optional, default value <c>(Word_t) -1</c> (finds the last index present in the array).
+  /// \return
+  ///		\li Last index present in the array that is equal or less than the passed \c idx (if found),
+  /// 	\li \c INVALID_IDX (if not found).
+  int last(int idx = INT_MAX) {
+    int index = idx;
+    if (index > nitems - 1) index = nitems - 1;
+    while (get(index).used == false) {
+      index--; 
+      if (index < 0) return INVALID_IDX;
+    }
+    return index;
+  }
+
+  /// Get the last index present in the array that is less than the passed \c idx.
+  /// Typically used to continue a reverse iteration over all indices present in the array.
+  /// \param[in] idx Index whose predecessor we want to find. Optional, default value <c>(Word_t) -1</c>.
+  /// \return
+  /// 	\li Last index present in the array that is less than the passed \c idx (if found),
+  /// 	\li \c INVALID_IDX (if not found).
+  int prev(int idx = INT_MAX) {
+    int index = idx - 1;
+    if (index > nitems - 1) index = nitems - 1;
+    while (get(index).used == false) {
+      index--; 
+      if (index < 0) return INVALID_IDX;
+    }
+    return index;
+  }
+
 
   /// Cleans the array and reserves space for up to 'size' items.
   /// This is a special-purpose function, used for loading the array
