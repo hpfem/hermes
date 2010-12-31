@@ -48,8 +48,7 @@ Defining initial condition
 This example uses a constant initial guess::
 
     // Initialize previous iteration solution for the Picard method.
-    sln_prev = new Solution();
-    sln_prev->set_const(&mesh, INIT_COND_CONST);
+    sln_prev_iter.set_const(&mesh, INIT_COND_CONST);
 
 
 Weak forms
@@ -62,9 +61,9 @@ The weak forms are as the user expects::
     Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
-      Func<Scalar>* u_prev = ext->fn[0];
+      Func<Scalar>* u_prev_iter = ext->fn[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (lam(u_prev->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+        result += wt[i] * (lam(u_prev_iter->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
 
       return result;
     }
@@ -74,16 +73,16 @@ The weak forms are as the user expects::
     Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
-      Func<Scalar>* u_prev = u_ext[0];
+      Func<Scalar>* u_prev_iter = u_ext[0];
       for (int i = 0; i < n; i++) result += wt[i] * rhs(e->x[i], e->y[i]) * v->val[i];
       return result;
     }
 
-Notice that the solution $u$ is accessed through
+Notice that the previous iteration level solution is accessed through
 
 ::
 
-    Func<Scalar>* u_prev = ext->fn[0];
+    Func<Scalar>* u_prev_iter = ext->fn[0];
 
 **Do not** use the variable u_ext[] which is not initialized for linear problems.
 
@@ -95,56 +94,67 @@ being an external function::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY, sln_prev);
+    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY, &sln_prev_iter);
     wf.add_vector_form(callback(res), HERMES_ANY);
-
-Initializing a linear DiscreteProblem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The Picard's method deals with a linear problem, therefore the DiscreteProblem 
-class is initialized with is_linear = true::
-
-    // Initialize the FE problem.
-    bool is_linear = true;
-    DiscreteProblem dp(&wf, &space, is_linear);
 
 Picard's iteration loop
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The iteration loop is straightforward::
+The Picard's iteration is performed simply as::
 
-    // Picard's iteration.
-    double rel_err;
+    // Perform the Picard's iteration.
+    bool verbose = true;
+    solve_picard(&wf, &space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
+	         PICARD_MAX_ITER, verbose);
+
+This command replaces the following code which can be found in the file 
+.../hermes2d/src/discrete_problem.cpp::
+
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Initialize the FE problem.
+    bool is_linear = true;
+    DiscreteProblem dp(wf, space, is_linear);
+
     int iter_count = 0;
     while (true) {
       // Assemble the stiffness matrix and right-hand side.
-      info("Assembling the stiffness matrix and right-hand side vector.");
       dp.assemble(matrix, rhs);
 
       // Solve the linear system and if successful, obtain the solution.
-      info("Solving the matrix problem.");
-      if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+      Solution sln_new;
+      if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), space, &sln_new);
       else error ("Matrix solver failed.\n");
 
-      double rel_error = calc_abs_error(sln_prev, &sln, HERMES_H1_NORM) / calc_norm(&sln, HERMES_H1_NORM) * 100;
-      info("Relative error: %g%%", rel_error);
+      double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM) 
+                         / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
+      if (verbose) info("---- Picard iter %d, ndof %d, rel. error %g%%", 
+                   iter_count+1, Space::get_num_dofs(space), rel_error);
 
       // Stopping criterion.
-      if (rel_error < PICARD_TOL || iter_count >= MAX_PICARD_ITER_NUM) break;
-
+      if (rel_error < PICARD_TOL) {
+        sln_prev_iter->copy(&sln_new);
+        delete matrix;
+        delete rhs;
+        delete solver;
+        return true;
+      }
+    
+      if (iter_count >= PICARD_MAX_ITER) {
+        delete matrix;
+        delete rhs;
+        delete solver;
+        return false;
+      }
+    
       // Saving solution for the next iteration;
-      sln_prev->copy(&sln);
+      sln_prev_iter->copy(&sln_new);
    
       iter_count++;
     }
-
-As a last step, we clean up as usual::
-
-    // Cleanup.
-    delete [] coeff_vec;
-    delete matrix;
-    delete rhs;
-    delete solver;
 
 Sample results
 ~~~~~~~~~~~~~~

@@ -5,58 +5,6 @@
 #include <fstream>
 using namespace std;
 
-bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                  MatrixSolverType matrix_solver, double picard_tol, 
-                  int picard_max_iter, bool verbose) 
-{
-  // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-  Solution sln_new;
-
-  // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(wf, space, is_linear);
-
-  int iter_count = 0;
-  while (true) {
-    // Assemble the stiffness matrix and right-hand side.
-    dp.assemble(matrix, rhs);
-
-    // Solve the linear system and if successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), space, &sln_new);
-    else error ("Matrix solver failed.\n");
-
-    double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM) 
-                       / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
-    if (verbose) info("---- Picard iter %d, ndof %d, rel. error %g%%", 
-                 iter_count+1, Space::get_num_dofs(space), rel_error);
-
-    // Stopping criterion.
-    if (rel_error < picard_tol) {
-      sln_prev_iter->copy(&sln_new);
-      delete matrix;
-      delete rhs;
-      delete solver;
-      return true;
-    }
-    
-    if (iter_count >= picard_max_iter) {
-      delete matrix;
-      delete rhs;
-      delete solver;
-      return false;
-    }
-    
-    // Saving solution for the next iteration;
-    sln_prev_iter->copy(&sln_new);
-   
-    iter_count++;
-  }
-}
-
 // Look for a file with precalculated constitutive relations. 
 // If found, read it. If not, create it. 
 bool get_constitutive_tables(const char* tables_filename, int method)

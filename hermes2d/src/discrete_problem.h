@@ -254,4 +254,7 @@ HERMES_API double get_l2_norm(Vector* vec);
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
 			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false, double damping_coeff = 1.0);
 
+HERMES_API bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
+                             MatrixSolverType matrix_solver, double picard_tol, 
+			     int picard_max_iter, bool verbose);
 #endif
