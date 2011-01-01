@@ -37,7 +37,7 @@ add_subdirectory(schroedinger-quantum-billiard)
 
 # Richards
 add_subdirectory(richards)
-add_subdirectory(richards-capillary-barrier)
+add_subdirectory(richards-capillary-barrier-adapt)
 add_subdirectory(richards-seepage-adapt)
 add_subdirectory(richards-tracy-adapt)
 

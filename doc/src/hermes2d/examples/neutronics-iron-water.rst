@@ -1,7 +1,7 @@
 Iron-Water (Neutronics)
 -----------------------
 
-**Git reference:** Example `iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/iron-water>`_.
+**Git reference:** Example `neutronics-iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics-iron-water>`_.
 
 This example is very similar to the example "saphir", the main difference being that 
 it reads a mesh file in the exodusii format (created by Cubit). This example only builds 
