@@ -257,6 +257,9 @@ int main(int argc, char* argv[])
   OrderView ordview("Initial mesh", new WinGeom(640, 0, 600, 350));
   view.show(&sln_prev_time);
   ordview.show(&space);
+  //MeshView mview("Mesh", new WinGeom(840, 0, 600, 350));
+  //mview.show(&mesh);
+  //View::wait();
 
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
@@ -270,8 +273,9 @@ int main(int argc, char* argv[])
     // Periodic global derefinements.
     if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
-      mesh.copy(&basemesh);
-      space.set_uniform_order(P_INIT);
+      //mesh.copy(&basemesh);            // Brings the mesh back to the basemesh.
+      mesh.unrefine_all_elements();      // Shaves off one layer of refinement for all elements.
+      space.set_uniform_order(P_INIT);   // Resets poly degree to the initial one.
     }
 
     // Spatial adaptivity loop. Note: sln_prev_time must not be touched during adaptivity.
@@ -286,6 +290,12 @@ int main(int argc, char* argv[])
       // and setup reference space.
       Space* ref_space = construct_refined_space(&space);
       ndof = Space::get_num_dofs(ref_space);
+
+      // debug 
+      //BaseView bview("FE basis", new WinGeom(0, 360, 600, 350));
+      //H1Space *temp = (H1Space*)space.dup(&mesh);
+      //temp->copy_orders((Space*)&space, 0);
+      //bview.show(temp);
 
       // Next we need to calculate the reference solution.
       // Newton's method:
@@ -315,7 +325,7 @@ int main(int argc, char* argv[])
         // Perform Newton's iteration on the reference mesh. If necessary, 
         // reduce time step to make it converge, but then restore time step 
         // size to its original value.
-        info("Performing Newton's iteration (tau = %g):", TAU);
+        info("Performing Newton's iteration (tau = %g days):", TAU);
         bool success, verbose = true;
         double* save_coeff_vec = new double[ndof];
         // Save coefficient vector.
@@ -326,7 +336,7 @@ int main(int argc, char* argv[])
           // Restore solution from the beginning of time step.
           for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
           // Reducing time step to 50%.
-          info("Reducing time step size from %g to %g for the rest of this time step.", 
+          info("Reducing time step size from %g to %g days for the rest of this time step.", 
                TAU, TAU * TIMESTEP_DEC);
           TAU *= TIMESTEP_DEC;
           // If TAU less than the prescribed minimum, stop.
@@ -359,14 +369,14 @@ int main(int argc, char* argv[])
         // Perform Picard iteration on the reference mesh. If necessary, 
         // reduce time step to make it converge, but then restore time step 
         // size to its original value.
-        info("Performing Picard's iteration (tau = %g):", TAU);
+        info("Performing Picard's iteration (tau = %g days):", TAU);
         bool success, verbose = true;
         while(!solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                             PICARD_MAX_ITER, verbose)) {
           // Restore solution from the beginning of time step.
           sln_prev_iter.copy(&sln_prev_time);
           // Reducing time step to 50%.
-          info("Reducing time step size from %g to %g for the rest of this time step", TAU, TAU * TIMESTEP_DEC);
+          info("Reducing time step size from %g to %g days for the rest of this time step", TAU, TAU * TIMESTEP_DEC);
           TAU *= TIMESTEP_DEC;
           // If TAU less than the prescribed minimum, stop.
           if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
@@ -424,10 +434,10 @@ int main(int argc, char* argv[])
 
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time %g (days)", TIME);
+    sprintf(title, "Solution, time %g days", TIME);
     view.set_title(title);
     view.show(&sln);
-    sprintf(title, "Mesh, time %g (days)", TIME);
+    sprintf(title, "Mesh, time %g days", TIME);
     ordview.set_title(title);
     ordview.show(&space);
     
@@ -446,7 +456,7 @@ int main(int argc, char* argv[])
     TIME += TAU;
 
     // Increase time step.
-    info("Increasing TAU from %g to %g.", TAU, TAU * TIMESTEP_INC);
+    info("Increasing time step from %g to %g days.", TAU, TAU * TIMESTEP_INC);
     TAU *= TIMESTEP_INC;
   }
 
