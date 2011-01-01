@@ -1,26 +1,37 @@
 find_package(JUDY REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
 
-# examples
-add_subdirectory(bracket)
-add_subdirectory(crack)
-add_subdirectory(iron-water)
-add_subdirectory(saphir)
+# elasticity
+add_subdirectory(elasticity-bracket)
+add_subdirectory(elasticity-crack)
+
+# thermoelasticity
 add_subdirectory(thermoelasticity)
-add_subdirectory(waveguide)
+
+# maxwell
+add_subdirectory(maxwell-waveguide)
 add_subdirectory(linear-advection-diffusion)
 add_subdirectory(singular-perturbation)
 add_subdirectory(optimal-meshes)
+
+# neutronics
+add_subdirectory(neutronics-iron-water)
+add_subdirectory(neutronics-saphir)
 add_subdirectory(neutronics-4-group)
 add_subdirectory(neutronics-4-group-adapt)
 
-# timedep adapt examples
-add_subdirectory(newton-np-timedep-adapt-system)
-add_subdirectory(ns-bearing)
-add_subdirectory(ns-timedep-adapt)
-add_subdirectory(ns-two-phase)
-add_subdirectory(quantum-billiard)
+# nernst-planck
+add_subdirectory(nernst-planck-timedep-adapt)
+
+# navier-stokes
+add_subdirectory(navier-stokes-bearing)
+add_subdirectory(navier-stokes-timedep-adapt)
+add_subdirectory(navier-stokes-two-phase)
+
+# schroedinger
+add_subdirectory(schroedinger-quantum-billiard)
+
+# richards
 add_subdirectory(richards)
 add_subdirectory(richards-tracy-adapt)
 add_subdirectory(richards-seepage-adapt)
-#add_subdirectory(newton-np-timedep-adapt-system/nonadaptive)
