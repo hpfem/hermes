@@ -2,19 +2,21 @@
 #include "hermes2d.h"
 #include <stdio.h>
 
-//  This example solves the Schroedinger eigenproblem with a given potential V(x, y)
-//  in a square with zero boundary conditions. Python and Pysparse must be installed. 
+//  This example shows how one can perform adaptivity to a selected eigenfunction
+//  without calling the eigensolver again in each adaptivity step. The eigensolver 
+//  is only called once at the beginning. 
 //
 //  PDE: -Laplace u + V*u = lambda_k u,
 //  where lambda_0, lambda_1, ... are the eigenvalues.
 //
-//  Domain: Square (-1, 1)^2.
+//  Domain: Square (-pi/2, pi/2)^2.
 //
 //  BC:  Homogeneous Dirichlet.
 //
 //  The following parameters can be changed:
 
-int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalues.
+int EIGENFUNCTION_INDEX = 2;                      // Desired eigenfunction: 1 for the first, 2 for the second, etc.
+
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
@@ -71,7 +73,7 @@ void write_matrix_mm(const char* filename, Matrix* mat)
 
 int main(int argc, char* argv[])
 {
-  info("Desired number of eigenvalues: %d.", NUMBER_OF_EIGENVALUES);
+  info("Desired eigenfunction to calculate: %d.", EIGENFUNCTION_INDEX);
 
   // Load the mesh.
   Mesh mesh;
@@ -80,15 +82,6 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-
-  // Refine the mesh to vertex #4 (intended for use with INIT_REF_NUM = 1).
-  mesh.refine_towards_vertex(8, 3);
-
-  // debug
-  //MeshView mv("", new WinGeom(0, 0, 400, 400));
-  //mv.show(&mesh);
-  //View::wait(HERMES_WAIT_KEYPRESS);
-
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -130,17 +123,15 @@ int main(int argc, char* argv[])
   info("Calling Pysparse...");
   char call_cmd[255];
   sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	  TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
+	  TARGET_VALUE, EIGENFUNCTION_INDEX, TOL, MAX_ITER);
   system(call_cmd);
   info("Pysparse finished.");
 
   // Initializing solution vector, solution and ScalarView.
   double* coeff_vec = new double[ndof];
-  Solution sln;
-  ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
   // Reading solution vectors from file and visualizing.
-  double* eigenval =new double[NUMBER_OF_EIGENVALUES];
+  double* eigenval =new double[EIGENFUNCTION_INDEX];
   FILE *file = fopen("eivecs.dat", "r");
   char line [64];                  // Maximum line size.
   fgets(line, sizeof line, file);  // ndof
@@ -148,7 +139,7 @@ int main(int argc, char* argv[])
   if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
   fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
   int neig = atoi(line);
-  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+  if (neig != EIGENFUNCTION_INDEX) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
     // Get next eigenvalue from the file
     fgets(line, sizeof line, file);  // eigenval
@@ -159,19 +150,31 @@ int main(int argc, char* argv[])
       coeff_vec[i] = atof(line);
     }
 
-    // Convert coefficient vector into a Solution.
-    Solution::vector_to_solution(coeff_vec, &space, &sln);
-
-    // Visualize the solution.
-    char title[100];
-    sprintf(title, "Solution %d, val = %g", ieig, eigenval[ieig]);
-    view.set_title(title);
-    view.show(&sln);
-
-    // Wait for keypress.
-    View::wait(HERMES_WAIT_KEYPRESS);
   }  
   fclose(file);
+
+  // Convert coefficient vector into a Solution.
+  Solution sln;
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
+
+  // Visualize the solution.
+  ScalarView sview("", new WinGeom(0, 0, 440, 350));
+  char title[100];
+  sprintf(title, "Eigenfunction no. %d, val = %g", neig, eigenval[neig-1]);
+  sview.set_title(title);
+  sview.show(&sln);
+  OrderView oview("Mesh", new WinGeom(450, 0, 410, 350));
+  oview.show(&space);
+
+
+  // Wait for keypress.
+  View::wait(HERMES_WAIT_KEYPRESS);
+
+
+
+
+
+
 
   delete [] coeff_vec;
 
