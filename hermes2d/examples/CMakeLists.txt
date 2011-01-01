@@ -43,6 +43,7 @@ add_subdirectory(richards-tracy-adapt)
 
 # Eigenproblems
 add_subdirectory(eigen-schroedinger)
+add_subdirectory(eigen-schroedinger-adapt)
 
 # Miscellaneous
 add_subdirectory(singular-perturbation)
