@@ -210,6 +210,11 @@ public:
     return index;
   }
 
+  /// Checks whether an element exists at position idx.
+  bool exists(int idx) {
+    if (get(idx).used == true) return true;
+    else return false;
+  }
 
   /// Cleans the array and reserves space for up to 'size' items.
   /// This is a special-purpose function, used for loading the array

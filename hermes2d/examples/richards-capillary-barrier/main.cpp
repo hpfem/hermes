@@ -35,10 +35,10 @@ const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
 // Adaptive time stepping.
-double TAU = 5.0;                                 // Time step (in days).
+double TAU = 1.0;                                 // Time step (in days).
 double TIMESTEP_DEC = 0.5;                        // Timestep decrease ratio after unsuccessful nonlinear solve.
 double TIMESTEP_INC = 1.1;                        // Timestep increase ratio after successful nonlinear solve.
-double TAU_MIN = 0.01;                            // Computation will stop if time step drops below this value.
+double TAU_MIN = 0.001;                           // Computation will stop if time step drops below this value.
 
 // Elements orders and initial refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
