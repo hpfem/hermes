@@ -44,11 +44,11 @@ Known exact solution for mode 2:
 
 .. math::
 
-  u(x, y) =  \frac{1}{2G} r^{\lambda}[(k - Q(\lambda + 1))sin(\lambda \theta) - \lambda sin((\lambda - 2) \theta)].
+    u(x, y) =  \frac{1}{2G} r^{\lambda}[(k - Q(\lambda + 1))sin(\lambda \theta) - \lambda sin((\lambda - 2) \theta)].
 
 .. math::
 
-  v(x, y) = -\frac{1}{2G} r^{\lambda}[(k + Q(\lambda + 1))cos(\lambda \theta) + \lambda cos((\lambda - 2) \theta)].
+    v(x, y) = -\frac{1}{2G} r^{\lambda}[(k + Q(\lambda + 1))cos(\lambda \theta) + \lambda cos((\lambda - 2) \theta)].
 
 here \lambda = 0.9085291898461, Q = -0.2189232362488.
 Both in mode 1 and mode 2, $k = 3 - 4 \nu$, $G = E / (2(1 + \nu))$.

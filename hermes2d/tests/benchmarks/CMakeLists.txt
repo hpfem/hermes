@@ -17,6 +17,7 @@ add_subdirectory(nonsym-check)
 # Tests for NIST benchmarks
 add_subdirectory(nist-01)
 add_subdirectory(nist-02)
+add_subdirectory(nist-03)
 add_subdirectory(nist-04)
 add_subdirectory(nist-05)
 add_subdirectory(nist-06)
