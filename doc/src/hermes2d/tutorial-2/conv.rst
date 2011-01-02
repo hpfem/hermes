@@ -95,9 +95,9 @@ This is shown in the figure below.
 In problems with extremely strong singularities the difference between the 
 exact and estimated error can be significant. This is illustrated in the 
 following graph that belongs to the benchmark 
-`kellogg <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks/kellogg.html>`_.
+`nist-11 <http://hpfem.org/hermes/doc/src/hermes2d/nist/nist-11.html>`_.
 
- .. image:: ../benchmarks/benchmark-kellogg/kellogg-conv.png
+ .. image:: ../nist/nist-11/kellogg-conv.png
    :align: center
    :width: 600
    :height: 450
