@@ -76,14 +76,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double E = 1.0;                             // Young modulus.
 const double nu = 0.3;                            // Poisson ratio.
-const double k = 3 - 4 * nu;
-const double G = E / (2.0 * (1 + nu));
-//const double lambda = 0.5444837367825;            // Mode 1.
+const double k = 3.0 - 4.0 * nu;
+const double G = E / (2.0 * (1.0 + nu));
+const double lambda = 0.5444837367825;            // Mode 1.
 const double Q = 0.5430755788367;
 
 // TEMPORARY: if forms.cpp.bracket is used:
-const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
-const double mu = E / (2*(1 + nu));
+//const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
+//const double mu = E / (2*(1 + nu));
 
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
@@ -134,9 +134,10 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
   wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
   wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
+  //wf.add_vector_form(0, linear_form_u, linear_form_0_ord, HERMES_SYM);
+  //wf.add_vector_form(1, linear_form_v, linear_form_1_ord, HERMES_SYM);
 
-  Solution u_sln, v_sln;
-  Solution u_ref_sln, v_ref_sln;
+  Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
 
   // Initialize exact solutions.
   ExactSolution u_exact(&u_mesh, u_fndd);
@@ -146,12 +147,21 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 440, 350));
-  s_view_0.show_mesh(false);
-  OrderView  o_view_0("Mesh[0]", new WinGeom(450, 0, 420, 350));
-  ScalarView s_view_1("Solution[1]", new WinGeom(880, 0, 440, 350));
-  s_view_1.show_mesh(false);
-  OrderView  o_view_1("Mesh[1]", new WinGeom(1330, 0, 420, 350));
+  ScalarView s_view_u("Solution for u", new WinGeom(0, 0, 440, 350));
+  s_view_u.show_mesh(false);
+  OrderView  o_view_u("Mesh for u", new WinGeom(450, 0, 420, 350));
+
+  ScalarView s_view_v("Solution for v", new WinGeom(880, 0, 440, 350));
+  s_view_v.show_mesh(false);
+  OrderView  o_view_v("Mesh for v", new WinGeom(1330, 0, 420, 350));
+
+  /*  
+  ScalarView sview_u_exact("", new WinGeom(550, 0, 500, 400));
+  sview_u_exact.fix_scale_width(50);
+  ScalarView sview_v_exact("", new WinGeom(550, 500, 500, 400));
+  sview_v_exact.fix_scale_width(50);
+  char title[100];
+  */
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
@@ -170,6 +180,7 @@ int main(int argc, char* argv[])
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
@@ -195,19 +206,30 @@ int main(int argc, char* argv[])
                                  Hermes::Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
-    s_view_0.show(&u_sln); 
-    o_view_0.show(&u_space);
-    s_view_1.show(&v_sln); 
-    o_view_1.show(&v_space);
+    s_view_u.show(&u_sln); 
+    o_view_u.show(&u_space);
+    s_view_v.show(&v_sln); 
+    o_view_v.show(&v_space);
+
+    /*
+    // Exact solution for comparison with computational results.
+    u_exact.update(&u_mesh, u_fndd);
+    v_exact.update(&v_mesh, v_fndd);
+
+    // Show exact solution.
+    sview_u_exact.show(&u_exact);
+    sprintf(title, "Exact solution for u.");
+    sview_u_exact.set_title(title);
+    
+    sview_v_exact.show(&v_exact);
+    sprintf(title, "Exact solution for v.");
+    sview_v_exact.set_title(title);
+    */
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), 
                                   Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
-    adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
-    adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
-    adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
-    adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
     
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
@@ -215,7 +237,6 @@ int main(int argc, char* argv[])
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
                                Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
                                HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
-
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::Tuple<double> err_exact_rel;
@@ -228,15 +249,15 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Report results.
-    info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
+    info("ndof_coarse[u]: %d, ndof_fine[u]: %d",
          u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
 
-    info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
+    info("err_est_rel[u]: %g%%, err_exact_rel[u]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
 
-    info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
+    info("ndof_coarse[v]: %d, ndof_fine[v]: %d",
          v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
 
-    info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
+    info("err_est_rel[v]: %g%%, err_exact_rel[v]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
 
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
