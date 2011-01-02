@@ -15,7 +15,7 @@
 //
 //  The following parameters can be changed:
 
-int EIGENFUNCTION_INDEX = 2;                      // Desired eigenfunction: 1 for the first, 2 for the second, etc.
+int TARGET_EIGENFUNCTION = 1;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
@@ -86,7 +86,7 @@ void normalize(UMFPackMatrix* mat, double* vec, int length)
 
 int main(int argc, char* argv[])
 {
-  info("Desired eigenfunction to calculate: %d.", EIGENFUNCTION_INDEX);
+  info("Desired eigenfunction to calculate: %d.", TARGET_EIGENFUNCTION);
 
   // Load the mesh.
   Mesh mesh;
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   info("Calling Pysparse...");
   char call_cmd[255];
   sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	  TARGET_VALUE, EIGENFUNCTION_INDEX, TOL, MAX_ITER);
+	  TARGET_VALUE, TARGET_EIGENFUNCTION, TOL, MAX_ITER);
   system(call_cmd);
   info("Pysparse finished.");
 
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
   double* coeff_vec = new double[ndof];
 
   // Reading solution vectors from file and visualizing.
-  double* eigenval =new double[EIGENFUNCTION_INDEX];
+  double* eigenval =new double[TARGET_EIGENFUNCTION];
   FILE *file = fopen("eivecs.dat", "r");
   char line [64];                  // Maximum line size.
   fgets(line, sizeof line, file);  // ndof
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
   fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
   int neig = atoi(line);
-  if (neig != EIGENFUNCTION_INDEX) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+  if (neig != TARGET_EIGENFUNCTION) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
     // Get next eigenvalue from the file
     fgets(line, sizeof line, file);  // eigenval
@@ -172,6 +172,7 @@ int main(int argc, char* argv[])
   // Convert coefficient vector into a Solution.
   Solution sln;
   double lambda = eigenval[neig-1];
+  info("Eigenvalue (coarse mesh): %g", lambda);
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Visualize the solution.
@@ -182,6 +183,9 @@ int main(int argc, char* argv[])
   sview.show(&sln);
   OrderView oview("Mesh", new WinGeom(450, 0, 410, 350));
   oview.show(&space);
+
+  // Wait for keypress.
+  View::wait(HERMES_WAIT_KEYPRESS);
 
   /*** Begin adaptivity ***/
 
@@ -304,8 +308,6 @@ int main(int argc, char* argv[])
   UMFPackMatrix* new_matrix = new UMFPackMatrix();
   new_matrix->create(new_size, new_nnz, new_Ap, new_Ai, new_Ax);
 
-
-
   // Create the residual vector.
   // Multiply S times Y.
   double* residual_1 = new double[ndof_ref];
@@ -334,11 +336,7 @@ int main(int argc, char* argv[])
   // Update the eigenfunction and eigenvalue.
   for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] += increment[i];
   lambda += increment[ndof_ref];
-  info("Updated eigenvalue: %g", lambda);
-  
-  // Wait for keypress.
-  View::wait(HERMES_WAIT_KEYPRESS);
-
+  info("Eigenvalue (fine mesh): %g", lambda);
 
   // Show updated eigenfunction on the reference mesh.
   Solution* ref_sln = new Solution();
@@ -357,6 +355,27 @@ int main(int argc, char* argv[])
 
   // Wait for keypress.
   View::wait(HERMES_WAIT_KEYPRESS);
+
+
+
+  // Visualize the increment.
+  DiffFilter increm(Hermes::Tuple<MeshFunction*>(&sln, ref_sln));
+  sprintf(title, "Newton's increment");
+  sview.set_title(title);
+  sview.show(&increm);
+
+
+
+
+
+  // Wait for keypress.
+  View::wait(HERMES_WAIT_KEYPRESS);
+
+
+
+
+
+
 
   // Cleaning up.
   delete [] coeff_vec;
