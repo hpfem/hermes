@@ -92,12 +92,10 @@ int PICARD_MAX_ITER = 10;                         // Maximum allowed number of P
 // Times.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
-const double PULS_END_TIME = 1000.0 ;             // time interval of the top layer infiltration
+const double PULSE_END_TIME = 1000.0 ;            // Time interval of the top layer infiltration.
 double TIME = TAU;                                // Global time variable initialized with first time step.
 
-
 // Problem parameters.
-const char* TABLES_FILENAME = "tables.txt";       // Filename for constitutive tables.
 double H_INIT = -50.0;                            // Initial pressure head.
 double H_ELEVATION = 10.0;
 const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64}; 
@@ -157,7 +155,7 @@ scalar essential_bc_values(double x, double y, double time)
 {
   if (time < STARTUP_TIME)
     return H_INIT + time/STARTUP_TIME*(H_ELEVATION-H_INIT);
-  else if (time > PULS_END_TIME)
+  else if (time > PULSE_END_TIME)
     return H_INIT;
   else
     return H_ELEVATION;
@@ -185,7 +183,7 @@ int main(int argc, char* argv[])
 
   // Either use exact constitutive relations (slow) or precalculate 
   // their polynomial approximations (faster).
-  CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
+  CONSTITUTIVE_TABLES_READY = get_constitutive_tables(ITERATIVE_METHOD);
 
   // Time measurement.
   TimePeriod cpu_time;

@@ -1,8 +1,9 @@
-// this function uses Horner scheme to efficiently evaluate values of polynomials in  approximating K(h) function close to full saturation
+// This function uses Horner scheme to efficiently evaluate values of 
+// polynomials in approximating K(h) function close to full saturation.
 double horner(double *pol, double x, int n){
   double px=0.0;
   for (int i=0; i<n; i++){
-    px = px*x + pol[n-1-i] ;
+    px = px*x + pol[n-1-i];
   }
   return px;
 }
@@ -18,25 +19,25 @@ double K(double h, int layer)
   else
   {
     if (USE_CONSTITUTIVE_TABLE < 0 || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT)  {
-      ALPHA = ALPHA_vals[layer] ;
-      N = N_vals[layer] ;
-      M = M_vals[layer] ;
-      K_S = K_S_vals[layer] ;
-      THETA_R = THETA_R_vals[layer] ;
-      THETA_S = THETA_S_vals[layer] ;
-      STORATIVITY = STORATIVITY_vals[layer] ;
+      ALPHA = ALPHA_vals[layer];
+      N = N_vals[layer];
+      M = M_vals[layer];
+      K_S = K_S_vals[layer];
+      THETA_R = THETA_R_vals[layer];
+      THETA_S = THETA_S_vals[layer];
+      STORATIVITY = STORATIVITY_vals[layer];
       if (h < 0) return 
 	  K_S*(pow(1 - pow(-(ALPHA*h),M*N)/
 	  pow(1 + pow(-(ALPHA*h),N),M),2)/
-      pow(1 + pow(-(ALPHA*h),N),M/2.)) ;
+      pow(1 + pow(-(ALPHA*h),N),M/2.));
       else return K_S;    
     }
     else if (h<0) {
       location = -int(h/TABLE_PRECISION) ;
-      value = (K_TABLE[layer][location+1] - K_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+K_TABLE[layer][location] ;
-      return value ;
+      value = (K_TABLE[layer][location+1] - K_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+K_TABLE[layer][location];
+      return value;
     }
-    else return K_S_vals[layer] ;
+    else return K_S_vals[layer];
   }
 }
 
@@ -52,25 +53,25 @@ double dKdh(double h, int layer)
   else
   {
     if (!USE_CONSTITUTIVE_TABLE || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT)  {
-      ALPHA = ALPHA_vals[layer] ;
-      N = N_vals[layer] ;
-      M = M_vals[layer] ;
-      K_S = K_S_vals[layer] ;
-      THETA_R = THETA_R_vals[layer] ;
-      THETA_S = THETA_S_vals[layer] ;
-      STORATIVITY = STORATIVITY_vals[layer] ;
+      ALPHA = ALPHA_vals[layer];
+      N = N_vals[layer];
+      M = M_vals[layer];
+      K_S = K_S_vals[layer];
+      THETA_R = THETA_R_vals[layer];
+      THETA_S = THETA_S_vals[layer];
+      STORATIVITY = STORATIVITY_vals[layer];
       if (h < 0) return 
-	  K_S*((ALPHA*pow(-(ALPHA*h),-1 + N)*
-	  pow(1 + pow(-(ALPHA*h),N),-1 - M/2.)*
-	  pow(1 - pow(-(ALPHA*h),M*N)/
-	  pow(1 + pow(-(ALPHA*h),N),M),2)*M*N)/2. + 
-	  (2*(1 - pow(-(ALPHA*h),M*N)/
-	  pow(1 + pow(-(ALPHA*h),N),M))*
-	  (-(ALPHA*pow(-(ALPHA*h),-1 + N + M*N)*
-	  pow(1 + pow(-(ALPHA*h),N),-1 - M)*M*N) + 
-	  (ALPHA*pow(-(ALPHA*h),-1 + M*N)*M*N)/
-	  pow(1 + pow(-(ALPHA*h),N),M)))/
-	  pow(1 + pow(-(ALPHA*h),N),M/2.));
+	  K_S*((ALPHA*pow(-(ALPHA*h), -1 + N)*
+	  pow(1 + pow(-(ALPHA*h), N), -1 - M/2.)*
+	  pow(1 - pow(-(ALPHA*h), M*N)/
+	  pow(1 + pow(-(ALPHA*h), N), M), 2)*M*N)/2. + 
+	  (2*(1 - pow(-(ALPHA*h), M*N)/
+	  pow(1 + pow(-(ALPHA*h), N), M))*
+	  (-(ALPHA*pow(-(ALPHA*h), -1 + N + M*N)*
+	  pow(1 + pow(-(ALPHA*h), N), -1 - M)*M*N) + 
+	  (ALPHA*pow(-(ALPHA*h), -1 + M*N)*M*N)/
+	  pow(1 + pow(-(ALPHA*h), N), M)))/
+	  pow(1 + pow(-(ALPHA*h), N), M/2.));
       else return 0;
     }
     else if (h < 0) {
@@ -95,14 +96,14 @@ double ddKdhh(double h, int layer)
   }
   else
   {
-    if (!USE_CONSTITUTIVE_TABLE || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT)  {
-      ALPHA = ALPHA_vals[layer] ;
-      N = N_vals[layer] ;
-      M = M_vals[layer] ;
-      K_S = K_S_vals[layer] ;
-      THETA_R = THETA_R_vals[layer] ;
-      THETA_S = THETA_S_vals[layer] ;
-      STORATIVITY = STORATIVITY_vals[layer] ;
+    if (!USE_CONSTITUTIVE_TABLE || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT) {
+      ALPHA = ALPHA_vals[layer];
+      N = N_vals[layer];
+      M = M_vals[layer];
+      K_S = K_S_vals[layer];
+      THETA_R = THETA_R_vals[layer];
+      THETA_S = THETA_S_vals[layer];
+      STORATIVITY = STORATIVITY_vals[layer];
 
       if (h  < 0 ) return 
 	    K_S*( -(pow(ALPHA,2)*pow(-(ALPHA*h),-2 + N)*
@@ -138,13 +139,14 @@ double ddKdhh(double h, int layer)
 	    pow(1 + pow(-(ALPHA*h),N),M) + 
 	    pow(ALPHA,2)*pow(-(ALPHA*h),-2 + N + M*N)*
 	    pow(1 + pow(-(ALPHA*h),N),-1 - M)*M*N*
-	    (-1 + N + M*N)))/pow(1 + pow(-(ALPHA*h),N),M/2.)) ;
+	    (-1 + N + M*N)))/pow(1 + pow(-(ALPHA*h),N),M/2.));
 
       else return 0;
     }
     else if (h < 0) {
       location = -int(h/TABLE_PRECISION) ;
-      value = (ddKdhh_TABLE[layer][location+1] - ddKdhh_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+ddKdhh_TABLE[layer][location] ;
+      value = (ddKdhh_TABLE[layer][location+1] - 
+              ddKdhh_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+ddKdhh_TABLE[layer][location];
       return value ;
     }
     else return 0 ;
@@ -158,13 +160,13 @@ double C(double h, int layer)
   double value ;
   
   if (!USE_CONSTITUTIVE_TABLE || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT)  {
-    ALPHA = ALPHA_vals[layer] ;
-    N = N_vals[layer] ;
-    M = M_vals[layer] ;
-    K_S = K_S_vals[layer] ;
-    THETA_R = THETA_R_vals[layer] ;
-    THETA_S = THETA_S_vals[layer] ;
-    STORATIVITY = STORATIVITY_vals[layer] ;
+    ALPHA = ALPHA_vals[layer];
+    N = N_vals[layer];
+    M = M_vals[layer];
+    K_S = K_S_vals[layer];
+    THETA_R = THETA_R_vals[layer];
+    THETA_S = THETA_S_vals[layer];
+    STORATIVITY = STORATIVITY_vals[layer];
     if (h < 0) return 
     ALPHA*pow(-(ALPHA*h),-1 + N)*
       pow(1 + pow(-(ALPHA*h),N),-1 - M)*M*N*(THETA_S - THETA_R) + 
@@ -173,11 +175,11 @@ double C(double h, int layer)
     else return STORATIVITY; 
   }
   else if (h<0) {
-    location = -int(h/TABLE_PRECISION) ;
-    value = (C_TABLE[layer][location+1] - C_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+C_TABLE[layer][location] ;
-    return value ;
+    location = -int(h/TABLE_PRECISION);
+    value = (C_TABLE[layer][location+1] - C_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+C_TABLE[layer][location];
+    return value;
   }
-  else return STORATIVITY_vals[layer] ;
+  else return STORATIVITY_vals[layer];
 }
 
 // dC/dh (van Genuchten).
@@ -186,14 +188,14 @@ double dCdh(double h, int layer)
   int location ;
   double value ;
     
-  if (!USE_CONSTITUTIVE_TABLE || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT)  {
-    ALPHA = ALPHA_vals[layer] ;
-    N = N_vals[layer] ;
-    M = M_vals[layer] ;
-    K_S = K_S_vals[layer] ;
-    THETA_R = THETA_R_vals[layer] ;
-    THETA_S = THETA_S_vals[layer] ;
-    STORATIVITY = STORATIVITY_vals[layer] ;
+  if (!USE_CONSTITUTIVE_TABLE || !CONSTITUTIVE_TABLES_READY || h < TABLE_LIMIT) {
+    ALPHA = ALPHA_vals[layer];
+    N = N_vals[layer];
+    M = M_vals[layer];
+    K_S = K_S_vals[layer];
+    THETA_R = THETA_R_vals[layer];
+    THETA_S = THETA_S_vals[layer];
+    STORATIVITY = STORATIVITY_vals[layer];
     if (h < 0) return
       -(pow(ALPHA,2)*pow(-(ALPHA*h),-2 + N)*
 	pow(1 + pow(-(ALPHA*h),N),-1 - M)*M*(-1 + N)*N*
@@ -206,7 +208,8 @@ double dCdh(double h, int layer)
   }
   else if (h<0) {
     location = -int(h/TABLE_PRECISION) ;
-    value = (dCdh_TABLE[layer][location+1] - dCdh_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+dCdh_TABLE[layer][location] ;
+    value = (dCdh_TABLE[layer][location+1] - 
+            dCdh_TABLE[layer][location])*(-h/TABLE_PRECISION-location)+dCdh_TABLE[layer][location];
     return value ;
   }
   else return 0;

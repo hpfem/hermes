@@ -5,17 +5,15 @@
 #include <fstream>
 using namespace std;
 
-//creates a table of precalculated constitutive functions 
-bool get_constitutive_tables(const char* tables_filename, int method)
+// Creates a table of precalculated constitutive functions.
+bool get_constitutive_tables(int method)
 {
-  
-  info("Creating tables of constitutive functions (complicated real exponent relations) ");
-  info("This will take some time, but it is worthwhile. \n");
+  info("Creating tables of constitutive functions (complicated real exponent relations).");
 
-  // table values dimension
+  // Table values dimension.
   int bound = int(-TABLE_LIMIT/TABLE_PRECISION)+1 ;
   
-  //allocating arrays 
+  // Allocating arrays. 
   K_TABLE = new double*[MATERIAL_COUNT] ;
   for (int i=0; i<MATERIAL_COUNT; i++) {
     K_TABLE[i] = new double[bound];
@@ -41,12 +39,10 @@ bool get_constitutive_tables(const char* tables_filename, int method)
     C_TABLE[i] = new double[bound];
   }
   
-  
   dCdh_TABLE = new double*[MATERIAL_COUNT] ;
   for (int i=0; i<MATERIAL_COUNT; i++) {
     dCdh_TABLE[i] = new double[bound];
   }
-  
   
   // Calculate and save K(h).
   info("Calculating and saving K(h).");
@@ -84,12 +80,10 @@ bool get_constitutive_tables(const char* tables_filename, int method)
     }
   }
       
-
   return true;
 }
 
-
-//simple Gaussian elimnation for full matrices called from init_polynomials procedure
+// Simple Gaussian elimination for full matrices called from init_polynomials().
 bool gem_full(double** A, double* b, double* X, int n){
   int i,j,k;
   
@@ -117,7 +111,6 @@ bool gem_full(double** A, double* b, double* X, int n){
       }
     }
   }
-  
 
   for (i=n-1; i>-1; i--){
     dotproduct=0.0;
@@ -127,7 +120,6 @@ bool gem_full(double** A, double* b, double* X, int n){
     X[i] = (aa[i][n]-dotproduct)/aa[i][i] ;
   }
     
-  
   delete []aa;
   return true;
 }
@@ -168,7 +160,7 @@ int init_polynomials(int n, double low_limit, double *points, int n_inside_point
     Aside[i] = new double[n] ;
   }
 
-  // evaluate the first three rows of the matrix (zero, first and second derivative at point low_limit)
+  // Evaluate the first three rows of the matrix (zero, first and second derivative at point low_limit).
   for (int i=0; i<n; i++){
     for (int j=0; j<n; j++){
       Aside[i][j] = 0.0;
@@ -183,10 +175,10 @@ int init_polynomials(int n, double low_limit, double *points, int n_inside_point
   Bside[4] = dKdh(low_limit, layer) ;
   Bside[5] = ddKdhh(low_limit, layer) ; 
   
-  //evaluate the second three rows of the matrix (zero, first and second derivative at point zero)
+  // Evaluate the second three rows of the matrix (zero, first and second derivative at point zero).
   Aside[0][0] = 1.0 ;
 
-  //for the both first and second derivative it does not really matter what value is placed there.
+  // For the both first and second derivative it does not really matter what value is placed there.
   Aside[1][1] = 1.0 ;
   Aside[2][2] = 2.0 ;
  
