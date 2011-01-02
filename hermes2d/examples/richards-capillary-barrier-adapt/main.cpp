@@ -30,6 +30,10 @@ using namespace RefinementSelectors;
 // Constitutive relations.
 #define CONSTITUTIVE_GENUCHTEN                    // Van Genuchten or Gardner.
 
+// Choose full domain or half domain.
+//const char* mesh_file = "domain-full.mesh";
+const char* mesh_file = "domain-half.mesh";
+
 // Methods.
 const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
@@ -181,7 +185,12 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &basemesh);
+  mloader.load(mesh_file, &basemesh);
+  
+  // Initial refinements.
+  //basemesh.refine_towards_boundary(1, 1);
+  //basemesh.refine_towards_boundary(3, 1);
+  //basemesh.refine_towards_boundary(4, 1);
 
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);
