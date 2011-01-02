@@ -88,9 +88,11 @@ int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of N
 const double PICARD_TOL = 1e-5;                   // Stopping criterion for Picard on fine mesh.
 int PICARD_MAX_ITER = 10;                         // Maximum allowed number of Picard iterations.
 
+
 // Times.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
+const double PULS_END_TIME = 1000.0 ;             // time interval of the top layer infiltration
 double TIME = TAU;                                // Global time variable initialized with first time step.
 
 
@@ -109,11 +111,15 @@ const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 
 // Precalculation of constitutive tables.
 const int MATERIAL_COUNT = 4;
-double K_TABLE[4][1500000];                       // Four materials, 15000 values.
-double dKdh_TABLE[4][1500000];
-double ddKdhh_TABLE[4][1500000];
-double C_TABLE[4][1500000];
-double dCdh_TABLE[4][1500000];
+bool USE_CONSTITUTIVE_TABLE = true;		  // If true, all constitutive functions are precalculated into a table, 
+const double TABLE_LIMIT = -1000.0 ; 		  // limit of precalculated functions (should be always negative value lower 
+						  // then the lowest expect value of the solution (consider DMP!!)
+const double TABLE_PRECISION = 0.1;               // precision of precalculated table use 1.0, 0,1, 0.01, etc.....
+double** K_TABLE;                                 // 
+double** dKdh_TABLE;
+double** ddKdhh_TABLE;
+double** C_TABLE;
+double** dCdh_TABLE;
 bool CONSTITUTIVE_TABLES_READY = false;
 double*** POLYNOMIALS;                            // Polynomial approximation of the K(h) function close to saturation 
                                                   // (this function has singularity in its second derivative).
@@ -121,6 +127,7 @@ const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) functio
 const int NUM_OF_INSIDE_PTS = 0;
 bool POLYNOMIALS_READY = false;
 bool POLYNOMIALS_ALLOCATED = false;
+
 
 // Global variables for forms.
 double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
@@ -150,7 +157,9 @@ scalar essential_bc_values(double x, double y, double time)
 {
   if (time < STARTUP_TIME)
     return H_INIT + time/STARTUP_TIME*(H_ELEVATION-H_INIT);
-  else 
+  else if (time > PULS_END_TIME)
+    return H_INIT;
+  else
     return H_ELEVATION;
 }
 
