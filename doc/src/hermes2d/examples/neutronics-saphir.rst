@@ -1,7 +1,7 @@
 Saphir (Neutronics)
 -------------------
 
-**Git reference:** Example `saphir <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/saphir>`_.
+**Git reference:** Example `neutronics-saphir <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics-saphir>`_.
 
 This is a standard nuclear engineering benchmark (IAEA number EIR-2) describing 
 an external-force-driven configuration without fissile materials present, using one-group 

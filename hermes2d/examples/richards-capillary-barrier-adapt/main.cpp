@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -18,7 +16,8 @@ using namespace RefinementSelectors;
 //        C(h) = alpha*(theta_s - theta_r)*exp(alpha*h)    for h < 0,
 //        C(h) = alpha*(theta_s - theta_r)                 for h >= 0.
 //
-//  Picard's linearization: C(h^n)dh^{n+1}/dt - div(K(h^n)grad(h^{n+1})) - (dK/dh(h^n))*(dh^{n+1}/dy) = 0
+//  Picard's linearization: C(h^k)dh^{k+1}/dt - div(K(h^k)grad(h^{k+1})) - (dK/dh(h^k))*(dh^{k+1}/dy) = 0
+//                          Note: the index 'k' does not refer to time stepping.
 //  Newton's method is more involved, see the file forms.cpp.
 //
 //  Domain: rectangle (0, 8) x (0, 6.5).
@@ -28,16 +27,23 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-// If this is defined, use van Genuchten's constitutive relations, otherwise use Gardner's.
-#define CONSTITUTIVE_GENUCHTEN
+// Constitutive relations.
+#define CONSTITUTIVE_GENUCHTEN                    // Van Genuchten or Gardner.
 
-// Select Newton or Picard.
+// Methods.
 const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
+const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
+// Adaptive time stepping.
+double TAU = 1.0;                                 // Time step (in days).
+double TIMESTEP_DEC = 0.5;                        // Timestep decrease ratio after unsuccessful nonlinear solve.
+double TIMESTEP_INC = 1.1;                        // Timestep increase ratio after successful nonlinear solve.
+double TAU_MIN = 0.001;                           // Computation will stop if time step drops below this value.
+
+// Elements orders and initial refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refinements towards the top edge.
-const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
 
 // Adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -73,20 +79,21 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 
 // Newton's and Picard's methods.
-const double NEWTON_TOL = 0.0015;                 // Stopping criterion for Newton on fine mesh.
-int NEWTON_MAX_ITER = 23;                         // Maximum allowed number of Newton iterations.
-const double PICARD_TOL = 0.0015;                 // Stopping criterion for Picard on fine mesh.
-int PICARD_MAX_ITER = 23;                         // Maximum allowed number of Picard iterations.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for Newton on fine mesh.
+int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of Newton iterations.
+const double PICARD_TOL = 1e-5;                   // Stopping criterion for Picard on fine mesh.
+int PICARD_MAX_ITER = 10;                         // Maximum allowed number of Picard iterations.
+
+// Times.
+const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
+const double T_FINAL = 1000.0;                    // Time interval length.
+double TIME = TAU;                                // Global time variable initialized with first time step.
+
 
 // Problem parameters.
 const char* TABLES_FILENAME = "tables.txt";       // Filename for constitutive tables.
-const double TAU = 1e-1;                          // Time step.
-const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
-const double T_FINAL = 1000.0;                    // Time interval length.
-double TIME = 0;                                  // Global time variable initialized with first time step.
 double H_INIT = -50.0;                            // Initial pressure head.
 double H_ELEVATION = 10.0;
-
 const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64}; 
 const double ALPHA_vals[4] = {0.01, 1.0, 0.01, 0.01};
 const double N_vals[4] = {2.5, 2.0, 1.23, 2.5};
@@ -96,8 +103,7 @@ const double THETA_R_vals[4] = {0.064, 0.0, 0.089, 0.064};
 const double THETA_S_vals[4] = {0.14, 0.43, 0.43, 0.24};
 const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 
-bool USE_CONSTITUTIVE_TABLE = true;		  // If true, all constitutive functions are precalculated into a table, 
-                                                  // which improves performance. If not desired, set -1.
+// Precalculation of constitutive tables.
 const int MATERIAL_COUNT = 4;
 double K_TABLE[4][1500000];                       // Four materials, 15000 values.
 double dKdh_TABLE[4][1500000];
@@ -109,10 +115,8 @@ double*** POLYNOMIALS;                            // Polynomial approximation of
                                                   // (this function has singularity in its second derivative).
 const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) function approximated by polynomials.
 const int NUM_OF_INSIDE_PTS = 0;
-int POLYNOMIALS_READY = -1;
-const int X_OUTPUT = -1;
-
-int POLYNOMIALS_ALLOCATED = -1;
+bool POLYNOMIALS_READY = false;
+bool POLYNOMIALS_ALLOCATED = false;
 
 // Global variables for forms.
 double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
@@ -155,12 +159,20 @@ scalar essential_bc_values(double x, double y, double time)
 // Main function.
 int main(int argc, char* argv[])
 {
+  // Points to be used for polynomial approximation of K(h).
+  double* points = new double[NUM_OF_INSIDE_PTS];
+
+  // The van Genuchten + Mualem K(h) function is approximated by polynomials close to zero.
+  info("Initializing polynomial approximation of K(h) close to its full saturation in range (%g, 0).", LOW_LIMIT);
+  for (int i=0; i < MATERIAL_COUNT; i++) {
+    info("Processing layer %d", i);
+    init_polynomials(6 + NUM_OF_INSIDE_PTS, LOW_LIMIT, points, NUM_OF_INSIDE_PTS, i);
+  }
+  POLYNOMIALS_READY = true;
 
   // Either use exact constitutive relations (slow) or precalculate 
   // their polynomial approximations (faster).
-  if (USE_CONSTITUTIVE_TABLE == true) {
-    CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
-  }
+  CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -236,42 +248,54 @@ int main(int argc, char* argv[])
   }
 
   // Error estimate and discrete problem size as a function of physical time.
-  SimpleGraph graph_time_err_est, graph_time_err_exact, graph_time_dof, graph_time_cpu;
+  SimpleGraph graph_time_err_est, graph_time_err_exact, 
+    graph_time_dof, graph_time_cpu, graph_time_step;
  
   // Visualize the projection and mesh.
-  ScalarView view("Initial condition", new WinGeom(0, 0, 620, 350));
-  OrderView ordview("Initial mesh", new WinGeom(630, 0, 600, 350));
+  ScalarView view("Initial condition", new WinGeom(0, 0, 630, 350));
+  view.fix_scale_width(50);
+  OrderView ordview("Initial mesh", new WinGeom(640, 0, 600, 350));
   view.show(&sln_prev_time);
   ordview.show(&space);
+  //MeshView mview("Mesh", new WinGeom(840, 0, 600, 350));
+  //mview.show(&mesh);
+  //View::wait();
 
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
   for(int ts = 1; ts <= num_time_steps; ts++)
   {
+    info("---- Time step %d:", ts);
+
     // Time measurement.
     cpu_time.tick();
-
-    // Updating current time.
-    TIME = ts*TAU;
-    info("---- Time step %d:", ts);
 
     // Periodic global derefinements.
     if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
-      mesh.copy(&basemesh);
-      space.set_uniform_order(P_INIT);
+      //mesh.copy(&basemesh);            // Brings the mesh back to the basemesh.
+      mesh.unrefine_all_elements();      // Shaves off one layer of refinement for all elements.
+      space.set_uniform_order(P_INIT);   // Resets poly degree to the initial one.
     }
 
-    // Adaptivity loop (in space):
+    // Spatial adaptivity loop. Note: sln_prev_time must not be touched during adaptivity.
     bool done = false;
     int as = 1;
+    double err_est_rel;
     do
     {
-      info("---- Time step %d, simulation time %lf, adaptivity step %d:", ts, TIME, as);
+      info("---- Time step %d, time %g (days), adaptivity step %d:", ts, TIME, as);
 
       // Construct globally refined reference mesh
       // and setup reference space.
       Space* ref_space = construct_refined_space(&space);
+      ndof = Space::get_num_dofs(ref_space);
+
+      // debug 
+      //BaseView bview("FE basis", new WinGeom(0, 360, 600, 350));
+      //H1Space *temp = (H1Space*)space.dup(&mesh);
+      //temp->copy_orders((Space*)&space, 0);
+      //bview.show(temp);
 
       // Next we need to calculate the reference solution.
       // Newton's method:
@@ -298,27 +322,28 @@ int main(int argc, char* argv[])
         Vector* rhs = create_vector(matrix_solver);
         Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-        // Perform Newton's iteration.
-        info("Performing Newton's iteretion:");
-        bool verbose = true;
-
-        double damping_coeff = 1.0 ;
-        int i_err ;
-        int save_global_max_iter =  NEWTON_MAX_ITER; 
-        while(true) {
-          bool success = solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-                                      NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff);
-	  if (success == false) {
-            // ...
-	    damping_coeff *= 0.75;
-	    NEWTON_MAX_ITER = NEWTON_MAX_ITER * 1/damping_coeff * 1.15;   
-	  }
-	  else break;
-        }
-      
-        // ...
-        NEWTON_MAX_ITER = save_global_max_iter;
-        damping_coeff = 1.0;
+        // Perform Newton's iteration on the reference mesh. If necessary, 
+        // reduce time step to make it converge, but then restore time step 
+        // size to its original value.
+        info("Performing Newton's iteration (tau = %g days):", TAU);
+        bool success, verbose = true;
+        double* save_coeff_vec = new double[ndof];
+        // Save coefficient vector.
+        for (int i=0; i < ndof; i++) save_coeff_vec[i] = coeff_vec[i];
+        double damping_coeff = 1.0;
+        while (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+                             NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff)) {
+          // Restore solution from the beginning of time step.
+          for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
+          // Reducing time step to 50%.
+          info("Reducing time step size from %g to %g days for the rest of this time step.", 
+               TAU, TAU * TIMESTEP_DEC);
+          TAU *= TIMESTEP_DEC;
+          // If TAU less than the prescribed minimum, stop.
+          if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
+        }  
+        // Delete the saved coefficient vector.
+        delete [] save_coeff_vec;
 
         // Translate the resulting coefficient vector 
         // into the desired reference solution. 
@@ -339,18 +364,24 @@ int main(int argc, char* argv[])
         else {
           info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
           OGProjection::project_global(ref_space, &ref_sln, &sln_prev_iter, matrix_solver);
-          //delete ref_sln.get_mesh();  // Not sure whether we can remove this.
         }
 
-        // This puts both sln_prev_iter and sln_prev_iter on the same reference mesh.
-        sln_prev_time.copy(&sln_prev_iter);
+        // Perform Picard iteration on the reference mesh. If necessary, 
+        // reduce time step to make it converge, but then restore time step 
+        // size to its original value.
+        info("Performing Picard's iteration (tau = %g days):", TAU);
+        bool success, verbose = true;
+        while(!solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
+                            PICARD_MAX_ITER, verbose)) {
+          // Restore solution from the beginning of time step.
+          sln_prev_iter.copy(&sln_prev_time);
+          // Reducing time step to 50%.
+          info("Reducing time step size from %g to %g days for the rest of this time step", TAU, TAU * TIMESTEP_DEC);
+          TAU *= TIMESTEP_DEC;
+          // If TAU less than the prescribed minimum, stop.
+          if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
+        } 
 
-        // Perform Picard iteration on the reference mesh.
-        info("Performing Picard's iteretion:");
-        bool verbose = true;
-        bool success = solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
-                                    PICARD_MAX_ITER, verbose); 
-        if (!success) error("Picard's iteration did not converge.");
         ref_sln.copy(&sln_prev_iter);
       }
 
@@ -367,20 +398,12 @@ int main(int argc, char* argv[])
       bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                    HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%", 
         Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
-
-      // Add entries to convergence graphs.
-      graph_time_err_est.add_values(ts*TAU, err_est_rel);
-      graph_time_err_est.save("time_error_est.dat");
-      graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
-      graph_time_dof.save("time_dof.dat");
-      graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());
-      graph_time_cpu.save("time_cpu.dat");
 
       // If space_err_est too large, adapt the mesh.
       if (err_est_rel < ERR_STOP) done = true;
@@ -399,12 +422,22 @@ int main(int argc, char* argv[])
     }
     while (!done);
 
+    // Add entries to graphs.
+    graph_time_err_est.add_values(TIME, err_est_rel);
+    graph_time_err_est.save("time_error_est.dat");
+    graph_time_dof.add_values(TIME, Space::get_num_dofs(&space));
+    graph_time_dof.save("time_dof.dat");
+    graph_time_cpu.add_values(TIME, cpu_time.accumulated());
+    graph_time_cpu.save("time_cpu.dat");
+    graph_time_step.add_values(TIME, TAU);
+    graph_time_step.save("time_step_history.dat");
+
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time level %d", ts);
+    sprintf(title, "Solution, time %g days", TIME);
     view.set_title(title);
     view.show(&sln);
-    sprintf(title, "Mesh, time level %d", ts);
+    sprintf(title, "Mesh, time %g days", TIME);
     ordview.set_title(title);
     ordview.show(&space);
     
@@ -413,10 +446,18 @@ int main(int argc, char* argv[])
     sprintf(filename, "outputs/tsln_%f.dat", TIME);
     bool compress = false;   // Gzip compression not used as it only works on Linux.
     sln.save(filename, compress);
-    info("Complete Solution saved to file %s.", filename);
+    info("Solution at time %g saved to file %s.", TIME, filename);
 
-    // Copy new time level solution into sln_prev_time.
+    // Copy new reference level solution into sln_prev_time.
+    // This starts new time step.
     sln_prev_time.copy(&ref_sln);
+
+    // Updating time step. Note that TAU might have been reduced during adaptivity.
+    TIME += TAU;
+
+    // Increase time step.
+    info("Increasing time step from %g to %g days.", TAU, TAU * TIMESTEP_INC);
+    TAU *= TIMESTEP_INC;
   }
 
   // Wait for all views to be closed.

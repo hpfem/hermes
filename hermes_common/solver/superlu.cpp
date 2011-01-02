@@ -197,9 +197,21 @@ bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 int SuperLUMatrix::get_matrix_size() const
 {
+  return size;
+}
+
+/* THIS WAS WRONG
+int SuperLUMatrix::get_matrix_size() const
+{
   _F_
-  /*           Ax               Ai                 Ap                      nnz     */
+  //           Ax               Ai                 Ap                      nnz
   return (sizeof(scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1) + sizeof(int);
+}
+*/
+
+int SuperLUMatrix::get_nnz() const
+{
+  return nnz;
 }
 
 double SuperLUMatrix::get_fill_in() const

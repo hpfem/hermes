@@ -240,11 +240,25 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 int MumpsMatrix::get_matrix_size() const
 {
   _F_
-  /*           Ax               Ai                 Ap                 */
+  return size;
+}
+
+int MumpsMatrix::get_nnz() const
+{
+  _F_
+  return nnz;
+}
+
+/* THIS WAS WRONG
+int MumpsMatrix::get_matrix_size() const
+{
+  _F_
+  //           Ax               Ai                 Ap                 
   return (sizeof(scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1)
           + 2 * sizeof(int) * nnz + sizeof(int);
-  /*          irn, jcn                  nnz                           */    
+  //          irn, jcn                  nnz                             
 }
+*/
 
 double MumpsMatrix::get_fill_in() const
 {

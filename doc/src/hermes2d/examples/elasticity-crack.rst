@@ -1,7 +1,7 @@
 Crack (Linear Elasticity)
 -------------------------
 
-**Git reference:** Example `crack <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/crack>`_.
+**Git reference:** Example `elasticity-crack <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/elasticity-crack>`_.
 
 This example employs the adaptive multimesh hp-FEM to solve
 equations of linear elasticity that we already saw in the tutorial example
@@ -20,7 +20,7 @@ cracks, as shown in the following figure:
 
 The cracks have a flat diamond-like shape and their width along with some other parameters 
 can be changed in the mesh file `crack.mesh 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/crack/crack.mesh>`_:
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/elasticity-crack/crack.mesh>`_:
 
 ::
 
@@ -213,7 +213,7 @@ Calculating element error and a global error estimate
                                HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
 The rest is straightforward and details can be found in the 
-`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/crack/main.cpp>`_ file.
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/elasticity-crack/main.cpp>`_ file.
 
 Sample results
 ~~~~~~~~~~~~~~

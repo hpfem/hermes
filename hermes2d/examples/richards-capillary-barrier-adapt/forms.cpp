@@ -146,7 +146,7 @@ double linear_form_picard_euler(int n, double *wt, Func<double> *u_ext[], Func<d
   double result = 0;
   Func<double>* h_prev_picard = ext->fn[0];
   Func<double>* h_prev_time = ext->fn[1];
-  for (int i = 0; i < n; i++) result += wt[i] * C(h_prev_picard->val[i], elem_marker) * h_prev_time->val[i] * v->val[i];
+  for (int i = 0; i < n; i++) result += wt[i] * C(h_prev_picard->val[i], elem_marker) * h_prev_time->val[i] * v->val[i] / TAU;
   return result;
 }
 

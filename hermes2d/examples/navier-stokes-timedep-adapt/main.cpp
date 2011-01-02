@@ -230,7 +230,8 @@ int main(int argc, char* argv[])
       p_space.set_uniform_order(P_INIT_PRESSURE);
     }
 
-    // Adaptivity loop:
+    // Spatial adaptivity loop. Note: xvel_prev_time, yvel_prev_time and pvel_prev_time
+    // must not be changed during spatial adaptivity. 
     bool done = false; int as = 1;
     double err_est;
     do {
@@ -277,7 +278,8 @@ int main(int argc, char* argv[])
       info("Projecting reference solution on coarse mesh.");
       OGProjection::project_global(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
                     Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
-                    Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver, Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm) );
+                    Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver, 
+                    Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm) );
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");

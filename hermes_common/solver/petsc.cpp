@@ -105,10 +105,10 @@ void PetscMatrix::alloc() {
   assert(pages != NULL);
 
   // calc nnz
-  int *nnz = new int[size];
+  int *nnz_array = new int[size];
   MEM_CHECK(nnz);
 
-  // fill in nnz
+  // fill in nnz_array
   int aisize = get_num_indices();
   int *ai = new int[aisize];
   MEM_CHECK(ai);
@@ -116,18 +116,20 @@ void PetscMatrix::alloc() {
   // sort the indices and remove duplicities, insert into ai
   int pos = 0;
   for (int i = 0; i < size; i++) {
-    nnz[i] = sort_and_store_indices(pages[i], ai + pos, ai + aisize);
-    pos += nnz[i];
+    nnz_array[i] = sort_and_store_indices(pages[i], ai + pos, ai + aisize);
+    pos += nnz_array[i];
   }
+  // stote the number of nonzeros
+  nnz = pos;
   delete [] pages; pages = NULL;
   delete [] ai;
 
   //
-  MatCreateSeqAIJ(PETSC_COMM_SELF, size, size, 0, nnz, &matrix);
+  MatCreateSeqAIJ(PETSC_COMM_SELF, size, size, 0, nnz_array, &matrix);
 //	MatSetOption(matrix, MAT_ROW_ORIENTED);
 //	MatSetOption(matrix, MAT_ROWS_SORTED);
 
-  delete [] nnz;
+  delete [] nnz_array;
 
   inited = true;
 #endif
@@ -195,12 +197,17 @@ bool PetscMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
 
 int PetscMatrix::get_matrix_size() const {
   _F_
-  return 0;
+  return size;
+}
+
+int PetscMatrix::get_nnz() const {
+  _F_
+  return nnz;
 }
 
 double PetscMatrix::get_fill_in() const {
   _F_
-  return 0;
+    return (double) nnz / ((double)size*size);
 }
 
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

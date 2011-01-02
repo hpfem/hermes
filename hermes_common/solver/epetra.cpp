@@ -145,7 +145,7 @@ int EpetraMatrix::get_num_row_entries(int row)
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalEntries(row);
+    return mat->NumGlobalEntries(row);
 #else
   return 0;
 #endif
@@ -212,7 +212,7 @@ int EpetraMatrix::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros();
+  return size;
 #else
   return -1;
 #endif
@@ -222,12 +222,21 @@ double EpetraMatrix::get_fill_in() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros() / (double) (size * size);
+  return mat->NumGlobalNonzeros() / ((double)size*size);
 #else
   return -1;
 #endif
 }
 
+int EpetraMatrix::get_nnz() const
+{
+  _F_
+#ifdef HAVE_EPETRA
+  return mat->NumGlobalNonzeros();
+#else
+  return -1;
+#endif
+}
 
 // EpetraVector ////////////////////////////////////////////////////////////////////////////////////
 

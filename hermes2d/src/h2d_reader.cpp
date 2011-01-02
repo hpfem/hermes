@@ -268,8 +268,9 @@ void H2DReader::load_stream(FILE *f, Mesh *mesh)
 
   // check that all boundary edges have a marker assigned
   for_all_edge_nodes(en, mesh)
-    if (en->ref < 2 && en->marker == 0)
+    if (en->ref < 2 && en->marker == 0) {
       warn("Boundary edge node does not have a boundary marker");
+    }
 
   // read the number of curved edges
   if ((line = get_line(f)) == NULL) eof_error;
@@ -654,8 +655,9 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
 
   // check that all boundary edges have a marker assigned
   for_all_edge_nodes(en, mesh)
-    if (en->ref < 2 && en->marker == 0)
+    if (en->ref < 2 && en->marker == 0) {
       warn("Boundary edge node does not have a boundary marker");
+    }
 
   mitem_drop_string_markers(sym->data);
   //// curves //////////////////////////////////////////////////////////////////

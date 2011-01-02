@@ -1,7 +1,7 @@
 Waveguide (Electromagnetics)
 ----------------------------
 
-**Git reference:** Example `waveguide <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/waveguide>`_.
+**Git reference:** Example `maxwell-waveguide <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/maxwell-waveguide>`_.
 
 Model problem
 ~~~~~~~~~~~~~

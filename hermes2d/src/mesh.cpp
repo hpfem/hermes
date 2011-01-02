@@ -324,8 +324,7 @@ static CurvMap* create_son_curv_map(Element* e, int son)
   return cm;
 }
 
-
-void Mesh::refine_triangle(Element* e)
+void Mesh::refine_triangle_to_triangles(Element* e)
 {
   // remember the markers of the edge nodes
   int bnd[3] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd    };
@@ -390,7 +389,6 @@ void Mesh::refine_triangle(Element* e)
   // copy son pointers (could not have been done earlier because of the union)
   memcpy(e->sons, sons, 4 * sizeof(Element*));
 }
-
 
 void Mesh::refine_quad(Element* e, int refinement)
 {
@@ -594,8 +592,10 @@ void Mesh::refine_element(int id, int refinement)
   if (!e->used) error("Invalid element id number.");
   if (!e->active) error("Attempt to refine element #%d which has been refined already.", e->id);
 
-  if (e->is_triangle())
-    refine_triangle(e);
+  if (e->is_triangle()) {
+    if (refinement == 3) refine_triangle_to_quads(e);
+    else refine_triangle_to_triangles(e);
+  }
   else
     refine_quad(e, refinement);
 
@@ -617,13 +617,13 @@ void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
 {
   Element* e;
   elements.set_append_only(true);
-  for (int r, i = 0; i < depth; i++)
-    for_all_active_elements(e, this)
-      if ((r = criterion(e)) >= 0)
-        refine_element(e->id, r);
+  for (int r, i = 0; i < depth; i++) {
+    for_all_active_elements(e, this) {
+      if ((r = criterion(e)) >= 0) refine_element(e->id, r);
+    }
+  }
   elements.set_append_only(false);
 }
-
 
 static int rtv_id;
 
@@ -641,26 +641,34 @@ void Mesh::refine_towards_vertex(int vertex_id, int depth)
   refine_by_criterion(rtv_criterion, depth);
 }
 
-
 static int rtb_marker;
 static bool rtb_aniso;
+static bool rtb_tria_to_quad;
 static char* rtb_vert;
 
 static int rtb_criterion(Element* e)
 {
   int i;
-  for (i = 0; i < e->nvert; i++)
-    if (e->en[i]->marker == rtb_marker || rtb_vert[e->vn[i]->id])
+  for (i = 0; i < e->nvert; i++) {
+    if (e->en[i]->marker == rtb_marker || rtb_vert[e->vn[i]->id]) {
       break;
+    }
+  }
 
   if (i >= e->nvert) return -1;
+  // triangle should be split into 3 quads
+  if (e->is_triangle() && rtb_tria_to_quad) return 3;
+  // triangle should be split into 4 triangles or quad should
+  // be split into 4 quads
   if (e->is_triangle() || !rtb_aniso) return 0;
 
+  // quads - anisotropic case 1
   if ((e->en[0]->marker == rtb_marker && !rtb_vert[e->vn[2]->id] && !rtb_vert[e->vn[3]->id]) ||
       (e->en[2]->marker == rtb_marker && !rtb_vert[e->vn[0]->id] && !rtb_vert[e->vn[1]->id]) ||
       (e->en[0]->marker == rtb_marker && e->en[2]->marker == rtb_marker &&
        e->en[1]->marker != rtb_marker && e->en[3]->marker != rtb_marker)) return 1;
 
+  // quads - anisotropic case 2
   if ((e->en[1]->marker == rtb_marker && !rtb_vert[e->vn[3]->id] && !rtb_vert[e->vn[0]->id]) ||
       (e->en[3]->marker == rtb_marker && !rtb_vert[e->vn[1]->id] && !rtb_vert[e->vn[2]->id]) ||
       (e->en[1]->marker == rtb_marker && e->en[3]->marker == rtb_marker &&
@@ -669,10 +677,11 @@ static int rtb_criterion(Element* e)
   return 0;
 }
 
-void Mesh::refine_towards_boundary(int marker, int depth, bool aniso)
+void Mesh::refine_towards_boundary(int marker, int depth, bool aniso, bool tria_to_quad)
 {
   rtb_marker = marker;
   rtb_aniso  = aniso;
+  rtb_tria_to_quad = tria_to_quad;
 
   for (int i = 0; i < depth; i++)
   {
@@ -682,9 +691,11 @@ void Mesh::refine_towards_boundary(int marker, int depth, bool aniso)
 
     Element* e;
     for_all_active_elements(e, this)
-      for (int j = 0; j < e->nvert; j++)
-        if (e->en[j]->marker == marker)
+      for (int j = 0; j < e->nvert; j++) {
+        if (e->en[j]->marker == marker) {
           rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
+        }
+      }
 
     refine_by_criterion(rtb_criterion, 1);
     delete [] rtb_vert;

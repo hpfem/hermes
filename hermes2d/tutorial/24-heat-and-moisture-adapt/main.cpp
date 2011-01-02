@@ -127,9 +127,9 @@ int main(int argc, char* argv[])
 
   // Define constant initial conditions.
   info("Setting initial conditions.");
-  Solution T_prev, M_prev;
-  T_prev.set_const(&T_mesh, TEMP_INITIAL);
-  M_prev.set_const(&M_mesh, MOIST_INITIAL);
+  Solution T_prev_time, M_prev_time;
+  T_prev_time.set_const(&T_mesh, TEMP_INITIAL);
+  M_prev_time.set_const(&M_mesh, MOIST_INITIAL);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -137,8 +137,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(0, 1, callback(bilinear_form_sym_0_1));
   wf.add_matrix_form(1, 1, callback(bilinear_form_sym_1_1));
   wf.add_matrix_form(1, 0, callback(bilinear_form_sym_1_0));
-  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &T_prev);
-  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &M_prev);
+  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &T_prev_time);
+  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &M_prev_time);
   wf.add_matrix_form_surf(0, 0, callback(bilinear_form_surf_0_0_ext), BDY_EXTERIOR_WALL);
   wf.add_matrix_form_surf(1, 1, callback(bilinear_form_surf_1_1_ext), BDY_EXTERIOR_WALL);
   wf.add_vector_form_surf(0, callback(linear_form_surf_0_ext), BDY_EXTERIOR_WALL);
@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
   OrderView M_order_view("Moisture mesh", M_mesh_win_geom);
 
   // Show initial conditions.
-  T_sln_view.show(&T_prev);
-  M_sln_view.show(&M_prev);
+  T_sln_view.show(&T_prev_time);
+  M_sln_view.show(&M_prev_time);
   T_order_view.show(&T_space);
   M_order_view.show(&M_space);
 
@@ -187,7 +187,8 @@ int main(int argc, char* argv[])
       M_space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop:
+    // Spatial adaptivity loop. Note: T_prev_time and M_prev_time must not be changed during 
+    // spatial adaptivity.
     int as = 1; 
     bool done = false;
     do
@@ -285,8 +286,8 @@ int main(int argc, char* argv[])
     M_order_view.show(&M_space);
 
     // Save fine mesh solutions for the next time step.
-    T_prev.copy(&T_fine);
-    M_prev.copy(&M_fine);
+    T_prev_time.copy(&T_fine);
+    M_prev_time.copy(&M_fine);
 
     ts++;
   }

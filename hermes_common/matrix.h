@@ -301,7 +301,7 @@ Matrix()
 class HERMES_API SparseMatrix : public Matrix {
 public:
 	SparseMatrix();
-    SparseMatrix(int size);
+        SparseMatrix(int size);
 	virtual ~SparseMatrix();
 
 	/// prepare memory

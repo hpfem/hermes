@@ -209,10 +209,25 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 int PardisoMatrix::get_matrix_size() const
 {
   _F_
+  return size;
+}
+
+int PardisoMatrix::get_nnz() const
+{
+  _F_
+  return nnz;
+}
+
+
+/* THIS WAS WRONG
+int PardisoMatrix::get_matrix_size() const
+{
+  _F_
   assert(Ap != NULL);
-  /*          Ai             Ax                     Ap                    nnz       */    
+  //          Ai             Ax                     Ap                    nnz   
   return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
+*/
 
 double PardisoMatrix::get_fill_in() const 
 {
