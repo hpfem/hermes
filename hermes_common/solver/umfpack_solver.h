@@ -37,8 +37,14 @@ public:
   virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual int get_matrix_size() const;
+  int get_nnz() {return this->nnz;}
   virtual double get_fill_in() const;
 
+  // Applies the matrix to vector_in and saves result to vector_out.
+  void multiply(scalar* vector_in, scalar* vector_out);
+  // Creates matrix in CSC format using size, nnz, and the three arrays.
+  void create(int size, int nnz, int* ap, int* ai, scalar* ax);
+  // Exposes pointers to the CSC arrays.
   int *get_Ap() {
       return this->Ap;
   }
@@ -47,9 +53,6 @@ public:
   }
   scalar *get_Ax() {
       return this->Ax;
-  }
-  int get_nnz() {
-      return this->nnz;
   }
 
 protected:
@@ -85,7 +88,6 @@ public:
 protected:
   //UMFPack specific data structures for storing the rhs.
   scalar *v;
-
   friend class UMFPackLinearSolver;
 };
 
