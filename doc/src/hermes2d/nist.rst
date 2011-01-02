@@ -13,14 +13,15 @@ problems to adaptivity algorithms.
 .. toctree::
    :maxdepth: 2
 
-   nist/nist-1
-   nist/nist-2
-   nist/nist-4
-   nist/nist-5
-   nist/nist-6
-   nist/nist-7
-   nist/nist-8
-   nist/nist-9
+   nist/nist-01
+   nist/nist-02
+   nist/nist-03
+   nist/nist-04
+   nist/nist-05
+   nist/nist-06
+   nist/nist-07
+   nist/nist-08
+   nist/nist-09
    nist/nist-10
    nist/nist-11
    nist/nist-12

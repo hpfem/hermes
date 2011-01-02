@@ -219,8 +219,8 @@ int main(int argc, char* argv[])
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
       OGProjection::project_global(Hermes::Tuple<Space *>(&T_space, &M_space), 
-                     Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
-                     Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
+                                   Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
+                                   Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Registering custom forms for error calculation.
       Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), 
