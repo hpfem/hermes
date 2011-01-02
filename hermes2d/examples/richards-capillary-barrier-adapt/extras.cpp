@@ -5,105 +5,122 @@
 #include <fstream>
 using namespace std;
 
-// Look for a file with precalculated constitutive relations. 
-// If found, read it. If not, create it. 
-bool get_constitutive_tables(const char* tables_filename, int method)
+// Creates a table of precalculated constitutive functions.
+bool get_constitutive_tables(int method)
 {
-  bool file_found;
-  ifstream inFile;
+  info("Creating tables of constitutive functions (complicated real exponent relations).");
 
-  // NOTE: The order of tables is important!
-  inFile.open(tables_filename);
-  if (inFile) {
-    info("File with precalculated constitutive tables found, reading.");
-    // Reading K.
-    info("Reading K(h).");
-    for (int j=0; j<4; j++) {
-      for (int i=0; i< 1500000; i++) {
-        inFile >> K_TABLE[j][i];
-      }
-    }
-    // Reading dKdh.
-    info("Reading dKdh(h).");
-    for (int j=0; j<4; j++) {
-      for (int i=0; i< 1500000; i++) {
-        inFile >> dKdh_TABLE[j][i];
-      }
-    }
-    // Reading C(h).
-    info("Reading C(h).");
-    for (int j=0; j<4; j++) {
-      for (int i=0; i< 1500000; i++) {
-        inFile >> C_TABLE[j][i];
-      }
-    }
-    // If Picard, stop here.
-    if (method != 1) {
-      inFile.close();    
-      return true;
-    }
-    // Reading ddKdhh.
-    info("Reading ddKdhh(h).");
-    for (int j=0; j<4; j++) {
-      for (int i=0; i< 1500000; i++) {
-        inFile >> ddKdhh_TABLE[j][i];
-      }
-    }
-    // Reading dCdh(h).
-    info("Reading dCdh(h).");
-    for (int j=0; j<4; j++) {
-      for (int i=0; i< 1500000; i++) {
-        inFile >> dCdh_TABLE[j][i];
-      }
-    }
-    // Closing input file and returning.
-    inFile.close();
-    return true;
+  // Table values dimension.
+  int bound = int(-TABLE_LIMIT/TABLE_PRECISION)+1 ;
+  
+  // Allocating arrays. 
+  K_TABLE = new double*[MATERIAL_COUNT] ;
+  for (int i=0; i<MATERIAL_COUNT; i++) {
+    K_TABLE[i] = new double[bound];
+  }
+  
+  dKdh_TABLE = new double*[MATERIAL_COUNT] ;
+  for (int i=0; i<MATERIAL_COUNT; i++) {
+    dKdh_TABLE[i] = new double[bound];
+  }
+  
+  dKdh_TABLE = new double*[MATERIAL_COUNT] ;
+  for (int i=0; i<MATERIAL_COUNT; i++) {
+    dKdh_TABLE[i] = new double[bound];
+  }
+  
+  ddKdhh_TABLE = new double*[MATERIAL_COUNT] ;
+  for (int i=0; i<MATERIAL_COUNT; i++) {
+    ddKdhh_TABLE[i] = new double[bound];
   }
 
-  /*** TABLES DATA FILE WAS NOT FOUND, CREATING ***/
-
-  info("File %s with precalculated constitutive tables not found, creating.", tables_filename);
-  info("This will take some time, but it is worthwhile.");
-  FILE* f = fopen(tables_filename, "w");
-  if (f == NULL) error("Could not open file %s for writing.", tables_filename);
+  C_TABLE = new double*[MATERIAL_COUNT] ;
+  for (int i=0; i<MATERIAL_COUNT; i++) {
+    C_TABLE[i] = new double[bound];
+  }
+  
+  dCdh_TABLE = new double*[MATERIAL_COUNT] ;
+  for (int i=0; i<MATERIAL_COUNT; i++) {
+    dCdh_TABLE[i] = new double[bound];
+  }
+  
   // Calculate and save K(h).
   info("Calculating and saving K(h).");
-  for (int j=0; j<4; j++) {
-    for (int i=0; i< 1500000; i++) {
-      fprintf(f, "%15.10f ", K_TABLE[j][i] = K(-0.01*i, j));
+  for (int j=0; j<MATERIAL_COUNT; j++) {
+    for (int i=0; i< bound; i++) {
+      K_TABLE[j][i] = K(-TABLE_PRECISION*i, j);
     }
   }
   // Calculate and save dKdh(h).
   info("Calculating and saving dKdh(h).");
-  for (int j=0; j<4; j++) {
-    for (int i=0; i< 1500000; i++) {
-      fprintf(f, "%15.10f ", dKdh_TABLE[j][i] = dKdh(-0.01*i, j));
+  for (int j=0; j<MATERIAL_COUNT; j++) {
+    for (int i=0; i< bound; i++) {
+      dKdh_TABLE[j][i] = dKdh(-TABLE_PRECISION*i, j);
     }
   }
   // Calculate and save C(h).
   info("Calculating and saving C(h).");
-  for (int j=0; j<4; j++) {
-    for (int i=0; i< 1500000; i++) {
-      fprintf(f, "%15.10f ", C_TABLE[j][i] = C(-0.01*i, j));
+  for (int j=0; j<MATERIAL_COUNT; j++) {
+    for (int i=0; i< bound; i++) {
+      C_TABLE[j][i] = C(-TABLE_PRECISION*i, j);
     }
   }
   // Calculate and save ddKdhh(h).
   info("Calculating and saving ddKdhh(h).");
-  for (int j=0; j<4; j++) {
-    for (int i=0; i< 1500000; i++) {
-      fprintf(f, "%15.10f ", ddKdhh_TABLE[j][i] = ddKdhh(-0.01*i, j));
+  for (int j=0; j<MATERIAL_COUNT; j++) {
+    for (int i=0; i< bound; i++) {
+      ddKdhh_TABLE[j][i] = ddKdhh(-TABLE_PRECISION*i, j);
     }
   }
   // Calculate and save dCdh(h).
   info("Calculating and saving dCdh(h).");
-  for (int j=0; j<4; j++) {
-    for (int i=0; i< 1500000; i++) {
-      fprintf(f, "%15.10f ", dCdh_TABLE[j][i] = dCdh(-0.01*i, j));
+  for (int j=0; j<MATERIAL_COUNT; j++) {
+    for (int i=0; i< bound; i++) {
+      dCdh_TABLE[j][i] = dCdh(-TABLE_PRECISION*i, j);
     }
   }
       
-  fclose(f);
+  return true;
+}
+
+// Simple Gaussian elimination for full matrices called from init_polynomials().
+bool gem_full(double** A, double* b, double* X, int n){
+  int i,j,k;
+  
+  double** aa;
+  double dotproduct, tmp;
+  aa = new double*[n];
+  
+  for (i=0; i<n; i++){
+    aa[i] = new double[n+1];
+  }
+  
+  for (i=0;i<n; i++){
+    for (j=0; j<n; j++){
+      aa[i][j] = A[i][j] ;
+    }
+    aa[i][n] = b[i];
+  }
+
+  for (j=0; j<(n-1); j++){
+    for (i=j+1; i<n; i++){
+    tmp = aa[i][j]/aa[j][j];
+
+      for (k=0; k<(n+1); k++){
+	aa[i][k] = aa[i][k] - tmp*aa[j][k] ;
+      }
+    }
+  }
+
+  for (i=n-1; i>-1; i--){
+    dotproduct=0.0;
+    for (j=i+1; j<n; j++){
+      dotproduct = dotproduct + aa[i][j]*X[j] ;
+    }
+    X[i] = (aa[i][n]-dotproduct)/aa[i][i] ;
+  }
+    
+  delete []aa;
   return true;
 }
 
@@ -143,7 +160,7 @@ int init_polynomials(int n, double low_limit, double *points, int n_inside_point
     Aside[i] = new double[n] ;
   }
 
-  // evaluate the first three rows of the matrix (zero, first and second derivative at point low_limit)
+  // Evaluate the first three rows of the matrix (zero, first and second derivative at point low_limit).
   for (int i=0; i<n; i++){
     for (int j=0; j<n; j++){
       Aside[i][j] = 0.0;
@@ -158,10 +175,10 @@ int init_polynomials(int n, double low_limit, double *points, int n_inside_point
   Bside[4] = dKdh(low_limit, layer) ;
   Bside[5] = ddKdhh(low_limit, layer) ; 
   
-  //evaluate the second three rows of the matrix (zero, first and second derivative at point zero)
+  // Evaluate the second three rows of the matrix (zero, first and second derivative at point zero).
   Aside[0][0] = 1.0 ;
 
-  //for the both first and second derivative it does not really matter what value is placed there.
+  // For the both first and second derivative it does not really matter what value is placed there.
   Aside[1][1] = 1.0 ;
   Aside[2][2] = 2.0 ;
  

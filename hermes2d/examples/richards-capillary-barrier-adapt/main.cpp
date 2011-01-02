@@ -30,6 +30,10 @@ using namespace RefinementSelectors;
 // Constitutive relations.
 #define CONSTITUTIVE_GENUCHTEN                    // Van Genuchten or Gardner.
 
+// Choose full domain or half domain.
+//const char* mesh_file = "domain-full.mesh";
+const char* mesh_file = "domain-half.mesh";
+
 // Methods.
 const int ITERATIVE_METHOD = 1;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
@@ -84,14 +88,14 @@ int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of N
 const double PICARD_TOL = 1e-5;                   // Stopping criterion for Picard on fine mesh.
 int PICARD_MAX_ITER = 10;                         // Maximum allowed number of Picard iterations.
 
+
 // Times.
 const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
+const double PULSE_END_TIME = 1000.0 ;            // Time interval of the top layer infiltration.
 double TIME = TAU;                                // Global time variable initialized with first time step.
 
-
 // Problem parameters.
-const char* TABLES_FILENAME = "tables.txt";       // Filename for constitutive tables.
 double H_INIT = -50.0;                            // Initial pressure head.
 double H_ELEVATION = 10.0;
 const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64}; 
@@ -105,11 +109,15 @@ const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 
 // Precalculation of constitutive tables.
 const int MATERIAL_COUNT = 4;
-double K_TABLE[4][1500000];                       // Four materials, 15000 values.
-double dKdh_TABLE[4][1500000];
-double ddKdhh_TABLE[4][1500000];
-double C_TABLE[4][1500000];
-double dCdh_TABLE[4][1500000];
+bool USE_CONSTITUTIVE_TABLE = true;		  // If true, all constitutive functions are precalculated into a table, 
+const double TABLE_LIMIT = -1000.0 ; 		  // limit of precalculated functions (should be always negative value lower 
+						  // then the lowest expect value of the solution (consider DMP!!)
+const double TABLE_PRECISION = 0.1;               // precision of precalculated table use 1.0, 0,1, 0.01, etc.....
+double** K_TABLE;                                 // 
+double** dKdh_TABLE;
+double** ddKdhh_TABLE;
+double** C_TABLE;
+double** dCdh_TABLE;
 bool CONSTITUTIVE_TABLES_READY = false;
 double*** POLYNOMIALS;                            // Polynomial approximation of the K(h) function close to saturation 
                                                   // (this function has singularity in its second derivative).
@@ -117,6 +125,7 @@ const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) functio
 const int NUM_OF_INSIDE_PTS = 0;
 bool POLYNOMIALS_READY = false;
 bool POLYNOMIALS_ALLOCATED = false;
+
 
 // Global variables for forms.
 double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
@@ -146,7 +155,9 @@ scalar essential_bc_values(double x, double y, double time)
 {
   if (time < STARTUP_TIME)
     return H_INIT + time/STARTUP_TIME*(H_ELEVATION-H_INIT);
-  else 
+  else if (time > PULSE_END_TIME)
+    return H_INIT;
+  else
     return H_ELEVATION;
 }
 
@@ -172,7 +183,7 @@ int main(int argc, char* argv[])
 
   // Either use exact constitutive relations (slow) or precalculate 
   // their polynomial approximations (faster).
-  CONSTITUTIVE_TABLES_READY = get_constitutive_tables(TABLES_FILENAME, ITERATIVE_METHOD);
+  CONSTITUTIVE_TABLES_READY = get_constitutive_tables(ITERATIVE_METHOD);
 
   // Time measurement.
   TimePeriod cpu_time;
@@ -181,7 +192,12 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &basemesh);
+  mloader.load(mesh_file, &basemesh);
+  
+  // Initial refinements.
+  //basemesh.refine_towards_boundary(1, 1);
+  //basemesh.refine_towards_boundary(3, 1);
+  //basemesh.refine_towards_boundary(4, 1);
 
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);
@@ -255,7 +271,7 @@ int main(int argc, char* argv[])
   ScalarView view("Initial condition", new WinGeom(0, 0, 630, 350));
   view.fix_scale_width(50);
   OrderView ordview("Initial mesh", new WinGeom(640, 0, 600, 350));
-  view.show(&sln_prev_time);
+  view.show(&sln_prev_time, HERMES_EPS_HIGH);
   ordview.show(&space);
   //MeshView mview("Mesh", new WinGeom(840, 0, 600, 350));
   //mview.show(&mesh);
@@ -436,7 +452,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, time %g days", TIME);
     view.set_title(title);
-    view.show(&sln);
+    view.show(&sln, HERMES_EPS_HIGH);
     sprintf(title, "Mesh, time %g days", TIME);
     ordview.set_title(title);
     ordview.show(&space);
