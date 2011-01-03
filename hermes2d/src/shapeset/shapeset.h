@@ -194,6 +194,8 @@ public:
   /// Returns shapeset identifier. Internal.
   virtual int get_id() const = 0;
 
+  /// Returns space type.
+  virtual ESpaceType get_space_type() const = 0;
 
 protected:
 

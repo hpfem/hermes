@@ -161,23 +161,34 @@ public:
   /// Multiplies the function represented by this class by the given coefficient.
   void multiply(scalar coef);
 
-  /// Returns the solution type.
-  int get_type() const { return type; };
+  /// Returns solution type.
+  ESolutionType get_type() const { return sln_type; };
+
+  /// Returns space type.
+  ESpaceType get_space_type() const { return space_type; };
+
 
 
 public:
   /// Internal.
   virtual void set_active_element(Element* e);
 
-  typedef enum { HERMES_UNDEF = -1, HERMES_SLN, HERMES_EXACT, HERMES_CONST } solution_type;
-
   /// Passes solution components calculated from solution vector as Solutions.
-  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *> solutions, Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
-  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, bool add_dir_lift = true);
-  static void vector_to_solutions(Vector* vec, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
-  static void vector_to_solution(Vector* vec, Space* space, Solution* solution, bool add_dir_lift = true);
-  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *> solutions, Hermes::Tuple<PrecalcShapeset *> pss, Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
-  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, PrecalcShapeset* pss, bool add_dir_lift = true);
+  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, 
+                                  Hermes::Tuple<Solution *> solutions, 
+                                  Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
+  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
+                                 bool add_dir_lift = true);
+  static void vector_to_solutions(Vector* vec, Hermes::Tuple<Space *> spaces, 
+                                  Hermes::Tuple<Solution*> solutions, 
+                                  Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
+  static void vector_to_solution(Vector* vec, Space* space, Solution* solution, 
+                                 bool add_dir_lift = true);
+  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, 
+                                  Hermes::Tuple<Solution *> solutions, Hermes::Tuple<PrecalcShapeset *> pss, 
+                                  Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
+  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
+                                 PrecalcShapeset* pss, bool add_dir_lift = true);
 
   bool own_mesh;
 protected:
@@ -187,7 +198,7 @@ protected:
   virtual void set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, bool add_dir_lift);
   virtual void set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift);
 
-  solution_type type;
+  ESolutionType sln_type;
 
   bool transform;
 
@@ -201,7 +212,7 @@ protected:
   int num_coefs, num_elems;
   int num_dofs;
 
-  int space_type;
+  ESpaceType space_type;
   void transform_values(int order, Node* node, int newmask, int oldmask, int np);
 
   ExactFunction exactfn1;

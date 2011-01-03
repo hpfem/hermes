@@ -68,6 +68,27 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
   return norm;
 }
 
+double calc_norms(Hermes::Tuple<Solution*> slns) 
+{
+  // Calculate norms for all solutions.
+  Hermes::Tuple<double> norms;
+  int n = slns.size();
+  for (int i=0; i<n; i++) {
+    switch (slns[i]->get_space_type()) {
+      case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
+      case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
+      case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
+      case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
+      default: error("Internal in calc_norms(): unknown space type.");
+    }
+  }
+  // Calculate the resulting norm.
+  double result = 0;
+  for (int i=0; i<n; i++) result += norms[i]*norms[i];
+  return sqrt(result);
+}
+
+
 bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Solution *> right, Hermes::Tuple<double> & err_abs, Hermes::Tuple<double> & norm_vals, 
                  double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::Tuple<ProjNormType> norms)
 {

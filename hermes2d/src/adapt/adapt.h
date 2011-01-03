@@ -51,19 +51,19 @@ HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>); ///< Instantiated template. 
 
 // Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
-                                   ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
-                                   ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
+                                      ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
+                                      ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
 #define HERMES_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
-                                   ///  The total error is absolute, i.e., it is an integral over squares of differencies.
-                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_TOTAL_ERROR_REL.
+                                      ///  The total error is absolute, i.e., it is an integral over squares of differencies.
+                                      ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_TOTAL_ERROR_REL.
 #define HERMES_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
-                                   ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
-                                   ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
-                                   ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
-                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
+                                      ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
+                                      ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
+                                      ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
+                                      ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
 #define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
-                                   ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
-                                   ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
+                                      ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
+                                      ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
 
 // Matrix forms for error calculation.
   typedef scalar (*matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[], 
@@ -129,7 +129,7 @@ class HERMES_API Adapt
 {
 public:
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 
-  /// Hdiv). If proj_norms are not specified, they are expected to be set later by set_error_form.
+  /// Hdiv). If proj_norms are not specified, they are defined as according to the spaces. 
   Adapt(Hermes::Tuple<Space *> spaces_, Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>()); 
   virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
@@ -145,34 +145,45 @@ public:
 
   /// Type-safe version of calc_err_est() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-	double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
-	{
-		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_est(Hermes::Tuple<Solution *> (sln), Hermes::Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
-	}
+  double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, 
+                      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+  {
+    if (num != 1) EXIT("Wrong number of solutions.");
+    return calc_err_est(Hermes::Tuple<Solution *> (sln), Hermes::Tuple<Solution *> (rsln), 
+                        solutions_for_adapt, error_flags);
+  }
 
-	/// Calculates the error of the solution. 'n' must be the same
-	/// as 'num' in the constructor. After that, n coarse solution
-	/// pointers are passed, followed by n fine solution pointers.
+  /// Calculates the error of the solution. 'n' must be the same
+  /// as 'num' in the constructor. After that, n coarse solution
+  /// pointers are passed, followed by n fine solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_est(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Hermes::Tuple<double>* component_errors = NULL)
+  double calc_err_est(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
+                      bool solutions_for_adapt = true, 
+                      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, 
+                      Hermes::Tuple<double>* component_errors = NULL)
   {
     return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
   }
 
   /// Type-safe version of calc_err_exact() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-	double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
-	{
-		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_exact(Hermes::Tuple<Solution *> (sln), Hermes::Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
-	}
+  double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, 
+                        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+  {
+    if (num != 1) EXIT("Wrong number of solutions.");
+    return calc_err_exact(Hermes::Tuple<Solution *> (sln), 
+                          Hermes::Tuple<Solution *> (rsln), 
+                          solutions_for_adapt, error_flags);
+  }
 
-	/// Calculates the error of the solution. 'n' must be the same
-	/// as 'num' in the constructor. After that, n coarse solution
-	/// pointers are passed, followed by n exact solution pointers.
+  /// Calculates the error of the solution. 'n' must be the same
+  /// as 'num' in the constructor. After that, n coarse solution
+  /// pointers are passed, followed by n exact solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_exact(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Hermes::Tuple<double>* component_errors = NULL)
+	double calc_err_exact(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
+                              bool solutions_for_adapt = true, 
+                              unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, 
+                              Hermes::Tuple<double>* component_errors = NULL)
   {
     return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
   }
@@ -260,7 +271,7 @@ protected: //adaptivity
    *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
    *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
   void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, AutoLocalArray2<int>& idx, 
-       Hermes::Tuple<RefinementSelectors::Selector *> refinement_selectors);
+                                   Hermes::Tuple<RefinementSelectors::Selector *> refinement_selectors);
 
   /// Enforces the same order to an element of a mesh which is shared among multiple compoenets.
   /** \param[in] meshes An arrat of meshes of components. */
@@ -291,7 +302,8 @@ protected: //forms and error evaluation
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-  virtual double calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt);
+  virtual double calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
+                                   unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt);
 
   /// Evaluates a square of an absolute error of an active element among a given pair of components.
   /** The method uses a bilinear forms to calculate the error. This is done by supplying a differences (f1 - v1) and (f2 - v2) at integration points to the bilinear form,
@@ -309,7 +321,7 @@ protected: //forms and error evaluation
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of an absolute error. */
   virtual double eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                    MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2);
+                            MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2);
 
   /// Evaluates a square of a norm of an active element in the reference solution among a given pair of components.
   /** The method uses a bilinear forms to calculate the norm. This is done by supplying a v1 and v2 at integration points to the bilinear form,
@@ -322,7 +334,7 @@ protected: //forms and error evaluation
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of a norm. */
   virtual double eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                   MeshFunction *rsln1, MeshFunction *rsln2);
+                           MeshFunction *rsln1, MeshFunction *rsln2);
 
   /// Builds an ordered queue of elements that are be examined.
   /** The method fills Adapt::standard_queue by elements sorted accordin to their error descending.

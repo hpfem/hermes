@@ -64,7 +64,7 @@ public:
 
   virtual void set_shapeset(Shapeset* shapeset);
 
-  virtual int get_type() const { return 3; }
+  virtual ESpaceType get_type() const { return HERMES_L2_SPACE; }
 
   virtual void get_element_assembly_list(Element* e, AsmList* al);
 

@@ -113,8 +113,8 @@ Func<Ord>* init_fn_ord(const int order)
 // Transformation of shape functions using reference mapping
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
-	int nc = fu->get_num_components();
-  int space_type = fu->get_type();
+  int nc = fu->get_num_components();
+  ESpaceType space_type = fu->get_space_type();
   Quad2D* quad = fu->get_quad_2d();
   if (nc == 1) fu->set_quad_order(order, H2D_FN_ALL);
   else fu->set_quad_order(order);
@@ -123,7 +123,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   Func<double>* u = new Func<double>(np, nc);
 
   // H1 or L2 space.
-  if (space_type == 0 || space_type == 3)
+  if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
   {
 		u->val = new double [np];
 		u->dx  = new double [np];
@@ -165,7 +165,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 		}
 	}
   // Hcurl space.
-	else if (space_type == 1)
+	else if (space_type == HERMES_HCURL_SPACE)
   {
     u->val0 = new double [np];
     u->val1 = new double [np];
@@ -184,7 +184,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     }
 	}
   // Hdiv space.
-  else if (space_type == 2)
+  else if (space_type == HERMES_HDIV_SPACE)
   {
     u->val0 = new double [np];
     u->val1 = new double [np];

@@ -67,6 +67,12 @@ public:
   // Get pointer to n-th space.
   Space* get_space(int n) {  return this->spaces[n];  }
 
+  // Get all spaces as a Hermes::Tuple.
+  Hermes::Tuple<Space *> get_spaces() {return this->spaces;}
+
+  // Get the number of spaces.
+  int get_num_spaces() {return this->spaces.size();}
+
   // This is different from H3D.
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 

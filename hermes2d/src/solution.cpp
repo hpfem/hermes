@@ -158,7 +158,7 @@ void Solution::init()
   memset(elems,  0, sizeof(elems));
   memset(oldest, 0, sizeof(oldest));
   transform = true;
-  type = HERMES_UNDEF;
+  sln_type = HERMES_UNDEF;
   own_mesh = false;
   num_components = 0;
   e_last = NULL;
@@ -177,11 +177,13 @@ void Solution::init()
 Solution::Solution()
         : MeshFunction()
 {
+  space_type = HERMES_INVALID_SPACE;
   this->init();
 }
 
 Solution::Solution(Mesh *mesh) : MeshFunction(mesh) 
 {
+  space_type = HERMES_INVALID_SPACE;
   this->init();
   this->mesh = mesh;
   this->own_mesh = false;
@@ -189,6 +191,7 @@ Solution::Solution(Mesh *mesh) : MeshFunction(mesh)
 
 Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh) 
 {
+  space_type = HERMES_INVALID_SPACE;
   this->init();
   this->mesh = mesh;
   this->own_mesh = false;
@@ -197,6 +200,7 @@ Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
 
 Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh()) 
 {
+  space_type = s->get_type();
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
@@ -205,6 +209,7 @@ Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh())
 
 Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh()) 
 {
+  space_type = s->get_type();
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
@@ -213,8 +218,8 @@ Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh())
 
 void Solution::assign(Solution* sln)
 {
-  if (sln->type == HERMES_UNDEF) error("Solution being assigned is uninitialized.");
-  if (sln->type != HERMES_SLN) { copy(sln); return; }
+  if (sln->sln_type == HERMES_UNDEF) error("Solution being assigned is uninitialized.");
+  if (sln->sln_type != HERMES_SLN) { copy(sln); return; }
 
   free();
 
@@ -230,18 +235,18 @@ void Solution::assign(Solution* sln)
   num_coefs = sln->num_coefs;          sln->num_coefs = 0;
   num_elems = sln->num_elems;          sln->num_elems = 0;
 
-  type = sln->type;
-  space_type = sln->space_type;
+  sln_type = sln->sln_type;
+  space_type = sln->get_space_type();
   num_components = sln->num_components;
 
-  sln->type = HERMES_UNDEF;
+  sln->sln_type = HERMES_UNDEF;
   memset(sln->tables, 0, sizeof(sln->tables));
 }
 
 
 void Solution::copy(const Solution* sln)
 {
-  if (sln->type == HERMES_UNDEF) error("Solution being copied is uninitialized.");
+  if (sln->sln_type == HERMES_UNDEF) error("Solution being copied is uninitialized.");
 
   free();
 
@@ -250,12 +255,12 @@ void Solution::copy(const Solution* sln)
   mesh->copy(sln->mesh);
   own_mesh = true;
 
-  type = sln->type;
-  space_type = sln->space_type;
+  sln_type = sln->sln_type;
+  space_type = sln->get_space_type();
   num_components = sln->num_components;
   num_dofs = sln->num_dofs;
 
-  if (sln->type == HERMES_SLN) // standard solution: copy coefficient arrays
+  if (sln->sln_type == HERMES_SLN) // standard solution: copy coefficient arrays
   {
     num_coefs = sln->num_coefs;
     num_elems = sln->num_elems;
@@ -317,6 +322,7 @@ void Solution::free()
 Solution::~Solution()
 {
   free();
+  space_type = HERMES_INVALID_SPACE;
 }
 
 
@@ -380,6 +386,7 @@ void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
     
+    space_type = space->get_type();
     scalar* coeffs = new scalar [vec->length()];
     vec->extract(coeffs);
     // debug
@@ -424,12 +431,12 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
     error("Provided 'space' and 'pss' must have the same shapesets.");
   int ndof = Space::get_num_dofs(space);
 
+  free();
+  
   space_type = space->get_type();
 
-  free();
-
   num_components = pss->get_num_components();
-  type = HERMES_SLN;
+  sln_type = HERMES_SLN;
   num_dofs = Space::get_num_dofs(space);
 
   // copy the mesh   TODO: share meshes between solutions // WHAT???
@@ -515,7 +522,6 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 
   if(mesh == NULL) error("mesh == NULL.\n");
   init_dxdy_buffer();
-
 }
 
 
@@ -527,7 +533,7 @@ void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
   this->mesh = mesh;
   exactfn1 = exactfn;
   num_components = 1;
-  type = HERMES_EXACT;
+  sln_type = HERMES_EXACT;
   exact_mult = 1.0;
   num_dofs = -1;
 }
@@ -539,7 +545,7 @@ void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
   this->mesh = mesh;
   exactfn2 = exactfn;
   num_components = 2;
-  type = HERMES_EXACT;
+  sln_type = HERMES_EXACT;
   exact_mult = 1.0;
   num_dofs = -1;
 }
@@ -552,7 +558,7 @@ void Solution::set_const(Mesh* mesh, scalar c)
   cnst[0] = c;
   cnst[1] = 0.0;
   num_components = 1;
-  type = HERMES_CONST;
+  sln_type = HERMES_CONST;
   num_dofs = -1;
 }
 
@@ -564,7 +570,7 @@ void Solution::set_const(Mesh* mesh, scalar c0, scalar c1)
   cnst[0] = c0;
   cnst[1] = c1;
   num_components = 2;
-  type = HERMES_CONST;
+  sln_type = HERMES_CONST;
   num_dofs = -1;
 }
 
@@ -580,7 +586,10 @@ void Solution::set_zero_2(Mesh* mesh)
   set_const(mesh, 0.0, 0.0);
 }
 
-void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<bool> add_dir_lift)
+void Solution::vector_to_solutions(scalar* solution_vector, 
+                                   Hermes::Tuple<Space*> spaces, 
+                                   Hermes::Tuple<Solution*> solutions, 
+                                   Hermes::Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
@@ -592,12 +601,17 @@ void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*
   return;
 }
 
-void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, bool add_dir_lift)
+void Solution::vector_to_solution(scalar* solution_vector, Space* space, 
+                                  Solution* solution, bool add_dir_lift)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), Hermes::Tuple<Solution*>(solution), Hermes::Tuple<bool>(add_dir_lift));
+  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), 
+                                Hermes::Tuple<Solution*>(solution), 
+                                Hermes::Tuple<bool>(add_dir_lift));
 }
 
-void Solution::vector_to_solutions(Vector* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<bool> add_dir_lift)
+void Solution::vector_to_solutions(Vector* solution_vector, Hermes::Tuple<Space*> spaces, 
+                                   Hermes::Tuple<Solution*> solutions, 
+                                   Hermes::Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
@@ -609,12 +623,18 @@ void Solution::vector_to_solutions(Vector* solution_vector, Hermes::Tuple<Space*
   return;
 }
 
-void Solution::vector_to_solution(Vector* solution_vector, Space* space, Solution* solution, bool add_dir_lift)
+void Solution::vector_to_solution(Vector* solution_vector, Space* space, 
+                                  Solution* solution, bool add_dir_lift)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), Hermes::Tuple<Solution*>(solution), Hermes::Tuple<bool>(add_dir_lift));
+  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), 
+                                Hermes::Tuple<Solution*>(solution), 
+                                Hermes::Tuple<bool>(add_dir_lift));
 }
 
-void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<PrecalcShapeset *> pss, Hermes::Tuple<bool> add_dir_lift)
+void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, 
+                                   Hermes::Tuple<Solution*> solutions, 
+                                   Hermes::Tuple<PrecalcShapeset *> pss, 
+                                   Hermes::Tuple<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
@@ -626,14 +646,19 @@ void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*
   return;
 }
 
-void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, PrecalcShapeset* pss, bool add_dir_lift)
+void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
+                                  PrecalcShapeset* pss, bool add_dir_lift)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), Hermes::Tuple<Solution*>(solution), Hermes::Tuple<PrecalcShapeset *>(pss), Hermes::Tuple<bool>(add_dir_lift));
+  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), 
+                                Hermes::Tuple<Solution*>(solution), 
+                                Hermes::Tuple<PrecalcShapeset *>(pss), 
+                                Hermes::Tuple<bool>(add_dir_lift));
 }
 
 
 void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
 {
+  space_type = space->get_type();
   int ndof = Space::get_num_dofs(space);
   scalar *temp = new scalar[ndof];
   memset(temp, 0, sizeof(scalar)*ndof);
@@ -650,17 +675,17 @@ void Solution::enable_transform(bool enable)
 
 void Solution::multiply(scalar coef)
 {
-  if (type == HERMES_SLN)
+  if (sln_type == HERMES_SLN)
   {
     for (int i = 0; i < num_coefs; i++)
       mono_coefs[i] *= coef;
   }
-  else if (type == HERMES_CONST)
+  else if (sln_type == HERMES_CONST)
   {
     cnst[0] *= coef;
     cnst[1] *= coef;
   }
-  else if (type == HERMES_EXACT)
+  else if (sln_type == HERMES_EXACT)
   {
     exact_mult *= coef;
   }
@@ -738,7 +763,7 @@ void Solution::set_active_element(Element* e)
     elems[cur_quad][cur_elem] = e;
   }
 
-  if (type == HERMES_SLN)
+  if (sln_type == HERMES_SLN)
   {
     int o = order = elem_orders[element->id];
     int n = mode ? sqr(o+1) : (o+1)*(o+2)/2;
@@ -755,11 +780,11 @@ void Solution::set_active_element(Element* e)
       make_dx_coefs(mode, o, dxdy_coefs[i][2], dxdy_coefs[i][5] = dxdy_buffer+m);  m += n;
     }
   }
-  else if (type == HERMES_EXACT)
+  else if (sln_type == HERMES_EXACT)
   {
     order = 20; // fixme
   }
-  else if (type == HERMES_CONST)
+  else if (sln_type == HERMES_CONST)
   {
     order = 0;
   }
@@ -807,7 +832,7 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
   int i, mstep = 0;
 
   // H1 space
-  if (space_type == 0)
+  if (space_type == HERMES_H1_SPACE)
   {
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     if (((newmask & H2D_SECOND) == H2D_SECOND && (oldmask & H2D_SECOND) != H2D_SECOND))
@@ -846,7 +871,7 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
   }
 
   // Hcurl space
-  else if (space_type == 1)
+  else if (space_type == HERMES_HCURL_SPACE)
   {
     bool trans_val = false, trans_curl = false;
     if ((newmask & H2D_FN_VAL) == H2D_FN_VAL && (oldmask & H2D_FN_VAL) != H2D_FN_VAL) trans_val  = true;
@@ -879,7 +904,7 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
   }
 
   // Hdiv space
-  else if (space_type == 2)
+  else if (space_type == HERMES_HDIV_SPACE)
   {
     if ((newmask & H2D_FN_VAL) == H2D_FN_VAL && (oldmask & H2D_FN_VAL) != H2D_FN_VAL)
     {
@@ -902,7 +927,7 @@ int Solution::get_edge_fn_order(int edge, Space* space, Element* e)
 {
   if (e == NULL) e = element;
   
-  if (type == HERMES_SLN && space != NULL) {
+  if (sln_type == HERMES_SLN && space != NULL) {
     return space->get_edge_order(e, edge); 
   } else {
     return ScalarFunction::get_edge_fn_order(edge);
@@ -919,7 +944,7 @@ void Solution::precalculate(int order, int mask)
   H2D_CHECK_ORDER(quad, order);
   int np = quad->get_num_points(order);
 
-  if (type == HERMES_SLN)
+  if (sln_type == HERMES_SLN)
   {
     // if we are required to transform vectors, we must precalculate both their components
     const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
@@ -927,12 +952,12 @@ void Solution::precalculate(int order, int mask)
     const int H2D_CURL = H2D_FN_DX | H2D_FN_DY; // sic
     if (transform)
     {
-      if (num_components == 1)                                            // H1 space
+      if (num_components == 1)                                            // H1 space or L2 space
       {
         if ((mask & H2D_FN_DX_0)  || (mask & H2D_FN_DY_0))  mask |= H2D_GRAD;
         if ((mask & H2D_FN_DXX_0)  || (mask & H2D_FN_DXY_0) || (mask & H2D_FN_DYY_0))  mask |= H2D_SECOND;
       }
-      else if (space_type == 1)                                           // Hcurl space
+      else if (space_type == HERMES_HCURL_SPACE)                                           // Hcurl space
         { if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL;
           if ((mask & H2D_FN_DX_1)  || (mask & H2D_FN_DY_0))  mask |= H2D_CURL; }
       else                                                                // Hdiv space
@@ -988,7 +1013,7 @@ void Solution::precalculate(int order, int mask)
     if (transform)
       transform_values(order, node, newmask, oldmask, np);
   }
-  else if (type == HERMES_EXACT)
+  else if (sln_type == HERMES_EXACT)
   {
     if (mask & ~H2D_FN_DEFAULT)
       error("Cannot obtain second derivatives of an exact solution.");
@@ -1045,7 +1070,7 @@ void Solution::precalculate(int order, int mask)
       }
     }
   }
-  else if (type == HERMES_CONST)
+  else if (sln_type == HERMES_CONST)
   {
     if (mask & ~H2D_FN_DEFAULT)
       error("Second derivatives of a constant solution not implemented.");
@@ -1077,9 +1102,9 @@ void Solution::save(const char* filename, bool compress)
 {
   int i;
 
-  if (type == HERMES_EXACT) error("Exact solution cannot be saved to a file.");
-  if (type == HERMES_CONST)  error("Constant solution cannot be saved to a file.");
-  if (type == HERMES_UNDEF) error("Cannot save -- uninitialized solution.");
+  if (sln_type == HERMES_EXACT) error("Exact solution cannot be saved to a file.");
+  if (sln_type == HERMES_CONST)  error("Constant solution cannot be saved to a file.");
+  if (sln_type == HERMES_UNDEF) error("Cannot save -- uninitialized solution.");
 
   // open the stream
   std::string fname = filename;
@@ -1131,7 +1156,7 @@ void Solution::load(const char* filename)
   int i;
 
   free();
-  type = HERMES_SLN;
+  sln_type = HERMES_SLN;
 
   int len = strlen(filename);
   bool compressed = (len > 3 && !strcmp(filename + len - 3, ".gz"));
@@ -1306,7 +1331,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
   if (mask >= 0x40) { a = 1; mask >>= 6; }
   while (!(mask & 1)) { mask >>= 1; b++; }
 
-  if (type == HERMES_EXACT)
+  if (sln_type == HERMES_EXACT)
   {
     if (num_components == 1)
     {
@@ -1326,12 +1351,12 @@ scalar Solution::get_pt_value(double x, double y, int item)
     }
     error("Cannot obtain second derivatives of an exact solution.");
   }
-  else if (type == HERMES_CONST)
+  else if (sln_type == HERMES_CONST)
   {
     if (b == 0) return cnst[a];
     return 0.0;
   }
-  else if (type == HERMES_UNDEF)
+  else if (sln_type == HERMES_UNDEF)
   {
     error("Cannot obtain values -- uninitialized solution. The solution was either "
           "not calculated yet or you used the assignment operator which destroys "

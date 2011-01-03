@@ -86,8 +86,8 @@ double* Shapeset::calculate_constrained_edge_combination(int order, int part, in
 
   // fill the matrix of the linear system
   n = order + 1 - ebias;
-  int space_type = get_id() / 10;
-  int component = space_type == 2 ? 1 : 0;
+  int space_type = this->get_space_type();
+  int component = (space_type == HERMES_HDIV_SPACE)? 1 : 0;
   double** a = new_matrix<double>(n, n);
   double* b = new double[n];
   for (i = 0; i < n; i++)

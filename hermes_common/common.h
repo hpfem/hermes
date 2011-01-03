@@ -116,11 +116,22 @@ const std::string MatrixSolverNames[7] = {
 
 // Spaces.
 enum ESpaceType {
-	HERMES_H1_SPACE = 1,
-	HERMES_HCURL_SPACE = 2,
-	HERMES_HDIV_SPACE = 3,
-	HERMES_L2_SPACE = 4
+  HERMES_H1_SPACE = 0,
+  HERMES_HCURL_SPACE = 1,
+  HERMES_HDIV_SPACE = 2,
+  HERMES_L2_SPACE = 3,
+  HERMES_INVALID_SPACE = -9999
 };
+
+
+// Solutions.
+enum ESolutionType {
+  HERMES_UNDEF = -1,
+  HERMES_SLN = 0,
+  HERMES_EXACT = 1,
+  HERMES_CONST = 2
+};
+
 
 // Projection norms.
 enum ProjNormType

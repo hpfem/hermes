@@ -183,14 +183,14 @@ void Space::set_element_order_internal(int id, int order)
 {
   _F_
   //NOTE: We need to take into account that L2 and Hcurl may use zero orders. The latter has its own version of this method, however.
-  assert_msg(mesh->get_element(id)->is_triangle() || get_type() == 3 || H2D_GET_V_ORDER(order) != 0, "Element #%d is quad but given vertical order is zero", id);
+  assert_msg(mesh->get_element(id)->is_triangle() || get_type() == HERMES_L2_SPACE || H2D_GET_V_ORDER(order) != 0, "Element #%d is quad but given vertical order is zero", id);
   assert_msg(mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical is not zero", id);
   if (id < 0 || id >= mesh->get_max_element_id())
     error("Invalid element id.");
   H2D_CHECK_ORDER(order);
 
   resize_tables();
-  if (mesh->get_element(id)->is_quad() && get_type() != 3 && H2D_GET_V_ORDER(order) == 0) 
+  if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0) 
      order = H2D_MAKE_QUAD_ORDER(order, order);
   edata[id].order = order;
   seq++;
@@ -299,7 +299,7 @@ void Space::copy_orders(Space* space, int inc)
     if (oo < 0) error("Source space has an uninitialized order (element id = %d)", e->id);
 
     int mo = shapeset->get_max_order();
-    int lower_limit = (get_type() == 3 || get_type() == 1) ? 0 : 1; // L2 and Hcurl may use zero orders.
+    int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
     int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(oo) + inc, mo));
     int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(oo) + inc, mo));
     oo = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
@@ -616,7 +616,7 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
   _F_
   int n = shapeset->get_max_order() + 1 - nv;
   mat = new_matrix<double>(n, n);
-  int component = get_type() == 2 ? 1 : 0;
+  int component = (get_type() == HERMES_HDIV_SPACE) ? 1 : 0;
 
   Quad1DStd quad1d;
   //shapeset->set_mode(HERMES_MODE_TRIANGLE);

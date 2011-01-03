@@ -57,7 +57,7 @@ public:
 
   virtual Space* dup(Mesh* mesh) const;
 
-  virtual int get_type() const { return 1; }
+  virtual ESpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
   virtual void set_shapeset(Shapeset* shapeset);
 

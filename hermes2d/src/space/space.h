@@ -323,8 +323,9 @@ public:
   int get_seq() const { return seq; }
   int set_seq(int seq_) { seq = seq_; return seq;}
 
-  /// Internal. Return type of this space (H1 = 0, Hcurl = 1, Hdiv = 2, L2 = 3)
-  virtual int get_type() const = 0;
+  /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE, 
+  /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
+  virtual ESpaceType get_type() const = 0;
 };
 
 // updating time-dependent essential (Dirichlet) boundary conditions

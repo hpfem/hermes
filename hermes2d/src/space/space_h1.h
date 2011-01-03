@@ -67,7 +67,7 @@ public:
 
   virtual Space* dup(Mesh* mesh) const;
 
-  virtual int get_type() const { return 0; }
+  virtual ESpaceType get_type() const { return HERMES_H1_SPACE; }
 
 protected:
 

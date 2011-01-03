@@ -20,10 +20,12 @@
 #include "refmap.h"
 
 // Error calculation in Hermes, useful for non-adaptive computations.
-extern HERMES_API double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type); // Note: coarse mesh sln has to be first, then                                                                                                        // ref_sln (because the abs. error is divided 
+extern HERMES_API double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type); // Note: coarse mesh sln has to be first, then      
+                                                                                                // ref_sln (because the abs. error is divided 
                                                                                                 // by the norm of the latter).
 extern HERMES_API double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type);
 extern HERMES_API double calc_norm(MeshFunction* sln, int norm_type);
+extern HERMES_API double calc_norms(Hermes::Tuple<Solution*> slns);         // Norms are determined from space_type in each Solution.
 
 // Function calculating errors between solutions in right and left vectors, returning all necessary parameters
 // returns correct parameters only if the return value is true
@@ -34,7 +36,8 @@ HERMES_API bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Soluti
                             Hermes::Tuple<ProjNormType> norms = Hermes::Tuple<ProjNormType>());
 
 // Helper functions
-extern HERMES_API double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), MeshFunction* sln1, MeshFunction* sln2);
+extern HERMES_API double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), 
+                                        MeshFunction* sln1, MeshFunction* sln2);
 extern HERMES_API double calc_norm(double (*fn)(MeshFunction*, RefMap*), MeshFunction* sln);
 
 extern HERMES_API double error_fn_l2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv);
