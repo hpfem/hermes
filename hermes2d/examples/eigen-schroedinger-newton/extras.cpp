@@ -31,40 +31,48 @@ void write_matrix_mm(const char* filename, Matrix* mat)
 }
 
 // Calculate mass norm vec^T*mat*vec.
-double calc_mass_norm(UMFPackMatrix* mat, double* vec, int length)
+double calc_mass_product(UMFPackMatrix* mat, double* vec, int length)
 {
   double norm = 0;
   double* product = new double[length];
   mat->multiply(vec, product);
   for (int i=0; i<length; i++) norm += vec[i]*product[i];
   delete [] product;
-  return sqrt(norm);
+  return norm;
 }
 
 // Normalizes vector so that vec^T*mat*vec = 1. 
 void normalize(UMFPackMatrix* mat, double* vec, int length) 
 {
-  double norm = calc_mass_norm(mat, vec, length);
+  double norm = sqrt(calc_mass_product(mat, vec, length));
   if (fabs(norm) < 1e-7) error("normalize(): Vector norm too small.");
   for (int i = 0; i < length; i++) vec[i] /= norm;
 }
 
-void create_augmented_linear_system(SparseMatrix* matrix_left_ref, SparseMatrix* matrix_right_ref, 
+// Multiply two vectors.
+double scalar_product(double* vec1, double* vec2, int length) 
+{
+  double val = 0;
+  for (int i=0; i<length; i++) val += vec1[i] * vec2[i];
+  return val;
+}
+
+void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* matrix_M_ref, 
                                     double* coeff_vec_ref, double lambda, UMFPackMatrix* new_matrix, 
                                     UMFPackVector* new_vector)
 {
   // Extracting the arrays Ap, Ai and Ax from the matrices M and S on reference mesh.
-  int size = ((UMFPackMatrix*)matrix_left_ref)->get_matrix_size();
+  int size = ((UMFPackMatrix*)matrix_S_ref)->get_matrix_size();
   int ndof_ref = size;
-  int nnz = ((UMFPackMatrix*)matrix_left_ref)->get_nnz();
-  int* ap = ((UMFPackMatrix*)matrix_left_ref)->get_Ap();
-  int* ai = ((UMFPackMatrix*)matrix_left_ref)->get_Ai();
-  double* ax_left = ((UMFPackMatrix*)matrix_left_ref)->get_Ax();
-  double* ax_right = ((UMFPackMatrix*)matrix_right_ref)->get_Ax();
+  int nnz = ((UMFPackMatrix*)matrix_S_ref)->get_nnz();
+  int* ap = ((UMFPackMatrix*)matrix_S_ref)->get_Ap();
+  int* ai = ((UMFPackMatrix*)matrix_S_ref)->get_Ai();
+  double* ax_S = ((UMFPackMatrix*)matrix_S_ref)->get_Ax();
+  double* ax_M = ((UMFPackMatrix*)matrix_M_ref)->get_Ax();
 
   // Calculating the vector MY.
   double* my_vec = new double[size+1];
-  ((UMFPackMatrix*)matrix_right_ref)->multiply(coeff_vec_ref, my_vec);
+  ((UMFPackMatrix*)matrix_M_ref)->multiply(coeff_vec_ref, my_vec);
 
 
   // Debug.
@@ -128,10 +136,10 @@ void create_augmented_linear_system(SparseMatrix* matrix_left_ref, SparseMatrix*
   count = 0;
   for (int j=0; j < size; j++) {                                // Index of a column.
     for (int i = ap[j]; i < ap[j + 1]; i++) {                   // Index of a row.
-      new_Ax[count++] = ax_left[i] - lambda * ax_right[i];      // Block S minus lambda M
-      //if (fabs(ax_left[i] - lambda * ax_right[i]) > 1e-10)
-      //  warn("value[%d] = %.12f", i, ax_left[i] - lambda * ax_right[i]);
-      //if (fabs(ax_left[i] - lambda * ax_right[i]) > max) max = fabs(ax_left[i] - lambda * ax_right[i]);
+      new_Ax[count++] = ax_S[i] - lambda * ax_M[i];      // Block S minus lambda M
+      //if (fabs(ax_S[i] - lambda * ax_M[i]) > 1e-10)
+      //  warn("value[%d] = %.12f", i, ax_S[i] - lambda * ax_M[i]);
+      //if (fabs(ax_S[i] - lambda * ax_M[i]) > max) max = fabs(ax_S[i] - lambda * ax_M[i]);
     }
     new_Ax[count++] = 2*my_vec[j];                              // 2*M*Y transposed is in the last row.
   }
@@ -143,21 +151,21 @@ void create_augmented_linear_system(SparseMatrix* matrix_left_ref, SparseMatrix*
 
   // Create the residual vector.
   // Multiply S times Y.
-  double* residual_1 = new double[ndof_ref];
-  ((UMFPackMatrix*)matrix_left_ref)->multiply(coeff_vec_ref, residual_1);
+  double* vec_SY = new double[ndof_ref];
+  ((UMFPackMatrix*)matrix_S_ref)->multiply(coeff_vec_ref, vec_SY);
   // Multiply M times Y.
-  double* residual_2 = new double[ndof_ref];
-  ((UMFPackMatrix*)matrix_right_ref)->multiply(coeff_vec_ref, residual_2);
+  double* vec_MY = new double[ndof_ref];
+  ((UMFPackMatrix*)matrix_M_ref)->multiply(coeff_vec_ref, vec_MY);
   // Calculate SY - lambda MY.
   double* residual = new double[ndof_ref+1];
-  for (int i=0; i<ndof_ref; i++) residual[i] = residual_1[i] - lambda * residual_2[i];
+  for (int i=0; i<ndof_ref; i++) residual[i] = vec_SY[i] - lambda * vec_MY[i];
   // Last component is Y^T M Y - 1.
-  double last_val = 0;
-  for (int i=0; i<ndof_ref; i++) last_val += coeff_vec_ref[i] * residual_2[i];
-  residual[ndof_ref] = last_val - 1;
+  residual[ndof_ref] = calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref) - 1;
+  delete [] vec_SY;
+  delete [] vec_MY;
 
   // Residual is multiplied with -1.
-  for (int i=0; i<ndof_ref+1; i++)  residual[i] *= -1.0;
+  for (int i=0; i<ndof_ref+1; i++) residual[i] *= -1.0;
 
   // Creating UMFPackVector for the residual.
   for (int i=0; i<ndof_ref+1; i++) new_vector->set(i, residual[i]);

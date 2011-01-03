@@ -52,7 +52,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Pysparse parameters.
 const double PYSPARSE_TARGET_VALUE = 2.0;         // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
-const double PYSPARSE_TOL = 1e-10;                // Pysparse parameter: Error tolerance.
+const double PYSPARSE_TOL = 1e-10;                // PySparse parameter: Error tolerance.
 const int PYSPARSE_MAX_ITER = 1000;               // PySparse parameter: Maximum number of iterations.
 
 // Error tolerance for the Newton's method on the reference mesh.
@@ -100,9 +100,9 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
 
   // Initialize the weak formulation for the left hand side, i.e., H.
-  WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_left_ord);
-  wf_right.add_matrix_form(callback(bilinear_form_right));
+  WeakForm wf_S, wf_M;
+  wf_S.add_matrix_form(bilinear_form_S, bilinear_form_S_ord);
+  wf_M.add_matrix_form(callback(bilinear_form_M));
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -115,28 +115,28 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof;
 
   // Initialize matrices and matrix solver.
-  SparseMatrix* matrix_left = create_matrix(matrix_solver);
-  SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_left);
+  SparseMatrix* matrix_S = create_matrix(matrix_solver);
+  SparseMatrix* matrix_M = create_matrix(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_S);
 
   // Assemble matrices S and M on coarse mesh.
   info("Assembling matrices S and M on coarse mesh.");
   bool is_linear = true;
-  DiscreteProblem dp_left(&wf_left, &space, is_linear);
-  dp_left.assemble(matrix_left);
-  DiscreteProblem dp_right(&wf_right, &space, is_linear);
-  dp_right.assemble(matrix_right);
+  DiscreteProblem dp_S(&wf_S, &space, is_linear);
+  dp_S.assemble(matrix_S);
+  DiscreteProblem dp_M(&wf_M, &space, is_linear);
+  dp_M.assemble(matrix_M);
 
-  // Write matrix_left in MatrixMarket format.
-  write_matrix_mm("mat_left.mtx", matrix_left);
+  // Write matrix_S in MatrixMarket format.
+  write_matrix_mm("mat_S.mtx", matrix_S);
 
-  // Write matrix_left in MatrixMarket format.
-  write_matrix_mm("mat_right.mtx", matrix_right);
+  // Write matrix_M in MatrixMarket format.
+  write_matrix_mm("mat_M.mtx", matrix_M);
 
   // Call Python eigensolver. Solution will be written to "eivecs.dat".
   info("Calling Pysparse.");
   char call_cmd[255];
-  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
+  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_S.mtx mat_M.mtx %g %d %g %d", 
 	  PYSPARSE_TARGET_VALUE, TARGET_EIGENFUNCTION, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
   system(call_cmd);
   info("Pysparse finished.");
@@ -164,13 +164,15 @@ int main(int argc, char* argv[])
       coeff_vec[i] = atof(line);
     }
     // Normalize the eigenvector.
-    normalize((UMFPackMatrix*)matrix_right, coeff_vec, ndof);
+    normalize((UMFPackMatrix*)matrix_M, coeff_vec, ndof);
   }  
   fclose(file);
 
   // Eigenvalue.
   double lambda = eigenval[neig-1];
   info("Eigenvalue on coarse mesh: %g", lambda);
+  info("Once more just to check: %g", calc_mass_product((UMFPackMatrix*)matrix_S, coeff_vec, ndof)
+      / calc_mass_product((UMFPackMatrix*)matrix_M, coeff_vec, ndof));
 
   // Eigenfunction.
   Solution sln;
@@ -221,18 +223,25 @@ int main(int argc, char* argv[])
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);      
 
     // Initialize matrices and matrix solver on reference mesh.
-    SparseMatrix* matrix_left_ref = create_matrix(matrix_solver);
-    SparseMatrix* matrix_right_ref = create_matrix(matrix_solver);
+    SparseMatrix* matrix_S_ref = create_matrix(matrix_solver);
+    SparseMatrix* matrix_M_ref = create_matrix(matrix_solver);
 
     // Assemble matrices S and M on reference mesh.
     info("Assembling matrices S and M on reference mesh.");
     is_linear = true;
-    DiscreteProblem dp_left_ref(&wf_left, ref_space, is_linear);
-    dp_left_ref.assemble(matrix_left_ref);
-    DiscreteProblem dp_right_ref(&wf_right, ref_space, is_linear);
-    dp_right_ref.assemble(matrix_right_ref);
+    DiscreteProblem dp_S_ref(&wf_S, ref_space, is_linear);
+    matrix_S_ref->zero();
+    dp_S_ref.assemble(matrix_S_ref);
+    DiscreteProblem dp_M_ref(&wf_M, ref_space, is_linear);
+    matrix_M_ref->zero();
+    dp_M_ref.assemble(matrix_M_ref);
 
-    // Newton's method for the eigenproblem on the reference mesh.
+    // Calculate eigenvalue corresponding to the new reference solution.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+      / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    info("Eigenvalue on reference mesh: %.12f", lambda);
+
+    // Newton's method on the reference mesh.
     double newton_err_rel;
     UMFPackMatrix* matrix_augm = new UMFPackMatrix();  
     UMFPackVector* vector_augm = new UMFPackVector(ndof_ref+1);
@@ -246,12 +255,12 @@ int main(int argc, char* argv[])
     View::wait(HERMES_WAIT_KEYPRESS);
     do {
       // Normalize the eigenvector.
-      //normalize((UMFPackMatrix*)matrix_right_ref, coeff_vec_ref, ndof_ref);
-      info("Eigenvector mass norm: %g", calc_mass_norm((UMFPackMatrix*)matrix_right_ref, coeff_vec_ref, ndof_ref));
+      //normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+      info("Eigenvector mass product: %g", calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref));
 
       // Create the augmented matrix and vector for Newton.
       //info("Creating augmented matrix and vector on reference mesh.");
-      create_augmented_linear_system(matrix_left_ref, matrix_right_ref, coeff_vec_ref, lambda, 
+      create_augmented_linear_system(matrix_S_ref, matrix_M_ref, coeff_vec_ref, lambda, 
                                      matrix_augm, vector_augm);
 
       // Solve the augmented matrix problem.
@@ -338,12 +347,13 @@ int main(int argc, char* argv[])
     if (ndof >= NDOF_STOP) done = true;
 
     // Clean up.
-    delete matrix_left_ref;
-    delete matrix_right_ref;
+    delete matrix_S_ref;
+    delete matrix_M_ref;
     delete matrix_augm;
     delete vector_augm;
     delete solver_augm;
     delete adaptivity;
+    delete ref_space->get_mesh();
     delete ref_space;
     delete [] coeff_vec;
     delete [] coeff_vec_ref;
