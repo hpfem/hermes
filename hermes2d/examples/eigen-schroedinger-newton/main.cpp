@@ -1,6 +1,8 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 #include <stdio.h>
+
+using namespace RefinementSelectors;
 
 //  This example shows how one can perform adaptivity to a selected eigenfunction
 //  without calling the eigensolver again in each adaptivity step. The eigensolver 
@@ -15,15 +17,46 @@
 //
 //  The following parameters can be changed:
 
-int TARGET_EIGENFUNCTION = 1;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
+int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
-double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
-double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
-int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
+const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
+                                                  // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 0;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_HP_ANISO_H;        // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
+                                                  // H2D_HP_ANISO_P, H2D_HP_ANISO. See User Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double ERR_STOP = 1e-3;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
+                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
+                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Pysparse parameters.
+const double PYSPARSE_TARGET_VALUE = 2.0;         // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
+const double PYSPARSE_TOL = 1e-10;                // PySparse parameter: Error tolerance.
+const int PYSPARSE_MAX_ITER = 1000;               // PySparse parameter: Maximum number of iterations.
+
+// Error tolerance for the Newton's method on the reference mesh.
+const double NEWTON_TOL = 1e-3;
 
 // Problem parameters.
 double V(double x, double y) {
@@ -33,57 +66,15 @@ double V(double x, double y) {
 }
 
 // Boundary markers.
-const int BDY_BOTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
+const int BDY_MARKER = 1;
 
 // Weak forms.
 #include "forms.cpp"
 
-// Write the matrix in Matrix Market format.
-void write_matrix_mm(const char* filename, Matrix* mat) 
-{
-  // Get matrix size.
-  int ndof = mat->get_size();
-  FILE *out = fopen(filename, "w" );
-  if (out == NULL) error("failed to open file for writing.");
+// Extras.
+#include "extras.cpp"
 
-  // Calculate the number of nonzeros.
-  int nz = 0;
-  for (int i = 0; i < ndof; i++) {
-    for (int j = 0; j <= i; j++) { 
-      double tmp = mat->get(i, j);
-      if (std::abs(tmp) > 1e-15) nz++;
-    }
-  } 
-
-  // Write the matrix in MatrixMarket format
-  fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
-  fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i = 0; i < ndof; i++) {
-    for (int j = 0; j <= i; j++) { 
-      double tmp = mat->get(i, j);
-      if (std::abs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
-    }
-  } 
-
-  fclose(out);
-}
-
-// Normalizes vector so that vec^T*mat*vec = 1. 
-void normalize(UMFPackMatrix* mat, double* vec, int length) 
-{
-  double norm = 0;
-  double* product = new double[length];
-  mat->multiply(vec, product);
-  for (int i=0; i<length; i++) norm += vec[i]*product[i];
-  norm = sqrt(norm);
-  if (fabs(norm) < 1e-7) error("normalize(): Vector norm too small.");
-  for (int i = 0; i < length; i++) vec[i] /= norm;
-  delete [] product;
-}
-
+// Main function.
 int main(int argc, char* argv[])
 {
   info("Desired eigenfunction to calculate: %d.", TARGET_EIGENFUNCTION);
@@ -98,52 +89,62 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_MARKER));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values.add_zero(Hermes::Tuple<int>(BDY_MARKER));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-  info("ndof: %d.", ndof);
 
   // Initialize the weak formulation for the left hand side, i.e., H.
-  WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_left_ord);
-  wf_right.add_matrix_form(callback(bilinear_form_right));
+  WeakForm wf_S, wf_M;
+  wf_S.add_matrix_form(bilinear_form_S, bilinear_form_S_ord);
+  wf_M.add_matrix_form(callback(bilinear_form_M));
+
+  // Initialize refinement selector.
+  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Initialize views.
+  ScalarView sview("", new WinGeom(0, 0, 440, 350));
+  OrderView oview("", new WinGeom(450, 0, 410, 350));
+
+  // DOF convergence graph.
+  SimpleGraph graph_dof;
 
   // Initialize matrices and matrix solver.
-  SparseMatrix* matrix_left = create_matrix(matrix_solver);
-  SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_left);
+  SparseMatrix* matrix_S = create_matrix(matrix_solver);
+  SparseMatrix* matrix_M = create_matrix(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_S);
 
-  // Assemble matrices M and S.
+  // Assemble matrices S and M on coarse mesh.
+  info("Assembling matrices S and M on coarse mesh.");
   bool is_linear = true;
-  DiscreteProblem dp_left(&wf_left, &space, is_linear);
-  dp_left.assemble(matrix_left);
-  DiscreteProblem dp_right(&wf_right, &space, is_linear);
-  dp_right.assemble(matrix_right);
+  DiscreteProblem dp_S(&wf_S, &space, is_linear);
+  dp_S.assemble(matrix_S);
+  DiscreteProblem dp_M(&wf_M, &space, is_linear);
+  dp_M.assemble(matrix_M);
 
-  // Write matrix_left in MatrixMarket format.
-  write_matrix_mm("mat_left.mtx", matrix_left);
+  // Write matrix_S in MatrixMarket format.
+  write_matrix_mm("mat_S.mtx", matrix_S);
 
-  // Write matrix_left in MatrixMarket format.
-  write_matrix_mm("mat_right.mtx", matrix_right);
+  // Write matrix_M in MatrixMarket format.
+  write_matrix_mm("mat_M.mtx", matrix_M);
 
-  // Calling Python eigensolver. Solution will be written to "eivecs.dat".
-  info("Calling Pysparse...");
+  // Call Python eigensolver. Solution will be written to "eivecs.dat".
+  info("Calling Pysparse.");
   char call_cmd[255];
-  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	  TARGET_VALUE, TARGET_EIGENFUNCTION, TOL, MAX_ITER);
+  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_S.mtx mat_M.mtx %g %d %g %d", 
+	  PYSPARSE_TARGET_VALUE, TARGET_EIGENFUNCTION, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
   system(call_cmd);
   info("Pysparse finished.");
 
-  // Initializing solution vector, solution and ScalarView.
+  // Initialize solution vector.
   double* coeff_vec = new double[ndof];
 
-  // Reading solution vectors from file and visualizing.
+  // Read solution vectors from file and visualize it.
   double* eigenval =new double[TARGET_EIGENFUNCTION];
   FILE *file = fopen("eivecs.dat", "r");
   char line [64];                  // Maximum line size.
@@ -163,25 +164,29 @@ int main(int argc, char* argv[])
       coeff_vec[i] = atof(line);
     }
     // Normalize the eigenvector.
-    normalize((UMFPackMatrix*)matrix_right, coeff_vec, ndof);
+    normalize((UMFPackMatrix*)matrix_M, coeff_vec, ndof);
   }  
   fclose(file);
 
-  /*** Now we have the desired eigenfunction in terms of the coefficient vector ***/
-
-  // Convert coefficient vector into a Solution.
-  Solution sln;
+  // Eigenvalue.
   double lambda = eigenval[neig-1];
-  info("Eigenvalue (coarse mesh): %g", lambda);
+  info("Eigenvalue on coarse mesh: %g", lambda);
+  info("Once more just to check: %g", calc_mass_product((UMFPackMatrix*)matrix_S, coeff_vec, ndof)
+      / calc_mass_product((UMFPackMatrix*)matrix_M, coeff_vec, ndof));
+
+  // Eigenfunction.
+  Solution sln;
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
-  // Visualize the solution.
-  ScalarView sview("", new WinGeom(0, 0, 440, 350));
+  // Visualize the eigenfunction.
+  info("Plotting initial eigenfunction on coarse mesh.");
   char title[100];
-  sprintf(title, "Eigenfunction no. %d, val = %g", neig, lambda);
+  sprintf(title, "Eigenfunction %d on initial mesh", neig);
   sview.set_title(title);
+  sview.show_mesh(false);
   sview.show(&sln);
-  OrderView oview("Mesh", new WinGeom(450, 0, 410, 350));
+  sprintf(title, "Initial mesh");
+  oview.set_title(title);
   oview.show(&space);
 
   // Wait for keypress.
@@ -189,197 +194,175 @@ int main(int argc, char* argv[])
 
   /*** Begin adaptivity ***/
 
-  // Construct globally refined reference mesh and setup reference space.
-  Space* ref_space = construct_refined_space(&space);
-  int ndof_ref = Space::get_num_dofs(ref_space);
-  info("ndof_ref = %d", ndof_ref);
+  // Adaptivity loop:
+  Solution ref_sln;
+  Space* ref_space = NULL;  
+  int as = 1; 
+  bool done = false;
+  do
+  {
+    info("---- Adaptivity step %d:", as);
 
-  // Initialize matrices and matrix solver on reference mesh.
-  SparseMatrix* matrix_left_ref = create_matrix(matrix_solver);
-  SparseMatrix* matrix_right_ref = create_matrix(matrix_solver);
+    // Construct globally refined reference mesh and setup reference space.
+    ref_space = construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
+    info("ndof: %d, ndof_ref: %d", ndof, ndof_ref);
 
-  // Assemble matrices M and S on reference mesh.
-  is_linear = true;
-  DiscreteProblem dp_left_ref(&wf_left, ref_space, is_linear);
-  dp_left_ref.assemble(matrix_left_ref);
-  DiscreteProblem dp_right_ref(&wf_right, ref_space, is_linear);
-  dp_right_ref.assemble(matrix_right_ref);
-
-
-
-
-  // Debug: dumping matrices.
-  //FILE* f;
-  //f = fopen("s.txt", "w");
-  //matrix_left_ref->dump(f, "mat-left");
-  //fclose(f);
-  //f = fopen("m.txt", "w");
-  //matrix_left_ref->dump(f, "mat-right");
-  //fclose(f);
-
-
-
-
-  // Project the coarse mesh eigenfunction to the reference mesh.
-  info("Projecting reference solution on coarse mesh.");
-  double* coeff_vec_ref = new double[ndof_ref];
-  OGProjection::project_global(ref_space, &sln, coeff_vec_ref, matrix_solver); 
-  // Normalize the eigenvector.
-  normalize((UMFPackMatrix*)matrix_right_ref, coeff_vec_ref, ndof_ref);
-
-  // Extracting the arrays Ap, Ai and Ax from the matrices M and S on reference mesh.
-  int size = ((UMFPackMatrix*)matrix_left_ref)->get_matrix_size();
-  int nnz = ((UMFPackMatrix*)matrix_left_ref)->get_nnz();
-  int* ap = ((UMFPackMatrix*)matrix_left_ref)->get_Ap();
-  int* ai = ((UMFPackMatrix*)matrix_left_ref)->get_Ai();
-  double* ax_left = ((UMFPackMatrix*)matrix_left_ref)->get_Ax();
-  double* ax_right = ((UMFPackMatrix*)matrix_right_ref)->get_Ax();
-
-  // Calculating the vector MY.
-  double* my_vec = new double[size+1];
-  ((UMFPackMatrix*)matrix_right_ref)->multiply(coeff_vec_ref, my_vec);
-
-
-  // Debug.
-  //info("coeff_vec_ref:");
-  //for (int i=0; i<ndof_ref; i++) printf("%g ", coeff_vec_ref[i]);
-  //printf("\n");
-  //info("my_vec:");
-  //for (int i=0; i<ndof_ref; i++) printf("%g ", my_vec[i]);
-  //printf("\n");
-
-
-
-  // Constructing the augmented matrix for Newton's method.
-  int new_size =  ndof_ref + 1;
-  int new_nnz = nnz + 2*size;
-  int* new_Ap = new int[new_size+1]; assert(new_Ap != NULL);
-  int* new_Ai = new int[new_nnz];    assert(new_Ai != NULL);
-  double* new_Ax = new double[new_nnz]; assert(new_Ax != NULL);
-  // Filling the new Ap array.
-  new_Ap[0] = ap[0];
-  for (int i=1; i < size+1; i++) new_Ap[i] = ap[i] + i;
-  new_Ap[size+1] = new_Ap[size] + size;
-
-
-  // Debug.
-  //info("old Ap:");
-  //for (int i=0; i<size+1; i++) printf("%d ", ap[i]);
-  //printf("\n");
-  //info("new Ap:");
-  //for (int i=0; i<new_size+1; i++) printf("%d ", new_Ap[i]);
-  //printf("\n");
-
-
-
-
-  // Filling the new Ai array.
-  int count = 0;
-  for (int j=0; j < size; j++) {                                // Index of a column.
-    for (int i = ap[j]; i < ap[j + 1]; i++) {                   // Index of a row.
-      new_Ai[count++] = ai[i];                                  // First size entries in each column are the same.
+    // Obtain initial approximation on new reference mesh.
+    double* coeff_vec_ref = new double[ndof_ref];
+    if (as == 1) {
+      // Project the coarse mesh eigenfunction to the reference mesh.
+      info("Projecting coarse mesh solution to reference mesh.");
+      OGProjection::project_global(ref_space, &sln, coeff_vec_ref, matrix_solver);     
     }
-    new_Ai[count++] = size;                                     // Accounting for last item in columns 0, 1, size-1.
-  }
-  for (int i=0; i < size; i++) new_Ai[count++] = i;             // Accounting for last column.
-
-
-  // Debug.
-  //info("old Ai:");
-  //for (int i=0; i<nnz; i++) printf("%d ", ai[i]);
-  //printf("\n");
-  //info("new Ai:");
-  //for (int i=0; i<new_nnz; i++) printf("%d ", new_Ai[i]);
-  //printf("\n");
-
-
-
-
-  // Filling the new Ax array.  
-  count = 0;
-  for (int j=0; j < size; j++) {                                // Index of a column.
-    for (int i = ap[j]; i < ap[j + 1]; i++) {                   // Index of a row.
-      new_Ax[count++] = ax_left[i] - lambda*ax_right[i];        // Block S minus lambda M
+    else {
+      // Project the last reference mesh solution to the reference mesh.
+      info("Projecting last reference mesh solution to new reference mesh.");
+      OGProjection::project_global(ref_space, &ref_sln, coeff_vec_ref, matrix_solver);     
     }
-    new_Ax[count++] = 2*my_vec[j];                              // 2*M*Y transposed is in the last row.
+    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);      
+
+    // Initialize matrices and matrix solver on reference mesh.
+    SparseMatrix* matrix_S_ref = create_matrix(matrix_solver);
+    SparseMatrix* matrix_M_ref = create_matrix(matrix_solver);
+
+    // Assemble matrices S and M on reference mesh.
+    info("Assembling matrices S and M on reference mesh.");
+    is_linear = true;
+    DiscreteProblem dp_S_ref(&wf_S, ref_space, is_linear);
+    matrix_S_ref->zero();
+    dp_S_ref.assemble(matrix_S_ref);
+    DiscreteProblem dp_M_ref(&wf_M, ref_space, is_linear);
+    matrix_M_ref->zero();
+    dp_M_ref.assemble(matrix_M_ref);
+
+    // Calculate eigenvalue corresponding to the new reference solution.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+      / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    info("Eigenvalue on reference mesh: %.12f", lambda);
+
+    // Newton's method on the reference mesh.
+    double newton_err_rel;
+    UMFPackMatrix* matrix_augm = new UMFPackMatrix();  
+    UMFPackVector* vector_augm = new UMFPackVector(ndof_ref+1);
+    Solver* solver_augm = create_linear_solver(matrix_solver, matrix_augm, vector_augm);
+    int it = 1;
+    // Debug.
+    char title0[100];
+    sprintf(title0, "Initial condition for Newton.");
+    sview.set_title(title0);
+    sview.show(&ref_sln);
+    View::wait(HERMES_WAIT_KEYPRESS);
+    do {
+      // Normalize the eigenvector.
+      //normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+      info("Eigenvector mass product: %g", calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref));
+
+      // Create the augmented matrix and vector for Newton.
+      //info("Creating augmented matrix and vector on reference mesh.");
+      create_augmented_linear_system(matrix_S_ref, matrix_M_ref, coeff_vec_ref, lambda, 
+                                     matrix_augm, vector_augm);
+
+      // Solve the augmented matrix problem.
+      //info("Solving augmented problem on reference mesh.");
+      if(!solver_augm->solve()) error ("Matrix solver failed.\n");
+      double* increment = solver_augm->get_solution();
+
+      // Update the eigenfunction and eigenvalue.
+      //info("Updating reference solution.");
+      for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] += increment[i];
+      lambda += increment[ndof_ref];
+      info("Eigenvalue increment: %.12f", increment[ndof_ref]);
+      info("Eigenvalue: %.12f", lambda);
+
+      // Calculate relative error of the increment.
+      Solution ref_sln_new;
+      Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
+      newton_err_rel = calc_abs_error(&ref_sln, &ref_sln_new, HERMES_H1_NORM)
+	               / calc_norm(&ref_sln_new, HERMES_H1_NORM) * 100;
+
+      // Updating reference solution.
+      ref_sln.copy(&ref_sln_new);
+
+      // Debug.
+      char title1[100];
+      sprintf(title1, "Newton's iteration %d", it);
+      sview.set_title(title1);
+      sview.show(&ref_sln);
+      View::wait(HERMES_WAIT_KEYPRESS);
+
+      info("---- Newton iter %d, ndof %d, newton_err_rel %g%%", it++, ndof_ref, newton_err_rel);
+    }
+    while (newton_err_rel > NEWTON_TOL);
+
+    // Project reference solution to coarse mesh for error estimation.
+    if (as > 1) {
+      // Project reference solution to coarse mesh.
+      info("Projecting reference solution to coarse mesh for error calculation.");
+      coeff_vec = new double[ndof];
+      OGProjection::project_global(&space, &ref_sln, coeff_vec, matrix_solver); 
+      Solution::vector_to_solution(coeff_vec, &space, &sln);
+
+      // Visualize the projection.
+      info("Plotting projection of reference solution to new coarse mesh.");
+      char title[100];
+      sprintf(title, "Coarse mesh projection");
+      sview.set_title(title);
+      sview.show_mesh(false);
+      sview.show(&sln);
+      sprintf(title, "Coarse mesh, step %d", as);
+      oview.set_title(title);
+      oview.show(&space);
+
+      // Wait for keypress.
+      View::wait(HERMES_WAIT_KEYPRESS);
+    }
+
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate."); 
+    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    bool solutions_for_adapt = true;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+    // Report results.
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+      Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
+    graph_dof.save("conv_dof_est.dat");
+
+    // If err_est too large, adapt the mesh.
+    if (err_est_rel < ERR_STOP) done = true;
+    else 
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      
+      // Increase the counter of performed adaptivity steps.
+      if (done == false)  as++;
+    }
+    ndof = Space::get_num_dofs(&space);
+    if (ndof >= NDOF_STOP) done = true;
+
+    // Clean up.
+    delete matrix_S_ref;
+    delete matrix_M_ref;
+    delete matrix_augm;
+    delete vector_augm;
+    delete solver_augm;
+    delete adaptivity;
+    delete ref_space->get_mesh();
+    delete ref_space;
+    delete [] coeff_vec;
+    delete [] coeff_vec_ref;
   }
-  for (int i=0; i < size; i++) new_Ax[count++] = -my_vec[i];    // Minus M*Y is in the last column.
-  // Creating the new matrix.
-  UMFPackMatrix* new_matrix = new UMFPackMatrix();
-  new_matrix->create(new_size, new_nnz, new_Ap, new_Ai, new_Ax);
+  while (done == false);
 
-  // Create the residual vector.
-  // Multiply S times Y.
-  double* residual_1 = new double[ndof_ref];
-  ((UMFPackMatrix*)matrix_left_ref)->multiply(coeff_vec_ref, residual_1);
-  // Multiply M times Y.
-  double* residual_2 = new double[ndof_ref];
-  ((UMFPackMatrix*)matrix_right_ref)->multiply(coeff_vec_ref, residual_2);
-  // Calculate SY - lambda MY.
-  double* residual = new double[ndof_ref+1];
-  for (int i=0; i<ndof_ref; i++) residual[i] = residual_1[i] - lambda * residual_2[i];
-  // Last component is Y^T M Y - 1.
-  double last_val = 0;
-  for (int i=0; i<ndof_ref; i++) last_val += coeff_vec_ref[i] * residual_2[i];
-  residual[ndof_ref] = last_val - 1;
-  // Residual is multiplied with -1.
-  for (int i=0; i<ndof_ref+1; i++)  residual[i] *= -1.0;
-
-  // Creating UMFPackVector for the residual.
-  Vector* new_vector = new UMFPackVector(ndof_ref+1);
-  for (int i=0; i<ndof_ref+1; i++) new_vector->set(i, residual[i]);
-
-  // Solving the matrix problem.
-  Solver* solver_new = create_linear_solver(matrix_solver, new_matrix, new_vector);
-  if(!solver_new->solve()) error ("Matrix solver failed.\n");
-  double* increment = solver_new->get_solution();
-  // Update the eigenfunction and eigenvalue.
-  for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] += increment[i];
-  lambda += increment[ndof_ref];
-  info("Eigenvalue (fine mesh): %g", lambda);
-
-  // Show updated eigenfunction on the reference mesh.
-  Solution* ref_sln = new Solution();
-  Solution::vector_to_solution(coeff_vec_ref, ref_space, ref_sln);
-  sprintf(title, "Eigenfunction no. %d, val = %g", neig, lambda);
-  sview.set_title(title);
-  sview.show(ref_sln);
-  sprintf(title, "Reference mesh");
-  oview.set_title(title);
-  oview.show(ref_space);
-
-
-
-
-
-
-  // Wait for keypress.
-  View::wait(HERMES_WAIT_KEYPRESS);
-
-
-
-  // Visualize the increment.
-  DiffFilter increm(Hermes::Tuple<MeshFunction*>(&sln, ref_sln));
-  sprintf(title, "Newton's increment");
-  sview.set_title(title);
-  sview.show(&increm);
-
-
-
-
-
-  // Wait for keypress.
-  View::wait(HERMES_WAIT_KEYPRESS);
-
-
-
-
-
-
-
-  // Cleaning up.
-  delete [] coeff_vec;
-  delete [] coeff_vec_ref;
+  // Wait for all views to be closed.
+  info("Computation finished.");
+  View::wait();
 
   return 0; 
 };
