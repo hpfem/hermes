@@ -460,7 +460,6 @@ void RefMap::untransform(Element* e, double x, double y, double& xi1, double& xi
   }
 }
 
-/* Changes related to getting rid of Judy. */
 void RefMap::init_node(Node* pp)
 {
   // reset all precalculated tables
@@ -503,8 +502,6 @@ void RefMap::free()
   }
 }
 
-
-/* Changes related to getting rid of Judy. */
 RefMap::Node* RefMap::handle_overflow()
 {
   if (overflow != NULL)

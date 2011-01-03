@@ -183,13 +183,7 @@ protected:
     double3* tan[4];
   };
 
-  /* Beginning of changes related to getting rid of Judy. */
-  // this name changed to the one with an underscore at the end.
-  void* nodes_;
-
   std::map<uint64_t, Node*> nodes;
-
-  /* End of those changes. */
 
   Node* cur_node;
   Node* overflow;
@@ -202,10 +196,10 @@ protected:
       updated_node = handle_overflow();
     else {
       if(nodes.insert(std::make_pair(sub_idx, updated_node)).second == false)
-        // The value already existed.
+        // The value had already existed.
         delete updated_node;
       else
-        // The value has not existed.
+        // The value had not existed.
         init_node(updated_node);
     }
     cur_node = nodes[sub_idx];
