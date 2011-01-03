@@ -67,7 +67,6 @@ protected:
     std::vector<Values> data;
   };
 
-  HERMES_API_USED_STL_VECTOR(Row);
   std::vector<Row> rows;
 
 };

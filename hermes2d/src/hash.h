@@ -49,11 +49,8 @@ public:
   /// Returns an edge node with parent id's p1 and p2 if it exists, NULL otherwise.
   Node* peek_edge_node(int p1, int p2);
 
-
-// The following functions are used by the derived class Mesh:
+  // The following functions are used by the derived class Mesh:
 protected:
-
-  HERMES_API_USED_TEMPLATE(Array<Node>);
   Array<Node> nodes; ///< Array storing all nodes
 
   static const int H2D_DEFAULT_HASH_SIZE = 0x20000; // 128K entries

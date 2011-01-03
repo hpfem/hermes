@@ -296,7 +296,6 @@ public:
   void convert_quads_to_triangles();
 
 protected:
-  HERMES_API_USED_TEMPLATE(Array<Element>);
   Array<Element> elements;
   int nbase, ntopvert;
   int nactive, ninitial;

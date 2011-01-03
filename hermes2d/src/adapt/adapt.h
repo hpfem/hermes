@@ -46,9 +46,6 @@
 
 #define H2D_MAX_COMPONENTS 10 ///< A maximum number of components.
 
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<Space*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>); ///< Instantiated template. It is used to create a clean Windows DLL interface.
-
 // Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
                                       ///  The total error is divided by the norm and therefore it should be in a range [0, 1].

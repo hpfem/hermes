@@ -40,13 +40,6 @@ class SparseMatrix;
 class Vector;
 class Solver;
 
-/// Instantiated template. It is used to create a clean Windows DLL interface.
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<ProjNormType>);
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<Space*>);
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<MeshFunction*>);
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<PrecalcShapeset*>);
-
 #define NEWTON_WATCH_RESIDUAL 0x01      // A flag that enables the residual norm
                                             // as the stop condition in Newton's iteration.
 #define NEWTON_WATCH_INCREMENTS 0x02 // A flag that enables the solution difference norm
