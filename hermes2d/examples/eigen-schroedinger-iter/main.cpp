@@ -19,6 +19,8 @@ using namespace RefinementSelectors;
 
 int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
+int ITERATIVE_METHOD = 2;                         // 1 = Newton, 2 = Picard.
+
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
@@ -55,8 +57,11 @@ const double PYSPARSE_TARGET_VALUE = 2.0;         // PySparse parameter: Eigenva
 const double PYSPARSE_TOL = 1e-10;                // PySparse parameter: Error tolerance.
 const int PYSPARSE_MAX_ITER = 1000;               // PySparse parameter: Maximum number of iterations.
 
-// Error tolerance for the Newton's method on the reference mesh.
+// Parameters for the Newton's and Picard's method.
 const double NEWTON_TOL = 1e-3;
+const int NEWTON_MAX_ITER = 10;
+const double PICARD_TOL = 1e-3;
+const int PICARD_MAX_ITER = 50;
 
 // Problem parameters.
 double V(double x, double y) {
@@ -141,7 +146,7 @@ int main(int argc, char* argv[])
   system(call_cmd);
   info("Pysparse finished.");
 
-  // Initialize solution vector.
+  // Initialize eigenvector.
   double* coeff_vec = new double[ndof];
 
   // Read solution vectors from file and visualize it.
@@ -174,9 +179,11 @@ int main(int argc, char* argv[])
   info("Once more just to check: %g", calc_mass_product((UMFPackMatrix*)matrix_S, coeff_vec, ndof)
       / calc_mass_product((UMFPackMatrix*)matrix_M, coeff_vec, ndof));
 
-  // Eigenfunction.
+  // Convert eigenvector into eigenfunction. After this, the 
+  // eigenvector on the coarse mesh will not be needed anymore.
   Solution sln;
   Solution::vector_to_solution(coeff_vec, &space, &sln);
+  delete [] coeff_vec;
 
   // Visualize the eigenfunction.
   info("Plotting initial eigenfunction on coarse mesh.");
@@ -188,8 +195,6 @@ int main(int argc, char* argv[])
   sprintf(title, "Initial mesh");
   oview.set_title(title);
   oview.show(&space);
-
-  // Wait for keypress.
   View::wait(HERMES_WAIT_KEYPRESS);
 
   /*** Begin adaptivity ***/
@@ -238,70 +243,33 @@ int main(int argc, char* argv[])
 
     // Calculate eigenvalue corresponding to the new reference solution.
     lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
-      / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
-    info("Eigenvalue on reference mesh: %.12f", lambda);
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    info("Initial guess for eigenvalue on reference mesh: %.12f", lambda);
 
-    // Newton's method on the reference mesh.
-    double newton_err_rel;
-    UMFPackMatrix* matrix_augm = new UMFPackMatrix();  
-    UMFPackVector* vector_augm = new UMFPackVector(ndof_ref+1);
-    Solver* solver_augm = create_linear_solver(matrix_solver, matrix_augm, vector_augm);
-    int it = 1;
-    // Debug.
-    char title0[100];
-    sprintf(title0, "Initial condition for Newton.");
-    sview.set_title(title0);
-    sview.show(&ref_sln);
-    View::wait(HERMES_WAIT_KEYPRESS);
-    do {
-      // Normalize the eigenvector.
-      //normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
-      info("Eigenvector mass product: %g", calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref));
-
-      // Create the augmented matrix and vector for Newton.
-      //info("Creating augmented matrix and vector on reference mesh.");
-      create_augmented_linear_system(matrix_S_ref, matrix_M_ref, coeff_vec_ref, lambda, 
-                                     matrix_augm, vector_augm);
-
-      // Solve the augmented matrix problem.
-      //info("Solving augmented problem on reference mesh.");
-      if(!solver_augm->solve()) error ("Matrix solver failed.\n");
-      double* increment = solver_augm->get_solution();
-
-      // Update the eigenfunction and eigenvalue.
-      //info("Updating reference solution.");
-      for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] += increment[i];
-      lambda += increment[ndof_ref];
-      info("Eigenvalue increment: %.12f", increment[ndof_ref]);
-      info("Eigenvalue: %.12f", lambda);
-
-      // Calculate relative error of the increment.
-      Solution ref_sln_new;
-      Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
-      newton_err_rel = calc_abs_error(&ref_sln, &ref_sln_new, HERMES_H1_NORM)
-	               / calc_norm(&ref_sln_new, HERMES_H1_NORM) * 100;
-
-      // Updating reference solution.
-      ref_sln.copy(&ref_sln_new);
-
-      // Debug.
-      char title1[100];
-      sprintf(title1, "Newton's iteration %d", it);
-      sview.set_title(title1);
-      sview.show(&ref_sln);
-      View::wait(HERMES_WAIT_KEYPRESS);
-
-      info("---- Newton iter %d, ndof %d, newton_err_rel %g%%", it++, ndof_ref, newton_err_rel);
+    if (ITERATIVE_METHOD == 1) {
+      // Newton's method on the reference mesh.
+      if(!solve_newton_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
+	  		     coeff_vec_ref, lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
+        error("Newton's method failed.");
     }
-    while (newton_err_rel > NEWTON_TOL);
+    else {
+      // Picard's method on the reference mesh.
+      if(!solve_picard_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
+	  		     coeff_vec_ref, lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER))
+        error("Picard's method failed.");
+    }
+    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);
+
+    // Clean up.
+    delete matrix_S_ref;
+    delete matrix_M_ref;
+    delete [] coeff_vec_ref;
 
     // Project reference solution to coarse mesh for error estimation.
     if (as > 1) {
       // Project reference solution to coarse mesh.
       info("Projecting reference solution to coarse mesh for error calculation.");
-      coeff_vec = new double[ndof];
-      OGProjection::project_global(&space, &ref_sln, coeff_vec, matrix_solver); 
-      Solution::vector_to_solution(coeff_vec, &space, &sln);
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
       // Visualize the projection.
       info("Plotting projection of reference solution to new coarse mesh.");
@@ -347,16 +315,9 @@ int main(int argc, char* argv[])
     if (ndof >= NDOF_STOP) done = true;
 
     // Clean up.
-    delete matrix_S_ref;
-    delete matrix_M_ref;
-    delete matrix_augm;
-    delete vector_augm;
-    delete solver_augm;
     delete adaptivity;
-    delete ref_space->get_mesh();
+    //delete ref_space->get_mesh();
     delete ref_space;
-    delete [] coeff_vec;
-    delete [] coeff_vec_ref;
   }
   while (done == false);
 

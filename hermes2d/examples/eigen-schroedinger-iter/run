@@ -1,4 +1,4 @@
 rm *~ 
-./schroedinger-eigen-newton
+./schroedinger-eigen-iter
 python plot_graph.py &
 
