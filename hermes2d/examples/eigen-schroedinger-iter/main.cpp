@@ -19,6 +19,8 @@ using namespace RefinementSelectors;
 
 int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
+int ITERATIVE_METHOD = 2;                         // 1 = Newton, 2 = Picard.
+
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
@@ -55,9 +57,11 @@ const double PYSPARSE_TARGET_VALUE = 2.0;         // PySparse parameter: Eigenva
 const double PYSPARSE_TOL = 1e-10;                // PySparse parameter: Error tolerance.
 const int PYSPARSE_MAX_ITER = 1000;               // PySparse parameter: Maximum number of iterations.
 
-// Parameters for the Newton's method.
+// Parameters for the Newton's and Picard's method.
 const double NEWTON_TOL = 1e-3;
 const int NEWTON_MAX_ITER = 10;
+const double PICARD_TOL = 1e-3;
+const int PICARD_MAX_ITER = 50;
 
 // Problem parameters.
 double V(double x, double y) {
@@ -191,8 +195,6 @@ int main(int argc, char* argv[])
   sprintf(title, "Initial mesh");
   oview.set_title(title);
   oview.show(&space);
-
-  // Wait for keypress.
   View::wait(HERMES_WAIT_KEYPRESS);
 
   /*** Begin adaptivity ***/
@@ -242,19 +244,20 @@ int main(int argc, char* argv[])
     // Calculate eigenvalue corresponding to the new reference solution.
     lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
              / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
-    info("Initial eigenvalue for Newton on reference mesh: %.12f", lambda);
+    info("Initial guess for eigenvalue on reference mesh: %.12f", lambda);
 
-    // Debug.
-    //char title0[100];
-    //sprintf(title0, "Initial condition for Newton.");
-    //sview.set_title(title0);
-    //sview.show(&ref_sln);
-    //View::wait(HERMES_WAIT_KEYPRESS);
-
-    // Newton's method on the reference mesh.
-    if(!solve_newton_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
-			   coeff_vec_ref, lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
-      error("Newton's method failed.");
+    if (ITERATIVE_METHOD == 1) {
+      // Newton's method on the reference mesh.
+      if(!solve_newton_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
+	  		     coeff_vec_ref, lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
+        error("Newton's method failed.");
+    }
+    else {
+      // Picard's method on the reference mesh.
+      if(!solve_picard_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
+	  		     coeff_vec_ref, lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER))
+        error("Picard's method failed.");
+    }
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);
 
     // Clean up.
@@ -280,7 +283,7 @@ int main(int argc, char* argv[])
       oview.show(&space);
 
       // Wait for keypress.
-      //View::wait(HERMES_WAIT_KEYPRESS);
+      View::wait(HERMES_WAIT_KEYPRESS);
     }
 
     // Calculate element errors and total error estimate.

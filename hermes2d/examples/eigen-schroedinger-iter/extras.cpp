@@ -33,12 +33,12 @@ void write_matrix_mm(const char* filename, Matrix* mat)
 // Calculate mass norm vec^T*mat*vec.
 double calc_mass_product(UMFPackMatrix* mat, double* vec, int length)
 {
-  double norm = 0;
+  double result = 0;
   double* product = new double[length];
   mat->multiply(vec, product);
-  for (int i=0; i<length; i++) norm += vec[i]*product[i];
+  for (int i=0; i<length; i++) result += vec[i]*product[i];
   delete [] product;
-  return norm;
+  return result;
 }
 
 // Normalizes vector so that vec^T*mat*vec = 1. 
@@ -171,8 +171,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
   for (int i=0; i<ndof_ref+1; i++) new_vector->set(i, residual[i]);
 }
 
-
-
 bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMatrix* matrix_M_ref, 
                         double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
                         double newton_tol, int newton_max_iter)
@@ -208,7 +206,11 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
 
     // Solve the augmented matrix problem.
     //info("Solving augmented problem on reference mesh.");
-    if(!solver_augm->solve()) error ("Matrix solver failed.\n");
+    if(!solver_augm->solve()) {
+      info("Matrix solver failed.\n");
+      success = false;
+      break;
+    }
     double* increment = solver_augm->get_solution();
 
     // Update the eigenfunction and eigenvalue.
@@ -245,4 +247,61 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   delete solver_augm;
 
   return success;
+}
+
+bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMatrix* matrix_M_ref, 
+                        double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
+                        double picard_tol, int picard_max_iter)
+{
+  int ndof_ref = matrix_M_ref->get_size();
+  double picard_err_rel;
+  UMFPackVector* vec_lambda_MY = new UMFPackVector(ndof_ref);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_S_ref, vec_lambda_MY);
+  double* vec_MY = new double[ndof_ref]; 
+  Solution ref_sln_prev;
+  Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_prev);
+  bool success = true;
+  int it = 1;
+  do {
+    // Check the number of iterations.
+    if (it >= picard_max_iter) {
+      success = false;
+      info("Picard's iteration not successful, returning false.");
+      break;
+    }
+  
+    matrix_M_ref->multiply(coeff_vec_ref, vec_MY);
+    for (int i=0; i<ndof_ref; i++) vec_lambda_MY->set(i, lambda*vec_MY[i]);
+
+    // Solve the matrix problem.
+    if(!solver->solve()) {
+      info("Matrix solver failed.\n");
+      success = false;
+      break;
+    }
+    double* new_eigen_vec = solver->get_solution();
+
+    // Copy the new eigen vector to coeff_vec_ref.
+    for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] = new_eigen_vec[i];
+
+    // Update the eigenvalue.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
+    // Calculate relative error of the increment.
+    Solution ref_sln_new;
+    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
+    picard_err_rel = calc_abs_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM)
+	             / calc_norm(&ref_sln_new, HERMES_H1_NORM) * 100;
+
+    // Updating reference solution.
+    ref_sln_prev.copy(&ref_sln_new);
+    
+    info("---- Picard iter %d, ndof %d, eigenvalue: %.12f, picard_err_rel %g%%", 
+         it++, ndof_ref, lambda, picard_err_rel);
+  }
+  while (picard_err_rel > picard_tol);
+
+  return success;
+
 }
