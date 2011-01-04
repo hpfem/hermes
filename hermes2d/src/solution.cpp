@@ -316,7 +316,6 @@ void Solution::free()
   e_last = NULL;
 
   free_tables();
-  space_type = HERMES_INVALID_SPACE;
 }
 
 
@@ -405,8 +404,6 @@ void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
     int ndof = Space::get_num_dofs(space);
 
-    space_type = space->get_type();
-
     // initialize precalc shapeset using the space's shapeset
     Shapeset *shapeset = space->get_shapeset();
     if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_coeff_vector().");
@@ -434,9 +431,9 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
     error("Provided 'space' and 'pss' must have the same shapesets.");
   int ndof = Space::get_num_dofs(space);
 
-  space_type = space->get_type();
-
   free();
+  
+  space_type = space->get_type();
 
   num_components = pss->get_num_components();
   sln_type = HERMES_SLN;
