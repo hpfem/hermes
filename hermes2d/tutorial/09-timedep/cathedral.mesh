@@ -38,9 +38,9 @@ elements =
 
 boundaries =
 {
-  { 0, 1, Boundary ground },
-  { 1, 2, Boundary ground },
-  { 2, 3, Boundary ground },
+  { 0, 1; Boundary ground },
+  { 1, 2; Boundary ground },
+  { 2, 3; Boundary ground },
   { 3, 7; Boundary air },
   { 7, 12; Boundary air },
   { 12, 14; Boundary air },
