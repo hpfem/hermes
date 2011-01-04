@@ -1,9 +1,10 @@
-NIST-4 (Elliptic)
+NIST-01 (Elliptic)
 ------------------
 
-**Git reference:** Benchmark `nist-4 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-4>`_.
+**Git reference:** Benchmark `nist-01 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-01>`_.
 
-This problem has an exponential peak in the interior of the domain. 
+This is a well behaved problem with a smooth solution that is suitable for testing 
+adaptive algorithm where adaptivity isn't really needed.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -11,7 +12,7 @@ Model problem
 Equation solved: Poisson equation 
 
 .. math::
-    :label: Poisson
+    :label: line-sing
 
        -\Delta u = f.
 
@@ -24,10 +25,9 @@ Exact solution
 
 .. math::
 
-    u(x,y) = e^{-\alpha ((x - x_{loc})^{2} + (y - y_{loc})^{2})}
+    u(x,y) = 2^{4p}x^{p}(1-x)^{p}y^{p}(1-y)^p
 
-where $(x_{loc}, y_{loc})$ is the location of the peak, 
-$\alpha$ determines the strength of the peak. 
+where $p$ determines the degree of the polynomial solution. 
 
 Right-hand side: Obtained by inserting the exact solution into the equation.
 The corresponding code snippet is shown below::
@@ -35,19 +35,23 @@ The corresponding code snippet is shown below::
     template<typename Real>
     Real rhs(Real x, Real y)
     {
-      Real a = (-ALPHA * pow((x - X_LOC), 2) - ALPHA*pow((y - Y_LOC), 2));
-      Real b = (2 * ALPHA * x - ALPHA);
-      Real c = (2 * ALPHA * y - ALPHA);
+      Real a = pow(2.0, 4.0*EXACT_SOL_P);
+      Real b = pow(x-1.0, 8.0);
+      Real c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
+      Real d = pow(y-1.0, EXACT_SOL_P);
+      Real e = pow(y-1.0, 8.0);
+      Real f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
+      Real g = pow(x-1.0, EXACT_SOL_P);
 
-      return exp(a) * pow(b,2) - 2 * ALPHA * exp(a) + exp(a) * pow(c,2) - 2 * ALPHA * exp(a);
+      return EXACT_SOL_P*a*pow(x, 8.0)*b*c*pow(y, EXACT_SOL_P)*d + EXACT_SOL_P*a*pow(y, 8.0)*e*f*pow(x,EXACT_SOL_P)*g;
     }
 
 Sample solution
 ~~~~~~~~~~~~~~~
 
-Solution for $\alpha = 1000$, $(x_{loc}, y_{loc}) = (0.5, 0.5)$:
+Solution for $p = 10$:
 
-.. image:: nist-4/solution.png
+.. image:: nist-01/solution.png
    :align: center
    :width: 600
    :height: 400
@@ -58,28 +62,28 @@ Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements
 
 Final mesh (h-FEM, p=1, anisotropic refinements):
 
-.. image:: nist-4/mesh_h1_aniso.png
+.. image:: nist-01/mesh_h1_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (h-FEM, p=2, anisotropic refinements):
 
-.. image:: nist-4/mesh_h2_aniso.png
+.. image:: nist-01/mesh_h2_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-4/mesh_hp_anisoh.png
+.. image:: nist-01/mesh_hp_anisoh.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-4/conv_dof_aniso.png
+.. image:: nist-01/conv_dof_aniso.png
    :align: center
    :width: 600
    :height: 400
@@ -87,7 +91,7 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: nist-4/conv_cpu_aniso.png
+.. image:: nist-01/conv_cpu_aniso.png
    :align: center
    :width: 600
    :height: 400
@@ -98,28 +102,28 @@ hp-FEM with iso, h-aniso and hp-aniso refinements
 
 Final mesh (hp-FEM, isotropic refinements):
 
-.. image:: nist-4/mesh_hp_iso.png
+.. image:: nist-01/mesh_hp_iso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-4/mesh_hp_anisoh.png
+.. image:: nist-01/mesh_hp_anisoh.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, hp-anisotropic refinements):
 
-.. image:: nist-4/mesh_hp_aniso.png
+.. image:: nist-01/mesh_hp_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-4/conv_dof_hp.png
+.. image:: nist-01/conv_dof_hp.png
    :align: center
    :width: 600
    :height: 400
@@ -127,7 +131,7 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: nist-4/conv_cpu_hp.png
+.. image:: nist-01/conv_cpu_hp.png
    :align: center
    :width: 600
    :height: 400

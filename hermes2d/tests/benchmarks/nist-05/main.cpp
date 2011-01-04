@@ -4,9 +4,9 @@
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_bench_nist-5 Benchmarks/nist-5
+/** \addtogroup t_bench_nist-05 Benchmarks/nist-05
  *  \{
- *  \brief This test makes sure that the benchmark "nist-5" works correctly.
+ *  \brief This test makes sure that the benchmark "nist-05" works correctly.
  *
  *  \section s_params Parameters
  *   - INIT_REF_NUM = 0

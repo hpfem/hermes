@@ -2,10 +2,10 @@
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_bench_nist-9 benchmarks/nist-9
+/** \addtogroup t_bench_nist-09 benchmarks/nist-09
  *  \{
- *  \brief This test makes sure that the benchmark nist-9 works correctly.
- *  (Testing version NIST-9 "well")
+ *  \brief This test makes sure that the benchmark nist-09 works correctly.
+ *  (Testing version NIST-09 "well")
  *
  *  \section s_params Parameters
  *   - PROB_PARAM = 3

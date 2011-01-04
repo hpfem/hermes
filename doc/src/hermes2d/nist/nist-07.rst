@@ -1,10 +1,9 @@
-NIST-1 (Elliptic)
+NIST-07 (Elliptic)
 ------------------
 
-**Git reference:** Benchmark `nist-1 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-1>`_.
+**Git reference:** Benchmark `nist-07 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-07>`_.
 
-This is a well behaved problem with a smooth solution that is suitable for testing 
-adaptive algorithm where adaptivity isn't really needed.
+This is a singularity problem with a solution that is singular along the left boundary.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -25,9 +24,9 @@ Exact solution
 
 .. math::
 
-    u(x,y) = 2^{4p}x^{p}(1-x)^{p}y^{p}(1-y)^p
+    u(x,y) = x^{\alpha} 
 
-where $p$ determines the degree of the polynomial solution. 
+where $\alpha \geq 0.5$ determines the strength of the singularity.
 
 Right-hand side: Obtained by inserting the exact solution into the equation.
 The corresponding code snippet is shown below::
@@ -35,23 +34,15 @@ The corresponding code snippet is shown below::
     template<typename Real>
     Real rhs(Real x, Real y)
     {
-      Real a = pow(2.0, 4.0*EXACT_SOL_P);
-      Real b = pow(x-1.0, 8.0);
-      Real c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
-      Real d = pow(y-1.0, EXACT_SOL_P);
-      Real e = pow(y-1.0, 8.0);
-      Real f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
-      Real g = pow(x-1.0, EXACT_SOL_P);
-
-      return EXACT_SOL_P*a*pow(x, 8.0)*b*c*pow(y, EXACT_SOL_P)*d + EXACT_SOL_P*a*pow(y, 8.0)*e*f*pow(x,EXACT_SOL_P)*g;
+      return (-0.24/(pow(x, 1.4)));
     }
 
 Sample solution
 ~~~~~~~~~~~~~~~
 
-Solution for $p = 10$:
+Solution for $\alpha = 0.6$:
 
-.. image:: nist-1/solution.png
+.. image:: nist-07/solution.png
    :align: center
    :width: 600
    :height: 400
@@ -62,28 +53,28 @@ Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements
 
 Final mesh (h-FEM, p=1, anisotropic refinements):
 
-.. image:: nist-1/mesh_h1_aniso.png
+.. image:: nist-07/mesh_h1_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (h-FEM, p=2, anisotropic refinements):
 
-.. image:: nist-1/mesh_h2_aniso.png
+.. image:: nist-07/mesh_h2_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-1/mesh_hp_anisoh.png
+.. image:: nist-07/mesh_hp_anisoh.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-1/conv_dof_aniso.png
+.. image:: nist-07/conv_dof_aniso.png
    :align: center
    :width: 600
    :height: 400
@@ -91,39 +82,32 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: nist-1/conv_cpu_aniso.png
+.. image:: nist-07/conv_cpu_aniso.png
    :align: center
    :width: 600
    :height: 400
    :alt: CPU convergence graph.
 
-hp-FEM with iso, h-aniso and hp-aniso refinements
+hp-FEM with h-aniso and hp-aniso refinements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Final mesh (hp-FEM, isotropic refinements):
-
-.. image:: nist-1/mesh_hp_iso.png
-   :align: center
-   :width: 450
-   :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-1/mesh_hp_anisoh.png
+.. image:: nist-07/mesh_hp_anisoh.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, hp-anisotropic refinements):
 
-.. image:: nist-1/mesh_hp_aniso.png
+.. image:: nist-07/mesh_hp_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-1/conv_dof_hp.png
+.. image:: nist-07/conv_dof_hp.png
    :align: center
    :width: 600
    :height: 400
@@ -131,10 +115,9 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: nist-1/conv_cpu_hp.png
+.. image:: nist-07/conv_cpu_hp.png
    :align: center
    :width: 600
    :height: 400
    :alt: CPU convergence graph.
-
 

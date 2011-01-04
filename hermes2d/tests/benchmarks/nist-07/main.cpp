@@ -2,9 +2,9 @@
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_bench_nist-7 benchmarks/nist-7
+/** \addtogroup t_bench_nist-07 benchmarks/nist-07
  *  \{
- *  \brief This test makes sure that the benchmark "nist-7" works correctly.
+ *  \brief This test makes sure that the benchmark "nist-07" works correctly.
  *
  *  \section s_params Parameters
  *   - INIT_REF_NUM=2

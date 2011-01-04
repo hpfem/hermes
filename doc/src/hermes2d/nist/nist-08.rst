@@ -1,7 +1,7 @@
-NIST-8 (Elliptic)
+NIST-08 (Elliptic)
 ------------------
 
-**Git reference:** Benchmark `nist-8 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-8>`_.
+**Git reference:** Benchmark `nist-08 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-08>`_.
 
 This is a wave function that satisfies a Schrodinger equation model of two 
 interacting atoms with highly oscillatory near the origin.
@@ -53,28 +53,28 @@ Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements
 
 Final mesh (h-FEM, p=1, anisotropic refinements):
 
-.. image:: nist-8/mesh_h1_aniso.png
+.. image:: nist-08/mesh_h1_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (h-FEM, p=2, anisotropic refinements):
 
-.. image:: nist-8/mesh_h2_aniso.png
+.. image:: nist-08/mesh_h2_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-8/mesh_hp_anisoh.png
+.. image:: nist-08/mesh_hp_anisoh.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-8/conv_dof_aniso.png
+.. image:: nist-08/conv_dof_aniso.png
    :align: center
    :width: 600
    :height: 400
@@ -82,7 +82,7 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: nist-8/conv_cpu_aniso.png
+.. image:: nist-08/conv_cpu_aniso.png
    :align: center
    :width: 600
    :height: 400
@@ -93,28 +93,28 @@ hp-FEM with iso, h-aniso and hp-aniso refinements
 
 Final mesh (hp-FEM, isotropic refinements):
 
-.. image:: nist-8/mesh_hp_iso.png
+.. image:: nist-08/mesh_hp_iso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: nist-8/mesh_hp_anisoh.png
+.. image:: nist-08/mesh_hp_anisoh.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, hp-anisotropic refinements):
 
-.. image:: nist-8/mesh_hp_aniso.png
+.. image:: nist-08/mesh_hp_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: nist-8/conv_dof_hp.png
+.. image:: nist-08/conv_dof_hp.png
    :align: center
    :width: 600
    :height: 400
@@ -122,7 +122,7 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: nist-8/conv_cpu_hp.png
+.. image:: nist-08/conv_cpu_hp.png
    :align: center
    :width: 600
    :height: 400

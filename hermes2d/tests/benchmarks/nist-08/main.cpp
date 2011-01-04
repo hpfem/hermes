@@ -6,9 +6,9 @@
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_bench_nist-8 Benchmarks/nist-8
+/** \addtogroup t_bench_nist-08 Benchmarks/nist-08
  *  \{
- *  \brief This test makes sure that the benchmark "nist-8" works correctly.
+ *  \brief This test makes sure that the benchmark "nist-08" works correctly.
  *
  *  \section s_params Parameters
  *   - INIT_REF_NUM=1
