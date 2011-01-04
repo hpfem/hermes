@@ -66,8 +66,9 @@ const scalar C0 = 1200;	                          // [mol/m^3] Anion and counter
 
 
 /* Simulation parameters */
-const double T_FINAL = 0.3;
-const double TAU = 0.1;                           // Size of the time step.
+const double T_FINAL = 1;
+double INIT_TAU = 0.05;
+double *TAU = &INIT_TAU;                        // Size of the time step
 const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	                  // Number of initial refinements.
 const bool MULTIMESH = true;	                  // Multimesh?
@@ -246,14 +247,14 @@ int main (int argc, char* argv[]) {
   delete[] coeff_vec_coarse;
   
   // Time stepping loop.
-  PidTimestepController pid(T_FINAL, TAU);
+  PidTimestepController pid(T_FINAL, INIT_TAU, false);
+  TAU = pid.timestep;
+  info("Starting time iteration with the step %g", *TAU);
 
-  int num_time_steps = (int)(T_FINAL/TAU + 0.5);
-  for(int ts = 1; ts <= num_time_steps; ts++)
-  {
+  do {
     pid.begin_step();
     // Periodic global derefinements.
-    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    if (pid.get_timestep_number() > 1 && pid.get_timestep_number() % UNREF_FREQ == 0)
     {
       info("Global mesh derefinement.");
       C_mesh.copy(&basemesh);
@@ -274,7 +275,7 @@ int main (int argc, char* argv[]) {
     bool done = false; int as = 1;
     double err_est;
     do {
-      info("Time step %d, adaptivity step %d:", ts, as);
+      info("Time step %d, adaptivity step %d:", pid.get_timestep_number(), as);
 
       // Construct globally refined reference mesh
       // and setup reference space.
@@ -287,7 +288,7 @@ int main (int argc, char* argv[]) {
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
-      if (as == 1 && ts == 1) {
+      if (as == 1 && pid.get_timestep_number() == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln), 
                                      coeff_vec, matrix_solver);
@@ -328,7 +329,7 @@ int main (int argc, char* argv[]) {
       Hermes::Tuple<double> err_est_rel;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&C_sln, &phi_sln), 
                                  Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
       // Report results.
       info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
@@ -362,18 +363,22 @@ int main (int argc, char* argv[]) {
       // Visualize the solution and mesh.
       info("Visualization procedures: C");
       char title[100];
-      sprintf(title, "Solution[C], time level %d", ts);
+      sprintf(title, "Solution[C], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       Cview.set_title(title);
       Cview.show(&C_ref_sln);
-      sprintf(title, "Mesh[C], time level %d", ts);
+      sprintf(title, "Mesh[C], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       Cordview.set_title(title);
       Cordview.show(&C_space);
       
       info("Visualization procedures: phi");
-      sprintf(title, "Solution[phi], time level %d", ts);
+      sprintf(title, "Solution[phi], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       phiview.set_title(title);
       phiview.show(&phi_ref_sln);
-      sprintf(title, "Mesh[phi], time level %d", ts);
+      sprintf(title, "Mesh[phi], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       phiordview.set_title(title);
       phiordview.show(&phi_space);
       //View::wait(HERMES_WAIT_KEYPRESS);
@@ -396,12 +401,15 @@ int main (int argc, char* argv[]) {
     }
     while (done == false);
 
-    // Copy last reference solution into sln_prev_time.
+
     pid.end_step(Hermes::Tuple<Solution*> (&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution*> (&C_prev_time, &phi_prev_time));
+    // TODO! Time step reduction when necessary.
+
+    // Copy last reference solution into sln_prev_time.
     C_prev_time.copy(&C_ref_sln);
     phi_prev_time.copy(&phi_ref_sln);
 
-  }
+  } while (pid.has_next());
 
   // Wait for all views to be closed.
   View::wait();

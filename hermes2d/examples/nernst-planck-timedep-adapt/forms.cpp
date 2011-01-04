@@ -7,7 +7,7 @@ Scalar Fc_euler(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Re
 	Func<Scalar>* C_prev_newton = u_ext[0];
 	Func<Scalar>* phi_prev_newton = u_ext[1];
 	for (int i = 0; i < n; i++) {
-		result += wt[i] * ((C_prev_newton->val[i] - C_prev_time->val[i]) * v->val[i] / TAU +
+		result += wt[i] * ((C_prev_newton->val[i] - C_prev_time->val[i]) * v->val[i] / (*TAU) +
 				D * (C_prev_newton->dx[i] * v->dx[i] + C_prev_newton->dy[i] * v->dy[i]) +
 				K * C_prev_newton->val[i] * (phi_prev_newton->dx[i] * v->dx[i] + phi_prev_newton->dy[i] * v->dy[i]));
 	}
@@ -35,7 +35,7 @@ Scalar J_euler_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, F
 	Scalar result = 0;
 	Func<Scalar>* phi_prev_newton = u_ext[1];
 	for (int i = 0; i < n; i++) {
-		result += wt[i] * (u->val[i] * v->val[i] / TAU +
+		result += wt[i] * (u->val[i] * v->val[i] / (*TAU) +
 				D * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) +
 				K * u->val[i] * (phi_prev_newton->dx[i] * v->dx[i] + phi_prev_newton->dy[i] * v->dy[i]));
 	}
@@ -84,7 +84,7 @@ Scalar Fc_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<R
   Func<Scalar>* C_prev_newton = u_ext[0];
   Func<Scalar>* phi_prev_newton = u_ext[1];
   for (int i = 0; i < n; i++) {
-    result += wt[i] * ((C_prev_newton->val[i] - C_prev_time->val[i]) * v->val[i] / TAU +
+    result += wt[i] * ((C_prev_newton->val[i] - C_prev_time->val[i]) * v->val[i] / (*TAU) +
         0.5 * D * (C_prev_newton->dx[i] * v->dx[i] + C_prev_newton->dy[i] * v->dy[i]) +
         0.5 * D * (C_prev_time->dx[i] * v->dx[i] + C_prev_time->dy[i] * v->dy[i]) +
         0.5 * K * C_prev_newton->val[i] * (phi_prev_newton->dx[i] * v->dx[i] + phi_prev_newton->dy[i] * v->dy[i]) +
@@ -111,7 +111,7 @@ Scalar J_cranic_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
   Scalar result = 0;
   Func<Scalar>* phi_prev_newton = u_ext[1];
   for (int i = 0; i < n; i++) {
-    result += wt[i] * (u->val[i] * v->val[i] / TAU +
+    result += wt[i] * (u->val[i] * v->val[i] / (*TAU) +
         0.5 * D * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) +
         0.5 * K * u->val[i] * (phi_prev_newton->dx[i] * v->dx[i] + phi_prev_newton->dy[i] * v->dy[i]));
   }
