@@ -462,7 +462,6 @@ void RefMap::untransform(Element* e, double x, double y, double& xi1, double& xi
 
 void RefMap::init_node(Node* pp)
 {
-  // reset all precalculated tables
   memset(pp->inv_ref_map, 0, num_tables * sizeof(double2x2*));
   memset(pp->second_ref_map, 0, num_tables * sizeof(double3x2*));
   memset(pp->phys_x, 0, num_tables * sizeof(double*));
@@ -496,7 +495,11 @@ void RefMap::free_node(Node* node)
 
 void RefMap::free()
 {
-  this->nodes.clear();
+  std::map<uint64_t, Node*>::iterator it;
+
+  for (it = nodes.begin(); it != nodes.end(); it++)
+    free_node(it->second);
+  nodes.clear();
   if (overflow != NULL) {
     free_node(overflow); overflow = NULL; 
   }

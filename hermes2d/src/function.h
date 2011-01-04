@@ -111,9 +111,6 @@ public:
   /// \brief Returns the number of components of the function being represented by the class.
   int get_num_components() const { return num_components; }
 
-  /// Checks whether the function is ready to use.
-  bool initialized() {return nodes != NULL;};
-
   /// Activates an integration rule of the specified order. Subsequent calls to
   /// get_values(), get_dx_values() etc. will be returning function values at these points.
   /// \param order [in] Integration rule order.
@@ -122,14 +119,22 @@ public:
   ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
   void set_quad_order(int order, int mask = H2D_FN_DEFAULT)
   {
-    pp_cur_node = (void**) JudyLIns(nodes, order, NULL);
-    // if you get SIGSEGV here, you maybe forgot to include the function in the list
-    // of external functions in WeakForm::add_biform()...
-    cur_node = (Node*) *pp_cur_node;
-    // another reason may be a bug in Judy array usage in Hermes2D (this needs to be fixed)
-    // -- as a workaround, you may for the time being use more than one pss for problems
-    // where the basis and test functions can be on different meshes (i.e., multi-mesh).
-    if (cur_node == NULL || (cur_node->mask & mask) != mask) precalculate(order, mask);
+    Node* updated_node = NULL;
+    if(nodes->insert(std::make_pair(order, updated_node)).second == false) {
+      // The value had already existed.
+      cur_node = (*nodes)[order];
+      // If the mask has changed.
+      if((cur_node->mask & mask) != mask) {
+        precalculate(order, mask);
+        (*nodes)[order] = cur_node;
+      }
+    }
+    else {
+      // The value had not existed.
+      cur_node = (*nodes)[order];
+      precalculate(order, mask);
+      (*nodes)[order] = cur_node;
+    }
   }
 
   /// \brief Returns function values.
@@ -226,7 +231,6 @@ public:
   /// \brief Frees all precalculated tables.
   virtual void free() = 0;
 
-
 protected:
 
   /// precalculates the current function at the current integration points.
@@ -248,21 +252,28 @@ protected:
     Node& operator=(const Node& other) { return *this; }; ///< Assignment is not allowed.
   };
 
-  void** sub_tables;  ///< pointer to the current secondary Judy array
-  void** nodes;       ///< pointer to the current tertiary Judy array FIXME
-  void** pp_cur_node;
-  void*  overflow_nodes;
+  /// Table of Node tables, for each possible transformation there can be a different Node table.
+  std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables;
+  /// Table of Nodes. Indexed by integration order.
+  std::map<unsigned int, Node*>* nodes;
+  Node*  overflow_nodes;
   Node*  cur_node;
 
+  /// With changed sub-element mapping, there comes the need for a change of the current
+  /// Node table nodes.
   void update_nodes_ptr()
   {
+    std::map<unsigned int, Node*>* updated_nodes = new std::map<unsigned int, Node*>;
+
     if (sub_idx > H2D_MAX_IDX)
       handle_overflow_idx();
     else {
-      //debug_assert((sub_idx << (sizeof(Word_t) * 8)) == 0, "E index is larger than JudyLins can contain (Function::update_nodes_ptr)");
-      nodes = (void**) JudyLIns(sub_tables, (Word_t)sub_idx, NULL);
+      if(sub_tables->insert(std::make_pair(sub_idx, updated_nodes)).second == false)
+        // The value had already existed.
+        delete updated_nodes;
+      nodes = (*sub_tables)[sub_idx];
     }
-  }
+  };
 
   /// For internal use only.
   void force_transform(uint64_t sub_idx, Trf* ctm)
@@ -278,14 +289,15 @@ protected:
   int max_mem;      ///< peak memory usage
 
   Node* new_node(int mask, int num_points); ///< allocates a new Node structure
-  void  free_nodes(void** nodes);
-  void  free_sub_tables(void** sub);
+  void  free_sub_tables(std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables_to_delete);
   void  handle_overflow_idx();
 
   void replace_cur_node(Node* node)
   {
-    if (cur_node != NULL) { total_mem -= cur_node->size; ::free(cur_node); }
-    *pp_cur_node = node;
+    if (cur_node != NULL) { 
+      total_mem -= cur_node->size; 
+      ::free(cur_node); 
+    }
     cur_node = node;
   }
 
@@ -321,12 +333,10 @@ Function<TYPE>::Function()
 {
   order = 0;
   max_mem = total_mem = 0;
-
-  nodes = NULL;
   cur_node = NULL;
-  sub_tables = NULL;
   overflow_nodes = NULL;
-
+  sub_tables = NULL;
+  nodes = NULL;
   memset(quads, 0, sizeof(quads));
 }
 
@@ -335,7 +345,7 @@ template<typename TYPE>
 Function<TYPE>::~Function()
 {
   if (overflow_nodes != NULL)
-    free_nodes(&overflow_nodes);
+    delete [] overflow_nodes;
 }
 
 
@@ -367,7 +377,7 @@ template<typename TYPE>
 void Function<TYPE>::push_transform(int son)
 {
   Transformable::push_transform(son);
-  if (sub_tables) update_nodes_ptr(); // fixme
+  update_nodes_ptr();
 }
 
 
@@ -375,7 +385,7 @@ template<typename TYPE>
 void Function<TYPE>::pop_transform()
 {
   Transformable::pop_transform();
-  if (sub_tables) update_nodes_ptr(); // fixme
+  update_nodes_ptr();
 }
 
 
@@ -416,45 +426,27 @@ typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points
   return node;
 }
 
-
 template<typename TYPE>
-void Function<TYPE>::free_nodes(void** nodes)
+void Function<TYPE>::free_sub_tables(std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables_to_delete)
 {
-  // free all nodes stored in the tertiary Judy array
-  unsigned long order = 0;
-  void** pp = (void**) JudyLFirst(*nodes, &order, NULL);
-  while (pp != NULL)
-  {
-    // free the concrete Node structure
-    total_mem -= ((Node*) *pp)->size;
-    ::free(*pp);
-    pp = JudyLNext(*nodes, &order, NULL);
+  std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+  for (it = sub_tables_to_delete->begin(); it != sub_tables_to_delete->end(); it++) {
+    std::map<unsigned int, Node*>::iterator it_inner;
+    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      ::free(it_inner->second);
+    it->second->clear();
   }
-  JudyLFreeArray(nodes, NULL);
-}
-
-
-template<typename TYPE>
-void Function<TYPE>::free_sub_tables(void** sub)
-{
-  // iterate through the specified secondary (sub_idx) Judy array
-  unsigned long idx = 0;
-  void** nodes = (void**) JudyLFirst(*sub, &idx, NULL);
-  while (nodes != NULL)
-  {
-    free_nodes(nodes);
-    nodes = JudyLNext(*sub, &idx, NULL);
-  }
-  JudyLFreeArray(sub, NULL);
+  sub_tables_to_delete->clear();
+  sub_tables_to_delete = NULL;
 }
 
 
 template<typename TYPE>
 void Function<TYPE>::handle_overflow_idx()
 {
-  if (overflow_nodes != NULL) free_nodes(&overflow_nodes);
+  if (overflow_nodes != NULL) 
+    delete [] overflow_nodes;
   overflow_nodes = NULL;
-  nodes = &overflow_nodes;
 }
 
 #undef H2D_Node_HRD_SIZE

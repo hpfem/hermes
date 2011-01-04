@@ -53,7 +53,15 @@ protected:
   int num;
   MeshFunction* sln[10];
   uint64_t sln_sub[10];
-  void* tables[10];
+
+  /// There is a 2-layer structure of the precalculated tables.
+  /// The first (the lowest) one is the layer where mapping of integral orders to 
+  /// Function::Node takes place. See function.h for details.
+  /// The second one is the layer with mapping of sub-element transformation to
+  /// a table from the lowest layer.
+  /// The highest layer (in contrast to the PrecalcShapeset class) is represented
+  /// here only by this array.
+  std::map<uint64_t, std::map<unsigned int, Node*>*>* tables[10];
 
   bool unimesh;
   UniData** unidata;

@@ -173,6 +173,8 @@ protected:
 
   static const int H2D_MAX_TABLES = g_max_quad+1 + 4 * g_max_quad + 4;
 
+  /// This structure represents one complete piece of information about the reference mapping
+  /// taking into account the sub-element mapping.
   struct Node
   {
     double* jacobian[H2D_MAX_TABLES];
@@ -183,6 +185,7 @@ protected:
     double3* tan[4];
   };
 
+  /// Table of RefMap::Nodes, indexed by a sub-element mapping.
   std::map<uint64_t, Node*> nodes;
 
   Node* cur_node;
@@ -196,10 +199,10 @@ protected:
       updated_node = handle_overflow();
     else {
       if(nodes.insert(std::make_pair(sub_idx, updated_node)).second == false)
-        // The value had already existed.
+        /// The value had already existed.
         delete updated_node;
       else
-        // The value had not existed.
+        /// The value had not existed.
         init_node(updated_node);
     }
     cur_node = nodes[sub_idx];

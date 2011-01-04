@@ -202,7 +202,16 @@ protected:
 
   bool transform;
 
-  void* tables[4][4];   ///< precalculated tables for last four used elements
+  /// Precalculated tables for last four used elements.
+  /// There is a 2-layer structure of the precalculated tables.
+  /// The first (the lowest) one is the layer where mapping of integral orders to 
+  /// Function::Node takes place. See function.h for details.
+  /// The second one is the layer with mapping of sub-element transformation to
+  /// a table from the lowest layer.
+  /// The highest layer (in contrast to the PrecalcShapeset class) is represented
+  /// here only by this array.
+  std::map<uint64_t, std::map<unsigned int, Node*>*>* tables[4][4];   
+
   Element* elems[4][4];
   int cur_elem, oldest[4];
 

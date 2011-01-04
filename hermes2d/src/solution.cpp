@@ -163,7 +163,11 @@ void Solution::init()
   num_components = 0;
   e_last = NULL;
   exact_mult = 1.0;
-
+  
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
+  
   mono_coefs = NULL;
   elem_coefs[0] = elem_coefs[1] = NULL;
   elem_orders = NULL;
@@ -292,7 +296,8 @@ void Solution::free_tables()
 {
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
-      free_sub_tables(&(tables[i][j]));
+      if(tables[i][j] != NULL)
+        free_sub_tables(tables[i][j]);
 }
 
 
@@ -754,7 +759,7 @@ void Solution::set_active_element(Element* e)
   if (cur_elem >= 4)
   {
     if (tables[cur_quad][oldest[cur_quad]] != NULL)
-      free_sub_tables(&(tables[cur_quad][oldest[cur_quad]]));
+      free_sub_tables(tables[cur_quad][oldest[cur_quad]]);
 
     cur_elem = oldest[cur_quad];
     if (++oldest[cur_quad] >= 4)
@@ -791,7 +796,8 @@ void Solution::set_active_element(Element* e)
   else
     error("Uninitialized solution.");
 
-  sub_tables = &(tables[cur_quad][cur_elem]);
+  sub_tables = tables[cur_quad][cur_elem];
+
   update_nodes_ptr();
 }
 
@@ -1091,8 +1097,12 @@ void Solution::precalculate(int order, int mask)
           "the solution on its right-hand side.");
   }
 
-  // remove the old node and attach the new one
-  replace_cur_node(node);
+  if((*nodes)[order] != NULL) {
+    assert((*nodes)[order] == cur_node);
+    ::free((*nodes)[order]);
+  }
+  (*nodes)[order] = node;
+  cur_node = node;
 }
 
 

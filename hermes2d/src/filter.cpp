@@ -74,7 +74,10 @@ void Filter::init()
   // misc init
   num_components = 1;
   order = 0;
-  memset(tables, 0, sizeof(tables));
+  
+  for(int i = 0; i < 10; i++)
+      tables[i] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
+
   memset(sln_sub, 0, sizeof(sln_sub));
   set_quad_2d(&g_quad_2d_std);
 }
@@ -119,8 +122,9 @@ void Filter::set_active_element(Element* e)
     }
   }
 
-  if (tables[cur_quad] != NULL) free_sub_tables(&(tables[cur_quad]));
-  sub_tables = &(tables[cur_quad]);
+  if (tables[cur_quad] != NULL) 
+    free_sub_tables(tables[cur_quad]);
+  sub_tables = (tables[cur_quad]);
   update_nodes_ptr();
 
   order = 20; // fixme
@@ -131,7 +135,7 @@ void Filter::free()
 {
   for (int i = 0; i < num; i++)
     if (tables[i] != NULL)
-      free_sub_tables(&(tables[i]));
+      free_sub_tables(tables[i]);
 }
 
 
@@ -246,8 +250,12 @@ void SimpleFilter::precalculate(int order, int mask)
 		filter_fn(np, values, node->values[j][0]);
   }
 
-  // remove the old node and attach the new one
-  replace_cur_node(node);
+  if((*nodes)[order] != NULL) {
+    assert((*nodes)[order] == cur_node);
+    ::free((*nodes)[order]);
+  }
+  (*nodes)[order] = node;
+  cur_node = node;
 }
 
 scalar SimpleFilter::get_pt_value(double x, double y, int it)
@@ -328,8 +336,12 @@ void DXDYFilter::precalculate(int order, int mask)
     filter_fn(np, values_tuple, dx_tuple, dy_tuple, node->values[j][0], node->values[j][1], node->values[j][2]);
   }
 
-  // remove the old node and attach the new one
-  replace_cur_node(node);
+  if((*nodes)[order] != NULL) {
+    assert((*nodes)[order] == cur_node);
+    ::free((*nodes)[order]);
+  }
+  (*nodes)[order] = node;
+  cur_node = node;
 }
 
 
@@ -513,8 +525,12 @@ void VonMisesFilter::precalculate(int order, int mask)
     node->values[0][0][i] = 1.0/sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6*sqr(txy));
   }
 
-  // remove the old node and attach the new one
-  replace_cur_node(node);
+  if((*nodes)[order] != NULL) {
+    assert((*nodes)[order] == cur_node);
+    ::free((*nodes)[order]);
+  }
+  (*nodes)[order] = node;
+  cur_node = node;
 }
 
 
@@ -568,8 +584,13 @@ void LinearFilter::precalculate(int order, int mask)
       }
 
   }
-  // remove the old node and attach the new one
-  replace_cur_node(node);
+  
+  if((*nodes)[order] != NULL) {
+    assert((*nodes)[order] == cur_node);
+    ::free((*nodes)[order]);
+  }
+  (*nodes)[order] = node;
+  cur_node = node;
 }
 
 
