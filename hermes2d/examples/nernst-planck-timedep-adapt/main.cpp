@@ -247,7 +247,7 @@ int main (int argc, char* argv[]) {
   delete[] coeff_vec_coarse;
   
   // Time stepping loop.
-  PidTimestepController pid(T_FINAL, INIT_TAU, false);
+  PidTimestepController pid(T_FINAL, INIT_TAU, true);
   TAU = pid.timestep;
   info("Starting time iteration with the step %g", *TAU);
 
