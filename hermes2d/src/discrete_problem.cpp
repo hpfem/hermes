@@ -1696,10 +1696,22 @@ Space* construct_refined_space(Space* coarse, int order_increase)
 }
 
 // Perform Newton's iteration.
+bool HERMES_RESIDUAL_AS_VECTOR = false;   // This is a temporary location of this variable.
 bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
                   Vector* rhs, double newton_tol, int newton_max_iter, bool verbose, 
                   double damping_coeff, double max_allowed_residual_norm)
 {
+  // Prepare solutions for measuring residual norm.
+  int num_spaces = dp->get_num_spaces();
+  Hermes::Tuple<Solution*> solutions;
+  Hermes::Tuple<bool> dir_lift_false;
+  for (int i=0; i < num_spaces; i++) {
+    solutions.push_back(new Solution());
+    dir_lift_false.push_back(false);      // No Dirichlet lifts will be considered.
+  }
+
+  // The Newton's loop.
+  double residual_norm;
   int it = 1;
   while (1)
   {
@@ -1713,25 +1725,36 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
     
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs);
+    // Measure the residual norm.
+    if (HERMES_RESIDUAL_AS_VECTOR) {
+      // Calculate the l2-norm of residual vector.
+      residual_norm = get_l2_norm(rhs);
+    }
+    else {
+      // Translate the residual vector into a residual function (or multiple functions) 
+      // in the corresponding finite element space(s) and measure their norm(s) there.
+      // This is more meaningful since not all components in the coefficient vector 
+      // have the same weight when translated into the finite element space.
+      Solution::vector_to_solutions(rhs, dp->get_spaces(), solutions, dir_lift_false);
+      residual_norm = calc_norms(solutions);
+    }
 
-    // Info for user.
-    if (verbose) info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, ndof, res_l2_norm);
+    // Info for the user.
+    if (verbose) info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
 
-    // If maximum alloed residual norm is exceeded, fail.
-    if (res_l2_norm > max_allowed_residual_norm) {
+    // If maximum allowed residual norm is exceeded, fail.
+    if (residual_norm > max_allowed_residual_norm) {
       if (verbose) {
-        info("Current residual norm: %g", res_l2_norm);
+        info("Current residual norm: %g", residual_norm);
         info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
         info("Newton solve not successful, returning false.");
       }
       return false;
     }
 
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
+    // If residual norm is within tolerance, or the maximum number 
     // of iteration has been reached, then quit.
-    if ((res_l2_norm < newton_tol || it > newton_max_iter) && it > 1) break;
+    if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
 
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix solver failed.\n");

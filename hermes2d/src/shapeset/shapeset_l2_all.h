@@ -26,6 +26,7 @@ class HERMES_API L2ShapesetLegendre : public Shapeset
 {
   public: L2ShapesetLegendre();
   virtual int get_id() const { return 30; }
+  virtual ESpaceType get_space_type() const { return HERMES_L2_SPACE; }
 };
 
 

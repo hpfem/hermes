@@ -36,8 +36,8 @@ using namespace std;
 #define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
-Adapt::Adapt(Hermes::Tuple< Space* > spaces_, Hermes::Tuple<ProjNormType>
-        proj_norms) :
+Adapt::Adapt(Hermes::Tuple< Space* > spaces_, 
+             Hermes::Tuple<ProjNormType> proj_norms) :
     num_act_elems(-1),
     have_errors(false),
     have_coarse_solutions(false),
@@ -64,16 +64,43 @@ Adapt::Adapt(Hermes::Tuple< Space* > spaces_, Hermes::Tuple<ProjNormType>
   memset(sln, 0, sizeof(sln));
   memset(rsln, 0, sizeof(rsln));
 
-  if (proj_norms.size() > 0) {
+  // if norms were not set by the user, set them to defaults 
+  // according to spaces
+  if (proj_norms.size() == 0) {
     for (int i = 0; i < this->num; i++) {
-      switch (proj_norms[i]) {
-        case HERMES_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i]  = l2_form<Ord, Ord>; break;
-        case HERMES_H1_NORM: form[i][i] = h1_form<double, scalar>; ord[i][i]  = h1_form<Ord, Ord>; break;
-        case HERMES_H1_SEMINORM: form[i][i] = h1_semi_form<double, scalar>; ord[i][i]  = h1_semi_form<Ord, Ord>; break;
-        case HERMES_HCURL_NORM: form[i][i] = hcurl_form<double, scalar>; ord[i][i]  = hcurl_form<Ord, Ord>; break;
-        case HERMES_HDIV_NORM: form[i][i] = hdiv_form<double, scalar>; ord[i][i]  = hdiv_form<Ord, Ord>; break;
-        default: error("Unknown projection type in Adapt::Adapt().");
-      }
+      switch (spaces[i]->get_type()) {
+        case HERMES_H1_SPACE: proj_norms.push_back(HERMES_H1_NORM); break;
+        case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
+        case HERMES_HDIV_SPACE: proj_norms.push_back(HERMES_HDIV_NORM); break;
+        case HERMES_L2_SPACE: proj_norms.push_back(HERMES_L2_NORM); break;
+        default: error("Unknown space type in Adapt::Adapt().");
+      }      
+    }
+  }
+
+  // assign norm weak forms  according to norms selection
+  for (int i = 0; i < this->num; i++) {
+    switch (proj_norms[i]) {
+      case HERMES_H1_NORM: 
+           form[i][i] = h1_form<double, scalar>; ord[i][i] = h1_form<Ord, Ord>; 
+           //printf("H1 norm.\n");
+           break;
+      case HERMES_H1_SEMINORM: 
+           form[i][i] = h1_semi_form<double, scalar>; ord[i][i] = h1_semi_form<Ord, Ord>; 
+           //printf("H1 semi norm.\n");
+           break;
+      case HERMES_HCURL_NORM: 
+           form[i][i] = hcurl_form<double, scalar>; ord[i][i] = hcurl_form<Ord, Ord>; 
+           //printf("Hcurl norm.\n");
+           break;
+      case HERMES_HDIV_NORM: 
+           form[i][i] = hdiv_form<double, scalar>; ord[i][i] = hdiv_form<Ord, Ord>; 
+           //printf("Hdiv norm.\n");
+           break;
+      case HERMES_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i] = l2_form<Ord, Ord>; 
+	   //printf("L2 norm.\n");
+           break;
+      default: error("Unknown projection type in Adapt::Adapt().");
     }
   }
 }
@@ -509,7 +536,8 @@ void Adapt::set_error_form(matrix_form_val_t bi_form, matrix_form_ord_t bi_ord)
 }
 
 double Adapt::eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                                 MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2)
+                         MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, 
+                         MeshFunction *rsln2)
 {
   RefMap *rv1 = sln1->get_refmap();
   RefMap *rv2 = sln2->get_refmap();
@@ -528,7 +556,7 @@ double Adapt::eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
   order += o.get_order();
   if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
   {
-    if(static_cast<Solution *>(rsln1)->get_type() == Solution::HERMES_EXACT)
+    if(static_cast<Solution *>(rsln1)->get_type() == HERMES_EXACT)
     { limit_order_nowarn(order); }
     else
       limit_order(order);
@@ -575,7 +603,7 @@ double Adapt::eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
 
 
 double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                                MeshFunction *rsln1, MeshFunction *rsln2)
+                        MeshFunction *rsln1, MeshFunction *rsln2)
 {
   RefMap *rrv1 = rsln1->get_refmap();
   RefMap *rrv2 = rsln2->get_refmap();
@@ -592,7 +620,7 @@ double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
   order += o.get_order();
   if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
   {
-    if(static_cast<Solution *>(rsln1)->get_type() == Solution::HERMES_EXACT)
+    if(static_cast<Solution *>(rsln1)->get_type() == HERMES_EXACT)
     { limit_order_nowarn(order);  }
     else
       limit_order(order);
@@ -631,7 +659,9 @@ double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt)
+double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
+                                unsigned int error_flags, Hermes::Tuple<double>* component_errors, 
+                                bool solutions_for_adapt)
 {
   _F_
   int i, j, k;
