@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 
-#include "hermes2d.h"
+#include "timestep_controller.h"
 
 using namespace RefinementSelectors;
 
@@ -66,7 +66,7 @@ const scalar C0 = 1200;	                          // [mol/m^3] Anion and counter
 
 
 /* Simulation parameters */
-const double T_FINAL = 3.0;
+const double T_FINAL = 0.3;
 const double TAU = 0.1;                           // Size of the time step.
 const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	                  // Number of initial refinements.
@@ -246,9 +246,12 @@ int main (int argc, char* argv[]) {
   delete[] coeff_vec_coarse;
   
   // Time stepping loop.
+  PidTimestepController pid(T_FINAL, TAU);
+
   int num_time_steps = (int)(T_FINAL/TAU + 0.5);
   for(int ts = 1; ts <= num_time_steps; ts++)
   {
+    pid.begin_step();
     // Periodic global derefinements.
     if (ts > 1 && ts % UNREF_FREQ == 0) 
     {
@@ -394,8 +397,10 @@ int main (int argc, char* argv[]) {
     while (done == false);
 
     // Copy last reference solution into sln_prev_time.
+    pid.end_step(Hermes::Tuple<Solution*> (&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution*> (&C_prev_time, &phi_prev_time));
     C_prev_time.copy(&C_ref_sln);
     phi_prev_time.copy(&phi_ref_sln);
+
   }
 
   // Wait for all views to be closed.
