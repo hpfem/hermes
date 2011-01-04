@@ -64,30 +64,20 @@ const double L =  F / eps;	                  // Constant for equation.
 const double VOLTAGE = 1;	                  // [V] Applied voltage.
 const scalar C0 = 1200;	                          // [mol/m^3] Anion and counterion concentration.
 
-/* For Neumann boundary */
-const double height = 180e-6;	                  // [m] thickness of the domain.
-
 
 /* Simulation parameters */
 const double T_FINAL = 3.0;
 const double TAU = 0.1;                           // Size of the time step.
-const int P_INIT = 3;       	                  // Initial polynomial degree of all mesh elements.
+const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	                  // Number of initial refinements.
 const bool MULTIMESH = true;	                  // Multimesh?
-const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
+const int TIME_DISCR = 2;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
 
-/* Nonadaptive solution parameters */
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for nonadaptive solution.
-
-/* Adaptive solution parameters */
-const bool SOLVE_ON_COARSE_MESH = false;          // true... Newton is done on coarse mesh in every adaptivity step.
-                                                  // false...Newton is done on coarse mesh only once, then projection 
-                                                  // of the fine mesh solution to coarse mesh is used.
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 
-const int UNREF_FREQ = 5;                         // every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 1;                         // every UNREF_FREQth time step the mesh is unrefined.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -294,7 +284,7 @@ int main (int argc, char* argv[]) {
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
-      if (as == 1) {
+      if (as == 1 && ts == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln), 
                                      coeff_vec, matrix_solver);
@@ -303,7 +293,8 @@ int main (int argc, char* argv[]) {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), 
                                      coeff_vec, matrix_solver);
-        
+      }
+      if (as > 1) {
         // Now deallocate the previous mesh
         info("Delallocating the previous mesh");
         delete C_ref_sln.get_mesh();
@@ -319,23 +310,12 @@ int main (int argc, char* argv[]) {
       // Store the result in ref_sln.
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, 
                                     Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
-      sprintf(title, "Solution[C], time level %d, REFERENCE SOLUTION", ts);
-      Cview.set_title(title);
-      Cview.show(&C_ref_sln);
-      //View::wait(HERMES_WAIT_KEYPRESS);
-      
       // Projecting reference solution onto the coarse mesh
       info("Projecting fine mesh solution on coarse mesh.");
       OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space), 
                                    Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), 
                                    Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
                                    matrix_solver);
-
-      sprintf(title, "Solution[C], time level %d, PROJECTED COARSE SOLUTION", ts);
-      Cview.set_title(title);
-      Cview.show(&C_sln);
-      //View::wait(HERMES_WAIT_KEYPRESS);
-
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -393,7 +373,7 @@ int main (int argc, char* argv[]) {
       sprintf(title, "Mesh[phi], time level %d", ts);
       phiordview.set_title(title);
       phiordview.show(&phi_space);
-
+      //View::wait(HERMES_WAIT_KEYPRESS);
 
       // Clean up.
       info("delete solver");
