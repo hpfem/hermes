@@ -280,8 +280,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize the nonlinear system.
-  DiscreteProblem dp(&wf, spaces);
-  Hermes::Tuple<ProjNormType> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
+  bool is_linear = false;
+  DiscreteProblem dp(&wf, spaces, is_linear);
   
   // Set initial conditions.
   T_prev_time.set_exact(&mesh_T, T_exact);
@@ -291,12 +291,9 @@ int main(int argc, char* argv[])
   info("Solving on coarse meshes.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
   OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
-                 coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+                 coeff_vec_coarse, matrix_solver_coarse);
    
-  // Indicate to all DiscreteProblem constructors that we solve a non-linear problem.
-  bool is_linear = false;                 
-  
-  // Initialize the FE problem.
+  // Initialize the discrete problem on coarse mesh.
   DiscreteProblem dp_coarse(&wf, spaces, is_linear);
 
   // Setup the solvers for the coarse and fine mesh calculations, respectively.
@@ -352,7 +349,7 @@ int main(int argc, char* argv[])
           scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
           info("Projecting previous fine mesh solution to obtain initial vector for Newton's iteration on globally derefined meshes.");
           OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                         coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+                         coeff_vec_coarse, matrix_solver_coarse);
 
           // Initialize the FE problem.
           DiscreteProblem dp_coarse(&wf, spaces, is_linear);
@@ -370,7 +367,7 @@ int main(int argc, char* argv[])
         else {
         // Projection onto the globally derefined meshes.
           info("Projecting fine mesh solutions from previous time step onto globally derefined meshes.");
-          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
+          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse); 
         }
       } 
     }
@@ -409,11 +406,11 @@ int main(int argc, char* argv[])
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
-                       coeff_vec, matrix_solver_fine, proj_norms);
+                       coeff_vec, matrix_solver_fine);
       } else {
         info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                       coeff_vec, matrix_solver_fine, proj_norms);
+                       coeff_vec, matrix_solver_fine);
         
         // Deallocate the previous fine mesh.
         delete T_fine.get_mesh();
@@ -438,7 +435,7 @@ int main(int argc, char* argv[])
         scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
         info("Projecting fine mesh solutions back onto coarse mesh to obtain initial vector for following Newton's iteration.");
         OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                        coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+                        coeff_vec_coarse, matrix_solver_coarse);
         
         // Initialize the FE problem.
         DiscreteProblem dp_coarse(&wf, spaces, is_linear);
@@ -456,24 +453,25 @@ int main(int argc, char* argv[])
       else {
         // Projection onto the new coarse meshes.
         info("Projecting fine mesh solutions back onto coarse meshes.");
-        OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
+        OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse); 
       }
 
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
-      Adapt* adaptivity = new Adapt(spaces, proj_norms);
+      Adapt* adaptivity = new Adapt(spaces);
 
       // Calculate error estimate for each solution component and the total error estimate.
       bool solutions_for_adapt = true;
       Hermes::Tuple<double> err_est_rel;
       double err_est_rel_total = adaptivity->calc_err_est(coarse_mesh_solutions, fine_mesh_solutions, solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
 
       // Calculate exact error for each solution component and the total exact error.
       solutions_for_adapt = false;
       Hermes::Tuple<double> err_exact_rel;
-      double err_exact_rel_total = adaptivity->calc_err_exact(coarse_mesh_solutions, Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_exact_rel) * 100;
+      double err_exact_rel_total = adaptivity->calc_err_exact(coarse_mesh_solutions, 
+                                   Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, 
+                                   HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_exact_rel) * 100;
 
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
             space_T.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(), err_est_rel[0]*100, err_exact_rel[0]*100);

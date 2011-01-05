@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
   // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  Adapt adaptivity(&space, HERMES_H1_NORM);
+  Adapt adaptivity(&space);
   bool solutions_for_adapt = false;
   double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
   info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);

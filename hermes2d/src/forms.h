@@ -105,6 +105,7 @@ public:
   T *dy0, *dy1;
 
   T *curl;           ///< Components of the curl of a vector field.
+  T *div;            ///< Components of the div of a vector field.
 
   /// Constructor.
   /** \param[in] num_gip A number of integration points.
@@ -114,6 +115,7 @@ public:
     dx = dx0 = dx1 = NULL;
     dy = dy0 = dy1 = NULL;
     curl = NULL;
+    div = NULL;
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     laplace = NULL;
 #endif
@@ -144,6 +146,7 @@ public:
       H2D_SUBTRACT_IF_NOT_NULL(dy0, func)
       H2D_SUBTRACT_IF_NOT_NULL(dy1, func)
       H2D_SUBTRACT_IF_NOT_NULL(curl, func)
+      H2D_SUBTRACT_IF_NOT_NULL(div, func)
     }
   };
 #undef H2D_SUBTRACT_IF_NOT_NULL
@@ -154,6 +157,7 @@ public:
     dx = dx0 = dx1 = NULL;
     dy = dy0 = dy1 = NULL;
     curl = NULL;
+    div = NULL;
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     laplace = NULL;
 #endif
@@ -171,6 +175,7 @@ public:
     delete [] dx0;  delete [] dx1; dx0 = dx1 = NULL;
     delete [] dy0;  delete [] dy1; dy0 = dy1 = NULL;
     delete [] curl; curl = NULL;
+    delete [] div; div = NULL;
   }
   
   virtual ~Func() { }; // All deallocation done via free_fn / free_ord. 

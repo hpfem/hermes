@@ -215,9 +215,9 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_l2_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_L2_NORM);
+      double exact_h1_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
       info("TIME: %g s.", TIME);
-      info("Exact error in l2-norm: %g.", exact_l2_error);
+      info("Exact error in l2-norm: %g.", exact_h1_error);
     } 
     while (ts < N_STEP);
 
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
 
     // Hack to extract error at final time for convergence graph.
     Solution citrouille(&mesh, exact_solution);
-    info("IE: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_L2_NORM));
+    info("IE: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_H1_NORM));
   }
   else if (method == SDIRK) {
     info("SDIRK22");
@@ -345,14 +345,14 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_l2_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_L2_NORM);
+      double exact_h1_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
       info("TIME: %g s.", TIME);
-      info("Exact error in l2-norm: %g.", exact_l2_error);
+      info("Exact error in H1-norm: %g.", exact_h1_error);
     } while (ts < N_STEP);
 
     // Hack to extract error at final time for convergence graph.
     Solution citrouille(&mesh, exact_solution);
-    info("SDIRK: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_L2_NORM));
+    info("SDIRK: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_H1_NORM));
   }
 
   info("Coordinate ( 0.0, 0.0) u_prev_time value = %lf", u_prev_time.get_pt_value(0.0, 0.0));

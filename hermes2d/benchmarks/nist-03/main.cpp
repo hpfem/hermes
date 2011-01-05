@@ -228,8 +228,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), 
-                                  Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space));
     
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;

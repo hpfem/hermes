@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&init_space, &ref_sln, &sln_prev_time, matrix_solver);
 
     // Calculate element errors and total error estimate.
-    Adapt adaptivity(&init_space, HERMES_H1_NORM);
+    Adapt adaptivity(&init_space);
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity.calc_err_est(&sln_prev_time, &ref_sln, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;

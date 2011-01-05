@@ -176,8 +176,7 @@ int main(int argc, char* argv[])
     cpu_time.tick(HERMES_SKIP);
 
     // Register custom forms for error calculation.
-    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), 
-                                  Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space));
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
@@ -189,7 +188,7 @@ int main(int argc, char* argv[])
     bool solutions_for_adapt = true;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
                                Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
 
     // Time measurement.
     cpu_time.tick();

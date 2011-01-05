@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error (est).");
-    Adapt hp(&space, HERMES_H1_NORM);
+    Adapt hp(&space);
     bool solutions_for_adapt = true;
     double err_est_rel = hp.calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
  

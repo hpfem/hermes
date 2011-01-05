@@ -266,7 +266,7 @@ int main(int argc, char* args[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    Adapt* adaptivity = new Adapt(&space, HERMES_L2_NORM);
+    Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;

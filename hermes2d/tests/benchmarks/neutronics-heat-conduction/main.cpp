@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
     // Calculate exact error.
     info("Calculating error (exact).");
     Hermes::Tuple<double> exact_errors;
-    Adapt adaptivity_exact(spaces, Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt adaptivity_exact(spaces);
     bool solutions_for_adapt = false;
     adaptivity_exact.calc_err_exact(Hermes::Tuple<Solution *>(&T_prev_newton, &phi_prev_newton), Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &exact_errors);
     

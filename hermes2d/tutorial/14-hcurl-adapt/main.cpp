@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM); 
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     v_view.show(&sln);
@@ -164,13 +164,15 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
+    Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
+                                                  HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Calculate exact error,
     solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt, 
+                                                      HERMES_TOTAL_ERROR_REL) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", 
