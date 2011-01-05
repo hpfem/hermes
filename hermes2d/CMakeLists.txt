@@ -164,8 +164,6 @@ else(MSVC)
 endif(MSVC)
 
 find_package(PTHREAD REQUIRED)
-find_package(JUDY REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
 
 if(WITH_GLUT)
   find_package(GLUT REQUIRED)

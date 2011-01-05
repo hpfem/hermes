@@ -1,6 +1,3 @@
-find_package(JUDY REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
-
 # Tests for regular benchmarks.
 add_subdirectory(smooth-iso)
 add_subdirectory(smooth-aniso-x)
