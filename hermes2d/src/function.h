@@ -289,7 +289,6 @@ protected:
   int max_mem;      ///< peak memory usage
 
   Node* new_node(int mask, int num_points); ///< allocates a new Node structure
-  void  free_sub_tables(std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables_to_delete);
   void  handle_overflow_idx();
 
   void replace_cur_node(Node* node)
@@ -424,20 +423,6 @@ typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points
   total_mem += size;
   if (max_mem < total_mem) max_mem = total_mem;
   return node;
-}
-
-template<typename TYPE>
-void Function<TYPE>::free_sub_tables(std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables_to_delete)
-{
-  std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-  for (it = sub_tables_to_delete->begin(); it != sub_tables_to_delete->end(); it++) {
-    std::map<unsigned int, Node*>::iterator it_inner;
-    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-      ::free(it_inner->second);
-    it->second->clear();
-  }
-  sub_tables_to_delete->clear();
-  sub_tables_to_delete = NULL;
 }
 
 

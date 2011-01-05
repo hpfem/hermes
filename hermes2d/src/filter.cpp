@@ -122,8 +122,16 @@ void Filter::set_active_element(Element* e)
     }
   }
 
-  if (tables[cur_quad] != NULL) 
-    free_sub_tables(tables[cur_quad]);
+  if (tables[cur_quad] != NULL) {
+    std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+    for (it = tables[cur_quad]->begin(); it != tables[cur_quad]->end(); it++) {
+      std::map<unsigned int, Node*>::iterator it_inner;
+	for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	  ::free(it_inner->second);
+      it->second->clear();
+    }
+  }
+    
   sub_tables = (tables[cur_quad]);
   update_nodes_ptr();
 
@@ -134,8 +142,15 @@ void Filter::set_active_element(Element* e)
 void Filter::free()
 {
   for (int i = 0; i < num; i++)
-    if (tables[i] != NULL)
-      free_sub_tables(tables[i]);
+    if (tables[i] != NULL) {
+    std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+    for (it = tables[i]->begin(); it != tables[i]->end(); it++) {
+      std::map<unsigned int, Node*>::iterator it_inner;
+	for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	  ::free(it_inner->second);
+      it->second->clear();
+    }
+  }
 }
 
 

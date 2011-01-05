@@ -296,8 +296,15 @@ void Solution::free_tables()
 {
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
-      if(tables[i][j] != NULL)
-        free_sub_tables(tables[i][j]);
+      if(tables[i][j] != NULL) {
+	std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+	for (it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) {
+	  std::map<unsigned int, Node*>::iterator it_inner;
+	    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	      ::free(it_inner->second);
+	  it->second->clear();
+	}
+      }
 }
 
 
@@ -758,8 +765,15 @@ void Solution::set_active_element(Element* e)
   // if not found, free the oldest one and use its slot
   if (cur_elem >= 4)
   {
-    if (tables[cur_quad][oldest[cur_quad]] != NULL)
-      free_sub_tables(tables[cur_quad][oldest[cur_quad]]);
+    if (tables[cur_quad][oldest[cur_quad]] != NULL) {
+      std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+      for (it = tables[cur_quad][oldest[cur_quad]]->begin(); it != tables[cur_quad][oldest[cur_quad]]->end(); it++) {
+	std::map<unsigned int, Node*>::iterator it_inner;
+	  for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	    ::free(it_inner->second);
+	it->second->clear();
+      }
+    }
 
     cur_elem = oldest[cur_quad];
     if (++oldest[cur_quad] >= 4)
