@@ -258,6 +258,9 @@ protected:
   std::map<unsigned int, Node*>* nodes;
   // Current Node.
   Node* cur_node;
+  // Nodes for the overflow sub-element transformation.
+  std::map<unsigned int, Node*>* overflow_nodes;
+
 
   /// With changed sub-element mapping, there comes the need for a change of the current
   /// Node table nodes.
@@ -265,8 +268,10 @@ protected:
   {
     std::map<unsigned int, Node*>* updated_nodes = new std::map<unsigned int, Node*>;
 
-    if (sub_idx > H2D_MAX_IDX)
+    if (sub_idx > H2D_MAX_IDX) {
+      delete updated_nodes;
       handle_overflow_idx();
+    }
     else {
       if(sub_tables->insert(std::make_pair(sub_idx, updated_nodes)).second == false)
         // The value had already existed.
@@ -289,7 +294,7 @@ protected:
   int max_mem;      ///< peak memory usage
 
   Node* new_node(int mask, int num_points); ///< allocates a new Node structure
-  void  handle_overflow_idx();
+  virtual void  handle_overflow_idx() = 0;
 
   void replace_cur_node(Node* node)
   {
@@ -335,6 +340,7 @@ Function<TYPE>::Function()
   cur_node = NULL;
   sub_tables = NULL;
   nodes = NULL;
+  overflow_nodes = NULL;
   memset(quads, 0, sizeof(quads));
 }
 
@@ -419,12 +425,6 @@ typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points
   return node;
 }
 
-
-template<typename TYPE>
-void Function<TYPE>::handle_overflow_idx()
-{
-  nodes = new std::map<unsigned int, Node*>;
-}
 
 #undef H2D_Node_HRD_SIZE
 

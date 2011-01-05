@@ -42,6 +42,11 @@ MeshFunction::MeshFunction(Mesh *mesh) :
 MeshFunction::~MeshFunction()
 {
   delete refmap;
+  if(overflow_nodes != NULL) {
+    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
+      ::free(it->second);
+    delete overflow_nodes;
+  }
 }
 
 
@@ -60,6 +65,16 @@ void MeshFunction::set_active_element(Element* e)
   reset_transform();
 }
 
+void MeshFunction::handle_overflow_idx()
+{
+  if(overflow_nodes != NULL) {
+    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
+      ::free(it->second);
+    delete overflow_nodes;
+  }
+  nodes = new std::map<unsigned int, Node*>;
+  overflow_nodes = nodes;
+}
 
 //// Quad2DCheb ////////////////////////////////////////////////////////////////////////////////////
 

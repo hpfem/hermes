@@ -59,6 +59,16 @@ void PrecalcShapeset::set_quad_2d(Quad2D* quad_2d)
   RealFunction::set_quad_2d(quad_2d);
 }
 
+void PrecalcShapeset::handle_overflow_idx()
+{
+  if(overflow_nodes != NULL) {
+    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
+      ::free(it->second);
+    delete overflow_nodes;
+  }
+  nodes = new std::map<unsigned int, Node*>;
+  overflow_nodes = nodes;
+}
 
 void PrecalcShapeset::set_active_shape(int index)
 {
@@ -156,6 +166,11 @@ void PrecalcShapeset::free()
       it_inner->second->clear();
     }
     it->second->clear();
+  }
+  if(overflow_nodes != NULL) {
+    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
+      ::free(it->second);
+    delete overflow_nodes;
   }
 }
 

@@ -195,8 +195,10 @@ protected:
   {
     Node* updated_node = new Node;
 
-    if (sub_idx > H2D_MAX_IDX)
-      cur_node = updated_node = handle_overflow();
+    if (sub_idx > H2D_MAX_IDX) {
+      delete updated_node;
+      cur_node = handle_overflow();
+    }
     else {
       if(nodes.insert(std::make_pair(sub_idx, updated_node)).second == false)
         /// The value had already existed.

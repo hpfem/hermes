@@ -54,6 +54,10 @@ public:
 
   virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
 
+  /// Virtual function handling overflows. Has to be virtual, because
+  /// the necessary iterators in the templated class do not work with GCC.
+  virtual void handle_overflow_idx();
+
 protected:
 
   int mode;

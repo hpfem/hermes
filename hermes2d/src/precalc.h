@@ -54,6 +54,10 @@ public:
   /// Switches the class to the appropriate mode (triangle, quad).
   virtual void set_active_element(Element* e);
 
+  /// Virtual function handling overflows. Has to be virtual, because
+  /// the necessary iterators in the templated class do not work with GCC.
+  virtual void handle_overflow_idx();
+
   /// Activates a shape function given by its index. The values of the shape function
   /// can then be obtained by setting the required integration rule order by calling
   /// set_quad_order() and after that calling get_values(), get_dx_values(), etc.
