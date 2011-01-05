@@ -1117,6 +1117,9 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
     cache_jwt[order] = new double[np];
     for(int i = 0; i < np; i++)
       cache_jwt[order][i] = pt[i][2] * jac[i];
+    if(ru->is_jacobian_const())
+      delete [] jac;
+
   }
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
@@ -1223,6 +1226,8 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
     cache_jwt[order] = new double[np];
     for(int i = 0; i < np; i++)
       cache_jwt[order][i] = pt[i][2] * jac[i];
+    if(rv->is_jacobian_const())
+      delete [] jac;
   }
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
