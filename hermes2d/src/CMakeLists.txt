@@ -112,7 +112,6 @@ macro(LIBRARY_SETTINGS BIN)
   # The respective variables will be empty for unselected TPL's.
   PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
   target_link_libraries(  ${BIN} 
-      ${JUDY_LIBRARY}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}

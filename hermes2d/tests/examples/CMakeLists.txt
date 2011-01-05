@@ -1,6 +1,3 @@
-find_package(JUDY REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
-
 # elasticity
 add_subdirectory(elasticity-bracket)
 add_subdirectory(elasticity-crack)

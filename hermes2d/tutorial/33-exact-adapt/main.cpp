@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -119,9 +117,7 @@ int main(int argc, char* argv[])
     info("Calculating exact error."); 
     Adapt* adaptivity = new Adapt(&space);
     // Note: the error estimate is now equal to the exact error.
-    bool solutions_for_adapt = true;
-    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 

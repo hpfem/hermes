@@ -541,8 +541,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and error estimate for adaptivity.
     info("Calculating error.");
-    bool solutions_for_adapt = true;
-    double energy_err_est = hp.calc_err_est(slptr_coarse_slns, slptr_fine_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double energy_err_est = hp.calc_err_est(slptr_coarse_slns, slptr_fine_slns) * 100;
     double h1_err_est = error_total(error_fn_h1_axisym, norm_fn_h1_axisym, slptr_coarse_slns, slptr_fine_slns);
     double l2_err_est = error_total(error_fn_l2_axisym, norm_fn_l2_axisym, slptr_coarse_slns, slptr_fine_slns);
 

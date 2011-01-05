@@ -35,9 +35,7 @@ template<class TYPE>
 class Array
 {
 protected:
-  HERMES_API_USED_STL_VECTOR(TYPE*);
   std::vector<TYPE*> pages; // todo: standard array for maximum access speed
-  HERMES_API_USED_STL_VECTOR(int);
   std::vector<int> unused;
   int  size, nitems;
   bool append_only;

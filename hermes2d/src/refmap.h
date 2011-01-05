@@ -71,7 +71,8 @@ public:
   /// points of the specified order. Intended for non-constant jacobian elements.
   double* get_jacobian(int order)
   {
-    if (cur_node->inv_ref_map/*sic!*/[order] == NULL) calc_inv_ref_map(order);
+    if (cur_node->inv_ref_map[order] == NULL) 
+      calc_inv_ref_map(order);
     return cur_node->jacobian[order];
   }
 
@@ -172,6 +173,8 @@ protected:
 
   static const int H2D_MAX_TABLES = g_max_quad+1 + 4 * g_max_quad + 4;
 
+  /// This structure represents one complete piece of information about the reference mapping
+  /// taking into account the sub-element mapping.
   struct Node
   {
     double* jacobian[H2D_MAX_TABLES];
@@ -182,21 +185,29 @@ protected:
     double3* tan[4];
   };
 
-  void* nodes;
+  /// Table of RefMap::Nodes, indexed by a sub-element mapping.
+  std::map<uint64_t, Node*> nodes;
+
   Node* cur_node;
   Node* overflow;
 
   void update_cur_node()
   {
-    Node** pp = NULL;
-    if (sub_idx > H2D_MAX_IDX)
-      pp = handle_overflow();
-    else {
-      pp = (Node**) JudyLIns(&nodes, (Word_t)sub_idx, NULL);
-      //debug_assert((sub_idx >> (sizeof(Word_t) * 8)) == 0, "E index is larger than JudyLins can contain (RefMap::update_cur_node)");
+    Node* updated_node = new Node;
+
+    if (sub_idx > H2D_MAX_IDX) {
+      delete updated_node;
+      cur_node = handle_overflow();
     }
-    if (*pp == NULL) init_node(pp);
-    cur_node = *pp;
+    else {
+      if(nodes.insert(std::make_pair(sub_idx, updated_node)).second == false)
+        /// The value had already existed.
+        delete updated_node;
+      else
+        /// The value had not existed.
+        init_node(updated_node);
+      cur_node = nodes[sub_idx];
+    }
   }
 
   void calc_inv_ref_map(int order);
@@ -213,9 +224,9 @@ protected:
   int calc_inv_ref_order();
 
 
-  void init_node(Node** pp);
+  void init_node(Node* pp);
   void free_node(Node* node);
-  Node** handle_overflow();
+  Node* handle_overflow();
 
   Quad1DStd quad_1d;
 

@@ -1,6 +1,3 @@
-find_package(JUDY REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
-
 # linear problems
 add_subdirectory(01-mesh)
 add_subdirectory(02-space)

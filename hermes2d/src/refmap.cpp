@@ -27,7 +27,6 @@ RefMap::RefMap()
 {
   quad_2d = NULL;
   num_tables = 0;
-  nodes = NULL;
   cur_node = NULL;
   overflow = NULL;
   set_quad_2d(&g_quad_2d_std); // default quadrature
@@ -461,17 +460,13 @@ void RefMap::untransform(Element* e, double x, double y, double& xi1, double& xi
   }
 }
 
-
-void RefMap::init_node(Node** pp)
+void RefMap::init_node(Node* pp)
 {
-  Node* node = *pp = new Node;
-
-  // reset all precalculated tables
-  memset(node->inv_ref_map, 0, num_tables * sizeof(double2x2*));
-  memset(node->second_ref_map, 0, num_tables * sizeof(double3x2*));
-  memset(node->phys_x, 0, num_tables * sizeof(double*));
-  memset(node->phys_y, 0, num_tables * sizeof(double*));
-  memset(node->tan, 0, sizeof(node->tan));
+  memset(pp->inv_ref_map, 0, num_tables * sizeof(double2x2*));
+  memset(pp->second_ref_map, 0, num_tables * sizeof(double3x2*));
+  memset(pp->phys_x, 0, num_tables * sizeof(double*));
+  memset(pp->phys_y, 0, num_tables * sizeof(double*));
+  memset(pp->tan, 0, sizeof(pp->tan));
 }
 
 
@@ -500,22 +495,21 @@ void RefMap::free_node(Node* node)
 
 void RefMap::free()
 {
-  unsigned long idx = 0;
-  Node** pp = (Node**) JudyLFirst(nodes, &idx, NULL);
-  while (pp != NULL)
-  {
-    free_node(*pp);
-    pp = (Node**) JudyLNext(nodes, &idx, NULL);
-  }
-  JudyLFreeArray(&nodes, NULL);
+  std::map<uint64_t, Node*>::iterator it;
 
-  if (overflow != NULL) { free_node(overflow); overflow = NULL; }
+  for (it = nodes.begin(); it != nodes.end(); it++)
+    free_node(it->second);
+  nodes.clear();
+  if (overflow != NULL) {
+    free_node(overflow); overflow = NULL; 
+  }
 }
 
-
-RefMap::Node** RefMap::handle_overflow()
+RefMap::Node* RefMap::handle_overflow()
 {
-  if (overflow != NULL) free_node(overflow);
-  overflow = NULL;
-  return &overflow;
+  if (overflow != NULL)
+    free_node(overflow);
+  overflow = new Node;
+  init_node(overflow);
+  return overflow;
 }

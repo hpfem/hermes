@@ -54,6 +54,10 @@ public:
   /// Switches the class to the appropriate mode (triangle, quad).
   virtual void set_active_element(Element* e);
 
+  /// Virtual function handling overflows. Has to be virtual, because
+  /// the necessary iterators in the templated class do not work with GCC.
+  virtual void handle_overflow_idx();
+
   /// Activates a shape function given by its index. The values of the shape function
   /// can then be obtained by setting the required integration rule order by calling
   /// set_quad_order() and after that calling get_values(), get_dx_values(), etc.
@@ -82,8 +86,6 @@ public:
     ctm = stack + top;
   }
 
-  void dump_info(int quad, const char* filename); // debug
-
   /// Returns the polynomial order of the active shape function on given edge. 
   virtual int get_edge_fn_order(int edge) { return h2d_make_edge_order(mode, edge, shapeset->get_order(index)); }
   
@@ -91,7 +93,16 @@ protected:
 
   Shapeset* shapeset;
 
-  void* tables; ///< primary Judy array of shapes
+  /// Main structure.
+  /// There is a 3-layer structure of the precalculated tables.
+  /// The first (the lowest) one is the layer where mapping of integral orders to 
+  /// Function::Node takes place. See function.h for details.
+  /// The second one is the layer with mapping of sub-element transformation to
+  /// a table from the lowest layer.
+  /// The highest and most complicated one maps a key formed by
+  /// quadrature table selector (0-7), mode of the shape function (triangle/quad),
+  /// and shape function index to a table from the middle layer.
+  std::map<unsigned int, std::map<uint64_t, std::map<unsigned int, Node*>*>*> tables;
 
   int mode;
   int index;

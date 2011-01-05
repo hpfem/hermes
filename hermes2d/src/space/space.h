@@ -308,7 +308,6 @@ protected: //debugging support
   void update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion);
   void update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion);
 
-  HERMES_API_USED_STL_VECTOR(void*);
   std::vector<void*> extra_data;
   void free_extra_data();
 

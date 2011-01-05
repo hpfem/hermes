@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -68,7 +66,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.01;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -203,17 +201,16 @@ int main(int argc, char* argv[])
     
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
-    bool solutions_for_adapt = true;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
-                                                        Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
-                                                        HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+                                                        Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
+                                                        &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::Tuple<double> err_exact_rel;
-    solutions_for_adapt = false;
+    bool solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
-                                                            Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
-                                                            HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
+                                                            Hermes::Tuple<Solution *>(&u_exact, &v_exact), 
+                                                            &err_exact_rel, solutions_for_adapt) * 100;
 
     // Time measurement.
     cpu_time.tick();

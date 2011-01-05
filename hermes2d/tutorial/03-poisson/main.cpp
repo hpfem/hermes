@@ -1,4 +1,4 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 // This example shows how to solve a first simple PDE:

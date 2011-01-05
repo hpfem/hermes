@@ -107,7 +107,6 @@ protected:
     scalar value;
   };
 
-  HERMES_API_USED_STL_VECTOR(FixedVertex);
   std::vector<FixedVertex> fixed_vertices;
 
   inline bool is_fixed_vertex(int id) const;

@@ -1105,10 +1105,21 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   if (cache_e[order] == NULL)
   {
     cache_e[order] = init_geom_vol(ru, order);
-    double* jac = ru->get_jacobian(order);
+    double* jac;
+    if(ru->is_jacobian_const()) {
+      jac = new double[np];
+      double const_jacobian = ru->get_const_jacobian();
+      for(int i = 0; i < np; i++)
+        jac[i] = const_jacobian;
+    }
+    else
+      jac = ru->get_jacobian(order);
     cache_jwt[order] = new double[np];
     for(int i = 0; i < np; i++)
       cache_jwt[order][i] = pt[i][2] * jac[i];
+    if(ru->is_jacobian_const())
+      delete [] jac;
+
   }
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
@@ -1203,10 +1214,20 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   if (cache_e[order] == NULL)
   {
     cache_e[order] = init_geom_vol(rv, order);
-    double* jac = rv->get_jacobian(order);
+    double* jac;
+    if(rv->is_jacobian_const()) {
+      jac = new double[np];
+      double const_jacobian = rv->get_const_jacobian();
+      for(int i = 0; i < np; i++)
+        jac[i] = const_jacobian;
+    }
+    else
+      jac = rv->get_jacobian(order);
     cache_jwt[order] = new double[np];
     for(int i = 0; i < np; i++)
       cache_jwt[order][i] = pt[i][2] * jac[i];
+    if(rv->is_jacobian_const())
+      delete [] jac;
   }
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];

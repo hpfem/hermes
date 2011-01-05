@@ -1,4 +1,4 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 #include <stdio.h>
 
@@ -270,8 +270,7 @@ int main(int argc, char* argv[])
     Hermes::Tuple<Space *> spaces;
     for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++) spaces.push_back(&space);
     Adapt* adaptivity = new Adapt(spaces);
-    bool solutions_for_adapt = true;
-    
+ 
     Hermes::Tuple<Solution *> slns;
     if (NUMBER_OF_EIGENVALUES > 0) slns.push_back(&sln[0]);
     if (NUMBER_OF_EIGENVALUES > 1) slns.push_back(&sln[1]);
@@ -288,8 +287,7 @@ int main(int argc, char* argv[])
     if (NUMBER_OF_EIGENVALUES > 4) ref_slns.push_back(&ref_sln[4]);
     if (NUMBER_OF_EIGENVALUES > 5) ref_slns.push_back(&ref_sln[5]);
     Hermes::Tuple<double> component_errors;
-    double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &component_errors) * 100;
+    double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, &component_errors) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

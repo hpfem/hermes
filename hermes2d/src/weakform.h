@@ -118,13 +118,11 @@ protected:
 
   struct Area  {  /*std::string name;*/  std::vector<int> markers;  };
 
-  HERMES_API_USED_STL_VECTOR(Area);
   std::vector<Area> areas;
-  HERMES_API_USED_STL_VECTOR(MeshFunction*);
 
-  public:
-    scalar evaluate_fn(int point_cnt, double *weights, Func<double> *values_v, Geom<double> *geometry, ExtData<scalar> *values_ext_fnc, Element* element, Shapeset* shape_set, int shape_inx); ///< Evaluate value of the user defined function.
-    Ord evaluate_ord(int point_cnt, double *weights, Func<Ord> *values_v, Geom<Ord> *geometry, ExtData<Ord> *values_ext_fnc, Element* element, Shapeset* shape_set, int shape_inx); ///< Evaluate order of the user defined function.
+public:
+  scalar evaluate_fn(int point_cnt, double *weights, Func<double> *values_v, Geom<double> *geometry, ExtData<scalar> *values_ext_fnc, Element* element, Shapeset* shape_set, int shape_inx); ///< Evaluate value of the user defined function.
+  Ord evaluate_ord(int point_cnt, double *weights, Func<Ord> *values_v, Geom<Ord> *geometry, ExtData<Ord> *values_ext_fnc, Element* element, Shapeset* shape_set, int shape_inx); ///< Evaluate order of the user defined function.
 
   // general case
   struct MatrixFormVol  {  int i, j, sym, area;  matrix_form_val_t fn;  matrix_form_ord_t ord;  std::vector<MeshFunction *> ext; };

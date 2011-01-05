@@ -460,6 +460,7 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
     // and the previous one defined a go-up neighborhood).
     neighb_pss->reset_transform();
     neighb_rm->reset_transform();
+    neighb_pss->set_active_shape(central_pss->get_active_shape());
     
     // Push the neighbor element's transformations in the case of a go-up neighborhood.
     if (neighborhood_type == H2D_DG_GO_UP) {
@@ -478,14 +479,6 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 void NeighborSearch::attach_pss(PrecalcShapeset *pss, RefMap *rm)
 {
   central_pss = pss;
-  
-  /* NOTE: Workaround for a possible segfault caused by pushing transforms to the slave pss fv and a bug in Judy usage.
-  * This would require a change in assembling linear forms, so that central_pss is used there instead of fv.  
-  central_pss = new PrecalcShapeset(pss->get_shapeset());
-  central_pss->set_quad_2d(pss->get_quad_2d());
-  central_pss->set_active_element(central_el);
-  central_pss->set_transform(pss->get_transform());
-  */
   central_rm = rm;
   
   original_central_el_transform = pss->get_transform();
@@ -503,9 +496,6 @@ void NeighborSearch::detach_pss()
       central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
     }
   }
-  
-  // NOTE: Workaround for a possible segfault caused by pushing transforms to the slave pss fv and a bug in Judy usage.
-  // delete central_pss; central_pss = NULL;
 }
 
 int NeighborSearch::create_extended_shapeset(Space *space, AsmList* al)

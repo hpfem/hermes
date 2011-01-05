@@ -450,8 +450,8 @@ int main(int argc, char* argv[])
     adaptivity->set_error_form(3, 3, bilinear_form_3_3<scalar, scalar>, bilinear_form_3_3<Ord, Ord>);
     */
     Hermes::Tuple<double> err_est_rel;
-    bool solutions_for_adapt = true;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u1, &u2, &u3, &u4), Hermes::Tuple<Solution *>(&r1, &r2, &r3, &r4), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u1, &u2, &u3, &u4), 
+                               Hermes::Tuple<Solution *>(&r1, &r2, &r3, &r4), &err_est_rel) * 100;
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",

@@ -164,6 +164,13 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
+    // In the following function, the Boolean parameter "solutions_for_adapt" determines whether 
+    // the calculated errors are intended for use with adaptivity (this may not be the case, for example,
+    // when error wrt. an exact solution is calculated). The default value is solutions_for_adapt = true, 
+    // The last parameter "error_flags" determine whether the total and element errors are treated as 
+    // absolute or relative. Its default value is error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL.
+    // In subsequent examples and benchmarks, these two parameters will be often used with 
+    // their default values, and thus they will not be present in the code explicitly.
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 

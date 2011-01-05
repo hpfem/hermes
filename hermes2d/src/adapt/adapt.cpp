@@ -660,8 +660,7 @@ double Adapt::eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
-                                unsigned int error_flags, Hermes::Tuple<double>* component_errors, 
-                                bool solutions_for_adapt)
+                                Hermes::Tuple<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
 {
   _F_
   int i, j, k;

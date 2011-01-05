@@ -42,6 +42,11 @@ MeshFunction::MeshFunction(Mesh *mesh) :
 MeshFunction::~MeshFunction()
 {
   delete refmap;
+  if(overflow_nodes != NULL) {
+    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
+      ::free(it->second);
+    delete overflow_nodes;
+  }
 }
 
 
@@ -60,6 +65,16 @@ void MeshFunction::set_active_element(Element* e)
   reset_transform();
 }
 
+void MeshFunction::handle_overflow_idx()
+{
+  if(overflow_nodes != NULL) {
+    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
+      ::free(it->second);
+    delete overflow_nodes;
+  }
+  nodes = new std::map<unsigned int, Node*>;
+  overflow_nodes = nodes;
+}
 
 //// Quad2DCheb ////////////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +178,11 @@ void Solution::init()
   num_components = 0;
   e_last = NULL;
   exact_mult = 1.0;
-
+  
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
+  
   mono_coefs = NULL;
   elem_coefs[0] = elem_coefs[1] = NULL;
   elem_orders = NULL;
@@ -292,7 +311,15 @@ void Solution::free_tables()
 {
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
-      free_sub_tables(&(tables[i][j]));
+      if(tables[i][j] != NULL) {
+	std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+	for (it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) {
+	  std::map<unsigned int, Node*>::iterator it_inner;
+	    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	      ::free(it_inner->second);
+	  it->second->clear();
+	}
+      }
 }
 
 
@@ -753,8 +780,15 @@ void Solution::set_active_element(Element* e)
   // if not found, free the oldest one and use its slot
   if (cur_elem >= 4)
   {
-    if (tables[cur_quad][oldest[cur_quad]] != NULL)
-      free_sub_tables(&(tables[cur_quad][oldest[cur_quad]]));
+    if (tables[cur_quad][oldest[cur_quad]] != NULL) {
+      std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
+      for (it = tables[cur_quad][oldest[cur_quad]]->begin(); it != tables[cur_quad][oldest[cur_quad]]->end(); it++) {
+	std::map<unsigned int, Node*>::iterator it_inner;
+	  for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	    ::free(it_inner->second);
+	it->second->clear();
+      }
+    }
 
     cur_elem = oldest[cur_quad];
     if (++oldest[cur_quad] >= 4)
@@ -791,7 +825,8 @@ void Solution::set_active_element(Element* e)
   else
     error("Uninitialized solution.");
 
-  sub_tables = &(tables[cur_quad][cur_elem]);
+  sub_tables = tables[cur_quad][cur_elem];
+
   update_nodes_ptr();
 }
 
@@ -1091,8 +1126,12 @@ void Solution::precalculate(int order, int mask)
           "the solution on its right-hand side.");
   }
 
-  // remove the old node and attach the new one
-  replace_cur_node(node);
+  if((*nodes)[order] != NULL) {
+    assert((*nodes)[order] == cur_node);
+    ::free((*nodes)[order]);
+  }
+  (*nodes)[order] = node;
+  cur_node = node;
 }
 
 

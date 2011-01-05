@@ -18,27 +18,31 @@
 
 #include "mesh.h"
 
-/// 2D transformatin.
+/// 2D transformation.
 struct Trf
 {
-  double2 m; ///< 2x2 diagonal transformation matrix
-  double2 t; ///< translation vector
+  double2 m; /// The 2x2 diagonal transformation matrix.
+  double2 t; /// Translation vector.
 };
 
-#define H2D_TRF_TRI_NUM 4 ///< A total number of valid transformation of a triangle to a sub-domain.
-#define H2D_TRF_QUAD_NUM 8 ///< A total number of valid transformation of a quad to a sub-domain.
-#define H2D_TRF_NUM (H2D_TRF_QUAD_NUM + 1) ///< A total number of transformations.
-#define H2D_TRF_IDENTITY H2D_TRF_QUAD_NUM ///< An index of identity transformation.
-
-extern HERMES_API Trf tri_trf[H2D_TRF_NUM];  ///< A table of triangle sub-subdomain transforms. Only first ::H2D_TRF_TRI_NUM transformations are valid, the rest are identity transformation.
-extern HERMES_API Trf quad_trf[H2D_TRF_NUM]; ///< A table of quad sub-subdomain transforms. Only first ::H2D_TRF_QUAD_NUM transformations are valid, the rest are identity transformation.
+/// A total number of valid transformation of a triangle to a sub-domain.
+#define H2D_TRF_TRI_NUM 4
+/// A total number of valid transformation of a quad to a sub-domain.
+#define H2D_TRF_QUAD_NUM 8
+/// A total number of transformations.
+#define H2D_TRF_NUM (H2D_TRF_QUAD_NUM + 1)
+/// An index of identity transformation.
+#define H2D_TRF_IDENTITY H2D_TRF_QUAD_NUM
+/// A table of triangle sub-subdomain transforms. Only first ::H2D_TRF_TRI_NUM transformations are valid, the rest are identity transformation.
+extern HERMES_API Trf tri_trf[H2D_TRF_NUM];
+/// A table of quad sub-subdomain transforms. Only first ::H2D_TRF_QUAD_NUM transformations are valid, the rest are identity transformation.
+extern HERMES_API Trf quad_trf[H2D_TRF_NUM];
 
 
 /// Transformable is a base class for all classes that perform some kind of precalculation of
 /// function values on elements. These classes (PrecalcShapeset, Solution, RefMap) inherit
 /// from Transformable the ability to transform integration points to the sub-elements
 /// of an element.
-///
 class HERMES_API Transformable
 {
 public:
@@ -122,16 +126,21 @@ public:
 
 protected:
 
-  Element* element; ///< the active element
+  /// The active element.
+  Element* element; 
 
-  Trf* ctm;  ///< current sub-element transformation matrix
-  uint64_t sub_idx; ///< sub-element transformation index. Data type is equal to the type used by Judy.
-  //static const unsigned H2D_MAX_IDX = 0x49249248; ///< largest sub_idx for top <= 10
-  static const uint64_t H2D_MAX_IDX = 0x4000; ///< largest sub_idx for top <= 10. Data type is equal to the type used by Judy.
+  /// Current sub-element transformation matrix.
+  Trf* ctm;  
+  /// Sub-element transformation index.
+  uint64_t sub_idx; 
+  /// The largest sub_idx for top <= 10.
+  /// FIXME: Why it was only 0x4000? 
+  static const uint64_t H2D_MAX_IDX = 0x4000; 
 
-  Trf stack[21]; ///< transformation matrix stack
-  int top;       ///< stack top
-
+  /// Transformation matrix stack.
+  Trf stack[21]; 
+  /// Stack top.
+  int top; 
 };
 
 

@@ -9,8 +9,8 @@ using namespace RefinementSelectors;
 // This test makes sure that example 11-adapt-system works correctly.
 
 const int P_INIT_U = 2;                           // Initial polynomial degree for u.
-const int P_INIT_V = 2;                           // Initial polynomial degree for v.
-const int INIT_REF_BDY = 3;                       // Number of initial boundary refinements
+const int P_INIT_V = 1;                           // Initial polynomial degree for v.
+const int INIT_REF_BDY = 5;                       // Number of initial boundary refinements
 const bool MULTI = true;                          // MULTI = true  ... use multi-mesh,
                                                   // MULTI = false ... use single-mesh.
                                                   // Note: In the single mesh option, the meshes are
@@ -39,7 +39,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -157,15 +157,15 @@ int main(int argc, char* argv[])
     
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
-    bool solutions_for_adapt = true;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
+                               Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::Tuple<double> err_exact_rel;
-    solutions_for_adapt = false;
-    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
+							    Hermes::Tuple<Solution *>(&u_exact, &v_exact), 
+                                                            &err_exact_rel, solutions_for_adapt) * 100;
 
     // Time measurement.
     cpu_time.tick();
@@ -222,9 +222,9 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&u_space, &v_space));
 
-  printf("ndof allowed = %d\n", 1040);
+  printf("ndof allowed = %d\n", 580);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 1040) {      // ndofs was 1030 at the time this test was created
+  if (ndof < 580) {      // ndofs was 574 at the time this test was created
     printf("Success!\n");
     return ERR_SUCCESS;
   }
