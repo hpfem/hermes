@@ -5,7 +5,7 @@
 #define PID_DEFAULT_TOLERANCE 0.25
 #define DEFAULT_STEP 0.1
 
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
+//HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
 
 class HERMES_API PidTimestepController {
 
