@@ -509,6 +509,7 @@ RefMap::Node* RefMap::handle_overflow()
 {
   if (overflow != NULL)
     free_node(overflow);
-  overflow = NULL;
+  overflow = new Node;
+  init_node(overflow);
   return overflow;
 }

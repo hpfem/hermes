@@ -256,8 +256,8 @@ protected:
   std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables;
   /// Table of Nodes. Indexed by integration order.
   std::map<unsigned int, Node*>* nodes;
-  Node*  overflow_nodes;
-  Node*  cur_node;
+  // Current Node.
+  Node* cur_node;
 
   /// With changed sub-element mapping, there comes the need for a change of the current
   /// Node table nodes.
@@ -333,7 +333,6 @@ Function<TYPE>::Function()
   order = 0;
   max_mem = total_mem = 0;
   cur_node = NULL;
-  overflow_nodes = NULL;
   sub_tables = NULL;
   nodes = NULL;
   memset(quads, 0, sizeof(quads));
@@ -341,11 +340,7 @@ Function<TYPE>::Function()
 
 
 template<typename TYPE>
-Function<TYPE>::~Function()
-{
-  if (overflow_nodes != NULL)
-    delete [] overflow_nodes;
-}
+Function<TYPE>::~Function() {}
 
 
 template<typename TYPE>
@@ -418,7 +413,6 @@ typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points
         data += num_points;
       }
   }
-  // todo: maybe put here copying of the old node
 
   total_mem += size;
   if (max_mem < total_mem) max_mem = total_mem;
@@ -429,9 +423,7 @@ typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points
 template<typename TYPE>
 void Function<TYPE>::handle_overflow_idx()
 {
-  if (overflow_nodes != NULL) 
-    delete [] overflow_nodes;
-  overflow_nodes = NULL;
+  nodes = new std::map<unsigned int, Node*>;
 }
 
 #undef H2D_Node_HRD_SIZE

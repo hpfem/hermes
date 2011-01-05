@@ -134,6 +134,7 @@ protected:
   /// Sub-element transformation index.
   uint64_t sub_idx; 
   /// The largest sub_idx for top <= 10.
+  /// FIXME: Why it was only 0x4000? 
   static const uint64_t H2D_MAX_IDX = 0x4000; 
 
   /// Transformation matrix stack.
