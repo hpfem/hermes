@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 
-#include "hermes2d.h"
+#include "timestep_controller.h"
 
 using namespace RefinementSelectors;
 
@@ -64,30 +64,21 @@ const double L =  F / eps;	                  // Constant for equation.
 const double VOLTAGE = 1;	                  // [V] Applied voltage.
 const scalar C0 = 1200;	                          // [mol/m^3] Anion and counterion concentration.
 
-/* For Neumann boundary */
-const double height = 180e-6;	                  // [m] thickness of the domain.
-
 
 /* Simulation parameters */
-const double T_FINAL = 3.0;
-const double TAU = 0.1;                           // Size of the time step.
-const int P_INIT = 3;       	                  // Initial polynomial degree of all mesh elements.
+const double T_FINAL = 1;
+double INIT_TAU = 0.05;
+double *TAU = &INIT_TAU;                        // Size of the time step
+const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	                  // Number of initial refinements.
 const bool MULTIMESH = true;	                  // Multimesh?
-const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
+const int TIME_DISCR = 2;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
 
-/* Nonadaptive solution parameters */
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for nonadaptive solution.
-
-/* Adaptive solution parameters */
-const bool SOLVE_ON_COARSE_MESH = false;          // true... Newton is done on coarse mesh in every adaptivity step.
-                                                  // false...Newton is done on coarse mesh only once, then projection 
-                                                  // of the fine mesh solution to coarse mesh is used.
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 
-const int UNREF_FREQ = 5;                         // every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 1;                         // every UNREF_FREQth time step the mesh is unrefined.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -256,11 +247,14 @@ int main (int argc, char* argv[]) {
   delete[] coeff_vec_coarse;
   
   // Time stepping loop.
-  int num_time_steps = (int)(T_FINAL/TAU + 0.5);
-  for(int ts = 1; ts <= num_time_steps; ts++)
-  {
+  PidTimestepController pid(T_FINAL, INIT_TAU, true);
+  TAU = pid.timestep;
+  info("Starting time iteration with the step %g", *TAU);
+
+  do {
+    pid.begin_step();
     // Periodic global derefinements.
-    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    if (pid.get_timestep_number() > 1 && pid.get_timestep_number() % UNREF_FREQ == 0)
     {
       info("Global mesh derefinement.");
       C_mesh.copy(&basemesh);
@@ -281,7 +275,7 @@ int main (int argc, char* argv[]) {
     bool done = false; int as = 1;
     double err_est;
     do {
-      info("Time step %d, adaptivity step %d:", ts, as);
+      info("Time step %d, adaptivity step %d:", pid.get_timestep_number(), as);
 
       // Construct globally refined reference mesh
       // and setup reference space.
@@ -294,7 +288,7 @@ int main (int argc, char* argv[]) {
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
-      if (as == 1) {
+      if (as == 1 && pid.get_timestep_number() == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln), 
                                      coeff_vec, matrix_solver);
@@ -303,7 +297,8 @@ int main (int argc, char* argv[]) {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), 
                                      coeff_vec, matrix_solver);
-        
+      }
+      if (as > 1) {
         // Now deallocate the previous mesh
         info("Delallocating the previous mesh");
         delete C_ref_sln.get_mesh();
@@ -319,23 +314,12 @@ int main (int argc, char* argv[]) {
       // Store the result in ref_sln.
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, 
                                     Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
-      sprintf(title, "Solution[C], time level %d, REFERENCE SOLUTION", ts);
-      Cview.set_title(title);
-      Cview.show(&C_ref_sln);
-      //View::wait(HERMES_WAIT_KEYPRESS);
-      
       // Projecting reference solution onto the coarse mesh
       info("Projecting fine mesh solution on coarse mesh.");
       OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space), 
                                    Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), 
                                    Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
                                    matrix_solver);
-
-      sprintf(title, "Solution[C], time level %d, PROJECTED COARSE SOLUTION", ts);
-      Cview.set_title(title);
-      Cview.show(&C_sln);
-      //View::wait(HERMES_WAIT_KEYPRESS);
-
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -345,7 +329,7 @@ int main (int argc, char* argv[]) {
       Hermes::Tuple<double> err_est_rel;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&C_sln, &phi_sln), 
                                  Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
       // Report results.
       info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
@@ -379,21 +363,25 @@ int main (int argc, char* argv[]) {
       // Visualize the solution and mesh.
       info("Visualization procedures: C");
       char title[100];
-      sprintf(title, "Solution[C], time level %d", ts);
+      sprintf(title, "Solution[C], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       Cview.set_title(title);
       Cview.show(&C_ref_sln);
-      sprintf(title, "Mesh[C], time level %d", ts);
+      sprintf(title, "Mesh[C], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       Cordview.set_title(title);
       Cordview.show(&C_space);
       
       info("Visualization procedures: phi");
-      sprintf(title, "Solution[phi], time level %d", ts);
+      sprintf(title, "Solution[phi], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       phiview.set_title(title);
       phiview.show(&phi_ref_sln);
-      sprintf(title, "Mesh[phi], time level %d", ts);
+      sprintf(title, "Mesh[phi], time step# %d, step size %g, time %g",
+          pid.get_timestep_number(), *TAU, pid.get_time());
       phiordview.set_title(title);
       phiordview.show(&phi_space);
-
+      //View::wait(HERMES_WAIT_KEYPRESS);
 
       // Clean up.
       info("delete solver");
@@ -413,10 +401,15 @@ int main (int argc, char* argv[]) {
     }
     while (done == false);
 
+
+    pid.end_step(Hermes::Tuple<Solution*> (&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution*> (&C_prev_time, &phi_prev_time));
+    // TODO! Time step reduction when necessary.
+
     // Copy last reference solution into sln_prev_time.
     C_prev_time.copy(&C_ref_sln);
     phi_prev_time.copy(&phi_ref_sln);
-  }
+
+  } while (pid.has_next());
 
   // Wait for all views to be closed.
   View::wait();
