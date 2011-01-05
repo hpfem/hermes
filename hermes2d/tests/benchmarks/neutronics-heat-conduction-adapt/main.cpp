@@ -245,8 +245,7 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize the nonlinear system.
-  DiscreteProblem dp(&wf, spaces);
-  Hermes::Tuple<ProjNormType> proj_norms(HERMES_H1_NORM, HERMES_H1_NORM);
+  DiscreteProblem dp(&wf, spaces, false);
   
   // Set initial conditions.
   T_prev_time.set_exact(&mesh_T, T_exact);
@@ -256,7 +255,7 @@ int main(int argc, char* argv[])
   info("Solving on coarse meshes.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
   OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
-                 coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+                 coeff_vec_coarse, matrix_solver_coarse);
   
   // Indicate to all DiscreteProblem constructors that we solve a non-linear problem.
   bool is_linear = false;                 
@@ -311,7 +310,7 @@ int main(int argc, char* argv[])
           scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
           info("Projecting previous fine mesh solution to obtain initial vector for Newton's iteration on globally derefined meshes.");
           OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                         coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+                         coeff_vec_coarse, matrix_solver_coarse);
           
           // Initialize the FE problem.
           DiscreteProblem dp_coarse(&wf, spaces, is_linear);
@@ -329,7 +328,7 @@ int main(int argc, char* argv[])
         else {
         // Projection onto the globally derefined meshes.
           info("Projecting fine mesh solutions from previous time step onto globally derefined meshes.");
-          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
+          OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse); 
         }
       } 
     }
@@ -351,11 +350,11 @@ int main(int argc, char* argv[])
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
-                       coeff_vec, matrix_solver_fine, proj_norms);
+                       coeff_vec, matrix_solver_fine);
       } else {
         info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
         OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                       coeff_vec, matrix_solver_fine, proj_norms);
+                       coeff_vec, matrix_solver_fine);
         
         // Deallocate the previous fine mesh.
         delete T_fine.get_mesh();
@@ -380,7 +379,7 @@ int main(int argc, char* argv[])
         scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
         info("Projecting fine mesh solutions back onto coarse mesh to obtain initial vector for following Newton's iteration.");
         OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
-                        coeff_vec_coarse, matrix_solver_coarse, proj_norms);
+                        coeff_vec_coarse, matrix_solver_coarse);
         
         // Initialize the FE problem.
         DiscreteProblem dp_coarse(&wf, spaces, is_linear);
@@ -398,12 +397,12 @@ int main(int argc, char* argv[])
       else {
         // Projection onto the new coarse meshes.
         info("Projecting fine mesh solutions back onto coarse meshes.");
-        OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse, proj_norms); 
+        OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse); 
       }
 
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
-      Adapt* adaptivity = new Adapt(spaces, proj_norms);
+      Adapt* adaptivity = new Adapt(spaces);
 
       // Calculate error estimate for each solution component and the total error estimate.
       bool solutions_for_adapt = true;

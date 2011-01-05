@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity->calc_err_est(&(sln[NUMBER_OF_EIGENVALUES-1]), 
                          &(ref_sln[NUMBER_OF_EIGENVALUES-1]), solutions_for_adapt, 

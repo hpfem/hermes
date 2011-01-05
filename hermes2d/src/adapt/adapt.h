@@ -129,7 +129,7 @@ class HERMES_API Adapt
 {
 public:
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 
-  /// Hdiv). If proj_norms are not specified, they are defined as according to the spaces. 
+  /// Hdiv). If proj_norms are not specified, they are defined according to the spaces. 
   Adapt(Hermes::Tuple<Space *> spaces_, Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>()); 
   virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 

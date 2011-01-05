@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
 
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
-      Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+      Adapt* adaptivity = new Adapt(&space);
       bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.

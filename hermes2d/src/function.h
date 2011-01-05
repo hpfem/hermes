@@ -54,7 +54,7 @@ const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN
 #ifndef NDEBUG
   #define check_params \
     if (component < 0 || component > num_components) \
-      error("Invalid component. You are probably using scalar-valued shapeset for an Hcurl problem."); \
+      error("Invalid component. You are probably using scalar-valued shapeset for an Hcurl / Hdiv problem."); \
     if (cur_node == NULL) \
       error("Invalid node. Did you call set_quad_order()?");
   #define check_table(n, msg) \

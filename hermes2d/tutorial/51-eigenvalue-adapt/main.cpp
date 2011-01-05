@@ -268,12 +268,8 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
     Hermes::Tuple<Space *> spaces;
-    for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
-        spaces.push_back(&space);
-    Hermes::Tuple<ProjNormType> proj_norms;
-    for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
-        proj_norms.push_back(HERMES_H1_NORM);
-    Adapt* adaptivity = new Adapt(spaces, proj_norms);
+    for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++) spaces.push_back(&space);
+    Adapt* adaptivity = new Adapt(spaces);
     bool solutions_for_adapt = true;
     
     Hermes::Tuple<Solution *> slns;

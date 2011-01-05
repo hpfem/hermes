@@ -422,7 +422,7 @@ int main(int argc, char* argv[])
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt adaptivity(Hermes::Tuple<Space*>(&space1, &space2), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt adaptivity(Hermes::Tuple<Space*>(&space1, &space2));
     if (ADAPTIVITY_NORM == 2) {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(0, 1, callback(biform_0_1));
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
     bool solutions_for_adapt = true;
     double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
     
-    Adapt adaptivity_proj(Hermes::Tuple<Space*>(&space1, &space2), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt adaptivity_proj(Hermes::Tuple<Space*>(&space1, &space2));
 
     double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns) * 100;
 

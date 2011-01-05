@@ -187,8 +187,9 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(Hermes::Tuple<Space *>(&u_space, &v_space), Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
-                   Hermes::Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    OGProjection::project_global(Hermes::Tuple<Space *>(&u_space, &v_space), 
+                                 Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), 
+                                 Hermes::Tuple<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     s_view_0.show(&u_sln); 
@@ -198,19 +199,21 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&u_space, &v_space));
     
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
     bool solutions_for_adapt = true;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
+                                                        Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
+                                                        HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::Tuple<double> err_exact_rel;
     solutions_for_adapt = false;
-    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
+    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
+                                                            Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
+                                                            HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
 
     // Time measurement.
     cpu_time.tick();

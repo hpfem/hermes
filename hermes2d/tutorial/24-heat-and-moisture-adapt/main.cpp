@@ -224,8 +224,7 @@ int main(int argc, char* argv[])
                                    Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Registering custom forms for error calculation.
-      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space), 
-                          Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
+      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
