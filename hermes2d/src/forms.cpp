@@ -139,20 +139,41 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     double *dxy = fu->get_dxy_values();
     double *dyy = fu->get_dyy_values();
 #endif
+    
+    double2x2 *m;
+    if(rm->is_jacobian_const()) {
+      m = new double2x2[np];
+      double2x2 const_inv_ref_map;
+      
+      const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
+      const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
+      const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
+      const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
 
-    double2x2 *m = rm->get_inv_ref_map(order);
+      for(int i = 0; i < np; i++) {
+        m[i][0][0] = const_inv_ref_map[0][0];
+        m[i][0][1] = const_inv_ref_map[0][1];
+        m[i][1][0] = const_inv_ref_map[1][0];
+        m[i][1][1] = const_inv_ref_map[1][1];
+      }
+
+    }
+    else
+      m = rm->get_inv_ref_map(order);
+
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     double3x2 *mm = rm->get_second_ref_map(order);
 #endif
+
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     for (int i = 0; i < np; i++, m++, mm++) {
 #else
       for (int i = 0; i < np; i++, m++)
 #endif
       {
-	u->val[i] = fn[i];
-	u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
-	u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
+        u->val[i] = fn[i];
+        u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
+        u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
 
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
         double axx = (sqr((*m)[0][0]) + sqr((*m)[1][0]));
