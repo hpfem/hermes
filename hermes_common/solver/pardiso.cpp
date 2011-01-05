@@ -145,7 +145,7 @@ scalar PardisoMatrix::get(int m, int n)
 
 void PardisoMatrix::zero() {
   _F_
-    memset(Ax, 0, sizeof(scalar) * nnz);
+  memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
 void PardisoMatrix::add(int m, int n, scalar v) {
@@ -265,6 +265,11 @@ void PardisoVector::zero()
 {
   _F_
   memset(v, 0, size * sizeof(scalar));
+}
+
+void PardisoVector::change_sign() {
+  _F_
+  for (int i = 0; i < size; i++) v[i] *= -1.;
 }
 
 void PardisoVector::free() 

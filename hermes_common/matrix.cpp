@@ -41,54 +41,52 @@
 
 void ludcmp(double **a, int n, int *indx, double *d)
 {
-	_F_
-	int i, imax = 0, j, k;
-	double big, dum, sum, temp;
-	double *vv = new double[n];
-	MEM_CHECK(vv);
+  _F_
+  int i, imax = 0, j, k;
+  double big, dum, sum, temp;
+  double *vv = new double[n];
+  MEM_CHECK(vv);
 
-	*d = 1.0;
-	for (i = 0; i < n; i++) {
-		big=0.0;
-		for (j = 0; j < n; j++)
-			if ((temp = fabs(a[i][j])) > big)
-				big = temp;
-		if (big == 0.0) EXIT("Singular matrix in routine LUDCMP!");
-		vv[i] = 1.0 / big;
-	}
-	for (j = 0; j < n; j++) {
-		for (i = 0; i < j; i++) {
-			sum = a[i][j];
-			for (k = 0; k < i; k++) sum -= a[i][k]*a[k][j];
-			a[i][j] = sum;
-		}
-		big = 0.0;
-		for (i = j; i < n; i++) {
-			sum = a[i][j];
-			for (k = 0; k < j; k++) sum -= a[i][k]*a[k][j];
-			a[i][j] = sum;
-			if ((dum = vv[i]*fabs(sum)) >= big) {
-				big = dum;
-				imax = i;
-			}
-		}
-		if (j != imax) {
-			for (k = 0; k < n; k++) {
-				dum = a[imax][k];
-				a[imax][k] = a[j][k];
-				a[j][k] = dum;
-			}
-			*d = -(*d);
-			vv[imax] = vv[j];
-		}
-		indx[j] = imax;
-		if (a[j][j] == 0.0) a[j][j] = HERMES_TINY;
-		if (j != n-1) {
-			dum = 1.0 / (a[j][j]);
-			for (i = j+1; i < n; i++) a[i][j] *= dum;
-		}
-	}
-	delete [] vv;
+  *d = 1.0;
+  for (i = 0; i < n; i++) {
+    big=0.0;
+    for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
+    if (big == 0.0) EXIT("Singular matrix in routine LUDCMP!");
+    vv[i] = 1.0 / big;
+  }
+  for (j = 0; j < n; j++) {
+    for (i = 0; i < j; i++) {
+      sum = a[i][j];
+      for (k = 0; k < i; k++) sum -= a[i][k]*a[k][j];
+      a[i][j] = sum;
+    }
+    big = 0.0;
+    for (i = j; i < n; i++) {
+      sum = a[i][j];
+      for (k = 0; k < j; k++) sum -= a[i][k]*a[k][j];
+      a[i][j] = sum;
+      if ((dum = vv[i]*fabs(sum)) >= big) {
+        big = dum;
+        imax = i;
+      }
+    }
+    if (j != imax) {
+      for (k = 0; k < n; k++) {
+        dum = a[imax][k];
+        a[imax][k] = a[j][k];
+        a[j][k] = dum;
+      }
+      *d = -(*d);
+      vv[imax] = vv[j];
+    }
+    indx[j] = imax;
+    if (a[j][j] == 0.0) a[j][j] = HERMES_TINY;
+    if (j != n-1) {
+      dum = 1.0 / (a[j][j]);
+      for (i = j+1; i < n; i++) a[i][j] *= dum;
+    }
+  }
+  delete [] vv;
 }
 
 // choldc, cholsl - Cholesky decomposition and solution routines from
@@ -96,23 +94,20 @@ void ludcmp(double **a, int n, int *indx, double *d)
 
 void choldc(double **a, int n, double p[])
 {
-	_F_
-	int i, j, k;
-	for (i = 0; i < n; i++) {
-		for (j = i; j < n; j++) {
-			double sum = a[i][j];
-			k = i;
-			while (--k >= 0)
-				sum -= a[i][k] * a[j][k];
-
-			if (i == j) {
-				if (sum <= 0.0) EXIT("CHOLDC failed!");
-				else p[i] = sqrt(sum);
-			}
-			else
-				a[j][i] = sum / p[i];
-		}
-	}
+  _F_
+  int i, j, k;
+  for (i = 0; i < n; i++) {
+    for (j = i; j < n; j++) {
+      double sum = a[i][j];
+      k = i;
+      while (--k >= 0) sum -= a[i][k] * a[j][k];
+      if (i == j) {
+	if (sum <= 0.0) EXIT("CHOLDC failed!");
+	else p[i] = sqrt(sum);
+      }
+      else a[j][i] = sum / p[i];
+    }
+  }
 }
 
 // Simple dot product.
@@ -140,85 +135,83 @@ void qsort_int(int* pbase, size_t total_elems); // defined in qsort.cpp
 
 SparseMatrix::SparseMatrix()
 {
-	_F_
-	size = 0;
-	pages = NULL;
+  _F_
+  size = 0;
+  pages = NULL;
 
-	row_storage = false;
-	col_storage = false;
+  row_storage = false;
+  col_storage = false;
 }
 
 SparseMatrix::SparseMatrix(int size)
 {
-	_F_
-	this->size = size;
-	pages = NULL;
+  _F_
+  this->size = size;
+  pages = NULL;
 
-	row_storage = false;
-	col_storage = false;
+  row_storage = false;
+  col_storage = false;
 }
 
 SparseMatrix::~SparseMatrix()
 {
-	_F_
-	delete [] pages;
+  _F_
+  delete [] pages;
 }
 
 void SparseMatrix::prealloc(int n)
 {
-	_F_
-	this->size = n;
+  _F_
+  this->size = n;
 
-	pages = new Page *[n];
-	MEM_CHECK(pages);
-	memset(pages, 0, n * sizeof(Page *));
+  pages = new Page *[n];
+  MEM_CHECK(pages);
+  memset(pages, 0, n * sizeof(Page *));
 }
 
 void SparseMatrix::pre_add_ij(int row, int col)
 {
-	_F_
-	if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {
-		Page *new_page = new Page;
-		MEM_CHECK(new_page);
-		new_page->count = 0;
-		new_page->next = pages[col];
-		pages[col] = new_page;
-	}
-	pages[col]->idx[pages[col]->count++] = row;
+  _F_
+  if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {
+    Page *new_page = new Page;
+    MEM_CHECK(new_page);
+    new_page->count = 0;
+    new_page->next = pages[col];
+    pages[col] = new_page;
+  }
+  pages[col]->idx[pages[col]->count++] = row;
 }
 
 int SparseMatrix::sort_and_store_indices(Page *page, int *buffer, int *max)
 {
-	_F_
-	// gather all pages in the buffer, deleting them along the way
-	int *end = buffer;
-	while (page != NULL) {
-		memcpy(end, page->idx, sizeof(int) * page->count);
-		end += page->count;
-		Page *tmp = page;
-		page = page->next;
-		delete tmp;
-	}
+  _F_
+  // gather all pages in the buffer, deleting them along the way
+  int *end = buffer;
+  while (page != NULL) {
+    memcpy(end, page->idx, sizeof(int) * page->count);
+    end += page->count;
+    Page *tmp = page;
+    page = page->next;
+    delete tmp;
+  }
 
-	// sort the indices and remove duplicities
-	qsort_int(buffer, end - buffer);
-	int *q = buffer;
-	for (int *p = buffer, last = -1; p < end; p++)
-		if (*p != last)
-			*q++ = last = *p;
+  // sort the indices and remove duplicities
+  qsort_int(buffer, end - buffer);
+  int *q = buffer;
+  for (int *p = buffer, last = -1; p < end; p++) if (*p != last) *q++ = last = *p;
 
-	return q - buffer;
+  return q - buffer;
 }
 
 int SparseMatrix::get_num_indices()
 {
-	_F_
-	int total = 0;
-	for (int i = 0; i < size; i++)
-		for (Page *page = pages[i]; page != NULL; page = page->next)
-			total += page->count;
+  _F_
+  int total = 0;
+  for (int i = 0; i < size; i++)
+    for (Page *page = pages[i]; page != NULL; page = page->next)
+      total += page->count;
 
-	return total;
+  return total;
 }
 
 // This function is identical in H2D and H3D.

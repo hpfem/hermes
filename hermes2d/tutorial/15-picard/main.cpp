@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_UNSYM, HERMES_ANY, &sln_prev_iter);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_NONSYM, HERMES_ANY, &sln_prev_iter);
   wf.add_vector_form(callback(linear_form), HERMES_ANY);
 
   // Perform the Picard's iteration.

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+convert "conv_outfl_dof.png" -trim "conv_outfl_dof.png"
+convert "conv_outfl_cpu.png" -trim "conv_outfl_cpu.png"
+montage "conv_outfl_dof.png" "conv_outfl_cpu.png" -tile x1 -geometry +36+0 -gravity south "conv_outfl.png"
+
+convert "conv_ex_dof.png" -trim "conv_ex_dof.png"
+convert "conv_ex_cpu.png" -trim "conv_ex_cpu.png"
+montage "conv_ex_dof.png" "conv_ex_cpu.png" -tile x1 -geometry +36+0 -gravity south "conv_ex.png"
+

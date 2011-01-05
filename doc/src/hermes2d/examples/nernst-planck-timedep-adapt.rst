@@ -339,18 +339,18 @@ are assembled as follows::
           wf.add_vector_form(0, callback(Fc_euler), H2D_ANY,
 		             Tuple<MeshFunction*>(&C_prev_time, &C_prev_newton, &phi_prev_newton));
           wf.add_vector_form(1, callback(Fphi_euler), H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &phi_prev_newton));
-          wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM, H2D_ANY, &phi_prev_newton);
-          wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM, H2D_ANY, &C_prev_newton);
-          wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
-          wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
+          wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_NONSYM, H2D_ANY, &phi_prev_newton);
+          wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_NONSYM, H2D_ANY, &C_prev_newton);
+          wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
+          wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
         } else {
           wf.add_vector_form(0, callback(Fc_cranic), H2D_ANY, 
 		             Tuple<MeshFunction*>(&C_prev_time, &C_prev_newton, &phi_prev_newton, &phi_prev_time));
           wf.add_vector_form(1, callback(Fphi_cranic), H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &phi_prev_newton));
-          wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&phi_prev_newton, &phi_prev_time));
-          wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_UNSYM, H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &C_prev_time));
-          wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_UNSYM);
-          wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_UNSYM);
+          wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_NONSYM, H2D_ANY, Tuple<MeshFunction*>(&phi_prev_newton, &phi_prev_time));
+          wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_NONSYM, H2D_ANY, Tuple<MeshFunction*>(&C_prev_newton, &C_prev_time));
+          wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_NONSYM);
+          wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_NONSYM);
         }
 
 where the variables ``C_prev_time``, ``C_prev_newton``, 

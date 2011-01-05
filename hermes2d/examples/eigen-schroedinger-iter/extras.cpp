@@ -221,8 +221,7 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     // Calculate relative error of the increment.
     Solution ref_sln_new;
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
-    newton_err_rel = calc_abs_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM)
-	             / calc_norm(&ref_sln_new, HERMES_H1_NORM) * 100;
+    newton_err_rel = calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
 
     // Updating reference solution.
     ref_sln_prev.copy(&ref_sln_new);
@@ -291,8 +290,7 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     // Calculate relative error of the increment.
     Solution ref_sln_new;
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
-    picard_err_rel = calc_abs_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM)
-	             / calc_norm(&ref_sln_new, HERMES_H1_NORM) * 100;
+    picard_err_rel = calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
 
     // Updating reference solution.
     ref_sln_prev.copy(&ref_sln_new);

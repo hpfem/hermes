@@ -17,6 +17,8 @@ using namespace RefinementSelectors;
 //  C = [Gamma, 1]
 //  Gamma = 1 - 1/sqrt(2)
 //
+//  The method can be found in Butcher's book on page 244. 
+//
 //  Authors: Damien L-G and Jean R (Texas A&M University).
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
@@ -168,7 +170,7 @@ int main(int argc, char* argv[])
     info("IMPLICIT EULER METHOD");
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
     // Initialize the FE problem. 
@@ -194,7 +196,7 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
       
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
@@ -260,10 +262,10 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&space, &u_prev_time, coeff_vec2, matrix_solver);
 
     WeakForm wf1;
-    wf1.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
+    wf1.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
     wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time));
     WeakForm wf2;
-    wf2.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
+    wf2.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
     wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time, &Y1));
 
     // Initialize the FE problem. 
@@ -289,7 +291,7 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
@@ -328,7 +330,7 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);

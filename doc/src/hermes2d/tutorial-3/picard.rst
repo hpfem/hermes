@@ -94,7 +94,7 @@ being an external function::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY, &sln_prev_iter);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY, &sln_prev_iter);
     wf.add_vector_form(callback(res), HERMES_ANY);
 
 Picard's iteration loop

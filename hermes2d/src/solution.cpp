@@ -1440,3 +1440,8 @@ scalar Solution::get_pt_value(double x, double y, int item)
   return NAN;
 }
 
+void Solution::push_transform(int son)
+{
+  Transformable::push_transform(son);
+  update_nodes_ptr();
+}

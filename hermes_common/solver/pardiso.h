@@ -62,6 +62,7 @@ public:
   virtual void free();
   virtual scalar get(int idx) { return v[idx]; }
   virtual void zero();
+  virtual void change_sign();
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
   virtual void extract(scalar *v) const;

@@ -290,6 +290,19 @@ void MumpsVector::alloc(int n)
   zero();
 }
 
+void MumpsVector::change_sign()
+{
+  _F_
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+  for (int i = 0; i < size; i++) v[i] *= -1.;
+#else
+  for (int i = 0; i < size; i++) {
+    v[i].r *= -1.;
+    v[i].i *= -1.;
+  }
+#endif
+}
+
 void MumpsVector::zero()
 {
   _F_

@@ -72,6 +72,7 @@ public:
   virtual scalar get(int idx);
   virtual void extract(scalar *v) const;
   virtual void zero();
+  virtual void change_sign();
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
   virtual void add(int n, int *idx, scalar *y);

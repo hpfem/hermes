@@ -482,6 +482,16 @@ int main(int argc, char* argv[])
       
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
+      else
+      {
+        // Show the reference solution - the final result.
+        view1.set_title("Fine mesh solution");
+        view1.show_mesh(false);
+        view1.show(&ref_sln1);
+        view2.set_title("Fine mesh solution");
+        view2.show_mesh(false);
+        view2.show(&ref_sln2);
+      }
     }
     
     // Clean up.
@@ -523,14 +533,6 @@ int main(int argc, char* argv[])
   graph_dof_evol.save("dof_evol.gp");
   graph_dof.save(cdfile.str().c_str());
   graph_cpu.save(ccfile.str().c_str());  
-
-  // Show the reference solution - the final result.
-  view1.set_title("Fine mesh solution");
-  view1.show_mesh(false);
-  view1.show(&ref_sln1);
-  view2.set_title("Fine mesh solution");
-  view2.show_mesh(false);
-  view2.show(&ref_sln2);
   
   // Wait for all views to be closed.
   View::wait();

@@ -134,7 +134,7 @@ scalar UMFPackMatrix::get(int m, int n)
   if (mid < 0) // if the entry has not been found
     return 0.0;   
   else 
-    return Ax[Ap[n]+mid];
+    return Ax[Ap[n] + mid];
 }
 
 void UMFPackMatrix::zero() {
@@ -152,7 +152,7 @@ void UMFPackMatrix::add(int m, int n, scalar v) {
     if (pos < 0) 
       error("Sparse matrix entry not found");
     
-    Ax[Ap[n]+pos] += v;
+    Ax[Ap[n] + pos] += v;
   }
 }
 
@@ -266,6 +266,11 @@ void UMFPackVector::alloc(int n) {
 void UMFPackVector::zero() {
   _F_
   memset(v, 0, size * sizeof(scalar));
+}
+
+void UMFPackVector::change_sign() {
+  _F_
+  for (int i = 0; i < size; i++) v[i] *= -1.;
 }
 
 void UMFPackVector::free() {

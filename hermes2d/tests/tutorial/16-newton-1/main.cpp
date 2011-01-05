@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
   wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Initialize the FE problem.
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    rhs->change_sign();
     
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);

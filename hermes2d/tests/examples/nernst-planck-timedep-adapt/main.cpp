@@ -156,10 +156,10 @@ int main (int argc, char* argv[]) {
   // The weak form for 2 equations.
   WeakForm wf(2);
   // Add the bilinear and linear forms.
-  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM, HERMES_ANY, &phi_prev_time);
-  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM, HERMES_ANY, &C_prev_time);
-  wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
-  wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
+  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_NONSYM, HERMES_ANY, &phi_prev_time);
+  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_NONSYM, HERMES_ANY, &C_prev_time);
+  wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
+  wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
   wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
   wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
 
@@ -197,7 +197,7 @@ int main (int argc, char* argv[]) {
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
+    rhs_coarse->change_sign();
     
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs_coarse);
@@ -291,13 +291,14 @@ int main (int argc, char* argv[]) {
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
+        rhs->change_sign();
+ 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", 
+             it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, or the maximum number 
         // of iteration has been reached, then quit.

@@ -102,7 +102,7 @@ Scalar stabilization_biform_sgs(int n, double *wt, Func<Scalar> *u_ext[], Func<R
 template<typename Real, typename Scalar>
 Scalar stabilization_biform_sgs_alt(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  #ifdef H2D_SECOND_DERIVATIVES_ENABLED
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
   Real h_e = e->diam;
   Scalar result = 0;
   for (int i=0; i < n; i++) {
@@ -112,9 +112,9 @@ Scalar stabilization_biform_sgs_alt(int n, double *wt, Func<Scalar> *u_ext[], Fu
                           * (B1 * u->dx[i] + B2 * u->dy[i] - EPSILON * u->laplace[i]);
   }
   return result;
-  #else
+#else
   error("Define H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h if you want to use second derivatives of shape functions in weak forms.");
-  #endif
+#endif
 }
 
 
@@ -132,7 +132,11 @@ inline Real calculate_a_dot_v(Real x, Real y, Real vx, Real vy)
 template<typename Real, typename Scalar>
 inline Scalar upwind_flux(Real u_cent, Real u_neib, Real a_dot_n)
 {
-  return a_dot_n * (a_dot_n >= 0 ? u_cent : u_neib); 
+  Scalar eff_val;
+  if (a_dot_n > 0) eff_val = u_cent;
+  else if (a_dot_n < 0) eff_val = u_neib;
+  else eff_val = 0.5*(u_cent + u_neib);
+  return a_dot_n * eff_val;
 }
 
 template<>
@@ -224,10 +228,18 @@ template<typename Real, typename Scalar>
 Scalar dg_interface_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
-  Real sigma = 2 * C_W / (e->diam + e->get_neighbor_diam());
+  //Real sigma = 2 * C_W / (e->diam + e->get_neighbor_diam());
+  Real edge_len;
   for (int i = 0; i < n; i++)
-    result += wt[i] * EPSILON * ( -AVG_GRAD(u) * JUMP(v) + theta * AVG_GRAD(v) * JUMP(u)  // diffusion
-                                 + sigma * JUMP(u) * JUMP(v)  );                          // interior discontinuity penalization
+    edge_len += wt[i];
+  
+  Real sigma = C_W * EPSILON / (0.5*edge_len);
+  
+  for (int i = 0; i < n; i++)
+  {
+    result += wt[i] * EPSILON * ( -AVG_GRAD(u) * JUMP(v) + theta * AVG_GRAD(v) * JUMP(u) ); // diffusion
+    result += wt[i] * sigma * JUMP(u) * JUMP(v);                          // interior discontinuity penalization
+  }
   return result;
 }
 
@@ -242,19 +254,38 @@ template<typename Real, typename Scalar>
 Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
-  Real sigma = C_W / e->diam;
+  //Real sigma = C_W * EPSILON / e->diam;
+  Real edge_len;
+  for (int i = 0; i < n; i++)
+    edge_len += wt[i];
+  
+  Real sigma = C_W * EPSILON / (0.5*edge_len);
+  
   for (int i = 0; i < n; i++)
   {
-    Scalar u_dir = essential_bc_values<Real,Scalar>(e->edge_marker, e->x[i], e->y[i]);
-    result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]                    // diffusion 
-                                  + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i] - u_dir)    
-                                  + sigma * ( ( u->val[i] - u_dir ) * v->val[i] ) );                        // boundary penalty
+    result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]
+                                  + theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * (u->val[i]) );   
+    result += wt[i] * sigma * ( u->val[i] ) * v->val[i];                    
   }
   return result;
 }
 
-template<>
-Ord dg_boundary_biform_diffusion(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+template<typename Real, typename Scalar>
+Scalar dg_boundary_liform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  return Ord(20);   // Not neccessary to be that high - just a safe enough setting for testing.
+  Scalar result = 0;
+  //Real sigma = C_W * EPSILON / e->diam;
+  Real edge_len;
+  for (int i = 0; i < n; i++)
+    edge_len += wt[i];
+  
+  Real sigma = C_W * EPSILON / (0.5*edge_len);
+  
+  for (int i = 0; i < n; i++)
+  {
+    Scalar u_dir = essential_bc_values<Real,Scalar>(e->edge_marker, e->x[i], e->y[i]);
+    result += wt[i] * EPSILON * theta * ( v->dx[i]*e->nx[i] + v->dy[i]*e->ny[i] ) * u_dir;
+    result += wt[i] * sigma * u_dir * v->val[i];                        
+  }
+  return result;
 }

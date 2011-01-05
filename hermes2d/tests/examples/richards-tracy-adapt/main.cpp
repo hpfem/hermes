@@ -15,7 +15,8 @@ const int P_INIT = 2;                             // Initial polynomial degree o
 const double TAU = 0.001;                         // Time step.
 const double T_FINAL = 2*TAU + 1e-4;              // Time interval length.
 const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
-
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Adaptivity
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -53,8 +54,6 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 double K_S = 20.464;
@@ -147,21 +146,21 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Solutions for the time stepping and adaptivity.
-  Solution u_prev_time, sln, ref_sln;
+  Solution sln_prev_time, sln, ref_sln;
 
-  // Initialize u_prev_time.
+  // Initialize sln_prev_time.
   // Note: only if adaptivity to initial condition is not done.
-  u_prev_time.set_exact(&basemesh, init_cond);
+  sln_prev_time.set_exact(&basemesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
-    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &sln_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
-    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &sln_prev_time);
   }
 
   // Error estimate and discrete problem size as a function of physical time.
@@ -217,7 +216,8 @@ int main(int argc, char* argv[])
       space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop (in space):
+    // Spatial adaptivity loop. Note; sln_prev_time must not be changed during 
+    // spatial adaptivity.
     bool done = false;
     int as = 1;
     do
@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
       info("Solving on fine mesh.");
       if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
           NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-      
+
       // Translate the resulting coefficient vector into the actual solutions. 
       Solution::vector_to_solutions(coeff_vec, ref_space, &ref_sln);
 
@@ -313,8 +313,8 @@ int main(int argc, char* argv[])
     }
     while (!done);
 
-    // Copy new time level solution into u_prev_time.
-    u_prev_time.copy(&ref_sln);
+    // Copy new time level solution into sln_prev_time.
+    sln_prev_time.copy(&ref_sln);
   }
 
   int ndof_allowed = 35;

@@ -186,11 +186,11 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
     wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &sln_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
     wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &sln_prev_time);
   }
 
@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
       space.set_uniform_order(P_INIT);
     }
 
-    // Spatial adaptivity loop. Note; sln_prev_timemust not be changed during 
+    // Spatial adaptivity loop. Note; sln_prev_time must not be changed during 
     // spatial adaptivity.
     bool done = false;
     int as = 1;
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
         as++;
       }
 
-      // Clean up.
+      // Cleanup.
       delete [] coeff_vec;
       delete solver;
       delete matrix;

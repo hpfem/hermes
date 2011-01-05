@@ -1,4 +1,7 @@
-# elasticity
+# Higher-order Runge-Kutta methods (via Butcher's tables)
+add_subdirectory(butcher)
+
+# Elasticity
 add_subdirectory(elasticity-bracket)
 add_subdirectory(elasticity-crack)
 

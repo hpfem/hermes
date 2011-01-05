@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_UNSYM);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_NONSYM);
   wf.add_vector_form(callback(linear_form_vol));
   wf.add_vector_form_surf(callback(linear_form_surf), BDY_RIGHT);
 
