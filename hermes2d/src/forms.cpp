@@ -183,7 +183,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
         double ay = (*mm)[0][1] + (*mm)[2][1];
         u->laplace[i] = ( dx[i] * ax + dy[i] * ay + dxx[i] * axx + dxy[i] * axy + dyy[i] * ayy );
 #endif
-
+      }
 		}
     m -= np;
     if(rm->is_jacobian_const())
