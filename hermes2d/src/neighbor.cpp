@@ -460,6 +460,7 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
     // and the previous one defined a go-up neighborhood).
     neighb_pss->reset_transform();
     neighb_rm->reset_transform();
+    neighb_pss->set_active_shape(central_pss->get_active_shape());
     
     // Push the neighbor element's transformations in the case of a go-up neighborhood.
     if (neighborhood_type == H2D_DG_GO_UP) {
