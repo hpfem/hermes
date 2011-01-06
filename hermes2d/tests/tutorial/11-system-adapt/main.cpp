@@ -157,17 +157,15 @@ int main(int argc, char* argv[])
     
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::Tuple<double> err_est_rel;
-    bool solutions_for_adapt = true;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
-                               Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), solutions_for_adapt, 
-                               HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+                               Hermes::Tuple<Solution *>(&u_ref_sln, &v_ref_sln), &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::Tuple<double> err_exact_rel;
-    solutions_for_adapt = false;
+    bool solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::Tuple<Solution *>(&u_sln, &v_sln), 
-                                 Hermes::Tuple<Solution *>(&u_exact, &v_exact), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL, &err_exact_rel) * 100;
+							    Hermes::Tuple<Solution *>(&u_exact, &v_exact), 
+                                                            &err_exact_rel, solutions_for_adapt) * 100;
 
     // Time measurement.
     cpu_time.tick();

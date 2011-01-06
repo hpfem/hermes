@@ -147,7 +147,7 @@ public:
   {
     if (num != 1) EXIT("Wrong number of solutions.");
     return calc_err_est(Hermes::Tuple<Solution *> (sln), Hermes::Tuple<Solution *> (rsln), 
-                        solutions_for_adapt, error_flags);
+                        (Hermes::Tuple<double>*) NULL, solutions_for_adapt, error_flags);
   }
 
   /// Calculates the error of the solution. 'n' must be the same
@@ -155,11 +155,10 @@ public:
   /// pointers are passed, followed by n fine solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
   double calc_err_est(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
-                      bool solutions_for_adapt = true, 
-                      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, 
-                      Hermes::Tuple<double>* component_errors = NULL)
+                      Hermes::Tuple<double>* component_errors = NULL, bool solutions_for_adapt = true, 
+                      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
-    return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
+    return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
   }
 
   /// Type-safe version of calc_err_exact() for one solution.
@@ -170,6 +169,7 @@ public:
     if (num != 1) EXIT("Wrong number of solutions.");
     return calc_err_exact(Hermes::Tuple<Solution *> (sln), 
                           Hermes::Tuple<Solution *> (rsln), 
+                          (Hermes::Tuple<double>*) NULL,
                           solutions_for_adapt, error_flags);
   }
 
@@ -177,12 +177,11 @@ public:
   /// as 'num' in the constructor. After that, n coarse solution
   /// pointers are passed, followed by n exact solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_exact(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
-                              bool solutions_for_adapt = true, 
-                              unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, 
-                              Hermes::Tuple<double>* component_errors = NULL)
+  double calc_err_exact(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
+                        Hermes::Tuple<double>* component_errors = NULL, bool solutions_for_adapt = true, 
+                        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
-    return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
+    return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
   }
 
   /// Refines elements based on results from calc_err_est().
@@ -214,7 +213,8 @@ public:
   /** \param[in] A component index.
    *  \param[in] An element index.
    *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
-  double get_element_error_squared(int component, int id) const { error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est()."); return errors[component][id]; };
+  double get_element_error_squared(int component, int id) const { error_if(!have_errors, 
+         "Element errors have to be calculated first, call calc_err_est()."); return errors[component][id]; };
 
   /// Returns regular queue of elements
   /** \return A regular queue. */
@@ -286,8 +286,9 @@ protected: // spaces & solutions
   Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions. 
 
 protected: // element error arrays
-  double* errors[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
-  double  errors_squared_sum; ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
+  double* errors[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the 
+                                      ///< method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
+  double  errors_squared_sum;         ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
 
   double error_time;			// time needed to calculate error
 
@@ -300,7 +301,8 @@ protected: //forms and error evaluation
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
   virtual double calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
-                                   unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt);
+                                   Hermes::Tuple<double>* component_errors, bool solutions_for_adapt, 
+                                   unsigned int error_flags);
 
   /// Evaluates a square of an absolute error of an active element among a given pair of components.
   /** The method uses a bilinear forms to calculate the error. This is done by supplying a differences (f1 - v1) and (f2 - v2) at integration points to the bilinear form,

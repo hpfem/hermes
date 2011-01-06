@@ -210,10 +210,8 @@ int main(int argc, char* argv[])
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
-      bool solutions_for_adapt = true;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), 
-                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine), solutions_for_adapt,
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine)) * 100;
 
       // Time measurement.
       cpu_time.tick();

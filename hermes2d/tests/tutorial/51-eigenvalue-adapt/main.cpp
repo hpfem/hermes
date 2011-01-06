@@ -195,8 +195,7 @@ int main(int argc, char* argv[])
     Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity->calc_err_est(&(sln[NUMBER_OF_EIGENVALUES-1]), 
-                         &(ref_sln[NUMBER_OF_EIGENVALUES-1]), solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+                         &(ref_sln[NUMBER_OF_EIGENVALUES-1])) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

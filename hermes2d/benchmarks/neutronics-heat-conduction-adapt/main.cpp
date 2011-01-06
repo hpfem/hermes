@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include <cmath>
@@ -461,17 +459,15 @@ int main(int argc, char* argv[])
       Adapt* adaptivity = new Adapt(spaces);
 
       // Calculate error estimate for each solution component and the total error estimate.
-      bool solutions_for_adapt = true;
       Hermes::Tuple<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(coarse_mesh_solutions, fine_mesh_solutions, solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_est_rel) * 100;
+      double err_est_rel_total = adaptivity->calc_err_est(coarse_mesh_solutions, fine_mesh_solutions, &err_est_rel) * 100;
 
       // Calculate exact error for each solution component and the total exact error.
-      solutions_for_adapt = false;
+      bool solutions_for_adapt = false;
       Hermes::Tuple<double> err_exact_rel;
       double err_exact_rel_total = adaptivity->calc_err_exact(coarse_mesh_solutions, 
-                                   Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, 
-                                   HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &err_exact_rel) * 100;
+							      Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), 
+                                                              &err_exact_rel, solutions_for_adapt) * 100;
 
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
             space_T.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs(), err_est_rel[0]*100, err_exact_rel[0]*100);

@@ -1,3 +1,4 @@
+#define HERMES_REPORT_WARN 
 #include "../h2d_common.h"
 #include "../solution.h"
 #include "../discrete_problem.h"
@@ -168,7 +169,10 @@ namespace RefinementSelectors {
     // obtain reference solution values on all four refined sons
     scalar** rval[H2D_MAX_ELEMENT_SONS];
     Element* base_element = rsln->get_mesh()->get_element(e->id);
-    assert(!base_element->active);
+    if(base_element->active) {
+      info("Have you calculated element errors twice with solutions_for_adaptivity == true?");
+      error("Program is aborting based on a failed assertion in ProjBasedSelector::calc_projection_errors().");
+    };
     for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
     {
       //set element

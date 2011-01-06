@@ -1,15 +1,21 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function.h"
 
 using namespace RefinementSelectors;
 
-//  This example is derived from tutorial 18 and shows an example of 
-//  implementation of the sdirk22 method.  This is a beta-version  
-//  that is very likely to be changed soon...
+//  This example is derived from tutorial 18 and it shows an example of 
+//  implementation of the sdirk-22 method. The Butcher table of this 
+//  method is:
+//
+//  A(1, 1) = Gamma
+//  A(1, 2) = 0
+//  A(2, 1) = 1 - Gamma
+//  A(2, 2) = Gamma
+//  B = [1 - Gamma, Gamma]
+//  C = [Gamma, 1]
+//  Gamma = 1 - 1/sqrt(2)
 //
 //  Authors: Damien L-G and Jean R (Texas A&M University).
 //

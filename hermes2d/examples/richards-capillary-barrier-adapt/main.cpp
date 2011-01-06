@@ -411,11 +411,9 @@ int main(int argc, char* argv[])
       // Calculate element errors.
       info("Calculating error estimate."); 
       Adapt* adaptivity = new Adapt(&space);
-      bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                    HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%", 

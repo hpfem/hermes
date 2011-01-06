@@ -29,7 +29,7 @@ Scalar res(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e,
   return result;
 }
 
-//////////////////////////// SDIRK22 ////////////
+//////////////////////////// SDIRK-22 ////////////
 template<typename Real, typename Scalar>
 Scalar jac_Y(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
@@ -84,7 +84,7 @@ Scalar res_Y2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> 
   return result;
 }
 
-//////////////////////////// SDIRK22 OLD FASHION ////////////
+//////////////////////////// SDIRK-22 OLD FASHION ////////////
 // Y1 ///////////
 template<typename Real, typename Scalar>
 Scalar jac1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)

@@ -332,8 +332,11 @@ int main(int argc, char* argv[])
       Adapt *adapt_for_time_der_calc = new Adapt(Hermes::Tuple<Space *>(&space_rho, &space_rho_v_x, 
         &space_rho_v_y, &space_e));
       bool solutions_for_adapt = false;
-      double difference = iteration == 1 ? 0 : adapt_for_time_der_calc->calc_err_est(Hermes::Tuple<Solution *>(&sln_temp_rho, &sln_temp_rho_v_x, &sln_temp_rho_v_y, &sln_temp_e), 
-        Hermes::Tuple<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), solutions_for_adapt, HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
+      double difference = iteration == 1 ? 0 : 
+        adapt_for_time_der_calc->calc_err_est(Hermes::Tuple<Solution *>(&sln_temp_rho, &sln_temp_rho_v_x, &sln_temp_rho_v_y, &sln_temp_e), 
+                                              Hermes::Tuple<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), 
+                                              (Hermes::Tuple<double>*) NULL, solutions_for_adapt, 
+                                              HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
       delete adapt_for_time_der_calc;
       sln_temp_rho.copy(&prev_time_rho);
       sln_temp_rho_v_x.copy(&prev_time_rho_v_x);

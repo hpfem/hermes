@@ -451,7 +451,7 @@ int main(int argc, char* argv[])
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
     bool solutions_for_adapt = true;
-    double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns) * 100;
     
     Adapt adaptivity_proj(Hermes::Tuple<Space*>(&space1, &space2));
 
@@ -460,7 +460,7 @@ int main(int argc, char* argv[])
     Hermes::Tuple<double> err_exact_h1;
     ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
     Hermes::Tuple<Solution*> exslns(&ex1, &ex2);
-    error_h1 = adaptivity_proj.calc_err_est(slns, exslns, true, HERMES_TOTAL_ERROR_REL, &err_exact_h1) * 100;
+    error_h1 = adaptivity_proj.calc_err_est(slns, exslns, &err_exact_h1) * 100;
     
     // Report results.
     cpu_time.tick(); 

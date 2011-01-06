@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
     Hermes::Tuple<double> exact_errors;
     Adapt adaptivity_exact(spaces);
     bool solutions_for_adapt = false;
-    adaptivity_exact.calc_err_exact(Hermes::Tuple<Solution *>(&T_prev_newton, &phi_prev_newton), Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL, &exact_errors);
+    adaptivity_exact.calc_err_exact(Hermes::Tuple<Solution *>(&T_prev_newton, &phi_prev_newton), Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), &exact_errors, solutions_for_adapt);
     
     double maxerr = std::max(exact_errors[0], exact_errors[1])*100;
     info("Exact solution error for T (H1 norm): %g %%", exact_errors[0]*100);

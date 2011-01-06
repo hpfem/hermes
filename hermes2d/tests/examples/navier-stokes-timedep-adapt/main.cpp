@@ -268,10 +268,8 @@ int main(int argc, char* argv[])
       info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
                           Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
-      bool solutions_for_adapt = true;
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), 
-             Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), solutions_for_adapt, 
-             HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100.;
+             Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln)) * 100.;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 

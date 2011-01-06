@@ -300,17 +300,14 @@ int main(int argc, char* argv[])
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
       Adapt* adaptivity = new Adapt(&space);
-      bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
       // Calculate error wrt. exact solution.
       ExactSolution exact(&mesh, exact_sol);
-      solutions_for_adapt = false;
-      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, 
-                             HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+      bool solutions_for_adapt = false;
+      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d", 
