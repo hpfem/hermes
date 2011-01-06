@@ -34,6 +34,8 @@
 #include "config.h"
 #include <hermes2d.h>
 
+#include <iostream>
+
 // For writing results into file.
 #include <fstream>
 #include <iterator>
@@ -440,7 +442,7 @@ int main(int argc, char* args[])
     
     // Calculate integral along the outflow boundary (top side of the rectangle).
     double outflow = bdry_integral(&ref_sln, BDY_OUTFLOW, &weight_fn);
-    double err_outflow = abs(outflow - 0.246500343856481)/0.246500343856481;
+    double err_outflow = std::abs(outflow - 0.246500343856481)/0.246500343856481;
     info("Integrated outflow: %f, relative error w.r.t. the ref. value (~0.2465): %g%%", 
          outflow, 100*err_outflow);
     
