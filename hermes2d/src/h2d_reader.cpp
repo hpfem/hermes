@@ -19,6 +19,7 @@
 #include <map>
 #include "hash.h"
 #include "mesh_parser.h"
+#include <iostream>
 
 extern unsigned g_mesh_seq;
 
@@ -30,329 +31,11 @@ H2DReader::~H2DReader()
 {
 }
 
-//// load //////////////////////////////////////////////////////////////////////////////////////////
-
-/*************** OLD OLD OLD ***************************************************************/
-
-#define eof_error error("Premature end of file")
-
-char* get_line(FILE* f)
-{
-  static char line[1000];
-
-  // read one line, skipping empty ones and those starting with '*' or '#'
-  while (fgets(line, 1000-1, f) != NULL)
-  {
-    char* p = line;
-    while (*p && (unsigned) *p <= ' ') p++;
-
-    if (*p && *p != '*' && *p != '#') return line;
-  }
-
-  return NULL;
-}
-
-
-Nurbs* H2DReader::load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2)
-{
-  int i;
-  char* line;
-  Nurbs* nurbs = new Nurbs;
-
-  // read the end point indices
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d %d", &p1, &p2) != 2) error("Error reading curved boundary data (end point indices)");
-  *en = mesh->peek_edge_node(p1, p2);
-  if (*en == NULL) error("Error reading curved boundary data (edge %d-%d does not exist)", p1, p2);
-
-  // degree of curved edge
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d", &(nurbs->degree)) != 1)
-    error("Error reading curved boundary data for edge %d-%d (degree)", p1, p2);
-
-  // create a circular arc if degree == 0
-  bool circle = (nurbs->degree == 0);
-  if (circle) nurbs->degree = 2;
-  nurbs->arc = circle;
-
-  // load control points of curved edge
-  int inner = 1, outer;
-  if (!circle)
-  {
-    if ((line = get_line(f)) == NULL) eof_error;
-    if (sscanf(line, "%d", &inner) != 1)
-      error("Error reading curved boundary data for edge %d-%d (# of control points)", p1, p2);
-  }
-  nurbs->np = inner + 2;
-
-  // edge endpoints are also control points, with weight 1.0
-  nurbs->pt = new double3[nurbs->np];
-  nurbs->pt[0][0] = mesh->nodes[p1].x;
-  nurbs->pt[0][1] = mesh->nodes[p1].y;
-  nurbs->pt[0][2] = 1.0;
-  nurbs->pt[inner+1][0] = mesh->nodes[p2].x;
-  nurbs->pt[inner+1][1] = mesh->nodes[p2].y;
-  nurbs->pt[inner+1][2] = 1.0;
-
-  if (!circle)
-  {
-    // load inner control points
-    for (i = 1; i <= inner; i++)
-    {
-      if ((line = get_line(f)) == NULL) eof_error;
-      if (sscanf(line, "%lf %lf %lf", &(nurbs->pt[i][0]), &(nurbs->pt[i][1]), &(nurbs->pt[i][2])) != 3)
-        error("Error reading curved boundary data for edge %d-%d (control points)", p1, p2);
-    }
-  }
-  else
-  {
-    // load the arc angle
-    if ((line = get_line(f)) == NULL) eof_error;
-    double angle;
-    if (sscanf(line, "%lf", &angle) != 1)
-      error("Error reading curved boundary data for edge %d-%d (arc angle)", p1, p2);
-    nurbs->angle = angle;
-    angle = (180.0 - angle) / 180.0 * M_PI;
-
-    // generate one control point
-    double x = 1.0 / tan(angle * 0.5);
-    nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-    nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-    nurbs->pt[1][2] = cos((M_PI - angle) * 0.5);
-  }
-
-  // load the number of knot vector points
-  inner = 0;
-  if (!circle)
-  {
-    if ((line = get_line(f)) == NULL) eof_error;
-    if (sscanf(line, "%d", &(inner)) != 1)
-      error("Error reading curved boundary data for edge %d-%d (# of knot vector points)", p1, p2);
-  }
-
-  nurbs->nk = nurbs->degree + nurbs->np + 1;
-  outer = nurbs->nk - inner;
-  if ((outer & 1) == 1)
-    error("Error reading curved boundary data for edge %d-%d (wrong number of knot points)", p1, p2);
-
-  // knot vector is completed by 0.0 on the left and by 1.0 on the right
-  nurbs->kv = new double[nurbs->nk];
-  for (i = 0; i < outer/2; i++)
-    nurbs->kv[i] = 0.0;
-  for (i = outer/2; i < inner + outer/2; i++)
-  {
-    if ((line = get_line(f)) == NULL) eof_error;
-    if (sscanf(line, "%lf", &(nurbs->kv[i])) != 1)
-      error("Error reading curved boundary data for edge %d-%d (knot points)", p1, p2);
-  }
-  for (i = outer/2 + inner; i < nurbs->nk; i++)
-    nurbs->kv[i] = 1.0;
-
-  nurbs->ref = 0;
-  return nurbs;
-}
-
-void H2DReader::load_old(const char* filename, Mesh *mesh)
-{
-  // open the mesh file
-  FILE* f = fopen(filename, "r");
-  if (f == NULL) error("Could not open the mesh file %s", filename);
-  this->load_stream(f, mesh);
-}
-
 void H2DReader::load_str(const char* mesh_str, Mesh *mesh)
 {
-  // open the mesh file
-  FILE* f = fmemopen((char*)mesh_str, strlen(mesh_str), "r");
-  if (f == NULL) error("Could not create the read buffer");
-  this->load_internal(f, mesh, "");
+  std::istringstream s(mesh_str);
+  this->load_stream(s, mesh, "");
 }
-
-/*
-   Loads the mesh from a stream.
-*/
-void H2DReader::load_stream(FILE *f, Mesh *mesh)
-{
-  int i, j, k, n, maj, min;
-  char* line;
-
-  // check file version
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d %d", &maj, &min) != 2) error("Could not read file version");
-  if (maj > 1) error("Unsupported file version");
-
-  // read the number of vertices
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d", &n) != 1) error("Could not read the number of vertices");
-
-  // free all current data
-  mesh->free();
-
-  // create a hash table large enough
-  int size = HashTable::H2D_DEFAULT_HASH_SIZE;
-  while (size < 8*n) size *= 2;
-  mesh->init(size);
-
-  // load vertices: create top-level vertex nodes
-  for (i = 0; i < n; i++)
-  {
-    Node* node = mesh->nodes.add();
-    assert(node->id == i);
-    node->ref = TOP_LEVEL_REF;
-    node->type = HERMES_TYPE_VERTEX;
-    node->bnd = 0;
-    node->p1 = node->p2 = -1;
-    node->next_hash = NULL;
-
-    if ((line = get_line(f)) == NULL) eof_error;
-    if (sscanf(line, "%lf %lf", &node->x, &node->y) != 2) error("Error reading vertex data");
-  }
-  mesh->ntopvert = n;
-
-  // read the number of elements
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d", &n) != 1) error("Could not read the number of elements");
-
-  // load elements
-  for (i = 0; i < n; i++)
-  {
-    if ((line = get_line(f)) == NULL) eof_error;
-
-    int ret, idx[5];
-    if ((ret = sscanf(line, "%d %d %d %d %d", idx, idx+1, idx+2, idx+3, idx+4)) != 4 && ret != 5)
-      error("Error reading elements");
-
-    for (j = 0; j < ret-1; j++)
-      if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
-        error("Error reading elements: node %d does not exist", idx[j]);
-
-    Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
-    if (ret == 4)
-    {
-      check_triangle(i, v0, v1, v2);
-      mesh->create_triangle(idx[3], v0, v1, v2, NULL);
-    }
-    else
-    {
-      Node *v3 = &mesh->nodes[idx[3]];
-      check_quad(i, v0, v1, v2, v3);
-      mesh->create_quad(idx[4], v0, v1, v2, v3, NULL);
-    }
-  }
-  mesh->nbase = mesh->nactive = n;
-
-  // read the number of boundary data
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d", &n) != 1) error("Could not read the number of boundary markers\n");
-
-  // load boundary data
-  Node* en;
-  for (i = 0; i < n; i++)
-  {
-    if ((line = get_line(f)) == NULL) eof_error;
-
-    int v1, v2, marker;
-    if (sscanf(line, "%d %d %d", &v1, &v2, &marker) != 3) error("Error reading boundary marker data");
-
-    en = mesh->peek_edge_node(v1, v2);
-    if (en == NULL) error("Boundary data error (edge %d-%d does not exist)", v1, v2);
-    en->marker = marker;
-
-    if (marker > 0)
-    {
-      mesh->nodes[v1].bnd = 1;
-      mesh->nodes[v2].bnd = 1;
-      en->bnd = 1;
-    }
-  }
-
-  // check that all boundary edges have a marker assigned
-  for_all_edge_nodes(en, mesh)
-    if (en->ref < 2 && en->marker == 0) {
-      warn("Boundary edge node does not have a boundary marker");
-    }
-
-  // read the number of curved edges
-  if ((line = get_line(f)) == NULL) eof_error;
-  if (sscanf(line, "%d", &n) != 1) error("Could not read the number of curved edges");
-
-  // load curved edges
-  for (i = 0; i < n; i++)
-  {
-    // load the control points, knot vector, etc.
-    Node* en;
-    int p1, p2;
-    Nurbs* nurbs = load_nurbs_old(mesh, f, &en, p1, p2);
-
-    // assign the nurbs to the elements sharing the edge node
-    for (k = 0; k < 2; k++)
-    {
-      Element* e = en->elem[k];
-      if (e == NULL) continue;
-
-      if (e->cm == NULL)
-      {
-        e->cm = new CurvMap;
-        memset(e->cm, 0, sizeof(CurvMap));
-        e->cm->toplevel = 1;
-        e->cm->order = 4;
-      }
-
-      int idx = -1;
-      for (j = 0; j < e->nvert; j++)
-        if (e->en[j] == en) { idx = j; break; }
-      assert(idx >= 0);
-
-      if (e->vn[idx]->id == p1)
-      {
-        e->cm->nurbs[idx] = nurbs;
-        nurbs->ref++;
-      }
-      else
-      {
-        Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
-        e->cm->nurbs[idx] = nurbs_rev;
-        nurbs_rev->ref++;
-      }
-    }
-    if (!nurbs->ref) delete nurbs;
-  }
-
-  // read the number of initial refinements
-  //if () eof_error;
-  //if (sscanf(line, "%d", &n) != 1) error("could not read the number of initial refinements");
-
-  if ((line = get_line(f)) == NULL ||
-      sscanf(line, "%d", &n) != 1)
-  {
-    warn("Could not read the number of initial refinements");
-  }
-  else
-  {
-    // perform initial refinements
-    for (i = 0; i < n; i++)
-    {
-      if ((line = get_line(f)) == NULL) eof_error;
-      int id, ref;
-      if (sscanf(line, "%d %d", &id, &ref) != 2)
-        error("Error reading initial refinement data");
-      mesh->refine_element(id, ref);
-    }
-  }
-  mesh->ninitial = mesh->elements.get_num_items();
-
-  // update refmap coeffs of curvilinear elements
-  Element* e;
-  for_all_elements(e, mesh)
-    if (e->cm != NULL)
-      e->cm->update_refmap_coeffs(e);
-
-  fclose(f);
-  mesh->seq = g_mesh_seq++;
-}
-
-/*************** OLD OLD OLD ***************************************************************/
-
 
 //// load_nurbs ////////////////////////////////////////////////////////////////////////////////////
 
@@ -474,17 +157,19 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
 
 bool H2DReader::load(const char *filename, Mesh *mesh)
 {
-  int i, j, k, n;
-  Node* en;
-  bool debug = false;
-
-  // open the mesh file
-  FILE* f = fopen(filename, "r");
-  return this->load_internal(f, mesh, filename);
+  std::ifstream s(filename);
+  return this->load_stream(s, mesh, filename);
 }
 
+std::string read_file(std::istream &is)
+{
+    std::ostringstream s;
+    s << is.rdbuf();
+    return s.str();
+}
 
-bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
+bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
+        const char *filename)
 {
   int i, j, k, n;
   Node* en;
@@ -493,6 +178,11 @@ bool H2DReader::load_internal(FILE *f, Mesh *mesh, const char *filename)
   mesh->free();
 
   // parse the file
+  // the internal mesh_parser_init only works with C FILE, so we create the
+  // FILE handle from istream using fmemopen.
+  std::string mesh_str = read_file(is);
+  FILE* f = fmemopen((void *) (mesh_str.c_str()), mesh_str.length(), "r");
+  if (f == NULL) error("Could not create the read buffer");
   mesh_parser_init(f, filename);
   mesh_parser_run(debug);
   fclose(f);
