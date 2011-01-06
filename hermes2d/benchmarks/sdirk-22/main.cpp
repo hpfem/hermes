@@ -17,6 +17,8 @@ using namespace RefinementSelectors;
 //  C = [Gamma, 1]
 //  Gamma = 1 - 1/sqrt(2)
 //
+//  The method can be found in Butcher's book on page 244. 
+//
 //  Authors: Damien L-G and Jean R (Texas A&M University).
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
