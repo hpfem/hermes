@@ -3,11 +3,12 @@
 # need. This is useful for developing, so that you don't need to wait couple
 # minutes to compile the whole hermes, but just compile the necessary parts.
 
-set(WITH_TRILINOS NO)
-set(WITH_EXAMPLES NO)
-set(WITH_TESTS NO)
-set(WITH_BENCHMARKS NO)
-set(WITH_UTIL NO)
-set(WITH_TUTORIAL NO)
-set(WITH_MODULES NO)
 set(H2D_COMPLEX NO)
+set(WITH_BENCHMARKS NO)
+set(WITH_EXAMPLES NO)
+set(WITH_MODULES NO)
+set(WITH_PYTHON NO)
+set(WITH_TESTS NO)
+set(WITH_TRILINOS NO)
+set(WITH_TUTORIAL NO)
+set(WITH_UTIL NO)
