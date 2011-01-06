@@ -45,8 +45,8 @@ const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Cra
 double TAU = 1.0;                                 // Time step (in days).
 double TIMESTEP_DEC = 0.75;                       // Timestep decrease ratio after unsuccessful nonlinear solve.
 double TIMESTEP_INC = 1.5;                        // Timestep increase ratio after successful nonlinear solve.
-double TAU_MIN = 1e-8; 				 // Computation will stop if time step drops below this value. 
-double TAU_MAX = 1.0;                            // Maximal time step.
+double TAU_MIN = 1e-8; 				  // Computation will stop if time step drops below this value. 
+double TAU_MAX = 1.0;                             // Maximal time step.
                        
 
 // Elements orders and initial refinements.
@@ -117,36 +117,37 @@ const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 
 // Precalculation of constitutive tables.
 const int MATERIAL_COUNT = 4;
-const int CONSTITUTIVE_TABLE_METHOD = 2;          // 0 - constitutive functions are evaluated directly (slow performance)
+const int CONSTITUTIVE_TABLE_METHOD = 2;          // 0 - constitutive functions are evaluated directly (slow performance).
 					          // 1 - constitutive functions are linearly approximated on interval <TABLE_LIMIT; LOW_LIMIT> 
-						  //	 (very efficient CPU utilization less efficient memory consumption (depending on TABLE_PRECISSION))
-						  // 2 - constitutive functions are aproximated by quintic splines
+						  //	 (very efficient CPU utilization less efficient memory consumption (depending on TABLE_PRECISSION)).
+						  // 2 - constitutive functions are aproximated by quintic splines.
 						  
-//!use only if 	CONSTITUTIVE_TABLE_METHOD = 2 !//					  
-const int NUM_OF_INTERVALS = 16;                   // number of intervals                      
-const double INTERVALS_4_APPROX[16] = {-1.0, -2.0, -3.0, -4.0, -5.0, -8.0, -10.0, -12.0, // low limits of intervals approximated by quintic splines
+//!Use only if 	CONSTITUTIVE_TABLE_METHOD == 2 !//					  
+const int NUM_OF_INTERVALS = 16;                  // Number of intervals.                      
+const double INTERVALS_4_APPROX[16] = {-1.0, -2.0, -3.0, -4.0, -5.0, -8.0, -10.0, -12.0, // Low limits of intervals approximated by quintic splines.
 				     -15.0, -20.0, -30.0, -50.0, -75.0, -100.0,-300.0, -1000.0}; 
-int* POL_SEARCH_HELP;                     //this array contains for each integer of h function appropriate polynomial ID
-double**** K_POLS;                        //first DIM is the interval ID, second DIM is the material ID, third DIM is the derivation degree, fourth DIM are the coefficients
+int* POL_SEARCH_HELP;                             // This array contains for each integer of h function appropriate polynomial ID.
+double**** K_POLS;                                // First DIM is the interval ID, second DIM is the material ID, third DIM is 
+                                                  // the derivative degree, fourth DIM are the coefficients.
 double**** C_POLS;
 //!------------------------------------------!//
 
 
-//!use only if CONSTITUTIVE_TABLE_METHOD = 1 !//
-double TABLE_LIMIT = -1000.0; 		          // limit of precalculated functions (should be always negative value lower 
+//!Use only if CONSTITUTIVE_TABLE_METHOD == 1 !//
+double TABLE_LIMIT = -1000.0; 		          // Limit of precalculated functions (should be always negative value lower 
 						  // then the lowest expect value of the solution (consider DMP!!)
-const double TABLE_PRECISION = 0.1;               // precision of precalculated table use 1.0, 0,1, 0.01, etc.....
-double** K_TABLE;                                 // 
+const double TABLE_PRECISION = 0.1;               // Precision of precalculated table use 1.0, 0,1, 0.01, etc.....
+double** K_TABLE;                                  
 double** dKdh_TABLE;
 double** ddKdhh_TABLE;
 double** C_TABLE;
 double** dCdh_TABLE;
 bool CONSTITUTIVE_TABLES_READY = false;
-double*** POLYNOMIALS;                            // Polynomial approximation of the K(h) function close to saturation 
-                                                  // (this function has singularity in its second derivative).
-						  // first dimension is material ID
-						  // second dimension is the polynomial derivation
-						  // third  dimension are the polynomial's coefficients
+double*** POLYNOMIALS;                            // Polynomial approximation of the K(h) function close to saturation.
+                                                  // This function has singularity in its second derivative.
+						  // First dimension is material ID
+						  // Second dimension is the polynomial derivative.
+						  // Third dimension are the polynomial's coefficients.
 						  
 						  
 const double LOW_LIMIT=-1.0;                      // Lower bound of K(h) function approximated by polynomials.
