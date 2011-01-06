@@ -229,8 +229,12 @@ Scalar dg_interface_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Fun
 {
   Scalar result = 0;
   //Real sigma = 2 * C_W / (e->diam + e->get_neighbor_diam());
-  Real edge_len = sqrt(sqr(e->x[0] - e->x[n-1]) + sqr(e->y[0] - e->y[n-1]));
-  Real sigma = C_W * EPSILON / edge_len;
+  Real edge_len;
+  for (int i = 0; i < n; i++)
+    edge_len += wt[i];
+  
+  Real sigma = C_W * EPSILON / (0.5*edge_len);
+  
   for (int i = 0; i < n; i++)
   {
     result += wt[i] * EPSILON * ( -AVG_GRAD(u) * JUMP(v) + theta * AVG_GRAD(v) * JUMP(u) ); // diffusion
@@ -251,8 +255,12 @@ Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func
 {
   Scalar result = 0;
   //Real sigma = C_W * EPSILON / e->diam;
-  Real edge_len = sqrt(sqr(e->x[0] - e->x[n-1]) + sqr(e->y[0] - e->y[n-1]));
-  Real sigma = C_W * EPSILON / edge_len;
+  Real edge_len;
+  for (int i = 0; i < n; i++)
+    edge_len += wt[i];
+  
+  Real sigma = C_W * EPSILON / (0.5*edge_len);
+  
   for (int i = 0; i < n; i++)
   {
     result += wt[i] * EPSILON * ( -( u->dx[i]*e->nx[i] + u->dy[i]*e->ny[i] ) * v->val[i]
@@ -267,8 +275,11 @@ Scalar dg_boundary_liform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func
 {
   Scalar result = 0;
   //Real sigma = C_W * EPSILON / e->diam;
-  Real edge_len = sqrt(sqr(e->x[0] - e->x[n-1]) + sqr(e->y[0] - e->y[n-1]));
-  Real sigma = C_W * EPSILON / edge_len;
+  Real edge_len;
+  for (int i = 0; i < n; i++)
+    edge_len += wt[i];
+  
+  Real sigma = C_W * EPSILON / (0.5*edge_len);
   
   for (int i = 0; i < n; i++)
   {
