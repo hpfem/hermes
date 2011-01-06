@@ -245,8 +245,8 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 1300;
-  printf("n_dof_actual = %d\n", ndof);
+  int n_dof_allowed = 1230;
+  printf("n_dof_actual = %d\n", ndof); // was 1218 at the time this test was last revisited
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
     printf("Success!\n");

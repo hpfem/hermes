@@ -284,15 +284,15 @@ int main(int argc, char* argv[])
     printf("Coordinate ( 0.1, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.1, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.5, 0.0) - (-0.000403)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.5, 0.0) - (-0.000347)) > eps) {
     printf("Coordinate ( 0.5, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.5, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.000057)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.000047)) > eps) {
     printf("Coordinate ( 0.9, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(1.3, 0.0) - (-0.000006)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(1.3, 0.0) - (-0.000004)) > eps) {
     printf("Coordinate ( 1.3, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(1.3, 0.0));
     success = 0;
   }
@@ -305,19 +305,19 @@ int main(int argc, char* argv[])
     printf("Coordinate ( 0.1, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.1, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.5, 0.0) - (0.001486)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(0.5, 0.0) - (0.001477)) > eps) {
     printf("Coordinate ( 0.5, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.5, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.9, 0.0) - (0.000577)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(0.9, 0.0) - (0.000572)) > eps) {
     printf("Coordinate ( 0.9, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(1.3, 0.0) - (0.000299)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(1.3, 0.0) - (0.000296)) > eps) {
     printf("Coordinate ( 1.3, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(1.3, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(1.7, 0.0) - (0.000170)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(1.7, 0.0) - (0.000169)) > eps) {
     printf("Coordinate ( 1.7, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(1.7, 0.0));
     success = 0;
   }
