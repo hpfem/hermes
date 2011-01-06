@@ -59,6 +59,8 @@ public:
 
   bool operator<(double d) { return true; }
   bool operator>(double d) { return false; }
+  bool operator<(const Ord &o) { return this->order < o.order; }
+  bool operator>(const Ord &o) { return this->order > o.order; }
 
 protected:
   int order;
