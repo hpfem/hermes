@@ -3,11 +3,10 @@
 //  The following discretization methods may be used:
 //    - standard continuous Galerkin method,
 //    - streamline upwind Petrov-Galerkin method,
-//    - discontinuous Galerkin method with upwind flux,
-//    - discontinuous Galerkin method with jump stabilization according to [1]
+//    - discontinuous Galerkin method with upwind flux.
 //  They differ in the mechanism that suppresses unphysical oscillations which develop near the discontinuities.
 //
-//  PDE: \nabla \cdot (\beta u) + cu = 0, where \beta = ( 10y^2 - 12x + 1, 1 + y ), c = -\nabla\cdot\beta = 11.
+//  PDE: \beta\cdot\nabla u + cu = f, where \beta = ( 10y^2 - 12x + 1, 1 + y ), c = f = 0.
 //
 //  Domain: Square (0,1)x(0,1).
 //
@@ -15,6 +14,8 @@
 //                  u = \sin \pi y^2 on {1} x [0,1]  (right side), 
 //                  u = 0 elsewhere.
 // 
+//  Author: Milan Hanus (University of West Bohemia, Pilsen, Czech Republic).
+//
 //  Ref.: 
 //    [1] F. Brezzi, L. D. Marini, and E. Suli: 
 //        Discontinuous Galerkin methods for first-order hyperbolic problems.
@@ -42,21 +43,21 @@ using namespace RefinementSelectors;
 enum DiscretizationMethod
 {
   CG,
-  CG_STAB_SUPG,
-  DG_UPWIND,
-  DG_JUMP_STAB
+  SUPG,
+  DG
 };
 
 const std::string method_names[4] = 
 {
   "unstabilized continuous Galerkin",
   "streamline upwind Petrov-Galerkin",
-  "discontinuous Galerkin - upwind flux",
-  "discontinuous Galerkin - Brezzi-Marini-Suli jump stabilization"
+  "discontinuous Galerkin",
 };
 
-const DiscretizationMethod method = DG_UPWIND;
-
+const DiscretizationMethod method = DG;
+const bool SAVE_FINAL_SOLUTION = false;           // Save the final solution at specified points for comparison with the
+                                                  // semi-analytic solution in Mathematica?
+                                                  
 const int INIT_REF = 0;                           // Number of initial uniform mesh refinements.
 const int P_INIT = 0;                             // Initial polynomial degrees of mesh elements.
 const double THRESHOLD = 0.20;                    // This is a quantitative parameter of the adapt(...) function and
@@ -81,12 +82,12 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
 const int ORDER_INCREASE = 1;                     // Difference in polynomial orders of the coarse and the reference spaces.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.0001;                   // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
                                                   // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 22222;                      // Adaptivity process stops when the number of degrees of freedom grows
+const int NDOF_STOP = 8000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -98,9 +99,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
-
-// Diameter of the smallest element of the grid (for SUPG stabilization).
-double MIN_DIAM;
 
 // Flow field and reaction term.
 
@@ -114,7 +112,10 @@ inline Real fn_b(Real x, Real y) {
 }
 template<typename Real>
 inline Real fn_c(Real x, Real y) {
-  return 11;  // = -div(beta)
+  if (method == DG)
+    return 11.; // -div(beta)
+  else
+    return 0.; 
 }
 
 // Boundary conditions.
@@ -149,7 +150,7 @@ Scalar essential_bc_values(int ess_bdy_marker, Real x, Real y)
 template<typename Real>
 Real F(Real x, Real y)
 {
-  return 0;
+  return 0.0;
 }
 
 // Weak forms.
@@ -158,7 +159,7 @@ Real F(Real x, Real y)
 // Exact solution.
 #include "exact.h"
 
-// Weighting function for the target functional (weighted outflow integral).
+// Weighting function for the target functional.
 double weight_fn(double x, double y)
 {
   return sin(M_PI*x*0.5);
@@ -219,14 +220,11 @@ void make_str_from_program_options(std::stringstream& str)
     case CG:
       str << "cg";
       break;
-    case CG_STAB_SUPG:
+    case SUPG:
       str << "supg";
       break;
-    case DG_UPWIND:
-      str << "dg-upwind";
-      break;
-    case DG_JUMP_STAB:
-      str << "dg-jump-stab";
+    case DG:
+      str << "dg";
       break;
   }
   
@@ -282,37 +280,34 @@ int main(int argc, char* args[])
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
   
-  // Objects storing info about boundary conditions.
+  // Object representing types of condtions prescribed on each part of the domain boundary.
   BCTypes bc_types;
-  BCValues bc_vals;
   
   // Create a space and refinement selector appropriate for the selected discretization method.
   Space *space;
   ProjBasedSelector *selector;
   ProjNormType norm;
-  if (method == CG || method == CG_STAB_SUPG)
-  {  
-    bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_NONZERO_CONSTANT_INFLOW, BDY_VARYING_INFLOW, BDY_ZERO_INFLOW));
-    bc_types.add_bc_neumann(BDY_OUTFLOW);
-    bc_vals.add_zero(BDY_ZERO_INFLOW);
-    bc_vals.add_const(BDY_NONZERO_CONSTANT_INFLOW, 1.0);
-    bc_vals.add_function(BDY_VARYING_INFLOW, fn_g<double>);
-    
-    space = new H1Space(&mesh, &bc_types, &bc_vals, Ord2(P_INIT, P_INIT));
+  
+  // For both methods, all inflow boundaries are treated as natural, enforcing the Dirichlet conditions in a weak sense. 
+  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NONZERO_CONSTANT_INFLOW, BDY_ZERO_INFLOW, BDY_VARYING_INFLOW));
+  if (method != DG)
+  { 
+    space = new H1Space(&mesh, &bc_types, Ord2(P_INIT, P_INIT));
     norm = HERMES_L2_NORM;
     //norm = HERMES_H1_NORM;
     
     if (STRATEGY > -1)
     {
-      //selector = new H1ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-      selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-      selector->set_error_weights(0.5, 2.0, 1.414); // Prefer h-refinement over p-refinement.
+      selector = new H1ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+      selector->set_error_weights(1.15, 1.0, 1.414); // Prefer h-refinement over p-refinement.
+      //selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+      //selector->set_error_weights(0.5, 2.0, 1.414); // Prefer h-refinement over p-refinement.
     }
   }
   else
   {
-    // All boundaries are treated as natural, enforcing the Dirichlet conditions in a weak sense.
-    bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NONZERO_CONSTANT_INFLOW, BDY_ZERO_INFLOW, BDY_VARYING_INFLOW, BDY_OUTFLOW));
+    // For DGM, there is also a bilinear form on the outflow boundary.
+    bc_types.add_bc_neumann(BDY_OUTFLOW);
     space = new L2Space(&mesh, &bc_types, Ord2(P_INIT, P_INIT));
     norm = HERMES_L2_NORM;
     
@@ -327,19 +322,21 @@ int main(int argc, char* args[])
   info("Discretization method: %s", method_names[method].c_str());
     
   WeakForm wf;
+  wf.add_vector_form(callback(source_liform));
   switch(method)
   {
     case CG:
       wf.add_matrix_form(callback(cg_biform));
-      wf.add_matrix_form_surf(callback(cg_biform_surf), BDY_OUTFLOW);
+      wf.add_matrix_form_surf(callback(cg_boundary_biform));
+      wf.add_vector_form_surf(callback(cg_boundary_liform));
       break;
-    case CG_STAB_SUPG:
+    case SUPG:
       wf.add_matrix_form(callback(cg_biform));
-      wf.add_matrix_form_surf(callback(cg_biform_surf), BDY_OUTFLOW);
+      wf.add_matrix_form_surf(callback(cg_boundary_biform));
+      wf.add_vector_form_surf(callback(cg_boundary_liform));
       wf.add_matrix_form(callback(stabilization_biform_supg));
       break; 
-    case DG_UPWIND:
-    case DG_JUMP_STAB:
+    case DG:
       wf.add_matrix_form(callback(dg_volumetric_biform));
       wf.add_matrix_form_surf(callback(dg_boundary_biform));
       wf.add_vector_form_surf(callback(dg_boundary_liform));
@@ -396,16 +393,6 @@ int main(int argc, char* args[])
     else
       // Construct globally refined reference mesh and setup reference space.
       actual_sln_space = construct_refined_space(space, ORDER_INCREASE);
-
-    // Find diameter of the smallest element (used by the empirical SUPG stabilization).
-    if (method == CG_STAB_SUPG)
-    {
-      Element *e;
-      MIN_DIAM = 1e7;
-      for_all_active_elements(e, actual_sln_space->get_mesh())
-        if (e->get_diameter() < MIN_DIAM)
-          MIN_DIAM = e->get_diameter();
-    }
     
     // Initialize the FE problem.
     bool is_linear = true;
@@ -535,45 +522,52 @@ int main(int argc, char* args[])
   // Wait for keyboard or mouse input.
   View::wait();
   
-  // Save convergence graphs.
+  // Get the string summarizing the currently selected options.
   std::stringstream str;
   make_str_from_program_options(str);
   
-  std::stringstream fdest, fcest, fdex, fcex, fdoutfl, fcoutfl;
-  fdest << "conv_dof_est_" << str.str() << ".dat";
-  fcest << "conv_cpu_est_" << str.str() << ".dat";
-  fdex << "conv_dof_ex_" << str.str() << ".dat";
-  fcex << "conv_cpu_ex_" << str.str() << ".dat";
-  fdoutfl << "conv_dof_outfl_" << str.str() << ".dat";
-  fcoutfl << "conv_cpu_outfl_" << str.str() << ".dat";
-  
-  graph_dof_est.save(fdest.str().c_str());
-  graph_cpu_est.save(fcest.str().c_str());
-  graph_dof_ex.save(fdex.str().c_str());
-  graph_cpu_ex.save(fcex.str().c_str());
-  graph_dof_outfl.save(fdoutfl.str().c_str());
-  graph_cpu_outfl.save(fcoutfl.str().c_str());
-  
-  // Save the final solution in 100x100 points of the domain for comparison with the semi-analytic solution.
-  double y = 0.0, step = 0.01;
-  int npts = int(1./step+0.5);
-  double *res = new double [npts*npts];
-  double *p = res;
-  std::stringstream sssln;
-  sssln << "sln_" << str.str() << ".dat";
-  std::ofstream fs(sssln.str().c_str());
-  info("Saving final solution to %s", sssln.str().c_str());
-  for (int i = 0; i < npts; i++, y+=step)
+  if (STRATEGY > -1)
   {
-    std::cout << "."; std::cout.flush(); 
-    double x = 0.0;
-    for (int j = 0; j < npts; j++, x+=step)
-      *p++ = ref_sln.get_pt_value(x, y);    
+    // Save convergence graphs.   
+    std::stringstream fdest, fcest, fdex, fcex, fdoutfl, fcoutfl;
+    fdest << "conv_dof_est_" << str.str() << ".dat";
+    fcest << "conv_cpu_est_" << str.str() << ".dat";
+    fdex << "conv_dof_ex_" << str.str() << ".dat";
+    fcex << "conv_cpu_ex_" << str.str() << ".dat";
+    fdoutfl << "conv_dof_outfl_" << str.str() << ".dat";
+    fcoutfl << "conv_cpu_outfl_" << str.str() << ".dat";
+    
+    graph_dof_est.save(fdest.str().c_str());
+    graph_cpu_est.save(fcest.str().c_str());
+    graph_dof_ex.save(fdex.str().c_str());
+    graph_cpu_ex.save(fcex.str().c_str());
+    graph_dof_outfl.save(fdoutfl.str().c_str());
+    graph_cpu_outfl.save(fcoutfl.str().c_str());
   }
-  std::copy(res, res+npts*npts, std::ostream_iterator<double>(fs, "\n"));
   
-  fs.close();
-  delete [] res;
+  if (SAVE_FINAL_SOLUTION)
+  {
+    // Save the final solution at 101x101 points of the domain for comparison with the semi-analytic solution.
+    double y = 0.0, step = 0.01;
+    int npts = int(1./step+0.5);
+    double *res = new double [npts*npts];
+    double *p = res;
+    std::stringstream sssln;
+    sssln << "sln_" << str.str() << ".dat";
+    std::ofstream fs(sssln.str().c_str());
+    info("Saving final solution to %s", sssln.str().c_str());
+    for (int i = 0; i < npts; i++, y+=step)
+    {
+      std::cout << "."; std::cout.flush(); 
+      double x = 0.0;
+      for (int j = 0; j < npts; j++, x+=step)
+        *p++ = ref_sln.get_pt_value(x, y);    
+    }
+    std::copy(res, res+npts*npts, std::ostream_iterator<double>(fs, "\n"));
+    
+    fs.close();
+    delete [] res;
+  }
   
   // Destroy spaces and refinement selector object.
   if (STRATEGY > -1)
