@@ -299,6 +299,17 @@ void EpetraVector::zero()
 #endif
 }
 
+void EpetraVector::change_sign()
+{
+  _F_
+#ifdef HAVE_EPETRA
+  for (int i = 0; i < size; i++) (*vec)[i] *= -1.;
+#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+  for (int i = 0; i < size; i++) (*vec_im)[i] *= -1.;
+#endif
+#endif
+}
+
 void EpetraVector::free()
 {
   _F_

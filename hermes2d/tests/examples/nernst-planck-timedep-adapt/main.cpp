@@ -197,7 +197,7 @@ int main (int argc, char* argv[]) {
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs_coarse->set(i, -rhs_coarse->get(i));
+    rhs_coarse->change_sign();
     
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs_coarse);
@@ -291,13 +291,14 @@ int main (int argc, char* argv[]) {
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-        
+        rhs->change_sign();
+ 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
 
         // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
+        info("---- Newton iter %d, ndof %d, res. l2 norm %g", 
+             it, Space::get_num_dofs(*ref_spaces), res_l2_norm);
 
         // If l2 norm of the residual vector is within tolerance, or the maximum number 
         // of iteration has been reached, then quit.

@@ -68,6 +68,8 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
   return norm;
 }
 
+// Calculate norm of a (possibly vector-valued) solution.
+// Take norm from spaces where these solutions belong.
 double calc_norms(Hermes::Tuple<Solution*> slns) 
 {
   // Calculate norms for all solutions.

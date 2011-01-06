@@ -207,7 +207,7 @@ int PetscMatrix::get_nnz() const {
 
 double PetscMatrix::get_fill_in() const {
   _F_
-    return (double) nnz / ((double)size*size);
+  return (double) nnz / ((double)size*size);
 }
 
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,6 +280,18 @@ void PetscVector::zero() {
   VecZeroEntries(vec);
 #endif
 }
+
+void PetscVector::change_sign() {
+  _F_
+#ifdef WITH_PETSC
+  scalar y = 0;
+  for (int idx = 0; idx < n; idx++) {
+    VecGetValues(vec, 1, &idx, &y);
+    VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
+  }
+#endif
+}
+
 
 void PetscVector::set(int idx, scalar y) {
   _F_

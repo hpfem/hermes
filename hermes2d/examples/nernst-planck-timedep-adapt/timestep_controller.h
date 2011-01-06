@@ -83,12 +83,11 @@ bool PidTimestepController::end_step(Hermes::Tuple<Solution *> solutions,
     double max_rel_error = 0.0;
 
     for (unsigned int i = 0; i < neq; i++) {
-      double abs_error = calc_abs_error(error_fn_h1, solutions[i], prev_solutions[i]);
-      double norm = calc_norm(norm_fn_h1, solutions[i]);
-      max_rel_error = (abs_error/norm > max_rel_error) ? (abs_error/norm) : max_rel_error;
+      double rel_error = calc_rel_error(solutions[i], prev_solutions[i], HERMES_H1_NORM);
+      max_rel_error = (rel_error > max_rel_error) ? rel_error : max_rel_error;
 
-      info("Solution[%i] abs error %g and norm %g and the largest relative error %g",
-          i, abs_error, norm, max_rel_error);
+      info("Solution[%i]: rel error %g, largest relative error %g",
+          i, rel_error, max_rel_error);
     }
 
     err_vector.push_back(max_rel_error);

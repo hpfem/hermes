@@ -1718,6 +1718,10 @@ Space* construct_refined_space(Space* coarse, int order_increase)
 
 // Perform Newton's iteration.
 bool HERMES_RESIDUAL_AS_VECTOR = false;   // This is a temporary location of this variable.
+                                          // If true, we measure the l2 norm of the residual vector.
+                                          // Otherwise we translate the residual vector into a residual
+                                          // function (or more functions) and measure their norm
+                                          // in the corresponding FE space.
 bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
                   Vector* rhs, double newton_tol, int newton_max_iter, bool verbose, 
                   double damping_coeff, double max_allowed_residual_norm)
@@ -1744,7 +1748,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    rhs->change_sign();
     
     // Measure the residual norm.
     if (HERMES_RESIDUAL_AS_VECTOR) {

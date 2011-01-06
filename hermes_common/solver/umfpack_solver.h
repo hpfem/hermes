@@ -76,6 +76,7 @@ public:
   virtual scalar get(int idx) { return v[idx]; }
   virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
   virtual void zero();
+  virtual void change_sign();
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
   virtual void add(int n, int *idx, scalar *y);

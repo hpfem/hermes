@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    rhs->change_sign();
     
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
@@ -228,9 +228,9 @@ int main(int argc, char* argv[])
   // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  double rel_err_1 = calc_abs_error(&sln1, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
+  double rel_err_1 = calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  double rel_err_2 = calc_abs_error(&sln2, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
+  double rel_err_2 = calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Show both solutions.

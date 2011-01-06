@@ -94,8 +94,7 @@ int main(int argc, char* argv[])
     if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
     else error ("Matrix solver failed.\n");
 
-    double rel_error = calc_abs_error(sln_prev, &sln, HERMES_H1_NORM) 
-                       / calc_norm(&sln, HERMES_H1_NORM) * 100;
+    double rel_error = calc_rel_error(sln_prev, &sln, HERMES_H1_NORM) * 100;
     info("Relative error: %g%%", rel_error);
 
     // Stopping criterion.
