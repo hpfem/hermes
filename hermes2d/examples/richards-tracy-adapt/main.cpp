@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
       space.set_uniform_order(P_INIT);
     }
 
-    // Spatial adaptivity loop. Note; sln_prev_timemust not be changed during 
+    // Spatial adaptivity loop. Note; sln_prev_time must not be changed during 
     // spatial adaptivity.
     bool done = false;
     int as = 1;
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
         as++;
       }
 
-      // Clean up.
+      // Cleanup.
       delete [] coeff_vec;
       delete solver;
       delete matrix;
