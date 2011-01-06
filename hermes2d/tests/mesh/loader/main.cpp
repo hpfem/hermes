@@ -171,13 +171,6 @@ int main(int argc, char* argv[])
     free(buffer);
     return ret;
   }
-  else if (strcmp(mtype, "h2d-old") == 0) {
-    H2DReader *hloader = new H2DReader();
-    hloader->load_old(file_name, &mesh);
-    ret = dump_compare(mesh, file_name_dump);
-    delete hloader;
-    return ret;
-  }
   else {
     error("unknown mesh loader type");
   }
