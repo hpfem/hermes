@@ -80,7 +80,7 @@ step is finished. The weak forms are registered as usual::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
 Time stepping loop

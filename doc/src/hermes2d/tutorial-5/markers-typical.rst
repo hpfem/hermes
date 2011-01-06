@@ -45,10 +45,10 @@ The forms are registered as::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(bilinear_form_vol_SE), HERMES_UNSYM, SOUTH_EAST);
-    wf.add_matrix_form(callback(bilinear_form_vol_NE), HERMES_UNSYM, NORTH_EAST);
-    wf.add_matrix_form(callback(bilinear_form_vol_NW), HERMES_UNSYM, NORTH_WEST);
-    wf.add_matrix_form(callback(bilinear_form_vol_SW), HERMES_UNSYM, SOUTH_WEST);
+    wf.add_matrix_form(callback(bilinear_form_vol_SE), HERMES_NONSYM, SOUTH_EAST);
+    wf.add_matrix_form(callback(bilinear_form_vol_NE), HERMES_NONSYM, NORTH_EAST);
+    wf.add_matrix_form(callback(bilinear_form_vol_NW), HERMES_NONSYM, NORTH_WEST);
+    wf.add_matrix_form(callback(bilinear_form_vol_SW), HERMES_NONSYM, SOUTH_WEST);
 
     wf.add_vector_form(callback(linear_form_vol));
 

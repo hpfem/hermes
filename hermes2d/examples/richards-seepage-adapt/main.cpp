@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_euler, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_euler, jac_form_surf_4_ord, BDY_4);
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
     wf.add_vector_form_surf(res_form_surf_6_euler, res_form_surf_6_ord, BDY_6);
   }
   else {
-    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_cranic, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_cranic, jac_form_surf_4_ord, BDY_4);

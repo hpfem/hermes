@@ -198,25 +198,25 @@ int main(int argc, char* argv[])
   // Problem initalization
   WeakForm wf(4);
   // OLD: wf.add_biform(0, 0, bilinear_form_0_0, 0, 0, 3, &lprev, &xprev, &yprev);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
+  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
 
   // OLD: wf.add_biform(0, 2, bilinear_form_0_2);
-  wf.add_matrix_form(0, 2, callback(bilinear_form_0_2), HERMES_UNSYM, HERMES_ANY);
+  wf.add_matrix_form(0, 2, callback(bilinear_form_0_2), HERMES_NONSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(1, 1, bilinear_form_0_0, 0, 0, 3, &lprev, &xprev, &yprev);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
+  wf.add_matrix_form(1, 1, callback(bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
 
   // OLD: wf.add_biform(1, 2, bilinear_form_1_2);
-  wf.add_matrix_form(1, 2, callback(bilinear_form_1_2), HERMES_UNSYM, HERMES_ANY);
+  wf.add_matrix_form(1, 2, callback(bilinear_form_1_2), HERMES_NONSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(2, 0, bilinear_form_2_0);
-  wf.add_matrix_form(2, 0, callback(bilinear_form_2_0), HERMES_UNSYM, HERMES_ANY);
+  wf.add_matrix_form(2, 0, callback(bilinear_form_2_0), HERMES_NONSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(2, 1, bilinear_form_2_1);
-  wf.add_matrix_form(2, 1, callback(bilinear_form_2_1), HERMES_UNSYM, HERMES_ANY);
+  wf.add_matrix_form(2, 1, callback(bilinear_form_2_1), HERMES_NONSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(3, 3, bilinear_form_3_3, 0, 0, 2, &xprev, &yprev);
-  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3), HERMES_UNSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xprev, &yprev));
+  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3), HERMES_NONSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xprev, &yprev));
 
   // OLD: wf.add_liform(0, linear_form_0, 0, 2, &lprev, &xprev);
   wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &yprev));

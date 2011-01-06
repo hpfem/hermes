@@ -371,7 +371,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           if (mfv->area != HERMES_ANY && !wf->is_in_area(marker, mfv->area)) continue;
           int m = mfv->i; fv = test_fn + m; am = al + m;
           int n = mfv->j; fu = base_fn + n; an = al + n;
-          bool tra = (m != n) && (mfv->sym != HERMES_UNSYM);
+          bool tra = (m != n) && (mfv->sym != HERMES_NONSYM);
           bool sym = (m == n) && (mfv->sym == HERMES_SYM);
 
           /* BEGIN IDENTICAL CODE WITH H2D */

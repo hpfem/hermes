@@ -153,10 +153,10 @@ The weak forms are registered as usual::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY);
 
-Recall that by HERMES_UNSYM we declare that the Jacobian bilinear form is not symmetric,
+Recall that by HERMES_NONSYM we declare that the Jacobian bilinear form is not symmetric,
 and by HERMES_ANY that the form should be used for elements with any material marker.
 
 Initializing a nonlinear DiscreteProblem

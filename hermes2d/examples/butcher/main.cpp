@@ -84,6 +84,20 @@ Real heat_src(Real x, Real y)
 // Main function.
 int main(int argc, char* argv[])
 {
+  // Create an arbitrary Butcher's table.
+  // This one below is an SDIRK method, see page 244 in Butcher's book.
+  int num_stages = 2;
+  ButcherTable BT(num_stages);
+  double gamma = 1/sqrt(2);
+  BT.set_A(0, 0, 1 - gamma);
+  BT.set_A(0, 1, 0);
+  BT.set_A(1, 0, gamma);
+  BT.set_A(1, 1, 1 - gamma);
+  BT.set_B(0, gamma);
+  BT.set_B(1, 1 - gamma);
+  BT.set_C(0, 1 - gamma);
+  BT.set_C(1, 1);
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -110,9 +124,17 @@ int main(int argc, char* argv[])
   Solution u_prev_time(&mesh, init_cond);
 
   // Initialize the weak formulation.
+  // We need just one jacobian and one residual, but they have to 
+  // accept num_stages external solutions for the stages.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
-  wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
+  Hermes::Tuple<MeshFunction*> stage_solutions;
+  stage_solutions.push_back(&u_prev_time);
+  for (int i=0; i < num_stages; i++) stage_solutions.push_back(new Solution());
+  for (int i=0; i < num_stages; i++) 
+    for (int j=0; j < num_stages; j++) 
+      wf.add_matrix_form(i, j, callback(jac), HERMES_NONSYM, HERMES_ANY, stage_solutions);
+  for (int i=0; i < num_stages; i++) 
+    wf.add_vector_form(i, callback(res), HERMES_ANY, stage_solutions);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.

@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+  wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
   wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Initialize the FE problem.

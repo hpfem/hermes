@@ -273,14 +273,14 @@ int main(int argc, char* argv[])
   if (ITERATIVE_METHOD == 1) {
     if (TIME_INTEGRATION == 1) {
       info("Registering forms for the Newton's method (implicit Euler in time).");
-      wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+      wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, 
 	                 &sln_prev_time);
       wf.add_vector_form(res_form_vol_euler, res_form_vol_ord, HERMES_ANY, 
 			 &sln_prev_time);
     }
     else {
       info("Registering forms for the Newton's method (Crank-Nicolson in time).");
-      wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+      wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, 
       		         &sln_prev_time);
       wf.add_vector_form(res_form_vol_cranic, res_form_vol_ord, HERMES_ANY, 
 			 &sln_prev_time);
@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
   else {
     if (TIME_INTEGRATION == 1) {
       info("Registering forms for the Picard's method (implicit Euler in time).");
-      wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_UNSYM, HERMES_ANY, 
+      wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_NONSYM, HERMES_ANY, 
 	                 &sln_prev_iter);
       wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
 			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
     else {
       info("Registering forms for the Picard's method (Crank-Nicolson in time).");
       error("Not implemented yet.");
-      wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_UNSYM, HERMES_ANY, 
+      wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_NONSYM, HERMES_ANY, 
 	                 &sln_prev_iter);
       wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
 			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));

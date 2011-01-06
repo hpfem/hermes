@@ -156,10 +156,10 @@ int main (int argc, char* argv[]) {
   // The weak form for 2 equations.
   WeakForm wf(2);
   // Add the bilinear and linear forms.
-  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM, HERMES_ANY, &phi_prev_time);
-  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM, HERMES_ANY, &C_prev_time);
-  wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
-  wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
+  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_NONSYM, HERMES_ANY, &phi_prev_time);
+  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_NONSYM, HERMES_ANY, &C_prev_time);
+  wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
+  wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
   wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
   wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
 

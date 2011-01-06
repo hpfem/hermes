@@ -123,11 +123,11 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if(TIME_DISCR == 1) {
-    wf.add_matrix_form(callback(J_euler), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(F_euler), HERMES_ANY, &sln_prev_time);
   }
   else {
-    wf.add_matrix_form(callback(J_cranic), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(J_cranic), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(F_cranic), HERMES_ANY, &sln_prev_time);
   }
 

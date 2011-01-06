@@ -150,11 +150,11 @@ int main(int argc, char **args)
 #elif defined SYS3
 	WeakForm wf(3);
 	wf.add_matrix_form(0, 0, biform_1_1<double, scalar>, biform_1_1<Ord, Ord>, HERMES_SYM);
-	wf.add_matrix_form(0, 1, biform_1_2<double, scalar>, biform_1_2<Ord, Ord>, HERMES_UNSYM);
+	wf.add_matrix_form(0, 1, biform_1_2<double, scalar>, biform_1_2<Ord, Ord>, HERMES_NONSYM);
 	wf.add_vector_form(0, liform_1<double, scalar>, liform_1<Ord, Ord>);
 
 	wf.add_matrix_form(1, 1, biform_2_2<double, scalar>, biform_2_2<Ord, Ord>, HERMES_SYM);
-	wf.add_matrix_form(1, 2, biform_2_3<double, scalar>, biform_2_3<Ord, Ord>, HERMES_UNSYM);
+	wf.add_matrix_form(1, 2, biform_2_3<double, scalar>, biform_2_3<Ord, Ord>, HERMES_NONSYM);
 	wf.add_vector_form(1, liform_2<double, scalar>, liform_2<Ord, Ord>);
 
 	wf.add_matrix_form(2, 2, biform_3_3<double, scalar>, biform_3_3<Ord, Ord>, HERMES_SYM);

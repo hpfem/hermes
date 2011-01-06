@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation,
   WeakForm wf1;
-  wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_UNSYM, HERMES_ANY);
+  wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_NONSYM, HERMES_ANY);
   wf1.add_vector_form(callback(residual_form_hermes), HERMES_ANY);
 
   // Initialize the FE problem.

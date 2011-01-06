@@ -45,7 +45,7 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_o
 {
 	_F_
 	if (i < 0 || i >= neq || j < 0 || j >= neq) error("Invalid equation number.");
-	if (sym != HERMES_ANTISYM && sym != HERMES_UNSYM && sym != HERMES_SYM) error("\"sym\" must be HERMES_ANTISYM, HERMES_UNSYM or HERMES_SYM.");
+	if (sym != HERMES_ANTISYM && sym != HERMES_NONSYM && sym != HERMES_SYM) error("\"sym\" must be HERMES_ANTISYM, HERMES_NONSYM or HERMES_SYM.");
 	if (sym < 0 && i == j) error("Only off-diagonal forms can be antisymmetric.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 	if (mfvol.size() > 100) warning("Large number of forms (> 100). Is this the intent?");

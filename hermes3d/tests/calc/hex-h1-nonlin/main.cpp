@@ -278,7 +278,7 @@ int main(int argc, char **args)
 
 	// Initialize the weak formulation.
 	WeakForm wf(1);
-	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<Ord, Ord>, HERMES_UNSYM);
+	wf.add_matrix_form(0, 0, jacobi_form<double, scalar>, jacobi_form<Ord, Ord>, HERMES_NONSYM);
 	wf.add_vector_form(0, resid_form<double, scalar>, resid_form<Ord, Ord>);
 
 	// Initialize the FE problem.
