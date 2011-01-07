@@ -25,15 +25,13 @@ cdef class PotentialHarmonicOscillator(Potential):
         s.set_omega(omega)
 
 cdef class ModuleSchroedinger:
-    cdef schroedinger_defs.ModuleSchroedinger *thisptr
+    cdef schroedinger_defs.RCP[schroedinger_defs.ModuleSchroedinger] thisptr
 
     def __init__(self):
-        self.thisptr = new schroedinger_defs.ModuleSchroedinger()
-
-    def __dealloc__(self):
-        del self.thisptr
+        self.thisptr = rcp(new schroedinger_defs.ModuleSchroedinger())
 
     def set_potential(self, Potential potential):
-        # TODO: how can we convert "potential" to "RCP<Potential>"?
-        cdef schroedinger_defs.RCP[Potential] p
-        self.thisptr.set_potential(p)
+        self.thisptr.set_potential(potential.thisptr)
+
+    def assemble(self, Matrix A, Matrix B):
+        self.thisptr.assemble(A.thisptr.ptr(), B.this.ptr.ptr())
