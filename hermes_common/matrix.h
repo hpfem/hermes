@@ -261,8 +261,11 @@ public:
   /// @param[in] n - the number of column
   virtual scalar get(int m, int n) = 0;
 
-  /// Zero the matrix
+  /// Zero the matrix.
   virtual void zero() = 0;
+
+  /// Add a number to each diagonal entry.
+  virtual void add_to_diagonal(scalar v) = 0;
 
   /// update the stiffness matrix
   ///

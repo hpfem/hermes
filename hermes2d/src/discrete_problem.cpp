@@ -169,7 +169,7 @@ bool DiscreteProblem::is_up_to_date()
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
-void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
+void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table* block_weights)
 {
   _F_
 
@@ -186,16 +186,18 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   
   // For DG, the sparse structure is different as we have to account for over-edge calculations.
   bool is_DG = false;
-  for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++)
+  for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++) {
     if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
-  for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++)
+  }
+  for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++) {
     if(this->wf->vfsurf[i].area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
+  }
 
   int ndof = get_num_dofs();
   
@@ -210,8 +212,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
     bool **blocks = wf->get_blocks();
 
     // Init multi-mesh traversal.
-    for (int i = 0; i < wf->get_neq(); i++)
-      meshes[i] = spaces[i]->get_mesh();
+    for (int i = 0; i < wf->get_neq(); i++) meshes[i] = spaces[i]->get_mesh();
 
     Traverse trav;
     trav.begin(wf->get_neq(), meshes);
@@ -258,9 +259,13 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
         }
 
         // Pre-add into the stiffness matrix.
-        for (int m = 0; m < wf->get_neq(); m++)
-          for(int el = 0; el < wf->get_neq(); el++)
-            for(int ed = 0; ed < num_edges; ed++)
+        for (int m = 0; m < wf->get_neq(); m++) {
+          for(int el = 0; el < wf->get_neq(); el++) {
+            // Do not include blocks with zero weight.
+            if (block_weights != NULL) {
+              if (fabs(block_weights->get_A(m, el)) < 1e-12) continue;
+            } 
+            for(int ed = 0; ed < num_edges; ed++) {
               for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++) {
                 if ((blocks[m][el] || blocks[el][m]) && e[m] != NULL)  {
                   AsmList *am = &(al[m]);
@@ -274,14 +279,15 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
                       for (int j = 0; j < an->cnt; j++)
                         if (an->dof[j] >= 0)
                         {
-                          if(blocks[m][el])
-                            mat->pre_add_ij(am->dof[i], an->dof[j]);
-                          if(blocks[el][m])
-                            mat->pre_add_ij(an->dof[j], am->dof[i]);
+                          if(blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
+                          if(blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
                         }
                   delete an;
                 }
               }
+            }
+	  }
+        }
         // Deallocation an array of arrays of neighboring elements for every mesh x edge.
         for(int el = 0; el < wf->get_neq(); el++) {
           for(int ed = 0; ed < num_edges; ed++)
@@ -299,6 +305,10 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
       // Go through all equation-blocks of the local stiffness matrix.
       for (int m = 0; m < wf->get_neq(); m++) {
         for (int n = 0; n < wf->get_neq(); n++) {
+          // Do not include blocks with zero weight.
+          if (block_weights != NULL) {
+            if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
+          } 
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {
             AsmList *am = &(al[m]);
             AsmList *an = &(al[n]);
@@ -337,40 +347,37 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly)
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
 // Light version for linear problems.
-void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly) 
+// The Table is here for optional weighting of matrix blocks in systems.
+void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table* block_weights) 
 {
   _F_
-  assemble(NULL, mat, rhs, rhsonly);
+  assemble(NULL, mat, rhs, rhsonly, block_weights);
 }
 
-// General assembling function for nonlinear problem. For linear problems use the 
+// General assembling function for nonlinear problems. For linear problems use the 
 // light version above.
-void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
+// The Table is here for optional weighting of matrix blocks in systems.
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly, Table* block_weights)
 {
   /* BEGIN IDENTICAL CODE WITH H3D */
 
-	_F_
+  _F_
   // Sanity checks.
-  if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in DiscreteProblem::assemble().");
   if (!have_spaces) error("You have to call DiscreteProblem::set_spaces() before calling assemble().");
   for (int i=0; i<this->wf->get_neq(); i++)
   {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
-  this->create(mat, rhs, rhsonly);
+  this->create(mat, rhs, rhsonly, block_weights);
 
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
   Hermes::Tuple<Solution*> u_ext;
   for (int i = 0; i < this->wf->get_neq(); i++) 
   {
-    if (this->is_linear == false)
-    {
-      u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
-    }
-    else
-      u_ext.push_back(NULL);
+    u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
+    if (coeff_vec != NULL) Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
+    else u_ext[i]->set_zero(this->spaces[i]->get_mesh());
   }
  
   /* END IDENTICAL CODE WITH H3D */
@@ -478,6 +485,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           if (mfv->area != HERMES_ANY && !wf->is_in_area(marker, mfv->area)) continue;
           int m = mfv->i;  
           int n = mfv->j;  
+
+          // If a block scaling table is provided, and if the scaling coefficient 
+          // A_mn for this block is zero, then the form does not need to be assembled.
+          scalar block_scaling_coeff = 1.;
+          if (block_weights != NULL) {
+            if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
+            block_scaling_coeff = block_weights->get_A(m, n);
+          }
+
           fu = pss[n]; 
           fv = spss[m];  
           am = &al[m];  
@@ -513,7 +529,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                 }
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
+                  scalar val = block_scaling_coeff * eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
                           &(refmap[m])) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
                 }
@@ -537,7 +553,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                 } 
                 else if (rhsonly == false) 
                 {
-                  scalar val = eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
+                  scalar val = block_scaling_coeff * eval_form(mfv, u_ext, fu, fv, &(refmap[n]),
                           &(refmap[m])) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
                 }
@@ -651,6 +667,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               if (mfs->area != HERMES_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE && !wf->is_in_area(marker, mfs->area)) continue;
               int m = mfs->i;  
               int n = mfs->j;  
+
+              // If a block scaling table is provided, and if the scaling coefficient 
+              // A_mn for this block is zero, then the form does not need to be assembled.
+              scalar block_scaling_coeff = 1.;
+              if (block_weights != NULL) {
+                if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
+                block_scaling_coeff = block_weights->get_A(m, n);
+              }
+
               fu = pss[n];      // This is different in H3D.
               fv = spss[m];     // This is different in H3D.
               am = &(al[m]);
@@ -682,7 +707,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                   }
                   else if (rhsonly == false) 
                   {
-                    scalar val = eval_form(mfs, u_ext, fu, fv, &(refmap[n]),
+                    scalar val = block_scaling_coeff * eval_form(mfs, u_ext, fu, fv, &(refmap[n]),
                             &(refmap[m]), surf_pos + isurf) * an->coef[j] * am->coef[i];
                     local_stiffness_matrix[i][j] = val;
                   } 

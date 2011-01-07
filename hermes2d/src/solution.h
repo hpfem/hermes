@@ -79,7 +79,6 @@ public:
 
 };
 
-
 /// \brief Represents the solution of a PDE.
 ///
 /// The Solution class represents the solution of a PDE. Given a space and a solution vector,

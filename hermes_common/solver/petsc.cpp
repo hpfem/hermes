@@ -177,6 +177,14 @@ void PetscMatrix::add(int m, int n, scalar v) {
 #endif
 }
 
+/// Add a number to each diagonal entry.
+void PetscMatrix::add_to_diagonal(scalar v) 
+{
+  for (int i=0; i<size; i++) {
+    add(i, i, v);
+  }
+};
+
 void PetscMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_
 #ifdef WITH_PETSC

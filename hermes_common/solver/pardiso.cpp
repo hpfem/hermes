@@ -162,6 +162,14 @@ void PardisoMatrix::add(int m, int n, scalar v) {
   }
 }
 
+/// Add a number to each diagonal entry.
+void PardisoMatrix::add_to_diagonal(scalar v) 
+{
+  for (int i=0; i<size; i++) {
+    add(i, i, v);
+  }
+};
+
 void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) 
 {
   _F_

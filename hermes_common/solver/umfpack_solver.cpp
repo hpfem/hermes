@@ -149,12 +149,22 @@ void UMFPackMatrix::add(int m, int n, scalar v) {
     // Find m-th row in the n-th column.
     int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
     // Make sure we are adding to an existing non-zero entry.
-    if (pos < 0) 
+    if (pos < 0) {
+      printf("UMFPackMatrix::add(): m = %d, n = %d, value = %g, pos = %d.\n", m, n, v, pos);
       error("Sparse matrix entry not found");
-    
+    }
+
     Ax[Ap[n] + pos] += v;
   }
 }
+
+/// Add a number to each diagonal entry.
+void UMFPackMatrix::add_to_diagonal(scalar v) 
+{
+  for (int i=0; i<size; i++) {
+    add(i, i, v);
+  }
+};
 
 void UMFPackMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
   _F_

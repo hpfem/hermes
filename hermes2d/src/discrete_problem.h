@@ -29,6 +29,7 @@
 #include "views/order_view.h"
 #include "function.h"
 #include "neighbor.h"
+#include "tables.h"
 #include "ref_selectors/selector.h"
 #include <map>
 
@@ -70,15 +71,18 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   // Precalculate matrix sparse structure.
-  void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  // The Table is here for optional weighting of matrix blocks in systems.
+  void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, Table* block_weights = NULL);
 
   // General assembling procedure for nonlinear problems. coeff_vec is the 
   // previous Newton vector.
-  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  // The Table is here for optional weighting of matrix blocks in systems.
+  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, Table* block_weights = NULL);
 
   // Assembling for linear problems. Same as the previous functions, but 
   // does not need the coeff_vector.
-  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  // The Table is here for optional weighting of matrix blocks in systems.
+  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, Table* block_weights = NULL);
 
   // Get the number of unknowns.
   int get_num_dofs();

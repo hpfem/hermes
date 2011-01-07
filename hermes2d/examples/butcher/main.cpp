@@ -1,7 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function.h"
 
 using namespace RefinementSelectors;
 
@@ -85,18 +84,32 @@ Real heat_src(Real x, Real y)
 int main(int argc, char* argv[])
 {
   // Create an arbitrary Butcher's table.
-  // This one below is an SDIRK method, see page 244 in Butcher's book.
+
+  /*
+  // Implicit Euler.
+  int num_stages = 1;
+  ButcherTable BT(num_stages);
+  BT.set_A(0, 0, 1.);
+  BT.set_B(0, 1.);
+  BT.set_C(0, 1.);
+  */
+ 
+  // SDIRK-22 method, see page 244 in Butcher's book.
   int num_stages = 2;
   ButcherTable BT(num_stages);
-  double gamma = 1/sqrt(2);
-  BT.set_A(0, 0, 1 - gamma);
-  BT.set_A(0, 1, 0);
+  double gamma = 1./sqrt(2.);
+  BT.set_A(0, 0, 1. - gamma);
+  BT.set_A(0, 1, 0.);
   BT.set_A(1, 0, gamma);
-  BT.set_A(1, 1, 1 - gamma);
+  BT.set_A(1, 1, 1. - gamma);
   BT.set_B(0, gamma);
-  BT.set_B(1, 1 - gamma);
-  BT.set_C(0, 1 - gamma);
-  BT.set_C(1, 1);
+  BT.set_B(1, 1. - gamma);
+  BT.set_C(0, 1. - gamma);
+  BT.set_C(1, 1.);
+
+  // Time step is stored inside of the Butcher's table 
+  // so that it can be passed along with its coefficients.
+  BT.set_time_step(TAU);
 
   // Load the mesh.
   Mesh mesh;
@@ -115,36 +128,40 @@ int main(int argc, char* argv[])
   BCValues bc_values;
   bc_values.add_function(BDY_DIRICHLET, essential_bc_values);   
 
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  // Create num_stages spaces for stage solutions.
+  Hermes::Tuple<Space*> stage_spaces;
+  for (int i = 0; i < num_stages; i++) stage_spaces.push_back(new H1Space(&mesh, &bc_types, &bc_values, P_INIT));
+  int ndof = Space::get_num_dofs(stage_spaces[0]);
   info("ndof = %d.", ndof);
 
   // Previous time level solution (initialized by the initial condition).
   Solution u_prev_time(&mesh, init_cond);
 
-  // Initialize the weak formulation.
-  // We need just one jacobian and one residual, but they have to 
-  // accept num_stages external solutions for the stages.
-  WeakForm wf;
+  // Initialize stage solutions: One for each stage.
   Hermes::Tuple<MeshFunction*> stage_solutions;
-  stage_solutions.push_back(&u_prev_time);
-  for (int i=0; i < num_stages; i++) stage_solutions.push_back(new Solution());
+  for (int i=0; i < num_stages; i++) {
+    Solution* stage_sln = new Solution(&mesh);
+    stage_sln->set_zero(&mesh);
+    stage_solutions.push_back(stage_sln);
+  }
+
+  // Initialize the weak formulation.
+  // We need just one jacobian and one residual.
+  WeakForm wf(num_stages);
   for (int i=0; i < num_stages; i++) 
     for (int j=0; j < num_stages; j++) 
-      wf.add_matrix_form(i, j, callback(jac), HERMES_NONSYM, HERMES_ANY, stage_solutions);
+      wf.add_matrix_form(i, j, callback(jac), HERMES_NONSYM, HERMES_ANY, stage_solutions[i]);
   for (int i=0; i < num_stages; i++) 
-    wf.add_vector_form(i, callback(res), HERMES_ANY, stage_solutions);
+    wf.add_vector_form(i, callback(res), HERMES_ANY, stage_solutions[i]);
 
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
+  info("Projecting initial condition to translate initial condition into a vector.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
+  OGProjection::project_global(stage_spaces[0], &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, stage_spaces, is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -154,7 +171,7 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
   OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
-  oview.show(&space);
+  oview.show(stage_spaces[0]);
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
@@ -165,11 +182,11 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration.
     info("Solving on coarse mesh:");
     bool verbose = true;
-    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+    if (!solve_newton_butcher(&BT, coeff_vec, &dp, solver, matrix, rhs, stage_solutions,
         NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-    // Update previous time level solution.
-    Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
+    // Convert coeff_vec into a new time level solution.
+    Solution::vector_to_solution(coeff_vec, stage_spaces[0], &u_prev_time);
 
     // Update time.
     current_time += TAU;
@@ -179,7 +196,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
     sview.show(&u_prev_time);
-    oview.show(&space);
+    oview.show(stage_spaces[0]);
   } 
   while (current_time < T_FINAL);
 
