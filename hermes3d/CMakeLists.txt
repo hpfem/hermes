@@ -124,10 +124,13 @@ endif(DEBUG)
 find_package(PTHREAD REQUIRED)
 add_definitions(-DWITH_BLAS)
 
-if(NOT MSVC)
+if(MSVC)
+	find_package(CLAPACK REQUIRED) # also searches for BLAS
+else(MSVC)
 	enable_language(Fortran)	# need a fortran compiler for checking BLAS
 	find_package(LAPACK REQUIRED) # also searches for BLAS
-endif(NOT MSVC)
+endif(MSVC)
+
 
 # solvers
 if(WITH_PETSC)
