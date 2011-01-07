@@ -112,18 +112,18 @@ int main(int argc, char* argv[])
     value[3] = 0.048752;
   }
 
+  bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if ((value[i] - sln.get_pt_value(coor_x[i], coor_y)) < 1E-6) 
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

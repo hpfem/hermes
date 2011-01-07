@@ -375,17 +375,19 @@ int main(int argc, char* argv[])
   double coor_x[5] = {2.0, 2.0, 6.0, 6.0, 4.0};
   double coor_y[5] = {-2.0, -4.0, -2.0, -4.0, -3.0};
   double value[5] = {-4.821844, -2.462673, -4.000754, -1.705534, -3.257146};
+
+  bool success = true;
   for (int i = 0; i < 5; i++)
   {
-    if ((value[i] - sln_prev_time.get_pt_value(coor_x[i], coor_y[i])) < 1E-6)
-    {
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(value[i] - sln_prev_time.get_pt_value(coor_x[i], coor_y[i])) > 1E-6) success = false;
   }
-  printf("Success!\n");
-  return ERR_SUCCESS;
+
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }

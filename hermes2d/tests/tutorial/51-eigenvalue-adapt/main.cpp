@@ -243,17 +243,17 @@ int main(int argc, char* argv[])
   double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
   double coor_y = 0.5;
   double t_value[4] = {0.154053, -0.178300, -0.530477, -0.313066};
+  bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if ((t_value[i] - sln[5].get_pt_value(coor_x[i], coor_y)) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(t_value[i] - sln[5].get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }

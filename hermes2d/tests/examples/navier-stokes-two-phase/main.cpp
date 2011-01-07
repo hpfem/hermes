@@ -485,7 +485,8 @@ int main(int argc, char* argv[])
     if (err_est_rel_total < ERR_STOP) done = true;
     else {
       info("Adapting the coarse mesh.");
-      done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *> (&selector, &selector, &selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY, to_be_processed);
+      done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *> (&selector, &selector, &selector, &selector), 
+                               THRESHOLD, STRATEGY, MESH_REGULARITY, to_be_processed);
 
       if (Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset)) >= NDOF_STOP) done = true;
     }
