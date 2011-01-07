@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
+  //mloader.load("square-tri.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
