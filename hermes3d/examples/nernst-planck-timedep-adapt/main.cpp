@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 
-#include <hermes3d.h>
+#include "timestep_controller.h"
 //#include "timestep_controller.h"
 
 //using namespace RefinementSelectors;
@@ -40,11 +40,13 @@ const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
-/*
+
 const int UNREF_FREQ = 1;                         // every UNREF_FREQth time step the mesh is unrefined.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 0;                           // Adaptive strategy:
+const double ERR_STOP = 5;                      // Stopping criteria
+const int NDOF_STOP = 8000;                   // To prevent adaptivity from going on forever.
+/*const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -120,11 +122,12 @@ int main (int argc, char* argv[]) {
   // Load the mesh. 
   Mesh basemesh;
   ExodusIIReader mesh_loader;
-  if (!mesh_loader.load("mesh.e", &basemesh))
-    error("Loading mesh file '%s' failed.\n", "mesh.e");
+  if (!mesh_loader.load("coarse_mesh.e", &basemesh))
+    error("Loading mesh file '%s' failed.\n", "coarse_mesh.e");
 
   Mesh C_mesh, phi_mesh;
   C_mesh.copy(basemesh);
+
   phi_mesh.copy(basemesh);
 
   H1Space C_space(&C_mesh, bc_types_C, essential_bc_values_C, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
@@ -191,259 +194,152 @@ int main (int argc, char* argv[]) {
   Solution::vector_to_solutions(coeff_vec_coarse, Hermes::Tuple<Space *>(&C_space, &phi_space),
                                 Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
 
-  out_fn_vtk(&C_sln,"C_sln");
-  out_fn_vtk(&phi_sln,"phi_sln");
-  /*
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C_space, &phi_space));
+  out_fn_vtk(&C_sln,"C_init_sln");
+  out_fn_vtk(&phi_sln,"phi_init_sln");
+  //out_fn_vtk(&sln, "sln", ts);
 
-  Solution C_sln, C_ref_sln;
-  Solution phi_sln, phi_ref_sln; 
+  Solution *C_ref_sln, *phi_ref_sln;
 
-  // Assign initial condition to mesh.
-  Solution C_prev_time(&C_mesh, concentration_ic);
-  Solution phi_prev_time(MULTIMESH ? &phi_mesh : &C_mesh, voltage_ic);
-
-  // The weak form for 2 equations.
-  WeakForm wf(2);
-  // Add the bilinear and linear forms.
-  if (TIME_DISCR == 1) {  // Implicit Euler.
-  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_UNSYM);
-  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_UNSYM);
-  wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_UNSYM);
-  wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_UNSYM);
-  wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
-  wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
-  } else {
-    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_UNSYM);
-    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_UNSYM);
-    wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_UNSYM);
-    wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_UNSYM);
-    wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY, 
-                       Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
-    wf.add_vector_form(1, callback(Fphi_cranic), HERMES_ANY);
-  }
-
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec_coarse = new scalar[ndof];
-  OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space), 
-                               Hermes::Tuple<MeshFunction *>(&C_prev_time, &phi_prev_time), 
-                               coeff_vec_coarse, matrix_solver);
-
-  // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, Hermes::Tuple<Space *>(&C_space, &phi_space), is_linear);
-
-  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-  Vector* rhs_coarse = create_vector(matrix_solver);
-  Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-
-  // Create a selector which will select optimal candidate.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Visualization windows.
-  char title[1000];
-  ScalarView Cview("Concentration [mol/m3]", new WinGeom(0, 0, 800, 800));
-  ScalarView phiview("Voltage [V]", new WinGeom(650, 0, 600, 600));
-  OrderView Cordview("C order", new WinGeom(0, 300, 600, 600));
-  OrderView phiordview("Phi order", new WinGeom(600, 300, 600, 600));
-
-  Cview.show(&C_prev_time);
-  Cordview.show(&C_space);
-  phiview.show(&phi_prev_time);
-  phiordview.show(&phi_space);
-
-  // Newton's loop on the coarse mesh.
-  info("Solving on coarse mesh:");
-  bool verbose = true;
-  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
-      NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-
-  // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solutions(coeff_vec_coarse, Hermes::Tuple<Space *>(&C_space, &phi_space), 
-                                Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
-
-  Cview.show(&C_sln);
-  phiview.show(&phi_sln);
-
-  // Cleanup after the Newton loop on the coarse mesh.
-  delete matrix_coarse;
-  delete rhs_coarse;
-  delete solver_coarse;
-  delete[] coeff_vec_coarse;
-  
-  // Time stepping loop.
-  PidTimestepController pid(T_FINAL, INIT_TAU, true);
+  PidTimestepController pid(T_FINAL, false, INIT_TAU);
   TAU = pid.timestep;
   info("Starting time iteration with the step %g", *TAU);
-
   do {
     pid.begin_step();
-    // Periodic global derefinements.
+
     if (pid.get_timestep_number() > 1 && pid.get_timestep_number() % UNREF_FREQ == 0)
     {
       info("Global mesh derefinement.");
-      C_mesh.copy(&basemesh);
+      C_mesh.copy(basemesh);
       if (MULTIMESH)
       {
-        phi_mesh.copy(&basemesh);
+        phi_mesh.copy(basemesh);
       }
-      C_space.set_uniform_order(P_INIT);
-      phi_space.set_uniform_order(P_INIT);
+      C_space.set_uniform_order(Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
+      phi_space.set_uniform_order(Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
 
-      // Project on globally derefined mesh.
-      //info("Projecting previous fine mesh solution on derefined mesh.");
-      //OGProjection::project_global(Hermes::Tuple<Space *>(&C, &phi), Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), 
-       //                            Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
-    }
 
-    // Adaptivity loop. Note: C_prev_time and Phi_prev_time must not be changed during spatial adaptivity.
-    bool done = false; int as = 1;
-    double err_est;
-    do {
-      info("Time step %d, adaptivity step %d:", pid.get_timestep_number(), as);
-
-      // Construct globally refined reference mesh
-      // and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&C_space, &phi_space));
-
-      scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
-      DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-      // Calculate initial coefficient vector for Newton on the fine mesh.
-      if (as == 1 && pid.get_timestep_number() == 1) {
-        info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln), 
-                                     coeff_vec, matrix_solver);
       }
-      else {
-        info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_ref_sln, &phi_ref_sln), 
-                                     coeff_vec, matrix_solver);
-      }
-      if (as > 1) {
-        // Now deallocate the previous mesh
-        info("Delallocating the previous mesh");
-        delete C_ref_sln.get_mesh();
-        delete phi_ref_sln.get_mesh();
-      }
+      bool done = false; int as = 1;
+      double err_est;
+      do {
+        info("Time step %d, adaptivity step %d:", pid.get_timestep_number(), as);
 
-      // Newton's loop on the fine mesh.
-      info("Solving on fine mesh:");
-      if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
-	  	      NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+        // Construct globally refined reference mesh
+        // and setup reference space.
+        Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(
+            Hermes::Tuple<Space *>(&C_space, &phi_space), 0, H3D_REFT_HEX_Y);
+        scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
+        DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+        SparseMatrix* matrix = create_matrix(matrix_solver);
+        Vector* rhs = create_vector(matrix_solver);
+        Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
 
-      // Store the result in ref_sln.
-      Solution::vector_to_solutions(coeff_vec, *ref_spaces, 
-                                    Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln));
-      // Projecting reference solution onto the coarse mesh
-      info("Projecting fine mesh solution on coarse mesh.");
-      OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space), 
-                                   Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), 
-                                   Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
-                                   matrix_solver);
+        if (as == 1 && pid.get_timestep_number() == 1) {
+          info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
+          OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln),
+                                       coeff_vec, matrix_solver);
+        }
+        else {
+          info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
+          OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(C_ref_sln, phi_ref_sln),
+                                       coeff_vec, matrix_solver);
+        }
+        if (as > 1) {
+          // Now deallocate the previous mesh
+          info("Deallocating the previous mesh");
+          //delete C_ref_sln->get_mesh();
+          //delete phi_ref_sln->get_mesh();
+          //delete C_ref_sln;
+          //delete phi_ref_sln;
+        }
+        /*TODO TEMP */
+        if (pid.get_timestep_number() > 1) {
 
-      // Calculate element errors and total error estimate.
-      info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&C_space, &phi_space), 
-                                    Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM));
-      bool solutions_for_adapt = true;
-      Hermes::Tuple<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&C_sln, &phi_sln), 
-                                 Hermes::Tuple<Solution *>(&C_ref_sln, &phi_ref_sln), solutions_for_adapt, 
-                                 HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+        delete C_ref_sln;
+        delete phi_ref_sln;
+        }
 
-      // Report results.
-      info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
-           C_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs());
-      info("err_est_rel[0]: %g%%", err_est_rel[0]*100);
-      info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
-           phi_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs());
-      info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
-      // Report results.
-      info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel: %g%%", 
-           Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space)), 
-                               Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+        info("Solving on fine mesh:");
+        if (!solve_newton(coeff_vec, dp, solver, matrix, rhs,
+              NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-      // If err_est too large, adapt the mesh.
-      if (err_est_rel_total < ERR_STOP) done = true;
-      else 
-      {
-        info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector),
-          THRESHOLD, STRATEGY, MESH_REGULARITY);
-        
-        info("Adapted...");
 
-        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space)) >= NDOF_STOP) 
-          done = true;
+        // Store the result in ref_sln.
+        C_ref_sln = new Solution(ref_spaces->at(0)->get_mesh());
+        phi_ref_sln = new Solution(ref_spaces->at(1)->get_mesh());
+
+        Solution::vector_to_solutions(coeff_vec, *ref_spaces,
+                                      Hermes::Tuple<Solution *>(C_ref_sln, phi_ref_sln));
+        // Projecting reference solution onto the coarse mesh
+        info("Projecting fine mesh solution on coarse mesh.");
+        OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space),
+                                     Hermes::Tuple<Solution *>(C_ref_sln, phi_ref_sln),
+                                     Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
+                                     matrix_solver);
+
+
+        info("Calculating error estimate.");
+        Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&C_space, &phi_space),
+            Hermes::Tuple<ProjNormType> (HERMES_H1_NORM, HERMES_H1_NORM));
+        Hermes::Tuple<double> err_est_rel;
+        bool solutions_for_adapt = true;
+
+        double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
+            Hermes::Tuple<Solution *>(C_ref_sln, phi_ref_sln), solutions_for_adapt,
+            HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
+
+        // Report results.
+        info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
+             C_space.get_num_dofs(), (*ref_spaces)[0]->get_num_dofs());
+        info("err_est_rel[0]: %g%%", err_est_rel[0]*100);
+        info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
+             phi_space.get_num_dofs(), (*ref_spaces)[1]->get_num_dofs());
+        info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
+        // Report results.
+        info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel: %g%%",
+             Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space)),
+                                 Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+
+        // If err_est too large, adapt the mesh.
+        if (err_est_rel_total < ERR_STOP) done = true;
         else
-          // Increase the counter of performed adaptivity steps.
-          as++;
-      }
+        {
+          info("Adapting the coarse mesh.");
+          adaptivity->adapt(THRESHOLD);
 
-      // Visualize the solution and mesh.
-      info("Visualization procedures: C");
-      char title[100];
-      sprintf(title, "Solution[C], time step# %d, step size %g, time %g",
-          pid.get_timestep_number(), *TAU, pid.get_time());
-      Cview.set_title(title);
-      Cview.show(&C_ref_sln);
-      sprintf(title, "Mesh[C], time step# %d, step size %g, time %g",
-          pid.get_timestep_number(), *TAU, pid.get_time());
-      Cordview.set_title(title);
-      Cordview.show(&C_space);
-      
-      info("Visualization procedures: phi");
-      sprintf(title, "Solution[phi], time step# %d, step size %g, time %g",
-          pid.get_timestep_number(), *TAU, pid.get_time());
-      phiview.set_title(title);
-      phiview.show(&phi_ref_sln);
-      sprintf(title, "Mesh[phi], time step# %d, step size %g, time %g",
-          pid.get_timestep_number(), *TAU, pid.get_time());
-      phiordview.set_title(title);
-      phiordview.show(&phi_space);
-      //View::wait(HERMES_WAIT_KEYPRESS);
+          info("Adapted...");
 
-      // Clean up.
-      info("delete solver");
-      delete solver;
-      info("delete matrix");
-      delete matrix;
-      info("delete rhs");
-      delete rhs;
-      info("delete adaptivity");
-      delete adaptivity;
-      info("delete[] ref_spaces");
-      delete ref_spaces;
-      info("delete dp");
-      delete dp;
-      info("delete[] coeff_vec");
-      delete[] coeff_vec;
-    }
-    while (done == false);
+          if (Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space)) >= NDOF_STOP)
+            done = true;
+          else
+            // Increase the counter of performed adaptivity steps.
+            as++;
+        }
 
 
-    pid.end_step(Hermes::Tuple<Solution*> (&C_ref_sln, &phi_ref_sln), Hermes::Tuple<Solution*> (&C_prev_time, &phi_prev_time));
-    // TODO! Time step reduction when necessary.
 
-    // Copy last reference solution into sln_prev_time.
-    C_prev_time.copy(&C_ref_sln);
-    phi_prev_time.copy(&phi_ref_sln);
+        //as++;
+        delete solver;
+        delete matrix;
+        delete rhs;
+        delete ref_spaces;
+        delete dp;
+        delete[] coeff_vec;
+        done = true;
+      } while (!done);
+      out_fn_vtk(C_ref_sln,"C_sln", pid.get_timestep_number());
+      out_fn_vtk(phi_ref_sln,"phi_sln", pid.get_timestep_number());
 
+      pid.end_step(Hermes::Tuple<Solution*> (C_ref_sln, phi_ref_sln), Hermes::Tuple<Solution*> (&C_prev_time, &phi_prev_time));
+
+      // Copy last reference solution into sln_prev_time.
+      C_prev_time.copy(C_ref_sln);
+      phi_prev_time.copy(phi_ref_sln);
   } while (pid.has_next());
 
-  // Wait for all views to be closed.
-  View::wait();
-  */
+
+  //View::wait();
   return 0;
 }
 

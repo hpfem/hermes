@@ -1,17 +1,16 @@
-#include "hermes2d.h"
-
+#include <hermes3d.h>
+#include <norm.h>
+#include <norm.cpp>
 #include <vector>
 
 #define PID_DEFAULT_TOLERANCE 0.25
 #define DEFAULT_STEP 0.1
 
-HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
-
 class HERMES_API PidTimestepController {
 
 public:
-  PidTimestepController(double final_time, double default_step = DEFAULT_STEP,
-      double tolerance = PID_DEFAULT_TOLERANCE, bool pid_on = true) {
+  PidTimestepController(double final_time, bool pid_on = true,
+      double default_step = DEFAULT_STEP, double tolerance = PID_DEFAULT_TOLERANCE) {
     this->delta = tolerance;
     this->final_time = final_time;
     this->time = 0;
@@ -69,6 +68,7 @@ bool PidTimestepController::end_step(Hermes::Tuple<Solution *> solutions,
     Hermes::Tuple<Solution *> prev_solutions) {
 
   if (pid) {
+    info("Running PID calculations...");
 
     unsigned int neq = solutions.size();
     if (neq == 0) {
@@ -83,7 +83,8 @@ bool PidTimestepController::end_step(Hermes::Tuple<Solution *> solutions,
     double max_rel_error = 0.0;
 
     for (unsigned int i = 0; i < neq; i++) {
-      double abs_error = calc_abs_error(error_fn_h1, solutions[i], prev_solutions[i]);
+      double abs_error = calc_error(error_fn_h1, solutions[i], prev_solutions[i]);
+
       double norm = calc_norm(norm_fn_h1, solutions[i]);
       max_rel_error = (abs_error/norm > max_rel_error) ? (abs_error/norm) : max_rel_error;
 
