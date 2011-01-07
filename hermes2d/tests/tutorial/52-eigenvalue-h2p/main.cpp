@@ -185,18 +185,18 @@ int main(int argc, char* argv[])
 
   double coor_x_y[6] = {0.0, 1.0, 3.0, 5.0, 7.0, 10.0};
   double value[6] = { 0.246677, 0.140036, 0.003992, 0.000072, 0.000001, 0.000000};
+  bool success = true;
   for (int i = 0; i < 6; i++)
   {
-    if ((value[i] - sln.get_pt_value(coor_x_y[i], coor_x_y[i])) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(value[i] - sln.get_pt_value(coor_x_y[i], coor_x_y[i])) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

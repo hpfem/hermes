@@ -11,7 +11,7 @@ using namespace RefinementSelectors;
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 1;                             // Initial polynomial degree.
 const double TAU = 0.5;                           // Time step.
-const double T_FINAL = 60.0;                      // Time interval length.
+const double T_FINAL = 4.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-4;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -174,39 +174,43 @@ int main(int argc, char* argv[])
   delete rhs;
   delete solver;
 
-  info("Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
-  info("Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
-  info("Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
-  info("Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
-  info("Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
-  info("Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
-  info("Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
-  info("Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
+  info("T Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
+  info("T Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
+  info("T Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
+  info("T Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
+  info("T Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
+  info("T Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
+  info("T Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
+  info("T Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
 
-  info("Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
-  info("Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
-  info("Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
-  info("Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
-  info("Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
-  info("Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
-  info("Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
-  info("Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
+  info("C Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
+  info("C Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
+  info("C Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
+  info("C Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
+  info("C Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
+  info("C Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
+  info("C Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
+  info("C Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
 
   double coor_x[8] = {0.0, 8.0, 15.0, 24.0, 30.0, 40.0, 50.0, 60.0};
   double coor_y = 8.0;
-  double t_value[8] = {1.000000, 0.850946, 0.624183, 0.524876, 0.696210, 0.964166, 0.998641, 0.001120};
-  double c_value[8] = {0.000000, -0.000000, 0.000002, 0.000009, 0.000001, -0.000000, 0.000042, 0.998844};
-  for (int i = 0; i < 6; i++)
+  double t_value[8] = {1.000000, 1.000003, 0.166155, 0.000022, 0.000000, 0.000000, 0.000000, 0.000000};
+  double c_value[8] = {0.000000, -0.000005, 0.833677, 0.999977, 1.000000, 1.000000, 1.000000, 1.000000};
+
+  bool success = true;
+  for (int i = 0; i < 8; i++)
   {
-    if (((t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-6) && ((c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-6))
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if ((abs(t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) > 1E-4) || 
+        (abs(c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) > 1E-4))
+      success = false;
   }
-  return ERR_SUCCESS;
+
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }

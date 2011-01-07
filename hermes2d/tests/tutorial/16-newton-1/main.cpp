@@ -13,7 +13,7 @@ const int P_INIT = 2;                             // Initial polynomial degree.
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 5;                   // Number of initial refinements towards boundary.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 7;                    // Maximum allowed number of Newton iterations.
+const int NEWTON_MAX_ITER = 8;                    // Maximum allowed number of Newton iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -82,49 +82,16 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)];
   Solution* init_sln = new Solution();
   init_sln->set_const(&mesh, INIT_COND_CONST);
   OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver);
   delete init_sln;
 
   // Perform Newton's iteration.
-  int it = 1;
-  bool success = false;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(&space);
-
-    // Assemble the Jacobian matrix and residual vector.
-    dp.assemble(coeff_vec, matrix, rhs, false);
-
-    // Multiply the residual vector with -1 since the matrix 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    rhs->change_sign();
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
-    // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system.
-    if(!(success = solver->solve()))
-      error ("Matrix solver failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  bool verbose = true;
+  if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
   Solution::vector_to_solution(coeff_vec, &space, &sln);
@@ -135,7 +102,23 @@ int main(int argc, char* argv[])
   delete rhs;
   delete solver;
   
-  if (success) {  // should pass with NEWTON_MAX_ITER = 7 and fail with NEWTON_MAX_ITER = 6
+  info("ndof = %d", ndof);
+  info("Coordinate (1, 0) value = %lf", sln.get_pt_value(1.0, 0.0));
+  info("Coordinate (3, 0) value = %lf", sln.get_pt_value(3.0, 0.0));
+  info("Coordinate (5, 0) value = %lf", sln.get_pt_value(5.0, 0.0));
+  info("Coordinate (7, 0) value = %lf", sln.get_pt_value(7.0, 0.0));
+
+  double coor_x[4] = {1.0, 3.0, 5.0, 7.0};
+  double coor_y = 0.0;
+  double t_value[4] = {2.658510, 2.617692, 2.522083, 2.329342};
+  bool success = true;
+
+  for (int i = 0; i < 4; i++)
+  {
+    if (abs(t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
+  }
+
+  if (success) {
     printf("Success!\n");
     return ERR_SUCCESS;
   }

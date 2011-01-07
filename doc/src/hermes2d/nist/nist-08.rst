@@ -42,7 +42,7 @@ Sample solution
 
 Solution for $\alpha = \frac{1}{10 \pi}$:
 
-.. image:: nist-8/solution.png
+.. image:: nist-08/solution.png
    :align: center
    :width: 600
    :height: 400

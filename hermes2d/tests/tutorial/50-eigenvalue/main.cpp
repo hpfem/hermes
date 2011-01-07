@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if ((t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
+    if (abs(t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
   }
   if (success) {
     printf("Success!\n");

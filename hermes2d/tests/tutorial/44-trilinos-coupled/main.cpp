@@ -173,40 +173,44 @@ int main(int argc, char* argv[])
     info("Total running time for time level %d: %g s.", ts, cpu_time.tick().last());
   }
 
-  info("Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
-  info("Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
-  info("Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
-  info("Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
-  info("Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
-  info("Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
-  info("Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
-  info("Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
+  info("T Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
+  info("T Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
+  info("T Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
+  info("T Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
+  info("T Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
+  info("T Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
+  info("T Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
+  info("T Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
 
-  info("Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
-  info("Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
-  info("Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
-  info("Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
-  info("Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
-  info("Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
-  info("Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
-  info("Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
+  info("C Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
+  info("C Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
+  info("C Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
+  info("C Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
+  info("C Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
+  info("C Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
+  info("C Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
+  info("C Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   double coor_x[8] = {0.0, 8.0, 15.0, 24.0, 30.0, 40.0, 50.0, 60.0};
   double coor_y = 8.0;
   double t_value[8] = {1.000000, 1.000078, 0.002819, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
   double c_value[8] = {0.000000, -0.000078, 0.997181, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000};
+
+  bool success = true;
   for (int i = 0; i < 8; i++)
   {
-    if (!((t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-4) || 
-        !((c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-4))
-    {
-      printf("Failure!\n");
-      return ERROR_FAILURE;
-    }
+    if ((abs(t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) > 1E-4) || 
+        (abs(c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) > 1E-4))
+      success = false;
   }
-  printf("Success!\n");
-  return ERROR_SUCCESS;
+
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

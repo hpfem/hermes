@@ -121,47 +121,20 @@ int main(int argc, char* argv[])
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
     // Perform Newton's iteration.
-    int it = 1;
-    while (1)
-    {
-      // Obtain the number of degrees of freedom.
-      int ndof = Space::get_num_dofs(&space);
-
-      // Assemble the Jacobian matrix and residual vector.
-      dp.assemble(coeff_vec, matrix, rhs, false);
-
-      // Multiply the residual vector with -1 since the matrix 
-      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-      rhs->change_sign();
-      
-      // Calculate the l2-norm of residual vector.
-      double res_l2_norm = get_l2_norm(rhs);
-
-      // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-      // If l2 norm of the residual vector is within tolerance, or the maximum number 
-      // of iteration has been reached, then quit.
-      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-      // Solve the linear system.
-      if(!solver->solve())
-        error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-      
-      if (it >= NEWTON_MAX_ITER)
-        error ("Newton method did not converge.");
-
-      it++;
-    }
+    info("Solving on coarse mesh:");
+    bool verbose = true;
+    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solution.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
     // Update time.
     current_time += TAU;
+
+    // Show the new time level solution.
+    char title[100];
+    sprintf(title, "Solution, t = %g", current_time);
   } 
   while (current_time < T_FINAL);
 
@@ -179,21 +152,21 @@ int main(int argc, char* argv[])
   info("Coordinate (  6,   6) value = %lf", u_prev_time.get_pt_value(6.0, 6.0));
   info("Coordinate ( 10,  10) value = %lf", u_prev_time.get_pt_value(10.0, 10.0));
 
-
   double coor_x_y[6] = {-10.0, -6.0, -2.0, 2.0, 6.0, 10.0};
   double value[6] = {0.000000, 2.311376, 2.748304, 2.919943, 3.146120, 4.000000};
+  bool success = true;
   for (int i = 0; i < 6; i++)
   {
-    if ((value[i] - u_prev_time.get_pt_value(coor_x_y[i], coor_x_y[i])) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(value[i] - u_prev_time.get_pt_value(coor_x_y[i], coor_x_y[i])) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

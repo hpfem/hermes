@@ -108,20 +108,20 @@ int main(int argc, char* argv[])
   info("Coordinate ( 0.5, 0.5) value = %lf", sln.get_pt_value(0.5, 0.5));
   info("Coordinate ( 0.7, 0.7) value = %lf", sln.get_pt_value(0.7, 0.7));
 
-  double coor_xy[4] = {0.1, 0.3, 0.5, 0.7};
+  double coor_x_y[4] = {0.1, 0.3, 0.5, 0.7};
   double value[4] = {0.999885, 0.844340, 0.000000, 0.000000};
+  bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if ((value[i] - sln.get_pt_value(coor_xy[i], coor_xy[i])) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(value[i] - sln.get_pt_value(coor_x_y[i], coor_x_y[i])) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

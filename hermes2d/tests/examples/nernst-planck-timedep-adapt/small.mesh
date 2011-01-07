@@ -1,6 +1,6 @@
 h = 200e-6
 hh = h/2
-w = 1e-3
+w = 1e-4
 
 vertices = 
 {

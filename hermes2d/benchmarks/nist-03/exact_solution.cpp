@@ -172,7 +172,6 @@ double dvdxdvdy(double x, double y)
 static double u_fn(double x, double y) 
 {
   return D * r(x, y) * u_r(x, y);
-//	  (u_F * cos(lambda * get_angle(y, x)) - lambda * cos((lambda - 2) * get_angle(y, x)));
 }
 
 static double u_fndd(double x, double y, double& dx, double& dy)
@@ -191,7 +190,7 @@ static double u_fndd(double x, double y, double& dx, double& dy)
 // Exact solution v(x,y) and its derivatives.
 static double v_fn(double x, double y)
 {
-  return D * r(x, y) * (v_F * sin(lambda * get_angle(y, x)) + lambda * sin((lambda - 2) * get_angle(y, x)));
+  return D * r(x, y) * v_r(x, y);
 }
 
 static double v_fndd(double x, double y, double& dx, double& dy)
