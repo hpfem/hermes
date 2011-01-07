@@ -4,6 +4,7 @@ from libcpp.pair cimport pair
 
 cimport schroedinger_defs
 from hermes2d.hermes2d cimport Solution
+from hermes2d.hermes_common.matrix cimport Matrix
 
 cdef class Potential:
     cdef schroedinger_defs.Potential *thisptr
@@ -25,10 +26,11 @@ cdef class PotentialHarmonicOscillator(Potential):
         s.set_omega(omega)
 
 cdef class ModuleSchroedinger:
-    cdef schroedinger_defs.RCP[schroedinger_defs.ModuleSchroedinger] thisptr
+    cdef schroedinger_defs.RCP[schroedinger_defs.ModuleSchroedinger] *thisptr
 
     def __init__(self):
-        self.thisptr = rcp(new schroedinger_defs.ModuleSchroedinger())
+        #self.thisptr = rcp(new schroedinger_defs.ModuleSchroedinger())
+        pass
 
     def set_potential(self, Potential potential):
         self.thisptr.set_potential(potential.thisptr)
