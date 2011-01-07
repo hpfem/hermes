@@ -160,6 +160,7 @@ enum ProjNormType
   
   inline double sqr(cplx x)   { return std::norm(x); }
   inline double magn(cplx x)  { return std::abs(x); }
+  inline double abs(cplx x)   { return std::abs(x); }
   inline cplx conj(cplx a)    { return std::conj(a); }
   
   #ifdef WITH_BLAS         // always true for Hermes3D
@@ -322,6 +323,7 @@ const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 inline int sqr(int x) { return x*x; }
 inline double sqr(double x) { return x*x; }
 inline double magn(double x) { return fabs(x); }
+inline double abs(double x) { return fabs(x); }
 inline double conj(double a) {  return a; }
 
 #ifdef WITH_BLAS         // always true for Hermes3D
