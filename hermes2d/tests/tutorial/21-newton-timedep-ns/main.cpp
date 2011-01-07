@@ -181,48 +181,23 @@ int main(int argc, char* argv[])
     if (NEWTON) 
     {
       // Perform Newton's iteration.
-      int it = 1;
-      while (1)
-      {
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
+      info("Solving nonlinear problem:");
+      bool verbose = true;
+      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        rhs->change_sign();
-        
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve())
-          error ("Matrix solver failed.\n");
-
-          // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-        
-        if (it >= NEWTON_MAX_ITER)
-          error ("Newton method did not converge.");
-
-        it++;
-      }
-  
       // Update previous time level solutions.
-      Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                                    Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
     else {
       // Linear solve.
       info("Assembling and solving linear problem.");
       dp.assemble(matrix, rhs, false);
       if(solver->solve()) 
-        Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+        Solution::vector_to_solutions(solver->get_solution(), 
+                  Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
+                  Hermes::Tuple<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       else 
         error ("Matrix solver failed.\n");
     }
