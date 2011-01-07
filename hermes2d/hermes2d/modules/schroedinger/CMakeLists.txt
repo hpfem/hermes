@@ -1,3 +1,4 @@
+set(CYTHON_INCLUDE_DIRECTORIES . -I ${PROJECT_BINARY_DIR}/hermes2d/hermes_common)
 CYTHON_ADD_MODULE_PYX(schroedinger)
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR}/modules/schroedinger)
