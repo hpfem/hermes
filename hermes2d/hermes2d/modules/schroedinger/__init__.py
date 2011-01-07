@@ -1,1 +1,1 @@
-from schroedinger import ModuleSchroedinger
+from schroedinger import ModuleSchroedinger, PotentialHarmonicOscillator

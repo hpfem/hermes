@@ -1,5 +1,8 @@
-from hermes2d.modules.schroedinger import ModuleSchroedinger
-from hermes2d.hermes2d import Linearizer
+from hermes2d.modules.schroedinger import (ModuleSchroedinger,
+        PotentialHarmonicOscillator)
 
-def test_basic():
-    e = ModuleSchroedinger()
+def test_oscillator():
+    m = ModuleSchroedinger()
+    p = PotentialHarmonicOscillator()
+    p.set_omega(5)
+    m.set_potential(p)

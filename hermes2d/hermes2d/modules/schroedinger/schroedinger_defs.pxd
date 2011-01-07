@@ -4,6 +4,11 @@ from libcpp.pair cimport pair
 
 from hermes2d.hermes2d_defs cimport Solution
 
+cdef extern from "hermes2d.h":
+
+    cdef cppclass RCP[T]:
+        pass
+
 cdef extern from "schroedinger.h":
 
     cdef cppclass Potential:
@@ -17,5 +22,5 @@ cdef extern from "schroedinger.h":
     cdef cppclass ModuleSchroedinger:
         ModuleSchroedinger()
         #~ModuleSchroedinger()
-        #void set_potential(const RCP<Potential> &potential)
+        void set_potential(RCP[Potential] &potential)
         #void assemble(const Ptr<SparseMatrix> &A, const Ptr<SparseMatrix> &B)
