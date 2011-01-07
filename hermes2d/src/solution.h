@@ -58,6 +58,9 @@ public:
   /// the necessary iterators in the templated class do not work with GCC.
   virtual void handle_overflow_idx();
 
+  /// See Transformable::push_transform.
+	virtual void push_transform(int son);
+
 protected:
 
   int mode;
@@ -121,9 +124,6 @@ public:
   /// Sets solution equal to Dirichlet lift only, solution vector = 0
   void set_dirichlet_lift(Space* space, PrecalcShapeset* pss = NULL);
   
-  /// See Transformable::push_transform.
-	virtual void push_transform(int son);
-
   /// Enables or disables transformation of the solution derivatives (H1 case)
   /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
   /// H2D_FN_VAL_0 and H2D_FN_VAL_1 will or will not be returned premultiplied by the reference

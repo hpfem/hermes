@@ -76,6 +76,12 @@ void MeshFunction::handle_overflow_idx()
   overflow_nodes = nodes;
 }
 
+void MeshFunction::push_transform(int son)
+{
+  Transformable::push_transform(son);
+  update_nodes_ptr();
+}
+
 //// Quad2DCheb ////////////////////////////////////////////////////////////////////////////////////
 
 static double3* cheb_tab_tri[11];
@@ -1438,10 +1444,4 @@ scalar Solution::get_pt_value(double x, double y, int item)
 
   warn("Point (%g, %g) does not lie in any element.", x, y);
   return NAN;
-}
-
-void Solution::push_transform(int son)
-{
-  Transformable::push_transform(son);
-  update_nodes_ptr();
 }
