@@ -1,3 +1,0 @@
-#cmakedefine TRACING
-#cmakedefine DEBUG
-
