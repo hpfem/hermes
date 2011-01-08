@@ -17,6 +17,10 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_WARN
+
+
 #include "h3d_common.h"
 #include "discrete_problem.h"
 #include "traverse.h"
@@ -1127,3 +1131,94 @@ Space* construct_refined_space(Space* coarse, int order_increase, int refinement
   ref_space->copy_orders(*coarse, order_increase);
   return ref_space;
 }
+
+// Perform Newton's iteration.
+bool HERMES_RESIDUAL_AS_VECTOR = false;
+bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+                  Vector* rhs, double newton_tol, int newton_max_iter, bool verbose,
+                  double damping_coeff, double max_allowed_residual_norm)
+{
+  info("Solve newton");
+  // Prepare solutions for measuring residual norm.
+  int num_spaces = dp->get_num_spaces();
+
+  Hermes::Tuple<Solution*> solutions;
+  Hermes::Tuple<double> dir_lift_false;
+  for (int i=0; i < num_spaces; i++) {
+    solutions.push_back(new Solution(dp->get_space(i)->get_mesh()));
+    dir_lift_false.push_back(0.0);      // No Dirichlet lifts will be considered.
+  }
+
+  // The Newton's loop.
+  double residual_norm;
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = dp->get_num_dofs();
+    info("Newton iteration beginning, NDOFs %i", ndof);
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble(coeff_vec, matrix, rhs, false);
+    // Multiply the residual vector with -1 since the matrix
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+
+    // Measure the residual norm.
+
+
+    scalar* rhs_coeffs = new scalar[rhs->length()];
+    rhs->extract(rhs_coeffs);
+    Solution::vector_to_solutions(rhs_coeffs, dp->get_spaces(), solutions, dir_lift_false);
+    if (HERMES_RESIDUAL_AS_VECTOR) {
+          // Calculate the l2-norm of residual vector.
+          // residual_norm = get_l2_norm(rhs);
+          // FIXME what's that?
+    } else {
+
+    info("vector_to_solutions completed");
+      double norm_squares;
+      for (unsigned int i = 0; i < solutions.size(); i++) {
+        double norm = h1_norm(solutions[i]);
+        norm_squares += norm * norm;
+        residual_norm = sqrt(norm_squares);
+      }
+    }
+
+    // Info for the user.
+    if (verbose) {
+      info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
+    }
+
+    // If maximum allowed residual norm is exceeded, fail.
+    if (residual_norm > max_allowed_residual_norm) {
+      if (verbose) {
+        info("Current residual norm: %g", residual_norm);
+        info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
+        info("Newton solve not successful, returning false.");
+      }
+      return false;
+    }
+
+    // If residual norm is within tolerance, or the maximum number
+    // of iteration has been reached, then quit.
+    if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
+
+    // Solve the linear system.
+    if(!solver->solve()) error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += damping_coeff * solver->get_solution()[i];
+
+    it++;
+  }
+
+  if (it >= newton_max_iter) {
+    if (verbose) {
+      info("Maximum allowed number of Newton iterations exceeded, returning false.");
+    }
+    return false;
+  }
+
+  return true;
+}
+

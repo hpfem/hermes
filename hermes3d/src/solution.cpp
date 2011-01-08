@@ -86,7 +86,6 @@ void MeshFunction::set_active_element(Element *e) {
 //  'n' is the polynomial degree.
 //
 
-
 Solution::Solution(Mesh *mesh) : MeshFunction(mesh) {
 	_F_
 

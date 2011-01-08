@@ -23,6 +23,7 @@
 #include "h3d_common.h"
 #include "weakform.h"
 #include "tuple.h"
+#include "norm.h"
 #include "../../hermes_common/judyarray.h"
 #include "../../hermes_common/solver/solver.h"
 
@@ -56,6 +57,11 @@ public:
         // does not need the coeff_vector.
 	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
                       bool rhsonly = false);
+  // Get the number of spaces.
+  int get_num_spaces() {return this->spaces.size();}
+
+  // Get all spaces as a Hermes::Tuple.
+  Hermes::Tuple<Space *> get_spaces() {return this->spaces;}
 
         // Get the number of unknowns.
 	int get_num_dofs();
@@ -131,5 +137,10 @@ protected:
 
 HERMES_API Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase, int refinement);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
+
+HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+           Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
+                             double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6);
+
 
 #endif /* _DISCRETE_PROBLEM_H_ */
