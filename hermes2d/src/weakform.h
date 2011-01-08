@@ -211,7 +211,7 @@ public:
   };
 
   void get_stages(Hermes::Tuple< Space* > spaces, Hermes::Tuple< Solution* >& u_ext, 
-                  Hermes::Tuple< WeakForm::Stage >& stages, bool rhsonly);
+                  std::vector< WeakForm::Stage >& stages, bool rhsonly);
   bool** get_blocks();
 
   bool is_in_area(int marker, int area) const
@@ -228,7 +228,7 @@ public:
 
 private:
 
-  Stage* find_stage(Hermes::Tuple<WeakForm::Stage>& stages, int ii, int jj,
+  Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                     Mesh* m1, Mesh* m2, 
                     Hermes::Tuple<MeshFunction*>& ext, Hermes::Tuple<Solution*>& u_ext);
 

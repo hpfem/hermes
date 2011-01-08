@@ -22,7 +22,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-const double TAU = 0.2;                           // Time step.
+const double tau = 0.2;                           // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -87,23 +87,23 @@ int main(int argc, char* argv[])
 
   /*
   // Implicit Euler.
-  ButcherTable BT(1);
-  BT.set_A(0, 0, 1.);
-  BT.set_B(0, 1.);
-  BT.set_C(0, 1.);
+  ButcherTable bt(1);
+  bt.set_A(0, 0, 1.);
+  bt.set_B(0, 1.);
+  bt.set_C(0, 1.);
   */
  
   // SDIRK-22 method, see page 244 in Butcher's book.
-  ButcherTable BT(2);
+  ButcherTable bt(2);
   double gamma = 1./sqrt(2.);
-  BT.set_A(0, 0, 1. - gamma);
-  BT.set_A(0, 1, 0.);
-  BT.set_A(1, 0, gamma);
-  BT.set_A(1, 1, 1. - gamma);
-  BT.set_B(0, gamma);
-  BT.set_B(1, 1. - gamma);
-  BT.set_C(0, 1. - gamma);
-  BT.set_C(1, 1.);
+  bt.set_A(0, 0, 1. - gamma);
+  bt.set_A(0, 1, 0.);
+  bt.set_A(1, 0, gamma);
+  bt.set_A(1, 1, 1. - gamma);
+  bt.set_B(0, gamma);
+  bt.set_B(1, 1. - gamma);
+  bt.set_C(0, 1. - gamma);
+  bt.set_C(1, 1.);
 
   // Load the mesh.
   Mesh mesh;
@@ -156,9 +156,9 @@ int main(int argc, char* argv[])
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
     // Perform one time step according to the Butcher's table.
-    info("Performing time step using the Butcher's table.");
+    info("Performing one Runge-Kutta time step using the Butcher's table.");
     bool verbose = true;
-    if (!rk_time_step(&BT, TAU, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(&bt, tau, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     Solution::vector_to_solution(coeff_vec, space, &u_prev_time);
 
     // Update time.
-    current_time += TAU;
+    current_time += tau;
 
     // Show the new time level solution.
     char title[100];

@@ -217,11 +217,11 @@ protected:
   PrecalcShapeset** pss;    // This is different from H3D.
   int num_user_pss;         // This is different from H3D.
 
-  ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext);
-  ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge);
-  ExtData<Ord>* init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
-  ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order);
-  ExtData<scalar>* init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, int edge);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs);
+  ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, RefMap *rm, const int order);
+  ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 
   // Caching transformed values for element

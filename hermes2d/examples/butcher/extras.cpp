@@ -6,7 +6,7 @@ bool HERMES_RESIDUAL_AS_VECTOR = false;
 bool rk_time_step(ButcherTable* bt, double time_step,
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver, 
                   double newton_tol, int newton_max_iter, bool verbose = true, 
-                  double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6)
+                  double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6)
 {
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -189,6 +189,7 @@ bool rk_time_step(ButcherTable* bt, double time_step,
   delete matrix;
   delete rhs;
   delete solver;
-
+  for (int i=0; i<num_stages; i++) delete stage_spaces[i];
+  
   return true;
 }

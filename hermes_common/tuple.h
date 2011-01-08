@@ -67,9 +67,14 @@ public:
       this->_v.clear();
   }
 
-  unsigned int size() {
+  unsigned int size() const {
       return this->_v.size();
   }
+
+  T& front() {
+      return this->_v.front();
+  }
+
 
   T& operator[](const int index) {
       return this->_v[index];

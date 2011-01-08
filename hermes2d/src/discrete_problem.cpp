@@ -949,7 +949,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Initialize integration order for external functions
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -963,7 +963,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext
 }
 
 // Initialize external functions (obtain values, derivatives,...)
-ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext, RefMap *rm, const int order)
+ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, RefMap *rm, const int order)
 {
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
@@ -980,7 +980,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext,
 }
 
 // Initialize integration order on a given edge for external functions
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, int edge)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, int edge)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -995,7 +995,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext
 
 // Initialize discontinuous external functions (obtain values, derivatives,... on both sides of the 
 // supplied NeighborSearch's active edge).
-ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
+ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs)
 {  
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
   for(unsigned int j = 0; j < ext.size(); j++)
@@ -1009,7 +1009,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(std::vector<MeshFunction *> &ext,
 }
 
 // Initialize integration order for discontinuous external functions.
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(std::vector<MeshFunction *> &ext, NeighborSearch* nbs)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs)
 { 
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
   for (unsigned int j = 0; j < ext.size(); j++)

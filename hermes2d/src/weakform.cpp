@@ -279,7 +279,7 @@ void WeakForm::set_ext_fns(void* fn, Hermes::Tuple<MeshFunction*>ext)
 /// This function is identical in H2D and H3D.
 ///
 void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *>& u_ext, 
-			  Hermes::Tuple<WeakForm::Stage>& stages, bool rhsonly)
+			  std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
   unsigned i;
@@ -364,7 +364,7 @@ void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution 
 /// stage can be found, a new one is created and returned.
 /// This function is the same in H2D and H3D.
 ///
-WeakForm::Stage* WeakForm::find_stage(Hermes::Tuple<WeakForm::Stage>& stages, int ii, int jj,
+WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2, 
                                       Hermes::Tuple<MeshFunction*>& ext, Hermes::Tuple<Solution*>& u_ext)
 {
