@@ -155,7 +155,7 @@ Scalar dg_interface_biform(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u
     Real b = fn_b<Real>(e->x[i], e->y[i]);
     Real beta_dot_n = dot2<Real>(a, b, e->nx[i], e->ny[i]);
     result += wt[i] * AVG(u) * dot2<Real>(a, b, JUMP(v));
-    result += wt[i] * theta * abs(beta_dot_n) * dot2<Real>(JUMP(u), JUMP(v));
+    result += wt[i] * theta * magn(beta_dot_n) * dot2<Real>(JUMP(u), JUMP(v));
   }
   
   return result;

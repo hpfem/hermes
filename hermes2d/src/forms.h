@@ -78,6 +78,7 @@ inline Ord sqrt(const Ord &a) { return a; }
 inline Ord sqr(const Ord &a) { return Ord(2 * a.get_order()); }
 inline Ord conj(const Ord &a) { return a; }
 inline Ord abs(const Ord &a) { return a; }
+inline Ord magn(const Ord &a) { return a; }
 
 inline Ord atan2(const Ord &a, const Ord &b) { return Ord(a.get_max_order()); }
 inline Ord atan(const Ord &a) { return Ord(a.get_max_order()); }
