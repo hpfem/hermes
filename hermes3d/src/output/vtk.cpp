@@ -60,14 +60,16 @@ class HERMES_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
-		if (!tables.exists(order.get_idx())) calculate_view_points(order);
-		return tables[order.get_idx()];
+		if ((*tables)[order.get_idx()] == NULL) 
+      calculate_view_points(order);
+		return (*tables)[order.get_idx()];
 	}
 
 	virtual int get_num_points(const Ord3 &order) {
 		_F_
-		if (!np.exists(order.get_idx())) calculate_view_points(order);
-		return np[order.get_idx()];
+		if ((*np)[order.get_idx()] == NULL) 
+      calculate_view_points(order);
+		return (*np)[order.get_idx()];
 	}
 
 protected:
@@ -101,8 +103,8 @@ OutputQuadTetra::~OutputQuadTetra()
 {
 	_F_
 #ifdef WITH_HEX
-	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
-		delete[] tables[i];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
 #endif
 }
 
@@ -111,16 +113,18 @@ void OutputQuadTetra::calculate_view_points(Ord3 order)
 	_F_
 #ifdef WITH_TETRA
 	int o = order.get_idx();
-	np[o] = Tetra::NUM_VERTICES;
-	tables[o] = new QuadPt3D[np[o]];
+	(*np)[o] = Tetra::NUM_VERTICES;
+  if((*tables)[o] != NULL)
+    delete [] (*tables)[o];
+	(*tables)[o] = new QuadPt3D[(*np)[o]];
 
 	const Point3D *ref_vtcs = RefTetra::get_vertices();
 
 	for (int i = 0; i < Tetra::NUM_VERTICES; i++) {
-		tables[o][i].x = ref_vtcs[i].x;
-		tables[o][i].y = ref_vtcs[i].y;
-		tables[o][i].z = ref_vtcs[i].z;
-		tables[o][i].w = 1.0;	// not used
+		(*tables)[o][i].x = ref_vtcs[i].x;
+		(*tables)[o][i].y = ref_vtcs[i].y;
+		(*tables)[o][i].z = ref_vtcs[i].z;
+		(*tables)[o][i].w = 1.0;	// not used
 	}
 #endif
 }
@@ -149,8 +153,8 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
-		delete[] tables[i];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
 #endif
 }
 
@@ -158,9 +162,11 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 	_F_
 #ifdef WITH_HEX
 	int o = order.get_idx();
-	np[o] = (divs[order.x] + 1) * (divs[order.y] + 1) * (divs[order.z] + 1);
+	(*np)[o] = (divs[order.x] + 1) * (divs[order.y] + 1) * (divs[order.z] + 1);
 
-	tables[o] = new QuadPt3D[np[o]];
+  if((*tables)[o] != NULL)
+    delete [] (*tables)[o];
+	(*tables)[o] = new QuadPt3D[(*np)[o]];
 	double step_x, step_y, step_z;
 	step_x = 2.0 / divs[order.x];
 	step_y = 2.0 / divs[order.y];
@@ -170,11 +176,11 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 	for (int k = 0; k < divs[order.z] + 1; k++) {
 		for (int l = 0; l < divs[order.y] + 1; l++) {
 			for (int m = 0; m < divs[order.x] + 1; m++, n++) {
-				assert(n < np[o]);
-				tables[o][n].x = (step_x * m) - 1;
-				tables[o][n].y = (step_y * l) - 1;
-				tables[o][n].z = (step_z * k) - 1;
-				tables[o][n].w = 1.0;   // not used
+				assert(n < (*np)[o]);
+				(*tables)[o][n].x = (step_x * m) - 1;
+				(*tables)[o][n].y = (step_y * l) - 1;
+				(*tables)[o][n].z = (step_z * k) - 1;
+				(*tables)[o][n].w = 1.0;   // not used
 			}
 		}
 	}

@@ -179,16 +179,31 @@ protected:
 /// @ingroup quadratures
 class HERMES_API Quad3D {
 public:
-	virtual ~Quad3D() { }
+  Quad3D() {
+    tables = new std::map<unsigned int, QuadPt3D *>;
+    edge_tables = new std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>;
+    face_tables = new std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>;
+	  np = new std::map<unsigned int, int>;
+	  np_edge = new std::map<unsigned int, int>;
+	  np_face = new std::map<unsigned int, int>;
+  }
+	virtual ~Quad3D() {
+    delete tables;
+    delete edge_tables;
+    delete face_tables;
+	  delete np;
+	  delete np_edge;
+	  delete np_face;
+  }
 
-	virtual QuadPt3D *get_points(const Ord3 &order) { CHECK_MODE; return tables[order.get_idx()]; }
-	virtual int get_num_points(const Ord3 &order) { CHECK_MODE; return np[order.get_idx()]; }
+	virtual QuadPt3D *get_points(const Ord3 &order) { CHECK_MODE; return (*tables)[order.get_idx()]; }
+	virtual int get_num_points(const Ord3 &order) { CHECK_MODE; return (*np)[order.get_idx()]; }
 
-	virtual QuadPt3D *get_edge_points(int edge, const Ord1 &order) { return edge_tables[edge][order]; }
-	int get_edge_num_points(int edge, const Ord1 &order) const { return np_edge[order]; }
+	virtual QuadPt3D *get_edge_points(int edge, const Ord1 &order) { return (*(*edge_tables)[edge])[order]; }
+  int get_edge_num_points(int edge, const Ord1 &order) const { return (*np_edge).at(order); }
 
-	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) { return face_tables[face][order.get_idx()]; }
-	int get_face_num_points(int face, const Ord2 &order) const { return np_face[order.get_idx()]; }
+	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) { return (*(*face_tables)[face])[order.get_idx()]; }
+  int get_face_num_points(int face, const Ord2 &order) const { return (*np_face).at(order.get_idx()); }
 
 	virtual QuadPt3D *get_vertex_points() { return vertex_table; }
 	int get_vertex_num_points() const { return np_vertex; }
@@ -207,13 +222,13 @@ protected:
 	Ord2 max_face_order;
 	Ord3 max_order;
 
-	JudyArray<QuadPt3D *> tables;
-	JudyArray<QuadPt3D *> *edge_tables;
-	JudyArray<QuadPt3D *> *face_tables;
+	std::map<unsigned int, QuadPt3D *>* tables;
+	std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*> *edge_tables;
+	std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*> *face_tables;
 	QuadPt3D *vertex_table;
-	JudyArray<int> np;
-	JudyArray<int> np_edge;
-	JudyArray<int> np_face;
+	std::map<unsigned int, int> *np;
+	std::map<unsigned int, int> *np_edge;
+	std::map<unsigned int, int> *np_face;
 	int np_vertex;
 };
 

@@ -991,10 +991,8 @@ QuadStdTri::~QuadStdTri() {
 	for (int edge = 0; edge < Tri::NUM_EDGES; edge++) {
 		for (int order = 0; order <= H3D_MAX_QUAD_ORDER; order++)
 			delete [] edge_tables[edge][order];
-
 		delete [] edge_tables[edge];
 	}
-
 	delete [] edge_tables;
 }
 
@@ -4165,7 +4163,6 @@ QuadStdTetra::QuadStdTetra() {
 	_F_
 #ifdef WITH_TETRA
 	mode = HERMES_MODE_TET;
-
 	max_order = H3D_MAX_QUAD_ORDER_TETRA;
 	max_edge_order = H3D_MAX_QUAD_ORDER_TETRA;
 	max_face_order = H3D_MAX_QUAD_ORDER_TRI;
@@ -4173,15 +4170,14 @@ QuadStdTetra::QuadStdTetra() {
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER_TETRA; i++) {
 		Ord3 o(i);
 		unsigned int oi = o.get_idx();
-		tables[oi] = std_tables_3d_tet[i];
-		np[oi] = std_np_3d_tet[i];
+    tables->insert(std::make_pair(oi, std_tables_3d_tet[i]));
+		(*np)[oi] = std_np_3d_tet[i];
 	}
 
 	const Point3D *ref_vtcs = RefTetra::get_vertices();
 	assert(ref_vtcs != NULL);
 
 	// edge points
-	edge_tables = new JudyArray<QuadPt3D *>[Tetra::NUM_EDGES];
 	for (int iedge = 0; iedge < Tetra::NUM_EDGES; iedge++) {
 		const int *tet_edge_vtcs = RefTetra::get_edge_vertices(iedge);
 		assert(tet_edge_vtcs != NULL);
@@ -4190,63 +4186,70 @@ QuadStdTetra::QuadStdTetra() {
 			Ord3 o(order);
 			unsigned int oi = o.get_idx();
 			int num = std_np_1d[oi];
-			np_edge[oi] = num;
-			edge_tables[iedge][oi] = new QuadPt3D[num];
-			MEM_CHECK(edge_tables[iedge][oi]);
+			(*np_edge)[oi] = num;
+
+      if((*edge_tables)[iedge] == NULL)
+        (*edge_tables)[iedge] = new std::map<unsigned int, QuadPt3D *>;
+      if((*(*edge_tables)[iedge])[oi] != NULL)
+        delete (*(*edge_tables)[iedge])[oi];
+      (*(*edge_tables)[iedge])[oi] = new QuadPt3D[num];
+
 			QuadPt1D *pts1d = std_tables_1d[oi];
 			for (int p = 0; p < num; p++) {
 				double t = (pts1d[p].x + 1.0) * 0.5;
 				double s = 1.0 - t;
-				edge_tables[iedge][oi][p].x = ref_vtcs[tet_edge_vtcs[0]].x * s + ref_vtcs[tet_edge_vtcs[1]].x * t;
-				edge_tables[iedge][oi][p].y = ref_vtcs[tet_edge_vtcs[0]].y * s + ref_vtcs[tet_edge_vtcs[1]].y * t;
-				edge_tables[iedge][oi][p].z = ref_vtcs[tet_edge_vtcs[0]].z * s + ref_vtcs[tet_edge_vtcs[1]].z * t;
-				edge_tables[iedge][oi][p].w = pts1d[p].w;
+				(*(*edge_tables)[iedge])[oi][p].x = ref_vtcs[tet_edge_vtcs[0]].x * s + ref_vtcs[tet_edge_vtcs[1]].x * t;
+				(*(*edge_tables)[iedge])[oi][p].y = ref_vtcs[tet_edge_vtcs[0]].y * s + ref_vtcs[tet_edge_vtcs[1]].y * t;
+				(*(*edge_tables)[iedge])[oi][p].z = ref_vtcs[tet_edge_vtcs[0]].z * s + ref_vtcs[tet_edge_vtcs[1]].z * t;
+				(*(*edge_tables)[iedge])[oi][p].w = pts1d[p].w;
 			}
 		}
 	}
 
 
 	// face points
-	face_tables = new JudyArray<QuadPt3D *>[Tetra::NUM_FACES];
 	for (int order = 0; order <= quad_std_tri.get_max_order(); order++) {
 		Ord3 o(order);
 		unsigned int oi = o.get_idx();
 		int num = quad_std_tri.get_num_points(order);
-		np_face[oi] = num;
+		(*np_face)[oi] = num;
 
-		face_tables[0][oi] = new QuadPt3D[num]; MEM_CHECK(face_tables[0][oi]);
-		face_tables[1][oi] = new QuadPt3D[num]; MEM_CHECK(face_tables[1][oi]);
-		face_tables[2][oi] = new QuadPt3D[num]; MEM_CHECK(face_tables[2][oi]);
-		face_tables[3][oi] = new QuadPt3D[num]; MEM_CHECK(face_tables[3][oi]);
+    for(int i = 0; i < 4; i++) {
+      if((*face_tables)[i] == NULL)
+        (*face_tables)[i] = new std::map<unsigned int, QuadPt3D *>;
+      if((*(*face_tables)[i])[oi] != NULL)
+        delete (*(*face_tables)[i])[oi];
+      (*(*face_tables)[i])[oi] = new QuadPt3D[num];
+    }
 
 		QuadPt2D *pts2d = quad_std_tri.get_points(order);
 		for (int p = 0; p < num; p++) {
 			// face 0
-			face_tables[0][oi][p].x =  pts2d[p].x;
-			face_tables[0][oi][p].y = -1;
-			face_tables[0][oi][p].z =  pts2d[p].y;
-			face_tables[0][oi][p].w =  pts2d[p].w;
+			(*(*face_tables)[0])[oi][p].x =  pts2d[p].x;
+			(*(*face_tables)[0])[oi][p].y = -1;
+			(*(*face_tables)[0])[oi][p].z =  pts2d[p].y;
+			(*(*face_tables)[0])[oi][p].w =  pts2d[p].w;
 
 			// face 1
-			face_tables[1][oi][p].x =
+			(*(*face_tables)[1])[oi][p].x =
 				 lambda2(pts2d[p].x, pts2d[p].y, -1.0) - lambda1(pts2d[p].x, pts2d[p].y, -1.0) - lambda0(pts2d[p].x, pts2d[p].y, -1.0);
-			face_tables[1][oi][p].y =
+			(*(*face_tables)[1])[oi][p].y =
 				- lambda2(pts2d[p].x, pts2d[p].y, -1.0) + lambda1(pts2d[p].x, pts2d[p].y, -1.0) - lambda0(pts2d[p].x, pts2d[p].y, -1.0);
-			face_tables[1][oi][p].z =
+			(*(*face_tables)[1])[oi][p].z =
 				- lambda2(pts2d[p].x, pts2d[p].y, -1.0) - lambda1(pts2d[p].x, pts2d[p].y, -1.0) + lambda0(pts2d[p].x, pts2d[p].y, -1.0);
-			face_tables[1][oi][p].w =  sqrt(3.0) * pts2d[p].w;
+			(*(*face_tables)[1])[oi][p].w =  sqrt(3.0) * pts2d[p].w;
 
 			// face 2
-			face_tables[2][oi][p].x = -1;
-			face_tables[2][oi][p].y =  pts2d[p].x;
-			face_tables[2][oi][p].z =  pts2d[p].y;
-			face_tables[2][oi][p].w =  pts2d[p].w;
+			(*(*face_tables)[2])[oi][p].x = -1;
+			(*(*face_tables)[2])[oi][p].y =  pts2d[p].x;
+			(*(*face_tables)[2])[oi][p].z =  pts2d[p].y;
+			(*(*face_tables)[2])[oi][p].w =  pts2d[p].w;
 
 			// face 3
-			face_tables[3][oi][p].x =  pts2d[p].x;
-			face_tables[3][oi][p].y =  pts2d[p].y;
-			face_tables[3][oi][p].z = -1;
-			face_tables[3][oi][p].w =  pts2d[p].w;
+			(*(*face_tables)[3])[oi][p].x =  pts2d[p].x;
+			(*(*face_tables)[3])[oi][p].y =  pts2d[p].y;
+			(*(*face_tables)[3])[oi][p].z = -1;
+			(*(*face_tables)[3])[oi][p].w =  pts2d[p].w;
 		}
 
 	}
@@ -4270,19 +4273,19 @@ QuadStdTetra::~QuadStdTetra() {
 	_F_
 #ifdef WITH_TETRA
 	// face
-	for (int iface = 0; iface < Tetra::NUM_FACES; iface++) {
-		for (unsigned int idx = face_tables[iface].first(); idx != INVALID_IDX; idx = face_tables[iface].next(idx))
-			delete [] face_tables[iface][idx];
+	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*face_tables).begin(); it != (*face_tables).end(); it++) {
+		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
 	}
-	delete [] face_tables;
 	// edge
-	for (int iedge = 0; iedge < Tetra::NUM_EDGES; iedge++) {
-		for (unsigned int idx = edge_tables[iedge].first(); idx != INVALID_IDX; idx = edge_tables[iedge].next(idx))
-			delete [] edge_tables[iedge][idx];
+	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*edge_tables).begin(); it != (*edge_tables).end(); it++) {
+		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
 	}
-	delete [] edge_tables;
-
-	delete [] vertex_table;
+  if(vertex_table != NULL)
+	  delete [] vertex_table;
 #endif
 }
 
@@ -4302,39 +4305,41 @@ QuadStdHex::QuadStdHex() {
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++)
 			for (int k = 0; k <= H3D_MAX_QUAD_ORDER; k++) {
 				Ord3 m(i, j, k);
-				np[m.get_idx()] = std_np_1d[i] * std_np_1d[j] * std_np_1d[k];
+				(*np)[m.get_idx()] = std_np_1d[i] * std_np_1d[j] * std_np_1d[k];
 			}
 
 	// faces
-	face_tables = new JudyArray<QuadPt3D *>[Hex::NUM_FACES];
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER; i++)
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++) {
 			Ord2 m(i, j);
-			np_face[m.get_idx()] = std_np_1d[i] * std_np_1d[j];
+			(*np_face)[m.get_idx()] = std_np_1d[i] * std_np_1d[j];
 //			if (i ==24 && j==24) printf("AAA = %d\n", m.get_idx());
 		}
 
 	// edges
 	for (int order = 0; order <= H3D_MAX_QUAD_ORDER; order++)
-		np_edge[order] = std_np_1d[order];
+		(*np_edge)[order] = std_np_1d[order];
 
 	const Point3D *ref_vtcs = RefHex::get_vertices();
 	assert(ref_vtcs != NULL);
-	edge_tables = new JudyArray<QuadPt3D *>[Hex::NUM_EDGES];
+
 	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
 		const int *hex_edge_vtcs = RefHex::get_edge_vertices(iedge);
 		assert(hex_edge_vtcs != NULL);
 		for (int order = 0; order <= H3D_MAX_QUAD_ORDER; order++) {
-			edge_tables[iedge][order] = new QuadPt3D[np_edge[order]];
-			MEM_CHECK(edge_tables[iedge][order]);
+      if((*edge_tables)[iedge] == NULL)
+        (*edge_tables)[iedge] = new std::map<unsigned int, QuadPt3D *>;
+      if((*(*edge_tables)[iedge])[order] != NULL)
+        delete (*(*edge_tables)[iedge])[order];
+      (*(*edge_tables)[iedge])[order] = new QuadPt3D[(*np_edge)[order]];
 			QuadPt1D *pts1d = std_tables_1d[order];
-			for (int p = 0; p < np_edge[order]; p++) {
+			for (int p = 0; p < (*np_edge)[order]; p++) {
 				double t = (pts1d[p].x + 1.0) * 0.5;
 				double s = 1.0 - t;
-				edge_tables[iedge][order][p].x = ref_vtcs[hex_edge_vtcs[0]].x * s + ref_vtcs[hex_edge_vtcs[1]].x * t;
-				edge_tables[iedge][order][p].y = ref_vtcs[hex_edge_vtcs[0]].y * s + ref_vtcs[hex_edge_vtcs[1]].y * t;
-				edge_tables[iedge][order][p].z = ref_vtcs[hex_edge_vtcs[0]].z * s + ref_vtcs[hex_edge_vtcs[1]].z * t;
-				edge_tables[iedge][order][p].w = pts1d[p].w;
+				(*(*edge_tables)[iedge])[order][p].x = ref_vtcs[hex_edge_vtcs[0]].x * s + ref_vtcs[hex_edge_vtcs[1]].x * t;
+				(*(*edge_tables)[iedge])[order][p].y = ref_vtcs[hex_edge_vtcs[0]].y * s + ref_vtcs[hex_edge_vtcs[1]].y * t;
+				(*(*edge_tables)[iedge])[order][p].z = ref_vtcs[hex_edge_vtcs[0]].z * s + ref_vtcs[hex_edge_vtcs[1]].z * t;
+				(*(*edge_tables)[iedge])[order][p].w = pts1d[p].w;
 			}
 		}
 	}
@@ -4357,22 +4362,22 @@ QuadStdHex::~QuadStdHex() {
 	_F_
 #ifdef WITH_HEX
 	// element
-	for (unsigned int idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
-		delete [] tables[idx];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
 	// face
-	for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-		for (unsigned int idx = face_tables[iface].first(); idx != INVALID_IDX; idx = face_tables[iface].next(idx))
-			delete [] face_tables[iface][idx];
+	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*face_tables).begin(); it != (*face_tables).end(); it++) {
+		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
 	}
-	delete [] face_tables;
 	// edge
-	for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-		for (unsigned int idx = edge_tables[iedge].first(); idx != INVALID_IDX; idx = edge_tables[iedge].next(idx))
-			delete [] edge_tables[iedge][idx];
+	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*edge_tables).begin(); it != (*edge_tables).end(); it++) {
+		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
 	}
-	delete [] edge_tables;
-
-	delete [] vertex_table;
+  if(vertex_table != NULL)
+	  delete [] vertex_table;
 #endif
 }
 
@@ -4381,18 +4386,20 @@ void QuadStdHex::calc_table(const Ord3 &order) {
 #ifdef WITH_HEX
 	assert(order.type == mode);
 	int idx = order.get_idx();
-	tables[idx] = new QuadPt3D[np[idx]];
-	MEM_CHECK(tables[idx]);
+	if((*tables)[idx] != NULL)
+    delete (*tables)[idx];
+  (*tables)[idx] = new QuadPt3D[(*np)[idx]];
+	MEM_CHECK((*tables)[idx]);
 
 	int i = order.x, j = order.y, o = order.z;
 	for (int k = 0, n = 0; k < std_np_1d[i]; k++) {
 		for (int l = 0; l < std_np_1d[j]; l++) {
 			for (int p = 0; p < std_np_1d[o]; p++, n++) {
-				assert(n < np[idx]);
-				tables[idx][n].x = std_tables_1d[i][k].x;
-				tables[idx][n].y = std_tables_1d[j][l].x;
-				tables[idx][n].z = std_tables_1d[o][p].x;
-				tables[idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w * std_tables_1d[o][p].w;
+				assert(n < (*np)[idx]);
+				(*tables)[idx][n].x = std_tables_1d[i][k].x;
+				(*tables)[idx][n].y = std_tables_1d[j][l].x;
+				(*tables)[idx][n].z = std_tables_1d[o][p].x;
+				(*tables)[idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w * std_tables_1d[o][p].w;
 			}
 		}
 	}
@@ -4403,20 +4410,23 @@ void QuadStdHex::calc_face_table(int face, const Ord2 &order) {
 	_F_
 #ifdef WITH_HEX
 	int idx = order.get_idx();
-	face_tables[face][idx] = new QuadPt3D[np_face[idx]];
-	MEM_CHECK(face_tables[face][idx]);
-
+  if((*face_tables)[face] == NULL)
+    (*face_tables)[face] = new std::map<unsigned int, QuadPt3D *>;
+  if((*(*face_tables)[face])[idx] != NULL)
+    delete (*(*face_tables)[face])[idx];
+  (*(*face_tables)[face])[idx] = new QuadPt3D[(*np_face)[idx]];
+	
 	int i = order.x, j = order.y;
 	switch (face) {
 		case 0:
 		case 1:
 			for (int k = 0, n = 0; k < std_np_1d[i]; k++) {
 				for (int l = 0; l < std_np_1d[j]; l++, n++) {
-					assert(n < np_face[idx]);
-					face_tables[face][idx][n].x = (face == 0) ? -1 : 1;
-					face_tables[face][idx][n].y = std_tables_1d[i][k].x;
-					face_tables[face][idx][n].z = std_tables_1d[j][l].x;
-					face_tables[face][idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w;
+					assert(n < (*np_face)[idx]);
+					(*(*face_tables)[face])[idx][n].x = (face == 0) ? -1 : 1;
+					(*(*face_tables)[face])[idx][n].y = std_tables_1d[i][k].x;
+					(*(*face_tables)[face])[idx][n].z = std_tables_1d[j][l].x;
+					(*(*face_tables)[face])[idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w;
 				}
 			}
 			break;
@@ -4425,11 +4435,11 @@ void QuadStdHex::calc_face_table(int face, const Ord2 &order) {
 		case 3:
 			for (int k = 0, n = 0; k < std_np_1d[i]; k++) {
 				for (int l = 0; l < std_np_1d[j]; l++, n++) {
-					assert(n < np_face[idx]);
-					face_tables[face][idx][n].x = std_tables_1d[i][k].x;
-					face_tables[face][idx][n].y = (face == 2) ? -1 : 1;
-					face_tables[face][idx][n].z = std_tables_1d[j][l].x;
-					face_tables[face][idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w;
+					assert(n < (*np_face)[idx]);
+					(*(*face_tables)[face])[idx][n].x = std_tables_1d[i][k].x;
+					(*(*face_tables)[face])[idx][n].y = (face == 2) ? -1 : 1;
+					(*(*face_tables)[face])[idx][n].z = std_tables_1d[j][l].x;
+					(*(*face_tables)[face])[idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w;
 				}
 			}
 			break;
@@ -4438,11 +4448,11 @@ void QuadStdHex::calc_face_table(int face, const Ord2 &order) {
 		case 5:
 			for (int k = 0, n = 0; k < std_np_1d[i]; k++) {
 				for (int l = 0; l < std_np_1d[j]; l++, n++) {
-					assert(n < np_face[idx]);
-					face_tables[face][idx][n].x = std_tables_1d[i][k].x;
-					face_tables[face][idx][n].y = std_tables_1d[j][l].x;
-					face_tables[face][idx][n].z = (face == 4) ? -1 : 1;
-					face_tables[face][idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w;
+					assert(n < (*np_face)[idx]);
+					(*(*face_tables)[face])[idx][n].x = std_tables_1d[i][k].x;
+					(*(*face_tables)[face])[idx][n].y = std_tables_1d[j][l].x;
+					(*(*face_tables)[face])[idx][n].z = (face == 4) ? -1 : 1;
+					(*(*face_tables)[face])[idx][n].w = std_tables_1d[i][k].w * std_tables_1d[j][l].w;
 				}
 			}
 			break;
@@ -4485,8 +4495,6 @@ QuadStdPrism::QuadStdPrism() {
 	int num = max_order + 1;
 
 	// number of integration points
-	np = new int [num];
-	memset(np, 0, num * sizeof(int));
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER_TRI; i++) {
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++) {
 			int m = MAKE_PRISM_ORDER(i, j);
@@ -4494,12 +4502,13 @@ QuadStdPrism::QuadStdPrism() {
 	}
 
 	// tables with points
-	tables = new QuadPt3D *[num];
 	memset(tables, 0, num * sizeof(QuadPt3D *));
 	for (int i = 0; i <= H3D_MAX_QUAD_ORDER_TRI; i++) {
 		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++) {
 			int m = MAKE_PRISM_ORDER(i, j);
 			np[m] = std_np_2d_tri[i] * std_np_1d[j];
+      if(tables[m] != NULL)
+        delete tables[m];
 			tables[m] = new QuadPt3D[np[m]];
 
 			for (int k = 0, n = 0; k < std_np_2d_tri[i]; k++) {
@@ -4515,12 +4524,12 @@ QuadStdPrism::QuadStdPrism() {
 
 
 	// TODO: edge tables
-	edge_tables = NULL;
-	np_edge = NULL;
+	(*edge_tables) = NULL;
+	(*np_edge) = NULL;
 
 	// TODO: face tables
-	face_tables = NULL;
-	np_face = NULL;
+	(*face_tables) = NULL;
+	(*np_face) = NULL;
 #endif
 }
 

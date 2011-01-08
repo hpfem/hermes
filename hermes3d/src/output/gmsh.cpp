@@ -46,14 +46,16 @@ class HERMES_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
-		if (!tables.exists(order.get_idx())) calculate_view_points(order);
-		return tables[order.get_idx()];
+		if ((*tables)[order.get_idx()] == NULL) 
+      calculate_view_points(order);
+		return (*tables)[order.get_idx()];
 	}
 
 	virtual int get_num_points(const Ord3 &order) {
 		_F_
-		if (!np.exists(order.get_idx())) calculate_view_points(order);
-		return np[order.get_idx()];
+		if ((*np)[order.get_idx()]) 
+      calculate_view_points(order);
+		return (*np)[order.get_idx()];
 	}
 
 	virtual int *get_subdiv_modes(Ord3 order) {
@@ -115,11 +117,12 @@ OutputQuadTetra::OutputQuadTetra() {
 OutputQuadTetra::~OutputQuadTetra() {
 	_F_
 #ifdef WITH_TETRA
-	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
-		delete[] tables[i];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
+  delete tables;
 
 	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
-		delete[] subdiv_modes[i];
+		delete [] subdiv_modes[i];
 #endif
 }
 
@@ -138,7 +141,7 @@ void OutputQuadTetra::calculate_view_points(Ord3 order) {
 	// each refinement level means that a tetrahedron is divided into 8 subtetrahedra
 	// i.e., there are 8^levels resulting tetrahedra
 	subdiv_num[orderidx] = (1 << (3 * levels));
-	np[orderidx] = subdiv_num[orderidx] * Tetra::NUM_VERTICES;
+	(*np)[orderidx] = subdiv_num[orderidx] * Tetra::NUM_VERTICES;
 
 	// the new subelements are tetrahedra only
 	subdiv_modes[orderidx] = new int[subdiv_num[orderidx]];
@@ -147,11 +150,10 @@ void OutputQuadTetra::calculate_view_points(Ord3 order) {
 		subdiv_modes[orderidx][i] = HERMES_MODE_TET;
 
 	// compute the table of points recursively
-	tables[orderidx] = new QuadPt3D[np[orderidx]];
-	MEM_CHECK(tables[orderidx]);
+	(*tables)[orderidx] = new QuadPt3D[(*np)[orderidx]];
 	int idx = 0;
 	const Point3D *ref_vtcs = RefTetra::get_vertices();
-	recursive_division(ref_vtcs, tables[orderidx], levels, idx);
+	recursive_division(ref_vtcs, (*tables)[orderidx], levels, idx);
 #endif
 }
 
@@ -221,11 +223,11 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
-		delete[] tables[i];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
 
 	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
-		delete[] subdiv_modes[i];
+		delete [] subdiv_modes[i];
 #endif
 }
 
@@ -238,7 +240,7 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 	int levels = 3;
 
 	subdiv_num[o] = (1 << (3 * levels));
-	np[o] = subdiv_num[o] * Hex::NUM_VERTICES;
+	(*np)[o] = subdiv_num[o] * Hex::NUM_VERTICES;
 
 	subdiv_modes[o] = new int[subdiv_num[o]];
 	MEM_CHECK(subdiv_modes[o]);
@@ -247,11 +249,10 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 		subdiv_modes[o][i] = HERMES_MODE_HEX;
 
 	// compute the table of points recursively
-	tables[o] = new QuadPt3D[np[o]];
-	MEM_CHECK(tables[o]);
+	(*tables)[o] = new QuadPt3D[(*np)[o]];
 	int idx = 0;
 	const Point3D *ref_vtcs = RefHex::get_vertices();
-	recursive_division(ref_vtcs, tables[o], levels, idx);
+	recursive_division(ref_vtcs, (*tables)[o], levels, idx);
 #endif
 }
 
