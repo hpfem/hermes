@@ -109,6 +109,5 @@ void ShapeFunction::precalculate(const int np, const QuadPt3D *pt, int mask) {
 		}
 	}
 
-	// remove the old node and attach the new one to the Judy array
 	replace_cur_node(node);
 }
