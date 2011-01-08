@@ -39,12 +39,12 @@ DiscreteProblem::FnCache::~FnCache()
 void DiscreteProblem::FnCache::free()
 {
   _F_
-  for (unsigned int i = jwt.first(); i != INVALID_IDX; i = jwt.next(i))
-    delete [] jwt[i];
-  jwt.remove_all();
-  for (unsigned int i = e.first(); i != INVALID_IDX; i = e.next(i))
-    free_geom(&e[i]);
-  e.remove_all();
+  for(std::map<unsigned int, double *>::iterator it = jwt.begin(); it != jwt.end(); it++)
+    delete [] it->second;
+  jwt.clear();
+  for(std::map<unsigned int, Geom<double>>::iterator it = e.begin(); it != e.end(); it++)
+    free_geom(&it->second);
+  e.clear();
   for (unsigned int i = fn.first(); i != INVALID_IDX; i = fn.next(i))
     free_fn(fn[i]);
   fn.remove_all();
@@ -763,7 +763,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) 
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) 
   {
     fn_cache.jwt[ord_idx] = ru->get_jacobian(np, pt);
     fn_cache.e[ord_idx] = init_geom(elem->marker, ru, np, pt);
@@ -864,7 +864,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
         // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) 
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) 
   {
     fn_cache.jwt[ord_idx] = rv->get_jacobian(np, pt);
     fn_cache.e[ord_idx] = init_geom(elem->marker, rv, np, pt);
@@ -967,7 +967,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
         // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) 
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) 
   {
     fn_cache.jwt[ord_idx] = ru->get_face_jacobian(surf_pos->surf_num, np, pt);
     fn_cache.e[ord_idx] = init_geom(surf_pos->marker, ru, surf_pos->surf_num, np, pt);
@@ -1067,7 +1067,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) {
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) {
     fn_cache.jwt[ord_idx] = rv->get_face_jacobian(surf_pos->surf_num, np, pt);
     fn_cache.e[ord_idx] = init_geom(surf_pos->marker, rv, surf_pos->surf_num, np, pt);
   }

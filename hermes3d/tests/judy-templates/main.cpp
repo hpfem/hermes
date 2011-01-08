@@ -24,8 +24,8 @@ bool testPrint(bool value, const char *msg, bool correct) {
 //
 
 int testJudyArrayInt() {
-	info("- Testing JudyArray<int>-----");
-	JudyArray<int> int_array;
+	info("- Testing std::map<unsigned int, int>-----");
+	std::map<unsigned int, int> int_array;
 	bool r;
 	unsigned int idx;
 
@@ -120,9 +120,9 @@ struct Point {
 };
 
 int testJudyArrayStruct() {
-	info("- Testing JudyArray<struct>-----");
+	info("- Testing std::map<unsigned int, struct>-----");
 
-	JudyArray<Point> pt_array;
+	std::map<unsigned int, Point> pt_array;
 	bool r;
 	unsigned int idx;
 
@@ -493,14 +493,14 @@ int testMapHS() {
 
 
 // test bit array
-int testBitJudyArray() {
-	BitJudyArray bit_array;
+int teststd::map<unsigned int, bool>() {
+	std::map<unsigned int, bool> bit_array;
 	bool r;
 	unsigned int count;
 	unsigned int index, value;
 	unsigned int mem_used;
 
-	info("- Testing BitJudyArray -----");
+	info("- Testing std::map<unsigned int, bool> -----");
 
 	// first set a value in the empty array
 	r = bit_array.set(1);
@@ -557,7 +557,7 @@ int testBitJudyArray() {
 		return -1;
 
 	// COPY
-	BitJudyArray dup;
+	std::map<unsigned int, bool> dup;
 	r = dup.copy(&bit_array);
 	if (!testPrint(r, "  * Making copy of the array", true))
 		return -1;
@@ -616,7 +616,7 @@ int main() {
 		return ret;
 
 	// test Judy1
-	if ((ret = testBitJudyArray()) != 0)
+	if ((ret = teststd::map<unsigned int, bool>()) != 0)
 		return ret;
 
 	return ret;

@@ -401,18 +401,16 @@ void Solution::set_active_element(Element *e) {
 static struct mono_lu_init {
 public:
 	// this is a set of LU-decomposed matrices shared by all Solutions
-	JudyArray<double **> mat[3];
-	JudyArray<int *> perm[3];
+	std::map<unsigned int, double **> mat[3];
+	std::map<unsigned int, int *> perm[3];
 
 	mono_lu_init() {
 	}
 
 	~mono_lu_init() {
 		for (int m = 0; m <= 2; m++)
-			for (unsigned int i = mat[m].first(); i != INVALID_IDX; i = mat[m].next(i)) {
-					delete [] mat[m][i];
-					delete [] perm[m][i];
-				}
+			for(std::map<unsigned int, double**>::iterator it = mat[m].begin(); it != mat[m].end(); it++)
+        delete [] it->second;
 	}
 
 } mono_lu;
@@ -570,7 +568,7 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 			  mono += np;
 
 			  // solve for the monomial coefficients
-			  if (!mono_lu.mat[mode].exists(ord.get_idx()))
+			  if (mono_lu.mat[mode].find(ord.get_idx()) == mono_lu.mat[mode].end())
 				  calc_mono_matrix(ord, mono_lu);
 			  lubksb(mono_lu.mat[mode][ord.get_idx()], np, mono_lu.perm[mode][ord.get_idx()], val);
 		  }

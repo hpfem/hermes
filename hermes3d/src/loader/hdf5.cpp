@@ -449,7 +449,7 @@ static bool save_vertices(hid_t parent_group_id, Mesh *mesh) {
 
 // Elements ////
 
-static bool save_hex(hid_t parent_group_id, JudyArray<Element *> &elems) {
+static bool save_hex(hid_t parent_group_id, std::map<unsigned int, Element *> &elems) {
 	_F_
 	herr_t status;
 
@@ -486,7 +486,7 @@ static bool save_hex(hid_t parent_group_id, JudyArray<Element *> &elems) {
 	return true;
 }
 
-static bool save_tetra(hid_t parent_group_id, JudyArray<Element *> &elems) {
+static bool save_tetra(hid_t parent_group_id, std::map<unsigned int, Element *> &elems) {
 	_F_
 	herr_t status;
 
@@ -522,7 +522,7 @@ static bool save_tetra(hid_t parent_group_id, JudyArray<Element *> &elems) {
 	return true;
 }
 
-static bool save_prism(hid_t parent_group_id, JudyArray<Element *> &elems) {
+static bool save_prism(hid_t parent_group_id, std::map<unsigned int, Element *> &elems) {
 	_F_
 	herr_t status;
 
@@ -571,7 +571,7 @@ static bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 	write_attr(group_id, "count", count);
 
 	///
-	JudyArray<Element *> tet, hex, pri;
+	std::map<unsigned int, Element *> tet, hex, pri;
 	for (uint i = 0; i < count; i++) {
 		Element *elem = mesh->elements[i];
 		switch (elem->get_mode()) {
@@ -593,7 +593,7 @@ static bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 
 // BC ////
 
-static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, JudyArray<unsigned int> &bcs) {
+static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, std::map<unsigned int, unsigned int> &bcs) {
 	_F_
 	herr_t status;
 
@@ -637,7 +637,7 @@ static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, JudyArray<unsigned in
 	return true;
 }
 
-static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, JudyArray<unsigned int> &bcs) {
+static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, std::map<unsigned int, unsigned int> &bcs) {
 	_F_
 	herr_t status;
 
@@ -694,7 +694,7 @@ static bool save_bc(hid_t parent_group_id, Mesh *mesh) {
 	write_attr(group_id, "count", count);
 
 	// sort out boundaries that are triangular and quadrilateral
-	JudyArray<unsigned int> tri, quad;
+	std::map<unsigned int, unsigned int> tri, quad;
 	FOR_ALL_FACETS(fid, mesh) {
 		Facet *facet = mesh->facets.get(fid);
 		if (facet->type == Facet::OUTER) {

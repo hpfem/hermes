@@ -207,7 +207,7 @@ public:
 			}
 		}
 
-		face_tables = new JudyArray<QuadPt3D *>[Hex::NUM_FACES];
+		face_tables = new std::map<unsigned int, QuadPt3D *>[Hex::NUM_FACES];
 		for (int order = 0; order < NUM_RULES; order++) {
 			int ord1 = order / (MAX_LEVEL + 1);
 			int ord2 = order % (MAX_LEVEL + 1);

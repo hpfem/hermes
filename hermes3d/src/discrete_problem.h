@@ -107,8 +107,8 @@ protected:
 	};
 
 	struct FnCache {
-		JudyArray<double *> jwt;			// jacobian x weight
-		JudyArray<Geom<double> > e;		// geometries
+		std::map<unsigned int, double *> jwt;			// jacobian x weight
+		std::map<unsigned int, Geom<double> > e;		// geometries
 		Map<fn_key_t, sFunc*> fn;		// shape functions
 		Map<fn_key_t, mFunc*> ext;		// external functions
 		Map<fn_key_t, mFunc*> sln;		// sln from prev iter

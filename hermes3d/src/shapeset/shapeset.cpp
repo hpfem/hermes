@@ -200,7 +200,7 @@ void Shapeset::free_constrained_combinations() {
 	for (unsigned int i = ced_comb.first(); i != INVALID_IDX; i = ced_comb.next(i))
 		delete ced_comb.get(i);
 	ced_id.remove_all();
-	ced_key.remove_all();
+	ced_key.clear();
 	ced_idx = -1;
 }
 
@@ -250,7 +250,7 @@ int *Shapeset::get_ced_indices(const CEDKey &key) {
 
 void Shapeset::get_constrained_values(int n, int index, int np, QuadPt3D *pt, int component, double *vals) {
 	_F_
-	assert(ced_key.exists(-1 - index));
+  assert(ced_key.find(-1 - index) != ced_key.end());
 	CEDKey key = ced_key[-1 - index];
 
 	CEDComb *comb = get_ced_comb(key);
@@ -270,7 +270,7 @@ void Shapeset::get_constrained_values(int n, int index, int np, QuadPt3D *pt, in
 
 double Shapeset::get_constrained_value(int n, int index, double x, double y, double z, int component) {
 	_F_
-	assert(ced_key.exists(-1 - index));
+  assert(ced_key.find(-1 - index) != ced_key.end());
 	CEDKey key = ced_key[-1 - index];
 
 	CEDComb *comb = get_ced_comb(key);
@@ -287,8 +287,8 @@ double Shapeset::get_constrained_value(int n, int index, double x, double y, dou
 
 Ord3 Shapeset::get_ced_order(int index) const {
 	_F_
-	assert(ced_key.exists(-1 - index));
-	CEDKey key = ced_key[-1 - index];
+  assert(ced_key.find(-1 - index) != ced_key.end());
+	CEDKey key = ced_key.at(-1 - index);
 
 	Ord3 order;
 	if (key.type == CED_KEY_TYPE_EDGE || key.type == CED_KEY_TYPE_EDGE_FACE) {
