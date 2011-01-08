@@ -1,18 +1,73 @@
+#include "hermes2d.h"
+#include "../../src/weakform.h"
+#include <string>
+
 bool HERMES_RESIDUAL_AS_VECTOR = false;
-bool solve_newton_butcher(ButcherTable* bt, 
-                          scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-                          Vector* rhs, Hermes::Tuple<MeshFunction*>stage_solutions, 
-                          double newton_tol, int newton_max_iter, bool verbose = true, 
-                          double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6)
+bool rk_time_step(ButcherTable* bt, double time_step,
+                  scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver, 
+                  double newton_tol, int newton_max_iter, bool verbose = true, 
+                  double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6)
 {
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
   // Get number of stages.
-  int num_stages = dp->get_num_spaces();
+  int num_stages = bt->get_size();
 
   // Space.
   Space* space = dp->get_space(0);
 
   // Get ndof.
   int ndof = space->get_num_dofs();
+
+  // Extract mesh from space.
+  Mesh* mesh = space->get_mesh();
+
+  // Create num_stages spaces for stage solutions.
+  Hermes::Tuple<Space*> stage_spaces;
+  stage_spaces.push_back(dp->get_space(0));
+  for (int i = 1; i < num_stages; i++) {
+    stage_spaces.push_back(space->dup(mesh));
+    stage_spaces[i]->copy_orders(space);
+  }
+
+  // Initialize stage solutions: One for each stage.
+  Hermes::Tuple<MeshFunction*> stage_solutions;
+  for (int i=0; i < num_stages; i++) {
+    Solution* stage_sln = new Solution(mesh);
+    stage_sln->set_zero(mesh);
+    stage_solutions.push_back(stage_sln);
+  }
+
+  // Extract the weak formulation from the original DiscreteProblem.
+  WeakForm* wf = dp->get_weak_formulation();
+  if (wf->get_neq() != 1) error("wf->neq != 1 not implemented yet.");
+  Hermes::Tuple<WeakForm::MatrixFormVol> mfvol = wf->get_mfvol();
+  Hermes::Tuple<WeakForm::MatrixFormSurf> mfsurf = wf->get_mfsurf();
+  Hermes::Tuple<WeakForm::VectorFormVol> vfvol = wf->get_vfvol();
+  Hermes::Tuple<WeakForm::VectorFormSurf> vfsurf = wf->get_vfsurf();
+
+  // TODO: these weak forms need to be duplicated and antered as
+  // blocks of the stage weah formulation.
+
+
+
+
+
+
+  // Initialize the stage weak formulation.
+  WeakForm stage_wf(num_stages);
+  for (int i=0; i < num_stages; i++) 
+    for (int j=0; j < num_stages; j++) 
+      stage_wf.add_matrix_form(i, j, callback(jac), HERMES_NONSYM, HERMES_ANY, stage_solutions[i]);
+  for (int i=0; i < num_stages; i++) 
+    stage_wf.add_vector_form(i, callback(res), HERMES_ANY, stage_solutions[i]);
+
+  // Create a new DiscreteProblem for the stage slutions.
+  bool is_linear = dp->get_is_linear();
+  DiscreteProblem stage_dp(&stage_wf, stage_spaces, is_linear);
 
   // Stage vector of length num_stages * ndof, initialize with zeros.
   scalar* stage_vec = new scalar[num_stages*ndof];
@@ -35,7 +90,7 @@ bool solve_newton_butcher(ButcherTable* bt,
         for (int s = 0; s < num_stages; s++) {
           increment += bt->get_A(r, s) * stage_vec[s*ndof + i]; 
         }
-        vec[i] = coeff_vec[i] + bt->get_time_step() * increment;
+        vec[i] = coeff_vec[i] + time_step * increment;
       }
       Solution::vector_to_solution(vec, space, (Solution*)stage_solutions[r]);
     } 
@@ -45,7 +100,7 @@ bool solve_newton_butcher(ButcherTable* bt,
     Table block_weights(num_stages);
     for (int r = 0; r < num_stages; r++) {
       for (int s = 0; s < num_stages; s++) {
-        block_weights.set_A(r, s, bt->get_A(r, s) * bt->get_time_step());
+        block_weights.set_A(r, s, bt->get_A(r, s) * time_step);
       }
     }
 
@@ -126,11 +181,14 @@ bool solve_newton_butcher(ButcherTable* bt,
     for (int s = 0; s < num_stages; s++) {
       increment += bt->get_B(s) * stage_vec[s*ndof + i]; 
     }
-    coeff_vec[i] += bt->get_time_step() * increment;
+    coeff_vec[i] += time_step * increment;
   } 
 
-  // Delete helper vector.
+  // Clean up.
   delete [] vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   return true;
 }

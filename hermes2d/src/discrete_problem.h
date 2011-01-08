@@ -59,7 +59,13 @@ public:
   void free();
 
   // Get pointer to n-th space.
-  Space* get_space(int n) {  return this->spaces[n];  }
+  Space* get_space(int n) { return this->spaces[n]; }
+
+  // Get whether the DiscreteProblem is linear.
+  bool get_is_linear() { return is_linear;};
+
+  // Get the weak forms.
+  WeakForm* get_weak_formulation() { return this->wf;};
 
   // Get all spaces as a Hermes::Tuple.
   Hermes::Tuple<Space *> get_spaces() {return this->spaces;}

@@ -42,13 +42,10 @@ class HERMES_API ButcherTable: public Table
   double get_C(int i);
   void set_B(int i, double val);
   void set_C(int i, double val); 
-  void set_time_step(double tau); // This is a workaround.
-  double get_time_step();         // This is a workaround.
 
  protected:
   double* B;
   double* C;
-  double time_step;               // This is a workaround.
 };
 
 #endif

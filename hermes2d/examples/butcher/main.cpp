@@ -87,16 +87,14 @@ int main(int argc, char* argv[])
 
   /*
   // Implicit Euler.
-  int num_stages = 1;
-  ButcherTable BT(num_stages);
+  ButcherTable BT(1);
   BT.set_A(0, 0, 1.);
   BT.set_B(0, 1.);
   BT.set_C(0, 1.);
   */
  
   // SDIRK-22 method, see page 244 in Butcher's book.
-  int num_stages = 2;
-  ButcherTable BT(num_stages);
+  ButcherTable BT(2);
   double gamma = 1./sqrt(2.);
   BT.set_A(0, 0, 1. - gamma);
   BT.set_A(0, 1, 0.);
@@ -106,10 +104,6 @@ int main(int argc, char* argv[])
   BT.set_B(1, 1. - gamma);
   BT.set_C(0, 1. - gamma);
   BT.set_C(1, 1.);
-
-  // Time step is stored inside of the Butcher's table 
-  // so that it can be passed along with its coefficients.
-  BT.set_time_step(TAU);
 
   // Load the mesh.
   Mesh mesh;
@@ -128,50 +122,32 @@ int main(int argc, char* argv[])
   BCValues bc_values;
   bc_values.add_function(BDY_DIRICHLET, essential_bc_values);   
 
-  // Create num_stages spaces for stage solutions.
-  Hermes::Tuple<Space*> stage_spaces;
-  for (int i = 0; i < num_stages; i++) stage_spaces.push_back(new H1Space(&mesh, &bc_types, &bc_values, P_INIT));
-  int ndof = Space::get_num_dofs(stage_spaces[0]);
+  // Create an H1 space with default shapeset.
+  H1Space* space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
   // Previous time level solution (initialized by the initial condition).
   Solution u_prev_time(&mesh, init_cond);
 
-  // Initialize stage solutions: One for each stage.
-  Hermes::Tuple<MeshFunction*> stage_solutions;
-  for (int i=0; i < num_stages; i++) {
-    Solution* stage_sln = new Solution(&mesh);
-    stage_sln->set_zero(&mesh);
-    stage_solutions.push_back(stage_sln);
-  }
-
   // Initialize the weak formulation.
-  // We need just one jacobian and one residual.
-  WeakForm wf(num_stages);
-  for (int i=0; i < num_stages; i++) 
-    for (int j=0; j < num_stages; j++) 
-      wf.add_matrix_form(i, j, callback(jac), HERMES_NONSYM, HERMES_ANY, stage_solutions[i]);
-  for (int i=0; i < num_stages; i++) 
-    wf.add_vector_form(i, callback(res), HERMES_ANY, stage_solutions[i]);
+  WeakForm wf;
+  wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
+  wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(stage_spaces[0], &u_prev_time, coeff_vec, matrix_solver);
+  OGProjection::project_global(space, &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, stage_spaces, is_linear);
-
-  // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  DiscreteProblem dp(&wf, space, is_linear);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
   OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
-  oview.show(stage_spaces[0]);
+  oview.show(space);
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
@@ -179,14 +155,16 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
-    // Perform Newton's iteration.
-    info("Solving on coarse mesh:");
+    // Perform one time step according to the Butcher's table.
+    info("Performing time step using the Butcher's table.");
     bool verbose = true;
-    if (!solve_newton_butcher(&BT, coeff_vec, &dp, solver, matrix, rhs, stage_solutions,
-        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    if (!rk_time_step(&BT, TAU, coeff_vec, &dp, matrix_solver,
+		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
+      error("Runge-Kutta time step failed, try to decrease time step size.");
+    }
 
     // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, stage_spaces[0], &u_prev_time);
+    Solution::vector_to_solution(coeff_vec, space, &u_prev_time);
 
     // Update time.
     current_time += TAU;
@@ -196,15 +174,12 @@ int main(int argc, char* argv[])
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
     sview.show(&u_prev_time);
-    oview.show(stage_spaces[0]);
+    oview.show(space);
   } 
   while (current_time < T_FINAL);
 
   // Cleanup.
   delete [] coeff_vec;
-  delete matrix;
-  delete rhs;
-  delete solver;
 
   // Wait for all views to be closed.
   View::wait();

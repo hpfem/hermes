@@ -52,8 +52,6 @@ ButcherTable::ButcherTable(int size) : Table(size)
   // C array.
   this->C = new double[size];
   for (int j=0; j<size; j++) this->C[j] = 0;
-
-  this->time_step = -1;
 }
 
 double ButcherTable::get_B(int i) 
@@ -78,15 +76,5 @@ void ButcherTable::set_C(int i, double val)
 {
   if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
   this->C[i] = val;
-}
-
-void ButcherTable::set_time_step(double tau) 
-{
-  this->time_step = tau;
-}
-
-double ButcherTable::get_time_step() 
-{
-  return this->time_step;
 }
 
