@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     // Perform one time step according to the Butcher's table.
     info("Performing one Runge-Kutta time step using the Butcher's table.");
     bool verbose = true;
-    if (!rk_time_step(&bt, tau, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(tau, &bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }

@@ -3,7 +3,7 @@
 #include <string>
 
 bool HERMES_RESIDUAL_AS_VECTOR = false;
-bool rk_time_step(ButcherTable* bt, double time_step,
+bool rk_time_step(double time_step, ButcherTable* bt, 
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver, 
                   double newton_tol, int newton_max_iter, bool verbose = true, 
                   double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6)
@@ -73,15 +73,13 @@ bool rk_time_step(ButcherTable* bt, double time_step,
   scalar* stage_vec = new scalar[num_stages*ndof];
   memset(stage_vec, 0, num_stages * ndof * sizeof(scalar));
 
-  // Helper vector.
-  scalar* vec = new scalar[ndof];
-
   // The Newton's loop.
   double residual_norm;
   int it = 1;
   while (true)
   {
     // Prepare external solution for each stage.
+    scalar* vec = new scalar[ndof];
     for (int r = 0; r < num_stages; r++) {
       memset(vec, 0, ndof * sizeof(scalar));
       double increment;
@@ -94,6 +92,7 @@ bool rk_time_step(ButcherTable* bt, double time_step,
       }
       Solution::vector_to_solution(vec, space, (Solution*)stage_solutions[r]);
     } 
+    delete [] vec;
 
     // Calculating weight coefficients for blocks in the 
     // Stage jacobian matrix. 
@@ -145,10 +144,10 @@ bool rk_time_step(ButcherTable* bt, double time_step,
     if (verbose) info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
 
     // If maximum allowed residual norm is exceeded, fail.
-    if (residual_norm > max_allowed_residual_norm) {
+    if (residual_norm > newton_max_allowed_residual_norm) {
       if (verbose) {
         info("Current residual norm: %g", residual_norm);
-        info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
+        info("Maximum allowed residual norm: %g", newton_max_allowed_residual_norm);
         info("Newton solve not successful, returning false.");
       }
       return false;
@@ -162,7 +161,7 @@ bool rk_time_step(ButcherTable* bt, double time_step,
     if(!solver->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < num_stages*ndof; i++) stage_vec[i] += damping_coeff * solver->get_solution()[i];
+    for (int i = 0; i < num_stages*ndof; i++) stage_vec[i] += newton_damping_coeff * solver->get_solution()[i];
 
     it++;
   }
@@ -170,8 +169,6 @@ bool rk_time_step(ButcherTable* bt, double time_step,
   // If max number of iterations was exceeded, fail. 
   if (it >= newton_max_iter) {
     if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
-    // Delete helper vector.
-    delete [] vec;
     return false;
   }
 
@@ -185,11 +182,18 @@ bool rk_time_step(ButcherTable* bt, double time_step,
   } 
 
   // Clean up.
-  delete [] vec;
   delete matrix;
   delete rhs;
   delete solver;
-  for (int i=0; i<num_stages; i++) delete stage_spaces[i];
+
+  // Delete stage spaces, but not the first (original) one.
+  for (int i = 1; i < num_stages; i++) delete stage_spaces[i];
+
+  // Delete stage solutions.
+  for (int i = 0; i < num_stages; i++) delete stage_solutions[i];
+
+  // Delete stage_vec.
+  delete [] stage_vec;
   
   return true;
 }
