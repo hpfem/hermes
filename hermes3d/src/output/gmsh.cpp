@@ -53,7 +53,7 @@ public:
 
 	virtual int get_num_points(const Ord3 &order) {
 		_F_
-		if ((*np)[order.get_idx()]) 
+		if ((*np)[order.get_idx()] == NULL) 
       calculate_view_points(order);
 		return (*np)[order.get_idx()];
 	}

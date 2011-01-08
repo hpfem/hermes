@@ -213,10 +213,10 @@ public:
 		EType type;		// type of the cell
 	};
 
-	JudyArray<Vertex *> &get_points() { return points; }
-	JudyArray<Cell *> &get_cells() { return cells; }
-	JudyArray<double> &get_cell_data() { return cell_data; }
-	JudyArray<double> &get_point_data(int idx = 0) { return pt_data[idx]; }
+	std::map<unsigned int, Vertex *> &get_points() { return points; }
+	std::map<unsigned int, Cell *> &get_cells() { return cells; }
+	std::map<unsigned int, double> &get_cell_data() { return cell_data; }
+	std::map<unsigned int, double> &get_point_data(int idx = 0) { return pt_data[idx]; }
 
 	int add_point(double x, double y, double z);
 	/// Adding cells prepared by VtkOuputEngine (0-based indexing)
@@ -231,20 +231,20 @@ public:
 
 public:
 	Map<double3, int> vertex_id;					// mapping: CEDKey => ced function index
-	JudyArray<Vertex *> points;
-	JudyArray<Cell *> cells;
-	JudyArray<double> cell_data;
-	JudyArray<double> pt_data[3];
+	std::map<unsigned int, Vertex *> points;
+	std::map<unsigned int, Cell *> cells;
+	std::map<unsigned int, double> cell_data;
+	std::map<unsigned int, double> pt_data[3];
 };
 
 Linearizer::~Linearizer()
 {
 	_F_
-	for (unsigned int i = points.first(); i != INVALID_IDX; i = points.next(i))
-		delete points[i];
-	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
-		delete [] cells[i]->idx;
-		delete cells[i];
+  for(std::map<unsigned int, Vertex*>::iterator it = points.begin(); it != points.end(); it++)
+    delete it->second;
+  for(std::map<unsigned int, Cell*>::iterator it = cells.begin(); it != cells.end(); it++) {
+    delete [] it->second->idx;
+    delete it->second;
 	}
 }
 
@@ -256,9 +256,13 @@ int Linearizer::add_point(double x, double y, double z)
 	if (vertex_id.lookup(key, idx))
 		return idx;
 	else {
-		idx = points.add(new Vertex(x, y, z));
-		vertex_id.set(key, idx);
-		return idx;
+    unsigned int i;
+    for(i = 0; ; i++)
+      if(points[i] == NULL)
+        break;
+    points[i] = new Vertex(x, y, z);
+		vertex_id.set(key, i);
+		return i;
 	}
 }
 
@@ -271,8 +275,12 @@ int Linearizer::add_cell(Linearizer::Cell::EType type, int n, int *vtcs)
 	cell->idx = new int [n];
 	for (int i = 0; i < n; i++)
 		cell->idx[i] = vtcs[i];
-
-	return cells.add(cell);
+  unsigned int i;
+  for(i = 0; ; i++)
+    if(cells[i] == NULL)
+      break;
+  cells[i] = cell;
+	return i;
 }
 
 //// FileFormatter /////////////////////////////////////////////////////////////////////////////////
@@ -304,11 +312,11 @@ void FileFormatter::write(FILE *file, const char *name)
 	fprintf(file, "ASCII\n");
 
 	// dataset
-	JudyArray<Vertex *> &points = lin->get_points();
-	JudyArray<Linearizer::Cell *> &cells = lin->get_cells();
+	std::map<unsigned int, Vertex *> &points = lin->get_points();
+	std::map<unsigned int, Linearizer::Cell *> &cells = lin->get_cells();
 	int sz_cells = 0;
-	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
-		Linearizer::Cell *cell = cells[i];
+  for(std::map<unsigned int, Vtk::Linearizer::Cell*>::iterator it = cells.begin(); it != cells.end(); it++) {
+    Linearizer::Cell *cell = it->second;
 		switch (cell->type) {
 			case Linearizer::Cell::Hex: sz_cells += Hex::NUM_VERTICES; break;
 			case Linearizer::Cell::Tetra: sz_cells += Tetra::NUM_VERTICES; break;
@@ -318,23 +326,23 @@ void FileFormatter::write(FILE *file, const char *name)
 		}
 		sz_cells++;
 	}
-	JudyArray<double> &cell_data = lin->get_cell_data();
-	JudyArray<double> &pt_data0 = lin->get_point_data(0);
-	JudyArray<double> &pt_data1 = lin->get_point_data(1);
-	JudyArray<double> &pt_data2 = lin->get_point_data(2);
+	std::map<unsigned int, double> &cell_data = lin->get_cell_data();
+	std::map<unsigned int, double> &pt_data0 = lin->get_point_data(0);
+	std::map<unsigned int, double> &pt_data1 = lin->get_point_data(1);
+	std::map<unsigned int, double> &pt_data2 = lin->get_point_data(2);
 
 	fprintf(file, "\n");
 	fprintf(file, "DATASET UNSTRUCTURED_GRID\n");
-	fprintf(file, "POINTS %ld %s\n", points.count(), "float");
-	for (unsigned int i = points.first(); i != INVALID_IDX; i = points.next(i)) {
-		Vertex *v = points[i];
+	fprintf(file, "POINTS %ld %s\n", points.size(), "float");
+  for(std::map<unsigned int, Vertex*>::iterator it = points.begin(); it != points.end(); it++) {
+    Vertex *v = it->second;
 		fprintf(file, "%e %e %e\n", v->x, v->y, v->z);
 	}
 
 	fprintf(file, "\n");
-	fprintf(file, "CELLS %ld %d\n", cells.count(), sz_cells);
-	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
-		Linearizer::Cell *cell = cells[i];
+	fprintf(file, "CELLS %ld %d\n", cells.size(), sz_cells);
+  for(std::map<unsigned int, Vtk::Linearizer::Cell*>::iterator it = cells.begin(); it != cells.end(); it++) {
+    Linearizer::Cell *cell = it->second;
 
 		fprintf(file, "%d", cell->n);
 		for (int j = 0; j < cell->n; j++)
@@ -343,9 +351,9 @@ void FileFormatter::write(FILE *file, const char *name)
 	}
 
 	fprintf(file, "\n");
-	fprintf(file, "CELL_TYPES %ld\n", cells.count());
-	for (unsigned int i = cells.first(); i != INVALID_IDX; i = cells.next(i)) {
-		Linearizer::Cell *cell = cells[i];
+	fprintf(file, "CELL_TYPES %ld\n", cells.size());
+  for(std::map<unsigned int, Vtk::Linearizer::Cell*>::iterator it = cells.begin(); it != cells.end(); it++) {
+    Linearizer::Cell *cell = it->second;
 
 		int vtk_type = 0;
 		switch (cell->type) {
@@ -359,30 +367,30 @@ void FileFormatter::write(FILE *file, const char *name)
 	}
 
 	fprintf(file, "\n");
-	if (pt_data0.count() > 0) {
-		if (pt_data2.count() > 0) {
+	if (pt_data0.size() > 0) {
+		if (pt_data2.size() > 0) {
 			// point data
-			fprintf(file, "POINT_DATA %ld\n", pt_data0.count());
+			fprintf(file, "POINT_DATA %ld\n", pt_data0.size());
 			fprintf(file, "VECTORS %s %s\n", name, "float");
-			for (unsigned int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
-				fprintf(file, "%e %e %e\n", pt_data0[i], pt_data1[i], pt_data2[i]);
+      for(std::map<unsigned int, double>::iterator it = pt_data0.begin(); it != pt_data0.end(); it++)
+        fprintf(file, "%e %e %e\n", it->second, it->second, it->second);
 		}
 		else {
 			// point data
-			fprintf(file, "POINT_DATA %ld\n", pt_data0.count());
+			fprintf(file, "POINT_DATA %ld\n", pt_data0.size());
 			fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 			fprintf(file, "LOOKUP_TABLE %s\n", "default");
-			for (unsigned int i = pt_data0.first(); i != INVALID_IDX; i = pt_data0.next(i))
-				fprintf(file, "%e\n", pt_data0[i]);
+      for(std::map<unsigned int, double>::iterator it = pt_data0.begin(); it != pt_data0.end(); it++)
+        fprintf(file, "%e\n", it->second);
 		}
 	}
-	else if (cell_data.count()) {
+	else if (cell_data.size()) {
 		// cell data
-		fprintf(file, "CELL_DATA %ld\n", cell_data.count());
+		fprintf(file, "CELL_DATA %ld\n", cell_data.size());
 		fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 		fprintf(file, "LOOKUP_TABLE %s\n", "default");
-		for (unsigned int i = cell_data.first(); i != INVALID_IDX; i = cell_data.next(i))
-			fprintf(file, "%e\n", cell_data[i]);
+    for(std::map<unsigned int, double>::iterator it = cell_data.begin(); it != cell_data.end(); it++)
+      fprintf(file, "%e\n", it->second);
 	}
 }
 
