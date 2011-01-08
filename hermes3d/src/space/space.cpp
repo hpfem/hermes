@@ -130,9 +130,8 @@ Space::~Space() {
 	_F_
 	free_data_tables();
 
-	for (unsigned int i = fi_data.first(); i != INVALID_IDX; i = fi_data.next(i))
-		delete fi_data[i];
-	fi_data.remove_all();
+  for(std::map<unsigned int, FaceInfo*>::iterator it = fi_data.begin(); it != fi_data.end(); it++)
+		delete it->second;
 }
 
 void Space::init_data_tables() {
@@ -149,21 +148,18 @@ void Space::init_data_tables() {
 
 void Space::free_data_tables() {
 	_F_
-	FOR_ALL_VERTEX_NODES(i)
-		delete vn_data[i];
-	vn_data.remove_all();
 
-	FOR_ALL_EDGE_NODES(i)
-		delete en_data[i];
-	en_data.remove_all();
+    for(std::map<unsigned int, VertexData*>::iterator it = vn_data.begin(); it != vn_data.end(); it++)
+		delete it->second;
 
-	FOR_ALL_FACE_NODES(i)
-		delete fn_data[i];
-	fn_data.remove_all();
+  for(std::map<unsigned int, EdgeData*>::iterator it = en_data.begin(); it != en_data.end(); it++)
+		delete it->second;
 
-	FOR_ALL_ELEMENT_NODES(i)
-		delete elm_data[i];
-	elm_data.remove_all();
+  for(std::map<unsigned int, FaceData*>::iterator it = fn_data.begin(); it != fn_data.end(); it++)
+		delete it->second;
+
+  for(std::map<unsigned int, ElementData*>::iterator it = elm_data.begin(); it != elm_data.end(); it++)
+		delete it->second;
 }
 
 // element orders ///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +170,7 @@ void Space::set_element_order(unsigned int eid, Ord3 order) {
 	CHECK_ELEMENT_ID(eid);
 
 	// TODO: check for validity of order
-	if (!elm_data.exists(eid)) {
+	if (elm_data[eid] == NULL) {
 		elm_data[eid] = new ElementData;
 		MEM_CHECK(elm_data[eid]);
 	}
@@ -184,19 +180,17 @@ void Space::set_element_order(unsigned int eid, Ord3 order) {
 	seq++;
 }
 
-Ord3 Space::get_element_order(unsigned int eid) const 
+Ord3 Space::get_element_order(unsigned int eid) const
 {
   _F_
   CHECK_ELEMENT_ID(eid);
-  assert(elm_data.exists(eid));
-  assert(elm_data[eid] != NULL);
-  return elm_data[eid]->order;
+  assert(elm_data.at(eid) != NULL);
+  return elm_data.at(eid)->order;
 }
 
 void Space::set_uniform_order_internal(Ord3 order, int marker) {
   _F_
   FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-    assert(elm_data.exists(eid));
     assert(elm_data[eid] != NULL);
     assert(mesh->elements[eid]->get_mode() == order.type);
     if (marker == HERMES_ANY) elm_data[eid]->order = order;
@@ -219,7 +213,6 @@ void Space::set_order_recurrent(unsigned int eid, Ord3 order) {
 	_F_
 	Element *e = mesh->elements[eid];
 	if (e->active) {
-		assert(elm_data.exists(e->id));
 		assert(elm_data[e->id] != NULL);
 		assert(mesh->elements[eid]->get_mode() == order.type);
 		elm_data[e->id]->order = order;
@@ -274,7 +267,7 @@ void Space::enforce_minimum_rule() {
 				// on faces
 				for (int iface = 0; iface < elem->get_num_faces(); iface++) {
 					unsigned int fidx = mesh->get_facet_id(elem, iface);
-					assert(fn_data.exists(fidx));
+					assert(fn_data[fidx] != NULL);
 					FaceData *fnode = fn_data[fidx];
 					Ord2 forder = elem_node->order.get_face_order(iface);
 					if (fnode->order.invalid() || forder.order < fnode->order.order)
@@ -284,7 +277,7 @@ void Space::enforce_minimum_rule() {
 				// on edges
 				for (int iedge = 0; iedge < elem->get_num_edges(); iedge++) {
 					unsigned int eidx = mesh->get_edge_id(elem, iedge);
-					assert(en_data.exists(eidx));
+					assert(en_data[eidx] != NULL);
 
 					EdgeData *enode = en_data[eidx];
 					Ord1 eorder = elem_node->order.get_edge_order(iedge);
@@ -564,7 +557,7 @@ void Space::set_bc_information() {
 
 			int marker = bdr->marker;
 			// set boundary condition for face
-			assert(fn_data.exists(idx));
+			assert(fn_data[idx] != NULL);
 			fn_data[idx]->bc_type = bc_type;
 			if (fn_data[idx]->marker == H3D_MARKER_UNDEFINED)
 				fn_data[idx]->marker = marker;
@@ -577,7 +570,7 @@ void Space::set_bc_information() {
 			unsigned int *vtcs = new unsigned int[vtx_num];
 			elem->get_face_vertices(iface, vtcs);
 			for (int i = 0; i < vtx_num; i++) {
-				assert(vn_data.exists(vtcs[i]));
+				assert(vn_data[vtcs[i]] != NULL);
 				set_bc_info(vn_data[vtcs[i]], bc_type, marker);
 			}
       delete [] vtcs;
@@ -587,7 +580,7 @@ void Space::set_bc_information() {
 			for (int i = 0; i < elem->get_num_face_edges(iface); i++) {
 				int edge_id = mesh->get_edge_id(elem, face_edges[i]);
 				if (mesh->edges[edge_id].bnd) {
-					assert(en_data.exists(edge_id));
+					assert(en_data[edge_id] != NULL);
 					set_bc_info(en_data[edge_id], bc_type, marker);
 				}
 			}
@@ -703,7 +696,7 @@ void Space::fc_face(unsigned int eid, int iface, bool ced) {
 	unsigned int fid = mesh->get_facet_id(elem, iface);
 	Facet *facet = mesh->facets[fid];
 
-	if (ced) face_ced.set(fid);
+	if (ced) face_ced[fid] = true;
 
 	// set CEDs
 	unsigned int emp[4], fmp;
@@ -882,7 +875,7 @@ void Space::fc_base(unsigned int eid, int iface)
 void Space::find_constraints()
 {
 	_F_
-	face_ced.free();
+	face_ced.clear();
 
 	// modified breadth-first search
 	JudyArray<unsigned int> open;
@@ -1822,7 +1815,8 @@ void Space::uc_face(unsigned int eid, int iface) {
 
 	unsigned int fid = mesh->get_facet_id(elem, iface);
 	assert(fid != INVALID_IDX);
-	if (!fi_data.exists(fid)) return;
+	if (fi_data[fid] == NULL) 
+    return;
 
 	FaceInfo *fi = fi_data[fid];
 	assert(fi != NULL);
@@ -2155,8 +2149,8 @@ void Space::uc_element(unsigned int idx) {
 		if (facet->ractive && facet->lactive && mesh->facets[fid]->type == Facet::OUTER)
 			calc_face_boundary_projection(e, iface);
 
-		if (face_ced.is_set(fid)) {
-			if (!fi_data.exists(fid)) {
+		if (face_ced[fid]) {
+			if (fi_data[fid] == NULL) {
 				switch (facet->mode) {
 					case HERMES_MODE_QUAD:
 						fi_data[fid] = new FaceInfo(HERMES_MODE_QUAD, idx, iface);
@@ -2187,23 +2181,26 @@ int Space::assign_dofs(int first_dof, int stride) {
 	this->stride = stride;
 
 	// free data
-	FOR_ALL_VERTEX_NODES(i)
-		delete vn_data[i];
-	vn_data.remove_all();
+	for(std::map<unsigned int, VertexData*>::iterator it = vn_data.begin(); it != vn_data.end(); it++) {
+		delete it->second;
+    it->second = NULL;
+  }
 
-	FOR_ALL_EDGE_NODES(i)
-		delete en_data[i];
-	en_data.remove_all();
+  for(std::map<unsigned int, EdgeData*>::iterator it = en_data.begin(); it != en_data.end(); it++) {
+		delete it->second;
+    it->second = NULL;
+  }
 
-	FOR_ALL_FACE_NODES(i)
-		delete fn_data[i];
-	fn_data.remove_all();
+  for(std::map<unsigned int, FaceData*>::iterator it = fn_data.begin(); it != fn_data.end(); it++) {
+		delete it->second;
+    it->second = NULL;
+  }
 
-	for (unsigned int i = fi_data.first(); i != INVALID_IDX; i = fi_data.next(i))
-		delete fi_data[i];
-	fi_data.remove_all();
-
-	// find constraints
+  for(std::map<unsigned int, FaceInfo*>::iterator it = fi_data.begin(); it != fi_data.end(); it++) {
+		delete it->second;
+    it->second = NULL;
+  }
+  // find constraints
 	find_constraints();
 
 	enforce_minimum_rule();
@@ -2239,9 +2236,9 @@ void Space::uc_dep(unsigned int eid)
 			unsigned int parent_id = facet->parent;
 			if (parent_id != INVALID_IDX) {
 				Facet *parent = mesh->facets[parent_id];
-				if (!uc_deps.is_set(parent->left) && (unsigned) parent->left != INVALID_IDX) {
+				if (!uc_deps[parent->left] && (unsigned) parent->left != INVALID_IDX) {
 					deps[idep++] = parent->left;
-					uc_deps.set(parent->left);
+					uc_deps[parent->left] = true;
 				}
 			}
 		}
@@ -2253,30 +2250,30 @@ void Space::uc_dep(unsigned int eid)
                             INVALID_IDX || (unsigned) parent->right == INVALID_IDX)) {
 					// CED -> take the value from the other side (i.e. constraining one)
 					if ((unsigned) facet->left == eid) {
-						if (!uc_deps.is_set(parent->right) && (unsigned) parent->right != INVALID_IDX) {
+						if (!uc_deps[parent->right] && (unsigned) parent->right != INVALID_IDX) {
 							deps[idep++] = parent->right;
-							uc_deps.set(parent->right);
+							uc_deps[parent->right] = true;
 						}
 					}
 					else {
-						if (!uc_deps.is_set(parent->left) && (unsigned) parent->left != INVALID_IDX) {
+						if (!uc_deps[parent->left] && (unsigned) parent->left != INVALID_IDX) {
 							deps[idep++] = parent->left;
-							uc_deps.set(parent->left);
+							uc_deps[parent->left] = true;
 						}
 					}
 				}
 				else {
 					// no CED, take tha parent element
 					if ((unsigned) facet->left == eid) {
-						if (!uc_deps.is_set(parent->left) && (unsigned) parent->left != INVALID_IDX) {
+						if (!uc_deps[parent->left] && (unsigned) parent->left != INVALID_IDX) {
 							deps[idep++] = parent->left;
-							uc_deps.set(parent->left);
+							uc_deps[parent->left] = true;
 						}
 					}
 					else {
-						if (!uc_deps.is_set(parent->right) && (unsigned) parent->right != INVALID_IDX) {
+						if (!uc_deps[parent->right] && (unsigned) parent->right != INVALID_IDX) {
 							deps[idep++] = parent->right;
-							uc_deps.set(parent->right);
+							uc_deps[parent->right] = true;
 						}
 					}
 				}
@@ -2288,13 +2285,13 @@ void Space::uc_dep(unsigned int eid)
 		uc_dep(deps[i]);
 
 	uc_element(eid);
-	uc_deps.set(eid);
+	uc_deps[eid] = true;
 }
 
 void Space::update_constraints()
 {
 	_F_
-	uc_deps.free();
+	uc_deps.clear();
 	// first calc BC projs in all vertices
 	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
 		Element *e = mesh->elements[eid];

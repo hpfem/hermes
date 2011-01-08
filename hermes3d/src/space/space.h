@@ -33,30 +33,6 @@
 /// @defgroup spaces Spaces
 ///
 /// TODO: description
-
-// for iterating through nodes in space classes
-
-///< Iterates over all vertex node indices.
-///< \param idx Vertex node hash table index.
-#define FOR_ALL_VERTEX_NODES(idx) \
-		for (unsigned int (idx) = vn_data.first(); (idx) != INVALID_IDX; (idx) = vn_data.next((idx)))
-
-///< Iterates over all edge node indices.
-///< \param idx Edge node hash table index.
-#define FOR_ALL_EDGE_NODES(idx) \
-		for (unsigned int (idx) = en_data.first(); (idx) != INVALID_IDX; (idx) = en_data.next((idx)))
-
-///< Iterates over all face node indices.
-///< \param idx Face node hash table index.
-#define FOR_ALL_FACE_NODES(idx) \
-		for (unsigned int (idx) = fn_data.first(); (idx) != INVALID_IDX; (idx) = fn_data.next((idx)))
-
-///< Iterates over all element node indices.
-///< \param idx Element node hash table index.
-#define FOR_ALL_ELEMENT_NODES(idx) \
-		for (unsigned int (idx) = elm_data.first(); (idx) != INVALID_IDX; (idx) = elm_data.next((idx)))
-
-
 #define H3D_MARKER_UNDEFINED				-1
 
 #define H3D_DOF_UNASSIGNED					-2
@@ -280,10 +256,10 @@ protected:
     void dump(int id);
   };
 
-  JudyArrayPtr<VertexData> vn_data;		/// Vertex node hash table
-  JudyArrayPtr<EdgeData> en_data;		/// Edge node hash table
-  JudyArrayPtr<FaceData> fn_data;		/// Face node hash table
-  JudyArrayPtr<ElementData> elm_data;		/// Element node hash table
+  std::map<unsigned int, VertexData *> vn_data;		/// Vertex node hash table
+  std::map<unsigned int, EdgeData *> en_data;		/// Edge node hash table
+  std::map<unsigned int, FaceData *> fn_data;		/// Face node hash table
+  std::map<unsigned int, ElementData *> elm_data;		/// Element node hash table
 
   void set_order_recurrent(unsigned int eid, Ord3 order);
 
@@ -358,15 +334,15 @@ protected:
   void fc_face_right(unsigned int fid);
   /// @param[in] idx - ID of the element
   void fc_element(unsigned int idx);
-  BitJudyArray face_ced;
+  std::map<unsigned int, bool> face_ced;
 
   // update constraints
   void uc_element(unsigned int idx);
   void uc_face(unsigned int eid, int iface);
   void uc_dep(unsigned int eid);
-  BitJudyArray uc_deps;
+  std::map<unsigned int, bool> uc_deps;
 
-  JudyArray<FaceInfo *> fi_data;
+  std::map<unsigned int, FaceInfo *> fi_data;
 
   VertexData *create_vertex_node_data(unsigned int vid, bool ced);
   EdgeData *create_edge_node_data(unsigned int eid, bool ced);
