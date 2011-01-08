@@ -60,13 +60,15 @@ public:
 
 	virtual int *get_subdiv_modes(Ord3 order) {
 		_F_
-		if (!subdiv_modes.exists(order.get_idx())) calculate_view_points(order);
+		if (subdiv_modes[order.get_idx()] == NULL) 
+      calculate_view_points(order);
 		return subdiv_modes[order.get_idx()];
 	}
 
 	virtual int get_subdiv_num(Ord3 order) {
 		_F_
-		if (!subdiv_num.exists(order.get_idx())) calculate_view_points(order);
+		if (subdiv_num[order.get_idx()] == NULL) 
+      calculate_view_points(order);
 		return subdiv_num[order.get_idx()];
 	}
 
@@ -79,8 +81,8 @@ public:
 	virtual void set_output_precision(int p) { output_precision = p; }
 
 protected:
-	JudyArray<int> subdiv_num;
-	JudyArray<int *> subdiv_modes;
+	std::map<unsigned int, int> subdiv_num;
+	std::map<unsigned int, int *> subdiv_modes;
 	int output_precision;
 
 	virtual void calculate_view_points(Ord3 order) = 0;
@@ -121,8 +123,8 @@ OutputQuadTetra::~OutputQuadTetra() {
     delete [] it->second;
   delete tables;
 
-	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
-		delete [] subdiv_modes[i];
+  for(std::map<unsigned int, int*>::iterator it = subdiv_modes.begin(); it != subdiv_modes.end(); it++)
+    delete [] it->second;
 #endif
 }
 
@@ -226,8 +228,8 @@ OutputQuadHex::~OutputQuadHex() {
 	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
     delete [] it->second;
 
-	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
-		delete [] subdiv_modes[i];
+  for(std::map<unsigned int, int*>::iterator it = subdiv_modes.begin(); it != subdiv_modes.end(); it++)
+    delete [] it->second;
 #endif
 }
 
@@ -787,8 +789,8 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	fprintf(this->out_file, "$EndMeshFormat\n");
 
 	// HEX specific
-	JudyArray<Vertex *> out_vtcs;	// vertices
-	JudyArray<int> vtx_pt;			// mapping from mesh vertex id to output vertex id
+	std::map<unsigned int, Vertex *> out_vtcs;	// vertices
+	std::map<unsigned int, int> vtx_pt;			// mapping from mesh vertex id to output vertex id
 	MapHSOrd face_pts;			// id of points on faces
 	MapHSOrd ctr_pts;			// id of points in the center
 
@@ -801,8 +803,12 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 
 		for (int i = 0; i < nv; i++) {
 			Vertex *v = mesh->vertices[vtcs[i]];
-			unsigned int idx = out_vtcs.add(new Vertex(*v));
-			vtx_pt[vtcs[i]] = idx;
+      unsigned int j;
+      for(j = 0; ; j++)
+        if(out_vtcs[j] == NULL)
+          break;
+      out_vtcs[j] = new Vertex(*v);
+			vtx_pt[vtcs[i]] = j;
 		}
 
 		for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
@@ -815,8 +821,12 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 				// create new vertex
 				Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]], mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
 				Vertex *fcenter = new Vertex((v[0]->x + v[2]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[2]->z) / 2.0);
-				unsigned int idx = out_vtcs.add(fcenter);
-				face_pts.set(k, Quad::NUM_VERTICES, idx);
+        unsigned int j;
+        for(j = 0; ; j++)
+          if(out_vtcs[j] == NULL)
+            break;
+        out_vtcs[j] = fcenter;
+				face_pts.set(k, Quad::NUM_VERTICES, j);
 			}
       delete [] fvtcs;
 		}
@@ -828,17 +838,21 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 			// create new vertex
 			Vertex *v[4] = { mesh->vertices[vtcs[0]], mesh->vertices[vtcs[1]], mesh->vertices[vtcs[3]], mesh->vertices[vtcs[4]] };
 			Vertex *center = new Vertex((v[0]->x + v[1]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[3]->z) / 2.0);
-			unsigned int idx = out_vtcs.add(center);
-			ctr_pts.set(c, Hex::NUM_VERTICES, idx);
+			unsigned int j;
+      for(j = 0; ; j++)
+        if(out_vtcs[j] == NULL)
+          break;
+      out_vtcs[j] = center;
+			ctr_pts.set(c, Hex::NUM_VERTICES, j);
 		}
     delete [] vtcs;
 	}
 
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", out_vtcs.count());
-	for (unsigned int i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
-		Vertex *v = out_vtcs[i];
-		fprintf(this->out_file, "%d %lf %lf %lf\n", i + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
+	fprintf(this->out_file, "%ld\n", out_vtcs.size());
+  for(std::map<unsigned int, Vertex*>::iterator it = out_vtcs.begin(); it != out_vtcs.end(); it++) {
+    Vertex *v = it->second;
+    fprintf(this->out_file, "%d %lf %lf %lf\n", it->first + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
 		delete v;																		// we no longer need the vertex data
 	}
 	fprintf(this->out_file, "$EndNodes\n");
