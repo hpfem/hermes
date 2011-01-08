@@ -28,9 +28,9 @@
 #define H3D_INVALID_EDGE_ORDER	    -1
 
 #define CHECK_ELEMENT_ID(id) \
-	if ((id) < 1 || (id) > mesh->elements.count())\
+	if ((id) < 1 || (id) > mesh->elements.size())\
 		EXIT("Invalid element id (eid = %d).", id);\
-	assert(mesh->elements.exists(id));
+	assert(mesh->elements[id] != NULL);
 
 
 void Space::VertexData::dump(int id) {
@@ -138,12 +138,11 @@ void Space::init_data_tables() {
 	_F_
 	assert(mesh != NULL);
 
-	FOR_ALL_ELEMENTS(idx, mesh) {
-		if (mesh->elements[idx]->active) {
-			elm_data[idx] = new ElementData;
-			MEM_CHECK(elm_data[idx]);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      elm_data[it->first] = new ElementData;
+      MEM_CHECK(elm_data[it->first]);
 		}
-	}
 }
 
 void Space::free_data_tables() {
@@ -190,14 +189,15 @@ Ord3 Space::get_element_order(unsigned int eid) const
 
 void Space::set_uniform_order_internal(Ord3 order, int marker) {
   _F_
-  FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-    assert(elm_data[eid] != NULL);
-    assert(mesh->elements[eid]->get_mode() == order.type);
-    if (marker == HERMES_ANY) elm_data[eid]->order = order;
-    else {
-      if (elm_data[eid]->marker == marker) elm_data[eid]->order = order;
+  for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      assert(elm_data[it->first] != NULL);
+      assert(mesh->elements[it->first]->get_mode() == order.type);
+      if (marker == HERMES_ANY) elm_data[it->first]->order = order;
+      else {
+        if (elm_data[it->first]->marker == marker) elm_data[it->first]->order = order;
+      }
     }
-  }
   seq++;
 }
 
@@ -235,20 +235,21 @@ inline int LIMIT_ELEMENT_ORDER(int a) {
 void Space::copy_orders(const Space &space, int inc) {
 	_F_
 	Mesh *cmesh = space.get_mesh();
-	FOR_ALL_ACTIVE_ELEMENTS(eid, cmesh) {
-		Ord3 oo = space.get_element_order(eid);
-		assert(cmesh->elements[eid]->get_mode() == mesh->elements[eid]->get_mode());
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Ord3 oo = space.get_element_order(it->first);
+		  assert(cmesh->elements[it->first]->get_mode() == mesh->elements[it->first]->get_mode());
 
-		Ord3 order;
-		switch (cmesh->elements[eid]->get_mode()) {
-			case HERMES_MODE_TET: order = oo + Ord3(inc); break;
-			case HERMES_MODE_HEX: order = oo + Ord3(inc, inc, inc); break;
-			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-		}
-		order.limit();
+		  Ord3 order;
+		  switch (cmesh->elements[it->first]->get_mode()) {
+			  case HERMES_MODE_TET: order = oo + Ord3(inc); break;
+			  case HERMES_MODE_HEX: order = oo + Ord3(inc, inc, inc); break;
+			  default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+		  }
+		  order.limit();
 
-		set_order_recurrent(eid, order);
-	}
+		  set_order_recurrent(it->first, order);
+	  }
 	seq++;
 
         // enumerate basis functions
@@ -257,71 +258,72 @@ void Space::copy_orders(const Space &space, int inc) {
 
 void Space::enforce_minimum_rule() {
 	_F_
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *elem = mesh->elements[idx];
-		ElementData *elem_node = elm_data[idx];
-		Ord3 elm_order = elem_node->order;
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *elem = mesh->elements[it->first];
+		  ElementData *elem_node = elm_data[it->first];
+		  Ord3 elm_order = elem_node->order;
 
-		switch (elem->get_mode()) {
-			case HERMES_MODE_TET:
-				// on faces
-				for (int iface = 0; iface < elem->get_num_faces(); iface++) {
-					unsigned int fidx = mesh->get_facet_id(elem, iface);
-					assert(fn_data[fidx] != NULL);
-					FaceData *fnode = fn_data[fidx];
-					Ord2 forder = elem_node->order.get_face_order(iface);
-					if (fnode->order.invalid() || forder.order < fnode->order.order)
-						fnode->order = forder;
-				}
+		  switch (elem->get_mode()) {
+			  case HERMES_MODE_TET:
+				  // on faces
+				  for (int iface = 0; iface < elem->get_num_faces(); iface++) {
+					  unsigned int fidx = mesh->get_facet_id(elem, iface);
+					  assert(fn_data[fidx] != NULL);
+					  FaceData *fnode = fn_data[fidx];
+					  Ord2 forder = elem_node->order.get_face_order(iface);
+					  if (fnode->order.invalid() || forder.order < fnode->order.order)
+						  fnode->order = forder;
+				  }
 
-				// on edges
-				for (int iedge = 0; iedge < elem->get_num_edges(); iedge++) {
-					unsigned int eidx = mesh->get_edge_id(elem, iedge);
-					assert(en_data[eidx] != NULL);
+				  // on edges
+				  for (int iedge = 0; iedge < elem->get_num_edges(); iedge++) {
+					  unsigned int eidx = mesh->get_edge_id(elem, iedge);
+					  assert(en_data[eidx] != NULL);
 
-					EdgeData *enode = en_data[eidx];
-					Ord1 eorder = elem_node->order.get_edge_order(iedge);
-					if (enode->order == H3D_INVALID_EDGE_ORDER || eorder < enode->order)
-						enode->order = eorder;
-				}
-				break;
+					  EdgeData *enode = en_data[eidx];
+					  Ord1 eorder = elem_node->order.get_edge_order(iedge);
+					  if (enode->order == H3D_INVALID_EDGE_ORDER || eorder < enode->order)
+						  enode->order = eorder;
+				  }
+				  break;
 
-			case HERMES_MODE_HEX:
-				// on faces
-				for (int iface = 0; iface < elem->get_num_faces(); iface++) {
-					unsigned int fidx = mesh->get_facet_id(elem, iface);
-					FaceData *fnode = fn_data[fidx];
+			  case HERMES_MODE_HEX:
+				  // on faces
+				  for (int iface = 0; iface < elem->get_num_faces(); iface++) {
+					  unsigned int fidx = mesh->get_facet_id(elem, iface);
+					  FaceData *fnode = fn_data[fidx];
 
-					if (!fnode->ced) {
-						Ord2 forder = elem_node->order.get_face_order(iface);
-						if (elem->get_face_orientation(iface) >= 4) forder = Ord2(forder.y, forder.x);		// switch h- and v- order
+					  if (!fnode->ced) {
+						  Ord2 forder = elem_node->order.get_face_order(iface);
+						  if (elem->get_face_orientation(iface) >= 4) forder = Ord2(forder.y, forder.x);		// switch h- and v- order
 
-						if (fnode->order.invalid())
-							fnode->order = forder;
-						else
-							fnode->order = Ord2(std::min(fnode->order.x, forder.x), std::min(fnode->order.y, forder.y));
-					}
-				}
+						  if (fnode->order.invalid())
+							  fnode->order = forder;
+						  else
+							  fnode->order = Ord2(std::min(fnode->order.x, forder.x), std::min(fnode->order.y, forder.y));
+					  }
+				  }
 
-				// on edges
-				for (int iedge = 0; iedge < elem->get_num_edges(); iedge++) {
-					unsigned int eidx = mesh->get_edge_id(elem, iedge);
-					assert(eidx != INVALID_IDX);
-					if (mesh->edges[eidx].is_active()) {
-						EdgeData *enode = en_data[eidx];
-						if (!enode->ced) {
-							Ord1 eorder = elem_node->order.get_edge_order(iedge);
-							if (enode->order == H3D_INVALID_EDGE_ORDER || eorder < enode->order)
-								enode->order = eorder;
-						}
-					}
-				}
-				break;
+				  // on edges
+				  for (int iedge = 0; iedge < elem->get_num_edges(); iedge++) {
+					  unsigned int eidx = mesh->get_edge_id(elem, iedge);
+					  assert(eidx != INVALID_IDX);
+					  if (mesh->edges[eidx].is_active()) {
+						  EdgeData *enode = en_data[eidx];
+						  if (!enode->ced) {
+							  Ord1 eorder = elem_node->order.get_edge_order(iedge);
+							  if (enode->order == H3D_INVALID_EDGE_ORDER || eorder < enode->order)
+								  enode->order = eorder;
+						  }
+					  }
+				  }
+				  break;
 
-			default:
-				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-		}
-	}
+			  default:
+				  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+		  }
+	  }
 }
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
@@ -882,16 +884,18 @@ void Space::find_constraints()
 	BitJudyArray elms;
 
 	// first include all base elements
-	FOR_ALL_BASE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
-			if (!elms.is_set(fid)) {
-				open.add(fid);
-				elms.set(fid);
-			}
-		}
-	}
+  for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+    if(it->first <= mesh->get_num_base_elements())
+      if (it->second->used) {
+		    Element *e = mesh->elements[it->first];
+		    for (int iface = 0; iface < e->get_num_faces(); iface++) {
+			    unsigned int fid = mesh->get_facet_id(e, iface);
+			    if (!elms.is_set(fid)) {
+				    open.add(fid);
+				    elms.set(fid);
+			    }
+		    }
+	    }
 
 	for (unsigned int idx = open.first(); idx != INVALID_IDX; idx = open.next(idx)) {
 		unsigned int fid = open[idx];
@@ -2293,32 +2297,33 @@ void Space::update_constraints()
 	_F_
 	uc_deps.clear();
 	// first calc BC projs in all vertices
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
-			Facet *facet = mesh->facets[fid];
-			if (facet->type == Facet::OUTER) {
-				// mark the vertices on the boundary
-				const int *vtx = e->get_face_vertices(iface);
-				for (int iv = 0; iv < e->get_num_face_vertices(iface); iv++)
-					calc_vertex_boundary_projection(e, vtx[iv]);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Element *e = mesh->elements[it->first];
+		  for (int iface = 0; iface < e->get_num_faces(); iface++) {
+			  unsigned int fid = mesh->get_facet_id(e, iface);
+			  Facet *facet = mesh->facets[fid];
+			  if (facet->type == Facet::OUTER) {
+				  // mark the vertices on the boundary
+				  const int *vtx = e->get_face_vertices(iface);
+				  for (int iv = 0; iv < e->get_num_face_vertices(iface); iv++)
+					  calc_vertex_boundary_projection(e, vtx[iv]);
 
-				// mark the edges on the boundary
-				const int *edge = e->get_face_edges(iface);
-				for (int ie = 0; ie < e->get_num_face_edges(iface); ie++) {
-					unsigned int edge_id = mesh->get_edge_id(e, edge[ie]);
-					if (mesh->edges[edge_id].bnd == 0)
-						EXIT("Edge #%ld should be a boundary edge.\n", edge_id);
-				}
-			}
-		}
-	}
+				  // mark the edges on the boundary
+				  const int *edge = e->get_face_edges(iface);
+				  for (int ie = 0; ie < e->get_num_face_edges(iface); ie++) {
+					  unsigned int edge_id = mesh->get_edge_id(e, edge[ie]);
+					  if (mesh->edges[edge_id].bnd == 0)
+						  EXIT("Edge #%ld should be a boundary edge.\n", edge_id);
+				  }
+			  }
+		  }
+	  }
 
 	// update constrains recursively
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		uc_dep(eid);
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active)
+      uc_dep(it->first);
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
@@ -2382,49 +2387,51 @@ void Space::copy_callbacks(const Space *space)
 void Space::calc_boundary_projections() 
 {
 	_F_
-	FOR_ALL_ACTIVE_ELEMENTS(elm_idx, mesh) {
-		Element *e = mesh->elements[elm_idx];
-		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
-			Facet *facet = mesh->facets[fid];
-			if (facet->type == Facet::OUTER) {
-				const int *vtx = e->get_face_vertices(iface);
-				for (int iv = 0; iv < e->get_num_face_vertices(iface); iv++) {
-					calc_vertex_boundary_projection(e, vtx[iv]);
-				}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  for (int iface = 0; iface < e->get_num_faces(); iface++) {
+			  unsigned int fid = mesh->get_facet_id(e, iface);
+			  Facet *facet = mesh->facets[fid];
+			  if (facet->type == Facet::OUTER) {
+				  const int *vtx = e->get_face_vertices(iface);
+				  for (int iv = 0; iv < e->get_num_face_vertices(iface); iv++) {
+					  calc_vertex_boundary_projection(e, vtx[iv]);
+				  }
 
-				const int *edge = e->get_face_edges(iface);
-				for (int ie = 0; ie < e->get_num_face_edges(iface); ie++)
-					calc_edge_boundary_projection(e, edge[ie]);
+				  const int *edge = e->get_face_edges(iface);
+				  for (int ie = 0; ie < e->get_num_face_edges(iface); ie++)
+					  calc_edge_boundary_projection(e, edge[ie]);
 
-				calc_face_boundary_projection(e, iface);
-			}
-		}
-	}
+				  calc_face_boundary_projection(e, iface);
+			  }
+		  }
+	  }
 }
 
 void Space::dump() {
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
 
-		unsigned int vtcs[Hex::NUM_VERTICES];
-		e->get_vertices(vtcs);
-		for (int iv = 0; iv < Hex::NUM_VERTICES; iv++) {
-			vn_data[vtcs[iv]]->dump(vtcs[iv]);
-		}
+		  unsigned int vtcs[Hex::NUM_VERTICES];
+		  e->get_vertices(vtcs);
+		  for (int iv = 0; iv < Hex::NUM_VERTICES; iv++) {
+			  vn_data[vtcs[iv]]->dump(vtcs[iv]);
+		  }
 
-		for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-			unsigned int edge = mesh->get_edge_id(e, iedge);
-			en_data[edge]->dump(edge);
-		}
+		  for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
+			  unsigned int edge = mesh->get_edge_id(e, iedge);
+			  en_data[edge]->dump(edge);
+		  }
 
-		for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-			unsigned int face = mesh->get_facet_id(e, iface);
-			fn_data[face]->dump(face);
-		}
+		  for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
+			  unsigned int face = mesh->get_facet_id(e, iface);
+			  fn_data[face]->dump(face);
+		  }
 
-		elm_data[eid]->dump(eid);
-	}
+      elm_data[it->first]->dump(it->first);
+	  }
 }
 
 // This is identical to H2D.

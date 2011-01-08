@@ -30,13 +30,6 @@ class MeshLoader;
 #include "../../hermes_common/judyarrayptr.h"
 #include "../../hermes_common/mapord.h"
 
-/// Iterates over all mesh vertex indices.
-///
-/// @param idx  Vertex hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_VERTICES(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->vertices.first(); (idx) != INVALID_IDX; (idx) = (mesh)->vertices.next((idx)))
-
 /// Iterates over all mesh edge indices.
 ///
 /// @param idx  Edge hash table index.
@@ -50,40 +43,6 @@ class MeshLoader;
 /// @param mesh Pointer to the Mesh object.
 #define FOR_ALL_FACETS(idx, mesh) \
 	for (unsigned int (idx) = (mesh)->facets.first(); (idx) != INVALID_IDX; (idx) = (mesh)->facets.next((idx)))
-
-/// Iterates over all mesh element indices.
-///
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used)
-
-/// Iterates over all active mesh element indices.
-///
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used) \
-			if ((mesh)->elements[idx]->active)
-
-/// Iterates over all inactive mesh element indices.
-///
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_INACTIVE_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used) \
-			if (!(mesh)->elements[idx]->active)
-
-/// Iterates over all base mesh element indices.
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_BASE_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(); (idx) <= mesh->get_num_base_elements(); (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used)
-
 
 // refinement type
 #define H3D_REFT_HEX_NONE							0x0000
@@ -540,13 +499,20 @@ public:
 
 
 	/// Returns the total number of elements stored.
-	unsigned int get_num_elements() const { return elements.count(); }
+	unsigned int get_num_elements() const { return elements.size(); }
 	/// Returns the number of coarse mesh elements.
 	unsigned int get_num_base_elements() const { return nbase; }
 	/// Returns the current number of active elements in the mesh.
 	unsigned int get_num_active_elements() const { return nactive; }
 	/// Returns the maximum node id number plus one.
-	unsigned int get_max_element_id() const { return elements.last(); }
+  unsigned int get_max_element_id() const 
+  { 
+    unsigned int temp_max = 0;
+    for(std::map<unsigned int, Element *>::const_iterator it = elements.begin(); it != elements.end(); it++)
+      if(it->first > temp_max)
+        temp_max = it->first;
+      return temp_max;
+  }
 
 	/// Checks wether it is possible to refine an element.
 	/// @return true if it posible to apply the refinement, otherwise false
@@ -635,10 +601,10 @@ public:
 	void ugh();
 
 	// data
-        JudyArray<Vertex *>   vertices;
+  std::map<unsigned int, Vertex *>   vertices;
 	MapOrd<Edge>      edges;
-	JudyArray<Element *>  elements;
-	JudyArray<Boundary *> boundaries;
+	std::map<unsigned int, Element *>  elements;
+	std::map<unsigned int, Boundary *> boundaries;
 	MapOrd<Facet *>   facets;
 
 protected:

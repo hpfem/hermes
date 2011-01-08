@@ -567,7 +567,7 @@ static bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 	hid_t group_id = H5Gcreate(parent_group_id, "elements", 0);
 
 	// count
-	uint count = mesh->elements.count();
+	uint count = mesh->elements.size();
 	write_attr(group_id, "count", count);
 
 	///

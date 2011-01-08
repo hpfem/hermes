@@ -521,58 +521,60 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 
 	// obtain element orders, allocate mono_coefs
 	num_coefs = 0;
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		int mode = e->get_mode();
-		Quad3D *quad = cheb_quad[mode];
-		Ord3 ord = space->get_element_order(e->id);
-		// FIXME: this is not very nice, could we handle this in a better (=more general) way
-		if (space->get_type() == HERMES_HCURL_SPACE) ord += Ord3(1, 1, 1);		// FIXME: tetras need Ord3(1)
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Element *e = mesh->elements[it->first];
+		  int mode = e->get_mode();
+		  Quad3D *quad = cheb_quad[mode];
+		  Ord3 ord = space->get_element_order(e->id);
+		  // FIXME: this is not very nice, could we handle this in a better (=more general) way
+		  if (space->get_type() == HERMES_HCURL_SPACE) ord += Ord3(1, 1, 1);		// FIXME: tetras need Ord3(1)
 
-		num_coefs += quad->get_num_points(ord);
-		elem_orders[e->id] = ord;
-	}
+		  num_coefs += quad->get_num_points(ord);
+		  elem_orders[e->id] = ord;
+	  }
 	num_coefs *= num_components;
 	mono_coefs = new scalar[num_coefs];
 
 	ShapeFunction shfn(ss);
 	// express the solution on elements as a linear combination of monomials
 	scalar *mono = mono_coefs;
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		int mode = e->get_mode();
-		Quad3D *quad = cheb_quad[mode];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  int mode = e->get_mode();
+		  Quad3D *quad = cheb_quad[mode];
 
-		Ord3 ord = elem_orders[e->id];
-		int np = quad->get_num_points(ord);
-		QuadPt3D *pt = quad->get_points(ord);
+		  Ord3 ord = elem_orders[e->id];
+		  int np = quad->get_num_points(ord);
+		  QuadPt3D *pt = quad->get_points(ord);
 
-		AsmList al;
-		space->get_element_assembly_list(e, &al);
-		shfn.set_active_element(e);
+		  AsmList al;
+		  space->get_element_assembly_list(e, &al);
+		  shfn.set_active_element(e);
 
-		for (int l = 0; l < num_components; l++) {
-			// obtain solution values for the current element
-			scalar *val = mono;
-			elem_coefs[l][e->id] = (int) (mono - mono_coefs);
-			memset(val, 0, sizeof(scalar) * np);
-			for (int k = 0; k < al.cnt; k++) {
-				shfn.set_active_shape(al.idx[k]);
-				shfn.precalculate(np, pt, FN_VAL);
-				int dof = al.dof[k];
-				scalar coef = al.coef[k] * (dof >= 0 ? vec[dof] : dir);
-				double *shape = shfn.get_fn_values(l);
-				for (int i = 0; i < np; i++)
-					val[i] += shape[i] * coef;
-			}
-			mono += np;
+		  for (int l = 0; l < num_components; l++) {
+			  // obtain solution values for the current element
+			  scalar *val = mono;
+			  elem_coefs[l][e->id] = (int) (mono - mono_coefs);
+			  memset(val, 0, sizeof(scalar) * np);
+			  for (int k = 0; k < al.cnt; k++) {
+				  shfn.set_active_shape(al.idx[k]);
+				  shfn.precalculate(np, pt, FN_VAL);
+				  int dof = al.dof[k];
+				  scalar coef = al.coef[k] * (dof >= 0 ? vec[dof] : dir);
+				  double *shape = shfn.get_fn_values(l);
+				  for (int i = 0; i < np; i++)
+					  val[i] += shape[i] * coef;
+			  }
+			  mono += np;
 
-			// solve for the monomial coefficients
-			if (!mono_lu.mat[mode].exists(ord.get_idx()))
-				calc_mono_matrix(ord, mono_lu);
-			lubksb(mono_lu.mat[mode][ord.get_idx()], np, mono_lu.perm[mode][ord.get_idx()], val);
-		}
-	}
+			  // solve for the monomial coefficients
+			  if (!mono_lu.mat[mode].exists(ord.get_idx()))
+				  calc_mono_matrix(ord, mono_lu);
+			  lubksb(mono_lu.mat[mode][ord.get_idx()], np, mono_lu.perm[mode][ord.get_idx()], val);
+		  }
+	  }
 
 	init_dxdydz_buffer();
 	seq = g_mfn_seq++;

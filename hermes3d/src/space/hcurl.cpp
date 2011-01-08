@@ -95,32 +95,33 @@ void HcurlSpace::assign_dofs_internal() {
 	BitJudyArray init_faces;
 
 	// edge dofs
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			unsigned int eid = mesh->get_edge_id(e, iedge);
-			EdgeData *ed = en_data[eid];
-			assert(ed != NULL);
-			if (!init_edges.is_set(eid) && !ed->ced) {
-				assign_edge_dofs(eid);
-				init_edges.set(eid);
-			}
-		}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
+			  unsigned int eid = mesh->get_edge_id(e, iedge);
+			  EdgeData *ed = en_data[eid];
+			  assert(ed != NULL);
+			  if (!init_edges.is_set(eid) && !ed->ced) {
+				  assign_edge_dofs(eid);
+				  init_edges.set(eid);
+			  }
+		  }
 
-		// face dofs
-		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
-			FaceData *fd = fn_data[fid];
-			assert(fd != NULL);
-			if (!init_faces.is_set(fid) && !fd->ced) {
-				assign_face_dofs(fid);
-				init_faces.set(fid);
-			}
-		}
+		  // face dofs
+		  for (int iface = 0; iface < e->get_num_faces(); iface++) {
+			  unsigned int fid = mesh->get_facet_id(e, iface);
+			  FaceData *fd = fn_data[fid];
+			  assert(fd != NULL);
+			  if (!init_faces.is_set(fid) && !fd->ced) {
+				  assign_face_dofs(fid);
+				  init_faces.set(fid);
+			  }
+		  }
 
-		// bubble dofs
-		assign_bubble_dofs(idx);
-	}
+		  // bubble dofs
+      assign_bubble_dofs(it->first);
+	  }
 }
 
 // assembly lists ////

@@ -66,20 +66,21 @@ double calc_norm(double (*fn)(MeshFunction*, int, QuadPt3D*), MeshFunction *sln)
 	double norm = 0.0;
 	Mesh *mesh = sln->get_mesh();
 
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		sln->set_active_element(e);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  sln->set_active_element(e);
 
-		RefMap *ru = sln->get_refmap();
-		Ord3 o = sln->get_fn_order() + ru->get_inv_ref_order();
-		o.limit();
+		  RefMap *ru = sln->get_refmap();
+		  Ord3 o = sln->get_fn_order() + ru->get_inv_ref_order();
+		  o.limit();
 
-		Quad3D *quad = get_quadrature(e->get_mode());
-		int np = quad->get_num_points(o);
-		QuadPt3D *pt = quad->get_points(o);
+		  Quad3D *quad = get_quadrature(e->get_mode());
+		  int np = quad->get_num_points(o);
+		  QuadPt3D *pt = quad->get_points(o);
 
-		norm += fn(sln, np, pt);
-	}
+		  norm += fn(sln, np, pt);
+	  }
 
 	return norm > H3D_TINY ? sqrt(norm) : norm;			// do not ruin the precision by taking the sqrt
 }

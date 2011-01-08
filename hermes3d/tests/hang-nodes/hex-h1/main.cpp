@@ -402,38 +402,38 @@ int main(int argc, char **args)
 	RefMap ref_map(&mesh);
 
 	int num_points = 0;
-	for (int order = 0; order < NUM_RULES; order++) {
-		FOR_ALL_ACTIVE_ELEMENTS(idx, &mesh) {
-			for (int iface = 0; iface < Hex::NUM_FACES; iface++)
-				num_points += my_quad.get_face_num_points(iface, order);
-		}
-	}
+	for (int order = 0; order < NUM_RULES; order++)
+    for(std::map<unsigned int, Element*>::iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++)
+		  if (it->second->used && it->second->active)
+			  for (int iface = 0; iface < Hex::NUM_FACES; iface++)
+				  num_points += my_quad.get_face_num_points(iface, order);
 
 	Point **points = new Point *[num_points];
 	int ipt = 0;
 
 	// Find points.
 	for (int order = 0; order < NUM_RULES; order++) {
-		FOR_ALL_ACTIVE_ELEMENTS(idx, &mesh) {
-			Element *e = mesh.elements[idx];
-			ref_map.set_active_element(e);
-			for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-				unsigned int fac_idx = mesh.get_facet_id(e, iface);
+    for(std::map<unsigned int, Element*>::iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++)
+		  if (it->second->used && it->second->active) {
+        Element *e = mesh.elements[it->first];
+			  ref_map.set_active_element(e);
+			  for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
+				  unsigned int fac_idx = mesh.get_facet_id(e, iface);
 
-				QuadPt3D *quad_pts = my_quad.get_face_points(iface, order);
-				int np = my_quad.get_face_num_points(iface, order);
-				double *phys_x = ref_map.get_phys_x(np, quad_pts);
-				double *phys_y = ref_map.get_phys_y(np, quad_pts);
-				double *phys_z = ref_map.get_phys_z(np, quad_pts);
+				  QuadPt3D *quad_pts = my_quad.get_face_points(iface, order);
+				  int np = my_quad.get_face_num_points(iface, order);
+				  double *phys_x = ref_map.get_phys_x(np, quad_pts);
+				  double *phys_y = ref_map.get_phys_y(np, quad_pts);
+				  double *phys_z = ref_map.get_phys_z(np, quad_pts);
 
-				// For each face and each integration point store reference and physical coordinates.
-				for (int pt = 0; pt < np; pt++) {
-					points[ipt++] = new Point(idx, fac_idx,
-						quad_pts[pt].x, quad_pts[pt].y, quad_pts[pt].z,
-						phys_x[pt], phys_y[pt], phys_z[pt]);
-				}
-			}
-		}
+				  // For each face and each integration point store reference and physical coordinates.
+				  for (int pt = 0; pt < np; pt++) {
+            points[ipt++] = new Point(it->first, fac_idx,
+						  quad_pts[pt].x, quad_pts[pt].y, quad_pts[pt].z,
+						  phys_x[pt], phys_y[pt], phys_z[pt]);
+				  }
+			  }
+		  }
 	}
 
 	// Sort points according to first phys_x, then phys_y and phys_z

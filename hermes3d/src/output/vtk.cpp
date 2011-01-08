@@ -472,86 +472,87 @@ void VtkOutputEngine::out(MeshFunction *fn, const char *name, int item)
 	Vtk::Linearizer l;
 	Mesh *mesh = fn->get_mesh();
 	// values
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		fn->set_active_element(element);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Element *element = mesh->elements[it->first];
+		  fn->set_active_element(element);
 
-		int mode = element->get_mode();
-		Vtk::OutputQuad *quad = output_quad[mode];
-		Ord3 order = fn->get_order();
+		  int mode = element->get_mode();
+		  Vtk::OutputQuad *quad = output_quad[mode];
+		  Ord3 order = fn->get_order();
 
-		int np = quad->get_num_points(order);
-		QuadPt3D *pt = quad->get_points(order);
+		  int np = quad->get_num_points(order);
+		  QuadPt3D *pt = quad->get_points(order);
 
-		// get coordinates of all points
-		RefMap *refmap = fn->get_refmap();
-		double *x = refmap->get_phys_x(np, pt);
-		double *y = refmap->get_phys_y(np, pt);
-		double *z = refmap->get_phys_z(np, pt);
+		  // get coordinates of all points
+		  RefMap *refmap = fn->get_refmap();
+		  double *x = refmap->get_phys_x(np, pt);
+		  double *y = refmap->get_phys_y(np, pt);
+		  double *z = refmap->get_phys_z(np, pt);
 
-		int *vtx_pt = new int[np];		// indices of the vertices for current element
-		for (int i = 0; i < np; i++)
-			vtx_pt[i] = l.add_point(x[i], y[i], z[i]);
+		  int *vtx_pt = new int[np];		// indices of the vertices for current element
+		  for (int i = 0; i < np; i++)
+			  vtx_pt[i] = l.add_point(x[i], y[i], z[i]);
 
-		int id;
-		switch (mode) {
-			case HERMES_MODE_HEX:
-				for (int i = 0; i < divs[order.z]; i++) {
-					for (int j = 0; j < divs[order.y]; j++) {
-						for (int o = 0; o < divs[order.x]; o++) {
-							int cell[Hex::NUM_VERTICES];
-							int base = ((divs[order.x] + 1) * (divs[order.y] + 1) * i) + ((divs[order.x] + 1) * j) + o;
-							cell[0] = vtx_pt[base];
-							cell[1] = vtx_pt[base + 1];
-							cell[2] = vtx_pt[base + (divs[order.x] + 1) + 1];
-							cell[3] = vtx_pt[base + (divs[order.x] + 1)];
+		  int id;
+		  switch (mode) {
+			  case HERMES_MODE_HEX:
+				  for (int i = 0; i < divs[order.z]; i++) {
+					  for (int j = 0; j < divs[order.y]; j++) {
+						  for (int o = 0; o < divs[order.x]; o++) {
+							  int cell[Hex::NUM_VERTICES];
+							  int base = ((divs[order.x] + 1) * (divs[order.y] + 1) * i) + ((divs[order.x] + 1) * j) + o;
+							  cell[0] = vtx_pt[base];
+							  cell[1] = vtx_pt[base + 1];
+							  cell[2] = vtx_pt[base + (divs[order.x] + 1) + 1];
+							  cell[3] = vtx_pt[base + (divs[order.x] + 1)];
 
-							int pl = (divs[order.x] + 1) * (divs[order.y] + 1);
-							cell[4] = vtx_pt[base + pl];
-							cell[5] = vtx_pt[base + pl + 1];
-							cell[6] = vtx_pt[base + pl + (divs[order.x] + 1) + 1];
-							cell[7] = vtx_pt[base + pl + (divs[order.x] + 1)];
-							id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, cell);
-						}
-					}
-				}
-				break;
+							  int pl = (divs[order.x] + 1) * (divs[order.y] + 1);
+							  cell[4] = vtx_pt[base + pl];
+							  cell[5] = vtx_pt[base + pl + 1];
+							  cell[6] = vtx_pt[base + pl + (divs[order.x] + 1) + 1];
+							  cell[7] = vtx_pt[base + pl + (divs[order.x] + 1)];
+							  id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, cell);
+						  }
+					  }
+				  }
+				  break;
 
-			case HERMES_MODE_TET:
-				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
-				break;
+			  case HERMES_MODE_TET:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
+				  break;
 
-			case HERMES_MODE_PRISM:
-				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-				break;
+			  case HERMES_MODE_PRISM:
+				  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+				  break;
 
-			default:
-				EXIT(HERMES_ERR_UNKNOWN_MODE);
-				break;
-		} // switch
+			  default:
+				  EXIT(HERMES_ERR_UNKNOWN_MODE);
+				  break;
+		  } // switch
 
-		fn->precalculate(np, pt, item);
-		int a = 0, b = 0;
-		mask_to_comp_val(item, a, b);
-		scalar *val[COMPONENTS];
-		for (int ic = 0; ic < nc; ic++)
-			val[ic] = fn->get_values(ic, FN);
+		  fn->precalculate(np, pt, item);
+		  int a = 0, b = 0;
+		  mask_to_comp_val(item, a, b);
+		  scalar *val[COMPONENTS];
+		  for (int ic = 0; ic < nc; ic++)
+			  val[ic] = fn->get_values(ic, FN);
 
-		for (int i = 0; i < np; i++) {
-#ifndef H3D_COMPLEX
-			if (nc == 1) l.set_point_data(vtx_pt[i], val[0][i]);
-			else l.set_point_data(vtx_pt[i], val[0][i], val[1][i], val[2][i]);
-#else
-			if (nc == 1) l.set_point_data(vtx_pt[i], REAL(val[0][i]));
-			else l.set_point_data(vtx_pt[i], REAL(val[0][i]), REAL(val[1][i]), REAL(val[2][i]));
-#endif
-		}
+		  for (int i = 0; i < np; i++) {
+  #ifndef H3D_COMPLEX
+			  if (nc == 1) l.set_point_data(vtx_pt[i], val[0][i]);
+			  else l.set_point_data(vtx_pt[i], val[0][i], val[1][i], val[2][i]);
+  #else
+			  if (nc == 1) l.set_point_data(vtx_pt[i], REAL(val[0][i]));
+			  else l.set_point_data(vtx_pt[i], REAL(val[0][i]), REAL(val[1][i]), REAL(val[2][i]));
+  #endif
+		  }
 
-    delete [] vtx_pt;
-		delete [] x;
-		delete [] y;
-		delete [] z;
-	}
+      delete [] vtx_pt;
+		  delete [] x;
+		  delete [] y;
+		  delete [] z;
+	  }
 
 	Vtk::FileFormatter fmt(&l);
 	fmt.write(out_file, name);
@@ -588,96 +589,97 @@ void VtkOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *fn
 	RefMap refmap;
 	refmap.set_mesh(mesh);
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		// set active elements
-		if (!unimesh) {
-			for (int i = 0; i < COMPONENTS; i++)
-				fn[i]->set_active_element(e);
-		}
-		else {
-			for (int i = 0; i < COMPONENTS; i++) {
-				fn[i]->set_active_element(unidata[i][e->id].e);
-				fn[i]->set_transform(unidata[i][e->id].idx);
-			}
-		}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  // set active elements
+		  if (!unimesh) {
+			  for (int i = 0; i < COMPONENTS; i++)
+				  fn[i]->set_active_element(e);
+		  }
+		  else {
+			  for (int i = 0; i < COMPONENTS; i++) {
+				  fn[i]->set_active_element(unidata[i][e->id].e);
+				  fn[i]->set_transform(unidata[i][e->id].idx);
+			  }
+		  }
 
-		int mode = e->get_mode();
-		Vtk::OutputQuad *quad = output_quad[mode];
-		Ord3 order = max(fn1->get_order(), max(fn2->get_order(), fn3->get_order()));
+		  int mode = e->get_mode();
+		  Vtk::OutputQuad *quad = output_quad[mode];
+		  Ord3 order = max(fn1->get_order(), max(fn2->get_order(), fn3->get_order()));
 
-		int np = quad->get_num_points(order);
-		QuadPt3D *pt = quad->get_points(order);
+		  int np = quad->get_num_points(order);
+		  QuadPt3D *pt = quad->get_points(order);
 
-		// get coordinates of all points
-		refmap.set_active_element(e);
-		double *x = refmap.get_phys_x(np, pt);
-		double *y = refmap.get_phys_y(np, pt);
-		double *z = refmap.get_phys_z(np, pt);
+		  // get coordinates of all points
+		  refmap.set_active_element(e);
+		  double *x = refmap.get_phys_x(np, pt);
+		  double *y = refmap.get_phys_y(np, pt);
+		  double *z = refmap.get_phys_z(np, pt);
 
-		int *vtx_pt = new int[np];		// indices of the vertices for current element
-		for (int i = 0; i < np; i++)
-			vtx_pt[i] = l.add_point(x[i], y[i], z[i]);
+		  int *vtx_pt = new int[np];		// indices of the vertices for current element
+		  for (int i = 0; i < np; i++)
+			  vtx_pt[i] = l.add_point(x[i], y[i], z[i]);
 
-		int id;
-		switch (mode) {
-			case HERMES_MODE_HEX:
-				for (int i = 0; i < divs[order.z]; i++) {
-					for (int j = 0; j < divs[order.y]; j++) {
-						for (int o = 0; o < divs[order.x]; o++) {
-							int cell[Hex::NUM_VERTICES];
-							int base = ((divs[order.x] + 1) * (divs[order.y] + 1) * i) + ((divs[order.x] + 1) * j) + o;
-							cell[0] = vtx_pt[base];
-							cell[1] = vtx_pt[base + 1];
-							cell[2] = vtx_pt[base + (divs[order.x] + 1) + 1];
-							cell[3] = vtx_pt[base + (divs[order.x] + 1)];
+		  int id;
+		  switch (mode) {
+			  case HERMES_MODE_HEX:
+				  for (int i = 0; i < divs[order.z]; i++) {
+					  for (int j = 0; j < divs[order.y]; j++) {
+						  for (int o = 0; o < divs[order.x]; o++) {
+							  int cell[Hex::NUM_VERTICES];
+							  int base = ((divs[order.x] + 1) * (divs[order.y] + 1) * i) + ((divs[order.x] + 1) * j) + o;
+							  cell[0] = vtx_pt[base];
+							  cell[1] = vtx_pt[base + 1];
+							  cell[2] = vtx_pt[base + (divs[order.x] + 1) + 1];
+							  cell[3] = vtx_pt[base + (divs[order.x] + 1)];
 
-							int pl = (divs[order.x] + 1) * (divs[order.y] + 1);
-							cell[4] = vtx_pt[base + pl];
-							cell[5] = vtx_pt[base + pl + 1];
-							cell[6] = vtx_pt[base + pl + (divs[order.x] + 1) + 1];
-							cell[7] = vtx_pt[base + pl + (divs[order.x] + 1)];
-							id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, cell);
-						}
-					}
-				}
-				break;
+							  int pl = (divs[order.x] + 1) * (divs[order.y] + 1);
+							  cell[4] = vtx_pt[base + pl];
+							  cell[5] = vtx_pt[base + pl + 1];
+							  cell[6] = vtx_pt[base + pl + (divs[order.x] + 1) + 1];
+							  cell[7] = vtx_pt[base + pl + (divs[order.x] + 1)];
+							  id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, cell);
+						  }
+					  }
+				  }
+				  break;
 
-			case HERMES_MODE_TET:
-				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
-				break;
+			  case HERMES_MODE_TET:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
+				  break;
 
-			case HERMES_MODE_PRISM:
-				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-				break;
+			  case HERMES_MODE_PRISM:
+				  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+				  break;
 
-			default:
-				EXIT(HERMES_ERR_UNKNOWN_MODE);
-				break;
-		} // switch
+			  default:
+				  EXIT(HERMES_ERR_UNKNOWN_MODE);
+				  break;
+		  } // switch
     
-		for (int i = 0; i < COMPONENTS; i++)
-			fn[i]->precalculate(np, pt, item);
+		  for (int i = 0; i < COMPONENTS; i++)
+			  fn[i]->precalculate(np, pt, item);
 
-		int a = 0, b = 0;
-		mask_to_comp_val(item, a, b);
-		scalar *val[COMPONENTS];
-		for (int ic = 0; ic < COMPONENTS; ic++)
-			val[ic] = fn[ic]->get_values(0, b);
+		  int a = 0, b = 0;
+		  mask_to_comp_val(item, a, b);
+		  scalar *val[COMPONENTS];
+		  for (int ic = 0; ic < COMPONENTS; ic++)
+			  val[ic] = fn[ic]->get_values(0, b);
 
-		for (int i = 0; i < np; i++) {
-#ifndef H3D_COMPLEX
-			l.set_point_data(vtx_pt[i], val[0][i], val[1][i], val[2][i]);
-#else
-			l.set_point_data(vtx_pt[i], REAL(val[0][i]), REAL(val[1][i]), REAL(val[2][i]));
-#endif
-		}
+		  for (int i = 0; i < np; i++) {
+  #ifndef H3D_COMPLEX
+			  l.set_point_data(vtx_pt[i], val[0][i], val[1][i], val[2][i]);
+  #else
+			  l.set_point_data(vtx_pt[i], REAL(val[0][i]), REAL(val[1][i]), REAL(val[2][i]));
+  #endif
+		  }
     
-    delete []vtx_pt;
-		delete [] x;
-		delete [] y;
-		delete [] z;
-	}
+      delete []vtx_pt;
+		  delete [] x;
+		  delete [] y;
+		  delete [] z;
+	  }
 
 	Vtk::FileFormatter fmt(&l);
 	fmt.write(out_file, name);
@@ -690,38 +692,39 @@ void VtkOutputEngine::out(Mesh *mesh)
 	_F_
 	Vtk::Linearizer l;
 	// add cells
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
 
-		int nv = element->get_num_vertices();
-		unsigned int *vtcs = new unsigned int[nv];
-		element->get_vertices(vtcs);
+		  int nv = element->get_num_vertices();
+		  unsigned int *vtcs = new unsigned int[nv];
+		  element->get_vertices(vtcs);
 
-		int *vtx_pt = new int[nv];
-		for (int i = 0; i < nv; i++) {
-			Vertex *v = mesh->vertices[vtcs[i]];
-			int idx = l.add_point(v->x, v->y, v->z);
-			vtx_pt[i] = idx;
-		}
+		  int *vtx_pt = new int[nv];
+		  for (int i = 0; i < nv; i++) {
+			  Vertex *v = mesh->vertices[vtcs[i]];
+			  int idx = l.add_point(v->x, v->y, v->z);
+			  vtx_pt[i] = idx;
+		  }
 
-		int id;
-		switch (element->get_mode()) {
-			case HERMES_MODE_HEX:
-				id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, vtx_pt);
-				break;
+		  int id;
+		  switch (element->get_mode()) {
+			  case HERMES_MODE_HEX:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, vtx_pt);
+				  break;
 
-			case HERMES_MODE_TET:
-				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
-				break;
+			  case HERMES_MODE_TET:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
+				  break;
 
-			default:
-				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-				break;
-		}
-    delete [] vtcs;
-    delete [] vtx_pt;
-		l.set_cell_data(id, 0);
-	}
+			  default:
+				  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+				  break;
+		  }
+      delete [] vtcs;
+      delete [] vtx_pt;
+		  l.set_cell_data(id, 0);
+	  }
 
 	Vtk::FileFormatter fmt(&l);
 	fmt.write(out_file, "mesh");
@@ -733,44 +736,45 @@ void VtkOutputEngine::out_bc_vtk(Mesh *mesh, const char *name)
 	_F_
 	Vtk::Linearizer l;
 	// add cells
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
 
-		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(element, iface);
-			Facet *facet = mesh->facets[fid];
-			if (facet->type == Facet::INNER) continue;
+		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
+			  unsigned int fid = mesh->get_facet_id(element, iface);
+			  Facet *facet = mesh->facets[fid];
+			  if (facet->type == Facet::INNER) continue;
 
-			int nv = element->get_num_face_vertices(iface);
-			unsigned int *vtcs = new unsigned int[nv];
-			element->get_face_vertices(iface, vtcs);
+			  int nv = element->get_num_face_vertices(iface);
+			  unsigned int *vtcs = new unsigned int[nv];
+			  element->get_face_vertices(iface, vtcs);
 
-			int *vtx_pt = new int[nv];		// indices of the vertices for current element
-			for (int i = 0; i < nv; i++) {
-				Vertex *v = mesh->vertices[vtcs[i]];
-				vtx_pt[i] = l.add_point(v->x, v->y, v->z);
-			}
+			  int *vtx_pt = new int[nv];		// indices of the vertices for current element
+			  for (int i = 0; i < nv; i++) {
+				  Vertex *v = mesh->vertices[vtcs[i]];
+				  vtx_pt[i] = l.add_point(v->x, v->y, v->z);
+			  }
 
-			int id;
-			switch (facet->mode) {
-				case HERMES_MODE_TRIANGLE:
-					id = l.add_cell(Vtk::Linearizer::Cell::Tri, Tri::NUM_VERTICES, vtx_pt);
-					break;
-				case HERMES_MODE_QUAD:
-					id = l.add_cell(Vtk::Linearizer::Cell::Quad, Quad::NUM_VERTICES, vtx_pt);
-					break;
-				default:
-					EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-					break;
-			}
+			  int id;
+			  switch (facet->mode) {
+				  case HERMES_MODE_TRIANGLE:
+					  id = l.add_cell(Vtk::Linearizer::Cell::Tri, Tri::NUM_VERTICES, vtx_pt);
+					  break;
+				  case HERMES_MODE_QUAD:
+					  id = l.add_cell(Vtk::Linearizer::Cell::Quad, Quad::NUM_VERTICES, vtx_pt);
+					  break;
+				  default:
+					  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+					  break;
+			  }
       
-      delete [] vtcs;
-      delete [] vtx_pt;
-			Boundary *bnd = mesh->boundaries[facet->right];
-			l.set_cell_data(id, bnd->marker);
-		}
+        delete [] vtcs;
+        delete [] vtx_pt;
+			  Boundary *bnd = mesh->boundaries[facet->right];
+			  l.set_cell_data(id, bnd->marker);
+		  }
 
-	}
+	  }
 
 	Vtk::FileFormatter fmt(&l);
 	fmt.write(out_file, name);
@@ -781,67 +785,68 @@ void VtkOutputEngine::out_orders_vtk(Space *space, const char *name)
 	_F_
 	Vtk::Linearizer l;
 	Mesh *mesh = space->get_mesh();
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Ord3 ord = space->get_element_order(idx);
-		Element *element = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Ord3 ord = space->get_element_order(it->first);
+		  Element *element = mesh->elements[it->first];
 
-		int nv = element->get_num_vertices();
-		unsigned int *vtcs = new unsigned int[nv];
-		element->get_vertices(vtcs);
+		  int nv = element->get_num_vertices();
+		  unsigned int *vtcs = new unsigned int[nv];
+		  element->get_vertices(vtcs);
 
-		int *vtx_pt = new int[nv];
-		for (int i = 0; i < nv; i++) {
-			Vertex *v = mesh->vertices[vtcs[i]];
-			int idx = l.add_point(v->x, v->y, v->z);
-			vtx_pt[i] = idx;
-		}
+		  int *vtx_pt = new int[nv];
+		  for (int i = 0; i < nv; i++) {
+			  Vertex *v = mesh->vertices[vtcs[i]];
+			  int idx = l.add_point(v->x, v->y, v->z);
+			  vtx_pt[i] = idx;
+		  }
 
-		int id;
-		switch (element->get_mode()) {
-			case HERMES_MODE_HEX:
-				for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-					unsigned int fvtcs[Quad::NUM_VERTICES];
-					element->get_face_vertices(iface, fvtcs);
+		  int id;
+		  switch (element->get_mode()) {
+			  case HERMES_MODE_HEX:
+				  for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
+					  unsigned int fvtcs[Quad::NUM_VERTICES];
+					  element->get_face_vertices(iface, fvtcs);
 
-					Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]],
-					                 mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
-					int fctr = l.add_point((v[0]->x + v[2]->x) / 2.0,
-					                       (v[0]->y + v[2]->y) / 2.0,
-					                       (v[0]->z + v[2]->z) / 2.0);
+					  Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]],
+					                   mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
+					  int fctr = l.add_point((v[0]->x + v[2]->x) / 2.0,
+					                         (v[0]->y + v[2]->y) / 2.0,
+					                         (v[0]->z + v[2]->z) / 2.0);
 
-					const int *fedges = element->get_face_edges(iface);
-					for (int ie = 0; ie < Quad::NUM_EDGES; ie++) {
-						int d;
-						int iedge = fedges[ie];		// local edge number
-						if (iedge == 0 || iedge == 2 || iedge == 8 || iedge == 10) d = ord.x;
-						else if (iedge == 1 || iedge == 3 || iedge == 9 || iedge == 11) d = ord.y;
-						else if (iedge == 4 || iedge == 5 || iedge == 6 || iedge == 7) d = ord.z;
-						else assert(false);
+					  const int *fedges = element->get_face_edges(iface);
+					  for (int ie = 0; ie < Quad::NUM_EDGES; ie++) {
+						  int d;
+						  int iedge = fedges[ie];		// local edge number
+						  if (iedge == 0 || iedge == 2 || iedge == 8 || iedge == 10) d = ord.x;
+						  else if (iedge == 1 || iedge == 3 || iedge == 9 || iedge == 11) d = ord.y;
+						  else if (iedge == 4 || iedge == 5 || iedge == 6 || iedge == 7) d = ord.z;
+						  else assert(false);
 
-						int cell_pts[3];		// triangle vertices
-						const int *edge_pt_idx = element->get_edge_vertices(iedge);
+						  int cell_pts[3];		// triangle vertices
+						  const int *edge_pt_idx = element->get_edge_vertices(iedge);
 
-						cell_pts[0] = vtx_pt[edge_pt_idx[0]];
-						cell_pts[1] = vtx_pt[edge_pt_idx[1]];
-						cell_pts[2] = fctr;
+						  cell_pts[0] = vtx_pt[edge_pt_idx[0]];
+						  cell_pts[1] = vtx_pt[edge_pt_idx[1]];
+						  cell_pts[2] = fctr;
 
-						id = l.add_cell(Vtk::Linearizer::Cell::Tri, Tri::NUM_VERTICES, cell_pts);
-						l.set_cell_data(id, d);
-					}
-				}
-				break;
+						  id = l.add_cell(Vtk::Linearizer::Cell::Tri, Tri::NUM_VERTICES, cell_pts);
+						  l.set_cell_data(id, d);
+					  }
+				  }
+				  break;
 
-			case HERMES_MODE_TET:
-				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
-				l.set_cell_data(id, ord.order);
-				break;
+			  case HERMES_MODE_TET:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
+				  l.set_cell_data(id, ord.order);
+				  break;
     
-			default:
-				error(HERMES_ERR_NOT_IMPLEMENTED);
-		}
-    delete [] vtcs;
-    delete [] vtx_pt;
-	}
+			  default:
+				  error(HERMES_ERR_NOT_IMPLEMENTED);
+		  }
+      delete [] vtcs;
+      delete [] vtx_pt;
+	  }
 
 	Vtk::FileFormatter fmt(&l);
 	fmt.write(out_file, name);
@@ -852,37 +857,38 @@ void VtkOutputEngine::out_elem_markers(Mesh *mesh, const char *name)
 	_F_
 	Vtk::Linearizer l;
 	// add cells
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
 
-		int nv = element->get_num_vertices();
-		unsigned int *vtcs = new unsigned int[nv];
-		element->get_vertices(vtcs);
+		  int nv = element->get_num_vertices();
+		  unsigned int *vtcs = new unsigned int[nv];
+		  element->get_vertices(vtcs);
 
-		int *vtx_pt = new int[nv];		// indices of the vertices for current element
-		for (int i = 0; i < nv; i++) {
-			Vertex *v = mesh->vertices[vtcs[i]];
-			vtx_pt[i] = l.add_point(v->x, v->y, v->z);
-		}
+		  int *vtx_pt = new int[nv];		// indices of the vertices for current element
+		  for (int i = 0; i < nv; i++) {
+			  Vertex *v = mesh->vertices[vtcs[i]];
+			  vtx_pt[i] = l.add_point(v->x, v->y, v->z);
+		  }
 
-		int id;
-		switch (element->get_mode()) {
-			case HERMES_MODE_HEX:
-				id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, vtx_pt);
-				break;
+		  int id;
+		  switch (element->get_mode()) {
+			  case HERMES_MODE_HEX:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Hex, Hex::NUM_VERTICES, vtx_pt);
+				  break;
 
-			case HERMES_MODE_TET:
-				id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
-				break;
+			  case HERMES_MODE_TET:
+				  id = l.add_cell(Vtk::Linearizer::Cell::Tetra, Tetra::NUM_VERTICES, vtx_pt);
+				  break;
 
-			default:
-				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-				break;
-		}
-		l.set_cell_data(id, element->marker);
-    delete [] vtcs;
-    delete [] vtx_pt;
-	}
+			  default:
+				  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+				  break;
+		  }
+		  l.set_cell_data(id, element->marker);
+      delete [] vtcs;
+      delete [] vtx_pt;
+	  }
 
 	Vtk::FileFormatter fmt(&l);
 	fmt.write(out_file, name);

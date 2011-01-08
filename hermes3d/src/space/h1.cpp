@@ -121,36 +121,39 @@ void H1Space::assign_dofs_internal() {
 	BitJudyArray init_edges;
 	BitJudyArray init_faces;
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		// vertex dofs
-		for (int ivtx = 0; ivtx < e->get_num_vertices(); ivtx++) {
-			unsigned int vid = e->get_vertex(ivtx);
-			VertexData *vd = vn_data[vid];
-			assert(vd != NULL);
-			if (!init_vertices.is_set(vid) && !vd->ced) {
-				assign_vertex_dofs(vid);
-				init_vertices.set(vid);
-			}
-		}
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  // vertex dofs
+		  for (int ivtx = 0; ivtx < e->get_num_vertices(); ivtx++) {
+			  unsigned int vid = e->get_vertex(ivtx);
+			  VertexData *vd = vn_data[vid];
+			  assert(vd != NULL);
+			  if (!init_vertices.is_set(vid) && !vd->ced) {
+				  assign_vertex_dofs(vid);
+				  init_vertices.set(vid);
+			  }
+		  }
+	  }
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		// edge dofs
-		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			unsigned int eid = mesh->get_edge_id(e, iedge);
-			EdgeData *ed = en_data[eid];
-			assert(ed != NULL);
-			if (!init_edges.is_set(eid) && !ed->ced) {
-				assign_edge_dofs(eid);
-				init_edges.set(eid);
-			}
-		}
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  // edge dofs
+		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
+			  unsigned int eid = mesh->get_edge_id(e, iedge);
+			  EdgeData *ed = en_data[eid];
+			  assert(ed != NULL);
+			  if (!init_edges.is_set(eid) && !ed->ced) {
+				  assign_edge_dofs(eid);
+				  init_edges.set(eid);
+			  }
+		  }
+	  }
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
 		// face dofs
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
 			unsigned int fid = mesh->get_facet_id(e, iface);
@@ -163,9 +166,9 @@ void H1Space::assign_dofs_internal() {
 		}
 	}
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		assign_bubble_dofs(idx);
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active)
+		  assign_bubble_dofs(it->first);
 }
 
 // assembly lists ////

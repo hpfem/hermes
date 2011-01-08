@@ -722,17 +722,14 @@ Mesh::~Mesh() {
 
 void Mesh::free() {
 	_F_
-	for (unsigned int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i))
-		delete vertices[i];
-	vertices.remove_all();
+	for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++)
+    delete it->second;
 
-	for (unsigned int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i))
-		delete boundaries[i];
-	boundaries.remove_all();
+	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+    delete it->second;
 
-	for (unsigned int i = elements.first(); i != INVALID_IDX; i = elements.next(i))
-		delete elements[i];
-	elements.remove_all();
+	for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++)
+    delete it->second;
 
 	for (unsigned int i = facets.first(); i != INVALID_IDX; i = facets.next(i))
 		delete facets.get(i);
@@ -747,18 +744,29 @@ void Mesh::copy(const Mesh &mesh) {
 	if (&mesh == this) warning("Copying mesh into itself.");
 	free();
 
+
+  for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++)
+    delete it->second;
+
+	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+    delete it->second;
+
+	for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++)
+    delete it->second;
+
+
 	// copy vertices
-	for (unsigned int i = mesh.vertices.first(); i != INVALID_IDX; i = mesh.vertices.next(i))
-		this->vertices.set(i, mesh.vertices[i]->copy());
+  for(std::map<unsigned int, Vertex*>::const_iterator it = mesh.vertices.begin(); it != mesh.vertices.end(); it++)
+    this->vertices[it->first] = it->second->copy();
 
 	// copy boundaries
-	for (unsigned int i = mesh.boundaries.first(); i != INVALID_IDX; i = mesh.boundaries.next(i))
-		this->boundaries.set(i, mesh.boundaries[i]->copy());
+	for(std::map<unsigned int, Boundary*>::const_iterator it = mesh.boundaries.begin(); it != mesh.boundaries.end(); it++)
+    this->boundaries[it->first] = it->second->copy();
 
 	// copy elements, facets and edges
-	for (unsigned int i = mesh.elements.first(); i != INVALID_IDX; i = mesh.elements.next(i)) {
-		Element *e = mesh.elements[i];
-		this->elements.set(i, e->copy());
+	for(std::map<unsigned int, Element*>::const_iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
+    Element *e = it->second;
+    this->elements[it->first] = e->copy();
 
 		// copy mid points on edges and edges
 		unsigned int *emp = new unsigned int[e->get_num_edges()];
@@ -813,12 +821,12 @@ void Mesh::copy(const Mesh &mesh) {
 
 		unsigned int *face_idxs = new unsigned int[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
 		if ((unsigned) facet->left != INVALID_IDX) {
-			Element *left_e = mesh.elements[facet->left];
+			Element *left_e = mesh.elements.at(facet->left);
 			int nvtcs = left_e->get_face_vertices(facet->left_face_num, face_idxs);
 			this->facets.set(face_idxs + 0, nvtcs, facet->copy());
 		}
 		else if ((unsigned) facet->right != INVALID_IDX && facet->type == Facet::INNER) {
-			Element *right_e = mesh.elements[facet->right];
+			Element *right_e = mesh.elements.at(facet->right);
 			int nvtcs = right_e->get_face_vertices(facet->right_face_num, face_idxs);
 			this->facets.set(face_idxs + 0, nvtcs, facet->copy());
 		}
@@ -839,14 +847,16 @@ void Mesh::copy_base(const Mesh &mesh) {
 
 	free();
 	// copy elements, facets and edges
-	for (unsigned int eid = mesh.elements.first(); eid <= mesh.nbase; eid = mesh.elements.next(eid)) {
-		Element *e = mesh.elements[eid];
+	for(std::map<unsigned int, Element*>::const_iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
+    if(it->first > mesh.nbase)
+      continue;
+    Element *e = it->second;
 
 		// vertices
 		for (int iv = 0; iv < e->get_num_vertices(); iv++) {
 			unsigned int vtx = e->get_vertex(iv);
-			if (!this->vertices.exists(vtx))
-				this->vertices.set(vtx, mesh.vertices[vtx]->copy());
+			if (this->vertices[vtx] == NULL)
+				this->vertices[vtx] = mesh.vertices.at(vtx)->copy();
 		}
 
 		// edges
@@ -869,23 +879,24 @@ void Mesh::copy_base(const Mesh &mesh) {
 				if (!this->facets.lookup(face_idxs + 0, nvts, facet)) {
 					// insert the facet
 					Facet *fcopy = facet->copy_base();
-					fcopy->left = eid;
+					fcopy->left = it->first;
 					this->facets.set(face_idxs + 0, nvts, fcopy);
 
 					// boundaries
 					if (facet->type == Facet::OUTER) {
 						unsigned int bnd_id = facet->right;
-						if (!this->boundaries.exists(bnd_id)) this->boundaries.set(bnd_id, mesh.boundaries[bnd_id]->copy());
+						if (this->boundaries[bnd_id] == NULL) 
+              this->boundaries[bnd_id] = mesh.boundaries.at(bnd_id)->copy();
 					}
 				}
 				else {
 					assert(facet->type == Facet::INNER);
-					facet->set_right_info(eid, iface);
+					facet->set_right_info(it->first, iface);
 				}
 			}
 		}
 
-		this->elements.set(eid, e->copy_base());
+		this->elements[it->first] = e->copy_base();
 	}
 
 	this->nbase = this->nactive = mesh.nbase;
@@ -910,23 +921,23 @@ unsigned int Mesh::get_edge_id(Element *e, int edge_num) const {
 
 void Mesh::dump() {
 	_F_
-	printf("Vertices (count = %lu)\n", vertices.count());
-	for (unsigned int i = vertices.first(); i != INVALID_IDX; i = vertices.next(i)) {
-		Vertex *v = vertices[i];
-		printf("  id = %d, ", i);
+	printf("Vertices (count = %lu)\n", vertices.size());
+  for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++) {
+		Vertex *v = it->second;
+    printf("  id = %d, ", it->first);
 		v->dump();
 	}
 
-	printf("Elements (count = %lu)\n", elements.count());
-	for (unsigned int i = elements.first(); i != INVALID_IDX; i = elements.next(i)) {
-		Element *e = elements[i];
+	printf("Elements (count = %lu)\n", elements.size());
+  for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++) {
+		Element *e = it->second;
 		printf("  ");
 		e->dump();
 	}
 
-	printf("Boundaries (count = %lu)\n", boundaries.count());
-	for (unsigned int i = boundaries.first(); i != INVALID_IDX; i = boundaries.next(i)) {
-		Boundary *b = boundaries[i];
+	printf("Boundaries (count = %lu)\n", boundaries.size());
+  for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++) {
+		Boundary *b = it->second;
 		printf("  ");
 		b->dump();
 	}
@@ -941,18 +952,26 @@ void Mesh::dump() {
 
 unsigned int Mesh::add_vertex(double x, double y, double z) {
 	_F_
-	unsigned int idx = vertices.count() + 1;
-	vertices.set(idx, new Vertex(x, y, z));
-	return idx;
+  unsigned int i;
+  for(i = 1; ; i++)
+    if(vertices[i] == NULL)
+      break;
+  vertices[i] = new Vertex(x, y, z);
+	return i;
 }
 
 Tetra *Mesh::create_tetra(unsigned int vtcs[]) {
 	_F_
 	Tetra *tetra = new Tetra(vtcs);
 	MEM_CHECK(tetra);
-	unsigned int id = elements.count() + 1;
-	elements.set(id, tetra);
-	tetra->id = id;
+	
+  unsigned int i;
+  for(i = 1; ; i++)
+    if(elements[i] == NULL)
+      break;
+  elements[i] = tetra;
+
+	tetra->id = i;
 
 	tetra->ref_all_nodes();
 
@@ -990,9 +1009,14 @@ Hex *Mesh::create_hex(unsigned int vtcs[]) {
 	// build up the element
 	Hex *hex = new Hex(vtcs);
 	MEM_CHECK(hex);
-	unsigned int id = elements.count() + 1;
-	elements.set(id, hex);
-	hex->id = id;
+	
+  unsigned int i;
+  for(i = 1; ; i++)
+    if(elements[i] == NULL)
+      break;
+  elements[i] = hex;
+
+	hex->id = i;
 
 	hex->ref_all_nodes();
 
@@ -1030,9 +1054,14 @@ Prism *Mesh::create_prism(unsigned int vtcs[]) {
 	_F_
 	Prism *prism = new Prism(vtcs);
 	MEM_CHECK(prism);
-	unsigned int id = elements.count() + 1;
-	elements.set(id, prism);
-	prism->id = id;
+
+  unsigned int i;
+  for(i = 1; ; i++)
+    if(elements[i] == NULL)
+      break;
+  elements[i] = prism;
+
+	prism->id = i;
 
 	prism->ref_all_nodes();
 
@@ -1072,9 +1101,14 @@ Boundary *Mesh::add_tri_boundary(unsigned int vtcs[], int marker) {
 	if (facets.lookup(vtcs + 0, Tri::NUM_VERTICES, facet)) {
 		Boundary *bdr = new BoundaryTri(marker);
 		MEM_CHECK(bdr);
-		unsigned int pos = boundaries.count() + 1;
-		boundaries.set(pos, bdr);
-		bdr->id = pos;
+
+    unsigned int i;
+    for(i = 1; ; i++)
+      if(boundaries[i] == NULL)
+        break;
+    boundaries[i] = bdr;
+
+		bdr->id = i;
 
 		facet->type = Facet::OUTER;
 		facet->set_right_info(bdr->id);
@@ -1091,9 +1125,14 @@ Boundary *Mesh::add_quad_boundary(unsigned int vtcs[], int marker) {
 	if (facets.lookup(vtcs + 0, Quad::NUM_VERTICES, facet)) {
 		Boundary *bdr = new BoundaryQuad(marker);
 		MEM_CHECK(bdr);
-		unsigned int pos = boundaries.count() + 1;
-		boundaries.set(pos, bdr);
-		bdr->id = pos;
+
+    unsigned int i;
+    for(i = 1; ; i++)
+      if(boundaries[i] == NULL)
+        break;
+    boundaries[i] = bdr;
+
+		bdr->id = i;
 
 		facet->type = Facet::OUTER;
 		facet->set_right_info(bdr->id);
@@ -1108,7 +1147,7 @@ void Mesh::ugh()
 {
 	_F_
 	// set the number of active/base elements
-	nactive = nbase = elements.count();
+	nactive = nbase = elements.size();
 
 	// set bnd flag for boundary edges
 	FOR_ALL_FACETS(idx, this){
@@ -1158,7 +1197,7 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 			return false;
 		}
 
-		Element *e = elements[eid];
+		Element *e = elements.at(eid);
 		int nv = e->get_num_face_vertices(face_num);
 		unsigned int *face_vtx = new unsigned int[nv];
 		e->get_face_vertices(face_num, face_vtx);
@@ -1187,7 +1226,7 @@ bool Mesh::can_refine_element(unsigned int eid, int reft) const {
 	_F_
 	bool can_refine = false;
 
-	Element *elem = elements.get(eid);
+	Element *elem = elements.at(eid);
 	assert(elem != NULL);
 	switch (elem->get_mode()) {
 		case HERMES_MODE_HEX: can_refine = can_refine_hex((Hex *) elem, reft); break;
@@ -1298,7 +1337,7 @@ bool Mesh::can_refine_hex(Hex *elem, int refinement) const {
 bool Mesh::refine_element(unsigned int id, int refinement) {
 	_F_
 	bool refined = false;
-	Element *elem = elements.get(id);
+	Element *elem = elements[id];
 	assert(elem != NULL);
 	if (can_refine_element(id, refinement)) {
 		switch (elem->get_mode()) {
@@ -2087,9 +2126,9 @@ Facet *Mesh::add_quad_facet(Facet::Type type, unsigned int left_elem, int left_i
 
 void Mesh::refine_all_elements(int refinement) {
 	_F_
-	FOR_ALL_ACTIVE_ELEMENTS(idx, this) {
-		refine_element(idx, refinement);
-	}
+	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+		if (it->second->used && it->second->active)
+      refine_element(it->first, refinement);
 }
 
 void Mesh::refine_by_criterion(int(*criterion)(Element* e), int depth) {
@@ -2107,8 +2146,8 @@ void Mesh::unrefine_all_elements() {
 unsigned int Mesh::create_midpoint(unsigned int a, unsigned int b) {
 	_F_
 	// get vertices
-	Vertex *v1 = vertices.get(a);
-	Vertex *v2 = vertices.get(b);
+	Vertex *v1 = vertices.at(a);
+	Vertex *v2 = vertices.at(b);
 	// create middle point
 	return add_vertex((v1->x + v2->x) / 2.0, (v1->y + v2->y) / 2.0, (v1->z + v2->z) / 2.0);
 }
@@ -2233,52 +2272,53 @@ void Mesh::regularize() {
 	// this parent facet) the same way. If it is active, we found hanging node of a  2. order and we refine this super parent.
 	// If it is inactive, hanging node of a higher order was found and we report an error.
 
-	FOR_ALL_ACTIVE_ELEMENTS(eid, this) {
-		Element *elem = elements[eid];
-		for (int iface = 0; iface < elem->get_num_faces(); iface++) {
-			unsigned int fid = get_facet_id(elem, iface);
-			Facet *facet = facets[fid];
-			assert(facet != NULL);
-			if (facet->lactive && !facet->ractive) {
-				if (facet->parent != INVALID_IDX) {
-					Facet *parent = facets.get(facet->parent);
-					if (parent->ractive) {
-						// OK: 1. order hanging node
-					}
-					else {
-						if (parent->parent != INVALID_IDX) {
-							Facet *super_parent = facets.get(parent->parent);
-							if (super_parent->ractive) {
-								refine_element(super_parent->right, H3D_H3D_H3D_REFT_HEX_XYZ);
-							}
-							else {
-								EXIT("Cannot handle hanging node of order > 1");
-							}
-						}
-					}
-				}
-			}
-			else if (!facet->lactive && facet->ractive) {
-				if (facet->parent != INVALID_IDX) {
-					Facet *parent = facets.get(facet->parent);
-					if (parent->lactive) {
-						// OK: 1. order hanging node
-					}
-					else {
-						if (parent->parent != INVALID_IDX) {
-							Facet *super_parent = facets.get(parent->parent);
-							if (super_parent->lactive) {
-								refine_element(super_parent->left, H3D_H3D_H3D_REFT_HEX_XYZ);
-							}
-							else {
-								EXIT("Cannot handle hanging node of order > 1");
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+  for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *elem = elements[it->first];
+		  for (int iface = 0; iface < elem->get_num_faces(); iface++) {
+			  unsigned int fid = get_facet_id(elem, iface);
+			  Facet *facet = facets[fid];
+			  assert(facet != NULL);
+			  if (facet->lactive && !facet->ractive) {
+				  if (facet->parent != INVALID_IDX) {
+					  Facet *parent = facets.get(facet->parent);
+					  if (parent->ractive) {
+						  // OK: 1. order hanging node
+					  }
+					  else {
+						  if (parent->parent != INVALID_IDX) {
+							  Facet *super_parent = facets.get(parent->parent);
+							  if (super_parent->ractive) {
+								  refine_element(super_parent->right, H3D_H3D_H3D_REFT_HEX_XYZ);
+							  }
+							  else {
+								  EXIT("Cannot handle hanging node of order > 1");
+							  }
+						  }
+					  }
+				  }
+			  }
+			  else if (!facet->lactive && facet->ractive) {
+				  if (facet->parent != INVALID_IDX) {
+					  Facet *parent = facets.get(facet->parent);
+					  if (parent->lactive) {
+						  // OK: 1. order hanging node
+					  }
+					  else {
+						  if (parent->parent != INVALID_IDX) {
+							  Facet *super_parent = facets.get(parent->parent);
+							  if (super_parent->lactive) {
+								  refine_element(super_parent->left, H3D_H3D_H3D_REFT_HEX_XYZ);
+							  }
+							  else {
+								  EXIT("Cannot handle hanging node of order > 1");
+							  }
+						  }
+					  }
+				  }
+			  }
+		  }
+	  }
 }
 
 void Mesh::refine_towards_boundary(int marker, int depth) {
@@ -2286,30 +2326,31 @@ void Mesh::refine_towards_boundary(int marker, int depth) {
 
 	if (depth == 0) return;
 
-	FOR_ALL_ACTIVE_ELEMENTS(eid, this) {
-		Element *e = elements[eid];
+	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = elements[it->first];
 
-		int split = H3D_SPLIT_NONE;
-		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = get_facet_id(e, iface);
-			Facet *facet = facets[fid];
+		  int split = H3D_SPLIT_NONE;
+		  for (int iface = 0; iface < e->get_num_faces(); iface++) {
+			  unsigned int fid = get_facet_id(e, iface);
+			  Facet *facet = facets[fid];
 
-			if (facet->type == Facet::OUTER) {
-				Boundary *bnd = boundaries[facet->right];
-				if (bnd->marker == marker) {
-					if (iface == 0 || iface == 1) split |= H3D_SPLIT_HEX_X;
-					else if (iface == 2 || iface == 3) split |= H3D_SPLIT_HEX_Y;
-					else if (iface == 4 || iface == 5) split |= H3D_SPLIT_HEX_Z;
-				}
-			}
-		}
+			  if (facet->type == Facet::OUTER) {
+				  Boundary *bnd = boundaries[facet->right];
+				  if (bnd->marker == marker) {
+					  if (iface == 0 || iface == 1) split |= H3D_SPLIT_HEX_X;
+					  else if (iface == 2 || iface == 3) split |= H3D_SPLIT_HEX_Y;
+					  else if (iface == 4 || iface == 5) split |= H3D_SPLIT_HEX_Z;
+				  }
+			  }
+		  }
 
-		int reft[] = {
-			H3D_REFT_HEX_NONE, H3D_REFT_HEX_X, H3D_REFT_HEX_Y, H3D_H3D_REFT_HEX_XY,
-			H3D_REFT_HEX_Z, H3D_H3D_REFT_HEX_XZ, H3D_H3D_REFT_HEX_YZ, H3D_H3D_H3D_REFT_HEX_XYZ
-		};
-		refine_element(eid, reft[split]);
-	}
+		  int reft[] = {
+			  H3D_REFT_HEX_NONE, H3D_REFT_HEX_X, H3D_REFT_HEX_Y, H3D_H3D_REFT_HEX_XY,
+			  H3D_REFT_HEX_Z, H3D_H3D_REFT_HEX_XZ, H3D_H3D_REFT_HEX_YZ, H3D_H3D_H3D_REFT_HEX_XYZ
+		  };
+      refine_element(it->first, reft[split]);
+	  }
 
 	refine_towards_boundary(marker, depth - 1);
 }
@@ -2318,22 +2359,23 @@ void Mesh::check_elem_oris()
 {
 	_F_
 	RefMap refmap(this);
-	FOR_ALL_ACTIVE_ELEMENTS(eid, this) {
-		Element *e = elements[eid];
-		refmap.set_active_element(e);
+  for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = it->second;
+		  refmap.set_active_element(e);
 
-		Ord3 ord;
-		if (e->get_mode() == HERMES_MODE_HEX) ord = Ord3(1, 1, 1);
-		else if (e->get_mode() == HERMES_MODE_TET) ord = Ord3(2);
-		else warning(HERMES_ERR_NOT_IMPLEMENTED);
-		Quad3D *quad = get_quadrature(e->get_mode());
-		int np = quad->get_num_points(ord);
-		QuadPt3D *pt = quad->get_points(ord);
+		  Ord3 ord;
+		  if (e->get_mode() == HERMES_MODE_HEX) ord = Ord3(1, 1, 1);
+		  else if (e->get_mode() == HERMES_MODE_TET) ord = Ord3(2);
+		  else warning(HERMES_ERR_NOT_IMPLEMENTED);
+		  Quad3D *quad = get_quadrature(e->get_mode());
+		  int np = quad->get_num_points(ord);
+		  QuadPt3D *pt = quad->get_points(ord);
 
-		double3x3 *m = refmap.get_ref_map(np, pt);
-		for (int i = 0; i < np; i++) {
-			if (det(m[i]) <= 0) error("Element #%ld has an incorrect orientation.", eid);
-		}
-		delete [] m;
-	}
+		  double3x3 *m = refmap.get_ref_map(np, pt);
+		  for (int i = 0; i < np; i++) {
+        if (det(m[i]) <= 0) error("Element #%ld has an incorrect orientation.", it->first);
+		  }
+		  delete [] m;
+	  }
 }

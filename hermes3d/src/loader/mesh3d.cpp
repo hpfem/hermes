@@ -330,17 +330,17 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// save vertices
 	fprintf(file, "# vertices\n");
-	fprintf(file, "%ld\n", mesh->vertices.count());
-	for (unsigned int i = mesh->vertices.first(); i != INVALID_IDX; i = mesh->vertices.next(i)) {
-		Vertex *v = mesh->vertices[i];
+	fprintf(file, "%ld\n", mesh->vertices.size());
+	for(std::map<unsigned int, Vertex*>::const_iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
+    Vertex *v = it->second;
 		fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
 	}
 	fprintf(file, "\n");
 
 	// elements
 	JudyArray<Element *> tet, hex, pri;
-	for (unsigned int i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
-		Element *elem = mesh->elements[i];
+	for(std::map<unsigned int, Element*>::const_iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++) {
+    Element *elem = it->second;
 		if (elem->active) {
 			switch (elem->get_mode()) {
 				case HERMES_MODE_TET: tet.add(elem); break;

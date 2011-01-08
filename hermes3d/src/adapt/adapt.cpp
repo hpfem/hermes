@@ -655,7 +655,7 @@ void Adapt::adapt(double thr)
 		if ((strategy == 1) && (err < thr * errors[esort[0][1]][esort[0][0] - 1]))
 			break;
 
-		assert(mesh[comp]->elements.exists(id));
+		assert(mesh[comp]->elements[id] != NULL);
 		Element *e = mesh[comp]->elements[id];
 #ifdef DEBUG_PRINT
 		printf("  - element #%d", id);
@@ -961,14 +961,15 @@ double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<So
   {
     k = 0;
     for (i = 0; i < num; i++)
-	    FOR_ALL_ACTIVE_ELEMENTS(eid, meshes[i]) {
-		    Element *e = meshes[i]->elements[eid];
-		    esort[k][0] = e->id;
-		    esort[k++][1] = i;
-		    if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
-          errors[i][e->id - 1] /= norms[i];
-	    }
-
+      for(std::map<unsigned int, Element*>::iterator it = meshes[i]->elements.begin(); it != meshes[i]->elements.end(); it++)
+		    if (it->second->used)
+			    if (it->second->active) {
+            Element *e = it->second;
+		        esort[k][0] = e->id;
+		        esort[k++][1] = i;
+		        if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+              errors[i][e->id - 1] /= norms[i];
+	        }
     assert(k == nact);
     cmp_err = errors;
     qsort(esort, nact, sizeof(int2), compare);
