@@ -117,9 +117,9 @@ int H1Space::get_element_ndofs(Ord3 order) {
 
 void H1Space::assign_dofs_internal() {
 	_F_
-	BitJudyArray init_vertices;
-	BitJudyArray init_edges;
-	BitJudyArray init_faces;
+	std::map<unsigned int, bool> init_vertices;
+	std::map<unsigned int, bool> init_edges;
+	std::map<unsigned int, bool> init_faces;
 
 	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
 		if (it->second->used && it->second->active) {
@@ -129,9 +129,9 @@ void H1Space::assign_dofs_internal() {
 			  unsigned int vid = e->get_vertex(ivtx);
 			  VertexData *vd = vn_data[vid];
 			  assert(vd != NULL);
-			  if (!init_vertices.is_set(vid) && !vd->ced) {
+			  if (!init_vertices[vid] && !vd->ced) {
 				  assign_vertex_dofs(vid);
-				  init_vertices.set(vid);
+				  init_vertices[vid] = true;
 			  }
 		  }
 	  }
@@ -144,9 +144,9 @@ void H1Space::assign_dofs_internal() {
 			  unsigned int eid = mesh->get_edge_id(e, iedge);
 			  EdgeData *ed = en_data[eid];
 			  assert(ed != NULL);
-			  if (!init_edges.is_set(eid) && !ed->ced) {
+			  if (!init_edges[eid] && !ed->ced) {
 				  assign_edge_dofs(eid);
-				  init_edges.set(eid);
+				  init_edges[eid] = true;
 			  }
 		  }
 	  }
@@ -159,9 +159,9 @@ void H1Space::assign_dofs_internal() {
 			unsigned int fid = mesh->get_facet_id(e, iface);
 			FaceData *fd = fn_data[fid];
 			assert(fd != NULL);
-			if (!init_faces.is_set(fid) && !fd->ced) {
+			if (!init_faces[fid] && !fd->ced) {
 				assign_face_dofs(fid);
-				init_faces.set(fid);
+				init_faces[fid] = true;
 			}
 		}
 	}

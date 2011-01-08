@@ -880,8 +880,8 @@ void Space::find_constraints()
 	face_ced.clear();
 
 	// modified breadth-first search
-	JudyArray<unsigned int> open;
-	BitJudyArray elms;
+	std::map<unsigned int, unsigned int> open;
+	std::map<unsigned int, bool> elms;
 
 	// first include all base elements
   for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
@@ -890,24 +890,32 @@ void Space::find_constraints()
 		    Element *e = mesh->elements[it->first];
 		    for (int iface = 0; iface < e->get_num_faces(); iface++) {
 			    unsigned int fid = mesh->get_facet_id(e, iface);
-			    if (!elms.is_set(fid)) {
-				    open.add(fid);
-				    elms.set(fid);
+			    if (!elms[fid]) {
+            unsigned int i;
+            for(i = 0; ; i++)
+              if(open.find(i) == open.end())
+                break;
+				    open[i] = fid;
+				    elms[fid] = true;
 			    }
 		    }
 	    }
 
-	for (unsigned int idx = open.first(); idx != INVALID_IDX; idx = open.next(idx)) {
-		unsigned int fid = open[idx];
+	for(std::map<unsigned int, unsigned int>::iterator it = open.begin(); it != open.end(); it++) {
+    unsigned int fid = it->second;
 		Facet *facet = mesh->facets[fid];
 
 		if ((unsigned) facet->left != INVALID_IDX) {
 			Element *e = mesh->elements[facet->left];
 			for (int iface = 0; iface < e->get_num_faces(); iface++) {
 				unsigned int fid = mesh->get_facet_id(e, iface);
-				if (!elms.is_set(fid)) {
-					open.add(fid);
-					elms.set(fid);
+				if (!elms[fid]) {
+					unsigned int i;
+            for(i = 0; ; i++)
+              if(open.find(i) == open.end())
+                break;
+				    open[i] = fid;
+					elms[fid] = true;
 				}
 			}
 		}
@@ -916,9 +924,13 @@ void Space::find_constraints()
 			Element *e = mesh->elements[facet->right];
 			for (int iface = 0; iface < e->get_num_faces(); iface++) {
 				unsigned int fid = mesh->get_facet_id(e, iface);
-				if (!elms.is_set(fid)) {
-					open.add(fid);
-					elms.set(fid);
+				if (!elms[fid]) {
+					unsigned int i;
+            for(i = 0; ; i++)
+              if(open.find(i) == open.end())
+                break;
+				    open[i] = fid;
+					elms[fid] = true;
 				}
 			}
 		}
@@ -926,16 +938,20 @@ void Space::find_constraints()
 		for (int i = 0; i < Facet::MAX_SONS; i++) {
 			unsigned int son = facet->sons[i];
 			if (son != INVALID_IDX) {
-				if (!elms.is_set(son)) {
-					open.add(son);
-					elms.set(son);
+				if (!elms[son]) {
+					unsigned int j;
+            for(j = 0; ; j++)
+              if(open.find(j) == open.end())
+                break;
+				    open[j] = son;
+					elms[son] = true;
 				}
 			}
 		}
 	}
 
-	for (unsigned int idx = open.first(); idx != INVALID_IDX; idx = open.next(idx)) {
-		unsigned int fid = open[idx];
+	for(std::map<unsigned int, unsigned int>::iterator it = open.begin(); it != open.end(); it++) {
+    unsigned int fid = it->second;
 		Facet *facet = mesh->facets[fid];
 		assert(facet != NULL);
 

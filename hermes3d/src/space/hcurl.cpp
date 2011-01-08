@@ -91,8 +91,8 @@ int HcurlSpace::get_element_ndofs(Ord3 order) {
 
 void HcurlSpace::assign_dofs_internal() {
 	_F_
-	BitJudyArray init_edges;
-	BitJudyArray init_faces;
+	std::map<unsigned int, bool> init_edges;
+	std::map<unsigned int, bool> init_faces;
 
 	// edge dofs
 	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
@@ -102,9 +102,9 @@ void HcurlSpace::assign_dofs_internal() {
 			  unsigned int eid = mesh->get_edge_id(e, iedge);
 			  EdgeData *ed = en_data[eid];
 			  assert(ed != NULL);
-			  if (!init_edges.is_set(eid) && !ed->ced) {
+			  if (!init_edges[eid] && !ed->ced) {
 				  assign_edge_dofs(eid);
-				  init_edges.set(eid);
+				  init_edges[eid];
 			  }
 		  }
 
@@ -113,9 +113,9 @@ void HcurlSpace::assign_dofs_internal() {
 			  unsigned int fid = mesh->get_facet_id(e, iface);
 			  FaceData *fd = fn_data[fid];
 			  assert(fd != NULL);
-			  if (!init_faces.is_set(fid) && !fd->ced) {
+			  if (!init_faces[fid] && !fd->ced) {
 				  assign_face_dofs(fid);
-				  init_faces.set(fid);
+				  init_faces[fid];
 			  }
 		  }
 
