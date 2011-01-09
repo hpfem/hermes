@@ -85,14 +85,13 @@ int main(int argc, char* argv[])
 {
   // Create an arbitrary Butcher's table.
 
-  /*
   // Implicit Euler.
   ButcherTable bt(1);
   bt.set_A(0, 0, 1.);
   bt.set_B(0, 1.);
   bt.set_C(0, 1.);
-  */
  
+  /*
   // SDIRK-22 method, see page 244 in Butcher's book.
   ButcherTable bt(2);
   double gamma = 1./sqrt(2.);
@@ -104,6 +103,7 @@ int main(int argc, char* argv[])
   bt.set_B(1, 1. - gamma);
   bt.set_C(0, 1. - gamma);
   bt.set_C(1, 1.);
+  */
 
   // Load the mesh.
   Mesh mesh;
