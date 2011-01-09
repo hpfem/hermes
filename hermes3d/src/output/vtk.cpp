@@ -230,7 +230,39 @@ public:
 	}
 
 public:
-	Map<double3, int> vertex_id;					// mapping: CEDKey => ced function index
+  struct VertexIdKey
+  {
+    double x, y, z;
+    VertexIdKey()
+    {
+      x = y = z = 0.0;
+    }
+    VertexIdKey(double x, double y, double z)
+    {
+      this->x = x;
+      this->y = x;
+      this->z = x;
+    };
+    bool operator<(const VertexIdKey & other) const
+    {
+      if(this->x < other.x)
+        return true;
+      else if(this->x > other.x)
+        return false;
+      else
+        if(this->y < other.y)
+          return true;
+        else if(this->y > other.y)
+          return false;
+        else
+            if(this->z < other.z)
+            return true;
+          else
+            return false;
+    };
+  };
+
+	std::map<VertexIdKey, int> vertex_id;					// mapping: CEDKey => ced function index
 	std::map<unsigned int, Vertex *> points;
 	std::map<unsigned int, Cell *> cells;
 	std::map<unsigned int, double> cell_data;
@@ -251,17 +283,16 @@ Linearizer::~Linearizer()
 int Linearizer::add_point(double x, double y, double z)
 {
 	_F_
-	double3 key = { x, y, z };
-	int idx;
-	if (vertex_id.lookup(key, idx))
-		return idx;
+	VertexIdKey key( x, y, z);
+  if (vertex_id.find(key) != vertex_id.end())
+		return vertex_id[key];
 	else {
     unsigned int i;
     for(i = 0; ; i++)
       if(points[i] == NULL)
         break;
     points[i] = new Vertex(x, y, z);
-		vertex_id.set(key, i);
+		vertex_id[key] = i;
 		return i;
 	}
 }
@@ -741,7 +772,7 @@ void VtkOutputEngine::out_bc_vtk(Mesh *mesh, const char *name)
       Element *element = mesh->elements[it->first];
 
 		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			  unsigned int fid = mesh->get_facet_id(element, iface);
+			  Facet::Key fid = mesh->get_facet_id(element, iface);
 			  Facet *facet = mesh->facets[fid];
 			  if (facet->type == Facet::INNER) continue;
 

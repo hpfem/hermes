@@ -145,19 +145,19 @@ double Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &o
 	ProjKey key(split, son, order);
 	double err;
   Projection *proj;
-	if (proj_err.lookup(key, err))
-		return err;
+  if (proj_err.find(key) != proj_err.end())
+    return proj_err.find(key)->second;
 	else {
     switch (ss->get_type()) {
       case 1:
         proj = new H1ProjectionIpol(rsln, e, ss);
 		    err = proj->get_error(split, son, order);
-		    proj_err.set(key, err);
+		    proj_err[key] = err;
         break;
       case 2:
         proj = new HCurlProjection(rsln, e, ss);
 		    err = proj->get_error(split, son, order);
-		    proj_err.set(key, err);
+		    proj_err[key] = err;
         break;
     }
     delete proj;
@@ -715,7 +715,7 @@ void Adapt::adapt(double thr)
 		err0 = err;
 		processed_error += err;
 
-		proj_err.remove_all();
+		proj_err.clear();
 	}
 
 	for (int j = 0; j < num; j++)

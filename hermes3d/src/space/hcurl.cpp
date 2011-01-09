@@ -91,15 +91,15 @@ int HcurlSpace::get_element_ndofs(Ord3 order) {
 
 void HcurlSpace::assign_dofs_internal() {
 	_F_
-	std::map<unsigned int, bool> init_edges;
-	std::map<unsigned int, bool> init_faces;
+	std::map<Edge::Key, bool> init_edges;
+	std::map<Facet::Key, bool> init_faces;
 
 	// edge dofs
 	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
 		if (it->second->used && it->second->active) {
       Element *e = mesh->elements[it->first];
 		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			  unsigned int eid = mesh->get_edge_id(e, iedge);
+			  Edge::Key eid = mesh->get_edge_id(e, iedge);
 			  EdgeData *ed = en_data[eid];
 			  assert(ed != NULL);
 			  if (!init_edges[eid] && !ed->ced) {
@@ -110,7 +110,7 @@ void HcurlSpace::assign_dofs_internal() {
 
 		  // face dofs
 		  for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			  unsigned int fid = mesh->get_facet_id(e, iface);
+			  Facet::Key fid = mesh->get_facet_id(e, iface);
 			  FaceData *fd = fn_data[fid];
 			  assert(fd != NULL);
 			  if (!init_faces[fid] && !fd->ced) {
@@ -160,7 +160,7 @@ void HcurlSpace::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 
 void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
-	unsigned int edge = mesh->get_edge_id(elem, iedge);
+  Edge::Key edge = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge];
 	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
@@ -168,7 +168,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	int num_fns;
 	if (enode->ced) {
 		assert(enode->edge_ncomponents > 0);
-		unsigned int edge_id = enode->edge_baselist[0].edge_id;
+    Edge::Key edge_id = enode->edge_baselist[0].edge_id;
 		num_fns = en_data[edge_id]->n;
 	}
 	else
@@ -207,7 +207,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 void HcurlSpace::calc_face_boundary_projection(Element *elem, int iface) {
 	_F_
-	unsigned int facet_idx = mesh->get_facet_id(elem, iface);
+	Facet::Key facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
 	if (fnode->bc_type != BC_ESSENTIAL) return;

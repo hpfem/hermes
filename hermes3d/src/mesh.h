@@ -26,15 +26,6 @@ class MeshLoader;
 
 #include "h3d_common.h"
 
-#include "../../hermes_common/mapord.h"
-
-/// Iterates over all mesh edge indices.
-///
-/// @param idx  Edge hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_EDGES(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->edges.first(); (idx) != INVALID_IDX; (idx) = (mesh)->edges.next((idx)))
-
 /// Iterates over all mesh face indices.
 ///
 /// @param idx  Face hash table index.
@@ -103,10 +94,74 @@ public:
 	// for debugging
 	void dump();
 
-	Edge();
-//	virtual ~Edge();
+  struct Key
+  {
+    unsigned int * vtcs;
+    unsigned int size;
+    Key()
+    {
+      vtcs = NULL;
+      size = 0;
+    }
+    Key(unsigned int vtcs_ [], unsigned int size_)
+    {
+      this->size = size_;
+      this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        this->vtcs[i] = vtcs_[i];
+    };
+    Key(const Key &b)
+    {
+      size = b.size;
+      vtcs = new unsigned int[size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+    };
+    ~Key()
+    {
+      if(size > 0)
+        delete [] vtcs;
+    };
+    bool operator <(const Key & other) const
+    {
+      if(this->size < other.size)
+        return true;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return true;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
 
-	bool is_active() { return ref > 0; }
+      return false;
+    };
+    bool operator ==(const Key & other) const
+    {
+      if(this->size < other.size)
+        return false;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return false;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+
+      return true;
+    };
+
+    bool operator !=(const Key & other) const
+    {
+      return (!((*this)==other));
+    };
+  };
+  static Key invalid_key;
+  Edge();
+	
+  bool is_active() { return ref > 0; }
 };
 
 
@@ -128,6 +183,10 @@ public:
 	static const int NUM_VERTICES = 4;
 	static const int NUM_EDGES = 4;
 };
+
+#ifndef INVALID_IDX
+#define INVALID_IDX					((unsigned int) -1)
+#endif
 
 
 /// Stores information about neighboring elements
@@ -181,8 +240,74 @@ public:
 	unsigned ractive:1;			/// information for the right is active; 1 - active; 0 - inactive
 	unsigned ref_mask:2;		/// how is the facet divided (0 - not divived, 1 - horz, 2 - vert, 3 - both)
 
-	unsigned int parent;		/// ID of the parent facet
-	int sons[MAX_SONS];		/// ID of child facets (interpretation depend on ref_mask)
+  struct Key
+  {
+    unsigned int * vtcs;
+    unsigned int size;
+    Key()
+    {
+      vtcs = NULL;
+      size = 0;
+    }
+    Key(unsigned int vtcs_ [], unsigned int size_)
+    {
+      this->size = size_;
+      this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        this->vtcs[i] = vtcs_[i];
+    };
+    ~Key()
+    {
+      if(size > 0)
+        delete [] vtcs;
+    };
+    Key(const Key &b)
+    {
+      size = b.size;
+      vtcs = new unsigned int[size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+    };
+    bool operator <(const Key & other) const
+    {
+      if(this->size < other.size)
+        return true;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return true;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+
+      return false;
+    };
+    bool operator ==(const Key & other) const
+    {
+      if(this->size < other.size)
+        return false;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return false;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+      return true;
+    };
+
+    bool operator !=(const Key & other) const
+    {
+      return (!(*this == other));
+    };
+
+  };
+  static Key invalid_key;
+  
+	Key parent;		/// Key of the parent facet
+	Key sons[MAX_SONS];		/// Key of child facets (interpretation depend on ref_mask)
 };
 
 
@@ -553,21 +678,18 @@ public:
 	/// Regularize mesh (only 1-irregularity rule implemented)
 	void regularize();
 
-	//
-	unsigned int get_facet_id(Element *e, int face_num) const;
-
-	unsigned int get_facet_id(int nv, ...) const;
+	Facet::Key get_facet_id(Element *e, int face_num) const;
 
 	/// Get ID of the edge
 	/// @param e Element
 	/// @param edge_num Local number of an edge on element e
 	/// @return ID of the edge on the element
-	unsigned int get_edge_id(Element *e, int edge_num) const;
+  Edge::Key get_edge_id(Element *e, int edge_num) const;
 	/// Get ID of the edge between a and b
 	/// @param[in] a Index (ID) of the first vertex
 	/// @param[in] b Index (ID) of the second vertex
 	/// @return ID of the edge, INVALID_IDX is edge does not exist
-	unsigned int get_edge_id(unsigned int a, unsigned int b) const;
+	Edge::Key get_edge_id(unsigned int a, unsigned int b) const;
 	/// Get state of an edge
 	/// @param eidx ID of an edge
 	/// @return true is edge is active, otherwise false
@@ -591,7 +713,7 @@ public:
 	/// Get the facing facet
 	/// @param[in] fid ID of the facet
 	/// @param[in] elem_id ID of the element
-	unsigned int get_facing_facet(unsigned int fid, unsigned int elem_id);
+	Facet::Key get_facing_facet(Facet::Key fid, unsigned int elem_id);
 
 	Boundary *add_tri_boundary(unsigned int vtcs[], int marker);
 	Boundary *add_quad_boundary(unsigned int vtcs[], int marker);
@@ -600,13 +722,15 @@ public:
 
 	// data
   std::map<unsigned int, Vertex *>   vertices;
-	MapOrd<Edge>      edges;
+	std::map<Edge::Key, Edge *>      edges;
 	std::map<unsigned int, Element *>  elements;
 	std::map<unsigned int, Boundary *> boundaries;
-	MapOrd<Facet *>   facets;
+  std::map<Facet::Key, Facet *> facets;
 
 protected:
-	unsigned int nbase;							/// number of base elements
+
+	
+  unsigned int nbase;							/// number of base elements
 	unsigned int nactive;						/// number of active elements
 
 	Tetra *create_tetra(unsigned int vtcs[]);
@@ -649,8 +773,32 @@ protected:
 	/// @return Pointer to the newly created facet
 	Facet *add_quad_facet(Facet::Type type, unsigned int left_elem, int left_iface, unsigned int right_elem, int right_iface);
 
+  struct MidPointKey {
+    unsigned int a;
+    unsigned int b;
+    MidPointKey() {
+      this->a = 0;
+      this->b = 0;
+    };
+    MidPointKey(unsigned int a, unsigned int b) {
+      this->a = a;
+      this->b = b;
+    };
+    bool operator<(const MidPointKey & other) const {
+      if(this->a < other.a)
+        return true;
+      else if(this->a > other.a)
+        return false;
+      else
+        if(this->b < other.b)
+          return true;
+        else if(this->b > other.b)
+          return false;
+    };
+  };
+
 	// midpoints
-	MapHSOrd midpoints;
+	std::map<MidPointKey, unsigned int> midpoints;
 
 	/// Adds a midpoint as a vertex
 	/// @param[in] a index of the first vertex

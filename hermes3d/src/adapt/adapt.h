@@ -209,13 +209,29 @@ protected:
 		int son;
 		Ord3 order;			// element order
 
+    bool operator <(const ProjKey & other) const {
+      if(this->split < other.split)
+        return true;
+      else if(this->split > other.split)
+        return false;
+      else
+        if(this->son < other.son)
+          return true;
+        else if(this->son > other.son)
+          return false;
+        else
+          if(this->order.order < other.order.order)
+            return true;
+          else return false;
+    };
+
 		ProjKey(int t, int s, const Ord3 &o) {
 			split = t;
 			son = s;
 			order = o;
 		}
 	};
-	Map<ProjKey, double> proj_err;				// cache for projection errors
+	std::map<ProjKey, double> proj_err;				// cache for projection errors
 
 	// debugging
 	FILE *log_file;

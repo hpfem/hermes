@@ -101,14 +101,35 @@ protected:
 			this->sub_idx = sub_idx;
 			this->ss_id = ss_id;
 		}
+    bool operator <(const fn_key_t & other) const {
+      if(this->index < other.index)
+        return true;
+      else if(this->index > other.index)
+        return false;
+      else
+        if(this->order < other.order)
+          return true;
+        else if(this->order > other.order)
+          return false;
+        else
+          if(this->sub_idx < other.sub_idx)
+            return true;
+          else if(this->sub_idx > other.sub_idx)
+            return false;
+          else
+            if(this->ss_id < other.ss_id)
+              return true;
+            else
+              return false;
+    };
 	};
 
 	struct FnCache {
 		std::map<unsigned int, double *> jwt;			// jacobian x weight
 		std::map<unsigned int, Geom<double> > e;		// geometries
-		Map<fn_key_t, sFunc*> fn;		// shape functions
-		Map<fn_key_t, mFunc*> ext;		// external functions
-		Map<fn_key_t, mFunc*> sln;		// sln from prev iter
+		std::map<fn_key_t, sFunc*> fn;		// shape functions
+		std::map<fn_key_t, mFunc*> ext;		// external functions
+		std::map<fn_key_t, mFunc*> sln;		// sln from prev iter
 
 		~FnCache();
 		void free();

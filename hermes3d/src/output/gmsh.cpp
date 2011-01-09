@@ -700,7 +700,7 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 		if (it->second->used && it->second->active) {
       Element *element = mesh->elements[it->first];
 		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			  unsigned int fid = mesh->get_facet_id(element, iface);
+        Facet::Key fid = mesh->get_facet_id(element, iface);
 			  Facet *facet = mesh->facets[fid];
 			  if (facet->type == Facet::OUTER) fc++;
 		  }
@@ -732,7 +732,7 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 			  int nv = element->get_num_face_vertices(iface);
 			  unsigned int *vtcs = new unsigned int[nv];
 			  element->get_face_vertices(iface, vtcs);
-			  unsigned int fid = mesh->get_facet_id(element, iface);
+        Facet::Key fid = mesh->get_facet_id(element, iface);
 			  Facet *facet = mesh->facets[fid];
 			  if (facet->type == Facet::INNER) continue;
 
@@ -763,7 +763,7 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 		if (it->second->used && it->second->active) {
 		  Element *element = mesh->elements[it->first];
 		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			  unsigned int fid = mesh->get_facet_id(element, iface);
+        Facet::Key fid = mesh->get_facet_id(element, iface);
 			  Facet *facet = mesh->facets[fid];
 			  if (facet->type == Facet::INNER) continue;
 
@@ -799,8 +799,42 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	// HEX specific
 	std::map<unsigned int, Vertex *> out_vtcs;	// vertices
 	std::map<unsigned int, int> vtx_pt;			// mapping from mesh vertex id to output vertex id
-	MapHSOrd face_pts;			// id of points on faces
-	MapHSOrd ctr_pts;			// id of points in the center
+  
+  struct PtsKey {
+    unsigned int *vtcs;
+    unsigned int size;
+
+    PtsKey() {
+      size = 0;
+      vtcs = NULL;
+    }
+
+    ~PtsKey() {
+      if(size > 0)
+        delete [] vtcs;
+    }
+    PtsKey(unsigned int *vtcs_, unsigned int size_) {
+      if(vtcs != NULL)
+        delete [] vtcs;
+      size = size_;
+      vtcs = new unsigned int[size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = vtcs_[i];
+    };
+    bool operator<(const PtsKey & other) const{
+      if(size < other.size)
+        return true;
+      else if(size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < size; i++)
+          if(vtcs[i] < other.vtcs[i])
+            return true;
+        return false;
+    };
+  };
+	std::map<PtsKey, unsigned int> face_pts;			// id of points on faces
+  std::map<PtsKey, unsigned int> ctr_pts;			// id of points in the center
 
 	// nodes
 	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
@@ -825,8 +859,8 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 			  element->get_face_vertices(iface, fvtcs);
 
 			  unsigned int k[] = { fvtcs[0], fvtcs[1], fvtcs[2], fvtcs[3] };
-			  unsigned int idx = INVALID_IDX;
-			  if (!face_pts.lookup(k, Quad::NUM_VERTICES, idx)) {
+        PtsKey key(k, Quad::NUM_VERTICES);
+        if (face_pts.find(key) == face_pts.end()) {
 				  // create new vertex
 				  Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]], mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
 				  Vertex *fcenter = new Vertex((v[0]->x + v[2]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[2]->z) / 2.0);
@@ -835,15 +869,15 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
             if(out_vtcs[j] == NULL)
               break;
           out_vtcs[j] = fcenter;
-				  face_pts.set(k, Quad::NUM_VERTICES, j);
+				  face_pts[key] = j;
 			  }
         delete [] fvtcs;
 		  }
 
 
 		  unsigned int c[] = { vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7] };
-		  unsigned int idx = INVALID_IDX;
-		  if (!ctr_pts.lookup(c, Hex::NUM_VERTICES, idx)) {
+      PtsKey key(c, Hex::NUM_VERTICES);
+      if (ctr_pts.find(key) == ctr_pts.end()) {
 			  // create new vertex
 			  Vertex *v[4] = { mesh->vertices[vtcs[0]], mesh->vertices[vtcs[1]], mesh->vertices[vtcs[3]], mesh->vertices[vtcs[4]] };
 			  Vertex *center = new Vertex((v[0]->x + v[1]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[3]->z) / 2.0);
@@ -852,7 +886,7 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
           if(out_vtcs[j] == NULL)
             break;
         out_vtcs[j] = center;
-			  ctr_pts.set(c, Hex::NUM_VERTICES, j);
+			  ctr_pts[key] = j;
 		  }
       delete [] vtcs;
 	  }
@@ -886,13 +920,12 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 			  element->get_face_vertices(eface[iedge][0], fvtcs[0]);
 			  element->get_face_vertices(eface[iedge][1], fvtcs[1]);
 
-			  unsigned int fidx[2] = { INVALID_IDX, INVALID_IDX };
-			  face_pts.lookup(fvtcs[0], Quad::NUM_VERTICES, fidx[0]);
-			  face_pts.lookup(fvtcs[1], Quad::NUM_VERTICES, fidx[1]);
+        PtsKey key0(fvtcs[0], Quad::NUM_VERTICES);
+        PtsKey key1(fvtcs[1], Quad::NUM_VERTICES);
 
 			  unsigned int evtcs[2];
 			  element->get_edge_vertices(iedge, evtcs);
-			  unsigned int v[4] = { vtx_pt[evtcs[0]] + 1, fidx[0] + 1, vtx_pt[evtcs[1]] + 1, fidx[1] + 1 };
+			  unsigned int v[4] = { vtx_pt[evtcs[0]] + 1, face_pts[key0] + 1, vtx_pt[evtcs[1]] + 1, face_pts[key1] + 1 };
 			  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", id++, v[0], v[1], v[2], v[3]);
 		  }
       delete [] vtcs;

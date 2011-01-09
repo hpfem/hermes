@@ -118,8 +118,8 @@ int H1Space::get_element_ndofs(Ord3 order) {
 void H1Space::assign_dofs_internal() {
 	_F_
 	std::map<unsigned int, bool> init_vertices;
-	std::map<unsigned int, bool> init_edges;
-	std::map<unsigned int, bool> init_faces;
+	std::map<Edge::Key, bool> init_edges;
+	std::map<Facet::Key, bool> init_faces;
 
 	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
 		if (it->second->used && it->second->active) {
@@ -141,7 +141,7 @@ void H1Space::assign_dofs_internal() {
       Element *e = mesh->elements[it->first];
 		  // edge dofs
 		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			  unsigned int eid = mesh->get_edge_id(e, iedge);
+			  Edge::Key eid = mesh->get_edge_id(e, iedge);
 			  EdgeData *ed = en_data[eid];
 			  assert(ed != NULL);
 			  if (!init_edges[eid] && !ed->ced) {
@@ -156,7 +156,7 @@ void H1Space::assign_dofs_internal() {
       Element *e = mesh->elements[it->first];
 		// face dofs
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
+			Facet::Key fid = mesh->get_facet_id(e, iface);
 			FaceData *fd = fn_data[fid];
 			assert(fd != NULL);
 			if (!init_faces[fid] && !fd->ced) {
@@ -206,7 +206,7 @@ void H1Space::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 
 void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
-	unsigned int edge_id = mesh->get_edge_id(elem, iedge);
+	Edge::Key edge_id = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge_id];
 	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
@@ -216,7 +216,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 		if(enode->edge_ncomponents <= 0)
       num_fns = 0;
     else {
-		  unsigned int edge_id = enode->edge_baselist[0].edge_id;
+		  edge_id = enode->edge_baselist[0].edge_id;
 		  num_fns = en_data[edge_id]->n;
     }
 	}
@@ -327,7 +327,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	_F_
-	unsigned int facet_idx = mesh->get_facet_id(elem, iface);
+	Facet::Key facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
 	if (fnode->bc_type != BC_ESSENTIAL) return;
@@ -351,11 +351,11 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	// get total number of vertex + edge functions
 	int num_fns = elem->get_num_face_vertices(iface);
 	for (int edge = 0; edge < elem->get_num_face_edges(iface); edge++) {
-		unsigned int edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
+    Edge::Key edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
 		EdgeData *enode = en_data[edge_idx];
 		if (enode->ced && enode->edge_ncomponents > 0 && enode->edge_baselist != NULL) {
 			assert(enode->edge_ncomponents > 0);
-			unsigned int eid = enode->edge_baselist[0].edge_id;
+      Edge::Key eid = enode->edge_baselist[0].edge_id;
 			num_fns += en_data[eid]->n;
 		}
 		else
@@ -376,7 +376,7 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	}
 	// edge projection coefficients
 	for (int edge = 0; edge < elem->get_num_face_edges(iface); edge++) {
-		unsigned int edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
+		Edge::Key edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
 		EdgeData *enode = en_data[edge_idx];
 
 		if (enode->ced && enode->edge_ncomponents > 0 && enode->edge_baselist != NULL) {

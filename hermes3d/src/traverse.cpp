@@ -408,7 +408,7 @@ void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 
 	for (int iface = 0; iface < e->get_num_faces(); iface++) {
 		if (bnd[iface]) {
-			unsigned int fid = m->get_facet_id(e, iface);
+      Facet::Key fid = m->get_facet_id(e, iface);
 			Facet *facet = m->facets[fid];
 			Boundary *b = m->boundaries[facet->right];
 

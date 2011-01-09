@@ -300,10 +300,10 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 		}
 
 		// check if all "outer" faces have defined boundary condition
-		for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
-			Facet *facet = mesh->facets.get(i);
+    for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
+      Facet *facet = it->second;
 
-			if (((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
+      if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
 				fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
 				throw E_READ_ERROR;
 			}
@@ -382,9 +382,9 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// boundaries
 	std::map<unsigned int, Facet *> tri_facets, quad_facets;
-	for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
-		Facet *facet = mesh->facets.get(i);
-		if (facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
+  for(std::map<Facet::Key, Facet*>::iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
+    Facet *facet = it->second;
+		if(facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
 			switch (facet->type) {
 				case HERMES_MODE_TRIANGLE: 
           unsigned int ii;

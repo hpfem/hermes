@@ -45,15 +45,15 @@ void DiscreteProblem::FnCache::free()
   for(std::map<unsigned int, Geom<double>>::iterator it = e.begin(); it != e.end(); it++)
     free_geom(&it->second);
   e.clear();
-  for (unsigned int i = fn.first(); i != INVALID_IDX; i = fn.next(i))
-    free_fn(fn[i]);
-  fn.remove_all();
-  for (unsigned int i = ext.first(); i != INVALID_IDX; i = ext.next(i))
-    delete ext[i];
-  ext.remove_all();
-  for (unsigned int i = sln.first(); i != INVALID_IDX; i = sln.next(i))
-    free_fn(sln[i]);
-  sln.remove_all();
+  for (std::map<fn_key_t, sFunc*>::iterator it = fn.begin(); it != fn.end(); it++)
+    free_fn(it->second);
+  fn.clear();
+  for (std::map<fn_key_t, sFunc*>::iterator it = ext.begin(); it != ext.end(); it++)
+    free_fn(it->second);
+  ext.clear();
+  for (std::map<fn_key_t, sFunc*>::iterator it = sln.begin(); it != sln.end(); it++)
+    free_fn(it->second);
+  sln.clear();
 }
 
 // DiscreteProblem ///////////////////////////////////////////////////////////////////////////////////////
@@ -634,14 +634,12 @@ void DiscreteProblem::init_ext_fns(ExtData<scalar> &ext_data, std::vector<MeshFu
   for (int i = 0; i < ext_data.nf; i++) 
   {
     fn_key_t key(ext[i]->seq, order, ext[i]->get_transform());
-    mFunc *efn = NULL;
-    if (!fn_cache.ext.lookup(key, efn)) 
+    if (fn_cache.ext.find(key) == fn_cache.ext.end()) 
     {
-      efn = init_fn(ext[i], rm, np, pt);
-      fn_cache.ext.set(key, efn);
+      fn_cache.ext[key] = init_fn(ext[i], rm, np, pt);
     }
-    assert(efn != NULL);
-    ext_fn[i] = efn;
+    assert(fn_cache.ext[key] != NULL);
+    ext_fn[i] = fn_cache.ext[key];
   }
   ext_data.fn = ext_fn;
 }
@@ -662,38 +660,28 @@ void DiscreteProblem::init_ext_fns(ExtData<Ord> &fake_ext_data, std::vector<Mesh
 sFunc *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
 {
   fn_key_t key(fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->id);
-  sFunc *u = NULL;
-  if (!fn_cache.fn.lookup(key, u)) 
-  {
-    u = init_fn(fu, rm, np, pt);
-    fn_cache.fn.set(key, u);
-  }
-  return u;
+  if (fn_cache.fn.find(key) == fn_cache.fn.end())
+    fn_cache.fn[key] = init_fn(fu, rm, np, pt);
+  return fn_cache.fn[key];
 }
 
 sFunc *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, int isurf, const int np,
                          const QuadPt3D *pt)
 {
   fn_key_t key(fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->id);
-  sFunc *u = NULL;
-  if (!fn_cache.fn.lookup(key, u)) 
-  {
-    u = init_fn(fu, rm, isurf, np, pt);
-    fn_cache.fn.set(key, u);
-  }
-  return u;
+  
+  if (fn_cache.fn.find(key) == fn_cache.fn.end()) 
+    fn_cache.fn[key] = init_fn(fu, rm, isurf, np, pt);
+  return fn_cache.fn[key];
 }
 
 mFunc *DiscreteProblem::get_fn(Solution *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
 {
   fn_key_t key(fu->seq, order, fu->get_transform());
-  mFunc *u = NULL;
-  if (!fn_cache.sln.lookup(key, u)) 
-  {
-    u = init_fn(fu, rm, np, pt);
-    fn_cache.sln.set(key, u);
-  }
-  return u;
+
+  if (fn_cache.sln.find(key) == fn_cache.sln.end()) 
+    fn_cache.sln[key] = init_fn(fu, rm, np, pt);
+  return fn_cache.sln[key];
 }
 
 scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
