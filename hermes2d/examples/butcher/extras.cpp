@@ -2,7 +2,7 @@
 
 // Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                     DiscreteProblem* dp, Hermes::Tuple<MeshFunction*> stage_solutions, WeakForm* stage_wf) 
+                     DiscreteProblem* dp, WeakForm* stage_wf) 
 {
   // Number of stages.
   int num_stages = bt->get_size();
@@ -43,9 +43,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfv_ij.fn = mfv_base.fn;
         mfv_ij.ord = mfv_base.ord;
         mfv_ij.ext.copy(mfv_base.ext);
- 
-        // Add the i-th stage solution to the form's ExtData.
-        mfv_ij.ext.push_back(stage_solutions[i]);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfv_ij.ext.push_back(stage_time_sol[i]);
@@ -71,9 +68,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.fn = mfs_base.fn;
         mfs_ij.ord = mfs_base.ord;
         mfs_ij.ext.copy(mfs_base.ext);
- 
-        // Add the i-th stage solution to the form's ExtData.
-        mfs_ij.ext.push_back(stage_solutions[i]);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfs_ij.ext.push_back(stage_time_sol[i]);
@@ -97,9 +91,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfv_i.fn = vfv_base.fn;
       vfv_i.ord = vfv_base.ord;
       vfv_i.ext.copy(vfv_base.ext);
- 
-      // Add the i-th stage solution to the form's ExtData.
-      vfv_i.ext.push_back(stage_solutions[i]);
 
       // Add stage_time_sol[i] as an external function to the form.
       vfv_i.ext.push_back(stage_time_sol[i]);
@@ -122,9 +113,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.fn = vfs_base.fn;
       vfs_i.ord = vfs_base.ord;
       vfs_i.ext.copy(vfs_base.ext);
- 
-      // Add the i-th stage solution to the form's ExtData.
-      vfs_i.ext.push_back(stage_solutions[i]);
 
       // Add stage_time_sol[i] as an external function to the form.
       vfs_i.ext.push_back(stage_time_sol[i]);
@@ -163,15 +151,9 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
     stage_spaces[i]->copy_orders(space);
   }
 
-  // Initialize stage solutions.
-  Hermes::Tuple<MeshFunction*> stage_solutions;
-  for (int i=0; i < num_stages; i++) {
-    stage_solutions.push_back(new Solution(mesh));
-  }
-
   // Create a multistage weak formulation.
   WeakForm stage_wf(num_stages);
-  create_stage_wf(current_time, time_step, bt, dp, stage_solutions, &stage_wf); 
+  create_stage_wf(current_time, time_step, bt, dp, &stage_wf); 
 
   // Create a multistage discrete problem.
   bool is_linear = dp->get_is_linear();
@@ -181,6 +163,9 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
   // It contains coefficients of all stage solutions.
   scalar* stage_vec = new scalar[num_stages*ndof];
   memset(stage_vec, 0, num_stages * ndof * sizeof(scalar));
+
+  // Create u_prev vector to be passed to weak forms.
+  scalar* u_prev_vec = new scalar[num_stages*ndof];
 
   // Calculating weight coefficients for blocks in the 
   // stage Jacobian matrix. 
@@ -204,27 +189,23 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
   int it = 1;
   while (true)
   {
-    // Prepare u_prev for weak forms (different for each stage 'r').
-    scalar* vec = new scalar[ndof];
+    // Prepare the u_prev vector for weak forms.
     for (int r = 0; r < num_stages; r++) {
-      memset(vec, 0, ndof * sizeof(scalar));
       for (int i = 0; i < ndof; i++) {
-        double increment = 0;
+        double increment_r = 0;
         for (int s = 0; s < num_stages; s++) {
-          increment += bt->get_A(r, s) * stage_vec[s*ndof + i]; 
+          increment_r += bt->get_A(r, s) * stage_vec[s*ndof + i]; 
         }
-        vec[i] = coeff_vec[i] + time_step * increment;
+        u_prev_vec[r*ndof + i] = coeff_vec[i] + time_step * increment_r;
       }
-      Solution::vector_to_solution(vec, space, (Solution*)stage_solutions[r]);
     } 
-    delete [] vec;
 
     // Assemble the stage Jacobian matrix and residual vector.
     // Blocks that would be zeroed are not assembled, and 
     // all assembled blocks are weighted according to the 
     // "block_weights" table.
     bool rhs_only = false;
-    stage_dp.assemble(NULL, matrix, rhs, rhs_only, &block_weights);
+    stage_dp.assemble(u_prev_vec, matrix, rhs, rhs_only, &block_weights);
 
     // Complete stage Jacobian matrix. This is done by subtracting 
     // 1.0 from each diagonal element.
@@ -299,17 +280,15 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
   // Delete stage spaces, but not the first (original) one.
   for (int i = 1; i < num_stages; i++) delete stage_spaces[i];
 
-  // Delete stage solutions and residuals.
-  for (int i = 0; i < num_stages; i++) {
-    delete stage_solutions[i];
-    delete residuals[i];
-  }
+  // Delete residuals.
+  for (int i = 0; i < num_stages; i++) delete residuals[i];
 
   // TODO: Delete stage_wf, in particular its external solutions 
   // stage_time_sol[i], i = 0, 1, ..., num_stages-1.
 
-  // Delete stage_vec.
+  // Delete stage_vec and u_prev_vec.
   delete [] stage_vec;
+  delete [] u_prev_vec;
   
   return true;
 }
