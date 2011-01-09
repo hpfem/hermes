@@ -167,6 +167,15 @@ Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<S
   return result;
 }
 
+template<typename Real, typename Scalar>
+Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  Func<Scalar>* u_prev = u_ext[0];
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (u_prev->val[i] * conj(v->val[i]));
+  return result;
+}
 
 //// error & norm integrals  ////////////////////////////////////////////////////////////////////////
 

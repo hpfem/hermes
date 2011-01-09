@@ -63,7 +63,8 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
     warn("Large number of forms (> 100). Is this the intent?");
   }
 
-  MatrixFormVol form = { i, j, sym, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor };
   mfvol.push_back(form);
   seq++;
 }
@@ -83,7 +84,8 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
   if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
   }
-  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;
 }
@@ -105,7 +107,8 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
   if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
   }
-  MatrixFormVol form = { i, j, sym, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor };
   mfvol.push_back(form);
   seq++;
 }
@@ -124,7 +127,8 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn,
   if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
   }
-  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;
 }
@@ -153,7 +157,8 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
           H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  MatrixFormSurf form = { i, j, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor };
   mfsurf.push_back(form);
   seq++;
 }
@@ -165,7 +170,8 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
   if (i < 0 || i >= neq || j < 0 || j >= neq)
     error("Invalid equation number.");
 
-  MatrixFormSurf form = { i, j, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor };
   mfsurf_string_temp.insert(std::pair<std::string, MatrixFormSurf>(area, form));
   seq++;
 }
@@ -181,7 +187,8 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
           H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  MatrixFormSurf form = { i, j, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor };
   mfsurf.push_back(form);
   seq++;
 }
@@ -191,7 +198,8 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
 {
   _F_
   int i = 0, j = 0;
-  MatrixFormSurf form = { i, j, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor };
   mfsurf_string_temp.insert(std::pair<std::string, MatrixFormSurf>(area, form));
   seq++;
 }
@@ -216,7 +224,8 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
   if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormVol form = { i, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormVol form = { i, area, fn, ord, ext, scaling_factor };
   vfvol.push_back(form);
   seq++;
 }
@@ -227,7 +236,8 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
   _F_
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
-  VectorFormVol form = { i, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor };
   vfvol_string_temp.insert(std::pair<std::string, VectorFormVol>(area, form));
   seq++;
 }
@@ -242,17 +252,20 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int 
   if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormVol form = { i, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormVol form = { i, area, fn, ord, ext, scaling_factor };
   vfvol.push_back(form);
   seq++;
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std::string area, 
+                               Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   int i = 0;
-  VectorFormVol form = { i, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor };
   vfvol_string_temp.insert(std::pair<std::string, VectorFormVol>(area, form));
   seq++;
 }
@@ -270,7 +283,8 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
   seq++;
 }
 
-void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
+                                    Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq)
@@ -279,25 +293,28 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
           H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormSurf form = { i, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor };
   vfsurf.push_back(form);
   seq++;
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, 
+                                    Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq)
-    error("Invalid equation number.");
-  VectorFormSurf form = { i, 0, fn, ord, ext };
+  if (i < 0 || i >= neq) error("Invalid equation number.");
+  double scaling_factor = 1.0;
+  VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor };
   vfsurf_string_temp.insert(std::pair<std::string, VectorFormSurf>(area, form));
   seq++;
 }
 
 
 // single equation case
-void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area, 
+                                    Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   int i = 0;
@@ -307,18 +324,21 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
           H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
 
-  VectorFormSurf form = { i, area, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor };
   vfsurf.push_back(form);
   seq++;
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, std::string area, 
+                                    Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   int i = 0;
   
-  VectorFormSurf form = { i, 0, fn, ord, ext };
+  double scaling_factor = 1.0;
+  VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor };
   vfsurf_string_temp.insert(std::pair<std::string, VectorFormSurf>(area, form));
   seq++;
 }

@@ -35,6 +35,7 @@ public:
   virtual void zero();
   virtual void add(int m, int n, scalar v);
   virtual void add_to_diagonal(scalar v);
+  virtual void add_umfpack_matrix(UMFPackMatrix* mat);
   virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual int get_matrix_size() const;
@@ -81,6 +82,10 @@ public:
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
   virtual void add(int n, int *idx, scalar *y);
+  virtual void add_vector(Vector* vec) {
+    assert(this->length() == vec->length());
+    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+  };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
   scalar *get_c_array() {
@@ -115,5 +120,42 @@ protected:
   bool setup_factorization();
   void free_factorization_data();
 };
+
+
+
+/*** UMFPack matrix iterator ****/
+
+class UMFPackIterator {
+public:
+  UMFPackIterator(UMFPackMatrix* mat) 
+  {
+    this->size = mat->get_size();
+    this->nnz = mat->get_nnz();
+    this->Ai = mat->get_Ai();
+    this->Ap = mat->get_Ap();
+    this->Ax = mat->get_Ax();
+    this->Ai_pos = 0;
+    this->Ap_pos = 0;
+  };
+  void init(int& i, int& j, scalar& val);
+  bool get_next(int& i, int& j, scalar& val);
+  void get_last(int& i, int& j, scalar& val);
+  void add_to_current_position(scalar val) 
+  {
+    this->Ax[this->Ai_pos] = val;
+  };
+
+protected:
+  int size;
+  int nnz;
+  int* Ai;
+  int* Ap;
+  scalar* Ax;
+  int Ai_pos;
+  int Ap_pos;
+};
+
+
+
 
 #endif

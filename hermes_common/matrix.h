@@ -22,8 +22,6 @@
 
 #include "common.h"
 #include "error.h"
-#
-
 
 /// Creates a new (full) matrix with m rows and n columns with entries of the type T.
 /// The entries can be accessed by matrix[i][j]. To delete the matrix, just
@@ -315,6 +313,11 @@ public:
 
   virtual int get_size() { return size; }
 
+  virtual void add_sparse_matrix(SparseMatrix* mat) 
+  { 
+    error("add_sparse_matrix() undefined.");
+  };
+
   /// Return the number of entries in a specified row
   ///
   /// @param[in] row - index of the row
@@ -412,6 +415,9 @@ public:
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
   virtual void add(int idx, scalar y) = 0;
+
+  /// Add a vector.
+  virtual void add_vector(Vector* vec) = 0;
 
   /// update subset of the elements
   ///

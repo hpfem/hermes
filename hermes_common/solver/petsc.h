@@ -77,6 +77,10 @@ public:
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
   virtual void add(int n, int *idx, scalar *y);
+  virtual void add_vector(Vector* vec) {
+    assert(this->length() == vec->length());
+    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+  };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:

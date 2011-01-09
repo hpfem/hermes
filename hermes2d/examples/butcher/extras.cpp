@@ -2,7 +2,7 @@
 
 // Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                     DiscreteProblem* dp, WeakForm* stage_wf) 
+                     DiscreteProblem* dp, WeakForm* stage_wf_stac, WeakForm* stage_wf_timedep) 
 {
   // Number of stages.
   int num_stages = bt->get_size();
@@ -43,15 +43,31 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfv_ij.fn = mfv_base.fn;
         mfv_ij.ord = mfv_base.ord;
         mfv_ij.ext.copy(mfv_base.ext);
+        mfv_ij.scaling_factor = bt->get_A(i, j);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfv_ij.ext.push_back(stage_time_sol[i]);
 
         // Add the matrix form to the corresponding block of the 
         // stage Jacobian matrix.
-        stage_wf->add_matrix_form(&mfv_ij);
+        stage_wf_stac->add_matrix_form(&mfv_ij);
       }
     }
+  }
+
+  // Add mass volumetric forms to diagonal blocks
+  for (int i = 0; i < num_stages; i++) {
+    WeakForm::MatrixFormVol mfv_ii;
+    mfv_ii.i = i;
+    mfv_ii.j = i;
+    mfv_ii.sym = HERMES_SYM;
+    mfv_ii.area = HERMES_ANY;
+    mfv_ii.fn = l2_form<double, scalar>;
+    mfv_ii.ord = l2_form<Ord, Ord>;
+    mfv_ii.ext = Hermes::Tuple<MeshFunction*> ();
+    mfv_ii.scaling_factor = -1.0 / time_step;
+    // Add the matrix form to the diagonal block.
+    stage_wf_timedep->add_matrix_form(&mfv_ii);
   }
 
   // Duplicate matrix surface forms, enhance them with 
@@ -68,13 +84,14 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.fn = mfs_base.fn;
         mfs_ij.ord = mfs_base.ord;
         mfs_ij.ext.copy(mfs_base.ext);
+        mfs_ij.scaling_factor = bt->get_A(i, j);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfs_ij.ext.push_back(stage_time_sol[i]);
 
         // Add the matrix form to the corresponding block of the 
         // stage Jacobian matrix.
-        stage_wf->add_matrix_form_surf(&mfs_ij);
+        stage_wf_stac->add_matrix_form_surf(&mfs_ij);
       }
     }
   }
@@ -91,14 +108,28 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfv_i.fn = vfv_base.fn;
       vfv_i.ord = vfv_base.ord;
       vfv_i.ext.copy(vfv_base.ext);
+      vfv_i.scaling_factor = 1.0;
 
       // Add stage_time_sol[i] as an external function to the form.
       vfv_i.ext.push_back(stage_time_sol[i]);
 
       // Add the matrix form to the corresponding block of the 
       // stage Jacobian matrix.
-      stage_wf->add_vector_form(&vfv_i);
+      stage_wf_stac->add_vector_form(&vfv_i);
     }
+  }
+
+  // Add mass volumetric vector forms to diagonal blocks.
+  for (int i = 0; i < num_stages; i++) {
+    WeakForm::VectorFormVol vfv_i;
+    vfv_i.i = i;
+    vfv_i.area = HERMES_ANY;
+    vfv_i.fn = l2_residual_form<double, scalar>;
+    vfv_i.ord = l2_residual_form<Ord, Ord>;
+    vfv_i.ext = Hermes::Tuple<MeshFunction*> ();
+    vfv_i.scaling_factor = -1.0 / time_step;
+    // Add the matrix form to the diagonal block.
+    stage_wf_timedep->add_vector_form(&vfv_i);
   }
 
   // Duplicate vector surface forms, enhance them with 
@@ -113,13 +144,14 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.fn = vfs_base.fn;
       vfs_i.ord = vfs_base.ord;
       vfs_i.ext.copy(vfs_base.ext);
+      vfs_i.scaling_factor = 1.0;
 
       // Add stage_time_sol[i] as an external function to the form.
       vfs_i.ext.push_back(stage_time_sol[i]);
 
       // Add the matrix form to the corresponding block of the 
       // stage Jacobian matrix.
-      stage_wf->add_vector_form_surf(&vfs_i);
+      stage_wf_stac->add_vector_form_surf(&vfs_i);
     }
   }
 }
@@ -130,9 +162,15 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
                   double newton_tol, int newton_max_iter, bool verbose = true, 
                   double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6)
 {
-  // Set up the solver, matrix, and rhs according to the solver selection.
+  // Matrix and vector for the time derivative part of the equation.
+  SparseMatrix* matrix_timedep = create_matrix(matrix_solver);
+  Vector* rhs_timedep = create_vector(matrix_solver);
+
+  // Matrix and vector for the rest of the equation.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
+
+  // Matrix solver.
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Get number of stages.
@@ -152,29 +190,25 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
   }
 
   // Create a multistage weak formulation.
-  WeakForm stage_wf(num_stages);
-  create_stage_wf(current_time, time_step, bt, dp, &stage_wf); 
+  WeakForm stage_wf_timedep(num_stages);     // For the time derivative term (written on the left).
+  WeakForm stage_wf_stac(num_stages);        // For the rest of equation (written on the right).
+  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_stac, &stage_wf_timedep); 
 
-  // Create a multistage discrete problem.
+  // Create a multistage discrete problems.
   bool is_linear = dp->get_is_linear();
-  DiscreteProblem stage_dp(&stage_wf, stage_spaces, is_linear);
+  DiscreteProblem stage_dp_timedep(&stage_wf_timedep, stage_spaces, is_linear);
+  DiscreteProblem stage_dp_stac(&stage_wf_stac, stage_spaces, is_linear);
 
   // Create stage vector of length num_stages * ndof.
-  // It contains coefficients of all stage solutions.
+  // It contains coefficients of all stage solutions,
+  // to be passed into the time derivative part of the 
+  // discrete problem.
   scalar* stage_vec = new scalar[num_stages*ndof];
   memset(stage_vec, 0, num_stages * ndof * sizeof(scalar));
 
-  // Create u_prev vector to be passed to weak forms.
+  // Create u_prev vector to be passed to weak forms of
+  // the stationary part of the discrete problem.
   scalar* u_prev_vec = new scalar[num_stages*ndof];
-
-  // Calculating weight coefficients for blocks in the 
-  // stage Jacobian matrix. 
-  Table block_weights(num_stages);
-  for (int r = 0; r < num_stages; r++) {
-    for (int s = 0; s < num_stages; s++) {
-      block_weights.set_A(r, s, bt->get_A(r, s) * time_step);
-    }
-  }
 
   // Prepare residuals of stage solutions.
   Hermes::Tuple<Solution*> residuals;
@@ -196,23 +230,25 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
         for (int s = 0; s < num_stages; s++) {
           increment_r += bt->get_A(r, s) * stage_vec[s*ndof + i]; 
         }
-        u_prev_vec[r*ndof + i] = coeff_vec[i] + time_step * increment_r;
+        u_prev_vec[r*ndof + i] = coeff_vec[i] + increment_r;
       }
     } 
 
-    // Assemble the stage Jacobian matrix and residual vector.
-    // Blocks that would be zeroed are not assembled, and 
-    // all assembled blocks are weighted according to the 
-    // "block_weights" table.
+    // Assemble the stage Jacobian matrix and residual vector
+    // for the stationary part of the equation.
     bool rhs_only = false;
-    stage_dp.assemble(u_prev_vec, matrix, rhs, rhs_only, &block_weights);
+    stage_dp_timedep.assemble(stage_vec, matrix_timedep, rhs_timedep, rhs_only);
+    stage_dp_stac.assemble(u_prev_vec, matrix, rhs, rhs_only);
 
-    // Complete stage Jacobian matrix. This is done by subtracting 
-    // 1.0 from each diagonal element.
-    matrix->add_to_diagonal(-1.0);
+    // debug
+    //FILE* f = fopen("debug-1.txt", "w");
+    //matrix_timedep->dump(f, "tmp", DF_MATLAB_SPARSE); 
+    //info("Matrix dumped.");
+    //fclose(f);
 
-    // Complete stage residual "rhs". This is done by subtracting the stage vector.
-    for (int i = 0; i < num_stages*ndof; i++) rhs->add(i, -stage_vec[i]);
+    // Putting the two parts together into matrix and rhs.
+    ((UMFPackMatrix*)matrix)->add_umfpack_matrix((UMFPackMatrix*)matrix_timedep);
+    rhs->add_vector(rhs_timedep);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -225,7 +261,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
     }
     else {
       // Translate residual vector into residual functions.
-      Solution::vector_to_solutions(rhs, stage_dp.get_spaces(), residuals, add_dir_lift);
+      Solution::vector_to_solutions(rhs, stage_dp_stac.get_spaces(), residuals, add_dir_lift);
       residual_norm = calc_norms(residuals);
     }
 
@@ -269,7 +305,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* bt,
     for (int s = 0; s < num_stages; s++) {
       increment += bt->get_B(s) * stage_vec[s*ndof + i]; 
     }
-    coeff_vec[i] += time_step * increment;
+    coeff_vec[i] += increment;
   } 
 
   // Clean up.

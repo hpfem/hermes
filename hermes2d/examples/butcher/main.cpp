@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   bt.set_A(0, 0, 1.);
   bt.set_B(0, 1.);
   bt.set_C(0, 1.);
- 
+
   /*
   // SDIRK-22 method, see page 244 in Butcher's book.
   ButcherTable bt(2);

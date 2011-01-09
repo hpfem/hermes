@@ -75,24 +75,28 @@ public:
     matrix_form_val_t fn;  
     matrix_form_ord_t ord;  
     Hermes::Tuple<MeshFunction *> ext; 
+    double scaling_factor;
   };
   struct MatrixFormSurf {  
     int i, j, area;       
     matrix_form_val_t fn;  
     matrix_form_ord_t ord;  
     Hermes::Tuple<MeshFunction *> ext; 
+    double scaling_factor;
   };
   struct VectorFormVol  {  
     int i, area;          
     vector_form_val_t fn;  
     vector_form_ord_t ord;  
     Hermes::Tuple<MeshFunction *> ext; 
+    double scaling_factor;
   };
   struct VectorFormSurf {  
     int i, area;          
     vector_form_val_t fn;  
     vector_form_ord_t ord;  
     Hermes::Tuple<MeshFunction *> ext; 
+    double scaling_factor;
   };
 
   // General case.

@@ -158,6 +158,41 @@ void UMFPackMatrix::add(int m, int n, scalar v) {
   }
 }
 
+void UMFPackMatrix::add_umfpack_matrix(UMFPackMatrix* mat) {
+  _F_
+  assert(this->get_size() == mat->get_size());
+  // Go over all nonzero entries in the matrix "mat".
+  UMFPackIterator mat_it(mat);
+  UMFPackIterator this_it(this);
+  //
+  int mat_i, mat_j;
+  scalar mat_val;
+  int this_i, this_j;
+  scalar this_val;
+
+  // debug
+  //mat_it.init(mat_i, mat_j, mat_val);
+  //do {
+  //  if (fabs(mat_val) < 1e-10) mat_val = 0;
+  //  // debug
+  //  //printf("NEXT: i = %d, j = %d, val = %g\n", mat_i+1, mat_j+1, mat_val);
+  //}
+  //while(mat_it.get_next(mat_i, mat_j, mat_val));
+
+  mat_it.init(mat_i, mat_j, mat_val);
+  this_it.init(this_i, this_j, this_val);
+  bool mat_finished = false;
+  do {
+    while ((this_i != mat_i) || (this_j != mat_j)) {
+      bool success = this_it.get_next(this_i, this_j, this_val);
+      if (!success) error("Trying to add a matrix with incompatible sparsity pattern.");
+    }
+    this_it.add_to_current_position(mat_val);
+    mat_finished = !mat_it.get_next(mat_i, mat_j, mat_val);
+  }
+  while (!mat_finished);
+}
+
 /// Add a number to each diagonal entry.
 void UMFPackMatrix::add_to_diagonal(scalar v) 
 {
@@ -488,5 +523,57 @@ void UMFPackLinearSolver::free_factorization_data()
   numeric = NULL;
 #endif
 }
+
+/*** UMFPack matrix iterator ****/
+
+void UMFPackIterator::init(int& i, int& j, scalar& val)
+{
+  i = this->Ap[0];
+  j = this->Ai[0];
+  val = this->Ax[0];
+  this->Ap_pos = 0;
+  this->Ai_pos = 0;
+}
+
+bool UMFPackIterator::get_next(int& i, int& j, scalar& val)
+{
+  // debug
+  //printf("get_next: Ai_pos = %d, Ap_pos = %d\n", Ai_pos, Ap_pos);
+  if (Ai_pos + 1 >= nnz) return false; // It is no longer possible to find next element.
+  i = Ai[Ai_pos + 1];                  // Row index.
+  j = Ap_pos;
+  if (Ai_pos + 1 >= Ap[Ap_pos + 1]) {
+    j++;
+    Ap_pos++;
+  }
+  Ai_pos++;
+  val = Ax[Ai_pos];
+  // debug
+  //printf("i = %d, j = %d, new Ai_pos = %d, new Ap_pos = %d\n", i, j, Ai_pos, Ap_pos);
+  return true;
+}
+
+void UMFPackIterator::get_last(int& i, int& j, scalar& val)
+{
+  i = this->size - 1;
+  j = this->Ai[this->nnz - 1];
+  val = this->Ax[this->nnz - 1];
+  this->Ap_pos = this->size;
+  this->Ai_pos = this->nnz - 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -1178,6 +1178,9 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   }
   if (ext != NULL) {ext->free(); delete ext;}
 
+  // Scaling.
+  res *= mfv->scaling_factor;
+
   return res;
 }
 
@@ -1287,6 +1290,9 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   }
   if (ext != NULL) {ext->free(); delete ext;}
   
+  // Scaling.
+  res *= vfv->scaling_factor;
+
   return res;
 }
 
@@ -1395,6 +1401,9 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
   }
   if (ext != NULL) {ext->free(); delete ext;}
   
+  // Scaling.
+  res *= mfs->scaling_factor;
+
   return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
@@ -1497,6 +1506,9 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   }
   if (ext != NULL) {ext->free(); delete ext;}
   
+  // Scaling.
+  res *= vfs->scaling_factor;
+
   // Clean up.
   return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
@@ -1605,6 +1617,9 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::Tupl
   delete u;
   delete v;
   
+  // Scaling.
+  res *= mfs->scaling_factor;
+
   return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
@@ -1698,6 +1713,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::Tupl
   }
   if (ext != NULL) {ext->free(); delete ext;}
 
+  // Scaling.
+  res *= vfs->scaling_factor;
   
   return 0.5 * res; // Edges are parametrized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
