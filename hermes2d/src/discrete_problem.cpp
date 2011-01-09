@@ -64,7 +64,7 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces,
 {
   _F_
   // Sanity checks.
-  if ( spaces.size() != (unsigned) wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
+  if (spaces.size() != (unsigned) wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
   if (spaces.size() > 0) have_spaces = true;
   else error("Zero number of spaces in DiscreteProblem.");
 
@@ -369,16 +369,19 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
+  // Creating matrix sparse structure
   this->create(mat, rhs, rhsonly, block_weights);
 
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
   Hermes::Tuple<Solution*> u_ext;
-  for (int i = 0; i < this->wf->get_neq(); i++) 
-  {
-    u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-    if (coeff_vec != NULL) Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
-    else u_ext[i]->set_zero(this->spaces[i]->get_mesh());
+  if (coeff_vec != NULL) {
+    for (int i = 0; i < this->wf->get_neq(); i++) 
+    {
+      u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
+      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
+    }
   }
+  else for (int i = 0; i < this->wf->get_neq(); i++) u_ext.push_back(NULL);
  
   /* END IDENTICAL CODE WITH H3D */
 
@@ -1164,6 +1167,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
 
   Func<double>* u = get_fn(fu, ru, order);
   Func<double>* v = get_fn(fv, rv, order);
+
   ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
   
   scalar res = mfv->fn(np, jwt, prev, u, v, e, ext);

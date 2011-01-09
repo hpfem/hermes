@@ -59,6 +59,11 @@ public:
       return this->_v.back();
   }
 
+  void copy(const Tuple &other) {
+    int size = other.size();
+    for(int i=0; i<size; i++) push_back(other[i]);
+  }
+
   void reserve(const unsigned int size) {
       this->_v.reserve(size);
   }

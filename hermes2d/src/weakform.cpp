@@ -28,6 +28,25 @@ WeakForm::WeakForm(int neq, bool mat_free)
   this->is_matfree = mat_free;
 }
 
+void WeakForm::add_matrix_form(MatrixFormVol* form) 
+{
+  _F_
+  if (form->i < 0 || form->i >= neq || form->j < 0 || form->j >= neq)
+    error("Invalid equation number.");
+  if (form->sym < -1 || form->sym > 1)
+    error("\"sym\" must be -1, 0 or 1.");
+  if (form->sym < 0 && form->i == form->j)
+    error("Only off-diagonal forms can be antisymmetric.");
+  if (form->area != HERMES_ANY && form->area < 0 && (unsigned) (-form->area) > areas.size())
+    error("Invalid area number.");
+  if (mfvol.size() > 100) {
+    warn("Large number of forms (> 100). Is this the intent?");
+  }
+
+  mfvol.push_back(*form);
+  seq++;
+}
+
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
                                matrix_form_ord_t ord, SymFlag sym, int area, Hermes::Tuple<MeshFunction*>ext)
 {
@@ -51,7 +70,8 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
 
 // A wrapper utilizing the MarkersConversion class.
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
-                               matrix_form_ord_t ord, SymFlag sym, std::string area, Hermes::Tuple<MeshFunction*>ext)
+                               matrix_form_ord_t ord, SymFlag sym, std::string area, 
+                               Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
@@ -68,9 +88,9 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
   seq++;
 }
 
-
 // single equation case
-void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, 
+                               int area, Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   int i = 0, j = 0;
@@ -110,7 +130,21 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn,
 }
 
 
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
+{
+  _F_
+  if (form->i < 0 || form->i >= neq || form->j < 0 || form->j >= neq)
+    error("Invalid equation number.");
+  if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
+          H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
+    error("Invalid area number.");
+
+  mfsurf.push_back(*form);
+  seq++;
+}
+
+void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
+                                    int area, Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
@@ -162,6 +196,18 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   seq++;
 }
 
+void WeakForm::add_vector_form(VectorFormVol* form)
+{
+  _F_
+  if (form->i < 0 || form->i >= neq)
+    error("Invalid equation number.");
+  if (form->area != HERMES_ANY && form->area < 0 && (unsigned) (-form->area) > areas.size())
+    error("Invalid area number.");
+
+  vfvol.push_back(*form);
+  seq++;
+}
+
 void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
 {
   _F_
@@ -208,6 +254,19 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std:
   int i = 0;
   VectorFormVol form = { i, 0, fn, ord, ext };
   vfvol_string_temp.insert(std::pair<std::string, VectorFormVol>(area, form));
+  seq++;
+}
+
+void WeakForm::add_vector_form_surf(VectorFormSurf* form)
+{
+  _F_
+  if (form->i < 0 || form->i >= neq)
+    error("Invalid equation number.");
+  if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
+          H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
+    error("Invalid area number.");
+
+  vfsurf.push_back(*form);
   seq++;
 }
 

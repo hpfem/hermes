@@ -22,7 +22,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-const double tau = 0.2;                           // Time step.
+const double time_step = 0.2;                     // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -156,9 +156,10 @@ int main(int argc, char* argv[])
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
     // Perform one time step according to the Butcher's table.
-    info("Performing one Runge-Kutta time step using the Butcher's table.");
+    if (bt.get_size() == 1) info("Performing one Runge-Kutta time step (%d stage).", bt.get_size());
+    else info("Performing one Runge-Kutta time step (%d stages).", bt.get_size());
     bool verbose = true;
-    if (!rk_time_step(tau, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -167,7 +168,7 @@ int main(int argc, char* argv[])
     Solution::vector_to_solution(coeff_vec, space, &u_prev_time);
 
     // Update time.
-    current_time += tau;
+    current_time += time_step;
 
     // Show the new time level solution.
     char title[100];
