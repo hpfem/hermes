@@ -92,20 +92,26 @@ int main(int argc, char* argv[])
   // Choose one of the following time integration methods.
   // NOTE: Explicit methods do not work yet.
 
-  //ButcherTable* bt = &HBT_Explicit_RK_1;             // Explicit Runge-Kutta (first-order), or explicit Euler method.
-  //ButcherTable* bt = &HBT_Explicit_RK_1;             // Explicit Runge-Kutta (first-order), or explicit Euler method.
-  //ButcherTable* bt = &HBT_Explicit_RK_2;             // Explicit Runge-Kutta (second-order).
-  //ButcherTable* bt = &HBT_Explicit_RK_3;             // Explicit Runge-Kutta (third-order).
-  //ButcherTable* bt = &HBT_Explicit_RK_4;             // Explicit Runge-Kutta (fourth-order).
-  //ButcherTable* bt = &HBT_Implicit_RK_1;             // Implicit Runge-Kutta (first-order), or implicit Euler method.
-  //ButcherTable* bt = &HBT_Implicit_Crank_Nicolson_2; // Implicit Crank_Nicolson method (second-order).
-  ButcherTable* bt = &HBT_Implicit_SDIRK_2;            // Implicit SDIRK method (second-order).
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_2;   // Implicit Lobatto IIIA (second-order).
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_2;   // Implicit Lobatto IIIB (second-order).
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_2;   // Implicit Lobatto IIIC (second-order).
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_4;   // Implicit Lobatto IIIA (fourth-order).
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_4;   // Implicit Lobatto IIIB (fourth-order).
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_4;   // Implicit Lobatto IIIC (fourth-order).
+  // First order:
+  //ButcherTable* bt = &HBT_Explicit_RK_1;             // Explicit Runge-Kutta RK-1, or explicit Euler method.
+  //ButcherTable* bt = &HBT_Implicit_RK_1;             // Implicit Runge-Kutta RK-1, or implicit Euler method.
+
+  // Second-order:
+  //ButcherTable* bt = &HBT_Explicit_RK_2;             // Explicit Runge-Kutta RK-2 method.
+  //ButcherTable* bt = &HBT_Implicit_Crank_Nicolson_2; // Implicit Crank_Nicolson method.
+  ButcherTable* bt = &HBT_Implicit_SDIRK_2;            // Implicit SDIRK-2 method.
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_2;   // Implicit Lobatto IIIA-2 method.
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_2;   // Implicit Lobatto IIIB-2 method.
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_2;   // Implicit Lobatto IIIC-2 method.
+
+  // Third-order:
+  //ButcherTable* bt = &HBT_Explicit_RK_3;             // Explicit Runge-Kutta RK-3 method.
+
+  // Fourth-order:
+  //ButcherTable* bt = &HBT_Explicit_RK_4;             // Explicit Runge-Kutta RK-4 method.
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_4;   // Implicit Lobatto IIIA-4 method.
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_4;   // Implicit Lobatto IIIB-4 method.
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_4;   // Implicit Lobatto IIIC-4 method.
 
   // Load the mesh.
   Mesh mesh;
