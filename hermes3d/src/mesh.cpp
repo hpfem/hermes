@@ -79,7 +79,7 @@ Facet::Key Facet::invalid_key = Facet::Key(NULL, 0);
 Facet::Facet(ElementMode2D mode) {
 	_F_
 	this->mode = mode;
-	this->type = INNER;
+	this->type = Facet::INNER;
 	this->left = INVALID_IDX;
 	this->right = INVALID_IDX;
 	this->left_face_num = -1;

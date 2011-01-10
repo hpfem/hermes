@@ -96,37 +96,35 @@ public:
       vtcs = NULL;
       size = 0;
     }
-    Key(unsigned int vtcs_ [], unsigned int size_)
+   Key(unsigned int vtcs_ [], unsigned int size_)
     {
       this->size = size_;
-      this->vtcs = new unsigned int [size];
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
       for(unsigned int i = 0; i < size; i++) {
-        unsigned int temp = vtcs_[i];
-        bool found_higher = false;
+        unsigned int temp_place = i;
         for(unsigned int j = i + 1; j < size; j++)
-          if(vtcs_[j] < temp) {
-            temp = vtcs_[i];
-            vtcs[i] = vtcs_[j];
-            vtcs_[j] = temp;
-            found_higher = true;
-          }
-        if(!found_higher)
-          vtcs[i] = temp;
+          if(vtcs_[j] < vtcs_[temp_place])
+            temp_place = j;
+        this->vtcs[i] = vtcs_[temp_place];
+        vtcs_[temp_place] = vtcs_[i];
       }
     };
     Key(const Key &b)
     {
       size = b.size;
-      vtcs = new unsigned int[size];
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
       for(unsigned int i = 0; i < size; i++)
         vtcs[i] = b.vtcs[i];
     };
     Key & operator =(const Key &b)
     {
-      size = b.size;
       if(size > 0)
         delete [] vtcs;
-      vtcs = new unsigned int[size];
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
       for(unsigned int i = 0; i < size; i++)
         vtcs[i] = b.vtcs[i];
       return *this;
@@ -266,19 +264,15 @@ public:
     Key(unsigned int vtcs_ [], unsigned int size_)
     {
       this->size = size_;
-      this->vtcs = new unsigned int [size];
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
       for(unsigned int i = 0; i < size; i++) {
-        unsigned int temp = vtcs_[i];
-        bool found_higher = false;
+        unsigned int temp_place = i;
         for(unsigned int j = i + 1; j < size; j++)
-          if(vtcs_[j] < temp) {
-            temp = vtcs_[i];
-            vtcs[i] = vtcs_[j];
-            vtcs_[j] = temp;
-            found_higher = true;
-          }
-        if(!found_higher)
-          vtcs[i] = temp;
+          if(vtcs_[j] < vtcs_[temp_place])
+            temp_place = j;
+        this->vtcs[i] = vtcs_[temp_place];
+        vtcs_[temp_place] = vtcs_[i];
       }
     };
     ~Key()
@@ -289,16 +283,18 @@ public:
     Key(const Key &b)
     {
       size = b.size;
-      vtcs = new unsigned int[size];
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
       for(unsigned int i = 0; i < size; i++)
         vtcs[i] = b.vtcs[i];
     };
     Key & operator =(const Key &b)
     {
-      size = b.size;
       if(size > 0)
         delete [] vtcs;
-      vtcs = new unsigned int[size];
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
       for(unsigned int i = 0; i < size; i++)
         vtcs[i] = b.vtcs[i];
       return *this;

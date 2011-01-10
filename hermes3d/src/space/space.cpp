@@ -895,11 +895,7 @@ void Space::find_constraints()
 		    for (int iface = 0; iface < e->get_num_faces(); iface++) {
 			    Facet::Key fid = mesh->get_facet_id(e, iface);
 			    if (!elms[fid]) {
-            unsigned int i;
-            for(i = 0; ; i++)
-              if(open.find(i) == open.end())
-                break;
-				    open.insert(std::make_pair(i, fid));
+            open[open.size()] = fid;
 				    elms[fid] = true;
 			    }
 		    }
@@ -914,11 +910,7 @@ void Space::find_constraints()
 			for (int iface = 0; iface < e->get_num_faces(); iface++) {
 				Facet::Key fid = mesh->get_facet_id(e, iface);
 				if (!elms[fid]) {
-					unsigned int i;
-            for(i = 0; ; i++)
-              if(open.find(i) == open.end())
-                break;
-				    open[i] = fid;
+          open[open.size()] = fid;
 					elms[fid] = true;
 				}
 			}
@@ -929,11 +921,7 @@ void Space::find_constraints()
 			for (int iface = 0; iface < e->get_num_faces(); iface++) {
 				Facet::Key fid = mesh->get_facet_id(e, iface);
 				if (!elms[fid]) {
-					unsigned int i;
-            for(i = 0; ; i++)
-              if(open.find(i) == open.end())
-                break;
-				    open[i] = fid;
+          open[open.size()] = fid;
 					elms[fid] = true;
 				}
 			}
@@ -943,11 +931,7 @@ void Space::find_constraints()
 			Facet::Key son = facet->sons[i];
 			if (son != Facet::invalid_key) {
 				if (!elms[son]) {
-					unsigned int j;
-            for(j = 0; ; j++)
-              if(open.find(j) == open.end())
-                break;
-				    open[j] = son;
+				  open[open.size()] = son;
 					elms[son] = true;
 				}
 			}
