@@ -151,8 +151,7 @@ void Facet::dump() {
 	printf("type = %s (%s), [%d, %d], left (elem = %d, face = %d), ", s_type[type], s_mode[mode], lactive, ractive, left, left_face_num);
 	if (type == INNER) printf(" right (elem = %d, face = %d)", right, right_face_num);
 	else printf(" right (bdr = %u)", right);
-	printf(", ref_mask = %u, sons = [%d, %d, %d, %d], ", ref_mask, sons[0], sons[1], sons[2], sons[3]);
-	if (parent != invalid_key) printf("parent = %u", parent);
+	if (parent != invalid_key) printf("parent");
 	else printf("no parent");
 	printf("\n");
 }
@@ -957,7 +956,10 @@ void Mesh::dump() {
 	printf("Facets (count = %u)\n", facets.size());
   for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++) {
     Facet *f = it->second;
-    printf("  id = %d, ", it->first);
+    if(it->first.size > 0)
+      printf("Vertices: ");
+    for(unsigned int i = 0; i < it->first.size; i++)
+      printf("no. %u: %u", i, it->first.vtcs[i]);
 		f->dump();
 	}
 }
