@@ -58,8 +58,7 @@ macro(LIBRARY_SETTINGS BIN)
   
   # Link with all third party libraries corresponding to selected configuration options.
   # The respective variables will be empty for unselected TPL's.
-  target_link_libraries(  ${BIN} 
-      ${JUDY_LIBRARY}
+  target_link_libraries(  ${BIN}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}

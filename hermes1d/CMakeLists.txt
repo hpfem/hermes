@@ -92,9 +92,7 @@ if(WITH_TESTS)
 endif(WITH_TESTS)
 
 # find necessary packages
-find_package(JUDY REQUIRED)
 find_package(PTHREAD REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
 include_directories(${HERMES_COMMON_DIR})
 
 if(NOT MSVC)
