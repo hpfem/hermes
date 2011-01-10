@@ -121,6 +121,16 @@ public:
       for(unsigned int i = 0; i < size; i++)
         vtcs[i] = b.vtcs[i];
     };
+    Key & operator =(const Key &b)
+    {
+      size = b.size;
+      if(size > 0)
+        delete [] vtcs;
+      vtcs = new unsigned int[size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+      return *this;
+    };
     ~Key()
     {
       if(size > 0)
@@ -282,6 +292,16 @@ public:
       vtcs = new unsigned int[size];
       for(unsigned int i = 0; i < size; i++)
         vtcs[i] = b.vtcs[i];
+    };
+    Key & operator =(const Key &b)
+    {
+      size = b.size;
+      if(size > 0)
+        delete [] vtcs;
+      vtcs = new unsigned int[size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+      return *this;
     };
     bool operator <(const Key & other) const
     {
