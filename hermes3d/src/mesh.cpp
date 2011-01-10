@@ -1678,12 +1678,6 @@ bool Mesh::refine_hex_8(Hex *parent, int refinement) {
 	    { fmp[0], ctr, fmp[3], emp[7],    emp[11], fmp[5], emp[10], vtx[7] }
 	   };
 
-	// deactivate edges on parent element
-	for (int i = 0; i < Hex::NUM_EDGES; i++) {
-		unsigned int edge_vtx[Edge::NUM_VERTICES];
-		parent->get_edge_vertices(i, edge_vtx);
-	}
-
 	parent->active = false; // make parent element inactive
 	parent->unref_all_nodes();
 	unref_edges(parent);
@@ -2137,7 +2131,8 @@ Facet *Mesh::add_quad_facet(Facet::Type type, unsigned int left_elem, int left_i
 
 void Mesh::refine_all_elements(int refinement) {
 	_F_
-	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+  std::map<unsigned int, Element*> local_elements = elements;
+	for(std::map<unsigned int, Element*>::iterator it = local_elements.begin(); it != local_elements.end(); it++)
 		if (it->second->used && it->second->active)
       refine_element(it->first, refinement);
 }
