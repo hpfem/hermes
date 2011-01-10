@@ -181,16 +181,16 @@ protected:
     union {
       /// normal node
       struct {
-	Ord1 order;   					/// polynomial order
-	int dof;
-	int n;								/// number of DOFs
+	      Ord1 order;   					/// polynomial order
+	      int dof;
+	      int n;								/// number of DOFs
       };
       /// CED
       struct {
-	BaseEdgeComponent *edge_baselist;
-	int edge_ncomponents;
-	BaseFaceComponent *face_baselist;
-	int face_ncomponents;
+	      BaseEdgeComponent *edge_baselist;
+	      int edge_ncomponents;
+	      BaseFaceComponent *face_baselist;
+	      int face_ncomponents;
       };
     };
 
@@ -212,19 +212,14 @@ protected:
   };
 
   struct FaceData : public NodeData  {
+
     unsigned ced:1;								/// 1 = is constrained
     Ord2 order;   							/// polynomial order
-    union {
-      struct {								/// normal node
-        int dof;
-        int n;								/// number of DOFs
-      };
-      struct {								/// CED node
-        Facet::Key facet_id;					/// ID of a facing facet
-        int ori;							/// orientation of facing facet
-        Part part;
-      };
-    };
+    int dof;
+    int n;								/// number of DOFs
+    Facet::Key facet_id;					/// ID of a facing facet
+    int ori;							/// orientation of facing facet
+    Part part;
 
     scalar *bc_proj;
 
