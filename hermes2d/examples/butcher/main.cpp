@@ -19,15 +19,21 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
-const int P_INIT = 2;                             // Initial polynomial degree.
-const double time_step = 0.2;                     // Time step.
-const double T_FINAL = 5.0;                       // Time interval length.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
+const int P_INIT = 2;                              // Initial polynomial degree.
+const double time_step = 0.2;                      // Time step.
+const double T_FINAL = 5.0;                        // Time interval length.
+const double NEWTON_TOL = 1e-6;                    // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+ButcherTableType butcher_table = Implicit_SDIRK_2; // Possibilities: Explicit_RK_1, Implicit_RK_1, Explicit_RK_2,
+                                                   // Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
+						   // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2,   
+						   // Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
+                                                   // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, 
+						   // Implicit_Lobatto_IIIC_4. 
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -86,32 +92,9 @@ Real heat_src(Real x, Real y)
 // Main function.
 int main(int argc, char* argv[])
 {
-  // Initializes Butcher's tables.
-  init_butcher_tables();
-
-  // Choose one of the following time integration methods.
-  // NOTE: Explicit methods do not work yet.
-
-  // First order:
-  //ButcherTable* bt = &HBT_Explicit_RK_1;             // Explicit Runge-Kutta RK-1, or explicit Euler method.
-  //ButcherTable* bt = &HBT_Implicit_RK_1;             // Implicit Runge-Kutta RK-1, or implicit Euler method.
-
-  // Second-order:
-  //ButcherTable* bt = &HBT_Explicit_RK_2;             // Explicit Runge-Kutta RK-2 method.
-  //ButcherTable* bt = &HBT_Implicit_Crank_Nicolson_2; // Implicit Crank_Nicolson method.
-  ButcherTable* bt = &HBT_Implicit_SDIRK_2;            // Implicit SDIRK-2 method.
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_2;   // Implicit Lobatto IIIA-2 method.
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_2;   // Implicit Lobatto IIIB-2 method.
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_2;   // Implicit Lobatto IIIC-2 method.
-
-  // Third-order:
-  //ButcherTable* bt = &HBT_Explicit_RK_3;             // Explicit Runge-Kutta RK-3 method.
-
-  // Fourth-order:
-  //ButcherTable* bt = &HBT_Explicit_RK_4;             // Explicit Runge-Kutta RK-4 method.
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_4;   // Implicit Lobatto IIIA-4 method.
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_4;   // Implicit Lobatto IIIB-4 method.
-  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_4;   // Implicit Lobatto IIIC-4 method.
+  // Choose a Butcher's table.
+  ButcherTable bt;
+  init_butcher_table(butcher_table, &bt);
 
   // Load the mesh.
   Mesh mesh;
@@ -163,9 +146,9 @@ int main(int argc, char* argv[])
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
-         current_time, time_step, bt->get_size());
+         current_time, time_step, bt.get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
