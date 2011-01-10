@@ -17,13 +17,14 @@
 #define _TABLES_H_
 
 #include "common.h"
-#include "error.h"
 
 // General square table of real numbers.
 class HERMES_API Table 
 {
  public:
+  Table();
   Table(int size);
+  virtual void alloc(int size); 
   int get_size(); 
   double get_A(int i, int j);
   void set_A(int i, int j, double val);
@@ -37,7 +38,9 @@ class HERMES_API Table
 class HERMES_API ButcherTable: public Table
 {
  public:
+ ButcherTable();
  ButcherTable(int size);
+  virtual void alloc(int size);
   double get_B(int i);
   double get_C(int i);
   void set_B(int i, double val);

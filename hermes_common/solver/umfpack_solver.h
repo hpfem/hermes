@@ -137,13 +137,10 @@ public:
     this->Ai_pos = 0;
     this->Ap_pos = 0;
   };
-  void init(int& i, int& j, scalar& val);
-  bool get_next(int& i, int& j, scalar& val);
-  void get_last(int& i, int& j, scalar& val);
-  void add_to_current_position(scalar val) 
-  {
-    this->Ax[this->Ai_pos] = val;
-  };
+  bool init();
+  void get_current_position(int& i, int& j, scalar& val);
+  bool move_ptr();
+  void add_to_current_position(scalar val);
 
 protected:
   int size;

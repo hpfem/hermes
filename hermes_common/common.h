@@ -51,6 +51,7 @@
 #include "error.h"
 //.
 #include "tuple.h"
+#include "tables.h"
 
 #define HERMES  "Hermes"
 
@@ -418,7 +419,6 @@ class HERMES_API CommandLineArgs
 /// Throws an exception std::runtime_error. Used by Python wrappers.
 /** \param[in] text A text (a cause) of the exception. */
 extern HERMES_API void throw_exception(char *text);
-
 
 #endif
 

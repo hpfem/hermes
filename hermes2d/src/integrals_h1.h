@@ -130,7 +130,8 @@ Scalar int_dudy_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
 }
 
 template<typename Real, typename Scalar>
-Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2, Func<Real> *u, Func<Real> *v)
+Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2, 
+                       Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -141,16 +142,19 @@ Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2, Func<R
 //// error calculation for adaptivity  //////////////////////////////////////////////////////////////////////////////
 
 template<typename Real, typename Scalar>
-Scalar h1_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar h1_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, 
+               Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
+    result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i]) 
+                       + u->dy[i] * conj(v->dy[i]));
   return result;
 }
 
 template<typename Real, typename Scalar>
-Scalar h1_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar h1_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, 
+                    Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -159,7 +163,8 @@ Scalar h1_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, F
 }
 
 template<typename Real, typename Scalar>
-Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, 
+               Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -168,7 +173,8 @@ Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<S
 }
 
 template<typename Real, typename Scalar>
-Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *v, 
+                           Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* u_prev = u_ext[0];

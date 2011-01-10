@@ -15,7 +15,25 @@
 
 #include "tables.h"
 
+Table::Table() 
+{
+  this->size = -1;
+  this->A = NULL;
+}
+
 Table::Table(int size) 
+{
+  // Size.
+  this->size = size;
+  // A array.
+  this->A = new double*[size];
+  for (int i=0; i<size; i++) {
+    this->A[i] = new double[size];
+    for (int j=0; j<size; j++) this->A[i][j] = 0;
+  }
+}
+
+void Table::alloc(int size) 
 {
   // Size.
   this->size = size;
@@ -44,8 +62,32 @@ void Table::set_A(int i, int j, double val)
   this->A[i][j] = val;
 }
 
+ButcherTable::ButcherTable() : Table() 
+{
+  this->B = NULL;
+  this->C = NULL;
+}
+
 ButcherTable::ButcherTable(int size) : Table(size)
 {
+  // B array.
+  this->B = new double[size];
+  for (int j=0; j<size; j++) this->B[j] = 0;
+  // C array.
+  this->C = new double[size];
+  for (int j=0; j<size; j++) this->C[j] = 0;
+}
+
+void ButcherTable::alloc(int size) 
+{
+  // Size.
+  this->size = size;
+  // A array.
+  this->A = new double*[size];
+  for (int i=0; i<size; i++) {
+    this->A[i] = new double[size];
+    for (int j=0; j<size; j++) this->A[i][j] = 0;
+  }
   // B array.
   this->B = new double[size];
   for (int j=0; j<size; j++) this->B[j] = 0;

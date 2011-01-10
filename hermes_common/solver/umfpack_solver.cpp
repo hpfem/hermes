@@ -17,6 +17,7 @@
 // along with Hermes; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#define HERMES_REPORT_INFO
 
 #include "umfpack_solver.h"
 
@@ -150,7 +151,7 @@ void UMFPackMatrix::add(int m, int n, scalar v) {
     int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
     // Make sure we are adding to an existing non-zero entry.
     if (pos < 0) {
-      printf("UMFPackMatrix::add(): m = %d, n = %d, value = %g, pos = %d.\n", m, n, v, pos);
+      info("UMFPackMatrix::add(): i = %d, j = %d.", m, n);
       error("Sparse matrix entry not found");
     }
 
@@ -161,36 +162,36 @@ void UMFPackMatrix::add(int m, int n, scalar v) {
 void UMFPackMatrix::add_umfpack_matrix(UMFPackMatrix* mat) {
   _F_
   assert(this->get_size() == mat->get_size());
-  // Go over all nonzero entries in the matrix "mat".
+  // Create iterators for both matrices. 
   UMFPackIterator mat_it(mat);
   UMFPackIterator this_it(this);
-  //
   int mat_i, mat_j;
   scalar mat_val;
   int this_i, this_j;
   scalar this_val;
 
-  // debug
-  //mat_it.init(mat_i, mat_j, mat_val);
-  //do {
-  //  if (fabs(mat_val) < 1e-10) mat_val = 0;
-  //  // debug
-  //  //printf("NEXT: i = %d, j = %d, val = %g\n", mat_i+1, mat_j+1, mat_val);
-  //}
-  //while(mat_it.get_next(mat_i, mat_j, mat_val));
-
-  mat_it.init(mat_i, mat_j, mat_val);
-  this_it.init(this_i, this_j, this_val);
-  bool mat_finished = false;
-  do {
-    while ((this_i != mat_i) || (this_j != mat_j)) {
-      bool success = this_it.get_next(this_i, this_j, this_val);
-      if (!success) error("Trying to add a matrix with incompatible sparsity pattern.");
+  bool mat_not_finished = mat_it.init();
+  bool this_not_finished = this_it.init();
+  while(mat_not_finished && this_not_finished) {
+    mat_it.get_current_position(mat_i, mat_j, mat_val);
+    //printf("mat: current position %d %d %g\n", mat_i, mat_j, mat_val);
+    this_it.get_current_position(this_i, this_j, this_val);
+    //printf("this: current position %d %d %g\n", this_i, this_j, this_val);
+    while(mat_i != this_i || mat_j != this_j) {
+      //printf("SHOULD NOT BE HERE\n");
+      this_not_finished = this_it.move_ptr();
+      if (!this_not_finished) {
+        printf("Entry %d %d does not exist in the matrix to which it is contributed.\n", mat_i, mat_j);
+        error("Incompatible matrices in add_umfpack_matrix().");
+      }
+      this_it.get_current_position(this_i, this_j, this_val);
     }
     this_it.add_to_current_position(mat_val);
-    mat_finished = !mat_it.get_next(mat_i, mat_j, mat_val);
+    mat_not_finished = mat_it.move_ptr();
+    this_not_finished = this_it.move_ptr();
+    if (mat_not_finished && !this_not_finished) 
+      error("Incompatible matrices in add_umfpack_matrix().");
   }
-  while (!mat_finished);
 }
 
 /// Add a number to each diagonal entry.
@@ -215,7 +216,8 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   switch (fmt) 
   {
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, nnz, nnz);
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
+              size, size, nnz, nnz);
       for (int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
@@ -526,43 +528,35 @@ void UMFPackLinearSolver::free_factorization_data()
 
 /*** UMFPack matrix iterator ****/
 
-void UMFPackIterator::init(int& i, int& j, scalar& val)
+bool UMFPackIterator::init()
 {
-  i = this->Ap[0];
-  j = this->Ai[0];
-  val = this->Ax[0];
+  if (this->size == 0 || this->nnz == 0) return false;
   this->Ap_pos = 0;
   this->Ai_pos = 0;
-}
-
-bool UMFPackIterator::get_next(int& i, int& j, scalar& val)
-{
-  // debug
-  //printf("get_next: Ai_pos = %d, Ap_pos = %d\n", Ai_pos, Ap_pos);
-  if (Ai_pos + 1 >= nnz) return false; // It is no longer possible to find next element.
-  i = Ai[Ai_pos + 1];                  // Row index.
-  j = Ap_pos;
-  if (Ai_pos + 1 >= Ap[Ap_pos + 1]) {
-    j++;
-    Ap_pos++;
-  }
-  Ai_pos++;
-  val = Ax[Ai_pos];
-  // debug
-  //printf("i = %d, j = %d, new Ai_pos = %d, new Ap_pos = %d\n", i, j, Ai_pos, Ap_pos);
   return true;
 }
 
-void UMFPackIterator::get_last(int& i, int& j, scalar& val)
+void UMFPackIterator::get_current_position(int& i, int& j, scalar& val)
 {
-  i = this->size - 1;
-  j = this->Ai[this->nnz - 1];
-  val = this->Ax[this->nnz - 1];
-  this->Ap_pos = this->size;
-  this->Ai_pos = this->nnz - 1;
+  i = Ai[Ai_pos];
+  j = Ap_pos;
+  val = Ax[Ai_pos];
 }
 
+bool UMFPackIterator::move_ptr()
+{
+  if (Ai_pos >= nnz - 1) return false; // It is no longer possible to find next element.
+  if (Ai_pos + 1 >= Ap[Ap_pos + 1]) {
+    Ap_pos++;
+  }
+  Ai_pos++;
+  return true;
+}
 
+void UMFPackIterator::add_to_current_position(scalar val)
+{
+  this->Ax[this->Ai_pos] += val;
+}
 
 
 

@@ -17,12 +17,14 @@
 #define HERMES_REPORT_WARN
 
 #include "h2d_common.h"
+#include "integrals_h1.h"
 #include "limit_order.h"
 #include "discrete_problem.h"
 #include "traverse.h"
 #include "space/space.h"
 #include "precalc.h"
 #include "../../hermes_common/matrix.h"
+#include "../../hermes_common/solver/umfpack_solver.h"
 #include "refmap.h"
 #include "solution.h"
 #include "config.h"
@@ -169,7 +171,8 @@ bool DiscreteProblem::is_up_to_date()
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
-void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table* block_weights)
+void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly, 
+                             bool force_diagonal_blocks, Table* block_weights)
 {
   _F_
 
@@ -261,10 +264,37 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table
         // Pre-add into the stiffness matrix.
         for (int m = 0; m < wf->get_neq(); m++) {
           for(int el = 0; el < wf->get_neq(); el++) {
-            // Do not include blocks with zero weight.
-            if (block_weights != NULL) {
-              if (fabs(block_weights->get_A(m, el)) < 1e-12) continue;
-            } 
+
+            // Do not include blocks with zero weight except if 
+            // (force_diagonal_blocks == true && this is a diagonal block).
+            bool is_diagonal_block = (m == el);
+            if (!(is_diagonal_block && force_diagonal_blocks == true)) {
+              // First look into the block scaling matrix.
+              if (block_weights != NULL) {
+                if (fabs(block_weights->get_A(m, el)) < 1e-12) continue;
+              } 
+              // Check whether there is at least one volume matrix form
+              // in this block with nonzero scaling factor.
+              bool all_matrix_forms_in_block_are_zero = true;
+              for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
+                if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == el) {
+                  if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
+                    all_matrix_forms_in_block_are_zero = false;
+                }
+              }
+              if (all_matrix_forms_in_block_are_zero) {
+                // Check whether there is at least one surface matrix form
+                // in this block with nonzero scaling factor.
+                for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
+                  if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == el) {
+                    if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
+                      all_matrix_forms_in_block_are_zero = false;
+                  }
+                }
+              }
+              if (all_matrix_forms_in_block_are_zero) continue;
+            }
+
             for(int ed = 0; ed < num_edges; ed++) {
               for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++) {
                 if ((blocks[m][el] || blocks[el][m]) && e[m] != NULL)  {
@@ -305,10 +335,37 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table
       // Go through all equation-blocks of the local stiffness matrix.
       for (int m = 0; m < wf->get_neq(); m++) {
         for (int n = 0; n < wf->get_neq(); n++) {
-          // Do not include blocks with zero weight.
-          if (block_weights != NULL) {
-            if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
-          } 
+
+          // Do not include blocks with zero weight except if 
+          // (force_diagonal_blocks == true && this is a diagonal block).
+          bool is_diagonal_block = (m == n);
+          if (!(is_diagonal_block && force_diagonal_blocks == true)) {
+          // First look into the block scaling matrix.
+            if (block_weights != NULL) {
+              if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
+            } 
+            // Check whether there is at least one volume matrix form
+            // in this block with nonzero scaling factor.
+            bool all_matrix_forms_in_block_are_zero = true;
+            for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
+              if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == n) {
+                if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
+                  all_matrix_forms_in_block_are_zero = false;
+              }
+            }
+            if (all_matrix_forms_in_block_are_zero) {
+              // Check whether there is at least one surface matrix form
+              // in this block with nonzero scaling factor.
+              for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
+                if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == n) {
+                  if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
+                    all_matrix_forms_in_block_are_zero = false;
+                }
+              }
+            }
+            if (all_matrix_forms_in_block_are_zero) continue;
+	  }
+
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {
             AsmList *am = &(al[m]);
             AsmList *an = &(al[n]);
@@ -348,16 +405,18 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table
 
 // Light version for linear problems.
 // The Table is here for optional weighting of matrix blocks in systems.
-void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly, Table* block_weights) 
+void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly, 
+                               bool force_diagonal_blocks, Table* block_weights) 
 {
   _F_
-  assemble(NULL, mat, rhs, rhsonly, block_weights);
+  assemble(NULL, mat, rhs, rhsonly, force_diagonal_blocks, block_weights);
 }
 
 // General assembling function for nonlinear problems. For linear problems use the 
 // light version above.
 // The Table is here for optional weighting of matrix blocks in systems.
-void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly, Table* block_weights)
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly, 
+                               bool force_diagonal_blocks, Table* block_weights)
 {
   /* BEGIN IDENTICAL CODE WITH H3D */
 
@@ -368,9 +427,13 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
- 
+  if (block_weights != NULL) {
+    if (block_weights->get_size() != this->wf->get_neq())
+      error ("Bad dimension of block scaling table in DiscreteProblem::assemble().");
+  } 
+
   // Creating matrix sparse structure
-  this->create(mat, rhs, rhsonly, block_weights);
+  this->create(mat, rhs, rhsonly, force_diagonal_blocks, block_weights);
 
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
   Hermes::Tuple<Solution*> u_ext;
@@ -485,6 +548,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         {
           WeakForm::MatrixFormVol* mfv = s->mfvol[ww];
           if (isempty[mfv->i] || isempty[mfv->j]) continue;
+          if (fabs(mfv->scaling_factor) < 1e-12) continue;
           if (mfv->area != HERMES_ANY && !wf->is_in_area(marker, mfv->area)) continue;
           int m = mfv->i;  
           int n = mfv->j;  
@@ -611,6 +675,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         {
           WeakForm::VectorFormVol* vfv = s->vfvol[ww];
           if (isempty[vfv->i]) continue;
+          if (fabs(vfv->scaling_factor) < 1e-12) continue;
           if (vfv->area != HERMES_ANY && !wf->is_in_area(marker, vfv->area)) continue;
           int m = vfv->i;  
           fv = spss[m];    // H3D uses fv = test_fn + m;
@@ -666,6 +731,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             {
               WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
               if (isempty[mfs->i] || isempty[mfs->j]) continue;
+              if (fabs(mfs->scaling_factor) < 1e-12) continue;
               if (mfs->area == H2D_DG_INNER_EDGE) continue;
               if (mfs->area != HERMES_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE && !wf->is_in_area(marker, mfs->area)) continue;
               int m = mfs->i;  
@@ -728,6 +794,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             {
               WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
               if (isempty[vfs->i]) continue;
+              if (fabs(vfs->scaling_factor) < 1e-12) continue;
               if (vfs->area == H2D_DG_INNER_EDGE) continue;
               if (vfs->area != HERMES_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE && !wf->is_in_area(marker, vfs->area)) continue;
               int m = vfs->i;  
@@ -770,6 +837,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
               
               if (isempty[mfs->i] || isempty[mfs->j]) continue;         
+              if (fabs(mfs->scaling_factor) < 1e-12) continue;
               if (mfs->area != H2D_DG_INNER_EDGE) continue;
               
               int m = mfs->i;    
@@ -867,6 +935,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
               
               if (isempty[vfs->i]) continue;
+              if (fabs(vfs->scaling_factor) < 1e-12) continue;
               if (vfs->area != H2D_DG_INNER_EDGE) continue;
               
               int m = vfs->i;

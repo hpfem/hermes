@@ -11,15 +11,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+// along with Hermes2D. If not, see <http://www.gnu.org/licenses/>.
 
 // $Id$
 
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
-// hermes_common
-// solvers
+// hermes_common solvers
 #include "../hermes_common/solver/amesos.h"
 #include "../hermes_common/solver/aztecoo.h"
 #include "../hermes_common/solver/epetra.h"

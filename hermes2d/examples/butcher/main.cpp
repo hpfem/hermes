@@ -77,33 +77,35 @@ Real heat_src(Real x, Real y)
 // Weak forms.
 #include "forms.cpp"
 
-// Extras.
-#include "extras.cpp"
+// Runge-Kutta time step function.
+#include "runge-kutta.cpp"
+
+// The rk_time_step() function:
+#include "butcher_tables.cpp"
 
 // Main function.
 int main(int argc, char* argv[])
 {
-  // Create an arbitrary Butcher's table.
+  // Initializes Butcher's tables.
+  init_butcher_tables();
 
-  // Implicit Euler.
-  ButcherTable bt(1);
-  bt.set_A(0, 0, 1.);
-  bt.set_B(0, 1.);
-  bt.set_C(0, 1.);
+  // Choose one of the following time integration methods.
+  // NOTE: Explicit methods do not work yet.
 
-  /*
-  // SDIRK-22 method, see page 244 in Butcher's book.
-  ButcherTable bt(2);
-  double gamma = 1./sqrt(2.);
-  bt.set_A(0, 0, 1. - gamma);
-  bt.set_A(0, 1, 0.);
-  bt.set_A(1, 0, gamma);
-  bt.set_A(1, 1, 1. - gamma);
-  bt.set_B(0, gamma);
-  bt.set_B(1, 1. - gamma);
-  bt.set_C(0, 1. - gamma);
-  bt.set_C(1, 1.);
-  */
+  //ButcherTable* bt = &HBT_Explicit_RK_1;             // Explicit Runge-Kutta (first-order), or explicit Euler method.
+  //ButcherTable* bt = &HBT_Explicit_RK_1;             // Explicit Runge-Kutta (first-order), or explicit Euler method.
+  //ButcherTable* bt = &HBT_Explicit_RK_2;             // Explicit Runge-Kutta (second-order).
+  //ButcherTable* bt = &HBT_Explicit_RK_3;             // Explicit Runge-Kutta (third-order).
+  //ButcherTable* bt = &HBT_Explicit_RK_4;             // Explicit Runge-Kutta (fourth-order).
+  //ButcherTable* bt = &HBT_Implicit_RK_1;             // Implicit Runge-Kutta (first-order), or implicit Euler method.
+  //ButcherTable* bt = &HBT_Implicit_Crank_Nicolson_2; // Implicit Crank_Nicolson method (second-order).
+  ButcherTable* bt = &HBT_Implicit_SDIRK_2;            // Implicit SDIRK method (second-order).
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_2;   // Implicit Lobatto IIIA (second-order).
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_2;   // Implicit Lobatto IIIB (second-order).
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_2;   // Implicit Lobatto IIIC (second-order).
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIA_4;   // Implicit Lobatto IIIA (fourth-order).
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIB_4;   // Implicit Lobatto IIIB (fourth-order).
+  //ButcherTable* bt = &HBT_Implicit_Lobatto_IIIC_4;   // Implicit Lobatto IIIC (fourth-order).
 
   // Load the mesh.
   Mesh mesh;
@@ -153,13 +155,11 @@ int main(int argc, char* argv[])
   double current_time = 0.0; int ts = 1;
   do 
   {
-    info("---- Time step %d, t = %g s.", ts, current_time); ts++;
-
-    // Perform one time step according to the Butcher's table.
-    if (bt.get_size() == 1) info("Performing one Runge-Kutta time step (%d stage).", bt.get_size());
-    else info("Performing one Runge-Kutta time step (%d stages).", bt.get_size());
+    // Perform one Runge-Kutta time step according to the selected Butcher's table.
+    info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
+         current_time, time_step, bt->get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -176,6 +176,9 @@ int main(int argc, char* argv[])
     sview.set_title(title);
     sview.show(&u_prev_time);
     oview.show(space);
+
+    // Increase counter of time steps.
+    ts++;
   } 
   while (current_time < T_FINAL);
 
