@@ -21,7 +21,3 @@
 
 // verbose output by default
 bool verbose = true;
-
-void set_verbose(bool verb) {
-  verbose = verb;
-}

@@ -201,8 +201,6 @@ void test_mm(Mesh *mesh)
 
 int main(int argc, char **args)
 {
-	set_verbose(false);
-
 	if (argc < 3) error("Not enough parameters.");
 
 	char *type = args[1];
