@@ -146,7 +146,7 @@ class NonlinearSolver : public Solver {
 class IterSolver : public Solver
 {
   public:
-    IterSolver() : Solver(), max_iters(1e4), tolerance(1e-8), precond_yes(false) {};
+    IterSolver() : Solver(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
     
     virtual int get_num_iters() = 0;
     virtual double get_residual() = 0;

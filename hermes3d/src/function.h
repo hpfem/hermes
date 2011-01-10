@@ -278,7 +278,7 @@ protected:
 		int mask;                               /// a combination of FN_XXX: specifies which tables are present
 		int size;                               /// size in bytes of this struct (for maintaining total_mem)
 		TYPE *values[COMPONENTS][VALUE_TYPES];  /// pointers to 'data'
-		TYPE data[0];                           /// value tables
+		TYPE *data;                           /// value tables
 	};
 
 	Node *cur_node;

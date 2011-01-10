@@ -28,7 +28,7 @@ class Space;
 class Matrix;
 class SparseMatrix;
 class Vector;
-class SurfPos;
+struct SurfPos;
 
 /// Discrete problem class
 ///
@@ -92,10 +92,10 @@ protected:
 	struct fn_key_t {
 		int index;
 		int order;
-		int sub_idx;
+		uint64_t sub_idx;
 		int ss_id;			// shapeset id
 
-		fn_key_t(int index, int order, int sub_idx, int ss_id = -1) {
+		fn_key_t(int index, int order, uint64_t sub_idx, int ss_id = -1) {
 			this->index = index;
 			this->order = order;
 			this->sub_idx = sub_idx;
