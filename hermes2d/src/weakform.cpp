@@ -17,7 +17,6 @@
 #include "weakform.h"
 #include "../../hermes_common/matrix.h"
 
-
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
 WeakForm::WeakForm(int neq, bool mat_free)
@@ -503,19 +502,21 @@ bool** WeakForm::get_blocks()
 {
   _F_
   bool** blocks = new_matrix<bool>(neq, neq);
-  for (int i = 0; i < neq; i++)
-    for (int j = 0; j < neq; j++)
+  for (int i = 0; i < neq; i++) {
+    for (int j = 0; j < neq; j++) {
       blocks[i][j] = false;
-
+    }
+  }
   for (unsigned i = 0; i < mfvol.size(); i++) {
-    blocks[mfvol[i].i][mfvol[i].j] = true;
-    if (mfvol[i].sym)
-      blocks[mfvol[i].j][mfvol[i].i] = true;
+    if (fabs(mfvol[i].scaling_factor) > 1e-12) blocks[mfvol[i].i][mfvol[i].j] = true;
+    if (mfvol[i].sym) {
+      if (fabs(mfvol[i].scaling_factor) > 1e-12) blocks[mfvol[i].j][mfvol[i].i] = true;
+    }
   }
 
-  for (unsigned i = 0; i < mfsurf.size(); i++)
-    blocks[mfsurf[i].i][mfsurf[i].j] = true;
-
+  for (unsigned i = 0; i < mfsurf.size(); i++) {
+    if (fabs(mfsurf[i].scaling_factor) > 1e-12) blocks[mfsurf[i].i][mfsurf[i].j] = true;
+  }
   return blocks;
 }
 

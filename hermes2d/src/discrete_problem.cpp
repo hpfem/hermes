@@ -269,30 +269,9 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
             // (force_diagonal_blocks == true && this is a diagonal block).
             bool is_diagonal_block = (m == el);
             if (!(is_diagonal_block && force_diagonal_blocks == true)) {
-              // First look into the block scaling matrix.
               if (block_weights != NULL) {
                 if (fabs(block_weights->get_A(m, el)) < 1e-12) continue;
               } 
-              // Check whether there is at least one volume matrix form
-              // in this block with nonzero scaling factor.
-              bool all_matrix_forms_in_block_are_zero = true;
-              for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
-                if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == el) {
-                  if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
-                    all_matrix_forms_in_block_are_zero = false;
-                }
-              }
-              if (all_matrix_forms_in_block_are_zero) {
-                // Check whether there is at least one surface matrix form
-                // in this block with nonzero scaling factor.
-                for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
-                  if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == el) {
-                    if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
-                      all_matrix_forms_in_block_are_zero = false;
-                  }
-                }
-              }
-              if (all_matrix_forms_in_block_are_zero) continue;
             }
 
             for(int ed = 0; ed < num_edges; ed++) {
@@ -304,20 +283,23 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
                   
                   // pretend assembling of the element stiffness matrix
                   // register nonzero elements
-                  for (int i = 0; i < am->cnt; i++)
-                    if (am->dof[i] >= 0)
-                      for (int j = 0; j < an->cnt; j++)
-                        if (an->dof[j] >= 0)
-                        {
+                  for (int i = 0; i < am->cnt; i++) {
+                    if (am->dof[i] >= 0) {
+                      for (int j = 0; j < an->cnt; j++) {
+                        if (an->dof[j] >= 0) {
                           if(blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
                           if(blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
                         }
+                      }
+                    }
+                  }
                   delete an;
                 }
               }
             }
 	  }
         }
+
         // Deallocation an array of arrays of neighboring elements for every mesh x edge.
         for(int el = 0; el < wf->get_neq(); el++) {
           for(int ed = 0; ed < num_edges; ed++)
@@ -340,30 +322,9 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
           // (force_diagonal_blocks == true && this is a diagonal block).
           bool is_diagonal_block = (m == n);
           if (!(is_diagonal_block && force_diagonal_blocks == true)) {
-          // First look into the block scaling matrix.
             if (block_weights != NULL) {
               if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
             } 
-            // Check whether there is at least one volume matrix form
-            // in this block with nonzero scaling factor.
-            bool all_matrix_forms_in_block_are_zero = true;
-            for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
-              if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == n) {
-                if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
-                  all_matrix_forms_in_block_are_zero = false;
-              }
-            }
-            if (all_matrix_forms_in_block_are_zero) {
-              // Check whether there is at least one surface matrix form
-              // in this block with nonzero scaling factor.
-              for (unsigned int iii = 0; iii < wf->mfvol.size(); iii++) {
-                if (wf->mfvol[iii].i == m && wf->mfvol[iii].j == n) {
-                  if (fabs(wf->mfvol[iii].scaling_factor) > 1e-12) 
-                    all_matrix_forms_in_block_are_zero = false;
-                }
-              }
-            }
-            if (all_matrix_forms_in_block_are_zero) continue;
 	  }
 
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {
@@ -371,11 +332,15 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
             AsmList *an = &(al[n]);
 
             // Pretend assembling of the element stiffness matrix.
-            for (int i = 0; i < am->cnt; i++)
-              if (am->dof[i] >= 0)
-                for (int j = 0; j < an->cnt; j++)
-                  if (an->dof[j] >= 0)
+            for (int i = 0; i < am->cnt; i++) {
+              if (am->dof[i] >= 0) {
+                for (int j = 0; j < an->cnt; j++) {
+                  if (an->dof[j] >= 0) {
                     mat->pre_add_ij(am->dof[i], an->dof[j]);
+                  }
+                }
+              }
+            }
           }
         }
       }

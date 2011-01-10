@@ -14,6 +14,7 @@
 // along with Hermes; if not, see <http://www.gnu.prg/licenses/>.
 
 #include "tables.h"
+#include "matrix.h"
 
 Table::Table() 
 {
@@ -26,9 +27,8 @@ Table::Table(int size)
   // Size.
   this->size = size;
   // A array.
-  this->A = new double*[size];
+  this->A = new_matrix<double>(size, size);
   for (int i=0; i<size; i++) {
-    this->A[i] = new double[size];
     for (int j=0; j<size; j++) this->A[i][j] = 0;
   }
 }
@@ -38,9 +38,8 @@ void Table::alloc(int size)
   // Size.
   this->size = size;
   // A array.
-  this->A = new double*[size];
+  this->A = new_matrix<double>(size, size);
   for (int i=0; i<size; i++) {
-    this->A[i] = new double[size];
     for (int j=0; j<size; j++) this->A[i][j] = 0;
   }
 }
@@ -83,9 +82,8 @@ void ButcherTable::alloc(int size)
   // Size.
   this->size = size;
   // A array.
-  this->A = new double*[size];
+  this->A = new_matrix<double>(size, size);
   for (int i=0; i<size; i++) {
-    this->A[i] = new double[size];
     for (int j=0; j<size; j++) this->A[i][j] = 0;
   }
   // B array.
