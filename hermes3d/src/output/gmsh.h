@@ -28,7 +28,7 @@
 ///
 ///
 /// @ingroup visualization
-class GmshOutputEngine : public OutputEngine {
+class HERMES_API GmshOutputEngine : public OutputEngine {
 public:
 	GmshOutputEngine(FILE *file);
 	virtual ~GmshOutputEngine();

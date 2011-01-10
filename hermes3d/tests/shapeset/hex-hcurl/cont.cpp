@@ -231,7 +231,7 @@ int compare(const void *a, const void *b) {
 	else return 0;
 }
 
-bool test_cont_values_of_edge_fns(Mesh *mesh, unsigned int fid, int pos0, int pos1, Shapeset *shapeset) {
+bool test_cont_values_of_edge_fns(Mesh *mesh, Facet::Key fid, int pos0, int pos1, Shapeset *shapeset) {
 	_F_
 	Facet *facet = mesh->facets[fid];
 	Quad3D *quad = get_quadrature(MODE);
@@ -332,12 +332,16 @@ bool test_cont_values_of_edge_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 		int n_edge_fns = shapeset->get_num_edge_fns(order);
 		for (int ifn = 0; ifn < n_edge_fns; ifn++) {
 			// get values of edge functions
-			double uval0[np], uval1[np], uval2[np];
+			double *uval0 = new double[np];
+			double *uval1 = new double[np];
+			double *uval2 = new double[np];
 			shapeset->get_fn_values(edge_fn[0][ifn], np, pt[0], 0, uval0);
 			shapeset->get_fn_values(edge_fn[0][ifn], np, pt[0], 1, uval1);
 			shapeset->get_fn_values(edge_fn[0][ifn], np, pt[0], 2, uval2);
 
-			double vval0[np], vval1[np], vval2[np];
+			double *vval0 = new double[np];
+			double *vval1 = new double[np];
+			double *vval2 = new double[np];
 			shapeset->get_fn_values(edge_fn[1][ifn], np, pt[1], 0, vval0);
 			shapeset->get_fn_values(edge_fn[1][ifn], np, pt[1], 1, vval1);
 			shapeset->get_fn_values(edge_fn[1][ifn], np, pt[1], 2, vval2);
@@ -375,7 +379,7 @@ bool test_cont_values_of_edge_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 	return true;
 }
 
-bool test_cont_values_of_face_fns(Mesh *mesh, unsigned int fid, int pos0, int pos1, Shapeset *shapeset) {
+bool test_cont_values_of_face_fns(Mesh *mesh, Facet::Key fid, int pos0, int pos1, Shapeset *shapeset) {
 	_F_
 	Quad3D *quad = get_quadrature(MODE);
 	Facet *facet = mesh->facets[fid];
@@ -430,11 +434,15 @@ bool test_cont_values_of_face_fns(Mesh *mesh, unsigned int fid, int pos0, int po
 	int n_face_fns = shapeset->get_num_face_fns(order);
 	for (int ifn = 0; ifn < n_face_fns; ifn++) {
 		// evaluate functions
-		double uval0[np], uval1[np], uval2[np];
+		double *uval0 = new double[np];
+		double *uval1 = new double[np];
+		double *uval2 = new double[np];
 		shapeset->get_fn_values(face_fn[0][ifn], np, pt[0], 0, uval0);
 		shapeset->get_fn_values(face_fn[0][ifn], np, pt[0], 1, uval1);
 		shapeset->get_fn_values(face_fn[0][ifn], np, pt[0], 2, uval2);
-		double vval0[np], vval1[np], vval2[np];
+		double *vval0 = new double[np];
+		double *vval1 = new double[np];
+		double *vval2 = new double[np];
 		shapeset->get_fn_values(face_fn[1][ifn], np, pt[1], 0, vval0);
 		shapeset->get_fn_values(face_fn[1][ifn], np, pt[1], 1, vval1);
 		shapeset->get_fn_values(face_fn[1][ifn], np, pt[1], 2, vval2);
@@ -497,16 +505,16 @@ bool test_continuity(Shapeset *shapeset) {
 
 			// test continuity on inner factes
 			// since we have only 2 elements, there is only one such facet
-			for (unsigned int fid = mesh.facets.first(); fid != INVALID_IDX; fid = mesh.facets.next(fid)) {
-				Facet *facet = mesh.facets[fid];
+      for(std::map<Facet::Key, Facet*>::iterator it = mesh.facets.begin(); it != mesh.facets.end(); it++) {
+        Facet *facet = it->second;
 				if (facet->type == Facet::INNER) {
 					printf("  - edge fns..."); fflush(stdout);
-					if (!test_cont_values_of_edge_fns(&mesh, fid, i, j, shapeset))
+					if (!test_cont_values_of_edge_fns(&mesh, it->first, i, j, shapeset))
 						return false;
 					printf("ok\n");
 
 					printf("  - face fns..."); fflush(stdout);
-					if (!test_cont_values_of_face_fns(&mesh, fid, i, j, shapeset))
+					if (!test_cont_values_of_face_fns(&mesh, it->first, i, j, shapeset))
 						return false;
 					printf("ok\n");
 				}

@@ -28,7 +28,7 @@
 /// Hcurl shapeset for hexahedra
 ///
 ///
-class HcurlShapesetLobattoHex : public Shapeset {
+class HERMES_API HcurlShapesetLobattoHex : public Shapeset {
 public:
 	HcurlShapesetLobattoHex();
 	virtual ~HcurlShapesetLobattoHex();

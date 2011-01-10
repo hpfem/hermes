@@ -101,6 +101,6 @@
 #include "ogprojection.h"
 
 // global H3D iface
-void set_verbose(bool verb = true);
+void HERMES_API set_verbose(bool verb = true);
 
 #endif

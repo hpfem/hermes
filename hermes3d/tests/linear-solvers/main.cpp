@@ -77,7 +77,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
 
       case STATE_MATRIX:
         if (read_n_nums(row, 3, buffer)) {
-          mat.add(MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
+          mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
         }
 	else
         state = STATE_RHS;
@@ -94,9 +94,9 @@ int read_matrix_and_rhs(char *file_name, int &n,
   fclose(file);
 #else
   n = 3;
-  mat.add(MatrixEntry(0, 0, scalar(1, 2)));
-  mat.add(MatrixEntry(1, 1, scalar(1, 4)));
-  mat.add(MatrixEntry(2, 2, scalar(1, 6)));
+  mat[mat.size()] = MatrixEntry(0, 0, scalar(1, 2));
+  mat[mat.size()] = MatrixEntry(1, 1, scalar(1, 4));
+  mat[mat.size()] = MatrixEntry(2, 2, scalar(1, 6));
 
   rhs[0] = scalar(2, 1);
   rhs[1] = scalar(4, 1);
@@ -109,21 +109,21 @@ void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat,
                   std::map<unsigned int, scalar> &ar_rhs, SparseMatrix *mat,
                   Vector *rhs) {
   mat->prealloc(n);
-  for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
-    MatrixEntry &me = ar_mat[i];
+  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    MatrixEntry &me = it->second;
     mat->pre_add_ij(me.m, me.n);
   }
 
   mat->alloc();
-  for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
-    MatrixEntry &me = ar_mat[i];
+  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    MatrixEntry &me = it->second;
     mat->add(me.m, me.n, me.value);
   }
   mat->finish();
 
   rhs->alloc(n);
-  for (unsigned int i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
-    rhs->add((int) i, ar_rhs[i]);
+  for (std::map<unsigned int, scalar>::iterator it = ar_rhs.begin(); it != ar_rhs.end(); it++) {
+    rhs->add(it->first, it->second);
   }
   rhs->finish();
 }
@@ -143,8 +143,8 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
     cols[i] = i;
     rows[i] = i;
   }
-  for (unsigned int i = ar_mat.first(); i != INVALID_IDX; i = ar_mat.next(i)) {
-    MatrixEntry &me = ar_mat[i];
+  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    MatrixEntry &me = it->second;
     mat[me.m][me.n] = me.value;
   }
   matrix->add(n, n, mat, rows, cols);
@@ -152,8 +152,8 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
 
   rhs->alloc(n);
   scalar *rs = new scalar[n];
-  for (unsigned int i = ar_rhs.first(); i != INVALID_IDX; i = ar_rhs.next(i)) {
-    rs[i] = ar_rhs[i];
+  for (std::map<unsigned int, scalar>::iterator it = ar_rhs.begin(); it != ar_rhs.end(); it++) {
+    rs[it->first] = it->second;
   }
   rhs->add(n, rows, rs);
   rhs->finish();
