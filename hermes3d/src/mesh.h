@@ -26,13 +26,6 @@ class MeshLoader;
 
 #include "h3d_common.h"
 
-/// Iterates over all mesh face indices.
-///
-/// @param idx  Face hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_FACETS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->facets.first(); (idx) != INVALID_IDX; (idx) = (mesh)->facets.next((idx)))
-
 // refinement type
 #define H3D_REFT_HEX_NONE							0x0000
 #define H3D_REFT_HEX_X								0x0001
@@ -107,8 +100,19 @@ public:
     {
       this->size = size_;
       this->vtcs = new unsigned int [size];
-      for(unsigned int i = 0; i < size; i++)
-        this->vtcs[i] = vtcs_[i];
+      for(unsigned int i = 0; i < size; i++) {
+        unsigned int temp = vtcs_[i];
+        bool found_higher = false;
+        for(unsigned int j = i + 1; j < size; j++)
+          if(vtcs_[j] < temp) {
+            temp = vtcs_[i];
+            vtcs[i] = vtcs_[j];
+            vtcs_[j] = temp;
+            found_higher = true;
+          }
+        if(!found_higher)
+          vtcs[i] = temp;
+      }
     };
     Key(const Key &b)
     {
@@ -253,8 +257,19 @@ public:
     {
       this->size = size_;
       this->vtcs = new unsigned int [size];
-      for(unsigned int i = 0; i < size; i++)
-        this->vtcs[i] = vtcs_[i];
+      for(unsigned int i = 0; i < size; i++) {
+        unsigned int temp = vtcs_[i];
+        bool found_higher = false;
+        for(unsigned int j = i + 1; j < size; j++)
+          if(vtcs_[j] < temp) {
+            temp = vtcs_[i];
+            vtcs[i] = vtcs_[j];
+            vtcs_[j] = temp;
+            found_higher = true;
+          }
+        if(!found_higher)
+          vtcs[i] = temp;
+      }
     };
     ~Key()
     {
@@ -780,9 +795,15 @@ protected:
       this->a = 0;
       this->b = 0;
     };
-    MidPointKey(unsigned int a, unsigned int b) {
-      this->a = a;
-      this->b = b;
+    MidPointKey(unsigned int a_, unsigned int b_) {
+      if(a_ < b_) {
+        this->a = a_;
+        this->b = b_;
+      }
+      else {
+        this->a = b_;
+        this->b = a_;
+      }
     };
     bool operator<(const MidPointKey & other) const {
       if(this->a < other.a)
@@ -792,7 +813,7 @@ protected:
       else
         if(this->b < other.b)
           return true;
-        else if(this->b > other.b)
+        else
           return false;
     };
   };

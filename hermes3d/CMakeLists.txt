@@ -121,9 +121,7 @@ else(DEBUG)
 endif(DEBUG)
 
 # find necessary packages
-find_package(JUDY REQUIRED)
 find_package(PTHREAD REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
 add_definitions(-DWITH_BLAS)
 
 if(NOT MSVC)

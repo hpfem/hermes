@@ -48,10 +48,10 @@ void DiscreteProblem::FnCache::free()
   for (std::map<fn_key_t, sFunc*>::iterator it = fn.begin(); it != fn.end(); it++)
     free_fn(it->second);
   fn.clear();
-  for (std::map<fn_key_t, sFunc*>::iterator it = ext.begin(); it != ext.end(); it++)
+  for (std::map<fn_key_t, mFunc*>::iterator it = ext.begin(); it != ext.end(); it++)
     free_fn(it->second);
   ext.clear();
-  for (std::map<fn_key_t, sFunc*>::iterator it = sln.begin(); it != sln.end(); it++)
+  for (std::map<fn_key_t, mFunc*>::iterator it = sln.begin(); it != sln.end(); it++)
     free_fn(it->second);
   sln.clear();
 }

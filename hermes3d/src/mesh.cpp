@@ -2091,7 +2091,7 @@ Facet *Mesh::add_quad_facet(Facet::Type type, unsigned int left_elem, int left_i
   
   Facet* facet = NULL;
   Facet::Key fidx = get_facet_id(elements[elem_id], iface);
-  if (fidx != Facet::invalid_key) {
+  if (facets.find(fidx) != facets.end()) {
 		// update info on existing facet
 		facet = facets[fidx];
 		if (elem_id == left_elem) facet->set_left_info(left_elem, left_iface);
