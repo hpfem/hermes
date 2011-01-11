@@ -60,14 +60,14 @@ class HERMES_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
-		if ((*tables)[order.get_idx()] == NULL) 
+    if (tables->find(order.get_idx()) == tables->end()) 
       calculate_view_points(order);
 		return (*tables)[order.get_idx()];
 	}
 
 	virtual int get_num_points(const Ord3 &order) {
 		_F_
-		if ((*np)[order.get_idx()] == NULL) 
+    if (np->find(order.get_idx()) == np->end()) 
       calculate_view_points(order);
 		return (*np)[order.get_idx()];
 	}

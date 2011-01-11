@@ -42,7 +42,7 @@ void DiscreteProblem::FnCache::free()
   for(std::map<unsigned int, double *>::iterator it = jwt.begin(); it != jwt.end(); it++)
     delete [] it->second;
   jwt.clear();
-  for(std::map<unsigned int, Geom<double>>::iterator it = e.begin(); it != e.end(); it++)
+  for(std::map<unsigned int, Geom<double> >::iterator it = e.begin(); it != e.end(); it++)
     free_geom(&it->second);
   e.clear();
   for (std::map<fn_key_t, sFunc*>::iterator it = fn.begin(); it != fn.end(); it++)

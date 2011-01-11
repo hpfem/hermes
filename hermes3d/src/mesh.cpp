@@ -755,13 +755,25 @@ void Mesh::copy(const Mesh &mesh) {
 
   for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++)
     delete it->second;
+  vertices.clear();
 
 	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
     delete it->second;
+  elements.clear();
 
 	for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++)
     delete it->second;
+  boundaries.clear();
 
+  for(std::map<Edge::Key, Edge*>::iterator it = edges.begin(); it != edges.end(); it++)
+    delete it->second;
+  edges.clear();
+
+	for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++)
+    delete it->second;
+  facets.clear();
+
+  midpoints.clear();
 
 	// copy vertices
   for(std::map<unsigned int, Vertex*>::const_iterator it = mesh.vertices.begin(); it != mesh.vertices.end(); it++)
@@ -771,7 +783,7 @@ void Mesh::copy(const Mesh &mesh) {
 	for(std::map<unsigned int, Boundary*>::const_iterator it = mesh.boundaries.begin(); it != mesh.boundaries.end(); it++)
     this->boundaries[it->first] = it->second->copy();
 
-	// copy elements, facets and edges
+	// copy elements, midpoints, facets and edges
 	for(std::map<unsigned int, Element*>::const_iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
     Element *e = it->second;
     this->elements[it->first] = e->copy();
@@ -782,12 +794,18 @@ void Mesh::copy(const Mesh &mesh) {
 			unsigned int *edge_vtx = new unsigned int[Edge::NUM_VERTICES];
 			e->get_edge_vertices(iedge, edge_vtx);
 			emp[iedge] = mesh.peek_midpoint(edge_vtx[0], edge_vtx[1]);
-			if (emp[iedge] != INVALID_IDX)
+			if (emp[iedge] != INVALID_IDX) {
+        MidPointKey key(edge_vtx[0], edge_vtx[1]);
+        if(midpoints.find(key) == midpoints.end())
+          create_midpoint(edge_vtx[0], edge_vtx[1]);
 				set_midpoint(edge_vtx[0], edge_vtx[1], emp[iedge]);
+      }
 
       Edge::Key key(edge_vtx + 0, Edge::NUM_VERTICES);
-			if (mesh.edges.at(key) != NULL)
-				edges[key] = mesh.edges.at(key);
+      if (mesh.edges.at(key) != NULL) {
+        edges[key] = new Edge;
+				*edges[key] = *mesh.edges.at(key);
+      }
       delete [] edge_vtx;
 		}
 
@@ -875,8 +893,11 @@ void Mesh::copy_base(const Mesh &mesh) {
 			e->get_edge_vertices(iedge, vtx);
 
       Edge::Key key(vtx + 0, Edge::NUM_VERTICES);
-      if (mesh.edges.find(key) != mesh.edges.end())
-				this->edges[key] = mesh.edges.at(key);
+      if (mesh.edges.at(key) != NULL) {
+        edges[key] = new Edge;
+				*edges[key] = *mesh.edges.at(key);
+      }
+
 		}
 
 		// facets
@@ -887,7 +908,8 @@ void Mesh::copy_base(const Mesh &mesh) {
 			Facet *facet = NULL;
       Facet::Key key(face_idxs + 0, nvts);
       if(mesh.facets.find(key) != mesh.facets.end()) {
-        if(this->facets.find(key) != mesh.facets.end()) {
+        facet = mesh.facets.at(key);
+        if(this->facets.find(key) == this->facets.end()) {
 					// insert the facet
 					Facet *fcopy = facet->copy_base();
 					fcopy->left = it->first;
@@ -953,7 +975,7 @@ void Mesh::dump() {
 		b->dump();
 	}
 
-	printf("Facets (count = %u)\n", facets.size());
+	printf("Facets (count = %lu)\n", facets.size());
   for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++) {
     Facet *f = it->second;
     if(it->first.size > 0)

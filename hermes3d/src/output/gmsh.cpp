@@ -46,28 +46,28 @@ class HERMES_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
-		if ((*tables)[order.get_idx()] == NULL) 
+    if (tables->find(order.get_idx()) == tables->end()) 
       calculate_view_points(order);
 		return (*tables)[order.get_idx()];
 	}
 
 	virtual int get_num_points(const Ord3 &order) {
 		_F_
-		if ((*np)[order.get_idx()] == NULL) 
+    if (np->find(order.get_idx()) == np->end()) 
       calculate_view_points(order);
 		return (*np)[order.get_idx()];
 	}
 
 	virtual int *get_subdiv_modes(Ord3 order) {
 		_F_
-		if (subdiv_modes[order.get_idx()] == NULL) 
+    if (subdiv_modes.find(order.get_idx()) == subdiv_modes.end()) 
       calculate_view_points(order);
 		return subdiv_modes[order.get_idx()];
 	}
 
 	virtual int get_subdiv_num(Ord3 order) {
 		_F_
-		if (subdiv_num[order.get_idx()] == NULL) 
+    if (subdiv_num.find(order.get_idx()) == subdiv_num.end()) 
       calculate_view_points(order);
 		return subdiv_num[order.get_idx()];
 	}
@@ -660,7 +660,13 @@ void GmshOutputEngine::out(Mesh *mesh) {
 		  unsigned int vtcs[Edge::NUM_VERTICES];
 		  for (int iedge = 0; iedge < element->get_num_edges(); iedge++) {
 			  element->get_edge_vertices(iedge, vtcs);
-			  fprintf(this->out_file, "%u 1 0 %u %u\n", mesh->get_edge_id(vtcs[0], vtcs[1]), vtcs[0], vtcs[1]);
+        unsigned int i = 0;
+        std::map<Edge::Key, Edge*>::const_iterator it_inner = mesh->edges.begin();
+        while(it_inner != mesh->edges.end() && it_inner->first != mesh->get_edge_id(vtcs[0], vtcs[1])) {
+          it_inner++;
+          i++;
+        }
+        fprintf(this->out_file, "%u 1 0 %u %u\n", i, vtcs[0], vtcs[1]);
 		  }
 	  }
 	fprintf(this->out_file, "$EndElements\n");
@@ -676,13 +682,19 @@ void GmshOutputEngine::out(Mesh *mesh) {
 			  int nv = element->get_num_face_vertices(iface);
 			  unsigned int *vtcs = new unsigned int[nv];
 			  element->get_face_vertices(iface, vtcs);
+        unsigned int i = 0;
+        std::map<Facet::Key, Facet*>::const_iterator it_inner = mesh->facets.begin();
+        while(it_inner != mesh->facets.end() && it_inner->first != mesh->get_facet_id(element, iface)) {
+          it_inner++;
+          i++;
+        }
 			  switch (element->get_face_mode(iface)) {
 				  case HERMES_MODE_TRIANGLE:
-					  fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
+            fprintf(this->out_file, "%u 2 0 %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2]);
 					  break;
 
 				  case HERMES_MODE_QUAD:
-					  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+					  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					  break;
 			  }
         delete [] vtcs;
@@ -735,14 +747,19 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
         Facet::Key fid = mesh->get_facet_id(element, iface);
 			  Facet *facet = mesh->facets[fid];
 			  if (facet->type == Facet::INNER) continue;
-
+        unsigned int i = 0;
+        std::map<Facet::Key, Facet*>::const_iterator it_inner = mesh->facets.begin();
+        while(it_inner != mesh->facets.end() && it_inner->first != mesh->get_facet_id(element, iface)) {
+          it_inner++;
+          i++;
+        }
 			  switch (facet->mode) {
 				  case HERMES_MODE_TRIANGLE:
-					  fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
+            fprintf(this->out_file, "%u 2 0 %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2]);
 					  break;
 
 				  case HERMES_MODE_QUAD:
-					  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+					  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 					  break;
 
 				  default:
@@ -769,13 +786,19 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 
 			  Boundary *bnd = mesh->boundaries[facet->right];
 			  int marker = bnd->marker;
+        unsigned int i = 0;
+        std::map<Facet::Key, Facet*>::const_iterator it_inner = mesh->facets.begin();
+        while(it_inner != mesh->facets.end() && it_inner->first != mesh->get_facet_id(element, iface)) {
+          it_inner++;
+          i++;
+        }
 			  switch (facet->mode) {
 				  case HERMES_MODE_TRIANGLE:
-					  fprintf(this->out_file, "%u 3 %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker);
+					  fprintf(this->out_file, "%u 3 %d %d %d\n", i, marker, marker, marker);
 					  break;
 
 				  case HERMES_MODE_QUAD:
-					  fprintf(this->out_file, "%u 4 %d %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker, marker);
+					  fprintf(this->out_file, "%u 4 %d %d %d %d\n", i, marker, marker, marker, marker);
 					  break;
 
 				  default:
@@ -800,39 +823,7 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	std::map<unsigned int, Vertex *> out_vtcs;	// vertices
 	std::map<unsigned int, int> vtx_pt;			// mapping from mesh vertex id to output vertex id
   
-  struct PtsKey {
-    unsigned int *vtcs;
-    unsigned int size;
-
-    PtsKey() {
-      size = 0;
-      vtcs = NULL;
-    }
-
-    ~PtsKey() {
-      if(size > 0)
-        delete [] vtcs;
-    }
-    PtsKey(unsigned int *vtcs_, unsigned int size_) {
-      if(vtcs != NULL)
-        delete [] vtcs;
-      size = size_;
-      vtcs = new unsigned int[size];
-      for(unsigned int i = 0; i < size; i++)
-        vtcs[i] = vtcs_[i];
-    };
-    bool operator<(const PtsKey & other) const{
-      if(size < other.size)
-        return true;
-      else if(size > other.size)
-        return false;
-      else
-        for(unsigned int i = 0; i < size; i++)
-          if(vtcs[i] < other.vtcs[i])
-            return true;
-        return false;
-    };
-  };
+  
 	std::map<PtsKey, unsigned int> face_pts;			// id of points on faces
   std::map<PtsKey, unsigned int> ctr_pts;			// id of points in the center
 

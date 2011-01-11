@@ -187,12 +187,7 @@ public:
 	  np_face = new std::map<unsigned int, int>;
   }
 	virtual ~Quad3D() {
-    delete tables;
-    delete edge_tables;
-    delete face_tables;
-	  delete np;
-	  delete np_edge;
-	  delete np_face;
+    
   }
 
 	virtual QuadPt3D *get_points(const Ord3 &order) { CHECK_MODE; return (*tables)[order.get_idx()]; }

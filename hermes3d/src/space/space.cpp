@@ -51,12 +51,12 @@ void Space::VertexData::dump(int id) {
 }
 
 void Space::EdgeData::dump(Edge::Key id) {
-	printf("edge #%d: ced = %d, ", id, ced);
+  printf("edge: vertices: %u, %u, ced = %d, ", id.size > 0 ? id.vtcs[0] : 0, id.size > 0 ? id.vtcs[1] : 0, ced);
 	if (ced) {
 		printf("edge_comp = %d", edge_ncomponents);
 		for (int i = 0; i < edge_ncomponents; i++) {
 			if (i > 0) printf(",");
-			printf(" (edge = %u, ori = %d, part = %d, coef = " SCALAR_FMT ")", edge_baselist[i].edge_id, edge_baselist[i].ori,
+			printf(" (ori = %d, part = %d, coef = " SCALAR_FMT ")", edge_baselist[i].ori,
 				edge_baselist[i].part.part, SCALAR(edge_baselist[i].coef));
 		}
 		printf(", ");
@@ -64,8 +64,7 @@ void Space::EdgeData::dump(Edge::Key id) {
 		printf("face_comp = %d", face_ncomponents);
 		for (int i = 0; i < face_ncomponents; i++) {
 			if (i > 0) printf(",");
-			printf(" (face = %u, ori = %d, iface = %d, part = (horz = %d, vert = %d), dir = %d, coef = " SCALAR_FMT ")",
-				face_baselist[i].face_id, face_baselist[i].ori, face_baselist[i].iface,
+			printf(" (ori = %d, iface = %d, part = (horz = %d, vert = %d), dir = %d, coef = " SCALAR_FMT ")", face_baselist[i].ori, face_baselist[i].iface,
 				face_baselist[i].part.horz, face_baselist[i].part.vert, face_baselist[i].dir,
 				SCALAR(face_baselist[i].coef));
 		}
@@ -85,9 +84,12 @@ void Space::EdgeData::dump(Edge::Key id) {
 }
 
 void Space::FaceData::dump(Facet::Key id) {
-	printf("face #%d: ced = %d, ", id, ced);
+  if(id.size > 0)
+      printf("Vertices: ");
+    for(unsigned int i = 0; i < id.size; i++)
+      printf("no. %u: %u", i, id.vtcs[i]);
 	if (ced) {
-		printf("part = (%d, %d), ori = %d, facet_id = %u", part.horz, part.vert, ori, facet_id);
+		printf("part = (%d, %d), ori = %d", part.horz, part.vert, ori);
 	}
 	else {
 		printf("order = %s, dof = %d, n = %d", order.str(), dof, n);
@@ -153,8 +155,13 @@ void Space::free_data_tables() {
       ::free(it->second->baselist);
   vn_data.clear();
 
-  for(std::map<Edge::Key, EdgeData*>::iterator it = en_data.begin(); it != en_data.end(); it++)
-		delete [] it->second;
+  for(std::map<Edge::Key, EdgeData*>::iterator it = en_data.begin(); it != en_data.end(); it++) {
+		delete [] it->second->bc_proj;
+    if (it->second->ced) {
+	    ::free(it->second->edge_baselist);
+	    ::free(it->second->face_baselist);
+    }
+  }
   en_data.clear();
 
   for(std::map<Facet::Key, FaceData*>::iterator it = fn_data.begin(); it != fn_data.end(); it++)
@@ -163,6 +170,7 @@ void Space::free_data_tables() {
 
   for(std::map<unsigned int, ElementData*>::iterator it = elm_data.begin(); it != elm_data.end(); it++)
 		delete it->second;
+
 }
 
 // element orders ///////////////////////////////////////////////////////////////////////////////
@@ -1032,6 +1040,7 @@ inline void Space::output_component(BaseEdgeComponent *&current, BaseEdgeCompone
 	}
 
 	// output new edge component
+  current->edge_id.size = 0;
 	current->edge_id = min->edge_id;
 	current->ori = min->ori;
 	current->part = min->part;
@@ -1099,6 +1108,7 @@ inline void Space::output_component(BaseFaceComponent *&current, BaseFaceCompone
 	}
 
 	// output new face component
+  current->face_id.size = 0;
 	current->face_id = min->face_id;
 	current->ori = min->ori;
 	current->iface = min->iface;
@@ -1387,6 +1397,7 @@ void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, Edge::K
 		fnc = ed->face_ncomponents;
 	}
 	else {	// make up an artificial baselist (we care about edge id and coef
+    edummy_bl.edge_id.size = 0;
 		edummy_bl.edge_id = eid;
 		edummy_bl.ori = ori;
 		edummy_bl.part.part = part;
@@ -1407,13 +1418,13 @@ void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, Edge::K
 
 	for (int i = 0; i < en_comp; i++) {
 		BaseEdgeComponent ec = edge_baselist[i];
-		PRINTF(" - [%d]: edge_id = %ld, ori = %d, part = %d, coef = %lf\n",
-			i, ec.edge_id, ec.ori, ec.part.part, ec.coef);
+		PRINTF(" - [%d]: ori = %d, part = %d, coef = %lf\n",
+			i, ec.ori, ec.part.part, ec.coef);
 	}
 	for (int i = 0; i < fn_comp; i++) {
 		BaseFaceComponent fc = face_baselist[i];
-		PRINTF(" - [%d]: face_id = %ld, part = (%d, %d), dir = %d, ori = %d, coef = %lf\n",
-			i, fc.face_id, fc.part.horz, fc.part.vert, fc.dir, fc.ori, fc.coef);
+		PRINTF(" - [%d]: part = (%d, %d), dir = %d, ori = %d, coef = %lf\n",
+			i, fc.part.horz, fc.part.vert, fc.dir, fc.ori, fc.coef);
 	}
 
 	// -- /////////////////
@@ -1445,8 +1456,8 @@ void Space::calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, Edge::K
 		BaseEdgeComponent *ecomp = edge_baselist + i;
 		EdgeData *cng_enode = en_data[ecomp->edge_id]; 						// constraining edge node
 
-		PRINTF("   - ECOMP: edge_id = %ld, part = %d, coef = %lf, order = %d\n",
-			ecomp->edge_id, ecomp->part.part, ecomp->coef, cng_enode->order);
+		PRINTF("   - ECOMP: part = %d, coef = %lf, order = %d\n",
+			ecomp->part.part, ecomp->coef, cng_enode->order);
 
 		if (cng_enode->n > 0) {
 			int *indices = shapeset->get_edge_indices(0, ecomp->ori, cng_enode->order);		// iedge bude 0 (?)
@@ -1633,21 +1644,23 @@ void Space::calc_edge_edge_ced(Edge::Key seid, Edge::Key eid, int ori, int epart
 
 		for (int i = 0; i < ed->edge_ncomponents; i++) {
 			BaseEdgeComponent ec = ed->edge_baselist[i];
-			PRINTF(" - [%d]: edge_id = %ld, ori = %d, part = %d, coef = %lf\n",
-				i, ec.edge_id, ec.ori, ec.part.part, ec.coef);
+			PRINTF(" - [%d]: ori = %d, part = %d, coef = %lf\n",
+				i, ec.ori, ec.part.part, ec.coef);
 		}
 
 		for (int i = 0; i < ed->face_ncomponents; i++) {
 			BaseFaceComponent fc = ed->face_baselist[i];
-			PRINTF(" - [%d]: face_id = %ld, ori = %d, part = (%d, %d), dir = %d, coef = %lf\n",
-				i, fc.face_id, fc.ori, fc.part.horz, fc.part.vert, fc.dir, fc.coef);
+			PRINTF(" - [%d]: ori = %d, part = (%d, %d), dir = %d, coef = %lf\n",
+				i, fc.ori, fc.part.horz, fc.part.vert, fc.dir, fc.coef);
 		}
 
 	}
 	else {
 		int nc = 1;
 		BaseEdgeComponent *baselist = (BaseEdgeComponent *) malloc(nc * sizeof(BaseEdgeComponent));
-		baselist[0].edge_id = eid;
+    // Needed for initialization, due to the use of malloc (above) which does not call constuctors.
+    baselist[0].edge_id.size = 0;
+    baselist[0].edge_id = eid;
 		baselist[0].ori = ori;
 		baselist[0].part.part = part;
 		baselist[0].coef = 1.0;
@@ -1660,8 +1673,8 @@ void Space::calc_edge_edge_ced(Edge::Key seid, Edge::Key eid, int ori, int epart
 
 		for (int i = 0; i < ncomp; i++) {
 			BaseEdgeComponent ec = ed->edge_baselist[i];
-			PRINTF(" - [%d]: edge_id = %ld, ori = %d, part = %d, coef = %lf\n",
-				i, ec.edge_id, ec.ori, ec.part.part, ec.coef);
+			PRINTF(" - [%d]: ori = %d, part = %d, coef = %lf\n",
+				i, ec.ori, ec.part.part, ec.coef);
 		}
 
 		::free(tmp);
@@ -1695,6 +1708,7 @@ void Space::calc_mid_edge_edge_ced(Edge::Key meid, Edge::Key eid[], int ori[], i
 			int ncomp = ed[k]->edge_ncomponents;
 			BaseEdgeComponent *edge_bl = (BaseEdgeComponent *) malloc(ncomp * sizeof(BaseEdgeComponent));
 			for (int i = 0; i < ncomp; i++) {
+        edge_bl[i].edge_id.size = 0;
 				edge_bl[i] = ed[k]->edge_baselist[i];
 				edge_bl[i].part.part = combine_face_part(edge_bl[i].part.part, epart);
 			}
@@ -1704,6 +1718,7 @@ void Space::calc_mid_edge_edge_ced(Edge::Key meid, Edge::Key eid[], int ori[], i
 			free_bl[k] = true;
 		}
 		else {	// make up an artificial baselist
+      dummy_bl[k].edge_id.size = 0;
 			dummy_bl[k].edge_id = eid[k];
 			dummy_bl[k].ori = ori[k];
 			dummy_bl[k].part.part = part;
@@ -1721,8 +1736,8 @@ void Space::calc_mid_edge_edge_ced(Edge::Key meid, Edge::Key eid[], int ori[], i
 
 	for (int i = 0; i < ncomp; i++) {
 		BaseEdgeComponent ec = mid_ed->edge_baselist[i];
-		PRINTF(" - [%d]: edge_id = %ld, ori = %d, part = %d, coef = %lf\n",
-			i, ec.edge_id, ec.ori, ec.part.part, ec.coef);
+		PRINTF(" - [%d]: ori = %d, part = %d, coef = %lf\n",
+			i, ec.ori, ec.part.part, ec.coef);
 	}
 
 	if (free_bl[0]) ::free(bl[0]);
@@ -2222,15 +2237,19 @@ int Space::assign_dofs(int first_dof, int stride) {
 	this->first_dof = next_dof = first_dof;
 	this->stride = stride;
 
-
 	// free data
 	for(std::map<unsigned int, VertexData*>::iterator it = vn_data.begin(); it != vn_data.end(); it++)
     if(it->second->ced)
       ::free(it->second->baselist);
   vn_data.clear();
 
-  for(std::map<Edge::Key, EdgeData*>::iterator it = en_data.begin(); it != en_data.end(); it++)
-		delete [] it->second;
+  for(std::map<Edge::Key, EdgeData*>::iterator it = en_data.begin(); it != en_data.end(); it++) {
+		delete [] it->second->bc_proj;
+    if (it->second->ced) {
+	    ::free(it->second->edge_baselist);
+	    ::free(it->second->face_baselist);
+    }
+  }
   en_data.clear();
 
   for(std::map<Facet::Key, FaceData*>::iterator it = fn_data.begin(); it != fn_data.end(); it++)
@@ -2351,7 +2370,7 @@ void Space::update_constraints()
 				  for (int ie = 0; ie < e->get_num_face_edges(iface); ie++) {
 					  Edge::Key edge_id = mesh->get_edge_id(e, edge[ie]);
 					  if (mesh->edges[edge_id]->bnd == 0)
-						  EXIT("Edge #%ld should be a boundary edge.\n", edge_id);
+						  EXIT("Edge should be a boundary edge.\n");
 				  }
 			  }
 		  }

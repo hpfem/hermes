@@ -87,6 +87,15 @@ public:
 	// for debugging
 	void dump();
 
+  Edge(const Edge &o) { this->bnd = o.bnd; this->ref = o.ref; }
+
+  Edge & operator=(const Edge &o) 
+  { 
+    this->bnd = o.bnd;
+    this->ref = o.ref; 
+    return (*this);
+  }
+
   struct Key
   {
     unsigned int * vtcs;

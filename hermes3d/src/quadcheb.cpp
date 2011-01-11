@@ -61,10 +61,26 @@ QuadChebTetra::QuadChebTetra() {
 
 QuadChebTetra::~QuadChebTetra() {
 	_F_
-#ifdef WITH_TETRA
-  for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+  for(std::map<unsigned int, QuadPt3D *>::iterator it = tables->begin(); it != tables->end(); it++)
     delete [] it->second;
-#endif
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = edge_tables->begin(); it != edge_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = face_tables->begin(); it != face_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  if(vertex_table != NULL)
+    delete [] vertex_table;
+  np->clear();
+  delete np;
+  np_edge->clear();
+  delete np_edge;
+  np_face->clear();
+  delete np_face;
 }
 
 //// QuadChebHex  /////////////////////////////////////////////////////////////////////////////////
@@ -90,10 +106,26 @@ QuadChebHex::QuadChebHex() {
 
 QuadChebHex::~QuadChebHex() {
 	_F_
-#ifdef WITH_HEX
-	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+  for(std::map<unsigned int, QuadPt3D *>::iterator it = tables->begin(); it != tables->end(); it++)
     delete [] it->second;
-#endif
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = edge_tables->begin(); it != edge_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = face_tables->begin(); it != face_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  if(vertex_table != NULL)
+    delete [] vertex_table;
+  np->clear();
+  delete np;
+  np_edge->clear();
+  delete np_edge;
+  np_face->clear();
+  delete np_face;
 }
 
 void QuadChebHex::calc_table(const Ord3 &order) {

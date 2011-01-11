@@ -47,6 +47,90 @@ public:
 	virtual void out(Matrix *mat);
 
 protected:
+
+  struct PtsKey
+  {
+    unsigned int * vtcs;
+    unsigned int size;
+    PtsKey()
+    {
+      vtcs = NULL;
+      size = 0;
+    }
+    PtsKey(unsigned int vtcs_ [], unsigned int size_)
+    {
+      this->size = size_;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++) {
+        unsigned int temp_place = i;
+        for(unsigned int j = i + 1; j < size; j++)
+          if(vtcs_[j] < vtcs_[temp_place])
+            temp_place = j;
+        this->vtcs[i] = vtcs_[temp_place];
+        vtcs_[temp_place] = vtcs_[i];
+      }
+    };
+    ~PtsKey()
+    {
+      if(size > 0)
+        delete [] vtcs;
+    };
+    PtsKey(const PtsKey &b)
+    {
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+    };
+    PtsKey & operator =(const PtsKey &b)
+    {
+      if(size > 0)
+        delete [] vtcs;
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+      return *this;
+    };
+    bool operator <(const PtsKey & other) const
+    {
+      if(this->size < other.size)
+        return true;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return true;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+
+      return false;
+    };
+    bool operator ==(const PtsKey & other) const
+    {
+      if(this->size < other.size)
+        return false;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return false;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+      return true;
+    };
+
+    bool operator !=(const PtsKey & other) const
+    {
+      return (!(*this == other));
+    };
+  };
+
 	/// file into which the output is done
 	FILE *out_file;
 

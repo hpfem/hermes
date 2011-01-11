@@ -4271,22 +4271,22 @@ QuadStdTetra::QuadStdTetra() {
 
 QuadStdTetra::~QuadStdTetra() {
 	_F_
-#ifdef WITH_TETRA
-	// face
-	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*face_tables).begin(); it != (*face_tables).end(); it++) {
-		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = edge_tables->begin(); it != edge_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
       delete [] it_inner->second;
     delete it->second;
-	}
-	// edge
-	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*edge_tables).begin(); it != (*edge_tables).end(); it++) {
-		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+  }
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = face_tables->begin(); it != face_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
       delete [] it_inner->second;
     delete it->second;
-	}
+  }
   if(vertex_table != NULL)
-	  delete [] vertex_table;
-#endif
+    delete [] vertex_table;
+  np_edge->clear();
+  delete np_edge;
+  np_face->clear();
+  delete np_face;
 }
 
 // QuadStdHex /////////////////////////////////////////////////////////////////
@@ -4360,25 +4360,13 @@ QuadStdHex::QuadStdHex() {
 
 QuadStdHex::~QuadStdHex() {
 	_F_
-#ifdef WITH_HEX
-	// element
-	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
-    delete [] it->second;
-	// face
-	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*face_tables).begin(); it != (*face_tables).end(); it++) {
-		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = edge_tables->begin(); it != edge_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
       delete [] it_inner->second;
     delete it->second;
-	}
-	// edge
-	for(std::map<unsigned int, std::map<unsigned int, QuadPt3D*>*>::iterator it = (*edge_tables).begin(); it != (*edge_tables).end(); it++) {
-		for(std::map<unsigned int, QuadPt3D*>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-      delete [] it_inner->second;
-    delete it->second;
-	}
+  }
   if(vertex_table != NULL)
-	  delete [] vertex_table;
-#endif
+    delete [] vertex_table;
 }
 
 void QuadStdHex::calc_table(const Ord3 &order) {
@@ -4535,17 +4523,6 @@ QuadStdPrism::QuadStdPrism() {
 
 QuadStdPrism::~QuadStdPrism() {
 	_F_
-#ifdef WITH_PRISM
-	delete [] np;
-
-	for (int i = 0; i <= H3D_MAX_QUAD_ORDER_TRI; i++) {
-		for (int j = 0; j <= H3D_MAX_QUAD_ORDER; j++) {
-			int m = MAKE_PRISM_ORDER(i, j);
-			delete [] tables[m];
-		}
-	}
-	delete [] tables;
-#endif
 }
 
 // quadrature access functions
