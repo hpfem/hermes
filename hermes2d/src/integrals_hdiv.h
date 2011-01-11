@@ -49,7 +49,7 @@ inline T int_g_h(Function<T>* fg, Function<T>* fh, RefMap* rg, RefMap* rh)
 //// error calculation for adaptivity  //////////////////////////////////////////////////////////////////////////////
 
 template<typename Real, typename Scalar>
-Scalar hdiv_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
 
   error("hdiv error form not implemented yet in integrals_hdiv.h.");

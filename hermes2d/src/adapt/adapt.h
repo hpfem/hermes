@@ -24,6 +24,7 @@
 #include "../integrals_h1.h"
 #include "../integrals_hcurl.h"
 #include "../integrals_hdiv.h"
+#include "../integrals_l2.h"
 #include "../ref_selectors/selector.h"
 
 /** \defgroup g_adapt Adaptivity

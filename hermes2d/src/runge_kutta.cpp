@@ -250,7 +250,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     // Prepare the u_prev vector for weak forms.
     for (int r = 0; r < num_stages; r++) {
       for (int i = 0; i < ndof; i++) {
-        double increment_r = 0;
+        scalar increment_r = 0;
         for (int s = 0; s < num_stages; s++) {
           increment_r += time_step * bt->get_A(r, s) * stage_vec[s*ndof + i]; 
         }
@@ -342,7 +342,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Calculate new coefficient vector using the stage vector and the Butcher's table.
   for (int i = 0; i < ndof; i++) {
-    double increment = 0;
+    scalar increment = 0;
     for (int s = 0; s < num_stages; s++) {
       increment += time_step * bt->get_B(s) * stage_vec[s*ndof + i]; 
     }

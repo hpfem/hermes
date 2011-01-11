@@ -82,22 +82,22 @@ Adapt::Adapt(Hermes::Tuple< Space* > spaces_,
   for (int i = 0; i < this->num; i++) {
     switch (proj_norms[i]) {
       case HERMES_H1_NORM: 
-           form[i][i] = h1_form<double, scalar>; ord[i][i] = h1_form<Ord, Ord>; 
+           form[i][i] = h1_error_form<double, scalar>; ord[i][i] = h1_error_form<Ord, Ord>; 
            //printf("H1 norm.\n");
            break;
       case HERMES_H1_SEMINORM: 
-           form[i][i] = h1_semi_form<double, scalar>; ord[i][i] = h1_semi_form<Ord, Ord>; 
+           form[i][i] = h1_error_semi_form<double, scalar>; ord[i][i] = h1_error_semi_form<Ord, Ord>; 
            //printf("H1 semi norm.\n");
            break;
       case HERMES_HCURL_NORM: 
-           form[i][i] = hcurl_form<double, scalar>; ord[i][i] = hcurl_form<Ord, Ord>; 
+           form[i][i] = hcurl_error_form<double, scalar>; ord[i][i] = hcurl_error_form<Ord, Ord>; 
            //printf("Hcurl norm.\n");
            break;
       case HERMES_HDIV_NORM: 
-           form[i][i] = hdiv_form<double, scalar>; ord[i][i] = hdiv_form<Ord, Ord>; 
+           form[i][i] = hdiv_error_form<double, scalar>; ord[i][i] = hdiv_error_form<Ord, Ord>; 
            //printf("Hdiv norm.\n");
            break;
-      case HERMES_L2_NORM: form[i][i] = l2_form<double, scalar>; ord[i][i] = l2_form<Ord, Ord>; 
+      case HERMES_L2_NORM: form[i][i] = l2_error_form<double, scalar>; ord[i][i] = l2_error_form<Ord, Ord>; 
 	   //printf("L2 norm.\n");
            break;
       default: error("Unknown projection type in Adapt::Adapt().");
