@@ -26,8 +26,6 @@ class MeshLoader;
 
 #include "h3d_common.h"
 
-#include "../../hermes_common/judyarray.h"
-#include "../../hermes_common/judyarrayptr.h"
 #include "../../hermes_common/mapord.h"
 
 /// Iterates over all mesh edge indices.

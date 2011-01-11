@@ -22,7 +22,6 @@
 
 #include "h3d_common.h"
 #include "order.h"
-#include "../../hermes_common/judyarray.h"
 #include "../../hermes_common/error.h"
 
 /// @defgroup quadratures Numerical quadratures

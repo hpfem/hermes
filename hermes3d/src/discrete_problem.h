@@ -23,9 +23,6 @@
 #include "h3d_common.h"
 #include "weakform.h"
 #include "tuple.h"
-#include "norm.h"
-#include "../../hermes_common/judyarray.h"
-#include "../../hermes_common/solver/solver.h"
 
 class Space;
 class Matrix;

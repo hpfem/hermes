@@ -17,7 +17,6 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "../../hermes_common/bitjudyarray.h"
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/error.h"
 
