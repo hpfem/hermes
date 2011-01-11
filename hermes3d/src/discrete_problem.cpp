@@ -24,7 +24,6 @@
 #include "h3d_common.h"
 #include "discrete_problem.h"
 #include "traverse.h"
-#include "../../hermes_common/matrix.h"
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/callstack.h"
 

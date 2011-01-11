@@ -23,6 +23,9 @@
 #include "h3d_common.h"
 #include "weakform.h"
 #include "tuple.h"
+#include "matrix.h"
+#include "solver/solver.h"
+#include "norm.h"
 
 class Space;
 class Matrix;
