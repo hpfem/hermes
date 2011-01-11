@@ -23,7 +23,7 @@ Applications folder and double click the 'Update Shell
 Profile.command' script to run it. This will update your system to use 
 the latest version of Python.
 
-**Step 3**: Install the following libraries and applications: judy, Suitesparse, 
+**Step 3**: Install the following libraries and applications: Suitesparse, 
 glew, cmake, git. If you don't already have these on your Mac, then 
 the easiest way to get them is to use MacPorts (which is an 
 application which allows you to easily install and manage UNIX 
@@ -31,7 +31,7 @@ libraries and applications on your Mac) by doing the following:
 
   (a) Download and install MacPorts from 
       http://www.macports.org/install.php.
-  (b) Do 'sudo port install judy suitesparse glew'.
+  (b) Do 'sudo port install suitesparse glew'.
   (c) If you don't already have git installed, do 
       'sudo port install git'.
   (d) If you don't already have cmake installed, do 

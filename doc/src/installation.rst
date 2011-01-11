@@ -11,7 +11,7 @@ If you are using a Debian-based system, install the required libraries first:
 
 :: 
 
-    apt-get install cmake g++ gfortran libjudy-dev freeglut3-dev libsuitesparse-dev libglew1.5-dev python-dev python-numpy python-scipy cython python-matplotlib
+    apt-get install cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev python-dev python-numpy python-scipy cython python-matplotlib
 
 (Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
 least 0.98.5.2 or higher.)
@@ -131,7 +131,7 @@ Applications folder and double click the 'Update Shell
 Profile.command' script to run it. This will update your system to use 
 the latest version of Python.
 
-**Step 3**: Install the following libraries and applications: judy, Suitesparse, 
+**Step 3**: Install the following libraries and applications: Suitesparse, 
 glew, cmake, git. If you don't already have these on your Mac, then 
 the easiest way to get them is to use MacPorts (which is an 
 application which allows you to easily install and manage UNIX 
@@ -139,7 +139,7 @@ libraries and applications on your Mac) by doing the following:
 
   (a) Download and install MacPorts from 
       http://www.macports.org/install.php.
-  (b) Do 'sudo port install judy suitesparse glew'.
+  (b) Do 'sudo port install suitesparse glew'.
   (c) If you don't already have git installed, do 
       'sudo port install git'.
   (d) If you don't already have cmake installed, do 
@@ -324,15 +324,7 @@ This list works for 32-bit version of Hermes. If you intend to cross-compile 64-
 
             python.exe setup.py install
 	
-  - JUDY(ver-1.0.5)
-
-    - Download judy (http://sourceforge.net/projects/judy/) and upack it.
-    - Open a command prompt with MSVC variables set up: either use a command prompt in MSVC start menu or start a command prompt and execute VCVARS.BAT from the MSVC directory.
-    - Switch to a directory containing JUDY sources, e.g., 'my_judy_root\\src'.
-    - Compile JUDY with 'build.bat': this creates Judy.dll and Judy.lib.
-    - Copy 'Judy.dll', 'Judy.h', and 'Judy.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
-
-  - PTHREAD(2.8.0)
+    - PTHREAD(2.8.0)
 
     - Download pthread binaries version 2.8.0 (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-8-0-release/).
     - Copy 'lib\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
@@ -349,14 +341,14 @@ This list works for 32-bit version of Hermes. If you intend to cross-compile 64-
       - Download AMD source file package (http://www.cise.ufl.edu/research/sparse/amd/).
       - Unpack source file into a directory that has the same parent as a directory where you unpacked UFconfig.
       - Copy the file 'my_hermes_root\\MSVC2008\\AMD.nmake' to a directory 'my_amd_directory\\Lib'.
-      - Run MSVC command prompt similar as in the case of Judy and switch to 'my_amd_directory\\Lib'.
+      - Run MSVC command prompt similar and switch to 'my_amd_directory\\Lib'.
       - Compile AMD using 'nmake -f AMD.nmake'.
       - Copy 'Include\\amd.h', 'Include\\amd_internal.h', and 'Lib\\libamd.lib' to 'include', and 'lib' dependecy directories respectively.
 
     - Download UMFPACK source file package (http://www.cise.ufl.edu/research/sparse/umfpack/).
     - Unpack source file into a directory that has the same parent as a directory where you unpacked UFconfig.
     - Copy the file 'my_hermes_root\\MSVC2008\\UMFPACK.nmake' to the 'my_umfpack_root\\Lib' directory.
-    - Run MSVC command prompt similar as in the case of Judy and switch to 'my_umfpack_root\\Lib'.
+    - Run MSVC command prompt and switch to 'my_umfpack_root\\Lib'.
     - Compile UMFPACK using 'nmake -f UMFPACK.nmake'. Linking might take some time, please, be patient.
     - Copy 'libumfpack.dll', all include files, and 'libumfpack.lib' to 'bin', 'include', and 'lib' dependecy directories, respectively.
 
