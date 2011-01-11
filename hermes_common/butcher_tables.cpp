@@ -37,7 +37,6 @@ ButcherTable* init_butcher_table(ButcherTableType butcher_table)
   case Explicit_RK_2: // Explicit RK-2.
     bt->alloc(2);
     bt->set_A(1, 0, 2./3.);
-    bt->set_A(1, 1, 0.);
     bt->set_B(0, 1./4.);
     bt->set_B(1, 3./4.);
     bt->set_C(0, 2./3.);
@@ -76,7 +75,7 @@ ButcherTable* init_butcher_table(ButcherTableType butcher_table)
   case Implicit_Lobatto_IIIB_2: // Implicit Lobatto IIIB (second-order).
     bt->alloc(2);
     bt->set_A(0, 0, 1./2.);
-    bt->set_A(0, 1, 1./2.);
+    bt->set_A(1, 0, 1./2.);
     bt->set_B(0, 1./2.);
     bt->set_B(1, 1./2.);
     bt->set_C(0, 1./2.);
