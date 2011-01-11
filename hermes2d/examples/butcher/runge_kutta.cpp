@@ -1,10 +1,10 @@
 // Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
 // The original discretized equation is M\dot{Y} = F(t, Y) where M is the mass 
 // matrix, Y the coefficient vector, and F the (nonlinear) stationary residual. 
-// Below, "stage_wf_timedep" and "stage_wf_stationary" refer to the left-hand side 
+// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side 
 // and right-hand side of the equation, respectively. 
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                     DiscreteProblem* dp, WeakForm* stage_wf_stationary, WeakForm* stage_wf_timedep) 
+                     DiscreteProblem* dp, WeakForm* stage_wf_right, WeakForm* stage_wf_left) 
 {
   // Number of stages.
   int num_stages = bt->get_size();
@@ -55,7 +55,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 
         // Add the matrix form to the corresponding block of the 
         // stage Jacobian matrix.
-        stage_wf_stationary->add_matrix_form(&mfv_ij);
+        stage_wf_right->add_matrix_form(&mfv_ij);
       }
     }
   }
@@ -72,7 +72,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     mfv_ii.ext = Hermes::Tuple<MeshFunction*> ();
     mfv_ii.scaling_factor = -1.0 / time_step;
     // Add the matrix form to the diagonal block.
-    stage_wf_timedep->add_matrix_form(&mfv_ii);
+    stage_wf_left->add_matrix_form(&mfv_ii);
   }
 
   // Duplicate matrix surface forms, enhance them with 
@@ -96,7 +96,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 
         // Add the matrix form to the corresponding block of the 
         // stage Jacobian matrix.
-        stage_wf_stationary->add_matrix_form_surf(&mfs_ij);
+        stage_wf_right->add_matrix_form_surf(&mfs_ij);
       }
     }
   }
@@ -120,7 +120,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 
       // Add the matrix form to the corresponding block of the 
       // stage Jacobian matrix.
-      stage_wf_stationary->add_vector_form(&vfv_i);
+      stage_wf_right->add_vector_form(&vfv_i);
     }
   }
 
@@ -134,7 +134,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     vfv_i.ext = Hermes::Tuple<MeshFunction*> ();
     vfv_i.scaling_factor = -1.0 / time_step;
     // Add the matrix form to the diagonal block.
-    stage_wf_timedep->add_vector_form(&vfv_i);
+    stage_wf_left->add_vector_form(&vfv_i);
   }
 
   // Duplicate vector surface forms, enhance them with 
@@ -156,7 +156,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 
       // Add the matrix form to the corresponding block of the 
       // stage Jacobian matrix.
-      stage_wf_stationary->add_vector_form_surf(&vfs_i);
+      stage_wf_right->add_vector_form_surf(&vfs_i);
     }
   }
 }
@@ -169,17 +169,17 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 {
   // Matrix and vector for the time derivative part of 
   // the equation (left-hand side).
-  SparseMatrix* matrix_timedep = create_matrix(matrix_solver);
-  Vector* rhs_timedep = create_vector(matrix_solver);
+  SparseMatrix* matrix_left = create_matrix(matrix_solver);
+  Vector* vector_left = create_vector(matrix_solver);
 
   // Matrix and vector for the stationary part of the 
   // equation (right-hand side).
-  SparseMatrix* matrix_stationary = create_matrix(matrix_solver);
-  Vector* rhs_stationary = create_vector(matrix_solver);
+  SparseMatrix* matrix_right = create_matrix(matrix_solver);
+  Vector* vector_right = create_vector(matrix_solver);
 
   // The two matrices and two vectors will be merged into "matrix" 
   // and "rhs", respectively, so we create just one matrix solver.
-  Solver* solver = create_linear_solver(matrix_solver, matrix_stationary, rhs_stationary);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
 
   // Get number of stages from the Butcher's table.
   int num_stages = bt->get_size();
@@ -199,15 +199,15 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   }
 
   // Create a multistage weak formulation.
-  WeakForm stage_wf_timedep(num_stages);           // For the time derivative term (written on the left).
-  WeakForm stage_wf_stationary(num_stages);        // For the rest of equation (written on the right).
-  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_stationary, &stage_wf_timedep); 
+  WeakForm stage_wf_left(num_stages);           // For the time derivative term (written on the left).
+  WeakForm stage_wf_right(num_stages);        // For the rest of equation (written on the right).
+  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_right, &stage_wf_left); 
 
   // Create the weak forms for the left- and right-hand sides of 
   // the equation, respectively.
   bool is_linear = dp->get_is_linear();
-  DiscreteProblem stage_dp_timedep(&stage_wf_timedep, stage_spaces, is_linear);
-  DiscreteProblem stage_dp_stationary(&stage_wf_stationary, stage_spaces, is_linear);
+  DiscreteProblem stage_dp_left(&stage_wf_left, stage_spaces, is_linear);
+  DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces, is_linear);
 
   // Create stage vector of length num_stages * ndof.
   // It contains coefficients of all stage solutions,
@@ -246,47 +246,47 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Assemble the stage Jacobian matrix and residual vector.
     bool rhs_only = false;
-    stage_dp_timedep.assemble(stage_vec, matrix_timedep, rhs_timedep, rhs_only);
+    stage_dp_left.assemble(stage_vec, matrix_left, vector_left, rhs_only);
     bool force_diagonal_blocks = true;
-    // Sparsity structure is forced so that matrix_timedep can be added later.
-    stage_dp_stationary.assemble(u_prev_vec, matrix_stationary, rhs_stationary, 
+    // Sparsity structure is forced so that matrix_left can be added later.
+    stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right, 
                                  rhs_only, force_diagonal_blocks);
 
     /*
     // Debug.
     FILE* f = fopen("debug-1.txt", "w");
-    matrix_timedep->dump(f, "tmp", DF_MATLAB_SPARSE); 
+    matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE); 
     info("Matrix timedep dumped.");
     fclose(f);
     f = fopen("debug-2.txt", "w");
-    matrix_stationary->dump(f, "tmp", DF_MATLAB_SPARSE); 
+    matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
     info("Matrix stationary dumped.");
     fclose(f);
     */
 
     // Putting the two parts together into matrix and rhs.
-    ((UMFPackMatrix*)matrix_stationary)->add_umfpack_matrix((UMFPackMatrix*)matrix_timedep);
-    rhs_stationary->add_vector(rhs_timedep);
+    ((UMFPackMatrix*)matrix_right)->add_umfpack_matrix((UMFPackMatrix*)matrix_left);
+    vector_right->add_vector(vector_left);
 
     // Debug.
     //f = fopen("debug-3.txt", "w");
-    //matrix_stationary->dump(f, "tmp", DF_MATLAB_SPARSE); 
+    //matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
     //info("Merged matrix dumped.");
     //fclose(f);
     //exit(0);
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    rhs_stationary->change_sign();
+    vector_right->change_sign();
     
     // Measure the residual norm.
     if (HERMES_RESIDUAL_AS_VECTOR) {
       // Calculate the l2-norm of residual vector.
-      residual_norm = get_l2_norm(rhs_stationary);
+      residual_norm = get_l2_norm(vector_right);
     }
     else {
       // Translate residual vector into residual functions.
-      Solution::vector_to_solutions(rhs_stationary, stage_dp_stationary.get_spaces(), 
+      Solution::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), 
                                     residuals, add_dir_lift);
       residual_norm = calc_norms(residuals);
     }
@@ -336,10 +336,10 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   } 
 
   // Clean up.
-  delete matrix_timedep;
-  delete matrix_stationary;
-  delete rhs_timedep;
-  delete rhs_stationary;
+  delete matrix_left;
+  delete matrix_right;
+  delete vector_left;
+  delete vector_right;
   delete solver;
 
   // Delete stage spaces, but not the first (original) one.
