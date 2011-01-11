@@ -149,20 +149,26 @@ double Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &o
     return proj_err.find(key)->second;
 	else {
     switch (ss->get_type()) {
-      case 1:
+      case HERMES_H1_SPACE:
         proj = new H1ProjectionIpol(rsln, e, ss);
 		    err = proj->get_error(split, son, order);
 		    proj_err[key] = err;
+        delete proj;
+		    return err;
         break;
-      case 2:
+      case HERMES_HCURL_SPACE:
         proj = new HCurlProjection(rsln, e, ss);
 		    err = proj->get_error(split, son, order);
 		    proj_err[key] = err;
+        delete proj;
+		    return err;
         break;
+      default:
+        error("Adaptivity only implemented for H1 and HCurl spaces.");
+        return 0.0;
     }
-    delete proj;
-		return err;
   }
+  return 0.0;
 }
 
 //// optimal refinement search /////////////////////////////////////////////////////////////////////

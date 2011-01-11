@@ -247,7 +247,7 @@ inline int LIMIT_ELEMENT_ORDER(int a) {
 void Space::copy_orders(const Space &space, int inc) {
 	_F_
 	Mesh *cmesh = space.get_mesh();
-	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+	for(std::map<unsigned int, Element*>::iterator it = cmesh->elements.begin(); it != cmesh->elements.end(); it++)
 		if (it->second->used && it->second->active) {
 		  Ord3 oo = space.get_element_order(it->first);
 		  assert(cmesh->elements[it->first]->get_mode() == mesh->elements[it->first]->get_mode());
@@ -264,8 +264,8 @@ void Space::copy_orders(const Space &space, int inc) {
 	  }
 	seq++;
 
-        // enumerate basis functions
-        this->assign_dofs();
+  // enumerate basis functions
+  this->assign_dofs();
 }
 
 void Space::enforce_minimum_rule() {
@@ -2271,7 +2271,7 @@ int Space::assign_dofs(int first_dof, int stride) {
 
 	mesh_seq = mesh->get_seq();
 	was_assigned = true;
-        this->ndof = (next_dof - first_dof) / stride;
+  this->ndof = (next_dof - first_dof) / stride;
 	seq++;
 
 	return this->ndof;

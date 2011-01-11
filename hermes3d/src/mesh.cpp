@@ -979,9 +979,9 @@ void Mesh::dump() {
   for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++) {
     Facet *f = it->second;
     if(it->first.size > 0)
-      printf("Vertices: ");
+      printf("Vertices: \n");
     for(unsigned int i = 0; i < it->first.size; i++)
-      printf("no. %u: %u", i, it->first.vtcs[i]);
+      printf("%u: %u\t", i, it->first.vtcs[i]);
 		f->dump();
 	}
 }

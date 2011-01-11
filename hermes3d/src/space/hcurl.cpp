@@ -95,33 +95,39 @@ void HcurlSpace::assign_dofs_internal() {
 	std::map<Facet::Key, bool> init_faces;
 
 	// edge dofs
-	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+  for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
 		if (it->second->used && it->second->active) {
       Element *e = mesh->elements[it->first];
+		  // edge dofs
 		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
 			  Edge::Key eid = mesh->get_edge_id(e, iedge);
 			  EdgeData *ed = en_data[eid];
 			  assert(ed != NULL);
 			  if (!init_edges[eid] && !ed->ced) {
 				  assign_edge_dofs(eid);
-				  init_edges[eid];
+				  init_edges[eid] = true;
 			  }
 		  }
-
-		  // face dofs
-		  for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			  Facet::Key fid = mesh->get_facet_id(e, iface);
-			  FaceData *fd = fn_data[fid];
-			  assert(fd != NULL);
-			  if (!init_faces[fid] && !fd->ced) {
-				  assign_face_dofs(fid);
-				  init_faces[fid];
-			  }
-		  }
-
-		  // bubble dofs
-      assign_bubble_dofs(it->first);
 	  }
+
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		// face dofs
+		for (int iface = 0; iface < e->get_num_faces(); iface++) {
+			Facet::Key fid = mesh->get_facet_id(e, iface);
+			FaceData *fd = fn_data[fid];
+			assert(fd != NULL);
+			if (!init_faces[fid] && !fd->ced) {
+				assign_face_dofs(fid);
+				init_faces[fid] = true;
+			}
+		}
+	}
+
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active)
+		  assign_bubble_dofs(it->first);
 }
 
 // assembly lists ////
