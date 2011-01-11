@@ -36,7 +36,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
-ButcherTableType butcher_table = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_RK_1;
 
 // Boundary markers.
 const std::string BDY_GROUND = "Boundary ground";
@@ -62,7 +62,7 @@ Real temp_ext(Real t) {
 int main(int argc, char* argv[])
 {
   // Choose a Butcher's table.
-  ButcherTable *bt = init_butcher_table(butcher_table);
+  ButcherTable bt(butcher_table_type);
 
   // Load the mesh.
   Mesh mesh;
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_const(BDY_GROUND, TEMP_INIT);
+  bc_values.add_const(BDY_GROUND, TEMP_BND);
 
   // Initialize an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -124,9 +124,9 @@ int main(int argc, char* argv[])
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
-         current_time, time_step, bt->get_size());
+         current_time, time_step, bt.get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -149,7 +149,6 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete [] coeff_vec;
-  delete bt;
 
   // Wait for the view to be closed.
   View::wait();

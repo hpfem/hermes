@@ -91,24 +91,6 @@ enum MatrixSolverType
    SOLVER_AZTECOO
 };
 
-// Butcher's tables.
-enum ButcherTableType 
-{
-   Explicit_RK_1,             // Explicit Runge-Kutta RK-1, or explicit Euler method.
-   Implicit_RK_1,             // Implicit Runge-Kutta RK-1, or implicit Euler method.
-   Explicit_RK_2,             // Explicit Runge-Kutta RK-2 method.
-   Implicit_Crank_Nicolson_2, // Implicit Crank_Nicolson method.
-   Implicit_SDIRK_2,          // Implicit SDIRK-2 method.
-   Implicit_Lobatto_IIIA_2,   // Implicit Lobatto IIIA-2 method.
-   Implicit_Lobatto_IIIB_2,   // Implicit Lobatto IIIB-2 method.
-   Implicit_Lobatto_IIIC_2,   // Implicit Lobatto IIIB-2 method.
-   Explicit_RK_3,             // Explicit Runge-Kutta RK-3 method.
-   Explicit_RK_4,             // Explicit Runge-Kutta RK-4 method.
-   Implicit_Lobatto_IIIA_4,   // Implicit Lobatto IIIA-4 method.
-   Implicit_Lobatto_IIIB_4,   // Implicit Lobatto IIIB-4 method.
-   Implicit_Lobatto_IIIC_4    // Implicit Lobatto IIIB-4 method.
-};
-
 // Should be in the same order as MatrixSolverTypes above, so that the
 // names may be accessed by the same enumeration variable.
 const std::string MatrixSolverNames[7] = {

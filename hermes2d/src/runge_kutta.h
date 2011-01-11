@@ -21,10 +21,10 @@
 /// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
 /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
 /// and right-hand side of the equation, respectively.
-void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
+void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
                      DiscreteProblem* dp, WeakForm* stage_wf_right, WeakForm* stage_wf_left);
 
-bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
                   double newton_tol, int newton_max_iter, bool verbose = false,
                   double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
