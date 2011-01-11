@@ -92,9 +92,9 @@ void init_butcher_table(ButcherTableType butcher_table, ButcherTable* bt)
 
   case Explicit_RK_4: // Explicit RK-4.
     bt->alloc(4);
-    bt->set_A(0, 1, 1./2.);
-    bt->set_A(1, 2, 1./2.);
-    bt->set_A(2, 3, 1.);
+    bt->set_A(1, 0, 1./2.);
+    bt->set_A(2, 1, 1./2.);
+    bt->set_A(3, 2, 1.);
     bt->set_B(0, 1./6.);
     bt->set_B(1, 1./3.);
     bt->set_B(2, 1./3.);

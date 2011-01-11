@@ -83,10 +83,10 @@ Real heat_src(Real x, Real y)
 // Weak forms.
 #include "forms.cpp"
 
-// Runge-Kutta time step function.
+// The rk_time_step() function.
 #include "runge_kutta.cpp"
 
-// The rk_time_step() function:
+// A few predefined Butcher's tables.
 #include "butcher_tables.cpp"
 
 // Main function.

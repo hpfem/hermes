@@ -48,7 +48,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfv_ij.fn = mfv_base.fn;
         mfv_ij.ord = mfv_base.ord;
         mfv_ij.ext.copy(mfv_base.ext);
-        mfv_ij.scaling_factor = bt->get_A(i, j);
+        mfv_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfv_ij.ext.push_back(stage_time_sol[i]);
@@ -70,7 +70,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     mfv_ii.fn = l2_form<double, scalar>;
     mfv_ii.ord = l2_form<Ord, Ord>;
     mfv_ii.ext = Hermes::Tuple<MeshFunction*> ();
-    mfv_ii.scaling_factor = -1.0 / time_step;
+    mfv_ii.scaling_factor = 1.0;
     // Add the matrix form to the diagonal block.
     stage_wf_left->add_matrix_form(&mfv_ii);
   }
@@ -89,7 +89,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.fn = mfs_base.fn;
         mfs_ij.ord = mfs_base.ord;
         mfs_ij.ext.copy(mfs_base.ext);
-        mfs_ij.scaling_factor = bt->get_A(i, j);
+        mfs_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfs_ij.ext.push_back(stage_time_sol[i]);
@@ -113,7 +113,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfv_i.fn = vfv_base.fn;
       vfv_i.ord = vfv_base.ord;
       vfv_i.ext.copy(vfv_base.ext);
-      vfv_i.scaling_factor = 1.0;
+      vfv_i.scaling_factor = -1.0;
 
       // Add stage_time_sol[i] as an external function to the form.
       vfv_i.ext.push_back(stage_time_sol[i]);
@@ -132,7 +132,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     vfv_i.fn = l2_residual_form<double, scalar>;
     vfv_i.ord = l2_residual_form<Ord, Ord>;
     vfv_i.ext = Hermes::Tuple<MeshFunction*> ();
-    vfv_i.scaling_factor = -1.0 / time_step;
+    vfv_i.scaling_factor = 1.0;
     // Add the matrix form to the diagonal block.
     stage_wf_left->add_vector_form(&vfv_i);
   }
@@ -149,7 +149,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.fn = vfs_base.fn;
       vfs_i.ord = vfs_base.ord;
       vfs_i.ext.copy(vfs_base.ext);
-      vfs_i.scaling_factor = 1.0;
+      vfs_i.scaling_factor = -1.0;
 
       // Add stage_time_sol[i] as an external function to the form.
       vfs_i.ext.push_back(stage_time_sol[i]);
@@ -238,7 +238,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       for (int i = 0; i < ndof; i++) {
         double increment_r = 0;
         for (int s = 0; s < num_stages; s++) {
-          increment_r += bt->get_A(r, s) * stage_vec[s*ndof + i]; 
+          increment_r += time_step * bt->get_A(r, s) * stage_vec[s*ndof + i]; 
         }
         u_prev_vec[r*ndof + i] = coeff_vec[i] + increment_r;
       }
@@ -250,7 +250,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     bool force_diagonal_blocks = true;
     // Sparsity structure is forced so that matrix_left can be added later.
     stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right, 
-                                 rhs_only, force_diagonal_blocks);
+                            rhs_only, force_diagonal_blocks);
 
     /*
     // Debug.
@@ -330,7 +330,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   for (int i = 0; i < ndof; i++) {
     double increment = 0;
     for (int s = 0; s < num_stages; s++) {
-      increment += bt->get_B(s) * stage_vec[s*ndof + i]; 
+      increment += time_step * bt->get_B(s) * stage_vec[s*ndof + i]; 
     }
     coeff_vec[i] += increment;
   } 
