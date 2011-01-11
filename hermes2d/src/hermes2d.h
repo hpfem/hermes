@@ -37,6 +37,9 @@
 // boundary conditions
 #include "../hermes_common/bctypes.h"
 
+// butcher tables
+#include "../../hermes_common/butcher_tables.h"
+
 #include "h2d_common.h"
 #include "hermes_logging.h"
 

@@ -1,6 +1,9 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
+
 #include "hermes2d.h"
+
+#include "runge_kutta.h"
 
 using namespace RefinementSelectors;
 
@@ -83,9 +86,6 @@ Real heat_src(Real x, Real y)
 // Weak forms.
 #include "forms.cpp"
 
-// The rk_time_step() function.
-#include "runge_kutta.cpp"
-
 // A few predefined Butcher's tables.
 #include "butcher_tables.cpp"
 
@@ -93,8 +93,7 @@ Real heat_src(Real x, Real y)
 int main(int argc, char* argv[])
 {
   // Choose a Butcher's table.
-  ButcherTable bt;
-  init_butcher_table(butcher_table, &bt);
+  ButcherTable *bt = init_butcher_table(butcher_table);
 
   // Load the mesh.
   Mesh mesh;
@@ -146,9 +145,9 @@ int main(int argc, char* argv[])
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
-         current_time, time_step, bt.get_size());
+         current_time, time_step, bt->get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -173,6 +172,7 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete [] coeff_vec;
+  delete bt;
 
   // Wait for all views to be closed.
   View::wait();
