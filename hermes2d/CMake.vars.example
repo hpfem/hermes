@@ -1,4 +1,5 @@
 set(WITH_MUMPS YES)
+set(WITH_SUPERLU YES)
 
 set(WITH_TRILINOS YES)
 set(TRILINOS_ROOT /opt/packages/trilinos)
