@@ -64,12 +64,12 @@
                                       ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
 
 // Matrix forms for error calculation.
-  typedef scalar (*matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[], 
-                                       Func<scalar> *u, Func<scalar> *v, Geom<double> *e, 
-                                       ExtData<scalar> *); ///< A bilinear form callback function.
-  typedef Ord (*matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[], 
-                                    Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
-                                    ExtData<Ord> *); ///< A bilinear form to estimate order of a function.
+  typedef scalar (*error_matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[], 
+                                             Func<scalar> *u, Func<scalar> *v, Geom<double> *e, 
+                                             ExtData<scalar> *); ///< Error bilinear form callback function.
+  typedef Ord (*error_matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[], 
+                                          Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                                          ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
 
 ///< Structure to hold adaptivity parameters together.
 struct AdaptivityParamType {
@@ -84,8 +84,8 @@ struct AdaptivityParamType {
 
   Hermes::Tuple<int> error_form_i;
   Hermes::Tuple<int> error_form_j;
-  Hermes::Tuple<matrix_form_val_t> error_form_val;
-  Hermes::Tuple<matrix_form_ord_t> error_form_ord;
+  Hermes::Tuple<error_matrix_form_val_t> error_form_val;
+  Hermes::Tuple<error_matrix_form_ord_t> error_form_ord;
 
   AdaptivityParamType(double err_stop = 1.0, int ndof_stop = 50000,
 	  	      double threshold = 0.3, int strategy = 0, 
@@ -103,11 +103,11 @@ struct AdaptivityParamType {
     this->elem_error_flag = elem_error_flag;
     error_form_i = Hermes::Tuple<int>();
     error_form_j = Hermes::Tuple<int>();
-    error_form_val = Hermes::Tuple<matrix_form_val_t>();
-    error_form_ord = Hermes::Tuple<matrix_form_ord_t>();
+    error_form_val = Hermes::Tuple<error_matrix_form_val_t>();
+    error_form_ord = Hermes::Tuple<error_matrix_form_ord_t>();
   }; 
   
-  void set_error_form(int i, int j, matrix_form_val_t mfv, matrix_form_ord_t mfo) 
+  void set_error_form(int i, int j, error_matrix_form_val_t mfv, error_matrix_form_ord_t mfo) 
   {
     if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::add_error_form().");
     this->error_form_i.push_back(i);
@@ -138,8 +138,8 @@ public:
    *  \param[in] j The second component index.
    *  \param[in] bi_form A bilinear form which calculates value.
    *  \param[in] bi_ord A bilinear form which calculates order. */
-  void set_error_form(int i, int j, matrix_form_val_t bi_form, matrix_form_ord_t bi_ord);
-  void set_error_form(matrix_form_val_t bi_form, matrix_form_ord_t bi_ord);   // i = j = 0
+  void set_error_form(int i, int j, error_matrix_form_val_t bi_form, error_matrix_form_ord_t bi_ord);
+  void set_error_form(error_matrix_form_val_t bi_form, error_matrix_form_ord_t bi_ord);   // i = j = 0
 
   /// Type-safe version of calc_err_est() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
@@ -294,8 +294,8 @@ protected: // element error arrays
   double error_time;			// time needed to calculate error
 
 protected: //forms and error evaluation
-  matrix_form_val_t form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
-  matrix_form_ord_t ord[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS];  ///< Bilinear forms to calculate error
+  error_matrix_form_val_t error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
+  error_matrix_form_ord_t error_ord[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS];  ///< Bilinear forms to calculate error
 
   /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
@@ -320,10 +320,10 @@ protected: //forms and error evaluation
    *  \param[in] rrv1 A reference map of a reference solution rsln1.
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of an absolute error. */
-  virtual double eval_error(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
+  virtual double eval_error(error_matrix_form_val_t error_bi_fn, error_matrix_form_ord_t error_bi_ord,
                             MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2);
 
-  /// Evaluates a square of a norm of an active element in the reference solution among a given pair of components.
+  /// Evaluates the square of a norm of an active element in the reference solution among a given pair of components.
   /** The method uses a bilinear forms to calculate the norm. This is done by supplying a v1 and v2 at integration points to the bilinear form,
    *  where v1 and v2 are values of reference solutions of the first and the second component respectively.
    *  \param[in] bi_fn A bilinear form.
@@ -333,8 +333,8 @@ protected: //forms and error evaluation
    *  \param[in] rrv1 A reference map of a reference solution rsln1.
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of a norm. */
-  virtual double eval_norm(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
-                           MeshFunction *rsln1, MeshFunction *rsln2);
+  virtual double eval_error_norm(error_matrix_form_val_t error_bi_fn, error_matrix_form_ord_t error_bi_ord,
+                                 MeshFunction *rsln1, MeshFunction *rsln2);
 
   /// Builds an ordered queue of elements that are be examined.
   /** The method fills Adapt::standard_queue by elements sorted accordin to their error descending.

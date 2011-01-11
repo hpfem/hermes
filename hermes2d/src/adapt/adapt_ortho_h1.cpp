@@ -31,8 +31,9 @@
 
 using namespace std;
 
-H1OrthoHP::H1OrthoHP(int num, Space* space1, Space* space2, Space* space3, Space* space4, Space* space5, Space* space6, Space* space7, Space* space8, Space* space9, Space* space10)
-  : H1AdaptHP(num, space1, space2, space3, space4, space5, space6, space7, space8, space9, space10) {};
+H1OrthoHP::H1OrthoHP(int num, Space* space1, Space* space2, Space* space3, Space* space4, Space* space5, 
+                     Space* space6, Space* space7, Space* space8, Space* space9, Space* space10)
+                     : H1AdaptHP(num, space1, space2, space3, space4, space5, space6, space7, space8, space9, space10) {};
 
 
 bool H1OrthoHP::adapt(double thr, int strat, int adapt_type, bool iso_only, int regularize,
