@@ -212,7 +212,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
 
     AUTOLA_CL(AsmList, al, wf->get_neq());
     AUTOLA_OR(Mesh*, meshes, wf->get_neq());
-    bool **blocks = wf->get_blocks();
+    bool **blocks = wf->get_blocks(force_diagonal_blocks);
 
     // Init multi-mesh traversal.
     for (int i = 0; i < wf->get_neq(); i++) meshes[i] = spaces[i]->get_mesh();
@@ -268,7 +268,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
             // Do not include blocks with zero weight except if 
             // (force_diagonal_blocks == true && this is a diagonal block).
             bool is_diagonal_block = (m == el);
-            if (!(is_diagonal_block && force_diagonal_blocks == true)) {
+            if (is_diagonal_block == false || force_diagonal_blocks == false) {
               if (block_weights != NULL) {
                 if (fabs(block_weights->get_A(m, el)) < 1e-12) continue;
               } 
@@ -321,7 +321,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
           // Do not include blocks with zero weight except if 
           // (force_diagonal_blocks == true && this is a diagonal block).
           bool is_diagonal_block = (m == n);
-          if (!(is_diagonal_block && force_diagonal_blocks == true)) {
+          if (is_diagonal_block == false || force_diagonal_blocks == false) {
             if (block_weights != NULL) {
               if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
             } 

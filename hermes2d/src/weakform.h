@@ -238,7 +238,7 @@ public:
 
   void get_stages(Hermes::Tuple< Space* > spaces, Hermes::Tuple< Solution* >& u_ext, 
                   std::vector< WeakForm::Stage >& stages, bool rhsonly);
-  bool** get_blocks();
+  bool** get_blocks(bool force_diagonal_blocks);
 
   bool is_in_area(int marker, int area) const
     { return area >= 0 ? area == marker : is_in_area_2(marker, area); }

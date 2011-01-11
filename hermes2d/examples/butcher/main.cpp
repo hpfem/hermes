@@ -28,12 +28,12 @@ const double NEWTON_TOL = 1e-6;                    // Stopping criterion for the
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-ButcherTableType butcher_table = Implicit_SDIRK_2; // Possibilities: Explicit_RK_1, Implicit_RK_1, Explicit_RK_2,
-                                                   // Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
-						   // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2,   
-						   // Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
-                                                   // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, 
-						   // Implicit_Lobatto_IIIC_4. 
+// Time integration. Choose one of the following methods, or define your own Butcher's table:
+// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
+// Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
+// Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
+
+ButcherTableType butcher_table = Implicit_Lobatto_IIIA_4;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -84,7 +84,7 @@ Real heat_src(Real x, Real y)
 #include "forms.cpp"
 
 // Runge-Kutta time step function.
-#include "runge-kutta.cpp"
+#include "runge_kutta.cpp"
 
 // The rk_time_step() function:
 #include "butcher_tables.cpp"

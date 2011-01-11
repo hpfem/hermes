@@ -498,7 +498,7 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
 /// block of weak forms is used, and false otherwise.
 /// This function is the same in H2D and H3D.
 ///
-bool** WeakForm::get_blocks()
+bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 {
   _F_
   bool** blocks = new_matrix<bool>(neq, neq);
@@ -506,6 +506,7 @@ bool** WeakForm::get_blocks()
     for (int j = 0; j < neq; j++) {
       blocks[i][j] = false;
     }
+    if (force_diagonal_blocks == true) blocks[i][i] = true;
   }
   for (unsigned i = 0; i < mfvol.size(); i++) {
     if (fabs(mfvol[i].scaling_factor) > 1e-12) blocks[mfvol[i].i][mfvol[i].j] = true;

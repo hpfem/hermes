@@ -199,7 +199,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   }
 
   // Create a multistage weak formulation.
-  WeakForm stage_wf_timedep(num_stages);     // For the time derivative term (written on the left).
+  WeakForm stage_wf_timedep(num_stages);           // For the time derivative term (written on the left).
   WeakForm stage_wf_stationary(num_stages);        // For the rest of equation (written on the right).
   create_stage_wf(current_time, time_step, bt, dp, &stage_wf_stationary, &stage_wf_timedep); 
 
