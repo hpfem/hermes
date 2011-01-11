@@ -210,8 +210,11 @@ public:
       int ord1 = order / (MAX_LEVEL + 1);
       int ord2 = order % (MAX_LEVEL + 1);
       (*np_face)[order] = my_np_1d[ord1] * my_np_1d[ord2];
-      for (int face = 0; face < Hex::NUM_FACES; face++)
+      for (int face = 0; face < Hex::NUM_FACES; face++) {
+        if((*face_tables)[face] == NULL)
+          (*face_tables)[face] = new std::map<unsigned int, QuadPt3D *>;
         (*(*face_tables)[face])[order] = new QuadPt3D[(*np_face)[order]];
+      }
 
       for (int k = 0, n = 0; k < my_np_1d[ord1]; k++) {
         for (int l = 0; l < my_np_1d[ord2]; l++, n++) {
@@ -271,10 +274,10 @@ public:
 
   ~ContQuad() {
     _F_
-    for (int face = 0; face < Hex::NUM_FACES; face++) {
-      for (int order = 0; order < NUM_RULES; order++)
-        delete [] (*(*face_tables)[face])[order];
-      delete [] (*face_tables)[face];
+    for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = face_tables->begin(); it != face_tables->end(); it++) {
+      for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+        delete [] it_inner->second;
+      delete it->second;
     }
     delete face_tables;
   }
