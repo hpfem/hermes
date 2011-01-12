@@ -178,7 +178,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 bool HERMES_RESIDUAL_AS_VECTOR_RK = false;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt, 
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver, 
-                  double newton_tol, int newton_max_iter, bool verbose, 
+                  bool verbose, double newton_tol, int newton_max_iter,  
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
   // Matrix and vector for the time derivative part of 

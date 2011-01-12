@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
-		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
+		      verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
