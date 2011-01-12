@@ -51,6 +51,8 @@ using namespace RefinementSelectors;
 // Parameters to tweak the amount of output to the console.
 #define NOSCREENSHOT
 
+#define TWO_BASE_MESH
+
 /*** Fundamental coefficients ***/
 const double D = 10e-11; 	                  // [m^2/s] Diffusion coefficient.
 const double R = 8.31; 		                  // [J/mol*K] Gas constant.
@@ -149,28 +151,37 @@ int main (int argc, char* argv[]) {
   Mesh C_mesh, phi_mesh, u1_mesh, u2_mesh, basemesh;
   H2DReader mloader;
   mloader.load("small.mesh", &basemesh);
-  
+#ifdef TWO_BASE_MESH
+
   Mesh basemesh_electrochem;  // Base mesh to hold C and phi
-  Mesh basemesh_deformation;  // Base mesh for deformation
+  Mesh basemesh_deformation;  // Base mesh for deformation displacements u1 and u2
 
   basemesh_electrochem.copy(&basemesh);
   basemesh_deformation.copy(&basemesh);
 
-  // When nonadaptive solution, refine the mesh.
-  basemesh_electrochem.refine_towards_boundary(BDY_TOP, REF_INIT);
   basemesh_electrochem.refine_towards_boundary(BDY_BOT, REF_INIT - 1);
-  //basemesh_electrochem.refine_all_elements(1);
-  //basemesh_electrochem.refine_all_elements(1);
+  basemesh_electrochem.refine_all_elements(1);
   C_mesh.copy(&basemesh_electrochem);
   phi_mesh.copy(&basemesh_electrochem);
 
-  basemesh_deformation.refine_towards_boundary(BDY_SIDE_FIXED, REF_INIT);
-  basemesh_deformation.refine_towards_boundary(BDY_SIDE_FREE, REF_INIT - 1);
-  basemesh_deformation.refine_all_elements(1);
-  //basemesh_deformation.refine_all_elements(1);
+  for (int i = 0; i < REF_INIT - 1; i++) {
+    basemesh_deformation.refine_all_elements(1); //horizontal
+    basemesh_deformation.refine_all_elements(2); //vertical
+  }
 
   u1_mesh.copy(&basemesh_deformation);
   u2_mesh.copy(&basemesh_deformation);
+
+#else
+  basemesh.refine_towards_boundary(BDY_BOT, REF_INIT);
+  basemesh.refine_towards_boundary(BDY_SIDE_FIXED, REF_INIT);
+  basemesh.refine_towards_boundary(BDY_SIDE_FREE, REF_INIT - 1);
+  basemesh.refine_all_elements(1);
+  C_mesh.copy(&basemesh);
+  phi_mesh.copy(&basemesh);
+  u1_mesh.copy(&basemesh);
+  u2_mesh.copy(&basemesh);
+#endif
 
   // Enter Neumann boundary markers for Nernst-Planck.
   BCTypes C_bc_types;
@@ -348,12 +359,24 @@ int main (int argc, char* argv[]) {
     if (pid.get_timestep_number() > 1 && pid.get_timestep_number() % UNREF_FREQ == 0)
     {
       info("Global mesh derefinement.");
+
+#ifdef TWO_BASE_MESH
       C_mesh.copy(&basemesh_electrochem);
+#else
+      C_mesh.copy(&basemesh);
+#endif
       if (MULTIMESH)
       {
+#ifdef TWO_BASE_MESH
         phi_mesh.copy(&basemesh_electrochem);
         u1_mesh.copy(&basemesh_deformation);
         u2_mesh.copy(&basemesh_deformation);
+#else
+        phi_mesh.copy(&basemesh);
+        u1_mesh.copy(&basemesh);
+        u2_mesh.copy(&basemesh);
+#endif
+
       }
       C_space.set_uniform_order(P_INIT);
       phi_space.set_uniform_order(P_INIT);

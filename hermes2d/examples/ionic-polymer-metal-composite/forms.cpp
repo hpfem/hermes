@@ -134,7 +134,7 @@ template<class Real, class Scalar>
 Scalar J_euler_DFu1DYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
-    result += wt[i] * lin_force_coup * u->val[i];
+    result += wt[i] * lin_force_coup * u->val[i] * v->val[i];
   }
   return result;
 }
