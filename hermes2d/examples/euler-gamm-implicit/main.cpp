@@ -127,7 +127,7 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 #include "filters.cpp"
 
 // Filter for entropy which uses the constants defined above.
-static void calc_entropy_estimate_func(int n, Hermes::Tuple<scalar*> scalars, scalar* result)
+static void calc_entropy_estimate_func(int n, Hermes::vector<scalar*> scalars, scalar* result)
 {
   for (int i = 0; i < n; i++)
     result[i] = std::log((calc_pressure(scalars.at(0)[i], scalars.at(1)[i], scalars.at(2)[i], scalars.at(3)[i]) / P_EXT)
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
 
   // Create L2 spaces with default shapesets.
   L2Space space_rho(&mesh, &bc_types, P_INIT);
@@ -216,13 +216,13 @@ int main(int argc, char* argv[])
   // Volumetric linear forms coming from the time discretization.
 #ifdef HERMES_USE_VECTOR_VALUED_FORMS
   wf.add_vector_form(0, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
   wf.add_vector_form(1, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
   wf.add_vector_form(2, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
   wf.add_vector_form(3, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
 #else
   wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho);
   wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho_v_x);
@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
   // If the FE problem is in fact a FV problem.
   if(P_INIT.order_h == 0 && P_INIT.order_v == 0)
@@ -283,16 +283,16 @@ int main(int argc, char* argv[])
   // Project the initial solution on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solution on the FE mesh.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e))];
-  OGProjection::project_global(Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
-    Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), coeff_vec);
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e))];
+  OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
+    Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), coeff_vec);
 
   // Filters for visualization of pressure and the two components of velocity.
-  SimpleFilter pressure(calc_pressure_func, Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter u(calc_u_func, Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter w(calc_w_func, Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter Mach_number(calc_Mach_func, Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+  SimpleFilter pressure(calc_pressure_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+  SimpleFilter u(calc_u_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+  SimpleFilter w(calc_w_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+  SimpleFilter Mach_number(calc_Mach_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
 
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
@@ -316,26 +316,26 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
-    OGProjection::project_global(Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
-    Hermes::Tuple<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), coeff_vec);
+    OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
+    Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), coeff_vec);
 
     info("Assembling by DiscreteProblem, solving by NOX.");
     solver.set_init_sln(coeff_vec);
     if (solver.solve())
-      Solution::vector_to_solutions(solver.get_solution(), Hermes::Tuple<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
-      Hermes::Tuple<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+      Solution::vector_to_solutions(solver.get_solution(), Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
+      Hermes::vector<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
     else
       error("NOX failed.");
 
     // Approximate the time derivative of the solution.
     if(CALC_TIME_DER) {
-      Adapt *adapt_for_time_der_calc = new Adapt(Hermes::Tuple<Space *>(&space_rho, &space_rho_v_x, 
+      Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
         &space_rho_v_y, &space_e));
       bool solutions_for_adapt = false;
       double difference = iteration == 1 ? 0 : 
-        adapt_for_time_der_calc->calc_err_est(Hermes::Tuple<Solution *>(&sln_temp_rho, &sln_temp_rho_v_x, &sln_temp_rho_v_y, &sln_temp_e), 
-                                              Hermes::Tuple<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), 
-                                              (Hermes::Tuple<double>*) NULL, solutions_for_adapt, 
+        adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&sln_temp_rho, &sln_temp_rho_v_x, &sln_temp_rho_v_y, &sln_temp_e), 
+                                              Hermes::vector<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), 
+                                              (Hermes::vector<double>*) NULL, solutions_for_adapt, 
                                               HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
       delete adapt_for_time_der_calc;
       sln_temp_rho.copy(&prev_time_rho);

@@ -212,17 +212,17 @@ int main(int argc, char* argv[])
   H1Space space_T(&mesh_T, &bc_types, &bc_values, P_INIT);
   H1Space space_phi(&mesh_phi, &bc_types, &bc_values, P_INIT);
 
-  Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
+  Hermes::vector<Space*> spaces(&space_T, &space_phi);
   int ndof = Space::get_num_dofs(spaces); 
  
   // Solutions in the previous time step (converging within the time stepping loop).
   Solution T_prev_time, phi_prev_time;
-  Hermes::Tuple<Solution*> prev_time_solutions(&T_prev_time, &phi_prev_time);
+  Hermes::vector<Solution*> prev_time_solutions(&T_prev_time, &phi_prev_time);
   
   // Solutions on the coarse and refined meshes in current time step (converging within the Newton's loop).
   Solution T_coarse, phi_coarse, T_fine, phi_fine;
-  Hermes::Tuple<Solution*> coarse_mesh_solutions(&T_coarse, &phi_coarse);
-  Hermes::Tuple<Solution*> fine_mesh_solutions(&T_fine, &phi_fine);
+  Hermes::vector<Solution*> coarse_mesh_solutions(&T_coarse, &phi_coarse);
+  Hermes::vector<Solution*> fine_mesh_solutions(&T_fine, &phi_fine);
   
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
   // Newton's loop on the initial coarse meshes.
   info("Solving on coarse meshes.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
-  OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
+  OGProjection::project_global(spaces, Hermes::vector<MeshFunction*>((MeshFunction*)&T_prev_time, (MeshFunction*)&phi_prev_time), 
                  coeff_vec_coarse, matrix_solver_coarse);
   
   // Indicate to all DiscreteProblem constructors that we solve a non-linear problem.
@@ -309,7 +309,7 @@ int main(int argc, char* argv[])
           // Newton's loop on the globally derefined meshes.
           scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
           info("Projecting previous fine mesh solution to obtain initial vector for Newton's iteration on globally derefined meshes.");
-          OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+          OGProjection::project_global(spaces, Hermes::vector<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                          coeff_vec_coarse, matrix_solver_coarse);
           
           // Initialize the FE problem.
@@ -343,17 +343,17 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(spaces, ORDER_INCREASE);
+      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(spaces, ORDER_INCREASE);
 
       // Newton's loop on the refined meshes.
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficients vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
+        OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction*>((MeshFunction*)&T_coarse, (MeshFunction*)&phi_coarse), 
                        coeff_vec, matrix_solver_fine);
       } else {
         info("Projecting previous fine mesh solution to obtain coefficients vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+        OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                        coeff_vec, matrix_solver_fine);
         
         // Deallocate the previous fine mesh.
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
         // Newton's loop on the new coarse meshes.
         scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(spaces)];
         info("Projecting fine mesh solutions back onto coarse mesh to obtain initial vector for following Newton's iteration.");
-        OGProjection::project_global(spaces, Hermes::Tuple<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
+        OGProjection::project_global(spaces, Hermes::vector<MeshFunction*>((MeshFunction*)&T_fine, (MeshFunction*)&phi_fine), 
                         coeff_vec_coarse, matrix_solver_coarse);
         
         // Initialize the FE problem.
@@ -405,14 +405,14 @@ int main(int argc, char* argv[])
       Adapt* adaptivity = new Adapt(spaces);
 
       // Calculate error estimate for each solution component and the total error estimate.
-      Hermes::Tuple<double> err_est_rel;
+      Hermes::vector<double> err_est_rel;
       double err_est_rel_total = adaptivity->calc_err_est(coarse_mesh_solutions, fine_mesh_solutions, &err_est_rel) * 100;
 
       // Calculate exact error for each solution component and the total exact error.
       bool solutions_for_adapt = false;
-      Hermes::Tuple<double> err_exact_rel;
+      Hermes::vector<double> err_exact_rel;
       double err_exact_rel_total = adaptivity->calc_err_exact(coarse_mesh_solutions, 
-                                   Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), 
+                                   Hermes::vector<Solution *>(&T_exact_solution, &phi_exact_solution), 
                                    &err_exact_rel, solutions_for_adapt) * 100;
 
       info("T: ndof_coarse: %d, ndof_fine: %d, err_est: %g %%, err_exact: %g %%", 
@@ -424,7 +424,7 @@ int main(int argc, char* argv[])
       if (err_est_rel_total < ERR_STOP) done = true;
       else {
         info("Adapting the coarse meshes.");
-        done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector*> (&selector, &selector), THRESHOLD, STRATEGY, MESH_REGULARITY);
         if (Space::get_num_dofs(spaces) >= NDOF_STOP) done = true; 
       }
       

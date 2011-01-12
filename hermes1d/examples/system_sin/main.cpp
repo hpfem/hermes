@@ -30,8 +30,8 @@ int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 // Boundary conditions.
-Hermes::Tuple<BCSpec *> DIR_BC_LEFT = Hermes::Tuple<BCSpec *>(new BCSpec(0,0), new BCSpec(1,k));
-Hermes::Tuple<BCSpec *> DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>();
+Hermes::vector<BCSpec *> DIR_BC_LEFT = Hermes::vector<BCSpec *>(new BCSpec(0,0), new BCSpec(1,k));
+Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
@@ -39,7 +39,7 @@ Hermes::Tuple<BCSpec *> DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>();
 int main() 
 {
   // Create space, set Dirichlet BC, enumerate basis functions.
-  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, Hermes::Tuple<BCSpec *>(), P_INIT, NEQ, NEQ);
+  Space* space = new Space(A, B, NELEM, DIR_BC_LEFT, Hermes::vector<BCSpec *>(), P_INIT, NEQ, NEQ);
  
   // Enumerate basis functions, info for user.
   int ndof = Space::get_num_dofs(space);

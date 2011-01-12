@@ -175,7 +175,7 @@ int main(int argc, char* args[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM_LEFT, BDY_REST));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_BOTTOM_LEFT, BDY_REST));
   
   // Create an L2 space.
   L2Space space(&mesh, &bc_types, Ord2(P_INIT_H, P_INIT_V));

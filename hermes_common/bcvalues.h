@@ -21,7 +21,7 @@
 #define __BCVALUES_H
 
 #include "common.h"
-#include "tuple.h"
+#include "vector.h"
 #include "error.h"
 #include "bctypes.h"
 
@@ -108,7 +108,7 @@ public:
 
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
-  void add_function(Hermes::Tuple<int> markers, value_callback callback) 
+  void add_function(Hermes::vector<int> markers, value_callback callback) 
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
@@ -123,7 +123,7 @@ public:
   };
 
   // A wrapper utilizing the Mesh::MarkersConversion class.
-  void add_function(Hermes::Tuple<std::string> markers, value_callback callback)
+  void add_function(Hermes::vector<std::string> markers, value_callback callback)
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
@@ -133,7 +133,7 @@ public:
     
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
-  void add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback) 
+  void add_timedep_function(Hermes::vector<int> markers, value_callback_time callback) 
   {
     if(markers.size() == 0)
       error("BCValues::add_timedep_function() called without any boundary markers specified.");
@@ -149,7 +149,7 @@ public:
   };
 
   // A wrapper utilizing the Mesh::MarkersConversion class.
-  void add_timedep_function(Hermes::Tuple<std::string> markers, value_callback_time callback)
+  void add_timedep_function(Hermes::vector<std::string> markers, value_callback_time callback)
   {
      if(markers.size() == 0)
       error("BCValues::add_timedep_function() called without any boundary markers specified.");
@@ -158,7 +158,7 @@ public:
   };
 
   /// The same as add_function(), only supplies a 1D constant.
-  void add_const(Hermes::Tuple<int> markers, scalar value) 
+  void add_const(Hermes::vector<int> markers, scalar value) 
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     if(value == 0) {
@@ -181,7 +181,7 @@ public:
   };
 
   // A wrapper utilizing the Mesh::MarkersConversion class.
-  void add_const(Hermes::Tuple<std::string> markers, scalar value)
+  void add_const(Hermes::vector<std::string> markers, scalar value)
   {
     #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     if(value == 0) {
@@ -198,7 +198,7 @@ public:
   };
 
   /// The same as add_const(), only supplies a zero.
-  void add_zero(Hermes::Tuple<int> markers) 
+  void add_zero(Hermes::vector<int> markers) 
   {
     if(markers.size() == 0)
       error("BCValues::add_zero() called without any boundary markers specified.");
@@ -219,7 +219,7 @@ public:
   };
 
   // A wrapper utilizing the Mesh::MarkersConversion class.
-  void add_zero(Hermes::Tuple<std::string> markers)
+  void add_zero(Hermes::vector<std::string> markers)
   {
     if(markers.size() == 0)
       error("BCValues::add_zero() called without any boundary markers specified.");

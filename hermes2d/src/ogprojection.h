@@ -22,19 +22,19 @@
 class HERMES_API OGProjection
 {
 public:
-  static void project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<MeshFunction *> source_meshfns, 
+  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction *> source_meshfns, 
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
-                             Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>());
+                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
-  static void project_global(Hermes::Tuple<Space *> spaces, 
-                             Hermes::Tuple<Solution*> sols_src, Hermes::Tuple<Solution*> sols_dest, 
+  static void project_global(Hermes::vector<Space *> spaces, 
+                             Hermes::vector<Solution*> sols_src, Hermes::vector<Solution*> sols_dest, 
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
-                             Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>());
+                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
-  static void project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple< std::pair<WeakForm::matrix_form_val_t, 
+  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector< std::pair<WeakForm::matrix_form_val_t, 
                              WeakForm::matrix_form_ord_t> > proj_biforms, 
-                             Hermes::Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms, 
-                             Hermes::Tuple<MeshFunction*> source_meshfns, 
+                             Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms, 
+                             Hermes::vector<MeshFunction*> source_meshfns, 
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   static void project_global(Space *space, 
@@ -62,7 +62,7 @@ public:
   // the weak form of the PDE. If you supply a weak form of the 
   // PDE, the PDE will just be solved. 
 protected:
-  static void project_internal(Hermes::Tuple<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, 
+  static void project_internal(Hermes::vector<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, 
                                MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   // The projection functionality below is identical in H2D and H3D.

@@ -41,7 +41,7 @@ WeakForm::~WeakForm()
 }
 
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, int area,
-                               Hermes::Tuple<MeshFunction*> ext)
+                               Hermes::vector<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq || j < 0 || j >= neq) error("Invalid equation number.");
@@ -50,44 +50,44 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_o
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 	if (mfvol.size() > 100) warning("Large number of forms (> 100). Is this the intent?");
 
-	MatrixFormVol form = { i, j, sym, area, fn, ord, ext.as_std_vector() };
+        MatrixFormVol form = { i, j, sym, area, fn, ord, ext };
 	mfvol.push_back(form);
 }
 
 void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, int area, 
-                                    Hermes::Tuple<MeshFunction*> ext)
+                                    Hermes::vector<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq || j < 0 || j >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	MatrixFormSurf form = { i, j, area, fn, ord, ext.as_std_vector() };
+        MatrixFormSurf form = { i, j, area, fn, ord, ext };
 	mfsurf.push_back(form);
 }
 
 void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
-                               Hermes::Tuple<MeshFunction*> ext)
+                               Hermes::vector<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	VectorFormVol form = { i, area, fn, ord, ext.as_std_vector() };
+        VectorFormVol form = { i, area, fn, ord, ext };
 	vfvol.push_back(form);
 }
 
 void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
-                                    Hermes::Tuple<MeshFunction*> ext)
+                                    Hermes::vector<MeshFunction*> ext)
 {
 	_F_
 	if (i < 0 || i >= neq) error("Invalid equation number.");
 	if (area != HERMES_ANY && area < 0 && -area > (signed) areas.size()) error("Invalid area number.");
 
-	VectorFormSurf form = { i, area, fn, ord, ext.as_std_vector() };
+        VectorFormSurf form = { i, area, fn, ord, ext };
 	vfsurf.push_back(form);
 }
 
-void WeakForm::set_ext_fns(void *fn, Hermes::Tuple<MeshFunction*> ext)
+void WeakForm::set_ext_fns(void *fn, Hermes::vector<MeshFunction*> ext)
 {
 	EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 }
@@ -100,7 +100,7 @@ void WeakForm::set_ext_fns(void *fn, Hermes::Tuple<MeshFunction*> ext)
 /// improves the performance of multi-mesh assembling.
 /// This function is identical in H2D and H3D.
 ///
-void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *>& u_ext, 
+void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solution *>& u_ext, 
                std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
@@ -188,7 +188,7 @@ void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution 
 ///
 WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2, 
-                                      std::vector<MeshFunction*>& ext, Hermes::Tuple<Solution*>& u_ext)
+                                      std::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext)
 {
   _F_
   // first create a list of meshes the form uses
@@ -263,7 +263,7 @@ bool **WeakForm::get_blocks()
 
 //// areas /////////////////////////////////////////////////////////////////////////////////////////
 
-int WeakForm::def_area(Hermes::Tuple<int> area_markers)
+int WeakForm::def_area(Hermes::vector<int> area_markers)
 {
 	_F_
 	Area newarea;

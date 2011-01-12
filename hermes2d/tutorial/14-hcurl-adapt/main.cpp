@@ -87,12 +87,12 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_1, BDY_6));
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_1, BDY_6));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_2, BDY_3, BDY_4, BDY_5));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_1, BDY_6));
+  bc_values.add_zero(Hermes::vector<int>(BDY_1, BDY_6));
 
   // Create an Hcurl space with default shapeset.
   HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);

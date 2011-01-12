@@ -36,8 +36,8 @@ using namespace std;
 #define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
 #define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
 
-Adapt::Adapt(Hermes::Tuple< Space* > spaces_, 
-             Hermes::Tuple<ProjNormType> proj_norms) :
+Adapt::Adapt(Hermes::vector< Space* > spaces_, 
+             Hermes::vector<ProjNormType> proj_norms) :
     num_act_elems(-1),
     have_errors(false),
     have_coarse_solutions(false),
@@ -114,11 +114,11 @@ Adapt::~Adapt()
 
 //// adapt /////////////////////////////////////////////////////////////////////////////////////////
 
-bool Adapt::adapt(Hermes::Tuple<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat, 
+bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat, 
             int regularize, double to_be_processed)
 {
   error_if(!have_errors, "element errors have to be calculated first, call Adapt::calc_err_est().");
-  error_if(refinement_selectors == Hermes::Tuple<RefinementSelectors::Selector *>(), "selector not provided");
+  error_if(refinement_selectors == Hermes::vector<RefinementSelectors::Selector *>(), "selector not provided");
   if (spaces.size() != refinement_selectors.size()) error("Wrong number of refinement selectors.");
   TimePeriod cpu_time;
 
@@ -287,7 +287,7 @@ bool Adapt::adapt(Hermes::Tuple<RefinementSelectors::Selector *> refinement_sele
 }
 
 void Adapt::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, 
-                                        AutoLocalArray2<int>& idx, Hermes::Tuple<RefinementSelectors::Selector *> refinement_selectors) {
+                                        AutoLocalArray2<int>& idx, Hermes::vector<RefinementSelectors::Selector *> refinement_selectors) {
   int num_elem_to_proc = elems_to_refine.size();
   for(int inx = 0; inx < num_elem_to_proc; inx++) {
     ElementToRefine& elem_ref = elems_to_refine[inx];
@@ -660,8 +660,8 @@ double Adapt::eval_error_norm(error_matrix_form_val_t error_bi_fn, error_matrix_
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, 
-                                Hermes::Tuple<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
+double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, 
+                                Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
 {
   _F_
   int i, j, k;

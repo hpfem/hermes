@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_LAYER, BDY_REST));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_LAYER, BDY_REST));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;

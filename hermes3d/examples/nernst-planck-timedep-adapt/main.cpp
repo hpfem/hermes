@@ -147,36 +147,36 @@ int main (int argc, char* argv[]) {
   wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
   wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
   wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY,
-                     Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
+                     Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
   wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY,
-                     Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
+                     Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
   } else {
     wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_NONSYM);
     wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_NONSYM);
     wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_NONSYM);
     wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_NONSYM);
     wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY,
-                       Hermes::Tuple<MeshFunction*>(&C_prev_time, &phi_prev_time));
+                       Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
     wf.add_vector_form(1, callback(Fphi_cranic), HERMES_ANY);
   }
 
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space*>(&C_space, &phi_space));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&C_space, &phi_space));
 
   Solution C_sln(C_space.get_mesh());
   Solution phi_sln(phi_space.get_mesh());
 
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   scalar* coeff_vec_coarse = new scalar[ndof];
-  OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space),
-                               Hermes::Tuple<MeshFunction *>(&C_prev_time, &phi_prev_time),
+  OGProjection::project_global(Hermes::vector<Space *>(&C_space, &phi_space),
+                               Hermes::vector<MeshFunction *>(&C_prev_time, &phi_prev_time),
                                coeff_vec_coarse, matrix_solver);
 
 
 
   bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, Hermes::Tuple<Space *>(&C_space, &phi_space), is_linear);
+  DiscreteProblem dp_coarse(&wf, Hermes::vector<Space *>(&C_space, &phi_space), is_linear);
 
-  //Solution::vector_to_solutions(coeff_vec_coarse, dp_coarse.get_spaces(), Hermes::Tuple<Solution *>(&C_sln, &phi_sln), NULL);
+  //Solution::vector_to_solutions(coeff_vec_coarse, dp_coarse.get_spaces(), Hermes::vector<Solution *>(&C_sln, &phi_sln), NULL);
 
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
@@ -191,8 +191,8 @@ int main (int argc, char* argv[]) {
 
   info("Solved!");
   // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solutions(coeff_vec_coarse, Hermes::Tuple<Space *>(&C_space, &phi_space),
-                                Hermes::Tuple<Solution *>(&C_sln, &phi_sln));
+  Solution::vector_to_solutions(coeff_vec_coarse, Hermes::vector<Space *>(&C_space, &phi_space),
+                                Hermes::vector<Solution *>(&C_sln, &phi_sln));
 
   out_fn_vtk(&C_sln,"C_init_sln");
   out_fn_vtk(&phi_sln,"phi_init_sln");
@@ -226,8 +226,8 @@ int main (int argc, char* argv[]) {
 
         // Construct globally refined reference mesh
         // and setup reference space.
-        Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(
-            Hermes::Tuple<Space *>(&C_space, &phi_space), 0, H3D_REFT_HEX_Y);
+        Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(
+            Hermes::vector<Space *>(&C_space, &phi_space), 0, H3D_REFT_HEX_Y);
         scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
         DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
         SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -237,12 +237,12 @@ int main (int argc, char* argv[]) {
 
         if (as == 1 && pid.get_timestep_number() == 1) {
           info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-          OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&C_sln, &phi_sln),
+          OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&C_sln, &phi_sln),
                                        coeff_vec, matrix_solver);
         }
         else {
           info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-          OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(C_ref_sln, phi_ref_sln),
+          OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(C_ref_sln, phi_ref_sln),
                                        coeff_vec, matrix_solver);
         }
         if (as > 1) {
@@ -270,23 +270,23 @@ int main (int argc, char* argv[]) {
         phi_ref_sln = new Solution(ref_spaces->at(1)->get_mesh());
 
         Solution::vector_to_solutions(coeff_vec, *ref_spaces,
-                                      Hermes::Tuple<Solution *>(C_ref_sln, phi_ref_sln));
+                                      Hermes::vector<Solution *>(C_ref_sln, phi_ref_sln));
         // Projecting reference solution onto the coarse mesh
         info("Projecting fine mesh solution on coarse mesh.");
-        OGProjection::project_global(Hermes::Tuple<Space *>(&C_space, &phi_space),
-                                     Hermes::Tuple<Solution *>(C_ref_sln, phi_ref_sln),
-                                     Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
+        OGProjection::project_global(Hermes::vector<Space *>(&C_space, &phi_space),
+                                     Hermes::vector<Solution *>(C_ref_sln, phi_ref_sln),
+                                     Hermes::vector<Solution *>(&C_sln, &phi_sln),
                                      matrix_solver);
 
 
         info("Calculating error estimate.");
-        Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&C_space, &phi_space),
-            Hermes::Tuple<ProjNormType> (HERMES_H1_NORM, HERMES_H1_NORM));
-        Hermes::Tuple<double> err_est_rel;
+        Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&C_space, &phi_space),
+            Hermes::vector<ProjNormType> (HERMES_H1_NORM, HERMES_H1_NORM));
+        Hermes::vector<double> err_est_rel;
         bool solutions_for_adapt = true;
 
-        double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&C_sln, &phi_sln),
-            Hermes::Tuple<Solution *>(C_ref_sln, phi_ref_sln), solutions_for_adapt,
+        double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&C_sln, &phi_sln),
+            Hermes::vector<Solution *>(C_ref_sln, phi_ref_sln), solutions_for_adapt,
             HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
         // Report results.
@@ -298,7 +298,7 @@ int main (int argc, char* argv[]) {
         info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
         // Report results.
         info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel: %g%%",
-             Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space)),
+             Space::get_num_dofs(Hermes::vector<Space *>(&C_space, &phi_space)),
                                  Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
         // If err_est too large, adapt the mesh.
@@ -310,7 +310,7 @@ int main (int argc, char* argv[]) {
 
           info("Adapted...");
 
-          if (Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space)) >= NDOF_STOP)
+          if (Space::get_num_dofs(Hermes::vector<Space *>(&C_space, &phi_space)) >= NDOF_STOP)
             done = true;
           else
             // Increase the counter of performed adaptivity steps.
@@ -331,7 +331,7 @@ int main (int argc, char* argv[]) {
       out_fn_vtk(C_ref_sln,"C_sln", pid.get_timestep_number());
       out_fn_vtk(phi_ref_sln,"phi_sln", pid.get_timestep_number());
 
-      pid.end_step(Hermes::Tuple<Solution*> (C_ref_sln, phi_ref_sln), Hermes::Tuple<Solution*> (&C_prev_time, &phi_prev_time));
+      pid.end_step(Hermes::vector<Solution*> (C_ref_sln, phi_ref_sln), Hermes::vector<Solution*> (&C_prev_time, &phi_prev_time));
 
       // Copy last reference solution into sln_prev_time.
       C_prev_time.copy(C_ref_sln);

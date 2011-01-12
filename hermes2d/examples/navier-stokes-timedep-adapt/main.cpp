@@ -141,15 +141,15 @@ int main(int argc, char* argv[])
   // Enter boundary markers for x-velocity and y-velocity.
   BCTypes bc_types;
   bc_types.add_bc_none(BDY_RIGHT);
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values_xvel(&TIME);
   bc_values_xvel.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
-  bc_values_xvel.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
+  bc_values_xvel.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
 
   BCValues bc_values_yvel;
-  bc_values_yvel.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  bc_values_yvel.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
   // Create spaces with default shapesets. 
   H1Space xvel_space(&mesh, &bc_types, &bc_values_xvel, P_INIT_VEL);
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -198,8 +198,8 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
   wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_NONSYM, HERMES_ANY);
   wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-  wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-  wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+  wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
+  wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
   wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
 
   // Initialize views.
@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
 
@@ -252,13 +252,13 @@ int main(int argc, char* argv[])
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (as == 1) {
         info("Projecting coarse mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&xvel_sln, &yvel_sln, &p_sln), 
-                      coeff_vec, matrix_solver, Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+        OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&xvel_sln, &yvel_sln, &p_sln), 
+                      coeff_vec, matrix_solver, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
       }
       else {
         info("Projecting previous fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(*ref_spaces, Hermes::Tuple<MeshFunction *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
-                      coeff_vec, matrix_solver, Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+        OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
+                      coeff_vec, matrix_solver, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
         delete xvel_ref_sln.get_mesh();
         delete yvel_ref_sln.get_mesh();
         delete p_ref_sln.get_mesh();
@@ -272,25 +272,25 @@ int main(int argc, char* argv[])
 
       // Store the result in ref_sln.
       Solution::vector_to_solutions(coeff_vec, *ref_spaces, 
-                Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln));
+                Hermes::vector<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln));
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
-                    Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
-                    Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver, 
-                    Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm) );
+      OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+                    Hermes::vector<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln), 
+                    Hermes::vector<Solution *>(&xvel_sln, &yvel_sln, &p_sln), matrix_solver, 
+                    Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm) );
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space), 
-                          Hermes::Tuple<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
-      double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&xvel_sln, &yvel_sln, &p_sln), 
-             Hermes::Tuple<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln)) * 100.;
+      Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+                          Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+      double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&xvel_sln, &yvel_sln, &p_sln), 
+             Hermes::vector<Solution *>(&xvel_ref_sln, &yvel_ref_sln, &p_ref_sln)) * 100.;
 
       // Report results.
       info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
-           Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space)), 
+           Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space)), 
            Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
@@ -298,10 +298,10 @@ int main(int argc, char* argv[])
       else 
       {
         info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector, &selector), 
+        done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.
@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
     pview.show(&p_prev_time);
   }
 
-  ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel_space, &yvel_space, &p_space));
+  ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d", ndof);
 
   // Wait for all views to be closed.

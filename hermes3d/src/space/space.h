@@ -21,7 +21,7 @@
 #define __SPACE_H
 
 #include "../mesh.h"
-#include "../../../hermes_common/tuple.h"
+#include "../../../hermes_common/vector.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
 #include "../quad.h"
@@ -99,8 +99,8 @@ public:
   /// FE mesh
   Mesh *mesh;
 
-  static int get_num_dofs(Hermes::Tuple<Space *> spaces);
-  static int assign_dofs(Hermes::Tuple<Space*> spaces) ;
+  static int get_num_dofs(Hermes::vector<Space *> spaces);
+  static int assign_dofs(Hermes::vector<Space*> spaces) ;
 
 protected:
   Shapeset *shapeset;

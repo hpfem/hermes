@@ -52,11 +52,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+  bc_values.add_zero(Hermes::vector<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);

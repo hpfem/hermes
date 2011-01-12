@@ -22,7 +22,7 @@
 
 #include "h3d_common.h"
 #include "weakform.h"
-#include "tuple.h"
+#include "vector.h"
 #include "matrix.h"
 #include "solver/solver.h"
 #include "norm.h"
@@ -39,7 +39,7 @@ struct SurfPos;
 ///
 class HERMES_API DiscreteProblem {
 public:
-        DiscreteProblem(WeakForm *wf, Hermes::Tuple<Space *> sp, bool is_linear = false);
+        DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
 	void free();
 
@@ -60,8 +60,8 @@ public:
   // Get the number of spaces.
   int get_num_spaces() {return this->spaces.size();}
 
-  // Get all spaces as a Hermes::Tuple.
-  Hermes::Tuple<Space *> get_spaces() {return this->spaces;}
+  // Get all spaces as a Hermes::vector.
+  Hermes::vector<Space *> get_spaces() {return this->spaces;}
 
         // Get the number of unknowns.
 	int get_num_dofs();
@@ -78,7 +78,7 @@ protected:
 	int ndof;				/// number of DOF
 	int* sp_seq;				/// sequence numbers of spaces
         int wf_seq;
-        Hermes::Tuple<Space *> spaces;
+        Hermes::vector<Space *> spaces;
 
 	scalar** matrix_buffer;		/// buffer for holding square matrix (during assembling)
 	int matrix_buffer_dim;		/// dimension of the matrix held by 'matrix_buffer'
@@ -138,12 +138,12 @@ protected:
 		void free();
 	} fn_cache;
 
-	scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
+	scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext, ShapeFunction *fu,
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv);
-	scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
-	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
+	scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
+	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext, ShapeFunction *fu,
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv, SurfPos *surf_pos);
-	scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
+	scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
 	                 SurfPos *surf_pos);
 
 	sFunc *get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
@@ -156,7 +156,7 @@ protected:
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
-HERMES_API Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase, int refinement);
+HERMES_API Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase, int refinement);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
 
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,

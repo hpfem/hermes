@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_1);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_3, BDY_4));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values(&TIME);
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
       wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_NONSYM, HERMES_ANY, 
 	                 &sln_prev_iter);
       wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
-			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
+			 Hermes::vector<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
     }
     else {
       info("Registering forms for the Picard's method (Crank-Nicolson in time).");
@@ -300,7 +300,7 @@ int main(int argc, char* argv[])
       wf.add_matrix_form(bilinear_form_picard_euler, bilinear_form_picard_euler_ord, HERMES_NONSYM, HERMES_ANY, 
 	                 &sln_prev_iter);
       wf.add_vector_form(linear_form_picard_euler, linear_form_picard_euler_ord, HERMES_ANY, 
-			 Hermes::Tuple<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
+			 Hermes::vector<MeshFunction*>(&sln_prev_iter, &sln_prev_time));
     }
   }
 

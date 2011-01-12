@@ -50,7 +50,7 @@
 #include "callstack.h"            // error tracing
 #include "error.h"
 //.
-#include "tuple.h"
+#include "vector.h"
 #include "tables.h"
 
 #define HERMES  "Hermes"

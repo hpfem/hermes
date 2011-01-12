@@ -362,13 +362,13 @@ int main(int argc, char* argv[])
   // Problem initalization
   WeakForm wf(4);
   // OLD: wf.add_biform(0, 0, bilinear_form_0_0, 0, 0, 3, &lprev, &xprev, &yprev);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
+  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&lprev, &xprev, &yprev));
 
   // OLD: wf.add_biform(0, 2, bilinear_form_0_2);
   wf.add_matrix_form(0, 2, callback(bilinear_form_0_2), HERMES_NONSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(1, 1, bilinear_form_0_0, 0, 0, 3, &lprev, &xprev, &yprev);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &xprev, &yprev));
+  wf.add_matrix_form(1, 1, callback(bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&lprev, &xprev, &yprev));
 
   // OLD: wf.add_biform(1, 2, bilinear_form_1_2);
   wf.add_matrix_form(1, 2, callback(bilinear_form_1_2), HERMES_NONSYM, HERMES_ANY);
@@ -380,13 +380,13 @@ int main(int argc, char* argv[])
   wf.add_matrix_form(2, 1, callback(bilinear_form_2_1), HERMES_NONSYM, HERMES_ANY);
 
   // OLD: wf.add_biform(3, 3, bilinear_form_3_3, 0, 0, 2, &xprev, &yprev);
-  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3), HERMES_NONSYM, HERMES_ANY, Hermes::Tuple<MeshFunction*>(&xprev, &yprev));
+  wf.add_matrix_form(3, 3, callback(bilinear_form_3_3), HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xprev, &yprev));
 
   // OLD: wf.add_liform(0, linear_form_0, 0, 2, &lprev, &xprev);
-  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &yprev));
+  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, Hermes::vector<MeshFunction*>(&lprev, &yprev));
 
   // OLD: wf.add_liform(1, linear_form_1, 0, 2, &lprev, &yprev);
-  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&lprev, &yprev));
+  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, Hermes::vector<MeshFunction*>(&lprev, &yprev));
 
   // OLD: wf.add_liform(3, linear_form_3, 0, 1, &lprev);
   wf.add_vector_form(3, callback(linear_form_3), HERMES_ANY, &lprev);
@@ -411,7 +411,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset));
+    Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset));
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
@@ -428,19 +428,19 @@ int main(int argc, char* argv[])
     
     // Solve the linear system of the reference problem. 
     // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, Hermes::Tuple<Solution *>(&r1, &r2, &r3, &r4));
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, Hermes::vector<Solution *>(&r1, &r2, &r3, &r4));
     else error ("Matrix solver failed.\n");
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset), Hermes::Tuple<Solution *>(&r1, &r2, &r3, &r4), Hermes::Tuple<Solution *>(&u1, &u2, &u3, &u4), matrix_solver); 
+    OGProjection::project_global(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset), Hermes::vector<Solution *>(&r1, &r2, &r3, &r4), Hermes::vector<Solution *>(&u1, &u2, &u3, &u4), matrix_solver); 
 
     // Time measurement.
     cpu_time.tick();
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset), Hermes::Tuple<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
+    Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset), Hermes::vector<ProjNormType>(HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM, HERMES_H1_NORM));
     /*
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     adaptivity->set_error_form(0, 2, bilinear_form_0_2<scalar, scalar>, bilinear_form_0_2<Ord, Ord>);
@@ -449,9 +449,9 @@ int main(int argc, char* argv[])
     adaptivity->set_error_form(2, 1, bilinear_form_2_1<scalar, scalar>, bilinear_form_2_1<Ord, Ord>);
     adaptivity->set_error_form(3, 3, bilinear_form_3_3<scalar, scalar>, bilinear_form_3_3<Ord, Ord>);
     */
-    Hermes::Tuple<double> err_est_rel;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&u1, &u2, &u3, &u4), 
-                               Hermes::Tuple<Solution *>(&r1, &r2, &r3, &r4), &err_est_rel) * 100;
+    Hermes::vector<double> err_est_rel;
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&u1, &u2, &u3, &u4), 
+                               Hermes::vector<Solution *>(&r1, &r2, &r3, &r4), &err_est_rel) * 100;
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
@@ -472,11 +472,11 @@ int main(int argc, char* argv[])
 
 
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
-         Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset)), Space::get_num_dofs(*ref_spaces));
+         Space::get_num_dofs(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset)), Space::get_num_dofs(*ref_spaces));
     info("err_est_rel_total: %g%%", err_est_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset)), err_est_rel_total);
+    graph_dof_est.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset)), err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
@@ -485,10 +485,10 @@ int main(int argc, char* argv[])
     if (err_est_rel_total < ERR_STOP) done = true;
     else {
       info("Adapting the coarse mesh.");
-      done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *> (&selector, &selector, &selector, &selector), 
+      done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *> (&selector, &selector, &selector, &selector), 
                                THRESHOLD, STRATEGY, MESH_REGULARITY, to_be_processed);
 
-      if (Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset)) >= NDOF_STOP) done = true;
+      if (Space::get_num_dofs(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset)) >= NDOF_STOP) done = true;
     }
 
     delete matrix;
@@ -501,7 +501,7 @@ int main(int argc, char* argv[])
 
   info("Total running time: %g s", cpu_time.accumulated());
 
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&xvel, &yvel, &press, &lset));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel, &yvel, &press, &lset));
 
   int ndof_allowed = 550;
   printf("ndof actual = %d\n", ndof);
