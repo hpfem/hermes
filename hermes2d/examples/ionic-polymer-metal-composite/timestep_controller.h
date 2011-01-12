@@ -1,7 +1,5 @@
 #include "hermes2d.h"
 
-#include <vector>
-
 #define PID_DEFAULT_TOLERANCE 0.25
 #define DEFAULT_STEP 0.1
 
@@ -10,8 +8,8 @@
 class HERMES_API PidTimestepController {
 
 public:
-  PidTimestepController(double final_time, double default_step = DEFAULT_STEP,
-      double tolerance = PID_DEFAULT_TOLERANCE, bool pid_on = true) {
+  PidTimestepController(double final_time, bool pid_on = true,
+      double default_step = DEFAULT_STEP, double tolerance = PID_DEFAULT_TOLERANCE) {
     this->delta = tolerance;
     this->final_time = final_time;
     this->time = 0;

@@ -29,6 +29,34 @@ Scalar Fphi_euler(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<
 	return result;
 }
 
+template<class Real, class Scalar>
+Scalar Fu1_euler(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  Func<Scalar>* C_prev_newton = u_ext[0];
+  Func<Scalar>* u1_prev_newton = u_ext[2];
+  Func<Scalar>* u2_prev_newton = u_ext[3];
+
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * ((2*mech_mu + mech_lambda) * u1_prev_newton->dx[i] * v->dx[i] + mech_mu * u1_prev_newton->dy[i] * v->dy[i] +
+        mech_mu * u2_prev_newton->dx[i] * v->dy[i] + mech_lambda * u2_prev_newton->dy[i] * v->dx[i] -
+        lin_force_coup * (C_prev_newton->val[i] - C0));
+  }
+  return result;
+}
+
+template<class Real, class Scalar>
+Scalar Fu2_euler(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  Func<Scalar>* u1_prev_newton = u_ext[2];
+  Func<Scalar>* u2_prev_newton = u_ext[3];
+
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * ((2*mech_mu + mech_lambda) * u2_prev_newton->dy[i] * v->dy[i] + mech_mu * u2_prev_newton->dx[i] * v->dx[i] +
+        mech_mu * u1_prev_newton->dy[i] * v->dx[i] + mech_lambda * u1_prev_newton->dx[i] * v->dy[i]);
+  }
+  return result;
+}
+
 // matrix 0_0
 template<class Real, class Scalar>
 Scalar J_euler_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -52,6 +80,20 @@ Scalar J_euler_DFcDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
 	}
 	return result;
 }
+//matrix 0_2
+template<class Real, class Scalar>
+Scalar J_euler_DFcDYu1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
+//matrix 0_3
+template<class Real, class Scalar>
+Scalar J_euler_DFcDYu2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
 
 //matrix 1_0
 template<class Real, class Scalar>
@@ -71,6 +113,90 @@ Scalar J_euler_DFphiDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *
 		result += wt[i] * ( u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
 	}
 	return result;
+}
+
+//matrix 1_2
+template<class Real, class Scalar>
+Scalar J_euler_DFphiDYu1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
+//matrix 1_3
+template<class Real, class Scalar>
+Scalar J_euler_DFphiDYu2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
+//matrix 2_0
+template<class Real, class Scalar>
+Scalar J_euler_DFu1DYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * lin_force_coup * u->val[i];
+  }
+  return result;
+}
+
+//matrix 2_1
+template<class Real, class Scalar>
+Scalar J_euler_DFu1DYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
+//matrix 2_2
+template<class Real, class Scalar>
+Scalar J_euler_DFu1DYu1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * ((2 * mech_mu + mech_lambda) * u->dx[i] * v->dx[i] + mech_mu * u->dy[i] * v->dy[i]);
+  }
+  return result;
+}
+
+//matrix 2_3
+template<class Real, class Scalar>
+Scalar J_euler_DFu1DYu2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (mech_mu * u->dx[i] * v->dy[i] + mech_lambda * u->dy[i] * v->dx[i]);
+  }
+  return result;
+}
+
+//matrix 3_0
+template<class Real, class Scalar>
+Scalar J_euler_DFu2DYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
+//matrix 3_1
+template<class Real, class Scalar>
+Scalar J_euler_DFu2DYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  return result;
+}
+
+//matrix 3_2
+template<class Real, class Scalar>
+Scalar J_euler_DFu2DYu1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (mech_mu * u->dy[i] * v->dx[i] + mech_lambda * u->dx[i] * v->dy[i]);
+  }
+  return result;
+}
+//matrix 3_3
+template<class Real, class Scalar>
+Scalar J_euler_DFu2DYu2(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * ((2 * mech_mu + mech_lambda) * u->dy[i] * v->dy[i] + mech_mu * u->dx[i] * v->dx[i]);
+  }
+  return result;
 }
 
 
