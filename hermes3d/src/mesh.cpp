@@ -2342,8 +2342,8 @@ void Mesh::refine_towards_boundary(int marker, int depth) {
 	_F_
 
 	if (depth == 0) return;
-
-	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
+  std::map<unsigned int, Element*> local_elements = elements;
+	for(std::map<unsigned int, Element*>::iterator it = local_elements.begin(); it != local_elements.end(); it++)
 		if (it->second->used && it->second->active) {
       Element *e = elements[it->first];
 
