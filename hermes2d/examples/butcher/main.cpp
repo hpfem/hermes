@@ -34,7 +34,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
-ButcherTableType butcher_table = Implicit_Lobatto_IIIA_4;
+ButcherTableType butcher_table_type = Implicit_Lobatto_IIIA_4;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -87,8 +87,8 @@ Real heat_src(Real x, Real y)
 // Main function.
 int main(int argc, char* argv[])
 {
-  // Choose a Butcher's table.
-  ButcherTable *bt = init_butcher_table(butcher_table);
+  // Choose a Butcher's table or define your own.
+  ButcherTable bt(butcher_table_type);
 
   // Load the mesh.
   Mesh mesh;
@@ -140,9 +140,9 @@ int main(int argc, char* argv[])
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
-         current_time, time_step, bt->get_size());
+         current_time, time_step, bt.get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
 		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -167,7 +167,6 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete [] coeff_vec;
-  delete bt;
 
   // Wait for all views to be closed.
   View::wait();
