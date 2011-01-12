@@ -1622,6 +1622,7 @@ void Space::calc_edge_edge_ced(Edge::Key seid, Edge::Key eid, int ori, int epart
 		int ncomp = cng_ed->edge_ncomponents;
 		BaseEdgeComponent *edge_bl = (BaseEdgeComponent *) malloc(ncomp * sizeof(BaseEdgeComponent));
 		for (int i = 0; i < ncomp; i++) {
+      edge_bl[i].edge_id.size = 0;
 			edge_bl[i] = cng_ed->edge_baselist[i];
 			edge_bl[i].part.part = combine_face_part(edge_bl[i].part.part, epart);
 		}
@@ -1633,6 +1634,7 @@ void Space::calc_edge_edge_ced(Edge::Key seid, Edge::Key eid, int ori, int epart
 		ncomp = cng_ed->face_ncomponents;
 		BaseFaceComponent *face_bl = (BaseFaceComponent *) malloc(ncomp * sizeof(BaseFaceComponent));
 		for (int i = 0; i < ncomp; i++) {
+      face_bl[i].face_id.size = 0;
 			face_bl[i] = cng_ed->face_baselist[i];
 
 			if (face_bl[i].dir == PART_ORI_VERT) face_bl[i].part.vert = combine_face_part(face_bl[i].part.vert, epart);
