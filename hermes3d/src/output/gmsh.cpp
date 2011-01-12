@@ -605,7 +605,7 @@ void GmshOutputEngine::out(Mesh *mesh) {
 
 	// vertices
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", mesh->vertices.size());
+	fprintf(this->out_file, "%lu\n", (unsigned long int)mesh->vertices.size());
   for(std::map<unsigned int, Vertex*>::iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
     Vertex *v = mesh->vertices[it->first];
     fprintf(this->out_file, "%u %lf %lf %lf\n", it->first, v->x, v->y, v->z);
@@ -726,7 +726,7 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 	// vertices
 	// TODO: dump only vertices on the boundaries
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", mesh->vertices.size());
+	fprintf(this->out_file, "%lu\n", (unsigned long int)mesh->vertices.size());
 	for(std::map<unsigned int, Vertex*>::iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
     Vertex *v = mesh->vertices[it->first];
     fprintf(this->out_file, "%u %lf %lf %lf\n", it->first, v->x, v->y, v->z);
@@ -883,7 +883,7 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	  }
 
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", out_vtcs.size());
+	fprintf(this->out_file, "%lu\n", (unsigned long int)out_vtcs.size());
   for(std::map<unsigned int, Vertex*>::iterator it = out_vtcs.begin(); it != out_vtcs.end(); it++) {
     Vertex *v = it->second;
     fprintf(this->out_file, "%d %lf %lf %lf\n", it->first + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1

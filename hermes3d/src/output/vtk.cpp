@@ -364,14 +364,14 @@ void FileFormatter::write(FILE *file, const char *name)
 
 	fprintf(file, "\n");
 	fprintf(file, "DATASET UNSTRUCTURED_GRID\n");
-	fprintf(file, "POINTS %ld %s\n", points.size(), "float");
+	fprintf(file, "POINTS %lu %s\n", (unsigned long int)points.size(), "float");
   for(std::map<unsigned int, Vertex*>::iterator it = points.begin(); it != points.end(); it++) {
     Vertex *v = it->second;
 		fprintf(file, "%e %e %e\n", v->x, v->y, v->z);
 	}
 
 	fprintf(file, "\n");
-	fprintf(file, "CELLS %ld %d\n", cells.size(), sz_cells);
+	fprintf(file, "CELLS %lu %d\n", (unsigned long int)cells.size(), sz_cells);
   for(std::map<unsigned int, Vtk::Linearizer::Cell*>::iterator it = cells.begin(); it != cells.end(); it++) {
     Linearizer::Cell *cell = it->second;
 
@@ -382,7 +382,7 @@ void FileFormatter::write(FILE *file, const char *name)
 	}
 
 	fprintf(file, "\n");
-	fprintf(file, "CELL_TYPES %ld\n", cells.size());
+	fprintf(file, "CELL_TYPES %lu\n", (unsigned long int)cells.size());
   for(std::map<unsigned int, Vtk::Linearizer::Cell*>::iterator it = cells.begin(); it != cells.end(); it++) {
     Linearizer::Cell *cell = it->second;
 
@@ -401,14 +401,14 @@ void FileFormatter::write(FILE *file, const char *name)
 	if (pt_data0.size() > 0) {
 		if (pt_data2.size() > 0) {
 			// point data
-			fprintf(file, "POINT_DATA %ld\n", pt_data0.size());
+			fprintf(file, "POINT_DATA %lu\n", (unsigned long int)pt_data0.size());
 			fprintf(file, "VECTORS %s %s\n", name, "float");
       for(std::map<unsigned int, double>::iterator it = pt_data0.begin(); it != pt_data0.end(); it++)
         fprintf(file, "%e %e %e\n", it->second, it->second, it->second);
 		}
 		else {
 			// point data
-			fprintf(file, "POINT_DATA %ld\n", pt_data0.size());
+			fprintf(file, "POINT_DATA %lu\n", (unsigned long int)pt_data0.size());
 			fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 			fprintf(file, "LOOKUP_TABLE %s\n", "default");
       for(std::map<unsigned int, double>::iterator it = pt_data0.begin(); it != pt_data0.end(); it++)
@@ -417,7 +417,7 @@ void FileFormatter::write(FILE *file, const char *name)
 	}
 	else if (cell_data.size()) {
 		// cell data
-		fprintf(file, "CELL_DATA %ld\n", cell_data.size());
+		fprintf(file, "CELL_DATA %lu\n", (unsigned long int)cell_data.size());
 		fprintf(file, "SCALARS %s %s %d\n", name, "float", 1);
 		fprintf(file, "LOOKUP_TABLE %s\n", "default");
     for(std::map<unsigned int, double>::iterator it = cell_data.begin(); it != cell_data.end(); it++)

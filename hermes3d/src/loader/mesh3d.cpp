@@ -330,7 +330,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// save vertices
 	fprintf(file, "# vertices\n");
-	fprintf(file, "%ld\n", mesh->vertices.size());
+	fprintf(file, "%lu\n", (unsigned long int)mesh->vertices.size());
 	for(std::map<unsigned int, Vertex*>::const_iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
     Vertex *v = it->second;
 		fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
@@ -352,7 +352,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// save tetras
 	fprintf(file, "# tetras\n");
-	fprintf(file, "%ld\n", tet.size());
+	fprintf(file, "%lu\n", (unsigned long int)tet.size());
   for(std::map<unsigned int, Element*>::const_iterator it = tet.begin(); it != tet.end(); it++) {
 		unsigned int vtcs[Tetra::NUM_VERTICES];
     it->second->get_vertices(vtcs);
@@ -362,7 +362,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// save hexes
 	fprintf(file, "# hexes\n");
-	fprintf(file, "%ld\n", hex.size());
+	fprintf(file, "%lu\n", (unsigned long int)hex.size());
 	for(std::map<unsigned int, Element*>::const_iterator it = hex.begin(); it != hex.end(); it++) {
 		unsigned int vtcs[Hex::NUM_VERTICES];
     it->second->get_vertices(vtcs);
@@ -372,7 +372,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// save prisms
 	fprintf(file, "# prisms\n");
-	fprintf(file, "%ld\n", pri.size());
+	fprintf(file, "%lu\n", (unsigned long int)pri.size());
   for(std::map<unsigned int, Element*>::const_iterator it = pri.begin(); it != pri.end(); it++) {
 		unsigned int vtcs[Prism::NUM_VERTICES];
 		it->second->get_vertices(vtcs);
@@ -406,7 +406,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// tris
 	fprintf(file, "# tris\n");
-	fprintf(file, "%ld\n", tri_facets.size());
+	fprintf(file, "%lu\n", (unsigned long int)tri_facets.size());
 	for(std::map<unsigned int, Facet*>::const_iterator it = tri_facets.begin(); it != tri_facets.end(); it++) {
     Facet *facet = it->second;
 		Boundary *bnd = mesh->boundaries[facet->right];
@@ -421,7 +421,7 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// quads
 	fprintf(file, "# quads\n");
-	fprintf(file, "%ld\n", quad_facets.size());
+	fprintf(file, "%lu\n", (unsigned long int)quad_facets.size());
 	for(std::map<unsigned int, Facet*>::const_iterator it = quad_facets.begin(); it != quad_facets.end(); it++) {
     Facet *facet = it->second;
 		Boundary *bnd = mesh->boundaries[facet->right];

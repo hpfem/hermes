@@ -953,29 +953,29 @@ Edge::Key Mesh::get_edge_id(Element *e, int edge_num) const {
 }
 
 void Mesh::dump() {
-	_F_
-	printf("Vertices (count = %lu)\n", vertices.size());
-  for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++) {
+    _F_
+    printf("Vertices (count = %lu)\n", (unsigned long int)vertices.size());
+    for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++) {
 		Vertex *v = it->second;
     printf("  id = %d, ", it->first);
 		v->dump();
 	}
 
-	printf("Elements (count = %lu)\n", elements.size());
+	printf("Elements (count = %lu)\n", (unsigned long int)elements.size());
   for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++) {
 		Element *e = it->second;
 		printf("  ");
 		e->dump();
 	}
 
-	printf("Boundaries (count = %lu)\n", boundaries.size());
+	printf("Boundaries (count = %lu)\n", (unsigned long int)boundaries.size());
   for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++) {
 		Boundary *b = it->second;
 		printf("  ");
 		b->dump();
 	}
 
-	printf("Facets (count = %lu)\n", facets.size());
+	printf("Facets (count = %lu)\n", (unsigned long int)facets.size());
   for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++) {
     Facet *f = it->second;
     if(it->first.size > 0)
