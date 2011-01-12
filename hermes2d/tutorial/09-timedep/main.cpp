@@ -26,8 +26,8 @@
 const int P_INIT = 4;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
-const double time_step = 3e2;                     // Time step in seconds.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const double time_step = 3e+2;                    // Time step in seconds.
+const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -36,7 +36,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
-ButcherTableType butcher_table_type = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Boundary markers.
 const std::string BDY_GROUND = "Boundary ground";

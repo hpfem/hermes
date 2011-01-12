@@ -288,7 +288,7 @@ void Space::copy_orders_recurrent(Element* e, int order)
 }
 
 
-void Space::copy_orders(Space* space, int inc)
+void Space::copy_orders(const Space* space, int inc)
 {
   _F_
   Element* e;

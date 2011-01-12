@@ -1,7 +1,7 @@
 // Jacobian matrix.
 template<typename Real, typename Scalar>
-Scalar jac(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-           Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar stac_jacobian(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                     Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* u_prev = u_ext[0];
@@ -24,8 +24,8 @@ Scalar jac(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
 
 // Residual vector
 template<typename Real, typename Scalar>
-Scalar res(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
-           Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar stac_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
+                     Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* u_prev = u_ext[0];

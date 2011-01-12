@@ -18,7 +18,8 @@
 #include "hermes2d.h"
 
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                     DiscreteProblem* dp, WeakForm* stage_wf_right, WeakForm* stage_wf_left) 
+                     DiscreteProblem* dp, WeakForm* stage_wf_right, 
+                     WeakForm* stage_wf_left) 
 {
   // Number of stages.
   int num_stages = bt->get_size();
@@ -147,6 +148,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     vfv_i.ord = l2_residual_form<Ord, Ord>;
     vfv_i.ext = Hermes::Tuple<MeshFunction*> ();
     vfv_i.scaling_factor = 1.0;
+
     // Add the matrix form to the diagonal block.
     stage_wf_left->add_vector_form(&vfv_i);
   }
@@ -181,58 +183,55 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   bool verbose, double newton_tol, int newton_max_iter,  
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
-  // Matrix and vector for the time derivative part of 
-  // the equation (left-hand side).
+  // Matrix for the time derivative part of the equation (left-hand side).
   SparseMatrix* matrix_left = create_matrix(matrix_solver);
-  Vector* vector_left = create_vector(matrix_solver);
 
-  // Matrix and vector for the stationary part of the 
-  // equation (right-hand side).
+  // Matrix and vector for the rest (right-hand side).
   SparseMatrix* matrix_right = create_matrix(matrix_solver);
   Vector* vector_right = create_vector(matrix_solver);
 
-  // The two matrices and two vectors will be merged into "matrix" 
-  // and "rhs", respectively, so we create just one matrix solver.
+  // Create matrix solver.
   Solver* solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
 
   // Get number of stages from the Butcher's table.
   int num_stages = bt->get_size();
 
   // Get original space, mesh, and ndof.
-  Space* space = dp->get_space(0);
-  Mesh* mesh = space->get_mesh();
-  int ndof = space->get_num_dofs();
+  dp->get_space(0);
+  Mesh* mesh = dp->get_space(0)->get_mesh();
+  int ndof = dp->get_space(0)->get_num_dofs();
 
   // Create spaces for stage solutions. This is necessary 
   // to define a num_stages x num_stages block weak formulation. 
   Hermes::Tuple<Space*> stage_spaces;
   stage_spaces.push_back(dp->get_space(0));
   for (int i = 1; i < num_stages; i++) {
-    stage_spaces.push_back(space->dup(mesh));
-    stage_spaces[i]->copy_orders(space);
+    stage_spaces.push_back(dp->get_space(0)->dup(mesh));
+    stage_spaces[i]->copy_orders(dp->get_space(0));
   }
 
   // Create a multistage weak formulation.
-  WeakForm stage_wf_left(num_stages);           // For the time derivative term (written on the left).
-  WeakForm stage_wf_right(num_stages);        // For the rest of equation (written on the right).
+  WeakForm stage_wf_left(num_stages);       // For the time derivative term (written on the left).
+  WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right).
   create_stage_wf(current_time, time_step, bt, dp, &stage_wf_right, &stage_wf_left); 
 
-  // Create the weak forms for the left- and right-hand sides of 
-  // the equation, respectively.
+  // Initialize discrete problems for the assembling of the 
+  // matrix M and the stage Jacobian matrix and residual.
+  DiscreteProblem stage_dp_left(&stage_wf_left, stage_spaces);
   bool is_linear = dp->get_is_linear();
-  DiscreteProblem stage_dp_left(&stage_wf_left, stage_spaces, is_linear);
   DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces, is_linear);
 
-  // Create stage vector of length num_stages * ndof.
-  // It contains coefficients of all stage solutions,
-  // to be passed into the time derivative part of the 
-  // discrete problem.
-  scalar* stage_vec = new scalar[num_stages*ndof];
-  memset(stage_vec, 0, num_stages * ndof * sizeof(scalar));
+  // Vector stage_coeff_vec of length num_stages * ndof. will represent 
+  // the 'k_i' vectors in the usual R-K notation.
+  scalar* stage_coeff_vec = new scalar[num_stages*ndof];
+  memset(stage_coeff_vec, 0, num_stages * ndof * sizeof(scalar));
 
-  // Create u_prev vector to be passed to weak forms of
-  // the stationary part of the discrete problem.
+  // Vector u_prev_vec will represent y_n + h \sum_{j=1}^s a_{ij}k_i
+  // in the usual R-K notation.
   scalar* u_prev_vec = new scalar[num_stages*ndof];
+
+  // Create a vector to facilitate residual calculation.
+  scalar* vector_left = new scalar[num_stages*ndof];
 
   // Prepare residuals of stage solutions.
   Hermes::Tuple<Solution*> residuals;
@@ -247,24 +246,31 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   int it = 1;
   while (true)
   {
-    // Prepare the u_prev vector for weak forms.
+    // Prepare the u_prev_vec vector to enter the stationary residual F.
     for (int r = 0; r < num_stages; r++) {
       for (int i = 0; i < ndof; i++) {
         scalar increment_r = 0;
         for (int s = 0; s < num_stages; s++) {
-          increment_r += time_step * bt->get_A(r, s) * stage_vec[s*ndof + i]; 
+          increment_r += time_step * bt->get_A(r, s) * stage_coeff_vec[s*ndof + i]; 
         }
         u_prev_vec[r*ndof + i] = coeff_vec[i] + increment_r;
       }
     } 
 
-    // Assemble the stage Jacobian matrix and residual vector.
+    // Assemble the block-diagonal mass matrix M corresponding to the 
+    // time derivative term.
+    stage_dp_left.assemble(matrix_left);
+
+    // Assemble the block Jacobian matrix of the stationary residual F
+    // Diagonal blocks are created even if empty, so that matrix_left 
+    // can be added later.
     bool rhs_only = false;
-    stage_dp_left.assemble(stage_vec, matrix_left, vector_left, rhs_only);
     bool force_diagonal_blocks = true;
-    // Sparsity structure is forced so that matrix_left can be added later.
     stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right, 
                             rhs_only, force_diagonal_blocks);
+
+    // Multiply M with u_prev_vec (to b eused for the residuum).
+    matrix_left->multiply(stage_coeff_vec, vector_left);
 
     /*
     // Debug.
@@ -278,7 +284,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     fclose(f);
     */
 
-    // Putting the two parts together into matrix and rhs.
+    // Putting the two parts together into matrix_right and rhs_right.
     ((UMFPackMatrix*)matrix_right)->add_umfpack_matrix((UMFPackMatrix*)matrix_left);
     vector_right->add_vector(vector_left);
 
@@ -327,8 +333,12 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     if(!solver->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < num_stages*ndof; i++) 
-      stage_vec[i] += newton_damping_coeff * solver->get_solution()[i];
+    for (int i = 0; i < num_stages*ndof; i++) {
+      stage_coeff_vec[i] += newton_damping_coeff * solver->get_solution()[i];
+      //printf("stage_coeff_vec[%d] = %g\n", i, stage_coeff_vec[i]);
+    }
+    //exit(0);
+
 
     // Increase iteration counter.
     it++;
@@ -344,7 +354,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   for (int i = 0; i < ndof; i++) {
     scalar increment = 0;
     for (int s = 0; s < num_stages; s++) {
-      increment += time_step * bt->get_B(s) * stage_vec[s*ndof + i]; 
+      increment += time_step * bt->get_B(s) * stage_coeff_vec[s*ndof + i]; 
     }
     coeff_vec[i] += increment;
   } 
@@ -352,22 +362,22 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Clean up.
   delete matrix_left;
   delete matrix_right;
-  delete vector_left;
   delete vector_right;
   delete solver;
 
   // Delete stage spaces, but not the first (original) one.
   for (int i = 1; i < num_stages; i++) delete stage_spaces[i];
 
-  // Delete residuals.
+  // Delete all residuals.
   for (int i = 0; i < num_stages; i++) delete residuals[i];
 
   // TODO: Delete stage_wf, in particular its external solutions 
   // stage_time_sol[i], i = 0, 1, ..., num_stages-1.
 
   // Delete stage_vec and u_prev_vec.
-  delete [] stage_vec;
+  delete [] stage_coeff_vec;
   delete [] u_prev_vec;
+  delete [] vector_left;
   
   return true;
 }

@@ -149,7 +149,7 @@ public:
   /// Copies element orders from another space. 'inc' is an optional order
   /// increase. If the source space has a coarser mesh, the orders are distributed
   /// recursively. This is useful for reference solution spaces.
-  void copy_orders(Space* space, int inc = 0);
+  void copy_orders(const Space* space, int inc = 0);
   /// Internal. Obtains the order of an edge, according to the minimum rule.
   virtual int get_edge_order(Element* e, int edge);
 

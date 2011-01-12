@@ -20,12 +20,12 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
+const int INIT_GLOB_REF_NUM = 4;                   // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 3;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
 const double time_step = 0.2;                      // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
-const double NEWTON_TOL = 1e-6;                    // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-3;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -34,7 +34,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
-ButcherTableType butcher_table_type = Implicit_Lobatto_IIIA_4;
+
+//ButcherTableType butcher_table_type = Implicit_SDIRK_2;
+//ButcherTableType butcher_table_type = Implicit_Crank_Nicolson_2;
+ButcherTableType butcher_table_type = Implicit_RK_1;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -117,8 +120,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
-  wf.add_vector_form(callback(res), HERMES_ANY);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");

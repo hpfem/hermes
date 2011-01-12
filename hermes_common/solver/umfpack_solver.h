@@ -84,7 +84,10 @@ public:
   virtual void add(int n, int *idx, scalar *y);
   virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
-    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    for (int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
+  };
+  virtual void add_vector(scalar* vec) {
+    for (int i = 0; i < this->length(); i++) this->v[i] += vec[i];
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 

@@ -44,7 +44,6 @@ PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss)
   set_quad_2d(&g_quad_2d_std);
 }
 
-
 void PrecalcShapeset::update_max_index()
 {
   shapeset->set_mode(HERMES_MODE_TRIANGLE);

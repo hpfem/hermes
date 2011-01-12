@@ -40,7 +40,7 @@ public:
   BaseView(const char* title = "BaseView", WinGeom* wg = NULL);
   BaseView(char* title, WinGeom* wg = NULL);
 
-  void show(Space* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
+  void show(const Space* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
 
   virtual ~BaseView() { free(); }
 

@@ -6,13 +6,6 @@ Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func
 }
 
 template<typename Real, typename Scalar>
-Scalar bilinear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-                          Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return - LAMBDA / HEATCAP / RHO * ALPHA * int_u_v<Real, Scalar>(n, wt, u, v);
-}
-
-template<typename Real, typename Scalar>
 Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
                    Geom<Real> *e, ExtData<Scalar> *ext)
 {
@@ -34,6 +27,12 @@ Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
   return result * LAMBDA / HEATCAP / RHO;
 }
 
+template<typename Real, typename Scalar>
+Scalar bilinear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                          Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  return - LAMBDA / HEATCAP / RHO * ALPHA * int_u_v<Real, Scalar>(n, wt, u, v);
+}
 
 template<typename Real, typename Scalar>
 Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
@@ -43,12 +42,14 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
 
   // This is a temporary workaround. The stage time t_n + h * c_i
   // can be accessed via u_stage_time->val[0];
-  // In this particular case the stage time is not needed as 
-  // the form does not depend explicitly on time.
   Func<Scalar>* u_stage_time = ext->fn[0]; 
   
-  Scalar current_time = u_stage_time->val[0];
-  Real current_exterior_temperature = temp_ext<Real>(current_time);
+  Scalar stage_time = u_stage_time->val[0];
+  Real stage_ext_temp = temp_ext<Real>(stage_time);
+  //if (sizeof(Scalar) == sizeof(double)) {
+  //  printf("stage_time = %g\n", stage_time);
+  //  printf("stage_ext_temp = %g\n", stage_ext_temp);
+  //}
 
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
@@ -56,6 +57,5 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
   }
 
   return LAMBDA / HEATCAP / RHO * ALPHA * 
-         (current_exterior_temperature * int_v<Real, Scalar>(n, wt, v) + result);
+         (stage_ext_temp * int_v<Real, Scalar>(n, wt, v) + result);
 }
-

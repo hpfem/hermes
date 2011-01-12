@@ -418,6 +418,7 @@ public:
 
   /// Add a vector.
   virtual void add_vector(Vector* vec) = 0;
+  virtual void add_vector(scalar* vec) = 0;
 
   /// update subset of the elements
   ///
@@ -430,18 +431,18 @@ public:
   int length() {return this->size;}
 
   // Write to file.
-  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
+  virtual bool dump(FILE *file, const char *var_name, 
+                    EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
   
 protected:
-	int size;
+  int size;
 };
 
 HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
 HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
 
 class Solver;
-HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs = NULL);
-
-
+HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, 
+                                         Matrix* matrix, Vector* rhs = NULL);
 
 #endif

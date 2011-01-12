@@ -31,6 +31,7 @@ BaseView::BaseView(const char* title, WinGeom* wg)
 {
   pss = NULL;
   sln = NULL;
+  space = NULL;
   show_edges = true;
   basic_title.assign(title);
 }
@@ -40,31 +41,31 @@ BaseView::BaseView(char* title, WinGeom* wg)
 {
   pss = NULL;
   sln = NULL;
+  space = NULL;
   show_edges = true;
   basic_title.assign(title);
 }
 
-void BaseView::show(Space* space, double eps, int item)
+void BaseView::show(const Space* space, double eps, int item)
 {
   free();
-  // todo: copy space
-  pss = new PrecalcShapeset(space->get_shapeset());
+  this->space = space->dup(space->get_mesh());
+  this->space->copy_orders(space);
+  pss = new PrecalcShapeset(this->space->get_shapeset());
   sln = new Solution();
-  ndof = Space::get_num_dofs(space);
+  ndof = Space::get_num_dofs(this->space);
   base_index = 0;
-  this->space = space;
   this->eps = eps;
   this->item = item;
   update_solution();
 }
 
-
 void BaseView::free()
 {
   if (pss != NULL) { delete pss; pss = NULL; }
   if (sln != NULL) { delete sln; sln = NULL; }
+  if (space != NULL) { delete space; space = NULL; }
 }
-
 
 void BaseView::update_solution()
 {
