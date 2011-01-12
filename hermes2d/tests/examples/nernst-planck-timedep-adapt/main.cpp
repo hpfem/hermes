@@ -34,8 +34,8 @@ const scalar C0 = 1200;	                          // [mol/m^3] Anion and counter
 
 
 /* Simulation parameters */
-const double T_FINAL = 1;
-double INIT_TAU = 0.5;
+const double T_FINAL = 0.2;
+double INIT_TAU = 0.1;
 double *TAU = &INIT_TAU;                          // Size of the time step
 const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	                  // Number of initial refinements.
@@ -71,7 +71,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const int NDOF_STOP = 5000;	                  // To prevent adaptivity from going on forever.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -200,7 +200,7 @@ int main (int argc, char* argv[]) {
   delete[] coeff_vec_coarse;
   
   // Time stepping loop.
-  PidTimestepController pid(T_FINAL, INIT_TAU, true);
+  PidTimestepController pid(T_FINAL, true, INIT_TAU);
   TAU = pid.timestep;
   info("Starting time iteration with the step %g", *TAU);
 
@@ -339,9 +339,9 @@ int main (int argc, char* argv[]) {
 
   ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(&C_space, &phi_space));
 
-  printf("ndof allowed = %d\n", 400);
+  printf("ndof allowed = %d\n", 350);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 400) {      // ndofs was 396 at the time this test was created
+  if (ndof < 400) {      // ndofs was 330 at the time this test was created
     printf("Success!\n");
     return ERR_SUCCESS;
   }

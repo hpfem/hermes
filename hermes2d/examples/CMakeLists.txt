@@ -1,3 +1,6 @@
+# Ionic-polymer-metal-composite example
+add_subdirectory(ionic-polymer-metal-composite)
+
 # Higher-order Runge-Kutta methods (via Butcher's tables)
 add_subdirectory(butcher)
 
