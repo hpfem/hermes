@@ -206,10 +206,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // to define a num_stages x num_stages block weak formulation. 
   Hermes::vector<Space*> stage_spaces;
   stage_spaces.push_back(dp->get_space(0));
-  for (int i = 1; i < num_stages; i++) {
-    int order_increase = 0;
-    stage_spaces.push_back(dp->get_space(0)->dup(mesh), order_increase);
-  }
+  for (int i = 1; i < num_stages; i++)
+    stage_spaces.push_back(dp->get_space(0)->dup(mesh));
 
   // Create a multistage weak formulation.
   WeakForm stage_wf_left(num_stages);       // For the time derivative term (written on the left).
