@@ -76,8 +76,8 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_TOP_NE, BDY_TOP_NW));
-  bc_types.add_bc_neumann(Hermes::Tuple<std::string>(BDY_VERTICAL_SE, BDY_VERTICAL_NE, BDY_VERTICAL_NW, BDY_VERTICAL_SW));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_TOP_NE, BDY_TOP_NW));
+  bc_types.add_bc_neumann(Hermes::vector<std::string>(BDY_VERTICAL_SE, BDY_VERTICAL_NE, BDY_VERTICAL_NW, BDY_VERTICAL_SW));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;

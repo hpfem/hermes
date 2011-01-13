@@ -47,7 +47,7 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
 }
 
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
-                               matrix_form_ord_t ord, SymFlag sym, int area, Hermes::Tuple<MeshFunction*>ext)
+                               matrix_form_ord_t ord, SymFlag sym, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
@@ -71,7 +71,7 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
 // A wrapper utilizing the MarkersConversion class.
 void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn, 
                                matrix_form_ord_t ord, SymFlag sym, std::string area, 
-                               Hermes::Tuple<MeshFunction*>ext)
+                               Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
@@ -91,7 +91,7 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
 
 // single equation case
 void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymFlag sym, 
-                               int area, Hermes::Tuple<MeshFunction*>ext)
+                               int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0, j = 0;
@@ -114,7 +114,7 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
 
 // A wrapper utilizing the MarkersConversion class.
 void WeakForm::add_matrix_form(matrix_form_val_t fn, 
-                               matrix_form_ord_t ord, SymFlag sym, std::string area, Hermes::Tuple<MeshFunction*>ext)
+                               matrix_form_ord_t ord, SymFlag sym, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   int i = 0, j = 0;
 
@@ -147,7 +147,7 @@ void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
 }
 
 void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-                                    int area, Hermes::Tuple<MeshFunction*>ext)
+                                    int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
@@ -163,7 +163,7 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
@@ -176,7 +176,7 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 }
 
 // single equation case
-void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0, j = 0;
@@ -193,7 +193,7 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0, j = 0;
@@ -215,7 +215,7 @@ void WeakForm::add_vector_form(VectorFormVol* form)
   seq++;
 }
 
-void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq)
@@ -230,7 +230,7 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq)
@@ -242,7 +242,7 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 }
 
 // single equation case
-void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0;
@@ -259,7 +259,7 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int 
 
 // A wrapper utilizing the MarkersConversion class.
 void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std::string area, 
-                               Hermes::Tuple<MeshFunction*>ext)
+                               Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0;
@@ -283,7 +283,7 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
 }
 
 void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
-                                    Hermes::Tuple<MeshFunction*>ext)
+                                    Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq)
@@ -300,7 +300,7 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
 
 // A wrapper utilizing the MarkersConversion class.
 void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, 
-                                    Hermes::Tuple<MeshFunction*>ext)
+                                    Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq) error("Invalid equation number.");
@@ -313,7 +313,7 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
 
 // single equation case
 void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, int area, 
-                                    Hermes::Tuple<MeshFunction*>ext)
+                                    Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0;
@@ -331,7 +331,7 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
 
 // A wrapper utilizing the MarkersConversion class.
 void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, std::string area, 
-                                    Hermes::Tuple<MeshFunction*>ext)
+                                    Hermes::vector<MeshFunction*>ext)
 {
   _F_
   int i = 0;
@@ -342,7 +342,7 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   seq++;
 }
 
-void WeakForm::set_ext_fns(void* fn, Hermes::Tuple<MeshFunction*>ext)
+void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   error("Not implemented yet.");
@@ -356,7 +356,7 @@ void WeakForm::set_ext_fns(void* fn, Hermes::Tuple<MeshFunction*>ext)
 /// improves the performance of multi-mesh assembling.
 /// This function is identical in H2D and H3D.
 ///
-void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *>& u_ext, 
+void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solution *>& u_ext, 
 			  std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
@@ -444,7 +444,7 @@ void WeakForm::get_stages(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution 
 ///
 WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2, 
-                                      Hermes::Tuple<MeshFunction*>& ext, Hermes::Tuple<Solution*>& u_ext)
+                                      Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext)
 {
   _F_
   // first create a list of meshes the form uses
@@ -540,39 +540,39 @@ bool WeakForm::is_in_area_2(int marker, int area) const
 // Function which according to the conversion table provided, updates the above members.
 void WeakForm::update_markers_acc_to_conversion(Mesh::MarkersConversion* markers_conversion)
 {
-  Hermes::Tuple<MeshFunction*> tuple_to_pass;
+  Hermes::vector<MeshFunction*> vector_to_pass;
 
   std::map<std::string, MatrixFormVol>::iterator it_mfv;
   for(it_mfv = mfvol_string_temp.begin(); it_mfv != mfvol_string_temp.end(); it_mfv++) {
-    tuple_to_pass = it_mfv->second.ext;
+    vector_to_pass = it_mfv->second.ext;
     add_matrix_form(it_mfv->second.i, it_mfv->second.j, it_mfv->second.fn, 
                     it_mfv->second.ord, (SymFlag)it_mfv->second.sym, 
                     markers_conversion->get_internal_boundary_marker(it_mfv->first),
-                    tuple_to_pass);
+                    vector_to_pass);
   }
 
   std::map<std::string, MatrixFormSurf>::iterator it_mfs;
   for(it_mfs = mfsurf_string_temp.begin(); it_mfs != mfsurf_string_temp.end(); it_mfs++) {
-    tuple_to_pass = it_mfs->second.ext;
+    vector_to_pass = it_mfs->second.ext;
     add_matrix_form_surf(it_mfs->second.i, it_mfs->second.j, 
                          it_mfs->second.fn, it_mfs->second.ord, 
                          markers_conversion->get_internal_boundary_marker(it_mfs->first),
-			 tuple_to_pass);
+                         vector_to_pass);
   }
 
   std::map<std::string, VectorFormVol>::iterator it_vfv;
   for(it_vfv = vfvol_string_temp.begin(); it_vfv != vfvol_string_temp.end(); it_vfv++) {
-    tuple_to_pass = it_vfv->second.ext;
+    vector_to_pass = it_vfv->second.ext;
     add_vector_form(it_vfv->second.i, it_vfv->second.fn, it_vfv->second.ord, 
                     markers_conversion->get_internal_boundary_marker(it_vfv->first),
-                    tuple_to_pass);
+                    vector_to_pass);
   }
 
   std::map<std::string, VectorFormSurf>::iterator it_vfs;
   for(it_vfs = vfsurf_string_temp.begin(); it_vfs != vfsurf_string_temp.end(); it_vfs++) {
-    tuple_to_pass = it_vfs->second.ext;
+    vector_to_pass = it_vfs->second.ext;
     add_vector_form_surf(it_vfs->second.i, it_vfs->second.fn, it_vfs->second.ord, 
                          markers_conversion->get_internal_boundary_marker(it_vfs->first),
-                         tuple_to_pass);
+                         vector_to_pass);
   }
 }

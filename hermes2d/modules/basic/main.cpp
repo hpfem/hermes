@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 
   // Gradient magnitude.
   ScalarView gradview("Gradient", new WinGeom(445, 0, 440, 350));
-  MagFilter grad(Hermes::Tuple<MeshFunction *>(&sln, &sln), Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show_mesh(false);
   gradview.show(&grad);
 

@@ -70,10 +70,10 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
 
 // Calculate norm of a (possibly vector-valued) solution.
 // Take norm from spaces where these solutions belong.
-double calc_norms(Hermes::Tuple<Solution*> slns) 
+double calc_norms(Hermes::vector<Solution*> slns) 
 {
   // Calculate norms for all solutions.
-  Hermes::Tuple<double> norms;
+  Hermes::vector<double> norms;
   int n = slns.size();
   for (int i=0; i<n; i++) {
     switch (slns[i]->get_space_type()) {
@@ -91,14 +91,14 @@ double calc_norms(Hermes::Tuple<Solution*> slns)
 }
 
 
-bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Solution *> right, Hermes::Tuple<double> & err_abs, Hermes::Tuple<double> & norm_vals, 
-                 double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::Tuple<ProjNormType> norms)
+bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right, Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals, 
+                 double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::vector<ProjNormType> norms)
 {
   bool default_norms = false;
   // Checks.
   if(left.size() != right.size())
     return false;
-  if (norms != Hermes::Tuple<ProjNormType>())
+  if (norms != Hermes::vector<ProjNormType>())
   {
     if(left.size() != norms.size())
       return false;

@@ -6,7 +6,7 @@
   if(!Get(f, &n_mat_markers)) error("Could not read number of material markers.");
   info("n_mat_markers: %d", n_mat_markers);
   if(n_mat_markers <= 0) error("At least one material marker must be given.");
-  std::vector<int> mat_markers;
+  Hermes::vector<int> mat_markers;
   for (int i = 0; i < n_mat_markers; i++) {
     int tmp;
     if(!Get(f, &tmp)) error("Could not read a material marker.");
@@ -69,7 +69,7 @@
   int n_bc_dirichlet;
   if(!Get(f, &n_bc_dirichlet)) error("Could not read number of Dirichlet boundary markers.");
   info("n_bc_dirichlet: %d", n_bc_dirichlet);
-  std::vector<int> bdy_markers_dirichlet;
+  Hermes::vector<int> bdy_markers_dirichlet;
   for (int i = 0; i < n_bc_dirichlet; i++) {
     int tmp;
     if(!Get(f, &tmp)) error("Could not read a VALUE boundary marker.");
@@ -79,7 +79,7 @@
   if (n_bc_dirichlet > 0) B.set_dirichlet_markers(bdy_markers_dirichlet);
 
   // Read Dirichlet boundary values.
-  std::vector<double> bdy_values_dirichlet;
+  Hermes::vector<double> bdy_values_dirichlet;
   for (int i = 0; i < n_bc_dirichlet; i++) {
     double tmp;
     if(!Get(f, &tmp)) error("Could not read a Dirichlet boundary value.");
@@ -92,7 +92,7 @@
   int n_bc_neumann;
   if(!Get(f, &n_bc_neumann)) error("Could not read number of Neumann boundary markers.");
   info("n_bc_neumann: %d", n_bc_neumann);
-  std::vector<int> bdy_markers_neumann;
+  Hermes::vector<int> bdy_markers_neumann;
   for (int i = 0; i < n_bc_neumann; i++) {
     int tmp;
     if(!Get(f, &tmp)) error("Could not read a Neumann boundary marker.");
@@ -102,7 +102,7 @@
   if (n_bc_neumann > 0) B.set_neumann_markers(bdy_markers_neumann);
 
   // Read list of Neumann boundary values.
-  std::vector<double> bdy_values_neumann;
+  Hermes::vector<double> bdy_values_neumann;
   for (int i = 0; i < n_bc_neumann; i++) {
     double tmp;
     if(!Get(f, &tmp)) error("Could not read a Neumann boundary value.");
@@ -115,7 +115,7 @@
   int n_bc_newton;
   if(!Get(f, &n_bc_newton)) error("Could not read number of Newton boundary markers.");
   info("n_bc_newton: %d", n_bc_newton);
-  std::vector<int> bdy_markers_newton;
+  Hermes::vector<int> bdy_markers_newton;
   for (int i = 0; i < n_bc_newton; i++) {
     int tmp;
     if(!Get(f, &tmp)) error("Could not read a Newton boundary marker.");
@@ -125,7 +125,7 @@
   if (n_bc_newton > 0) B.set_newton_markers(bdy_markers_newton);
 
   // Read list of Newton boundary value pairs.
-  std::vector<double_pair> bdy_values_newton;
+  Hermes::vector<double_pair> bdy_values_newton;
   for (int i = 0; i < n_bc_newton; i++) {
     double tmp1, tmp2;
     if(!Get(f, &tmp1)) error("Could not read a Newton boundary value (first in pair).");

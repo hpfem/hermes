@@ -42,10 +42,10 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   // Extracting volume and surface matrix and vector forms from the 
   // original weak formulation.
   if (wf->get_neq() != 1) error("wf->neq != 1 not implemented yet.");
-  Hermes::Tuple<WeakForm::MatrixFormVol> mfvol_base = wf->get_mfvol();
-  Hermes::Tuple<WeakForm::MatrixFormSurf> mfsurf_base = wf->get_mfsurf();
-  Hermes::Tuple<WeakForm::VectorFormVol> vfvol_base = wf->get_vfvol();
-  Hermes::Tuple<WeakForm::VectorFormSurf> vfsurf_base = wf->get_vfsurf();
+  Hermes::vector<WeakForm::MatrixFormVol> mfvol_base = wf->get_mfvol();
+  Hermes::vector<WeakForm::MatrixFormSurf> mfsurf_base = wf->get_mfsurf();
+  Hermes::vector<WeakForm::VectorFormVol> vfvol_base = wf->get_vfvol();
+  Hermes::vector<WeakForm::VectorFormSurf> vfsurf_base = wf->get_vfsurf();
 
   // Duplicate matrix volume forms, scale them according 
   // to the Butcher's table, enhance them with additional 
@@ -62,7 +62,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfv_ij.area = mfv_base.area;
         mfv_ij.fn = mfv_base.fn;
         mfv_ij.ord = mfv_base.ord;
-        mfv_ij.ext.copy(mfv_base.ext);
+        std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin());
         mfv_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
         // Add stage_time_sol[i] as an external function to the form.
@@ -84,7 +84,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     mfv_ii.area = HERMES_ANY;
     mfv_ii.fn = l2_form<double, scalar>;
     mfv_ii.ord = l2_form<Ord, Ord>;
-    mfv_ii.ext = Hermes::Tuple<MeshFunction*> ();
+    mfv_ii.ext = Hermes::vector<MeshFunction*> ();
     mfv_ii.scaling_factor = 1.0;
     // Add the matrix form to the diagonal block.
     stage_wf_left->add_matrix_form(&mfv_ii);
@@ -103,7 +103,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.area = mfs_base.area;
         mfs_ij.fn = mfs_base.fn;
         mfs_ij.ord = mfs_base.ord;
-        mfs_ij.ext.copy(mfs_base.ext);
+        std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin());
         mfs_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
         // Add stage_time_sol[i] as an external function to the form.
@@ -127,7 +127,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfv_i.area = vfv_base.area;
       vfv_i.fn = vfv_base.fn;
       vfv_i.ord = vfv_base.ord;
-      vfv_i.ext.copy(vfv_base.ext);
+      std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_i.ext.begin());
       vfv_i.scaling_factor = -1.0;
 
       // Add stage_time_sol[i] as an external function to the form.
@@ -146,7 +146,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     vfv_i.area = HERMES_ANY;
     vfv_i.fn = l2_residual_form<double, scalar>;
     vfv_i.ord = l2_residual_form<Ord, Ord>;
-    vfv_i.ext = Hermes::Tuple<MeshFunction*> ();
+    vfv_i.ext = Hermes::vector<MeshFunction*> ();
     vfv_i.scaling_factor = 1.0;
 
     // Add the matrix form to the diagonal block.
@@ -164,7 +164,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.area = vfs_base.area;
       vfs_i.fn = vfs_base.fn;
       vfs_i.ord = vfs_base.ord;
-      vfs_i.ext.copy(vfs_base.ext);
+      std::copy(vfs_base.ext.begin(), vfs_base.ext.end(), vfs_i.ext.begin());
       vfs_i.scaling_factor = -1.0;
 
       // Add stage_time_sol[i] as an external function to the form.
@@ -203,7 +203,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Create spaces for stage solutions. This is necessary 
   // to define a num_stages x num_stages block weak formulation. 
-  Hermes::Tuple<Space*> stage_spaces;
+  Hermes::vector<Space*> stage_spaces;
   stage_spaces.push_back(dp->get_space(0));
   for (int i = 1; i < num_stages; i++) {
     stage_spaces.push_back(dp->get_space(0)->dup(mesh));
@@ -234,8 +234,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   scalar* vector_left = new scalar[num_stages*ndof];
 
   // Prepare residuals of stage solutions.
-  Hermes::Tuple<Solution*> residuals;
-  Hermes::Tuple<bool> add_dir_lift;
+  Hermes::vector<Solution*> residuals;
+  Hermes::vector<bool> add_dir_lift;
   for (int i = 0; i < num_stages; i++) {
     residuals.push_back(new Solution(mesh));
     add_dir_lift.push_back(false);

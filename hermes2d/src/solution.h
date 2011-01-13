@@ -180,19 +180,19 @@ public:
   virtual void set_active_element(Element* e);
 
   /// Passes solution components calculated from solution vector as Solutions.
-  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, 
-                                  Hermes::Tuple<Solution *> solutions, 
-                                  Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
+  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces, 
+                                  Hermes::vector<Solution *> solutions, 
+                                  Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
   static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
                                  bool add_dir_lift = true);
-  static void vector_to_solutions(Vector* vec, Hermes::Tuple<Space *> spaces, 
-                                  Hermes::Tuple<Solution*> solutions, 
-                                  Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
+  static void vector_to_solutions(Vector* vec, Hermes::vector<Space *> spaces, 
+                                  Hermes::vector<Solution*> solutions, 
+                                  Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
   static void vector_to_solution(Vector* vec, Space* space, Solution* solution, 
                                  bool add_dir_lift = true);
-  static void vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space *> spaces, 
-                                  Hermes::Tuple<Solution *> solutions, Hermes::Tuple<PrecalcShapeset *> pss, 
-                                  Hermes::Tuple<bool> add_dir_lift = Hermes::Tuple<bool>());
+  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces, 
+                                  Hermes::vector<Solution *> solutions, Hermes::vector<PrecalcShapeset *> pss, 
+                                  Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
   static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
                                  PrecalcShapeset* pss, bool add_dir_lift = true);
 

@@ -56,7 +56,7 @@ class Solver;
 class HERMES_API DiscreteProblem 
 {
 public:
-  DiscreteProblem(WeakForm* wf, Hermes::Tuple<Space *> spaces, bool is_linear = false);
+  DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear = false);
   virtual ~DiscreteProblem();
   void free();
 
@@ -69,8 +69,8 @@ public:
   // Get the weak forms.
   WeakForm* get_weak_formulation() { return this->wf;};
 
-  // Get all spaces as a Hermes::Tuple.
-  Hermes::Tuple<Space *> get_spaces() {return this->spaces;}
+  // Get all spaces as a Hermes::vector.
+  Hermes::vector<Space *> get_spaces() {return this->spaces;}
 
   // Get the number of spaces.
   int get_num_spaces() {return this->spaces.size();}
@@ -212,7 +212,7 @@ protected:
   int ndof;
   int *sp_seq;
   int wf_seq;
-  Hermes::Tuple<Space *> spaces;
+  Hermes::vector<Space *> spaces;
 
   scalar** matrix_buffer;                /// buffer for holding square matrix (during assembling)
   int matrix_buffer_dim;                 /// dimension of the matrix held by 'matrix_buffer'
@@ -228,11 +228,11 @@ protected:
   PrecalcShapeset** pss;    // This is different from H3D.
   int num_user_pss;         // This is different from H3D.
 
-  ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext);
-  ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, int edge);
-  ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs);
-  ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, RefMap *rm, const int order);
-  ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
+  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order);
+  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 
   // Caching transformed values for element
@@ -243,26 +243,26 @@ protected:
   void init_cache();
   void delete_cache();
 
-  scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext, 
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
-  scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext, 
          PrecalcShapeset *fv, RefMap *rv);
-  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Hermes::Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Hermes::vector<Solution *> u_ext, 
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
-  scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::Tuple<Solution *> u_ext, 
+  scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext, 
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
 
   // Evaluation of forms, discontinuous Galerkin case.
-  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::Tuple<Solution *> sln, 
+  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> sln, 
                       NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
                       SurfPos* ep);
-  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::Tuple<Solution *> sln,
+  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> sln,
                       NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
                       SurfPos* ep);
 };
 
 // Create globally refined space.
-HERMES_API Hermes::Tuple<Space *>* construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase = 1);
+HERMES_API Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
 HERMES_API double get_l2_norm(Vector* vec); 

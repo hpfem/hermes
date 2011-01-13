@@ -25,7 +25,7 @@ public:
   double get_time() {return time;};
 
   // true if next time step can be run, false if the time step must be re-run with smaller time step.
-  bool end_step(Hermes::Tuple<Solution*> solutions, Hermes::Tuple<Solution *> prev_solutions);
+  bool end_step(Hermes::vector<Solution*> solutions, Hermes::vector<Solution *> prev_solutions);
   void begin_step();
   bool has_next();
 
@@ -64,8 +64,8 @@ void PidTimestepController::begin_step() {
   info("begin_step processed, new step number: %i and cumulative time: %g", step_number, time);
 }
 
-bool PidTimestepController::end_step(Hermes::Tuple<Solution *> solutions,
-    Hermes::Tuple<Solution *> prev_solutions) {
+bool PidTimestepController::end_step(Hermes::vector<Solution *> solutions,
+    Hermes::vector<Solution *> prev_solutions) {
 
   if (pid) {
     info("Running PID calculations...");

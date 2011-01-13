@@ -25,15 +25,15 @@ extern HERMES_API double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, 
                                                                                                 // by the norm of the latter).
 extern HERMES_API double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type);
 extern HERMES_API double calc_norm(MeshFunction* sln, int norm_type);
-extern HERMES_API double calc_norms(Hermes::Tuple<Solution*> slns);         // Norms are determined from space_type in each Solution.
+extern HERMES_API double calc_norms(Hermes::vector<Solution*> slns);         // Norms are determined from space_type in each Solution.
 
 // Function calculating errors between solutions in right and left vectors, returning all necessary parameters
 // returns correct parameters only if the return value is true
 // coarse mesh sln has to be first, then ref_sln
-HERMES_API bool calc_errors(Hermes::Tuple<Solution* > left, Hermes::Tuple<Solution *> right, 
-                            Hermes::Tuple<double> & err_abs, Hermes::Tuple<double> & norm_vals, 
+HERMES_API bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right, 
+                            Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals, 
                             double & err_abs_total, double & norm_total, double & err_rel_total, 
-                            Hermes::Tuple<ProjNormType> norms = Hermes::Tuple<ProjNormType>());
+                            Hermes::vector<ProjNormType> norms = Hermes::vector<ProjNormType>());
 
 // Helper functions
 extern HERMES_API double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), 

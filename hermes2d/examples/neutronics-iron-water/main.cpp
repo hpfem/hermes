@@ -89,12 +89,12 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(WATER_2, IRON));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(WATER_2, IRON));
   bc_types.add_bc_neumann(WATER_1); 
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(WATER_2, IRON));
+  bc_values.add_zero(Hermes::vector<int>(WATER_2, IRON));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);

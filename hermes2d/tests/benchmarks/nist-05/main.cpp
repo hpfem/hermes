@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_neumann(BDY_LEFT);
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;

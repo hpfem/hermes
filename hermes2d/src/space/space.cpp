@@ -734,7 +734,7 @@ void Space::free_extra_data()
   }
 }*/
 
-int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
+int Space::get_num_dofs(Hermes::vector<Space *> spaces)
 {
   _F_
   int ndof = 0;
@@ -745,7 +745,7 @@ int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
 }
 
 // This is identical to H3D.
-int Space::assign_dofs(Hermes::Tuple<Space*> spaces) 
+int Space::assign_dofs(Hermes::vector<Space*> spaces) 
 {
   _F_
   int n = spaces.size();
@@ -794,7 +794,7 @@ void Space::update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersC
 }
 
 // updating time-dependent essential BC
-HERMES_API void update_essential_bc_values(Hermes::Tuple<Space*> spaces) {
+HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->update_essential_bc_values();
@@ -802,6 +802,6 @@ HERMES_API void update_essential_bc_values(Hermes::Tuple<Space*> spaces) {
 }
 
 HERMES_API void update_essential_bc_values(Space *s) {
-  return update_essential_bc_values(Hermes::Tuple<Space*>(s));
+  return update_essential_bc_values(Hermes::vector<Space*>(s));
 }
 

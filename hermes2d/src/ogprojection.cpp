@@ -1,6 +1,6 @@
 #include "hermes2d.h"
 
-void OGProjection::project_internal(Hermes::Tuple<Space *> spaces, WeakForm* wf, 
+void OGProjection::project_internal(Hermes::vector<Space *> spaces, WeakForm* wf, 
                                     scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
@@ -40,8 +40,8 @@ void OGProjection::project_internal(Hermes::Tuple<Space *> spaces, WeakForm* wf,
   delete wf;
 }
 
-void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<MeshFunction*> source_meshfns, 
-                   scalar* target_vec, MatrixSolverType matrix_solver, Hermes::Tuple<ProjNormType> proj_norms)
+void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction*> source_meshfns, 
+                   scalar* target_vec, MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
 {
   _F_
   int n = spaces.size();  
@@ -53,7 +53,7 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<M
   for (int i = 0; i < n; i++) 
   {
     int norm;
-    if (proj_norms == Hermes::Tuple<ProjNormType>()) {
+    if (proj_norms == Hermes::vector<ProjNormType>()) {
       ESpaceType space_type = spaces[i]->get_type();
       switch (space_type) {
         case HERMES_H1_SPACE: norm = HERMES_H1_NORM; break;
@@ -112,14 +112,14 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<M
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<Solution *> sols_src, 
-                                  Hermes::Tuple<Solution *> sols_dest, MatrixSolverType matrix_solver, 
-                                  Hermes::Tuple<ProjNormType> proj_norms)
+void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<Solution *> sols_src, 
+                                  Hermes::vector<Solution *> sols_dest, MatrixSolverType matrix_solver, 
+                                  Hermes::vector<ProjNormType> proj_norms)
 {
   _F_
   
   scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
-  Hermes::Tuple<MeshFunction *> ref_slns_mf;
+  Hermes::vector<MeshFunction *> ref_slns_mf;
   for (unsigned int i = 0; i < sols_src.size(); i++) 
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
   
@@ -130,19 +130,19 @@ void OGProjection::project_global(Hermes::Tuple<Space *> spaces, Hermes::Tuple<S
   delete [] target_vec;
 }
 
-void OGProjection::project_global(Hermes::Tuple<Space *> spaces, 
-                                  Hermes::Tuple< std::pair<WeakForm::matrix_form_val_t, 
+void OGProjection::project_global(Hermes::vector<Space *> spaces, 
+                                  Hermes::vector< std::pair<WeakForm::matrix_form_val_t, 
                                   WeakForm::matrix_form_ord_t> > proj_biforms, 
-                                  Hermes::Tuple< std::pair<WeakForm::vector_form_val_t, 
+                                  Hermes::vector< std::pair<WeakForm::vector_form_val_t, 
                                   WeakForm::vector_form_ord_t> > proj_liforms, 
-                                  Hermes::Tuple<MeshFunction*> source_meshfns, 
+                                  Hermes::vector<MeshFunction*> source_meshfns, 
                                   scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   unsigned int n = spaces.size();
   unsigned int n_biforms = proj_biforms.size();
   if (n_biforms == 0)
-    error("Please use the simpler version of project_global with the argument Hermes::Tuple<ProjNormType> proj_norms if you do not provide your own projection norm.");
+    error("Please use the simpler version of project_global with the argument Hermes::vector<ProjNormType> proj_norms if you do not provide your own projection norm.");
   if (n_biforms != proj_liforms.size())
     error("Mismatched numbers of projection forms in project_global().");
   if (n != n_biforms)

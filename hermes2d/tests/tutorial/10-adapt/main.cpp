@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(OUTER_BDY, STATOR_BDY));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(OUTER_BDY, STATOR_BDY));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;

@@ -34,8 +34,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Hermes::Tuple<BCSpec *>DIR_BC_LEFT = Hermes::Tuple<BCSpec *>(new BCSpec(0,M_PI/2.), new BCSpec(1,0));
-Hermes::Tuple<BCSpec *> DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>();
+Hermes::vector<BCSpec *>DIR_BC_LEFT = Hermes::vector<BCSpec *>(new BCSpec(0,M_PI/2.), new BCSpec(1,0));
+Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"

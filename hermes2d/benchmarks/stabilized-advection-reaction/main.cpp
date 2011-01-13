@@ -291,7 +291,7 @@ int main(int argc, char* args[])
   ProjNormType norm;
   
   // For both methods, all inflow boundaries are treated as natural, enforcing the Dirichlet conditions in a weak sense. 
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_NONZERO_CONSTANT_INFLOW, BDY_ZERO_INFLOW, BDY_VARYING_INFLOW));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_NONZERO_CONSTANT_INFLOW, BDY_ZERO_INFLOW, BDY_VARYING_INFLOW));
   if (method != DG)
   { 
     space = new H1Space(&mesh, &bc_types, Ord2(P_INIT, P_INIT));

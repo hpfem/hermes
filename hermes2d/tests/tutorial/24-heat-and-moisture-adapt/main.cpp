@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   temp_bc_type.add_bc_dirichlet(BDY_REACTOR_WALL);
   temp_bc_type.add_bc_neumann(BDY_SYMMETRY);
   temp_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
-  moist_bc_type.add_bc_neumann(Hermes::Tuple<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
+  moist_bc_type.add_bc_neumann(Hermes::vector<int>(BDY_SYMMETRY, BDY_REACTOR_WALL));
   moist_bc_type.add_bc_newton(BDY_EXTERIOR_WALL);
 
   // Enter Dirichlet boundary values.
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      Hermes::Tuple<Space *>* ref_spaces = construct_refined_spaces(Hermes::Tuple<Space *>(&T_space, &M_space));
+      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&T_space, &M_space));
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
 
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
       if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                              Hermes::Tuple<Solution *>(&T_fine, &M_fine));
+                                              Hermes::vector<Solution *>(&T_fine, &M_fine));
       else error ("Matrix solver failed.\n");
     
       // Time measurement.
@@ -200,25 +200,25 @@ int main(int argc, char* argv[])
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
-      OGProjection::project_global(Hermes::Tuple<Space *>(&T_space, &M_space), Hermes::Tuple<Solution *>(&T_fine, &M_fine), 
-                     Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
+      OGProjection::project_global(Hermes::vector<Space *>(&T_space, &M_space), Hermes::vector<Solution *>(&T_fine, &M_fine), 
+                     Hermes::vector<Solution *>(&T_coarse, &M_coarse), matrix_solver); 
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate."); 
-      Adapt* adaptivity = new Adapt(Hermes::Tuple<Space *>(&T_space, &M_space));
+      Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&T_space, &M_space));
       adaptivity->set_error_form(0, 0, callback(bilinear_form_sym_0_0));
       adaptivity->set_error_form(0, 1, callback(bilinear_form_sym_0_1));
       adaptivity->set_error_form(1, 0, callback(bilinear_form_sym_1_0));
       adaptivity->set_error_form(1, 1, callback(bilinear_form_sym_1_1));
-      double err_est_rel_total = adaptivity->calc_err_est(Hermes::Tuple<Solution *>(&T_coarse, &M_coarse), 
-                                 Hermes::Tuple<Solution *>(&T_fine, &M_fine)) * 100;
+      double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&T_coarse, &M_coarse), 
+                                 Hermes::vector<Solution *>(&T_fine, &M_fine)) * 100;
 
       // Time measurement.
       cpu_time.tick();
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+        Space::get_num_dofs(Hermes::vector<Space *>(&T_space, &M_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
       
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
@@ -226,9 +226,9 @@ int main(int argc, char* argv[])
       else 
       {
         info("Adapting coarse mesh.");
-        done = adaptivity->adapt(Hermes::Tuple<RefinementSelectors::Selector *>(&selector, &selector), 
+        done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (Space::get_num_dofs(Hermes::Tuple<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
+        if (Space::get_num_dofs(Hermes::vector<Space *>(&T_space, &M_space)) >= NDOF_STOP) 
           done = true;
         else
           // Increase the counter of performed adaptivity steps.

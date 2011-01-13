@@ -197,10 +197,10 @@ public:
   void update_essential_bc_values();
 
   /// \brief Returns the number of basis functions contained in the spaces.
-  static int get_num_dofs(Hermes::Tuple<Space *> spaces);
+  static int get_num_dofs(Hermes::vector<Space *> spaces);
 
-  /// \brief Assings the degrees of freedom to all Spaces in the Hermes::Tuple.
-  static int assign_dofs(Hermes::Tuple<Space*> spaces);
+  /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
+  static int assign_dofs(Hermes::vector<Space*> spaces);
 
   BCTypes* bc_types;
   BCValues* bc_values;
@@ -328,7 +328,7 @@ public:
 };
 
 // updating time-dependent essential (Dirichlet) boundary conditions
-extern HERMES_API void update_essential_bc_values(Hermes::Tuple<Space*> spaces);  // multiple spaces
+extern HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces);  // multiple spaces
 extern HERMES_API void update_essential_bc_values(Space *s);    // one space
 
 class Ord2

@@ -19,7 +19,7 @@
 #include "../../hermes_common/common.h"
 
 #include "auto_local_array.h"
-//#include "tuple.h"
+//#include "vector.h"
 
 
 // H2D-specific error codes.

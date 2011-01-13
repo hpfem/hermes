@@ -76,16 +76,16 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an H1 space.
   H1Space* phi_space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
   H1Space* psi_space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(phi_space, psi_space));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(phi_space, psi_space));
   info("ndof = %d.", ndof);
 
   // Initialize previous time level solutions.
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     info("Solving linear system.");
     // Initialize the FE problem.
     bool is_linear = true;
-    DiscreteProblem dp(&wf, Hermes::Tuple<Space *>(phi_space, psi_space), is_linear);
+    DiscreteProblem dp(&wf, Hermes::vector<Space *>(phi_space, psi_space), is_linear);
    
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
     if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), Hermes::Tuple<Space *>(phi_space, psi_space), Hermes::Tuple<Solution *>(&phi_prev_time, &psi_prev_time));
+      Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(phi_space, psi_space), Hermes::vector<Solution *>(&phi_prev_time, &psi_prev_time));
     else
       error ("Matrix solver failed.\n");
 

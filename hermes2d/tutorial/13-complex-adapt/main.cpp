@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
   bc_types.add_bc_neumann(BDY_BUTTOM);
 
   // Create an H1 space with default shapeset.

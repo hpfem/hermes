@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets.
   H1Space space_T(&mesh, &bc_types, &bc_values, P_INIT);
   H1Space space_phi(&mesh, &bc_types, &bc_values, P_INIT);
-  Hermes::Tuple<Space*> spaces(&space_T, &space_phi);
+  Hermes::vector<Space*> spaces(&space_T, &space_phi);
 
   // Exact solutions for error evaluation.
   ExactSolution T_exact_solution(&mesh, T_exact),
@@ -169,11 +169,11 @@ int main(int argc, char* argv[])
 
   // Solutions in the previous time step.
   Solution T_prev_time, phi_prev_time;
-  Hermes::Tuple<MeshFunction*> time_iterates(&T_prev_time, &phi_prev_time);
+  Hermes::vector<MeshFunction*> time_iterates(&T_prev_time, &phi_prev_time);
   
   // Solutions in the previous Newton's iteration.
   Solution T_prev_newton, phi_prev_newton;
-  Hermes::Tuple<Solution*> newton_iterates(&T_prev_newton, &phi_prev_newton);
+  Hermes::vector<Solution*> newton_iterates(&T_prev_newton, &phi_prev_newton);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -204,8 +204,8 @@ int main(int argc, char* argv[])
 
     scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
     OGProjection::project_global(spaces, time_iterates, coeff_vec, matrix_solver);
-    Solution::vector_to_solutions(coeff_vec, Hermes::Tuple<Space*>(&space_T, &space_phi), 
-                                  Hermes::Tuple<Solution*>(&T_prev_newton, &phi_prev_newton));
+    Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space*>(&space_T, &space_phi), 
+                                  Hermes::vector<Solution*>(&T_prev_newton, &phi_prev_newton));
     
     // Initialize the FE problem.
     bool is_linear = false;
@@ -227,10 +227,10 @@ int main(int argc, char* argv[])
     
     // Calculate exact error.
     info("Calculating error (exact).");
-    Hermes::Tuple<double> exact_errors;
+    Hermes::vector<double> exact_errors;
     Adapt adaptivity_exact(spaces);
     bool solutions_for_adapt = false;
-    adaptivity_exact.calc_err_exact(Hermes::Tuple<Solution *>(&T_prev_newton, &phi_prev_newton), Hermes::Tuple<Solution *>(&T_exact_solution, &phi_exact_solution), &exact_errors, solutions_for_adapt);
+    adaptivity_exact.calc_err_exact(Hermes::vector<Solution *>(&T_prev_newton, &phi_prev_newton), Hermes::vector<Solution *>(&T_exact_solution, &phi_exact_solution), &exact_errors, solutions_for_adapt);
     
     double maxerr = std::max(exact_errors[0], exact_errors[1])*100;
     info("Exact solution error for T (H1 norm): %g %%", exact_errors[0]*100);

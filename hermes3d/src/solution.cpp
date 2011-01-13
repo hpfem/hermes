@@ -580,11 +580,11 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 
 // sets all elements of y[] to num
 
-void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<double> dir)
+void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space*> spaces, Hermes::vector<Solution*> solutions, Hermes::vector<double> dir)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
-    if(dir == Hermes::Tuple<double>())
+    if(dir == Hermes::vector<double>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector);
     else
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, dir[i]);
@@ -593,7 +593,7 @@ void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*
 
 void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, double dir)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), Hermes::Tuple<Solution*>(solution), Hermes::Tuple<double>(dir));
+  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space), Hermes::vector<Solution*>(solution), Hermes::vector<double>(dir));
 }
 
 

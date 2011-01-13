@@ -169,8 +169,8 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_3);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_5));
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_1, BDY_4, BDY_6));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_5));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_1, BDY_4, BDY_6));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values(&TIME);
