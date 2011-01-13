@@ -36,7 +36,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2;
+
+ButcherTableType butcher_table_type = Implicit_RK_1;
+//ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Boundary markers.
 const std::string BDY_GROUND = "Boundary ground";
@@ -44,17 +46,21 @@ const std::string BDY_AIR = "Boundary air";
 
 // Problem parameters.
 const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
-const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;         // Thermal conductivity of the material.
-const double HEATCAP = 1e6;        // Heat capacity.
-const double RHO = 3000;           // Material density.
+const double ALPHA = 1;//10;           // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1;//1e5;         // Thermal conductivity of the material.
+const double HEATCAP = 1;//1e6;        // Heat capacity.
+const double RHO = 1;//3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 
 // Time-dependent exterior temperature.
 template<typename Real>
 Real temp_ext(Real t) {
-  return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
+  return TEMP_INIT;// + 10. * sin(2*M_PI*t/T_FINAL);
 }
+
+// Heat sources (can be a general function of 'x' and 'y').
+template<typename Real>
+Real heat_src(Real x, Real y) { return 1.0;}
 
 // Weak forms.
 #include "forms.cpp"
@@ -75,30 +81,28 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_GROUND);
-  bc_types.add_bc_newton(BDY_AIR);
+  bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND, BDY_AIR));
+  //bc_types.add_bc_newton(BDY_AIR);
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_const(BDY_GROUND, TEMP_INIT);
+  bc_values.add_const(BDY_AIR, TEMP_INIT);
 
   // Initialize an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  
-  // Initialize the solution.
-  Solution u_prev_time;
-
-  // Set the initial condition.
-  u_prev_time.set_const(&mesh, TEMP_INIT);
+  // Previous time level solution (initialized by the external temperature).
+  Solution u_prev_time(&mesh, TEMP_INIT);
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+  wf.add_matrix_form(callback(stac_jacobian));
+  wf.add_vector_form(callback(stac_residual));
+  //wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
+  //wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
@@ -110,16 +114,12 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, &space, is_linear);
 
   // Initialize views.
-  double current_time = 0.0; 
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
-  char title[100];
-  sprintf(title, "Time %3.5f, exterior temperature %3.5f", current_time, temp_ext(current_time));
   //Tview.set_min_max_range(0,20);
-  Tview.set_title(title);
   Tview.fix_scale_width(3);
 
   // Time stepping loop:
-  int ts = 1;
+  double current_time = 0.0; int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
@@ -137,7 +137,8 @@ int main(int argc, char* argv[])
     // Update time.
     current_time += time_step;
 
-    // Visualize the solution.
+    // Show the new time level solution.
+    char title[100];
     sprintf(title, "Time %3.2f, exterior temperature %3.5f", current_time, temp_ext(current_time));
     Tview.set_title(title);
     Tview.show(&u_prev_time);

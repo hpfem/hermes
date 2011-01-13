@@ -177,7 +177,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   }
 }
 
-bool HERMES_RESIDUAL_AS_VECTOR_RK = false;
+bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt, 
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver, 
                   bool verbose, double newton_tol, int newton_max_iter,  
@@ -185,6 +185,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 {
   // Matrix for the time derivative part of the equation (left-hand side).
   SparseMatrix* matrix_left = create_matrix(matrix_solver);
+  Vector* vector_left = create_vector(matrix_solver);
 
   // Matrix and vector for the rest (right-hand side).
   SparseMatrix* matrix_right = create_matrix(matrix_solver);
@@ -231,7 +232,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   scalar* u_prev_vec = new scalar[num_stages*ndof];
 
   // Create a vector to facilitate residual calculation.
-  scalar* vector_left = new scalar[num_stages*ndof];
+  //scalar* vector_left = new scalar[num_stages*ndof];
 
   // Prepare residuals of stage solutions.
   Hermes::vector<Solution*> residuals;
@@ -258,8 +259,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     } 
 
     // Assemble the block-diagonal mass matrix M corresponding to the 
-    // time derivative term.
-    stage_dp_left.assemble(matrix_left);
+    // time derivative term, and the corresponding part of the residual.
+    stage_dp_left.assemble(stage_coeff_vec, matrix_left, vector_left);
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left 
@@ -269,31 +270,43 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right, 
                             rhs_only, force_diagonal_blocks);
 
-    // Multiply M with u_prev_vec (to b eused for the residuum).
-    matrix_left->multiply(stage_coeff_vec, vector_left);
+    // Multiply M with u_prev_vec (to be used for the residuum).
+    //matrix_left->multiply(stage_coeff_vec, vector_left);
 
-    /*
-    // Debug.
-    FILE* f = fopen("debug-1.txt", "w");
-    matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE); 
-    info("Matrix timedep dumped.");
-    fclose(f);
-    f = fopen("debug-2.txt", "w");
-    matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
-    info("Matrix stationary dumped.");
-    fclose(f);
-    */
+    // debug
+    if (it == -1) {
+      printf("vector_left = ");
+      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
+      printf("\n");
+      printf("vector_right = ");
+      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_right->get(i));
+      printf("\n");
+      //exit(0);
+ 
+      // Debug.
+      FILE* f = fopen("debug-left.txt", "w");
+      matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE); 
+      info("Matrix left dumped.");
+      fclose(f);
+      f = fopen("debug-right.txt", "w");
+      matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
+      info("Matrix right dumped.");
+      fclose(f);
+    }
 
     // Putting the two parts together into matrix_right and rhs_right.
     ((UMFPackMatrix*)matrix_right)->add_umfpack_matrix((UMFPackMatrix*)matrix_left);
     vector_right->add_vector(vector_left);
 
+
     // Debug.
-    //f = fopen("debug-3.txt", "w");
-    //matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
-    //info("Merged matrix dumped.");
-    //fclose(f);
-    //exit(0);
+    if (it == -1) {
+      FILE* f = fopen("debug-merged.txt", "w");
+      matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
+      info("Merged matrix dumped.");
+      fclose(f);
+      exit(0);
+    }
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -361,6 +374,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Clean up.
   delete matrix_left;
+  delete vector_left;
   delete matrix_right;
   delete vector_right;
   delete solver;
@@ -377,7 +391,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Delete stage_vec and u_prev_vec.
   delete [] stage_coeff_vec;
   delete [] u_prev_vec;
-  delete [] vector_left;
   
   return true;
 }

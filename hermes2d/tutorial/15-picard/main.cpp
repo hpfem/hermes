@@ -71,11 +71,8 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
-  // Declare solutions.
-  Solution sln_prev_iter;
-
   // Initialize previous iteration solution for the Picard method.
-  sln_prev_iter.set_const(&mesh, INIT_COND_CONST);
+  Solution sln_prev_iter(&mesh, INIT_COND_CONST);
 
   // Initialize the weak formulation.
   WeakForm wf;

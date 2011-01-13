@@ -62,8 +62,7 @@ int main(int argc, char* argv[])
   info("ndof: %d", ndof);
 
   // Define constant initial condition. 
-  Solution t_prev_time;
-  t_prev_time.set_const(&mesh, TEMP_INIT);
+  Solution t_prev_time(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);

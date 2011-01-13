@@ -15,7 +15,7 @@ Scalar stac_jacobian(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func
   // Stationary part of the Jacobian matrix (time derivative term left out).
   for (int i = 0; i < n; i++) {
     result += -wt[i] * (dlam_du(u_prev->val[i]) * u->val[i] *
-                       (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
+			(u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
                        + lam(u_prev->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
   }
 
@@ -38,8 +38,8 @@ Scalar stac_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
 
   // Stationary part of the residual (time derivative term left out).
   for (int i = 0; i < n; i++) {
-    result += -wt[i] * (lam(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
-		       - heat_src(e->x[i], e->y[i]) * v->val[i]);
+    result += -wt[i] * lam(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+    result += wt[i] * heat_src(e->x[i], e->y[i]) * v->val[i];
   }
 
   return result;

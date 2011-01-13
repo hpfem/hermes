@@ -125,9 +125,8 @@ int main(int argc, char* argv[])
 
   // Define constant initial conditions.
   info("Setting initial conditions.");
-  Solution T_prev_time, M_prev_time;
-  T_prev_time.set_const(&T_mesh, TEMP_INITIAL);
-  M_prev_time.set_const(&M_mesh, MOIST_INITIAL);
+  Solution T_prev_time(&T_mesh, TEMP_INITIAL);
+  Solution M_prev_time(&M_mesh, MOIST_INITIAL);
 
   // Initialize the weak formulation.
   WeakForm wf(2);

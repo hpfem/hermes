@@ -20,8 +20,8 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_GLOB_REF_NUM = 4;                   // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 3;                    // Number of initial refinements towards boundary.
+const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
 const double time_step = 0.2;                      // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
@@ -35,9 +35,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
 
-//ButcherTableType butcher_table_type = Implicit_SDIRK_2;
-//ButcherTableType butcher_table_type = Implicit_Crank_Nicolson_2;
-ButcherTableType butcher_table_type = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -79,10 +77,7 @@ scalar essential_bc_values(double x, double y)
 
 // Heat sources (can be a general function of 'x' and 'y').
 template<typename Real>
-Real heat_src(Real x, Real y)
-{
-  return 1.0;
-}
+Real heat_src(Real x, Real y) { return 1.0;}
 
 // Weak forms.
 #include "forms.cpp"
@@ -111,8 +106,8 @@ int main(int argc, char* argv[])
   bc_values.add_function(BDY_DIRICHLET, essential_bc_values);   
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(space);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
   // Previous time level solution (initialized by the initial condition).
@@ -120,22 +115,22 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY);
+  wf.add_matrix_form(callback(stac_jacobian));
+  wf.add_vector_form(callback(stac_residual));
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(space, &u_prev_time, coeff_vec, matrix_solver);
+  OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, space, is_linear);
+  DiscreteProblem dp(&wf, &space, is_linear);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
   OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
-  oview.show(space);
+  oview.show(&space);
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
@@ -151,7 +146,7 @@ int main(int argc, char* argv[])
     }
 
     // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, space, &u_prev_time);
+    Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
     // Update time.
     current_time += time_step;
@@ -161,7 +156,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
     sview.show(&u_prev_time);
-    oview.show(space);
+    oview.show(&space);
 
     // Increase counter of time steps.
     ts++;

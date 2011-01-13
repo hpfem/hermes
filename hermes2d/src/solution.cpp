@@ -223,6 +223,15 @@ Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
   this->set_exact(mesh, exactfn);
 }
 
+Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh) 
+{
+  space_type = HERMES_INVALID_SPACE;
+  this->init();
+  this->mesh = mesh;
+  this->own_mesh = false;
+  this->set_const(mesh, init_const);
+}
+
 Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh()) 
 {
   space_type = s->get_type();

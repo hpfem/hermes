@@ -1,12 +1,17 @@
 template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
+Scalar stac_jacobian(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
                      Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  return - LAMBDA / HEATCAP / RHO * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+  Scalar result = 0;
+  for (int i = 0; i < n; i++) {
+    result += -wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  }
+
+  return result * LAMBDA / HEATCAP / RHO;
 }
 
 template<typename Real, typename Scalar>
-Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
+Scalar stac_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
                    Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Scalar>* u_prev = u_ext[0];
@@ -15,18 +20,19 @@ Scalar linear_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
   // can be accessed via u_stage_time->val[0];
   // In this particular case the stage time is not needed as 
   // the form does not depend explicitly on time.
-  Func<Scalar>* u_stage_time = ext->fn[0]; 
-  
-  Scalar current_time = u_stage_time->val[0];
+  //Func<Scalar>* u_stage_time = ext->fn[0]; 
+  //Scalar current_time = u_stage_time->val[0];
 
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
-    result += -wt[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);		       
+    result += -wt[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+    result += wt[i] * heat_src(e->x[i], e->y[i]) * v->val[i];	       
   }
 
   return result * LAMBDA / HEATCAP / RHO;
 }
 
+/*
 template<typename Real, typename Scalar>
 Scalar bilinear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
                           Geom<Real> *e, ExtData<Scalar> *ext)
@@ -46,16 +52,12 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
   
   Scalar stage_time = u_stage_time->val[0];
   Real stage_ext_temp = temp_ext<Real>(stage_time);
-  //if (sizeof(Scalar) == sizeof(double)) {
-  //  printf("stage_time = %g\n", stage_time);
-  //  printf("stage_ext_temp = %g\n", stage_ext_temp);
-  //}
 
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
-    result += -wt[i] * u_prev->val[i] * v->val[i];		       
+    result += wt[i] * (stage_ext_temp - u_prev->val[i]) * v->val[i];		       
   }
 
-  return LAMBDA / HEATCAP / RHO * ALPHA * 
-         (stage_ext_temp * int_v<Real, Scalar>(n, wt, v) + result);
+  return LAMBDA / HEATCAP / RHO * ALPHA * result;
 }
+*/

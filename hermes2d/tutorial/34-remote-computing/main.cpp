@@ -71,11 +71,8 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
-  // Initialize the solution.
-  Solution tsln;
-
-  // Set the initial condition.
-  tsln.set_const(&mesh, T_INIT);
+  // Initialize and set the initial condition.
+  Solution tsln(&mesh, T_INIT);
 
   // Initialize weak formulation.
   WeakForm wf;

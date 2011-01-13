@@ -101,8 +101,7 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)];
-  Solution* init_sln = new Solution();
-  init_sln->set_const(&mesh, INIT_COND_CONST);
+  Solution* init_sln = new Solution(&mesh, INIT_COND_CONST);
   OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver);
   delete init_sln;
 
