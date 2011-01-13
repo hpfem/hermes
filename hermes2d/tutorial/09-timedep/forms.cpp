@@ -32,7 +32,7 @@ Scalar stac_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
   return result * LAMBDA / HEATCAP / RHO;
 }
 
-/*
+
 template<typename Real, typename Scalar>
 Scalar bilinear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
                           Geom<Real> *e, ExtData<Scalar> *ext)
@@ -60,4 +60,3 @@ Scalar linear_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
 
   return LAMBDA / HEATCAP / RHO * ALPHA * result;
 }
-*/

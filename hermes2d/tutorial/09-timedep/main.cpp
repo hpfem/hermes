@@ -23,9 +23,9 @@
 //
 //  The following parameters can be changed:
 
-const int P_INIT = 4;                             // Polynomial degree of all mesh elements.
+const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
+const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
 const double time_step = 3e+2;                    // Time step in seconds.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -55,7 +55,7 @@ const double T_FINAL = 86400;      // Length of time interval (24 hours) in seco
 // Time-dependent exterior temperature.
 template<typename Real>
 Real temp_ext(Real t) {
-  return TEMP_INIT;// + 10. * sin(2*M_PI*t/T_FINAL);
+  return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
 }
 
 // Heat sources (can be a general function of 'x' and 'y').
@@ -78,16 +78,16 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND, BDY_AIR));
-  //bc_types.add_bc_newton(BDY_AIR);
+  bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND));
+  bc_types.add_bc_newton(BDY_AIR);
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_const(BDY_GROUND, TEMP_INIT);
-  bc_values.add_const(BDY_AIR, TEMP_INIT);
 
   // Initialize an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(callback(stac_jacobian));
   wf.add_vector_form(callback(stac_residual));
-  //wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-  //wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
+  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
