@@ -460,9 +460,8 @@ int main(int argc, char* argv[])
       ref_mesh->copy(spaces[g]->get_mesh());
       ref_mesh->refine_all_elements();
       
-      ref_spaces.push_back(spaces[g]->dup(ref_mesh));
       int order_increase = 1;
-      ref_spaces[g]->copy_orders(spaces[g], order_increase);
+      ref_spaces.push_back(spaces[g]->dup(ref_mesh, order_increase));
     }
 
     // For the first time, project coarse mesh solutions on fine meshes to obtain 

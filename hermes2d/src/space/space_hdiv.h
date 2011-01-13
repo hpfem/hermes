@@ -55,7 +55,7 @@ public:
   
   virtual ~HdivSpace();
 
-  virtual Space* dup(Mesh* mesh) const;
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual void set_shapeset(Shapeset* shapeset);
 

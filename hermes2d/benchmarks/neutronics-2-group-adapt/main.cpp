@@ -374,12 +374,9 @@ int main(int argc, char* argv[])
     
     // Setup spaces for the reference solution.
     int order_increase = 1;
-    Space *ref_space1 = space1.dup(&ref_mesh1);
-    Space *ref_space2 = space2.dup(MULTIMESH ? &ref_mesh2 : &ref_mesh1);
+    Space *ref_space1 = space1.dup(&ref_mesh1, order_increase);
+    Space *ref_space2 = space2.dup(MULTIMESH ? &ref_mesh2 : &ref_mesh1, order_increase);
     
-    ref_space1->copy_orders(&space1, order_increase);
-    ref_space2->copy_orders(&space2, order_increase);
-
     int ref_ndof = Space::get_num_dofs(Hermes::vector<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
                             

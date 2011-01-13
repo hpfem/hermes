@@ -196,12 +196,13 @@ HcurlSpace::~HcurlSpace()
 }
 
 
-Space* HcurlSpace::dup(Mesh* mesh) const
+Space* HcurlSpace::dup(Mesh* mesh, int order_increase) const
 {
- // FIXME:
+  // FIXME:
   HcurlSpace* space = new HcurlSpace(mesh, this->bc_types,
           this->bc_value_callback_by_coord, Ord2(0,0), this->shapeset);
   space->copy_callbacks(this);
+  space->copy_orders(this, order_increase);
   return space;
 }
 

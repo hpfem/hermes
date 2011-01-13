@@ -182,11 +182,12 @@ void H1Space::set_shapeset(Shapeset *shapeset)
     error("Wrong shapeset type in H1Space::set_shapeset()");
 }
 
-Space* H1Space::dup(Mesh* mesh) const
+Space* H1Space::dup(Mesh* mesh, int order_increase) const
 {
   _F_
   H1Space* space = new H1Space(mesh, bc_types, bc_value_callback_by_coord, Ord2(1,1), shapeset);
   space->copy_callbacks(this);
+  space->copy_orders(this, order_increase);
   return space;
 }
 

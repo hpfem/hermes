@@ -1803,8 +1803,7 @@ Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coars
     Mesh* ref_mesh = new Mesh;
     ref_mesh->copy(coarse[i]->get_mesh());
     ref_mesh->refine_all_elements();
-    ref_spaces->push_back(coarse[i]->dup(ref_mesh));
-    (*ref_spaces)[i]->copy_orders(coarse[i], order_increase);
+    ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
   }
 
   return ref_spaces;
@@ -1817,8 +1816,7 @@ Space* construct_refined_space(Space* coarse, int order_increase)
   Mesh* ref_mesh = new Mesh;
   ref_mesh->copy(coarse->get_mesh());
   ref_mesh->refine_all_elements();
-  Space* ref_space = coarse->dup(ref_mesh);
-  ref_space->copy_orders(coarse, order_increase);
+  Space* ref_space = coarse->dup(ref_mesh, order_increase);
 
   return ref_space;
 }

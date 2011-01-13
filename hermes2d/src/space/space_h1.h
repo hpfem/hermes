@@ -66,7 +66,7 @@ public:
   /// boundary) is not suitable.
   void fix_vertex(int id, scalar value = 0.0);
 
-  virtual Space* dup(Mesh* mesh) const;
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual ESpaceType get_type() const { return HERMES_H1_SPACE; }
 

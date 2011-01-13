@@ -49,8 +49,8 @@ BaseView::BaseView(char* title, WinGeom* wg)
 void BaseView::show(const Space* space, double eps, int item)
 {
   free();
-  this->space = space->dup(space->get_mesh());
-  this->space->copy_orders(space);
+  int order_increase = 0;
+  this->space = space->dup(space->get_mesh(), order_increase);
   pss = new PrecalcShapeset(this->space->get_shapeset());
   sln = new Solution();
   ndof = Space::get_num_dofs(this->space);

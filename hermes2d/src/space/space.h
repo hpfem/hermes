@@ -170,8 +170,9 @@ public:
   Mesh* get_mesh() const { return mesh; }
   void set_mesh(Mesh* mesh);
 
-  /// Creates a copy of the space. For internal use (see RefDiscreteProblem).
-  virtual Space* dup(Mesh* mesh) const = 0;
+  /// Creates a copy of the space, increases order of all elements by
+  /// "order_increase".
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const = 0;
 
   /// Returns true if the space is ready for computation, false otherwise.
   bool is_up_to_date() const {
@@ -183,7 +184,7 @@ public:
 
 public:
 
-  /// Number of degrees of freedom (dimension of the space)
+  /// Number of degrees of freedom (dimension of the space).
   int ndof;
 
   /// Obtains an assembly list for the given element.
@@ -236,7 +237,8 @@ protected:
         scalar* edge_bc_proj;
         scalar* vertex_bc_coef;
       };
-      int n; ///< Number of dofs. Temporarily used during assignment of DOFs to indicate nodes which were not processed yet.
+      int n; ///< Number of dofs. Temporarily used during assignment 
+             ///< of DOFs to indicate nodes which were not processed yet.
     };
     struct // constrained vertex node
     {

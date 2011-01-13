@@ -207,8 +207,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   Hermes::vector<Space*> stage_spaces;
   stage_spaces.push_back(dp->get_space(0));
   for (int i = 1; i < num_stages; i++) {
-    stage_spaces.push_back(dp->get_space(0)->dup(mesh));
-    stage_spaces[i]->copy_orders(dp->get_space(0));
+    int order_increase = 0;
+    stage_spaces.push_back(dp->get_space(0)->dup(mesh), order_increase);
   }
 
   // Create a multistage weak formulation.

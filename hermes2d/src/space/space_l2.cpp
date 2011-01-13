@@ -131,10 +131,11 @@ L2Space::~L2Space()
 }
 
 
-Space* L2Space::dup(Mesh* mesh) const
+Space* L2Space::dup(Mesh* mesh, int order_increase) const
 {
   L2Space* space = new L2Space(mesh, 0, shapeset);
   space->copy_callbacks(this);
+  space->copy_orders(this, order_increase);
   return space;
 }
 

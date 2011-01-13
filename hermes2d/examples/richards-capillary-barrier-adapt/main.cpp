@@ -205,14 +205,16 @@ int main(int argc, char* argv[])
   
   // Either use exact constitutive relations (slow) (method 0) or precalculate 
   // their linear approximations (faster) (method 1) or
-  // precalculate their quintic polynomial approximations (method 2) -- managed by following loop "Initializing polynomial approximation".
+  // precalculate their quintic polynomial approximations (method 2) -- managed by 
+  // the following loop "Initializing polynomial approximation".
   if (CONSTITUTIVE_TABLE_METHOD == 1)
     CONSTITUTIVE_TABLES_READY = get_constitutive_tables(ITERATIVE_METHOD);
   // Points to be used for polynomial approximation of K(h).
   double* points = new double[NUM_OF_INSIDE_PTS];
 
-  // The van Genuchten + Mualem K(h) function is approximated by polynomials close to zero in case of CONSTITUTIVE_TABLE_METHOD=1.
-  // In case of CONSTITUTIVE_TABLE_METHOD=2, all constitutive functions are approximated by polynomials.
+  // The van Genuchten + Mualem K(h) function is approximated by polynomials close 
+  // to zero in case of CONSTITUTIVE_TABLE_METHOD==1.
+  // In case of CONSTITUTIVE_TABLE_METHOD==2, all constitutive functions are approximated by polynomials.
   info("Initializing polynomial approximations.");
   for (int i=0; i < MATERIAL_COUNT; i++) {
     info("Processing layer %d", i);
@@ -347,12 +349,6 @@ int main(int argc, char* argv[])
       // and setup reference space.
       Space* ref_space = construct_refined_space(&space);
       ndof = Space::get_num_dofs(ref_space);
-
-      // debug 
-      //BaseView bview("FE basis", new WinGeom(0, 360, 600, 350));
-      //H1Space *temp = (H1Space*)space.dup(&mesh);
-      //temp->copy_orders((Space*)&space, 0);
-      //bview.show(temp);
 
       // Next we need to calculate the reference solution.
       // Newton's method:

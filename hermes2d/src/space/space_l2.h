@@ -55,7 +55,7 @@ public:
 
   virtual ~L2Space();
 
-  virtual Space* dup(Mesh* mesh) const;
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual int get_edge_order(Element* e, int edge) { 
     // There are no continuity constraints on shape functions in L2.

@@ -55,7 +55,7 @@ public:
 
   virtual ~HcurlSpace();
 
-  virtual Space* dup(Mesh* mesh) const;
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual ESpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
