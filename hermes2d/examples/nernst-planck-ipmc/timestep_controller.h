@@ -3,8 +3,6 @@
 #define PID_DEFAULT_TOLERANCE 0.25
 #define DEFAULT_STEP 0.1
 
-//HERMES_API_USED_TEMPLATE(Hermes::Tuple<Solution*>);
-
 class HERMES_API PidTimestepController {
 
 public:
@@ -24,7 +22,7 @@ public:
   double get_time() {return time;};
 
   // true if next time step can be run, false if the time step must be re-run with smaller time step.
-  bool end_step(Hermes::Tuple<Solution*> solutions, Hermes::Tuple<Solution *> prev_solutions);
+  bool end_step(Hermes::vector<Solution*> solutions, Hermes::vector<Solution *> prev_solutions);
   void begin_step();
   bool has_next();
 
@@ -63,8 +61,8 @@ void PidTimestepController::begin_step() {
   info("begin_step processed, new step number: %i and cumulative time: %g", step_number, time);
 }
 
-bool PidTimestepController::end_step(Hermes::Tuple<Solution *> solutions,
-    Hermes::Tuple<Solution *> prev_solutions) {
+bool PidTimestepController::end_step(Hermes::vector<Solution *> solutions,
+    Hermes::vector<Solution *> prev_solutions) {
 
   if (pid) {
 
@@ -72,7 +70,7 @@ bool PidTimestepController::end_step(Hermes::Tuple<Solution *> solutions,
     if (neq == 0) {
       return true;
     }
-    if (prev_solutions == NULL) {
+    if (prev_solutions.empty()) {
       return true;
     }
     if (neq != prev_solutions.size()) {
