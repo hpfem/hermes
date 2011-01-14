@@ -69,7 +69,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 	double *z = new double [n_nodes]; MEM_CHECK(z);
 	err = ex_get_coord(exoid, x, y, z);
 	for (int i = 0; i < n_nodes; i++)
-		mesh->vertices.set(i + 1, new Vertex(x[i], y[i], z[i]));
+		mesh->vertices.insert(std::pair<unsigned int, Vertex*> (i + 1, new Vertex(x[i], y[i], z[i])));
 	delete [] x;
 	delete [] y;
 	delete [] z;
