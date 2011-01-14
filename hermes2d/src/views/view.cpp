@@ -548,7 +548,7 @@ void View::wait_for_close()
 
 // These two includes are needed for the wait_for_draw() function below:
 //#include <csignal>
-#include "Teuchos_stacktrace.hpp"
+#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 
 void View::wait_for_draw()
 {

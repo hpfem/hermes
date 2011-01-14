@@ -185,7 +185,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 {
   // Matrix for the time derivative part of the equation (left-hand side).
   SparseMatrix* matrix_left = create_matrix(matrix_solver);
-  //Vector* vector_left = create_vector(matrix_solver);
+  Vector* vector_left = create_vector(matrix_solver);
 
   // Matrix and vector for the rest (right-hand side).
   SparseMatrix* matrix_right = create_matrix(matrix_solver);
@@ -225,9 +225,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   scalar* stage_coeff_vec = new scalar[num_stages*ndof];
   memset(stage_coeff_vec, 0, num_stages * ndof * sizeof(scalar));
 
-  // debug
-  scalar* vector_left = new scalar[num_stages*ndof];
-
   // Vector u_prev_vec will represent y_n + h \sum_{j=1}^s a_{ij}k_i
   // in the usual R-K notation.
   scalar* u_prev_vec = new scalar[num_stages*ndof];
@@ -261,10 +258,10 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Assemble the block-diagonal mass matrix M corresponding to the 
     // time derivative term, and the corresponding part of the residual.
-    //stage_dp_left.assemble(stage_coeff_vec, matrix_left, vector_left);
+    stage_dp_left.assemble(stage_coeff_vec, matrix_left, vector_left);
     // debug
-    stage_dp_left.assemble(stage_coeff_vec, matrix_left);
-    matrix_left->multiply(stage_coeff_vec, vector_left);
+    //stage_dp_left.assemble(stage_coeff_vec, matrix_left);
+    //matrix_left->multiply(stage_coeff_vec, vector_left);
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left 
@@ -378,7 +375,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Clean up.
   delete matrix_left;
-  //delete vector_left;
+  delete vector_left;
   delete matrix_right;
   delete vector_right;
   delete solver;
@@ -397,7 +394,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   delete [] u_prev_vec;
  
   // debug
-  delete [] vector_left;
+  //delete [] vector_left;
 
   return true;
 }

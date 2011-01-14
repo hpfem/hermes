@@ -35,7 +35,7 @@
 #include "../hermes_common/solver/precond_ml.h"
 
 // RCP
-#include "../hermes_common/Teuchos_RCP.hpp"
+#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
 
 // boundary conditions
 #include "../hermes_common/bctypes.h"

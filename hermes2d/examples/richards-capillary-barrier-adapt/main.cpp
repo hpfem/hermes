@@ -314,7 +314,7 @@ int main(int argc, char* argv[])
   ScalarView view("Initial condition", new WinGeom(0, 0, 630, 350));
   view.fix_scale_width(50);
   OrderView ordview("Initial mesh", new WinGeom(640, 0, 600, 350));
-  view.show(&sln_prev_time, HERMES_EPS_HIGH);
+  view.show(&sln_prev_time, HERMES_EPS_VERYHIGH);
   ordview.show(&space);
   //MeshView mview("Mesh", new WinGeom(840, 0, 600, 350));
   //mview.show(&mesh);
@@ -488,7 +488,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, time %g days", TIME);
     view.set_title(title);
-    view.show(&sln, HERMES_EPS_HIGH);
+    view.show(&sln, HERMES_EPS_VERYHIGH);
     sprintf(title, "Mesh, time %g days", TIME);
     ordview.set_title(title);
     ordview.show(&space);

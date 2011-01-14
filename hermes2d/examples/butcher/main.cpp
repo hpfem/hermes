@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
-    sview.show(&u_prev_time);
+    sview.show(&u_prev_time, HERMES_EPS_VERYHIGH);
     oview.show(&space);
 
     // Increase counter of time steps.

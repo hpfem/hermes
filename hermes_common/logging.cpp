@@ -1,5 +1,5 @@
 #include "logging.h"
-#include "Teuchos_stacktrace.hpp"
+#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 #ifdef WIN32 //Windows platform
 	#include <Windows.h>
 #endif
