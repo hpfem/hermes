@@ -15,7 +15,7 @@
 
 #include "../h2d_common.h"
 #include "space_h1.h"
-#include "../quad_all.h"
+#include "../quadrature/quad_all.h"
 #include "../shapeset/shapeset_h1_all.h"
 #include "../../../hermes_common/matrix.h"
 

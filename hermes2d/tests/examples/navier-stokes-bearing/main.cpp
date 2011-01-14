@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "forms.h"
+#include "weakform/forms.h"
 
 // This test makes sure that example "ns-bearing" works correctly.
 

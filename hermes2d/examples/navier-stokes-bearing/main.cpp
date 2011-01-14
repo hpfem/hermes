@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "forms.h"
+#include "weakform/forms.h"
 
 // Flow in between two circles, inner circle is rotating with surface 
 // velocity VEL. The time-dependent laminar incompressible Navier-Stokes equations

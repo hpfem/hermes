@@ -7,29 +7,42 @@ endif(MSVC)
 
 # source files for the hermes2d library
 set(SRC
-       hash.cpp 
-       mesh.cpp 
-       regul.cpp 
-       refmap.cpp 
-       curved.cpp
-       transform.cpp 
-       traverse.cpp
-       limit_order.cpp
-       precalc.cpp 
-       solution.cpp 
-       filter.cpp
-       neighbor.cpp
-       numerical_flux.cpp
-       space/space.cpp 
-       space/space_h1.cpp 
-       space/space_hcurl.cpp 
-       space/space_l2.cpp
-       space/space_hdiv.cpp
-       linear1.cpp 
-       linear2.cpp 
-       linear3.cpp 
-       graph.cpp
-       quad_std.cpp
+       adapt/adapt.cpp
+
+       function/solution.cpp 
+       function/filter.cpp
+       function/norm.cpp
+
+       linearizer/linear1.cpp 
+       linearizer/linear2.cpp 
+       linearizer/linear3.cpp 
+
+       mesh/refmap.cpp 
+       mesh/curved.cpp
+       mesh/refinement_type.cpp 
+       mesh/element_to_refine.cpp
+       mesh/exodusii.cpp 
+       mesh/hash.cpp 
+       mesh/h2d_reader.cpp
+       mesh/mesh.cpp 
+       mesh/mesh_parser.cpp 
+       mesh/mesh_lexer.cpp
+       mesh/regul.cpp 
+       mesh/transform.cpp 
+       mesh/traverse.cpp
+       mesh/trans.cpp
+
+       quadrature/limit_order.cpp
+       quadrature/quad_std.cpp
+
+       ref_selectors/selector.cpp 
+       ref_selectors/order_permutator.cpp 
+       ref_selectors/optimum_selector.cpp 
+       ref_selectors/proj_based_selector.cpp 
+       ref_selectors/l2_proj_based_selector.cpp 
+       ref_selectors/h1_proj_based_selector.cpp 
+       ref_selectors/hcurl_proj_based_selector.cpp
+
        shapeset/shapeset.cpp 
        shapeset/shapeset_h1_ortho.cpp 
        shapeset/shapeset_h1_jacobi.cpp 
@@ -38,27 +51,14 @@ set(SRC
        shapeset/shapeset_hc_gradleg.cpp
        shapeset/shapeset_hd_legendre.cpp
        shapeset/shapeset_l2_legendre.cpp
-       qsort.cpp norm.cpp
-       trans.cpp
-       ogprojection.cpp
-       adapt/adapt.cpp
-       refinement_type.cpp 
-       element_to_refine.cpp
-       ref_selectors/selector.cpp 
-       ref_selectors/order_permutator.cpp 
-       ref_selectors/optimum_selector.cpp 
-       ref_selectors/proj_based_selector.cpp 
-       ref_selectors/l2_proj_based_selector.cpp 
-       ref_selectors/h1_proj_based_selector.cpp 
-       ref_selectors/hcurl_proj_based_selector.cpp
-       h2d_common.cpp  
-       weakform.cpp 
-       discrete_problem.cpp
-       forms.cpp
-       mesh_parser.cpp mesh_lexer.cpp
-       exodusii.cpp 
-       h2d_reader.cpp
-       runge_kutta.cpp
+       shapeset/precalc.cpp 
+
+       space/space.cpp 
+       space/space_h1.cpp 
+       space/space_hcurl.cpp 
+       space/space_l2.cpp
+       space/space_hdiv.cpp
+
        views/base_view.cpp 
        views/mesh_view.cpp 
        views/order_view.cpp 
@@ -69,6 +69,19 @@ set(SRC
        views/view.cpp 
        views/view_data.cpp 
        views/view_support.cpp
+
+       weakform/weakform.cpp 
+       weakform/forms.cpp
+
+       neighbor.cpp
+       numerical_flux.cpp
+       graph.cpp
+       qsort.cpp 
+       ogprojection.cpp
+       h2d_common.cpp  
+       discrete_problem.cpp
+       runge_kutta.cpp
+
        ${HERMES_COMMON_DIR}/common.cpp       
        ${HERMES_COMMON_DIR}/logging.cpp    
        ${HERMES_COMMON_DIR}/hermes_logging.cpp

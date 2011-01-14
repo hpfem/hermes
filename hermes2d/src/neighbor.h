@@ -2,11 +2,11 @@
 #define NEIGHBOR_H_
 
 #include "../hermes_common/common.h"
-#include "mesh.h"
-#include "quad.h"
-#include "solution.h"
-#include "forms.h"
-#include "refmap.h"
+#include "mesh/mesh.h"
+#include "quadrature/quad.h"
+#include "function/solution.h"
+#include "weakform/forms.h"
+#include "mesh/refmap.h"
 
 /*** Global sanity checks for the NeighborSearch class ***/
 

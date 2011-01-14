@@ -18,12 +18,12 @@
 
 #include "../../../hermes_common/bctypes.h"
 #include "../../../hermes_common/bcvalues.h"
-#include "../mesh.h"
-#include "../traverse.h"
+#include "../mesh/mesh.h"
+#include "../mesh/traverse.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
-#include "../precalc.h"
-#include "../quad_all.h"
+#include "../shapeset/precalc.h"
+#include "../quadrature/quad_all.h"
 
 /// \brief Represents a finite element space over a domain.
 ///

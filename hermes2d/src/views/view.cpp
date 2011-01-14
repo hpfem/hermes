@@ -25,7 +25,7 @@
 #include "../h2d_common.h"
 #include "view_support.h"
 #include "view.h"
-#include "../solution.h"
+#include "../function/solution.h"
 
 ///////////////// private constants /////////////////
 #define HERMES_WAIT_CLOSE_MSG "close all views to continue"

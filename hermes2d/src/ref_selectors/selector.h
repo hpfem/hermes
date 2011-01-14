@@ -17,13 +17,13 @@
 #define __H2D_REFINEMENT_SELECTOR_H
 
 #ifndef _MSC_VER
-#include "../refinement_type.h"
+#include "../mesh/refinement_type.h"
 
 class ElementToRefine;
 struct Element;
 class Solution;
 #else
-#include "../element_to_refine.h"
+#include "../mesh/element_to_refine.h"
 #endif
 
 

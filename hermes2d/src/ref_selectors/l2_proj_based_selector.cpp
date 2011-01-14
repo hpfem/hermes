@@ -1,8 +1,8 @@
 #include "../h2d_common.h"
 #include "../../../hermes_common/matrix.h"
-#include "../solution.h"
+#include "../function/solution.h"
 #include "../shapeset/shapeset_l2_all.h"
-#include "../element_to_refine.h"
+#include "../mesh/element_to_refine.h"
 #include "l2_proj_based_selector.h"
 
 namespace RefinementSelectors {

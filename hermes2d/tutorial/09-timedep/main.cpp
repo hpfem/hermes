@@ -46,10 +46,10 @@ const std::string BDY_AIR = "Boundary air";
 
 // Problem parameters.
 const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
-const double ALPHA = 1;//10;           // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1;//1e5;         // Thermal conductivity of the material.
-const double HEATCAP = 1;//1e6;        // Heat capacity.
-const double RHO = 1;//3000;           // Material density.
+const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e5;         // Thermal conductivity of the material.
+const double HEATCAP = 1e6;        // Heat capacity.
+const double RHO = 3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 
 // Time-dependent exterior temperature.
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
-  mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
+  //mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(callback(stac_jacobian));
   wf.add_vector_form(callback(stac_residual));
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_AIR);
+  wf.add_vector_form_surf(callback(linear_form_surf), BDY_AIR);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");

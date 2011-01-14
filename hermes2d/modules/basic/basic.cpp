@@ -227,8 +227,7 @@ Mesh* ModuleBasic::get_mesh()
 // Get space.
 void ModuleBasic::get_space(H1Space* s) 
 {
-  int order_increase = 0
-  s->dup(this->space->get_mesh(), order_increase);
+  s->dup(this->space->get_mesh());
 }
 
 // Set matrix solver.

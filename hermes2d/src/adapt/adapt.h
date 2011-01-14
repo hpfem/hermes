@@ -16,15 +16,15 @@
 #ifndef __H2D_ADAPT_H
 #define __H2D_ADAPT_H
 
-#include "../norm.h"
-#include "../forms.h"
+#include "../function/norm.h"
+#include "../weakform/forms.h"
 #include "../space/space.h"
 #include "../../../hermes_common/vector.h"
-#include "../weakform.h"
-#include "../integrals_h1.h"
-#include "../integrals_hcurl.h"
-#include "../integrals_hdiv.h"
-#include "../integrals_l2.h"
+#include "../weakform/weakform.h"
+#include "../integrals/integrals_h1.h"
+#include "../integrals/integrals_hcurl.h"
+#include "../integrals/integrals_hdiv.h"
+#include "../integrals/integrals_l2.h"
 #include "../ref_selectors/selector.h"
 
 /** \defgroup g_adapt Adaptivity

@@ -16,7 +16,7 @@
 #include "../h2d_common.h"
 #include "space_l2.h"
 #include "../../../hermes_common/matrix.h"
-#include "../quad_all.h"
+#include "../quadrature/quad_all.h"
 #include "../shapeset/shapeset_l2_all.h"
 
 void L2Space::init(Shapeset* shapeset, Ord2 p_init)

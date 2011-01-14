@@ -1,9 +1,9 @@
 #define HERMES_REPORT_WARN 
 #include "../h2d_common.h"
-#include "../solution.h"
+#include "../function/solution.h"
 #include "../discrete_problem.h"
-#include "../quad_all.h"
-#include "../element_to_refine.h"
+#include "../quadrature/quad_all.h"
+#include "../mesh/element_to_refine.h"
 #include "order_permutator.h"
 #include "proj_based_selector.h"
 
