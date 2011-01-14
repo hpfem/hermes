@@ -74,7 +74,7 @@ bool PidTimestepController::end_step(Hermes::vector<Solution *> solutions,
     if (neq == 0) {
       return true;
     }
-    if (prev_solutions == NULL) {
+    if (prev_solutions.empty()) {
       return true;
     }
     if (neq != prev_solutions.size()) {
