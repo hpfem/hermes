@@ -25,6 +25,9 @@
 #include "../mesh.h"
 #include "../refdomain.h"
 
+#include <fstream>
+#include <vector>
+
 // maximal row length in bytes (used for reading the mesh3d-file)
 #define MAX_ROW_LEN	                        1024
 
@@ -34,6 +37,36 @@
 
 // number of markers on mesd3d file
 #define MARKERS                             1
+
+
+using namespace std;
+
+struct Vertex
+{
+    double x,y,z;
+};
+
+struct Hex
+{
+    int v[8];
+};
+
+struct Quad
+{
+    int v[4];
+};
+
+struct Info
+{
+    vector<Vertex> v;
+    vector<Hex> h; 
+    vector<Quad> q;
+};
+
+void parse_ctuFormat(const char *file_name, Info *i)
+{
+    
+}
 
 CTUReader::CTUReader() {
     _F_
