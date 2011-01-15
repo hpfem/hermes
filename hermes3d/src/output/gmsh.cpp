@@ -121,7 +121,6 @@ OutputQuadTetra::~OutputQuadTetra() {
 #ifdef WITH_TETRA
 	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
     delete [] it->second;
-  delete tables;
 
   for(std::map<unsigned int, int*>::iterator it = subdiv_modes.begin(); it != subdiv_modes.end(); it++)
     delete [] it->second;

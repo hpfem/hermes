@@ -43,7 +43,7 @@ public:
 	~QuadChebHex();
 
 	virtual QuadPt3D *get_points(const Ord3 &order) {
-		if ((*tables)[order.get_idx()] == NULL) 
+    if (tables->find(order.get_idx()) == tables->end()) 
       calc_table(order);
 		return (*tables)[order.get_idx()];
 	}
