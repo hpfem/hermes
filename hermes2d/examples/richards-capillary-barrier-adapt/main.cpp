@@ -56,6 +56,10 @@ const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refi
 
 // Adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees
+                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
+                                                  // TODO: Add a third option where one layer will be taken off 
+                                                  // and just one polynomial degree subtracted.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
@@ -79,7 +83,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 2.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -90,7 +94,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Newton's and Picard's methods.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for Newton on fine mesh.
 int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of Newton iterations.
-const double PICARD_TOL = 5e-2;                   // Stopping criterion for Picard on fine mesh.
+const double PICARD_TOL = 1e-2;                   // Stopping criterion for Picard on fine mesh.
 int PICARD_MAX_ITER = 23;                         // Maximum allowed number of Picard iterations.
 
 
@@ -329,12 +333,14 @@ int main(int argc, char* argv[])
     // Time measurement.
     cpu_time.tick();
 
-    // Periodic global derefinements.
-    if (ts > 1 && ts % UNREF_FREQ == 0) {
+    // Periodic global derefinement.
+    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    {
       info("Global mesh derefinement.");
-      //mesh.copy(&basemesh);            // Brings the mesh back to the basemesh.
-      mesh.unrefine_all_elements();      // Shaves off one layer of refinement for all elements.
-      space.set_uniform_order(P_INIT);   // Resets poly degree to the initial one.
+      if (UNREF_LEVEL == 1) mesh.unrefine_all_elements();
+      else mesh.copy(&basemesh);
+      space.set_uniform_order(P_INIT);
+      ndof = Space::get_num_dofs(&space);
     }
 
     // Spatial adaptivity loop. Note: sln_prev_time must not be touched during adaptivity.

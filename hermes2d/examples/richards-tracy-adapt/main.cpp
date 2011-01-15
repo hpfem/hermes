@@ -43,6 +43,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Adaptivity
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees
+                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
+                                                  // TODO: Add a third option where one layer will be taken off 
+                                                  // and just one polynomial degree subtracted.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
@@ -244,10 +248,12 @@ int main(int argc, char* argv[])
     // Updating current time.
     TIME = ts*TAU;
 
-    // Periodic global derefinements.
-    if (ts > 1 && ts % UNREF_FREQ == 0) {
+    // Periodic global derefinement.
+    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    {
       info("Global mesh derefinement.");
-      mesh.copy(&basemesh);
+      if (UNREF_LEVEL == 1) mesh.unrefine_all_elements();
+      else mesh.copy(&basemesh);
       space.set_uniform_order(P_INIT);
     }
 

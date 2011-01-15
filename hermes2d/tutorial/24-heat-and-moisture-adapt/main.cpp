@@ -20,6 +20,10 @@ const bool MULTI = true;                          // MULTI = true  ... use multi
                                                   // forced to be geometrically the same but the
                                                   // polynomial degrees can still vary.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
+const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees 
+                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
+                                                  // TODO: Add a third option where one layer will be taken off 
+                                                  // and just one polynomial degree subtracted.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
@@ -178,8 +182,14 @@ int main(int argc, char* argv[])
     // Uniform mesh derefinement.
     if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
-      T_mesh.copy(&basemesh);
-      M_mesh.copy(&basemesh);
+      if (UNREF_LEVEL == 1) {
+        T_mesh.unrefine_all_elements();
+        M_mesh.unrefine_all_elements();
+      }
+      else {
+        T_mesh.copy(&basemesh);
+        M_mesh.copy(&basemesh);
+      }
       T_space.set_uniform_order(P_INIT);
       M_space.set_uniform_order(P_INIT);
     }
