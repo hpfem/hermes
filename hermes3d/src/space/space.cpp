@@ -134,6 +134,7 @@ Space::~Space() {
 
   for(std::map<Facet::Key, FaceInfo*>::iterator it = fi_data.begin(); it != fi_data.end(); it++)
 		delete it->second;
+  fi_data.clear();
 }
 
 void Space::init_data_tables() {
@@ -170,6 +171,7 @@ void Space::free_data_tables() {
 
   for(std::map<unsigned int, ElementData*>::iterator it = elm_data.begin(); it != elm_data.end(); it++)
 		delete it->second;
+  elm_data.clear();
 
 }
 
@@ -181,7 +183,7 @@ void Space::set_element_order(unsigned int eid, Ord3 order) {
 	CHECK_ELEMENT_ID(eid);
 
 	// TODO: check for validity of order
-	if (elm_data[eid] == NULL) {
+  if (elm_data.find(eid) == elm_data.end()) {
 		elm_data[eid] = new ElementData;
 		MEM_CHECK(elm_data[eid]);
 	}
@@ -1840,7 +1842,7 @@ void Space::uc_face(unsigned int eid, int iface) {
 
 	Facet::Key fid = mesh->get_facet_id(elem, iface);
 	assert(fid != Facet::invalid_key);
-	if (fi_data[fid] == NULL) 
+  if (fi_data.find(fid) == fi_data.end()) 
     return;
 
 	FaceInfo *fi = fi_data[fid];
@@ -2175,6 +2177,22 @@ void Space::uc_face(unsigned int eid, int iface) {
 			calc_edge_face_ced(mid_edge_id, edge_id, cng_face_id, cng_face_ori, iface, part_ori, sub_fi[1]->h_part, fi->v_part);
 
 			// face by face
+      if(fn_data.find(sub_fid[0]) == fn_data.end()) {
+        fn_data[sub_fid[0]] = new FaceData;
+        fn_data[sub_fid[0]]->order = fn_data[fid]->order;
+      }
+      if(fn_data.find(sub_fid[1]) == fn_data.end()) {
+        fn_data[sub_fid[1]] = new FaceData;
+        fn_data[sub_fid[1]]->order = fn_data[fid]->order;
+      }
+      if(fn_data.find(sub_fid[2]) == fn_data.end()) {
+        fn_data[sub_fid[2]] = new FaceData;
+        fn_data[sub_fid[2]]->order = fn_data[fid]->order;
+      }
+      if(fn_data.find(sub_fid[3]) == fn_data.end()) {
+        fn_data[sub_fid[3]] = new FaceData;
+        fn_data[sub_fid[3]]->order = fn_data[fid]->order;
+      }
 			calc_face_face_ced(sub_fid[0], cng_face_id, cng_face_ori, sub_fi[0]->h_part, sub_fi[0]->v_part);
 			calc_face_face_ced(sub_fid[1], cng_face_id, cng_face_ori, sub_fi[1]->h_part, sub_fi[1]->v_part);
 			calc_face_face_ced(sub_fid[2], cng_face_id, cng_face_ori, sub_fi[2]->h_part, sub_fi[2]->v_part);
@@ -2209,7 +2227,7 @@ void Space::uc_element(unsigned int idx) {
 			calc_face_boundary_projection(e, iface);
 
 		if (face_ced[fid]) {
-			if (fi_data[fid] == NULL) {
+      if (fi_data.find(fid) == fi_data.end()) {
 				switch (facet->mode) {
 					case HERMES_MODE_QUAD:
 						fi_data[fid] = new FaceInfo(HERMES_MODE_QUAD, idx, iface);

@@ -408,11 +408,13 @@ public:
 	}
 
 	~mono_lu_init() {
-		for (int m = 0; m <= 2; m++)
+		for (int m = 0; m <= 2; m++) {
 			for(std::map<unsigned int, double**>::iterator it = mat[m].begin(); it != mat[m].end(); it++)
         delete [] it->second;
+			for(std::map<unsigned int, int*>::iterator it = perm[m].begin(); it != perm[m].end(); it++)
+        delete [] it->second;
+    }
 	}
-
 } mono_lu;
 
 void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {

@@ -21,10 +21,10 @@
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
-const int P_INIT_X = 2,
-          P_INIT_Y = 2,
-          P_INIT_Z = 2;             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;         // Number of initial uniform mesh refinements.
+const int P_INIT_X = 1,
+          P_INIT_Y = 1,
+          P_INIT_Z = 1;             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;       // Error threshold for element refinement of the adapt(...) function 
                                     // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
                                     // times total error is processed. If more elements have similar errors, 
