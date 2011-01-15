@@ -1108,12 +1108,12 @@ Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coars
 }
 
 // Light version for a single space.
-Space* construct_refined_space(Space* coarse, int order_increase, int refinement)
+Space* construct_refined_space(Space* coarse, int order_increase)
 {
   _F_
   Mesh* ref_mesh = new Mesh;
   ref_mesh->copy(*coarse->get_mesh());
-  ref_mesh->refine_all_elements(refinement);
+  ref_mesh->refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
   Space* ref_space = coarse->dup(ref_mesh);
   ref_space->copy_orders(*coarse, order_increase);
   return ref_space;
