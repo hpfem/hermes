@@ -385,7 +385,7 @@ void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly,
 // light version above.
 // The Table is here for optional weighting of matrix blocks in systems.
 void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly, 
-                               bool force_diagonal_blocks, Table* block_weights)
+                               bool force_diagonal_blocks, Table* block_weights, bool add_dir_lift_to_external_solutions)
 {
   /* BEGIN IDENTICAL CODE WITH H3D */
 
@@ -411,7 +411,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     for (int i = 0; i < neq; i++) 
     {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
+      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i], add_dir_lift_to_external_solutions);
     }
   }
   else for (int i = 0; i < neq; i++) u_ext.push_back(NULL);
