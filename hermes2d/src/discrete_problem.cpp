@@ -1821,14 +1821,9 @@ Space* construct_refined_space(Space* coarse, int order_increase)
   return ref_space;
 }
 
-// Perform Newton's iteration.
-bool HERMES_RESIDUAL_AS_VECTOR = false;   // This is a temporary location of this variable.
-                                          // If true, we measure the l2 norm of the residual vector.
-                                          // Otherwise we translate the residual vector into a residual
-                                          // function (or more functions) and measure their norm
-                                          // in the corresponding FE space.
 bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
                   Vector* rhs, double newton_tol, int newton_max_iter, bool verbose, 
+                  bool residual_as_function,
                   double damping_coeff, double max_allowed_residual_norm)
 {
   // Prepare solutions for measuring residual norm.
@@ -1856,17 +1851,19 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
     rhs->change_sign();
     
     // Measure the residual norm.
-    if (HERMES_RESIDUAL_AS_VECTOR) {
-      // Calculate the l2-norm of residual vector.
-      residual_norm = get_l2_norm(rhs);
-    }
-    else {
+    if (residual_as_function) {
       // Translate the residual vector into a residual function (or multiple functions) 
       // in the corresponding finite element space(s) and measure their norm(s) there.
-      // This is more meaningful since not all components in the coefficient vector 
-      // have the same weight when translated into the finite element space.
+      // This is more meaningful than just measuring the l2-norm of the residual vector, 
+      // since in the FE space not all components in the residual vector have the same weight.
+      // On the other hand, this is slower as it requires global norm calculation, and thus 
+      // numerical integration over the entire domain. Therefore this option is off by default.
       Solution::vector_to_solutions(rhs, dp->get_spaces(), solutions, dir_lift_false);
       residual_norm = calc_norms(solutions);
+    }
+    else {
+      // Calculate the l2-norm of residual vector, this is the traditional way.
+      residual_norm = get_l2_norm(rhs);
     }
 
     // Info for the user.

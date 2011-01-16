@@ -5,10 +5,11 @@
 
 using namespace RefinementSelectors;
 
-//  This example uses general Butcher's tables to perform 
-//  arbitrary explicit or implicit low-order or higher-order
-//  time integration. The model problem is a simple nonlinear 
-//  parabolic PDE.
+//  This example is derived from the tutorial example 19.
+//  It uses general Butcher's tables to perform arbitrary 
+//  explicit or implicit low-order or higher-order Runge-Kutta
+//  time integration. Example 19 can just do implicit Euler.
+//  The model problem is a simple nonlinear parabolic PDE.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
@@ -24,28 +25,30 @@ const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform 
 const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
 const double time_step = 0.2;                      // Time step.
-const double T_FINAL = 5.0;                        // Time interval length.
+const double T_FINAL = 5.0;                          // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+const double ALPHA = 4.0;                          // For the nonlinear thermal conductivity.
 
 // Time integration. Choose one of the following methods, or define your own Butcher's table:
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
 
-//ButcherTableType butcher_table_type = Implicit_RK_1;
-ButcherTableType butcher_table_type = Implicit_SDIRK_2;
+ButcherTableType butcher_table_type = Implicit_RK_1;
+//ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
 template<typename Real>
-Real lam(Real u) { return 1 + pow(u, 4);}
+Real lam(Real u) { return 1 + pow(u, ALPHA);}
 
 // Derivative of the thermal conductivity with respect to 'u'.
 template<typename Real>
-Real dlam_du(Real u) { return 4*pow(u, 3);}
+Real dlam_du(Real u) { return ALPHA*pow(u, ALPHA - 1);}
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {

@@ -5,7 +5,7 @@
 
 using namespace RefinementSelectors;
 
-//  This example is derived from tutorial 18 and it shows an example of 
+//  This example is derived from tutorial 19 and it shows an example of 
 //  implementation of the sdirk-22 method. The Butcher table of this 
 //  method is:
 //
@@ -37,7 +37,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 0;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-double TAU = 0.1;                                // Time step.
+double TAU = 0.1;                                 // Time step.
 const double T_FINAL = 1.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-10;                  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
