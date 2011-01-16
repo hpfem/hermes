@@ -988,12 +988,8 @@ void Mesh::dump() {
 
 unsigned int Mesh::add_vertex(double x, double y, double z) {
 	_F_
-  unsigned int i;
-  for(i = 1; ; i++)
-    if(vertices[i] == NULL)
-      break;
-  vertices[i] = new Vertex(x, y, z);
-	return i;
+  vertices[vertices.size() + 1] = new Vertex(x, y, z);
+  return vertices.size();
 }
 
 Tetra *Mesh::create_tetra(unsigned int vtcs[]) {
