@@ -1,8 +1,8 @@
 //////////////////////////// IMPLICIT EULER ////////////
 // Jacobian matrix.
 template<typename Real, typename Scalar>
-Scalar implicit_euler_jacobian(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, 
-                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar jac_implicit_euler(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, 
+                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* u_prev_newton = u_ext[0];
@@ -17,7 +17,8 @@ Scalar implicit_euler_jacobian(int n, double *wt, Func<Real> *u_ext[], Func<Real
 
 // Residual vector.
 template<typename Real, typename Scalar>
-Scalar implicit_euler_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar res_implicit_euler(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
+                          Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* u_prev_newton = u_ext[0];
@@ -33,7 +34,8 @@ Scalar implicit_euler_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real
 
 //////////////////////////// SDIRK-22 ////////////
 template<typename Real, typename Scalar>
-Scalar jac_Y(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar jac_sdirk(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* u_prev_newton = u_ext[0];
@@ -47,19 +49,7 @@ Scalar jac_Y(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *
 }
 
 template<typename Real, typename Scalar>
-Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t)
-{
-  Scalar result = 0;
-  Func<Scalar>* Y_prev_newton = u_ext[0];
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (lam(Y_prev_newton->val[i]) * (Y_prev_newton->dx[i] * v->dx[i]
-                                                     + Y_prev_newton->dy[i] * v->dy[i])
-                       - heat_src(e->x[i], e->y[i], t) * v->val[i]);
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar res_Y1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar res_sdirk_stage_1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* Y1_prev_newton = u_ext[0];
@@ -72,7 +62,7 @@ Scalar res_Y1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> 
 }
 
 template<typename Real, typename Scalar>
-Scalar res_Y2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar res_sdirk_stage_2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   Func<Scalar>* Y2_prev_newton = u_ext[0];
@@ -147,3 +137,14 @@ Scalar res2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e
   return result;
 }
 
+template<typename Real, typename Scalar>
+Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t)
+{
+  Scalar result = 0;
+  Func<Scalar>* Y_prev_newton = u_ext[0];
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (lam(Y_prev_newton->val[i]) * (Y_prev_newton->dx[i] * v->dx[i]
+                                                     + Y_prev_newton->dy[i] * v->dy[i])
+                       - heat_src(e->x[i], e->y[i], t) * v->val[i]);
+  return result;
+}

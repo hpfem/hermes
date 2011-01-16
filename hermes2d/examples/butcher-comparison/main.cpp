@@ -114,124 +114,111 @@ int main(int argc, char* argv[])
   // Previous time level solution (initialized by the initial condition).
   Solution u_prev_time(&mesh, init_cond);
 
-  // Project the initial condition on the FE space to obtain initial
-  // coefficient vector for the Newton's method.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
-
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  scalar* coeff_vec1 = new scalar[ndof];
+  OGProjection::project_global(&space, &u_prev_time, coeff_vec1, matrix_solver);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
   OrderView oview("Mesh", new WinGeom(520, 0, 450, 400));
   oview.show(&space);
 
+  // Initialize the weak formulation and the FE problem.
+  WeakForm wf, wf1, wf2;
+  Solution sdirk_stage_sol;
+  scalar* coeff_vec2;
+  DiscreteProblem *dp, *dp1, *dp2;
   if (TIME_INTEGRATION == 1) {
-    // Initialize the weak formulation.
-    WeakForm wf;
-    wf.add_matrix_form(callback(implicit_euler_jacobian));
-    wf.add_vector_form(callback(implicit_euler_residual), HERMES_ANY, &u_prev_time);
-
-    // Initialize the FE problem. 
+    wf.add_matrix_form(callback(jac_implicit_euler));
+    wf.add_vector_form(callback(res_implicit_euler), HERMES_ANY, &u_prev_time);
+ 
     bool is_linear = false; 
-    DiscreteProblem dp(&wf, &space, is_linear); 
+    dp = new DiscreteProblem(&wf, &space, is_linear); 
+  }
+  else {
+    sdirk_stage_sol.set_exact(&mesh, init_cond);
 
-    // Time stepping loop:
-    int ts = 1;
-    do {
+    coeff_vec2 = new scalar[ndof];
+    for (int i = 0; i < ndof; i++) coeff_vec2[i] = coeff_vec1[i];
 
+    wf1.add_matrix_form(callback(jac_sdirk));
+    wf1.add_vector_form(callback(res_sdirk_stage_1), HERMES_ANY, 
+                        Hermes::vector<MeshFunction*>(&u_prev_time));
+    wf2.add_matrix_form(callback(jac_sdirk));
+    wf2.add_vector_form(callback(res_sdirk_stage_2), HERMES_ANY, 
+                        Hermes::vector<MeshFunction*>(&u_prev_time, &sdirk_stage_sol));
+
+    bool is_linear = false;
+    dp1 = new DiscreteProblem(&wf1, &space, is_linear);
+    dp2 = new DiscreteProblem(&wf2, &space, is_linear);
+  }
+
+  // Time stepping loop:
+  int ts = 1;
+  do {
+    if (TIME_INTEGRATION == 1) {
       // Perform Newton's iteration.
       info("Implicit Euler time step (t = %g, tau = %g):", TIME, TAU);
       bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      if (!solve_newton(coeff_vec1, dp, solver, matrix, rhs, 
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");  
 
       // Update previous time level solution.
-      Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
-
-      // Update time.
-      TIME = TIME + TAU;
-
-      // Show the new time level solution.
-      char title[100];
-      sprintf(title, "Solution, t = %g", TIME);
-      sview.set_title(title);
-      sview.show(&u_prev_time);
-      oview.show(&space);
-
-      ts++;
+      Solution::vector_to_solution(coeff_vec1, &space, &u_prev_time);
     } 
-    while (TIME < T_FINAL);
-
-    // Cleanup.
-    delete [] coeff_vec;
-    delete matrix;
-    delete rhs;
-    delete solver;
-  }
-  else if (TIME_INTEGRATION == 2) {
-
-    Solution Y1(&mesh, init_cond);
-    Solution Y2(&mesh, init_cond);
-
-    scalar* coeff_vec1 = new scalar[ndof];
-    OGProjection::project_global(&space, &u_prev_time, coeff_vec1, matrix_solver);
-    scalar* coeff_vec2 = new scalar[ndof];
-    OGProjection::project_global(&space, &u_prev_time, coeff_vec2, matrix_solver);
-
-    WeakForm wf1;
-    wf1.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
-    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::vector<MeshFunction*>(&u_prev_time));
-    WeakForm wf2;
-    wf2.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
-    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::vector<MeshFunction*>(&u_prev_time, &Y1));
-
-    // Initialize the FE problem. 
-    bool is_linear = false;
-    DiscreteProblem dp1(&wf1, &space, is_linear);
-    DiscreteProblem dp2(&wf2, &space, is_linear);
-
-    double current_time = 0.0; int ts = 1;
-    do {
-      // Perform Newton's iteration for Y1.
-      info("SDIRK-2 time step, computing Y1 (t = %g, tau = %g):", TIME, TAU);
+    else {
+      // Perform Newton's iteration for sdirk_stage_sol.
+      info("SDIRK-2 time step, stage I (t = %g, tau = %g):", TIME, TAU);
       bool verbose = true;
-      if (!solve_newton(coeff_vec1, &dp1, solver, matrix,
+      if (!solve_newton(coeff_vec1, dp1, solver, matrix,
 			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
         error("Newton's iteration did not converge."); 
 
-      // Convert the vector Y1 into a Solution.
-      Solution::vector_to_solution(coeff_vec1, &space, &Y1);
+      // Convert the vector coeff_vec1 into a Solution.
+      Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
 
-      // Perform Newton's iteration for Y2.
-      info("SDIRK-2 time step, computing Y2 (t = %g, tau = %g):", TIME, TAU);
+      // Perform Newton's iteration for the final solution.
+      info("SDIRK-2 time step, stage II (t = %g, tau = %g):", TIME, TAU);
 
-      if (!solve_newton(coeff_vec2, &dp2, solver, matrix,
+      if (!solve_newton(coeff_vec2, dp2, solver, matrix,
 			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
         error("Newton's iteration did not converge."); 
 
       // Translate Y2 into a Solution.
-      Solution::vector_to_solution(coeff_vec2, &space, &Y2);
+      Solution::vector_to_solution(coeff_vec2, &space, &u_prev_time);
+    }
+  
+    // Update time.
+    TIME = TIME + TAU;
 
-      // Update previous time level solution.
-      u_prev_time.copy(&Y2);
+    // Show the new time level solution.
+    char title[100];
+    sprintf(title, "Solution, t = %g", TIME);
+    sview.set_title(title);
+    sview.show(&u_prev_time);
 
-      // Update time.
-      TIME = TIME + TAU;
+    ts++;
+  } while (TIME < T_FINAL);
 
-      // Show the new time level solution.
-      char title[100];
-      sprintf(title, "Solution, t = %g", TIME);
-      sview.set_title(title);
-      sview.show(&u_prev_time);
-
-      ts++;
-    } while (TIME < T_FINAL);
+  // Clean up.
+  delete [] coeff_vec1;
+  if (TIME_INTEGRATION == 1) {
+    delete dp;
   }
+  else {
+    delete dp1;
+    delete dp2;
+    delete [] coeff_vec2;
+  }
+  delete matrix;
+  delete solver;
 
   // Wait for all views to be closed.
   View::wait();
