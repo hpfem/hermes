@@ -35,7 +35,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
 
-ButcherTableType butcher_table_type = Implicit_Crank_Nicolson_2;
+//ButcherTableType butcher_table_type = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -150,6 +151,8 @@ int main(int argc, char* argv[])
     sview.set_title(title);
     sview.show(&u_prev_time, HERMES_EPS_VERYHIGH);
     oview.show(&space);
+
+    //View::wait(HERMES_WAIT_KEYPRESS);
 
     // Increase counter of time steps.
     ts++;

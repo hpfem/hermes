@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
-  mesh.refine_towards_boundary(BDY_GROUND, 1);
+  mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
   //Tview.set_min_max_range(0,20);
-  Tview.fix_scale_width(3);
+  Tview.fix_scale_width(30);
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;

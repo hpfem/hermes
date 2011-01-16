@@ -164,11 +164,14 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   }
 }
 
-void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_stages, 
+// This takes a matrix, and uses it to formally construct a block-diagonal 
+// matrix. There are num_blocks blocks on the diagonal. The block diagonal
+// matrix is then multiplied with the vector source_vec.
+void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks, 
                                        scalar* source_vec, scalar* target_vec) 
 {
   int size = matrix->get_size();
-  for (int i = 0; i < num_stages; i++) {
+  for (int i = 0; i < num_blocks; i++) {
     matrix->multiply(source_vec + i*size, target_vec + i*size);
   }
 }
@@ -181,7 +184,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 {
   if (matrix_solver != SOLVER_UMFPACK) 
     error("Sorry, rk_time_step() still only works with UMFpack.");
-  if (dp->get_weak_formulation()->get_neq() != 1) 
+  if (dp->get_weak_formulation()->get_neq() > 1) 
     error("Sorry, rk_time_step() does not work with systems yet.");
 
   // Matrix for the time derivative part of the equation (left-hand side).
@@ -212,20 +215,19 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Create a multistage weak formulation.
   WeakForm stage_wf_left;                   // For the matrix M (size ndof times ndof).
-  WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right).
+  WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right),
+                                            // size num_stages*ndof times num_stages*ndof.
   create_stage_wf(current_time, time_step, bt, dp, &stage_wf_right, &stage_wf_left); 
 
   // Initialize discrete problems for the assembling of the 
   // matrix M and the stage Jacobian matrix and residual.
-  bool is_linear_left = true;
-  DiscreteProblem stage_dp_left(&stage_wf_left, dp->get_space(0), is_linear_left);
-  bool is_linear_right = dp->get_is_linear();
-  DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces, is_linear_right);
+  DiscreteProblem stage_dp_left(&stage_wf_left, dp->get_space(0));
+  DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces);
 
-  // Vector stage_coeff_vec of length num_stages * ndof. will represent 
+  // Vector K_vector of length num_stages * ndof. will represent 
   // the 'k_i' vectors in the usual R-K notation.
-  scalar* stage_coeff_vec = new scalar[num_stages*ndof];
-  memset(stage_coeff_vec, 0, num_stages * ndof * sizeof(scalar));
+  scalar* K_vector = new scalar[num_stages*ndof];
+  memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
 
   // Vector u_prev_vec will represent y_n + h \sum_{j=1}^s a_{ij}k_i
   // in the usual R-K notation.
@@ -247,14 +249,14 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   int it = 1;
   while (true)
   {
-    // Prepare the u_prev_vec vector to enter the stationary residual F.
-    for (int r = 0; r < num_stages; r++) {
-      for (int i = 0; i < ndof; i++) {
-        scalar increment_r = 0;
-        for (int s = 0; s < num_stages; s++) {
-          increment_r += bt->get_A(r, s) * stage_coeff_vec[s*ndof + i]; 
+    // Prepare vector Y_n + h\sum_{j=1}^s a_{ij} K_j.
+    for (int idx = 0; idx < ndof; idx++) {
+      scalar increment_i = 0;
+      for (int i = 0; i < num_stages; i++) {
+        for (int j = 0; j < num_stages; j++) {
+          increment_i += bt->get_A(i, j) * K_vector[j*ndof + idx]; 
         }
-        u_prev_vec[r*ndof + i] = coeff_vec[i] + time_step * increment_r;
+        u_prev_vec[i*ndof + idx] = coeff_vec[idx] + time_step * increment_i;
       }
     } 
 
@@ -271,8 +273,26 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       exit(0);
     */
 
+    /*
+    if (it == 2) {
+      printf("K_vector before multiplication with M = ");
+      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
+      for (int i=0; i<ndof*num_stages; i++) printf("%g ", K_vector[i]);
+      printf("\n");
+    }
+    */
+
     multiply_as_diagonal_block_matrix((UMFPackMatrix*)matrix_left, num_stages, 
-                                      stage_coeff_vec, vector_left);
+                                      K_vector, vector_left);
+
+    /*
+    if (it == 2) {
+      printf("vector_left (M times K_vector) = ");
+      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
+      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left[i]);
+      printf("\n");
+    }
+    */
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left 
@@ -291,7 +311,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     /*
     // debug
-    if (it == -1) {
+    if (it == 2) {
       printf("vector_left = ");
       //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
       for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left[i]);
@@ -300,7 +320,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_right->get(i));
       printf("\n");
       //exit(0);
- 
+
       // Debug.
       FILE* f = fopen("debug-left.txt", "w");
       matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE); 
@@ -308,7 +328,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       fclose(f);
       f = fopen("debug-right.txt", "w");
       matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE); 
-            info("Matrix right dumped.");
+      info("Matrix right dumped.");
       fclose(f);
     }
     */
@@ -325,9 +345,21 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       exit(0);
     */
 
-
     //((UMFPackMatrix*)matrix_right)->add_to_diagonal(1.0);
     vector_right->add_vector(vector_left);
+
+    /*
+    if (it == 2) {
+      printf("vector_left = ");
+      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
+      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left[i]);
+      printf("\n");
+      printf("vector_right = ");
+      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_right->get(i));
+      printf("\n");
+      exit(0);
+    }
+    */
 
     /*
     // Debug.
@@ -379,11 +411,10 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < num_stages*ndof; i++) {
-      stage_coeff_vec[i] += newton_damping_coeff * solver->get_solution()[i];
-      //printf("stage_coeff_vec[%d] = %g\n", i, stage_coeff_vec[i]);
+      K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
+      //printf("K_vector[%d] = %g\n", i, K_vector[i]);
     }
     //exit(0);
-
 
     // Increase iteration counter.
     it++;
@@ -395,17 +426,21 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     return false;
   }
 
+  /* THIS DID NOT WORK
   // Create a metrix solver for the equation M(Y_{n+1} - Y_n) = increment_vector.
   Vector* rk_increment_vector = create_vector(matrix_solver);  
   rk_increment_vector->alloc(ndof);
   Solver* rk_increment_solver = create_linear_solver(matrix_solver, 
                                 matrix_left, rk_increment_vector);
+  */
 
   // Calculate the vector \sum_{j=1}^s b_j k_j.
-  rk_increment_vector->zero();
+  Vector* rk_increment_vector = create_vector(matrix_solver);  
+  rk_increment_vector->alloc(ndof);
   for (int i = 0; i < ndof; i++) {
+    rk_increment_vector->set(i, 0); 
     for (int j = 0; j < num_stages; j++) {
-      rk_increment_vector->add(i, bt->get_B(j) * stage_coeff_vec[j*ndof + i]); 
+      rk_increment_vector->add(i, bt->get_B(j) * K_vector[j*ndof + i]); 
     }
   } 
 
@@ -418,8 +453,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   */
 
   // Calculate Y^{n+1} = Y^n + h \sum_{j=1}^s b_j k_j.
-  for (int i=0; i < ndof; i++) coeff_vec[i] += time_step * rk_increment_vector->get(i);
-
+  for (int i = 0; i < ndof; i++) coeff_vec[i] += time_step * rk_increment_vector->get(i);
 
   // Clean up.
   delete matrix_left;
@@ -439,7 +473,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // stage_time_sol[i], i = 0, 1, ..., num_stages-1.
 
   // Delete stage_vec and u_prev_vec.
-  delete [] stage_coeff_vec;
+  delete [] K_vector;
   delete [] u_prev_vec;
  
   // debug
