@@ -25,9 +25,19 @@ void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTa
                                 DiscreteProblem* dp, WeakForm* stage_wf_right, 
                                 WeakForm* stage_wf_left);
 
+/// Takes a matrix M of size ndof times ndof, extends it (formally) to 
+/// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and 
+/// zero everywhere else, and multiplies the new matrix with the vector stage_coeff_vec
+/// which has length num_stages*ndof. The result is saved in vector_left which also 
+/// has length num_stages*ndof.
+/// TODO: enable this for other types of matrices.
+void HERMES_API multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, int num_stages, 
+                                                  scalar* stage_coeff_vec, scalar* vector_left);
+
 // Perform one explicit or implicit time step using the Runge-Kutta method 
 // corresponding to a given Butcher's table. The negative defaults values for 
 // newton_tol and newton_max_iter are for linear problems.
+/// TODO: enable this for other types of solvers besides UMFpack.
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                              scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
                              bool verbose = false, double newton_tol = -1.0, int newton_max_iter = -1, 

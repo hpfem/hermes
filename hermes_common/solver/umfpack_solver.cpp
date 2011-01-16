@@ -159,7 +159,46 @@ void UMFPackMatrix::add(int m, int n, scalar v) {
   }
 }
 
-void UMFPackMatrix::add_umfpack_matrix(UMFPackMatrix* mat) {
+// NOTE: Corresponding nonzero entries in the matrix "this" must be existing.
+void UMFPackMatrix::add_to_diagonal_blocks(int num_stages, UMFPackMatrix* mat_block)
+{
+  _F_
+  int ndof = mat_block->get_size();
+  if (this->get_size() != num_stages * ndof) 
+    error("Incompatible matrix sizes in UMFPackMatrix::add_to_diagonal_blocks()");
+
+  for (int i = 0; i < num_stages; i++) {
+    this->add_as_block(ndof*i, ndof*i, mat_block);
+  }
+}
+
+void UMFPackMatrix::add_as_block(int offset_i, int offset_j, UMFPackMatrix* mat)
+{
+  UMFPackIterator mat_it(mat);
+  UMFPackIterator this_it(this);
+
+  // Sanity check.
+  bool this_not_empty = this_it.init();
+  if (!this_not_empty) error("Empty matrix detected in UMFPackMatrix::add_as_block().");
+
+  // Iterate through the small matrix column by column and add all nonzeros 
+  // to the large one.
+  bool mat_not_finished = mat_it.init();
+  if (!mat_not_finished) error("Empty matrix detected in UMFPackMatrix::add_as_block().");
+  
+  int mat_i, mat_j;
+  scalar mat_val;
+  while(mat_not_finished) {
+    mat_it.get_current_position(mat_i, mat_j, mat_val);
+    bool found = this_it.move_to_position(mat_i + offset_i, mat_j + offset_j);
+    if (!found) error ("Nonzero matrix entry at %d, %d not found in UMFPackMatrix::add_as_block().", 
+                       mat_i + offset_i, mat_j + offset_j);
+    this_it.add_to_current_position(mat_val);
+    mat_not_finished = mat_it.move_ptr();
+  }
+}
+
+void UMFPackMatrix::add_matrix(UMFPackMatrix* mat) {
   _F_
   assert(this->get_size() == mat->get_size());
   // Create iterators for both matrices. 
@@ -541,6 +580,18 @@ void UMFPackIterator::get_current_position(int& i, int& j, scalar& val)
   i = Ai[Ai_pos];
   j = Ap_pos;
   val = Ax[Ai_pos];
+}
+
+bool UMFPackIterator::move_to_position(int i, int j)
+{
+  int ii, jj;
+  scalar val;
+  get_current_position(ii, jj, val);
+  while (!(ii == i && jj == j)) {
+    if(!this->move_ptr()) return false;
+    get_current_position(ii, jj, val);
+  }
+  return true;
 }
 
 bool UMFPackIterator::move_ptr()

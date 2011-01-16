@@ -24,7 +24,7 @@ const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinemen
 const int P_INIT = 2;                             // Initial polynomial degree.
 const double TAU = 0.2;                           // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.

@@ -27,7 +27,7 @@ const int P_INIT = 2;                             // Polynomial degree of all me
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
 const double time_step = 3e+2;                    // Time step in seconds.
-const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -38,7 +38,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
 
 ButcherTableType butcher_table_type = Implicit_RK_1;
-//ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Boundary markers.
 const std::string BDY_GROUND = "Boundary ground";
@@ -60,7 +59,7 @@ Real temp_ext(Real t) {
 
 // Heat sources (can be a general function of 'x' and 'y').
 template<typename Real>
-Real heat_src(Real x, Real y) { return 1.0;}
+Real heat_src(Real x, Real y) { return 0.0;}
 
 // Weak forms.
 #include "forms.cpp"
@@ -78,7 +77,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
-  //mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_GROUND, 1);
 
   // Enter boundary markers.
   BCTypes bc_types;
