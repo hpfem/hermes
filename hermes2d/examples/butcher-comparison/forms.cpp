@@ -40,11 +40,10 @@ Scalar jac_sdirk(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Rea
   Scalar result = 0;
   Func<Scalar>* u_prev_newton = u_ext[0];
   for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * v->val[i]
-                       + GAMMA * TAU * (dlam_du(u_prev_newton->val[i]) * u->val[i] * (u_prev_newton->dx[i] * v->dx[i]
-                                                                                      + u_prev_newton->dy[i] * v->dy[i])
-                                        + lam(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i]
-                                                                        + u->dy[i] * v->dy[i])));
+    result += wt[i] * (u->val[i] * v->val[i] / TAU
+                       + BUTCHER_A_11 * (dlam_du(u_prev_newton->val[i]) * u->val[i] 
+                                  * (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
+                                  + lam(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])));
   return result;
 }
 
@@ -54,10 +53,22 @@ Scalar res_sdirk_stage_1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
   Scalar result = 0;
   Func<Scalar>* Y1_prev_newton = u_ext[0];
   Func<Scalar>* u_prev_time = ext->fn[0];
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (Y1_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i];
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (Y1_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / TAU;
+  }
+  result += GAMMA * res_ss(n, wt, u_ext, v, e, ext, TIME + BUTCHER_C_1 * TAU);
+  return result;
+}
 
-  result += GAMMA * TAU * res_ss(n, wt, u_ext, v, e, ext, TIME+GAMMA*TAU);
+template<typename Real, typename Scalar>
+Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t)
+{
+  Scalar result = 0;
+  Func<Scalar>* Y_prev_newton = u_ext[0];
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (lam(Y_prev_newton->val[i]) * (Y_prev_newton->dx[i] * v->dx[i] + Y_prev_newton->dy[i] * v->dy[i])
+                       - heat_src(e->x[i], e->y[i], t) * v->val[i]);
+  }
   return result;
 }
 
@@ -68,11 +79,11 @@ Scalar res_sdirk_stage_2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, 
   Func<Scalar>* Y2_prev_newton = u_ext[0];
   Func<Scalar>* u_prev_time = ext->fn[0];
   Func<Scalar>* Y1[] = {ext->fn[1]};
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (Y2_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i];
-
-  result += (1-GAMMA) * TAU * res_ss(n, wt, Y1, v, e, ext, TIME+GAMMA*TAU);
-  result += GAMMA * TAU * res_ss(n, wt, u_ext, v, e, ext, TIME+TAU);
+  for (int i = 0; i < n; i++) {
+    result += wt[i] * (Y2_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / TAU;
+  }
+  result += BUTCHER_B_1 * res_ss(n, wt, Y1, v, e, ext, TIME + BUTCHER_C_1 * TAU);
+  result += BUTCHER_B_2 * res_ss(n, wt, u_ext, v, e, ext, TIME + BUTCHER_C_2 * TAU);
   return result;
 }
 
@@ -137,14 +148,3 @@ Scalar res2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t)
-{
-  Scalar result = 0;
-  Func<Scalar>* Y_prev_newton = u_ext[0];
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (lam(Y_prev_newton->val[i]) * (Y_prev_newton->dx[i] * v->dx[i]
-                                                     + Y_prev_newton->dy[i] * v->dy[i])
-                       - heat_src(e->x[i], e->y[i], t) * v->val[i]);
-  return result;
-}

@@ -12,15 +12,17 @@ using namespace RefinementSelectors;
 //  faster than example "butcher" for the same methods. The sole 
 //  purpose of this example is a performance comparison with example 
 //  "butcher". The Butcher's table of the SDIRK-2 method is:
-//
-//  A(1, 1) = Gamma
-//  A(1, 2) = 0
-//  A(2, 1) = 1 - Gamma
-//  A(2, 2) = Gamma
-//  B = [1 - Gamma, Gamma]
-//  C = [Gamma, 1]
-//  Gamma = 1 - 1/sqrt(2)
-//
+
+double GAMMA = 1. - 1./sqrt(2.);
+double BUTCHER_A_11 = 1. - 1./sqrt(2.);
+double BUTCHER_A_12 = 0.;
+double BUTCHER_A_21 = 1. - (1. - 1./sqrt(2.));
+double BUTCHER_A_22 = 1. - 1./sqrt(2.);
+double BUTCHER_B_1 = 1. - (1. - 1./sqrt(2.));
+double BUTCHER_B_2 = 1. - 1./sqrt(2.);
+double BUTCHER_C_1 = 1. - 1./sqrt(2.);
+double BUTCHER_C_2 = 1.;
+
 //  The method can be found in Butcher's book on page 244. 
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
@@ -44,10 +46,8 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-double TIME = 0.0;
-
 const double ALPHA = 4.0;                         // For the nonlinear thermal ocnductivity.
-const double GAMMA = 1 - 1/sqrt((double)2);       // Constant for the SDIRK-2 method
+double TIME = 0.0;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
