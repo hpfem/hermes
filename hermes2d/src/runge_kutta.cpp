@@ -176,7 +176,7 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
   }
 }
 
-bool HERMES_RESIDUAL_AS_VECTOR_RK = false;
+bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt, 
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver, 
                   bool verbose, double newton_tol, int newton_max_iter,  

@@ -27,7 +27,7 @@ Scalar res_implicit_euler(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
     result += wt[i] * ((u_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / TAU
                           + (lam(u_prev_newton->val[i]) * 
                           (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
-		          - heat_src(e->x[i], e->y[i], TIME+TAU) * v->val[i])
+		          - heat_src(e->x[i], e->y[i], TIME + TAU) * v->val[i])
                       );
   return result;
 }
