@@ -241,11 +241,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   WeakForm stage_wf_left;                   // For the matrix M (size ndof times ndof).
   WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right),
                                             // size num_stages*ndof times num_stages*ndof.
-<<<<<<< HEAD
-  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_right, &stage_wf_left);
-=======
   create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right); 
->>>>>>> github/master
 
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
@@ -298,14 +294,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       }
     }
 
-<<<<<<< HEAD
-    // Assemble the block-diagonal mass matrix M of size ndof times ndof.
-    // The corresponding part of the global residual vector is obtained
-    // just by multiplication.
-    stage_dp_left.assemble(matrix_left);
-
-=======
->>>>>>> github/master
     /*
       FILE* f = fopen("debug-left.txt", "w");
       matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE);
@@ -325,11 +313,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
    
     printf("K_vector before multiplication with M: %g %g\n", K_vector[0], K_vector[1]);
 
-<<<<<<< HEAD
-    multiply_as_diagonal_block_matrix((UMFPackMatrix*)matrix_left, num_stages,
-=======
+
     multiply_as_diagonal_block_matrix(matrix_left, num_stages, 
->>>>>>> github/master
                                       K_vector, vector_left);
 
     printf("vector_left (M times K_vector): %g %g\n", vector_left[0], vector_left[1]);
@@ -391,10 +376,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Putting the two parts together into matrix_right and rhs_right.
     //((UMFPackMatrix*)matrix_right)->add_matrix((UMFPackMatrix*)matrix_left);
-<<<<<<< HEAD
-    ((UMFPackMatrix*)matrix_right)->add_to_diagonal_blocks(num_stages,
-                                                           (UMFPackMatrix*)matrix_left);
-=======
 
     printf("Adding M to diagonal of matrix_right.\n");
 
@@ -403,7 +384,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     printf("matrix_right = %g %g %g %g\n", matrix_right->get(0, 0), matrix_right->get(0, 1),
                                            matrix_right->get(1, 0), matrix_right->get(1, 1));
 
->>>>>>> github/master
     /*
       f = fopen("debug-composite.txt", "w");
       matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE);
@@ -455,11 +435,9 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     printf("Changing sign of vector_right.\n");
 
     vector_right->change_sign();
-<<<<<<< HEAD
-=======
+
     
     printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
->>>>>>> github/master
 
     // Measure the residual norm.
     if (HERMES_RESIDUAL_AS_VECTOR_RK) {
