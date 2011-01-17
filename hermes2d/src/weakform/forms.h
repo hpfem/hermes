@@ -87,10 +87,10 @@ inline Ord cos(const Ord &a) { return Ord(a.get_max_order()); }
 inline Ord log(const Ord &a) { return Ord(a.get_max_order()); }
 inline Ord exp(const Ord &a) { return Ord(3 * a.get_order()); }
 
-static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS = 
+static const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS =
   "Neighboring elements are not defined and so are not function traces on their interface. "
   "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
-  
+
 // Function
 template<typename T>
 class Func
@@ -180,14 +180,14 @@ public:
     delete [] curl; curl = NULL;
     delete [] div; div = NULL;
   }
-  
-  virtual ~Func() { }; // All deallocation done via free_fn / free_ord. 
+
+  virtual ~Func() { }; // All deallocation done via free_fn / free_ord.
                        // This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
-  
+
   // NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
   // Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
-  // expected from a continuous function. 
-  virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; } 
+  // expected from a continuous function.
+  virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
   virtual T& get_val_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
   virtual T& get_dx_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
   virtual T& get_dx_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
@@ -205,10 +205,10 @@ public:
  *  We will refer to one of the elements sharing the interface of discontinuity as to the \em central element,
  *  while to the other one as to the \em neighbor element.
  *
- *  Instance of the class may be constructed either with two \c Func objects, which represent the continuous 
+ *  Instance of the class may be constructed either with two \c Func objects, which represent the continuous
  *  components on the central and the neighbor element, respectively, or with only one \c Func object and
  *  information about its support (where it attains non-zero value). The discontinuous function is in the latter
- *  case constructed by extending the supplied function by zero to the other element. Values and derivatives from 
+ *  case constructed by extending the supplied function by zero to the other element. Values and derivatives from
  *  both elements may then be obtained by querying the corresponding \c Func object, using methods
  *  \c get_val_central, \c get_val_neighbor, etc.
  **/
@@ -219,11 +219,11 @@ private:
   bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
                               ///< (when retrieving values on an edge that is oriented differently in both elements).
   static T zero;              ///< Zero value used for the zero-extension.
-  
-public: 
+
+public:
   Func<T> *fn_central;        ///< Central element's component.
   Func<T> *fn_neighbor;       ///< Neighbor element's component.
-  
+
   /// One-component constructor.
   ///
   /// \param[in]  fn                  Function defined either on the central or the neighbor element.
@@ -235,57 +235,57 @@ public:
     reverse_neighbor_side(reverse),
     fn_central(NULL),
     fn_neighbor(NULL)
-  { 
+  {
     assert_msg(fn != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
     if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
   }
-  
+
   /// Two-component constructor.
   ///
   /// \param[in]  fn_c                Function defined on the central element.
   /// \param[in]  fn_n                Function defined on the neighbor element.
   /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
   ///
-  DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) : 
+  DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false) :
     Func<T>(fn_c->num_gip, fn_c->nc),
     reverse_neighbor_side(reverse),
     fn_central(fn_c),
     fn_neighbor(fn_n)
-  { 
+  {
     assert_msg(fn_c != NULL && fn_n != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
     assert_msg(fn_c->num_gip == fn_n->num_gip && fn_c->nc == fn_n->nc,
                 "DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
   }
-  
+
   // Get values, derivatives, etc. in both elements adjacent to the discontinuity.
-  
+
   virtual T& get_val_central(int k) const { GET_CENT_FN(val); }
   virtual T& get_val_neighbor(int k) const { GET_NEIB_FN(val); }
   virtual T& get_dx_central(int k) const { GET_CENT_FN(dx); }
   virtual T& get_dx_neighbor(int k) const { GET_NEIB_FN(dx); }
   virtual T& get_dy_central(int k) const { GET_CENT_FN(dy); }
   virtual T& get_dy_neighbor(int k) const { GET_NEIB_FN(dy); }
-  
+
   #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     virtual T& get_laplace_central(int k) { GET_CENT_FN(laplace); }
     virtual T& get_laplace_neighbor(int k) { GET_NEIB_FN(laplace); }
   #endif
-  
-  void subtract(const DiscontinuousFunc<T>& func) 
-  { 
+
+  void subtract(const DiscontinuousFunc<T>& func)
+  {
     // TODO: Add sanity checks, revise for adaptivity.
     if (fn_central != NULL && func.fn_central != NULL)
       fn_central->subtract(func.fn_central);
     if (fn_neighbor != NULL && func.fn_neighbor != NULL)
       fn_neighbor->subtract(func.fn_neighbor);
   }
-  
+
   // Default destructor may be used. Deallocation is done using the following functions.
   // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized
   //  destructors should be used instead (also in Func).
-  virtual void free_fn() { 
+  virtual void free_fn() {
     if (fn_central != NULL) {
-      fn_central->free_fn(); 
+      fn_central->free_fn();
       delete fn_central;
       fn_central = NULL;
     }
@@ -297,7 +297,7 @@ public:
   }
   virtual void free_ord() {
     if (fn_central != NULL) {
-      fn_central->free_ord(); 
+      fn_central->free_ord();
       delete fn_central;
       fn_central = NULL;
     }
@@ -327,7 +327,7 @@ public:
 
   T *x, *y;         ///< Coordinates [in physical domain].
   T *nx, *ny;       ///< Normals [in physical domain] (locally oriented
-                    ///< to point outside the element). Only for edge 
+                    ///< to point outside the element). Only for edge
                     ///< (undefined for element).
   T *tx, *ty;       ///< Tangents [in physical domain]. Only for edge.
   int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
@@ -344,7 +344,7 @@ public:
     tx = ty = NULL;
     diam = 0;
   }
-    
+
   virtual ~Geom() { };
 
   void free()
@@ -352,7 +352,7 @@ public:
     delete [] tx;    delete [] ty;
     delete [] nx;    delete [] ny;
   }
-  
+
   virtual int get_neighbor_marker() const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
   virtual int get_neighbor_id()     const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
   virtual T   get_neighbor_diam()   const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
@@ -367,16 +367,16 @@ public:
 template<typename T>
 class InterfaceGeom : public Geom<T>
 {
-private:  
+private:
   const Geom<T>* central_geom;  // The wrapped instance of Geom (representing geometric data for the
                                 // central element).
-  
+
 public:
   int neighb_marker;
   int neighb_id;
   T   neighb_diam;
-  
-  InterfaceGeom(const Geom<T>* geom, int n_marker, int n_id, T n_diam) : 
+
+  InterfaceGeom(const Geom<T>* geom, int n_marker, int n_id, T n_diam) :
       Geom<T>(), central_geom(geom), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
   {
     // Let this class expose the standard Geom interface.
@@ -386,15 +386,15 @@ public:
     this->diam = geom->diam;
     this->x = geom->x;
     this->y = geom->y;
-    this->tx = geom->tx; 
-    this->ty = geom->ty; 
-    this->nx = geom->nx; 
-    this->ny = geom->ny; 
+    this->tx = geom->tx;
+    this->ty = geom->ty;
+    this->nx = geom->nx;
+    this->ny = geom->ny;
     this->orientation = geom->orientation;
   }
-  
+
   ~InterfaceGeom() { delete central_geom; }
-  
+
   virtual int get_neighbor_marker() const { return neighb_marker; }
   virtual int get_neighbor_id()     const { return neighb_id; }
   virtual T   get_neighbor_diam()   const { return neighb_diam; }
@@ -421,13 +421,13 @@ Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order);
 /// It also holds arbitraty number of functions, that user can use.
 /// Typically, these functions are solutions from the previous time/iteration levels.
 template<typename T>
-class ExtData 
+class ExtData
 {
 public:
   int nf;         ///< Number of functions in 'fn' array.
   Func<T>** fn;   ///< Array of pointers to functions.
 
-  ExtData() 
+  ExtData()
   {
     nf = 0;
     fn = NULL;

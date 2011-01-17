@@ -20,8 +20,8 @@
 #include "../mesh/refmap.h"
 
 // Error calculation in Hermes, useful for non-adaptive computations.
-extern HERMES_API double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type); // Note: coarse mesh sln has to be first, then      
-                                                                                                // ref_sln (because the abs. error is divided 
+extern HERMES_API double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type); // Note: coarse mesh sln has to be first, then
+                                                                                                // ref_sln (because the abs. error is divided
                                                                                                 // by the norm of the latter).
 extern HERMES_API double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type);
 extern HERMES_API double calc_norm(MeshFunction* sln, int norm_type);
@@ -30,13 +30,13 @@ extern HERMES_API double calc_norms(Hermes::vector<Solution*> slns);         // 
 // Function calculating errors between solutions in right and left vectors, returning all necessary parameters
 // returns correct parameters only if the return value is true
 // coarse mesh sln has to be first, then ref_sln
-HERMES_API bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right, 
-                            Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals, 
-                            double & err_abs_total, double & norm_total, double & err_rel_total, 
+HERMES_API bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right,
+                            Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
+                            double & err_abs_total, double & norm_total, double & err_rel_total,
                             Hermes::vector<ProjNormType> norms = Hermes::vector<ProjNormType>());
 
 // Helper functions
-extern HERMES_API double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), 
+extern HERMES_API double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
                                         MeshFunction* sln1, MeshFunction* sln2);
 extern HERMES_API double calc_norm(double (*fn)(MeshFunction*, RefMap*), MeshFunction* sln);
 

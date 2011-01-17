@@ -37,25 +37,25 @@ void L2Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset,
     bc_types, (BCValues*) NULL, p_init)
 {
   init(shapeset, p_init);
 }
 
-L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset): Space(mesh, shapeset,
     bc_types, (BCValues*) NULL, p_init)
 {
   init(shapeset, Ord2(p_init, p_init));
 }
 
-L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset,
     bc_types, bc_values, p_init)
 {
   init(shapeset, p_init);
 }
 
-L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset): Space(mesh, shapeset,
     bc_types, bc_values, p_init)
 {
   init(shapeset, Ord2(p_init, p_init));
@@ -63,8 +63,8 @@ L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init,
 
 
 // the following constructors are DEPRECATED.
-L2Space::L2Space(Mesh* mesh, BCTypes* bc_types, 
-	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+L2Space::L2Space(Mesh* mesh, BCTypes* bc_types,
+	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset,
     bc_types, bc_value_callback_by_coord, p_init)
 {
   if (shapeset == NULL)
@@ -84,8 +84,8 @@ L2Space::L2Space(Mesh* mesh, BCTypes* bc_types,
 }
 
 
-L2Space::L2Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
-	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset, 
+L2Space::L2Space(Mesh* mesh, BCType (*bc_type_callback)(int),
+	  scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, Shapeset* shapeset): Space(mesh, shapeset,
     bc_type_callback, bc_value_callback_by_coord, p_init)
 {
   if (shapeset == NULL)
@@ -210,7 +210,7 @@ void L2Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 // FIXME: this should only return bubble functions which are nonzero on the
-// given element surface 
+// given element surface
 void L2Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
 {
     this->get_bubble_assembly_list(e, al);

@@ -103,7 +103,7 @@ public:
 
   /// \brief Returns the polynomial degree of the function being represented by the class.
   int get_fn_order() const { return order; }
-  
+
   /// \brief Returns the polynomial degree of the function at given edge. To be overriden in derived classes.
   /// \param edge [in] Edge at which the order should be evaluated. (0-3)
   virtual int get_edge_fn_order(int edge) { return order; }
@@ -294,9 +294,9 @@ protected:
 
   void replace_cur_node(Node* node)
   {
-    if (cur_node != NULL) { 
-      total_mem -= cur_node->size; 
-      ::free(cur_node); 
+    if (cur_node != NULL) {
+      total_mem -= cur_node->size;
+      ::free(cur_node);
     }
     cur_node = node;
   }

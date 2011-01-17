@@ -18,7 +18,7 @@
 #include "shapeset_h1_all.h"
 
 
-// Shape functions based on integrated Jacobi polynomials (by Sven Beuchler). Implementation 
+// Shape functions based on integrated Jacobi polynomials (by Sven Beuchler). Implementation
 // of all shape functions on the
 // reference element up to the polynomial degree 10. Vertex functions: barycentric
 // coordinates. Edge functions: coinciding with Lobatto shape functions on edges.

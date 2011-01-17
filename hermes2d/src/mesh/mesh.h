@@ -156,10 +156,10 @@ class HERMES_API Mesh : public HashTable
 public:
 
   Mesh();
-  ~Mesh() { 
+  ~Mesh() {
     //printf("Calling Mesh::free() in ~Mesh().\n");
-    free(); 
-    dump_hash_stat(); 
+    free();
+    dump_hash_stat();
   }
   /// Creates a copy of another mesh.
   void copy(const Mesh* mesh);
@@ -193,24 +193,24 @@ public:
   Element* get_element(int id) const;
 
   /// Returns the total number of elements stored.
-  int get_num_elements() const { 
-    if (this == NULL) error("this == NULL in Mesh::get_num_elements()."); 
-    return elements.get_num_items(); 
+  int get_num_elements() const {
+    if (this == NULL) error("this == NULL in Mesh::get_num_elements().");
+    return elements.get_num_items();
   }
   /// Returns the number of coarse mesh elements.
-  int get_num_base_elements() const { 
-    if (this == NULL) error("this == NULL in Mesh::get_num_base_elements()."); 
-    return nbase; 
+  int get_num_base_elements() const {
+    if (this == NULL) error("this == NULL in Mesh::get_num_base_elements().");
+    return nbase;
   }
   /// Returns the current number of active elements in the mesh.
-  int get_num_active_elements() const { 
-    if (this == NULL) error("this == NULL in Mesh::get_num_active_elements()."); 
-    return nactive; 
+  int get_num_active_elements() const {
+    if (this == NULL) error("this == NULL in Mesh::get_num_active_elements().");
+    return nactive;
   }
   /// Returns the maximum node id number plus one.
-  int get_max_element_id() const { 
-    if (this == NULL) error("this == NULL in Mesh::get_max_element_id()."); 
-    return elements.get_size(); 
+  int get_max_element_id() const {
+    if (this == NULL) error("this == NULL in Mesh::get_max_element_id().");
+    return elements.get_size();
   }
 
   /// Refines an element.
@@ -286,12 +286,12 @@ public:
   Element* get_element_fast(int id) const { return &(elements[id]);}
   /// Refines all triangle elements to quads.
   /// It can refine a triangle element into three quadrilaterals.
-  /// Note: this function creates a base mesh -- it can only be 
+  /// Note: this function creates a base mesh -- it can only be
   /// used before any other mesh refinement function is called.
   void convert_triangles_to_quads();
   /// Refines all quad elements to triangles.
   /// It refines a quadrilateral element into two triangles.
-  /// Note: this function creates a base mesh -- it can only be 
+  /// Note: this function creates a base mesh -- it can only be
   /// used before any other mesh refinement function is called.
   void convert_quads_to_triangles();
 
@@ -333,14 +333,14 @@ protected:
     ~MarkersConversion();
 
     // Info about the maximum markers used so far, used in determining
-    // of the internal marker for a user-supplied std::string identification for 
+    // of the internal marker for a user-supplied std::string identification for
     // the purpose of disambiguity.
-    // 
+    //
     int min_boundary_marker_unused;
     int min_element_marker_unused;
-  
+
     // Function inserting a marker into conversion_table_for_element_markers.
-    // This function controls if this user_marker x internal_marker is already 
+    // This function controls if this user_marker x internal_marker is already
     // present, and if not, it inserts the std::pair.
     void insert_element_marker(int internal_marker, std::string user_marker);
     // An analogy for boundary markers.

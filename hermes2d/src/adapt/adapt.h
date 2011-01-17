@@ -64,18 +64,18 @@
                                       ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
 
 // Matrix forms for error calculation.
-  typedef scalar (*error_matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[], 
-                                             Func<scalar> *u, Func<scalar> *v, Geom<double> *e, 
+  typedef scalar (*error_matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
+                                             Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
                                              ExtData<scalar> *); ///< Error bilinear form callback function.
-  typedef Ord (*error_matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[], 
-                                          Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+  typedef Ord (*error_matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
+                                          Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
                                           ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
 
 ///< Structure to hold adaptivity parameters together.
 struct AdaptivityParamType {
-  double err_stop; 
+  double err_stop;
   int ndof_stop;
-  double threshold; 
+  double threshold;
   int strategy;
   int mesh_regularity;
   double to_be_processed;
@@ -88,7 +88,7 @@ struct AdaptivityParamType {
   Hermes::vector<error_matrix_form_ord_t> error_form_ord;
 
   AdaptivityParamType(double err_stop = 1.0, int ndof_stop = 50000,
-	  	      double threshold = 0.3, int strategy = 0, 
+	  	      double threshold = 0.3, int strategy = 0,
                       int mesh_regularity = -1, double to_be_processed = 0.0,
                       int total_error_flag = HERMES_TOTAL_ERROR_REL,
                       int elem_error_flag = HERMES_ELEMENT_ERROR_REL)
@@ -105,9 +105,9 @@ struct AdaptivityParamType {
     error_form_j = Hermes::vector<int>();
     error_form_val = Hermes::vector<error_matrix_form_val_t>();
     error_form_ord = Hermes::vector<error_matrix_form_ord_t>();
-  }; 
-  
-  void set_error_form(int i, int j, error_matrix_form_val_t mfv, error_matrix_form_ord_t mfo) 
+  };
+
+  void set_error_form(int i, int j, error_matrix_form_val_t mfv, error_matrix_form_ord_t mfo)
   {
     if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::add_error_form().");
     this->error_form_i.push_back(i);
@@ -126,9 +126,9 @@ struct AdaptivityParamType {
 class HERMES_API Adapt
 {
 public:
-  /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 
-  /// Hdiv). If proj_norms are not specified, they are defined according to the spaces. 
-  Adapt(Hermes::vector<Space *> spaces_, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>()); 
+  /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
+  /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
+  Adapt(Hermes::vector<Space *> spaces_, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
   virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
   /// Sets user defined bilinear form which is used to calculate error.
@@ -143,11 +143,11 @@ public:
 
   /// Type-safe version of calc_err_est() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-  double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, 
+  double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true,
                       unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     if (num != 1) EXIT("Wrong number of solutions.");
-    return calc_err_est(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln), 
+    return calc_err_est(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln),
                         (Hermes::vector<double>*) NULL, solutions_for_adapt, error_flags);
   }
 
@@ -155,8 +155,8 @@ public:
   /// as 'num' in the constructor. After that, n coarse solution
   /// pointers are passed, followed by n fine solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-  double calc_err_est(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, 
-                      Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true, 
+  double calc_err_est(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+                      Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
                       unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
@@ -164,12 +164,12 @@ public:
 
   /// Type-safe version of calc_err_exact() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-  double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, 
+  double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     if (num != 1) EXIT("Wrong number of solutions.");
-    return calc_err_exact(Hermes::vector<Solution *> (sln), 
-                          Hermes::vector<Solution *> (rsln), 
+    return calc_err_exact(Hermes::vector<Solution *> (sln),
+                          Hermes::vector<Solution *> (rsln),
                           (Hermes::vector<double>*) NULL,
                           solutions_for_adapt, error_flags);
   }
@@ -178,8 +178,8 @@ public:
   /// as 'num' in the constructor. After that, n coarse solution
   /// pointers are passed, followed by n exact solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-  double calc_err_exact(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, 
-                        Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true, 
+  double calc_err_exact(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+                        Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
@@ -214,7 +214,7 @@ public:
   /** \param[in] A component index.
    *  \param[in] An element index.
    *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
-  double get_element_error_squared(int component, int id) const { error_if(!have_errors, 
+  double get_element_error_squared(int component, int id) const { error_if(!have_errors,
          "Element errors have to be calculated first, call calc_err_est()."); return errors[component][id]; };
 
   /// Returns regular queue of elements
@@ -268,7 +268,7 @@ protected: //adaptivity
    *  \param[in] elems_to_refine A vector of refinements.
    *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
    *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
-  void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, AutoLocalArray2<int>& idx, 
+  void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, AutoLocalArray2<int>& idx,
                                    Hermes::vector<RefinementSelectors::Selector *> refinement_selectors);
 
   /// Enforces the same order to an element of a mesh which is shared among multiple compoenets.
@@ -282,12 +282,12 @@ protected: //object state
 
 protected: // spaces & solutions
   int num;                              ///< Number of solution components (as in wf->neq).
-  Hermes::vector<Space*> spaces;                 ///< Spaces. 
-  Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution. 
-  Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions. 
+  Hermes::vector<Space*> spaces;                 ///< Spaces.
+  Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
+  Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
 
 protected: // element error arrays
-  double* errors[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the 
+  double* errors[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the
                                       ///< method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
   double  errors_squared_sum;         ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
 
@@ -301,8 +301,8 @@ protected: //forms and error evaluation
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-  virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, 
-                                   Hermes::vector<double>* component_errors, bool solutions_for_adapt, 
+  virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+                                   Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags);
 
   /// Evaluates a square of an absolute error of an active element among a given pair of components.
@@ -344,7 +344,7 @@ protected: //forms and error evaluation
    *  /param[in] meshes An array of pointers to meshes of a reference solution. An index into the array is an index of a component. */
   virtual void fill_regular_queue(Mesh** meshes);
 
-private: 
+private:
   /// A functor that compares elements accoring to their error. Used by std::sort().
   class CompareElements {
   private:

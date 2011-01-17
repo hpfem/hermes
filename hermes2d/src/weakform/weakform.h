@@ -60,99 +60,99 @@ public:
   WeakForm(int neq = 1, bool mat_free = false);
 
   // General case.
-  typedef scalar (*matrix_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi, Func<double> *vj, 
+  typedef scalar (*matrix_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi, Func<double> *vj,
                   Geom<double> *e, ExtData<scalar> *);
-  typedef Ord (*matrix_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi, Func<Ord> *vj, 
+  typedef Ord (*matrix_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi, Func<Ord> *vj,
                Geom<Ord> *e, ExtData<Ord> *);
-  typedef scalar (*vector_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi, 
+  typedef scalar (*vector_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi,
                   Geom<double> *e, ExtData<scalar> *);
-  typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi, 
+  typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi,
                                    Geom<Ord> *e, ExtData<Ord> *);
 
   // General case.
-  struct MatrixFormVol  {  
-    int i, j, sym, area;  
-    matrix_form_val_t fn;  
-    matrix_form_ord_t ord;  
-    Hermes::vector<MeshFunction *> ext; 
+  struct MatrixFormVol  {
+    int i, j, sym, area;
+    matrix_form_val_t fn;
+    matrix_form_ord_t ord;
+    Hermes::vector<MeshFunction *> ext;
     double scaling_factor;
   };
-  struct MatrixFormSurf {  
-    int i, j, area;       
-    matrix_form_val_t fn;  
-    matrix_form_ord_t ord;  
-    Hermes::vector<MeshFunction *> ext; 
+  struct MatrixFormSurf {
+    int i, j, area;
+    matrix_form_val_t fn;
+    matrix_form_ord_t ord;
+    Hermes::vector<MeshFunction *> ext;
     double scaling_factor;
   };
-  struct VectorFormVol  {  
-    int i, area;          
-    vector_form_val_t fn;  
-    vector_form_ord_t ord;  
-    Hermes::vector<MeshFunction *> ext; 
+  struct VectorFormVol  {
+    int i, area;
+    vector_form_val_t fn;
+    vector_form_ord_t ord;
+    Hermes::vector<MeshFunction *> ext;
     double scaling_factor;
   };
-  struct VectorFormSurf {  
-    int i, area;          
-    vector_form_val_t fn;  
-    vector_form_ord_t ord;  
-    Hermes::vector<MeshFunction *> ext; 
+  struct VectorFormSurf {
+    int i, area;
+    vector_form_val_t fn;
+    vector_form_ord_t ord;
+    Hermes::vector<MeshFunction *> ext;
     double scaling_factor;
   };
 
   // General case.
   void add_matrix_form(MatrixFormVol* mfv);
-  void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-		       SymFlag sym = HERMES_NONSYM, int area = HERMES_ANY, 
+  void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord,
+		       SymFlag sym = HERMES_NONSYM, int area = HERMES_ANY,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, 
-		       SymFlag sym = HERMES_NONSYM, int area = HERMES_ANY, 
+  void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord,
+		       SymFlag sym = HERMES_NONSYM, int area = HERMES_ANY,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
   void add_matrix_form_surf(MatrixFormSurf* mfs);
-  void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-			    int area = HERMES_ANY, 
+  void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord,
+			    int area = HERMES_ANY,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, 
-			    int area = HERMES_ANY, 
+  void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
+			    int area = HERMES_ANY,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
   void add_vector_form(VectorFormVol* vfv);
-  void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, 
-		       int area = HERMES_ANY, 
+  void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord,
+		       int area = HERMES_ANY,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, 
-		       int area = HERMES_ANY, 
+  void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord,
+		       int area = HERMES_ANY,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
   void add_vector_form_surf(VectorFormSurf* vfs);
-  void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, 
-			    int area = HERMES_ANY, 
+  void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord,
+			    int area = HERMES_ANY,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, 
-			    int area = HERMES_ANY, 
+  void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
+			    int area = HERMES_ANY,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
 
   // Wrapper functions utilizing the MarkersConversion class.
-  void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-                       SymFlag sym, std::string area, 
+  void add_matrix_form(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord,
+                       SymFlag sym, std::string area,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, 
-		       SymFlag sym, std::string area, 
+  void add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord,
+		       SymFlag sym, std::string area,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
-  void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
-			    std::string area, 
+  void add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord,
+			    std::string area,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, 
-                            std::string area, 
+  void add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
+                            std::string area,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
-  void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, 
-                       std::string area, 
+  void add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord,
+                       std::string area,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, 
-                       std::string area, 
+  void add_vector_form(vector_form_val_t fn, vector_form_ord_t ord,
+                       std::string area,
                        Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
-  void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, 
-                            std::string area, 
+  void add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord,
+                            std::string area,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-  void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord, 
-			    std::string area, 
+  void add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
+			    std::string area,
                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()); // single equation case
 
   void set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
@@ -165,7 +165,7 @@ public:
   Hermes::vector<MatrixFormSurf> get_mfsurf() { return mfsurf; }
   Hermes::vector<VectorFormVol> get_vfvol() { return vfvol; }
   Hermes::vector<VectorFormSurf> get_vfsurf() { return vfsurf; }
-  
+
   /// Sets volumetric and surface weak forms.
   void set_mfvol(Hermes::vector<MatrixFormVol> mfvol) { this->mfvol = mfvol; }
   void set_mfsurf(Hermes::vector<MatrixFormSurf> mfvol) { this->mfsurf = mfsurf; }
@@ -173,8 +173,8 @@ public:
   void set_vfsurf(Hermes::vector<VectorFormSurf> vfvol) { this->vfsurf = vfsurf; }
 
   /// Deletes all volumetric and surface forms.
-  void delete_all() 
-  { 
+  void delete_all()
+  {
     mfvol.clear();
     mfsurf.clear();
     vfvol.clear();
@@ -196,11 +196,11 @@ protected:
   Hermes::vector<Area> areas;
 
 public:
-  scalar evaluate_fn(int point_cnt, double *weights, Func<double> *values_v, 
-                     Geom<double> *geometry, ExtData<scalar> *values_ext_fnc, Element* element, 
+  scalar evaluate_fn(int point_cnt, double *weights, Func<double> *values_v,
+                     Geom<double> *geometry, ExtData<scalar> *values_ext_fnc, Element* element,
                      Shapeset* shape_set, int shape_inx); ///< Evaluate value of the user defined function.
-  Ord evaluate_ord(int point_cnt, double *weights, Func<Ord> *values_v, 
-                   Geom<Ord> *geometry, ExtData<Ord> *values_ext_fnc, Element* element, 
+  Ord evaluate_ord(int point_cnt, double *weights, Func<Ord> *values_v,
+                   Geom<Ord> *geometry, ExtData<Ord> *values_ext_fnc, Element* element,
                    Shapeset* shape_set, int shape_inx); ///< Evaluate order of the user defined function.
 
   // General case.
@@ -214,7 +214,7 @@ public:
   std::map<std::string, MatrixFormSurf> mfsurf_string_temp;
   std::map<std::string, VectorFormVol>  vfvol_string_temp;
   std::map<std::string, VectorFormSurf> vfsurf_string_temp;
-  
+
   // Function which according to the conversion table provided, updates the above members.
   void update_markers_acc_to_conversion(Mesh::MarkersConversion* markers_conversion);
 
@@ -236,7 +236,7 @@ public:
     std::set<MeshFunction*> ext_set;
   };
 
-  void get_stages(Hermes::vector< Space* > spaces, Hermes::vector< Solution* >& u_ext, 
+  void get_stages(Hermes::vector< Space* > spaces, Hermes::vector< Solution* >& u_ext,
                   std::vector< WeakForm::Stage >& stages, bool rhsonly);
   bool** get_blocks(bool force_diagonal_blocks);
 
@@ -255,7 +255,7 @@ public:
 private:
 
   Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
-                    Mesh* m1, Mesh* m2, 
+                    Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
 
   bool is_in_area_2(int marker, int area) const;

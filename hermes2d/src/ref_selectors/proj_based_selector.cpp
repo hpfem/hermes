@@ -1,4 +1,4 @@
-#define HERMES_REPORT_WARN 
+#define HERMES_REPORT_WARN
 #include "../h2d_common.h"
 #include "../function/solution.h"
 #include "../discrete_problem.h"
@@ -8,7 +8,7 @@
 #include "proj_based_selector.h"
 
 namespace RefinementSelectors {
-  
+
   ProjBasedSelector::ProjBasedSelector(CandList cand_list, double conv_exp, int
           max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
           Range<int>& edge_bubble_order) :

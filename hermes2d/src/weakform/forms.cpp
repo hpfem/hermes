@@ -117,10 +117,10 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   int nc = fu->get_num_components();
   ESpaceType space_type = fu->get_space_type();
   Quad2D* quad = fu->get_quad_2d();
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED  
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
   if (space_type == 0) fu->set_quad_order(order, H2D_FN_ALL);
   else
-#endif    
+#endif
     fu->set_quad_order(order);
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
@@ -142,12 +142,12 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     double *dxy = fu->get_dxy_values();
     double *dyy = fu->get_dyy_values();
 #endif
-    
+
     double2x2 *m;
     if(rm->is_jacobian_const()) {
       m = new double2x2[np];
       double2x2 const_inv_ref_map;
-      
+
       const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
       const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
       const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
@@ -171,7 +171,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     for (int i = 0; i < np; i++, m++, mm++)
 #else
-    for (int i = 0; i < np; i++, m++) 
+    for (int i = 0; i < np; i++, m++)
 #endif
     {
       u->val[i] = fn[i];
@@ -187,7 +187,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
       u->laplace[i] = ( dx[i] * ax + dy[i] * ay + dxx[i] * axx + dxy[i] * axy + dyy[i] * ayy );
 #endif
     }
-    
+
     m -= np;
     if(rm->is_jacobian_const())
       delete [] m;
@@ -207,7 +207,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     if(rm->is_jacobian_const()) {
       m = new double2x2[np];
       double2x2 const_inv_ref_map;
-      
+
       const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
       const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
       const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
@@ -249,7 +249,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     if(rm->is_jacobian_const()) {
       m = new double2x2[np];
       double2x2 const_inv_ref_map;
-      
+
       const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
       const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
       const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
@@ -278,7 +278,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   // L2 Space.
   else if (space_type == HERMES_L2_SPACE)
   {
-    // Same as for H1, except that we currently do not have 
+    // Same as for H1, except that we currently do not have
     // second derivatives of L2 shape functions for triangles.
     u->val = new double [np];
     u->dx  = new double [np];
@@ -287,12 +287,12 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     double *fn = fu->get_fn_values();
     double *dx = fu->get_dx_values();
     double *dy = fu->get_dy_values();
-    
+
     double2x2 *m;
     if(rm->is_jacobian_const()) {
       m = new double2x2[np];
       double2x2 const_inv_ref_map;
-      
+
       const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
       const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
       const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
@@ -315,7 +315,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
       u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
       u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
     }
-		
+
     m -= np;
     if(rm->is_jacobian_const())
       delete [] m;

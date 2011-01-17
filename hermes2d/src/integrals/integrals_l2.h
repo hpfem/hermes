@@ -22,7 +22,7 @@
 //// some l2 integrals ////
 
 template<typename Real, typename Scalar>
-Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
@@ -32,7 +32,7 @@ Scalar l2_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
 }
 
 template<typename Real, typename Scalar>
-Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
@@ -45,7 +45,7 @@ Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
 //// error calculation for adaptivity  ////
 
 template<typename Real, typename Scalar>
-Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, 
+Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
                Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;

@@ -73,7 +73,7 @@ void PrecalcShapeset::set_active_shape(int index)
 {
   // Key creation.
   unsigned key = cur_quad | (mode << 3) | ((unsigned) (max_index[mode] - index) << 4);
-  
+
   // Blank value.
   std::map<uint64_t, std::map<unsigned int, Node*>*>* updated_nodes = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
 
@@ -83,10 +83,10 @@ void PrecalcShapeset::set_active_shape(int index)
   if(tab->insert(make_pair(key, updated_nodes)).second == false)
     // If the value had existed.
     delete updated_nodes;
-  
+
   // Get the proper sub-element tables.
   sub_tables = (*tab)[key];
-  
+
   // Update the Node table.
   update_nodes_ptr();
 
@@ -156,7 +156,7 @@ void PrecalcShapeset::free()
 {
   if (master_pss != NULL) return;
   std::map<unsigned int, std::map<uint64_t, std::map<unsigned int, Node*>*>*>::iterator it;
-  for(it = tables.begin(); it != tables.end(); it++) {  
+  for(it = tables.begin(); it != tables.end(); it++) {
     std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it_inner;
     for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++) {
       std::map<unsigned int, Node*>::iterator it_inner_inner;

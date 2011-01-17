@@ -82,9 +82,9 @@ static inline MItem* new_item()
 {
   std::string* str= new std::string;
   MItem* it = (MItem*) new_block(sizeof(MItem));
-  it->next = NULL; 
+  it->next = NULL;
   it->marker = str;
-  return it; 
+  return it;
 }
 
 static inline MSymbol* new_symbol()

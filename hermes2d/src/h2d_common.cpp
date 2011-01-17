@@ -24,7 +24,7 @@ HERMES_API const std::string h2d_get_quad_order_str(const int quad_order) {
 HERMES_API int h2d_make_edge_order(int mode, int edge, int encoded_order)
 {
   assert(edge < 4);
-  
+
   if (mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2)
     return H2D_GET_H_ORDER(encoded_order);
   else

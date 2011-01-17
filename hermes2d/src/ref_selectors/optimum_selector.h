@@ -257,7 +257,7 @@ namespace RefinementSelectors {
       H2DST_VERTEX = 0x01, ///< Vertex function.
       H2DST_HORIZ_EDGE = 0x02, ///< Horizontal edge function.
       H2DST_VERT_EDGE = 0x04, ///< Verical edge function.
-      H2DST_TRI_EDGE = 0x08, ///< Triangle edge. 
+      H2DST_TRI_EDGE = 0x08, ///< Triangle edge.
       H2DST_BUBBLE = 0x10 ///< Bubble function.
     };
 

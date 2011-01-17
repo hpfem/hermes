@@ -232,7 +232,7 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     if (top <= 0)
     {
       // Push the state of a new base element.
-			// This function only allocates memory for the new state, 
+			// This function only allocates memory for the new state,
 			// with as many Elements* as there are meshes in this stage.
 			// (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
       s = push_state();
@@ -250,13 +250,13 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
         {
 					// Retrieve the Element with this id on the i-th mesh.
           s->e[i] = meshes[i]->get_element(id);
-          if (!s->e[i]->used) 
-					{ 
-						s->e[i] = NULL; 
-						continue; 
+          if (!s->e[i]->used)
+					{
+						s->e[i] = NULL;
+						continue;
 					}
           if (s->e[i]->active && fn != NULL)
-						// Important, sets the active element for all functions that share the i-th mesh 
+						// Important, sets the active element for all functions that share the i-th mesh
             // (PrecalcShapesets, Solutions from previous time/Newton iterations)
 						fn[i]->set_active_element(s->e[i]);
           s->er[i] = H2D_UNITY;
@@ -264,9 +264,9 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
           nused++;
           base = s->e[i];
         }
-				// If there is any used element in this stage we continue with the calculation 
+				// If there is any used element in this stage we continue with the calculation
 				// (break this cycle looking for such an element id).
-        if (nused) 
+        if (nused)
 					break;
         id++;
       }
@@ -302,12 +302,12 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
               fn[i]->push_transform(s->trans[i]-1);
             subs[i] = fn[i]->get_transform();
           }
-					// ..and when it is active we have to activate on it all functions on i-th mesh 
+					// ..and when it is active we have to activate on it all functions on i-th mesh
           // (PrecalcShapesets, Solutions from previous time/Newton iterations)
           else if (s->trans[i] < 0)
           {
             fn[i]->set_active_element(s->e[i]);
-            if (!tri) 
+            if (!tri)
 							init_transforms(fn[i], &s->cr, s->er + i);
             subs[i] = fn[i]->get_transform();
           }
@@ -318,10 +318,10 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     bool leaf = true;
     for (i = 0; i < num; i++)
       if (s->e[i] != NULL)
-        if (!s->e[i]->active) 
-				{ 
-					leaf = false; 
-					break; 
+        if (!s->e[i]->active)
+				{
+					leaf = false;
+					break;
 				}
 
     // if yes, set boundary flags and return the state
@@ -418,7 +418,7 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
               ns->e[i] = s->e[i]->sons[sons[i][son] & 3];
 							// Sets the son's "current mesh" rectangle correctly.
               move_to_son(ns->er + i, s->er + i, sons[i][son]);
-              if (ns->e[i]->active) 
+              if (ns->e[i]->active)
 								ns->trans[i] = -1;
             }
           }
@@ -519,7 +519,7 @@ void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
   int counter = 0;
   double min_elem_area = 1e30;
   Element* e;
-  for_all_base_elements(e, meshes[0]) 
+  for_all_base_elements(e, meshes[0])
   {
     areas[counter] = e->get_area();
     if (areas[counter] < min_elem_area) min_elem_area = areas[counter];
@@ -530,7 +530,7 @@ void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
   double tolerance = min_elem_area/100.;
   for (int i = 1; i < n; i++) {
     counter = 0;
-    for_all_base_elements(e, meshes[i]) 
+    for_all_base_elements(e, meshes[i])
     {
       if (fabs(areas[counter] - e->get_area()) > tolerance) {
         printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());

@@ -52,7 +52,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
 }
 
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
@@ -80,7 +80,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
 }
 
 // DEPRECATED
-Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
@@ -102,7 +102,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
   bc_types->register_callback(bc_type_callback);
   this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
-  
+
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
   this->bc_values = NULL;
@@ -167,7 +167,7 @@ void Space::H2D_CHECK_ORDER(int order)
     error("Order = %d, maximum is 10.", order);
 }
 
-// if the user calls this, then the enumeration of dof 
+// if the user calls this, then the enumeration of dof
 // is updated
 void Space::set_element_order(int id, int order)
 {
@@ -190,7 +190,7 @@ void Space::set_element_order_internal(int id, int order)
   H2D_CHECK_ORDER(order);
 
   resize_tables();
-  if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0) 
+  if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0)
      order = H2D_MAKE_QUAD_ORDER(order, order);
   edata[id].order = order;
   seq++;
@@ -219,7 +219,7 @@ void Space::set_uniform_order(int order, int marker)
   // since space changed, enumerate basis functions
   this->assign_dofs();
 }
-  
+
 void Space::set_uniform_order_internal(Ord2 order, int marker)
 {
   _F_
@@ -252,7 +252,7 @@ void Space::set_element_orders(int* elem_orders_)
 {
   _F_
   resize_tables();
-  
+
   Element* e;
   int counter = 0;
   for_all_elements(e, mesh)
@@ -449,7 +449,7 @@ int Space::assign_dofs(int first_dof, int stride)
   return this->ndof;
 }
 
-void Space::reset_dof_assignment() 
+void Space::reset_dof_assignment()
 {
   _F_
   // First assume that all vertex nodes are part of a natural BC. the member NodeData::n
@@ -745,12 +745,12 @@ int Space::get_num_dofs(Hermes::vector<Space *> spaces)
 }
 
 // This is identical to H3D.
-int Space::assign_dofs(Hermes::vector<Space*> spaces) 
+int Space::assign_dofs(Hermes::vector<Space*> spaces)
 {
   _F_
   int n = spaces.size();
   // assigning dofs to each space
-  int ndof = 0;  
+  int ndof = 0;
   for (int i = 0; i < n; i++) {
     ndof += spaces[i]->assign_dofs(ndof);
   }
@@ -775,15 +775,15 @@ void Space::update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersCon
 }
 
 void Space::update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion)
-{    
+{
   std::map<std::string, BCValues::value_callback>::iterator it;
   for(it = bc_values->value_callbacks_string_temp.begin(); it != bc_values->value_callbacks_string_temp.end(); it++)
     bc_values->add_function(markers_conversion->get_internal_boundary_marker(it->first), it->second);
-    
+
   std::map<std::string, BCValues::value_callback_time>::iterator it_time;
   for(it_time = bc_values->value_callbacks_time_string_temp.begin(); it_time != bc_values->value_callbacks_time_string_temp.end(); it_time++)
     bc_values->add_timedep_function(markers_conversion->get_internal_boundary_marker(it_time->first), it_time->second);
-    
+
   std::map<std::string, scalar>::iterator it_scalar;
   for(it_scalar = bc_values->value_constants_string_temp.begin(); it_scalar != bc_values->value_constants_string_temp.end(); it_scalar++)
     bc_values->add_const(markers_conversion->get_internal_boundary_marker(it_scalar->first), it_scalar->second);

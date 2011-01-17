@@ -49,7 +49,7 @@ void HcurlSpace::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset) 
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset)
   : Space(mesh, shapeset, bc_types, (BCValues*) NULL, Ord2(p_init, p_init))
 {
   init(shapeset, Ord2(p_init, p_init));
@@ -61,7 +61,7 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types, Ord2 p_init, Shapeset* sh
   init(shapeset, p_init);
 }
 
-HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset) 
+HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset)
   : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
 {
   init(shapeset, Ord2(p_init, p_init));
@@ -75,7 +75,7 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types, BCValues* bc_values, Ord2
 
 // All the following constructors are DEPRECATED!
 HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes* bc_types,
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
   if (shapeset == NULL)
@@ -129,8 +129,8 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCTypes*  bc_types,
   this->assign_dofs();
 }
 
-HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
   if (shapeset == NULL)
@@ -156,7 +156,7 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
   this->assign_dofs();
 }
 
-HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
+HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
 		       scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init,
                        Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
@@ -217,7 +217,7 @@ void HcurlSpace::set_shapeset(Shapeset *shapeset)
     error("Wrong shapeset type in HcurlSpace::set_shapeset()");
 }
 
-// Sets element order and updates enumeration of dofs. Intended for 
+// Sets element order and updates enumeration of dofs. Intended for
 // the user.
 void HcurlSpace::set_element_order(int id, int order)
 {

@@ -46,7 +46,7 @@ public:
 
   virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
-  
+
   virtual int get_edge_fn_order(int edge) { return ScalarFunction::get_edge_fn_order(edge); }
 
   Mesh*   get_mesh() const { return mesh; }
@@ -98,7 +98,7 @@ public:
   Solution();
   Solution(Mesh *mesh);
   Solution(Mesh *mesh, ExactFunction exactfn);
-  Solution(Mesh *mesh, scalar init_const); 
+  Solution(Mesh *mesh, scalar init_const);
   Solution (Space* s, Vector* coeff_vec);
   Solution (Space* s, scalar* coeff_vec);
   virtual ~Solution();
@@ -121,10 +121,10 @@ public:
 
   virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
   int get_edge_fn_order(int edge, Space* space, Element* e = NULL);
-  
+
   /// Sets solution equal to Dirichlet lift only, solution vector = 0
   void set_dirichlet_lift(Space* space, PrecalcShapeset* pss = NULL);
-  
+
   /// Enables or disables transformation of the solution derivatives (H1 case)
   /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
   /// H2D_FN_VAL_0 and H2D_FN_VAL_1 will or will not be returned premultiplied by the reference
@@ -181,20 +181,20 @@ public:
   virtual void set_active_element(Element* e);
 
   /// Passes solution components calculated from solution vector as Solutions.
-  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces, 
-                                  Hermes::vector<Solution *> solutions, 
+  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces,
+                                  Hermes::vector<Solution *> solutions,
                                   Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
+  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution,
                                  bool add_dir_lift = true);
-  static void vector_to_solutions(Vector* vec, Hermes::vector<Space *> spaces, 
-                                  Hermes::vector<Solution*> solutions, 
+  static void vector_to_solutions(Vector* vec, Hermes::vector<Space *> spaces,
+                                  Hermes::vector<Solution*> solutions,
                                   Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-  static void vector_to_solution(Vector* vec, Space* space, Solution* solution, 
+  static void vector_to_solution(Vector* vec, Space* space, Solution* solution,
                                  bool add_dir_lift = true);
-  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces, 
-                                  Hermes::vector<Solution *> solutions, Hermes::vector<PrecalcShapeset *> pss, 
+  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces,
+                                  Hermes::vector<Solution *> solutions, Hermes::vector<PrecalcShapeset *> pss,
                                   Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
+  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution,
                                  PrecalcShapeset* pss, bool add_dir_lift = true);
 
   bool own_mesh;
@@ -211,13 +211,13 @@ protected:
 
   /// Precalculated tables for last four used elements.
   /// There is a 2-layer structure of the precalculated tables.
-  /// The first (the lowest) one is the layer where mapping of integral orders to 
+  /// The first (the lowest) one is the layer where mapping of integral orders to
   /// Function::Node takes place. See function.h for details.
   /// The second one is the layer with mapping of sub-element transformation to
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, std::map<unsigned int, Node*>*>* tables[4][4];   
+  std::map<uint64_t, std::map<unsigned int, Node*>*>* tables[4][4];
 
   Element* elems[4][4];
   int cur_elem, oldest[4];

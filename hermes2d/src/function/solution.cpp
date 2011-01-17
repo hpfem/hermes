@@ -184,11 +184,11 @@ void Solution::init()
   num_components = 0;
   e_last = NULL;
   exact_mult = 1.0;
-  
+
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
       tables[i][j] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
-  
+
   mono_coefs = NULL;
   elem_coefs[0] = elem_coefs[1] = NULL;
   elem_orders = NULL;
@@ -206,7 +206,7 @@ Solution::Solution()
   this->init();
 }
 
-Solution::Solution(Mesh *mesh) : MeshFunction(mesh) 
+Solution::Solution(Mesh *mesh) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -214,7 +214,7 @@ Solution::Solution(Mesh *mesh) : MeshFunction(mesh)
   this->own_mesh = false;
 }
 
-Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh) 
+Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -223,7 +223,7 @@ Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
   this->set_exact(mesh, exactfn);
 }
 
-Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh) 
+Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -232,7 +232,7 @@ Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
   this->set_const(mesh, init_const);
 }
 
-Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh()) 
+Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh())
 {
   space_type = s->get_type();
   this->init();
@@ -241,7 +241,7 @@ Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh())
   Solution::vector_to_solution(coeff_vec, s, this);
 }
 
-Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh()) 
+Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh())
 {
   space_type = s->get_type();
   this->init();
@@ -427,7 +427,7 @@ void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
-    
+
     space_type = space->get_type();
     scalar* coeffs = new scalar [vec->length()];
     vec->extract(coeffs);
@@ -474,7 +474,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   int ndof = Space::get_num_dofs(space);
 
   free();
-  
+
   space_type = space->get_type();
 
   num_components = pss->get_num_components();
@@ -628,9 +628,9 @@ void Solution::set_zero_2(Mesh* mesh)
   set_const(mesh, 0.0, 0.0);
 }
 
-void Solution::vector_to_solutions(scalar* solution_vector, 
-                                   Hermes::vector<Space*> spaces, 
-                                   Hermes::vector<Solution*> solutions, 
+void Solution::vector_to_solutions(scalar* solution_vector,
+                                   Hermes::vector<Space*> spaces,
+                                   Hermes::vector<Solution*> solutions,
                                    Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
@@ -643,16 +643,16 @@ void Solution::vector_to_solutions(scalar* solution_vector,
   return;
 }
 
-void Solution::vector_to_solution(scalar* solution_vector, Space* space, 
+void Solution::vector_to_solution(scalar* solution_vector, Space* space,
                                   Solution* solution, bool add_dir_lift)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space), 
-                                Hermes::vector<Solution*>(solution), 
+  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space),
+                                Hermes::vector<Solution*>(solution),
                                 Hermes::vector<bool>(add_dir_lift));
 }
 
-void Solution::vector_to_solutions(Vector* solution_vector, Hermes::vector<Space*> spaces, 
-                                   Hermes::vector<Solution*> solutions, 
+void Solution::vector_to_solutions(Vector* solution_vector, Hermes::vector<Space*> spaces,
+                                   Hermes::vector<Solution*> solutions,
                                    Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
@@ -665,17 +665,17 @@ void Solution::vector_to_solutions(Vector* solution_vector, Hermes::vector<Space
   return;
 }
 
-void Solution::vector_to_solution(Vector* solution_vector, Space* space, 
+void Solution::vector_to_solution(Vector* solution_vector, Space* space,
                                   Solution* solution, bool add_dir_lift)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space), 
-                                Hermes::vector<Solution*>(solution), 
+  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space),
+                                Hermes::vector<Solution*>(solution),
                                 Hermes::vector<bool>(add_dir_lift));
 }
 
-void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space*> spaces, 
-                                   Hermes::vector<Solution*> solutions, 
-                                   Hermes::vector<PrecalcShapeset *> pss, 
+void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space*> spaces,
+                                   Hermes::vector<Solution*> solutions,
+                                   Hermes::vector<PrecalcShapeset *> pss,
                                    Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
@@ -688,12 +688,12 @@ void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space
   return;
 }
 
-void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, 
+void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution,
                                   PrecalcShapeset* pss, bool add_dir_lift)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space), 
-                                Hermes::vector<Solution*>(solution), 
-                                Hermes::vector<PrecalcShapeset *>(pss), 
+  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space),
+                                Hermes::vector<Solution*>(solution),
+                                Hermes::vector<PrecalcShapeset *>(pss),
                                 Hermes::vector<bool>(add_dir_lift));
 }
 
@@ -976,9 +976,9 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
 int Solution::get_edge_fn_order(int edge, Space* space, Element* e)
 {
   if (e == NULL) e = element;
-  
+
   if (sln_type == HERMES_SLN && space != NULL) {
-    return space->get_edge_order(e, edge); 
+    return space->get_edge_order(e, edge);
   } else {
     return ScalarFunction::get_edge_fn_order(edge);
   }

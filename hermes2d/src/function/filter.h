@@ -35,9 +35,9 @@ public:
 
   Filter(Hermes::vector<MeshFunction*> solutions);
   virtual ~Filter();
-	
+
         void init(Hermes::vector<MeshFunction*> solutions);
-  
+
 	virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
   virtual void free();
@@ -55,7 +55,7 @@ protected:
   uint64_t sln_sub[10];
 
   /// There is a 2-layer structure of the precalculated tables.
-  /// The first (the lowest) one is the layer where mapping of integral orders to 
+  /// The first (the lowest) one is the layer where mapping of integral orders to
   /// Function::Node takes place. See function.h for details.
   /// The second one is the layer with mapping of sub-element transformation to
   /// a table from the lowest layer.
@@ -124,9 +124,9 @@ public:
 
 	DXDYFilter() {};
   DXDYFilter(filter_fn_ filter_fn, Hermes::vector<MeshFunction*> solutions);
-	
+
         void init(filter_fn_ filter_fn, Hermes::vector<MeshFunction*> solutions);
-  
+
 		virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
   { error("Not implemented yet"); return 0; }
 
@@ -145,7 +145,7 @@ protected:
 /// \brief Calculates the magnitude of a vector function.
 class HERMES_API MagFilter : public SimpleFilter
 {
-  public: 
+  public:
 		MagFilter() {};
                 MagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 		MagFilter(MeshFunction* sln1, int item1 = H2D_FN_VAL); // for vector-valued sln1

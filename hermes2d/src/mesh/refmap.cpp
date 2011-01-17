@@ -501,7 +501,7 @@ void RefMap::free()
     free_node(it->second);
   nodes.clear();
   if (overflow != NULL) {
-    free_node(overflow); overflow = NULL; 
+    free_node(overflow); overflow = NULL;
   }
 }
 

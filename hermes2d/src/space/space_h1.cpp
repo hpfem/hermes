@@ -25,7 +25,7 @@ int      H1Space::h1_proj_ref = 0;
 
 void H1Space::init(Shapeset* shapeset, Ord2 p_init)
 {
-  if (shapeset == NULL) 
+  if (shapeset == NULL)
   {
     this->shapeset = new H1Shapeset;
     own_shapeset = true;
@@ -80,7 +80,7 @@ H1Space::H1Space(Mesh* mesh, BCTypes* bc_types, scalar (*bc_value_callback_by_co
     : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, p_init)
 {
   _F_
-  if (shapeset == NULL) 
+  if (shapeset == NULL)
   {
     this->shapeset = new H1Shapeset;
     own_shapeset = true;
@@ -103,12 +103,12 @@ H1Space::H1Space(Mesh* mesh, BCTypes* bc_types, scalar (*bc_value_callback_by_co
 }
 
 // DEPRECATED
-H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
+H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 	  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
     Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
   _F_
-  if (shapeset == NULL) 
+  if (shapeset == NULL)
   {
     this->shapeset = new H1Shapeset;
     own_shapeset = true;
@@ -131,8 +131,8 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 }
 
 // DEPRECATED
-H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
-                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, 
+H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
+                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init,
                  Shapeset* shapeset)
         : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {

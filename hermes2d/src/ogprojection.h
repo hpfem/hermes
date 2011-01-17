@@ -22,54 +22,54 @@
 class HERMES_API OGProjection
 {
 public:
-  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction *> source_meshfns, 
-                             scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
+  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction *> source_meshfns,
+                             scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
-  static void project_global(Hermes::vector<Space *> spaces, 
-                             Hermes::vector<Solution*> sols_src, Hermes::vector<Solution*> sols_dest, 
-                             MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
+  static void project_global(Hermes::vector<Space *> spaces,
+                             Hermes::vector<Solution*> sols_src, Hermes::vector<Solution*> sols_dest,
+                             MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
-  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector< std::pair<WeakForm::matrix_form_val_t, 
-                             WeakForm::matrix_form_ord_t> > proj_biforms, 
-                             Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms, 
-                             Hermes::vector<MeshFunction*> source_meshfns, 
+  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector< std::pair<WeakForm::matrix_form_val_t,
+                             WeakForm::matrix_form_ord_t> > proj_biforms,
+                             Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms,
+                             Hermes::vector<MeshFunction*> source_meshfns,
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
-  static void project_global(Space *space, 
+  static void project_global(Space *space,
                              std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> proj_biform,
                              std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
-                             ExactFunction source_fn, scalar* target_vec, 
+                             ExactFunction source_fn, scalar* target_vec,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   /// Global orthogonal projection of one vector-valued ExactFunction.
-  static void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec, 
+  static void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   /// Global orthogonal projection of one scalar-valued ExactFunction.
-  static void project_global(Space *space, ExactFunction source_fn, scalar* target_vec, 
+  static void project_global(Space *space, ExactFunction source_fn, scalar* target_vec,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   /// Projection-based interpolation of an exact function. This is faster than the
   /// global projection since no global matrix problem is solved.
-  static void project_local(Space *space, int proj_norm, ExactFunction source_fn, 
+  static void project_local(Space *space, int proj_norm, ExactFunction source_fn,
                             Mesh* mesh, scalar* target_vec);
 
   // Underlying function for global orthogonal projection.
-  // Not intended for the user. NOTE: the weak form here must be 
-  // a special projection weak form, which is different from 
-  // the weak form of the PDE. If you supply a weak form of the 
-  // PDE, the PDE will just be solved. 
+  // Not intended for the user. NOTE: the weak form here must be
+  // a special projection weak form, which is different from
+  // the weak form of the PDE. If you supply a weak form of the
+  // PDE, the PDE will just be solved.
 protected:
-  static void project_internal(Hermes::vector<Space *> spaces, WeakForm *proj_wf, scalar* target_vec, 
+  static void project_internal(Hermes::vector<Space *> spaces, WeakForm *proj_wf, scalar* target_vec,
                                MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   // The projection functionality below is identical in H2D and H3D.
 
   // H1 projection.
   template<typename Real, typename Scalar>
-  static Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+  static Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -80,7 +80,7 @@ protected:
   }
 
   template<typename Real, typename Scalar>
-  static Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+  static Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                           Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -91,7 +91,7 @@ protected:
   }
 
   template<typename Real, typename Scalar>
-  static Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+  static Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                     Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -102,7 +102,7 @@ protected:
   }
 
   template<typename Real, typename Scalar>
-  static Scalar H1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+  static Scalar H1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                           Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -114,7 +114,7 @@ protected:
 
   // L2 projection.
   template<typename Real, typename Scalar>
-  static Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+  static Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -125,7 +125,7 @@ protected:
   }
 
   template<typename Real, typename Scalar>
-  static Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+  static Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                     Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -137,7 +137,7 @@ protected:
 
   // Hcurl projection.
   template<typename Real, typename Scalar>
-  static Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+  static Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                 Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -150,7 +150,7 @@ protected:
   }
 
   template<typename Real, typename Scalar>
-  static Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+  static Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                 Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -162,10 +162,10 @@ protected:
 
     return result;
   }
- 
+
   // Hdiv projection.
   template<typename Real, typename Scalar>
-  static Scalar Hdivprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+  static Scalar Hdivprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                 Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_
@@ -178,7 +178,7 @@ protected:
   }
 
   template<typename Real, typename Scalar>
-  static Scalar Hdivprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+  static Scalar Hdivprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                 Geom<Real> *e, ExtData<Scalar> *ext)
   {
     _F_

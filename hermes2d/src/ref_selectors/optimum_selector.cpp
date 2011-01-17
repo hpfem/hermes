@@ -282,7 +282,7 @@ namespace RefinementSelectors {
     if (candidates.capacity() < H2DRS_ASSUMED_MAX_CANDS)
       candidates.reserve(H2DRS_ASSUMED_MAX_CANDS);
 
-    //generate all P-candidates (start from intention of generating all possible candidates 
+    //generate all P-candidates (start from intention of generating all possible candidates
     //and restrict it according to the given adapt-type)
     bool iso_p = false;
     int start_quad_order = quad_order;

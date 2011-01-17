@@ -244,7 +244,7 @@ void ScalarView::show(MeshFunction* sln, double eps, int item,
 void ScalarView::show_linearizer_data(double eps, int item)
 {
   double max_abs = range_auto ? -1.0 : std::max(fabs(range_min), fabs(range_max));
-  
+
   update_mesh_info();
 
   create();

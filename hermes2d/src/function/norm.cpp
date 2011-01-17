@@ -28,16 +28,16 @@ double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type)
 {
   double error;
   switch (norm_type) {
-  case HERMES_L2_NORM: 
+  case HERMES_L2_NORM:
     error = calc_abs_error(error_fn_l2, sln1, sln2);
     break;
-  case HERMES_H1_NORM: 
+  case HERMES_H1_NORM:
     error = calc_abs_error(error_fn_h1, sln1, sln2);
     break;
-  case HERMES_HCURL_NORM: 
+  case HERMES_HCURL_NORM:
     error = calc_abs_error(error_fn_hc, sln1, sln2);
     break;
-  case HERMES_HDIV_NORM: 
+  case HERMES_HDIV_NORM:
     error = calc_abs_error(error_fn_hdiv, sln1, sln2);
     break;
   default: error("Unknown norm in calc_error().");
@@ -50,16 +50,16 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
 {
   double norm;
   switch (norm_type) {
-  case HERMES_L2_NORM: 
+  case HERMES_L2_NORM:
     norm = calc_norm(norm_fn_l2, ref_sln);
     break;
-  case HERMES_H1_NORM: 
+  case HERMES_H1_NORM:
     norm = calc_norm(norm_fn_h1, ref_sln);
     break;
-  case HERMES_HCURL_NORM: 
+  case HERMES_HCURL_NORM:
     norm = calc_norm(norm_fn_hc, ref_sln);
     break;
-  case HERMES_HDIV_NORM: 
+  case HERMES_HDIV_NORM:
     norm = calc_norm(norm_fn_hdiv, ref_sln);
     break;
   default: error("Unknown norm in calc_norm().");
@@ -70,7 +70,7 @@ double calc_norm(MeshFunction* ref_sln, int norm_type)
 
 // Calculate norm of a (possibly vector-valued) solution.
 // Take norm from spaces where these solutions belong.
-double calc_norms(Hermes::vector<Solution*> slns) 
+double calc_norms(Hermes::vector<Solution*> slns)
 {
   // Calculate norms for all solutions.
   Hermes::vector<double> norms;
@@ -91,7 +91,7 @@ double calc_norms(Hermes::vector<Solution*> slns)
 }
 
 
-bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right, Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals, 
+bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right, Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
                  double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::vector<ProjNormType> norms)
 {
   bool default_norms = false;
@@ -105,7 +105,7 @@ bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> rig
   }
   else
     default_norms = true;
-  
+
   // Zero the resulting Tuples.
   err_abs.clear();
   norm_vals.clear();
@@ -114,7 +114,7 @@ bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> rig
   err_abs_total = 0;
   norm_total = 0;
   err_rel_total = 0;
-  
+
   // Calculation.
   for(unsigned int i = 0; i < left.size(); i++)
   {
@@ -127,14 +127,14 @@ bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> rig
   err_abs_total = sqrt(err_abs_total);
   norm_total = sqrt(norm_total);
   err_rel_total = err_abs_total / norm_total * 100.;
-  
+
   // Everything went well, return appropriate flag.
   return true;
 }
 
 
 /// Calculates the absolute error between sln1 and sln2 using function fn
-double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), MeshFunction* sln1, 
+double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), MeshFunction* sln1,
                       MeshFunction* sln2)
 {
   // sanity checks
@@ -194,7 +194,7 @@ double calc_rel_error(MeshFunction* sln, MeshFunction* ref_sln, int norm_type)
 {
   double error = calc_abs_error(sln, ref_sln, norm_type);
   double norm = calc_norm(ref_sln, norm_type);
-  
+
   return error/norm;
 }
 

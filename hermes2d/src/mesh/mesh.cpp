@@ -1962,26 +1962,26 @@ void Mesh::MarkersConversion::insert_boundary_marker(int internal_marker, std::s
   return;
 }
 
-std::string Mesh::MarkersConversion::get_user_element_marker(int internal_marker) 
+std::string Mesh::MarkersConversion::get_user_element_marker(int internal_marker)
 {
   if(conversion_table_for_element_markers->find(internal_marker) == conversion_table_for_element_markers->end())
     error("MarkersConversions class asked for a non existing marker %d", internal_marker);
   return conversion_table_for_element_markers->find(internal_marker)->second;
 }
-std::string Mesh::MarkersConversion::get_user_boundary_marker(int internal_marker) 
+std::string Mesh::MarkersConversion::get_user_boundary_marker(int internal_marker)
 {
   if(conversion_table_for_boundary_markers->find(internal_marker) == conversion_table_for_boundary_markers->end())
     error("MarkersConversions class asked for a non existing marker %d", internal_marker);
   return conversion_table_for_boundary_markers->find(internal_marker)->second;
 }
 
-int Mesh::MarkersConversion::get_internal_element_marker(std::string user_marker) 
+int Mesh::MarkersConversion::get_internal_element_marker(std::string user_marker)
 {
   if(conversion_table_for_element_markers_inverse->find(user_marker) == conversion_table_for_element_markers_inverse->end())
     error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
   return conversion_table_for_element_markers_inverse->find(user_marker)->second;
 }
-int Mesh::MarkersConversion::get_internal_boundary_marker(std::string user_marker) 
+int Mesh::MarkersConversion::get_internal_boundary_marker(std::string user_marker)
 {
   if(conversion_table_for_boundary_markers_inverse->find(user_marker) == conversion_table_for_boundary_markers_inverse->end())
     error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());

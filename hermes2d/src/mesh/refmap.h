@@ -71,7 +71,7 @@ public:
   /// points of the specified order. Intended for non-constant jacobian elements.
   double* get_jacobian(int order)
   {
-    if (cur_node->inv_ref_map[order] == NULL) 
+    if (cur_node->inv_ref_map[order] == NULL)
       calc_inv_ref_map(order);
     return cur_node->jacobian[order];
   }
@@ -109,11 +109,11 @@ public:
     if (cur_node->phys_y[order] == NULL) calc_phys_y(order);
     return cur_node->phys_y[order];
   }
-    
+
   /// Returns the triples [x,y,norm] of the tangent to the specified (possibly
   /// curved) edge at the 1D integration points along the edge. The maximum
   /// 1D quadrature rule is used by default, but the user may specify his own
-  /// order. In this case, the edge pseudo-order is expected (as returned by 
+  /// order. In this case, the edge pseudo-order is expected (as returned by
   /// Quad2D::get_edge_points).
   double3* get_tangent(int edge, int order = -1)
   {
@@ -121,7 +121,7 @@ public:
       error("2d quadrature wasn't set.");
     if (order == -1)
       order = quad_2d->get_edge_points(edge);
-  
+
     // NOTE: Order-based caching of geometric data is already employed in DiscreteProblem.
     if(cur_node->tan[edge] != NULL)
     {
@@ -129,7 +129,7 @@ public:
       cur_node->tan[edge] = NULL;
     }
     calc_tangent(edge, order);
-    
+
     return cur_node->tan[edge];
   }
 

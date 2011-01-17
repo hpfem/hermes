@@ -50,7 +50,7 @@ struct WinGeom {
     this->width = width;
     this->height = height;
   };
-}; 
+};
 
 /// View palette type.
 enum ViewPaletteType {

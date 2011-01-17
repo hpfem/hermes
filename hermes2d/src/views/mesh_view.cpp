@@ -171,7 +171,7 @@ void MeshView::on_display()
       sprintf(text, "#%d", elems[i].id);
       draw_text(transform_x(elems[i].x), transform_y(elems[i].y), text, 0);
     }
-  } 
+  }
   else if (b_elem_mrk)  // draw element markers
   {
     glColor3f(0, 0, 0);
@@ -208,13 +208,13 @@ void MeshView::on_key_down(unsigned char key, int x, int y)
       b_ids = !b_ids;
       refresh();
       break;
-      
+
     case 'm':
       if (b_ids) b_ids = false;
       b_elem_mrk = !b_elem_mrk;
       refresh();
       break;
-      
+
     default:
       View::on_key_down(key, x, y);
       break;

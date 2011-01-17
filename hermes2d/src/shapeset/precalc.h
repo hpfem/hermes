@@ -86,16 +86,16 @@ public:
     ctm = stack + top;
   }
 
-  /// Returns the polynomial order of the active shape function on given edge. 
+  /// Returns the polynomial order of the active shape function on given edge.
   virtual int get_edge_fn_order(int edge) { return h2d_make_edge_order(mode, edge, shapeset->get_order(index)); }
-  
+
 protected:
 
   Shapeset* shapeset;
 
   /// Main structure.
   /// There is a 3-layer structure of the precalculated tables.
-  /// The first (the lowest) one is the layer where mapping of integral orders to 
+  /// The first (the lowest) one is the layer where mapping of integral orders to
   /// Function::Node takes place. See function.h for details.
   /// The second one is the layer with mapping of sub-element transformation to
   /// a table from the lowest layer.
@@ -126,9 +126,9 @@ protected:
 
   friend class Solution;
   friend class RefMap;
-  
+
 public:
-    
+
     /// Key for caching precalculated shapeset values on transformed elements.
     struct Key
     {
@@ -158,7 +158,7 @@ public:
       }
 #endif
     };
-    
+
     /// Functor that compares two PrecalcShapeset keys (needed e.g. to create a std::map indexed by these keys);
     struct Compare
     {

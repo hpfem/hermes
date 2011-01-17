@@ -45,11 +45,11 @@ public:
   // For backward compatibility. Good to be deleted as soon as all the examples etc. use the second one.
   L2Space(Mesh* mesh, int p_init, Shapeset* shapeset = NULL);
 
-  L2Space(Mesh* mesh, BCTypes* bc_types, 
+  L2Space(Mesh* mesh, BCTypes* bc_types,
 	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
           Shapeset* shapeset = NULL);
 
-  L2Space(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL, 
+  L2Space(Mesh* mesh = NULL, BCType (*bc_type_callback)(int) = NULL,
 	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
           Shapeset* shapeset = NULL);
 
@@ -57,9 +57,9 @@ public:
 
   virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
-  virtual int get_edge_order(Element* e, int edge) { 
+  virtual int get_edge_order(Element* e, int edge) {
     // There are no continuity constraints on shape functions in L2.
-    return h2d_make_edge_order( e->get_mode(), edge, edata[e->id].order ); 
+    return h2d_make_edge_order( e->get_mode(), edge, edata[e->id].order );
   }
 
   virtual void set_shapeset(Shapeset* shapeset);

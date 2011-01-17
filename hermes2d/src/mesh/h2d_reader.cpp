@@ -241,10 +241,10 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     for (j = 0; j < nv-1; j++)
       if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
         error("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
-    
+
     Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
     int marker;
-    
+
     // If we are dealing with a string as a marker.
     if(elem->marker->size() > 0) {
       // Number of vertices + the marker is 1 bigger than in the previous context.
@@ -274,7 +274,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
         marker = idx[4];
       }
     }
-    
+
     if(nv == 4) {
         check_triangle(i, v0, v1, v2);
         mesh->create_triangle(marker, v0, v1, v2, NULL);
@@ -310,7 +310,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       en = mesh->peek_edge_node(v1, v2);
       if (en == NULL)
         error("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
-      
+
       int marker_to_set;
 
       // If we are dealing with a string as a marker.

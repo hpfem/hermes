@@ -53,7 +53,7 @@ class Solver;
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class HERMES_API DiscreteProblem 
+class HERMES_API DiscreteProblem
 {
 public:
   DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear = false);
@@ -79,26 +79,26 @@ public:
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
   // Precalculate matrix sparse structure.
-  // If force_diagonal_block == true, then (zero) matrix 
-  // antries are created in diagonal blocks even if corresponding matrix weak 
-  // forms do not exist. This is useful if the matrix is later to be merged with 
-  // a matrix that has nonzeros in these blocks. The Table serves for optional 
+  // If force_diagonal_block == true, then (zero) matrix
+  // antries are created in diagonal blocks even if corresponding matrix weak
+  // forms do not exist. This is useful if the matrix is later to be merged with
+  // a matrix that has nonzeros in these blocks. The Table serves for optional
   // weighting of matrix blocks in systems.
-  void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, 
+  void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
               bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
-  // General assembling procedure for nonlinear problems. coeff_vec is the 
-  // previous Newton vector. If force_diagonal_block == true, then (zero) matrix 
-  // antries are created in diagonal blocks even if corresponding matrix weak 
-  // forms do not exist. This is useful if the matrix is later to be merged with 
-  // a matrix that has nonzeros in these blocks. The Table serves for optional 
+  // General assembling procedure for nonlinear problems. coeff_vec is the
+  // previous Newton vector. If force_diagonal_block == true, then (zero) matrix
+  // antries are created in diagonal blocks even if corresponding matrix weak
+  // forms do not exist. This is useful if the matrix is later to be merged with
+  // a matrix that has nonzeros in these blocks. The Table serves for optional
   // weighting of matrix blocks in systems.
-  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, 
+  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
                 bool force_diagonal_blocks = false, Table* block_weights = NULL, bool add_dir_lift_to_external_solutions = true);
 
-  // Assembling for linear problems. Same as the previous functions, but 
+  // Assembling for linear problems. Same as the previous functions, but
   // does not need the coeff_vector.
-  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, 
+  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
                 bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
   // Get the number of unknowns.
@@ -108,7 +108,7 @@ public:
 
   void invalidate_matrix() { have_matrix = false; }
 
-  void set_fvm() {this->is_fvm = true;}  
+  void set_fvm() {this->is_fvm = true;}
 
   // Experimental caching of vector valued (vector) forms.
   struct SurfVectorFormsKey
@@ -117,37 +117,37 @@ public:
     int element_id, isurf, shape_fn;
 #ifdef _MSC_VER
     UINT64 sub_idx;
-    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, UINT64 sub_idx) 
+    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, UINT64 sub_idx)
       : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
 #else
     unsigned int sub_idx;
-    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, unsigned int sub_idx) 
+    SurfVectorFormsKey(WeakForm::vector_form_val_t vfs, int element_id, int isurf, int shape_fn, unsigned int sub_idx)
       : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
 #endif
   };
-  
+
   struct SurfVectorFormsKeyCompare
   {
     bool operator()(SurfVectorFormsKey a, SurfVectorFormsKey b) const
     {
       if (a.vfs < b.vfs)
         return true;
-      else if (a.vfs > b.vfs) 
+      else if (a.vfs > b.vfs)
         return false;
       else
           if (a.element_id < b.element_id)
             return true;
-          else if (a.element_id > b.element_id) 
+          else if (a.element_id > b.element_id)
             return false;
           else
               if (a.isurf < b.isurf)
                 return true;
-              else if (a.isurf > b.isurf) 
+              else if (a.isurf > b.isurf)
                 return false;
               else
                   if (a.sub_idx < b.sub_idx)
                     return true;
-                  else if (a.sub_idx > b.sub_idx) 
+                  else if (a.sub_idx > b.sub_idx)
                     return false;
                   else
                     return (a.shape_fn < b.shape_fn);
@@ -164,22 +164,22 @@ public:
   {
     WeakForm::vector_form_val_t vfv;
     int element_id, shape_fn;
-    VolVectorFormsKey(WeakForm::vector_form_val_t vfv, int element_id, int shape_fn) 
+    VolVectorFormsKey(WeakForm::vector_form_val_t vfv, int element_id, int shape_fn)
       : vfv(vfv), element_id(element_id), shape_fn(shape_fn) {};
   };
-  
+
   struct VolVectorFormsKeyCompare
   {
     bool operator()(VolVectorFormsKey a, VolVectorFormsKey b) const
     {
       if (a.vfv < b.vfv)
         return true;
-      else if (a.vfv > b.vfv) 
+      else if (a.vfv > b.vfv)
         return false;
       else
           if (a.element_id < b.element_id)
             return true;
-          else if (a.element_id > b.element_id) 
+          else if (a.element_id > b.element_id)
             return false;
           else
             return (a.shape_fn < b.shape_fn);
@@ -200,7 +200,7 @@ public:
 protected:
   WeakForm* wf;
 
-  // If the problem has only constant test functions, there is no need for order calculation, 
+  // If the problem has only constant test functions, there is no need for order calculation,
   // which saves time.
   bool is_fvm;
 
@@ -243,17 +243,17 @@ protected:
   void init_cache();
   void delete_cache();
 
-  scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext, 
+  scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
-  scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext, 
+  scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv);
-  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Hermes::vector<Solution *> u_ext, 
+  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
-  scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext, 
+  scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
 
   // Evaluation of forms, discontinuous Galerkin case.
-  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> sln, 
+  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> sln,
                       NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
                       SurfPos* ep);
   scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> sln,
@@ -265,20 +265,20 @@ protected:
 HERMES_API Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
-HERMES_API double get_l2_norm(Vector* vec); 
+HERMES_API double get_l2_norm(Vector* vec);
 
 // New interface, still in developement
 //HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-//		               Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose, 
+//		               Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
 //                             unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
 
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false, 
+			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
                              bool residual_as_function = false,
                              double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6);
 
 HERMES_API bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                             MatrixSolverType matrix_solver, double picard_tol, 
+                             MatrixSolverType matrix_solver, double picard_tol,
 			     int picard_max_iter, bool verbose);
 
 #endif
