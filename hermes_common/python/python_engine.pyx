@@ -20,6 +20,10 @@ cdef extern from "stdcython.h":
 
 import sys
 import traceback
+from numpy cimport (ndarray, npy_intp, import_array, PyArray_SimpleNewFromData,
+        NPY_INT, NPY_DOUBLE, NPY_COMPLEX128)
+from libc.string cimport memcpy
+
 # this is important to be called here, otherwise we can't use the NumPy C/API:
 import_array()
 
