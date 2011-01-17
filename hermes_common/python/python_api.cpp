@@ -27,7 +27,7 @@ void Python::_init(int argc, char* argv[])
         // mechanism should be used instead, once we figure out how to do it:
         int nchars = snprintf(new_path, max_len, "PYTHONPATH=.:../..:../../../python:../hermes_common/:../../hermes_common/:%s", PYTHONPATH);
         if (nchars >= max_len)
-            _error("internal error in hermes_common: PYTHONPATH too long.");
+            error("internal error in hermes_common: PYTHONPATH too long.");
         // We have to make a copy of the string, because new_path[] will get
         // deallocated:
         putenv(strdup(new_path));

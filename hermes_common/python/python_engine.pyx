@@ -6,6 +6,18 @@
 #-----------------------------------------------------------------------
 # Common C++ <-> Python+NumPy conversion tools:
 
+ctypedef double complex cplx
+
+cdef extern from *:
+    ctypedef char* char_p       "char*"
+    ctypedef char* const_char_p "const char*"
+
+    # This is just the C++ "delete" statement
+    void delete(...)
+
+cdef extern from "stdcython.h":
+    void throw_exception(char *msg)
+
 import sys
 import traceback
 # this is important to be called here, otherwise we can't use the NumPy C/API:
