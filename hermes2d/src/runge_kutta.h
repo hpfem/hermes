@@ -21,9 +21,9 @@
 /// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
 /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
 /// and right-hand side of the equation, respectively.
-void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTable* bt,
-                                DiscreteProblem* dp, WeakForm* stage_wf_right,
-                                WeakForm* stage_wf_left);
+void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
+                                DiscreteProblem* dp, WeakForm* stage_wf_left,
+                                WeakForm* stage_wf_right);
 
 /// Takes a matrix M of size ndof times ndof, extends it (formally) to
 /// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and

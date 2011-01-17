@@ -29,19 +29,16 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
+
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
 template<typename Real>
-Real lam(Real u)
-{
-  return 1 + pow(u, 4);
-}
+Real lam(Real u) { return 1 + pow(u, ALPHA);}
 
 // Derivative of the thermal conductivity with respect to 'u'.
 template<typename Real>
-Real dlam_du(Real u) {
-  return 4*pow(u, 3);
-}
+Real dlam_du(Real u) { return ALPHA*pow(u, ALPHA - 1);}
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {

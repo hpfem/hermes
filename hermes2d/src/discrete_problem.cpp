@@ -384,8 +384,9 @@ void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly,
 // General assembling function for nonlinear problems. For linear problems use the
 // light version above.
 // The Table is here for optional weighting of matrix blocks in systems.
-void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly,
-                               bool force_diagonal_blocks, Table* block_weights, bool add_dir_lift_to_external_solutions)
+
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly, 
+                               bool force_diagonal_blocks, Table* block_weights)
 {
   /* BEGIN IDENTICAL CODE WITH H3D */
 
@@ -411,36 +412,10 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     for (int i = 0; i < neq; i++)
     {
       u_ext.push_back(new Solution(this->spaces[i]->get_mesh()));
-      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i], add_dir_lift_to_external_solutions);
+      Solution::vector_to_solution(coeff_vec, this->spaces[i], u_ext[i]);
     }
   }
   else for (int i = 0; i < neq; i++) u_ext.push_back(NULL);
-
-
-
-  /* DEBUG
-  BaseView b0("E", new WinGeom(0, 0, 300, 300));
-  BaseView b1("F", new WinGeom(300, 0, 300, 300));
-  if (neq > 1) {
-    b0.show(this->spaces[0]);
-    b1.show(this->spaces[1]);
-  }
-  ScalarView s0("E", new WinGeom(0, 0, 300, 300));
-  ScalarView s1("F", new WinGeom(300, 0, 300, 300));
-  if (neq > 1) {
-    if (u_ext[0] != NULL && u_ext[1] != NULL) {
-      s0.show(u_ext[0]);
-      s1.show(u_ext[1]);
-      View::wait();
-    }
-  }
-  */
-
-
-
-
-
-
 
   /* END IDENTICAL CODE WITH H3D */
 
@@ -684,10 +659,12 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
             if(vector_valued_forms) {
               vol_forms_key = VolVectorFormsKey(vfv->fn, fv->get_active_element()->id, am->idx[i]);
-              if(vol_forms_cache[vol_forms_key] == NULL)
+              if(vol_forms_cache[vol_forms_key] == NULL) {
                 rhs->add(am->dof[i], eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i]);
-              else
+              }
+              else {
                 rhs->add(am->dof[i], vol_forms_cache[vol_forms_key][m]);
+              }
             }
             else {
               scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];

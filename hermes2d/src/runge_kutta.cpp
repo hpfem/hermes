@@ -17,13 +17,35 @@
 
 #include "hermes2d.h"
 
-// TODO: We do not take advantage of the fact that all blocks in the
-// Jacobian matrix have the same structure. If the problem does not
-// depend explicitly on time, then the blocks in the Jacobian matrix
-// are the same up to a multiplicative constant.
-void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
-                     DiscreteProblem* dp, WeakForm* stage_wf_right,
-                     WeakForm* stage_wf_left)
+// TODO LIST: 
+//
+// (1) Enable more equations than one. Right now rk_time_step() does not 
+//     work for systems.
+//
+// (2) Enable all other matrix solvers, so far UMFPack is hardwired here.
+//
+// (3) We do not take advantage of the fact that all blocks in the 
+//     Jacobian matrix have the same structure. Thus it is enough to 
+//     assemble the matrix M (one block) and copy the sparsity structure
+//     into all remaining nonzero blocks (and diagonal blocks). Right 
+//     now, the sparsity structure is created expensively in each block 
+//     again.
+//
+// (4) If space does not change, the sparsity does not change. Right now 
+//     we discard everything at the end of every time step, we should not 
+//     do it.  
+//
+// (5) If the problem does not depend explicitly on time, then all the blocks 
+//     in the Jacobian matrix of the stationary residual are the same up 
+//     to a multiplicative constant. Thus they do not have to be aassembled 
+//     from scratch.
+// 
+// (4) If the problem is linear, then the Jacobian is constant. If Space 
+//     does not change between time steps, we should keep it. 
+
+void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
+                     DiscreteProblem* dp, WeakForm* stage_wf_left, 
+                     WeakForm* stage_wf_right) 
 {
   // Number of stages.
   int num_stages = bt->get_size();
@@ -79,7 +101,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     }
   }
 
-  // Add mass volumetric form.
+  // Add mass volumetric form (only one block).
   WeakForm::MatrixFormVol mfv_00;
   mfv_00.i = 0;
   mfv_00.j = 0;
@@ -188,12 +210,12 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     error("Sorry, rk_time_step() does not work with systems yet.");
 
   // Matrix for the time derivative part of the equation (left-hand side).
-  SparseMatrix* matrix_left = create_matrix(matrix_solver);
+  UMFPackMatrix* matrix_left = new UMFPackMatrix();
   //Vector* vector_left = create_vector(matrix_solver);
 
   // Matrix and vector for the rest (right-hand side).
-  SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Vector* vector_right = create_vector(matrix_solver);
+  UMFPackMatrix* matrix_right = new UMFPackMatrix();
+  UMFPackVector* vector_right = new UMFPackVector();
 
   // Create matrix solver.
   Solver* solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
@@ -210,14 +232,20 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // to define a num_stages x num_stages block weak formulation.
   Hermes::vector<Space*> stage_spaces;
   stage_spaces.push_back(dp->get_space(0));
-  for (int i = 1; i < num_stages; i++)
+  for (int i = 1; i < num_stages; i++) {
     stage_spaces.push_back(dp->get_space(0)->dup(mesh));
+  }
+  Space::assign_dofs(stage_spaces);
 
   // Create a multistage weak formulation.
   WeakForm stage_wf_left;                   // For the matrix M (size ndof times ndof).
   WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right),
                                             // size num_stages*ndof times num_stages*ndof.
+<<<<<<< HEAD
   create_stage_wf(current_time, time_step, bt, dp, &stage_wf_right, &stage_wf_left);
+=======
+  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right); 
+>>>>>>> github/master
 
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
@@ -244,11 +272,21 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     add_dir_lift.push_back(false);
   }
 
+  // Assemble the block-diagonal mass matrix M of size ndof times ndof.
+  // The corresponding part of the global residual vector is obtained 
+  // just by multiplication.
+  stage_dp_left.assemble(matrix_left);
+
+  printf("matrix_left = %g\n", matrix_left->get(0, 0));
+ 
+
   // The Newton's loop.
   double residual_norm;
   int it = 1;
   while (true)
   {
+    printf("coeff_vec[0] = %g\n", coeff_vec[0]);
+
     // Prepare vector Y_n + h\sum_{j=1}^s a_{ij} K_j.
     for (int idx = 0; idx < ndof; idx++) {
       scalar increment_i = 0;
@@ -260,11 +298,14 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       }
     }
 
+<<<<<<< HEAD
     // Assemble the block-diagonal mass matrix M of size ndof times ndof.
     // The corresponding part of the global residual vector is obtained
     // just by multiplication.
     stage_dp_left.assemble(matrix_left);
 
+=======
+>>>>>>> github/master
     /*
       FILE* f = fopen("debug-left.txt", "w");
       matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE);
@@ -281,9 +322,18 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       printf("\n");
     }
     */
+   
+    printf("K_vector before multiplication with M: %g %g\n", K_vector[0], K_vector[1]);
 
+<<<<<<< HEAD
     multiply_as_diagonal_block_matrix((UMFPackMatrix*)matrix_left, num_stages,
+=======
+    multiply_as_diagonal_block_matrix(matrix_left, num_stages, 
+>>>>>>> github/master
                                       K_vector, vector_left);
+
+    printf("vector_left (M times K_vector): %g %g\n", vector_left[0], vector_left[1]);
+    printf("K_vector after multiplication with M: %g %g\n", K_vector[0], K_vector[1]);
 
     /*
     if (it == 2) {
@@ -301,6 +351,12 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     bool force_diagonal_blocks = true;
     stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right,
                             rhs_only, force_diagonal_blocks);
+
+    printf("u_prev_vec: %g %g\n", u_prev_vec[0], u_prev_vec[1]);
+    printf("matrix_right = %g %g %g %g\n", matrix_right->get(0, 0), matrix_right->get(0, 1),
+                                           matrix_right->get(1, 0), matrix_right->get(1, 1));
+    printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
+    
 
     /*
       FILE* f = fopen("debug-right.txt", "w");
@@ -335,8 +391,19 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Putting the two parts together into matrix_right and rhs_right.
     //((UMFPackMatrix*)matrix_right)->add_matrix((UMFPackMatrix*)matrix_left);
+<<<<<<< HEAD
     ((UMFPackMatrix*)matrix_right)->add_to_diagonal_blocks(num_stages,
                                                            (UMFPackMatrix*)matrix_left);
+=======
+
+    printf("Adding M to diagonal of matrix_right.\n");
+
+    matrix_right->add_to_diagonal_blocks(num_stages, matrix_left);
+
+    printf("matrix_right = %g %g %g %g\n", matrix_right->get(0, 0), matrix_right->get(0, 1),
+                                           matrix_right->get(1, 0), matrix_right->get(1, 1));
+
+>>>>>>> github/master
     /*
       f = fopen("debug-composite.txt", "w");
       matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE);
@@ -346,7 +413,17 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     */
 
     //((UMFPackMatrix*)matrix_right)->add_to_diagonal(1.0);
+
+    printf("Adding vector_left to vector_right.\n");
+
+
+
     vector_right->add_vector(vector_left);
+
+    //vector_right->set(0, -99.302);
+    //vector_right->set(1, -99.302);
+
+    printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
 
     /*
     if (it == 2) {
@@ -374,7 +451,15 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+
+    printf("Changing sign of vector_right.\n");
+
     vector_right->change_sign();
+<<<<<<< HEAD
+=======
+    
+    printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
+>>>>>>> github/master
 
     // Measure the residual norm.
     if (HERMES_RESIDUAL_AS_VECTOR_RK) {
@@ -409,12 +494,16 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix solver failed.\n");
 
+    printf("solution vector: %g %g\n", solver->get_solution()[0], 
+                                       solver->get_solution()[1]);
+
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < num_stages*ndof; i++) {
       K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
-      //printf("K_vector[%d] = %g\n", i, K_vector[i]);
     }
-    //exit(0);
+
+    printf("new K_vector: %g %g\n", K_vector[0], K_vector[1]);
+
 
     // Increase iteration counter.
     it++;
