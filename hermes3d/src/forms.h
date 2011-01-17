@@ -228,4 +228,6 @@ public:
 	}
 };
 
+void HERMES_API free_ext_fns_ord(ExtData<Ord> * ext);
+
 #endif /* _FORMS_H_ */

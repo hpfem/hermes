@@ -735,6 +735,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<S
   int ord_idx = order.get_idx();
 
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ou);
@@ -838,6 +839,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<S
   int ord_idx = order.get_idx();
 
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ov);
@@ -939,6 +941,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<
   int ord_idx = face_order.get_idx();
 
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ou);
@@ -1041,6 +1044,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
   int ord_idx = face_order.get_idx();
  
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ov);

@@ -304,6 +304,14 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	return u;
 }
 
+void free_ext_fns_ord(ExtData<Ord> * ext) {
+  _F_
+  for (int i = 0; i < ext->nf; i++) {
+      free_fn(ext->fn[i]);
+      delete ext->fn[i];
+  }
+}
+
 void free_fn(Func<Ord> *f) {
 	_F_
 	delete f->val;
