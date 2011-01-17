@@ -17,7 +17,8 @@
 int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalues.
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
-double TARGET_VALUE = -10.0;                      // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
+double TARGET_VALUE = 2;// -10.0;
+                      // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -26,7 +27,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double V(double x, double y) {
   double r = sqrt(x*x + y*y);
-  return -1./(0.001 + r*r);
+  return 0.0;
+  //return -1./(0.001 + r*r);
 }
 
 // Boundary markers.
