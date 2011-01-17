@@ -3,6 +3,11 @@
 # file for the exact terms).
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
+# Compile this with:
+# $ cython --cplus python_engine.pyx
+# and it will generate the python_engine.cpp and python_engine_api.h files,
+# that are included with the project. Do this whenever you modify this file.
+
 #-----------------------------------------------------------------------
 # Common C++ <-> Python+NumPy conversion tools:
 
