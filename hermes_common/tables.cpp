@@ -82,7 +82,6 @@ ButcherTable::ButcherTable(int size) : Table(size)
 ButcherTable::ButcherTable(ButcherTableType butcher_table)
 {
   double gamma = 1./sqrt(2.);
-
   switch (butcher_table) {
     case Explicit_RK_1: // Explicit Euler.
       this->alloc(1);

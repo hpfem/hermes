@@ -94,7 +94,7 @@ public:
   // a matrix that has nonzeros in these blocks. The Table serves for optional 
   // weighting of matrix blocks in systems.
   void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, 
-                bool force_diagonal_blocks = false, Table* block_weights = NULL, bool add_dir_lift_to_external_solutions = true);
+                bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
   // Assembling for linear problems. Same as the previous functions, but 
   // does not need the coeff_vector.
