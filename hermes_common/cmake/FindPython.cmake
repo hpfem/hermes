@@ -12,6 +12,9 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PYTHON DEFAULT_MSG PYTHON_INCLUDE_PATH)
 
+# TODO: Determine this automatically
+SET(PYTHON_LIBRARY python2.6)
+
 
 # Links a Python extension module.
 #
