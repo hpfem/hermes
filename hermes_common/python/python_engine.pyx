@@ -11,7 +11,7 @@
 #-----------------------------------------------------------------------
 # Common C++ <-> Python+NumPy conversion tools:
 
-ctypedef double complex cplx
+#ctypedef double complex cplx
 
 cdef extern from *:
     ctypedef char* char_p       "char*"
@@ -92,12 +92,12 @@ cdef api object c2numpy_double_inplace(double *A, int len):
     cdef npy_intp dim = len
     return PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, A)
 
-cdef api object c2numpy_double_complex_inplace(cplx *A, int len):
-    """
-    Construct the double NumPy array inplace (don't copy any data).
-    """
-    cdef npy_intp dim = len
-    return PyArray_SimpleNewFromData(1, &dim, NPY_COMPLEX128, A)
+#cdef api object c2numpy_double_complex_inplace(cplx *A, int len):
+#    """
+#    Construct the double NumPy array inplace (don't copy any data).
+#    """
+#    cdef npy_intp dim = len
+#    return PyArray_SimpleNewFromData(1, &dim, NPY_COMPLEX128, A)
 
 _AA = None
 
@@ -141,25 +141,25 @@ cdef api void numpy2c_double_inplace(object A_n, double **A_c, int *n):
     n[0] = len(A)
     A_c[0] = <double *>(A.data)
 
-cdef api void numpy2c_double_complex_inplace(object A_n, cplx **A_c, int *n):
-    """
-    Returns the C array, that points to the numpy array (inplace).
-
-    Only if strides != sizeof(double), the data get copied first.
-
-    Important note: you need to use the A_c array immediately after calling
-    this function in C, otherwise numpy could deallocate the array, especially
-    if the _AA global variable was deallocated.
-    """
-    cdef ndarray A = A_n
-    if not (A.nd == 1 and A.strides[0] == sizeof(cplx)):
-        from numpy import array
-        A = array(A.flat, dtype="complex128")
-        # this is needed so that numpy doesn't dealocate the arrays
-        global _AA
-        _AA = A
-    n[0] = len(A)
-    A_c[0] = <cplx *>(A.data)
+#cdef api void numpy2c_double_complex_inplace(object A_n, cplx **A_c, int *n):
+#    """
+#    Returns the C array, that points to the numpy array (inplace).
+#
+#    Only if strides != sizeof(double), the data get copied first.
+#
+#    Important note: you need to use the A_c array immediately after calling
+#    this function in C, otherwise numpy could deallocate the array, especially
+#    if the _AA global variable was deallocated.
+#    """
+#    cdef ndarray A = A_n
+#    if not (A.nd == 1 and A.strides[0] == sizeof(cplx)):
+#        from numpy import array
+#        A = array(A.flat, dtype="complex128")
+#        # this is needed so that numpy doesn't dealocate the arrays
+#        global _AA
+#        _AA = A
+#    n[0] = len(A)
+#    A_c[0] = <cplx *>(A.data)
 
 cdef api void run_cmd(const_char_p text, object namespace):
     try:

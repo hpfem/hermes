@@ -1,7 +1,7 @@
 #include <stdexcept>
 
 #include "python_api.h"
-#include "matrix.h"
+#include "python_engine_api.h"
 
 static int python_count=0;
 
@@ -34,8 +34,8 @@ void Python::_init(int argc, char* argv[])
         Py_Initialize();
         if (argc >= 0)
             PySys_SetArgv(argc, argv);
-        if (import__hermes_common())
-            throw std::runtime_error("hermes_common failed to import.");
+        if (import__python_engine())
+            throw std::runtime_error("python_engine failed to import.");
     }
     this->_namespace = namespace_create();
 }
