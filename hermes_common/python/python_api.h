@@ -6,7 +6,9 @@
 #ifndef __HERMES_COMMON_PYTHON_API_H
 #define __HERMES_COMMON_PYTHON_API_H
 
-#include "_hermes_common_api_new.h"
+#undef _POSIX_C_SOURCE
+#undef _XOPEN_SOURCE
+#include "Python.h"
 
 /*
     This is a nice C++ Python API and the only header file that you should
