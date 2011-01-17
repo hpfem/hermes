@@ -70,8 +70,8 @@
     I Done. \endverbatim on screen if all events are enabled.
  */
  
-#ifndef __HERMES_LOGGING_H_
-#define __HERMES_LOGGING_H_
+#ifndef __HERMES_COMMON_LOGGING_H_
+#define __HERMES_COMMON_LOGGING_H_
 
 #include "logging.h"
 

@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __HERMES_ARRAY_H
-#define __HERMES_ARRAY_H
+#ifndef __HERMES_COMMON_ARRAY_H
+#define __HERMES_COMMON_ARRAY_H
 
 #include <vector>
 #include <limits.h>

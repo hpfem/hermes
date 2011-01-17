@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __HERMES_PRECOND_IFPACK_H_
-#define __HERMES_PRECOND_IFPACK_H_
+#ifndef __HERMES_COMMON_PRECOND_IFPACK_H_
+#define __HERMES_COMMON_PRECOND_IFPACK_H_
 
 #include "precond.h"
 #include "epetra.h"

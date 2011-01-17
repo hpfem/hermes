@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _SOLVER_EPETRA_H_
-#define _SOLVER_EPETRA_H_
+#ifndef __HERMES_COMMON_SOLVER_EPETRA_H_
+#define __HERMES_COMMON_SOLVER_EPETRA_H_
 
 #include "../matrix.h"
 

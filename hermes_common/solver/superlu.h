@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _SUPERLU_SOLVER_H_
-#define _SUPERLU_SOLVER_H_
+#ifndef __HERMES_COMMON_SUPERLU_SOLVER_H_
+#define __HERMES_COMMON_SUPERLU_SOLVER_H_
 
 #include "solver.h"
 #include "../matrix.h"

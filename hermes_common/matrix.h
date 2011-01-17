@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef __MATRIX_H
-#define __MATRIX_H
+#ifndef __HERMES_COMMON_MATRIX_H
+#define __HERMES_COMMON_MATRIX_H
 
 #include "common.h"
 #include "error.h"

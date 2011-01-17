@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _ERROR_H_
-#define _ERROR_H_
+#ifndef __HERMES_COMMON_ERROR_H_
+#define __HERMES_COMMON_ERROR_H_
 
 #include "compat.h"
 

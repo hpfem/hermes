@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __NOX_SOLVER_H_
-#define __NOX_SOLVER_H_
+#ifndef __HERMES_COMMON_NOX_SOLVER_H_
+#define __HERMES_COMMON_NOX_SOLVER_H_
 
 #if defined(H2D_REAL) || defined(H2D_COMPLEX)
   #include "../../hermes2d/src/discrete_problem.h"
