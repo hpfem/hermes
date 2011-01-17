@@ -15,7 +15,7 @@ Python::Python(int argc, char* argv[])
     this->_init(argc, argv);
 }
 
-extern void initpython_engine();
+PyMODINIT_FUNC initpython_engine(void); /*proto*/
 
 void Python::_init(int argc, char* argv[])
 {
