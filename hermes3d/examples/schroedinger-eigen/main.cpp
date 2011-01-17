@@ -3,7 +3,7 @@
 #include "config.h"
 #include "hermes3d.h"
 #include <stdio.h>
-
+#define HERMES__REPORT_INFO
 //  This example solves the eigenproblem for the time-independent Schroedinger 
 //  equation in a cube with zero boundary conditions. Python and Pysparse must
 //  be installed. 
@@ -24,7 +24,7 @@ int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalu
 int P_INIT_X = 4;                                   // Uniform polynomial degree of mesh elements.
 int P_INIT_Y = 4;                                   // Uniform polynomial degree of mesh elements.
 int P_INIT_Z = 4;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
+const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 3.0;
 // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
