@@ -20,8 +20,8 @@ cdef extern from *:
     # This is just the C++ "delete" statement
     void delete(...)
 
-cdef extern from "stdcython.h":
-    void throw_exception(char *msg)
+#cdef extern from "stdcython.h":
+#    void throw_exception(char *msg)
 
 import sys
 import traceback
