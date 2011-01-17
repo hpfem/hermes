@@ -81,7 +81,8 @@ set(SRC
        h2d_common.cpp  
        discrete_problem.cpp
        runge_kutta.cpp
-
+       boundaryconditions/boundaryconditions.cpp
+       
        ${HERMES_COMMON_DIR}/common.cpp    
        ${HERMES_COMMON_DIR}/hermes_logging.cpp
        ${HERMES_COMMON_DIR}/common_time_period.cpp
