@@ -14,10 +14,8 @@ static PyObject *(*c2numpy_int)(int *, int);
 static PyObject *(*c2numpy_int_inplace)(int *, int);
 static PyObject *(*c2numpy_double)(double *, int);
 static PyObject *(*c2numpy_double_inplace)(double *, int);
-static PyObject *(*c2numpy_double_complex_inplace)(__pyx_t_double_complex *, int);
 static void (*numpy2c_int_inplace)(PyObject *, int **, int *);
 static void (*numpy2c_double_inplace)(PyObject *, double **, int *);
-static void (*numpy2c_double_complex_inplace)(PyObject *, __pyx_t_double_complex **, int *);
 static void (*run_cmd)(const char*, PyObject *);
 
 #ifndef __PYX_HAVE_API_FUNC_import_module
@@ -118,10 +116,8 @@ static int import_python_engine(void) {
   if (__Pyx_ImportFunction(module, "c2numpy_int_inplace", (void (**)(void))&c2numpy_int_inplace, "PyObject *(int *, int)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "c2numpy_double", (void (**)(void))&c2numpy_double, "PyObject *(double *, int)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "c2numpy_double_inplace", (void (**)(void))&c2numpy_double_inplace, "PyObject *(double *, int)") < 0) goto bad;
-  if (__Pyx_ImportFunction(module, "c2numpy_double_complex_inplace", (void (**)(void))&c2numpy_double_complex_inplace, "PyObject *(__pyx_t_double_complex *, int)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "numpy2c_int_inplace", (void (**)(void))&numpy2c_int_inplace, "void (PyObject *, int **, int *)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "numpy2c_double_inplace", (void (**)(void))&numpy2c_double_inplace, "void (PyObject *, double **, int *)") < 0) goto bad;
-  if (__Pyx_ImportFunction(module, "numpy2c_double_complex_inplace", (void (**)(void))&numpy2c_double_complex_inplace, "void (PyObject *, __pyx_t_double_complex **, int *)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "run_cmd", (void (**)(void))&run_cmd, "void (const char*, PyObject *)") < 0) goto bad;
   Py_DECREF(module); module = 0;
   return 0;
