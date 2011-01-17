@@ -12,7 +12,6 @@ set(SRC
     adapt.cpp graph.cpp h1_polys.cpp
     weakform.cpp
   ${HERMES_COMMON_DIR}/common.cpp
-  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/hermes_logging.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp
   ${HERMES_COMMON_DIR}/error.cpp
