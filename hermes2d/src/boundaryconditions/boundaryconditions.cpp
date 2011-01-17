@@ -42,7 +42,7 @@ scalar DirichletBoundaryCondition::function(double x, double y) const {
   return 0.0;
 };
 
-BoundaryCondition::BCType DirichletBoundaryCondition::get_type() {
+BoundaryCondition::BoundaryConditionType DirichletBoundaryCondition::get_type() {
   return BoundaryCondition::BC_DIRICHLET;
 };
 
@@ -58,7 +58,7 @@ scalar NeumannBoundaryCondition::function(double x, double y) const {
   return 0.0;
 };
 
-BoundaryCondition::BCType NeumannBoundaryCondition::get_type() {
+BoundaryCondition::BoundaryConditionType NeumannBoundaryCondition::get_type() {
   return BoundaryCondition::BC_NEUMANN;
 };
 
@@ -80,7 +80,7 @@ scalar NewtonBoundaryCondition::function_g(double x, double y) const {
   return 0.0;
 };
 
-BoundaryCondition::BCType NewtonBoundaryCondition::get_type() {
+BoundaryCondition::BoundaryConditionType NewtonBoundaryCondition::get_type() {
   return BoundaryCondition::BC_NEWTON;
 };
 

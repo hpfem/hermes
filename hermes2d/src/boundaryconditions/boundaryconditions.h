@@ -43,14 +43,14 @@ protected:
   
   /// Types of boundary conditions.
   /// There is no need to a special marker BC_NONE, as the default condition is zero Dirichlet.
-  enum BCType {
+  enum BoundaryConditionType {
     BC_DIRICHLET, ///< Dirichlet BC.
     BC_NEUMANN,   ///< Neumann BC.
     BC_NEWTON     ///< Newton BC.
   };
   
   /// Types of description of boundary values, either a function (callback), or a constant.
-  enum BCValueType {
+  enum BoundaryConditionValueType {
     BC_FUNCTION,
     BC_VALUE
   };
@@ -75,10 +75,10 @@ public:
   virtual ~DirichletBoundaryCondition();
 
   /// Pure virtual function giving info whether u_Dirichlet is a constant or a function.
-  virtual BCValueType get_value_type() const = 0;
+  virtual BoundaryConditionValueType get_value_type() const = 0;
 
   /// Gets the type of this boundary condition.
-  BCType get_type();
+  BoundaryConditionType get_type();
 
 protected:
   /// Represents a function prescribed on the boundary.
@@ -100,10 +100,10 @@ public:
   virtual ~NeumannBoundaryCondition();
 
   /// Pure virtual function giving info whether u_Neumann is a constant or a function.
-  virtual BCValueType get_value_type() const = 0;
+  virtual BoundaryConditionValueType get_value_type() const = 0;
   
   /// Gets the type of this boundary condition.
-  BCType get_type();
+  BoundaryConditionType get_type();
 
 protected:
   /// Represents a function prescribed on the boundary.
@@ -125,13 +125,13 @@ public:
   virtual ~NewtonBoundaryCondition();
 
   /// Pure virtual function giving info whether u_Newton is a constant or a function.
-  virtual BCValueType get_value_type_u() const = 0;
+  virtual BoundaryConditionValueType get_value_type_u() const = 0;
 
   /// Pure virtual function giving info whether g is a constant or a function.
-  virtual BCValueType get_value_type_g() const = 0;
+  virtual BoundaryConditionValueType get_value_type_g() const = 0;
 
   /// Gets the type of this boundary condition.
-  BCType get_type();
+  BoundaryConditionType get_type();
 
 protected:
   /// Represents a function prescribed on the boundary.
