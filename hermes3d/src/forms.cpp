@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+//#define HERMES_REPORT_INFO
 #include "forms.h"
 #include "../../hermes_common/callstack.h"
 #include "integrals/hcurl.h"
@@ -82,8 +82,7 @@ void free_geom(Geom<double> *e) {
 Func<Ord> *init_fn_ord(const Ord3 &order) {
 	_F_
 	int o = order.get_ord();
-	Ord *d = new Ord(o);
-
+	Ord *d = new Ord(o);	//info("in init_fn_ord: o=%d",o); 
 	Func<Ord> * f = new Func<Ord>;
 	f->val = d;
 	f->dx = f->dy = f->dz = d;
@@ -238,6 +237,7 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	u->nc = f->get_num_components();
 	f->precalculate(np, pt, FN_DEFAULT);
 	if (u->nc == 1) {
+	  //info("in init_fn np=%d",np);
 		u->val = new scalar [np]; MEM_CHECK(u->val);
 		u->dx = new scalar [np]; MEM_CHECK(u->dx);
 		u->dy = new scalar [np]; MEM_CHECK(u->dy);
