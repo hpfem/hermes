@@ -15,26 +15,20 @@ Python::Python(int argc, char* argv[])
     this->_init(argc, argv);
 }
 
+extern void initpython_engine();
+
 void Python::_init(int argc, char* argv[])
 {
     python_count++;
     if (python_count == 1) {
-        char *PYTHONPATH = getenv("PYTHONPATH");
-        // (If PYTHONPATH is not defined, it will be NULL)
-        int max_len = 10000;
-        char new_path[max_len];
-        // This is a hack, so that we can load hermes_common below. Some better
-        // mechanism should be used instead, once we figure out how to do it:
-        int nchars = snprintf(new_path, max_len, "PYTHONPATH=.:../..:../../../python:../hermes_common/:../../hermes_common/:%s", PYTHONPATH);
-        if (nchars >= max_len)
-            error("internal error in hermes_common: PYTHONPATH too long.");
-        // We have to make a copy of the string, because new_path[] will get
-        // deallocated:
-        putenv(strdup(new_path));
         Py_Initialize();
         if (argc >= 0)
             PySys_SetArgv(argc, argv);
-        if (import__python_engine())
+        // This initializes the Python module using Python C / API:
+        initpython_engine();
+        // This imports the module using Cython functionality, so that we can
+        // use the Cython api functions
+        if (import_python_engine())
             throw std::runtime_error("python_engine failed to import.");
     }
     this->_namespace = namespace_create();
