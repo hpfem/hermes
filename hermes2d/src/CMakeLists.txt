@@ -107,6 +107,8 @@ set(SRC
        ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
 
        ${TEUCHOS_SOURCES}
+
+       ${HERMES_COMMON_DIR}/python/python_api.cpp
        )
 
 include(PickRealOrCplxLibs)
