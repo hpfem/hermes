@@ -75,11 +75,22 @@ UMFPackMatrix::~UMFPackMatrix() {
   free();
 }
 
+void UMFPackMatrix::multiply(scalar* vector_in, scalar* vector_out) 
+{
+  int n = this->size;
+  for (int j=0; j<n; j++) vector_out[j] = 0;
+  for (int j=0; j<n; j++) {
+    for (int i = Ap[j]; i < Ap[j + 1]; i++) {
+      vector_out[j] += vector_in[Ai[i]]*Ax[i];
+    }
+  }
+}
+
 void UMFPackMatrix::alloc() {
   _F_
   assert(pages != NULL);
   if (size <= 0)
-      error("UMFPack failed, matrix size must be greater than 0");
+      error("UMFPack failed, matrix size must be greater than 0.");
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];
@@ -109,9 +120,9 @@ void UMFPackMatrix::alloc() {
 void UMFPackMatrix::free() {
   _F_
   nnz = 0;
-  delete [] Ap; Ap = NULL;
-  delete [] Ai; Ai = NULL;
-  delete [] Ax; Ax = NULL;
+  if (Ap != NULL) {delete [] Ap; Ap = NULL;}
+  if (Ai != NULL) {delete [] Ai; Ai = NULL;}
+  if (Ax != NULL) {delete [] Ax; Ax = NULL;}
 }
 
 scalar UMFPackMatrix::get(int m, int n)
@@ -167,6 +178,21 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
       return true;
 
+    case DF_MATRIX_MARKET:
+    {
+      fprintf(file,"%%%%MatrixMarket matrix coordinate real symmetric\n");
+      int nnz_sym=0;
+      for (int j = 0; j < size; j++)
+        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          if (j <= Ai[i]) nnz_sym++;
+      fprintf(file,"%d %d %d\n", size, size, nnz_sym);
+      for (int j = 0; j < size; j++)
+        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1 ,Ax[i]);
+
+      return true;
+    }
+
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
@@ -190,15 +216,36 @@ bool UMFPackMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 }
 
 int UMFPackMatrix::get_matrix_size() const {
+  return size;
+}
+
+/* THIS WAS WRONG
+int UMFPackMatrix::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
-  /*          Ai             Ax                      Ap                     nnz     */    
+  //          Ai             Ax                      Ap                     nnz         
   return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
+*/
 
 double UMFPackMatrix::get_fill_in() const {
   _F_
   return nnz / (double) (size * size);
+}
+
+void UMFPackMatrix::create(int size, int nnz, int* ap, int* ai, scalar* ax) 
+{
+  _F_
+  this->nnz = nnz;
+  this->size = size;
+  this->Ap = new int[size+1]; assert(this->Ap != NULL);
+  this->Ai = new int[nnz];    assert(this->Ai != NULL);
+  this->Ax = new scalar[nnz]; assert(this->Ax != NULL);
+  for (int i=0; i < size+1; i++) this->Ap[i] = ap[i];
+  for (int i=0; i < nnz; i++) {
+    this->Ax[i] = ax[i]; 
+    this->Ai[i] = ai[i];
+  } 
 }
 
 
@@ -212,8 +259,9 @@ UMFPackVector::UMFPackVector() {
 
 UMFPackVector::UMFPackVector(int size) {
   _F_
+  v = NULL;
   this->size = size;
-        this->alloc(size);
+  this->alloc(size);
 }
 
 UMFPackVector::~UMFPackVector() {
