@@ -109,6 +109,7 @@ set(SRC
        ${TEUCHOS_SOURCES}
 
        ${HERMES_COMMON_DIR}/python/python_api.cpp
+       ${HERMES_COMMON_DIR}/python/python_engine.cpp
        )
 
 include(PickRealOrCplxLibs)
