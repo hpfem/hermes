@@ -122,3 +122,13 @@ void Python::pull_numpy_int_inplace(const std::string &name,
 {
     numpy2c_int_inplace(this->pull(name), A, n);
 }
+
+void Python::push_str(const std::string &name, const std::string &s)
+{
+    this->push(name, c2py_str(s.c_str()));
+}
+
+std::string Python::pull_str(const std::string &name)
+{
+    return py2c_str(this->pull(name));
+}

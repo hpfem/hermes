@@ -49,6 +49,9 @@ cdef api object c2py_int(int i):
 cdef api int py2c_int(object i):
     return i
 
+cdef api object c2py_str(const_char_p s):
+    return s
+
 cdef api char* py2c_str(object s):
     return s
 
