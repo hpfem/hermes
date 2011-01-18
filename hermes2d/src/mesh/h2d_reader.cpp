@@ -20,6 +20,8 @@
 #include "hash.h"
 #include "mesh_parser.h"
 #include <iostream>
+#include "../../../hermes_common/python/python_api.h"
+#include "python_reader_api.h"
 
 extern unsigned g_mesh_seq;
 
@@ -168,6 +170,8 @@ std::string read_file(std::istream &is)
     return s.str();
 }
 
+PyMODINIT_FUNC initpython_reader(void); /*proto*/
+
 bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
         const char *filename)
 {
@@ -186,6 +190,15 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   mesh_parser_init(f, filename);
   mesh_parser_run(debug);
   fclose(f);
+
+  printf("--------------------------");
+  //printf("%s", mesh_str.c_str());
+  Python p;
+  initpython_reader();
+  if (import_python_reader())
+      throw std::runtime_error("python_reader failed to import.");
+  show_mesh(mesh_str.c_str());
+  printf("--------------------------");
 
   //// vertices ////////////////////////////////////////////////////////////////
 
