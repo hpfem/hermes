@@ -8,6 +8,7 @@ static void (*namespace_print)(PyObject *);
 static PyObject *(*namespace_pull)(PyObject *, const char*);
 static PyObject *(*c2py_int)(int);
 static int (*py2c_int)(PyObject *);
+static PyObject *(*c2py_str)(const char*);
 static char *(*py2c_str)(PyObject *);
 static double (*py2c_double)(PyObject *);
 static PyObject *(*c2numpy_int)(int *, int);
@@ -110,6 +111,7 @@ static int import_python_engine(void) {
   if (__Pyx_ImportFunction(module, "namespace_pull", (void (**)(void))&namespace_pull, "PyObject *(PyObject *, const char*)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "c2py_int", (void (**)(void))&c2py_int, "PyObject *(int)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "py2c_int", (void (**)(void))&py2c_int, "int (PyObject *)") < 0) goto bad;
+  if (__Pyx_ImportFunction(module, "c2py_str", (void (**)(void))&c2py_str, "PyObject *(const char*)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "py2c_str", (void (**)(void))&py2c_str, "char *(PyObject *)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "py2c_double", (void (**)(void))&py2c_double, "double (PyObject *)") < 0) goto bad;
   if (__Pyx_ImportFunction(module, "c2numpy_int", (void (**)(void))&c2numpy_int, "PyObject *(int *, int)") < 0) goto bad;
