@@ -100,3 +100,25 @@ int Python::pull_int(const std::string &name)
 {
     return py2c_int(this->pull(name.c_str()));
 }
+
+void Python::push_numpy_double(const std::string &name, double *A, int n)
+{
+    this->push(name.c_str(), c2numpy_double(A, n));
+}
+
+void Python::pull_numpy_double_inplace(const std::string &name,
+        double **A, int *n)
+{
+    numpy2c_double_inplace(this->pull(name.c_str()), A, n);
+}
+
+void Python::push_numpy_int(const std::string &name, int *A, int n)
+{
+    this->push(name.c_str(), c2numpy_int(A, n));
+}
+
+void Python::pull_numpy_int_inplace(const std::string &name,
+        int **A, int *n)
+{
+    numpy2c_int_inplace(this->pull(name.c_str()), A, n);
+}
