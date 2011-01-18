@@ -22,6 +22,10 @@
   assert_msg( obj->central_pss != NULL && obj->central_pss->get_active_element() == obj->central_el &&\
               obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
               "Precalculated shapeset and refmap have not been attached or have a wrong active element." )
+              
+#define ensure_central_rm(obj) \
+  assert_msg( obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
+              "Reference mapping has not been attached or has a wrong active element." )              
 
 //TODO: Add a test for overshooting the maximum allowed edge order.
 #define ensure_set_quad_order(obj) \
@@ -40,9 +44,9 @@
  * In order to search for the neighboring elements, one selects a particular edge of the central element and calls
  * the method \c set_active_edge. This enumerates the neighbors and fills in the array \c transformations, which
  * will be needed later for getting function values at matching points from both sides of the selected (active) edge.
- * If values of a test function will be needed, a precalculated shapeset that will receive the transformations
- * must also be attached via \c attach_pss (so that a call to \c detach_pss may be performed afterwards to return
- * the pss to its original state).
+ * If values of a test function will be needed, a precalculated shapeset that will receive the transformations 
+ * must also be attached via \c attach_pss_and_rm (so that a call to \c detach_pss_and_rm may be performed afterwards 
+ * to return the pss to its original state).
  *
  * The actual procedure depends on the relative size of the central element with respect to the neighbor element(s)
  * across the active edge:
@@ -185,12 +189,25 @@ public:
   /// \param[in]  pss Pointer to a PrecalcShapeset object (typically from the assembling procedure).
   /// \param[in]  rm  Pointer to a RefMap object associated with the pss.
   ///
-  void attach_pss(PrecalcShapeset* pss, RefMap* rm);
-
+  void attach_pss_and_rm(PrecalcShapeset* pss, RefMap* rm);
+  
+  /// Assign a reference mapping to the central element.
+  ///
+  /// If geometric data about the neighborhood is needed (see function \c init_geometry), a reference mapping with 
+  /// the correctly pushed <em>way down</em> transformations is required. If the extended shapesets will not be used,
+  /// this method may be used for this purpose instead of \c attach_pss_and_rm.
+  ///
+  /// \param[in]  rm  Pointer to a RefMap object associated with the pss.
+  ///
+  void attach_rm(RefMap* rm);
+  
   /// Restore the transformation set for central element's pss and refmap to that before their attachment to the
   /// NeighborSearch.
-  void detach_pss();
-
+  void detach_pss_and_rm();
+  
+  /// Restore the transformation set for central element's refmap to that before its attachment to the NeighborSearch.
+  void detach_rm();
+  
 /*** Methods for working with quadrature on the active edge. ***/
 
   /// Sets the quadrature order to be used for obtaining integration points and weights in both neighbors.
@@ -248,6 +265,8 @@ public:
   ///                               neighbor, an internal cache is used which is queried by both edge pseudo-order
   ///                               and active segment (which uniquely determines the transformation).
   ///
+  ///                               If ext_cache_e == NULL, no cache is used whatsoever.
+  ///
   /// \param[in] ep Active edge data required by the \c init_geom_surf function.
   /// \return Pointer to a structure holding the geometry data as well as diameter, id and marker of elements on both
   ///         sides of the edge.
@@ -260,7 +279,7 @@ public:
   /// \c init_geometry.
   /// This function assumes that integration order has been set by \c set_quad_order.
   ///
-  /// \param[in,out]  ext_cache_jwt   Cache from the assembling procedure.
+  /// \param[in,out]  ext_cache_jwt   Cache from the assembling procedure (may be set to NULL to bypass the caching).
   /// \return         The array of Jacobian * weights.
   ///
   double* init_jwt(double** ext_cache_jwt);
@@ -557,6 +576,10 @@ private:
   std::map<Key, Geom<double>*, Compare> cache_e;
   std::map<Key, double*, Compare> cache_jwt;
 
+/*** Geometric calculations. ***/  
+
+  double* calculate_jwt(int edge_order);
+  
 public:
   /// This class represents the extended shapeset, consisting of shape functions from both the central element and
   /// current neighbor element, extended by zero to the union of these elements.
