@@ -12,13 +12,13 @@ Scalar stac_jacobian(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func
   Func<Scalar>* u_stage_time = ext->fn[0]; 
 
   // Stationary part of the Jacobian matrix (time derivative term left out).
-  Scalar result = 0;
+  Scalar result1 = 0, result2 = 0;
   for (int i = 0; i < n; i++) {
-    result += -wt[i] * dlam_du(u_prev->val[i]) * u->val[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
-    result += -wt[i] * lam(u_prev->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+    result1 += -wt[i] * dlam_du(u_prev->val[i]) * u->val[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+    result2 += -wt[i] * lam(u_prev->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   }
 
-  return result;
+  return result1 + result2;
 }
 
 // Residual vector
@@ -34,21 +34,21 @@ Scalar stac_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
   // the form does not depend explicitly on time.
   Func<Scalar>* u_stage_time = ext->fn[0]; 
 
-  if (e->elem_marker >= 0) {
-    for (int i=0; i<n; i++) {
-      printf("u_prev value at %g %g = %g\n", e->x[i], e->y[i], u_prev->val[i]);
-    }
-  }
+  //if (e->elem_marker >= 0) {
+  //  for (int i=0; i<n; i++) {
+  //    printf("residual, u_prev value at %g %g = %g\n", e->x[i], e->y[i], u_prev->val[i]);
+  //  }
+  //}
 
   // Stationary part of the residual (time derivative term left out).
-  Scalar result = 0;
+  Scalar result1 = 0, result2 = 0;
   for (int i = 0; i < n; i++) {
-    result = result - wt[i] * lam(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
-    result = result + wt[i] * heat_src(e->x[i], e->y[i]) * v->val[i];
+    result1 = result1 - wt[i] * lam(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+    result2 = result2 + wt[i] * heat_src(e->x[i], e->y[i]) * v->val[i];
   }
 
-  if (e->elem_marker >= 0)  printf("returning %g\n", result);
-  if (e->elem_marker >= 0) printf("----------\n");
+  if (e->elem_marker >= 0) printf("residual, part with u_prev, returning %g\n", result1);
+  if (e->elem_marker >= 0) printf("residual, part with heat sources, returning %g\n", result2);
 
-  return result;
+  return result1 + result2;
 }

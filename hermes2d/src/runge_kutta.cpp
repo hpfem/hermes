@@ -271,7 +271,10 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Assemble the block-diagonal mass matrix M of size ndof times ndof.
   // The corresponding part of the global residual vector is obtained 
   // just by multiplication.
+  printf("Started assembling of matrix left.\n");
   stage_dp_left.assemble(matrix_left);
+
+  printf("Finished assembling of matrix left.\n");
 
   printf("matrix_left = %g\n", matrix_left->get(0, 0));
  
@@ -285,14 +288,16 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
     // Prepare vector Y_n + h\sum_{j=1}^s a_{ij} K_j.
     for (int idx = 0; idx < ndof; idx++) {
-      scalar increment_i = 0;
       for (int i = 0; i < num_stages; i++) {
+        scalar increment_i = 0;
         for (int j = 0; j < num_stages; j++) {
           increment_i += bt->get_A(i, j) * K_vector[j*ndof + idx];
         }
         u_prev_vec[i*ndof + idx] = coeff_vec[idx] + time_step * increment_i;
       }
     }
+
+    printf("it = %d, u_prev = %g %g\n", it, u_prev_vec[0], u_prev_vec[1]);
 
     /*
       FILE* f = fopen("debug-left.txt", "w");
@@ -334,8 +339,13 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     // can be added later.
     bool rhs_only = false;
     bool force_diagonal_blocks = true;
+    printf("Started assembling of matrix right.\n");
+    printf("u_prev = %g %g\n", u_prev_vec[0], u_prev_vec[1]);
     stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right,
                             rhs_only, force_diagonal_blocks);
+
+    printf("Finished assembling of matrix right.\n");
+
 
     printf("u_prev_vec: %g %g\n", u_prev_vec[0], u_prev_vec[1]);
     printf("matrix_right = %g %g %g %g\n", matrix_right->get(0, 0), matrix_right->get(0, 1),

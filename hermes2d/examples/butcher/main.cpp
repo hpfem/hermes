@@ -24,14 +24,12 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 1;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;                    // Number of initial refinements towards boundary.
 const int P_INIT = 1;                              // Initial polynomial degree.
-const double time_step = 0.2;                      // Time step.
-const double T_FINAL = 0.1;                          // Time interval length.
+const double time_step = 1;                        // Time step.
+const double T_FINAL = 0.1;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
-const double ALPHA = 0.0;                          // For the nonlinear thermal conductivity.
 
 // Time integration. Choose one of the following methods, or define your own Butcher's table:
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
@@ -44,17 +42,25 @@ ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
 template<typename Real>
-Real lam(Real u) { return 1 + pow(u, ALPHA);}
+Real lam(Real u) 
+{ 
+  return 1;
+  //return 1 + pow(u, 4);
+}
 
 // Derivative of the thermal conductivity with respect to 'u'.
 template<typename Real>
-Real dlam_du(Real u) { return ALPHA*pow(u, ALPHA - 1);}
+Real dlam_du(Real u) 
+{ 
+  return 0;
+  //return 4*pow(u, 3);
+}
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
-  return (x+10)*(y+10)/100.;
+  dx = 0;//(y+10)/10.;
+  dy = 0;//(x+10)/10.;
+  return 0;//(x+10)*(y+10)/100.;
 }
 
 // Initial condition. It will be projected on the FE mesh 
