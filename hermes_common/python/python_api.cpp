@@ -62,9 +62,9 @@ void Python::exec(const std::string &text)
     run_cmd(text.c_str(), this->_namespace);
 }
 
-void Python::push(const char *name, PyObject *o)
+void Python::push(const std::string &name, PyObject *o)
 {
-    namespace_push(this->_namespace, name, o);
+    namespace_push(this->_namespace, name.c_str(), o);
     // namespace_push() is a regular Cython function and
     // as such, it increfs the object "o" before storing it in the namespace,
     // but we want to steal the reference, so we decref it here (there is still
@@ -76,9 +76,9 @@ void Python::push(const char *name, PyObject *o)
     Py_DECREF(o);
 }
 
-PyObject *Python::pull(const char *name)
+PyObject *Python::pull(const std::string &name)
 {
-    PyObject *tmp = namespace_pull(this->_namespace, name);
+    PyObject *tmp = namespace_pull(this->_namespace, name.c_str());
     // namespace_pull() is a regular Cython function and
     // as such, it increfs the result before returning it, but we only want to
     // borrow a reference, so we decref it here (there is still at least one
@@ -93,32 +93,32 @@ PyObject *Python::pull(const char *name)
 
 void Python::push_int(const std::string &name, int i)
 {
-    this->push(name.c_str(), c2py_int(i));
+    this->push(name, c2py_int(i));
 }
 
 int Python::pull_int(const std::string &name)
 {
-    return py2c_int(this->pull(name.c_str()));
+    return py2c_int(this->pull(name));
 }
 
 void Python::push_numpy_double(const std::string &name, double *A, int n)
 {
-    this->push(name.c_str(), c2numpy_double(A, n));
+    this->push(name, c2numpy_double(A, n));
 }
 
 void Python::pull_numpy_double_inplace(const std::string &name,
         double **A, int *n)
 {
-    numpy2c_double_inplace(this->pull(name.c_str()), A, n);
+    numpy2c_double_inplace(this->pull(name), A, n);
 }
 
 void Python::push_numpy_int(const std::string &name, int *A, int n)
 {
-    this->push(name.c_str(), c2numpy_int(A, n));
+    this->push(name, c2numpy_int(A, n));
 }
 
 void Python::pull_numpy_int_inplace(const std::string &name,
         int **A, int *n)
 {
-    numpy2c_int_inplace(this->pull(name.c_str()), A, n);
+    numpy2c_int_inplace(this->pull(name), A, n);
 }

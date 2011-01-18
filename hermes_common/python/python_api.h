@@ -68,9 +68,9 @@ public:
     */
 
     // pushes the object to the namespace, stealing the reference
-    void push(const char *name, PyObject *o);
+    void push(const std::string &name, PyObject *o);
     // pulls the object from the namespace, borrowing the reference
-    PyObject *pull(const char *name);
+    PyObject *pull(const std::string &name);
 
 private:
     PyObject *_namespace;
