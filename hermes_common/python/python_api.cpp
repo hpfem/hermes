@@ -101,6 +101,16 @@ int Python::pull_int(const std::string &name)
     return py2c_int(this->pull(name));
 }
 
+void Python::push_double(const std::string &name, double i)
+{
+    this->push(name, c2py_double(i));
+}
+
+double Python::pull_double(const std::string &name)
+{
+    return py2c_double(this->pull(name));
+}
+
 void Python::push_numpy_double(const std::string &name, double *A, int n)
 {
     this->push(name, c2numpy_double(A, n));

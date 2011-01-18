@@ -39,6 +39,8 @@ public:
 
     void push_int(const std::string &name, int i);
     int pull_int(const std::string &name);
+    void push_double(const std::string &name, double i);
+    double pull_double(const std::string &name);
     void push_str(const std::string &name, const std::string &s);
     std::string pull_str(const std::string &name);
     void push_numpy_double(const std::string &name, double *A, int n);
