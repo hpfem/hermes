@@ -541,10 +541,10 @@ void NeighborSearch::set_quad_order(int order)
 {
   ensure_active_segment(this);
 
-  quad->set_mode(central_el->get_mode());
-  central_quad.init(quad, quad->get_edge_points(active_edge, order));
   quad->set_mode(neighb_el->get_mode());
   neighb_quad.init(quad, quad->get_edge_points(neighbor_edge, order));
+  quad->set_mode(central_el->get_mode());
+  central_quad.init(quad, quad->get_edge_points(active_edge, order));
 }
 
 double3* NeighborSearch::get_quad_pt(bool on_neighbor)
