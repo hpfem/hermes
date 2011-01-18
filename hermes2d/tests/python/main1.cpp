@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
         test_basic3();
         test_basic4();
 
+        std::cout << "Test succeeded." << "\n";
         return ERROR_SUCCESS;
     } catch(std::exception const &ex) {
         std::cout << "Exception raised: " << ex.what() << "\n";
