@@ -17,11 +17,8 @@ cdef extern from *:
     ctypedef char* char_p       "char*"
     ctypedef char* const_char_p "const char*"
 
-    # This is just the C++ "delete" statement
-    void delete(...)
-
-#cdef extern from "stdcython.h":
-#    void throw_exception(char *msg)
+cdef extern from "utilities.h":
+    void throw_exception(char *msg)
 
 import sys
 import traceback
@@ -184,5 +181,4 @@ cdef api void run_cmd(const_char_p text, object namespace):
         etype, value, tb = sys.exc_info()
         s = "".join(traceback.format_exception(etype, value, tb))
         s = "Exception raised in the Python code:\n" + s
-        # FIXME:
-        #throw_exception(s)
+        throw_exception(s)
