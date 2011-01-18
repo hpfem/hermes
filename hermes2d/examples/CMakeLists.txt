@@ -53,4 +53,5 @@ add_subdirectory(eigen-schroedinger-iter)
 # Miscellaneous
 add_subdirectory(singular-perturbation)
 add_subdirectory(optimal-meshes)
+add_subdirectory(poisson-kelly-adapt)
 
