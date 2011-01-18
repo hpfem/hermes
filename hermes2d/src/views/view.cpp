@@ -25,7 +25,7 @@
 #include "../h2d_common.h"
 #include "view_support.h"
 #include "view.h"
-#include "../solution.h"
+#include "../function/solution.h"
 
 ///////////////// private constants /////////////////
 #define HERMES_WAIT_CLOSE_MSG "close all views to continue"
@@ -260,9 +260,9 @@ void View::pre_display()
   if (b_help) draw_help();
   else if (b_scale) scale_dispatch();
 
-  //draw current rendring time
+  //draw current rendering time
 # ifdef _DEBUG
-  draw_fps();
+  //draw_fps();
 # endif
 
   //wait to finish
@@ -374,12 +374,12 @@ void View::draw_fps()
   glVertex2i(output_width - (width_px + 2*edge_thickness), height_px + 2*edge_thickness);
   glEnd();
 
-  //render text
+  // render text
   glDisable(GL_BLEND);
   glColor3f(1.0f, 0.0f, 0.0f);
   glRasterPos2i(output_width - (width_px + edge_thickness), edge_thickness + height_px);
-  // If the following line is uncommented, timing information is printed into the image.
-  //glutBitmapString(font, buffer);
+  // iming information is printed into the image.
+  glutBitmapString(font, buffer);
 }
 
 void View::on_reshape(int width, int height)
@@ -548,7 +548,7 @@ void View::wait_for_close()
 
 // These two includes are needed for the wait_for_draw() function below:
 //#include <csignal>
-#include "Teuchos_stacktrace.hpp"
+#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 
 void View::wait_for_draw()
 {
@@ -588,17 +588,17 @@ double View::get_tick_count()
 void View::set_title(const char* title)
 {
   bool do_set_title = true;
-  
+
   // Always set the title property.
   this->title = title;
-  
+
   view_sync.enter();
   if (output_id < 0)
     // If the window does not exist, do nothing else and wait until it is created.
     do_set_title = false;
-  
+
   view_sync.leave();
-  
+
   // If the window already exists, show the new title in its header.
   if (do_set_title)
     set_view_title(output_id, title);

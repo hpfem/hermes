@@ -43,6 +43,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Adaptivity
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees
+                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
+                                                  // TODO: Add a third option where one layer will be taken off 
+                                                  // and just one polynomial degree subtracted.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
@@ -152,11 +156,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_TOP, BDY_REST));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_TOP, BDY_REST));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_function(Hermes::Tuple<int>(BDY_TOP, BDY_REST), essential_bc_values);
+  bc_values.add_function(Hermes::vector<int>(BDY_TOP, BDY_REST), essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -169,7 +173,7 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Solutions for the time stepping and adaptivity.
-  Solution u_prev_time, sln, ref_sln;
+  Solution sln_prev_time, sln, ref_sln;
 
   // Initialize views.
   char title_init[200];
@@ -179,19 +183,19 @@ int main(int argc, char* argv[])
   OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
   view_init->fix_scale_width(80);
 
-  // Initialize u_prev_time.
+  // Initialize sln_prev_time.
   // Note: only if adaptivity to initial condition is not done.
-  u_prev_time.set_exact(&basemesh, init_cond);
+  sln_prev_time.set_exact(&basemesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
-    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &sln_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
-    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
+    wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &sln_prev_time);
   }
 
   // Error estimate and discrete problem size as a function of physical time.
@@ -244,14 +248,17 @@ int main(int argc, char* argv[])
     // Updating current time.
     TIME = ts*TAU;
 
-    // Periodic global derefinements.
-    if (ts > 1 && ts % UNREF_FREQ == 0) {
+    // Periodic global derefinement.
+    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    {
       info("Global mesh derefinement.");
-      mesh.copy(&basemesh);
+      if (UNREF_LEVEL == 1) mesh.unrefine_all_elements();
+      else mesh.copy(&basemesh);
       space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop (in space):
+    // Spatial adaptivity loop. Note; sln_prev_time must not be changed during 
+    // spatial adaptivity.
     bool done = false;
     int as = 1;
     do
@@ -298,18 +305,15 @@ int main(int argc, char* argv[])
 
       // Calculate element errors.
       info("Calculating error estimate and exact error."); 
-      Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-      bool solutions_for_adapt = true;
+      Adapt* adaptivity = new Adapt(&space);
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
       // Calculate error wrt. exact solution.
       ExactSolution exact(&mesh, exact_sol);
-      solutions_for_adapt = false;
-      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, 
-                             HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+      bool solutions_for_adapt = false;
+      double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d", 
@@ -340,7 +344,7 @@ int main(int argc, char* argv[])
         as++;
       }
 
-      // Clean up.
+      // Cleanup.
       delete [] coeff_vec;
       delete solver;
       delete matrix;
@@ -359,8 +363,8 @@ int main(int argc, char* argv[])
     ordview.set_title(title);
     ordview.show(&space);
 
-    // Copy new time level solution into u_prev_time.
-    u_prev_time.copy(&ref_sln);
+    // Copy new time level solution into sln_prev_time.
+    sln_prev_time.copy(&ref_sln);
   }
 
   // Wait for all views to be closed.

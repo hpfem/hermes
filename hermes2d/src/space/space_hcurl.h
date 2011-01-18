@@ -39,25 +39,25 @@ public:
 
   // For backward compatibility.
   HcurlSpace(Mesh* mesh, BCTypes* bc_types,
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
                  Shapeset* shapeset = NULL);
   HcurlSpace(Mesh* mesh = NULL, BCTypes* bc_types=NULL,
-                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1), 
+                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
                  Shapeset* shapeset = NULL);
 
   // DEPRECATED:
-  HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+  HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
                  Shapeset* shapeset = NULL);
-  HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
-                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1), 
+  HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
+                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
                  Shapeset* shapeset = NULL);
 
   virtual ~HcurlSpace();
 
-  virtual Space* dup(Mesh* mesh) const;
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
-  virtual int get_type() const { return 1; }
+  virtual ESpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
   virtual void set_shapeset(Shapeset* shapeset);
 

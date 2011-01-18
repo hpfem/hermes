@@ -1,8 +1,8 @@
-Constant Initial Condition (15)
+Constant Initial Condition (16)
 -------------------------------
 
-**Git reference:** Tutorial example `15-newton-elliptic-1 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/15-newton-elliptic-1>`_.
+**Git reference:** Tutorial example `16-newton-elliptic-1 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/16-newton-elliptic-1>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -13,16 +13,14 @@ Let us solve the nonlinear model problem from the previous section,
 
     -\nabla \cdot (\lambda(u)\nabla u) - f(x,y) = 0, \ \ \ u = 0 \ \mbox{on}\ \partial \Omega.
 
-One possible interpretation of this equation is stationary heat transfer where the thermal
-conductivity $\lambda$ depends on the temperature $u$.
-Our domain is a square $\Omega = (-10,10)^2$, $f(x,y) = 1$, and the nonlinearity $\lambda$ has the form 
+Recall that the domain is a square $\Omega = (-10,10)^2$, $f(x,y) = 1$, and the nonlinearity $\lambda$ 
+has the form 
 
 .. math::
 
-    \lambda(u) = 1 + u^\alpha.
+    \lambda(u) = 1 + u^\alpha
 
-Recall that $\lambda$ must be entirely positive or entirely negative for the problem to be solvable, so it is safe 
-to restrict $\alpha$ to be an even nonnegative integer. Recall from the previous section that 
+where $\alpha$ is an even nonnegative integer. Also recall from the previous section that 
 
 .. math::
 
@@ -40,7 +38,7 @@ and
 Defining Jacobian matrix and residual vector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the `code <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/15-newton-elliptic-1/forms.cpp>`_, 
+In the `code <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/16-newton-1/forms.cpp>`_, 
 the above formulas become::
 
     // Heat sources (can be a general function of 'x' and 'y').
@@ -80,6 +78,9 @@ Notice that the solution $u$ is accessed through
 ::
 
     Func<Scalar>* u_prev = u_ext[0];
+
+In principle, one could register a previous iteration level solution as in the Picard
+iteration, but this is simpler and more elegant. 
 
 Also notice that the basis function $v_j$ and the test function 
 $v_i$ are entering the weak forms via the parameters u and v, respectively (same as for linear 
@@ -152,10 +153,10 @@ The weak forms are registered as usual::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY);
 
-Recall that by HERMES_UNSYM we declare that the Jacobian bilinear form is not symmetric,
+Recall that by HERMES_NONSYM we declare that the Jacobian bilinear form is not symmetric,
 and by HERMES_ANY that the form should be used for elements with any material marker.
 
 Initializing a nonlinear DiscreteProblem
@@ -241,18 +242,6 @@ As a last step, we clean up as usual::
 Sample results
 ~~~~~~~~~~~~~~
 
-Approximate solution $u$ for $\alpha = 2$: 
-
-.. image:: 15/newton-ellipt-1-2.png
-   :align: center
-   :width: 600
-   :height: 400
-   :alt: result for alpha = 2
-
-Approximate solution $u$ for $\alpha = 4$: 
-
-.. image:: 15/newton-ellipt-1-4.png
-   :align: center
-   :width: 600
-   :height: 400
-   :alt: result for alpha = 4
+The results are exactly the same as in the Picard's example 15. 
+Notice that the Newton's method uses very few iterations compared
+to Picard.

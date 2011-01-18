@@ -1,8 +1,8 @@
-Nonlinear Time-Dependent Problem (18)
---------------------------------
+Nonlinear Time-Dependent Problem (19)
+-------------------------------------
 
-**Git reference:** Tutorial example `18-newton-timedep-heat 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/18-newton-timedep-heat>`_.
+**Git reference:** Tutorial example `19-newton-timedep-heat 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/19-newton-timedep-heat>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -80,7 +80,7 @@ step is finished. The weak forms are registered as usual::
 
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
 Time stepping loop

@@ -190,6 +190,14 @@ void MumpsMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
       add(rows[i], cols[j], mat[i][j]);
 }
 
+/// Add a number to each diagonal entry.
+void MumpsMatrix::add_to_diagonal(scalar v) 
+{
+  for (int i=0; i<size; i++) {
+    add(i, i, v);
+  }
+};
+
 /// dumping matrix and right-hand side
 ///
 bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
@@ -240,11 +248,25 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 int MumpsMatrix::get_matrix_size() const
 {
   _F_
-  /*           Ax               Ai                 Ap                 */
+  return size;
+}
+
+int MumpsMatrix::get_nnz() const
+{
+  _F_
+  return nnz;
+}
+
+/* THIS WAS WRONG
+int MumpsMatrix::get_matrix_size() const
+{
+  _F_
+  //           Ax               Ai                 Ap                 
   return (sizeof(scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1)
           + 2 * sizeof(int) * nnz + sizeof(int);
-  /*          irn, jcn                  nnz                           */    
+  //          irn, jcn                  nnz                             
 }
+*/
 
 double MumpsMatrix::get_fill_in() const
 {
@@ -274,6 +296,19 @@ void MumpsVector::alloc(int n)
   size = n;
   v = new mumps_scalar[n];
   zero();
+}
+
+void MumpsVector::change_sign()
+{
+  _F_
+#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+  for (int i = 0; i < size; i++) v[i] *= -1.;
+#else
+  for (int i = 0; i < size; i++) {
+    v[i].r *= -1.;
+    v[i].i *= -1.;
+  }
+#endif
 }
 
 void MumpsVector::zero()

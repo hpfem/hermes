@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP));
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_UNSYM);
+  wf.add_matrix_form(callback(bilinear_form), HERMES_NONSYM);
   wf.add_vector_form(callback(linear_form_vol));
   wf.add_vector_form_surf(callback(linear_form_surf), BDY_RIGHT);
 
@@ -154,13 +154,12 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.   
-    solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

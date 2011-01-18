@@ -33,7 +33,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;           // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
                                                   // H2D_HP_ANISO_P, H2D_HP_ANISO. See User Documentation for details.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
@@ -175,7 +175,7 @@ int main(int argc, char* args[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM_LEFT, BDY_REST));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_BOTTOM_LEFT, BDY_REST));
   
   // Create an L2 space.
   L2Space space(&mesh, &bc_types, Ord2(P_INIT_H, P_INIT_V));
@@ -252,7 +252,7 @@ int main(int argc, char* args[])
     
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);  
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_L2_NORM);  
 
     // Time measurement.
     cpu_time.tick();
@@ -266,10 +266,8 @@ int main(int argc, char* args[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    Adapt* adaptivity = new Adapt(&space, HERMES_L2_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
  
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 

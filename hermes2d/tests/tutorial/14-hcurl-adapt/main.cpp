@@ -73,12 +73,12 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_1, BDY_6));
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_2, BDY_3, BDY_4, BDY_5));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_1, BDY_6));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_2, BDY_3, BDY_4, BDY_5));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_1, BDY_6));
+  bc_values.add_zero(Hermes::vector<int>(BDY_1, BDY_6));
 
   // Create an Hcurl space with default shapeset.
   HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -133,17 +133,16 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_HCURL_NORM); 
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error,
-    solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", 

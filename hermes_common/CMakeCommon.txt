@@ -46,3 +46,12 @@ ENDIF()
 # Tests
 add_custom_target(test COMMAND ctest)
 add_custom_target(test-quick COMMAND ctest -LE slow -j9)
+
+# Teuchos RCP
+SET(TEUCHOS_SOURCES
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_Ptr.cpp
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_RCPNode.cpp
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_TestForException.cpp
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_dyn_cast.cpp
+  )

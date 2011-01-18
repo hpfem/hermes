@@ -33,7 +33,7 @@ HcurlSpace::HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
   _F_
   // FIXME: this will fail if the mesh contains tetrahedra. 
   if (shapeset == NULL) this->shapeset = new HcurlShapesetLobattoHex;
-  this->type = Hcurl;
+  this->type = HERMES_HCURL_SPACE;
 
   // set uniform poly order in elements
   this->set_uniform_order_internal(p_init);
@@ -73,16 +73,16 @@ int HcurlSpace::get_edge_ndofs(Ord1 order) {
 
 int HcurlSpace::get_face_ndofs(Ord2 order) {
 	switch (order.type) {
-		case MODE_QUAD: return (order.x + 1) * order.y + order.x * (order.y + 1);
-		case MODE_TRIANGLE: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
+		case HERMES_MODE_QUAD: return (order.x + 1) * order.y + order.x * (order.y + 1);
+		case HERMES_MODE_TRIANGLE: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
 		default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
 	}
 }
 
 int HcurlSpace::get_element_ndofs(Ord3 order) {
 	switch (order.type) {
-		case MODE_HEXAHEDRON: return (order.x + 1) * order.y * order.z + order.x * (order.y + 1) * order.z + order.x * order.y * (order.z + 1);
-		case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
+		case HERMES_MODE_HEX: return (order.x + 1) * order.y * order.z + order.x * (order.y + 1) * order.z + order.x * order.y * (order.z + 1);
+		case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); return -1;
 		default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
 	}
 }
@@ -91,36 +91,43 @@ int HcurlSpace::get_element_ndofs(Ord3 order) {
 
 void HcurlSpace::assign_dofs_internal() {
 	_F_
-	BitArray init_edges;
-	BitArray init_faces;
+	std::map<Edge::Key, bool> init_edges;
+	std::map<Facet::Key, bool> init_faces;
 
 	// edge dofs
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			unsigned int eid = mesh->get_edge_id(e, iedge);
-			EdgeData *ed = en_data[eid];
-			assert(ed != NULL);
-			if (!init_edges.is_set(eid) && !ed->ced) {
-				assign_edge_dofs(eid);
-				init_edges.set(eid);
-			}
-		}
+  for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  // edge dofs
+		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
+			  Edge::Key eid = mesh->get_edge_id(e, iedge);
+			  EdgeData *ed = en_data[eid];
+			  assert(ed != NULL);
+			  if (!init_edges[eid] && !ed->ced) {
+				  assign_edge_dofs(eid);
+				  init_edges[eid] = true;
+			  }
+		  }
+	  }
 
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
 		// face dofs
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
+			Facet::Key fid = mesh->get_facet_id(e, iface);
 			FaceData *fd = fn_data[fid];
 			assert(fd != NULL);
-			if (!init_faces.is_set(fid) && !fd->ced) {
+			if (!init_faces[fid] && !fd->ced) {
 				assign_face_dofs(fid);
-				init_faces.set(fid);
+				init_faces[fid] = true;
 			}
 		}
-
-		// bubble dofs
-		assign_bubble_dofs(idx);
 	}
+
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active)
+		  assign_bubble_dofs(it->first);
 }
 
 // assembly lists ////
@@ -159,7 +166,7 @@ void HcurlSpace::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 
 void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
-	unsigned int edge = mesh->get_edge_id(elem, iedge);
+  Edge::Key edge = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge];
 	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
@@ -167,7 +174,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	int num_fns;
 	if (enode->ced) {
 		assert(enode->edge_ncomponents > 0);
-		unsigned int edge_id = enode->edge_baselist[0].edge_id;
+    Edge::Key edge_id = enode->edge_baselist[0].edge_id;
 		num_fns = en_data[edge_id]->n;
 	}
 	else
@@ -206,7 +213,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 void HcurlSpace::calc_face_boundary_projection(Element *elem, int iface) {
 	_F_
-	unsigned int facet_idx = mesh->get_facet_id(elem, iface);
+	Facet::Key facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
 	if (fnode->bc_type != BC_ESSENTIAL) return;

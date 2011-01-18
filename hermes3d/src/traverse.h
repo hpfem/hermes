@@ -37,7 +37,7 @@ struct SurfPos
   double lo, hi; ///< H2D only: for internal use
 };
 
-struct Mesh;
+class Mesh;
 class HERMES_API  Transformable;
 struct State;
 struct Box;

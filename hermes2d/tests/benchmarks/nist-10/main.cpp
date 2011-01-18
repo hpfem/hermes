@@ -151,13 +151,12 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error for each solution component.   
-    solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
 
     // Report results.

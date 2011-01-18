@@ -20,7 +20,6 @@
 #ifndef _ASMLIST_H_
 #define _ASMLIST_H_
 
-#include "../../hermes_common/array.h"
 #include "../../hermes_common/error.h"
 
 /// AsmList is a simple container for the element assembly arrays idx, dof, coef. and ori

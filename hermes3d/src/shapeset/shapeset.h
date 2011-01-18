@@ -43,6 +43,12 @@ struct Part {
 			unsigned part:32;		// (stripe)
 		};
 	};
+  bool operator <(const Part & other) const {
+    if(part < other.part)
+      return true;
+    else
+      return false;
+  };
 };
 
 void get_interval_part(int part, double &lo, double &hi);
@@ -107,7 +113,48 @@ struct CEDKey {
 		this->part = part;
 		this->dir = dir;
 		this->variant = variant;
-	}
+	};
+  bool operator <(const CEDKey & other) const {
+    if(this->type < other.type)
+      return true;
+    else if(this->type > other.type)
+      return false;
+    else
+      if(this->ori < other.ori)
+        return true;
+      else if(this->ori > other.ori)
+        return false;
+      else
+        if(this->face < other.face)
+          return true;
+        else if(this->face > other.face)
+          return false;
+        else
+          if(this->edge < other.edge)
+            return true;
+          else if(this->edge > other.edge)
+            return false;
+          else
+            if(this->order < other.order)
+              return true;
+            else if(this->order > other.order)
+              return false;
+            else
+              if(this->dir < other.dir)
+                return true;
+              else if(this->dir > other.dir)
+                return false;
+              else
+                if(this->variant < other.variant)
+                  return true;
+                else if(this->variant > other.variant)
+                  return false;
+                else
+                  if(this->part < other.part)
+                    return true;
+                  else
+                    return false;
+  };
 };
 
 ///
@@ -265,9 +312,9 @@ protected:
 	virtual CEDComb *calc_constrained_face_combination(int ori, const Ord2 &order, Part part, int variant = 0) { return NULL; }
 	void free_constrained_combinations();
 
-	Map<CEDKey, CEDComb *> ced_comb;			// mapping: CEDKey => CEDComb
-	Map<CEDKey, int> ced_id;					// mapping: CEDKey => ced function index
-	Array<CEDKey> ced_key;						// indexing: index => CEDKey
+	std::map<CEDKey, CEDComb *> ced_comb;			// mapping: CEDKey => CEDComb
+	std::map<CEDKey, int> ced_id;					// mapping: CEDKey => ced function index
+	std::map<unsigned int, CEDKey> ced_key;						// indexing: index => CEDKey
 	int ced_idx;								// ced index to assing
 
 	CEDComb *get_ced_comb(const CEDKey &key);
@@ -286,7 +333,7 @@ public:
 	inline scalar get_dz_product(int idx1, int idx2) { return get_product_val(idx1, idx2, dz_prods); }
 
 protected:
-	Array<int> fnidx2idx;				// mapping from fn index to a array index
+	std::map<unsigned int, int> fnidx2idx;				// mapping from fn index to a array index
 	double *fn_prods;					// products of fn. values, dx, dy, dz
 	double *dx_prods;
 	double *dy_prods;

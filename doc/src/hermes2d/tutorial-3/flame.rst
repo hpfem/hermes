@@ -1,8 +1,8 @@
-Flame Propagation Problem (19)
+Flame Propagation Problem (20)
 ------------------------------
 
-**Git reference:** Tutorial example `19-newton-timedep-flame 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/19-newton-timedep-flame>`_.
+**Git reference:** Tutorial example `20-newton-timedep-flame 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/20-newton-timedep-flame>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -12,7 +12,7 @@ describing a very simple flame propagation model (laminar flame, no fluid mechan
 The computational domain shown below contains in the middle a narrow portion (cooling rods) 
 whose purpose is to slow down the chemical reaction:
 
-.. image:: 19/domain.png
+.. image:: 20/domain.png
    :align: center
    :width: 760
    :alt: computational domain
@@ -115,7 +115,7 @@ via Filters::
 
 Details on the functions omega_fn, omega_dt_fn, omega_dy_fn and the weak 
 forms can be found in the file `forms.cpp 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/19-newton-timedep-flame/forms.cpp>`_
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/20-newton-timedep-flame/forms.cpp>`_
 
 Registering weak forms
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -124,11 +124,11 @@ Here is how we register the weak forms::
 
     // Initialize the weak formulation.
     WeakForm wf(2);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
+    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
     wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), 3);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
+    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
+    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
+    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
     wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
                        Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
     wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
@@ -185,22 +185,22 @@ Sample results
 
 A few snapshots of the reaction rate $\omega$ at various times are shown below:
 
-.. image:: 19/sol1.png
+.. image:: 20/sol1.png
    :align: center
    :width: 800
    :alt: solution
 
-.. image:: 19/sol2.png
+.. image:: 20/sol2.png
    :align: center
    :width: 800
    :alt: solution
 
-.. image:: 19/sol3.png
+.. image:: 20/sol3.png
    :align: center
    :width: 800
    :alt: solution
 
-.. image:: 19/sol4.png
+.. image:: 20/sol4.png
    :align: center
    :width: 800
    :alt: solution

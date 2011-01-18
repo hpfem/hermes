@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _SOLVER_H_
-#define _SOLVER_H_
+#ifndef __HERMES_COMMON_SOLVER_H_
+#define __HERMES_COMMON_SOLVER_H_
 
 #include "precond.h"
                         
@@ -146,7 +146,7 @@ class NonlinearSolver : public Solver {
 class IterSolver : public Solver
 {
   public:
-    IterSolver() : Solver(), max_iters(1e4), tolerance(1e-8), precond_yes(false) {};
+    IterSolver() : Solver(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
     
     virtual int get_num_iters() = 0;
     virtual double get_residual() = 0;

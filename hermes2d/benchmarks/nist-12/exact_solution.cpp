@@ -1,29 +1,46 @@
-//double get_angle(double y, double x )<--  ignore this for now, but might come in handy later if test doesn't work out.
-//{
-//  double theta = atan2(y, x);
-//  if (theta < 0)
-//    theta += 2 * M_PI;
-//  return theta;
-//}
-
+double get_angle(double y, double x)
+{
+  double theta = atan2(y, x);
+  if (theta < 0)
+    theta += 2 * M_PI;
+  return theta;
+}
 
 static double fn(double x, double y)
 {
-  double a = pow(x - X_w, 2);
-  double b = pow(y - Y_w, 2);
-  double c = pow(x - X_p, 2);
-  double d = pow(y - Y_p, 2);
+  double ALPHA_C = (M_PI/ OMEGA_C);
 
-  return (pow(sqrt(x*x + y*y), M_PI/OMEGA)* sin(atan2(y, x)* (M_PI/OMEGA)) + atan(ALPHA_w* (sqrt(a+b) - R_0)) + exp(-ALPHA_p* (c+d)) + exp(-(1+y)/ EPSILON));
+  return exp(-ALPHA_P * (pow((x - X_P), 2) + pow((y - Y_P), 2)))
+         + (pow(sqrt(x*x + y*y), ALPHA_C) * sin(ALPHA_C * get_angle(y, x)))
+         + atan(ALPHA_W * (sqrt(pow(x - X_W, 2) + pow(y - Y_W, 2)) - R_0))
+         + exp(-(1 + y) / EPSILON);
 }
 
 static double fndd(double x, double y, double& dx, double& dy)
 {
   //For a more elegant showing please execute file "generate_diff_f_x.py" or "generate_diff_f_y.py"
+  double a_P = -ALPHA_P * ( (x - X_P) * (x - X_P) + (y - Y_P) * (y - Y_P));
 
-  dx = 2*x*sin(2*atan(y/x)/3)/(3*pow((pow(x,2) + pow(y,2)),(2.0/3.0))) - 2*y*pow((pow(x,2) + pow(y,2)),(1.0/3.0))*cos(2*atan(y/x)/3)/(3*pow(x,2)*(1 + pow(y,2)/pow(x,2))) + 200*x/((1 + pow((150 - 200*pow((pow(x,2) + pow((3.0/4.0 + y),2)),(1.0/2.0))),2))*pow((pow(x,2) + pow((3.0/4.0 + y),2)),(1.0/2.0))) + (-2000*x + 500*pow(5,(1.0/2.0)))*exp(-1000*pow((1.0/4.0 + y),2) - 1000*pow((x - pow(5,(1.0/2.0))/4),2));
+  double ALPHA_C = (M_PI/ OMEGA_C);
+  double a_C = sqrt(x*x + y*y);
+  double b_C = pow(a_C, (ALPHA_C - 1.0));
+  double c_C = pow(a_C, ALPHA_C);
+  double d_C = ((y*y)/(x*x) + 1.0 );
 
-  dy = 200*(3.0/4.0 + y)/((1 + pow((150 - 200*pow((pow(x,2) + pow((3.0/4.0 + y),2)),(1.0/2.0))),2))*pow((pow(x,2) + pow((3.0/4.0 + y),2)),(1.0/2.0))) + 2*y*sin(2*atan(y/x)/3)/(3*pow((pow(x,2) + pow(y,2)),(2.0/3.0))) + 2*pow((pow(x,2) + pow(y,2)),(1.0/3.0))*cos(2*atan(y/x)/3)/(3*x*(1 + pow(y,2)/pow(x,2))) - 100*exp(-100 - 100*y) - (500 + 2000*y)*exp(-1000*pow((1.0/4.0 + y),2) - 1000*pow((x - pow(5,(1.0/2.0))/4),2));
+  double a_W = pow(x - X_W, 2);
+  double b_W = pow(y - Y_W, 2);
+  double c_W = sqrt(a_W + b_W);
+  double d_W = (ALPHA_W * x - (ALPHA_W * X_W));
+  double e_W = (ALPHA_W * y - (ALPHA_W * Y_W));
+  double f_W = (pow(ALPHA_W * c_W - (ALPHA_W * R_0), 2) + 1.0);
+
+  dx = -exp(a_P) * (2 * ALPHA_P * (x - X_P))
+       + (((ALPHA_C* x* sin(ALPHA_C * get_angle(y,x)) *b_C)/a_C) - ((ALPHA_C *y *cos(ALPHA_C * get_angle(y, x)) * c_C)/(pow(x, 2.0) *d_C)))
+       + (d_W / (c_W * f_W));
+  dy = -exp(a_P) * (2 * ALPHA_P * (y - Y_P))
+       + (((ALPHA_C* cos(ALPHA_C* get_angle(y, x)) *c_C)/(x * d_C)) + ((ALPHA_C* y* sin(ALPHA_C* get_angle(y, x)) *b_C)/a_C))
+       + (e_W / (c_W * f_W))
+       + (-1) * (1.0 / EPSILON) * exp(-(1 + y) / EPSILON); 
 
   return fn(x, y);
 }

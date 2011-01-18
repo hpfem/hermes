@@ -4,7 +4,7 @@
 
 // This test makes sure that example 50-eigenvalue works correctly.
 
-int NUMBER_OF_EIGENVALUES = 6;                    // Desired number of eigenvalues.
+int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
@@ -57,11 +57,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers. 
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -133,19 +133,19 @@ int main(int argc, char* argv[])
 
   double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
   double coor_y = 0.5;
-  double t_value[4] = {0.001018, 0.396296, 0.633004, 0.495077};
+  double t_value[4] = {0.146640, 0.257224, 0.304497, 0.277808};
+  bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if ((t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(t_value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -112,7 +110,7 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -162,13 +160,12 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error for each solution component.   
-    solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d",

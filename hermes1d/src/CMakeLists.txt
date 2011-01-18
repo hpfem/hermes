@@ -12,13 +12,12 @@ set(SRC
     adapt.cpp graph.cpp h1_polys.cpp
     weakform.cpp
   ${HERMES_COMMON_DIR}/common.cpp
-  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/hermes_logging.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
-  ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 
   ${HERMES_COMMON_DIR}/solver/epetra.cpp 
   ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
@@ -58,8 +57,7 @@ macro(LIBRARY_SETTINGS BIN)
   
   # Link with all third party libraries corresponding to selected configuration options.
   # The respective variables will be empty for unselected TPL's.
-  target_link_libraries(  ${BIN} 
-      ${JUDY_LIBRARY}
+  target_link_libraries(  ${BIN}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}

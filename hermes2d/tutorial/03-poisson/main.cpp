@@ -1,4 +1,4 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 // This example shows how to solve a first simple PDE:
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
 
   // Enter zero Dirichlet boundary values.
   BCValues bc_values;

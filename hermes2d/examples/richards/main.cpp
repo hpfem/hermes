@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function.h"
+#include "function/function.h"
 
 //  This example solves a simple version of the time-dependent
 //  Richard's equation using the backward Euler method in time 
@@ -108,11 +108,11 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_NONSYM, HERMES_ANY, &u_prev_time);
     wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_NONSYM, HERMES_ANY, &u_prev_time);
     wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
   }
 

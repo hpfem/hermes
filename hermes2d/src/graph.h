@@ -67,7 +67,6 @@ protected:
     std::vector<Values> data;
   };
 
-  HERMES_API_USED_STL_VECTOR(Row);
   std::vector<Row> rows;
 
 };
@@ -109,7 +108,7 @@ static const char* default_terminal = "set terminal postscript eps enhanced\n";
 class HERMES_API GnuplotGraph : public Graph
 {
 public:
- 
+
   GnuplotGraph(const char* title = NULL, const char* x_axis_name = NULL, const
           char* y_axis_name = NULL, double lines_width = 1.0, const
           std::string& terminal_str = default_terminal) :
@@ -130,11 +129,11 @@ protected:
   /// Initially empty (may be changed by calling "set_legend_pos") -- "legend == true" with empty "legend_pos"
   /// means that the default gnuplot setting will be used.
   std::string legend_pos;
-  
+
   /// Terminal string.
   /// Specifies GnuPlot output type.
   std::string terminal_str;
-  
+
   /// Line width.
   /// Specifies relative width of plot lines.
   double lw;
@@ -145,7 +144,7 @@ protected:
 class HERMES_API PNGGraph : public GnuplotGraph
 {
 public:
-    
+
   PNGGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL,
             double lines_width = 1.0, double plot_width = 800, double plot_height = 600);
 };

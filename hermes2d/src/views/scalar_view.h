@@ -94,7 +94,6 @@ protected: // node selection
     VertexNodeInfo() {}; ///< An empty default constructor to limit time
     VertexNodeInfo(int id, float x, float y) : x(x), y(y), id(id), selected(false), tw_bar(NULL) {};
   };
-  HERMES_API_USED_STL_VECTOR(VertexNodeInfo);
   std::vector<VertexNodeInfo> vertex_nodes; ///< Vertex nodes. Sorted accordin to the X-axis.
   VertexNodeInfo* pointed_vertex_node; ///< A vertex node that is under the mouse cursor. NULL if none.
 
@@ -121,7 +120,6 @@ protected: //element nfo
     ElementInfo() : x(0), y(0), width(0), height(0), id(-1) {};
     ElementInfo(int id, float x, float y, float width, float height) : x(x), y(y), width(width), height(height), id(id) {};
   };
-  HERMES_API_USED_STL_VECTOR(ElementInfo);
   std::vector<ElementInfo> element_infos; ///< Element info.
 
   unsigned int element_id_widget; ///> A GL display-list denoting a element ID widget. The geometry assumes the size of a pixel is 1x1.

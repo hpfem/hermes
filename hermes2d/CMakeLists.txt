@@ -28,7 +28,7 @@ set(WITH_TUTORIAL           YES)
 set(WITH_TESTS              YES)
 
 # Optional functionality:
-set(WITH_PYTHON             YES)
+set(WITH_PYTHON             NO)
 set(WITH_GLUT               YES)
 set(WITH_VIEWER_GUI         NO)
 set(WITH_UTIL               YES)
@@ -100,17 +100,17 @@ set(WITH_HDF5               NO)
 # set(ADDITIONAL_LIBS       -lgfortran -lm)
 
 # Reporting and logging:
-set(REPORT_WITH_LOGO        NO)   #logo will be shown
-set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
+set(HERMES_REPORT_WITH_LOGO        NO)   #logo will be shown
+set(HERMES_REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+set(HERMES_REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
                                   #The runtime control is intended just for Python wrappers.
-set(REPORT_ALL              NO)   #do not report all events, just selected ones
-set(REPORT_WARNING          YES)  #warnings will be reported
-set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
-set(REPORT_INFO             YES)  #info will be reported
-set(REPORT_VERBOSE          NO)   #info details will not be reported
-set(REPORT_TRACE            NO)   #code execution tracing will not be reported
-set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+set(HERMES_REPORT_ALL              NO)   #do not report all events, just selected ones
+set(HERMES_REPORT_WARNING          YES)  #warnings will be reported
+set(HERMES_REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+set(HERMES_REPORT_INFO             YES)  #info will be reported
+set(HERMES_REPORT_VERBOSE          NO)   #info details will not be reported
+set(HERMES_REPORT_TRACE            NO)   #code execution tracing will not be reported
+set(HERMES_REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
 #set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
 
 # Allow to override the default values in CMake.vars:
@@ -164,8 +164,6 @@ else(MSVC)
 endif(MSVC)
 
 find_package(PTHREAD REQUIRED)
-find_package(JUDY REQUIRED)
-include_directories(${JUDY_INCLUDE_DIR})
 
 if(WITH_GLUT)
   find_package(GLUT REQUIRED)
@@ -207,7 +205,11 @@ if(WITH_OPENMP)
   set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 endif(WITH_OPENMP)
 
-if(NOT MSVC)
+if(MSVC)
+	if(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+		find_package(CLAPACK REQUIRED)
+	endif(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+else(MSVC)
   # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
   # FindLAPACK is Fortran-only so Fortran must be enabled as well.
   if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
@@ -215,7 +217,7 @@ if(NOT MSVC)
     find_package(LAPACK REQUIRED)
     add_definitions(-DWITH_BLAS)
   endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-endif(NOT MSVC)  
+endif(MSVC)  
  
 # Solvers:
 if(WITH_UMFPACK)
@@ -259,6 +261,9 @@ endif(WITH_SUPERLU)
 
 include_directories(${HERMES_COMMON_DIR})
 
+# We require Python for the  mesh parser
+find_package(Python REQUIRED)
+
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
 
@@ -268,7 +273,6 @@ if(WITH_TESTS)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
-  find_package(Python REQUIRED)
   find_package(NumPy REQUIRED)
   find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})

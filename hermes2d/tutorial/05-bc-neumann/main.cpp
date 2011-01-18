@@ -1,4 +1,4 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 // This example shows how to define Neumann boundary conditions. In addition,
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_INNER);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   // (Note that the gradient at the re-entrant
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
-  MagFilter grad(Hermes::Tuple<MeshFunction *>(&sln, &sln), Hermes::Tuple<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for the views to be closed.

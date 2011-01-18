@@ -147,3 +147,49 @@ Scalar liform_3(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Re
                                       * e->x[i] * v->val[i];
   return result;
 }
+
+//////  Determining the quadrature order used for integrating the respective forms.  ////////////////////////////////////////////////
+
+#define DIAG_BIFORM_VOL_ORD(i)\
+    template<>\
+    Ord biform_##i##_##i(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)\
+    {\
+      return int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) * int_u_v<Ord, Ord>(n, wt, u, v);\
+    }
+#define DIAG_BIFORM_SURF_ORD(i)\
+    template<>\
+    Ord biform_surf_##i##_##i(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)\
+    {\
+      return int_u_v<Ord, Ord>(n, wt, u, v);\
+    }
+#define OFFDIAG_BIFORM_VOL_ORD(i,j)\
+    template<>\
+    Ord biform_##i##_##j(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)\
+    {\
+      return int_u_v<Ord, Ord>(n, wt, u, v);\
+    }
+#define LIFORM_VOL_ORD(i)\
+    template<>\
+    Ord liform_##i(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)\
+    {\
+      return (ext->fn[0]->val[0] + ext->fn[1]->val[0] + ext->fn[2]->val[0] + ext->fn[3]->val[0])*e->x[0]*v->val[0];\
+    }
+    
+DIAG_BIFORM_VOL_ORD(0)
+DIAG_BIFORM_VOL_ORD(1)
+DIAG_BIFORM_VOL_ORD(2)
+DIAG_BIFORM_VOL_ORD(3)
+
+DIAG_BIFORM_SURF_ORD(0)
+DIAG_BIFORM_SURF_ORD(1)
+DIAG_BIFORM_SURF_ORD(2)
+DIAG_BIFORM_SURF_ORD(3)
+
+OFFDIAG_BIFORM_VOL_ORD(1,0)
+OFFDIAG_BIFORM_VOL_ORD(2,1)
+OFFDIAG_BIFORM_VOL_ORD(3,2)
+
+LIFORM_VOL_ORD(0)
+LIFORM_VOL_ORD(1)
+LIFORM_VOL_ORD(2)
+LIFORM_VOL_ORD(3)

@@ -88,11 +88,11 @@ int main(int argc, char* argv[])
   // Enter boundary markers. 
   // Note: "essential" means that solution value is prescribed.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Enter Dirichlet boudnary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -192,11 +192,10 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
     double err_est_rel = adaptivity->calc_err_est(&(sln[NUMBER_OF_EIGENVALUES-1]), 
-                         &(ref_sln[NUMBER_OF_EIGENVALUES-1]), solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+                         &(ref_sln[NUMBER_OF_EIGENVALUES-1])) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
@@ -244,17 +243,17 @@ int main(int argc, char* argv[])
   double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
   double coor_y = 0.5;
   double t_value[4] = {0.154053, -0.178300, -0.530477, -0.313066};
+  bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if ((t_value[i] - sln[5].get_pt_value(coor_x[i], coor_y)) < 1E-6)
-    {
-      printf("Success!\n");
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(t_value[i] - sln[5].get_pt_value(coor_x[i], coor_y)) > 1E-6) success = false;
   }
-  return ERR_SUCCESS;
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }

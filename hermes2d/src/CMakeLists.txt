@@ -7,29 +7,42 @@ endif(MSVC)
 
 # source files for the hermes2d library
 set(SRC
-       hash.cpp 
-       mesh.cpp 
-       regul.cpp 
-       refmap.cpp 
-       curved.cpp
-       transform.cpp 
-       traverse.cpp
-       limit_order.cpp
-       precalc.cpp 
-       solution.cpp 
-       filter.cpp
-       neighbor.cpp
-       numerical_flux.cpp
-       space/space.cpp 
-       space/space_h1.cpp 
-       space/space_hcurl.cpp 
-       space/space_l2.cpp
-       space/space_hdiv.cpp
-       linear1.cpp 
-       linear2.cpp 
-       linear3.cpp 
-       graph.cpp
-       quad_std.cpp
+       adapt/adapt.cpp
+
+       function/solution.cpp 
+       function/filter.cpp
+       function/norm.cpp
+
+       linearizer/linear1.cpp 
+       linearizer/linear2.cpp 
+       linearizer/linear3.cpp 
+
+       mesh/refmap.cpp 
+       mesh/curved.cpp
+       mesh/refinement_type.cpp 
+       mesh/element_to_refine.cpp
+       mesh/exodusii.cpp 
+       mesh/hash.cpp 
+       mesh/h2d_reader.cpp
+       mesh/mesh.cpp 
+       mesh/mesh_parser.cpp 
+       mesh/mesh_lexer.cpp
+       mesh/regul.cpp 
+       mesh/transform.cpp 
+       mesh/traverse.cpp
+       mesh/trans.cpp
+
+       quadrature/limit_order.cpp
+       quadrature/quad_std.cpp
+
+       ref_selectors/selector.cpp 
+       ref_selectors/order_permutator.cpp 
+       ref_selectors/optimum_selector.cpp 
+       ref_selectors/proj_based_selector.cpp 
+       ref_selectors/l2_proj_based_selector.cpp 
+       ref_selectors/h1_proj_based_selector.cpp 
+       ref_selectors/hcurl_proj_based_selector.cpp
+
        shapeset/shapeset.cpp 
        shapeset/shapeset_h1_ortho.cpp 
        shapeset/shapeset_h1_jacobi.cpp 
@@ -38,26 +51,14 @@ set(SRC
        shapeset/shapeset_hc_gradleg.cpp
        shapeset/shapeset_hd_legendre.cpp
        shapeset/shapeset_l2_legendre.cpp
-       qsort.cpp norm.cpp
-       trans.cpp
-       ogprojection.cpp
-       adapt/adapt.cpp
-       refinement_type.cpp 
-       element_to_refine.cpp
-       ref_selectors/selector.cpp 
-       ref_selectors/order_permutator.cpp 
-       ref_selectors/optimum_selector.cpp 
-       ref_selectors/proj_based_selector.cpp 
-       ref_selectors/l2_proj_based_selector.cpp 
-       ref_selectors/h1_proj_based_selector.cpp 
-       ref_selectors/hcurl_proj_based_selector.cpp
-       h2d_common.cpp  
-       weakform.cpp 
-       discrete_problem.cpp
-       forms.cpp
-       mesh_parser.cpp mesh_lexer.cpp
-       exodusii.cpp 
-       h2d_reader.cpp
+       shapeset/precalc.cpp 
+
+       space/space.cpp 
+       space/space_h1.cpp 
+       space/space_hcurl.cpp 
+       space/space_l2.cpp
+       space/space_hdiv.cpp
+
        views/base_view.cpp 
        views/mesh_view.cpp 
        views/order_view.cpp 
@@ -68,15 +69,29 @@ set(SRC
        views/view.cpp 
        views/view_data.cpp 
        views/view_support.cpp
-       ${HERMES_COMMON_DIR}/common.cpp       
-       ${HERMES_COMMON_DIR}/logging.cpp    
+
+       weakform/weakform.cpp 
+       weakform/forms.cpp
+
+       neighbor.cpp
+       numerical_flux.cpp
+       graph.cpp
+       qsort.cpp 
+       ogprojection.cpp
+       h2d_common.cpp  
+       discrete_problem.cpp
+       runge_kutta.cpp
+       boundaryconditions/boundaryconditions.cpp
+       
+       ${HERMES_COMMON_DIR}/common.cpp    
        ${HERMES_COMMON_DIR}/hermes_logging.cpp
        ${HERMES_COMMON_DIR}/common_time_period.cpp
        ${HERMES_COMMON_DIR}/callstack.cpp
        ${HERMES_COMMON_DIR}/error.cpp
        ${HERMES_COMMON_DIR}/utils.cpp
        ${HERMES_COMMON_DIR}/matrix.cpp
-       ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
+       ${HERMES_COMMON_DIR}/tables.cpp
+       ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
        ${HERMES_COMMON_DIR}/solver/nox.cpp 
        ${HERMES_COMMON_DIR}/solver/epetra.cpp 
        ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
@@ -90,6 +105,8 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
        ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
        ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
+
+       ${TEUCHOS_SOURCES}
        )
 
 include(PickRealOrCplxLibs)
@@ -112,7 +129,6 @@ macro(LIBRARY_SETTINGS BIN)
   # The respective variables will be empty for unselected TPL's.
   PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
   target_link_libraries(  ${BIN} 
-      ${JUDY_LIBRARY}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}
@@ -125,29 +141,32 @@ macro(LIBRARY_SETTINGS BIN)
       ${SUPERLU_LIBRARY}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
-      ${ADDITIONAL_LIBS}        
+	  ${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
+      ${ADDITIONAL_LIBS}
+      ${PYTHON_LIBRARIES}
+      ${EXODUSII_LIBRARY}
   )
 endmacro(LIBRARY_SETTINGS)
 
 macro(BUILD_REPORT_FLAGS FLAGS)
 set(REPORT_FLAGS "")
 if(NOT REPORT_WITH_LOGO)
-	set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_NO_LOGO")
+	set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_NO_LOGO")
 endif(NOT REPORT_WITH_LOGO)
 if(NOT REPORT_TO_FILE)
-	set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_NO_FILE")
+	set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_NO_FILE")
 endif(NOT REPORT_TO_FILE)
 if(REPORT_RUNTIME_CONTROL)
-	set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_RUNTIME_CONTROL")
+	set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_RUNTIME_CONTROL")
 endif(REPORT_RUNTIME_CONTROL)
 if(REPORT_ALL)
-	set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_ALL")
+	set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_ALL")
 else(REPORT_ALL)
 	if(REPORT_WARNING)
 		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_WARNING")
 	endif(REPORT_WARNING)
 	if(REPORT_INTR_WARNING)
-		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_INTR_WARNING")
+		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_INTR_WARNING")
 	endif(REPORT_INTR_WARNING)
 	if(REPORT_INFO)
 		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_INFO")
@@ -156,10 +175,10 @@ else(REPORT_ALL)
 		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_VERBOSE")
 	endif(REPORT_VERBOSE)
 	if(REPORT_TRACE)
-		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_TRACE")
+		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_TRACE")
 	endif(REPORT_TRACE)
 	if(REPORT_TIME)
-		set(REPORT_FLAGS "${REPORT_FLAGS} -DH2D_REPORT_TIME")
+		set(REPORT_FLAGS "${REPORT_FLAGS} -DHERMES_REPORT_TIME")
 	endif(REPORT_TIME)
 endif(REPORT_ALL)
 set(${FLAGS} "${REPORT_FLAGS}")

@@ -1,8 +1,8 @@
-Navier-Stokes Equations (20)
+Navier-Stokes Equations (21)
 ----------------------------
 
-**Git reference:** Tutorial example `20-newton-timedep-ns 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/20-newton-timedep-ns>`_.
+**Git reference:** Tutorial example `21-newton-timedep-ns 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/21-newton-timedep-ns>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -21,7 +21,7 @@ pressure with the standard (continuous) Taylor-Hood elements is shown.
 The computational domain is a rectangular channel containing a 
 circular obstacle: 
 
-.. image:: 20/domain.png
+.. image:: 21/domain.png
    :align: center
    :width: 760
    :alt: computational domain
@@ -185,65 +185,65 @@ should definitely use the option (3).
 
 Time t = 10 s:
 
-.. image:: 20/sol_no_newton_10.png
+.. image:: 21/sol_no_newton_10.png
    :align: center
    :width: 840
    :alt: solution
 
-.. image:: 20/sol_newton_10.png
+.. image:: 21/sol_newton_10.png
    :align: center
    :width: 840
    :alt: solution
 
-.. image:: 20/sol_l2_newton_10.png
+.. image:: 21/sol_l2_newton_10.png
    :align: center
    :width: 840
    :alt: solution
 
 Time t = 15 s:
 
-.. image:: 20/sol_no_newton_15.png
+.. image:: 21/sol_no_newton_15.png
    :align: center
    :width: 840
    :alt: solution
 
-.. image:: 20/sol_newton_15.png
+.. image:: 21/sol_newton_15.png
    :align: center
    :width: 840
    :alt: solution
 
-.. image:: 20/sol_l2_newton_15.png
+.. image:: 21/sol_l2_newton_15.png
    :align: center
    :width: 840
    :alt: solution
 
-Time t = 20 s:
+Time t = 21 s:
 
-.. image:: 20/sol_no_newton_20.png
+.. image:: 21/sol_no_newton_20.png
    :align: center
    :width: 840
    :alt: solution
 
-.. image:: 20/sol_newton_20.png
+.. image:: 21/sol_newton_20.png
    :align: center
    :width: 840
    :alt: solution
 
-.. image:: 20/sol_l2_newton_20.png
+.. image:: 21/sol_l2_newton_20.png
    :align: center
    :width: 840
    :alt: solution
 
 Snapshot of a continuous pressure approximation (t = 20 s):
 
-.. image:: 20/p_no_newton_20.png
+.. image:: 21/p_no_newton_20.png
    :align: center
    :width: 840
    :alt: solution
 
 Snapshot of a discontinuous pressure approximation (t = 20 s):
 
-.. image:: 20/p_l2_newton_20.png
+.. image:: 21/p_l2_newton_20.png
    :align: center
    :width: 840
    :alt: solution

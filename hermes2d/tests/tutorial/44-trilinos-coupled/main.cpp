@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);
   H1Space* c_space = new H1Space(&mesh, &bc_types, &bc_values_c, P_INIT);
-  int ndof = Space::get_num_dofs(Hermes::Tuple<Space *>(t_space, c_space));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(t_space, c_space));
   info("ndof = %d.", ndof);
 
   // Define initial conditions.
@@ -85,19 +85,19 @@ int main(int argc, char* argv[])
   c_iter.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
-  DXDYFilter omega(omega_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
-  DXDYFilter omega_dt(omega_dt_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
-  DXDYFilter omega_dc(omega_dc_fn, Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega_dt(omega_dt_fn, Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
+  DXDYFilter omega_dc(omega_dc_fn, Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
 
   // Initialize weak formulation.
   WeakForm wf(2, JFNK ? true : false);
   if (!JFNK || (JFNK && PRECOND == 1))
   {
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
+    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
     wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), 3);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_UNSYM, HERMES_ANY, &omega_dc);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_UNSYM, HERMES_ANY, &omega_dt);
+    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
+    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
+    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
   }
   else if (PRECOND == 2)
   {
@@ -105,23 +105,23 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(precond_1_1));
   }
   wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+                     Hermes::vector<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-                     Hermes::Tuple<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+                     Hermes::vector<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Project the functions "t_iter" and "c_iter" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
+  OGProjection::project_global(Hermes::vector<Space *>(t_space, c_space), Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
     coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
 
   // Initialize finite element problem.
-  DiscreteProblem dp(&wf, Hermes::Tuple<Space*>(t_space, c_space));
+  DiscreteProblem dp(&wf, Hermes::vector<Space*>(t_space, c_space));
 
   // Initialize NOX solver and preconditioner.
   NoxSolver solver(&dp);
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
     solver.set_init_sln(coeff_vec);
     if (solver.solve())
     {
-      Solution::vector_to_solutions(solver.get_solution(), Hermes::Tuple<Space *>(t_space, c_space), Hermes::Tuple<Solution *>(&t_prev_newton, &c_prev_newton));
+      Solution::vector_to_solutions(solver.get_solution(), Hermes::vector<Space *>(t_space, c_space), Hermes::vector<Solution *>(&t_prev_newton, &c_prev_newton));
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",
@@ -173,40 +173,44 @@ int main(int argc, char* argv[])
     info("Total running time for time level %d: %g s.", ts, cpu_time.tick().last());
   }
 
-  info("Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
-  info("Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
-  info("Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
-  info("Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
-  info("Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
-  info("Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
-  info("Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
-  info("Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
+  info("T Coordinate (  0,   8) value = %lf", t_prev_time_1.get_pt_value(0.0, 8.0));
+  info("T Coordinate (  8,   8) value = %lf", t_prev_time_1.get_pt_value(8.0, 8.0));
+  info("T Coordinate ( 15,   8) value = %lf", t_prev_time_1.get_pt_value(15.0, 8.0));
+  info("T Coordinate ( 24,   8) value = %lf", t_prev_time_1.get_pt_value(24.0, 8.0));
+  info("T Coordinate ( 30,   8) value = %lf", t_prev_time_1.get_pt_value(30.0, 8.0));
+  info("T Coordinate ( 40,   8) value = %lf", t_prev_time_1.get_pt_value(40.0, 8.0));
+  info("T Coordinate ( 50,   8) value = %lf", t_prev_time_1.get_pt_value(50.0, 8.0));
+  info("T Coordinate ( 60,   8) value = %lf", t_prev_time_1.get_pt_value(60.0, 8.0));
 
-  info("Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
-  info("Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
-  info("Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
-  info("Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
-  info("Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
-  info("Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
-  info("Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
-  info("Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
+  info("C Coordinate (  0,   8) value = %lf", c_prev_time_1.get_pt_value(0.0, 8.0));
+  info("C Coordinate (  8,   8) value = %lf", c_prev_time_1.get_pt_value(8.0, 8.0));
+  info("C Coordinate ( 15,   8) value = %lf", c_prev_time_1.get_pt_value(15.0, 8.0));
+  info("C Coordinate ( 24,   8) value = %lf", c_prev_time_1.get_pt_value(24.0, 8.0));
+  info("C Coordinate ( 30,   8) value = %lf", c_prev_time_1.get_pt_value(30.0, 8.0));
+  info("C Coordinate ( 40,   8) value = %lf", c_prev_time_1.get_pt_value(40.0, 8.0));
+  info("C Coordinate ( 50,   8) value = %lf", c_prev_time_1.get_pt_value(50.0, 8.0));
+  info("C Coordinate ( 60,   8) value = %lf", c_prev_time_1.get_pt_value(60.0, 8.0));
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
   double coor_x[8] = {0.0, 8.0, 15.0, 24.0, 30.0, 40.0, 50.0, 60.0};
   double coor_y = 8.0;
   double t_value[8] = {1.000000, 1.000078, 0.002819, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
   double c_value[8] = {0.000000, -0.000078, 0.997181, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000};
+
+  bool success = true;
   for (int i = 0; i < 8; i++)
   {
-    if (!((t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-4) || 
-        !((c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) < 1E-4))
-    {
-      printf("Failure!\n");
-      return ERROR_FAILURE;
-    }
+    if ((abs(t_value[i] - t_prev_time_1.get_pt_value(coor_x[i], coor_y)) > 1E-4) || 
+        (abs(c_value[i] - c_prev_time_1.get_pt_value(coor_x[i], coor_y)) > 1E-4))
+      success = false;
   }
-  printf("Success!\n");
-  return ERROR_SUCCESS;
+
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

@@ -39,9 +39,9 @@ public:
 
   void show(Space* space);
 
-  virtual void set_title(const char* t) { 
-    if (basic_title.length() == 0) 
-      basic_title.assign(t); 
+  virtual void set_title(const char* t) {
+    if (basic_title.length() == 0)
+      basic_title.assign(t);
     View::set_title(t);
   }
 

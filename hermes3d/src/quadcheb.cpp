@@ -31,7 +31,7 @@
 QuadChebTetra::QuadChebTetra() {
 	_F_
 #ifdef WITH_TETRA
-	mode = MODE_TETRAHEDRON;
+	mode = HERMES_MODE_TET;
 
 	max_edge_order = 10;
 	max_face_order = Ord2(10);
@@ -41,15 +41,15 @@ QuadChebTetra::QuadChebTetra() {
 	for (int o = 0; o < 10; o++) {
 		Ord3 ord(o);
 		int idx = ord.get_idx();
-		np[idx] = (o + 1) * (o + 2) * (o + 3) / 6;
-
-		tables[idx] = pt = new QuadPt3D[np[idx]];
-		MEM_CHECK(tables[idx]);
+		(*np)[idx] = (o + 1) * (o + 2) * (o + 3) / 6;
+    if((*tables)[idx] != NULL)
+      delete [] (*tables)[idx];
+		(*tables)[idx] = pt = new QuadPt3D[(*np)[idx]];
 
 		for (int i = o, m = 0; i >= 0; i--)				// z
 			for (int j = o; j >= o - i; j--)			// y
 				for (int k = o; k >= o - j + o - i; k--, m++) {	// x
-					assert(m < np[idx]);
+					assert(m < (*np)[idx]);
 					pt[m].x = o ? cos(k * M_PI / o) : 1.0;
 					pt[m].y = o ? cos(j * M_PI / o) : 1.0;
 					pt[m].z = o ? cos(i * M_PI / o) : 1.0;
@@ -61,10 +61,26 @@ QuadChebTetra::QuadChebTetra() {
 
 QuadChebTetra::~QuadChebTetra() {
 	_F_
-#ifdef WITH_TETRA
-	for (unsigned int idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
-		delete [] tables[idx];
-#endif
+  for(std::map<unsigned int, QuadPt3D *>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = edge_tables->begin(); it != edge_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = face_tables->begin(); it != face_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  if(vertex_table != NULL)
+    delete [] vertex_table;
+  np->clear();
+  delete np;
+  np_edge->clear();
+  delete np_edge;
+  np_face->clear();
+  delete np_face;
 }
 
 //// QuadChebHex  /////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +88,7 @@ QuadChebTetra::~QuadChebTetra() {
 QuadChebHex::QuadChebHex() {
 	_F_
 #ifdef WITH_HEX
-	mode = MODE_HEXAHEDRON;
+	mode = HERMES_MODE_HEX;
 
 	max_edge_order = 10;
 	max_face_order = Ord2(10, 10);
@@ -83,17 +99,33 @@ QuadChebHex::QuadChebHex() {
 		for (j = 0; j <= 10; j++)
 			for (k = 0; k <= 10; k++) {
 				Ord3 o(i, j, k);
-				np[o.get_idx()] = (i + 1) * (j + 1) * (k + 1);
+				(*np)[o.get_idx()] = (i + 1) * (j + 1) * (k + 1);
 			}
 #endif
 }
 
 QuadChebHex::~QuadChebHex() {
 	_F_
-#ifdef WITH_HEX
-	for (unsigned int idx = tables.first(); idx != INVALID_IDX; idx = tables.next(idx))
-		delete [] tables[idx];
-#endif
+  for(std::map<unsigned int, QuadPt3D *>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = edge_tables->begin(); it != edge_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  for(std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>::iterator it = face_tables->begin(); it != face_tables->end(); it++) {
+    for(std::map<unsigned int, QuadPt3D *>::iterator it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
+      delete [] it_inner->second;
+    delete it->second;
+  }
+  if(vertex_table != NULL)
+    delete [] vertex_table;
+  np->clear();
+  delete np;
+  np_edge->clear();
+  delete np_edge;
+  np_face->clear();
+  delete np_face;
 }
 
 void QuadChebHex::calc_table(const Ord3 &order) {
@@ -102,8 +134,9 @@ void QuadChebHex::calc_table(const Ord3 &order) {
 	QuadPt3D *pt;
 
 	int idx = order.get_idx();
-	tables[idx] = pt = new QuadPt3D[np[idx]];
-	MEM_CHECK(tables[idx]);
+  if((*tables)[idx] != NULL)
+    delete [] (*tables)[idx];
+	(*tables)[idx] = pt = new QuadPt3D[(*np)[idx]];
 
 	for (int i = order.z, m = 0; i >= 0; i--)
 		for (int j = order.y; j >= 0; j--)

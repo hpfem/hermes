@@ -62,11 +62,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation,
   WeakForm wf1;
-  wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_UNSYM, HERMES_ANY);
+  wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_NONSYM, HERMES_ANY);
   wf1.add_vector_form(callback(residual_form_hermes), HERMES_ANY);
 
   // Initialize the FE problem.
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+    rhs->change_sign();
     
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
@@ -217,11 +217,11 @@ int main(int argc, char* argv[])
   // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  Adapt adaptivity(&space, HERMES_H1_NORM);
+  Adapt adaptivity(&space);
   bool solutions_for_adapt = false;
-  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt) * 100;
   info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
-  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt) * 100;
   info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   info("Coordinate ( 0.6,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.6,  0.6));

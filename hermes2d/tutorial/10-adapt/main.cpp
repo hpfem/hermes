@@ -1,4 +1,4 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(OUTER_BDY, STATOR_BDY));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(OUTER_BDY, STATOR_BDY));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
@@ -162,8 +162,15 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space);
     bool solutions_for_adapt = true;
+    // In the following function, the Boolean parameter "solutions_for_adapt" determines whether 
+    // the calculated errors are intended for use with adaptivity (this may not be the case, for example,
+    // when error wrt. an exact solution is calculated). The default value is solutions_for_adapt = true, 
+    // The last parameter "error_flags" determine whether the total and element errors are treated as 
+    // absolute or relative. Its default value is error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL.
+    // In subsequent examples and benchmarks, these two parameters will be often used with 
+    // their default values, and thus they will not be present in the code explicitly.
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
                          HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 

@@ -192,10 +192,10 @@ NoxSolver::NoxSolver(DiscreteProblem* problem) : IterSolver()
   conv_flag.update = 0;
   conv_flag.wrms = 0;
 
-  // Create the interface between the test problem and the nonlinear solver
+  // Create the interface_ between the test problem and the nonlinear solver
   // This is created by the user using inheritance of the abstract base class:
   // NOX_Epetra_Interface
-  interface = Teuchos::rcp(new NoxProblemInterface(problem));
+  interface_ = Teuchos::rcp(new NoxProblemInterface(problem));
 #else
   error(NOX_NOT_COMPILED);
 #endif
@@ -204,9 +204,9 @@ NoxSolver::NoxSolver(DiscreteProblem* problem) : IterSolver()
 NoxSolver::~NoxSolver()
 {
 #ifdef HAVE_NOX
-  // FIXME: this does not destroy the "interface", and Trilinos 
+  // FIXME: this does not destroy the "interface_", and Trilinos 
   // complains at closing main.cpp.
-  interface->fep->invalidate_matrix();
+  interface_->fep->invalidate_matrix();
 #endif
 }
 
@@ -215,7 +215,7 @@ NoxSolver::~NoxSolver()
   {
   #ifdef HAVE_NOX
     precond_yes = true;
-    interface->set_precond(pc);
+    interface_->set_precond(pc);
   #endif
   }
 #endif
@@ -231,7 +231,7 @@ void NoxSolver::set_precond(const char *pc)
 bool NoxSolver::set_init_sln(double *ic)
 {
 #ifdef HAVE_NOX
-  interface->set_init_sln(ic);
+  interface_->set_init_sln(ic);
   return true;
 #else
   return false;
@@ -243,7 +243,7 @@ bool NoxSolver::set_init_sln(EpetraVector *ic)
 #ifdef HAVE_NOX
   double *vals;
   ic->vec->ExtractView(&vals);
-  interface->set_init_sln(vals);
+  interface_->set_init_sln(vals);
   return true;
 #else
   return false;
@@ -253,10 +253,10 @@ bool NoxSolver::set_init_sln(EpetraVector *ic)
 bool NoxSolver::solve()
 {
 #ifdef HAVE_NOX
-   if (interface->fep->get_num_dofs() == 0) return false;
+   if (interface_->fep->get_num_dofs() == 0) return false;
 
    // start from the initial solution
-   NOX::Epetra::Vector nox_sln_vec(*interface->get_init_sln()->vec);
+   NOX::Epetra::Vector nox_sln_vec(*interface_->get_init_sln()->vec);
 
    // Create the top level parameter list
    Teuchos::RCP<Teuchos::ParameterList> nl_pars_ptr = Teuchos::rcp(new Teuchos::ParameterList);
@@ -293,12 +293,12 @@ bool NoxSolver::solve()
    ls_pars.set("Tolerance", ls_tolerance);
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
    // precond stuff
-   Teuchos::RCP<Precond> precond = interface->get_precond();
+   Teuchos::RCP<Precond> precond = interface_->get_precond();
    if (precond_yes == false) {
      ls_pars.set("Preconditioner", "None");
    }
    else 
-     if (interface->fep->is_matrix_free()) ls_pars.set("Preconditioner", "User Defined");
+     if (interface_->fep->is_matrix_free()) ls_pars.set("Preconditioner", "User Defined");
      else {
        if (strcasecmp(precond_type, "ML") == 0) {
          ls_pars.set("Preconditioner", "ML");
@@ -312,17 +312,17 @@ bool NoxSolver::solve()
      }
      ls_pars.set("Max Age Of Prec", 5);
 
-     Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = interface;
+     Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = interface_;
      Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac;
-     Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = interface;
+     Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = interface_;
      Teuchos::RCP<Epetra_RowMatrix> jac_mat;
      Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
 
-     if (interface->fep->is_matrix_free()) {
+     if (interface_->fep->is_matrix_free()) {
        // Matrix-Free (Epetra_Operator)
        if (precond == Teuchos::null) {
    Teuchos::RCP<NOX::Epetra::MatrixFree> mf = 
-           Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, interface, nox_sln_vec));
+           Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, interface_, nox_sln_vec));
    i_jac = mf;
    lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
         i_jac, mf, nox_sln_vec));
@@ -335,8 +335,8 @@ bool NoxSolver::solve()
      }
      else {  // not Matrix Free
        // Create the Epetra_RowMatrix.
-       jac_mat = Teuchos::rcp(interface->get_jacobian()->mat);
-       i_jac = interface;
+       jac_mat = Teuchos::rcp(interface_->get_jacobian()->mat);
+       i_jac = interface_;
        lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
             i_jac, jac_mat, nox_sln_vec));
      }
@@ -389,7 +389,7 @@ bool NoxSolver::solve()
      Teuchos::RCP<NOX::Solver::Generic> solver = NOX::Solver::buildSolver(grp, cmb, final_pars);
      NOX::StatusTest::StatusType status = solver->solve();
 
-     if (!interface->fep->is_matrix_free()) {
+     if (!interface_->fep->is_matrix_free()) {
        jac_mat.release();	// release the ownership (we take care of jac_mat by ourselves)
      }
      bool success;
@@ -407,7 +407,7 @@ bool NoxSolver::solve()
        (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
 #endif
        // extract solution
-       int n = interface->fep->get_num_dofs();
+       int n = interface_->fep->get_num_dofs();
        delete [] sln;
        sln = new scalar[n];
        memset(sln, 0, n * sizeof(double));
@@ -423,7 +423,7 @@ bool NoxSolver::solve()
      }
 
      // debug
-     //int n = interface->fep->get_num_dofs();
+     //int n = interface_->fep->get_num_dofs();
      //printf("n = %d\nvec = ", n);
      //for (int i=0; i < n; i++) printf("%g ", sln[i]);
      //printf("\n");

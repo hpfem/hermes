@@ -34,6 +34,10 @@ const int TIME_INTEGRATION = 2;                   // 1... implicit Euler, 2... C
 
 // Adaptivity
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees
+                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
+                                                  // TODO: Add a third option where one layer will be taken off 
+                                                  // and just one polynomial degree subtracted.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
@@ -188,8 +192,8 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_3);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_2, BDY_5));
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_1, BDY_4, BDY_6));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_5));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_1, BDY_4, BDY_6));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values(&TIME);
@@ -209,8 +213,6 @@ int main(int argc, char* argv[])
   // Solutions for the time stepping and the Newton's method.
   Solution sln, ref_sln, sln_prev_time;
   
-  // Adapt mesh to represent initial condition with given accuracy.
-  info("Mesh adaptivity to an exact function:");
   // Initialize views.
   char title_init[200];
   sprintf(title_init, "Projection of initial condition");
@@ -218,6 +220,9 @@ int main(int argc, char* argv[])
   sprintf(title_init, "Initial mesh");
   OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
   view_init->fix_scale_width(80);
+
+  // Adapt mesh to represent initial condition with given accuracy.
+  info("Mesh adaptivity to an exact function:");
   int as = 1; bool done = false;
   do
   {
@@ -231,10 +236,8 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&init_space, &ref_sln, &sln_prev_time, matrix_solver);
 
     // Calculate element errors and total error estimate.
-    Adapt adaptivity(&init_space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity.calc_err_est(&sln_prev_time, &ref_sln, solutions_for_adapt, 
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt adaptivity(&init_space);
+    double err_est_rel = adaptivity.calc_err_est(&sln_prev_time, &ref_sln) * 100;
 
     info("Step %d, ndof %d, proj_error %g%%", as, Space::get_num_dofs(&init_space), err_est_rel);
 
@@ -259,7 +262,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+    wf.add_matrix_form(jac_form_vol_euler, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_euler, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_euler, jac_form_surf_4_ord, BDY_4);
@@ -271,7 +274,7 @@ int main(int argc, char* argv[])
     wf.add_vector_form_surf(res_form_surf_6_euler, res_form_surf_6_ord, BDY_6);
   }
   else {
-    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_UNSYM, HERMES_ANY, 
+    wf.add_matrix_form(jac_form_vol_cranic, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, 
                        &sln_prev_time);
     wf.add_matrix_form_surf(jac_form_surf_1_cranic, jac_form_surf_1_ord, BDY_1);
     wf.add_matrix_form_surf(jac_form_surf_4_cranic, jac_form_surf_4_ord, BDY_4);
@@ -306,14 +309,17 @@ int main(int argc, char* argv[])
     TIME = ts*TAU;
     info("---- Time step %d:", ts);
 
-    // Periodic global derefinements.
-    if (ts > 1 && ts % UNREF_FREQ == 0) {
+    // Periodic global derefinement.
+    if (ts > 1 && ts % UNREF_FREQ == 0) 
+    {
       info("Global mesh derefinement.");
-      mesh.copy(&basemesh);
+      if (UNREF_LEVEL == 1) mesh.unrefine_all_elements();
+      else mesh.copy(&basemesh);
       space.set_uniform_order(P_INIT);
     }
 
-    // Adaptivity loop (in space):
+    // Spatial adaptivity loop. Note; sln_prev_time must not be changed 
+    // during spatial adaptivity.
     bool done = false;
     int as = 1;
     do
@@ -362,11 +368,9 @@ int main(int argc, char* argv[])
       // Calculate element errors.
       info("Calculating error estimate."); 
       Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-      bool solutions_for_adapt = true;
       
       // Calculate error estimate wrt. fine mesh solution.
-      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, 
-                           HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS) * 100;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
       // Report results.
       info("ndof_coarse: %d, ndof_fine: %d, space_err_est_rel: %g%%", 
@@ -374,7 +378,7 @@ int main(int argc, char* argv[])
 
       // Add entries to convergence graphs.
       graph_time_err_est.add_values(ts*TAU, err_est_rel);
-      graph_time_err_est.save("time_error_est.dat");
+      graph_time_err_est.save("time_err_est.dat");
       graph_time_dof.add_values(ts*TAU, Space::get_num_dofs(&space));
       graph_time_dof.save("time_dof.dat");
       graph_time_cpu.add_values(ts*TAU, cpu_time.accumulated());

@@ -23,7 +23,7 @@
 #define __H2D_VIEW_H
 
 #include "../h2d_common.h"
-#include "../linear.h"
+#include "../linearizer/linear.h"
 
 // Constants
 #define H2D_DEFAULT_X_POS -1
@@ -50,7 +50,7 @@ struct WinGeom {
     this->width = width;
     this->height = height;
   };
-}; 
+};
 
 /// View palette type.
 enum ViewPaletteType {

@@ -1,19 +1,19 @@
-General Initial Condition (16)
+General Initial Condition (17)
 ------------------------------
 
-**Git reference:** Tutorial example `16-newton-elliptic-2 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/16-newton-elliptic-2>`_.
+**Git reference:** Tutorial example `17-newton-2 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/17-newton-2>`_.
 
 Model problem
 ~~~~~~~~~~~~~
 
-We will solve the nonlinear model problem from the previous section again,
+We will still stay with the nonlinear model problem from the previous sections,
 
 .. math::
 
     -\nabla \cdot (\lambda(u)\nabla u) - f(x,y) = 0 \ \ \ \mbox{in } \Omega = (-10,10)^2
 
-but now with nonhomogeneous Dirichlet boundary conditions 
+but now we will change the boundary conditions to nonhomogeneous Dirichlet,
 
 .. math::
 
@@ -76,7 +76,7 @@ Sample results
 
 The following figure shows the $H^1$-projection of the initial condition init_cond():
 
-.. image:: 16/proj-h1.png
+.. image:: 17/proj-h1.png
    :align: center
    :width: 600
    :height: 350
@@ -84,7 +84,7 @@ The following figure shows the $H^1$-projection of the initial condition init_co
 
 The converged solution looks as follows:
 
-.. image:: 16/solution.png
+.. image:: 17/solution.png
    :align: center
    :width: 600
    :height: 350

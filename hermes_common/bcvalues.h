@@ -17,11 +17,11 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef __BCVALUES_H
-#define __BCVALUES_H
+#ifndef __HERMES_COMMON_BCVALUES_H
+#define __HERMES_COMMON_BCVALUES_H
 
 #include "common.h"
-#include "tuple.h"
+#include "vector.h"
 #include "error.h"
 #include "bctypes.h"
 
@@ -29,8 +29,13 @@
 /// the function representing them.
 class HERMES_API BCValues {
 public:
-  BCValues(double* t) : t(t) { t_set = true; };
-  BCValues() { t_set = false; };
+  BCValues(double* t) : t(t) { 
+    t_set = true;
+  };
+  BCValues() 
+  { 
+    t_set = false; 
+  };
   ~BCValues() {};
 
 protected:
@@ -42,18 +47,27 @@ protected:
 
   /// Storage of functions. 
   std::map<int, value_callback> value_callbacks;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, value_callback> value_callbacks_string_temp;
+
   std::map<int, value_callback_time> value_callbacks_time;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, value_callback_time> value_callbacks_time_string_temp;
 
   /// Registering which condition is time-dependent.
   std::map<int, bool> is_time_dep;
 
   /// Storage of 1D constants. 
   std::map<int, scalar> value_constants;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, scalar> value_constants_string_temp;
 
   /// Storage of zeroes.
   /// This is needed, so that we are able to check, if the zero has been set by user, or
   /// if it is put there by a call to map<>::operator[].
   std::map<int, bool> value_zeroes;
+  // This member is used temporary for storing markers defined by user-supplied strings.
+  std::map<std::string, bool> value_zeroes_string_temp;
 
   /// Current time. In the case of time_dependency.
   double* t;
@@ -94,7 +108,7 @@ public:
 
   /// Adds the function callback to represent the Dirichlet BC on the parts of
   /// the boundary marked with markers.
-  void add_function(Hermes::Tuple<int> markers, value_callback callback) 
+  void add_function(Hermes::vector<int> markers, value_callback callback) 
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
@@ -108,12 +122,21 @@ public:
     }
   };
 
-  /// Adds the function callback to represent the Dirichlet BC on the parts of
-  /// the boundary marked with markers.
-  void add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback) 
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_function(Hermes::vector<std::string> markers, value_callback callback)
   {
     if(markers.size() == 0)
       error("BCValues::add_function() called without any boundary markers specified.");
+    for(unsigned int i = 0; i < markers.size(); i++)
+      this->value_callbacks_string_temp.insert(std::pair<std::string, value_callback>(markers[i], callback));
+  };
+    
+  /// Adds the function callback to represent the Dirichlet BC on the parts of
+  /// the boundary marked with markers.
+  void add_timedep_function(Hermes::vector<int> markers, value_callback_time callback) 
+  {
+    if(markers.size() == 0)
+      error("BCValues::add_timedep_function() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a function present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the function.
@@ -125,8 +148,17 @@ public:
     }
   };
 
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_timedep_function(Hermes::vector<std::string> markers, value_callback_time callback)
+  {
+     if(markers.size() == 0)
+      error("BCValues::add_timedep_function() called without any boundary markers specified.");
+    for(unsigned int i = 0; i < markers.size(); i++)
+      this->value_callbacks_time_string_temp.insert(std::pair<std::string, value_callback_time>(markers[i], callback));
+  };
+
   /// The same as add_function(), only supplies a 1D constant.
-  void add_const(Hermes::Tuple<int> markers, scalar value) 
+  void add_const(Hermes::vector<int> markers, scalar value) 
   {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     if(value == 0) {
@@ -148,11 +180,28 @@ public:
     }
   };
 
-  /// The same as add_const(), only supplies a zero.
-  void add_zero(Hermes::Tuple<int> markers) 
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_const(Hermes::vector<std::string> markers, scalar value)
   {
+    #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    if(value == 0) {
+    #else
+        if(value == std::complex<double>(0, 0)) {
+    #endif
+          this->add_zero(markers);
+          return;
+        }
     if(markers.size() == 0)
       error("BCValues::add_const() called without any boundary markers specified.");
+    for(unsigned int i = 0; i < markers.size(); i++)
+      this->value_constants_string_temp.insert(std::pair<std::string, scalar>(markers[i], value));
+  };
+
+  /// The same as add_const(), only supplies a zero.
+  void add_zero(Hermes::vector<int> markers) 
+  {
+    if(markers.size() == 0)
+      error("BCValues::add_zero() called without any boundary markers specified.");
     for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
@@ -167,6 +216,15 @@ public:
 
       check(markers[i]);
     }
+  };
+
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_zero(Hermes::vector<std::string> markers)
+  {
+    if(markers.size() == 0)
+      error("BCValues::add_zero() called without any boundary markers specified.");
+    for(unsigned int i = 0; i < markers.size(); i++)
+      value_zeroes_string_temp.insert(std::pair<std::string, bool>(markers[i], true));
   };
 
   /// Checks whether all functions representing Dirichlet BCs are really set on a Dirichlet
@@ -269,6 +327,9 @@ public:
       bv->value_zeroes = this->value_zeroes;
       return bv;
   }
+
+  friend class Space;
 };
 
 #endif
+

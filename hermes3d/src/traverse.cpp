@@ -374,7 +374,7 @@ void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 	Mesh *m = meshes[0];
 
 	switch (e->get_mode()) {
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			PRINTF("set_boundary_info (elem # = %d)\n", e->id);
 
 			PRINTF(" * cr = (%llx, %llx) x (%llx, %llx) x (%llx, %llx)\n", s->cr.x_lo, s->cr.x_hi, s->cr.y_lo, s->cr.y_hi, s->cr.z_lo, s->cr.z_hi);
@@ -389,15 +389,15 @@ void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 			bnd[5] = (s->cr.z_hi == ONE) && m->facets[m->get_facet_id(e, 5)]->type == Facet::OUTER;
 			break;
 
-		case MODE_TETRAHEDRON:
-			// FIXME: check that the triangle is the unit triable (0, ONE) (see case MODE_HEXAHEDRON above)
+		case HERMES_MODE_TET:
+			// FIXME: check that the triangle is the unit triable (0, ONE) (see case HERMES_MODE_HEX above)
 			bnd[0] = m->facets[m->get_facet_id(e, 0)]->type == Facet::OUTER;
 			bnd[1] = m->facets[m->get_facet_id(e, 1)]->type == Facet::OUTER;
 			bnd[2] = m->facets[m->get_facet_id(e, 2)]->type == Facet::OUTER;
 			bnd[3] = m->facets[m->get_facet_id(e, 3)]->type == Facet::OUTER;
 			break;
 
-		case MODE_PRISM:
+		case HERMES_MODE_PRISM:
 			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 			break;
 
@@ -408,7 +408,7 @@ void Traverse::set_boundary_info(State *s, bool *bnd, SurfPos *surf_pos) {
 
 	for (int iface = 0; iface < e->get_num_faces(); iface++) {
 		if (bnd[iface]) {
-			unsigned int fid = m->get_facet_id(e, iface);
+      Facet::Key fid = m->get_facet_id(e, iface);
 			Facet *facet = m->facets[fid];
 			Boundary *b = m->boundaries[facet->right];
 
@@ -584,10 +584,10 @@ Element **Traverse::get_next_state(bool *bnd, SurfPos *surf_pos) {
 		}
 
 		switch (base->get_mode()) {
-			case MODE_HEXAHEDRON: hex_push_son_states(s); break;
+			case HERMES_MODE_HEX: hex_push_son_states(s); break;
 
-			case MODE_TETRAHEDRON:
-			case MODE_PRISM:
+			case HERMES_MODE_TET:
+			case HERMES_MODE_PRISM:
 				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 				break;
 
@@ -791,9 +791,9 @@ void Traverse::union_recurrent(Box *cr, Element **e, Box *er, uint64 *idx, Eleme
 	}
 	else {
 		switch (base->get_mode()) {
-			case MODE_HEXAHEDRON:  hex_union_rec(cr, e, er, idx, uni); break;
-			case MODE_TETRAHEDRON: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
- 			case MODE_PRISM:       EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			case HERMES_MODE_HEX:  hex_union_rec(cr, e, er, idx, uni); break;
+			case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+ 			case HERMES_MODE_PRISM:       EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
 		}
 	}

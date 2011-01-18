@@ -192,8 +192,8 @@ HcurlShapesetLobattoHex::HcurlShapesetLobattoHex() : Shapeset(3)
 {
 	_F_
 #ifdef WITH_HEX
-	type = Hcurl;
-	mode = MODE_HEXAHEDRON;
+	type = HERMES_HCURL_SPACE;
+	mode = HERMES_MODE_HEX;
 
 	num_components = 3;
 
@@ -217,16 +217,16 @@ HcurlShapesetLobattoHex::~HcurlShapesetLobattoHex() {
 #ifdef WITH_HEX
 	for (int edge = 0; edge < Hex::NUM_EDGES; edge++)
 		for (int ori = 0; ori < NUM_EDGE_ORIS; ori++)
-			for (unsigned int idx = edge_indices[edge][ori].first(); idx != INVALID_IDX; idx = edge_indices[edge][ori].next(idx))
-				delete [] edge_indices[edge][ori][idx];
+      for(std::map<unsigned int, int*>::iterator it = edge_indices[edge][ori].begin(); it != edge_indices[edge][ori].end(); it++)
+        delete [] it->second;
 
 	for (int face = 0; face < Hex::NUM_FACES; face++)
 		for (int ori = 0; ori < NUM_FACE_ORIS; ori++)
-			for (unsigned int idx = face_indices[face][ori].first(); idx != INVALID_IDX; idx = face_indices[face][ori].next(idx))
-				delete [] face_indices[face][ori][idx];
+			for(std::map<unsigned int, int*>::iterator it = face_indices[face][ori].begin(); it != face_indices[face][ori].end(); it++)
+        delete [] it->second;
 
-	for (unsigned int idx = bubble_indices.first(); idx != INVALID_IDX; idx = bubble_indices.next(idx))
-		delete [] bubble_indices[idx];
+	for(std::map<unsigned int, int*>::iterator it = bubble_indices.begin(); it != bubble_indices.end(); it++)
+    delete [] it->second;
 #endif
 }
 

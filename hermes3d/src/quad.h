@@ -22,7 +22,6 @@
 
 #include "h3d_common.h"
 #include "order.h"
-#include "../../hermes_common/array.h"
 #include "../../hermes_common/error.h"
 
 /// @defgroup quadratures Numerical quadratures
@@ -153,7 +152,7 @@ public:
 	ElementMode2D get_mode() const { return mode; }
 
 protected:
-	/// mode of quadratures (MODE_TRIANGLE, MODE_QUAD)
+	/// mode of quadratures (HERMES_MODE_TRIANGLE, HERMES_MODE_QUAD)
 	ElementMode2D mode;
 	/// maximal order for integration (interpretation depened on the mode)
 	int max_order;
@@ -179,16 +178,26 @@ protected:
 /// @ingroup quadratures
 class HERMES_API Quad3D {
 public:
-	virtual ~Quad3D() { }
+  Quad3D() {
+    tables = new std::map<unsigned int, QuadPt3D *>;
+    edge_tables = new std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>;
+    face_tables = new std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*>;
+	  np = new std::map<unsigned int, int>;
+	  np_edge = new std::map<unsigned int, int>;
+	  np_face = new std::map<unsigned int, int>;
+  }
+	virtual ~Quad3D() {
+    
+  }
 
-	virtual QuadPt3D *get_points(const Ord3 &order) { CHECK_MODE; return tables[order.get_idx()]; }
-	virtual int get_num_points(const Ord3 &order) { CHECK_MODE; return np[order.get_idx()]; }
+	virtual QuadPt3D *get_points(const Ord3 &order) { CHECK_MODE; return (*tables)[order.get_idx()]; }
+	virtual int get_num_points(const Ord3 &order) { CHECK_MODE; return (*np)[order.get_idx()]; }
 
-	virtual QuadPt3D *get_edge_points(int edge, const Ord1 &order) { return edge_tables[edge][order]; }
-	int get_edge_num_points(int edge, const Ord1 &order) const { return np_edge[order]; }
+	virtual QuadPt3D *get_edge_points(int edge, const Ord1 &order) { return (*(*edge_tables)[edge])[order]; }
+  int get_edge_num_points(int edge, const Ord1 &order) const { return (*np_edge).at(order); }
 
-	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) { return face_tables[face][order.get_idx()]; }
-	int get_face_num_points(int face, const Ord2 &order) const { return np_face[order.get_idx()]; }
+	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) { return (*(*face_tables)[face])[order.get_idx()]; }
+  int get_face_num_points(int face, const Ord2 &order) const { return (*np_face).at(order.get_idx()); }
 
 	virtual QuadPt3D *get_vertex_points() { return vertex_table; }
 	int get_vertex_num_points() const { return np_vertex; }
@@ -200,20 +209,20 @@ public:
 	ElementMode3D get_mode() const { return mode; }
 
 protected:
-	/// mode of quadratures (MODE_TETRAHEDRON, MODE_HEXAHEDRON, MODE_PRISM)
+	/// mode of quadratures (HERMES_MODE_TET, HERMES_MODE_HEX, HERMES_MODE_PRISM)
 	ElementMode3D mode;
 	/// maximal order for integration (interpretation depends on the mode)
 	Ord1 max_edge_order;
 	Ord2 max_face_order;
 	Ord3 max_order;
 
-	Array<QuadPt3D *> tables;
-	Array<QuadPt3D *> *edge_tables;
-	Array<QuadPt3D *> *face_tables;
+	std::map<unsigned int, QuadPt3D *>* tables;
+	std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*> *edge_tables;
+	std::map<unsigned int, std::map<unsigned int, QuadPt3D *>*> *face_tables;
 	QuadPt3D *vertex_table;
-	Array<int> np;
-	Array<int> np_edge;
-	Array<int> np_face;
+	std::map<unsigned int, int> *np;
+	std::map<unsigned int, int> *np_edge;
+	std::map<unsigned int, int> *np_face;
 	int np_vertex;
 };
 

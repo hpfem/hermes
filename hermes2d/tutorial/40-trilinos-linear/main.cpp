@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -211,9 +209,9 @@ int main(int argc, char **argv)
   // Calculate errors.
   Solution ex;
   ex.set_exact(&mesh, &exact);
-  double rel_err_1 = calc_abs_error(&sln1, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
+  double rel_err_1 = calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  double rel_err_2 = calc_abs_error(&sln2, &ex, HERMES_H1_NORM) / calc_norm(&ex, HERMES_H1_NORM) * 100;
+  double rel_err_2 = calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
  
   // Wait for all views to be closed.

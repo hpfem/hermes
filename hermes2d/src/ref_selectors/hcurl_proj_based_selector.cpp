@@ -1,8 +1,8 @@
 #include "../h2d_common.h"
 #include "../../../hermes_common/matrix.h"
-#include "../solution.h"
+#include "../function/solution.h"
 #include "../shapeset/shapeset_hc_all.h"
-#include "../element_to_refine.h"
+#include "../mesh/element_to_refine.h"
 #include "hcurl_proj_based_selector.h"
 
 #ifdef H2D_COMPLEX

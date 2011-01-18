@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /// \brief Allocation of a local array on the stack.
-// An array of ordinal types or strctures.
+// An array of ordinal types or structures.
 //#define AUTOLA_OR(__type, __name, __len) AutoLocalArray<__type> __name ((__type*)alloca((__len) * sizeof(__type)), __len)
 #define AUTOLA_OR(__type, __name, __len) AutoLocalArray<__type> __name (new __type[__len], __len)
 // An array of classes that has a default constructor that allocates memery.

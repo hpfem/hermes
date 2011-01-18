@@ -28,7 +28,7 @@
 /// Hcurl shapeset for hexahedra
 ///
 ///
-class HcurlShapesetLobattoHex : public Shapeset {
+class HERMES_API HcurlShapesetLobattoHex : public Shapeset {
 public:
 	HcurlShapesetLobattoHex();
 	virtual ~HcurlShapesetLobattoHex();
@@ -40,20 +40,23 @@ public:
     return -1;
 	}
 
-	virtual int *get_edge_indices(int edge, int ori, Ord1 order) {
+  virtual int *get_edge_indices(int edge, int ori, Ord1 order) {
 		CHECK_EDGE(edge);
-		if (!edge_indices[edge][ori].exists(order)) compute_edge_indices(edge, ori, order);
+		if (edge_indices[edge][ori].find(order) == edge_indices[edge][ori].end()) 
+      compute_edge_indices(edge, ori, order);
 		return edge_indices[edge][ori][order];
 	}
 
 	virtual int *get_face_indices(int face, int ori, Ord2 order) {
 		CHECK_FACE(face);
-		if (!face_indices[face][ori].exists(order.get_idx())) compute_face_indices(face, ori, order);
+    if (face_indices[face][ori].find(order.get_idx()) == face_indices[face][ori].end()) 
+      compute_face_indices(face, ori, order);
 		return face_indices[face][ori][order.get_idx()];
 	}
 
-	virtual int *get_bubble_indices(Ord3 order) {
-		if (!bubble_indices.exists(order.get_idx())) compute_bubble_indices(order);
+  	virtual int *get_bubble_indices(Ord3 order) {
+		if (bubble_indices.find(order.get_idx()) == bubble_indices.end()) 
+      compute_bubble_indices(order);
 		return bubble_indices[order.get_idx()];
 	}
 
@@ -103,9 +106,9 @@ protected:
 
 	/// Indices of vertex shape functions on reference element, indexing: [vertex shape fn index]
 	int *vertex_indices;
-	Array<int *> edge_indices[Hex::NUM_EDGES][NUM_EDGE_ORIS];
-	Array<int *> face_indices[Hex::NUM_FACES][NUM_FACE_ORIS];
-	Array<int *> bubble_indices;
+	std::map<unsigned int, int *> edge_indices[Hex::NUM_EDGES][NUM_EDGE_ORIS];
+	std::map<unsigned int, int *> face_indices[Hex::NUM_FACES][NUM_FACE_ORIS];
+	std::map<unsigned int, int *> bubble_indices;
 
 	void compute_edge_indices(int edge, int ori, Ord1 order);
 	void compute_face_indices(int face, int ori, Ord2 order);

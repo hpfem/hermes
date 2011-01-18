@@ -17,9 +17,9 @@
 #define __H2D_RANGE_H
 
 template<typename T>
-class Range { ///< Range of values.
-  T lower_bound; ///< Lower boundary.
-  T upper_bound; ///< Upper boundary.
+class Range {       ///< Range of values.
+  T lower_bound;    ///< Lower boundary.
+  T upper_bound;    ///< Upper boundary.
   bool empty_range; ///< True if range is empty.
 public:
   Range() : empty_range(true) {};

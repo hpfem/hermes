@@ -344,8 +344,8 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
     space->set_element_order(H2D_TEST_ELEM_ID, test_case.start_quad_order());
   
     // Assemble the stiffness matrix and right-hand side vector.
-  //  info("Assembling the stiffness matrix and right-hand side vector.");
-  //  dp.assemble(mat, rhs);
+    //  info("Assembling the stiffness matrix and right-hand side vector.");
+    //  dp.assemble(mat, rhs);
 
     // Create and solve the reference system.
     Solution rsln;
@@ -355,12 +355,11 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
     Mesh *ref_mesh = new Mesh();
     ref_mesh->copy(space->get_mesh());
     ref_mesh->refine_all_elements();
-    Space* ref_space = space->dup(ref_mesh);
     int order_increase = 1;
-    ref_space->copy_orders(space, order_increase);
+    Space* ref_space = space->dup(ref_mesh, order_increase);
 
     // Solve the reference problem.
-//    solve_linear(ref_space, weakform, matrix_solver, &rsln);
+    // solve_linear(ref_space, weakform, matrix_solver, &rsln);
 
     // Initialize the FE problem.
     bool is_linear = true;

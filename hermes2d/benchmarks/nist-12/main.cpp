@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -47,7 +45,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -55,15 +53,18 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.                      
-double OMEGA = 3*M_PI/2;     //useful information about parameters will go here 
-double X_w = 0;              //
-double Y_w = -3/4;
-double R_0 = 3/4;
-double ALPHA_w = 200;
-double X_p = sqrt((double)5)/4;
-double Y_p = -1/4;
-double ALPHA_p = 1000;
-double EPSILON = 1/100;
+const double OMEGA_C = 3.0 * M_PI / 2.0;
+
+const double X_W = 0.0;             
+const double Y_W = -3.0 / 4.0;
+const double R_0 = 3.0 / 4.0;
+const double ALPHA_W = 200.0;
+
+const double X_P = -sqrt(5.0) / 4.0;
+const double Y_P = -1.0 / 4.0;
+const double ALPHA_P = 1000.0;
+
+const double EPSILON = 1.0 / 100.0;
 
  
 // Exact solution.
@@ -113,7 +114,8 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  sview.fix_scale_width(50);
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -163,13 +165,12 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error for each solution component.   
-    solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d",

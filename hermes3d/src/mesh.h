@@ -26,65 +26,6 @@ class MeshLoader;
 
 #include "h3d_common.h"
 
-#include "../../hermes_common/array.h"
-#include "../../hermes_common/arrayptr.h"
-#include "../../hermes_common/mapord.h"
-
-/// Iterates over all mesh vertex indices.
-///
-/// @param idx  Vertex hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_VERTICES(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->vertices.first(); (idx) != INVALID_IDX; (idx) = (mesh)->vertices.next((idx)))
-
-/// Iterates over all mesh edge indices.
-///
-/// @param idx  Edge hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_EDGES(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->edges.first(); (idx) != INVALID_IDX; (idx) = (mesh)->edges.next((idx)))
-
-/// Iterates over all mesh face indices.
-///
-/// @param idx  Face hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_FACETS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->facets.first(); (idx) != INVALID_IDX; (idx) = (mesh)->facets.next((idx)))
-
-/// Iterates over all mesh element indices.
-///
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used)
-
-/// Iterates over all active mesh element indices.
-///
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used) \
-			if ((mesh)->elements[idx]->active)
-
-/// Iterates over all inactive mesh element indices.
-///
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_INACTIVE_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(), _max = (mesh)->elements.count(); (idx) <= _max && (idx) != INVALID_IDX; (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used) \
-			if (!(mesh)->elements[idx]->active)
-
-/// Iterates over all base mesh element indices.
-/// @param idx  Element hash table index.
-/// @param mesh Pointer to the Mesh object.
-#define FOR_ALL_BASE_ELEMENTS(idx, mesh) \
-	for (unsigned int (idx) = (mesh)->elements.first(); (idx) <= mesh->get_num_base_elements(); (idx) = (mesh)->elements.next((idx))) \
-		if ((mesh)->elements[idx]->used)
-
-
 // refinement type
 #define H3D_REFT_HEX_NONE							0x0000
 #define H3D_REFT_HEX_X								0x0001
@@ -146,10 +87,102 @@ public:
 	// for debugging
 	void dump();
 
-	Edge();
-//	virtual ~Edge();
+  Edge(const Edge &o) { this->bnd = o.bnd; this->ref = o.ref; }
 
-	bool is_active() { return ref > 0; }
+  Edge & operator=(const Edge &o) 
+  { 
+    this->bnd = o.bnd;
+    this->ref = o.ref; 
+    return (*this);
+  }
+
+  struct Key
+  {
+    unsigned int * vtcs;
+    unsigned int size;
+    Key()
+    {
+      vtcs = NULL;
+      size = 0;
+    }
+   Key(unsigned int vtcs_ [], unsigned int size_)
+    {
+      this->size = size_;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++) {
+        unsigned int temp_place = i;
+        for(unsigned int j = i + 1; j < size; j++)
+          if(vtcs_[j] < vtcs_[temp_place])
+            temp_place = j;
+        this->vtcs[i] = vtcs_[temp_place];
+        vtcs_[temp_place] = vtcs_[i];
+      }
+    };
+    Key(const Key &b)
+    {
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+    };
+    Key & operator =(const Key &b)
+    {
+      if(size > 0)
+        delete [] vtcs;
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+      return *this;
+    };
+    ~Key()
+    {
+      if(size > 0)
+        delete [] vtcs;
+    };
+    bool operator <(const Key & other) const
+    {
+      if(this->size < other.size)
+        return true;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return true;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+
+      return false;
+    };
+    bool operator ==(const Key & other) const
+    {
+      if(this->size < other.size)
+        return false;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return false;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+
+      return true;
+    };
+
+    bool operator !=(const Key & other) const
+    {
+      return (!((*this)==other));
+    };
+  };
+  static Key invalid_key;
+  Edge();
+	
+  bool is_active() { return ref > 0; }
 };
 
 
@@ -171,6 +204,10 @@ public:
 	static const int NUM_VERTICES = 4;
 	static const int NUM_EDGES = 4;
 };
+
+#ifndef INVALID_IDX
+#define INVALID_IDX					((unsigned int) -1)
+#endif
 
 
 /// Stores information about neighboring elements
@@ -224,8 +261,93 @@ public:
 	unsigned ractive:1;			/// information for the right is active; 1 - active; 0 - inactive
 	unsigned ref_mask:2;		/// how is the facet divided (0 - not divived, 1 - horz, 2 - vert, 3 - both)
 
-	unsigned int parent;		/// ID of the parent facet
-	int sons[MAX_SONS];		/// ID of child facets (interpretation depend on ref_mask)
+  struct Key
+  {
+    unsigned int * vtcs;
+    unsigned int size;
+    Key()
+    {
+      vtcs = NULL;
+      size = 0;
+    }
+    Key(unsigned int vtcs_ [], unsigned int size_)
+    {
+      this->size = size_;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++) {
+        unsigned int temp_place = i;
+        for(unsigned int j = i + 1; j < size; j++)
+          if(vtcs_[j] < vtcs_[temp_place])
+            temp_place = j;
+        this->vtcs[i] = vtcs_[temp_place];
+        vtcs_[temp_place] = vtcs_[i];
+      }
+    };
+    ~Key()
+    {
+      if(size > 0)
+        delete [] vtcs;
+    };
+    Key(const Key &b)
+    {
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+    };
+    Key & operator =(const Key &b)
+    {
+      if(size > 0)
+        delete [] vtcs;
+      size = b.size;
+      if(size > 0)
+        this->vtcs = new unsigned int [size];
+      for(unsigned int i = 0; i < size; i++)
+        vtcs[i] = b.vtcs[i];
+      return *this;
+    };
+    bool operator <(const Key & other) const
+    {
+      if(this->size < other.size)
+        return true;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return true;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+
+      return false;
+    };
+    bool operator ==(const Key & other) const
+    {
+      if(this->size < other.size)
+        return false;
+      else if(this->size > other.size)
+        return false;
+      else
+        for(unsigned int i = 0; i < this->size; i++)
+          if(this->vtcs[i] < other.vtcs[i])
+            return false;
+          else if(this->vtcs[i] > other.vtcs[i])
+            return false;
+      return true;
+    };
+
+    bool operator !=(const Key & other) const
+    {
+      return (!(*this == other));
+    };
+
+  };
+  static Key invalid_key;
+  
+	Key parent;		/// Key of the parent facet
+	Key sons[MAX_SONS];		/// Key of child facets (interpretation depend on ref_mask)
 };
 
 
@@ -313,7 +435,7 @@ public:
 	virtual ~Hex();
 
 	//
-	virtual ElementMode3D get_mode() const { return MODE_HEXAHEDRON; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_HEX; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -328,7 +450,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual ElementMode2D get_face_mode(int face_num) const { return MODE_QUAD; }
+	virtual ElementMode2D get_face_mode(int face_num) const { return HERMES_MODE_QUAD; }
 	virtual int get_num_face_vertices(int face_num) const { return Quad::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Quad::NUM_EDGES; }
 
@@ -376,7 +498,7 @@ public:
 	virtual ~Tetra();
 
 	//
-	virtual ElementMode3D get_mode() const { return MODE_TETRAHEDRON; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_TET; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -391,7 +513,7 @@ public:
 
 	virtual int get_edge_orientation(int edge_num) const;
 
-	virtual ElementMode2D get_face_mode(int face_num) const { return MODE_TRIANGLE; }
+	virtual ElementMode2D get_face_mode(int face_num) const { return HERMES_MODE_TRIANGLE; }
 	virtual int get_num_face_vertices(int face_num) const  { return Tri::NUM_VERTICES; }
 	virtual int get_num_face_edges(int face_num) const { return Tri::NUM_EDGES; }
 	// FIXME
@@ -433,7 +555,7 @@ public:
 	virtual ~Prism();
 
 	//
-	virtual ElementMode3D get_mode() const { return MODE_PRISM; }
+	virtual ElementMode3D get_mode() const { return HERMES_MODE_PRISM; }
 	virtual int get_num_vertices() const { return NUM_VERTICES; }
 	virtual int get_num_edges() const { return NUM_EDGES; }
 	virtual int get_num_faces() const { return NUM_FACES; }
@@ -540,13 +662,20 @@ public:
 
 
 	/// Returns the total number of elements stored.
-	unsigned int get_num_elements() const { return elements.count(); }
+	unsigned int get_num_elements() const { return elements.size(); }
 	/// Returns the number of coarse mesh elements.
 	unsigned int get_num_base_elements() const { return nbase; }
 	/// Returns the current number of active elements in the mesh.
 	unsigned int get_num_active_elements() const { return nactive; }
 	/// Returns the maximum node id number plus one.
-	unsigned int get_max_element_id() const { return elements.last(); }
+  unsigned int get_max_element_id() const 
+  { 
+    unsigned int temp_max = 0;
+    for(std::map<unsigned int, Element *>::const_iterator it = elements.begin(); it != elements.end(); it++)
+      if(it->first > temp_max)
+        temp_max = it->first;
+      return temp_max;
+  }
 
 	/// Checks wether it is possible to refine an element.
 	/// @return true if it posible to apply the refinement, otherwise false
@@ -589,21 +718,18 @@ public:
 	/// Regularize mesh (only 1-irregularity rule implemented)
 	void regularize();
 
-	//
-	unsigned int get_facet_id(Element *e, int face_num) const;
-
-	unsigned int get_facet_id(int nv, ...) const;
+	Facet::Key get_facet_id(Element *e, int face_num) const;
 
 	/// Get ID of the edge
 	/// @param e Element
 	/// @param edge_num Local number of an edge on element e
 	/// @return ID of the edge on the element
-	unsigned int get_edge_id(Element *e, int edge_num) const;
+  Edge::Key get_edge_id(Element *e, int edge_num) const;
 	/// Get ID of the edge between a and b
 	/// @param[in] a Index (ID) of the first vertex
 	/// @param[in] b Index (ID) of the second vertex
 	/// @return ID of the edge, INVALID_IDX is edge does not exist
-	unsigned int get_edge_id(unsigned int a, unsigned int b) const;
+	Edge::Key get_edge_id(unsigned int a, unsigned int b) const;
 	/// Get state of an edge
 	/// @param eidx ID of an edge
 	/// @return true is edge is active, otherwise false
@@ -627,7 +753,7 @@ public:
 	/// Get the facing facet
 	/// @param[in] fid ID of the facet
 	/// @param[in] elem_id ID of the element
-	unsigned int get_facing_facet(unsigned int fid, unsigned int elem_id);
+	Facet::Key get_facing_facet(Facet::Key fid, unsigned int elem_id);
 
 	Boundary *add_tri_boundary(unsigned int vtcs[], int marker);
 	Boundary *add_quad_boundary(unsigned int vtcs[], int marker);
@@ -635,14 +761,16 @@ public:
 	void ugh();
 
 	// data
-        Array<Vertex *>   vertices;
-	MapOrd<Edge>      edges;
-	Array<Element *>  elements;
-	Array<Boundary *> boundaries;
-	MapOrd<Facet *>   facets;
+  std::map<unsigned int, Vertex *>   vertices;
+	std::map<Edge::Key, Edge *>      edges;
+	std::map<unsigned int, Element *>  elements;
+	std::map<unsigned int, Boundary *> boundaries;
+  std::map<Facet::Key, Facet *> facets;
 
 protected:
-	unsigned int nbase;							/// number of base elements
+
+	
+  unsigned int nbase;							/// number of base elements
 	unsigned int nactive;						/// number of active elements
 
 	Tetra *create_tetra(unsigned int vtcs[]);
@@ -685,8 +813,38 @@ protected:
 	/// @return Pointer to the newly created facet
 	Facet *add_quad_facet(Facet::Type type, unsigned int left_elem, int left_iface, unsigned int right_elem, int right_iface);
 
+  struct MidPointKey {
+    unsigned int a;
+    unsigned int b;
+    MidPointKey() {
+      this->a = 0;
+      this->b = 0;
+    };
+    MidPointKey(unsigned int a_, unsigned int b_) {
+      if(a_ < b_) {
+        this->a = a_;
+        this->b = b_;
+      }
+      else {
+        this->a = b_;
+        this->b = a_;
+      }
+    };
+    bool operator<(const MidPointKey & other) const {
+      if(this->a < other.a)
+        return true;
+      else if(this->a > other.a)
+        return false;
+      else
+        if(this->b < other.b)
+          return true;
+        else
+          return false;
+    };
+  };
+
 	// midpoints
-	MapHSOrd midpoints;
+	std::map<MidPointKey, unsigned int> midpoints;
 
 	/// Adds a midpoint as a vertex
 	/// @param[in] a index of the first vertex

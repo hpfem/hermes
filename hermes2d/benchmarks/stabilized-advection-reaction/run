@@ -1,0 +1,4 @@
+rm *~ 
+./stabilized-advection-reaction
+python plot_graph.py &
+

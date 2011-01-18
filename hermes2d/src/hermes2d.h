@@ -11,15 +11,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+// along with Hermes2D. If not, see <http://www.gnu.org/licenses/>.
 
 // $Id$
 
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
-// hermes_common
-// solvers
+// hermes_common solvers
 #include "../hermes_common/solver/amesos.h"
 #include "../hermes_common/solver/aztecoo.h"
 #include "../hermes_common/solver/epetra.h"
@@ -35,47 +34,54 @@
 #include "../hermes_common/solver/precond_ifpack.h"
 #include "../hermes_common/solver/precond_ml.h"
 
+// RCP
+#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+
 // boundary conditions
+  // this
 #include "../hermes_common/bctypes.h"
+  // is going to be replaced with this
+#include "boundaryconditions/boundaryconditions.h"
 
 #include "h2d_common.h"
 #include "hermes_logging.h"
 
 #include "range.h"
-#include "limit_order.h"
+#include "quadrature/limit_order.h"
 
-#include "mesh.h"
-#include "mesh_loader.h"
-#include "h2d_reader.h"
-#include "exodusii.h"
+#include "mesh/mesh.h"
+#include "mesh/mesh_loader.h"
+#include "mesh/h2d_reader.h"
+#include "mesh/exodusii.h"
 
 #include "space/space_h1.h"
 #include "space/space_hcurl.h"
 #include "space/space_l2.h"
 #include "space/space_hdiv.h"
 
-#include "quad_all.h"
+#include "quadrature/quad_all.h"
 #include "shapeset/shapeset_h1_all.h"
 #include "shapeset/shapeset_hc_all.h"
 #include "shapeset/shapeset_hd_all.h"
 #include "shapeset/shapeset_l2_all.h"
 
-#include "refmap.h"
-#include "traverse.h"
-#include "trans.h"
+#include "mesh/refmap.h"
+#include "mesh/traverse.h"
+#include "mesh/trans.h"
 
-#include "weakform.h"
+#include "weakform/weakform.h"
 #include "discrete_problem.h"
-#include "forms.h"
+#include "weakform/forms.h"
 
-#include "integrals_h1.h"
-#include "integrals_hcurl.h"
-#include "integrals_hdiv.h"
+#include "integrals/integrals_h1.h"
+#include "integrals/integrals_hcurl.h"
+#include "integrals/integrals_hdiv.h"
+#include "integrals/integrals_l2.h"
 
-#include "solution.h"
-#include "filter.h"
+#include "function/solution.h"
+#include "function/filter.h"
 
-#include "norm.h"
+#include "function/norm.h"
 #include "graph.h"
 
 #include "views/view.h"
@@ -87,8 +93,8 @@
 #include "views/vector_base_view.h"
 #include "views/vector_view.h"
 
-#include "refinement_type.h"
-#include "element_to_refine.h"
+#include "mesh/refinement_type.h"
+#include "mesh/element_to_refine.h"
 #include "ref_selectors/selector.h"
 #include "ref_selectors/order_permutator.h"
 #include "ref_selectors/optimum_selector.h"
@@ -102,6 +108,8 @@
 #include "ogprojection.h"
 
 #include "numerical_flux.h"
+#include "runge_kutta.h"
+#include "tables.h"
 /**
 
 \mainpage

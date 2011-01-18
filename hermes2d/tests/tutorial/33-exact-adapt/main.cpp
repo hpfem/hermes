@@ -105,10 +105,9 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating exact error."); 
-    Adapt* adaptivity = new Adapt(&space, HERMES_H1_NORM);
+    Adapt* adaptivity = new Adapt(&space);
     // Note: the error estimate is now equal to the exact error.
-    bool solutions_for_adapt = true;
-    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
 
     // Report results.

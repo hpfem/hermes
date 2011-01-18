@@ -1,6 +1,6 @@
 #include "../h2d_common.h"
-#include "../solution.h"
-#include "../element_to_refine.h"
+#include "../function/solution.h"
+#include "../mesh/element_to_refine.h"
 #include "selector.h"
 
 namespace RefinementSelectors {

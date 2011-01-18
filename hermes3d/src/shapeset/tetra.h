@@ -29,7 +29,7 @@
 #define CHECK_EDGE_ORI(ori)	      	assert(ori == 0 || ori == 1)
 
 #define CHECK_FACE(face)			assert(face >= 0 && face < 4)
-#define CHECK_FACE_MODE(mode)		assert(mode == MODE_TRIANGLE)
+#define CHECK_FACE_MODE(mode)		assert(mode == HERMES_MODE_TRIANGLE)
 #define CHECK_FACE_ORI(ori)	      	assert(ori >= 0 || ori <= 6)
 
 //#define CHECK_PART(p)				assert(p >= 0)

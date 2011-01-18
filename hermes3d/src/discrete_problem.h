@@ -22,15 +22,16 @@
 
 #include "h3d_common.h"
 #include "weakform.h"
-#include "tuple.h"
-#include "../../hermes_common/array.h"
-#include "../../hermes_common/solver/solver.h"
+#include "vector.h"
+#include "matrix.h"
+#include "solver/solver.h"
+#include "norm.h"
 
 class Space;
 class Matrix;
 class SparseMatrix;
 class Vector;
-class SurfPos;
+struct SurfPos;
 
 /// Discrete problem class
 ///
@@ -38,7 +39,7 @@ class SurfPos;
 ///
 class HERMES_API DiscreteProblem {
 public:
-        DiscreteProblem(WeakForm *wf, Hermes::Tuple<Space *> sp, bool is_linear = false);
+        DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
 	void free();
 
@@ -56,6 +57,11 @@ public:
         // does not need the coeff_vector.
 	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
                       bool rhsonly = false);
+  // Get the number of spaces.
+  int get_num_spaces() {return this->spaces.size();}
+
+  // Get all spaces as a Hermes::vector.
+  Hermes::vector<Space *> get_spaces() {return this->spaces;}
 
         // Get the number of unknowns.
 	int get_num_dofs();
@@ -72,7 +78,7 @@ protected:
 	int ndof;				/// number of DOF
 	int* sp_seq;				/// sequence numbers of spaces
         int wf_seq;
-        Hermes::Tuple<Space *> spaces;
+        Hermes::vector<Space *> spaces;
 
 	scalar** matrix_buffer;		/// buffer for holding square matrix (during assembling)
 	int matrix_buffer_dim;		/// dimension of the matrix held by 'matrix_buffer'
@@ -89,34 +95,55 @@ protected:
 	struct fn_key_t {
 		int index;
 		int order;
-		int sub_idx;
+		uint64_t sub_idx;
 		int ss_id;			// shapeset id
 
-		fn_key_t(int index, int order, int sub_idx, int ss_id = -1) {
+		fn_key_t(int index, int order, uint64_t sub_idx, int ss_id = -1) {
 			this->index = index;
 			this->order = order;
 			this->sub_idx = sub_idx;
 			this->ss_id = ss_id;
 		}
+    bool operator <(const fn_key_t & other) const {
+      if(this->index < other.index)
+        return true;
+      else if(this->index > other.index)
+        return false;
+      else
+        if(this->order < other.order)
+          return true;
+        else if(this->order > other.order)
+          return false;
+        else
+          if(this->sub_idx < other.sub_idx)
+            return true;
+          else if(this->sub_idx > other.sub_idx)
+            return false;
+          else
+            if(this->ss_id < other.ss_id)
+              return true;
+            else
+              return false;
+    };
 	};
 
 	struct FnCache {
-		Array<double *> jwt;			// jacobian x weight
-		Array<Geom<double> > e;		// geometries
-		Map<fn_key_t, sFunc*> fn;		// shape functions
-		Map<fn_key_t, mFunc*> ext;		// external functions
-		Map<fn_key_t, mFunc*> sln;		// sln from prev iter
+		std::map<unsigned int, double *> jwt;			// jacobian x weight
+		std::map<unsigned int, Geom<double> > e;		// geometries
+		std::map<fn_key_t, sFunc*> fn;		// shape functions
+		std::map<fn_key_t, mFunc*> ext;		// external functions
+		std::map<fn_key_t, mFunc*> sln;		// sln from prev iter
 
 		~FnCache();
 		void free();
 	} fn_cache;
 
-	scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
+	scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext, ShapeFunction *fu,
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv);
-	scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
-	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
+	scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext, ShapeFunction *fv, RefMap *rv);
+	scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext, ShapeFunction *fu,
 	                 ShapeFunction *fv, RefMap *ru, RefMap *rv, SurfPos *surf_pos);
-	scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
+	scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext, ShapeFunction *fv, RefMap *rv,
 	                 SurfPos *surf_pos);
 
 	sFunc *get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt);
@@ -129,7 +156,12 @@ protected:
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
-HERMES_API Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase, int refinement);
-HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement);
+HERMES_API Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase);
+HERMES_API Space* construct_refined_space(Space* coarse, int order_increase);
+
+HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+           Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
+                             double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6);
+
 
 #endif /* _DISCRETE_PROBLEM_H_ */

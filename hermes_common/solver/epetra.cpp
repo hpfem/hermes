@@ -145,7 +145,7 @@ int EpetraMatrix::get_num_row_entries(int row)
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalEntries(row);
+    return mat->NumGlobalEntries(row);
 #else
   return 0;
 #endif
@@ -179,14 +179,24 @@ void EpetraMatrix::add(int m, int n, scalar v)
     int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n);
     if (ierr != 0) error("Failed to insert into Epetra matrix");
 #else
-    int ierr = mat->SumIntoGlobalValues(m, 1, &std::real(v), &n);
+    double v_r = std::real<double>(v);
+    int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n);
     assert(ierr == 0);
-    ierr = mat_im->SumIntoGlobalValues(m, 1, &std::imag(v), &n);
+    double v_i = std::imag<double>(v);
+    ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n);
     assert(ierr == 0);
 #endif
   }
 #endif
 }
+
+/// Add a number to each diagonal entry.
+void EpetraMatrix::add_to_diagonal(scalar v) 
+{
+  for (int i=0; i<size; i++) {
+    add(i, i, v);
+  }
+};
 
 void EpetraMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
 {
@@ -210,7 +220,7 @@ int EpetraMatrix::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros();
+  return size;
 #else
   return -1;
 #endif
@@ -220,12 +230,21 @@ double EpetraMatrix::get_fill_in() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros() / (double) (size * size);
+  return mat->NumGlobalNonzeros() / ((double)size*size);
 #else
   return -1;
 #endif
 }
 
+int EpetraMatrix::get_nnz() const
+{
+  _F_
+#ifdef HAVE_EPETRA
+  return mat->NumGlobalNonzeros();
+#else
+  return -1;
+#endif
+}
 
 // EpetraVector ////////////////////////////////////////////////////////////////////////////////////
 
@@ -284,6 +303,17 @@ void EpetraVector::zero()
   for (int i = 0; i < size; i++) (*vec)[i] = 0.0;
 #if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
   for (int i = 0; i < size; i++) (*vec_im)[i] = 0.0;
+#endif
+#endif
+}
+
+void EpetraVector::change_sign()
+{
+  _F_
+#ifdef HAVE_EPETRA
+  for (int i = 0; i < size; i++) (*vec)[i] *= -1.;
+#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+  for (int i = 0; i < size; i++) (*vec_im)[i] *= -1.;
 #endif
 #endif
 }

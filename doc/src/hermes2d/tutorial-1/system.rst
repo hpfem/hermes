@@ -145,7 +145,7 @@ space 0 (x-displacement space) and test functions from space 0. The block index
 from space 1 (y-displacement space), etc. This yields a 2x2 block structure in the 
 resulting matrix system.
 
-Flags HERMES_SYM, HERMES_UNSYM, HERMES_ANTISYM
+Flags HERMES_SYM, HERMES_NONSYM, HERMES_ANTISYM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
 Also explanation of the extra parameter HERMES_SYM in add_matrix_form() is in order.
@@ -155,7 +155,7 @@ two cases $a_{ii}(u,v)$ and $a_{ii}(v,u)$ to speed up assembly. In fact, we shou
 used the HERMES_SYM flag already in the previous sections, since the form
 $a(u,v) = \nabla u \cdot \nabla v$ was symmetric. Of course this is not the case
 for all forms and so the default value of the fourth parameter of add_matrix_form() 
-is HERMES_UNSYM.
+is HERMES_NONSYM.
 
 The off-diagonal forms $a_{12}(u_2, v_1)$ and $a_{21}(u_1, v_2)$ are not
 (and cannot) be symmetric, since their arguments come from different spaces in general.
@@ -168,7 +168,7 @@ we don't add bilinear_form_1_0). This again speeds up the matrix assembly.
 You can also use the flag HERMES_ANTISYM, which moreover inverts the sign of the block.
 This makes sense in the case where $a_{ij}(u, v) = -a_{ji}(v, u)$.
 
-It is recommended that you start with the default (and safe) HERMES_UNSYM flag for all
+It is recommended that you start with the default (and safe) HERMES_NONSYM flag for all
 forms when developing your project, and only optimize the evaluation of the forms when
 the code works well.
 

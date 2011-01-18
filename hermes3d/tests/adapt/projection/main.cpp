@@ -176,9 +176,12 @@ int main(int argc, char **args)
   }
 
   unsigned int ne = mesh.get_num_base_elements();
-  for (unsigned int idx = mesh.elements.first(); idx <= ne; idx = mesh.elements.next(idx)) {
-    Element *e = mesh.elements[idx];
-
+  for(std::map<unsigned int, Element*>::iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
+    // We are done with base elements.
+    if(it->first > ne)
+      break;
+    Element *e = it->second;
+    
     Ord3 order(4, 4, 4);
     double error;
 

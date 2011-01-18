@@ -71,9 +71,11 @@ int main(int argc, char **args)
   }
 
   if (success_test) {
+    info("Success!");
     return ERR_SUCCESS;
   }
   else {
+    info("Failure!");
     return ERR_FAILURE;
   }
 }

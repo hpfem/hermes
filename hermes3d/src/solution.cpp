@@ -86,7 +86,6 @@ void MeshFunction::set_active_element(Element *e) {
 //  'n' is the polynomial degree.
 //
 
-
 Solution::Solution(Mesh *mesh) : MeshFunction(mesh) {
 	_F_
 
@@ -253,7 +252,7 @@ static void make_dx_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 	int i, j, k;
 
 	switch (mode) {
-		case MODE_TETRAHEDRON:
+		case HERMES_MODE_TET:
 			for (i = 0; i <= ord.order; i++)
 				for (j = 0; j <= i; j++) {
 					*result++ = 0.0;
@@ -263,7 +262,7 @@ static void make_dx_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 				}
 			break;
 
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			for (i = 0; i <= ord.z; i++) {
 				for (j = 0; j <= ord.y; j++) {
 					*result++ = 0.0;
@@ -274,7 +273,7 @@ static void make_dx_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 			}
 			break;
 
-		case MODE_PRISM:
+		case HERMES_MODE_PRISM:
 			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 
 		default:
@@ -288,7 +287,7 @@ static void make_dy_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 	int i, j, k;
 
 	switch (mode) {
-		case MODE_TETRAHEDRON:
+		case HERMES_MODE_TET:
 			for (i = 0; i <= ord.order; i++) {
 				for (j = 0; j <= i; j++) {
 					*result++ = 0.0;
@@ -299,7 +298,7 @@ static void make_dy_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 			}
 			break;
 
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			for (i = 0; i <= ord.z; i++) {
 				for (j = 0; j <= ord.x; j++)
 					*result++ = 0.0;
@@ -310,7 +309,7 @@ static void make_dy_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 			}
 			break;
 
-		case MODE_PRISM:
+		case HERMES_MODE_PRISM:
 			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 
 		default:
@@ -323,7 +322,7 @@ static void make_dz_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 	int i, j, k;
 
 	switch (mode) {
-		case MODE_TETRAHEDRON:
+		case HERMES_MODE_TET:
 			for (i = 0; i <= ord.order; i++)
 				for (j = 0; j <= i; j++) {
 					*result++ = 0.0;
@@ -332,7 +331,7 @@ static void make_dz_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 				}
 			break;
 
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			for (j = 0; j <= ord.y; j++)
 				for (k = 0; k <= ord.x; k++)
 					*result++ = 0.0;
@@ -343,7 +342,7 @@ static void make_dz_coefs(int mode, Ord3 ord, scalar *mono, scalar *result) {
 						*result++ = (scalar) (ord.z - i) * (*mono++);
 			break;
 
-		case MODE_PRISM:
+		case HERMES_MODE_PRISM:
 			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
 
 		default:
@@ -367,8 +366,8 @@ void Solution::set_active_element(Element *e) {
 		order = elem_orders[element->id];
 		int np;
 		switch (mode) {
-			case MODE_TETRAHEDRON: np = (order.order + 1) * (order.order + 2) * (order.order + 3) / 6; break;
-			case MODE_HEXAHEDRON: np = (order.x + 1) * (order.y + 1) * (order.z + 1); break;
+			case HERMES_MODE_TET: np = (order.order + 1) * (order.order + 2) * (order.order + 3) / 6; break;
+			case HERMES_MODE_HEX: np = (order.x + 1) * (order.y + 1) * (order.z + 1); break;
 			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 
@@ -383,15 +382,15 @@ void Solution::set_active_element(Element *e) {
 	}
 	else if (type == HERMES_EXACT) {
 		switch (mode) {
-			case MODE_TETRAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER_TETRA); break;
-			case MODE_HEXAHEDRON: order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
+			case HERMES_MODE_TET: order = Ord3(H3D_MAX_QUAD_ORDER_TETRA); break;
+			case HERMES_MODE_HEX: order = Ord3(H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER, H3D_MAX_QUAD_ORDER); break;
 			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
 	else if (type == HERMES_CONST) {
     switch (mode) {
-			case MODE_TETRAHEDRON: order = Ord3(0); break;
-			case MODE_HEXAHEDRON: order = Ord3(0, 0, 0); break;
+			case HERMES_MODE_TET: order = Ord3(0); break;
+			case HERMES_MODE_HEX: order = Ord3(0, 0, 0); break;
 			default: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
 		}
 	}
@@ -402,20 +401,20 @@ void Solution::set_active_element(Element *e) {
 static struct mono_lu_init {
 public:
 	// this is a set of LU-decomposed matrices shared by all Solutions
-	Array<double **> mat[3];
-	Array<int *> perm[3];
+	std::map<unsigned int, double **> mat[3];
+	std::map<unsigned int, int *> perm[3];
 
 	mono_lu_init() {
 	}
 
 	~mono_lu_init() {
-		for (int m = 0; m <= 2; m++)
-			for (unsigned int i = mat[m].first(); i != INVALID_IDX; i = mat[m].next(i)) {
-					delete [] mat[m][i];
-					delete [] perm[m][i];
-				}
+		for (int m = 0; m <= 2; m++) {
+			for(std::map<unsigned int, double**>::iterator it = mat[m].begin(); it != mat[m].end(); it++)
+        delete [] it->second;
+			for(std::map<unsigned int, int*>::iterator it = perm[m].begin(); it != perm[m].end(); it++)
+        delete [] it->second;
+    }
 	}
-
 } mono_lu;
 
 void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {
@@ -425,7 +424,7 @@ void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {
 	int np;
 	double **mat;
 	switch (ord.type) {
-		case MODE_TETRAHEDRON:
+		case HERMES_MODE_TET:
 			np = (ord.order + 1) * (ord.order + 2) * (ord.order + 3) / 6;
 			mat = new_matrix<double>(np, np);
 			for (p = ord.order, row = 0; p >= 0; p--) {
@@ -447,7 +446,7 @@ void calc_mono_matrix(const Ord3 &ord, mono_lu_init &mono) {
 			}
 			break;
 
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			np = (ord.x + 1) * (ord.y + 1) * (ord.z + 1);
 			mat = new_matrix<double>(np, np);
 			for (p = ord.z, row = 0; p >= 0; p--) {
@@ -522,58 +521,60 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 
 	// obtain element orders, allocate mono_coefs
 	num_coefs = 0;
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		int mode = e->get_mode();
-		Quad3D *quad = cheb_quad[mode];
-		Ord3 ord = space->get_element_order(e->id);
-		// FIXME: this is not very nice, could we handle this in a better (=more general) way
-		if (space->get_type() == Hcurl) ord += Ord3(1, 1, 1);		// FIXME: tetras need Ord3(1)
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Element *e = mesh->elements[it->first];
+		  int mode = e->get_mode();
+		  Quad3D *quad = cheb_quad[mode];
+		  Ord3 ord = space->get_element_order(e->id);
+		  // FIXME: this is not very nice, could we handle this in a better (=more general) way
+		  if (space->get_type() == HERMES_HCURL_SPACE) ord += Ord3(1, 1, 1);		// FIXME: tetras need Ord3(1)
 
-		num_coefs += quad->get_num_points(ord);
-		elem_orders[e->id] = ord;
-	}
+		  num_coefs += quad->get_num_points(ord);
+		  elem_orders[e->id] = ord;
+	  }
 	num_coefs *= num_components;
 	mono_coefs = new scalar[num_coefs];
 
 	ShapeFunction shfn(ss);
 	// express the solution on elements as a linear combination of monomials
 	scalar *mono = mono_coefs;
-	FOR_ALL_ACTIVE_ELEMENTS(eid, mesh) {
-		Element *e = mesh->elements[eid];
-		int mode = e->get_mode();
-		Quad3D *quad = cheb_quad[mode];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  int mode = e->get_mode();
+		  Quad3D *quad = cheb_quad[mode];
 
-		Ord3 ord = elem_orders[e->id];
-		int np = quad->get_num_points(ord);
-		QuadPt3D *pt = quad->get_points(ord);
+		  Ord3 ord = elem_orders[e->id];
+		  int np = quad->get_num_points(ord);
+		  QuadPt3D *pt = quad->get_points(ord);
 
-		AsmList al;
-		space->get_element_assembly_list(e, &al);
-		shfn.set_active_element(e);
+		  AsmList al;
+		  space->get_element_assembly_list(e, &al);
+		  shfn.set_active_element(e);
 
-		for (int l = 0; l < num_components; l++) {
-			// obtain solution values for the current element
-			scalar *val = mono;
-			elem_coefs[l][e->id] = (int) (mono - mono_coefs);
-			memset(val, 0, sizeof(scalar) * np);
-			for (int k = 0; k < al.cnt; k++) {
-				shfn.set_active_shape(al.idx[k]);
-				shfn.precalculate(np, pt, FN_VAL);
-				int dof = al.dof[k];
-				scalar coef = al.coef[k] * (dof >= 0 ? vec[dof] : dir);
-				double *shape = shfn.get_fn_values(l);
-				for (int i = 0; i < np; i++)
-					val[i] += shape[i] * coef;
-			}
-			mono += np;
+		  for (int l = 0; l < num_components; l++) {
+			  // obtain solution values for the current element
+			  scalar *val = mono;
+			  elem_coefs[l][e->id] = (int) (mono - mono_coefs);
+			  memset(val, 0, sizeof(scalar) * np);
+			  for (int k = 0; k < al.cnt; k++) {
+				  shfn.set_active_shape(al.idx[k]);
+				  shfn.precalculate(np, pt, FN_VAL);
+				  int dof = al.dof[k];
+				  scalar coef = al.coef[k] * (dof >= 0 ? vec[dof] : dir);
+				  double *shape = shfn.get_fn_values(l);
+				  for (int i = 0; i < np; i++)
+					  val[i] += shape[i] * coef;
+			  }
+			  mono += np;
 
-			// solve for the monomial coefficients
-			if (!mono_lu.mat[mode].exists(ord.get_idx()))
-				calc_mono_matrix(ord, mono_lu);
-			lubksb(mono_lu.mat[mode][ord.get_idx()], np, mono_lu.perm[mode][ord.get_idx()], val);
-		}
-	}
+			  // solve for the monomial coefficients
+			  if (mono_lu.mat[mode].find(ord.get_idx()) == mono_lu.mat[mode].end())
+				  calc_mono_matrix(ord, mono_lu);
+			  lubksb(mono_lu.mat[mode][ord.get_idx()], np, mono_lu.perm[mode][ord.get_idx()], val);
+		  }
+	  }
 
 	init_dxdydz_buffer();
 	seq = g_mfn_seq++;
@@ -581,11 +582,11 @@ void Solution::set_coeff_vector(Space *space, scalar *vec, double dir) {
 
 // sets all elements of y[] to num
 
-void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*> spaces, Hermes::Tuple<Solution*> solutions, Hermes::Tuple<double> dir)
+void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space*> spaces, Hermes::vector<Solution*> solutions, Hermes::vector<double> dir)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
-    if(dir == Hermes::Tuple<double>())
+    if(dir == Hermes::vector<double>())
       solutions[i]->set_coeff_vector(spaces[i], solution_vector);
     else
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, dir[i]);
@@ -594,7 +595,7 @@ void Solution::vector_to_solutions(scalar* solution_vector, Hermes::Tuple<Space*
 
 void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution, double dir)
 {
-  Solution::vector_to_solutions(solution_vector, Hermes::Tuple<Space*>(space), Hermes::Tuple<Solution*>(solution), Hermes::Tuple<double>(dir));
+  Solution::vector_to_solutions(solution_vector, Hermes::vector<Space*>(space), Hermes::vector<Solution*>(solution), Hermes::vector<double>(dir));
 }
 
 
@@ -669,7 +670,7 @@ void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) {
 				// calculate the solution values using Horner's scheme
 				scalar *mono = dxdydz_coefs[l][v];
 				switch (mode) {
-					case MODE_TETRAHEDRON:
+					case HERMES_MODE_TET:
 						for (int k = 0; k <= ord.order; k++) {					// z
 							for (int i = 0; i <= k; i++) {				// y
 								set_vec_num(np, tx, *mono++);
@@ -685,7 +686,7 @@ void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) {
 						}
 						break;
 
-					case MODE_HEXAHEDRON:
+					case HERMES_MODE_HEX:
 						for (int k = 0; k <= ord.z; k++) {					// z
 							for (int i = 0; i <= ord.y; i++) {				// y
 								set_vec_num(np, tx, *mono++);
@@ -870,7 +871,7 @@ Ord3 Solution::get_order()
 {
 	_F_
 	switch (element->get_mode()) {
-		case MODE_HEXAHEDRON:
+		case HERMES_MODE_HEX:
 			switch (type) {
 				case HERMES_SLN: return elem_orders[element->id];
 				case HERMES_EXACT: return Ord3(10, 10, 10);
@@ -880,7 +881,7 @@ Ord3 Solution::get_order()
 			}
 			break;
 
-		case MODE_TETRAHEDRON:
+		case HERMES_MODE_TET:
 			switch (type) {
 				case HERMES_SLN: return elem_orders[element->id];
 				case HERMES_EXACT: return Ord3(10);

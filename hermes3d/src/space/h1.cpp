@@ -34,23 +34,23 @@ H1Space::H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
   _F_ 
   if (shapeset == NULL) {
     switch (p_init.type) {
-      case MODE_TETRAHEDRON: this->shapeset = new H1ShapesetLobattoTetra; break;
-      case MODE_HEXAHEDRON:  this->shapeset = new H1ShapesetLobattoHex; break;
-      //case MODE_PRISM: this->shapeset = new H1ShapesetLobattoPrism; break;
+      case HERMES_MODE_TET: this->shapeset = new H1ShapesetLobattoTetra; break;
+      case HERMES_MODE_HEX:  this->shapeset = new H1ShapesetLobattoHex; break;
+      //case HERMES_MODE_PRISM: this->shapeset = new H1ShapesetLobattoPrism; break;
       default: error("Unknown element type in H1Space::H1Space().");
     }
   }
-  this->type = H1;
+  this->type = HERMES_H1_SPACE;
 
   // set uniform poly order in elements
   switch (p_init.type) {
-    case MODE_HEXAHEDRON: 
+    case HERMES_MODE_HEX: 
       if (p_init.x < 1 || p_init.y < 1 || p_init.z < 1) {
         error("P_INIT must be >= 1 in all directions in an H1 space on hexahedra.");
       }
       else this->set_uniform_order_internal(p_init);
       break;
-    case MODE_TETRAHEDRON: 
+    case HERMES_MODE_TET: 
       if (p_init.order < 1) error("P_INIT must be >= 1 in an H1 space on tetrahedra.");
       else this->set_uniform_order_internal(p_init);
       break;
@@ -101,71 +101,74 @@ int H1Space::get_edge_ndofs(Ord1 order)
 int H1Space::get_face_ndofs(Ord2 order) 
 {
   switch (order.type) {
-    case MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
-    case MODE_QUAD: return (order.x - 1) * (order.y - 1);
+    case HERMES_MODE_TRIANGLE: return (order.order - 1) * (order.order - 2) / 2;
+    case HERMES_MODE_QUAD: return (order.x - 1) * (order.y - 1);
     default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
   }
 }
 
 int H1Space::get_element_ndofs(Ord3 order) {
   switch (order.type) {
-    case MODE_TETRAHEDRON: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
-    case MODE_HEXAHEDRON: return (order.x - 1) * (order.y - 1) * (order.z - 1);
+    case HERMES_MODE_TET: return (order.order - 1) * (order.order - 2) * (order.order - 3) / 6;
+    case HERMES_MODE_HEX: return (order.x - 1) * (order.y - 1) * (order.z - 1);
     default: EXIT(HERMES_ERR_UNKNOWN_MODE); return -1;
   }
 }
 
 void H1Space::assign_dofs_internal() {
 	_F_
-	BitArray init_vertices;
-	BitArray init_edges;
-	BitArray init_faces;
+	std::map<unsigned int, bool> init_vertices;
+	std::map<Edge::Key, bool> init_edges;
+	std::map<Facet::Key, bool> init_faces;
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		// vertex dofs
-		for (int ivtx = 0; ivtx < e->get_num_vertices(); ivtx++) {
-			unsigned int vid = e->get_vertex(ivtx);
-			VertexData *vd = vn_data[vid];
-			assert(vd != NULL);
-			if (!init_vertices.is_set(vid) && !vd->ced) {
-				assign_vertex_dofs(vid);
-				init_vertices.set(vid);
-			}
-		}
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  // vertex dofs
+		  for (int ivtx = 0; ivtx < e->get_num_vertices(); ivtx++) {
+			  unsigned int vid = e->get_vertex(ivtx);
+			  VertexData *vd = vn_data[vid];
+			  assert(vd != NULL);
+			  if (!init_vertices[vid] && !vd->ced) {
+				  assign_vertex_dofs(vid);
+				  init_vertices[vid] = true;
+			  }
+		  }
+	  }
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
-		// edge dofs
-		for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-			unsigned int eid = mesh->get_edge_id(e, iedge);
-			EdgeData *ed = en_data[eid];
-			assert(ed != NULL);
-			if (!init_edges.is_set(eid) && !ed->ced) {
-				assign_edge_dofs(eid);
-				init_edges.set(eid);
-			}
-		}
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
+		  // edge dofs
+		  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
+			  Edge::Key eid = mesh->get_edge_id(e, iedge);
+			  EdgeData *ed = en_data[eid];
+			  assert(ed != NULL);
+			  if (!init_edges[eid] && !ed->ced) {
+				  assign_edge_dofs(eid);
+				  init_edges[eid] = true;
+			  }
+		  }
+	  }
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *e = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *e = mesh->elements[it->first];
 		// face dofs
 		for (int iface = 0; iface < e->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(e, iface);
+			Facet::Key fid = mesh->get_facet_id(e, iface);
 			FaceData *fd = fn_data[fid];
 			assert(fd != NULL);
-			if (!init_faces.is_set(fid) && !fd->ced) {
+			if (!init_faces[fid] && !fd->ced) {
 				assign_face_dofs(fid);
-				init_faces.set(fid);
+				init_faces[fid] = true;
 			}
 		}
 	}
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		assign_bubble_dofs(idx);
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active)
+		  assign_bubble_dofs(it->first);
 }
 
 // assembly lists ////
@@ -203,7 +206,7 @@ void H1Space::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 
 void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
-	unsigned int edge_id = mesh->get_edge_id(elem, iedge);
+	Edge::Key edge_id = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge_id];
 	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
@@ -213,7 +216,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 		if(enode->edge_ncomponents <= 0)
       num_fns = 0;
     else {
-		  unsigned int edge_id = enode->edge_baselist[0].edge_id;
+		  edge_id = enode->edge_baselist[0].edge_id;
 		  num_fns = en_data[edge_id]->n;
     }
 	}
@@ -324,7 +327,7 @@ void H1Space::calc_edge_boundary_projection(Element *elem, int iedge) {
 
 void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	_F_
-	unsigned int facet_idx = mesh->get_facet_id(elem, iface);
+	Facet::Key facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
 	if (fnode->bc_type != BC_ESSENTIAL) return;
@@ -348,11 +351,11 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	// get total number of vertex + edge functions
 	int num_fns = elem->get_num_face_vertices(iface);
 	for (int edge = 0; edge < elem->get_num_face_edges(iface); edge++) {
-		unsigned int edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
+    Edge::Key edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
 		EdgeData *enode = en_data[edge_idx];
 		if (enode->ced && enode->edge_ncomponents > 0 && enode->edge_baselist != NULL) {
 			assert(enode->edge_ncomponents > 0);
-			unsigned int eid = enode->edge_baselist[0].edge_id;
+      Edge::Key eid = enode->edge_baselist[0].edge_id;
 			num_fns += en_data[eid]->n;
 		}
 		else
@@ -373,7 +376,7 @@ void H1Space::calc_face_boundary_projection(Element *elem, int iface) {
 	}
 	// edge projection coefficients
 	for (int edge = 0; edge < elem->get_num_face_edges(iface); edge++) {
-		unsigned int edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
+		Edge::Key edge_idx = mesh->get_edge_id(elem, local_face_edge[edge]);
 		EdgeData *enode = en_data[edge_idx];
 
 		if (enode->ced && enode->edge_ncomponents > 0 && enode->edge_baselist != NULL) {

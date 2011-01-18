@@ -22,7 +22,6 @@
 
 #include "../output.h"
 #include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/array.h"
 
 /// VTK output engine.
 ///

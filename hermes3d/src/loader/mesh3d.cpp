@@ -300,10 +300,10 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 		}
 
 		// check if all "outer" faces have defined boundary condition
-		for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
-			Facet *facet = mesh->facets.get(i);
+    for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
+      Facet *facet = it->second;
 
-			if (((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
+      if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
 				fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
 				throw E_READ_ERROR;
 			}
@@ -330,73 +330,85 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// save vertices
 	fprintf(file, "# vertices\n");
-	fprintf(file, "%ld\n", mesh->vertices.count());
-	for (unsigned int i = mesh->vertices.first(); i != INVALID_IDX; i = mesh->vertices.next(i)) {
-		Vertex *v = mesh->vertices[i];
+	fprintf(file, "%lu\n", (unsigned long int)mesh->vertices.size());
+	for(std::map<unsigned int, Vertex*>::const_iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
+    Vertex *v = it->second;
 		fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
 	}
 	fprintf(file, "\n");
 
 	// elements
-	Array<Element *> tet, hex, pri;
-	for (unsigned int i = mesh->elements.first(); i != INVALID_IDX; i = mesh->elements.next(i)) {
-		Element *elem = mesh->elements[i];
+	std::map<unsigned int, Element *> tet, hex, pri;
+	for(std::map<unsigned int, Element*>::const_iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++) {
+    Element *elem = it->second;
 		if (elem->active) {
 			switch (elem->get_mode()) {
-				case MODE_TETRAHEDRON: tet.add(elem); break;
-				case MODE_HEXAHEDRON: hex.add(elem); break;
-				case MODE_PRISM: pri.add(elem); break;
+      case HERMES_MODE_TET: tet[it->first] = elem; break;
+				case HERMES_MODE_HEX: hex[it->first] = elem; break;
+				case HERMES_MODE_PRISM: pri[it->first] = elem; break;
 			}
 		}
 	}
 
 	// save tetras
 	fprintf(file, "# tetras\n");
-	fprintf(file, "%ld\n", tet.count());
-	for (unsigned int i = tet.first(); i != INVALID_IDX; i = tet.next(i)) {
+	fprintf(file, "%lu\n", (unsigned long int)tet.size());
+  for(std::map<unsigned int, Element*>::const_iterator it = tet.begin(); it != tet.end(); it++) {
 		unsigned int vtcs[Tetra::NUM_VERTICES];
-		tet[i]->get_vertices(vtcs);
+    it->second->get_vertices(vtcs);
 		fprintf(file, "%u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
 	}
 	fprintf(file, "\n");
 
 	// save hexes
 	fprintf(file, "# hexes\n");
-	fprintf(file, "%ld\n", hex.count());
-	for (unsigned int i = hex.first(); i != INVALID_IDX; i = hex.next(i)) {
+	fprintf(file, "%lu\n", (unsigned long int)hex.size());
+	for(std::map<unsigned int, Element*>::const_iterator it = hex.begin(); it != hex.end(); it++) {
 		unsigned int vtcs[Hex::NUM_VERTICES];
-		hex[i]->get_vertices(vtcs);
+    it->second->get_vertices(vtcs);
 		fprintf(file, "%u %u %u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
 	}
 	fprintf(file, "\n");
 
 	// save prisms
 	fprintf(file, "# prisms\n");
-	fprintf(file, "%ld\n", pri.count());
-	for (unsigned int i = pri.first(); i != INVALID_IDX; i = pri.next(i)) {
+	fprintf(file, "%lu\n", (unsigned long int)pri.size());
+  for(std::map<unsigned int, Element*>::const_iterator it = pri.begin(); it != pri.end(); it++) {
 		unsigned int vtcs[Prism::NUM_VERTICES];
-		pri[i]->get_vertices(vtcs);
+		it->second->get_vertices(vtcs);
 		fprintf(file, "%u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
 	}
 	fprintf(file, "\n");
 
 	// boundaries
-	Array<Facet *> tri_facets, quad_facets;
-	for (unsigned int i = mesh->facets.first(); i != INVALID_IDX; i = mesh->facets.next(i)) {
-		Facet *facet = mesh->facets.get(i);
-		if (facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
+	std::map<unsigned int, Facet *> tri_facets, quad_facets;
+  for(std::map<Facet::Key, Facet*>::iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
+    Facet *facet = it->second;
+		if(facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
 			switch (facet->type) {
-				case MODE_TRIANGLE: tri_facets.add(facet); break;
-				case MODE_QUAD: quad_facets.add(facet); break;
+				case HERMES_MODE_TRIANGLE: 
+          unsigned int ii;
+          for(ii = 0; ; ii++)
+            if(tri_facets[ii] == NULL)
+              break;
+          tri_facets[ii] = facet;
+          break;
+				case HERMES_MODE_QUAD: 
+          unsigned int ij;
+          for(ij = 0; ; ij++)
+            if(quad_facets[ij] == NULL)
+              break;
+          quad_facets[ij] = facet;
+          break;
 			}
 		}
 	}
 
 	// tris
 	fprintf(file, "# tris\n");
-	fprintf(file, "%ld\n", tri_facets.count());
-	for (unsigned int i = tri_facets.first(); i != INVALID_IDX; i = tri_facets.next(i)) {
-		Facet *facet = tri_facets[i];
+	fprintf(file, "%lu\n", (unsigned long int)tri_facets.size());
+	for(std::map<unsigned int, Facet*>::const_iterator it = tri_facets.begin(); it != tri_facets.end(); it++) {
+    Facet *facet = it->second;
 		Boundary *bnd = mesh->boundaries[facet->right];
 		Element *elem = mesh->elements[facet->left];
 
@@ -409,9 +421,9 @@ bool H3DReader::save(const char *file_name, Mesh *mesh) {
 
 	// quads
 	fprintf(file, "# quads\n");
-	fprintf(file, "%ld\n", quad_facets.count());
-	for (unsigned int i = quad_facets.first(); i != INVALID_IDX; i = quad_facets.next(i)) {
-		Facet *facet = quad_facets[i];
+	fprintf(file, "%lu\n", (unsigned long int)quad_facets.size());
+	for(std::map<unsigned int, Facet*>::const_iterator it = quad_facets.begin(); it != quad_facets.end(); it++) {
+    Facet *facet = it->second;
 		Boundary *bnd = mesh->boundaries[facet->right];
 		Element *elem = mesh->elements[facet->left];
 

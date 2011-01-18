@@ -21,42 +21,17 @@
 #define __SPACE_H
 
 #include "../mesh.h"
-#include "../../../hermes_common/tuple.h"
+#include "../../../hermes_common/vector.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
 #include "../quad.h"
 #include "../order.h"
 
-#include "../../../hermes_common/bitarray.h"
 #include "../../../hermes_common/bctypes.h"
 
 /// @defgroup spaces Spaces
 ///
 /// TODO: description
-
-// for iterating through nodes in space classes
-
-///< Iterates over all vertex node indices.
-///< \param idx Vertex node hash table index.
-#define FOR_ALL_VERTEX_NODES(idx) \
-		for (unsigned int (idx) = vn_data.first(); (idx) != INVALID_IDX; (idx) = vn_data.next((idx)))
-
-///< Iterates over all edge node indices.
-///< \param idx Edge node hash table index.
-#define FOR_ALL_EDGE_NODES(idx) \
-		for (unsigned int (idx) = en_data.first(); (idx) != INVALID_IDX; (idx) = en_data.next((idx)))
-
-///< Iterates over all face node indices.
-///< \param idx Face node hash table index.
-#define FOR_ALL_FACE_NODES(idx) \
-		for (unsigned int (idx) = fn_data.first(); (idx) != INVALID_IDX; (idx) = fn_data.next((idx)))
-
-///< Iterates over all element node indices.
-///< \param idx Element node hash table index.
-#define FOR_ALL_ELEMENT_NODES(idx) \
-		for (unsigned int (idx) = elm_data.first(); (idx) != INVALID_IDX; (idx) = elm_data.next((idx)))
-
-
 #define H3D_MARKER_UNDEFINED				-1
 
 #define H3D_DOF_UNASSIGNED					-2
@@ -124,8 +99,8 @@ public:
   /// FE mesh
   Mesh *mesh;
 
-  static int get_num_dofs(Hermes::Tuple<Space *> spaces);
-  static int assign_dofs(Hermes::Tuple<Space*> spaces) ;
+  static int get_num_dofs(Hermes::vector<Space *> spaces);
+  static int assign_dofs(Hermes::vector<Space*> spaces) ;
 
 protected:
   Shapeset *shapeset;
@@ -144,14 +119,14 @@ protected:
   };
 
   struct BaseEdgeComponent {
-    unsigned int edge_id;							/// ID of the constraining edge
+    Edge::Key edge_id;							/// ID of the constraining edge
     int ori;								/// the orientation of the constraining edge
     Part part;								/// part of the edge that is constrained
     scalar coef;
   };
 
   struct BaseFaceComponent {
-    unsigned int face_id;							/// ID of a constraining face
+    Facet::Key face_id;							/// ID of a constraining face
     unsigned ori:3;							/// the orientation of constraining face
     unsigned dir:1;							/// the orientation of ???
     unsigned iface:4;						/// local number of constraining face
@@ -206,16 +181,16 @@ protected:
     union {
       /// normal node
       struct {
-	Ord1 order;   					/// polynomial order
-	int dof;
-	int n;								/// number of DOFs
+	      Ord1 order;   					/// polynomial order
+	      int dof;
+	      int n;								/// number of DOFs
       };
       /// CED
       struct {
-	BaseEdgeComponent *edge_baselist;
-	int edge_ncomponents;
-	BaseFaceComponent *face_baselist;
-	int face_ncomponents;
+	      BaseEdgeComponent *edge_baselist;
+	      int edge_ncomponents;
+	      BaseFaceComponent *face_baselist;
+	      int face_ncomponents;
       };
     };
 
@@ -233,23 +208,18 @@ protected:
       }
     }
 
-    void dump(int id);
+    void dump(Edge::Key id);
   };
 
   struct FaceData : public NodeData  {
+
     unsigned ced:1;								/// 1 = is constrained
     Ord2 order;   							/// polynomial order
-    union {
-      struct {								/// normal node
-        int dof;
-        int n;								/// number of DOFs
-      };
-      struct {								/// CED node
-        unsigned int facet_id;					/// ID of a facing facet
-        int ori;							/// orientation of facing facet
-        Part part;
-      };
-    };
+    int dof;
+    int n;								/// number of DOFs
+    Facet::Key facet_id;					/// ID of a facing facet
+    int ori;							/// orientation of facing facet
+    Part part;
 
     scalar *bc_proj;
 
@@ -261,7 +231,7 @@ protected:
       delete [] bc_proj;
     }
 
-    void dump(int id);
+    void dump(Facet::Key id);
   };
 
   struct ElementData {
@@ -280,10 +250,10 @@ protected:
     void dump(int id);
   };
 
-  ArrayPtr<VertexData> vn_data;		/// Vertex node hash table
-  ArrayPtr<EdgeData> en_data;		/// Edge node hash table
-  ArrayPtr<FaceData> fn_data;		/// Face node hash table
-  ArrayPtr<ElementData> elm_data;		/// Element node hash table
+  std::map<unsigned int, VertexData *> vn_data;		/// Vertex node hash table
+  std::map<Edge::Key, EdgeData *> en_data;		/// Edge node hash table
+  std::map<Facet::Key, FaceData *> fn_data;		/// Face node hash table
+  std::map<unsigned int, ElementData *> elm_data;		/// Element node hash table
 
   void set_order_recurrent(unsigned int eid, Ord3 order);
 
@@ -293,8 +263,8 @@ protected:
   virtual int get_element_ndofs(Ord3 order) = 0;
 
   virtual void assign_vertex_dofs(unsigned int vid);
-  virtual void assign_edge_dofs(unsigned int eid);
-  virtual void assign_face_dofs(unsigned int fid);
+  virtual void assign_edge_dofs(Edge::Key eid);
+  virtual void assign_face_dofs(Facet::Key fid);
   virtual void assign_bubble_dofs(unsigned int eid);
 
   virtual void assign_dofs_internal() = 0;
@@ -335,7 +305,7 @@ protected:
     };
 
     FaceInfo(ElementMode2D mode, unsigned int elem_id, int face) {
-      this->type = mode == MODE_QUAD;
+      this->type = mode == HERMES_MODE_QUAD;
       this->elem_id = elem_id;
       this->face = face;
       this->h_part = this->v_part = 0;
@@ -353,24 +323,24 @@ protected:
   /// @param[in] iface - local number of the face on the element eid
   void fc_face(unsigned int eid, int iface, bool ced);
   /// @param[in] fid - ID of the facet
-  void fc_face_left(unsigned int fid);
+  void fc_face_left(Facet::Key fid);
   /// @param[in] fid - ID of the facet
-  void fc_face_right(unsigned int fid);
+  void fc_face_right(Facet::Key fid);
   /// @param[in] idx - ID of the element
   void fc_element(unsigned int idx);
-  BitArray face_ced;
+  std::map<Facet::Key, bool> face_ced;
 
   // update constraints
   void uc_element(unsigned int idx);
   void uc_face(unsigned int eid, int iface);
   void uc_dep(unsigned int eid);
-  BitArray uc_deps;
+  std::map<unsigned int, bool> uc_deps;
 
-  Array<FaceInfo *> fi_data;
+  std::map<Facet::Key, FaceInfo *> fi_data;
 
   VertexData *create_vertex_node_data(unsigned int vid, bool ced);
-  EdgeData *create_edge_node_data(unsigned int eid, bool ced);
-  FaceData *create_face_node_data(unsigned int fid, bool ced);
+  EdgeData *create_edge_node_data(Edge::Key eid, bool ced);
+  FaceData *create_face_node_data(Facet::Key fid, bool ced);
 
   void output_component(BaseVertexComponent *&current, BaseVertexComponent *&last, BaseVertexComponent *min, bool add);
   void output_component(BaseEdgeComponent *&current, BaseEdgeComponent *&last, BaseEdgeComponent *min, bool add);
@@ -379,19 +349,19 @@ protected:
 
   BaseVertexComponent *merge_baselist(BaseVertexComponent *l1, int n1, BaseVertexComponent *l2, int n2, int &ncomponents, bool add);
   BaseEdgeComponent *merge_baselist(BaseEdgeComponent *l1, int n1, BaseEdgeComponent *l2, int n2, int &ncomponents, bool add);
-  BaseFaceComponent *merge_baselist(BaseFaceComponent *l1, int n1, BaseFaceComponent *l2, int n2, int &ncomponents, unsigned int fid, bool add);
+  BaseFaceComponent *merge_baselist(BaseFaceComponent *l1, int n1, BaseFaceComponent *l2, int n2, int &ncomponents, Facet::Key fid, bool add);
 
   // all these work for hexahedra
   void calc_vertex_vertex_ced(unsigned int vtx1, unsigned int vtx2);
-  void calc_vertex_edge_ced(unsigned int vtx, unsigned int edge_id, int ori, int part);
-  void calc_vertex_face_ced(unsigned int vtx, unsigned int fid, int ori, int iface, int hpart, int vpart);
-  void calc_edge_edge_ced(unsigned int seid, unsigned int eid, int ori, int epart, int part);
-  void calc_edge_face_ced(unsigned int mid_eid, unsigned int eid[], unsigned int fid, int ori, int iface, int part_ori, int fpart, int epart);
-  void calc_face_face_ced(unsigned int sfid, unsigned int fid, int ori, int hpart, int vpart);
+  void calc_vertex_edge_ced(unsigned int vtx, Edge::Key edge_id, int ori, int part);
+  void calc_vertex_face_ced(unsigned int vtx, Facet::Key fid, int ori, int iface, int hpart, int vpart);
+  void calc_edge_edge_ced(Edge::Key seid, Edge::Key eid, int ori, int epart, int part);
+  void calc_edge_face_ced(Edge::Key mid_eid, Edge::Key eid[], Facet::Key fid, int ori, int iface, int part_ori, int fpart, int epart);
+  void calc_face_face_ced(Facet::Key sfid, Facet::Key fid, int ori, int hpart, int vpart);
 
   void calc_mid_vertex_vertex_ced(unsigned int mid, unsigned int vtx1, unsigned int vtx2, unsigned int vtx3, unsigned int vtx4);
-  void calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, unsigned int eid, int ori, int part);
-  void calc_mid_edge_edge_ced(unsigned int meid, unsigned int eid[], int ori[], int epart, int part);
+  void calc_mid_vertex_edge_ced(unsigned int vtx, unsigned int fmp, Edge::Key eid, int ori, int part);
+  void calc_mid_edge_edge_ced(Edge::Key meid, Edge::Key eid[], int ori[], int epart, int part);
 
 public:
   BCType (*bc_type_callback)(int);

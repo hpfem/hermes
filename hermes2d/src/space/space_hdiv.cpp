@@ -16,7 +16,7 @@
 #include "../h2d_common.h"
 #include "space_hdiv.h"
 #include "../../../hermes_common/matrix.h"
-#include "../quad_all.h"
+#include "../quadrature/quad_all.h"
 #include "../shapeset/shapeset_hd_all.h"
 
 
@@ -77,7 +77,7 @@ HdivSpace::HdivSpace(Mesh* mesh, BCTypes *bc_types, BCValues* bc_values, Ord2 p_
 
 // the following constructors are DEPRECATED.
 HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types,
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
   if (shapeset == NULL)
@@ -104,7 +104,7 @@ HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types,
 }
 
 HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types,
-                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, 
+                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init,
                  Shapeset* shapeset)
           : Space(mesh, shapeset, bc_types, bc_value_callback_by_coord, p_init)
 {
@@ -131,8 +131,8 @@ HdivSpace::HdivSpace(Mesh* mesh, BCTypes* bc_types,
   this->assign_dofs();
 }
 
-HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, 
+HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
+                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
                  Shapeset* shapeset) : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, Ord2(p_init, p_init))
 {
   if (shapeset == NULL)
@@ -158,8 +158,8 @@ HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
   this->assign_dofs();
 }
 
-HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int), 
-                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init, 
+HdivSpace::HdivSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
+                 scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init,
                  Shapeset* shapeset)
           : Space(mesh, shapeset, bc_type_callback, bc_value_callback_by_coord, p_init)
 {
@@ -198,11 +198,12 @@ HdivSpace::~HdivSpace()
 }
 
 
-Space* HdivSpace::dup(Mesh* mesh) const
+Space* HdivSpace::dup(Mesh* mesh, int order_increase) const
 {
   HdivSpace* space = new HdivSpace(mesh, this->bc_types,
           this->bc_value_callback_by_coord, Ord2(0,0), this->shapeset);
   space->copy_callbacks(this);
+  space->copy_orders(this, order_increase);
   return space;
 }
 

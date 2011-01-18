@@ -21,11 +21,6 @@
 #define _HERMES_3D_
 
 // hermes_common
-#include "../../hermes_common/array.h"
-#include "../../hermes_common/bitarray.h"
-#include "../../hermes_common/map.h"
-#include "../../hermes_common/maphs.h"
-#include "../../hermes_common/mapord.h"
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/utils.h"
 #include "../../hermes_common/bctypes.h"
@@ -104,8 +99,5 @@
 #include "adapt/h1projipol.h"
 
 #include "ogprojection.h"
-
-// global H3D iface
-void set_verbose(bool verb = true);
 
 #endif

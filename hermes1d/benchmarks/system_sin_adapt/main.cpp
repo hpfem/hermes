@@ -42,8 +42,8 @@ double K = 1.0;                         // Equation parameter.
 double A = 0, B = 2*M_PI;               // Domain end points.
 
 // Boundary conditions.
-Hermes::Tuple<BCSpec *>DIR_BC_LEFT =  Hermes::Tuple<BCSpec *>(new BCSpec(0,0), new BCSpec(1,K));
-Hermes::Tuple<BCSpec *> DIR_BC_RIGHT = Hermes::Tuple<BCSpec *>();
+Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,0), new BCSpec(1,K));
+Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Exact solution.
 // When changing exact solution, do not 

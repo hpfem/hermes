@@ -1,5 +1,4 @@
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -32,7 +31,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary markers.
-const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
+const int BDY_HORIZONTAL = 1;
+const std::string BDY_VERTICAL = "Boundary vertical";
 
 // Problem parameters.
 double a_11(double x, double y) {
@@ -114,6 +114,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
+  bool matrix_free = false;
   WeakForm wf;
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);

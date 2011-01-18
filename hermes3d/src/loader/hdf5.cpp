@@ -449,7 +449,7 @@ static bool save_vertices(hid_t parent_group_id, Mesh *mesh) {
 
 // Elements ////
 
-static bool save_hex(hid_t parent_group_id, Array<Element *> &elems) {
+static bool save_hex(hid_t parent_group_id, std::map<unsigned int, Element *> &elems) {
 	_F_
 	herr_t status;
 
@@ -486,7 +486,7 @@ static bool save_hex(hid_t parent_group_id, Array<Element *> &elems) {
 	return true;
 }
 
-static bool save_tetra(hid_t parent_group_id, Array<Element *> &elems) {
+static bool save_tetra(hid_t parent_group_id, std::map<unsigned int, Element *> &elems) {
 	_F_
 	herr_t status;
 
@@ -522,7 +522,7 @@ static bool save_tetra(hid_t parent_group_id, Array<Element *> &elems) {
 	return true;
 }
 
-static bool save_prism(hid_t parent_group_id, Array<Element *> &elems) {
+static bool save_prism(hid_t parent_group_id, std::map<unsigned int, Element *> &elems) {
 	_F_
 	herr_t status;
 
@@ -567,17 +567,17 @@ static bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 	hid_t group_id = H5Gcreate(parent_group_id, "elements", 0);
 
 	// count
-	uint count = mesh->elements.count();
+	uint count = mesh->elements.size();
 	write_attr(group_id, "count", count);
 
 	///
-	Array<Element *> tet, hex, pri;
+	std::map<unsigned int, Element *> tet, hex, pri;
 	for (uint i = 0; i < count; i++) {
 		Element *elem = mesh->elements[i];
 		switch (elem->get_mode()) {
-			case MODE_TETRAHEDRON: tet.add(elem); break;
-			case MODE_HEXAHEDRON: hex.add(elem); break;
-			case MODE_PRISM: pri.add(elem); break;
+			case HERMES_MODE_TET: tet.add(elem); break;
+			case HERMES_MODE_HEX: hex.add(elem); break;
+			case HERMES_MODE_PRISM: pri.add(elem); break;
 		}
 	}
 
@@ -593,7 +593,7 @@ static bool save_elements(hid_t parent_group_id, Mesh *mesh) {
 
 // BC ////
 
-static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, Array<unsigned int> &bcs) {
+static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, std::map<unsigned int, unsigned int> &bcs) {
 	_F_
 	herr_t status;
 
@@ -637,7 +637,7 @@ static bool save_tri_bc(hid_t parent_group_id, Mesh *mesh, Array<unsigned int> &
 	return true;
 }
 
-static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, Array<unsigned int> &bcs) {
+static bool save_quad_bc(hid_t parent_group_id, Mesh *mesh, std::map<unsigned int, unsigned int> &bcs) {
 	_F_
 	herr_t status;
 
@@ -694,13 +694,13 @@ static bool save_bc(hid_t parent_group_id, Mesh *mesh) {
 	write_attr(group_id, "count", count);
 
 	// sort out boundaries that are triangular and quadrilateral
-	Array<unsigned int> tri, quad;
+	std::map<unsigned int, unsigned int> tri, quad;
 	FOR_ALL_FACETS(fid, mesh) {
 		Facet *facet = mesh->facets.get(fid);
 		if (facet->type == Facet::OUTER) {
 			switch (facet->mode) {
-				case MODE_TRIANGLE: tri.add(fid); break;
-				case MODE_QUAD: quad.add(fid); break;
+				case HERMES_MODE_TRIANGLE: tri.add(fid); break;
+				case HERMES_MODE_QUAD: quad.add(fid); break;
 			}
 		}
 	}

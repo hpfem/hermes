@@ -50,15 +50,15 @@ set(SRC
 	adapt/hcurlproj.cpp
 	adapt/h1projipol.cpp
   ${HERMES_COMMON_DIR}/common.cpp
-  ${HERMES_COMMON_DIR}/logging.cpp
   ${HERMES_COMMON_DIR}/hermes_logging.cpp
   ${HERMES_COMMON_DIR}/common_time_period.cpp
   ${HERMES_COMMON_DIR}/callstack.cpp
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
+  ${HERMES_COMMON_DIR}/tables.cpp
   ${HERMES_COMMON_DIR}/trace.cpp
-  ${HERMES_COMMON_DIR}/Teuchos_stacktrace.cpp 
+  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 
   ${HERMES_COMMON_DIR}/solver/epetra.cpp 
   ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
@@ -94,7 +94,6 @@ macro(LIBRARY_SETTINGS BIN)
   # The respective variables will be empty for unselected TPL's.
   PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
   target_link_libraries(  ${BIN} 
-      ${JUDY_LIBRARY}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}
@@ -107,6 +106,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${SUPERLU_LIBRARY}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
+	  ${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
       ${ADDITIONAL_LIBS}        
   )
 endmacro(LIBRARY_SETTINGS)

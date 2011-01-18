@@ -137,7 +137,7 @@ sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, const int np, const QuadPt3D *pt
 		delete [] irm;
 	}
 
-	if (shfn->get_type() == Hcurl) {
+	if (shfn->get_type() == HERMES_HCURL_SPACE) {
 		u->curl0 = new double [np]; MEM_CHECK(u->curl0);
 		u->curl1 = new double [np]; MEM_CHECK(u->curl1);
 		u->curl2 = new double [np]; MEM_CHECK(u->curl2);
@@ -194,7 +194,7 @@ sFunc *init_fn(ShapeFunction *shfn, RefMap *rm, int iface, const int np, const Q
 		delete [] m;
 	}
 
-	if (shfn->get_type() == Hcurl) {
+	if (shfn->get_type() == HERMES_HCURL_SPACE) {
 		double *nx, *ny, *nz;
 		rm->calc_face_normal(iface, np, pt, nx, ny, nz);
 
@@ -302,6 +302,14 @@ mFunc *init_fn(MeshFunction *f, RefMap *rm, const int np, const QuadPt3D *pt) {
 	}
 
 	return u;
+}
+
+void free_ext_fns_ord(ExtData<Ord> * ext) {
+  _F_
+  for (int i = 0; i < ext->nf; i++) {
+      free_fn(ext->fn[i]);
+      delete ext->fn[i];
+  }
 }
 
 void free_fn(Func<Ord> *f) {

@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function.h"
+#include "function/function.h"
 
 // This test makes sure that example "richards" works correctly.
 
@@ -90,11 +90,11 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   if (TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(jac_euler, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_euler, jac_ord, HERMES_NONSYM, HERMES_ANY, &u_prev_time);
     wf.add_vector_form(res_euler, res_ord, HERMES_ANY, &u_prev_time);
   }
   else {
-    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_UNSYM, HERMES_ANY, &u_prev_time);
+    wf.add_matrix_form(jac_cranic, jac_ord, HERMES_NONSYM, HERMES_ANY, &u_prev_time);
     wf.add_vector_form(res_cranic, res_ord, HERMES_ANY, &u_prev_time);
   }
 
@@ -121,41 +121,9 @@ int main(int argc, char* argv[])
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
     // Perform Newton's iteration.
-    int it = 1;
-    while (1)
-    {
-      // Obtain the number of degrees of freedom.
-      int ndof = Space::get_num_dofs(&space);
-
-      // Assemble the Jacobian matrix and residual vector.
-      dp.assemble(coeff_vec, matrix, rhs, false);
-
-      // Multiply the residual vector with -1 since the matrix 
-      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-      for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-      
-      // Calculate the l2-norm of residual vector.
-      double res_l2_norm = get_l2_norm(rhs);
-
-      // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-      // If l2 norm of the residual vector is within tolerance, or the maximum number 
-      // of iteration has been reached, then quit.
-      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-      // Solve the linear system.
-      if(!solver->solve())
-        error ("Matrix solver failed.\n");
-
-      // Add \deltaY^{n+1} to Y^n.
-      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-      
-      if (it >= NEWTON_MAX_ITER)
-        error ("Newton method did not converge.");
-
-      it++;
-    }
+    bool verbose = true;
+    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed."); 
 
     // Translate the resulting coefficient vector into the Solution sln.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
@@ -180,18 +148,20 @@ int main(int argc, char* argv[])
 
   double coor_x_y[5] = {0.0, 25.0, 50.0, 75.0, 100.0};
   double value[5] = {-1000.000000, -969.316013, -836.504249, -651.433710, -1000.000000};
+  bool success = true;
   for (int i = 0; i < 5; i++)
   {
-    if ((value[i] - u_prev_time.get_pt_value(coor_x_y[i], coor_x_y[i])) < 1E-6)
-    {
-    }
-    else
-    {
-      printf("Failure!\n");
-      return ERR_FAILURE;
-    }
+    if (abs(value[i] - u_prev_time.get_pt_value(coor_x_y[i], coor_x_y[i])) > 1E-6) 
+      success = false;
   }
-  printf("Success!\n");
-  return ERR_SUCCESS;
+
+  if (success) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }
 

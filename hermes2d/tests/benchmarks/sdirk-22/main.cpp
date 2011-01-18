@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function.h"
+#include "function/function.h"
 
 using namespace RefinementSelectors;
 
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     info("IMPLICIT EULER METHOD");
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
     // Initialize the FE problem. 
@@ -173,39 +173,10 @@ int main(int argc, char* argv[])
       info("We are computing solution at next time step TIME+TAU = %g s.", TIME+TAU);
 
       // Perform Newton's iteration.
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(&space);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-      
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve()) error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-      
-        if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
-
-        it++;
-      }
+      info("Solving nonlinear problem:");
+      bool verbose = true;
+      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solution.
       Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
@@ -215,9 +186,9 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_l2_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_L2_NORM);
+      double exact_h1_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
       info("TIME: %g s.", TIME);
-      info("Exact error in l2-norm: %g.", exact_l2_error);
+      info("Exact error in l2-norm: %g.", exact_h1_error);
     } 
     while (ts < N_STEP);
 
@@ -229,7 +200,7 @@ int main(int argc, char* argv[])
 
     // Hack to extract error at final time for convergence graph.
     Solution citrouille(&mesh, exact_solution);
-    info("IE: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_L2_NORM));
+    info("IE: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_H1_NORM));
   }
   else if (method == SDIRK) {
     info("SDIRK22");
@@ -243,11 +214,11 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&space, &u_prev_time, coeff_vec2, matrix_solver);
 
     WeakForm wf1;
-    wf1.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
-    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time));
+    wf1.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
+    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::vector<MeshFunction*>(&u_prev_time));
     WeakForm wf2;
-    wf2.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
-    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time, &Y1));
+    wf2.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
+    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::vector<MeshFunction*>(&u_prev_time, &Y1));
 
     // Initialize the FE problem. 
     bool is_linear = false;
@@ -272,7 +243,8 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
+
 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
@@ -311,7 +283,7 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
@@ -345,14 +317,14 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_l2_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_L2_NORM);
+      double exact_h1_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
       info("TIME: %g s.", TIME);
-      info("Exact error in l2-norm: %g.", exact_l2_error);
+      info("Exact error in H1-norm: %g.", exact_h1_error);
     } while (ts < N_STEP);
 
     // Hack to extract error at final time for convergence graph.
     Solution citrouille(&mesh, exact_solution);
-    info("SDIRK: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_L2_NORM));
+    info("SDIRK: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_H1_NORM));
   }
 
   info("Coordinate ( 0.0, 0.0) u_prev_time value = %lf", u_prev_time.get_pt_value(0.0, 0.0));

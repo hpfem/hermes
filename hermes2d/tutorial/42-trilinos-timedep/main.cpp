@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -52,7 +50,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_newton(Hermes::Tuple<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
@@ -64,8 +62,7 @@ int main(int argc, char* argv[])
   info("ndof: %d", ndof);
 
   // Define constant initial condition. 
-  Solution t_prev_time;
-  t_prev_time.set_const(&mesh, TEMP_INIT);
+  Solution t_prev_time(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf(1, JFNK ? true : false);

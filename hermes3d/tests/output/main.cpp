@@ -201,8 +201,6 @@ void test_mm(Mesh *mesh)
 
 int main(int argc, char **args)
 {
-	set_verbose(false);
-
 	if (argc < 3) error("Not enough parameters.");
 
 	char *type = args[1];
@@ -231,9 +229,9 @@ int main(int argc, char **args)
 	else if (strcmp(type, "ord") == 0) {
 
 		Ord3 order;
-		if (mesh.elements[1]->get_mode() == MODE_HEXAHEDRON)
+		if (mesh.elements[1]->get_mode() == HERMES_MODE_HEX)
 			order = Ord3(2, 3, 4);
-		else if (mesh.elements[1]->get_mode() == MODE_TETRAHEDRON)
+		else if (mesh.elements[1]->get_mode() == HERMES_MODE_TET)
 			order = Ord3(3);
 		else
 			error(HERMES_ERR_NOT_IMPLEMENTED);

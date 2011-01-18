@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 #include <stdio.h>
 #include <cmath>
@@ -94,32 +95,28 @@ int main(int argc, char* argv[])
     Element* elem=mesh.get_element(id);
     for(int i=0;i<4;i++){
       Node* node= elem->vn[i];
-      if ( node->x == 0.0 and node->y == 1.0) 
-	vertex_id_nucleus=node->id;
+      if ( node->x == 0.0 && node->y == 1.0) 
+	      vertex_id_nucleus=node->id;
     }
   }
-  if (vertex_id_nucleus == -1)
-    {
-      printf("nucleus is not a vertex! Slow convergence would result\n");
-      exit(0);
-    }
-  printf("vertex_id_nucleus=%d\n",vertex_id_nucleus);
+  if (vertex_id_nucleus == -1) error("Nucleus is not a vertex! Slow convergence would result.");
+  info("Vertex_id_nucleus = %d",vertex_id_nucleus);
   mesh.refine_towards_vertex(vertex_id_nucleus,10);
   for (int i=0;i<FINAL_REF_NUM;i++) mesh.refine_all_elements();
 
   // Enter boundary markers. 
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_RIGHT, BDY_TOP));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::Tuple<int>(BDY_RIGHT, BDY_TOP));
+  bc_values.add_zero(Hermes::vector<int>(BDY_RIGHT, BDY_TOP));
 
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-  printf("ndof = %d\n", ndof);
+  info("ndof = %d", ndof);
   // Initialize the weak formulation for the left hand side, i.e., H.
   WeakForm wfH, wfU;
   wfH.add_matrix_form(bilinear_form_H,bilinear_form_ord);
@@ -136,23 +133,23 @@ int main(int argc, char* argv[])
   DiscreteProblem dpU(&wfU, &space, is_linear);
   dpU.assemble(Umat);
   cpu_time.tick();
-  printf("Total running time for assembling matrices : %g s\n", cpu_time.accumulated());
+  info("Total running time for assembling matrices : %g s.", cpu_time.accumulated());
   cpu_time.reset();
   write_matrix_mm("mat_left.mtx" ,Hmat);
   write_matrix_mm("mat_right.mtx", Umat);
   cpu_time.tick();
-  printf("Total running time for writing matrices to disk : %g s\n", cpu_time.accumulated());
+  info("Total running time for writing matrices to disk : %g s.", cpu_time.accumulated());
   cpu_time.reset();
-  printf("Calling JDSYM...\n");
+  info("Calling JDSYM.");
   char call_cmd[255];
   double TOL=1e-10;
   int MAX_ITER=1000;
   sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
 	  TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
   system(call_cmd);
-  printf("JDSYM finished.\n");
+  info("JDSYM finished.");
   cpu_time.tick();
-  printf("Total running time for solving generalized eigenvalue problem: %g s\n", cpu_time.accumulated());
+  info("Total running time for solving generalized eigenvalue problem: %g s.", cpu_time.accumulated());
   double* coeff_vec = new double[ndof];
   Solution sln;
   ScalarView view("Solution", new WinGeom(0, 0, 1024, 768));
@@ -193,7 +190,7 @@ int main(int argc, char* argv[])
   delete [] coeff_vec;
 
   double E=eigenval[0];
-  printf("E=%.16f   Delta E=%.16e\n",E ,E-E_LITERATURE);
+  info("E = %.16f   Delta E = %.16e", E, E - E_LITERATURE);
   return 0; 
 };
 

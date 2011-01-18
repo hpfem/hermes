@@ -9,18 +9,19 @@ in the source code.
 .. toctree::
    :maxdepth: 2
 
-   examples/crack
-   examples/bracket
+   examples/elasticity-crack
+   examples/elasticity-bracket
    examples/thermoelasticity
-   examples/saphir
-   examples/iron-water
+   examples/neutronics-saphir
+   examples/neutronics-iron-water
    examples/neutronics-4-group-adapt
-   examples/waveguide
-   examples/ns-timedep-adapt
-   examples/ns-bearing
-   examples/newton-np-timedep-adapt-system
+   examples/maxwell-waveguide
+   examples/navier-stokes-timedep-adapt
+   examples/navier-stokes-bearing
+   examples/nernst-planck-timedep-adapt
    examples/singular-perturbation
    examples/linear-advection-diffusion
-   examples/richards
+   examples/richards-basic
    examples/richards-tracy-adapt
    examples/richards-seepage-adapt
+   examples/richards-capillary-barrier-adapt

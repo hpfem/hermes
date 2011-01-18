@@ -15,10 +15,14 @@ which are suitable for comparing adaptivity algorithms.
    benchmarks/lshape
    benchmarks/layer-interior
    benchmarks/layer-boundary
+   benchmarks/neutronics-heat-conduction
+   benchmarks/neutronics-heat-conduction-adapt
    benchmarks/neutronics-2-group-adapt
+   benchmarks/stabilized-advection-reaction   
+   benchmarks/stabilized-advection-diffusion
+   benchmarks/sdirk-22
+   benchmarks/nonsym-check
    benchmarks/screen
-
-
 
 
 

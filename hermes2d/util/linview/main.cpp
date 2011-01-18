@@ -1,3 +1,4 @@
+#ifndef WIN32
 #include "hermes2d.h"
 #include <GL/glut.h>
 #include <getopt.h>
@@ -246,3 +247,10 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
+#else
+#include <stdio.h>
+int main(int argc, char* argv[])
+{
+  printf("There is no include getopt.h under WIN32.");
+}
+#endif

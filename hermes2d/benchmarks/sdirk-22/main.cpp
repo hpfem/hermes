@@ -1,15 +1,23 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function.h"
+#include "function/function.h"
 
 using namespace RefinementSelectors;
 
-//  This example is derived from tutorial 18 and shows an example of 
-//  implementation of the sdirk22 method.  This is a beta-version  
-//  that is very likely to be changed soon...
+//  This example is derived from tutorial 19 and it shows an example of 
+//  implementation of the sdirk-22 method. The Butcher table of this 
+//  method is:
+//
+//  A(1, 1) = Gamma
+//  A(1, 2) = 0
+//  A(2, 1) = 1 - Gamma
+//  A(2, 2) = Gamma
+//  B = [1 - Gamma, Gamma]
+//  C = [Gamma, 1]
+//  Gamma = 1 - 1/sqrt(2)
+//
+//  The method can be found in Butcher's book on page 244. 
 //
 //  Authors: Damien L-G and Jean R (Texas A&M University).
 //
@@ -29,7 +37,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 0;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-double TAU = 0.1;                                // Time step.
+double TAU = 0.1;                                 // Time step.
 const double T_FINAL = 1.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-10;                  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -162,7 +170,7 @@ int main(int argc, char* argv[])
     info("IMPLICIT EULER METHOD");
     // Initialize the weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(callback(jac), HERMES_UNSYM, HERMES_ANY);
+    wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(res), HERMES_ANY, &u_prev_time);
 
     // Initialize the FE problem. 
@@ -177,39 +185,10 @@ int main(int argc, char* argv[])
       info("We are computing solution at next time step TIME+TAU = %g s.", TIME+TAU);
 
       // Perform Newton's iteration.
-      int it = 1;
-      while (1)
-      {
-        // Obtain the number of degrees of freedom.
-        int ndof = Space::get_num_dofs(&space);
-
-        // Assemble the Jacobian matrix and residual vector.
-        dp.assemble(coeff_vec, matrix, rhs, false);
-
-        // Multiply the residual vector with -1 since the matrix 
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
-      
-        // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
-
-        // Info for user.
-        info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-        // If l2 norm of the residual vector is within tolerance, or the maximum number 
-        // of iteration has been reached, then quit.
-        if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-        // Solve the linear system.
-        if(!solver->solve()) error ("Matrix solver failed.\n");
-
-        // Add \deltaY^{n+1} to Y^n.
-        for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-      
-        if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
-
-        it++;
-      }
+      info("Solving nonlinear problem:");
+      bool verbose = true;
+      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");  
 
       // Update previous time level solution.
       Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
@@ -254,11 +233,11 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&space, &u_prev_time, coeff_vec2, matrix_solver);
 
     WeakForm wf1;
-    wf1.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
-    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time));
+    wf1.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
+    wf1.add_vector_form(callback(res_Y1), HERMES_ANY, Hermes::vector<MeshFunction*>(&u_prev_time));
     WeakForm wf2;
-    wf2.add_matrix_form(callback(jac_Y), HERMES_UNSYM, HERMES_ANY);
-    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::Tuple<MeshFunction*>(&u_prev_time, &Y1));
+    wf2.add_matrix_form(callback(jac_Y), HERMES_NONSYM, HERMES_ANY);
+    wf2.add_vector_form(callback(res_Y2), HERMES_ANY, Hermes::vector<MeshFunction*>(&u_prev_time, &Y1));
 
     // Initialize the FE problem. 
     bool is_linear = false;
@@ -283,7 +262,7 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);
@@ -322,7 +301,7 @@ int main(int argc, char* argv[])
 
         // Multiply the residual vector with -1 since the matrix 
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-        for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+        rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
         double res_l2_norm = get_l2_norm(rhs);

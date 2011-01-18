@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef _SOLVER_EPETRA_H_
-#define _SOLVER_EPETRA_H_
+#ifndef __HERMES_COMMON_SOLVER_EPETRA_H_
+#define __HERMES_COMMON_SOLVER_EPETRA_H_
 
 #include "../matrix.h"
 
@@ -36,7 +36,7 @@ class NoxSolver;
 class IfpackPrecond;
 class MlPrecond;
 
-class EpetraMatrix : public SparseMatrix {
+class HERMES_API EpetraMatrix : public SparseMatrix {
 public:
   EpetraMatrix();
 #ifdef HAVE_EPETRA
@@ -55,9 +55,11 @@ public:
   virtual void extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs);
   virtual void zero();
   virtual void add(int m, int n, scalar v);
+  virtual void add_to_diagonal(scalar v);
   virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual int get_matrix_size() const;
+  virtual int get_nnz() const;
   virtual double get_fill_in() const;
 
 protected:
@@ -79,7 +81,7 @@ protected:
 };
 
 
-class EpetraVector : public Vector {
+class HERMES_API EpetraVector : public Vector {
 public:
   EpetraVector();
 #ifdef HAVE_EPETRA
@@ -101,9 +103,17 @@ public:
   virtual void extract(scalar *v) const { }
 #endif
   virtual void zero();
+  virtual void change_sign();
   virtual void set(int idx, scalar y);
   virtual void add(int idx, scalar y);
   virtual void add(int n, int *idx, scalar *y);
+  virtual void add_vector(Vector* vec) {
+    assert(this->length() == vec->length());
+    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+  };
+  virtual void add_vector(scalar* vec) {
+    for (int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+  };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:

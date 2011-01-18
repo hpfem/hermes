@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -126,11 +124,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_function(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), essential_bc_values);
+  bc_values.add_function(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -237,14 +235,13 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     info("Calculating error (est).");
-    Adapt hp(&space, HERMES_H1_NORM);
-    bool solutions_for_adapt = true;
-    double err_est_rel = hp.calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    Adapt hp(&space);
+    double err_est_rel = hp.calc_err_est(&sln, &ref_sln) * 100;
  
     // Calculate exact error.
     Solution* exact = new Solution(&mesh, fndd);
-    solutions_for_adapt = false;
-    double err_exact_rel = hp.calc_err_exact(&sln, exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    bool solutions_for_adapt = false;
+    double err_exact_rel = hp.calc_err_exact(&sln, exact, solutions_for_adapt) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%, err_exact: %g%%", 

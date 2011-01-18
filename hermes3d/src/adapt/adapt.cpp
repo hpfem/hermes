@@ -63,7 +63,7 @@ res_t hcurl_form(int n, double *wt, Func<res_t> *u_ext[], Func<res_t> *u, Func<r
 
 // H1 adapt ///////////////////////////////////////////////////////////////////////////////////////
 
-void Adapt::init(Hermes::Tuple<Space *> sp, Hermes::Tuple<ProjNormType> proj_norms)
+void Adapt::init(Hermes::vector<Space *> sp, Hermes::vector<ProjNormType> proj_norms)
 {
 	_F_
 	this->num = sp.size();
@@ -145,31 +145,37 @@ double Adapt::get_projection_error(Element *e, int split, int son, const Ord3 &o
 	ProjKey key(split, son, order);
 	double err;
   Projection *proj;
-	if (proj_err.lookup(key, err))
-		return err;
+  if (proj_err.find(key) != proj_err.end())
+    return proj_err.find(key)->second;
 	else {
     switch (ss->get_type()) {
-      case 1:
+      case HERMES_H1_SPACE:
         proj = new H1ProjectionIpol(rsln, e, ss);
 		    err = proj->get_error(split, son, order);
-		    proj_err.set(key, err);
+		    proj_err[key] = err;
+        delete proj;
+		    return err;
         break;
-      case 2:
+      case HERMES_HCURL_SPACE:
         proj = new HCurlProjection(rsln, e, ss);
 		    err = proj->get_error(split, son, order);
-		    proj_err.set(key, err);
+		    proj_err[key] = err;
+        delete proj;
+		    return err;
         break;
+      default:
+        error("Adaptivity only implemented for H1 and HCurl spaces.");
+        return 0.0;
     }
-    delete proj;
-		return err;
   }
+  return 0.0;
 }
 
 //// optimal refinement search /////////////////////////////////////////////////////////////////////
 
 static inline int ndofs_elem(const Ord3 &order)
 {
-	assert(order.type == MODE_HEXAHEDRON);
+	assert(order.type == HERMES_MODE_HEX);
 	return (order.x + 1) * (order.y + 1) * (order.z + 1);
 }
 
@@ -655,7 +661,7 @@ void Adapt::adapt(double thr)
 		if ((strategy == 1) && (err < thr * errors[esort[0][1]][esort[0][0] - 1]))
 			break;
 
-		assert(mesh[comp]->elements.exists(id));
+		assert(mesh[comp]->elements[id] != NULL);
 		Element *e = mesh[comp]->elements[id];
 #ifdef DEBUG_PRINT
 		printf("  - element #%d", id);
@@ -715,7 +721,7 @@ void Adapt::adapt(double thr)
 		err0 = err;
 		processed_error += err;
 
-		proj_err.remove_all();
+		proj_err.clear();
 	}
 
 	for (int j = 0; j < num; j++)
@@ -761,8 +767,8 @@ Ord3 Adapt::get_form_order(int marker, const Ord3 &ordu, const Ord3 &ordv, RefMa
 	Ord o = mf_ord(1, &fake_wt, NULL, ou, ov, &fake_e, NULL);
 	Ord3 order = ru->get_inv_ref_order();
 	switch (order.type) {
-		case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-		case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+		case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+		case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
 	}
 	order.limit();
 
@@ -846,7 +852,7 @@ scalar Adapt::eval_norm(int marker, biform_val_t bi_fn, biform_ord_t bi_ord, Mes
 	return res;
 }
 
-double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt)
+double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, unsigned int error_flags, Hermes::vector<double>* component_errors, bool solutions_for_adapt)
 {
 	_F_
 	int i, j, k;
@@ -961,14 +967,15 @@ double Adapt::calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<So
   {
     k = 0;
     for (i = 0; i < num; i++)
-	    FOR_ALL_ACTIVE_ELEMENTS(eid, meshes[i]) {
-		    Element *e = meshes[i]->elements[eid];
-		    esort[k][0] = e->id;
-		    esort[k++][1] = i;
-		    if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
-          errors[i][e->id - 1] /= norms[i];
-	    }
-
+      for(std::map<unsigned int, Element*>::iterator it = meshes[i]->elements.begin(); it != meshes[i]->elements.end(); it++)
+		    if (it->second->used)
+			    if (it->second->active) {
+            Element *e = it->second;
+		        esort[k][0] = e->id;
+		        esort[k++][1] = i;
+		        if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+              errors[i][e->id - 1] /= norms[i];
+	        }
     assert(k == nact);
     cmp_err = errors;
     qsort(esort, nact, sizeof(int2), compare);

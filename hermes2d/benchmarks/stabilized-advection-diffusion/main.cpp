@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -37,17 +35,17 @@ const std::string method_names[6] =
   "discontinuous Galerkin"
 };
 
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT = 0;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements. 
-const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary. If INIT_BDY_REF_NUM == 0, 
+const int INIT_BDY_REF_NUM = 2;                   // Number of initial refinements towards boundary. If INIT_BDY_REF_NUM == 0, 
                                                   // the first solution will be performed on a mesh (INIT_REF_NUM + 1) times 
                                                   // globally refined.
-const int ORDER_INCREASE = 0;                     // Order increase for the refined space. If no change of order is allowed 
+const int ORDER_INCREASE = 1;                     // Order increase for the refined space. If no change of order is allowed 
                                                   // (not even for computing the reference solution), set to 0.
-const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
-                                                  // STRATEGY = -1... dont perform adaptive refinement
+                                                  // STRATEGY = -1... do not refine.
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -56,7 +54,7 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
@@ -73,7 +71,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 
-GalerkinMethod method = CG;
+GalerkinMethod method = DG;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK. 
 
@@ -144,14 +142,16 @@ int main(int argc, char* argv[])
   if (method != DG)
   {
     space = new H1Space(&mesh, bc_types, essential_bc_values, P_INIT);
-    selector = new H1ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-    norm = HERMES_H1_NORM;  // WARNING: In order to compare the errors with DG, L2 norm should be here.
+    selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+    norm = HERMES_L2_NORM;  // WARNING: In order to compare the errors with DG, L2 norm should be here.
   }
   else
   {
     space = new L2Space(&mesh, bc_types, NULL, Ord2(P_INIT));
     selector = new L2ProjBasedSelector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
     norm = HERMES_L2_NORM;
+    // Disable weighting of refinement candidates.
+    selector->set_error_weights(1, 1, 1);
   }
 
   // Initialize the weak formulation.
@@ -159,17 +159,19 @@ int main(int argc, char* argv[])
     
   if (method != CG && method != DG)
   {
-    if (CAND_LIST != H2D_H_ISO && CAND_LIST != H2D_H_ANISO)
+    if (STRATEGY > -1 && CAND_LIST != H2D_H_ISO && CAND_LIST != H2D_H_ANISO)
       error("The %s method may be used only with h-refinement.", method_names[method].c_str());
   
+    int eff_order = (STRATEGY == -1) ? P_INIT : P_INIT + ORDER_INCREASE;
+    
     if (method != CG_STAB_GLS)
     {
-      if (P_INIT + ORDER_INCREASE > 1)
+      if (eff_order > 1)
         error("The %s method may be used only with at most 1st order elements.", method_names[method].c_str());
     }
     else
     {
-      if (P_INIT + ORDER_INCREASE > 2)
+      if (eff_order > 2)
         error("The %s method may be used only with at most 2nd order elements.", method_names[method].c_str());
     }
   }
@@ -204,6 +206,7 @@ int main(int argc, char* argv[])
       wf.add_matrix_form_surf(callback(dg_boundary_biform_advection));
       wf.add_matrix_form_surf(callback(dg_boundary_biform_diffusion));
       wf.add_vector_form_surf(callback(dg_boundary_liform_advection));
+      wf.add_vector_form_surf(callback(dg_boundary_liform_diffusion));
       break;
   }
   
@@ -234,116 +237,118 @@ int main(int argc, char* argv[])
   // Adaptivity loop:
   int as = 1; 
   bool done = false;
-  Space* ref_space;
+  Space* actual_sln_space;
   do
   {
     info("---- Adaptivity step %d:", as);
 
-    // Construct globally refined reference mesh and setup reference space.
-    ref_space = construct_refined_space(space, ORDER_INCREASE);
+    if (STRATEGY == -1)
+      actual_sln_space = space;
+    else
+      // Construct globally refined reference mesh and setup reference space.
+      actual_sln_space = construct_refined_space(space, ORDER_INCREASE);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, actual_sln_space, is_linear);
     dp->assemble(matrix, rhs);
-
-    // Time measurement.
-    cpu_time.tick();
     
     // Solve the linear system of the reference problem. 
     // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), actual_sln_space, &ref_sln);
     else error ("Matrix solver failed.\n");
-
-    // Project the fine mesh solution onto the coarse mesh.
-    info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(space, &ref_sln, &sln, matrix_solver); 
+    
+    // Instantiate adaptivity and error calculation driver. Space is used only for adaptivity, it is ignored when 
+    // STRATEGY == -1 and only the exact error is calculated by this object.
+    Adapt* adaptivity = new Adapt(space, norm);
+    
+    // Calculate and report exact error.
+    bool solutions_for_adapt = false;
+    double err_exact_rel = adaptivity->calc_err_exact(&ref_sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    info("ndof_fine: %d, err_exact_rel: %g%%", Space::get_num_dofs(actual_sln_space), err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
-  
-    // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
-    oview.show(space);
-
+    
+    // View the fine mesh solution and polynomial orders.
+    sview.show(&ref_sln);
+    oview.show(actual_sln_space);
+    
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
 
-    // Calculate element errors and total error estimate.
-    info("Calculating error estimate."); 
-    Adapt* adaptivity = new Adapt(space, norm);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
-    
-    // Calculate exact error.
-    solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    if (STRATEGY == -1) done = true;  // Do not adapt.
+    else
+    {  
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(space, &ref_sln, &sln, matrix_solver, norm); 
 
-    // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(space), Space::get_num_dofs(ref_space));
-    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate."); 
+      bool solutions_for_adapt = true;
+      double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
-    // Time measurement.
-    cpu_time.tick();
-    
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(Space::get_num_dofs(space), err_est_rel);
-    graph_dof.save("conv_dof_est.dat");
-    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(Space::get_num_dofs(space), err_exact_rel);
-    graph_dof_exact.save("conv_dof_exact.dat");
-    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
-    graph_cpu_exact.save("conv_cpu_exact.dat");
+      // Report results.
+      info("ndof_coarse: %d, err_est_rel: %g%%", Space::get_num_dofs(space), err_est_rel);
 
-    // If err_est too large, adapt the mesh.
-    if (err_exact_rel < ERR_STOP) done = true;
-    else 
-    {
-      info("Adapting coarse mesh.");
-      if (STRATEGY >= 0)
-        done = adaptivity->adapt(selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      else // Do not adapt.
-        done = true;
-        
+      // Time measurement.
+      cpu_time.tick();
       
-      // Increase the counter of performed adaptivity steps.
-      if (done == false)  as++;
-    }
-    if (Space::get_num_dofs(space) >= NDOF_STOP) done = true;
+      // Add entry to DOF and CPU convergence graphs.
+      graph_dof.add_values(Space::get_num_dofs(space), err_est_rel);
+      graph_dof.save("conv_dof_est.dat");
+      graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
+      graph_cpu.save("conv_cpu_est.dat");
+      graph_dof_exact.add_values(Space::get_num_dofs(space), err_exact_rel);
+      graph_dof_exact.save("conv_dof_exact.dat");
+      graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+      graph_cpu_exact.save("conv_cpu_exact.dat");
 
+      // Skip graphing time.
+      cpu_time.tick(HERMES_SKIP);
+      
+      // If err_est too large, adapt the mesh.
+      if (err_exact_rel < ERR_STOP) done = true;
+      else 
+      {
+        info("Adapting coarse mesh.");
+        done = adaptivity->adapt(selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+  
+        // Increase the counter of performed adaptivity steps.
+        if (done == false)  as++;
+      }
+      if (Space::get_num_dofs(space) >= NDOF_STOP) done = true;
+      
+      if(done == false) 
+      {
+        delete actual_sln_space->get_mesh();
+        delete actual_sln_space;
+      }
+    }
+    
     // Clean up.
     delete adaptivity;
-    
-    if(done == false) 
-    {
-      delete ref_space->get_mesh();
-      delete ref_space;
-    }
     delete dp;
-    
   }
   while (done == false);
   
+  if (space != actual_sln_space) 
+  {
+    delete space;
+    delete actual_sln_space->get_mesh();
+  }
+  delete actual_sln_space;
   delete solver;
   delete matrix;
   delete rhs;
-  
-  delete space;
   delete selector;
   
   verbose("Total running time: %g s", cpu_time.accumulated());
-
-  // Show the reference solution - the final result.
-  sview.set_title("Fine mesh solution");
-  sview.show_mesh(false);
-  sview.show(&ref_sln);
-  oview.show(ref_space);
   
   // Wait for all views to be closed.
   View::wait();
   
-  delete ref_space;
   return 0;
 }

@@ -111,7 +111,7 @@ double TOL_PIT_RM = 1e-6;   // Tolerance for eigenvalue convergence when solving
 #include "norms.cpp"
 
 /// Fission source function.
-inline void source_fn(int n, Hermes::Tuple<scalar*> values, scalar* out)
+inline void source_fn(int n, Hermes::vector<scalar*> values, scalar* out)
 {
   for (int i = 0; i < n; i++) {
     out[i] = 0.0;
@@ -198,8 +198,8 @@ int get_num_of_neg(MeshFunction *sln)
 ///
 /// \return  number of iterations needed for convergence within the specified tolerance.
 ///
-int power_iteration(Hermes::Tuple<Space *>& spaces, WeakForm *wf,
-                    Hermes::Tuple<Solution *>& slptr_solution, Hermes::Tuple<MeshFunction *>& mfptr_solution,
+int power_iteration(Hermes::vector<Space *>& spaces, WeakForm *wf,
+                    Hermes::vector<Solution *>& slptr_solution, Hermes::vector<MeshFunction *>& mfptr_solution,
                     double tol, SparseMatrix *mat, Vector* rhs, Solver *solver)
 {
   // Sanity checks.
@@ -218,8 +218,8 @@ int power_iteration(Hermes::Tuple<Space *>& spaces, WeakForm *wf,
   // The following variables will store pointers to solutions obtained at each iteration and will be needed for 
   // updating the eigenvalue. We will also need to use them in the fission source filter, so their MeshFunction* 
   // version is created as well.
-  Hermes::Tuple<Solution*> slptr_new_solution;
-  Hermes::Tuple<MeshFunction*> mfptr_new_solution;
+  Hermes::vector<Solution*> slptr_new_solution;
+  Hermes::vector<MeshFunction*> mfptr_new_solution;
   for_each_group(g) { 
     slptr_new_solution.push_back(new Solution);
     mfptr_new_solution.push_back(slptr_new_solution.back());
@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Use multimesh, i.e. create one mesh for each energy group.
-  Hermes::Tuple<Mesh *> meshes;
+  Hermes::vector<Mesh *> meshes;
   for_each_group(g) meshes.push_back(new Mesh());
   
   // Load the mesh for the 1st group.
@@ -303,10 +303,10 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM[0]; i++) meshes[0]->refine_all_elements();
   
   // Create pointers to solutions on coarse and fine meshes and from the latest power iteration, respectively.
-  Hermes::Tuple<Solution*> slptr_coarse_slns, slptr_fine_slns, slptr_pow_iter_slns;
+  Hermes::vector<Solution*> slptr_coarse_slns, slptr_fine_slns, slptr_pow_iter_slns;
   // We will need to pass the power iteration solutions to methods like OGProjection::project_global,
   // which expect MeshFunction* pointers instead of just Solution*:
-  Hermes::Tuple<MeshFunction*> mfptr_pow_iter_slns;
+  Hermes::vector<MeshFunction*> mfptr_pow_iter_slns;
   // Initialize all the new solution variables.
   for_each_group(g) 
   {
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
   bc_types.add_bc_newton(BDY_VACUUM);
   
   // Create the approximation spaces with the default shapeset.
-  Hermes::Tuple<Space *> spaces;
+  Hermes::vector<Space *> spaces;
   for_each_group(g) spaces.push_back(new H1Space(meshes[g], &bc_types, P_INIT[g]));
 
   // Initialize the weak formulation.
@@ -395,8 +395,8 @@ int main(int argc, char* argv[])
   OrderView oview4("Mesh for group 4", new WinGeom(2350, 500, 340, 500));
   */
 
-  Hermes::Tuple<ScalarView *> sviews(&view1, &view2, &view3, &view4);
-  Hermes::Tuple<OrderView *> oviews(&oview1, &oview2, &oview3, &oview4); 
+  Hermes::vector<ScalarView *> sviews(&view1, &view2, &view3, &view4);
+  Hermes::vector<OrderView *> oviews(&oview1, &oview2, &oview3, &oview4); 
   for_each_group(g) 
   { 
     sviews[g]->show_mesh(false);
@@ -431,7 +431,7 @@ int main(int argc, char* argv[])
 
   // Initialize the refinement selectors.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  Hermes::Tuple<RefinementSelectors::Selector*> selectors;
+  Hermes::vector<RefinementSelectors::Selector*> selectors;
   for_each_group(g) selectors.push_back(&selector);
 
   // Adaptivity loop:
@@ -441,8 +441,8 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined meshes and setup reference spaces on them.
-    Hermes::Tuple<Space *> ref_spaces;
-    Hermes::Tuple<Mesh *> ref_meshes;
+    Hermes::vector<Space *> ref_spaces;
+    Hermes::vector<Mesh *> ref_meshes;
     for_each_group(g) 
     { 
       ref_meshes.push_back(new Mesh());
@@ -450,9 +450,8 @@ int main(int argc, char* argv[])
       ref_mesh->copy(spaces[g]->get_mesh());
       ref_mesh->refine_all_elements();
       
-      ref_spaces.push_back(spaces[g]->dup(ref_mesh));
       int order_increase = 1;
-      ref_spaces[g]->copy_orders(spaces[g], order_increase);
+      ref_spaces.push_back(spaces[g]->dup(ref_mesh, order_increase));
     }
 
 #ifdef WITH_PETSC    
@@ -479,8 +478,8 @@ int main(int argc, char* argv[])
     if (as == 1) {
       info("Projecting initial coarse mesh solutions on fine meshes.");
       OGProjection::project_global(spaces, 
-                     Hermes::Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
-                     Hermes::Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
+                     Hermes::vector< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
+                     Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
                      mfptr_pow_iter_slns, coeff_vec, matrix_solver);
       Solution::vector_to_solutions(coeff_vec, spaces, slptr_pow_iter_slns);
     }
@@ -505,8 +504,8 @@ int main(int argc, char* argv[])
     else {
       scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
       info("Projecting fine mesh solutions on coarse meshes.");
-      OGProjection::project_global(spaces,Hermes::Tuple< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
-                     Hermes::Tuple< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
+      OGProjection::project_global(spaces,Hermes::vector< std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> >(callback_pairs(projection_biform)), 
+                     Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> >(callback_pairs(projection_liform)),
                      mfptr_pow_iter_slns, coeff_vec, matrix_solver);
       Solution::vector_to_solutions(coeff_vec, spaces, slptr_coarse_slns);
       delete coeff_vec;
@@ -541,8 +540,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and error estimate for adaptivity.
     info("Calculating error.");
-    bool solutions_for_adapt = true;
-    double energy_err_est = hp.calc_err_est(slptr_coarse_slns, slptr_fine_slns, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double energy_err_est = hp.calc_err_est(slptr_coarse_slns, slptr_fine_slns) * 100;
     double h1_err_est = error_total(error_fn_h1_axisym, norm_fn_h1_axisym, slptr_coarse_slns, slptr_fine_slns);
     double l2_err_est = error_total(error_fn_l2_axisym, norm_fn_l2_axisym, slptr_coarse_slns, slptr_fine_slns);
 

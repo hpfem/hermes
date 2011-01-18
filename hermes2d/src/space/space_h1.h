@@ -46,10 +46,11 @@ public:
           Shapeset* shapeset = NULL);
 
   // For backward compatibility.
-  H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
+  H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 	  scalar (*bc_value_callback_by_coord)(int, double, double), int p_init, Shapeset* shapeset = NULL);
+
   // For backward compatibility.
-  H1Space(Mesh* mesh, BCType (*bc_type_callback)(int), 
+  H1Space(Mesh* mesh, BCType (*bc_type_callback)(int),
 	  scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
           Shapeset* shapeset = NULL);
 
@@ -65,9 +66,9 @@ public:
   /// boundary) is not suitable.
   void fix_vertex(int id, scalar value = 0.0);
 
-  virtual Space* dup(Mesh* mesh) const;
+  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
-  virtual int get_type() const { return 0; }
+  virtual ESpaceType get_type() const { return HERMES_H1_SPACE; }
 
 protected:
 
@@ -107,7 +108,6 @@ protected:
     scalar value;
   };
 
-  HERMES_API_USED_STL_VECTOR(FixedVertex);
   std::vector<FixedVertex> fixed_vertices;
 
   inline bool is_fixed_vertex(int id) const;

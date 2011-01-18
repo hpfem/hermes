@@ -20,7 +20,7 @@
 #ifndef _ADAPT_H_
 #define _ADAPT_H_
 
-#include "../../../hermes_common/tuple.h"
+#include "../../../hermes_common/vector.h"
 #include "../weakform.h"
 
 /// hp-Adaptivity module
@@ -59,9 +59,9 @@ public:
 	/// Initializes the class.
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 
   /// Hdiv). If proj_norms are not specified, they are expected to be set later by set_error_form.
-  Adapt(Hermes::Tuple<Space *> sp, Hermes::Tuple<ProjNormType> proj_norms = Hermes::Tuple<ProjNormType>()) {this->init(sp, proj_norms);};
-  Adapt(Space* sp, ProjNormType proj_norm = HERMES_H1_NORM) {this->init(Hermes::Tuple<Space *> (sp), Hermes::Tuple<ProjNormType> (proj_norm));};
-	void init(Hermes::Tuple<Space *> sp, Hermes::Tuple<ProjNormType> proj_norms);
+  Adapt(Hermes::vector<Space *> sp, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>()) {this->init(sp, proj_norms);};
+  Adapt(Space* sp, ProjNormType proj_norm = HERMES_H1_NORM) {this->init(Hermes::vector<Space *> (sp), Hermes::vector<ProjNormType> (proj_norm));};
+	void init(Hermes::vector<Space *> sp, Hermes::vector<ProjNormType> proj_norms);
 	~Adapt();
 
 	typedef
@@ -124,14 +124,14 @@ public:
 	double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_est(Hermes::Tuple<Solution *> (sln), Hermes::Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
+		return calc_err_est(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln), solutions_for_adapt, error_flags);
 	}
 
 	/// Calculates the error of the solution. 'n' must be the same
 	/// as 'num' in the constructor. After that, n coarse solution
 	/// pointers are passed, followed by n fine solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_est(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Hermes::Tuple<double>* component_errors = NULL)
+	double calc_err_est(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Hermes::vector<double>* component_errors = NULL)
   {
     return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
   }
@@ -141,14 +141,14 @@ public:
 	double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_exact(Hermes::Tuple<Solution *> (sln), Hermes::Tuple<Solution *> (rsln), solutions_for_adapt, error_flags);
+		return calc_err_exact(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln), solutions_for_adapt, error_flags);
 	}
 
 	/// Calculates the error of the solution. 'n' must be the same
 	/// as 'num' in the constructor. After that, n coarse solution
 	/// pointers are passed, followed by n exact solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-	double calc_err_exact(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Hermes::Tuple<double>* component_errors = NULL)
+	double calc_err_exact(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, Hermes::vector<double>* component_errors = NULL)
   {
     return calc_err_internal(slns, rslns, error_flags, component_errors, solutions_for_adapt);
   }
@@ -158,7 +158,7 @@ protected:
   /// Internal, calculates the error of the solution. 'n' must be the same
 	/// as 'num' in the constructor. After that, first n solution
 	/// pointers are passed, followed by second n solution pointers.
-	double calc_err_internal(Hermes::Tuple<Solution *> slns, Hermes::Tuple<Solution *> rslns, unsigned int error_flags, Hermes::Tuple<double>* component_errors, bool solutions_for_adapt);
+	double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns, unsigned int error_flags, Hermes::vector<double>* component_errors, bool solutions_for_adapt);
 
 	// parameters
 	bool h_only;
@@ -166,7 +166,7 @@ protected:
 	int max_order;
 	bool aniso;
 	double exponent;			// exponent used in score formula (see get_optimal_refinement())
-  Hermes::Tuple<ProjNormType> proj_norms;
+  Hermes::vector<ProjNormType> proj_norms;
 
 	// spaces & solutions
 	int num;					// number of spaces to work with
@@ -209,13 +209,29 @@ protected:
 		int son;
 		Ord3 order;			// element order
 
+    bool operator <(const ProjKey & other) const {
+      if(this->split < other.split)
+        return true;
+      else if(this->split > other.split)
+        return false;
+      else
+        if(this->son < other.son)
+          return true;
+        else if(this->son > other.son)
+          return false;
+        else
+          if(this->order.order < other.order.order)
+            return true;
+          else return false;
+    };
+
 		ProjKey(int t, int s, const Ord3 &o) {
 			split = t;
 			son = s;
 			order = o;
 		}
 	};
-	Map<ProjKey, double> proj_err;				// cache for projection errors
+	std::map<ProjKey, double> proj_err;				// cache for projection errors
 
 	// debugging
 	FILE *log_file;

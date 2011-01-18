@@ -52,13 +52,17 @@ public:
 
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		CHECK_MODE;
-		if (!tables.exists(order.get_idx())) calc_table(order);
-		return tables[order.get_idx()];
+		if ((*tables)[order.get_idx()] == NULL) 
+      calc_table(order);
+		return (*tables)[order.get_idx()];
 	}
 
 	virtual QuadPt3D *get_face_points(int face, const Ord2 &order) {
-		if (!face_tables[face].exists(order.get_idx())) calc_face_table(face, order);
-		return face_tables[face][order.get_idx()];
+		if ((*face_tables)[face] == NULL)
+      (*face_tables)[face] = new std::map<unsigned int, QuadPt3D *>;
+    if((*(*face_tables)[face])[order.get_idx()] == NULL) 
+      calc_face_table(face, order);
+		return (*(*face_tables)[face])[order.get_idx()];
 	}
 
 protected:

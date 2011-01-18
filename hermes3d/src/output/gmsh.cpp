@@ -46,25 +46,29 @@ class HERMES_API OutputQuad : public Quad3D {
 public:
 	virtual QuadPt3D *get_points(const Ord3 &order) {
 		_F_
-		if (!tables.exists(order.get_idx())) calculate_view_points(order);
-		return tables[order.get_idx()];
+    if (tables->find(order.get_idx()) == tables->end()) 
+      calculate_view_points(order);
+		return (*tables)[order.get_idx()];
 	}
 
 	virtual int get_num_points(const Ord3 &order) {
 		_F_
-		if (!np.exists(order.get_idx())) calculate_view_points(order);
-		return np[order.get_idx()];
+    if (np->find(order.get_idx()) == np->end()) 
+      calculate_view_points(order);
+		return (*np)[order.get_idx()];
 	}
 
 	virtual int *get_subdiv_modes(Ord3 order) {
 		_F_
-		if (!subdiv_modes.exists(order.get_idx())) calculate_view_points(order);
+    if (subdiv_modes.find(order.get_idx()) == subdiv_modes.end()) 
+      calculate_view_points(order);
 		return subdiv_modes[order.get_idx()];
 	}
 
 	virtual int get_subdiv_num(Ord3 order) {
 		_F_
-		if (!subdiv_num.exists(order.get_idx())) calculate_view_points(order);
+    if (subdiv_num.find(order.get_idx()) == subdiv_num.end()) 
+      calculate_view_points(order);
 		return subdiv_num[order.get_idx()];
 	}
 
@@ -77,8 +81,8 @@ public:
 	virtual void set_output_precision(int p) { output_precision = p; }
 
 protected:
-	Array<int> subdiv_num;
-	Array<int *> subdiv_modes;
+	std::map<unsigned int, int> subdiv_num;
+	std::map<unsigned int, int *> subdiv_modes;
 	int output_precision;
 
 	virtual void calculate_view_points(Ord3 order) = 0;
@@ -103,7 +107,7 @@ protected:
 OutputQuadTetra::OutputQuadTetra() {
 	_F_
 #ifdef WITH_TETRA
-	mode = MODE_TETRAHEDRON;
+	mode = HERMES_MODE_TET;
 	max_order = H3D_MAX_QUAD_ORDER;
 
 	output_precision = 1;
@@ -115,11 +119,11 @@ OutputQuadTetra::OutputQuadTetra() {
 OutputQuadTetra::~OutputQuadTetra() {
 	_F_
 #ifdef WITH_TETRA
-	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
-		delete[] tables[i];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
 
-	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
-		delete[] subdiv_modes[i];
+  for(std::map<unsigned int, int*>::iterator it = subdiv_modes.begin(); it != subdiv_modes.end(); it++)
+    delete [] it->second;
 #endif
 }
 
@@ -138,20 +142,19 @@ void OutputQuadTetra::calculate_view_points(Ord3 order) {
 	// each refinement level means that a tetrahedron is divided into 8 subtetrahedra
 	// i.e., there are 8^levels resulting tetrahedra
 	subdiv_num[orderidx] = (1 << (3 * levels));
-	np[orderidx] = subdiv_num[orderidx] * Tetra::NUM_VERTICES;
+	(*np)[orderidx] = subdiv_num[orderidx] * Tetra::NUM_VERTICES;
 
 	// the new subelements are tetrahedra only
 	subdiv_modes[orderidx] = new int[subdiv_num[orderidx]];
 	MEM_CHECK(subdiv_modes[orderidx]);
 	for (int i = 0; i < subdiv_num[orderidx]; i++)
-		subdiv_modes[orderidx][i] = MODE_TETRAHEDRON;
+		subdiv_modes[orderidx][i] = HERMES_MODE_TET;
 
 	// compute the table of points recursively
-	tables[orderidx] = new QuadPt3D[np[orderidx]];
-	MEM_CHECK(tables[orderidx]);
+	(*tables)[orderidx] = new QuadPt3D[(*np)[orderidx]];
 	int idx = 0;
 	const Point3D *ref_vtcs = RefTetra::get_vertices();
-	recursive_division(ref_vtcs, tables[orderidx], levels, idx);
+	recursive_division(ref_vtcs, (*tables)[orderidx], levels, idx);
 #endif
 }
 
@@ -190,7 +193,7 @@ void OutputQuadTetra::recursive_division(const Point3D *tv, QuadPt3D *table, int
 //// OutputQuadHex ////////////////////////////////////////////////////////////////////////////////
 
 int get_principal_order(Ord3 order) {
-	assert(order.type == MODE_HEXAHEDRON);
+	assert(order.type == HERMES_MODE_HEX);
 	return std::max(order.x, std::max(order.y, order.z));
 }
 
@@ -210,7 +213,7 @@ protected:
 OutputQuadHex::OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	mode = MODE_HEXAHEDRON;
+	mode = HERMES_MODE_HEX;
 	max_order = H3D_MAX_QUAD_ORDER;
 	output_precision = 0;
 #else
@@ -221,11 +224,11 @@ OutputQuadHex::OutputQuadHex() {
 OutputQuadHex::~OutputQuadHex() {
 	_F_
 #ifdef WITH_HEX
-	for (unsigned int i = tables.first(); i != INVALID_IDX; i = tables.next(i))
-		delete[] tables[i];
+	for(std::map<unsigned int, QuadPt3D*>::iterator it = tables->begin(); it != tables->end(); it++)
+    delete [] it->second;
 
-	for (unsigned int i = subdiv_modes.first(); i != INVALID_IDX; i = subdiv_modes.next(i))
-		delete[] subdiv_modes[i];
+  for(std::map<unsigned int, int*>::iterator it = subdiv_modes.begin(); it != subdiv_modes.end(); it++)
+    delete [] it->second;
 #endif
 }
 
@@ -238,20 +241,19 @@ void OutputQuadHex::calculate_view_points(Ord3 order) {
 	int levels = 3;
 
 	subdiv_num[o] = (1 << (3 * levels));
-	np[o] = subdiv_num[o] * Hex::NUM_VERTICES;
+	(*np)[o] = subdiv_num[o] * Hex::NUM_VERTICES;
 
 	subdiv_modes[o] = new int[subdiv_num[o]];
 	MEM_CHECK(subdiv_modes[o]);
 	// the new subelements are hexahedra only
 	for (int i = 0; i < subdiv_num[o]; i++)
-		subdiv_modes[o][i] = MODE_HEXAHEDRON;
+		subdiv_modes[o][i] = HERMES_MODE_HEX;
 
 	// compute the table of points recursively
-	tables[o] = new QuadPt3D[np[o]];
-	MEM_CHECK(tables[o]);
+	(*tables)[o] = new QuadPt3D[(*np)[o]];
 	int idx = 0;
 	const Point3D *ref_vtcs = RefHex::get_vertices();
-	recursive_division(ref_vtcs, tables[o], levels, idx);
+	recursive_division(ref_vtcs, (*tables)[o], levels, idx);
 #endif
 }
 
@@ -325,9 +327,9 @@ void GmshOutputEngine::dump_scalars(int mode, int num_pts, Point3D *pts, double 
 	_F_
 	const char *id;
 	switch (mode) {
-		case MODE_TETRAHEDRON: id = "SS"; break;
-		case MODE_HEXAHEDRON: id = "SH"; break;
-		case MODE_PRISM: EXIT("Unsupported mode."); break;
+		case HERMES_MODE_TET: id = "SS"; break;
+		case HERMES_MODE_HEX: id = "SH"; break;
+		case HERMES_MODE_PRISM: EXIT("Unsupported mode."); break;
 		default: EXIT("Invalid mode."); break;
 	}
 
@@ -349,9 +351,9 @@ void GmshOutputEngine::dump_vectors(int mode, int num_pts, Point3D *pts, double 
 	_F_
 	const char *id;
 	switch (mode) {
-		case MODE_TETRAHEDRON: id = "VS"; break;
-		case MODE_HEXAHEDRON: id = "VH"; break;
-		case MODE_PRISM: EXIT("Unsupported mode."); break;
+		case HERMES_MODE_TET: id = "VS"; break;
+		case HERMES_MODE_HEX: id = "VH"; break;
+		case HERMES_MODE_PRISM: EXIT("Unsupported mode."); break;
 		default: EXIT("Invalid mode."); break;
 	}
 
@@ -415,89 +417,90 @@ void GmshOutputEngine::out(MeshFunction *fn, const char *name, int item/* = FN_V
 	// prepare
 	fprintf(this->out_file, "View \"%s\" {\n", name);
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		int mode = element->get_mode();
-		// FIXME: get order from the space
-		Ord3 order;
-		switch (mode) {
-			case MODE_TETRAHEDRON: order = Ord3(1); break;
-			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
-			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
-		}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
+		  int mode = element->get_mode();
+		  // FIXME: get order from the space
+		  Ord3 order;
+		  switch (mode) {
+			  case HERMES_MODE_TET: order = Ord3(1); break;
+			  case HERMES_MODE_HEX: order = Ord3(1, 1, 1); break;
+			  case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			  default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
+		  }
 
-		Gmsh::OutputQuad *quad = output_quad[mode];
-		int subdiv_num = quad->get_subdiv_num(order);
+		  Gmsh::OutputQuad *quad = output_quad[mode];
+		  int subdiv_num = quad->get_subdiv_num(order);
 
-		fn->set_active_element(element);
-		int np2 = quad->get_num_points(order);
-		QuadPt3D *pt2 = quad->get_points(order);
+		  fn->set_active_element(element);
+		  int np2 = quad->get_num_points(order);
+		  QuadPt3D *pt2 = quad->get_points(order);
 
-		RefMap *refmap = fn->get_refmap();
-		double *phys_x = refmap->get_phys_x(np2, pt2);
-		double *phys_y = refmap->get_phys_y(np2, pt2);
-		double *phys_z = refmap->get_phys_z(np2, pt2);
+		  RefMap *refmap = fn->get_refmap();
+		  double *phys_x = refmap->get_phys_x(np2, pt2);
+		  double *phys_y = refmap->get_phys_y(np2, pt2);
+		  double *phys_z = refmap->get_phys_z(np2, pt2);
 
-		fn->precalculate(np2, pt2, item);
+		  fn->precalculate(np2, pt2, item);
 
-		scalar **val = new scalar *[nc];
-		for (int ic = 0; ic < nc; ic++)
-			val[ic] = fn->get_values(comp[ic], b);
+		  scalar **val = new scalar *[nc];
+		  for (int ic = 0; ic < nc; ic++)
+			  val[ic] = fn->get_values(comp[ic], b);
 
-		int pt_idx = 0;
-		// iterate through sub-elements and output them
-		for (int i = 0; i < subdiv_num; i++) {
-			int np;
-			switch (mode) {
-				case MODE_TETRAHEDRON: np = Tetra::NUM_VERTICES; break;
-				case MODE_HEXAHEDRON: np = Hex::NUM_VERTICES; break;
-				case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-				default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
-			}
+		  int pt_idx = 0;
+		  // iterate through sub-elements and output them
+		  for (int i = 0; i < subdiv_num; i++) {
+			  int np;
+			  switch (mode) {
+				  case HERMES_MODE_TET: np = Tetra::NUM_VERTICES; break;
+				  case HERMES_MODE_HEX: np = Hex::NUM_VERTICES; break;
+				  case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+				  default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
+			  }
 
-			// small buffers to hold values for one sub-element
-      Point3D *phys_pt = new Point3D[np * nc];
-      double **v = new double*[nc];
-			for(int i = 0; i < nc; i++)
-        v[i] = new double [np];
+			  // small buffers to hold values for one sub-element
+        Point3D *phys_pt = new Point3D[np * nc];
+        double **v = new double*[nc];
+			  for(int i = 0; i < nc; i++)
+          v[i] = new double [np];
 
-			for (int j = 0; j < np; j++, pt_idx++) {
-				// physical coordinates of sub-element
-				phys_pt[j].x = phys_x[pt_idx];
-				phys_pt[j].y = phys_y[pt_idx];
-				phys_pt[j].z = phys_z[pt_idx];
+			  for (int j = 0; j < np; j++, pt_idx++) {
+				  // physical coordinates of sub-element
+				  phys_pt[j].x = phys_x[pt_idx];
+				  phys_pt[j].y = phys_y[pt_idx];
+				  phys_pt[j].z = phys_z[pt_idx];
 
-				for (int ic = 0; ic < nc; ic++) {
-#ifndef H3D_COMPLEX
-					v[ic][j] = val[ic][pt_idx];
-#else
-					assert(fabs(IMAG(val[ic][pt_idx])) < 1e-12); // output only for real numbers
-					v[ic][j] = REAL(val[ic][pt_idx]);
-#endif
-				}
-			}
+				  for (int ic = 0; ic < nc; ic++) {
+  #ifndef H3D_COMPLEX
+					  v[ic][j] = val[ic][pt_idx];
+  #else
+					  assert(fabs(IMAG(val[ic][pt_idx])) < 1e-12); // output only for real numbers
+					  v[ic][j] = REAL(val[ic][pt_idx]);
+  #endif
+				  }
+			  }
 
-			switch (nc) {
-				case 1:
-					dump_scalars(mode, np, phys_pt, v[0]);
-					break;
+			  switch (nc) {
+				  case 1:
+					  dump_scalars(mode, np, phys_pt, v[0]);
+					  break;
 
-				case 3:
-					dump_vectors(mode, np, phys_pt, v[0], v[1], v[2]);
-					break;
+				  case 3:
+					  dump_vectors(mode, np, phys_pt, v[0], v[1], v[2]);
+					  break;
 
-				default: assert(false); break;
-			}
-      delete [] phys_pt;
-      delete [] v;
-		}
+				  default: assert(false); break;
+			  }
+        delete [] phys_pt;
+        delete [] v;
+		  }
     
-    delete [] val;
-		delete [] phys_x;
-		delete [] phys_y;
-		delete [] phys_z;
-	}
+      delete [] val;
+		  delete [] phys_x;
+		  delete [] phys_y;
+		  delete [] phys_z;
+	  }
 
 	// finalize
 	fprintf(this->out_file, "};\n");
@@ -510,80 +513,81 @@ void GmshOutputEngine::out(MeshFunction *fn1, MeshFunction *fn2, MeshFunction *f
 	// prepare
 	fprintf(this->out_file, "View \"%s\" {\n", name);
 
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		int mode = element->get_mode();
-		// FIXME: get order from the space
-		Ord3 order;
-		switch (mode) {
-			case MODE_TETRAHEDRON: order = Ord3(1); break;
-			case MODE_HEXAHEDRON: order = Ord3(1, 1, 1); break;
-			case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-			default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
-		}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
+		  int mode = element->get_mode();
+		  // FIXME: get order from the space
+		  Ord3 order;
+		  switch (mode) {
+			  case HERMES_MODE_TET: order = Ord3(1); break;
+			  case HERMES_MODE_HEX: order = Ord3(1, 1, 1); break;
+			  case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+			  default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
+		  }
 
-		Gmsh::OutputQuad *quad = output_quad[mode];
-		int subdiv_num = quad->get_subdiv_num(order);
+		  Gmsh::OutputQuad *quad = output_quad[mode];
+		  int subdiv_num = quad->get_subdiv_num(order);
 
-		for (int i = 0; i < COMPONENTS; i++) {
-			fn[i]->set_active_element(element);
-		}
+		  for (int i = 0; i < COMPONENTS; i++) {
+			  fn[i]->set_active_element(element);
+		  }
 
-		int np2 = quad->get_num_points(order);
-		QuadPt3D *pt2 = quad->get_points(order);
+		  int np2 = quad->get_num_points(order);
+		  QuadPt3D *pt2 = quad->get_points(order);
 
-		RefMap *refmap = fn[0]->get_refmap();
-		double *phys_x = refmap->get_phys_x(np2, pt2);
-		double *phys_y = refmap->get_phys_y(np2, pt2);
-		double *phys_z = refmap->get_phys_z(np2, pt2);
+		  RefMap *refmap = fn[0]->get_refmap();
+		  double *phys_x = refmap->get_phys_x(np2, pt2);
+		  double *phys_y = refmap->get_phys_y(np2, pt2);
+		  double *phys_z = refmap->get_phys_z(np2, pt2);
 
-		for (int i = 0; i < COMPONENTS; i++)
-			fn[i]->precalculate(np2, pt2, item);
+		  for (int i = 0; i < COMPONENTS; i++)
+			  fn[i]->precalculate(np2, pt2, item);
 
-		int a = 0, b = 0;
-		mask_to_comp_val(item, a, b);
+		  int a = 0, b = 0;
+		  mask_to_comp_val(item, a, b);
 
-		scalar *val[COMPONENTS];
-		for (int i = 0; i < COMPONENTS; i++) {
-			val[i] = fn[i]->get_values(0, b);
-		}
+		  scalar *val[COMPONENTS];
+		  for (int i = 0; i < COMPONENTS; i++) {
+			  val[i] = fn[i]->get_values(0, b);
+		  }
 
-		int pt_idx = 0;
-		// iterate through sub-elements and output them
-		for (int i = 0; i < subdiv_num; i++) {
-			int np;
-			switch (mode) {
-				case MODE_TETRAHEDRON: np = Tetra::NUM_VERTICES; break;
-				case MODE_HEXAHEDRON: np = Hex::NUM_VERTICES; break;
-				case MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-				default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
-			}
+		  int pt_idx = 0;
+		  // iterate through sub-elements and output them
+		  for (int i = 0; i < subdiv_num; i++) {
+			  int np;
+			  switch (mode) {
+				  case HERMES_MODE_TET: np = Tetra::NUM_VERTICES; break;
+				  case HERMES_MODE_HEX: np = Hex::NUM_VERTICES; break;
+				  case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+				  default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
+			  }
 
-			// small buffers to hold values for one sub-element
-			Point3D *phys_pt = new Point3D[np * COMPONENTS];
-      double **v = new double*[COMPONENTS];
-			for(int i = 0; i < COMPONENTS; i++)
-        v[i] = new double [np];
+			  // small buffers to hold values for one sub-element
+			  Point3D *phys_pt = new Point3D[np * COMPONENTS];
+        double **v = new double*[COMPONENTS];
+			  for(int i = 0; i < COMPONENTS; i++)
+          v[i] = new double [np];
 
-			for (int j = 0; j < np; j++, pt_idx++) {
-				// physical coordinates of sub-element
-				phys_pt[j].x = phys_x[pt_idx];
-				phys_pt[j].y = phys_y[pt_idx];
-				phys_pt[j].z = phys_z[pt_idx];
+			  for (int j = 0; j < np; j++, pt_idx++) {
+				  // physical coordinates of sub-element
+				  phys_pt[j].x = phys_x[pt_idx];
+				  phys_pt[j].y = phys_y[pt_idx];
+				  phys_pt[j].z = phys_z[pt_idx];
 
-				for (int ic = 0; ic < COMPONENTS; ic++) {
-#ifndef H3D_COMPLEX
-					v[ic][j] = val[ic][pt_idx];
-#else
-					v[ic][j] = REAL(val[ic][pt_idx]);
-#endif
-				}
-			}
-      delete [] phys_pt;
-      delete [] v;
-			dump_vectors(mode, np, phys_pt, v[0], v[1], v[2]);
-		}
-	}
+				  for (int ic = 0; ic < COMPONENTS; ic++) {
+  #ifndef H3D_COMPLEX
+					  v[ic][j] = val[ic][pt_idx];
+  #else
+					  v[ic][j] = REAL(val[ic][pt_idx]);
+  #endif
+				  }
+			  }
+        delete [] phys_pt;
+        delete [] v;
+			  dump_vectors(mode, np, phys_pt, v[0], v[1], v[2]);
+		  }
+	  }
 
 	// finalize
 	fprintf(this->out_file, "};\n");
@@ -600,10 +604,10 @@ void GmshOutputEngine::out(Mesh *mesh) {
 
 	// vertices
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", mesh->vertices.count());
-	FOR_ALL_VERTICES(idx, mesh) {
-		Vertex *v = mesh->vertices[idx];
-		fprintf(this->out_file, "%u %lf %lf %lf\n", idx, v->x, v->y, v->z);
+	fprintf(this->out_file, "%lu\n", (unsigned long int)mesh->vertices.size());
+  for(std::map<unsigned int, Vertex*>::iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
+    Vertex *v = mesh->vertices[it->first];
+    fprintf(this->out_file, "%u %lf %lf %lf\n", it->first, v->x, v->y, v->z);
 	}
 	fprintf(this->out_file, "$EndNodes\n");
 
@@ -612,74 +616,89 @@ void GmshOutputEngine::out(Mesh *mesh) {
 	// elements
 	fprintf(this->out_file, "$Elements\n");
 	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements());
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
 
-		n_edges += element->get_num_edges();
-		n_faces += element->get_num_faces();
+		  n_edges += element->get_num_edges();
+		  n_faces += element->get_num_faces();
 
-		unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
-		element->get_vertices(vtcs);
+		  unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
+		  element->get_vertices(vtcs);
 
-		switch (element->get_mode()) {
-			case MODE_TETRAHEDRON:
-				fprintf(this->out_file, "%u 4 0 %u %u %u %u\n",
-					element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
-				break;
+		  switch (element->get_mode()) {
+			  case HERMES_MODE_TET:
+				  fprintf(this->out_file, "%u 4 0 %u %u %u %u\n",
+					  element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+				  break;
 
-			case MODE_HEXAHEDRON:
-				fprintf(this->out_file, "%u 5 0 %u %u %u %u %u %u %u %u\n",
-					element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
-				break;
+			  case HERMES_MODE_HEX:
+				  fprintf(this->out_file, "%u 5 0 %u %u %u %u %u %u %u %u\n",
+					  element->id, vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
+				  break;
 
-			case MODE_PRISM:
-				EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-				break;
+			  case HERMES_MODE_PRISM:
+				  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+				  break;
 
-			default:
-				EXIT(HERMES_ERR_UNKNOWN_MODE);
-				break;
-		}
-    delete [] vtcs;
-	}
+			  default:
+				  EXIT(HERMES_ERR_UNKNOWN_MODE);
+				  break;
+		  }
+      delete [] vtcs;
+	  }
 	fprintf(this->out_file, "$EndElements\n");
 
 	// edges
 	// TODO: do not include edges twice or more
 	fprintf(this->out_file, "$Elements\n");
 	fprintf(this->out_file, "%d\n", n_edges);
-	FOR_ALL_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		unsigned int vtcs[Edge::NUM_VERTICES];
-		for (int iedge = 0; iedge < element->get_num_edges(); iedge++) {
-			element->get_edge_vertices(iedge, vtcs);
-			fprintf(this->out_file, "%u 1 0 %u %u\n", mesh->get_edge_id(vtcs[0], vtcs[1]), vtcs[0], vtcs[1]);
-		}
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used) {
+      Element *element = mesh->elements[it->first];
+		  unsigned int vtcs[Edge::NUM_VERTICES];
+		  for (int iedge = 0; iedge < element->get_num_edges(); iedge++) {
+			  element->get_edge_vertices(iedge, vtcs);
+        unsigned int i = 0;
+        std::map<Edge::Key, Edge*>::const_iterator it_inner = mesh->edges.begin();
+        while(it_inner != mesh->edges.end() && it_inner->first != mesh->get_edge_id(vtcs[0], vtcs[1])) {
+          it_inner++;
+          i++;
+        }
+        fprintf(this->out_file, "%u 1 0 %u %u\n", i, vtcs[0], vtcs[1]);
+		  }
+	  }
 	fprintf(this->out_file, "$EndElements\n");
 
 	// faces
 	// TODO: do not include faces twice
 	fprintf(this->out_file, "$Elements\n");
 	fprintf(this->out_file, "%d\n", n_faces);
-	FOR_ALL_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			int nv = element->get_num_face_vertices(iface);
-			unsigned int *vtcs = new unsigned int[nv];
-			element->get_face_vertices(iface, vtcs);
-			switch (element->get_face_mode(iface)) {
-				case MODE_TRIANGLE:
-					fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
-					break;
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used) {
+      Element *element = mesh->elements[it->first];
+		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
+			  int nv = element->get_num_face_vertices(iface);
+			  unsigned int *vtcs = new unsigned int[nv];
+			  element->get_face_vertices(iface, vtcs);
+        unsigned int i = 0;
+        std::map<Facet::Key, Facet*>::const_iterator it_inner = mesh->facets.begin();
+        while(it_inner != mesh->facets.end() && it_inner->first != mesh->get_facet_id(element, iface)) {
+          it_inner++;
+          i++;
+        }
+			  switch (element->get_face_mode(iface)) {
+				  case HERMES_MODE_TRIANGLE:
+            fprintf(this->out_file, "%u 2 0 %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2]);
+					  break;
 
-				case MODE_QUAD:
-					fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
-					break;
-			}
-      delete [] vtcs;
-    }
-	}
+				  case HERMES_MODE_QUAD:
+					  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+					  break;
+			  }
+        delete [] vtcs;
+      }
+	  }
 	fprintf(this->out_file, "$EndElements\n");
 }
 
@@ -688,14 +707,15 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 	// see Gmsh documentation on details (http://www.geuz.org/gmsh/doc/texinfo/gmsh-full.html)
 
 	int fc = 0; 		// number of outer facets
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(element, iface);
-			Facet *facet = mesh->facets[fid];
-			if (facet->type == Facet::OUTER) fc++;
-		}
-	}
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
+		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
+        Facet::Key fid = mesh->get_facet_id(element, iface);
+			  Facet *facet = mesh->facets[fid];
+			  if (facet->type == Facet::OUTER) fc++;
+		  }
+	  }
 
 	// header
 	fprintf(this->out_file, "$MeshFormat\n");
@@ -705,43 +725,49 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 	// vertices
 	// TODO: dump only vertices on the boundaries
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", mesh->vertices.count());
-	FOR_ALL_VERTICES(idx, mesh) {
-		Vertex *v = mesh->vertices[idx];
-		fprintf(this->out_file, "%u %lf %lf %lf\n", idx, v->x, v->y, v->z);
+	fprintf(this->out_file, "%lu\n", (unsigned long int)mesh->vertices.size());
+	for(std::map<unsigned int, Vertex*>::iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
+    Vertex *v = mesh->vertices[it->first];
+    fprintf(this->out_file, "%u %lf %lf %lf\n", it->first, v->x, v->y, v->z);
 	}
 	fprintf(this->out_file, "$EndNodes\n");
 
 	// elements
 	fprintf(this->out_file, "$Elements\n");
 	fprintf(this->out_file, "%d\n", fc);
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
 
-		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			int nv = element->get_num_face_vertices(iface);
-			unsigned int *vtcs = new unsigned int[nv];
-			element->get_face_vertices(iface, vtcs);
-			unsigned int fid = mesh->get_facet_id(element, iface);
-			Facet *facet = mesh->facets[fid];
-			if (facet->type == Facet::INNER) continue;
+		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
+			  int nv = element->get_num_face_vertices(iface);
+			  unsigned int *vtcs = new unsigned int[nv];
+			  element->get_face_vertices(iface, vtcs);
+        Facet::Key fid = mesh->get_facet_id(element, iface);
+			  Facet *facet = mesh->facets[fid];
+			  if (facet->type == Facet::INNER) continue;
+        unsigned int i = 0;
+        std::map<Facet::Key, Facet*>::const_iterator it_inner = mesh->facets.begin();
+        while(it_inner != mesh->facets.end() && it_inner->first != mesh->get_facet_id(element, iface)) {
+          it_inner++;
+          i++;
+        }
+			  switch (facet->mode) {
+				  case HERMES_MODE_TRIANGLE:
+            fprintf(this->out_file, "%u 2 0 %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2]);
+					  break;
 
-			switch (facet->mode) {
-				case MODE_TRIANGLE:
-					fprintf(this->out_file, "%u 2 0 %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2]);
-					break;
+				  case HERMES_MODE_QUAD:
+					  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", i, vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+					  break;
 
-				case MODE_QUAD:
-					fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", mesh->get_facet_id(element, iface), vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
-					break;
-
-				default:
-					EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-					break;
-			}
-      delete [] vtcs;
-		}
-	}
+				  default:
+					  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+					  break;
+			  }
+        delete [] vtcs;
+		  }
+	  }
 	fprintf(this->out_file, "$EndElements\n");
 
 	// faces
@@ -749,30 +775,37 @@ void GmshOutputEngine::out_bc_gmsh(Mesh *mesh, const char *name) {
 	fprintf(this->out_file, "$ElementNodeData \n");
 	fprintf(this->out_file, "1\n\"%s\"\n0\n3\n0\n1\n", name);
 	fprintf(this->out_file, "%d\n", fc);
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		for (int iface = 0; iface < element->get_num_faces(); iface++) {
-			unsigned int fid = mesh->get_facet_id(element, iface);
-			Facet *facet = mesh->facets[fid];
-			if (facet->type == Facet::INNER) continue;
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+		  Element *element = mesh->elements[it->first];
+		  for (int iface = 0; iface < element->get_num_faces(); iface++) {
+        Facet::Key fid = mesh->get_facet_id(element, iface);
+			  Facet *facet = mesh->facets[fid];
+			  if (facet->type == Facet::INNER) continue;
 
-			Boundary *bnd = mesh->boundaries[facet->right];
-			int marker = bnd->marker;
-			switch (facet->mode) {
-				case MODE_TRIANGLE:
-					fprintf(this->out_file, "%u 3 %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker);
-					break;
+			  Boundary *bnd = mesh->boundaries[facet->right];
+			  int marker = bnd->marker;
+        unsigned int i = 0;
+        std::map<Facet::Key, Facet*>::const_iterator it_inner = mesh->facets.begin();
+        while(it_inner != mesh->facets.end() && it_inner->first != mesh->get_facet_id(element, iface)) {
+          it_inner++;
+          i++;
+        }
+			  switch (facet->mode) {
+				  case HERMES_MODE_TRIANGLE:
+					  fprintf(this->out_file, "%u 3 %d %d %d\n", i, marker, marker, marker);
+					  break;
 
-				case MODE_QUAD:
-					fprintf(this->out_file, "%u 4 %d %d %d %d\n", mesh->get_facet_id(element, iface), marker, marker, marker, marker);
-					break;
+				  case HERMES_MODE_QUAD:
+					  fprintf(this->out_file, "%u 4 %d %d %d %d\n", i, marker, marker, marker, marker);
+					  break;
 
-				default:
-					EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-					break;
-			}
-		}
-	}
+				  default:
+					  EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+					  break;
+			  }
+		  }
+	  }
 	fprintf(this->out_file, "$EndElementNodeData\n");
 }
 
@@ -786,58 +819,73 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	fprintf(this->out_file, "$EndMeshFormat\n");
 
 	// HEX specific
-	Array<Vertex *> out_vtcs;	// vertices
-	Array<int> vtx_pt;			// mapping from mesh vertex id to output vertex id
-	MapHSOrd face_pts;			// id of points on faces
-	MapHSOrd ctr_pts;			// id of points in the center
+	std::map<unsigned int, Vertex *> out_vtcs;	// vertices
+	std::map<unsigned int, int> vtx_pt;			// mapping from mesh vertex id to output vertex id
+  
+  
+	std::map<PtsKey, unsigned int> face_pts;			// id of points on faces
+  std::map<PtsKey, unsigned int> ctr_pts;			// id of points in the center
 
 	// nodes
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		int nv = Hex::NUM_VERTICES;
-		unsigned int *vtcs = new unsigned int[nv];
-		element->get_vertices(vtcs);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
+		  int nv = Hex::NUM_VERTICES;
+		  unsigned int *vtcs = new unsigned int[nv];
+		  element->get_vertices(vtcs);
 
-		for (int i = 0; i < nv; i++) {
-			Vertex *v = mesh->vertices[vtcs[i]];
-			unsigned int idx = out_vtcs.add(new Vertex(*v));
-			vtx_pt[vtcs[i]] = idx;
-		}
+		  for (int i = 0; i < nv; i++) {
+			  Vertex *v = mesh->vertices[vtcs[i]];
+        unsigned int j;
+        for(j = 0; ; j++)
+          if(out_vtcs[j] == NULL)
+            break;
+        out_vtcs[j] = new Vertex(*v);
+			  vtx_pt[vtcs[i]] = j;
+		  }
 
-		for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
-			unsigned int *fvtcs = new unsigned int[Quad::NUM_VERTICES];
-			element->get_face_vertices(iface, fvtcs);
+		  for (int iface = 0; iface < Hex::NUM_FACES; iface++) {
+			  unsigned int *fvtcs = new unsigned int[Quad::NUM_VERTICES];
+			  element->get_face_vertices(iface, fvtcs);
 
-			unsigned int k[] = { fvtcs[0], fvtcs[1], fvtcs[2], fvtcs[3] };
-			unsigned int idx = INVALID_IDX;
-			if (!face_pts.lookup(k, Quad::NUM_VERTICES, idx)) {
-				// create new vertex
-				Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]], mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
-				Vertex *fcenter = new Vertex((v[0]->x + v[2]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[2]->z) / 2.0);
-				unsigned int idx = out_vtcs.add(fcenter);
-				face_pts.set(k, Quad::NUM_VERTICES, idx);
-			}
-      delete [] fvtcs;
-		}
+			  unsigned int k[] = { fvtcs[0], fvtcs[1], fvtcs[2], fvtcs[3] };
+        PtsKey key(k, Quad::NUM_VERTICES);
+        if (face_pts.find(key) == face_pts.end()) {
+				  // create new vertex
+				  Vertex *v[4] = { mesh->vertices[fvtcs[0]], mesh->vertices[fvtcs[1]], mesh->vertices[fvtcs[2]], mesh->vertices[fvtcs[3]] };
+				  Vertex *fcenter = new Vertex((v[0]->x + v[2]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[2]->z) / 2.0);
+          unsigned int j;
+          for(j = 0; ; j++)
+            if(out_vtcs[j] == NULL)
+              break;
+          out_vtcs[j] = fcenter;
+				  face_pts[key] = j;
+			  }
+        delete [] fvtcs;
+		  }
 
 
-		unsigned int c[] = { vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7] };
-		unsigned int idx = INVALID_IDX;
-		if (!ctr_pts.lookup(c, Hex::NUM_VERTICES, idx)) {
-			// create new vertex
-			Vertex *v[4] = { mesh->vertices[vtcs[0]], mesh->vertices[vtcs[1]], mesh->vertices[vtcs[3]], mesh->vertices[vtcs[4]] };
-			Vertex *center = new Vertex((v[0]->x + v[1]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[3]->z) / 2.0);
-			unsigned int idx = out_vtcs.add(center);
-			ctr_pts.set(c, Hex::NUM_VERTICES, idx);
-		}
-    delete [] vtcs;
-	}
+		  unsigned int c[] = { vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7] };
+      PtsKey key(c, Hex::NUM_VERTICES);
+      if (ctr_pts.find(key) == ctr_pts.end()) {
+			  // create new vertex
+			  Vertex *v[4] = { mesh->vertices[vtcs[0]], mesh->vertices[vtcs[1]], mesh->vertices[vtcs[3]], mesh->vertices[vtcs[4]] };
+			  Vertex *center = new Vertex((v[0]->x + v[1]->x) / 2.0, (v[0]->y + v[2]->y) / 2.0, (v[0]->z + v[3]->z) / 2.0);
+			  unsigned int j;
+        for(j = 0; ; j++)
+          if(out_vtcs[j] == NULL)
+            break;
+        out_vtcs[j] = center;
+			  ctr_pts[key] = j;
+		  }
+      delete [] vtcs;
+	  }
 
 	fprintf(this->out_file, "$Nodes\n");
-	fprintf(this->out_file, "%ld\n", out_vtcs.count());
-	for (unsigned int i = out_vtcs.first(); i != INVALID_IDX; i = out_vtcs.next(i)) {
-		Vertex *v = out_vtcs[i];
-		fprintf(this->out_file, "%d %lf %lf %lf\n", i + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
+	fprintf(this->out_file, "%lu\n", (unsigned long int)out_vtcs.size());
+  for(std::map<unsigned int, Vertex*>::iterator it = out_vtcs.begin(); it != out_vtcs.end(); it++) {
+    Vertex *v = it->second;
+    fprintf(this->out_file, "%d %lf %lf %lf\n", it->first + 1, v->x, v->y, v->z);			// IDs for GMSH are indexed from 1
 		delete v;																		// we no longer need the vertex data
 	}
 	fprintf(this->out_file, "$EndNodes\n");
@@ -851,27 +899,27 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	int id = 1;
 	fprintf(this->out_file, "$Elements\n");
 	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		Element *element = mesh->elements[idx];
-		unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
-		element->get_vertices(vtcs);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      Element *element = mesh->elements[it->first];
+		  unsigned int *vtcs = new unsigned int[element->get_num_vertices()];
+		  element->get_vertices(vtcs);
 
-		for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-			unsigned int fvtcs[2][Quad::NUM_VERTICES];
-			element->get_face_vertices(eface[iedge][0], fvtcs[0]);
-			element->get_face_vertices(eface[iedge][1], fvtcs[1]);
+		  for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
+			  unsigned int fvtcs[2][Quad::NUM_VERTICES];
+			  element->get_face_vertices(eface[iedge][0], fvtcs[0]);
+			  element->get_face_vertices(eface[iedge][1], fvtcs[1]);
 
-			unsigned int fidx[2] = { INVALID_IDX, INVALID_IDX };
-			face_pts.lookup(fvtcs[0], Quad::NUM_VERTICES, fidx[0]);
-			face_pts.lookup(fvtcs[1], Quad::NUM_VERTICES, fidx[1]);
+        PtsKey key0(fvtcs[0], Quad::NUM_VERTICES);
+        PtsKey key1(fvtcs[1], Quad::NUM_VERTICES);
 
-			unsigned int evtcs[2];
-			element->get_edge_vertices(iedge, evtcs);
-			unsigned int v[4] = { vtx_pt[evtcs[0]] + 1, fidx[0] + 1, vtx_pt[evtcs[1]] + 1, fidx[1] + 1 };
-			fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", id++, v[0], v[1], v[2], v[3]);
-		}
-    delete [] vtcs;
-	}
+			  unsigned int evtcs[2];
+			  element->get_edge_vertices(iedge, evtcs);
+			  unsigned int v[4] = { vtx_pt[evtcs[0]] + 1, face_pts[key0] + 1, vtx_pt[evtcs[1]] + 1, face_pts[key1] + 1 };
+			  fprintf(this->out_file, "%u 3 0 %u %u %u %u\n", id++, v[0], v[1], v[2], v[3]);
+		  }
+      delete [] vtcs;
+	  }
 	fprintf(this->out_file, "$EndElements\n");
 
 	// node data
@@ -884,21 +932,22 @@ void GmshOutputEngine::out_orders_gmsh(Space *space, const char *name) {
 	fprintf(this->out_file, "1\n"); // 1 value per node
 	fprintf(this->out_file, "%u\n", mesh->get_num_active_elements() * Hex::NUM_EDGES);
 	id = 1;
-	FOR_ALL_ACTIVE_ELEMENTS(idx, mesh) {
-		assert(mesh->elements[idx]->get_mode() == MODE_HEXAHEDRON);			// HEX-specific
-		// get order from the space
-		Ord3 order = space->get_element_order(idx);
+	for(std::map<unsigned int, Element*>::iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++)
+		if (it->second->used && it->second->active) {
+      assert(mesh->elements[it->first]->get_mode() == HERMES_MODE_HEX);			// HEX-specific
+		  // get order from the space
+      Ord3 order = space->get_element_order(it->first);
 
-		for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
-			int dord;
-			if (iedge == 0 || iedge == 2 || iedge == 8 || iedge == 10) dord = order.x;
-			else if (iedge == 1 || iedge == 3 || iedge == 9 || iedge == 11) dord = order.y;
-			else if (iedge == 4 || iedge == 5 || iedge == 6 || iedge == 7) dord = order.z;
-			else assert(false);
-			fprintf(this->out_file, "%d 4 %d %d %d %d\n", id++, dord, dord, dord, dord);
-		}
+		  for (int iedge = 0; iedge < Hex::NUM_EDGES; iedge++) {
+			  int dord;
+			  if (iedge == 0 || iedge == 2 || iedge == 8 || iedge == 10) dord = order.x;
+			  else if (iedge == 1 || iedge == 3 || iedge == 9 || iedge == 11) dord = order.y;
+			  else if (iedge == 4 || iedge == 5 || iedge == 6 || iedge == 7) dord = order.z;
+			  else assert(false);
+			  fprintf(this->out_file, "%d 4 %d %d %d %d\n", id++, dord, dord, dord, dord);
+		  }
 
-	}
+	  }
 	fprintf(this->out_file, "$EndElementNodeData\n");
 }
 

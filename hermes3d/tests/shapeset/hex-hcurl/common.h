@@ -22,7 +22,7 @@
 #define COMMON_H_
 
 #define EPS						10e-14
-#define MODE					MODE_HEXAHEDRON
+#define MODE					HERMES_MODE_HEX
 #define REF_DOMAIN				RefHex
 
 #endif /*COMMON_H_*/

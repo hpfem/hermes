@@ -17,11 +17,11 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef __BCTYPES_H
-#define __BCTYPES_H
+#ifndef __HERMES_COMMON_BCTYPES_H
+#define __HERMES_COMMON_BCTYPES_H
 
 #include "common.h"
-#include "tuple.h"
+#include "vector.h"
 #include "error.h"
 
 // Types of boundary conditions.
@@ -37,7 +37,7 @@ enum BCType
 class HERMES_API BCTypes {
 public:
  
-  void add_bc_dirichlet(Hermes::Tuple<int> markers) 
+  void add_bc_dirichlet(Hermes::vector<int> markers) 
   {
     unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
@@ -45,7 +45,17 @@ public:
     return;
   };
 
-  void add_bc_neumann(Hermes::Tuple<int> markers) 
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_bc_dirichlet(Hermes::vector<std::string> markers)
+  {
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++)
+      this->markers_dirichlet_string_temp.push_back(markers[i]);
+    return;
+  }
+
+  void add_bc_neumann(Hermes::vector<int> markers) 
   {
     unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_neumann() expects at least one marker.");
@@ -54,7 +64,17 @@ public:
     return;
   };
 
-  void add_bc_newton(Hermes::Tuple<int> markers) 
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_bc_neumann(Hermes::vector<std::string> markers) 
+  {
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++)
+      this->markers_neumann_string_temp.push_back(markers[i]);
+    return;
+  };
+
+  void add_bc_newton(Hermes::vector<int> markers) 
   {
     unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_newton() expects at least one marker.");
@@ -62,11 +82,31 @@ public:
     return;
   };
 
-  void add_bc_none(Hermes::Tuple<int> markers) 
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_bc_newton(Hermes::vector<std::string> markers) 
+  {
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++)
+      this->markers_newton_string_temp.push_back(markers[i]);
+    return;
+  };
+
+  void add_bc_none(Hermes::vector<int> markers) 
   {
     unsigned int n = markers.size();
     if (n <= 0) error("BCTypes::add_bc_none() expects at least one marker.");
     for (unsigned int i = 0; i < n; i++) this->markers_none.push_back(markers[i]);    
+    return;
+  };
+
+  // A wrapper utilizing the Mesh::MarkersConversion class.
+  void add_bc_none(Hermes::vector<std::string> markers) 
+  {
+    unsigned int n = markers.size();
+    if (n <= 0) error("BCTypes::add_bc_dirichlet() expects at least one marker.");
+    for (unsigned int i = 0; i < n; i++)
+      this->markers_none_string_temp.push_back(markers[i]);
     return;
   };
 
@@ -207,11 +247,18 @@ public:
   }
 
   protected:
-    Hermes::Tuple<int> markers_neumann;
-    Hermes::Tuple<int> markers_newton;
-    Hermes::Tuple<int> markers_dirichlet;
-    Hermes::Tuple<int> markers_none;
-  
+    Hermes::vector<int> markers_neumann;
+    Hermes::vector<int> markers_newton;
+    Hermes::vector<int> markers_dirichlet;
+    Hermes::vector<int> markers_none;
+
+    // These members are used temporary for storing markers defined by user-supplied strings.
+    Hermes::vector<std::string> markers_neumann_string_temp;
+    Hermes::vector<std::string> markers_newton_string_temp;
+    Hermes::vector<std::string> markers_dirichlet_string_temp;
+    Hermes::vector<std::string> markers_none_string_temp;
+
+    friend class Space;
     friend class BCValues;
 };
 

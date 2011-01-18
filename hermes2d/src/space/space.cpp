@@ -35,6 +35,12 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
   this->ndof = 0;
 
   if(bc_types == NULL) error("BCTypes pointer cannot be NULL in Space::Space().");
+
+  // Before adding, update the boundary variables with the user-supplied string markers
+  // according to the conversion table contained in the mesh.
+  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
+  if(bc_values != NULL)
+    this->update_markers_acc_to_conversion(bc_values, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
   this->set_essential_bc_values(bc_values);
   this->bc_value_callback_by_coord = NULL;
@@ -46,7 +52,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
 }
 
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
@@ -74,7 +80,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
 }
 
 // DEPRECATED
-Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int), 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
@@ -94,8 +100,9 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
 
   BCTypesCallback *bc_types = new BCTypesCallback();
   bc_types->register_callback(bc_type_callback);
+  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
   this->set_bc_types_init(bc_types);
-  
+
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
   this->bc_values = NULL;
@@ -160,7 +167,7 @@ void Space::H2D_CHECK_ORDER(int order)
     error("Order = %d, maximum is 10.", order);
 }
 
-// if the user calls this, then the enumeration of dof 
+// if the user calls this, then the enumeration of dof
 // is updated
 void Space::set_element_order(int id, int order)
 {
@@ -176,14 +183,14 @@ void Space::set_element_order_internal(int id, int order)
 {
   _F_
   //NOTE: We need to take into account that L2 and Hcurl may use zero orders. The latter has its own version of this method, however.
-  assert_msg(mesh->get_element(id)->is_triangle() || get_type() == 3 || H2D_GET_V_ORDER(order) != 0, "Element #%d is quad but given vertical order is zero", id);
+  assert_msg(mesh->get_element(id)->is_triangle() || get_type() == HERMES_L2_SPACE || H2D_GET_V_ORDER(order) != 0, "Element #%d is quad but given vertical order is zero", id);
   assert_msg(mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical is not zero", id);
   if (id < 0 || id >= mesh->get_max_element_id())
     error("Invalid element id.");
   H2D_CHECK_ORDER(order);
 
   resize_tables();
-  if (mesh->get_element(id)->is_quad() && get_type() != 3 && H2D_GET_V_ORDER(order) == 0) 
+  if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0)
      order = H2D_MAKE_QUAD_ORDER(order, order);
   edata[id].order = order;
   seq++;
@@ -212,7 +219,7 @@ void Space::set_uniform_order(int order, int marker)
   // since space changed, enumerate basis functions
   this->assign_dofs();
 }
-  
+
 void Space::set_uniform_order_internal(Ord2 order, int marker)
 {
   _F_
@@ -245,7 +252,7 @@ void Space::set_element_orders(int* elem_orders_)
 {
   _F_
   resize_tables();
-  
+
   Element* e;
   int counter = 0;
   for_all_elements(e, mesh)
@@ -281,7 +288,7 @@ void Space::copy_orders_recurrent(Element* e, int order)
 }
 
 
-void Space::copy_orders(Space* space, int inc)
+void Space::copy_orders(const Space* space, int inc)
 {
   _F_
   Element* e;
@@ -292,7 +299,7 @@ void Space::copy_orders(Space* space, int inc)
     if (oo < 0) error("Source space has an uninitialized order (element id = %d)", e->id);
 
     int mo = shapeset->get_max_order();
-    int lower_limit = (get_type() == 3 || get_type() == 1) ? 0 : 1; // L2 and Hcurl may use zero orders.
+    int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
     int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(oo) + inc, mo));
     int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(oo) + inc, mo));
     oo = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
@@ -323,7 +330,7 @@ int Space::get_edge_order(Element* e, int edge)
 int Space::get_edge_order_internal(Node* en)
 {
   _F_
-  assert(en->type == H2D_TYPE_EDGE);
+  assert(en->type == HERMES_TYPE_EDGE);
   Element** e = en->elem;
   int o1 = 1000, o2 = 1000;
   assert(e[0] != NULL || e[1] != NULL);
@@ -442,7 +449,7 @@ int Space::assign_dofs(int first_dof, int stride)
   return this->ndof;
 }
 
-void Space::reset_dof_assignment() 
+void Space::reset_dof_assignment()
 {
   _F_
   // First assume that all vertex nodes are part of a natural BC. the member NodeData::n
@@ -609,11 +616,11 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
   _F_
   int n = shapeset->get_max_order() + 1 - nv;
   mat = new_matrix<double>(n, n);
-  int component = get_type() == 2 ? 1 : 0;
+  int component = (get_type() == HERMES_HDIV_SPACE) ? 1 : 0;
 
   Quad1DStd quad1d;
-  //shapeset->set_mode(H2D_MODE_TRIANGLE);
-  shapeset->set_mode(H2D_MODE_QUAD);
+  //shapeset->set_mode(HERMES_MODE_TRIANGLE);
+  shapeset->set_mode(HERMES_MODE_QUAD);
   for (int i = 0; i < n; i++)
   {
     for (int j = i; j < n; j++)
@@ -708,7 +715,7 @@ void Space::free_extra_data()
   for_all_nodes(n, mesh)
   {
     NodeData* nd = &ndata[n->id];
-    if (n->type == H2D_TYPE_VERTEX)
+    if (n->type == HERMES_TYPE_VERTEX)
     {
       printf("vert node id=%d ref=%d bnd=%d x=%g y=%g dof=%d n=%d ",
              n->id, n->ref, n->bnd, n->x, n->y, nd->dof, nd->n);
@@ -727,7 +734,7 @@ void Space::free_extra_data()
   }
 }*/
 
-int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
+int Space::get_num_dofs(Hermes::vector<Space *> spaces)
 {
   _F_
   int ndof = 0;
@@ -738,12 +745,12 @@ int Space::get_num_dofs(Hermes::Tuple<Space *> spaces)
 }
 
 // This is identical to H3D.
-int Space::assign_dofs(Hermes::Tuple<Space*> spaces) 
+int Space::assign_dofs(Hermes::vector<Space*> spaces)
 {
   _F_
   int n = spaces.size();
   // assigning dofs to each space
-  int ndof = 0;  
+  int ndof = 0;
   for (int i = 0; i < n; i++) {
     ndof += spaces[i]->assign_dofs(ndof);
   }
@@ -751,8 +758,43 @@ int Space::assign_dofs(Hermes::Tuple<Space*> spaces)
   return ndof;
 }
 
+void Space::update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion)
+{
+  for(unsigned int i = 0; i < bc_types->markers_neumann_string_temp.size(); i++)
+    bc_types->markers_neumann.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_neumann_string_temp[i]));
+
+  for(unsigned int i = 0; i < bc_types->markers_newton_string_temp.size(); i++)
+    bc_types->markers_newton.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_newton_string_temp[i]));
+
+  for(unsigned int i = 0; i < bc_types->markers_dirichlet_string_temp.size(); i++)
+    bc_types->markers_dirichlet.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_dirichlet_string_temp[i]));
+
+  for(unsigned int i = 0; i < bc_types->markers_none_string_temp.size(); i++)
+    bc_types->markers_none.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_none_string_temp[i]));
+
+}
+
+void Space::update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion)
+{
+  std::map<std::string, BCValues::value_callback>::iterator it;
+  for(it = bc_values->value_callbacks_string_temp.begin(); it != bc_values->value_callbacks_string_temp.end(); it++)
+    bc_values->add_function(markers_conversion->get_internal_boundary_marker(it->first), it->second);
+
+  std::map<std::string, BCValues::value_callback_time>::iterator it_time;
+  for(it_time = bc_values->value_callbacks_time_string_temp.begin(); it_time != bc_values->value_callbacks_time_string_temp.end(); it_time++)
+    bc_values->add_timedep_function(markers_conversion->get_internal_boundary_marker(it_time->first), it_time->second);
+
+  std::map<std::string, scalar>::iterator it_scalar;
+  for(it_scalar = bc_values->value_constants_string_temp.begin(); it_scalar != bc_values->value_constants_string_temp.end(); it_scalar++)
+    bc_values->add_const(markers_conversion->get_internal_boundary_marker(it_scalar->first), it_scalar->second);
+
+  std::map<std::string, bool>::iterator it_zero;
+  for(it_zero = bc_values->value_zeroes_string_temp.begin(); it_zero != bc_values->value_zeroes_string_temp.end(); it_zero++)
+    bc_values->add_zero(markers_conversion->get_internal_boundary_marker(it_zero->first));
+}
+
 // updating time-dependent essential BC
-HERMES_API void update_essential_bc_values(Hermes::Tuple<Space*> spaces) {
+HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->update_essential_bc_values();
@@ -760,6 +802,6 @@ HERMES_API void update_essential_bc_values(Hermes::Tuple<Space*> spaces) {
 }
 
 HERMES_API void update_essential_bc_values(Space *s) {
-  return update_essential_bc_values(Hermes::Tuple<Space*>(s));
+  return update_essential_bc_values(Hermes::vector<Space*>(s));
 }
 

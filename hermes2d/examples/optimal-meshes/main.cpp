@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function.h"
+#include "function/function.h"
 
 using namespace RefinementSelectors;
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, P_INIT);

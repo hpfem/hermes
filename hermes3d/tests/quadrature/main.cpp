@@ -172,7 +172,7 @@ int test_quadrature_3d() {
 	int ret = ERR_SUCCESS;
 
 	// Hexs.
-	if (get_quadrature(MODE_HEXAHEDRON) != NULL) {
+	if (get_quadrature(HERMES_MODE_HEX) != NULL) {
 		info("- Testing 3D quadrature (hex) -----");
 
 		TC3D fn_hex[] = {
@@ -200,7 +200,7 @@ int test_quadrature_3d() {
 	}
 
 	// Tetras.
-	if (get_quadrature(MODE_TETRAHEDRON) != NULL) {
+	if (get_quadrature(HERMES_MODE_TET) != NULL) {
 		info("- Testing 3D quadrature (tetra) -----");
 
 		TC3D Funcetra[] = {

@@ -64,6 +64,7 @@ int main(int argc, char **args) {
   }
 
   if (ok) {
+    info("Success!");
     mesh.dump();
   }
   else {

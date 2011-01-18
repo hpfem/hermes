@@ -17,10 +17,13 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_WARN
+
+
 #include "h3d_common.h"
 #include "discrete_problem.h"
 #include "traverse.h"
-#include "../../hermes_common/matrix.h"
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/callstack.h"
 
@@ -35,26 +38,26 @@ DiscreteProblem::FnCache::~FnCache()
 void DiscreteProblem::FnCache::free()
 {
   _F_
-  for (unsigned int i = jwt.first(); i != INVALID_IDX; i = jwt.next(i))
-    delete [] jwt[i];
-  jwt.remove_all();
-  for (unsigned int i = e.first(); i != INVALID_IDX; i = e.next(i))
-    free_geom(&e[i]);
-  e.remove_all();
-  for (unsigned int i = fn.first(); i != INVALID_IDX; i = fn.next(i))
-    free_fn(fn[i]);
-  fn.remove_all();
-  for (unsigned int i = ext.first(); i != INVALID_IDX; i = ext.next(i))
-    delete ext[i];
-  ext.remove_all();
-  for (unsigned int i = sln.first(); i != INVALID_IDX; i = sln.next(i))
-    free_fn(sln[i]);
-  sln.remove_all();
+  for(std::map<unsigned int, double *>::iterator it = jwt.begin(); it != jwt.end(); it++)
+    delete [] it->second;
+  jwt.clear();
+  for(std::map<unsigned int, Geom<double> >::iterator it = e.begin(); it != e.end(); it++)
+    free_geom(&it->second);
+  e.clear();
+  for (std::map<fn_key_t, sFunc*>::iterator it = fn.begin(); it != fn.end(); it++)
+    free_fn(it->second);
+  fn.clear();
+  for (std::map<fn_key_t, mFunc*>::iterator it = ext.begin(); it != ext.end(); it++)
+    free_fn(it->second);
+  ext.clear();
+  for (std::map<fn_key_t, mFunc*>::iterator it = sln.begin(); it != sln.end(); it++)
+    free_fn(it->second);
+  sln.clear();
 }
 
 // DiscreteProblem ///////////////////////////////////////////////////////////////////////////////////////
 
-DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::Tuple<Space *> spaces, bool is_linear)
+DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> spaces, bool is_linear)
 {
   _F_
   // sanity checks
@@ -77,7 +80,7 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::Tuple<Space *> spaces, bo
 
   have_matrix = false;
 
-  this->spaces = Hermes::Tuple<Space *>();
+  this->spaces = Hermes::vector<Space *>();
   for (int i = 0; i < wf->neq; i++) this->spaces.push_back(spaces[i]);
   have_spaces = true;
 
@@ -265,8 +268,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
  
   this->create(mat, rhs, rhsonly);
 
-  // Convert the coefficient vector 'coeff_vec' into solutions Hermes::Tuple 'u_ext'.
-  Hermes::Tuple<Solution*> u_ext;
+  // Convert the coefficient vector 'coeff_vec' into solutions Hermes::vector 'u_ext'.
+  Hermes::vector<Solution*> u_ext;
   for (int i = 0; i < this->wf->neq; i++) 
   {
     if (this->is_linear == false)
@@ -371,7 +374,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           if (mfv->area != HERMES_ANY && !wf->is_in_area(marker, mfv->area)) continue;
           int m = mfv->i; fv = test_fn + m; am = al + m;
           int n = mfv->j; fu = base_fn + n; an = al + n;
-          bool tra = (m != n) && (mfv->sym != HERMES_UNSYM);
+          bool tra = (m != n) && (mfv->sym != HERMES_NONSYM);
           bool sym = (m == n) && (mfv->sym == HERMES_SYM);
 
           /* BEGIN IDENTICAL CODE WITH H2D */
@@ -630,14 +633,12 @@ void DiscreteProblem::init_ext_fns(ExtData<scalar> &ext_data, std::vector<MeshFu
   for (int i = 0; i < ext_data.nf; i++) 
   {
     fn_key_t key(ext[i]->seq, order, ext[i]->get_transform());
-    mFunc *efn = NULL;
-    if (!fn_cache.ext.lookup(key, efn)) 
+    if (fn_cache.ext.find(key) == fn_cache.ext.end()) 
     {
-      efn = init_fn(ext[i], rm, np, pt);
-      fn_cache.ext.set(key, efn);
+      fn_cache.ext[key] = init_fn(ext[i], rm, np, pt);
     }
-    assert(efn != NULL);
-    ext_fn[i] = efn;
+    assert(fn_cache.ext[key] != NULL);
+    ext_fn[i] = fn_cache.ext[key];
   }
   ext_data.fn = ext_fn;
 }
@@ -658,41 +659,31 @@ void DiscreteProblem::init_ext_fns(ExtData<Ord> &fake_ext_data, std::vector<Mesh
 sFunc *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
 {
   fn_key_t key(fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->id);
-  sFunc *u = NULL;
-  if (!fn_cache.fn.lookup(key, u)) 
-  {
-    u = init_fn(fu, rm, np, pt);
-    fn_cache.fn.set(key, u);
-  }
-  return u;
+  if (fn_cache.fn.find(key) == fn_cache.fn.end())
+    fn_cache.fn[key] = init_fn(fu, rm, np, pt);
+  return fn_cache.fn[key];
 }
 
 sFunc *DiscreteProblem::get_fn(ShapeFunction *fu, int order, RefMap *rm, int isurf, const int np,
                          const QuadPt3D *pt)
 {
   fn_key_t key(fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->id);
-  sFunc *u = NULL;
-  if (!fn_cache.fn.lookup(key, u)) 
-  {
-    u = init_fn(fu, rm, isurf, np, pt);
-    fn_cache.fn.set(key, u);
-  }
-  return u;
+  
+  if (fn_cache.fn.find(key) == fn_cache.fn.end()) 
+    fn_cache.fn[key] = init_fn(fu, rm, isurf, np, pt);
+  return fn_cache.fn[key];
 }
 
 mFunc *DiscreteProblem::get_fn(Solution *fu, int order, RefMap *rm, const int np, const QuadPt3D *pt)
 {
   fn_key_t key(fu->seq, order, fu->get_transform());
-  mFunc *u = NULL;
-  if (!fn_cache.sln.lookup(key, u)) 
-  {
-    u = init_fn(fu, rm, np, pt);
-    fn_cache.sln.set(key, u);
-  }
-  return u;
+
+  if (fn_cache.sln.find(key) == fn_cache.sln.end()) 
+    fn_cache.sln[key] = init_fn(fu, rm, np, pt);
+  return fn_cache.sln[key];
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext, ShapeFunction *fu,
                             ShapeFunction *fv, RefMap *ru, RefMap *rv)
 {
   _F_
@@ -706,7 +697,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   Func<Ord> **oi = new Func<Ord> *[wf->neq];
 
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -737,13 +728,14 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   // Increase due to reference map.
   Ord3 order = ru->get_inv_ref_order();
   switch (order.type) {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   int ord_idx = order.get_idx();
 
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ou);
@@ -759,7 +751,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) 
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) 
   {
     fn_cache.jwt[ord_idx] = ru->get_jacobian(np, pt);
     fn_cache.e[ord_idx] = init_geom(elem->marker, ru, np, pt);
@@ -770,7 +762,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc **prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -796,7 +788,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::Tuple<So
   return res;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fv, RefMap *rv)
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext, ShapeFunction *fv, RefMap *rv)
 {
   _F_
   // At this point H2D sets an increase of one if 
@@ -809,7 +801,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   Func<Ord> **oi = new Func<Ord> * [wf->neq];
 
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -840,13 +832,14 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   Ord3 order = rv->get_inv_ref_order();
   switch (order.type) 
   {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   int ord_idx = order.get_idx();
 
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ov);
@@ -860,7 +853,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
         // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) 
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) 
   {
     fn_cache.jwt[ord_idx] = rv->get_jacobian(np, pt);
     fn_cache.e[ord_idx] = init_geom(elem->marker, rv, np, pt);
@@ -871,7 +864,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc ** prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -897,7 +890,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, Hermes::Tuple<So
   return res;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<Solution *> u_ext, ShapeFunction *fu,
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext, ShapeFunction *fu,
                                   ShapeFunction *fv, RefMap *ru, RefMap *rv, SurfPos *surf_pos)
 {
   _F_
@@ -908,7 +901,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
   Func<Ord> **oi = new Func<Ord> *[wf->neq];
   
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -940,14 +933,15 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
   Ord3 order = ru->get_inv_ref_order();
   switch (order.type) 
   {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   Ord2 face_order = order.get_face_order(surf_pos->surf_num);
   int ord_idx = face_order.get_idx();
 
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ou);
@@ -963,7 +957,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
         // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) 
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) 
   {
     fn_cache.jwt[ord_idx] = ru->get_face_jacobian(surf_pos->surf_num, np, pt);
     fn_cache.e[ord_idx] = init_geom(surf_pos->marker, ru, surf_pos->surf_num, np, pt);
@@ -974,7 +968,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc **prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -1002,7 +996,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::Tuple<S
   return res;
 }
 
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<Solution *> u_ext, 
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext, 
                                   ShapeFunction *fv, RefMap *rv, SurfPos *surf_pos)
 {
   _F_
@@ -1011,7 +1005,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   Func<Ord> **oi = new Func<Ord> *[wf->neq];
 
   // Order of solutions from the previous Newton iteration.
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -1042,14 +1036,15 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   Ord3 order = rv->get_inv_ref_order();
   switch (order.type) 
   {
-    case MODE_TETRAHEDRON: order += Ord3(o.get_order()); break;
-    case MODE_HEXAHEDRON: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
+    case HERMES_MODE_TET: order += Ord3(o.get_order()); break;
+    case HERMES_MODE_HEX: order += Ord3(o.get_order(), o.get_order(), o.get_order()); break;
   }
   order.limit();
   Ord2 face_order = order.get_face_order(surf_pos->surf_num);
   int ord_idx = face_order.get_idx();
  
   // Clean up.
+  free_ext_fns_ord(&fake_ext);
   for (int i = 0; i < wf->neq; i++) free_fn(oi[i]);
   delete [] oi;
   free_fn(ov);
@@ -1063,7 +1058,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   // Init geometry and jacobian*weights.
   double *jwt = NULL;
   Geom<double> e;
-  if (!fn_cache.e.exists(ord_idx)) {
+  if (fn_cache.e.find(ord_idx) == fn_cache.e.end()) {
     fn_cache.jwt[ord_idx] = rv->get_face_jacobian(surf_pos->surf_num, np, pt);
     fn_cache.e[ord_idx] = init_geom(surf_pos->marker, rv, surf_pos->surf_num, np, pt);
   }
@@ -1073,7 +1068,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   mFunc **prev = new mFunc *[wf->neq];
   // OLD CODE: for (int i = 0; i < wf->neq; i++) prev[i] = get_fn(u_ext[i], ord_idx, rv, np, pt);
-  if (u_ext != Hermes::Tuple<Solution *>()) 
+  if (u_ext != Hermes::vector<Solution *>()) 
   {
     for (int i = 0; i < wf->neq; i++) 
     {
@@ -1101,10 +1096,10 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::Tuple<S
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse, int order_increase, int refinement)
+Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase, int refinement)
 {
   _F_
-  Hermes::Tuple<Space *> * ref_spaces = new Hermes::Tuple<Space *>;
+  Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
   for (unsigned int i = 0; i < coarse.size(); i++) 
   {
     Mesh* ref_mesh = new Mesh;
@@ -1117,13 +1112,104 @@ Hermes::Tuple<Space *> * construct_refined_spaces(Hermes::Tuple<Space *> coarse,
 }
 
 // Light version for a single space.
-Space* construct_refined_space(Space* coarse, int order_increase, int refinement)
+Space* construct_refined_space(Space* coarse, int order_increase)
 {
   _F_
   Mesh* ref_mesh = new Mesh;
   ref_mesh->copy(*coarse->get_mesh());
-  ref_mesh->refine_all_elements(refinement);
+  ref_mesh->refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
   Space* ref_space = coarse->dup(ref_mesh);
   ref_space->copy_orders(*coarse, order_increase);
   return ref_space;
 }
+
+// Perform Newton's iteration.
+bool HERMES_RESIDUAL_AS_VECTOR = false;
+bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+                  Vector* rhs, double newton_tol, int newton_max_iter, bool verbose,
+                  double damping_coeff, double max_allowed_residual_norm)
+{
+  info("Solve newton");
+  // Prepare solutions for measuring residual norm.
+  int num_spaces = dp->get_num_spaces();
+
+  Hermes::vector<Solution*> solutions;
+  Hermes::vector<double> dir_lift_false;
+  for (int i=0; i < num_spaces; i++) {
+    solutions.push_back(new Solution(dp->get_space(i)->get_mesh()));
+    dir_lift_false.push_back(0.0);      // No Dirichlet lifts will be considered.
+  }
+
+  // The Newton's loop.
+  double residual_norm;
+  int it = 1;
+  while (1)
+  {
+    // Obtain the number of degrees of freedom.
+    int ndof = dp->get_num_dofs();
+    info("Newton iteration beginning, NDOFs %i", ndof);
+    // Assemble the Jacobian matrix and residual vector.
+    dp->assemble(coeff_vec, matrix, rhs, false);
+    // Multiply the residual vector with -1 since the matrix
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    for (int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
+
+    // Measure the residual norm.
+
+
+    scalar* rhs_coeffs = new scalar[rhs->length()];
+    rhs->extract(rhs_coeffs);
+    Solution::vector_to_solutions(rhs_coeffs, dp->get_spaces(), solutions, dir_lift_false);
+    if (HERMES_RESIDUAL_AS_VECTOR) {
+          // Calculate the l2-norm of residual vector.
+          // residual_norm = get_l2_norm(rhs);
+          // FIXME what's that?
+    } else {
+
+    info("vector_to_solutions completed");
+      double norm_squares;
+      for (unsigned int i = 0; i < solutions.size(); i++) {
+        double norm = h1_norm(solutions[i]);
+        norm_squares += norm * norm;
+        residual_norm = sqrt(norm_squares);
+      }
+    }
+
+    // Info for the user.
+    if (verbose) {
+      info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
+    }
+
+    // If maximum allowed residual norm is exceeded, fail.
+    if (residual_norm > max_allowed_residual_norm) {
+      if (verbose) {
+        info("Current residual norm: %g", residual_norm);
+        info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
+        info("Newton solve not successful, returning false.");
+      }
+      return false;
+    }
+
+    // If residual norm is within tolerance, or the maximum number
+    // of iteration has been reached, then quit.
+    if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
+
+    // Solve the linear system.
+    if(!solver->solve()) error ("Matrix solver failed.\n");
+
+    // Add \deltaY^{n+1} to Y^n.
+    for (int i = 0; i < ndof; i++) coeff_vec[i] += damping_coeff * solver->get_solution()[i];
+
+    it++;
+  }
+
+  if (it >= newton_max_iter) {
+    if (verbose) {
+      info("Maximum allowed number of Newton iterations exceeded, returning false.");
+    }
+    return false;
+  }
+
+  return true;
+}
+
