@@ -192,15 +192,12 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   fclose(f);
 
   printf("--------------------------");
-  //printf("%s", mesh_str.c_str());
   Python p;
   initpython_reader();
-  //if (import_python_reader())
-  //    throw std::runtime_error("python_reader failed to import.");
-  //show_mesh(mesh_str.c_str());
   p.exec("from python_reader import read_hermes_format_str");
-  //p.push_str("s", mesh_str);
-  p.exec("read_hermes_format_str(s)");
+  p.push_str("s", mesh_str);
+  p.exec("vertices, elements, boundaries, curves = read_hermes_format_str(s)");
+  p.exec("print vertices");
   printf("--------------------------");
 
   //// vertices ////////////////////////////////////////////////////////////////
