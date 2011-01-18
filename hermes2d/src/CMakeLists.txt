@@ -31,6 +31,7 @@ set(SRC
        mesh/transform.cpp 
        mesh/traverse.cpp
        mesh/trans.cpp
+       mesh/python_reader.cpp
 
        quadrature/limit_order.cpp
        quadrature/quad_std.cpp
