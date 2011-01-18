@@ -428,7 +428,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   if (neighb_el->visited && ignore_visited_segments)
     return false;
 
-  if(central_pss != NULL) {
+  if(central_pss != NULL)
+  {
     ensure_central_pss_rm(this);
 
     // Reset the transformation of the pss on central element.

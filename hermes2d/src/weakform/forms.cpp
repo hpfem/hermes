@@ -118,7 +118,8 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   ESpaceType space_type = fu->get_space_type();
   Quad2D* quad = fu->get_quad_2d();
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-  if (space_type == 0) fu->set_quad_order(order, H2D_FN_ALL);
+  if (space_type == HERMES_H1_SPACE)
+    fu->set_quad_order(order, H2D_FN_ALL);
   else
 #endif
     fu->set_quad_order(order);

@@ -72,6 +72,7 @@
                                           ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
 
 ///< Structure to hold adaptivity parameters together.
+//NOTE: Seem to be unused in current version of Hermes.
 struct AdaptivityParamType {
   double err_stop;
   int ndof_stop;
@@ -109,7 +110,7 @@ struct AdaptivityParamType {
 
   void set_error_form(int i, int j, error_matrix_form_val_t mfv, error_matrix_form_ord_t mfo)
   {
-    if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::add_error_form().");
+    if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::set_error_form().");
     this->error_form_i.push_back(i);
     this->error_form_j.push_back(j);
     this->error_form_val.push_back(mfv);
@@ -161,7 +162,7 @@ public:
   {
     return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
   }
-
+  
   /// Type-safe version of calc_err_exact() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
   double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true,
@@ -282,7 +283,7 @@ protected: //object state
 
 protected: // spaces & solutions
   int num;                              ///< Number of solution components (as in wf->neq).
-  Hermes::vector<Space*> spaces;                 ///< Spaces.
+  Hermes::vector<Space*> spaces;        ///< Spaces.
   Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
   Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
 
@@ -291,7 +292,7 @@ protected: // element error arrays
                                       ///< method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
   double  errors_squared_sum;         ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
 
-  double error_time;			// time needed to calculate error
+  double error_time;                  ///< Time needed to calculate the error.
 
 protected: //forms and error evaluation
   error_matrix_form_val_t error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error

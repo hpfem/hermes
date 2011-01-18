@@ -671,8 +671,8 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
 
   TimePeriod tmr;
 
-  Solution* rslns_original[10];
-  Solution* slns_original[10];
+  Solution* rslns_original[H2D_MAX_COMPONENTS];
+  Solution* slns_original[H2D_MAX_COMPONENTS];
 
   for (i = 0; i < n; i++) {
     slns_original[i] = this->sln[i];

@@ -301,7 +301,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
                 }
               }
             }
-	  }
+          }
         }
 
         // Deallocation an array of arrays of neighboring elements for every mesh x edge.
@@ -328,8 +328,8 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
           if (is_diagonal_block == false || force_diagonal_blocks == false) {
             if (block_weights != NULL) {
               if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
-            }
-	  }
+            } 
+          }
 
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {
             AsmList *am = &(al[m]);
@@ -420,7 +420,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   /* END IDENTICAL CODE WITH H3D */
 
-  bool bnd[4];			    // FIXME: magic number - maximal possible number of element surfaces
+  bool bnd[4];          // FIXME: magic number - maximal possible number of element surfaces
   SurfPos surf_pos[4];
   AUTOLA_CL(AsmList, al, neq);
   AUTOLA_OR(bool, nat, neq);
@@ -509,7 +509,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
         e[i]->visited = true;
       }
-      // Boundary marker.
+      // Element or boundary marker.
       marker = e0->marker;
 
       init_cache();     // This is different in H2D.
