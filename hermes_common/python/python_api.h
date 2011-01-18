@@ -41,7 +41,7 @@ public:
     Python(int argc, char* argv[]);
     ~Python();
     void print();
-    void exec(const char *text);
+    void exec(const std::string &text);
 
     void push_int(const std::string &name, int i);
     int pull_int(const std::string &name);

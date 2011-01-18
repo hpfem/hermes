@@ -57,9 +57,9 @@ void Python::print()
     namespace_print(_namespace);
 }
 
-void Python::exec(const char *text)
+void Python::exec(const std::string &text)
 {
-    run_cmd(text, this->_namespace);
+    run_cmd(text.c_str(), this->_namespace);
 }
 
 void Python::push(const char *name, PyObject *o)
