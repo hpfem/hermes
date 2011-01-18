@@ -295,6 +295,9 @@ protected: // element error arrays
   double error_time;                  ///< Time needed to calculate the error.
 
 protected: //forms and error evaluation
+  static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal
+  static const unsigned char HERMES_ELEMENT_ERROR_MASK = 0xF0;  ///< A mask which masks-out element error type. Used by Adapt::calc_err_internal(). \internal
+
   error_matrix_form_val_t error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
   error_matrix_form_ord_t error_ord[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS];  ///< Bilinear forms to calculate error
 
@@ -305,7 +308,7 @@ protected: //forms and error evaluation
   virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags);
-
+                                   
   /// Evaluates a square of an absolute error of an active element among a given pair of components.
   /** The method uses a bilinear forms to calculate the error. This is done by supplying a differences (f1 - v1) and (f2 - v2) at integration points to the bilinear form,
    *  where f1 and f2 are values of (coarse) solutions of the first and the second component respectively,

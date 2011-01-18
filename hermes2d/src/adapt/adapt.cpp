@@ -32,10 +32,6 @@
 
 using namespace std;
 
-/* Private constants */
-#define HERMES_TOTAL_ERROR_MASK 0x0F ///< A mask which mask-out total error type. Used by Adapt::calc_errors_internal(). \internal
-#define HERMES_ELEMENT_ERROR_MASK 0xF0 ///< A mask which mask-out element error type. Used by Adapt::calc_errors_internal(). \internal
-
 Adapt::Adapt(Hermes::vector< Space* > spaces_,
              Hermes::vector<ProjNormType> proj_norms) :
     num_act_elems(-1),
@@ -51,7 +47,7 @@ Adapt::Adapt(Hermes::vector< Space* > spaces_,
 
   // sanity checks
   error_if(this->num <= 0, "Too few components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
-  error_if(this->num >= H2D_MAX_COMPONENTS, "Too many components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
+  error_if(this->num > H2D_MAX_COMPONENTS, "Too many components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
   for (int i = 0; i < this->num; i++) {
     if (spaces_[i] == NULL) error("spaces[%d] is NULL in Adapt::Adapt().", i);
     this->spaces.push_back(spaces_[i]);
@@ -127,8 +123,10 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
   Mesh* meshes[H2D_MAX_COMPONENTS];
   for (int j = 0; j < this->num; j++) {
     meshes[j] = this->spaces[j]->get_mesh();
-    rsln[j]->set_quad_2d(&g_quad_2d_std);
-    rsln[j]->enable_transform(false);
+    if (rsln[j] != NULL) {
+      rsln[j]->set_quad_2d(&g_quad_2d_std);
+      rsln[j]->enable_transform(false);
+    }
     if (meshes[j]->get_max_element_id() > max_id)
       max_id = meshes[j]->get_max_element_id();
   }
@@ -208,6 +206,7 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
       // get refinement suggestion
       ElementToRefine elem_ref(id, comp);
       int current = this->spaces[comp]->get_element_order(id);
+      // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
       bool refined = refinement_selectors[comp]->select_refinement(e, current, rsln[comp], elem_ref);
 
       //add to a list of elements that are going to be refined
@@ -268,7 +267,8 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
   }
 
   for (int j = 0; j < this->num; j++)
-    rsln[j]->enable_transform(true);
+    if (rsln[j] != NULL)
+      rsln[j]->enable_transform(true);
 
   verbose("Refined elements: %d", elem_inx_to_proc.size());
   report_time("Refined elements in: %g s", cpu_time.tick().last());
@@ -723,22 +723,18 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
   while ((ee = trav.get_next_state(NULL, NULL)) != NULL) {
     for (i = 0; i < num; i++) {
       for (j = 0; j < num; j++) {
-	if (error_form[i][j] != NULL) {
-	  double err, nrm;
-
-          err = fabs(eval_error(error_form[i][j], error_ord[i][j], sln[i], sln[j], rsln[i], rsln[j]));
-          nrm = fabs(eval_error_norm(error_form[i][j], error_ord[i][j], rsln[i], rsln[j]));
+        if (error_form[i][j] != NULL) {
+          double err, nrm;
+          err = eval_error(error_form[i][j], error_ord[i][j], sln[i], sln[j], rsln[i], rsln[j]);
+          nrm = eval_error_norm(error_form[i][j], error_ord[i][j], rsln[i], rsln[j]);
 
           norms[i] += nrm;
           total_norm  += nrm;
           total_error += err;
           errors_components[i] += err;
           if(solutions_for_adapt)
-          {
             this->errors[i][ee[i]->id] += err;
-	    this->errors_squared_sum += err;
-          }
-	}
+        }
       }
     }
   }
@@ -771,6 +767,9 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
           errors[i][e->id] /= norms[i];
       }
     }
+
+    this->errors_squared_sum = total_error;
+
     // Element error mask is used here, because this variable is used in the adapt()
     // function, where the processed error (sum of errors of processed element errors)
     // is matched to this variable.
