@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "python_api.h"
+#include "../../../hermes_common/python/python_api.h"
 
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                              -1
@@ -16,9 +16,9 @@ void _assert(bool a)
 // Test the global python instance
 void test_basic1()
 {
-    python->push("i", c2py_int(5));
+    python->push_int("i", 5);
     python->exec("i = i*2");
-    int i = py2c_int(python->pull("i"));
+    int i = python->pull_int("i");
     _assert(i == 10);
 }
 
@@ -26,9 +26,9 @@ void test_basic1()
 void test_basic2()
 {
     Python *p = new Python();
-    p->push("i", c2py_int(5));
+    p->push_int("i", 5);
     p->exec("i = i*2");
-    int i = py2c_int(p->pull("i"));
+    int i = p->pull_int("i");
     _assert(i == 10);
     delete p;
 }
@@ -37,16 +37,16 @@ void test_basic2()
 void test_basic3()
 {
     Python *p1 = new Python();
-    p1->push("i", c2py_int(5));
+    p1->push_int("i", 5);
     p1->exec("i = i*2");
-    int i = py2c_int(p1->pull("i"));
+    int i = p1->pull_int("i");
     _assert(i == 10);
     delete p1;
 
     Python *p2 = new Python();
-    p2->push("i", c2py_int(5));
+    p2->push_int("i", 5);
     p2->exec("i = i*2");
-    i = py2c_int(p2->pull("i"));
+    i = p2->pull_int("i");
     _assert(i == 10);
     delete p2;
 }
@@ -56,12 +56,12 @@ void test_basic4()
 {
     Python *p1 = new Python();
     Python *p2 = new Python();
-    p1->push("i", c2py_int(5));
-    p2->push("i", c2py_int(6));
+    p1->push_int("i", 5);
+    p2->push_int("i", 6);
     p1->exec("i = i*2");
     p2->exec("i = i*2");
-    int i1 = py2c_int(p1->pull("i"));
-    int i2 = py2c_int(p2->pull("i"));
+    int i1 = p1->pull_int("i");
+    int i2 = p2->pull_int("i");
     _assert(i1 == 10);
     _assert(i2 == 12);
     delete p1;

@@ -90,3 +90,13 @@ PyObject *Python::pull(const char *name)
     Py_DECREF(tmp);
     return tmp;
 }
+
+void Python::push_int(const std::string &name, int i)
+{
+    this->push(name.c_str(), c2py_int(i));
+}
+
+int Python::pull_int(const std::string &name)
+{
+    return py2c_int(this->pull(name.c_str()));
+}

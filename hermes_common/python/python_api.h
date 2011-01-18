@@ -42,6 +42,16 @@ public:
     ~Python();
     void print();
     void exec(const char *text);
+
+    void push_int(const std::string &name, int i);
+    int pull_int(const std::string &name);
+
+
+
+    // The following two methods are for advanced users only. Make sure you
+    // understand the Python reference counting and who is responsible for what
+    // in terms of memory management before you use them.
+
     // pushes the object to the namespace, stealing the reference
     void push(const char *name, PyObject *o);
     // pulls the object from the namespace, borrowing the reference
