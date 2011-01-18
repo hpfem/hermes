@@ -191,20 +191,16 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   mesh_parser_run(debug);
   fclose(f);
 
-  printf("--------------------------");
   Python p;
   initpython_reader();
   p.exec("from python_reader import read_hermes_format_str");
   p.push_str("s", mesh_str);
   p.exec("vertices, elements, boundaries, curves = read_hermes_format_str(s)");
-  p.exec("print vertices");
-  printf("--------------------------");
 
   //// vertices ////////////////////////////////////////////////////////////////
 
-  MSymbol* sym = mesh_parser_find_symbol("vertices");
-  if (sym == NULL) error("File %s: 'vertices' not found.", filename);
-  n = sym->data->n;
+  p.exec("n = len(vertices)");
+  n = p.pull_int("n");
   if (n < 0) error("File %s: 'vertices' must be a list.", filename);
   if (n < 2) error("File %s: invalid number of vertices.", filename);
 
@@ -214,8 +210,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   mesh->init(size);
 
   // create top-level vertex nodes
-  MItem* pair = sym->data->list;
-  for (i = 0; i < n; i++, pair = pair->next)
+  for (i = 0; i < n; i++)
   {
     Node* node = mesh->nodes.add();
     assert(node->id == i);
@@ -224,16 +219,17 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     node->bnd = 0;
     node->p1 = node->p2 = -1;
     node->next_hash = NULL;
-
-    if (!mesh_parser_get_doubles(pair, 2, &node->x, &node->y))
-      error("File %s: invalid vertex #%d.", filename, i);
+    p.push_int("i", i);
+    p.exec("x, y = vertices[i]");
+    node->x = p.pull_double("x");
+    node->y = p.pull_double("y");
   }
   mesh->ntopvert = n;
-  mitem_drop_string_markers(sym->data);
+  //mitem_drop_string_markers(sym->data);
 
   //// elements ////////////////////////////////////////////////////////////////
 
-  sym = mesh_parser_find_symbol("elements");
+  MSymbol *sym = mesh_parser_find_symbol("elements");
   if (sym == NULL) error("File %s: 'elements' not found.", filename);
   n = sym->data->n;
   if (n < 0) error("File %s: 'elements' must be a list.", filename);
