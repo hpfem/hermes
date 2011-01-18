@@ -52,7 +52,7 @@ Python::~Python()
     */
 }
 
-void Python::print()
+void Python::print_namespace()
 {
     namespace_print(_namespace);
 }

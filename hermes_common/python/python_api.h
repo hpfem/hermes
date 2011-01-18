@@ -14,14 +14,40 @@
     This is a nice C++ Python API and the only header file that you should
     include in your code.
 
-    You have to create an instance of the Python() class first, which will
-    initialize the pointers to the conversion methods (like py2c_int, c2py_int,
-    ...), defined in _hermes_common_api_new.h. Once you instantiated one
-    Python() instance, then you don't have to worry about this at all. If you
-    call the c2py_int (and similar methods) without instantiating Python()
-    first, it will segfault (as they point to NULL).
+    Use the push_int, pull_int (and similar) methods and then you don't need to
+    worry about anything. Here is an example how to use it:
 
-    Here is an example how to use it:
+        Python *p = new Python();
+        p->push_int("i", 5);
+        p->exec("i = i*2");
+        int i = p->pull_int("i");
+        _assert(i == 10);
+        delete p;
+
+    All memory allocation/deallocation as well as Python initialization is
+    handled automatically.
+
+*/
+
+class Python {
+public:
+    Python();
+    Python(int argc, char* argv[]);
+    ~Python();
+    void print_namespace();
+    void exec(const std::string &text);
+
+    void push_int(const std::string &name, int i);
+    int pull_int(const std::string &name);
+
+
+
+    /*
+    The following two methods are for advanced users only. Make sure you
+    understand the Python reference counting and who is responsible for what
+    in terms of memory management before you use them.
+
+    Here is an example how to use them:
 
         Python *p = new Python();
         p->push("i", c2py_int(5));
@@ -31,31 +57,17 @@
         delete p;
 
     All memory allocation/deallocation as well as Python initialization is
-    handled automatically, you don't have to worry about anything.
+    handled automatically, you don't have to worry about anything, as long as
+    you use it as shown above. See also the implementation of pull/push() for
+    more info and comments.
 
-*/
-
-class Python {
-public:
-    Python();
-    Python(int argc, char* argv[]);
-    ~Python();
-    void print();
-    void exec(const std::string &text);
-
-    void push_int(const std::string &name, int i);
-    int pull_int(const std::string &name);
-
-
-
-    // The following two methods are for advanced users only. Make sure you
-    // understand the Python reference counting and who is responsible for what
-    // in terms of memory management before you use them.
+    */
 
     // pushes the object to the namespace, stealing the reference
     void push(const char *name, PyObject *o);
     // pulls the object from the namespace, borrowing the reference
     PyObject *pull(const char *name);
+
 private:
     PyObject *_namespace;
     void _init(int argc, char* argv[]);
