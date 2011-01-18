@@ -777,14 +777,18 @@ void Mesh::copy(const Mesh &mesh) {
 
 	// copy vertices
   for(std::map<unsigned int, Vertex*>::const_iterator it = mesh.vertices.begin(); it != mesh.vertices.end(); it++)
-    this->vertices[it->first] = it->second->copy();
+    if(it->first != INVALID_IDX)
+      this->vertices[it->first] = it->second->copy();
 
 	// copy boundaries
 	for(std::map<unsigned int, Boundary*>::const_iterator it = mesh.boundaries.begin(); it != mesh.boundaries.end(); it++)
-    this->boundaries[it->first] = it->second->copy();
+    if(it->first != INVALID_IDX)
+      this->boundaries[it->first] = it->second->copy();
 
 	// copy elements, midpoints, facets and edges
 	for(std::map<unsigned int, Element*>::const_iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
+    if(it->first == INVALID_IDX)
+      continue;
     Element *e = it->second;
     this->elements[it->first] = e->copy();
 
