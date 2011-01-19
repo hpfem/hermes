@@ -17,6 +17,11 @@ Python::Python(int argc, char* argv[])
 
 PyMODINIT_FUNC initpython_engine(void); /*proto*/
 
+void exit_program(int sig) {
+    printf("\nCTRL-C received, aborting...\n");
+    abort();
+}
+
 void Python::_init(int argc, char* argv[])
 {
     python_count++;
@@ -24,6 +29,9 @@ void Python::_init(int argc, char* argv[])
         Py_Initialize();
         if (argc >= 0)
             PySys_SetArgv(argc, argv);
+        // We need to install our own signal, because Python redefines it and
+        // then the C++ program can't be killed with CTRL-C:
+        signal(SIGINT, exit_program);
         // This initializes the Python module using Python C / API:
         initpython_engine();
         // This imports the module using Cython functionality, so that we can
