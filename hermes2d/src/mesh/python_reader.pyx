@@ -56,6 +56,7 @@ def read_hermes_format_str(m):
     try:
         exec m in math.__dict__, namespace
     except (SyntaxError, NameError), e:
+        print "Error while parsing the mesh file. More information below."
         raise ParseError(str(e))
     nodes = namespace.pop("vertices", None)
     elements = namespace.pop("elements", None)
