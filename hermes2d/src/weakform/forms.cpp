@@ -378,23 +378,23 @@ Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
   // sanity checks
   if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
   if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
-  
+
   ESpaceType space_type = fu->get_space_type();
   ESolutionType sln_type = fu->get_type();
-  
+
   int nc = fu->get_num_components();
   Quad2D* quad = fu->get_quad_2d();
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED  
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
   if (space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
     fu->set_quad_order(order, H2D_FN_ALL);
   else
-#endif    
+#endif
     fu->set_quad_order(order);
-  
+
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
   Func<scalar>* u = new Func<scalar>(np, nc);
-  
+
   if (u->nc == 1)
   {
     u->val = new scalar [np];
@@ -430,10 +430,10 @@ Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
     u->val1 = new scalar [np];
     u->curl = new scalar [np];
     u->div = new scalar [np];
-    
+
     memcpy(u->val0, fu->get_fn_values(0), np * sizeof(scalar));
     memcpy(u->val1, fu->get_fn_values(1), np * sizeof(scalar));
-    
+
     // This works.
     scalar *dx1 = fu->get_dx_values(1);
     scalar *dy0 = fu->get_dy_values(0);

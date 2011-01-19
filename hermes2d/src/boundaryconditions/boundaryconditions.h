@@ -36,11 +36,11 @@ public:
 
   /// Gets the type of this boundary condition. Pure virtual function making this class abstract.
   virtual BCType get_type() const = 0;
-  
+
 protected:
   /// Current time.
   double current_time;
-  
+
   /// Types of boundary conditions.
   /// There is no need to a special marker BC_NONE, as the default condition is zero Dirichlet.
   enum BoundaryConditionType {
@@ -48,7 +48,7 @@ protected:
     BC_NEUMANN,   ///< Neumann BC.
     BC_NEWTON     ///< Newton BC.
   };
-  
+
   /// Types of description of boundary values, either a function (callback), or a constant.
   enum BoundaryConditionValueType {
     BC_FUNCTION,
@@ -101,7 +101,7 @@ public:
 
   /// Pure virtual function giving info whether u_Neumann is a constant or a function.
   virtual BoundaryConditionValueType get_value_type() const = 0;
-  
+
   /// Gets the type of this boundary condition.
   BoundaryConditionType get_type();
 

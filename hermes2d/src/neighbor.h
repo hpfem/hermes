@@ -22,10 +22,10 @@
   assert_msg( obj->central_pss != NULL && obj->central_pss->get_active_element() == obj->central_el &&\
               obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
               "Precalculated shapeset and refmap have not been attached or have a wrong active element." )
-              
+
 #define ensure_central_rm(obj) \
   assert_msg( obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
-              "Reference mapping has not been attached or has a wrong active element." )              
+              "Reference mapping has not been attached or has a wrong active element." )
 
 //TODO: Add a test for overshooting the maximum allowed edge order.
 #define ensure_set_quad_order(obj) \
@@ -44,8 +44,8 @@
  * In order to search for the neighboring elements, one selects a particular edge of the central element and calls
  * the method \c set_active_edge. This enumerates the neighbors and fills in the array \c transformations, which
  * will be needed later for getting function values at matching points from both sides of the selected (active) edge.
- * If values of a test function will be needed, a precalculated shapeset that will receive the transformations 
- * must also be attached via \c attach_pss_and_rm (so that a call to \c detach_pss_and_rm may be performed afterwards 
+ * If values of a test function will be needed, a precalculated shapeset that will receive the transformations
+ * must also be attached via \c attach_pss_and_rm (so that a call to \c detach_pss_and_rm may be performed afterwards
  * to return the pss to its original state).
  *
  * The actual procedure depends on the relative size of the central element with respect to the neighbor element(s)
@@ -190,24 +190,24 @@ public:
   /// \param[in]  rm  Pointer to a RefMap object associated with the pss.
   ///
   void attach_pss_and_rm(PrecalcShapeset* pss, RefMap* rm);
-  
+
   /// Assign a reference mapping to the central element.
   ///
-  /// If geometric data about the neighborhood is needed (see function \c init_geometry), a reference mapping with 
+  /// If geometric data about the neighborhood is needed (see function \c init_geometry), a reference mapping with
   /// the correctly pushed <em>way down</em> transformations is required. If the extended shapesets will not be used,
   /// this method may be used for this purpose instead of \c attach_pss_and_rm.
   ///
   /// \param[in]  rm  Pointer to a RefMap object associated with the pss.
   ///
   void attach_rm(RefMap* rm);
-  
+
   /// Restore the transformation set for central element's pss and refmap to that before their attachment to the
   /// NeighborSearch.
   void detach_pss_and_rm();
-  
+
   /// Restore the transformation set for central element's refmap to that before its attachment to the NeighborSearch.
   void detach_rm();
-  
+
 /*** Methods for working with quadrature on the active edge. ***/
 
   /// Sets the quadrature order to be used for obtaining integration points and weights in both neighbors.
@@ -576,10 +576,10 @@ private:
   std::map<Key, Geom<double>*, Compare> cache_e;
   std::map<Key, double*, Compare> cache_jwt;
 
-/*** Geometric calculations. ***/  
+/*** Geometric calculations. ***/
 
   double* calculate_jwt(int edge_order);
-  
+
 public:
   /// This class represents the extended shapeset, consisting of shape functions from both the central element and
   /// current neighbor element, extended by zero to the union of these elements.

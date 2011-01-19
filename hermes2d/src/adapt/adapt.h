@@ -162,7 +162,7 @@ public:
   {
     return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
   }
-  
+
   /// Type-safe version of calc_err_exact() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
   double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true,
@@ -308,7 +308,7 @@ protected: //forms and error evaluation
   virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags);
-                                   
+
   /// Evaluates a square of an absolute error of an active element among a given pair of components.
   /** The method uses a bilinear forms to calculate the error. This is done by supplying a differences (f1 - v1) and (f2 - v2) at integration points to the bilinear form,
    *  where f1 and f2 are values of (coarse) solutions of the first and the second component respectively,

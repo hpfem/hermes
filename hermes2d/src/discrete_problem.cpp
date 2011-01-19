@@ -328,7 +328,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
           if (is_diagonal_block == false || force_diagonal_blocks == false) {
             if (block_weights != NULL) {
               if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
-            } 
+            }
           }
 
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {

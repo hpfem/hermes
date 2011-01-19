@@ -441,7 +441,7 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
       for(int i = 0; i < n_trans[active_segment]; i++)
         central_pss->push_transform(transformations[active_segment][i]);
 
-    central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm()); 
+    central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
   }
   else if (central_rm != NULL)
   {
@@ -519,7 +519,7 @@ void NeighborSearch::detach_pss_and_rm()
 
 void NeighborSearch::detach_rm()
 {
-  if (central_rm != NULL && 
+  if (central_rm != NULL &&
       neighborhood_type == H2D_DG_GO_DOWN && central_rm->get_transform() != original_central_el_transform)
     central_rm->set_transform(original_central_el_transform);
 }
@@ -586,14 +586,14 @@ Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos 
 {
   ensure_active_segment(this);
   ensure_central_rm(this);
-  
+
   int eo = get_quad_eo();
-  
-  // Do not use the caches at all.                                                          
+
+  // Do not use the caches at all.
   if (ext_cache_e == NULL)
-    return new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo), 
+    return new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo),
                                       neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
-  
+
   if (n_neighbors == 1) // go-up or no-transf neighborhood
   {
     // Do the same as if assembling standard (non-DG) surface forms.
@@ -617,13 +617,13 @@ double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 {
   ensure_active_segment(this);
   ensure_central_rm(this);
-    
+
   int eo = get_quad_eo();
-  
+
   // Do not use the cache at all.
   if (ext_cache_jwt == NULL)
     return calculate_jwt(eo);
-  
+
   if (n_neighbors == 1) // go-up or no-transf neighborhood
   {
     // Do the same as if assembling standard (non-DG) surface forms.
@@ -646,11 +646,11 @@ double* NeighborSearch::calculate_jwt(int edge_order)
   int np = get_quad_np();
   double3* pt = get_quad_pt();
   double3* tan = central_rm->get_tangent(active_edge, edge_order);
-  
+
   double *jwt = new double[np];
   for(int i = 0; i < np; i++)
     jwt[i] = pt[i][2] * tan[i][2];
-  
+
   return jwt;
 }
 
