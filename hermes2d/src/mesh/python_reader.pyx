@@ -61,10 +61,12 @@ def read_hermes_format_str(m):
     elements = namespace.pop("elements", None)
     boundary = namespace.pop("boundaries", None)
     nurbs = namespace.pop("curves", None)
+    refinements = namespace.pop("refinements", None)
     if nodes is None or elements is None or boundary is None:
         raise ParseError("Either nodes, elements or boundary is missing")
     return convert2tuple(nodes), convert2tuple(elements), \
-            convert2tuple(boundary), convert2tuple(nurbs)
+            convert2tuple(boundary), convert2tuple(nurbs), \
+            convert2tuple(refinements)
 
 cdef api void show_mesh(const_char_p s):
     print read_hermes_format_str(s)

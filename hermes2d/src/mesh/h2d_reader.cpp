@@ -186,7 +186,8 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   initpython_reader();
   p.exec("from python_reader import read_hermes_format_str");
   p.push_str("s", mesh_str);
-  p.exec("vertices, elements, boundaries, curves = read_hermes_format_str(s)");
+  p.exec("vertices, elements, boundaries, curves, refinements"
+          " = read_hermes_format_str(s)");
 
   //// vertices ////////////////////////////////////////////////////////////////
 
@@ -363,7 +364,6 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     }
 
   //// curves //////////////////////////////////////////////////////////////////
-
   p.exec("have_curves = 1 if curves else 0");
   if (p.pull_int("have_curves"))
   {
@@ -423,20 +423,21 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       e->cm->update_refmap_coeffs(e);
 
   //// refinements /////////////////////////////////////////////////////////////
-
-  MSymbol *sym = mesh_parser_find_symbol("refinements");
-  if (sym != NULL)
+  p.exec("have_refinements = 1 if refinements else 0");
+  if (p.pull_int("have_refinements"))
   {
-    n = sym->data->n;
+    p.exec("n = len(refinements)");
+    n = p.pull_int("n");
     if (n < 0) error("File %s: 'refinements' must be a list.", filename);
 
     // perform initial refinements
-    MItem* pair = sym->data->list;
-    for (i = 0; i < n; i++, pair = pair->next)
+    for (i = 0; i < n; i++)
     {
       int id, ref;
-      if (!mesh_parser_get_ints(pair, 2, &id, &ref))
-        error("File %s: invalid refinement #%d.", filename, i);
+      p.push_int("i", i);
+      p.exec("id, ref = refinements[i]");
+      id = p.pull_int("id");
+      ref = p.pull_int("ref");
       mesh->refine_element(id, ref);
     }
   }
