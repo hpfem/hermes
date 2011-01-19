@@ -457,10 +457,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // traverses through the union mesh. On the other hand, if you don't use multi-mesh
   // at all, there will always be only one stage in which all forms are assembled as usual.
   Traverse trav;
-  printf("stages.size() = %d\n", stages.size());
   for (unsigned ss = 0; ss < stages.size(); ss++)
   {
-    printf("ss = %d\n", ss);
     WeakForm::Stage* s = &stages[ss];
     for (unsigned i = 0; i < s->idx.size(); i++)
       s->fns[i] = pss[s->idx[i]];
@@ -478,8 +476,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         if ((e0 = e[i]) != NULL) break;
       }
       if (e0 == NULL) continue;
-
-      printf("element: %d %d %d %d\n", e0->vn[0]->id, e0->vn[1]->id, e0->vn[2]->id, e0->vn[3]->id);
 
       // set maximum integration order for use in integrals, see limit_order()
       update_limit_table(e0->get_mode());
@@ -646,39 +642,27 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
          is only one line of difference that is highlighted below */
 
       //// assemble volume vector forms ////////////////////////////////////////
-      if (rhs != NULL) printf("Assembling volumetric vector forms.\n");
-      else printf("Not assembling volumetric vector forms.\n");
       if (rhs != NULL)
       {
         for (unsigned int ww = 0; ww < s->vfvol.size(); ww++)
         {
-          printf("s->vfvol.size() = %d\n", s->vfvol.size());
-          printf("ww = %d\n", ww);
           WeakForm::VectorFormVol* vfv = s->vfvol[ww];
           if (isempty[vfv->i]) {
-            printf("form is empty, continue.\n");
             continue;
           }
-          printf("form scaling factor = %g\n", vfv->scaling_factor);
           if (fabs(vfv->scaling_factor) < 1e-12) {
-            printf("form scaling factor zero, continue.\n");
             continue;
           }
           if (vfv->area != HERMES_ANY && !this->wf->is_in_area(marker, vfv->area)) {
-            printf("not in area, continue.\n");
             continue;
           }
           int m = vfv->i;
-          printf("m = vfv->i = %d\n", m);
           fv = spss[m];    // H3D uses fv = test_fn + m;
           am = &(al[m]);
 
-          printf("am->cnt = %d\n", am->cnt);
           for (int i = 0; i < am->cnt; i++)
           {
-            printf("i = %d\n", i);
             if (am->dof[i] < 0) {
-              printf("am->dof[%d] < 0, this is an inactive dof, continue.\n", i);
               continue;
             }
             fv->set_active_shape(am->idx[i]);
@@ -695,25 +679,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             else {
               scalar val = eval_form(vfv, u_ext, fv, &(refmap[m])) * am->coef[i];
               rhs->add(am->dof[i], val);
-
-
-  // DEBUG - here the external solutions are still correct.
-  ScalarView sv0("sol 0 right before eval vfv", new WinGeom(0, 0, 430, 400));
-  ScalarView sv1("sol 1 right before eval vfv", new WinGeom(440, 0, 430, 400));
-  if (neq == 2) {
-    printf("s->vfvol.size() = %d\n", s->vfvol.size());
-    printf("i = %d\n", i);
-    sv0.show(u_ext[0]);
-    sv1.show(u_ext[1]);
-  }
-
-  printf("Added value %g to rhs[%d]\n", val, am->dof[i]);
-
-  if (neq == 2) {
-    View::wait(HERMES_WAIT_KEYPRESS);
-  }
-
-
             }
           }
         }

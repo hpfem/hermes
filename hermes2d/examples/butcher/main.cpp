@@ -21,11 +21,11 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_GLOB_REF_NUM = 1;                   // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 0;                    // Number of initial refinements towards boundary.
-const int P_INIT = 1;                              // Initial polynomial degree.
-const double time_step = 1;                        // Time step.
-const double T_FINAL = 0.1;                        // Time interval length.
+const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
+const int P_INIT = 2;                              // Initial polynomial degree.
+const double time_step = 0.2;                      // Time step.
+const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -36,7 +36,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
 
-//ButcherTableType butcher_table_type = Implicit_RK_1;
 ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 
 // Thermal conductivity (temperature-dependent).
@@ -44,23 +43,21 @@ ButcherTableType butcher_table_type = Implicit_SDIRK_2;
 template<typename Real>
 Real lam(Real u) 
 { 
-  return 1;
-  //return 1 + pow(u, 4);
+  return 1 + pow(u, 4);
 }
 
 // Derivative of the thermal conductivity with respect to 'u'.
 template<typename Real>
 Real dlam_du(Real u) 
 { 
-  return 0;
-  //return 4*pow(u, 3);
+  return 4*pow(u, 3);
 }
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = 0;//(y+10)/10.;
-  dy = 0;//(x+10)/10.;
-  return 0;//(x+10)*(y+10)/100.;
+  dx = (y+10)/10.;
+  dy = (x+10)/10.;
+  return (x+10)*(y+10)/100.;
 }
 
 // Initial condition. It will be projected on the FE mesh 
@@ -90,9 +87,6 @@ int main(int argc, char* argv[])
 {
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
-
-  printf("Butcher's table: ");
-  for (int i=0; i<2; i++) for (int j=0; j<2; j++) printf("%g ", bt.get_A(i, j));
 
   // Load the mesh.
   Mesh mesh;
@@ -164,8 +158,6 @@ int main(int argc, char* argv[])
     sview.set_title(title);
     sview.show(u_prev_time, HERMES_EPS_VERYHIGH);
     oview.show(space);
-
-    //View::wait(HERMES_WAIT_KEYPRESS);
 
     // Increase counter of time steps.
     ts++;

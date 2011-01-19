@@ -35,7 +35,7 @@ double BUTCHER_C_2 = 1.;
 //
 //  The following parameters can be changed:
 
-const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = SDIRK-2
+const int TIME_INTEGRATION = 2;                   // 1 = implicit Euler, 2 = SDIRK-2
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.

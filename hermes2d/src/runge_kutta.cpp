@@ -289,183 +289,42 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Assemble the block-diagonal mass matrix M of size ndof times ndof.
   // The corresponding part of the global residual vector is obtained 
   // just by multiplication.
-  printf("Started assembling of matrix left.\n");
   stage_dp_left.assemble(matrix_left);
-
-  printf("Finished assembling of matrix left.\n");
-
-  printf("matrix_left = %g\n", matrix_left->get(0, 0));
- 
 
   // The Newton's loop.
   double residual_norm;
   int it = 1;
   while (true)
   {
-    printf("coeff_vec[0] = %g\n", coeff_vec[0]);
-
     // Prepare vector Y_n + h\sum_{j=1}^s a_{ij} K_j.
     for (int i = 0; i < num_stages; i++) {                // block row
       for (int idx = 0; idx < ndof; idx++) {
-        scalar increment = coeff_vec[idx];
+        scalar increment = 0;
         for (int j = 0; j < num_stages; j++) {
           increment += bt->get_A(i, j) * K_vector[j*ndof + idx];
         }
-        u_prev_vec[i*ndof + idx] = time_step * increment;
+        u_prev_vec[i*ndof + idx] = coeff_vec[idx] + time_step * increment;
       }
     }
 
-    printf("it = %d, u_prev = %g %g\n", it, u_prev_vec[0], u_prev_vec[1]);
-
-    /*
-      FILE* f = fopen("debug-left.txt", "w");
-      matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE);
-      info("Matrix left dumped.");
-      fclose(f);
-      exit(0);
-    */
-
-    /*
-    if (it == 2) {
-      printf("K_vector before multiplication with M = ");
-      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
-      for (int i=0; i<ndof*num_stages; i++) printf("%g ", K_vector[i]);
-      printf("\n");
-    }
-    */
-   
-    printf("K_vector before multiplication with M: %g %g\n", K_vector[0], K_vector[1]);
-
-
     multiply_as_diagonal_block_matrix(matrix_left, num_stages, 
                                       K_vector, vector_left);
-
-    printf("vector_left (M times K_vector): %g %g\n", vector_left[0], vector_left[1]);
-    printf("K_vector after multiplication with M: %g %g\n", K_vector[0], K_vector[1]);
-
-    /*
-    if (it == 2) {
-      printf("vector_left (M times K_vector) = ");
-      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
-      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left[i]);
-      printf("\n");
-    }
-    */
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left
     // can be added later.
     bool rhs_only = false;
     bool force_diagonal_blocks = true;
-    printf("Started assembling of matrix right.\n");
-    printf("u_prev = %g %g\n", u_prev_vec[0], u_prev_vec[1]);
     stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right,
                             rhs_only, force_diagonal_blocks);
 
-    printf("Finished assembling of matrix right.\n");
-
-
-    printf("u_prev_vec: %g %g\n", u_prev_vec[0], u_prev_vec[1]);
-    printf("matrix_right = %g %g %g %g\n", matrix_right->get(0, 0), matrix_right->get(0, 1),
-                                           matrix_right->get(1, 0), matrix_right->get(1, 1));
-    printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
-    
-
-    /*
-      FILE* f = fopen("debug-right.txt", "w");
-      matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE);
-      info("Matrix right dumped.");
-      fclose(f);
-    */
-
-    /*
-    // debug
-    if (it == 2) {
-      printf("vector_left = ");
-      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
-      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left[i]);
-      printf("\n");
-      printf("vector_right = ");
-      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_right->get(i));
-      printf("\n");
-      //exit(0);
-
-      // Debug.
-      FILE* f = fopen("debug-left.txt", "w");
-      matrix_left->dump(f, "tmp", DF_MATLAB_SPARSE);
-      info("Matrix left dumped.");
-      fclose(f);
-      f = fopen("debug-right.txt", "w");
-      matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE);
-      info("Matrix right dumped.");
-      fclose(f);
-    }
-    */
-
-    // Putting the two parts together into matrix_right and rhs_right.
-    //((UMFPackMatrix*)matrix_right)->add_matrix((UMFPackMatrix*)matrix_left);
-
-    printf("Adding M to diagonal of matrix_right.\n");
-
     matrix_right->add_to_diagonal_blocks(num_stages, matrix_left);
-
-    printf("matrix_right = %g %g %g %g\n", matrix_right->get(0, 0), matrix_right->get(0, 1),
-                                           matrix_right->get(1, 0), matrix_right->get(1, 1));
-
-    /*
-      f = fopen("debug-composite.txt", "w");
-      matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE);
-      info("Matrix composite dumped.");
-      fclose(f);
-      exit(0);
-    */
-
-    //((UMFPackMatrix*)matrix_right)->add_to_diagonal(1.0);
-
-    printf("Adding vector_left to vector_right.\n");
-
-
 
     vector_right->add_vector(vector_left);
 
-    //vector_right->set(0, -99.302);
-    //vector_right->set(1, -99.302);
-
-    printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
-
-    /*
-    if (it == 2) {
-      printf("vector_left = ");
-      //for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left->get(i));
-      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_left[i]);
-      printf("\n");
-      printf("vector_right = ");
-      for (int i=0; i<ndof*num_stages; i++) printf("%g ", vector_right->get(i));
-      printf("\n");
-      exit(0);
-    }
-    */
-
-    /*
-    // Debug.
-    if (it == -1) {
-      FILE* f = fopen("debug-merged.txt", "w");
-      matrix_right->dump(f, "tmp", DF_MATLAB_SPARSE);
-      info("Merged matrix dumped.");
-      fclose(f);
-      exit(0);
-    }
-    */
-
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-
-    printf("Changing sign of vector_right.\n");
-
     vector_right->change_sign();
-
-    
-    printf("vector_right: %g %g\n", vector_right->get(0), vector_right->get(1));
 
     // Measure the residual norm.
     if (HERMES_RESIDUAL_AS_VECTOR_RK) {
@@ -500,16 +359,10 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix solver failed.\n");
 
-    printf("solution vector: %g %g\n", solver->get_solution()[0], 
-                                       solver->get_solution()[1]);
-
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < num_stages*ndof; i++) {
       K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
     }
-
-    printf("new K_vector: %g %g\n", K_vector[0], K_vector[1]);
-
 
     // Increase iteration counter.
     it++;
@@ -521,14 +374,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     return false;
   }
 
-  /* THIS DID NOT WORK
-  // Create a metrix solver for the equation M(Y_{n+1} - Y_n) = increment_vector.
-  Vector* rk_increment_vector = create_vector(matrix_solver);
-  rk_increment_vector->alloc(ndof);
-  Solver* rk_increment_solver = create_linear_solver(matrix_solver,
-                                matrix_left, rk_increment_vector);
-  */
-
   // Calculate the vector \sum_{j=1}^s b_j k_j.
   Vector* rk_increment_vector = create_vector(matrix_solver);
   rk_increment_vector->alloc(ndof);
@@ -539,14 +384,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     }
   }
 
-  /* THIS DID NOT WORK
-  // Solve the linear system.
-  if(!rk_increment_solver->solve()) error ("Matrix solver failed.\n");
-
-  // Update coeff_vec to new time level.
-  for (int i=0; i < ndof; i++) coeff_vec[i] += rk_increment_solver->get_solution()[i];
-  */
-
   // Calculate Y^{n+1} = Y^n + h \sum_{j=1}^s b_j k_j.
   for (int i = 0; i < ndof; i++) coeff_vec[i] += time_step * rk_increment_vector->get(i);
 
@@ -555,7 +392,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   delete matrix_right;
   delete vector_right;
   delete solver;
-  //delete rk_increment_solver;
   delete rk_increment_vector;
 
   // Delete stage spaces, but not the first (original) one.
