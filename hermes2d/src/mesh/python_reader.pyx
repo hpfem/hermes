@@ -1,5 +1,3 @@
-from __future__ import division
-
 cdef extern from *:
     ctypedef char* char_p       "char*"
     ctypedef char* const_char_p "const char*"
@@ -53,6 +51,8 @@ def read_hermes_format_str(m):
     m = m.replace("{", "[")
     m = m.replace("}", "]")
     m = m.replace("^", "**")
+    # Make sure 1/2 produces 0.5:
+    m = "from __future__ import division\n\n" + m
     namespace = {}
     try:
         exec m in math.__dict__, namespace
