@@ -17,7 +17,6 @@
 #include "mesh.h"
 #include <map>
 #include "hash.h"
-#include "mesh_parser.h"
 #include <iostream>
 #include "h2d_reader.h"
 
@@ -171,15 +170,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
   mesh->free();
 
-  // parse the file
-  // the internal mesh_parser_init only works with C FILE, so we create the
-  // FILE handle from istream using fmemopen.
   std::string mesh_str = read_file(is);
-  FILE* f = fmemopen((void *) (mesh_str.c_str()), mesh_str.length(), "r");
-  if (f == NULL) error("Could not create the read buffer");
-  mesh_parser_init(f, filename);
-  mesh_parser_run(debug);
-  fclose(f);
 
   Python p;
   initpython_reader();
@@ -442,7 +433,6 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   }
   mesh->ninitial = mesh->elements.get_num_items();
 
-  mesh_parser_free();
   mesh->seq = g_mesh_seq++;
 
 
