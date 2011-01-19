@@ -312,20 +312,21 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   mesh->nbase = n;
 
   //// boundaries //////////////////////////////////////////////////////////////
-
-  MSymbol *sym = mesh_parser_find_symbol("boundaries");
-  if (sym != NULL)
+  p.exec("have_boundaries = 1 if boundaries else 0");
+  if (p.pull_int("have_boundaries"))
   {
-    n = sym->data->n;
-    if (n < 0) error("File %s: 'boundaries' must be a list.", filename);
+    p.exec("n = len(boundaries)");
+    n = p.pull_int("n");
 
     // read boundary data
-    MItem* triple = sym->data->list;
-    for (i = 0; i < n; i++, triple = triple->next)
+    for (i = 0; i < n; i++)
     {
       int v1, v2, marker;
-      if (!mesh_parser_get_ints(triple, triple->n, &v1, &v2, &marker))
-        error("File %s: invalid boundary data #%d.", filename, i);
+      p.push_int("i", i);
+      p.exec("v1, v2, marker = boundaries[i]");
+      v1 = p.pull_int("v1");
+      v2 = p.pull_int("v2");
+      marker = p.pull_int("marker");
 
       en = mesh->peek_edge_node(v1, v2);
       if (en == NULL)
@@ -333,6 +334,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
       int marker_to_set;
 
+      /* FIXME: enable string markers again:
       // If we are dealing with a string as a marker.
       if(triple->marker->size() > 0) {
         // This functions check if the user-supplied marker on this element has been
@@ -340,7 +342,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
         mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, *triple->marker);
         marker_to_set = mesh->markers_conversion->get_internal_boundary_marker(*triple->marker);
       }
-      else {
+      else*/ {
         // If we have some string-labeled boundary markers.
         if(mesh->markers_conversion != NULL) {
           // We need to make sure that the internal markers do not collide.
@@ -369,10 +371,9 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       warn("Boundary edge node does not have a boundary marker");
     }
 
-  mitem_drop_string_markers(sym->data);
   //// curves //////////////////////////////////////////////////////////////////
 
-  sym = mesh_parser_find_symbol("curves");
+  MSymbol *sym = mesh_parser_find_symbol("curves");
   if (sym != NULL)
   {
     n = sym->data->n;
