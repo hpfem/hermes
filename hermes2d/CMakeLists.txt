@@ -261,9 +261,11 @@ endif(WITH_SUPERLU)
 
 include_directories(${HERMES_COMMON_DIR})
 
-# We require Python for the  mesh parser
+# We require Python for the mesh parser (it also needs NumPy)
 find_package(Python REQUIRED)
-include_directories(${PYTHON_INCLUDE_PATH})
+find_package(NumPy REQUIRED)
+include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+set(PYTHON_INSTALL_PATH lib/python/site-packages)
 
 #add_subdirectory(hermes_common)
 add_subdirectory(src)
@@ -274,10 +276,7 @@ if(WITH_TESTS)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
-  find_package(NumPy REQUIRED)
   find_package(Cython REQUIRED)
-  include_directories(${NUMPY_INCLUDE_PATH})
-  set(PYTHON_INSTALL_PATH lib/python/site-packages)
   add_subdirectory(hermes2d)
 endif(WITH_PYTHON)
 
