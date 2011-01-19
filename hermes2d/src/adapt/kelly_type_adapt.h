@@ -4,63 +4,64 @@
 #include "adapt.h"
 #include "../neighbor.h"
 
+// The following enumeration defines 
+//    1/ how to accumulate values computed at individual quadrature points into an element integral result
+//    2/ element-wise values into a full domain-integral value
+// ACCUMULATE_BY_ADDITION defines the standard accumulation procedure used for calculating L^p norms with
+//    1 <= p < oo.
+// ACCUMULATE_MAX_VALUE may be used for obtaining the L^oo norm.
+//
 enum ElementAccumulationMethod
 {
   ACCUMULATE_BY_ADDITION,
   ACCUMULATE_MAX_VALUE
 };
 
-inline double original_kelly_scaling_factor(double e_diam)
-{
-  return e_diam/24.;
-}
+/// Pre-defined function used for scaling interface error estimates (see the KellyTypeAdapt constructor).
 inline double scale_by_element_diameter(double e_diam)
 {
   return e_diam;
 }
 
-template<typename Real, typename Scalar>
-Scalar original_kelly_interface_estimator(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u,
-                                         Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0.;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-                           e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
-  return result;
-}
+/// Type of a pointer to the interface estimator scaling function.
+typedef double (*interface_estimator_scaling_fn_t)(double e_diam);
 
 class HERMES_API KellyTypeAdapt : public Adapt
 {
-  void accumulate(double *accumulated, double element_contribution, ElementAccumulationMethod accum_type)
-  {
-    if (accum_type == ACCUMULATE_BY_ADDITION) *accumulated += element_contribution;
-    else *accumulated = std::max(*accumulated, element_contribution);
-  }
-
-  typedef double (*scaling_factor_t)(double e_diam);
-  struct ErrorEstimatorForm
-  {
-    int i, area;
-    WeakForm::vector_form_val_t fn;
-    WeakForm::vector_form_ord_t ord;
-    Hermes::vector<MeshFunction *> ext;
-  };
-
-  double eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap* rm);
-  double eval_boundary_estimator(ErrorEstimatorForm* err_est_form, RefMap* rm, SurfPos* surf_pos);
-  double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap* rm, SurfPos* surf_pos, NeighborSearch* nbs);
-  double eval_estimator_normalization(matrix_form_val_t val, matrix_form_ord_t ord, RefMap* rm, MeshFunction* sln);
-
   protected:
-    /// Linear forms to calculate the error estimator for each component.
-    Hermes::vector<ErrorEstimatorForm> error_estimators_vol;
-    Hermes::vector<ErrorEstimatorForm> error_estimators_surf;
+    /// Accumulates \c current_contribution into \c accumulated according to the specified \c accum_type.
+    void accumulate(double *accumulated, double current_contribution, ElementAccumulationMethod accum_type)
+    {
+      if (accum_type == ACCUMULATE_BY_ADDITION) *accumulated += current_contribution;
+      else *accumulated = std::max(*accumulated, current_contribution);
+    }
+    
+    ///
+    /// Functions used for evaluating the actual error estimator forms for an active element or edge segment.
+    ///
+    double eval_volumetric_estimator(WeakForm::VectorFormVol* err_est_form, 
+                                    RefMap* rm);
+    double eval_boundary_estimator(WeakForm::VectorFormSurf* err_est_form, RefMap* rm, 
+                                  SurfPos* surf_pos);
+    double eval_interface_estimator(WeakForm::VectorFormSurf* err_est_form, 
+                                    RefMap* rm, SurfPos* surf_pos, NeighborSearch* nbs);
+    double eval_estimator_normalization(error_matrix_form_val_t val, error_matrix_form_ord_t ord, 
+                                        RefMap* rm, MeshFunction* sln);
 
+    ///
+    /// Linear forms used to calculate the error estimator value for each component.
+    ///
+    Hermes::vector<WeakForm::VectorFormVol> error_estimators_vol;
+    Hermes::vector<WeakForm::VectorFormSurf> error_estimators_surf;
+    
     ElementAccumulationMethod estimator_normalization_accum_types[H2D_MAX_COMPONENTS];
     ElementAccumulationMethod total_norm_accum_type;
 
-    scaling_factor_t interface_scaling_factor;
+    interface_estimator_scaling_fn_t interface_scaling_fn;
+    double interface_scaling_const;
+    double volumetric_scaling_const;
+    double boundary_scaling_const;
+    
     bool ignore_visited_segments;
 
     virtual double calc_err_internal(Hermes::vector< Solution* > slns,
@@ -69,7 +70,7 @@ class HERMES_API KellyTypeAdapt : public Adapt
   public:
     KellyTypeAdapt(Hermes::vector<Space *> spaces_,
                    Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-                   scaling_factor_t interface_scaling_factor_ = original_kelly_scaling_factor,
+                   interface_estimator_scaling_fn_t interface_scaling_fn_ = scale_by_element_diameter,
                    bool ignore_visited_segments = true);
 
     virtual ~KellyTypeAdapt()
@@ -81,29 +82,33 @@ class HERMES_API KellyTypeAdapt : public Adapt
     void add_error_form_vol(int i,
                             WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                             int area = HERMES_ANY,
-                            Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
+                            Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>(),
+                            double scaling_factor = 0.0);
     void add_error_form_vol(WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                             int area = HERMES_ANY,
-                            Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>())
+                            Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>(),
+                            double scaling_factor = 0.0)
     {
-      add_error_form_vol(0, vfv, vfo, area, ext);
+      add_error_form_vol(0, vfv, vfo, area, ext, scaling_factor);
     }
 
     void add_error_form_surf(int i,
                              WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                              int area = H2D_DG_INNER_EDGE,
-                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
+                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>(),
+                             double scaling_factor = 0.0);
     void add_error_form_surf(WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                              int area = H2D_DG_INNER_EDGE,
-                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>())
+                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>(),
+                             double scaling_factor = 0.0)
     {
-      add_error_form_surf(0, vfv, vfo, area, ext);
+      add_error_form_surf(0, vfv, vfo, area, ext, scaling_factor);
     }
 
     void set_normalization_form(int i,
-                                matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
+                                error_matrix_form_val_t bi_fn, error_matrix_form_ord_t bi_ord,
                                 ElementAccumulationMethod accum_type);
-    void set_normalization_form(matrix_form_val_t bi_fn, matrix_form_ord_t bi_ord,
+    void set_normalization_form(error_matrix_form_val_t bi_fn, error_matrix_form_ord_t bi_ord,
                                 ElementAccumulationMethod accum_type)
     {
       set_normalization_form(0, bi_fn, bi_ord, accum_type);
