@@ -225,28 +225,40 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     node->y = p.pull_double("y");
   }
   mesh->ntopvert = n;
-  //mitem_drop_string_markers(sym->data);
 
   //// elements ////////////////////////////////////////////////////////////////
 
-  MSymbol *sym = mesh_parser_find_symbol("elements");
-  if (sym == NULL) error("File %s: 'elements' not found.", filename);
-  n = sym->data->n;
+  p.exec("n = len(elements)");
+  n = p.pull_int("n");
   if (n < 0) error("File %s: 'elements' must be a list.", filename);
   if (n < 1) error("File %s: no elements defined.", filename);
 
   // create elements
-  MItem* elem = sym->data->list;
   mesh->nactive = 0;
-  for (i = 0; i < n; i++, elem = elem->next)
+  for (i = 0; i < n; i++)
   {
     // read and check vertex indices
-    int nv = elem->n, idx[5];
+    p.push_int("i", i);
+    p.exec("nv = len(elements[i])");
+    int nv = p.pull_int("nv");
+    int idx[5];
     if (!nv) { mesh->elements.skip_slot(); continue; }
     if (nv < 4 || nv > 5)
       error("File %s: element #%d: wrong number of vertex indices.", filename, i);
-    if (!mesh_parser_get_ints(elem, nv, &idx[0], &idx[1], &idx[2], &idx[3], &idx[4]))
-      error("File %s: invalid definition of element #%d.", filename, i);
+    if (nv == 4) {
+      p.exec("n1, n2, n3, b = elements[i]");
+      idx[0] = p.pull_int("n1");
+      idx[1] = p.pull_int("n2");
+      idx[2] = p.pull_int("n3");
+      idx[3] = p.pull_int("b");
+    } else {
+      p.exec("n1, n2, n3, n4, b = elements[i]");
+      idx[0] = p.pull_int("n1");
+      idx[1] = p.pull_int("n2");
+      idx[2] = p.pull_int("n3");
+      idx[3] = p.pull_int("n4");
+      idx[4] = p.pull_int("b");
+    }
     for (j = 0; j < nv-1; j++)
       if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
         error("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
@@ -254,6 +266,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
     int marker;
 
+    /* FIXME: enable the string markers again:
     // If we are dealing with a string as a marker.
     if(elem->marker->size() > 0) {
       // Number of vertices + the marker is 1 bigger than in the previous context.
@@ -263,7 +276,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       mesh->markers_conversion->insert_element_marker(mesh->markers_conversion->min_element_marker_unused, *elem->marker);
       marker = mesh->markers_conversion->get_internal_element_marker(*elem->marker);
     }
-    else {
+    else*/ {
       if(nv == 4) {
         // If we have some string-labeled boundary markers.
         if(mesh->markers_conversion != NULL) {
@@ -298,11 +311,9 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   }
   mesh->nbase = n;
 
-  mitem_drop_string_markers(sym->data);
-
   //// boundaries //////////////////////////////////////////////////////////////
 
-  sym = mesh_parser_find_symbol("boundaries");
+  MSymbol *sym = mesh_parser_find_symbol("boundaries");
   if (sym != NULL)
   {
     n = sym->data->n;
