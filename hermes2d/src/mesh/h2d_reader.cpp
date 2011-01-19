@@ -308,23 +308,25 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       p.exec("v1, v2, marker = boundaries[i]");
       v1 = p.pull_int("v1");
       v2 = p.pull_int("v2");
-      marker = p.pull_int("marker");
 
       en = mesh->peek_edge_node(v1, v2);
       if (en == NULL)
         error("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
 
       int marker_to_set;
+      p.exec("marker_str = 1 if isinstance(marker, str) else 0");
+      int marker_str = p.pull_int("marker_str");
 
-      /* FIXME: enable string markers again:
       // If we are dealing with a string as a marker.
-      if(triple->marker->size() > 0) {
+      if (marker_str) {
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, *triple->marker);
-        marker_to_set = mesh->markers_conversion->get_internal_boundary_marker(*triple->marker);
+        std::string smarker = p.pull_str("marker");
+        mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, smarker);
+        marker_to_set = mesh->markers_conversion->get_internal_boundary_marker(smarker);
       }
-      else*/ {
+      else {
+        marker = p.pull_int("marker");
         // If we have some string-labeled boundary markers.
         if(mesh->markers_conversion != NULL) {
           // We need to make sure that the internal markers do not collide.
