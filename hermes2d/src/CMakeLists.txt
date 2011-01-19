@@ -25,8 +25,6 @@ set(SRC
        mesh/hash.cpp 
        mesh/h2d_reader.cpp
        mesh/mesh.cpp 
-       mesh/mesh_parser.cpp 
-       mesh/mesh_lexer.cpp
        mesh/regul.cpp 
        mesh/transform.cpp 
        mesh/traverse.cpp
