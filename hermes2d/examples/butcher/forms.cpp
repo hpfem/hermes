@@ -28,17 +28,19 @@ Scalar stac_residual(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v,
 {
   Func<Scalar>* u_prev = u_ext[0];
 
+
+  if (e->elem_marker >= 0) for (int i=0; i < n; i++) {
+    printf("Value of u_prev at point (%g, %g) = %g\n", e->x[i], e->y[i], u_prev->val[i]);
+    printf("Value of v at point (%g, %g) = %g\n", e->x[i], e->y[i], v->val[i]);
+    printf("Ratio: %g\n", u_prev->val[i] / v->val[i]);
+  }
+
+
   // This is a temporary workaround. The stage time t_n + h * c_i
   // can be accessed via u_stage_time->val[0];
   // In this particular case the stage time is not needed as 
   // the form does not depend explicitly on time.
   Func<Scalar>* u_stage_time = ext->fn[0]; 
-
-  //if (e->elem_marker >= 0) {
-  //  for (int i=0; i<n; i++) {
-  //    printf("residual, u_prev value at %g %g = %g\n", e->x[i], e->y[i], u_prev->val[i]);
-  //  }
-  //}
 
   // Stationary part of the residual (time derivative term left out).
   Scalar result1 = 0, result2 = 0;

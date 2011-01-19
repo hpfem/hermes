@@ -63,7 +63,8 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
   }
 
   double scaling_factor = 1.0;
-  MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor, u_ext_offset };
   mfvol.push_back(form);
   seq++;
 }
@@ -84,7 +85,8 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
     warn("Large number of forms (> 100). Is this the intent?");
   }
   double scaling_factor = 1.0;
-  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;
 }
@@ -107,7 +109,8 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
     warn("Large number of forms (> 100). Is this the intent?");
   }
   double scaling_factor = 1.0;
-  MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor, u_ext_offset };
   mfvol.push_back(form);
   seq++;
 }
@@ -127,7 +130,8 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn,
     warn("Large number of forms (> 100). Is this the intent?");
   }
   double scaling_factor = 1.0;
-  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;
 }
@@ -157,20 +161,23 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
     error("Invalid area number.");
 
   double scaling_factor = 1.0;
-  MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor, u_ext_offset };
   mfsurf.push_back(form);
   seq++;
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
+void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
+                                    std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq || j < 0 || j >= neq)
     error("Invalid equation number.");
 
   double scaling_factor = 1.0;
-  MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   mfsurf_string_temp.insert(std::pair<std::string, MatrixFormSurf>(area, form));
   seq++;
 }
@@ -187,7 +194,8 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
     error("Invalid area number.");
 
   double scaling_factor = 1.0;
-  MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor, u_ext_offset };
   mfsurf.push_back(form);
   seq++;
 }
@@ -198,7 +206,8 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   _F_
   int i = 0, j = 0;
   double scaling_factor = 1.0;
-  MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   mfsurf_string_temp.insert(std::pair<std::string, MatrixFormSurf>(area, form));
   seq++;
 }
@@ -224,7 +233,8 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
     error("Invalid area number.");
 
   double scaling_factor = 1.0;
-  VectorFormVol form = { i, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormVol form = { i, area, fn, ord, ext, scaling_factor, u_ext_offset };
   vfvol.push_back(form);
   seq++;
 }
@@ -236,7 +246,8 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
   if (i < 0 || i >= neq)
     error("Invalid equation number.");
   double scaling_factor = 1.0;
-  VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   vfvol_string_temp.insert(std::pair<std::string, VectorFormVol>(area, form));
   seq++;
 }
@@ -252,7 +263,8 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int 
     error("Invalid area number.");
 
   double scaling_factor = 1.0;
-  VectorFormVol form = { i, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormVol form = { i, area, fn, ord, ext, scaling_factor, u_ext_offset };
   vfvol.push_back(form);
   seq++;
 }
@@ -264,7 +276,8 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std:
   _F_
   int i = 0;
   double scaling_factor = 1.0;
-  VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   vfvol_string_temp.insert(std::pair<std::string, VectorFormVol>(area, form));
   seq++;
 }
@@ -293,7 +306,8 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
     error("Invalid area number.");
 
   double scaling_factor = 1.0;
-  VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor, u_ext_offset };
   vfsurf.push_back(form);
   seq++;
 }
@@ -305,7 +319,8 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
   _F_
   if (i < 0 || i >= neq) error("Invalid equation number.");
   double scaling_factor = 1.0;
-  VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset};
   vfsurf_string_temp.insert(std::pair<std::string, VectorFormSurf>(area, form));
   seq++;
 }
@@ -324,7 +339,8 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
     error("Invalid area number.");
 
   double scaling_factor = 1.0;
-  VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor, u_ext_offset };
   vfsurf.push_back(form);
   seq++;
 }
@@ -337,7 +353,8 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   int i = 0;
 
   double scaling_factor = 1.0;
-  VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor };
+  int u_ext_offset = 0;
+  VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset };
   vfsurf_string_temp.insert(std::pair<std::string, VectorFormSurf>(area, form));
   seq++;
 }

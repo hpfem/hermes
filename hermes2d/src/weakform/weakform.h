@@ -75,28 +75,44 @@ public:
     matrix_form_val_t fn;
     matrix_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
   struct MatrixFormSurf {
     int i, j, area;
     matrix_form_val_t fn;
     matrix_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
   struct VectorFormVol  {
     int i, area;
     vector_form_val_t fn;
     vector_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
   struct VectorFormSurf {
     int i, area;
     vector_form_val_t fn;
     vector_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
 
   // General case.

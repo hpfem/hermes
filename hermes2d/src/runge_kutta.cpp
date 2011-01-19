@@ -47,16 +47,34 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
                      DiscreteProblem* dp, WeakForm* stage_wf_left, 
                      WeakForm* stage_wf_right) 
 {
+  // First let's do the mass matrix (only one block ndof times ndof).
+  WeakForm::MatrixFormVol mfv_00;
+  mfv_00.i = 0;
+  mfv_00.j = 0;
+  mfv_00.sym = HERMES_SYM;
+  mfv_00.area = HERMES_ANY;
+  mfv_00.fn = l2_form<double, scalar>;
+  mfv_00.ord = l2_form<Ord, Ord>;
+  mfv_00.ext = Hermes::vector<MeshFunction*> ();
+  mfv_00.scaling_factor = 1.0;
+  mfv_00.u_ext_offset = 0;
+  stage_wf_left->add_matrix_form(&mfv_00);
+
+  // In the rest we will take the stationary jacobian and residual forms 
+  // (right-hand side) and use them to create a block Jacobian matrix of
+  // size (num_stages*ndof times num_stages*ndof) and a block residual 
+  // vector of length num_stages*ndof.
+
   // Number of stages.
   int num_stages = bt->get_size();
 
   // Original weak formulation.
   WeakForm* wf = dp->get_weak_formulation();
 
-  // Extract mesh from (the first space of) the discrete problem.
+  // Extract mesh from (the first space of) the original discrete problem.
   Mesh* mesh = dp->get_space(0)->get_mesh();
 
-  // Create a constant Solution to represent the stage time
+  // Create constant Solutions to represent the stage times,
   // stage_time = current_time + c_i*time_step.
   // (Temporary workaround. these should be passed as numbers.)
   Solution** stage_time_sol = new Solution*[num_stages];
@@ -91,6 +109,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin());
         mfv_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
+        // Set offset for u_ext[] external solutions.
+        mfv_ij.u_ext_offset = i;
+
         // Add stage_time_sol[i] as an external function to the form.
         mfv_ij.ext.push_back(stage_time_sol[i]);
 
@@ -100,18 +121,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       }
     }
   }
-
-  // Add mass volumetric form (only one block).
-  WeakForm::MatrixFormVol mfv_00;
-  mfv_00.i = 0;
-  mfv_00.j = 0;
-  mfv_00.sym = HERMES_SYM;
-  mfv_00.area = HERMES_ANY;
-  mfv_00.fn = l2_form<double, scalar>;
-  mfv_00.ord = l2_form<Ord, Ord>;
-  mfv_00.ext = Hermes::vector<MeshFunction*> ();
-  mfv_00.scaling_factor = 1.0;
-  stage_wf_left->add_matrix_form(&mfv_00);
 
   // Duplicate matrix surface forms, enhance them with
   // additional external solutions, and anter them as
@@ -128,6 +137,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.ord = mfs_base.ord;
         std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin());
         mfs_ij.scaling_factor = -time_step * bt->get_A(i, j);
+
+        // Set offset for u_ext[] external solutions.
+        mfs_ij.u_ext_offset = i;
 
         // Add stage_time_sol[i] as an external function to the form.
         mfs_ij.ext.push_back(stage_time_sol[i]);
@@ -153,6 +165,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_i.ext.begin());
       vfv_i.scaling_factor = -1.0;
 
+      // Set offset for u_ext[] external solutions.
+      vfv_i.u_ext_offset = i;
+
       // Add stage_time_sol[i] as an external function to the form.
       vfv_i.ext.push_back(stage_time_sol[i]);
 
@@ -175,6 +190,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.ord = vfs_base.ord;
       std::copy(vfs_base.ext.begin(), vfs_base.ext.end(), vfs_i.ext.begin());
       vfs_i.scaling_factor = -1.0;
+
+      // Set offset for u_ext[] external solutions.
+      vfs_i.u_ext_offset = i;
 
       // Add stage_time_sol[i] as an external function to the form.
       vfs_i.ext.push_back(stage_time_sol[i]);
@@ -287,13 +305,13 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     printf("coeff_vec[0] = %g\n", coeff_vec[0]);
 
     // Prepare vector Y_n + h\sum_{j=1}^s a_{ij} K_j.
-    for (int idx = 0; idx < ndof; idx++) {
-      for (int i = 0; i < num_stages; i++) {
-        scalar increment_i = 0;
+    for (int i = 0; i < num_stages; i++) {                // block row
+      for (int idx = 0; idx < ndof; idx++) {
+        scalar increment = coeff_vec[idx];
         for (int j = 0; j < num_stages; j++) {
-          increment_i += bt->get_A(i, j) * K_vector[j*ndof + idx];
+          increment += bt->get_A(i, j) * K_vector[j*ndof + idx];
         }
-        u_prev_vec[i*ndof + idx] = coeff_vec[idx] + time_step * increment_i;
+        u_prev_vec[i*ndof + idx] = time_step * increment;
       }
     }
 
