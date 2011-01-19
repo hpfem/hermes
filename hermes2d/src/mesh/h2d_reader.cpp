@@ -15,12 +15,11 @@
 
 #include <string.h>
 #include "mesh.h"
-#include "h2d_reader.h"
 #include <map>
 #include "hash.h"
 #include "mesh_parser.h"
 #include <iostream>
-#include "../../../hermes_common/python/python_api.h"
+#include "h2d_reader.h"
 #include "python_reader_api.h"
 
 extern unsigned g_mesh_seq;
@@ -41,50 +40,45 @@ void H2DReader::load_str(const char* mesh_str, Mesh *mesh)
 
 //// load_nurbs ////////////////////////////////////////////////////////////////////////////////////
 
-Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p1, int &p2)
+Nurbs* H2DReader::load_nurbs(Mesh *mesh, Python &p, int id, Node** en, int &p1, int &p2)
 {
   int i;
   Nurbs* nurbs = new Nurbs;
 
-  if (curve == NULL || curve->n < 0 || (curve->n != 3 && curve->n != 5))
+  p.exec("print '='*80");
+  p.exec("print curve");
+  p.exec("curve_n = len(curve)");
+  int curve_n = p.pull_int("curve_n");
+  if (curve_n < 0 || (curve_n != 3 && curve_n != 5))
     error("Invalid curve #%d.", id);
-  bool circle = (curve->n == 3);
+  bool circle = (curve_n == 3);
   nurbs->arc = circle;
 
   // read the end point indices
-  MItem* edge = curve->list;
-  if (edge->n >= 0 || !HERMES_IS_INT(edge->val))
-    error("Curve #%d: invalid edge definition.", id);
-  p1 = (int) edge->val;
-  edge = edge->next;
-
-  if (edge->n >= 0 || !HERMES_IS_INT(edge->val))
-    error("Curve #%d: invalid edge definition.", id);
-  p2 = (int) edge->val;
-  edge = edge->next;
+  p.exec("p1 = curve[0]");
+  p1 = p.pull_int("p1");
+  p.exec("p2 = curve[1]");
+  p2 = p.pull_int("p2");
 
   *en = mesh->peek_edge_node(p1, p2);
   if (*en == NULL)
     error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
   // degree of curved edge
-  MItem* deg = edge;
   nurbs->degree = 2;
   if (!circle)
   {
-    if (deg == NULL || deg->n >= 0 || !HERMES_IS_INT(deg->val) || deg->val < 0 || deg->val == 1)
-      error("Curve #%d: invalid degee.", id);
-    nurbs->degree = (int) deg->val;
+    p.exec("degree = curve[2]");
+    nurbs->degree = p.pull_int("degree");
   }
 
   // get the number of control points
-  MItem* pts = deg->next;
   int inner = 1, outer;
   if (!circle)
   {
-    if (pts == NULL || pts->n < 0)
-      error("Curve #%d: control points not defined.", id);
-    inner = pts->n;
+    p.exec("inner = curve[3]");
+    p.exec("inner_n = len(inner)");
+    inner = p.pull_int("inner_n");
   }
   nurbs->np = inner + 2;
 
@@ -100,21 +94,21 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
   if (!circle)
   {
     // read inner control points
-    MItem* it = pts->list;
-    for (i = 1; i <= inner; i++, it = it->next)
+    for (i = 0; i < inner; i++)
     {
-      if (!mesh_parser_get_doubles(it, 3, &(nurbs->pt[i][0]), &(nurbs->pt[i][1]), &(nurbs->pt[i][2])))
-        error("Curve #%d: invalid control point #%d.", id, i-1);
+      p.push_int("i", i);
+      p.exec("pt0, pt1, pt2 = inner[i]");
+      nurbs->pt[i+1][0] = p.pull_double("pt0");
+      nurbs->pt[i+1][1] = p.pull_double("pt1");
+      nurbs->pt[i+1][2] = p.pull_double("pt2");
     }
   }
   else
   {
     // read the arc angle
-    MItem* angle = deg;
-    if (angle == NULL || angle->n >= 0)
-      error("Curve #%d: invalid arc angle.", id);
-    double a = (180.0 - angle->val) / 180.0 * M_PI;
-    nurbs->angle = angle->val;
+    p.exec("angle = curve[2]");
+    nurbs->angle = p.pull_double("angle");
+    double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
 
     // generate one control point
     double x = 1.0 / tan(a * 0.5);
@@ -125,12 +119,11 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
 
   // get the number of knot vector points
   inner = 0;
-  MItem* knot=pts;
-  if (!circle && knot != NULL)
+  if (!circle)
   {
-    knot = pts->next;
-    if (knot->n < 0) error("Curve #%d: invalid knot vector.", id);
-    inner = knot->n;
+    p.exec("inner = curve[4]");
+    p.exec("inner_n = len(inner)");
+    inner = p.pull_int("inner_n");
   }
 
   nurbs->nk = nurbs->degree + nurbs->np + 1;
@@ -143,10 +136,11 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, MItem* curve, int id, Node** en, int &p
   for (i = 0; i < outer/2; i++)
     nurbs->kv[i] = 0.0;
   if (inner) {
-    MItem* it = knot->list;
-    for (i = outer/2; i < inner + outer/2; i++, it = it->next) {
-      if (it->n >= 0) error("Curve #%d: invalid knot vector item.", id);
-      nurbs->kv[i] = it->val;
+    for (i = outer/2; i < inner + outer/2; i++) {
+      p.push_int("i", i-outer/2);
+      p.exec("print i, inner");
+      p.exec("val = inner[i]");
+      nurbs->kv[i] = p.pull_double("val");
     }
   }
   for (i = outer/2 + inner; i < nurbs->nk; i++)
@@ -373,20 +367,22 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
   //// curves //////////////////////////////////////////////////////////////////
 
-  MSymbol *sym = mesh_parser_find_symbol("curves");
-  if (sym != NULL)
+  p.exec("have_curves = 1 if curves else 0");
+  if (p.pull_int("have_curves"))
   {
-    n = sym->data->n;
+    p.exec("n = len(curves)");
+    n = p.pull_int("n");
     if (n < 0) error("File %s: 'curves' must be a list.", filename);
 
     // load curved edges
-    MItem* curve = sym->data->list;
-    for (i = 0; i < n; i++, curve = curve->next)
+    for (i = 0; i < n; i++)
     {
       // load the control points, knot vector, etc.
       Node* en;
       int p1, p2;
-      Nurbs* nurbs = load_nurbs(mesh, curve, i, &en, p1, p2);
+      p.push_int("i", i);
+      p.exec("curve = curves[i]");
+      Nurbs* nurbs = load_nurbs(mesh, p, i, &en, p1, p2);
 
       // assign the nurbs to the elements sharing the edge node
       for (k = 0; k < 2; k++)
@@ -431,7 +427,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
   //// refinements /////////////////////////////////////////////////////////////
 
-  sym = mesh_parser_find_symbol("refinements");
+  MSymbol *sym = mesh_parser_find_symbol("refinements");
   if (sym != NULL)
   {
     n = sym->data->n;
