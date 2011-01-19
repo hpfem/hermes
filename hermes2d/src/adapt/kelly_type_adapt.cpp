@@ -1,7 +1,7 @@
 #include "kelly_type_adapt.h"
 
-KellyTypeAdapt::KellyTypeAdapt(Hermes::Tuple< Space* > spaces_, 
-                               Hermes::Tuple< ProjNormType > norms_,
+KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_, 
+                               Hermes::vector< ProjNormType > norms_,
                                scaling_factor_t interface_scaling_factor_,
                                bool ignore_visited_segments_) : Adapt(spaces_, norms_)
 {  
@@ -18,7 +18,7 @@ KellyTypeAdapt::KellyTypeAdapt(Hermes::Tuple< Space* > spaces_,
 
 bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_processed)
 {
-  Hermes::Tuple<RefinementSelectors::Selector *> refinement_selectors;
+  Hermes::vector<RefinementSelectors::Selector *> refinement_selectors;
   RefinementSelectors::HOnlySelector selector;
   for (int i = 0; i < this->num; i++)
     refinement_selectors.push_back(&selector);
@@ -29,7 +29,7 @@ bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_p
 void KellyTypeAdapt::add_error_form_vol(int i, 
                                         WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                                         int area,
-                                        Hermes::Tuple<MeshFunction*> ext)
+                                        Hermes::vector<MeshFunction*> ext)
 {
   error_if(i < 0 || i >= this->num, 
            "Invalid component number (%d), max. supported components: %d", i, H2D_MAX_COMPONENTS);
@@ -43,7 +43,7 @@ void KellyTypeAdapt::add_error_form_vol(int i,
 void KellyTypeAdapt::add_error_form_surf(int i,
                                          WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                                          int area,
-                                         Hermes::Tuple<MeshFunction*> ext)
+                                         Hermes::vector<MeshFunction*> ext)
 {
   error_if (i < 0 || i >= this->num, 
             "Invalid equation number.");
@@ -66,8 +66,8 @@ void KellyTypeAdapt::set_normalization_form(int i,
 }
 
 
-double KellyTypeAdapt::calc_err_internal(Hermes::Tuple< Solution* > slns, 
-                                         Hermes::Tuple< double >* component_errors, 
+double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns, 
+                                         Hermes::vector< double >* component_errors, 
                                          unsigned int error_flags)
 {  
   int n = slns.size();
@@ -348,7 +348,7 @@ double KellyTypeAdapt::eval_estimator_normalization(matrix_form_val_t val, matri
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Initialize integration order for external functions
-ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext)
+ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -362,7 +362,7 @@ ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext)
 }
 
 // Initialize external functions (obtain values, derivatives,...)
-ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, RefMap *rm, const int order)
+ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order)
 {
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
@@ -378,7 +378,7 @@ ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, RefMap *rm, co
 }
 
 // Initialize integration order on a given edge for external functions
-ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, int edge)
+ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
@@ -393,7 +393,7 @@ ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, int edge)
 
 // Initialize discontinuous external functions (obtain values, derivatives,... on both sides of the 
 // supplied NeighborSearch's active edge).
-ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs)
+ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 {  
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
   for(unsigned int j = 0; j < ext.size(); j++)
@@ -407,7 +407,7 @@ ExtData<scalar>* init_ext_fns(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch
 }
 
 // Initialize integration order for discontinuous external functions.
-ExtData<Ord>* init_ext_fns_ord(Hermes::Tuple<MeshFunction *> &ext, NeighborSearch* nbs)
+ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
 { 
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
   for (unsigned int j = 0; j < ext.size(); j++)

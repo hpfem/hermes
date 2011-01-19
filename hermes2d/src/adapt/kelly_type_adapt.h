@@ -44,7 +44,7 @@ class HERMES_API KellyTypeAdapt : public Adapt
     int i, area;          
     WeakForm::vector_form_val_t fn;  
     WeakForm::vector_form_ord_t ord;  
-    Hermes::Tuple<MeshFunction *> ext;
+    Hermes::vector<MeshFunction *> ext;
   };
   
   double eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap* rm);
@@ -54,8 +54,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
     
   protected:
     /// Linear forms to calculate the error estimator for each component.
-    Hermes::Tuple<ErrorEstimatorForm> error_estimators_vol;     
-    Hermes::Tuple<ErrorEstimatorForm> error_estimators_surf;
+    Hermes::vector<ErrorEstimatorForm> error_estimators_vol;     
+    Hermes::vector<ErrorEstimatorForm> error_estimators_surf;
     
     ElementAccumulationMethod estimator_normalization_accum_types[H2D_MAX_COMPONENTS];    
     ElementAccumulationMethod total_norm_accum_type;
@@ -63,12 +63,12 @@ class HERMES_API KellyTypeAdapt : public Adapt
     scaling_factor_t interface_scaling_factor;
     bool ignore_visited_segments;
     
-    virtual double calc_err_internal(Hermes::Tuple< Solution* > slns, 
-                                     Hermes::Tuple< double >* component_errors,  
+    virtual double calc_err_internal(Hermes::vector< Solution* > slns, 
+                                     Hermes::vector< double >* component_errors,  
                                      unsigned int error_flags);
   public:
-    KellyTypeAdapt(Hermes::Tuple<Space *> spaces_, 
-                   Hermes::Tuple<ProjNormType> norms_ = Hermes::Tuple<ProjNormType>(),
+    KellyTypeAdapt(Hermes::vector<Space *> spaces_, 
+                   Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
                    scaling_factor_t interface_scaling_factor_ = original_kelly_scaling_factor,
                    bool ignore_visited_segments = true);
                    
@@ -81,10 +81,10 @@ class HERMES_API KellyTypeAdapt : public Adapt
     void add_error_form_vol(int i, 
                             WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo, 
                             int area = HERMES_ANY,
-                            Hermes::Tuple<MeshFunction*>ext = Hermes::Tuple<MeshFunction*>());
+                            Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
     void add_error_form_vol(WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo, 
                             int area = HERMES_ANY,
-                            Hermes::Tuple<MeshFunction*>ext = Hermes::Tuple<MeshFunction*>())
+                            Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>())
     { 
       add_error_form_vol(0, vfv, vfo, area, ext); 
     }
@@ -92,10 +92,10 @@ class HERMES_API KellyTypeAdapt : public Adapt
     void add_error_form_surf(int i, 
                              WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                              int area = H2D_DG_INNER_EDGE,
-                             Hermes::Tuple<MeshFunction*>ext = Hermes::Tuple<MeshFunction*>());
+                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
     void add_error_form_surf(WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
                              int area = H2D_DG_INNER_EDGE,
-                             Hermes::Tuple<MeshFunction*>ext = Hermes::Tuple<MeshFunction*>()) 
+                             Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()) 
     { 
       add_error_form_surf(0, vfv, vfo, area, ext); 
     }
@@ -118,12 +118,12 @@ class HERMES_API KellyTypeAdapt : public Adapt
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
       if (num != 1) EXIT("Wrong number of solutions.");
-      return calc_err_est(Hermes::Tuple<Solution *> (sln), 
-                          (Hermes::Tuple<double>*) NULL, error_flags);
+      return calc_err_est(Hermes::vector<Solution *> (sln), 
+                          (Hermes::vector<double>*) NULL, error_flags);
     }  
     
-    double calc_err_est(Hermes::Tuple<Solution *> slns, 
-                        Hermes::Tuple<double>* component_errors = NULL,
+    double calc_err_est(Hermes::vector<Solution *> slns, 
+                        Hermes::vector<double>* component_errors = NULL,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
       return calc_err_internal(slns, component_errors, error_flags);

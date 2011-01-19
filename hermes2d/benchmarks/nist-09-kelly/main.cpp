@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space, Hermes::Tuple<ProjNormType>(),
+    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space, Hermes::vector<ProjNormType>(),
                                                     scale_by_element_diameter);
     
     if (USE_RESIDUAL_ESTIMATOR)

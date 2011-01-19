@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(Hermes::Tuple<int>(BDY_OUTER, BDY_INNER));
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_OUTER, BDY_INNER));
   bc_types.add_bc_newton(BDY_BOTTOM);
 
   // Enter Dirichlet boudnary values.
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space, Hermes::Tuple<ProjNormType>(), scale_by_element_diameter);
+    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space, Hermes::vector<ProjNormType>(), scale_by_element_diameter);
     adaptivity->add_error_form_surf(callback(kelly_interface_estimator));
 //    adaptivity->add_error_form_surf(callback(kelly_newton_boundary_estimator), BDY_BOTTOM);
 //    adaptivity->add_error_form_surf(callback(kelly_neumann_boundary_estimator), BDY_OUTER);
