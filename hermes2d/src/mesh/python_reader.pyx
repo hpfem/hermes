@@ -1,7 +1,3 @@
-cdef extern from *:
-    ctypedef char* char_p       "char*"
-    ctypedef char* const_char_p "const char*"
-
 import math
 
 class ParseError(Exception):
