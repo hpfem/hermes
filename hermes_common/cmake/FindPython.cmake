@@ -9,11 +9,19 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
     NO_SYSTEM_ENVIRONMENT_PATH
     )
 
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PYTHON DEFAULT_MSG PYTHON_INCLUDE_PATH)
+execute_process(
+	COMMAND python -c "from distutils.sysconfig import get_config_var; print get_config_var('LIBDIR')"
+	OUTPUT_VARIABLE PYTHON_LIB_PATH
+	)
+string(STRIP ${PYTHON_LIB_PATH} PYTHON_LIB_PATH)
+FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6
+    PATHS ${PYTHON_LIB_PATH}
+    NO_DEFAULT_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH
+    )
 
-# TODO: Determine this automatically
-SET(PYTHON_LIBRARY python2.6)
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PYTHON DEFAULT_MSG PYTHON_LIBRARY PYTHON_INCLUDE_PATH)
 
 
 # Links a Python extension module.
