@@ -137,4 +137,38 @@ class HERMES_API KellyTypeAdapt : public Adapt
     bool adapt(double thr, int strat = 0, int regularize = -1, double to_be_processed = 0.0);
 };
 
+template<typename Real, typename Scalar>
+Scalar original_kelly_interface_estimator(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u,
+                                         Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0.;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
+                           e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
+  return result;
+}
+
+class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
+{
+  public:
+    BasicKellyAdapt(Hermes::vector<Space *> spaces_,
+                    Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
+                    double const_by_laplacian = 1.0) : 
+      KellyTypeAdapt(spaces_, norms_)
+    {
+      for (int i = 0; i < num; i++) 
+      {
+        interface_scaling_const = 1./(24.*const_by_laplacian);
+        volumetric_scaling_const = interface_scaling_const;
+        boundary_scaling_const = interface_scaling_const; 
+      
+        WeakForm::VectorFormSurf form = { 
+          i, H2D_DG_INNER_EDGE, callback(original_kelly_interface_estimator), 
+          Hermes::vector<MeshFunction*>(), interface_scaling_const 
+        };
+        
+        this->error_estimators_surf.push_back(form);
+      }
+    }
+};
 #endif // KELLY_TYPE_ADAPT_H
