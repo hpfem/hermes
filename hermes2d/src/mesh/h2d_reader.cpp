@@ -45,8 +45,6 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, Python &p, int id, Node** en, int &p1, 
   int i;
   Nurbs* nurbs = new Nurbs;
 
-  p.exec("print '='*80");
-  p.exec("print curve");
   p.exec("curve_n = len(curve)");
   int curve_n = p.pull_int("curve_n");
   if (curve_n < 0 || (curve_n != 3 && curve_n != 5))
@@ -138,7 +136,6 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, Python &p, int id, Node** en, int &p1, 
   if (inner) {
     for (i = outer/2; i < inner + outer/2; i++) {
       p.push_int("i", i-outer/2);
-      p.exec("print i, inner");
       p.exec("val = inner[i]");
       nurbs->kv[i] = p.pull_double("val");
     }
