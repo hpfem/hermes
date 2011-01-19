@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <csignal>
 
 #include "python_api.h"
 #include "python_engine_api.h"
