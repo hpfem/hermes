@@ -48,6 +48,7 @@ def read_hermes_format_str(m):
     syntax is invalid.
     """
     m = m.strip()
+    m = m.replace("\r\n", "\n")
     m = m.replace("=\n", "= \\\n")
     m = m.replace("{", "[")
     m = m.replace("}", "]")
