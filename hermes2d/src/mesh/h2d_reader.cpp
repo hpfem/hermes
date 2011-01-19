@@ -20,7 +20,6 @@
 #include "mesh_parser.h"
 #include <iostream>
 #include "h2d_reader.h"
-#include "python_reader_api.h"
 
 extern unsigned g_mesh_seq;
 

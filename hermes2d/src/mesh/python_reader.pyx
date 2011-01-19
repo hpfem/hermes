@@ -67,6 +67,3 @@ def read_hermes_format_str(m):
     return convert2tuple(nodes), convert2tuple(elements), \
             convert2tuple(boundary), convert2tuple(nurbs), \
             convert2tuple(refinements)
-
-cdef api void show_mesh(const_char_p s):
-    print read_hermes_format_str(s)
