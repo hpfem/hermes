@@ -6,6 +6,9 @@ using namespace RefinementSelectors;
 
 //  This is the ninth in the series of NIST benchmarks with known exact solutions. This benchmark
 //  has four different versions, use the global variable PROB_PARAM below to switch among them.
+//  The difference from benchmark 'nist-09' is that h-adaptivity with Kelly error estimator is used
+//  here instead of the general hp-adaptivity using reference solutions and their projections
+//  onto coarse meshes.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
@@ -28,8 +31,8 @@ int PROB_PARAM = 3;    // PROB_PARAM determines which parameter values you wish 
                        // 2: asymmetric         1000	 1.5	 0.25	0.92
                        // 3: well		50	 0.5	 0.5	0.25
 
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:

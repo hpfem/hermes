@@ -145,11 +145,11 @@ int main(int argc, char* argv[])
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space, Hermes::vector<ProjNormType>(), scale_by_element_diameter);
+    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space);
     adaptivity->add_error_form_surf(callback(kelly_interface_estimator));
-//    adaptivity->add_error_form_surf(callback(kelly_newton_boundary_estimator), BDY_BOTTOM);
-//    adaptivity->add_error_form_surf(callback(kelly_neumann_boundary_estimator), BDY_OUTER);
-//    adaptivity->add_error_form_surf(callback(kelly_zero_neumann_boundary_estimator), BDY_INNER);
+    adaptivity->add_error_form_surf(callback(kelly_newton_boundary_estimator), BDY_BOTTOM);
+    adaptivity->add_error_form_surf(callback(kelly_neumann_boundary_estimator), BDY_OUTER);
+    adaptivity->add_error_form_surf(callback(kelly_zero_neumann_boundary_estimator), BDY_INNER);
     
     double err_est_rel = adaptivity->calc_err_est(&sln, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
                                                   
