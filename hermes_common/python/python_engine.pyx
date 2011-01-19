@@ -47,19 +47,37 @@ cdef api object c2py_int(int i):
     return i
 
 cdef api int py2c_int(object i):
-    return i
+    try:
+        return i
+    except:
+        etype, value, tb = sys.exc_info()
+        s = "".join(traceback.format_exception(etype, value, tb))
+        s = "Exception raised in the Python code:\n" + s
+        throw_exception(s)
 
 cdef api object c2py_double(double i):
     return i
 
 cdef api double py2c_double(object i):
-    return i
+    try:
+        return i
+    except:
+        etype, value, tb = sys.exc_info()
+        s = "".join(traceback.format_exception(etype, value, tb))
+        s = "Exception raised in the Python code:\n" + s
+        throw_exception(s)
 
 cdef api object c2py_str(const_char_p s):
     return s
 
 cdef api char* py2c_str(object s):
-    return s
+    try:
+        return s
+    except:
+        etype, value, tb = sys.exc_info()
+        s = "".join(traceback.format_exception(etype, value, tb))
+        s = "Exception raised in the Python code:\n" + s
+        throw_exception(s)
 
 cdef api object c2numpy_int(int *A, int len):
     """
