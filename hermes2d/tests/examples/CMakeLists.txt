@@ -1,5 +1,5 @@
 # Higher-order Runge-Kutta methods (via Butcher's tables)
-#add_subdirectory(butcher)
+add_subdirectory(butcher)
 #add_subdirectory(butcher-comparison)
 
 # Elasticity
