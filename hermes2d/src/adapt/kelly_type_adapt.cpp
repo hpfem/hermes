@@ -3,7 +3,7 @@
 KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
                                Hermes::vector< ProjNormType > norms_,
                                bool ignore_visited_segments_,
-                               Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_) 
+                               Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
   : Adapt(spaces_, norms_)
 {
   error_estimators_surf.reserve(num);
@@ -40,7 +40,7 @@ void KellyTypeAdapt::add_error_estimator_vol( int i,
            "Invalid component number (%d), max. supported components: %d", i, H2D_MAX_COMPONENTS);
   error_if(area != HERMES_ANY && area < 0,
            "Invalid area number.");
-  
+
   KellyTypeAdapt::ErrorEstimatorForm form = { i, area, vfv, vfo, ext };
   this->error_estimators_vol.push_back(form);
 }
@@ -54,7 +54,7 @@ void KellyTypeAdapt::add_error_estimator_surf(int i,
             "Invalid equation number.");
   error_if (area != HERMES_ANY && area != H2D_DG_INNER_EDGE && area < 0,
             "Invalid area number.");
-            
+
   KellyTypeAdapt::ErrorEstimatorForm form = { i, area, vfv, vfo, ext };
   this->error_estimators_surf.push_back(form);
 }
@@ -80,7 +80,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
   // Prepare mesh traversal and error arrays.
   Mesh **meshes = new Mesh* [num];
   std::set<Transformable*> trset;
-  
+
   num_act_elems = 0;
   for (int i = 0; i < num; i++)
   {
@@ -105,18 +105,18 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
   trset.clear();
 
   double total_norm = 0.0;
-  
+
   bool calc_norm = false;
-  if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL || 
+  if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
       (error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
-  
+
   double *norms;
   if (calc_norm)
   {
     norms = new double[num];
     memset(norms, 0.0, num * sizeof(double));
   }
-  
+
   double *errors_components = new double[num];
   memset(errors_components, 0.0, num * sizeof(double));
   this->errors_squared_sum = 0.0;
@@ -160,9 +160,9 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       // Go through all volumetric error estimators.
       for (unsigned int iest = 0; iest < error_estimators_vol.size(); iest++)
       {
-        // Skip current error estimator if it is assigned to a different component or geometric area 
+        // Skip current error estimator if it is assigned to a different component or geometric area
         // different from that of the current active element.
-        if (error_estimators_vol[iest].i != i)  
+        if (error_estimators_vol[iest].i != i)
           continue;
         if (error_estimators_vol[iest].area >= 0 && error_estimators_vol[iest].area != ee[i]->marker)
           continue;
@@ -215,7 +215,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
                 central_err *= interface_scaling_fns[i](ee[i]->get_diameter());
 
-              // In the case this edge will be ignored when calculating the error for the element on 
+              // In the case this edge will be ignored when calculating the error for the element on
               // the other side, add the now computed error to that element as well.
               if (ignore_visited_segments)
               {
@@ -237,14 +237,14 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
           }
         }
       }
-      
+
       if (calc_norm)
       {
         double nrm = eval_solution_norm(error_form[i][i], error_ord[i][i], rm, sln[i]);
         norms[i] += nrm;
         total_norm += nrm;
       }
-      
+
       errors_components[i] += err;
       total_error += err;
       errors[i][ee[i]->id] += err;
@@ -277,7 +277,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
 
   tmr.tick();
   error_time = tmr.accumulated();
-      
+
   // Make the error relative if needed.
   if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
   {
@@ -288,7 +288,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
         errors[i][e->id] /= norms[i];
     }
   }
-  
+
   this->errors_squared_sum = total_error;
 
   // Element error mask is used here, because this variable is used in the adapt()
@@ -489,7 +489,7 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
     ui[i] = init_fn(this->sln[i], rm, order);
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, order);
 
-  scalar res = volumetric_scaling_const * 
+  scalar res = volumetric_scaling_const *
                 err_est_form->fn(np, jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)
@@ -547,7 +547,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
     ui[i] = init_fn(this->sln[i], rm, eo);
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, eo);
 
-  scalar res = boundary_scaling_const * 
+  scalar res = boundary_scaling_const *
                 err_est_form->fn(np, jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)
@@ -603,7 +603,7 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
     ui[i] = nbs->init_ext_fn(this->sln[i]);
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, nbs);
 
-  scalar res = interface_scaling_const * 
+  scalar res = interface_scaling_const *
                 err_est_form->fn(nbs->get_quad_np(), jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)

@@ -13,14 +13,14 @@ inline double scale_by_element_diameter(double e_diam)
 /// Type of a pointer to the interface estimator scaling function.
 typedef double (*interface_estimator_scaling_fn_t)(double e_diam);
 
-/// \class KellyTypeAdapt  
+/// \class KellyTypeAdapt
 /// \ingroup g_adapt
 /// \brief A framework for explicit aposteriori error estimators.
 ///
 /// Explicit error estimators estimate the error of approximate solution on an element by evaluating
 /// element residuals and jumps of the solution across element edges ([2]). A typical example is
-/// the Kelly error estimator ([1]) where a sum of the L2 norms of element residual and jumps of 
-/// solution gradients across the element boundaries defines the element error. 
+/// the Kelly error estimator ([1]) where a sum of the L2 norms of element residual and jumps of
+/// solution gradients across the element boundaries defines the element error.
 ///
 /// References:
 ///   [1] Kelly D. W., Gago O. C., Zienkiewicz O. C., Babuska I.:
@@ -43,21 +43,21 @@ class HERMES_API KellyTypeAdapt : public Adapt
       WeakForm::vector_form_ord_t ord;
       Hermes::vector<MeshFunction *> ext;
     };
-    
+
     ///
     /// Functions used for evaluating the actual error estimator forms for an active element or edge segment.
     ///
-    double eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
+    double eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                     RefMap* rm);
-    double eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
-                                   RefMap* rm, 
+    double eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+                                   RefMap* rm,
                                    SurfPos* surf_pos);
-    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
-                                    RefMap* rm, 
-                                    SurfPos* surf_pos, 
+    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+                                    RefMap* rm,
+                                    SurfPos* surf_pos,
                                     NeighborSearch* nbs);
-    double eval_solution_norm(error_matrix_form_val_t val, error_matrix_form_ord_t ord, 
-                              RefMap* rm, 
+    double eval_solution_norm(error_matrix_form_val_t val, error_matrix_form_ord_t ord,
+                              RefMap* rm,
                               MeshFunction* sln);
 
     ///
@@ -65,34 +65,34 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_vol;
     Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_surf;
-        
+
     /// Scaling of the interface error estimates. May be specified by the user during construction.
     ///
     Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns;
     bool use_aposteriori_interface_scaling; ///< Specifies whether the interface error estimators for each
-                                            ///< component will be multiplied by \c interface_scaling_fns 
+                                            ///< component will be multiplied by \c interface_scaling_fns
                                             ///< after being evaluated.
-    
+
     ///
     /// Constant scaling. Reserved for the derived classes, not to be used by the user explicitly.
     ///
     double interface_scaling_const;   ///< Constant scaling of the boundary error estimates.
     double volumetric_scaling_const;  ///< Constant scaling of the volumetric error estimates (like the residual norm).
     double boundary_scaling_const;    ///< Constant scaling of the boundary error estimates.
-    
+
     /// Specifies whether the interface error estimator will be evaluated from each side of each interface
-    /// (when <c>ignore_visited_segments == false</c> ), or only once for each interface 
+    /// (when <c>ignore_visited_segments == false</c> ), or only once for each interface
     /// (<c>ignore_visited_segments == true</c>).
     bool ignore_visited_segments;
-    
+
     /// Calculates error estimates for each solution component, the total error estimate, and possibly also
     /// their normalizations.
     virtual double calc_err_internal(Hermes::vector< Solution* > slns,
                                      Hermes::vector< double >* component_errors,
                                      unsigned int error_flags);
-  
+
   public:
-    
+
     /// Constructor.
     ///
     /// \param[in]  spaces_   Approximation space of each solution component.
@@ -102,14 +102,14 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     /// \param[in]  ignore_visited_segments_ If true, error estimator for each inner edge will be evaluated only
     ///                                      once. It will be added to the total error estimate for both the active
-    ///                                      element and its neighbors across that edge, after possible scaling by 
+    ///                                      element and its neighbors across that edge, after possible scaling by
     ///                                      \c interface_scaling_fns_ for the current component (with the diameter of
-    ///                                      the appropriate element). This saves duplicate evaluations with same 
+    ///                                      the appropriate element). This saves duplicate evaluations with same
     ///                                      results when the estimator is given e.g. by the jumps of the solution.
     ///
     ///                                      If false, error estimator for each surface of each element will be
     ///                                      evaluated, regardless of whether the neighbor side of the interface
-    ///                                      has already been processed. 
+    ///                                      has already been processed.
     ///
     ///                                      Note that if \c interface_scaling_fns_ is empty (or unspecified) then the
     ///                                      default scaling by element diameter will be always performed unless it is
@@ -120,14 +120,14 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///                                     diameter and multiplies the result of the interface estimators.
     ///                                     It may thus be already present in the interface estimator forms
     ///                                     themselves, in which case call \c disable_aposteriori_interface_scaling.
-    ///                                     In this case, it may also be required that \c ignore_visited_segments be 
+    ///                                     In this case, it may also be required that \c ignore_visited_segments be
     ///                                     false in order to always ensure that the diameter belongs to the element
-    ///                                     whose error is being calculated.    
+    ///                                     whose error is being calculated.
     ///
     KellyTypeAdapt(Hermes::vector<Space *> spaces_,
                    Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
                    bool ignore_visited_segments_ = true,
-                   Hermes::vector<interface_estimator_scaling_fn_t> 
+                   Hermes::vector<interface_estimator_scaling_fn_t>
                         interface_scaling_fns_ = Hermes::vector<interface_estimator_scaling_fn_t>());
 
     /// Destructor.
@@ -139,14 +139,14 @@ class HERMES_API KellyTypeAdapt : public Adapt
 
     /// Append volumetric error estimator form.
     ///
-    /// For example, element residual norms may be represented by such a form. 
-    /// 
-    /// \c vector_form_val_t is defined in \c weakform/weakform.h and its arguments will be interpreted during 
+    /// For example, element residual norms may be represented by such a form.
+    ///
+    /// \c vector_form_val_t is defined in \c weakform/weakform.h and its arguments will be interpreted during
     /// evaluation of the estimator as follows:
     ///
     ///   - int n,                 ... number of integration points
     ///   - double *wt,            ... integration weights
-    ///   - Func\<scalar\> *u[],   ... all solution components 
+    ///   - Func\<scalar\> *u[],   ... all solution components
     ///   - Func\<double\> *vi,    ... currently processed solution component
     ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
     ///   - ExtData\<scalar\> *ext ... external functions (e.g. previous time-level solutions appearing in the residual)
@@ -164,7 +164,7 @@ class HERMES_API KellyTypeAdapt : public Adapt
 
     /// Append boundary or interface error estimator form.
     ///
-    /// Interpretation of the \c vector_form_val_t arguments is as in the volumetric forms, except now 
+    /// Interpretation of the \c vector_form_val_t arguments is as in the volumetric forms, except now
     /// with respect to the processed interface/boundary instead of  to the element. Interface form is defined
     /// by <c> area == H2D_DG_INNER_EDGE </c> and then the effective types for \c u, \c vi and \c e are,
     /// respectively \c DiscontinuousFunc, \c DiscontinuousFunc and \c InterfaceGeom.
@@ -183,7 +183,7 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     /// The following two methods calculate the error of the given \c sln, using \code calc_err_internal \endcode.
     ///
-    
+
     double calc_err_est(Solution *sln,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
@@ -199,21 +199,21 @@ class HERMES_API KellyTypeAdapt : public Adapt
       return calc_err_internal(slns, component_errors, error_flags);
     }
 
-    /// Refines the elements selected by the \code RefinementSelectors::HOnlySelector \endcode according 
+    /// Refines the elements selected by the \code RefinementSelectors::HOnlySelector \endcode according
     /// to the errors calculated by \code calc_err_est \endcode.
     ///
     bool adapt(double thr, int strat = 0, int regularize = -1, double to_be_processed = 0.0);
-    
+
     void disable_aposteriori_interface_scaling() { use_aposteriori_interface_scaling = false; }
 };
 
-/// \class BasicKellyAdapt  
+/// \class BasicKellyAdapt
 /// \ingroup g_adapt
 /// \brief Simple Kelly-estimator based adaptivity for elliptic problems.
 ///
 /// Original error estimator that Kelly et. al. ([1]) derived for the Laplace equation with constant
 /// coefficient, approximated on a quadrilateral mesh. The error of each element is estimated by the
-/// L2 norm of jumps of gradients across element faces (the contribution of the residual norm is 
+/// L2 norm of jumps of gradients across element faces (the contribution of the residual norm is
 /// relatively insignificant and is neglected, see [3]). Note that the estimator has been successfully
 /// used also for other problems than that for which it had been originally derived.
 ///
@@ -245,14 +245,14 @@ class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
     {
       interface_scaling_const = 1./(24.*const_by_laplacian);
       volumetric_scaling_const = interface_scaling_const;
-      boundary_scaling_const = interface_scaling_const; 
-      
-      for (int i = 0; i < num; i++) 
-      {      
-        KellyTypeAdapt::ErrorEstimatorForm form = { 
-          i, H2D_DG_INNER_EDGE, callback(original_kelly_interface_estimator), Hermes::vector<MeshFunction*>() 
+      boundary_scaling_const = interface_scaling_const;
+
+      for (int i = 0; i < num; i++)
+      {
+        KellyTypeAdapt::ErrorEstimatorForm form = {
+          i, H2D_DG_INNER_EDGE, callback(original_kelly_interface_estimator), Hermes::vector<MeshFunction*>()
         };
-        
+
         this->error_estimators_surf.push_back(form);
       }
     }
