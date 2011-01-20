@@ -30,19 +30,15 @@
 /** \defgroup g_adapt Adaptivity
  *  \brief Adaptivity provides framework for modyfying elements in order to decrease errors of the solution.
  *
- *  Adaptivity classes calculates error of every element.
- *  An error of an element is calculated by comparing an
- *  coarse solution with a reference solution. Errors of
- *  elements defines an order in which elements are examined.
+ *  Adaptivity classes calculate error of every element.
+ *  An error of an element is calculated either by comparing a
+ *  coarse solution with a reference solution or by evaluating
+ *  suitable error estimate. Errors of
+ *  elements define the order in which elements are examined.
  *  During examining an element, a refinement is proposed
  *  and the element is refined if applicable. The refinement
  *  is proposed through refinement selectors, see \ref g_selectors.
  *
- *  All adaptivity classes have to be derived from the class Adapt.
- *  Currently available classes are:
- *  - H1Adapt
- *  - L2Adapt
- *    \if H2D_COMPLEX # -HcurlAdapt \endif
  */
 
 #define H2D_MAX_COMPONENTS 10 ///< A maximum number of components.
@@ -118,11 +114,10 @@ struct AdaptivityParamType {
   }
 };
 
-/// Evaluation of an error between a (coarse) solution and a refernece solution and adaptivity. \ingroup g_adapt
+/// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity. \ingroup g_adapt
 /** The class provides basic functionality necessary to adaptively refine elements.
  *  Given a reference solution and a coarse solution, it calculates error estimates
  *  and it acts as a container for the calculated errors.
- *  The class has to be inherited in order to be used.
  */
 class HERMES_API Adapt
 {

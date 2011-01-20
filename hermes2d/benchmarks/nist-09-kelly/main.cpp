@@ -43,7 +43,8 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   //   than THRESHOLD times maximum element error.
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
-                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp
+const bool USE_RESIDUAL_ESTIMATOR = true;        // Add also the norm of the residual to the error estimate of each element.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
                                                   // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
                                                   // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
@@ -55,9 +56,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-                                                  
-const bool USE_RESIDUAL_ESTIMATOR = false;                                                  
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.                                            
 
 // Problem parameters.
 double ALPHA;          // (X_LOC, Y_LOC) is the center of the circular wave front, R_ZERO is the distance from the 
@@ -156,8 +155,11 @@ int main(int argc, char* argv[])
     info("Calculating error estimate and exact error.");
     BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space);
     
-    if (USE_RESIDUAL_ESTIMATOR)
-      adaptivity->add_error_form_vol(callback(residual_estimator));
+    // Use energy norm for error estimate normalization and measuring of exact error.
+    adaptivity->set_error_form(callback(bilinear_form));
+    
+    if (USE_RESIDUAL_ESTIMATOR) 
+      adaptivity->add_error_estimator_vol(callback(residual_estimator));
     
     double err_est_rel = adaptivity->calc_err_est(&sln) * 100;  
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact) * 100;

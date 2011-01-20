@@ -42,8 +42,10 @@ Scalar kelly_interface_estimator(int n, double *wt, Func<Real> *u_ext[], Func<Re
   for (int i = 0; i < n; i++)
     result += wt[i] * sqr( e->nx[i] * (EPS_C*u->get_dx_central(i) - EPS_N*u->get_dx_neighbor(i)) +
                            e->ny[i] * (EPS_C*u->get_dy_central(i) - EPS_N*u->get_dy_neighbor(i))  );
-  
-  return result;
+ 
+  return result;  // Multiplication by element diameter will be done automatically by the KellyTypeAdapt class.
+                  // This allows to call this function only once for each interface and add the correctly scaled
+                  // result to the total error estimate for both elements sharing the interface.
 }
 
 template<typename Real, typename Scalar>
