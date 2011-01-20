@@ -24,8 +24,8 @@ using namespace RefinementSelectors;
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *  \section s_res Results
- *   - DOFs: 3783
- *   - Adaptivity steps: 54
+ *   - DOFs: 1309
+ *   - Adaptivity steps: 35
  */
 
 const int P_INIT_U = 2;                           // Initial polynomial degree for u.
@@ -54,7 +54,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
 
-  int n_dof_allowed = 3800;
+  int n_dof_allowed = 1315;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
