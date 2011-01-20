@@ -5,11 +5,14 @@
 
 using namespace RefinementSelectors;
 
-//  This example is derived from the tutorial example 19.
-//  It uses general Butcher's tables to perform arbitrary 
-//  explicit or implicit low-order or higher-order Runge-Kutta
-//  time integration. Example 19 can just do implicit Euler.
-//  The model problem is a simple nonlinear parabolic PDE.
+//  This example is derived from the example "butcher" and it 
+//  shows how adaptive time-stepping can be done with a pair 
+//  of embedded Runge-Kutta methods. By embedded we mean that 
+//  the Butcher's table has two B rows. After calculating the 
+//  stages K_1, K_2, ..., K_s, the two B rows are used to 
+//  calculate two different approximations Y_{n+1} on the next
+//  time level, with different orders of accuracy. With those
+//  one works as usual.  
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
