@@ -2,7 +2,7 @@ h = 200e-6
 hh = h/2
 w = 1e-4
 
-vertices = 
+vertices =
 {
 	{ 0, -hh },	#0
 	{ 0, hh },	#1

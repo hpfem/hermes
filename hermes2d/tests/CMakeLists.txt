@@ -9,6 +9,7 @@ add_subdirectory(view)
 add_subdirectory(shapeset)
 add_subdirectory(integrals)
 add_subdirectory(rcp)
+add_subdirectory(python)
 
 # Additional definitions for tests.
 add_definitions(-DHERMES_REPORT_ALL -DH2D_TEST)

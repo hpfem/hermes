@@ -23,11 +23,11 @@ boundaries =
 {
   { 0, 1, 1 },
   { 1, 2, 1 },
-  { 2, 5; Boundary marker SE },
-  { 5, 8; Boundary marker NE },
+  { 2, 5, "Boundary marker SE" },
+  { 5, 8, "Boundary marker NE" },
   { 8, 7, 3 },
   { 7, 6, 30 },
-  { 6, 3; Boundary marker NW },
-  { 3, 0; Boundary marker SW }
+  { 6, 3, "Boundary marker NW" },
+  { 3, 0, "Boundary marker SW" }
 }
 
