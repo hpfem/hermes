@@ -8,7 +8,7 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
     NO_DEFAULT_PATH
     NO_SYSTEM_ENVIRONMENT_PATH
     )
-
+	
 execute_process(
 	COMMAND python -c "from distutils.sysconfig import get_config_var; print get_config_var('LIBDIR')"
 	OUTPUT_VARIABLE PYTHON_LIB_PATH
@@ -19,6 +19,13 @@ FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6
     NO_DEFAULT_PATH
     NO_SYSTEM_ENVIRONMENT_PATH
     )
+
+# For MSVC (on Win, the function get_config_var does not accept the parameter 'LIBDIR').
+IF(MSVC)	
+	IF(PYTHON_ROOT)
+		FIND_LIBRARY(PYTHON_LIBRARY NAMES python26 python27 PATHS ${PYTHON_ROOT}/libs)
+	ENDIF(PYTHON_ROOT)
+ENDIF(MSVC)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PYTHON DEFAULT_MSG PYTHON_LIBRARY PYTHON_INCLUDE_PATH)

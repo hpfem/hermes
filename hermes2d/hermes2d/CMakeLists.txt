@@ -1,7 +1,7 @@
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR}/../hermes_common/)
 
-add_subdirectory(hermes_common)
+#add_subdirectory(hermes_common)
 
 CYTHON_ADD_MODULE_PYX(hermes2d)
 add_python_library(hermes2d hermes2d.cpp)
