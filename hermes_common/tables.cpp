@@ -236,20 +236,20 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
 
     case Implicit_Radau_IIA_3_5: // Implicit Radau IIA (fifth-order).
       this->alloc(3);
-      this->set_A(0, 0, (88. - 7*sqrt(6)) / 360 );
-      this->set_A(1, 0, (296 + 169 * sqrt(6)) / 1800 );
-      this->set_A(2, 0, (16. - sqrt(6)) / 36 );
-      this->set_A(0, 1, (296 - 169 * sqrt(6)) / 1800);
-      this->set_A(1, 1, (88. + 7*sqrt(6)) / 360);
-      this->set_A(2, 1, (16. + sqrt(6)) / 36); 
-      this->set_A(0, 2, (-2. + 3 * sqrt(6)) / 225 );
-      this->set_A(1, 2, (-2. - 3 * sqrt(6)) / 225 );
+      this->set_A(0, 0, (88. - 7*sqrt((double)6)) / 360 );
+      this->set_A(1, 0, (296 + 169 * sqrt((double)6)) / 1800 );
+      this->set_A(2, 0, (16. - sqrt((double)6)) / 36 );
+      this->set_A(0, 1, (296 - 169 * sqrt((double)6)) / 1800);
+      this->set_A(1, 1, (88. + 7*sqrt((double)6)) / 360);
+      this->set_A(2, 1, (16. + sqrt((double)6)) / 36); 
+      this->set_A(0, 2, (-2. + 3 * sqrt((double)6)) / 225 );
+      this->set_A(1, 2, (-2. - 3 * sqrt((double)6)) / 225 );
       this->set_A(2, 2, 1./9.);
-      this->set_B(0, (16. - sqrt(6)) / 36 );
-      this->set_B(1, (16. + sqrt(6)) / 36 );
+      this->set_B(0, (16. - sqrt((double)6)) / 36 );
+      this->set_B(1, (16. + sqrt((double)6)) / 36 );
       this->set_B(2, 1./9.);
-      this->set_C(0, (4. - sqrt(6)) / 10 );
-      this->set_C(1, (4. + sqrt(6)) / 10 );
+      this->set_C(0, (4. - sqrt((double)6)) / 10 );
+      this->set_C(1, (4. + sqrt((double)6)) / 10 );
       this->set_C(2, 1.);
     break;
 

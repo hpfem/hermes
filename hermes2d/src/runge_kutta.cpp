@@ -441,7 +441,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   bool verbose, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm) 
 {
-  rk_time_step(current_time, time_step, bt,
+  return rk_time_step(current_time, time_step, bt,
 	       coeff_vec, NULL, dp, matrix_solver,
                verbose, newton_tol, newton_max_iter,
                newton_damping_coeff, newton_max_allowed_residual_norm);
