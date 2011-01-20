@@ -23,7 +23,7 @@ FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6
 # For MSVC (on Win, the function get_config_var does not accept the parameter 'LIBDIR').
 IF(MSVC)	
 	IF(PYTHON_ROOT)
-		FIND_LIBRARY(PYTHON_LIBRARY NAMES python26 python27 PATHS ${PYTHON_ROOT}/libs)
+		FIND_LIBRARY(PYTHON_LIBRARY NAMES python26_d python27_d PATHS ${PYTHON_ROOT}/libs)
 	ENDIF(PYTHON_ROOT)
 ENDIF(MSVC)
 
