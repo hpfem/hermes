@@ -35,12 +35,23 @@ void HERMES_API multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, in
                                                   scalar* stage_coeff_vec, scalar* vector_left);
 
 // Perform one explicit or implicit time step using the Runge-Kutta method
-// corresponding to a given Butcher's table. The negative defaults values for
-// newton_tol and newton_max_iter are for linear problems.
-/// TODO: enable this for other types of solvers besides UMFpack.
+// corresponding to a given Butcher's table. If err_vec != NULL then it will be 
+// filled with an error vector calculated using the second B-row of the Butcher's
+// table (the second B-row B2 must be nonzero in that case). The negative default 
+// values for newton_tol and newton_max_iter are for linear problems.
+// Many improvements are needed, a todo list is presented at the beginning of
+// the crresponding .cpp file.
+bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+                             scalar* coeff_vec, scalar* err_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                             bool verbose = false, double newton_tol = -1.0, int newton_max_iter = -1,
+                             double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+
+// This is a wrapper for the previous function if err_vec is not desired (adaptive time stepping 
+// is not attempted). 
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                              scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
                              bool verbose = false, double newton_tol = -1.0, int newton_max_iter = -1,
                              double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+
 
 #endif

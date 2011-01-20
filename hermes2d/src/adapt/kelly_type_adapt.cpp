@@ -32,7 +32,7 @@ bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_p
 }
 
 void KellyTypeAdapt::add_error_estimator_vol( int i,
-                                              WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
+                                              WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
                                               int area,
                                               Hermes::vector<MeshFunction*> ext )
 {
@@ -46,7 +46,7 @@ void KellyTypeAdapt::add_error_estimator_vol( int i,
 }
 
 void KellyTypeAdapt::add_error_estimator_surf(int i,
-                                              WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
+                                              WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
                                               int area,
                                               Hermes::vector<MeshFunction*> ext)
 {
@@ -207,7 +207,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               // The estimate is multiplied by 0.5 in order to distribute the error equally onto
               // the two neighboring elements.
               double central_err = 0.5 * eval_interface_estimator(&error_estimators_surf[iest],
-                                                                   rm, surf_pos, nbs);
+                                                                  rm, surf_pos, nbs);
               double neighb_err = central_err;
 
               // Scale the error estimate by the scaling function dependent on the element diameter
@@ -562,9 +562,10 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
                               // the weights.
 }
 
-double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap *rm, SurfPos* surf_pos, NeighborSearch* nbs)
+double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
+                                                RefMap *rm, SurfPos* surf_pos, NeighborSearch* nbs)
 {
-  // determine the integration order
+  // Determine integration order.
   Func<Ord>** oi = new Func<Ord>* [num];
   for (int i = 0; i < num; i++)
     oi[i] = nbs->init_ext_fn_ord(this->sln[i]);

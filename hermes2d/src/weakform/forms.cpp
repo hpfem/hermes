@@ -402,7 +402,7 @@ Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
     u->dy  = new scalar [np];
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     if (space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
-      u->laplace = new double [np];
+      u->laplace = new scalar [np];
 #endif
     memcpy(u->val, fu->get_fn_values(), np * sizeof(scalar));
     memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
@@ -412,14 +412,14 @@ Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
     {
       if(sln_type == HERMES_SLN)
       {
-        double *dxx = fu->get_dxx_values();
-        double *dyy = fu->get_dyy_values();
+        scalar *dxx = fu->get_dxx_values();
+        scalar *dyy = fu->get_dyy_values();
         for (int i = 0; i < np; i++)
           u->laplace[i] = dxx[i] + dyy[i];
       }
       else if (sln_type == HERMES_CONST)
       {
-        memset(u->laplace, scalar(0), np * sizeof(scalar));
+        memset(u->laplace, 0, np * sizeof(scalar));
       }
     }
 #endif

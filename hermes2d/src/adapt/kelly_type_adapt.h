@@ -39,8 +39,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
     struct ErrorEstimatorForm
     {
       int i, area;
-      WeakForm::vector_form_val_t fn;
-      WeakForm::vector_form_ord_t ord;
+      WeakForm::error_vector_form_val_t fn;
+      WeakForm::error_vector_form_ord_t ord;
       Hermes::vector<MeshFunction *> ext;
     };
 
@@ -152,10 +152,10 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///   - ExtData\<scalar\> *ext ... external functions (e.g. previous time-level solutions appearing in the residual)
     ///
     void add_error_estimator_vol( int i,
-                                  WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
+                                  WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
                                   int area = HERMES_ANY,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()  );
-    void add_error_estimator_vol( WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
+    void add_error_estimator_vol( WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
                                   int area = HERMES_ANY,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()  )
     {
@@ -170,10 +170,10 @@ class HERMES_API KellyTypeAdapt : public Adapt
     /// respectively \c DiscontinuousFunc, \c DiscontinuousFunc and \c InterfaceGeom.
     ///
     void add_error_estimator_surf(int i,
-                                  WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
+                                  WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
                                   int area = H2D_DG_INNER_EDGE,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-    void add_error_estimator_surf(WeakForm::vector_form_val_t vfv, WeakForm::vector_form_ord_t vfo,
+    void add_error_estimator_surf(WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
                                   int area = H2D_DG_INNER_EDGE,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>())
     {
@@ -222,8 +222,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
 ///       the user, see the example \c poisson-kelly-adapt.
 ///
 template<typename Real, typename Scalar>
-Scalar original_kelly_interface_estimator(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u,
-                                         Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar original_kelly_interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
+                                          Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0.;
   for (int i = 0; i < n; i++)
