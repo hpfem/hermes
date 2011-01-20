@@ -18,7 +18,7 @@ using namespace RefinementSelectors;
  *   - CAND_LIST=H2D_HP_ANISO;
  *   - MESH_REGULARITY=-1
  *   - CONV_EXP=1.0
- *   - ERR_STOP=1.0
+ *   - ERR_STOP=5.0
  *   - NDOF_STOP=60000
  *   - matrix_solver = SOLVER_UMFPACK
  *   - method = DG

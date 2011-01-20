@@ -8,6 +8,8 @@ add_subdirectory(layer-boundary)
 add_subdirectory(neutronics-heat-conduction)
 add_subdirectory(neutronics-heat-conduction-adapt)
 add_subdirectory(neutronics-2-group-adapt)
+add_subdirectory(stabilized-advection-diffusion)
+add_subdirectory(stabilized-advection-reaction)
 add_subdirectory(sdirk-22)
 add_subdirectory(nonsym-check)
 
