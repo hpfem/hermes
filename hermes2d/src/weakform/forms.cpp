@@ -26,7 +26,7 @@ template<> double DiscontinuousFunc<double>::zero = 0.0;
   template<> std::complex<double> DiscontinuousFunc<std::complex<double> >::zero = std::complex<double>(0);
 #endif
 
-// Integration order for coordinates, normals and tangents is one
+/// Integration order for coordinates, normals and tangents is one.
 Geom<Ord>* init_geom_ord()
 {
 	Geom<Ord>* e = new Geom<Ord>;
@@ -51,7 +51,7 @@ Geom<Ord>* init_geom_ord()
 	return e;
 }
 
-// Initialize element marker and coordinates
+/// Initialize element marker and coordinates.
 Geom<double>* init_geom_vol(RefMap *rm, const int order)
 {
     Geom<double>* e = new Geom<double>;
@@ -64,7 +64,7 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order)
     return e;
 }
 
-// Initialize edge marker, coordinates, tangent and normals
+/// Initialize edge marker, coordinates, tangent and normals.
 Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
   Geom<double>* e = new Geom<double>;
@@ -92,7 +92,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 	return e;
 }
 
-// Initialize integration order for function values and derivatives
+/// Initialize integration order for function values and derivatives.
 Func<Ord>* init_fn_ord(const int order)
 {
   Ord *d = new Ord(order);
@@ -111,7 +111,7 @@ Func<Ord>* init_fn_ord(const int order)
 	return f;
 }
 
-// Transformation of shape functions using reference mapping
+/// Transformation of shape functions using reference mapping.
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
   int nc = fu->get_num_components();
@@ -327,7 +327,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   return u;
 }
 
-// Preparation of mesh-functions
+/// Preparation of mesh functions.
 Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order)
 {
   // sanity checks
@@ -372,7 +372,7 @@ Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order)
   return u;
 }
 
-// Preparation of mesh-functions
+/// Preparation of solutions.
 Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
 {
   // sanity checks
