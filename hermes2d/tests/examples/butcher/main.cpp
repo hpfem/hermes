@@ -18,11 +18,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Time integration. Choose one of the following methods, or define your own Butcher's table:
-// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
-// Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
-// Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
+// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SDIRK_2_2, 
+// Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4,
+// Implicit_Lobatto_IIIA_3_4, Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5. 
 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2;
+ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -84,18 +84,18 @@ int main(int argc, char* argv[])
     case 2: butcher_table_type = Implicit_RK_1; break;
 
     case 3: butcher_table_type = Explicit_RK_2; break;
-    case 4: butcher_table_type = Implicit_Crank_Nicolson_2; break;
-    case 5: butcher_table_type = Implicit_SDIRK_2; break;
-    case 6: butcher_table_type = Implicit_Lobatto_IIIA_2; break;
-    case 7: butcher_table_type = Implicit_Lobatto_IIIB_2; break;
-    case 8: butcher_table_type = Implicit_Lobatto_IIIC_2; break;
+    case 4: butcher_table_type = Implicit_Crank_Nicolson_2_2; break;
+    case 5: butcher_table_type = Implicit_SDIRK_2_2; break;
+    case 6: butcher_table_type = Implicit_Lobatto_IIIA_2_2; break;
+    case 7: butcher_table_type = Implicit_Lobatto_IIIB_2_2; break;
+    case 8: butcher_table_type = Implicit_Lobatto_IIIC_2_2; break;
 
     case 9: butcher_table_type = Explicit_RK_3; break;
 
     case 10: butcher_table_type = Explicit_RK_4; break;
-    case 11: butcher_table_type = Implicit_Lobatto_IIIA_4; break;
-    case 12: butcher_table_type = Implicit_Lobatto_IIIB_4; break;
-    case 13: butcher_table_type = Implicit_Lobatto_IIIC_4; break;
+    case 11: butcher_table_type = Implicit_Lobatto_IIIA_3_4; break;
+    case 12: butcher_table_type = Implicit_Lobatto_IIIB_3_4; break;
+    case 13: butcher_table_type = Implicit_Lobatto_IIIC_3_4; break;
 
     default: error("Admissible command-line options are from 1 to 13.");
   }
