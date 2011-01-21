@@ -41,3 +41,5 @@ add_test(example-butcher-Implicit_Lobatto_IIIA_3_4 ${BIN} 11)
 add_test(example-butcher-Implicit_Lobatto_IIIB_3_4 ${BIN} 12)
 add_test(example-butcher-Implicit_Lobatto_IIIC_3_4 ${BIN} 13)
 
+add_test(example-butcher-Implicit_Radau_IIA_3_5 ${BIN} 14)
+

@@ -97,7 +97,9 @@ int main(int argc, char* argv[])
     case 12: butcher_table_type = Implicit_Lobatto_IIIB_3_4; break;
     case 13: butcher_table_type = Implicit_Lobatto_IIIC_3_4; break;
 
-    default: error("Admissible command-line options are from 1 to 13.");
+    case 14: butcher_table_type = Implicit_Radau_IIA_3_5; break;
+
+    default: error("Admissible command-line options are from 1 to 14.");
   }
 
   // Choose a Butcher's table or define your own.
@@ -297,7 +299,15 @@ int main(int argc, char* argv[])
              if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265482) > 1E-6) success = false;
              break;
 
-    default: error("Admissible command-line options are from 1 to 13.");
+    case 14: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265482) > 1E-6) success = false;
+             break;
+    default: error("Admissible command-line options are from 1 to 14.");
   }
 
   // Cleanup.
