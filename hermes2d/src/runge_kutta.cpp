@@ -233,10 +233,12 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Check whether the user provided a second B-row if he wants 
   // err_vec.
-  double b2_coeff_sum = 0;
-  for (int i=0; i < num_stages; i++) b2_coeff_sum += fabs(bt->get_B2(i)); 
-  if (b2_coeff_sum < 1e-10) 
-    error("err_vec != NULL but the B2 row in the Butcher's table is zero in rk_time_step().");
+  if(err_vec != NULL) {
+    double b2_coeff_sum = 0;
+    for (int i=0; i < num_stages; i++) b2_coeff_sum += fabs(bt->get_B2(i)); 
+    if (b2_coeff_sum < 1e-10) 
+      error("err_vec != NULL but the B2 row in the Butcher's table is zero in rk_time_step().");
+  }
 
   // Matrix for the time derivative part of the equation (left-hand side).
   UMFPackMatrix* matrix_left = new UMFPackMatrix();
