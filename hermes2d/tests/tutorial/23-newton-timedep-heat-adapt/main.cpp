@@ -13,7 +13,7 @@ const int P_INIT = 2;                             // Initial polynomial degree o
 const int TIME_DISCR = 1;//2;                     // 1 for implicit Euler, 2 for Crank-Nicolson.
 const double TAU =
   TIME_DISCR == 1 ? 0.5 : 0.1;                    // Time step (0.5 for implicit Euler, 0.1 for Crank-Nicolson).
-const double T_FINAL = 5.0;                       // Time interval length.
+const double T_FINAL = 2.0;                       // Time interval length.
 
 // Adaptivity
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -271,9 +271,9 @@ int main(int argc, char* argv[])
 
   ndof = Space::get_num_dofs(&space);
 
-  printf("ndof allowed = %d\n", 240);
+  printf("ndof allowed = %d\n", 150);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 240) {      // ndofs was 231 at the time this test was created.
+  if (ndof < 150) {      // ndofs was 145 at the time this test was created.
     printf("Success!\n");
     return ERR_SUCCESS;
   }

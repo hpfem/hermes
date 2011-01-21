@@ -24,8 +24,8 @@ using namespace RefinementSelectors;
  *   - method = DG
  *
  *  \section s_res Results
- *   - DOFs: 476
- *   - Adaptivity steps: 24 
+ *   - DOFs: 36
+ *   - Adaptivity steps: 9 
  */
 
 enum GalerkinMethod
@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
   
   verbose("Total running time: %g s", cpu_time.accumulated());
 
-  int n_dof_allowed = 70;
+  int n_dof_allowed = 40;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
