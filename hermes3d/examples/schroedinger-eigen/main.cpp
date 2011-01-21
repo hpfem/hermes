@@ -177,8 +177,12 @@ int main(int argc, char* argv[])
   }  
   fclose(file);
 
+  // Clean up.
   delete [] coeff_vec;
-
+  delete solver;
+  delete matrix_left;
+  delete matrix_right;
+  
   return 0; 
 };
 
