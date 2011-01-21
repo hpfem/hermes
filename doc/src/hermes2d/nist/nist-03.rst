@@ -1,4 +1,4 @@
-NIST-03 (Elliptic)
+NIST-03 (Linear Elasticity)
 ------------------
 
 **Git reference:** Benchmark `nist-03 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-03>`_.

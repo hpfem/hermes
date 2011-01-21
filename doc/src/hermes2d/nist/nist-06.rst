@@ -1,4 +1,4 @@
-NIST-06 (Elliptic)
+NIST-06 (Boundary Layer)
 -----------------
 
 **Git reference:** Benchmark `nist-06 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-06>`_.

@@ -1,4 +1,4 @@
-NIST-04 (Elliptic)
+NIST-04 (Peak)
 ------------------
 
 **Git reference:** Benchmark `nist-04 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-04>`_.

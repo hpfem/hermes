@@ -1,4 +1,4 @@
-NIST-05 (Elliptic)
+NIST-05 (Battery)
 ------------------
 
 **Git reference:** Benchmark `nist-05 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-05>`_.

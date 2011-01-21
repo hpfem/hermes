@@ -1,4 +1,4 @@
-NIST-01 (Elliptic)
+NIST-01 (Analytic Solution)
 ------------------
 
 **Git reference:** Benchmark `nist-01 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-01>`_.

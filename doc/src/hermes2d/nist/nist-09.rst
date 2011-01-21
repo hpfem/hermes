@@ -1,10 +1,9 @@
-NIST-09 (Elliptic)
+NIST-09 (Wave Front)
 ------------------
 
 **Git reference:** Benchmark `nist-09 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-09>`_.
 
-This is a standard benchmark for adaptive FEM algorithms.The exact solution is smooth
-but contains singular gradient in a re-entrant corner.
+This is a commonly used example for testing the performance of adaptive refinement algorithms using a wave front and a singularity.
 
 Model problem
 ~~~~~~~~~~~~~

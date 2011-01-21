@@ -1,4 +1,4 @@
-NIST-11 (Elliptic)
+NIST-11 (Intersecting Interfaces)
 ------------------
 
 **Git reference:** Benchmark `nist-11 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-11>`_.
