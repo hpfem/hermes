@@ -2,14 +2,18 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "runge_kutta.h"
+#include "function/norm.h"
 
 using namespace RefinementSelectors;
 
-//  This example is derived from the tutorial example 19.
-//  It uses general Butcher's tables to perform arbitrary 
-//  explicit or implicit low-order or higher-order Runge-Kutta
-//  time integration. Example 19 can just do implicit Euler.
-//  The model problem is a simple nonlinear parabolic PDE.
+//  This example is derived from the example "butcher" and it 
+//  shows how adaptive time-stepping can be done with a pair 
+//  of embedded Runge-Kutta methods. By embedded we mean that 
+//  the Butcher's table has two B rows. After calculating the 
+//  stages K_1, K_2, ..., K_s, the two B rows are used to 
+//  calculate two different approximations Y_{n+1} on the next
+//  time level, with different orders of accuracy. With those
+//  one works as usual.  
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
@@ -24,10 +28,16 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
-const double time_step = 0.2;                      // Time step.
+double time_step = 0.2;                            // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
+const double TIME_TOL_LOWER = 0.005;               // If rel. temporal error is less than this threshold, increase time step
+                                                   // but do not repeat time step (this might need further research).
+const double TIME_TOL_UPPER = 0.05;                // If rel. temporal error is greater than this threshold, decrease time 
+                                                   // step size and repeat time step.
+const double TIME_STEP_INC_RATIO = 1.1;            // Time step increase ratio (applied when rel. temporal error is too small).
+const double TIME_STEP_DEC_RATIO = 0.5;            // Time step decrease ratio (applied when rel. temporal error is too large).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -124,6 +134,9 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[ndof];
   OGProjection::project_global(space, u_prev_time, coeff_vec, matrix_solver);
 
+  // Initialize an error vector for adaptive time stepping.
+  scalar* err_vec = new scalar[ndof];
+
   // Initialize the FE problem.
   bool is_linear = false;
   DiscreteProblem dp(&wf, space, is_linear);
@@ -141,11 +154,32 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, err_vec, &dp, matrix_solver,
 		      verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
+    // Convert err_vec into an error function (Dirichlet lift must not 
+    // be included).
+    Solution* error_function = new Solution(&mesh);
+    bool add_dir_lift = false;
+    Solution::vector_to_solution(err_vec, space, error_function, add_dir_lift);
+
+    // Calculate relative time stepping error and decide whether the 
+    // time step can be accepted. If not, then the time step size is 
+    // reduced and the entire time step repeated. If yes, then another
+    // check is run, and if the relative error is very low, time step 
+    // is increased.
+    double rel_err = calc_norm(error_function, HERMES_H1_NORM) / calc_norm(u_prev_time, HERMES_H1_NORM);
+    if (rel_err > TIME_TOL_UPPER) {
+      time_step *= TIME_STEP_DEC_RATIO;
+      continue;
+    }
+    if (rel_err < TIME_TOL_LOWER) {
+      time_step *= TIME_STEP_INC_RATIO;
+      continue;
+    }
+   
     // Convert coeff_vec into a new time level solution.
     Solution::vector_to_solution(coeff_vec, space, u_prev_time);
 

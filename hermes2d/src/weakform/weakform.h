@@ -69,6 +69,22 @@ public:
   typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi,
                                    Geom<Ord> *e, ExtData<Ord> *);
 
+// Matrix forms for error calculation.
+  typedef scalar (*error_matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
+                                             Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
+                                             ExtData<scalar> *); ///< Error bilinear form callback function.
+  typedef Ord (*error_matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
+                                          Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
+                                          ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
+
+// Vector forms for error calculation.
+  typedef scalar (*error_vector_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
+                                             Func<scalar> *u, Geom<double> *e,
+                                             ExtData<scalar> *); ///< Error linear form callback function.
+  typedef Ord (*error_vector_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
+                                          Func<Ord> *u, Geom<Ord> *e,
+                                          ExtData<Ord> *); ///< Error linear form to estimate order of a function.
+
   // General case.
   struct MatrixFormVol  {
     int i, j, sym, area;

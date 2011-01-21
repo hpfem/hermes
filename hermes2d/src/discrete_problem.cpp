@@ -301,7 +301,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
                 }
               }
             }
-	  }
+          }
         }
 
         // Deallocation an array of arrays of neighboring elements for every mesh x edge.
@@ -329,7 +329,7 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
             if (block_weights != NULL) {
               if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
             }
-	  }
+          }
 
           if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {
             AsmList *am = &(al[m]);
@@ -420,7 +420,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   /* END IDENTICAL CODE WITH H3D */
 
-  bool bnd[4];			    // FIXME: magic number - maximal possible number of element surfaces
+  bool bnd[4];          // FIXME: magic number - maximal possible number of element surfaces
   SurfPos surf_pos[4];
   AUTOLA_CL(AsmList, al, neq);
   AUTOLA_OR(bool, nat, neq);
@@ -509,7 +509,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
         e[i]->visited = true;
       }
-      // Boundary marker.
+      // Element or boundary marker.
       marker = e0->marker;
 
       init_cache();     // This is different in H2D.
@@ -847,11 +847,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
               // shared by the active element and distinct neighbors.
               NeighborSearch *nbs_v = new NeighborSearch(refmap[m].get_active_element(), spaces[m]->get_mesh());
               nbs_v->set_active_edge(isurf);
-              nbs_v->attach_pss(fv, &(refmap[m]));
+              nbs_v->attach_pss_and_rm(fv, &(refmap[m]));
 
               NeighborSearch *nbs_u = new NeighborSearch(refmap[n].get_active_element(), spaces[n]->get_mesh());
               nbs_u->set_active_edge(isurf);
-              nbs_u->attach_pss(fu, &(refmap[n]));
+              nbs_u->attach_pss_and_rm(fu, &(refmap[n]));
 
               // Go through each segment of the active edge. If the active segment has already
               // been processed (when the neighbor element was assembled), it is skipped.
@@ -940,7 +940,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                 RefMap *rm_for_main_cache = new RefMap();
                 rm_for_main_cache->set_active_element(e0);
                 rm_for_main_cache->set_transform(refmap[0].get_transform());
-                NeighborSearch::main_cache_m[nbs_key_m]->attach_pss(fv_for_main_cache, rm_for_main_cache);
+                NeighborSearch::main_cache_m[nbs_key_m]->attach_pss_and_rm(fv_for_main_cache, rm_for_main_cache);
               }
               NeighborSearch *nbs_v = NeighborSearch::main_cache_m[nbs_key_m];
 

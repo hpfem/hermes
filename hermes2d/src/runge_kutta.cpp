@@ -218,18 +218,28 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
 
 bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                  scalar* coeff_vec, scalar* err_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
                   bool verbose, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
+  // Check for not implemented features.
   if (matrix_solver != SOLVER_UMFPACK)
     error("Sorry, rk_time_step() still only works with UMFpack.");
   if (dp->get_weak_formulation()->get_neq() > 1)
     error("Sorry, rk_time_step() does not work with systems yet.");
 
+  // Get number of stages from the Butcher's table.
+  int num_stages = bt->get_size();
+
+  // Check whether the user provided a second B-row if he wants 
+  // err_vec.
+  double b2_coeff_sum = 0;
+  for (int i=0; i < num_stages; i++) b2_coeff_sum += fabs(bt->get_B2(i)); 
+  if (b2_coeff_sum < 1e-10) 
+    error("err_vec != NULL but the B2 row in the Butcher's table is zero in rk_time_step().");
+
   // Matrix for the time derivative part of the equation (left-hand side).
   UMFPackMatrix* matrix_left = new UMFPackMatrix();
-  //Vector* vector_left = create_vector(matrix_solver);
 
   // Matrix and vector for the rest (right-hand side).
   UMFPackMatrix* matrix_right = new UMFPackMatrix();
@@ -237,9 +247,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Create matrix solver.
   Solver* solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
-
-  // Get number of stages from the Butcher's table.
-  int num_stages = bt->get_size();
 
   // Get original space, mesh, and ndof.
   dp->get_space(0);
@@ -387,6 +394,21 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Calculate Y^{n+1} = Y^n + h \sum_{j=1}^s b_j k_j.
   for (int i = 0; i < ndof; i++) coeff_vec[i] += time_step * rk_increment_vector->get(i);
 
+  // If err_vec is not NULL, use the second B-row in the Butcher's
+  // table to calculate the second approximation Y_{n+1}. Then 
+  // subtract the original one from it, and return this as an
+  // error vector err_vec.
+  if (err_vec != NULL) {
+    for (int i = 0; i < ndof; i++) {
+      rk_increment_vector->set(i, 0);
+      for (int j = 0; j < num_stages; j++) {
+        rk_increment_vector->add(i, bt->get_B2(j) * K_vector[j*ndof + i]);
+      }
+    }
+    for (int i = 0; i < ndof; i++) err_vec[i] = time_step * rk_increment_vector->get(i);
+    for (int i = 0; i < ndof; i++) err_vec[i] = err_vec[i] - coeff_vec[i];
+  }
+
   // Clean up.
   delete matrix_left;
   delete matrix_right;
@@ -411,4 +433,16 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   delete [] vector_left;
 
   return true;
+}
+
+// This is the same as the rk_time_step() function above but it does not have the err_vec vector.
+bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+                  scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                  bool verbose, double newton_tol, int newton_max_iter,
+                  double newton_damping_coeff, double newton_max_allowed_residual_norm) 
+{
+  return rk_time_step(current_time, time_step, bt,
+	       coeff_vec, NULL, dp, matrix_solver,
+               verbose, newton_tol, newton_max_iter,
+               newton_damping_coeff, newton_max_allowed_residual_norm);
 }

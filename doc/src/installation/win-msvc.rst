@@ -73,26 +73,32 @@ This list works for 32-bit version of Hermes. If you intend to cross-compile 64-
     - dependencies\\bin: Binary modules (\*.dll) of dependency libraries. Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable.
 
 
-  - Python(ver-2.6.5, 2.7.1)
-
-    - Download Python windows installer (http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi, or http://www.python.org/ftp/python/2.7.1/python-2.7.1.msi) and run it. 
-    - Add the installation directory (e.g. 'C:\Python26') to your 'PATH' environment variable.
+  - Python(2.6.5)
+	
+    - Download Python source code from http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2 and unpack it.
+    - Navigate to Python-2.6.5\PC\VS8.0\, you will find a MSVC 8.0 sln file pcbuild.sln.
+    - Open it using your version of MSVC (newer versions will automatically convert the solution file).
+    - Now build the solution and from the same directory copy python26_d.lib to dependencies\\lib.
+    - Copy Python.h from Python-2.6.5\Include\ to dependencies\\include. This is for the Python library.
+    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64)
+    - Install Python.
     - Open a command prompt, execute python, and you will see something like::
 
           python.exe
-          Python 2.6.5 (r265:79096, Mar 19 2010, 21:48:26) [MSC v.1500 32 bit (Intel)] on win32
-          >>>
+          Python 2.6.5 (r27:82500, Jan 20 2011, 18:55:31) [MSC v.1600 32 bit (Intel)] on win32
+		  >>>
 
-      If you have Cygwin installed again, make sure you are running the Windows Python. 
+
+		If you have Cygwin installed again, make sure you are running the Windows Python. 
  
     - Numpy(ver-1.4.1)
 
-      - Download Numpy-1.4.1-py2.6-superpack-python2.6.exe (http://sourceforge.net/projects/numpy/files/) and run it.
-      - Open a command prompt, excute following command from python shell::
+      - Download http://downloads.sourceforge.net/project/numpy/NumPy/1.4.1/numpy-1.4.1-win32-superpack-python2.6.exe and run it.
+      - Open a command prompt, execute following command from python shell::
 
             >>> import numpy
             >>> print numpy.get_include()
-            C:\Pytthon26\lib\site-packages\numpy\core\include
+            C:\Python26\Lib\site-packages\numpy\core\include
             >>>
 
     - Cython(ver-0.12.1)

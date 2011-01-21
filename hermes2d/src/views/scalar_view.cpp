@@ -214,6 +214,8 @@ void ScalarView::create_setup_bar()
 void ScalarView::show(MeshFunction* sln, double eps, int item,
                       MeshFunction* xdisp, MeshFunction* ydisp, double dmult)
 {
+  // For preservation of the sln's active element. Will be set back after the visualization.
+  Element* active_element = sln->get_active_element();
   lin.lock_data();
 
   double max_abs = range_auto ? -1.0 : std::max(fabs(range_min), fabs(range_max));
@@ -239,6 +241,13 @@ void ScalarView::show(MeshFunction* sln, double eps, int item,
   verbose("Showing data in view \"%s\"", title.c_str());
   verbose(" Used value range [%g; %g]", range_min, range_max);
   verbose(" Value range of data: [%g, %g]", lin.get_min_value(), lin.get_max_value());
+  
+  // Now we reset the active element if it was set before the MeshFunction sln entered this method.
+  if(active_element != NULL)
+    // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
+    // there is nothing to restore to.
+    if(active_element->active)
+      sln->set_active_element(active_element);
 }
 
 void ScalarView::show_linearizer_data(double eps, int item)

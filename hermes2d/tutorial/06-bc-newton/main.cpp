@@ -12,7 +12,7 @@
 //     du/dn = 0 ... insulated wall on Gamma_outer and Gamma_inner (Neumann)
 //     du/dn = H*(u - T0) ... heat flux on Gamma_bottom (Newton)
 //
-// Note that the last BC can be written in the form  du/dn - H*u = -h*T0.
+// Note that the last BC can be written in the form  du/dn - H*u = -H*T0.
 //
 // The following parameters can be changed:
 

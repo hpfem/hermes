@@ -8,6 +8,7 @@ endif(MSVC)
 # source files for the hermes2d library
 set(SRC
        adapt/adapt.cpp
+       adapt/kelly_type_adapt.cpp
 
        function/solution.cpp 
        function/filter.cpp

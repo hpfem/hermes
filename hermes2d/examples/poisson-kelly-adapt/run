@@ -1,4 +1,4 @@
 rm *~ 
-./nist-09
+./poisson-kelly-adapt
 python plot_graph.py &
 

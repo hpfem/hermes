@@ -70,7 +70,7 @@ NeighborSearch::~NeighborSearch()
   clear_caches();
   clear_supported_shapes();
   clear_neighbor_pss();
-  detach_pss();
+  detach_pss_and_rm();
   for(unsigned int i = 0; i < transformations.size(); i++)
     delete [] transformations.at(i);
   transformations.clear();
@@ -428,7 +428,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   if (neighb_el->visited && ignore_visited_segments)
     return false;
 
-  if(central_pss != NULL) {
+  if(central_pss != NULL)
+  {
     ensure_central_pss_rm(this);
 
     // Reset the transformation of the pss on central element.
@@ -441,6 +442,13 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
         central_pss->push_transform(transformations[active_segment][i]);
 
     central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
+  }
+  else if (central_rm != NULL)
+  {
+    // Push the central element's transformation to the central refmap.
+    if (neighborhood_type == H2D_DG_GO_DOWN)
+      for(int i = 0; i < n_trans[active_segment]; i++)
+        central_rm->push_transform(transformations[active_segment][i]);
   }
 
   if (with_neighbor_pss) // If the extended shapeset is needed...
@@ -476,7 +484,7 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   return true;
 }
 
-void NeighborSearch::attach_pss(PrecalcShapeset *pss, RefMap *rm)
+void NeighborSearch::attach_pss_and_rm(PrecalcShapeset *pss, RefMap *rm)
 {
   central_pss = pss;
   central_rm = rm;
@@ -486,9 +494,20 @@ void NeighborSearch::attach_pss(PrecalcShapeset *pss, RefMap *rm)
               "Cannot use a RefMap that is transformed differently than the supplied PrecalcShapeset." );
 }
 
-void NeighborSearch::detach_pss()
+void NeighborSearch::attach_rm(RefMap *rm)
 {
-  if (central_pss == NULL) return;
+  central_rm = rm;
+  original_central_el_transform = rm->get_transform();
+}
+
+void NeighborSearch::detach_pss_and_rm()
+{
+  if (central_pss == NULL)
+  {
+    if (central_rm != NULL)
+      detach_rm();
+    return;
+  }
 
   if (neighborhood_type == H2D_DG_GO_DOWN) {
     if (central_pss->get_transform() != original_central_el_transform) {
@@ -496,6 +515,13 @@ void NeighborSearch::detach_pss()
       central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
     }
   }
+}
+
+void NeighborSearch::detach_rm()
+{
+  if (central_rm != NULL &&
+      neighborhood_type == H2D_DG_GO_DOWN && central_rm->get_transform() != original_central_el_transform)
+    central_rm->set_transform(original_central_el_transform);
 }
 
 int NeighborSearch::create_extended_shapeset(Space *space, AsmList* al)
@@ -515,10 +541,10 @@ void NeighborSearch::set_quad_order(int order)
 {
   ensure_active_segment(this);
 
-  quad->set_mode(central_el->get_mode());
-  central_quad.init(quad, quad->get_edge_points(active_edge, order));
   quad->set_mode(neighb_el->get_mode());
   neighb_quad.init(quad, quad->get_edge_points(neighbor_edge, order));
+  quad->set_mode(central_el->get_mode());
+  central_quad.init(quad, quad->get_edge_points(active_edge, order));
 }
 
 double3* NeighborSearch::get_quad_pt(bool on_neighbor)
@@ -558,10 +584,15 @@ int NeighborSearch::get_quad_np()
 
 Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos *ep)
 {
-  ensure_central_pss_rm(this);
   ensure_active_segment(this);
+  ensure_central_rm(this);
 
   int eo = get_quad_eo();
+
+  // Do not use the caches at all.
+  if (ext_cache_e == NULL)
+    return new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo),
+                                      neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
 
   if (n_neighbors == 1) // go-up or no-transf neighborhood
   {
@@ -584,40 +615,43 @@ Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos 
 
 double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 {
-  ensure_central_pss_rm(this);
   ensure_active_segment(this);
+  ensure_central_rm(this);
 
   int eo = get_quad_eo();
+
+  // Do not use the cache at all.
+  if (ext_cache_jwt == NULL)
+    return calculate_jwt(eo);
 
   if (n_neighbors == 1) // go-up or no-transf neighborhood
   {
     // Do the same as if assembling standard (non-DG) surface forms.
-    if (ext_cache_jwt[eo] == NULL) {
-      int np = get_quad_np();
-      double3* pt = get_quad_pt();
-      double3* tan = central_rm->get_tangent(active_edge, eo);
-
-      ext_cache_jwt[eo] = new double[np];
-      for(int i = 0; i < np; i++)
-        ext_cache_jwt[eo][i] = pt[i][2] * tan[i][2];
-    }
+    if (ext_cache_jwt[eo] == NULL)
+      ext_cache_jwt[eo] = calculate_jwt(eo);
     return ext_cache_jwt[eo];
   }
   else  // go-down neighborhood
   {
     // Also take into account the transformations of the central element.
     Key key(eo, active_segment);
-    if (cache_jwt[key] == NULL) {
-      int np = get_quad_np();
-      double3* pt = get_quad_pt();
-      double3* tan = central_rm->get_tangent(active_edge, eo);
-
-      cache_jwt[key] = new double[np];
-      for(int i = 0; i < np; i++)
-        cache_jwt[key][i] = pt[i][2] * tan[i][2];
-    }
+    if (cache_jwt[key] == NULL)
+      cache_jwt[key] = calculate_jwt(eo);
     return cache_jwt[key];
   }
+}
+
+double* NeighborSearch::calculate_jwt(int edge_order)
+{
+  int np = get_quad_np();
+  double3* pt = get_quad_pt();
+  double3* tan = central_rm->get_tangent(active_edge, edge_order);
+
+  double *jwt = new double[np];
+  for(int i = 0; i < np; i++)
+    jwt[i] = pt[i][2] * tan[i][2];
+
+  return jwt;
 }
 
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
@@ -686,22 +720,22 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
 int NeighborSearch::get_neighb_edge_number(int segment)
 {
-    ensure_active_edge(this);
-	if( (unsigned) segment >= neighbor_edges.size())
-		error("given number is bigger than actual number of neighbors ");
-	else
-		return neighbor_edges[segment].local_num_of_edge;
-    return 0;
+  ensure_active_edge(this);
+  if( (unsigned) segment >= neighbor_edges.size())
+    error("given number is bigger than actual number of neighbors ");
+  else
+    return neighbor_edges[segment].local_num_of_edge;
+  return 0;
 }
 
 int NeighborSearch::get_neighb_edge_orientation(int segment)
 {
-    ensure_active_edge(this);
-	if( (unsigned) segment >= neighbor_edges.size())
-		error("given number is bigger than actual number of neighbors ");
-	else
-		return neighbor_edges[segment].orientation;
-    return 0;
+  ensure_active_edge(this);
+  if( (unsigned) segment >= neighbor_edges.size())
+    error("given number is bigger than actual number of neighbors ");
+  else
+    return neighbor_edges[segment].orientation;
+  return 0;
 }
 
 
