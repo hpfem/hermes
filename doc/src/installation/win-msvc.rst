@@ -73,18 +73,19 @@ This list works for 32-bit version of Hermes. If you intend to cross-compile 64-
     - dependencies\\bin: Binary modules (\*.dll) of dependency libraries. Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable.
 
 
-  - Python(2.7.1)
-
-    - Download Python source code from http://www.python.org/ftp/python/2.7/Python-2.7.tar.bz2 and unpack it. 
-	- Navigate to Python-2.7\PC\VS8.0\, you will find a MSVC 8.0 sln file pcbuild.sln.
-	- Open it using your version of MSVC (newer versions will automatically convert the solution file).
-    - Now build the solution and from the same directory copy python27_d.dll to dependencies\\bin, python27_d.lib to dependencies\\lib.
-	- Copy Python.h from Python-2.7\Include\ to dependencies\\include.
-	- Add the path Python-2.7\PC\VS8.0\ to your system path
+  - Python(2.6.5)
+	
+    - Download Python source code from http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2 and unpack it.
+    - Navigate to Python-2.6.5\PC\VS8.0\, you will find a MSVC 8.0 sln file pcbuild.sln.
+    - Open it using your version of MSVC (newer versions will automatically convert the solution file).
+    - Now build the solution and from the same directory copy python26_d.lib to dependencies\\lib.
+    - Copy Python.h from Python-2.6.5\Include\ to dependencies\\include. This is for the Python library.
+    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64)
+    - Install Python.
     - Open a command prompt, execute python, and you will see something like::
 
           python.exe
-          Python 2.7 (r27:82500, Jan 20 2011, 18:55:31) [MSC v.1600 32 bit (Intel)] on win32
+          Python 2.6.5 (r27:82500, Jan 20 2011, 18:55:31) [MSC v.1600 32 bit (Intel)] on win32
 		  >>>
 
 
@@ -92,12 +93,12 @@ This list works for 32-bit version of Hermes. If you intend to cross-compile 64-
  
     - Numpy(ver-1.4.1)
 
-      - Download NumPy/1.5.1/numpy-1.5.1-win32-superpack-python2.7.exe (http://sourceforge.net/projects/numpy/files/) and run it.
-      - Open a command prompt, excute following command from python shell::
+      - Download http://downloads.sourceforge.net/project/numpy/NumPy/1.4.1/numpy-1.4.1-win32-superpack-python2.6.exe and run it.
+      - Open a command prompt, execute following command from python shell::
 
             >>> import numpy
             >>> print numpy.get_include()
-            C:\Python27\Lib\site-packages\numpy\core\include
+            C:\Python26\Lib\site-packages\numpy\core\include
             >>>
 
     - Cython(ver-0.12.1)
