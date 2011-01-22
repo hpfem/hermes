@@ -229,7 +229,7 @@ Scalar dg_interface_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Fun
 {
   Scalar result = 0;
   //Real sigma = 2 * C_W / (e->diam + e->get_neighbor_diam());
-  Real edge_len;
+  Real edge_len = 0.;
   for (int i = 0; i < n; i++)
     edge_len += wt[i];
   
@@ -255,7 +255,7 @@ Scalar dg_boundary_biform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func
 {
   Scalar result = 0;
   //Real sigma = C_W * EPSILON / e->diam;
-  Real edge_len;
+  Real edge_len = 0.;
   for (int i = 0; i < n; i++)
     edge_len += wt[i];
   
@@ -275,7 +275,7 @@ Scalar dg_boundary_liform_diffusion(int n, double *wt, Func<Real> *u_ext[], Func
 {
   Scalar result = 0;
   //Real sigma = C_W * EPSILON / e->diam;
-  Real edge_len;
+  Real edge_len = 0.;
   for (int i = 0; i < n; i++)
     edge_len += wt[i];
   
