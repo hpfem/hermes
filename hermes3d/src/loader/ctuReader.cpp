@@ -28,6 +28,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <iostream>
+#include <cstdlib>
 
 // maximal row length in bytes (used for reading the mesh3d-file)
 #define MAX_ROW_LEN	                        1024
@@ -173,18 +175,25 @@ void parse_ctuFormat(const char *file_name, CTUInfo *ctuInfo)
             if(point_write)
             {
                 _Node_ *node = new _Node_;
-                caster << cols[1] << " " << cols[2] << " " << cols[3];
-                caster >> node->n[0] >> node->n[1] >> node->n[2];
-                caster.str("");
+
+		node->n[0]  = atof(cols[1].c_str());
+		node->n[1]  = atof(cols[2].c_str());
+		node->n[2] = atof(cols[3].c_str());
 
                 ctuInfo->nodes.push_back(node);
             }
             else
             {
                 _Hex_ *hex = new _Hex_;
-                caster << cols[2] << " " + cols[3] << " " << cols[4] << " " << cols[5] << " " << cols[6] << " " << cols[7] << " " << cols[8] << " " << cols[9];
-                caster >> hex->n[0] >> hex->n[1] >> hex->n[2] >> hex->n[3] >> hex->n[4] >> hex->n[5] >> hex->n[6] >> hex->n[7];
-                caster.str("");
+
+		hex->n[0]  = atof(cols[2].c_str());
+		hex->n[1]  = atof(cols[3].c_str());
+		hex->n[2]  = atof(cols[4].c_str());
+		hex->n[3]  = atof(cols[5].c_str());
+		hex->n[4]  = atof(cols[6].c_str());
+		hex->n[5]  = atof(cols[7].c_str());
+		hex->n[6]  = atof(cols[8].c_str());
+		hex->n[7]  = atof(cols[9].c_str());
 
                 ctuInfo->hexs.push_back(hex);
             }
@@ -214,7 +223,7 @@ bool CTUReader::load(const char *file_name, Mesh *mesh)
     vector<_Node_*>::iterator itv;
     vector<_Hex_*>::iterator ith;
 
-    for(itv = ci.nodes.begin();itv < ci.nodes.end(); itv++)
+    for(itv = ci.nodes.begin();itv != ci.nodes.end(); itv++)
     {
         mesh->add_vertex((*itv)->n[0], (*itv)->n[1], (*itv)->n[2]);
     }
@@ -237,7 +246,6 @@ bool CTUReader::load(const char *file_name, Mesh *mesh)
     }
 
     mesh->ugh();
-
     return true;
 }
 
@@ -363,6 +371,5 @@ bool CTUReader::save_as_h3d(const char *file_name, Mesh *mesh)
 
 bool CTUReader::save(const char *file_name, Mesh *mesh)
 {
-    save_as_h3d(file_name, mesh);
-    return true;
+    return save_as_h3d(file_name, mesh);
 }
