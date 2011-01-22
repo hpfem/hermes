@@ -52,6 +52,7 @@
 #include "loader/mesh3d.h"
 #include "loader/hdf5.h"
 #include "loader/exodusii.h"
+#include "loader/ctuReader.h"
 
 // spaces
 #include "space/space.h"

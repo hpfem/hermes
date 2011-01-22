@@ -17,7 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "ctu.h"
+#include "ctuReader.h"
 #include <string.h>
 #include "../../../hermes_common/error.h"
 #include "../../../hermes_common/trace.h"
@@ -26,6 +26,7 @@
 #include "../refdomain.h"
 
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 // maximal row length in bytes (used for reading the mesh3d-file)
@@ -40,26 +41,53 @@
 
 using namespace std;
 
-struct Vertex
+struct _Node_
 {
-    double x,y,z;
+    double n[3];
 };
 
-struct Hex
+struct _Hex_
 {
-    int v[8];
+    unsigned int n[8];
 };
 
-struct Quad
+struct _Quad_
 {
-    int v[4];
+    unsigned int n[4];
 };
 
-struct Info
+class CTUInfo
 {
-    vector<Vertex> v;
-    vector<Hex> h; 
-    vector<Quad> q;
+    public:
+        vector<_Node_*> nodes;
+        vector<_Hex_*> hexs; 
+        vector<_Quad_*> quads;
+
+        CTUInfo()
+        {
+            
+        }
+
+        ~CTUInfo()
+        {
+            for(unsigned i=0;i<nodes.size();i++)
+            {
+                delete[] nodes.at(i);
+            }
+            nodes.clear();
+
+            for(unsigned i=0;i<hexs.size();i++)
+            {
+                delete[] hexs.at(i);
+            }
+            hexs.clear();
+
+            for(unsigned i=0;i<quads.size();i++)
+            {
+                delete[] quads.at(i);
+            }
+            quads.clear();
+        }
 };
 
 bool in_list(vector<int> *l, int i)
@@ -77,11 +105,43 @@ bool in_list(vector<int> *l, int i)
     return false;
 }
 
-void parse_ctuFormat(const char *file_name, Info *i)
+void Split(std::vector<std::string>& lst, const std::string& input, const std::string& separators, bool remove_empty = true)
 {
-    ofstream h3d_f("test.mesh3d");
-    ofstream pd0_f("test.pd0.mesh3d");
-    ofstream hd0_f("test.hd0.mesh3d");
+    string word = "";
+    for (size_t n = 0; n < input.size(); ++n)
+    {
+        if (string::npos == separators.find(input[n]))
+            word += input[n];
+        else
+        {
+            if (!word.empty() || !remove_empty)
+                lst.push_back(word);
+            word = "";
+        }
+    }
+    if (!word.empty() || !remove_empty)
+        lst.push_back(word);
+}
+
+void Trim(string& str)
+{
+    // trim leading spaces
+    size_t startpos = str.find_first_not_of(" \n\r\t");
+    if( string::npos != startpos )
+    {
+        str = str.substr( startpos );
+    }
+
+    // trim trailing spaces
+    size_t endpos = str.find_last_not_of(" \n\r\t");
+    if( string::npos != endpos )
+    {
+        str = str.substr( 0, endpos+1 );
+    }
+}
+
+void parse_ctuFormat(const char *file_name, CTUInfo *ctuInfo)
+{
     ifstream ctu_f(file_name);
 
     bool point_start = true;
@@ -89,77 +149,50 @@ void parse_ctuFormat(const char *file_name, Info *i)
 
     string line, str;
     vector<string> cols;
-    vector<int> pd0_id;
+    stringstream caster;
 
     while(getline(ctu_f,line))
     {
-        boost::trim(line);
+        Trim(line);
 
-        boost::split(cols, line, boost::is_any_of("\t "));
+        Split(cols, line, " ",true);
 
         if(cols.size() == 1)
         {
-            int item_count = boost::lexical_cast<int>(cols[0]);
-
             if(point_start)
             {
-                h3d_f << "# points\n";
-                pd0_f << "# points with displacement 0\n";
                 point_start = false;
             }
             else
             {
-                h3d_f << "# hex\n";
-                hd0_f << "# hex with atleast one point with displacement 0\n";
                 point_write = false;
             }
-
-            h3d_f << boost::lexical_cast<string>(item_count) << "\n";
         }
         else
         {
             if(point_write)
             {
-                h3d_f << cols[1] << " " << cols[2] << " " << cols[3] << "\n";
+                _Node_ *node = new _Node_;
+                caster << cols[1] << " " << cols[2] << " " << cols[3];
+                caster >> node->n[0] >> node->n[1] >> node->n[2];
+                caster.str("");
 
-                if(boost::lexical_cast<int>(cols[cols.size()-1]) >= 10 && boost::lexical_cast<int>(cols[cols.size()-1]) <= 16)
-                {
-                    pd0_f << cols[0] << " " << cols[1] << " " << cols[2] << " " << cols[3] << "\n";
-                    pd0_id.push_back(boost::lexical_cast<int>(cols[0]));
-                }
+                ctuInfo->nodes.push_back(node);
             }
             else
             {
-                h3d_f << cols[2] << " " + cols[3] << " " << cols[4] << " " << cols[5] << " " << cols[6] << " " << cols[7] << " " << cols[8] << " " << cols[9] << "\n";
+                _Hex_ *hex = new _Hex_;
+                caster << cols[2] << " " + cols[3] << " " << cols[4] << " " << cols[5] << " " << cols[6] << " " << cols[7] << " " << cols[8] << " " << cols[9];
+                caster >> hex->n[0] >> hex->n[1] >> hex->n[2] >> hex->n[3] >> hex->n[4] >> hex->n[5] >> hex->n[6] >> hex->n[7];
+                caster.str("");
 
-                str = cols[0] + " " + cols[1] + " ";
-                bool hex_with_disp0 = false;
-
-                for(int i=2;i<10;i++)
-                {
-                    if(in_list(&pd0_id, boost::lexical_cast<int>(cols[i])))
-                    {
-                        str += "|" + cols[i] + "|" + " ";
-                        hex_with_disp0 = true;
-                    }
-                    else
-                        str += cols[i] + " ";
-                }
-
-                if(hex_with_disp0)
-                    hd0_f << str + "\n";
+                ctuInfo->hexs.push_back(hex);
             }
         }
+
+        cols.clear();
     }
-
-    h3d_f << "\n# prims\n0\n\n# tri\n0\n\n";
-
-    h3d_f.close();
-    pd0_f.close();
-    hd0_f.close();
     ctu_f.close();
-
-return 0;
 }
 
 CTUReader::CTUReader() {
@@ -175,349 +208,161 @@ bool CTUReader::load(const char *file_name, Mesh *mesh)
     _F_
     assert(mesh != NULL);
 
-    FILE *file = fopen(file_name, "r");
-    if (file == NULL) error("Could not open the mesh file %s", file_name);
+    CTUInfo ci;
+    parse_ctuFormat(file_name, &ci);
 
-/*
-    try {
-        line_nr = 0;
-        enum EState {
-            STATE_VERTICES_NUM,
-            STATE_VERTICES,
-            STATE_TETRAS_NUM,
-            STATE_TETRAS,
-            STATE_HEXES_NUM,
-            STATE_HEXES,
-            STATE_PRISMS_NUM,
-            STATE_PRISMS,
-            STATE_TRIS_NUM,
-            STATE_TRIS,
-            STATE_QUADS_NUM,
-            STATE_QUADS,
-            STATE_OK
-        } state = STATE_VERTICES_NUM;
-*/
-        int vertex_count = 0;
-        int tetra_count = 0;
-        int hex_count = 0;
-        int prism_count = 0;
-        int tri_count = 0;
-        int quad_count = 0;
-        double buffer[10];
-        unsigned int vs[10];
-        int n;
+    vector<_Node_*>::iterator itv;
+    vector<_Hex_*>::iterator ith;
 
-        int max_vertex_index = 0;
-/*
-        char row[MAX_ROW_LEN] = { 0 };
-        while (fgets(row, MAX_ROW_LEN, file) != NULL && state != STATE_OK) {
-            line_nr++;
-            if (row[0] == '#') continue; // comment
-
-            // trim right
-            int i = strlen(row) - 1;
-            for (; i >= 0; i--) {
-                if (row[i] != ' ' && row[i] != '\r' && row[i] != '\n' && row[i] != '\t') break;
-            }
-            row[i + 1] = '\0';
-            if (strlen(row) <= 0) continue; // skip empty lines
-*/
-            switch (state) {
-                case STATE_VERTICES_NUM:
-                    if (read_num(row, vertex_count)) {
-                        state = STATE_VERTICES;
-                        if (vertex_count <= 0) throw E_READ_ERROR;
-                        max_vertex_index = vertex_count; //vertices are counted from 1 in mesh3d format
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_VERTICES:
-                    if (read_n_nums(row, Vertex::NUM_COORDS, buffer) == Vertex::NUM_COORDS) {
-                        mesh->add_vertex(buffer[0], buffer[1], buffer[2]);
-
-                        vertex_count--;
-                        if (vertex_count == 0) state = STATE_TETRAS_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-/*
-                case STATE_TETRAS_NUM:
-                    if (read_num(row, tetra_count)) {
-                        state = STATE_TETRAS;
-                        if (tetra_count <= 0) state = STATE_HEXES_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_TETRAS:
-                    if ((n = read_n_nums(row, Tetra::NUM_VERTICES + 1, vs)) >= Tetra::NUM_VERTICES) {
-                        if (!range_check(max_vertex_index, vs, Tetra::NUM_VERTICES)) {
-                            fprintf(stderr, "Invalid vertex index found in the section defining tetras (line %d).\n", line_nr);
-                            throw E_READ_ERROR;
-                        }
-
-                        Tetra *tet = mesh->add_tetra(vs);
-                        if (n > Tetra::NUM_VERTICES) tet->marker = vs[Tetra::NUM_VERTICES];
-                        tetra_count--;
-                        if (tetra_count == 0) state = STATE_HEXES_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-*/
-                case STATE_HEXES_NUM:
-                    if (read_num(row, hex_count)) {
-                        state = STATE_HEXES;
-                        if (hex_count <= 0) state = STATE_PRISMS_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_HEXES:
-                    if ((n = read_n_nums(row, Hex::NUM_VERTICES + 1, vs)) >= Hex::NUM_VERTICES) {
-                        if (!range_check(max_vertex_index, vs, Hex::NUM_VERTICES)) {
-                            fprintf(stderr, "Invalid vertex index found in the section defining hexes (line %d).\n", line_nr);
-                            throw E_READ_ERROR;
-                        }
-
-                        Hex *hex = mesh->add_hex(vs);
-                        if (n > Hex::NUM_VERTICES) hex->marker = vs[Hex::NUM_VERTICES];
-                        hex_count--;
-                        if (hex_count == 0) state = STATE_PRISMS_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-/*
-                case STATE_PRISMS_NUM:
-                    if (read_num(row, prism_count)) {
-                        state = STATE_PRISMS;
-                        if (prism_count <= 0) state = STATE_TRIS_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_PRISMS:
-                    if ((n = read_n_nums(row, Prism::NUM_VERTICES + 1, vs)) >= Prism::NUM_VERTICES) {
-                        if (!range_check(max_vertex_index, vs, Prism::NUM_VERTICES)) {
-                            fprintf(stderr, "Invalid vertex index found in the section defining prisms (line %d).\n", line_nr);
-                            throw E_READ_ERROR;
-                        }
-
-                        Prism *pri = mesh->add_prism(vs);
-                        if (n > Hex::NUM_VERTICES) pri->marker = vs[Prism::NUM_VERTICES];
-                        prism_count--;
-                        if (prism_count == 0) state = STATE_TRIS_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_TRIS_NUM:
-                    if (read_num(row, tri_count)) {
-                        state = STATE_TRIS;
-                        if (tri_count <= 0) state = STATE_QUADS_NUM;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_TRIS:
-                    if (read_n_nums(row, Tri::NUM_VERTICES + MARKERS, vs) == Tri::NUM_VERTICES + MARKERS) {
-                        if (!range_check(max_vertex_index, vs, Tri::NUM_VERTICES)) {
-                            fprintf(stderr, "Invalid vertex index found in the section defining tris (line %d).\n", line_nr);
-                            throw E_READ_ERROR;
-                        }
-
-                        unsigned int facet_idxs[Tri::NUM_VERTICES] = { vs[0], vs[1], vs[2] };
-                        mesh->add_tri_boundary(facet_idxs, vs[Tri::NUM_VERTICES]);
-                        tri_count--;
-                        if (tri_count == 0) state = STATE_QUADS_NUM;
-                    }
-                    else {
-                        fprintf(stderr, "Not enough information for tris. You probably forgot to define boundary condition (line %d).\n", line_nr);
-                        throw E_READ_ERROR;
-                    }
-                    break;
-*/
-                case STATE_QUADS_NUM:
-                    if (read_num(row, quad_count)) {
-                        state = STATE_QUADS;
-                        if (quad_count <= 0) state = STATE_QUADS;
-                    }
-                    else
-                        throw E_READ_ERROR;
-                    break;
-
-                case STATE_QUADS:
-                    if (read_n_nums(row, Quad::NUM_VERTICES + MARKERS, vs) == Quad::NUM_VERTICES + MARKERS) {
-                        if (!range_check(max_vertex_index, vs, Quad::NUM_VERTICES)) {
-                            fprintf(stderr, "Invalid vertex index found in the section defining quads (line %d).\n", line_nr);
-                            throw E_READ_ERROR;
-                        }
-
-                        unsigned int facet_idxs[Quad::NUM_VERTICES] = { vs[0], vs[1], vs[2], vs[3] };
-                        mesh->add_quad_boundary(facet_idxs, vs[Quad::NUM_VERTICES]);
-                        quad_count--;
-                        if (quad_count == 0) state = STATE_OK;
-                    }
-                    else {
-                        fprintf(stderr, "Not enough information for quads. You probably forgot to define boundary condition (line %d).", line_nr);
-                        throw E_READ_ERROR;
-                    }
-                    break;
-
-                case STATE_OK:
-                    break;
-            }
-        }
-
-        // check if all "outer" faces have defined boundary condition
-    for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
-      Facet *facet = it->second;
-
-      if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
-                fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
-                throw E_READ_ERROR;
-            }
-        }
-
-        mesh->ugh();
-    }
-    catch (int e) {
-        fclose(file);
-        return false;
+    for(itv = ci.nodes.begin();itv < ci.nodes.end(); itv++)
+    {
+        mesh->add_vertex((*itv)->n[0], (*itv)->n[1], (*itv)->n[2]);
     }
 
-    fclose(file);
+    for(ith = ci.hexs.begin();ith < ci.hexs.end(); ith++)
+    {
+        mesh->add_hex((*ith)->n);
+    }
+
+    // check if all "outer" faces have defined boundary condition
+    for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++)
+    {
+        Facet *facet = it->second;
+
+        if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX))
+        {
+            fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
+            throw E_READ_ERROR;
+        }
+    }
+
+    mesh->ugh();
 
     return true;
 }
 
-bool CTUReader::save(const char *file_name, Mesh *mesh)
+bool CTUReader::save_as_h3d(const char *file_name, Mesh *mesh)
 {
-/*
-    _F_
-    assert(mesh != NULL);
+	_F_
+	assert(mesh != NULL);
 
-    FILE *file = fopen(file_name, "w");
-    if (file == NULL) return false;
+	FILE *file = fopen(file_name, "w");
+	if (file == NULL) return false;
 
-    // save vertices
-    fprintf(file, "# vertices\n");
-    fprintf(file, "%lu\n", (unsigned long int)mesh->vertices.size());
-    for(std::map<unsigned int, Vertex*>::const_iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
+	// save vertices
+	fprintf(file, "# vertices\n");
+	fprintf(file, "%lu\n", (unsigned long int)mesh->vertices.size());
+	for(std::map<unsigned int, Vertex*>::const_iterator it = mesh->vertices.begin(); it != mesh->vertices.end(); it++) {
     Vertex *v = it->second;
-        fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
-    }
-    fprintf(file, "\n");
+		fprintf(file, "%lf %lf %lf\n", v->x, v->y, v->z);
+	}
+	fprintf(file, "\n");
 
-    // elements
-    std::map<unsigned int, Element *> tet, hex, pri;
-    for(std::map<unsigned int, Element*>::const_iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++) {
+	// elements
+	std::map<unsigned int, Element *> tet, hex, pri;
+	for(std::map<unsigned int, Element*>::const_iterator it = mesh->elements.begin(); it != mesh->elements.end(); it++) {
     Element *elem = it->second;
-        if (elem->active) {
-            switch (elem->get_mode()) {
+		if (elem->active) {
+			switch (elem->get_mode()) {
       case HERMES_MODE_TET: tet[it->first] = elem; break;
-                case HERMES_MODE_HEX: hex[it->first] = elem; break;
-                case HERMES_MODE_PRISM: pri[it->first] = elem; break;
-            }
-        }
-    }
+				case HERMES_MODE_HEX: hex[it->first] = elem; break;
+				case HERMES_MODE_PRISM: pri[it->first] = elem; break;
+			}
+		}
+	}
 
-    // save tetras
-    fprintf(file, "# tetras\n");
-    fprintf(file, "%lu\n", (unsigned long int)tet.size());
-    for(std::map<unsigned int, Element*>::const_iterator it = tet.begin(); it != tet.end(); it++) {
-        unsigned int vtcs[Tetra::NUM_VERTICES];
+	// save tetras
+	fprintf(file, "# tetras\n");
+	fprintf(file, "%lu\n", (unsigned long int)tet.size());
+  for(std::map<unsigned int, Element*>::const_iterator it = tet.begin(); it != tet.end(); it++) {
+		unsigned int vtcs[Tetra::NUM_VERTICES];
     it->second->get_vertices(vtcs);
-        fprintf(file, "%u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
-    }
-    fprintf(file, "\n");
+		fprintf(file, "%u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3]);
+	}
+	fprintf(file, "\n");
 
-    // save hexes
-    fprintf(file, "# hexes\n");
-    fprintf(file, "%lu\n", (unsigned long int)hex.size());
-    for(std::map<unsigned int, Element*>::const_iterator it = hex.begin(); it != hex.end(); it++) {
-        unsigned int vtcs[Hex::NUM_VERTICES];
+	// save hexes
+	fprintf(file, "# hexes\n");
+	fprintf(file, "%lu\n", (unsigned long int)hex.size());
+	for(std::map<unsigned int, Element*>::const_iterator it = hex.begin(); it != hex.end(); it++) {
+		unsigned int vtcs[Hex::NUM_VERTICES];
     it->second->get_vertices(vtcs);
-        fprintf(file, "%u %u %u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
-    }
-    fprintf(file, "\n");
+		fprintf(file, "%u %u %u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5], vtcs[6], vtcs[7]);
+	}
+	fprintf(file, "\n");
 
-    // save prisms
-    fprintf(file, "# prisms\n");
-    fprintf(file, "%lu\n", (unsigned long int)pri.size());
-    for(std::map<unsigned int, Element*>::const_iterator it = pri.begin(); it != pri.end(); it++) {
-        unsigned int vtcs[Prism::NUM_VERTICES];
-        it->second->get_vertices(vtcs);
-        fprintf(file, "%u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
-    }
-    fprintf(file, "\n");
+	// save prisms
+	fprintf(file, "# prisms\n");
+	fprintf(file, "%lu\n", (unsigned long int)pri.size());
+  for(std::map<unsigned int, Element*>::const_iterator it = pri.begin(); it != pri.end(); it++) {
+		unsigned int vtcs[Prism::NUM_VERTICES];
+		it->second->get_vertices(vtcs);
+		fprintf(file, "%u %u %u %u %u %u\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], vtcs[4], vtcs[5]);
+	}
+	fprintf(file, "\n");
 
-    // boundaries
-    std::map<unsigned int, Facet *> tri_facets, quad_facets;
-    for(std::map<Facet::Key, Facet*>::iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
+	// boundaries
+	std::map<unsigned int, Facet *> tri_facets, quad_facets;
+  for(std::map<Facet::Key, Facet*>::iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
     Facet *facet = it->second;
-        if(facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
-            switch (facet->type) {
-                case HERMES_MODE_TRIANGLE: 
+		if(facet->type == Facet::OUTER && mesh->elements[facet->left]->active) {
+			switch (facet->type) {
+				case HERMES_MODE_TRIANGLE: 
           unsigned int ii;
           for(ii = 0; ; ii++)
             if(tri_facets[ii] == NULL)
               break;
           tri_facets[ii] = facet;
           break;
-                case HERMES_MODE_QUAD: 
+				case HERMES_MODE_QUAD: 
           unsigned int ij;
           for(ij = 0; ; ij++)
             if(quad_facets[ij] == NULL)
               break;
           quad_facets[ij] = facet;
           break;
-            }
-        }
-    }
+			}
+		}
+	}
 
-    // tris
-    fprintf(file, "# tris\n");
-    fprintf(file, "%lu\n", (unsigned long int)tri_facets.size());
-    for(std::map<unsigned int, Facet*>::const_iterator it = tri_facets.begin(); it != tri_facets.end(); it++) {
+	// tris
+	fprintf(file, "# tris\n");
+	fprintf(file, "%lu\n", (unsigned long int)tri_facets.size());
+	for(std::map<unsigned int, Facet*>::const_iterator it = tri_facets.begin(); it != tri_facets.end(); it++) {
     Facet *facet = it->second;
-        Boundary *bnd = mesh->boundaries[facet->right];
-        Element *elem = mesh->elements[facet->left];
+		Boundary *bnd = mesh->boundaries[facet->right];
+		Element *elem = mesh->elements[facet->left];
 
-        unsigned int vtcs[Tri::NUM_VERTICES];
-        elem->get_face_vertices(facet->left_face_num, vtcs);
+		unsigned int vtcs[Tri::NUM_VERTICES];
+		elem->get_face_vertices(facet->left_face_num, vtcs);
 
-        fprintf(file, "%u %u %u     %d\n", vtcs[0], vtcs[1], vtcs[2], bnd->marker);
-    }
-    fprintf(file, "\n");
+		fprintf(file, "%u %u %u     %d\n", vtcs[0], vtcs[1], vtcs[2], bnd->marker);
+	}
+	fprintf(file, "\n");
 
-    // quads
-    fprintf(file, "# quads\n");
-    fprintf(file, "%lu\n", (unsigned long int)quad_facets.size());
-    for(std::map<unsigned int, Facet*>::const_iterator it = quad_facets.begin(); it != quad_facets.end(); it++) {
+	// quads
+	fprintf(file, "# quads\n");
+	fprintf(file, "%lu\n", (unsigned long int)quad_facets.size());
+	for(std::map<unsigned int, Facet*>::const_iterator it = quad_facets.begin(); it != quad_facets.end(); it++) {
     Facet *facet = it->second;
-        Boundary *bnd = mesh->boundaries[facet->right];
-        Element *elem = mesh->elements[facet->left];
+		Boundary *bnd = mesh->boundaries[facet->right];
+		Element *elem = mesh->elements[facet->left];
 
-        unsigned int vtcs[Quad::NUM_VERTICES];
-        elem->get_face_vertices(facet->left_face_num, vtcs);
+		unsigned int vtcs[Quad::NUM_VERTICES];
+		elem->get_face_vertices(facet->left_face_num, vtcs);
 
-        fprintf(file, "%u %u %u %u     %d\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], bnd->marker);
-    }
-    fprintf(file, "\n");
+		fprintf(file, "%u %u %u %u     %d\n", vtcs[0], vtcs[1], vtcs[2], vtcs[3], bnd->marker);
+	}
+	fprintf(file, "\n");
 
-    // the end
-    fclose(file);
+	// the end
+	fclose(file);
 
+	return true;
+}
+
+bool CTUReader::save(const char *file_name, Mesh *mesh)
+{
+    save_as_h3d(file_name, mesh);
     return true;
-*/
 }

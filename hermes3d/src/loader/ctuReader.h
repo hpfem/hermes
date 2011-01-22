@@ -32,6 +32,7 @@ public:
 
 	virtual bool load(const char *file_name, Mesh *mesh);
 	virtual bool save(const char *file_name, Mesh *mesh);
+	bool save_as_h3d(const char *file_name, Mesh *mesh);
 
 protected:
 	int line_nr;

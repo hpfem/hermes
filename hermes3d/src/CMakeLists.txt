@@ -14,6 +14,7 @@ set(SRC
 	mesh.cpp
 	discrete_problem.cpp
 	ogprojection.cpp
+	loader/ctuReader.cpp
 	loader/exodusii.cpp
 	loader/mesh3d.cpp
 	loader/hdf5.cpp
