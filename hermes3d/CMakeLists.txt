@@ -240,7 +240,7 @@ endif(WITH_PYTHON)
 
 
 # examples
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+add_subdirectory(examples)
 add_custom_target(examples)
 add_custom_command(
 	TARGET    examples
@@ -248,7 +248,7 @@ add_custom_command(
 )
 
 # benchmarks
-add_subdirectory(benchmarks EXCLUDE_FROM_ALL)
+add_subdirectory(benchmarks)
 add_custom_target(benchmarks)
 add_custom_command(
 	TARGET    benchmarks
