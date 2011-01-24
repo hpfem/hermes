@@ -19,28 +19,30 @@
 
 // TODO LIST: 
 //
-// (1) Enable more equations than one. Right now rk_time_step() does not 
+// (1) Incorporate spatial adaptivity into the time stepping.
+//
+// (2) Enable more equations than one. Right now rk_time_step() does not 
 //     work for systems.
 //
-// (2) Enable all other matrix solvers, so far UMFPack is hardwired here.
+// (3) Enable all other matrix solvers, so far UMFPack is hardwired here.
 //
-// (3) We do not take advantage of the fact that all blocks in the 
+// (4) We do not take advantage of the fact that all blocks in the 
 //     Jacobian matrix have the same structure. Thus it is enough to 
 //     assemble the matrix M (one block) and copy the sparsity structure
 //     into all remaining nonzero blocks (and diagonal blocks). Right 
 //     now, the sparsity structure is created expensively in each block 
 //     again.
 //
-// (4) If space does not change, the sparsity does not change. Right now 
+// (5) If space does not change, the sparsity does not change. Right now 
 //     we discard everything at the end of every time step, we should not 
 //     do it.  
 //
-// (5) If the problem does not depend explicitly on time, then all the blocks 
+// (6) If the problem does not depend explicitly on time, then all the blocks 
 //     in the Jacobian matrix of the stationary residual are the same up 
 //     to a multiplicative constant. Thus they do not have to be aassembled 
 //     from scratch.
 // 
-// (4) If the problem is linear, then the Jacobian is constant. If Space 
+// (7) If the problem is linear, then the Jacobian is constant. If Space 
 //     does not change between time steps, we should keep it. 
 
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
@@ -219,7 +221,7 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
 bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   scalar* coeff_vec, scalar* err_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                  bool verbose, double newton_tol, int newton_max_iter,
+                  bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
   // Check for not implemented features.
@@ -362,7 +364,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     }
 
     // If residual norm is within tolerance, or the maximum number
-    // of iteration has been reached, then quit.
+    // of iteration has been reached, or the problem is linear, then quit.
     if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
 
     // Solve the linear system.
@@ -371,6 +373,14 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < num_stages*ndof; i++) {
       K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
+    }
+
+    // If the problem is linear, quit.
+    if (is_linear) {
+      if (verbose) {
+        info("Terminating Newton's loop as problem is linear.");
+      }
+      break;
     }
 
     // Increase iteration counter.
@@ -440,11 +450,11 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 // This is the same as the rk_time_step() function above but it does not have the err_vec vector.
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                  bool verbose, double newton_tol, int newton_max_iter,
+                  bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm) 
 {
   return rk_time_step(current_time, time_step, bt,
 	       coeff_vec, NULL, dp, matrix_solver,
-               verbose, newton_tol, newton_max_iter,
+		      verbose, is_linear, newton_tol, newton_max_iter,
                newton_damping_coeff, newton_max_allowed_residual_norm);
 }

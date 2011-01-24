@@ -11,6 +11,9 @@ using namespace RefinementSelectors;
 //  time integration. Example 19 can just do implicit Euler.
 //  The model problem is a simple nonlinear parabolic PDE.
 //
+//  The function rk_time_step() needs more optimisation, see
+//  a todo list at the beginning of file src/runge-kutta.cpp.
+//
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
 //
@@ -31,7 +34,8 @@ const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Time integration. Choose one of the following methods, or define your own Butcher's table:
+// Time integration. Choose one of the following methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
 // Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SDIRK_2_2, 
 // Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4,
 // Implicit_Lobatto_IIIA_3_4, Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5. 
@@ -141,8 +145,9 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
+    bool is_linear = false;
     if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
-		      verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
+		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 

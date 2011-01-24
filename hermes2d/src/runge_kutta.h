@@ -43,14 +43,14 @@ void HERMES_API multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, in
 // the crresponding .cpp file.
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                              scalar* coeff_vec, scalar* err_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, double newton_tol = -1.0, int newton_max_iter = -1,
+                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, int newton_max_iter = 20,
                              double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
 // This is a wrapper for the previous function if err_vec is not desired (adaptive time stepping 
 // is not attempted). 
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                              scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, double newton_tol = -1.0, int newton_max_iter = -1,
+                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, int newton_max_iter = 20,
                              double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
 
