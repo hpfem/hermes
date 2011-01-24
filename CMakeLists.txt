@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
 
 # Optional parts of the library:
-set(WITH_H1D           NO)
+set(WITH_H1D           YES)
 set(WITH_H2D           YES)
 set(WITH_H3D           YES)
 
