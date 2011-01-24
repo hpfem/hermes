@@ -1,17 +1,17 @@
-// This file is part of Hermes2D.
-//
-// Hermes2D is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 2 of the License, or
-// (at your option) any later version.
-//
-// Hermes2D is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Hermes2D. If not, see <http://www.gnu.org/licenses/>.
+/// This file is part of Hermes2D.
+///
+/// Hermes2D is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU General Public License as published by
+/// the Free Software Foundation, either version 2 of the License, or
+/// (at your option) any later version.
+///
+/// Hermes2D is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with Hermes2D. If not, see <http:///www.gnu.org/licenses/>.
 
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_WARN
@@ -43,13 +43,7 @@ class SparseMatrix;
 class Vector;
 class Solver;
 
-#define NEWTON_WATCH_RESIDUAL 0x01      // A flag that enables the residual norm
-                                            // as the stop condition in Newton's iteration.
-#define NEWTON_WATCH_INCREMENTS 0x02 // A flag that enables the solution difference norm
-                                            // as the stop condition in Newton's iteration.
-
-
-/// Discrete problem class
+/// Discrete problem class.
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
@@ -60,48 +54,61 @@ public:
   virtual ~DiscreteProblem();
   void free();
 
-  // Get pointer to n-th space.
+  /// Get pointer to n-th space.
   Space* get_space(int n) { return this->spaces[n]; }
 
-  // Get whether the DiscreteProblem is linear.
+  /// Get whether the DiscreteProblem is linear.
   bool get_is_linear() { return is_linear;};
 
-  // Get the weak forms.
+  /// Get the weak forms.
   WeakForm* get_weak_formulation() { return this->wf;};
 
-  // Get all spaces as a Hermes::vector.
+  /// Get all spaces as a Hermes::vector.
   Hermes::vector<Space *> get_spaces() {return this->spaces;}
 
-  // Get the number of spaces.
+  /// Get the number of spaces.
   int get_num_spaces() {return this->spaces.size();}
 
-  // This is different from H3D.
+  /// This is different from H3D.
   PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
 
-  // Precalculate matrix sparse structure.
-  // If force_diagonal_block == true, then (zero) matrix
-  // antries are created in diagonal blocks even if corresponding matrix weak
-  // forms do not exist. This is useful if the matrix is later to be merged with
-  // a matrix that has nonzeros in these blocks. The Table serves for optional
-  // weighting of matrix blocks in systems.
+  /// Precalculate matrix sparse structure.
+  /// If force_diagonal_block == true, then (zero) matrix
+  /// antries are created in diagonal blocks even if corresponding matrix weak
+  /// forms do not exist. This is useful if the matrix is later to be merged with
+  /// a matrix that has nonzeros in these blocks. The Table serves for optional
+  /// weighting of matrix blocks in systems.
   void create(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
               bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
-  // General assembling procedure for nonlinear problems. coeff_vec is the
-  // previous Newton vector. If force_diagonal_block == true, then (zero) matrix
-  // antries are created in diagonal blocks even if corresponding matrix weak
-  // forms do not exist. This is useful if the matrix is later to be merged with
-  // a matrix that has nonzeros in these blocks. The Table serves for optional
-  // weighting of matrix blocks in systems.
-  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, 
-                bool force_diagonal_blocks = false, Table* block_weights = NULL);
+  /// Check whether it is sane to assemble.
+  /// Throws errors if not.
+  void assemble_sanity_checks(Table* block_weights);
 
-  // Assembling for linear problems. Same as the previous functions, but
-  // does not need the coeff_vector.
-  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
-                bool force_diagonal_blocks = false, Table* block_weights = NULL);
+  /// Converts coeff_vec to u_ext.
+  /// If the supplied coeff_vec is NULL, it supplies the appropriate number of NULL pointers.
+  void DiscreteProblem::convert_coeff_vec(scalar* coeff_vec, Hermes::vector<Solution *> & u_ext);
 
-  // Get the number of unknowns.
+  /// General assembling procedure for nonlinear problems. coeff_vec is the
+  /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
+  /// antries are created in diagonal blocks even if corresponding matrix weak
+  /// forms do not exist. This is useful if the matrix is later to be merged with
+  /// a matrix that has nonzeros in these blocks. The Table serves for optional
+  /// weighting of matrix blocks in systems.
+  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
+        bool force_diagonal_blocks = false, Table* block_weights = NULL);
+
+  /// Assembling for linear problems. Same as the previous functions, but
+  /// does not need the coeff_vector.
+  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false, 
+        bool force_diagonal_blocks = false, Table* block_weights = NULL);
+
+  /// Assembles one stage.
+  void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
+        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext);
+
+  /// Get the number of unknowns.
   int get_num_dofs();
 
   bool is_matrix_free() { return wf->is_matrix_free(); }
@@ -110,7 +117,7 @@ public:
 
   void set_fvm() {this->is_fvm = true;}
 
-  // Experimental caching of vector valued (vector) forms.
+  /// Experimental caching of vector valued (vector) forms.
   struct SurfVectorFormsKey
   {
     WeakForm::vector_form_val_t vfs;
@@ -200,11 +207,11 @@ public:
 protected:
   WeakForm* wf;
 
-  // If the problem has only constant test functions, there is no need for order calculation,
-  // which saves time.
+  /// If the problem has only constant test functions, there is no need for order calculation,
+  /// which saves time.
   bool is_fvm;
 
-  // Experimental caching of vector valued forms.
+  /// Experimental caching of vector valued forms.
   bool vector_valued_forms;
 
   bool is_linear;
@@ -214,9 +221,9 @@ protected:
   int wf_seq;
   Hermes::vector<Space *> spaces;
 
-  scalar** matrix_buffer;                /// buffer for holding square matrix (during assembling)
-  int matrix_buffer_dim;                 /// dimension of the matrix held by 'matrix_buffer'
-  inline scalar** get_matrix_buffer(int n);
+  scalar** matrix_buffer;                // buffer for holding square matrix (during assembling)
+  int matrix_buffer_dim;                 // dimension of the matrix held by 'matrix_buffer'
+  scalar** get_matrix_buffer(int n);
 
   bool have_spaces;
   bool have_matrix;
@@ -235,7 +242,7 @@ protected:
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 
-  // Caching transformed values for element
+  /// Caching transformed values for element
   std::map<PrecalcShapeset::Key, Func<double>*, PrecalcShapeset::Compare> cache_fn;
   Geom<double>* cache_e[g_max_quad + 1 + 4 * g_max_quad + 4];
   double* cache_jwt[g_max_quad + 1 + 4 * g_max_quad + 4];
@@ -252,7 +259,7 @@ protected:
   scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
 
-  // Evaluation of forms, discontinuous Galerkin case.
+  /// Evaluation of forms, discontinuous Galerkin case.
   scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> sln,
                       NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
                       SurfPos* ep);
@@ -261,16 +268,16 @@ protected:
                       SurfPos* ep);
 };
 
-// Create globally refined space.
+/// Create globally refined space.
 HERMES_API Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
 HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
 HERMES_API double get_l2_norm(Vector* vec);
 
-// New interface, still in developement
-//HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-//		               Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
-//                             unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
+/// New interface, still in developement
+/// HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
+///		               Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
+///                             unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
 
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
 			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
