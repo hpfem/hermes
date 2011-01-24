@@ -1,4 +1,4 @@
-project(mesh-loader)
+project(h3d-mesh-loader)
 
 include(${hermes3d_SOURCE_DIR}/CMake.common)
 
