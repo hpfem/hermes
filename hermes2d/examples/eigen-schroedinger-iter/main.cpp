@@ -114,6 +114,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   ScalarView sview("", new WinGeom(0, 0, 440, 350));
+  sview.fix_scale_width(50);
   OrderView oview("", new WinGeom(450, 0, 410, 350));
 
   // DOF convergence graph.
