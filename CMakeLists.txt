@@ -14,7 +14,7 @@ set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
 # Optional parts of the library:
 set(WITH_H1D           NO)
 set(WITH_H2D           YES)
-set(WITH_H3D           NO)
+set(WITH_H3D           YES)
 
 # Allow to override the default values in CMake.vars:
 if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
