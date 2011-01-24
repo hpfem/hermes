@@ -747,46 +747,41 @@ void Mesh::free() {
 	midpoints.clear();
 }
 
-void Mesh::copy(const Mesh &mesh) {
-	_F_
-	if (&mesh == this) warning("Copying mesh into itself.");
-	free();
+void Mesh::copy(const Mesh &mesh) 
+{
+  _F_
+  if (&mesh == this) warning("Copying mesh into itself.");
+  free();
 
-
-  for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++)
-    delete it->second;
+  for(std::map<unsigned int, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); it++) delete it->second;
   vertices.clear();
 
-	for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++)
-    delete it->second;
+  for(std::map<unsigned int, Element*>::iterator it = elements.begin(); it != elements.end(); it++) delete it->second;
   elements.clear();
 
-	for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++)
-    delete it->second;
+  for(std::map<unsigned int, Boundary*>::iterator it = boundaries.begin(); it != boundaries.end(); it++) delete it->second;
   boundaries.clear();
 
-  for(std::map<Edge::Key, Edge*>::iterator it = edges.begin(); it != edges.end(); it++)
-    delete it->second;
+  for(std::map<Edge::Key, Edge*>::iterator it = edges.begin(); it != edges.end(); it++) delete it->second;
   edges.clear();
 
-	for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++)
-    delete it->second;
+  for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++) delete it->second;
   facets.clear();
 
   midpoints.clear();
 
-	// copy vertices
+  // copy vertices
   for(std::map<unsigned int, Vertex*>::const_iterator it = mesh.vertices.begin(); it != mesh.vertices.end(); it++)
     if(it->first != INVALID_IDX)
       this->vertices[it->first] = it->second->copy();
 
-	// copy boundaries
-	for(std::map<unsigned int, Boundary*>::const_iterator it = mesh.boundaries.begin(); it != mesh.boundaries.end(); it++)
+  // copy boundaries
+  for(std::map<unsigned int, Boundary*>::const_iterator it = mesh.boundaries.begin(); it != mesh.boundaries.end(); it++)
     if(it->first != INVALID_IDX)
       this->boundaries[it->first] = it->second->copy();
 
-	// copy elements, midpoints, facets and edges
-	for(std::map<unsigned int, Element*>::const_iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
+  // copy elements, midpoints, facets and edges
+  for(std::map<unsigned int, Element*>::const_iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++) {
     if(it->first == INVALID_IDX)
       continue;
     Element *e = it->second;
@@ -843,34 +838,33 @@ void Mesh::copy(const Mesh &mesh) {
 			}
 		}
     delete [] emp;
-	}
+  }
 
-	// facets
+  // facets
   for(std::map<Facet::Key, Facet*>::const_iterator it = mesh.facets.begin(); it != mesh.facets.end(); it++) {
     Facet *facet = it->second;
 
-		unsigned int *face_idxs = new unsigned int[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
-		if ((unsigned) facet->left != INVALID_IDX) {
-			Element *left_e = mesh.elements.at(facet->left);
-			int nvtcs = left_e->get_face_vertices(facet->left_face_num, face_idxs);
-      Facet::Key key(face_idxs + 0, nvtcs);
-      this->facets[key] = facet->copy();
-		}
-		else if ((unsigned) facet->right != INVALID_IDX && facet->type == Facet::INNER) {
-			Element *right_e = mesh.elements.at(facet->right);
-			int nvtcs = right_e->get_face_vertices(facet->right_face_num, face_idxs);
-      Facet::Key key(face_idxs + 0, nvtcs);
-      this->facets[key] = facet->copy();
-		}
-		else
-			EXIT("WTF?");		// FIXME
+      unsigned int *face_idxs = new unsigned int[Quad::NUM_VERTICES]; // quad is shape with the largest number of vertices
+      if ((unsigned) facet->left != INVALID_IDX) {
+	Element *left_e = mesh.elements.at(facet->left);
+	int nvtcs = left_e->get_face_vertices(facet->left_face_num, face_idxs);
+        Facet::Key key(face_idxs + 0, nvtcs);
+        this->facets[key] = facet->copy();
+      }
+      else if ((unsigned) facet->right != INVALID_IDX && facet->type == Facet::INNER) {
+	Element *right_e = mesh.elements.at(facet->right);
+	int nvtcs = right_e->get_face_vertices(facet->right_face_num, face_idxs);
+        Facet::Key key(face_idxs + 0, nvtcs);
+        this->facets[key] = facet->copy();
+      }
+      else EXIT("Internal error in Mesh::copy().");		// FIXME
     
-    delete [] face_idxs;
-	}
+      delete [] face_idxs;
+  }
 
-	nbase = mesh.nbase;
-	nactive = mesh.nactive;
-	seq = mesh.seq;
+  nbase = mesh.nbase;
+  nactive = mesh.nactive;
+  seq = mesh.seq;
 }
 
 void Mesh::copy_base(const Mesh &mesh) {
@@ -1350,8 +1344,6 @@ bool Mesh::can_refine_hex(Hex *elem, int refinement) const {
 			iface[4] = 4; face_reft[4] = H3D_REFT_QUAD_BOTH;
 			iface[5] = 5; face_reft[5] = H3D_REFT_QUAD_BOTH;
 			break;
-
-		// WTF?
 		default:
 			EXIT(HERMES_ERR_UNKNOWN_REFINEMENT_TYPE);
 			break;
@@ -1414,7 +1406,6 @@ bool Mesh::refine_hex(Hex *elem, int refinement) {
 		case H3D_H3D_H3D_REFT_HEX_XYZ:
 			refined = refine_hex_8(elem, refinement);
 			break;
-		// WTF?
 		default:
 			EXIT(HERMES_ERR_UNKNOWN_REFINEMENT_TYPE);
 			break;
@@ -1942,7 +1933,6 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		}
 	}
 	else {
-		// WTF?
 		EXIT("Refining facet that does not face with appropriate element/boundary");
 	}
 
@@ -2085,7 +2075,6 @@ bool Mesh::refine_quad_facet(Hex *parent_elem, int iface, unsigned int face_refi
 		}
 	}
 	else {
-		// WTF?
 		EXIT("Refining facet that does not face with appropriate element/boundary");
 	}
 
