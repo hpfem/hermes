@@ -3,6 +3,13 @@
 
 #include "hermes2d.h"
 
+namespace Schroedinger {
+
+using Teuchos::RCP;
+using Teuchos::Ptr;
+using Teuchos::rcp;
+using Teuchos::null;
+
 class HERMES_API EigenSolver {
 public:
     EigenSolver(const RCP<Matrix> &A, const RCP<Matrix> &B) {
@@ -20,5 +27,7 @@ public:
 private:
     RCP<Matrix> A, B;
 };
+
+}
 
 #endif

@@ -2,6 +2,13 @@
 
 namespace {
 
+using Teuchos::RCP;
+using Teuchos::Ptr;
+using Teuchos::rcp;
+using Teuchos::null;
+
+using Schroedinger::Potential;
+
 RCP<Potential> global_potential=null;
 
 double bilinear_form_left(int n, double *wt, Func<double> *u_ext[],
@@ -38,6 +45,9 @@ Scalar bilinear_form_right(int n, double *wt, Func<Scalar> *u_ext[],
 } // anonymous namespace
 
 
+namespace Schroedinger {
+
+
 void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
         const Ptr<SparseMatrix> &B)
 {
@@ -56,10 +66,10 @@ void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
     mesh.refine_all_elements();
 
     BCTypes bc_types;
-    bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT,
+    bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT,
                 BDY_TOP, BDY_LEFT));
     BCValues bc_values;
-    bc_values.add_zero(Hermes::Tuple<int>(BDY_BOTTOM, BDY_RIGHT,
+    bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT,
                 BDY_TOP, BDY_LEFT));
 
     H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -75,3 +85,5 @@ void ModuleSchroedinger::assemble(const Ptr<SparseMatrix> &A,
     dp_left.assemble(A.getRawPtr());
     dp_right.assemble(B.getRawPtr());
 }
+
+} // namespace Schroedinger

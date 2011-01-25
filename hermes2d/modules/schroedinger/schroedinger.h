@@ -4,6 +4,13 @@
 #include "hermes2d.h"
 #include "eigensolver.h"
 
+namespace Schroedinger {
+
+using Teuchos::RCP;
+using Teuchos::Ptr;
+using Teuchos::rcp;
+using Teuchos::null;
+
 class Potential {
     public:
         // Returns the value in the point "x" and "y"
@@ -53,5 +60,7 @@ public:
 private:
     RCP<Potential> potential;
 };
+
+}
 
 #endif
