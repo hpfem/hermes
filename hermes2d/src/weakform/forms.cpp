@@ -29,39 +29,39 @@ template<> double DiscontinuousFunc<double>::zero = 0.0;
 /// Integration order for coordinates, normals and tangents is one.
 Geom<Ord>* init_geom_ord()
 {
-	Geom<Ord>* e = new Geom<Ord>;
-	static Ord x[] = { Ord(1) };
-	static Ord y[] = { Ord(1) };
+  Geom<Ord>* e = new Geom<Ord>;
+  static Ord x[] = { Ord(1) };
+  static Ord y[] = { Ord(1) };
 
-	static Ord nx[] = { Ord(1) };
-	static Ord ny[] = { Ord(1) };
+  static Ord nx[] = { Ord(1) };
+  static Ord ny[] = { Ord(1) };
 
-	static Ord tx[] = { Ord(1) };
-	static Ord ty[] = { Ord(1) };
+  static Ord tx[] = { Ord(1) };
+  static Ord ty[] = { Ord(1) };
 
-	static Ord diam = Ord(1);
+  static Ord diam = Ord(1);
 
-        // element = NULL;
-	e->x = x; e->y = y;
-	e->nx = nx; e->ny = ny;
-	e->tx = tx; e->ty = ty;
-    e->diam = diam;
-    e->edge_marker = -8888;
-    e->elem_marker = -9999;
-	return e;
+  // element = NULL;
+  e->x = x; e->y = y;
+  e->nx = nx; e->ny = ny;
+  e->tx = tx; e->ty = ty;
+  e->diam = diam;
+  e->edge_marker = -8888;
+  e->elem_marker = -9999;
+  return e;
 }
 
 /// Initialize element marker and coordinates.
 Geom<double>* init_geom_vol(RefMap *rm, const int order)
 {
-    Geom<double>* e = new Geom<double>;
-    //e->element = rm->get_active_element();
-    e->diam = rm->get_active_element()->get_diameter();
-    e->id = rm->get_active_element()->id;
-    e->elem_marker = rm->get_active_element()->marker;
-    e->x = rm->get_phys_x(order);
-    e->y = rm->get_phys_y(order);
-    return e;
+  Geom<double>* e = new Geom<double>;
+  //e->element = rm->get_active_element();
+  e->diam = rm->get_active_element()->get_diameter();
+  e->id = rm->get_active_element()->id;
+  e->elem_marker = rm->get_active_element()->marker;
+  e->x = rm->get_phys_x(order);
+  e->y = rm->get_phys_y(order);
+  return e;
 }
 
 /// Initialize edge marker, coordinates, tangent and normals.

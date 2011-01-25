@@ -141,8 +141,10 @@ int DiscreteProblem::get_num_dofs()
 scalar** DiscreteProblem::get_matrix_buffer(int n)
 {
   _F_
-  if (n <= matrix_buffer_dim) return matrix_buffer;
-  if (matrix_buffer != NULL) delete [] matrix_buffer;
+  if (n <= matrix_buffer_dim) 
+    return matrix_buffer;
+  if (matrix_buffer != NULL) 
+    delete [] matrix_buffer;
   matrix_buffer_dim = n;
   return (matrix_buffer = new_matrix<scalar>(n, n));
 }
@@ -586,7 +588,7 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   if(rep_element == NULL)
     return;
 
-  init_cache();     // This is different in H2D.
+  init_cache();
 
   assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, rep_element->marker, al);
     //// assemble volume matrix forms //////////////////////////////////////
@@ -599,7 +601,7 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
    assemble_surface_integrals(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
    surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf], nat, isurf, e, trav_base, rep_element);
 
-  delete_cache();   // This is different in H3D.
+  delete_cache();
 }
 
 void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage, 
@@ -612,18 +614,18 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
       WeakForm::MatrixFormVol* mfv = stage.mfvol[ww];
       int m = mfv->i;
       int n = mfv->j;
-      if (isempty[m] || isempty[n]) 
+      if (isempty[m] || isempty[n])
         continue;
-      if (fabs(mfv->scaling_factor) < 1e-12) 
+      if (fabs(mfv->scaling_factor) < 1e-12)
         continue;
-      if (mfv->area != HERMES_ANY && !this->wf->is_in_area(marker, mfv->area)) 
+      if (mfv->area != HERMES_ANY && !this->wf->is_in_area(marker, mfv->area))
         continue;
 
       // If a block scaling table is provided, and if the scaling coefficient
       // A_mn for this block is zero, then the form does not need to be assembled.
       scalar block_scaling_coeff = 1.;
       if (block_weights != NULL) {
-        if (fabs(block_weights->get_A(m, n)) < 1e-12) 
+        if (fabs(block_weights->get_A(m, n)) < 1e-12)
           continue;
         block_scaling_coeff = block_weights->get_A(m, n);
       }
