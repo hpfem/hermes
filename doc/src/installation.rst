@@ -29,11 +29,20 @@ These two repositories are synchronized. For more advanced users we recommend to
 create a free account at `Github <http://github.com>`_ (if you do not have one yet),
 fork the `Hermes repository <http://github.com/hpfem/hermes>`_, and then clone your 
 Github copy of Hermes to your local computer. This will establish links between
-your local copy and the master repository, and you'll become part of the Hermes 
+your local copy and the master repository, and you will become part of the Hermes 
 network at Github
 
 Once you have a local copy of the Hermes repository on your computer, change dir 
-to hermes/hermes1d/, hermes/hermes2d/ or hermes/hermes3d/ and type::
+to hermes/. There you will find a CMakeLists.txt file that contains the lines
+::
+
+    # Optional parts of the library:
+    set(WITH_H1D           YES)
+    set(WITH_H2D           YES)
+    set(WITH_H3D           YES)
+
+Thus by default, all Hermes1D, Hermes2D and Hermes3D will be built. You can
+disable any of them here. After that, type::
 
     cmake .
     make
@@ -44,7 +53,7 @@ the number of CPUs of your computer.
 Tests
 ~~~~~
 
-To execute all tests, do::
+To execute all tests, change dir to either hermes1d/, hermes2d/ or hermes3d/ and do::
 
     make test
 
