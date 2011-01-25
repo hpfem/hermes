@@ -399,6 +399,7 @@ void DiscreteProblem::assemble_sanity_checks(Table* block_weights)
 
 void DiscreteProblem::convert_coeff_vec(scalar* coeff_vec, Hermes::vector<Solution *> & u_ext) 
 {
+  _F_
   if (coeff_vec != NULL) {
     for (unsigned int i = 0; i < wf->get_neq(); i++) {
       Solution* external_solution_i = new Solution(spaces[i]->get_mesh());
@@ -411,6 +412,7 @@ void DiscreteProblem::convert_coeff_vec(scalar* coeff_vec, Hermes::vector<Soluti
 
 void DiscreteProblem::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss) 
 {
+  _F_
   for (unsigned int i = 0; i < wf->get_neq(); i++) {
     spss.push_back(new PrecalcShapeset(pss[i]));
     spss[i]->set_quad_2d(&g_quad_2d_std);
@@ -420,6 +422,7 @@ void DiscreteProblem::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss)
 
 void DiscreteProblem::initialize_refmaps(Hermes::vector<RefMap *>& refmap) 
 {
+  _F_
   for (unsigned int i = 0; i < wf->get_neq(); i++) {
     refmap.push_back(new RefMap());
     refmap[i]->set_quad_2d(&g_quad_2d_std);
@@ -433,6 +436,7 @@ void DiscreteProblem::initialize_refmaps(Hermes::vector<RefMap *>& refmap)
 void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly,
                                bool force_diagonal_blocks, Table* block_weights)
 {
+  _F_
   // Sanity checks.
   assemble_sanity_checks(block_weights);
 
@@ -496,6 +500,7 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext)
 {
+  _F_
   // Boundary flags. bnd[i] == true := i-th edge of the current Element is a boundary edge.
   bool bnd[4];
 
@@ -527,6 +532,7 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
 Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<PrecalcShapeset *>& spss, 
   Hermes::vector<RefMap *>& refmap, Element** e, Hermes::vector<bool>& isempty, Hermes::vector<AsmList *>& al)
 {
+  _F_
   // Find a non-NULL e[i].
   Element* e0;
   for (unsigned int i = 0; i < stage.idx.size(); i++)
@@ -571,6 +577,7 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
         Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, Element** e, 
         bool* bnd, SurfPos* surf_pos, Element* trav_base)
 {
+  _F_
   // Assembly list vector.
   Hermes::vector<AsmList *> al;
   for(unsigned int i = 0; i < wf->get_neq(); i++) al.push_back(new AsmList);
@@ -609,6 +616,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al)
 {
+  _F_
   if (mat != NULL) {
     for (unsigned ww = 0; ww < stage.mfvol.size(); ww++) {
       WeakForm::MatrixFormVol* mfv = stage.mfvol[ww];
@@ -719,6 +727,7 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al)
 {
+  _F_
   for (unsigned int ww = 0; ww < stage.vfvol.size(); ww++) {
     WeakForm::VectorFormVol* vfv = stage.vfvol[ww];
     int m = vfv->i;
@@ -756,6 +765,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, 
        Hermes::vector<bool>& nat, int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
+  _F_
   // Obtain the list of shape functions which are nonzero on this surface.
   for (unsigned int i = 0; i < stage.idx.size(); i++) {
     int j = stage.idx[i];
@@ -795,6 +805,7 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base)
 {
+  _F_
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
     WeakForm::MatrixFormSurf* mfs = stage.mfsurf[ww];
     int m = mfs->i;
@@ -850,6 +861,7 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base)
 {
+  _F_
   for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) {
       WeakForm::VectorFormSurf* vfs = stage.vfsurf[ww];
       int m = vfs->i;
@@ -891,6 +903,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
+  _F_
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
             WeakForm::MatrixFormSurf* mfs = stage.mfsurf[ww];
             int m = mfs->i;
@@ -975,6 +988,7 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
+  _F_
   for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) {
             WeakForm::VectorFormSurf* vfs = stage.vfsurf[ww];
             int m = vfs->i;
