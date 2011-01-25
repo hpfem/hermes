@@ -171,30 +171,18 @@ int main(int argc, char* argv[])
   es.print_eigenvalues();
   info("Total running time for solving generalized eigenvalue problem (new approach): %g s.", cpu_time.accumulated());
 
-  double* coeff_vec = new double[ndof];
+  double* coeff_vec;
   Solution sln;
   ScalarView view("Solution", new WinGeom(0, 0, 1024, 768));
   // Reading solution vectors from file and visualizing.
   double* eigenval = new double[NUMBER_OF_EIGENVALUES];
-  FILE *file = fopen("eivecs.dat", "r");
-  char line [64];                  // Maximum line size.
-  fgets(line, sizeof line, file);  // ndof
-  int n = atoi(line);            
-  if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
-  fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
-  int neig = atoi(line);
-  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+  int neig = es.get_n_eigs();
+  int n;
+  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver versus requested number.");
   for (int ieig = 0; ieig < neig; ieig++) {
-    // Get next eigenvalue from the file
-    fgets(line, sizeof line, file);
-    eigenval[ieig] = atof(line);            
-    // Get the corresponding eigenvector.
-    for (int i = 0; i < ndof; i++) {  
-      fgets(line, sizeof line, file);
-      coeff_vec[i] = atof(line);
-    }
-
+    eigenval[ieig] = es.get_eigenvalue(ieig);
     // Convert coefficient vector into a Solution.
+    es.get_eigenvector(ieig, &coeff_vec, &n);
     Solution::vector_to_solution(coeff_vec, &space, &sln);
 
     // Visualize the solution.
@@ -205,13 +193,10 @@ int main(int argc, char* argv[])
 
     // Wait for keypress.
     View::wait(HERMES_WAIT_KEYPRESS);
-  }  
-  fclose(file);
-
-  delete [] coeff_vec;
+  }
 
   double E=eigenval[0];
   info("E = %.16f   Delta E = %.16e", E, E - E_LITERATURE);
-  return 0; 
+  return 0;
 };
 
