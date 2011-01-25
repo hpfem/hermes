@@ -22,7 +22,7 @@ void wrap_CSC(const Ptr<Python> p, const std::string name,
 
 PyMODINIT_FUNC initeigen(void); /*proto*/
 
-void EigenSolver::solve() {
+void EigenSolver::solve(double target_value) {
     // Support CSCMatrix only for now:
     RCP<CSCMatrix> A = rcp_dynamic_cast<CSCMatrix>(this->A, true);
     RCP<CSCMatrix> B = rcp_dynamic_cast<CSCMatrix>(this->B, true);
@@ -31,9 +31,10 @@ void EigenSolver::solve() {
     wrap_CSC(ptr(&p), "B", B);
     initeigen();
     p.exec("from eigen import solve_eig_pysparse");
+    p.push_double("target_value", target_value);
 
     printf("Solving the system A * x = lambda * B * x\n");
-    p.exec("eigs = solve_eig_pysparse(A, B)");
+    p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value)");
 
     p.exec("energies = [E for E, eig in eigs]");
     printf("Energies:");

@@ -17,7 +17,7 @@ public:
         this->B = B;
     }
 
-    void solve();
+    void solve(double target_value=-1);
 
     void print_eigenvalues() {
     }

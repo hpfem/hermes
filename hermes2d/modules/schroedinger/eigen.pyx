@@ -78,7 +78,7 @@ def convert_mat(mtx):
         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
     return A
 
-def solve_eig_pysparse(A, B, n_eigs=4, verbose=False):
+def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False):
     """
     Solves the generalized eigenvalue problem.
 
@@ -99,7 +99,7 @@ def solve_eig_pysparse(A, B, n_eigs=4, verbose=False):
     if verbose:
         print "solving (%d x %d)" % (n, n)
     Atau = A.copy()
-    tau = -1
+    tau = target_value
     Atau.shift(-tau, B)
     K = precon.jacobi(Atau)
     A = A.to_sss()
