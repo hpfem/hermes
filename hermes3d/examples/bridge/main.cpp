@@ -10,9 +10,9 @@ int main(int argc, char **args)
 {
     // Load the mesh. 
     Mesh mesh;
-    CTUReader mloader;
-    mloader.load("most-sup.top", &mesh);
+    H3DReader mloader;
+    mloader.load("mesh.mesh3d", &mesh);
 
-    mloader.save_as_h3d("mesh.mesh3d", &mesh);
+    mloader.save("new.mesh.mesh3d", &mesh);
     return 0;
 }

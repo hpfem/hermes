@@ -44,8 +44,6 @@ int main()
 
         if(cols.size() == 1)
         {
-            int item_count = boost::lexical_cast<int>(cols[0]);
-
             if(point_start)
             {
                 h3d_f << "# points\n";
@@ -59,17 +57,19 @@ int main()
                 point_write = false;
             }
 
-            h3d_f << boost::lexical_cast<string>(item_count) << "\n";
+            h3d_f << cols[0] << "\n";
         }
         else
         {
             if(point_write)
             {
+                
                 h3d_f << cols[1] << " " << cols[2] << " " << cols[3] << "\n";
 
                 if(boost::lexical_cast<int>(cols[cols.size()-1]) >= 10 && boost::lexical_cast<int>(cols[cols.size()-1]) <= 16)
                 {
-                    pd0_f << cols[0] << " " << cols[1] << " " << cols[2] << " " << cols[3] << "\n";
+                    //pd0_f << cols[0] << " " << cols[1] << " " << cols[2] << " " << cols[3] << "\n";
+                    pd0_f << cols[1] << " " << cols[2] << " " << cols[3] << "\n";
                     pd0_id.push_back(boost::lexical_cast<int>(cols[0]));
                 }
             }
