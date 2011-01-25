@@ -43,8 +43,9 @@ MeshFunction::~MeshFunction()
 {
   delete refmap;
   if(overflow_nodes != NULL) {
-    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
-      ::free(it->second);
+    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+      if(overflow_nodes->present(i))
+        ::free(overflow_nodes->get(i));
     delete overflow_nodes;
   }
 }
@@ -68,11 +69,12 @@ void MeshFunction::set_active_element(Element* e)
 void MeshFunction::handle_overflow_idx()
 {
   if(overflow_nodes != NULL) {
-    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
-      ::free(it->second);
+    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+      if(overflow_nodes->present(i))
+        ::free(overflow_nodes->get(i));
     delete overflow_nodes;
   }
-  nodes = new std::map<unsigned int, Node*>;
+  nodes = new LightArray<Node *>;
   overflow_nodes = nodes;
 }
 
@@ -187,7 +189,7 @@ void Solution::init()
 
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      tables[i][j] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
 
   mono_coefs = NULL;
   elem_coefs[0] = elem_coefs[1] = NULL;
@@ -327,13 +329,14 @@ void Solution::free_tables()
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
       if(tables[i][j] != NULL) {
-	std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-	for (it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) {
-	  std::map<unsigned int, Node*>::iterator it_inner;
-	    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-	      ::free(it_inner->second);
-	  it->second->clear();
-	}
+        for(unsigned int k = 0; k < tables[i][j]->get_size(); k++) 
+          if(tables[i][j]->present(k)) {
+            for(unsigned int l = 0; l < tables[i][j]->get(k)->get_size(); l++)
+              if(tables[i][j]->get(k)->present(l))
+                ::free(tables[i][j]->get(k)->get(l));
+            delete tables[i][j]->get(k);
+          }
+        delete tables[i][j];
       }
 }
 
@@ -474,6 +477,11 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   int ndof = Space::get_num_dofs(space);
 
   free();
+  
+  // Recreate the tables.
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
 
   space_type = space->get_type();
 
@@ -795,15 +803,18 @@ void Solution::set_active_element(Element* e)
   // if not found, free the oldest one and use its slot
   if (cur_elem >= 4)
   {
-    if (tables[cur_quad][oldest[cur_quad]] != NULL) {
-      std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-      for (it = tables[cur_quad][oldest[cur_quad]]->begin(); it != tables[cur_quad][oldest[cur_quad]]->end(); it++) {
-	std::map<unsigned int, Node*>::iterator it_inner;
-	  for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-	    ::free(it_inner->second);
-	it->second->clear();
-      }
+    if(tables[cur_quad][oldest[cur_quad]] != NULL) {
+      for(unsigned int k = 0; k < tables[cur_quad][oldest[cur_quad]]->get_size(); k++) 
+        if(tables[cur_quad][oldest[cur_quad]]->present(k)) {
+          for(unsigned int l = 0; l < tables[cur_quad][oldest[cur_quad]]->get(k)->get_size(); l++)
+            if(tables[cur_quad][oldest[cur_quad]]->get(k)->present(l))
+              ::free(tables[cur_quad][oldest[cur_quad]]->get(k)->get(l));
+          delete tables[cur_quad][oldest[cur_quad]]->get(k);
+        }
+      delete tables[cur_quad][oldest[cur_quad]];
     }
+
+    tables[cur_quad][oldest[cur_quad]] = new LightArray<LightArray<Node*>*>;
 
     cur_elem = oldest[cur_quad];
     if (++oldest[cur_quad] >= 4)
@@ -1141,11 +1152,11 @@ void Solution::precalculate(int order, int mask)
           "the solution on its right-hand side.");
   }
 
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 

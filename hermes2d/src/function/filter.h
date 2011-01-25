@@ -61,7 +61,7 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, std::map<unsigned int, Node*>*>* tables[10];
+  LightArray<LightArray<Node*>*>* tables[10];
 
   bool unimesh;
   UniData** unidata;
