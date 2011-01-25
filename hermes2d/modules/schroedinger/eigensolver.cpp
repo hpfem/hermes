@@ -13,9 +13,12 @@ void EigenSolver::solve() {
     RCP<CSCMatrix> A = rcp_dynamic_cast<CSCMatrix>(this->A);
     RCP<CSCMatrix> B = rcp_dynamic_cast<CSCMatrix>(this->B);
     Python p;
-    p.push_numpy_int_inplace("Ap", A->get_Ap(), A->get_size()+1);
-    p.push_numpy_int_inplace("Ai", A->get_Ai(), A->get_nnz());
-    p.push_numpy_double_inplace("Ax", A->get_Ax(), A->get_nnz());
+    p.push_numpy_int_inplace("_IA", A->get_Ai(), A->get_nnz());
+    p.push_numpy_int_inplace("_JA", A->get_Ap(), A->get_size()+1);
+    p.push_numpy_double_inplace("_A", A->get_Ax(), A->get_nnz());
+    p.push_int("n", A->get_size());
+    p.exec("from scipy.sparse import csc_matrix\n");
+    p.exec("A = csc_matrix((_A, _IA, _JA), shape=(n, n))");
 
     printf("Solving the system A * x = lambda * B * x\n");
 }
