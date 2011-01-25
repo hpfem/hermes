@@ -149,24 +149,6 @@ int main(int argc, char* argv[])
   info("Total running time for initializing EigenSolver : %g s.", cpu_time.accumulated());
 
   cpu_time.reset();
-  write_matrix_mm("mat_left.mtx" ,Hmat.get());
-  write_matrix_mm("mat_right.mtx", Umat.get());
-  cpu_time.tick();
-  info("Total running time for writing matrices to disk : %g s.", cpu_time.accumulated());
-
-  cpu_time.reset();
-  info("Calling JDSYM.");
-  char call_cmd[255];
-  double TOL=1e-10;
-  int MAX_ITER=1000;
-  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	  TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
-  system(call_cmd);
-  info("JDSYM finished.");
-  cpu_time.tick();
-  info("Total running time for solving generalized eigenvalue problem: %g s.", cpu_time.accumulated());
-
-  cpu_time.reset();
   es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE);
   es.print_eigenvalues();
   info("Total running time for solving generalized eigenvalue problem (new approach): %g s.", cpu_time.accumulated());
