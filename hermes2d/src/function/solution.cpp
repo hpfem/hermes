@@ -286,6 +286,10 @@ void Solution::copy(const Solution* sln)
 
   free();
 
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
+
   mesh = new Mesh;
   //printf("Copying mesh from Solution and setting own_mesh = true.\n");
   mesh->copy(sln->mesh);
@@ -580,6 +584,12 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
 {
   free();
+
+  // Recreate the tables.
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
+
   this->mesh = mesh;
   exactfn1 = exactfn;
   num_components = 1;
@@ -592,6 +602,12 @@ void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
 void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
 {
   free();
+
+  // Recreate the tables.
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
+
   this->mesh = mesh;
   exactfn2 = exactfn;
   num_components = 2;
@@ -604,6 +620,12 @@ void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
 void Solution::set_const(Mesh* mesh, scalar c)
 {
   free();
+
+  // Recreate the tables.
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
+
   this->mesh = mesh;
   cnst[0] = c;
   cnst[1] = 0.0;
@@ -616,6 +638,12 @@ void Solution::set_const(Mesh* mesh, scalar c)
 void Solution::set_const(Mesh* mesh, scalar c0, scalar c1)
 {
   free();
+
+  // Recreate the tables.
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
+
   this->mesh = mesh;
   cnst[0] = c0;
   cnst[1] = c1;
