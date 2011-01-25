@@ -6,6 +6,7 @@
 #include "../../modules/schroedinger/schroedinger.h"
 
 using Teuchos::ptr;
+using Teuchos::RCP;
 using Teuchos::rcp;
 using Schroedinger::EigenSolver;
 
@@ -130,26 +131,26 @@ int main(int argc, char* argv[])
   wfU.add_matrix_form(bilinear_form_U,bilinear_form_ord);
 
   // Initialize matrices.
-  SparseMatrix* Hmat = create_matrix(matrix_solver);
-  SparseMatrix* Umat = create_matrix(matrix_solver);
+  RCP<SparseMatrix> Hmat = rcp(create_matrix(matrix_solver));
+  RCP<SparseMatrix> Umat = rcp(create_matrix(matrix_solver));
 
   // Assemble the matrices.
   bool is_linear = true;
   DiscreteProblem dpH(&wfH, &space, is_linear);
-  dpH.assemble(Hmat);
+  dpH.assemble(Hmat.get());
   DiscreteProblem dpU(&wfU, &space, is_linear);
-  dpU.assemble(Umat);
+  dpU.assemble(Umat.get());
   cpu_time.tick();
   info("Total running time for assembling matrices : %g s.", cpu_time.accumulated());
 
   cpu_time.reset();
-  EigenSolver es(rcp(Hmat, false), rcp(Umat, false));
+  EigenSolver es(Hmat, Umat);
   cpu_time.tick();
   info("Total running time for initializing EigenSolver : %g s.", cpu_time.accumulated());
 
   cpu_time.reset();
-  write_matrix_mm("mat_left.mtx" ,Hmat);
-  write_matrix_mm("mat_right.mtx", Umat);
+  write_matrix_mm("mat_left.mtx" ,Hmat.get());
+  write_matrix_mm("mat_right.mtx", Umat.get());
   cpu_time.tick();
   info("Total running time for writing matrices to disk : %g s.", cpu_time.accumulated());
 
