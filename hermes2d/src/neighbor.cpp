@@ -415,6 +415,7 @@ int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_v
 
 bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 {
+  _F_
   ensure_active_edge(this);
 
   active_segment = neighbor;
@@ -486,6 +487,7 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 
 void NeighborSearch::attach_pss_and_rm(PrecalcShapeset *pss, RefMap *rm)
 {
+  _F_
   central_pss = pss;
   central_rm = rm;
 
@@ -502,6 +504,7 @@ void NeighborSearch::attach_rm(RefMap *rm)
 
 void NeighborSearch::detach_pss_and_rm()
 {
+  _F_
   if (central_pss == NULL)
   {
     if (central_rm != NULL)
@@ -526,6 +529,7 @@ void NeighborSearch::detach_rm()
 
 int NeighborSearch::create_extended_shapeset(Space *space, AsmList* al)
 {
+  _F_
   ensure_central_pss_rm(this);
   ensure_active_segment(this);
 
@@ -539,6 +543,7 @@ int NeighborSearch::create_extended_shapeset(Space *space, AsmList* al)
 
 void NeighborSearch::set_quad_order(int order)
 {
+  _F_
   ensure_active_segment(this);
 
   quad->set_mode(neighb_el->get_mode());
@@ -656,6 +661,7 @@ double* NeighborSearch::calculate_jwt(int edge_order)
 
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
 {
+  _F_
   ensure_active_segment(this);
   Func<Ord>* fo1 = init_fn_ord(fu->get_edge_fn_order(active_edge));
   Func<Ord>* fo2 = init_fn_ord(fu->get_edge_fn_order(active_edge));
@@ -664,6 +670,7 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
 
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
 {
+  _F_
   ensure_active_segment(this);
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   int central_order = fu->get_edge_fn_order(active_edge) + inc;
@@ -673,6 +680,7 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
 
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 {
+  _F_
   ensure_active_segment(this);
   ensure_set_quad_order(central_quad);
   ensure_set_quad_order(neighb_quad);
@@ -746,6 +754,7 @@ int NeighborSearch::get_neighb_edge_orientation(int segment)
 NeighborSearch::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space* space) :
   central_al(central_al)
 {
+  _F_
   neighbor_al = new AsmList();
   space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
   combine_assembly_lists();
@@ -763,6 +772,7 @@ void NeighborSearch::ExtendedShapeset::combine_assembly_lists()
 
 void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(int index, AsmList* central_al, AsmList* neighb_al)
 {
+  _F_
   ensure_active_segment(neibhood);
   ensure_central_pss_rm(neibhood);
   assert_msg(neibhood->neighb_pss != NULL, "Cannot activate extended shape function."
