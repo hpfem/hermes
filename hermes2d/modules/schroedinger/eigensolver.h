@@ -34,7 +34,7 @@ public:
     void get_eigenvector(int i, double **vec, int *n);
 
     void print_eigenvalues() {
-        printf("Eigenvalues:");
+        printf("Eigenvalues:\n");
         for (int i=0; i < this->get_n_eigs(); i++)
             printf("%3d: %f\n", i, this->get_eigenvalue(i));
     }

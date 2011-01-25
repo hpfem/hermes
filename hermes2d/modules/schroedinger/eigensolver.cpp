@@ -42,19 +42,28 @@ void EigenSolver::solve(int n_eigs, double target_value) {
 
     printf("Solving the system A * x = lambda * B * x\n");
     this->p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value, n_eigs=n_eigs)");
-
-    this->p.exec("energies = [E for E, eig in eigs]");
-    printf("Energies:");
-    this->p.exec("print energies");
+    this->p.exec("n_eigs = len(eigs)");
+    this->n_eigs = this->p.pull_int("n_eigs");
 }
 
 double EigenSolver::get_eigenvalue(int i)
 {
-    return 0;
+    if (i >= 0 && i < this->n_eigs) {
+        this->p.push_int("i", i);
+        this->p.exec("E = eigs[i][0]");
+        return this->p.pull_double("E");
+    } else
+        throw std::runtime_error("'i' must obey 0 <= i < n_eigs");
 }
 
 void EigenSolver::get_eigenvector(int i, double **vec, int *n)
 {
+    if (i >= 0 && i < this->n_eigs) {
+        this->p.push_int("i", i);
+        this->p.exec("vec = eigs[i][1]");
+        this->p.pull_numpy_double_inplace("vec", vec, n);
+    } else
+        throw std::runtime_error("'i' must obey 0 <= i < n_eigs");
 }
 
 } // namespace Schroedinger
