@@ -31,11 +31,13 @@ void EigenSolver::solve() {
     wrap_CSC(ptr(&p), "B", B);
     initeigen();
     p.exec("from eigen import solve_eig_pysparse");
-    p.exec("eigs = solve_eig_pysparse(A, B)");
-    p.exec("energies = [E for E, eig in eigs]");
-    p.exec("print energies");
 
     printf("Solving the system A * x = lambda * B * x\n");
+    p.exec("eigs = solve_eig_pysparse(A, B)");
+
+    p.exec("energies = [E for E, eig in eigs]");
+    printf("Energies:");
+    p.exec("print energies");
 }
 
 } // namespace Schroedinger
