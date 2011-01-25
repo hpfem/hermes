@@ -168,6 +168,7 @@ int main(int argc, char* argv[])
 
   cpu_time.reset();
   es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE);
+  es.print_eigenvalues();
   info("Total running time for solving generalized eigenvalue problem (new approach): %g s.", cpu_time.accumulated());
 
   double* coeff_vec = new double[ndof];
