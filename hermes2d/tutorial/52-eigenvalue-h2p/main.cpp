@@ -131,8 +131,8 @@ int main(int argc, char* argv[])
   wfU.add_matrix_form(bilinear_form_U,bilinear_form_ord);
 
   // Initialize matrices.
-  RCP<SparseMatrix> Hmat = rcp(create_matrix(matrix_solver));
-  RCP<SparseMatrix> Umat = rcp(create_matrix(matrix_solver));
+  RCP<SparseMatrix> Hmat = rcp(new CSCMatrix());
+  RCP<SparseMatrix> Umat = rcp(new CSCMatrix());
 
   // Assemble the matrices.
   bool is_linear = true;
