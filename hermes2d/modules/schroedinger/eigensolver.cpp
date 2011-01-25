@@ -20,6 +20,8 @@ void wrap_CSC(const Ptr<Python> p, const std::string name,
     p->exec(name + " = csc_matrix((_A, _IA, _JA), shape=(n, n))");
 }
 
+PyMODINIT_FUNC initeigen(void); /*proto*/
+
 void EigenSolver::solve() {
     // Support CSCMatrix only for now:
     RCP<CSCMatrix> A = rcp_dynamic_cast<CSCMatrix>(this->A);
@@ -27,6 +29,8 @@ void EigenSolver::solve() {
     Python p;
     wrap_CSC(ptr(&p), "A", A);
     wrap_CSC(ptr(&p), "B", B);
+    initeigen();
+    p.exec("from eigen import solve_eig_pysparse");
 
     printf("Solving the system A * x = lambda * B * x\n");
 }
