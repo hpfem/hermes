@@ -114,11 +114,11 @@ def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False):
         vec = Q[:, i]
         r.append((lmbd[i], vec))
     r.sort(key=lambda x: x[0])
-    print "eigenvalues:"
-    eigs = []
-    for w, vec in r:
-        if w > 0:
-            break
-        print w
-        eigs.append(vec)
+    #print "eigenvalues:"
+    #eigs = []
+    #for w, vec in r:
+    #    if w > 0:
+    #        break
+    #    print w
+    #    eigs.append(vec)
     return r
