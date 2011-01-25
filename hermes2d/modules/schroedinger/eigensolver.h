@@ -17,9 +17,7 @@ public:
         this->B = B;
     }
 
-    void solve() {
-        printf("Solving the system A * x = lambda * B * x\n");
-    }
+    void solve();
 
     void print_eigenvalues() {
     }

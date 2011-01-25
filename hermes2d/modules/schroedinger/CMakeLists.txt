@@ -4,6 +4,7 @@ project(module-schroedinger)
 
 set(SRC
     schroedinger.cpp
+    eigensolver.cpp
     )
 
 include_directories(${hermes2d_SOURCE_DIR}/src)
