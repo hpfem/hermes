@@ -316,7 +316,7 @@ public:
     return;
   }
 
-  int get_size() const { 
+  unsigned int get_size() const { 
     return size; 
   }
 
