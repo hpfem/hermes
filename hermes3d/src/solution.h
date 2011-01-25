@@ -111,12 +111,22 @@ public:
   /// mapping matrix. The default is enabled (true).
   void enable_transform(bool enable);
 
+  /// Calculates the value of the solution at a point that is given in terms 
+  /// of its physical mesh coordinates. 
   virtual scalar get_pt_value(double x, double y, double z, int comp = 0) {
     QuadPt3D pt(x, y, z, 1.0);
     precalculate(1, &pt, FN_VAL);
     return get_fn_values(comp)[0];
   }
 
+  /// Calculates the values or derivatives of the solution at 'np'
+  /// points. The points are provided in the array 'pt'. What exactly is 
+  /// calculated is determined by the mask. In the scalar (H1) case, 
+  /// possible values of mask are FN_VAL (for function values) and 
+  /// FN_DX, FN_DY, FN_DZ (first partial derivatives). In the vector-valued
+  /// Hcurl case, function value masks are FN_VAL_0, FN_VAL_1, FN_VAL_2
+  /// for function values and FN_DX_0, FN_DX_1, FN_DX_2, FN_DY_0, ...
+  /// for partial derivatives.
   virtual void precalculate(const int np, const QuadPt3D *pt, int mask);
 
   virtual Ord3 get_order();

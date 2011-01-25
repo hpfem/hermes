@@ -18,7 +18,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary markers.
-const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
+const std::string BDY_HORIZONTAL = "Boundary horizontal";
+const std::string BDY_VERTICAL = "Boundary vertical";
 
 // Problem parameters.
 double a_11(double x, double y) {

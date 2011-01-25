@@ -778,124 +778,125 @@ void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask)
   replace_cur_node(node);
 }
 
-void Solution::precalculate_exact(const int np, const QuadPt3D *pt, int mask) {
-	_F_
+void Solution::precalculate_exact(const int np, const QuadPt3D *pt, int mask) 
+{
+  _F_
 
-	mask = FN_DEFAULT;
-	Node *node = new_node(mask, np);
+  mask = FN_DEFAULT;
+  Node *node = new_node(mask, np);
 
-	// transform points from ref. domain to physical one
-	double *x = refmap->get_phys_x(np, pt);
-	double *y = refmap->get_phys_y(np, pt);
-	double *z = refmap->get_phys_z(np, pt);
+  // transform points from ref. domain to physical one
+  double *x = refmap->get_phys_x(np, pt);
+  double *y = refmap->get_phys_y(np, pt);
+  double *z = refmap->get_phys_z(np, pt);
 
-	// evaluate the exact solution
-	if (num_components == 1) {
-		if (transform) {
-			for (int i = 0; i < np; i++) {
-				scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
-				val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
-				node->values[0][FN][i] = val;
-				node->values[0][DX][i] = dx;
-				node->values[0][DY][i] = dy;
-				node->values[0][DZ][i] = dz;
-			}
-		}
-		else {
-			// untransform values
-			double3x3 *mat = NULL, *m;
-			mat = refmap->get_ref_map(np, pt);
+  // evaluate the exact solution
+  if (num_components == 1) {
+    if (transform) {
+       for (int i = 0; i < np; i++) {
+	 scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
+	 val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
+	 node->values[0][FN][i] = val;
+	 node->values[0][DX][i] = dx;
+	 node->values[0][DY][i] = dy;
+	 node->values[0][DZ][i] = dz;
+       }
+     }
+     else {
+       // untransform values
+       double3x3 *mat = NULL, *m;
+       mat = refmap->get_ref_map(np, pt);
 
-			int i;
-			for (i = 0, m = mat; i < np; i++, m++) {
-				scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
-				val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
+       int i;
+       for (i = 0, m = mat; i < np; i++, m++) {
+         scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
+         val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
 
-				node->values[0][FN][i] = val;
-				node->values[0][DX][i] = ((*m)[0][0]*dx + (*m)[0][1]*dy + (*m)[0][2]*dz);
-				node->values[0][DY][i] = ((*m)[1][0]*dx + (*m)[1][1]*dy + (*m)[1][2]*dz);
-				node->values[0][DZ][i] = ((*m)[2][0]*dx + (*m)[2][1]*dy + (*m)[2][2]*dz);
-			}
+         node->values[0][FN][i] = val;
+         node->values[0][DX][i] = ((*m)[0][0]*dx + (*m)[0][1]*dy + (*m)[0][2]*dz);
+         node->values[0][DY][i] = ((*m)[1][0]*dx + (*m)[1][1]*dy + (*m)[1][2]*dz);
+         node->values[0][DZ][i] = ((*m)[2][0]*dx + (*m)[2][1]*dy + (*m)[2][2]*dz);
+       }
 
-			delete [] mat;
-		}
-	}
-	else if (num_components == 3) {
-		// TODO: untransform Hcurl and vector-valued functions
-		assert(transform == true);
-		for (int i = 0; i < np; i++) {
-			scalar3  dx = { 0.0, 0.0, 0.0 };
-			scalar3  dy = { 0.0, 0.0, 0.0 };
-			scalar3  dz = { 0.0, 0.0, 0.0 };
-			scalar3 &fn = exact_vec_fn(x[i], y[i], z[i], dx, dy, dz);
-			for (int j = 0; j < num_components; j++) {
-				node->values[j][FN][i] = fn[j];
-				node->values[j][DX][i] = dx[j];
-				node->values[j][DY][i] = dy[j];
-				node->values[j][DZ][i] = dz[j];
-			}
-		}
-	}
-	else
-		EXIT("Invalid number of components.");
+       delete [] mat;
+     }
+   }
+   else if (num_components == 3) {
+     // TODO: untransform Hcurl and vector-valued functions
+     assert(transform == true);
+     for (int i = 0; i < np; i++) {
+       scalar3  dx = { 0.0, 0.0, 0.0 };
+       scalar3  dy = { 0.0, 0.0, 0.0 };
+       scalar3  dz = { 0.0, 0.0, 0.0 };
+       scalar3 &fn = exact_vec_fn(x[i], y[i], z[i], dx, dy, dz);
+       for (int j = 0; j < num_components; j++) {
+	 node->values[j][FN][i] = fn[j];
+	 node->values[j][DX][i] = dx[j];
+	 node->values[j][DY][i] = dy[j];
+	 node->values[j][DZ][i] = dz[j];
+       }
+     }
+   }
+   else
+   EXIT("Invalid number of components.");
 
-	replace_cur_node(node);
+   replace_cur_node(node);
 
-	delete [] x;
-	delete [] y;
-	delete [] z;
+   delete [] x;
+   delete [] y;
+   delete [] z;
 }
 
-void Solution::precalculate_const(const int np, const QuadPt3D *pt, int mask) {
-	_F_
-	mask = FN_DEFAULT;
-	Node *node = new_node(mask, np);
+void Solution::precalculate_const(const int np, const QuadPt3D *pt, int mask) 
+{
+  _F_
+  mask = FN_DEFAULT;
+  Node *node = new_node(mask, np);
 
-	assert(num_components == 1 || num_components == 3);
-	for (int i = 0; i < np; i++) {
-		for (int j = 0; j < num_components; j++) {
-			node->values[j][FN][i] = cnst[j];
-			node->values[j][DX][i] = 0.0;
-			node->values[j][DY][i] = 0.0;
-			node->values[j][DZ][i] = 0.0;
-		}
-	}
+  assert(num_components == 1 || num_components == 3);
+  for (int i = 0; i < np; i++) {
+    for (int j = 0; j < num_components; j++) {
+      node->values[j][FN][i] = cnst[j];
+      node->values[j][DX][i] = 0.0;
+      node->values[j][DY][i] = 0.0;
+      node->values[j][DZ][i] = 0.0;
+    }
+  }
 
-	replace_cur_node(node);
+  replace_cur_node(node);
 }
 
-void Solution::enable_transform(bool enable) {
-	_F_
-	transform = enable;
+void Solution::enable_transform(bool enable) 
+{
+  _F_
+  transform = enable;
 }
 
 Ord3 Solution::get_order()
 {
-	_F_
-	switch (element->get_mode()) {
-		case HERMES_MODE_HEX:
-			switch (type) {
-				case HERMES_SLN: return elem_orders[element->id];
-				case HERMES_EXACT: return Ord3(10, 10, 10);
-                                case HERMES_CONST: return Ord3(0, 0, 0);
+  _F_
+  switch (element->get_mode()) {
+    case HERMES_MODE_HEX:
+      switch (type) {
+	case HERMES_SLN: return elem_orders[element->id];
+	case HERMES_EXACT: return Ord3(10, 10, 10);
+        case HERMES_CONST: return Ord3(0, 0, 0);
+	default: EXIT("Internal error in Solution::get_order() - A.");
+      }
+      break;
 
-				default: EXIT("Internal error in Solution::get_order() - A.");
-			}
-			break;
+    case HERMES_MODE_TET:
+      switch (type) {
+	case HERMES_SLN: return elem_orders[element->id];
+	case HERMES_EXACT: return Ord3(10);
+        case HERMES_CONST: return Ord3(0);
+	default: EXIT("Internal error in Solution::get_order() - A.");
+      }
+      break;
 
-		case HERMES_MODE_TET:
-			switch (type) {
-				case HERMES_SLN: return elem_orders[element->id];
-				case HERMES_EXACT: return Ord3(10);
-                                case HERMES_CONST: return Ord3(0);
-				default: EXIT("Internal error in Solution::get_order() - A.");
-			}
-			break;
+    default: EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+    break;
+  }
 
-		default:
-			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-			break;
-	}
-
-	return Ord3(0);
+  return Ord3(0);
 }
