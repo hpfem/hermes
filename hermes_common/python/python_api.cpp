@@ -125,6 +125,12 @@ void Python::push_numpy_double(const std::string &name, double *A, int n)
     this->push(name, c2numpy_double(A, n));
 }
 
+void Python::push_numpy_double_inplace(const std::string &name,
+        double *A, int n)
+{
+    this->push(name, c2numpy_double_inplace(A, n));
+}
+
 void Python::pull_numpy_double_inplace(const std::string &name,
         double **A, int *n)
 {
@@ -134,6 +140,11 @@ void Python::pull_numpy_double_inplace(const std::string &name,
 void Python::push_numpy_int(const std::string &name, int *A, int n)
 {
     this->push(name, c2numpy_int(A, n));
+}
+
+void Python::push_numpy_int_inplace(const std::string &name, int *A, int n)
+{
+    this->push(name, c2numpy_int_inplace(A, n));
 }
 
 void Python::pull_numpy_int_inplace(const std::string &name,
