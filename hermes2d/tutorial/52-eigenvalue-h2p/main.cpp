@@ -141,12 +141,18 @@ int main(int argc, char* argv[])
   dpU.assemble(Umat);
   cpu_time.tick();
   info("Total running time for assembling matrices : %g s.", cpu_time.accumulated());
+
   cpu_time.reset();
   EigenSolver es(rcp(Hmat, false), rcp(Umat, false));
+  cpu_time.tick();
+  info("Total running time for initializing EigenSolver : %g s.", cpu_time.accumulated());
+
+  cpu_time.reset();
   write_matrix_mm("mat_left.mtx" ,Hmat);
   write_matrix_mm("mat_right.mtx", Umat);
   cpu_time.tick();
   info("Total running time for writing matrices to disk : %g s.", cpu_time.accumulated());
+
   cpu_time.reset();
   info("Calling JDSYM.");
   char call_cmd[255];
@@ -158,6 +164,11 @@ int main(int argc, char* argv[])
   info("JDSYM finished.");
   cpu_time.tick();
   info("Total running time for solving generalized eigenvalue problem: %g s.", cpu_time.accumulated());
+
+  cpu_time.reset();
+  es.solve();
+  info("Total running time for solving generalized eigenvalue problem (new approach): %g s.", cpu_time.accumulated());
+
   double* coeff_vec = new double[ndof];
   Solution sln;
   ScalarView view("Solution", new WinGeom(0, 0, 1024, 768));
