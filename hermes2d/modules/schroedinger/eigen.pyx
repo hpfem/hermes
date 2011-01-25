@@ -2,6 +2,8 @@
 #
 # cython --cplus eigen.pyx
 
+import warnings
+
 def solve_eig_numpy(A, B):
     """
     A, B .... scipy sparse matrices
@@ -86,6 +88,8 @@ def solve_eig_pysparse(A, B, n_eigs=4, verbose=False):
     returns a list of (lmbd, vec), where lmbd is the eigenvalue and vec is the
         eigenvector
     """
+    # Suppress the pysparse numpy warnings:
+    warnings.simplefilter("ignore", DeprecationWarning)
     from pysparse import jdsym, precon, itsolvers
     if verbose:
         print "converting to pysparse"
