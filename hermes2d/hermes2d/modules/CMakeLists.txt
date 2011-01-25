@@ -1,4 +1,5 @@
-add_subdirectory(basic)
+# Disable basic, as it doesn't compile:
+#add_subdirectory(basic)
 add_subdirectory(schroedinger)
 
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d/modules)
