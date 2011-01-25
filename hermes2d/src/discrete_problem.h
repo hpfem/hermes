@@ -114,17 +114,29 @@ public:
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext);
 
+  /// Initialize a state, returns a non-NULL Element.
+  Element* init_state(WeakForm::Stage& stage, Hermes::vector<PrecalcShapeset *>& spss, 
+  Hermes::vector<RefMap *>& refmap, Element** e, Hermes::vector<bool>& isempty, Hermes::vector<AsmList *>& al);
+
   /// Assemble one state.
   void assemble_one_state(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, Element** e, 
         bool* bnd, SurfPos* surf_pos, Element* trav_base);
 
+  /// Calculates the integration order for assemble_volume_matrix_forms().
+  int calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
+
   /// Assemble volume matrix forms.
   void assemble_volume_matrix_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al);
+
+  /// Calculates the integration order for assemble_volume_vector_forms().
+  int calc_order_vector_form_vol(WeakForm::VectorFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv);
 
   /// Assemble volume vector forms.
   void assemble_volume_vector_forms(WeakForm::Stage& stage, 
@@ -137,8 +149,11 @@ public:
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
-       int isurf, Element** e, Element* trav_base);
+       int isurf, Element** e, Element* trav_base, Element* rep_element);
 
+  /// Calculates the integration order for assemble_surface_matrix_forms().
+  int calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
   /// Assemble surface matrix forms.
   void assemble_surface_matrix_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -146,6 +161,9 @@ public:
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base);
 
+  /// Calculates the integration order for assemble_surface_vector_forms().
+  int calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
   /// Assemble surface vector forms.
   void assemble_surface_vector_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -158,14 +176,14 @@ public:
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
-       int isurf, Element** e, Element* trav_base);
+       int isurf, Element** e, Element* trav_base, Element* rep_element);
 
   /// Assemble DG vector forms.
   void assemble_DG_vector_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
-       int isurf, Element** e, Element* trav_base);
+       int isurf, Element** e, Element* trav_base, Element* rep_element);
 
   /// Get the number of unknowns.
   int get_num_dofs();

@@ -190,7 +190,7 @@ public:
   void set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
 
   /// Returns the number of equations.
-  int get_neq() { return neq; }
+  unsigned int get_neq() { return neq; }
 
   /// Returns volumetric and surface weak forms.
   Hermes::vector<MatrixFormVol> get_mfvol() { return mfvol; }
@@ -219,7 +219,7 @@ public:
   bool is_matrix_free() { return is_matfree; }
 
 protected:
-  int neq;
+  unsigned int neq;
   int seq;
   bool is_matfree;
 
