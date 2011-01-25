@@ -9,6 +9,16 @@ using Teuchos::ptr;
 using Teuchos::null;
 using Teuchos::rcp_dynamic_cast;
 
+PyMODINIT_FUNC initeigen(void); /*proto*/
+
+EigenSolver::EigenSolver(const RCP<Matrix> &A, const RCP<Matrix> &B) {
+    this->A = A;
+    this->B = B;
+    this->n_eigs=0;
+
+    initeigen();
+}
+
 void wrap_CSC(const Ptr<Python> p, const std::string name,
         const Ptr<CSCMatrix> A)
 {
@@ -20,25 +30,31 @@ void wrap_CSC(const Ptr<Python> p, const std::string name,
     p->exec(name + " = csc_matrix((_A, _IA, _JA), shape=(n, n))");
 }
 
-PyMODINIT_FUNC initeigen(void); /*proto*/
-
-void EigenSolver::solve(double target_value) {
+void EigenSolver::solve(int n_eigs, double target_value) {
     // Support CSCMatrix only for now:
     RCP<CSCMatrix> A = rcp_dynamic_cast<CSCMatrix>(this->A, true);
     RCP<CSCMatrix> B = rcp_dynamic_cast<CSCMatrix>(this->B, true);
-    Python p;
     wrap_CSC(ptr(&p), "A", A);
     wrap_CSC(ptr(&p), "B", B);
-    initeigen();
-    p.exec("from eigen import solve_eig_pysparse");
-    p.push_double("target_value", target_value);
+    this->p.exec("from eigen import solve_eig_pysparse");
+    this->p.push_double("target_value", target_value);
+    this->p.push_int("n_eigs", n_eigs);
 
     printf("Solving the system A * x = lambda * B * x\n");
-    p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value)");
+    this->p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value, n_eigs=n_eigs)");
 
-    p.exec("energies = [E for E, eig in eigs]");
+    this->p.exec("energies = [E for E, eig in eigs]");
     printf("Energies:");
-    p.exec("print energies");
+    this->p.exec("print energies");
+}
+
+double EigenSolver::get_eigenvalue(int i)
+{
+    return 0;
+}
+
+void EigenSolver::get_eigenvector(int i, double **vec, int *n)
+{
 }
 
 } // namespace Schroedinger
