@@ -62,8 +62,8 @@ double g_D(double x, double y) { return -cos(M_PI*x);}
 double g_N(double x, double y) { return 0;}
 
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
-const int BDY_NEUMANN = 2;
+const std::string BDY_HORIZONTAL = "Boundary horizontal";
+const std::string BDY_VERTICAL = "Boundary vertical";
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(double x, double y)
@@ -90,12 +90,12 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-  bc_types.add_bc_neumann(BDY_NEUMANN);
+  bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
+  bc_types.add_bc_neumann(BDY_VERTICAL);
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+  bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
-  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_NEUMANN);
+  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
