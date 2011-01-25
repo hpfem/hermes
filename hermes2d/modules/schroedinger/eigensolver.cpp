@@ -25,7 +25,11 @@ PyMODINIT_FUNC initeigen(void); /*proto*/
 void EigenSolver::solve() {
     // Support CSCMatrix only for now:
     RCP<CSCMatrix> A = rcp_dynamic_cast<CSCMatrix>(this->A);
+    if (A == null)
+        throw std::runtime_error("Must pass CSCMatrix only for now.");
     RCP<CSCMatrix> B = rcp_dynamic_cast<CSCMatrix>(this->B);
+    if (B == null)
+        throw std::runtime_error("Must pass CSCMatrix only for now.");
     Python p;
     wrap_CSC(ptr(&p), "A", A);
     wrap_CSC(ptr(&p), "B", B);
