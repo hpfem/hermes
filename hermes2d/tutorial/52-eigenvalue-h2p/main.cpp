@@ -1,8 +1,15 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
 #include <stdio.h>
 #include <cmath>
-using namespace std;
+
+#include "hermes2d.h"
+#include "../../modules/schroedinger/schroedinger.h"
+
+using Teuchos::ptr;
+using Teuchos::rcp;
+using Schroedinger::EigenSolver;
+
+//using namespace std;
 
 // This is a solver for the Schroedinger equation for the ground state of 
 // the Hydrogen molecular Ion in cylindrical coordinates
@@ -135,6 +142,7 @@ int main(int argc, char* argv[])
   cpu_time.tick();
   info("Total running time for assembling matrices : %g s.", cpu_time.accumulated());
   cpu_time.reset();
+  EigenSolver es(rcp(Hmat, false), rcp(Umat, false));
   write_matrix_mm("mat_left.mtx" ,Hmat);
   write_matrix_mm("mat_right.mtx", Umat);
   cpu_time.tick();
