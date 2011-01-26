@@ -19,7 +19,7 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-WeakForm::WeakForm(int neq, bool mat_free)
+WeakForm::WeakForm(unsigned int neq, bool mat_free)
 {
   _F_
   this->neq = neq;
@@ -377,13 +377,13 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 			  std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
-  unsigned i;
+  unsigned int i;
   stages.clear();
 
   // process volume matrix forms
   for (i = 0; i < mfvol.size(); i++)
   {
-    int ii = mfvol[i].i, jj = mfvol[i].j;
+    unsigned int ii = mfvol[i].i, jj = mfvol[i].j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
     Stage* s = find_stage(stages, ii, jj, m1, m2,
@@ -394,7 +394,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
   // process surface matrix forms
   for (i = 0; i < mfsurf.size(); i++)
   {
-    int ii = mfsurf[i].i, jj = mfsurf[i].j;
+    unsigned int ii = mfsurf[i].i, jj = mfsurf[i].j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
     Stage* s = find_stage(stages, ii, jj, m1, m2,
@@ -404,7 +404,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 
   // process volume vector forms
   for (unsigned i = 0; i < vfvol.size(); i++) {
-    int ii = vfvol[i].i;
+    unsigned int ii = vfvol[i].i;
     Mesh *m = spaces[ii]->get_mesh();
     Stage *s = find_stage(stages, ii, ii, m, m,
                           vfvol[i].ext, u_ext);
@@ -413,7 +413,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 
   // process surface vector forms
   for (unsigned i = 0; i < vfsurf.size(); i++) {
-    int ii = vfsurf[i].i;
+    unsigned int ii = vfsurf[i].i;
     Mesh *m = spaces[ii]->get_mesh();
     Stage *s = find_stage(stages, ii, ii, m, m,
                           vfsurf[i].ext, u_ext);

@@ -57,7 +57,7 @@ class HERMES_API WeakForm
 {
 public:
 
-  WeakForm(int neq = 1, bool mat_free = false);
+  WeakForm(unsigned int neq = 1, bool mat_free = false);
 
   // General case.
   typedef scalar (*matrix_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi, Func<double> *vj,
