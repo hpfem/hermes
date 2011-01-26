@@ -1,5 +1,5 @@
 #include "eigensolver.h"
-#include "../matrix_csc.h"
+#include "umfpack_solver.h"
 
 namespace Hermes {
 

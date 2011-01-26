@@ -29,8 +29,6 @@
 #include "../hermes_common/solver/umfpack_solver.h"
 #include "../hermes_common/solver/superlu.h"
 
-#include "../hermes_common/matrix_csc.h"
-
 // preconditioners
 #include "../hermes_common/solver/precond.h"
 #include "../hermes_common/solver/precond_ifpack.h"
