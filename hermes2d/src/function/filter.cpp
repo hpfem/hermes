@@ -154,6 +154,7 @@ void Filter::free()
           delete tables[i]->get(k);
         }
       delete tables[i];
+      tables[i] = NULL;
     }
 }
 
