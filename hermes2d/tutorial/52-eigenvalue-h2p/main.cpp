@@ -24,7 +24,7 @@ using Schroedinger::EigenSolver;
 // natural  for rho=0 and z=0.
 
 const int NUMBER_OF_EIGENVALUES = 1;             // Desired number of eigenvalues.
-int P_INIT =2;  // Uniform polynomial degree of mesh elements.
+int P_INIT = 4;  // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 4; // DON'T CHANGE THIS!!
 const int FINAL_REF_NUM = 0; // final global refinement 
 const double TARGET_VALUE = -2.0;                  // JDSYM parameter: Eigenvalues in the vicinity of this number will be computed. 
