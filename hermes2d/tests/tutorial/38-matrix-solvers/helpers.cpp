@@ -159,7 +159,12 @@ void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<VectorEntry> &a
     VectorEntry &ve = ar_rhs.get(i);
     rs[ve.m] = ve.value;
   }
-  rhs->add(n, rows, rs);
+  unsigned int *u_rows = new unsigned int[n];
+  for (unsigned int i = 0; i < n; i++) {
+    u_rows[i] = i;
+  }
+
+  rhs->add(n, u_rows, rs);
   rhs->finish();
 }
 
