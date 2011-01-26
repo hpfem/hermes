@@ -61,29 +61,6 @@ double  wfun (double rho,double z){
 const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
 #include "forms.cpp"
-// Write the matrix in Matrix Market format.
-void write_matrix_mm(const char* filename, Matrix* mat) 
-{
-  int ndof = mat->get_size();
-  FILE *out = fopen(filename, "w" );
-  int nz=0;
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) nz++;
-    }
-  } 
-
-  fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
-  fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i+1, j+1, tmp);
-    }
-  } 
-  fclose(out);
-}
 
 int main(int argc, char* argv[])
 {
@@ -181,4 +158,3 @@ int main(int argc, char* argv[])
   info("E = %.16f   Delta E = %.16e", E, E - E_LITERATURE);
   return 0;
 };
-
