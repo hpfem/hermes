@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include "hermes2d.h"
-#include "../../modules/schroedinger/schroedinger.h"
 
 using Teuchos::ptr;
 using Teuchos::RCP;
