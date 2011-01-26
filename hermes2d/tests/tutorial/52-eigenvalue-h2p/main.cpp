@@ -1,6 +1,6 @@
+#define HERMES_REPORT_ALL
 #include <stdio.h>
 #include <cmath>
-
 #include "hermes2d.h"
 
 using Teuchos::ptr;
@@ -54,11 +54,15 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
+
+  // Global mesh refinement.
   for (int i=0;i<INIT_REF_NUM;i++) mesh.refine_all_elements();
-  //The following code finds the 
+
+  // The following code finds the 
   // vertex id at the nuclear coordinate (0.0,1.0).
   int NUM_ELEMS=mesh.get_max_element_id();
   int vertex_id_nucleus=-1;
@@ -97,6 +101,7 @@ int main(int argc, char* argv[])
   RCP<SparseMatrix> Umat = rcp(new CSCMatrix());
 
   // Assemble the matrices.
+  info("Assembling matrices.");
   bool is_linear = true;
   DiscreteProblem dpH(&wfH, &space, is_linear);
   dpH.assemble(Hmat.get());
@@ -131,15 +136,15 @@ int main(int argc, char* argv[])
 
 
   double E=eigenval[0];
-  printf("E=%.16f   Delta E=%.16e\n",E ,E-E_LITERATURE);
+  info("E=%.16f   Delta E=%.16e",E ,E-E_LITERATURE);
 
   ndof = Space::get_num_dofs(&space);
-  printf("Coordinate ( 0, 0) value = %lf\n", sln.get_pt_value(0, 0));
-  printf("Coordinate ( 1, 1) value = %lf\n", sln.get_pt_value(1.0, 1.0));
-  printf("Coordinate ( 3, 3) value = %lf\n", sln.get_pt_value(3.0, 3.0));
-  printf("Coordinate ( 5, 5) value = %lf\n", sln.get_pt_value(5.0, 5.0));
-  printf("Coordinate ( 7, 7) value = %lf\n", sln.get_pt_value(7.0, 7.0));
-  printf("Coordinate (10,10) value = %lf\n", sln.get_pt_value(10.0, 10.0));
+  info("Coordinate ( 0, 0) value = %lf", sln.get_pt_value(0, 0));
+  info("Coordinate ( 1, 1) value = %lf", sln.get_pt_value(1.0, 1.0));
+  info("Coordinate ( 3, 3) value = %lf", sln.get_pt_value(3.0, 3.0));
+  info("Coordinate ( 5, 5) value = %lf", sln.get_pt_value(5.0, 5.0));
+  info("Coordinate ( 7, 7) value = %lf", sln.get_pt_value(7.0, 7.0));
+  info("Coordinate (10,10) value = %lf", sln.get_pt_value(10.0, 10.0));
 
   double coor_x_y[6] = {0.0, 1.0, 3.0, 5.0, 7.0, 10.0};
   double value[6] = { 0.246677, 0.140036, 0.003992, 0.000072, 0.000001, 0.000000};
@@ -152,17 +157,17 @@ int main(int argc, char* argv[])
             std::abs(correct + calculated) < 1E-6) {
             // OK
     } else {
-        printf("Failed: i=%d, value[i]=%f, pt=%f, difference=%f\n", i,
+        info("Failed: i=%d, value[i]=%f, pt=%f, difference=%f", i,
                 correct, calculated, std::abs(correct - calculated));
         success = false;
     }
   }
   if (success) {
-    printf("Success!\n");
+    info("Success!");
     return ERR_SUCCESS;
   }
   else {
-    printf("Failure!\n");
+    info("Failure!");
     return ERR_FAILURE;
   }
 }

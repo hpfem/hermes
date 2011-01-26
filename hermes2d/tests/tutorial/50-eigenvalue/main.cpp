@@ -1,4 +1,4 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 #include <stdio.h>
 
@@ -10,14 +10,13 @@ const int INIT_REF_NUM = 0;                       // Number of initial mesh refi
 double TARGET_VALUE = 2.0;                        // PySparse parameter: Eigenvalues in the vicinity of this number will be computed. 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
+
 using Teuchos::RCP;
 using Teuchos::rcp;
 using Hermes::EigenSolver;
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
+const int BDY_ALL = 1;
 
 // Weak forms.
 #include "forms.cpp"
@@ -36,11 +35,11 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers. 
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_types.add_bc_dirichlet(BDY_ALL);
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  bc_values.add_zero(BDY_ALL);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -103,17 +102,17 @@ int main(int argc, char* argv[])
             std::abs(correct + calculated) < 1E-6) {
             // OK
     } else {
-        printf("Failed: i=%d, value[i]=%f, pt=%f, difference=%f\n", i,
+        info("Failed: i=%d, value[i]=%f, pt=%f, difference=%f", i,
                 correct, calculated, std::abs(correct - calculated));
         success = false;
     }
   }
   if (success) {
-    printf("Success!\n");
+    info("Success!");
     return ERR_SUCCESS;
   }
   else {
-    printf("Failure!\n");
+    info("Failure!");
     return ERR_FAILURE;
   }
 }
