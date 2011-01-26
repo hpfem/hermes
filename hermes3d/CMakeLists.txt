@@ -1,4 +1,3 @@
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/../hermes_common/cmake/cxx_flag_overrides.cmake) # this is in H2D
 project(hermes3d)
 
 cmake_minimum_required(VERSION 2.6)
