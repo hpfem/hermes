@@ -219,6 +219,13 @@ include_directories(${HERMES_COMMON_DIR})
 
 include(../hermes_common/CMakeCommon.txt)
 
+# We require Python for the mesh parser (it also needs NumPy)
+find_package(Python REQUIRED)
+find_package(NumPy REQUIRED)
+include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+set(PYTHON_INSTALL_PATH lib/python/site-packages)
+
+
 #
 add_subdirectory(src)
 if(WITH_TESTS)
