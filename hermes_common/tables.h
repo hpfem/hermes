@@ -59,7 +59,7 @@ class HERMES_API ButcherTable: public Table
 {
 public:
   ButcherTable();
-  ButcherTable(int size);
+  ButcherTable(unsigned int size);
   ButcherTable(ButcherTableType butcher_table);
   virtual void alloc(unsigned int size);
   double get_B(unsigned int i);

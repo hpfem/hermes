@@ -174,7 +174,7 @@ void EpetraMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (v != 0.0 && m >= 0 && n >= 0) {		// ignore dirichlet DOFs
+  if (v != 0.0) {		// ignore zero values
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n);
     if (ierr != 0) error("Failed to insert into Epetra matrix");
@@ -204,7 +204,8 @@ void EpetraMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, 
 #ifdef HAVE_EPETRA
   for (int i = 0; i < m; i++)				// rows
     for (int j = 0; j < n; j++)			// cols
-      add(rows[i], cols[j], mat[i][j]);
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 

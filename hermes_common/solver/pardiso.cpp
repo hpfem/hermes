@@ -151,7 +151,7 @@ void PardisoMatrix::zero() {
 
 void PardisoMatrix::add(unsigned int m, unsigned int n, scalar v) {
   _F_
-  if (v != 0.0 && m >= 0 && n >= 0) // ignore dirichlet DOFs
+  if (v != 0.0) // ignore zero values.
   {   
     // Find n-th column in the m-th row.
     int pos = find_position(Ai + Ap[m], Ap[m + 1] - Ap[m], n);
@@ -176,7 +176,8 @@ void PardisoMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows,
   _F_
   for (unsigned int i = 0; i < m; i++)       // rows
     for (unsigned int j = 0; j < n; j++)     // cols
-      add(rows[i], cols[j], mat[i][j]);
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 }
 
 bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
@@ -292,13 +293,13 @@ void PardisoVector::free()
 void PardisoVector::set(unsigned int idx, scalar y) 
 {
   _F_
-  if (idx >= 0) v[idx] = y;
+  v[idx] = y;
 }
 
 void PardisoVector::add(unsigned int idx, scalar y) 
 {
   _F_
-  if (idx >= 0) v[idx] += y;
+  v[idx] += y;
 }
 
 void PardisoVector::extract(scalar *v) const
@@ -310,7 +311,7 @@ void PardisoVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
   for (unsigned int i = 0; i < n; i++)
-    if (idx[i] >= 0) v[idx[i]] += y[i];
+    v[idx[i]] += y[i];
 }
 
 bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 

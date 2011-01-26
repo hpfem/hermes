@@ -68,7 +68,7 @@ ButcherTable::ButcherTable() : Table()
   this->C = NULL;
 }
 
-ButcherTable::ButcherTable(int size) : Table(size)
+ButcherTable::ButcherTable(unsigned int size) : Table(size)
 {
   // B array.
   this->B = new double[size];
@@ -312,4 +312,3 @@ void ButcherTable::set_C(unsigned int i, double val)
   if (i > size) error("Invalid access to a Butcher's table.");
   this->C[i] = val;
 }
-

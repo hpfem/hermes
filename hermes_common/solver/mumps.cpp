@@ -99,7 +99,7 @@ void MumpsMatrix::alloc()
 
   // sort the indices and remove duplicities, insert into Ai
   unsigned int i, pos = 0;
-  for (unsigned i = 0; i < size; i++) {
+  for (i = 0; i < size; i++) {
     Ap[i] = pos;
     pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
   }
@@ -161,24 +161,21 @@ void MumpsMatrix::add(unsigned int m, unsigned int n, scalar v)
   // WARNING: The additional condition v != 0.0 used in (Pardiso/Umfpack)Matrix
   //          produced an error in neutronics-2-group-adapt (although tutorial-07
   //          ran well).
-  if (m >= 0 && n >= 0) // ignore dirichlet DOFs
-  {   
-    // Find m-th row in the n-th column.
-    int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
-    // Make sure we are adding to an existing non-zero entry.
-    if (pos < 0) 
-      error("Sparse matrix entry not found");
-    // Add offset to the n-th column.
-    pos += Ap[n];
+  // Find m-th row in the n-th column.
+  int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+  // Make sure we are adding to an existing non-zero entry.
+  if (pos < 0) 
+    error("Sparse matrix entry not found");
+  // Add offset to the n-th column.
+  pos += Ap[n];
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    Ax[pos] += v;
+  Ax[pos] += v;
 #else
-    Ax[pos].r += v.real();
-    Ax[pos].i += v.imag();
+  Ax[pos].r += v.real();
+  Ax[pos].i += v.imag();
 #endif
-    irn[pos] = m + 1;  // MUMPS is indexing from 1
-    jcn[pos] = n + 1;
-  }
+  irn[pos] = m + 1;  // MUMPS is indexing from 1
+  jcn[pos] = n + 1;
 }
 
 void MumpsMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
@@ -186,7 +183,8 @@ void MumpsMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, i
   _F_
   for (unsigned int i = 0; i < m; i++)       // rows
     for (unsigned int j = 0; j < n; j++)     // cols
-      add(rows[i], cols[j], mat[i][j]);
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 }
 
 /// Add a number to each diagonal entry.
@@ -328,12 +326,10 @@ void MumpsVector::set(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  if (idx >= 0) v[idx] = y;
+  v[idx] = y;
 #else
-  if (idx >= 0) {
-    v[idx].r = y.real();
-    v[idx].i = y.imag();
-  }
+  v[idx].r = y.real();
+  v[idx].i = y.imag();
 #endif
 }
 
@@ -341,27 +337,24 @@ void MumpsVector::add(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  if (idx >= 0) v[idx] += y;
+  v[idx] += y;
 #else
-  if (idx >= 0) {
-    v[idx].r += y.real();
-    v[idx].i += y.imag();
-  }
+  v[idx].r += y.real();
+  v[idx].i += y.imag();
 #endif
 }
 
 void MumpsVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
-  for (unsigned int i = 0; i < n; i++)
-    if (idx[i] >= 0) {
+  for (unsigned int i = 0; i < n; i++) {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-      v[idx[i]] += y[i];
+    v[idx[i]] += y[i];
 #else
-      v[idx[i]].r += y[i].real();
-      v[idx[i]].i += y[i].imag();
+    v[idx[i]].r += y[i].real();
+    v[idx[i]].i += y[i].imag();
 #endif
-    }
+  }
 }
 
 bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)

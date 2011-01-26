@@ -129,7 +129,7 @@ void SuperLUMatrix::zero()
 void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
-  if (v != 0.0 && m >= 0 && n >= 0) // ignore dirichlet DOFs
+  if (v != 0.0) // ignore zero values.
   {   
     // Find m-th row in the n-th column.
     int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
@@ -161,7 +161,8 @@ void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows,
   _F_
   for (unsigned int i = 0; i < m; i++)       // rows
     for (unsigned int j = 0; j < n; j++)     // cols
-      add(rows[i], cols[j], mat[i][j]);
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 }
 
 /// Save matrix and right-hand side to a file.
@@ -264,7 +265,7 @@ void SuperLUVector::change_sign()
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 #else
-  for (int i = 0; i < size; i++) {
+  for (unsigned int i = 0; i < size; i++) {
     v[i].r *= -1.;
     v[i].i *= -1.;
   }
@@ -282,12 +283,10 @@ void SuperLUVector::set(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  if (idx >= 0) v[idx] = y;
+  v[idx] = y;
 #else
-  if (idx >= 0) {
-    v[idx].r = y.real();
-    v[idx].i = y.imag();
-  }
+  v[idx].r = y.real();
+  v[idx].i = y.imag();
 #endif
 }
 
@@ -295,27 +294,24 @@ void SuperLUVector::add(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  if (idx >= 0) v[idx] += y;
+  v[idx] += y;
 #else
-  if (idx >= 0) {
-    v[idx].r += y.real();
-    v[idx].i += y.imag();
-  }
+  v[idx].r += y.real();
+  v[idx].i += y.imag();
 #endif
 }
 
 void SuperLUVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
-  for (unsigned int i = 0; i < n; i++)
-    if (idx[i] >= 0) {
+  for (unsigned int i = 0; i < n; i++) {
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-      v[idx[i]] += y[i];
+    v[idx[i]] += y[i];
 #else
-      v[idx[i]].r += y[i].real();
-      v[idx[i]].i += y[i].imag();
+    v[idx[i]].r += y[i].real();
+    v[idx[i]].i += y[i].imag();
 #endif
-    }
+  }
 }
 
 bool SuperLUVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)

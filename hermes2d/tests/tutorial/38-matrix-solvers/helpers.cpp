@@ -131,18 +131,18 @@ void build_matrix(int n, Array<MatrixEntry> &ar_mat,
 }
 
 // Block version of build_matrix().
-void build_matrix_block(int n, Array<MatrixEntry> &ar_mat, Array<VectorEntry> &ar_rhs,
+void build_matrix_block(unsigned int n, Array<MatrixEntry> &ar_mat, Array<VectorEntry> &ar_rhs,
                         SparseMatrix *matrix, Vector *rhs) {
   matrix->prealloc(n);
-  for (int i = 0; i < n; i++)
-    for (int j = 0; j < n; j++)
+  for (unsigned int i = 0; i < n; i++)
+    for (unsigned int j = 0; j < n; j++)
       matrix->pre_add_ij(i, j);
 
   matrix->alloc();
   scalar **mat = new_matrix<scalar>(n, n);
   int *cols = new int[n];
   int *rows = new int[n];
-  for (int i = 0; i < n; i++) {
+  for (unsigned int i = 0; i < n; i++) {
     cols[i] = i;
     rows[i] = i;
   }

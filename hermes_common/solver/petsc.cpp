@@ -172,7 +172,7 @@ void PetscMatrix::zero() {
 void PetscMatrix::add(unsigned int m, unsigned int n, scalar v) {
   _F_
 #ifdef WITH_PETSC
-  if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
+  if (v != 0.0)		// ignore zero values.
     MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
 #endif
 }
@@ -192,7 +192,8 @@ void PetscMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, i
   // row and cols for -1)
   for (int i = 0; i < m; i++)				// rows
     for (int j = 0; j < n; j++)			// cols
-      add(rows[i], cols[j], mat[i][j]);
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 

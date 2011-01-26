@@ -1924,7 +1924,7 @@ double get_l2_norm(Vector* vec)
 {
   _F_
   scalar val = 0;
-  for (int i = 0; i < vec->length(); i++) {
+  for (unsigned int i = 0; i < vec->length(); i++) {
     scalar inc = vec->get(i);
     val = val + inc*conj(inc);
   }

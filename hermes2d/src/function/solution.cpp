@@ -547,7 +547,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
       scalar* val = mono;
       elem_coefs[l][e->id] = (int) (mono - mono_coefs);
       memset(val, 0, sizeof(scalar)*np);
-      for (int k = 0; k < al.cnt; k++)
+      for (unsigned int k = 0; k < al.cnt; k++)
       {
         pss->set_active_shape(al.idx[k]);
         pss->set_quad_order(o, H2D_FN_VAL);

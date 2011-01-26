@@ -165,7 +165,7 @@ void CSCMatrix::add_to_diagonal_blocks(int num_stages, CSCMatrix* mat_block)
 {
   _F_
   int ndof = mat_block->get_size();
-  if (this->get_size() != num_stages * ndof) 
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
     error("Incompatible matrix sizes in CSCMatrix::add_to_diagonal_blocks()");
 
   for (int i = 0; i < num_stages; i++) {
@@ -370,18 +370,18 @@ void UMFPackVector::free() {
 
 void UMFPackVector::set(unsigned int idx, scalar y) {
   _F_
-  if (idx >= 0) v[idx] = y;
+  v[idx] = y;
 }
 
 void UMFPackVector::add(unsigned int idx, scalar y) {
   _F_
-  if (idx >= 0) v[idx] += y;
+  v[idx] += y;
 }
 
 void UMFPackVector::add(unsigned int n, unsigned int *idx, scalar *y) {
   _F_
   for (unsigned int i = 0; i < n; i++)
-    if (idx[i] >= 0) v[idx[i]] += y[i];
+    v[idx[i]] += y[i];
 }
 
 bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
