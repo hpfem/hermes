@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 
   EigenSolver es(matrix_left, matrix_right);
   info("Calling Pysparse...");
-  es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE);
+  es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE, TOL, MAX_ITER);
   info("Pysparse finished.");
   es.print_eigenvalues();
 
