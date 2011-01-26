@@ -3,6 +3,9 @@
 #include <stdio.h>
 
 using namespace RefinementSelectors;
+using Teuchos::RCP;
+using Teuchos::rcp;
+using Hermes::EigenSolver;
 
 //  This example uses automatic adaptivity to solve the eigenproblem for the 
 //  Laplace operator in a square with zero boundary conditions. Python and 
@@ -59,30 +62,6 @@ const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
 // Weak forms.
 #include "forms.cpp"
-
-// Write the matrix in Matrix Market format.
-void write_matrix_mm(const char* filename, Matrix* mat) 
-{
-  int ndof = mat->get_size();
-  FILE *out = fopen(filename, "w" );
-  int nz=0;
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) nz++;
-    }
-  } 
-
-  fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
-  fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i+1, j+1, tmp);
-    }
-  } 
-  fclose(out);
-}
 
 int main(int argc, char* argv[])
 {
@@ -161,62 +140,42 @@ int main(int argc, char* argv[])
     info("ref_ndof: %d.", ref_ndof);
 
     // Initialize matrices and matrix solver on referenc emesh.
-    SparseMatrix* matrix_left = create_matrix(matrix_solver);
-    SparseMatrix* matrix_right = create_matrix(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix_left);
+    RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());
+    RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
+    Solver* solver = create_linear_solver(matrix_solver, matrix_left.get());
 
     // Assemble the matrices on reference mesh.
     bool is_linear = true;
     DiscreteProblem* dp_left = new DiscreteProblem(&wf_left, ref_space, is_linear);
-    dp_left->assemble(matrix_left);
+    dp_left->assemble(matrix_left.get());
     DiscreteProblem* dp_right = new DiscreteProblem(&wf_right, ref_space, is_linear);
-    dp_right->assemble(matrix_right);
+    dp_right->assemble(matrix_right.get());
 
     // Time measurement.
     cpu_time.tick();
 
-    // Write matrix_left in MatrixMarket format.
-    write_matrix_mm("mat_left.mtx", matrix_left);
-
-    // Write matrix_left in MatrixMarket format.
-    write_matrix_mm("mat_right.mtx", matrix_right);
-
     // Time measurement.
     cpu_time.tick(HERMES_SKIP);
 
-    // Calling Python eigensolver. Solution will be written to "eivecs.dat".
+    EigenSolver es(matrix_left, matrix_right);
     info("Calling Pysparse...");
-    char call_cmd[255];
-    sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	    TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
-    system(call_cmd);
+    es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE, TOL, MAX_ITER);
     info("Pysparse finished.");
+    es.print_eigenvalues();
 
     // Initializing solution vector, solution and ScalarView.
-    double* ref_coeff_vec = new double[ref_ndof];
+    double* ref_coeff_vec;
     //Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
     //ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
     // Reading solution vectors from file and visualizing.
     double eigenval[NUMBER_OF_EIGENVALUES];
-    FILE *file = fopen("eivecs.dat", "r");
-    char line [64];                  // Maximum line size.
-    fgets(line, sizeof line, file);  // ref_ndof
-    int n = atoi(line);            
-    if (n != ref_ndof) error("Mismatched ndof in the eigensolver output file.");  
-    fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
-    int neig = atoi(line);
+    int neig = es.get_n_eigs();
     if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
     for (int ieig = 0; ieig < NUMBER_OF_EIGENVALUES; ieig++) {
-      // Get next eigenvalue from the file
-      fgets(line, sizeof line, file);  // eigenval
-      eigenval[ieig] = atof(line);            
-      // Get the corresponding eigenvector.
-      for (int i = 0; i < ref_ndof; i++) {  
-        fgets(line, sizeof line, file);
-        ref_coeff_vec[i] = atof(line);
-      }
-
+      eigenval[ieig] = es.get_eigenvalue(ieig);
+      int n;
+      es.get_eigenvector(ieig, &ref_coeff_vec, &n);
       // Convert coefficient vector into a Solution.
       Solution::vector_to_solution(ref_coeff_vec, ref_space, &(ref_sln[ieig]));
 
@@ -224,8 +183,6 @@ int main(int argc, char* argv[])
       info("Projecting reference solution %d on coarse mesh.", ieig);
       OGProjection::project_global(&space, &(ref_sln[ieig]), &(sln[ieig]), matrix_solver);
     }  
-    fclose(file);
-    delete [] ref_coeff_vec;
 
     // FIXME: Below, the adaptivity is done for the last eigenvector only,
     // this needs to be changed to take into account all eigenvectors.
@@ -324,8 +281,6 @@ int main(int argc, char* argv[])
 
     // Clean up.
     delete solver;
-    delete matrix_left;
-    delete matrix_right;
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;

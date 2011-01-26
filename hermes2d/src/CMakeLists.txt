@@ -103,6 +103,8 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
        ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
        ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
+       ${HERMES_COMMON_DIR}/solver/eigensolver.cpp 
+       ${HERMES_COMMON_DIR}/solver/eigen.cpp 
        ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
        ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
 
