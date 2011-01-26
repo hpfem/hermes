@@ -46,7 +46,7 @@ void EigenSolver::solve(int n_eigs, double target_value, double tol,
     this->p.push_double("target_value", target_value);
     this->p.push_int("n_eigs", n_eigs);
     this->p.push_double("jdtol", tol);
-    this->p.push_int("max_iter", maxiter);
+    this->p.push_int("max_iter", max_iter);
 
     printf("Solving the system A * x = lambda * B * x\n");
     this->p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value, n_eigs=n_eigs, jdtol=jdtol, max_iter=max_iter)");
