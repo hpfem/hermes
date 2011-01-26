@@ -1,8 +1,6 @@
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR}/../hermes_common/)
 
-add_subdirectory(hermes_common)
-
 add_subdirectory(h1d_wrapper)
 add_subdirectory(fekete)
 
