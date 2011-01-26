@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Previous time level solution (initialized by the initial condition).
-  Solution* u_prev_time = new Solution(&mesh, init_cond);
+  Solution* sln = new Solution(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(space, u_prev_time, coeff_vec, matrix_solver);
+  OGProjection::project_global(space, sln, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     }
 
     // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, space, u_prev_time);
+    Solution::vector_to_solution(coeff_vec, space, sln);
 
     // Update time.
     current_time += time_step;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
-    sview.show(u_prev_time, HERMES_EPS_VERYHIGH);
+    sview.show(sln, HERMES_EPS_VERYHIGH);
     oview.show(space);
 
     // Increase counter of time steps.
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
   // Cleanup.
   delete [] coeff_vec;
   delete space;
-  delete u_prev_time;
+  delete sln;
 
   // Wait for all views to be closed.
   View::wait();
