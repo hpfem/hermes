@@ -8,6 +8,7 @@
 
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
+#undef HAVE_SYS_TIME_H
 #include "Python.h"
 
 /*
