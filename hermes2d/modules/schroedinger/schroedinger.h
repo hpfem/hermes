@@ -2,7 +2,6 @@
 #define __H2D_SCHROEDINGER_H
 
 #include "hermes2d.h"
-#include "eigensolver.h"
 
 namespace Schroedinger {
 

@@ -5,7 +5,7 @@ using Teuchos::RCP;
 using Teuchos::rcp;
 using Schroedinger::ModuleSchroedinger;
 using Schroedinger::PotentialHarmonicOscillator;
-using Schroedinger::EigenSolver;
+using Hermes::EigenSolver;
 
 int main(int argc, char* argv[])
 {
