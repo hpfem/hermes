@@ -20,6 +20,11 @@
 //  i^2+j^2+k^2, where i,j,k are natural numbers 
 //  The following parameters can be changed:
 
+using Teuchos::ptr;
+using Teuchos::RCP;
+using Teuchos::rcp;
+using Hermes::EigenSolver;
+
 int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalues.
 
 int P_INIT_X = 4;                                 // Uniform polynomial degree of mesh elements.
@@ -56,36 +61,6 @@ double V( double x, double y, double z){
 // Weak forms.
 #include "forms.cpp"
 
-// Write the matrix in Matrix Market format.
-void write_matrix_mm(const char* filename, Matrix* mat) 
-{
-  // Get matrix size.
-  int ndof = mat->get_size();
-  FILE *out = fopen(filename, "w" );
-  if (out == NULL) error("failed to open file for writing.");
-
-  // Calculate the number of nonzeros.
-  int nz = 0;
-  for (int i = 0; i < ndof; i++) {
-    for (int j = 0; j <= i; j++) { 
-      double tmp = mat->get(i, j);
-      if (fabs(tmp) > 1e-15) nz++;
-    }
-  } 
-
-  // Write the matrix in MatrixMarket format
-  fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
-  fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i = 0; i < ndof; i++) {
-    for (int j = 0; j <= i; j++) { 
-      double tmp = mat->get(i, j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i + 1, j + 1, tmp);
-    }
-  } 
-
-  fclose(out);
-}
-
 int main(int argc, char* argv[])
 {
   info("Desired number of eigenvalues: %d", NUMBER_OF_EIGENVALUES);
@@ -114,74 +89,55 @@ int main(int argc, char* argv[])
   wf_right.add_matrix_form(callback(bilinear_form_right), HERMES_SYM, HERMES_ANY );
 
   // Initialize matrices and matrix solver.
-  SparseMatrix* matrix_left = create_matrix(matrix_solver);
-  SparseMatrix* matrix_right = create_matrix(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_left);
+  RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());
+  RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
+  Solver* solver = create_linear_solver(matrix_solver, matrix_left.get());
 
   // Assemble the matrices.
   cpu_time.reset();
   info("Assembling matrices...");
   bool is_linear = true;
   DiscreteProblem dp_left(&wf_left, &space, is_linear);
-  dp_left.assemble(matrix_left);
+  dp_left.assemble(matrix_left.get());
   DiscreteProblem dp_right(&wf_right, &space, is_linear);
-  dp_right.assemble(matrix_right);
+  dp_right.assemble(matrix_right.get());
   cpu_time.tick();
   info("Total running time for assembling matrices: %g s", cpu_time.accumulated());
   cpu_time.reset();
-  // Write matrix_left in MatrixMarket format.
-  write_matrix_mm("mat_left.mtx", matrix_left);
 
-  // Write matrix_right in MatrixMarket format.
-  write_matrix_mm("mat_right.mtx", matrix_right);
-
-  cpu_time.tick();
-  info("Total running time for writing matrices to disk: %g s", cpu_time.accumulated());
+  // Initialize eigensolver.
   cpu_time.reset();
+  EigenSolver es(matrix_left, matrix_right);
+  cpu_time.tick();
+  info("Total running time for initializing EigenSolver : %g s.", cpu_time.accumulated());
+
 
   // Calling Python eigensolver. Solution will be written to "eivecs.dat".
+  cpu_time.reset();
   info("Using eigensolver...");
-  char call_cmd[255];
-  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	  TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
-  system(call_cmd);
-  cpu_time.tick();
+  es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE, TOL, MAX_ITER);
   info("Total running time for solving generalized eigenvalue problem: %g s", cpu_time.accumulated());
+  es.print_eigenvalues();
   // Initializing solution vector, solution and ScalarView.
   info("Initializing solution vector...");
-  double* coeff_vec = new double[ndof];
+  double* coeff_vec;
   Solution sln(space.get_mesh());
 
 
   // Reading solution vectors from file and visualizing.
-  info("Reading solution vectors from file and saving as solutions in paraview format...");
-  FILE *file = fopen("eivecs.dat", "r");
-  char line [64];                  // Maximum line size.
-  fgets(line, sizeof line, file);  // ndof
-  int n = atoi(line);            
-  if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
-  fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
-  int neig = atoi(line);
+  int neig = es.get_n_eigs();
   if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
-    // Get next eigenvector from the file.
-    for (int i = 0; i < ndof; i++) {  
-      fgets(line, sizeof line, file);
-      coeff_vec[i] = atof(line);
-    }
-
+    int n;
+    es.get_eigenvector(ieig, &coeff_vec, &n);
     // Convert coefficient vector into a Solution.
     Solution::vector_to_solution(coeff_vec, &space, &sln);
 
     out_fn_vtk(&sln, "sln", ieig );
   }  
-  fclose(file);
 
   // Clean up.
-  delete [] coeff_vec;
   delete solver;
-  delete matrix_left;
-  delete matrix_right;
   
   return 0; 
 };
