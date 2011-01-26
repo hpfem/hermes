@@ -146,7 +146,16 @@ int main(int argc, char* argv[])
   bool success = true;
   for (int i = 0; i < 6; i++)
   {
-    if (abs(value[i] - sln.get_pt_value(coor_x_y[i], coor_x_y[i])) > 1E-6) success = false;
+    double correct = value[i];
+    double calculated = sln.get_pt_value(coor_x_y[i], coor_x_y[i]);
+    if (std::abs(correct - calculated) < 1E-6 ||
+            std::abs(correct + calculated) < 1E-6) {
+            // OK
+    } else {
+        printf("Failed: i=%d, value[i]=%f, pt=%f, difference=%f\n", i,
+                correct, calculated, std::abs(correct - calculated));
+        success = false;
+    }
   }
   if (success) {
     printf("Success!\n");
