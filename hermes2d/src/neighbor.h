@@ -605,7 +605,7 @@ public:
                                       ///< reversed.
 
           ///
-          void activate(int index, AsmList* central_al, AsmList* neighb_al);
+          void activate(unsigned int index, AsmList* central_al, AsmList* neighb_al);
 
           /// Constructor.
           /// \param[in] neighborhood Neighborhood on which the extended shape function is defined.

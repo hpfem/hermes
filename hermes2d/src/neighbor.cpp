@@ -770,15 +770,13 @@ void NeighborSearch::ExtendedShapeset::combine_assembly_lists()
   memcpy(dof + central_al->cnt, neighbor_al->dof, sizeof(int)*neighbor_al->cnt);
 }
 
-void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(int index, AsmList* central_al, AsmList* neighb_al)
+void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(unsigned int index, AsmList* central_al, AsmList* neighb_al)
 {
   _F_
   ensure_active_segment(neibhood);
   ensure_central_pss_rm(neibhood);
   assert_msg(neibhood->neighb_pss != NULL, "Cannot activate extended shape function."
                                            "PrecalcShapeset for neighbor has not been set."  );
-  assert_msg(index >= 0, "Wrong shape function index.");
-
   if (index >= central_al->cnt)
   {
     // Active shape is nonzero on the neighbor element
