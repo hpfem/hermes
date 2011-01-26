@@ -257,7 +257,7 @@ public:
   /// @return the value from the specified position
   /// @param[in] m - the number of row
   /// @param[in] n - the number of column
-  virtual scalar get(int m, int n) = 0;
+  virtual scalar get(unsigned int m, unsigned int n) = 0;
 
   /// Zero the matrix.
   virtual void zero() = 0;
@@ -270,7 +270,7 @@ public:
   /// @param[in] m    - the row where to update
   /// @param[in] n    - the column where to update
   /// @param[in] v    - value
-  virtual void add(int m, int n, scalar v) = 0;
+  virtual void add(unsigned int m, unsigned int n, scalar v) = 0;
 
   /// update the stiffness matrix
   ///
@@ -279,13 +279,13 @@ public:
   /// @param[in] matrix    - block of values
   /// @param[in] rows      - array with row indexes
   /// @param[in] cols      - array with column indexes
-  virtual void add(int m, int n, scalar **mat, int *rows, int *cols) = 0;
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) = 0;
 
   /// dumping matrix and right-hand side
   ///
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
 
-  virtual int get_matrix_size() const = 0;
+  virtual unsigned int get_matrix_size() const = 0;
 
 protected:
 
@@ -301,17 +301,17 @@ public:
   /// prepare memory
   ///
   /// @param[in] ndofs - number of unknowns
-  virtual void prealloc(int n);
+  virtual void prealloc(unsigned int n);
 
   /// add indices of nonzero matrix element
   ///
   /// @param[in] row  - row index
   /// @param[in] col  - column index
-  virtual void pre_add_ij(int row, int col);
+  virtual void pre_add_ij(unsigned int row, unsigned int col);
 
   virtual void finish() { }
 
-  virtual int get_size() { return size; }
+  virtual unsigned int get_size() { return size; }
 
   virtual void add_sparse_matrix(SparseMatrix* mat) 
   { 
@@ -322,7 +322,7 @@ public:
   ///
   /// @param[in] row - index of the row
   /// @return - the number of entries in the row 'row'
-  virtual int get_num_row_entries(int row) { return -1; }
+  virtual int get_num_row_entries(unsigned int row) { return -1; }
 
   /// Extract the copy of a row
   ///
@@ -331,13 +331,13 @@ public:
   /// @param[out] n_entries - number of nonzero entries extracted.
   /// @param[out] vals - extracted values for this row.
   /// @param[out] idxs - extracted global column indices for the corresponding values.
-  virtual void extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs) { }
+  virtual void extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs) { }
 
   /// Return the number of entries in a specified column
   ///
   /// @param[in] row - index of the column
   /// @return - the number of entries in the column 'col'
-  virtual int get_num_col_entries(int col) { return -1; }
+  virtual int get_num_col_entries(unsigned int col) { return -1; }
 
   /// Extract the copy of a column
   ///
@@ -346,7 +346,7 @@ public:
   /// @param[out] n_entries - number of nonzero entries extracted.
   /// @param[out] vals - extracted values for this column.
   /// @param[out] idxs - extracted global row indices for the corresponding values.
-  virtual void extract_col_copy(int col, int len, int &n_entries, double *vals, int *idxs) { }
+  virtual void extract_col_copy(unsigned int col, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs) { }
 
   // virtual function for multiplying a vector by a 
   // derived type of SparseMatrix
@@ -383,7 +383,7 @@ public:
   /// allocate memory for storing ndofs elements
   ///
   /// @param[in] ndofs - number of elements of the vector
-  virtual void alloc(int ndofs) = 0;
+  virtual void alloc(unsigned int ndofs) = 0;
   /// free the memory
   virtual void free() = 0;
   // finish the assembly of the vector
@@ -392,7 +392,7 @@ public:
   /// Get the value from a position
   /// @return the value form the specified index
   /// @param[in] idx - index which to obtain the value from
-  virtual scalar get(int idx) = 0;
+  virtual scalar get(unsigned int idx) = 0;
 
   /// Extract vector values into user-provided array.
   /// @param[out] v - array which will contain extracted values
@@ -408,13 +408,13 @@ public:
   ///
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
-  virtual void set(int idx, scalar y) = 0;
+  virtual void set(unsigned int idx, scalar y) = 0;
 
   /// update element on the specified position
   ///
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
-  virtual void add(int idx, scalar y) = 0;
+  virtual void add(unsigned int idx, scalar y) = 0;
 
   /// Add a vector.
   virtual void add_vector(Vector* vec) = 0;
@@ -425,17 +425,17 @@ public:
   /// @param[in] n   - number of positions to update
   /// @param[in] idx - indices where to update
   /// @param[in] y   - values
-  virtual void add(int n, int *idx, scalar *y) = 0;
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y) = 0;
 
   /// Get vector length.
-  int length() {return this->size;}
+  unsigned int length() {return this->size;}
 
   // Write to file.
   virtual bool dump(FILE *file, const char *var_name, 
                     EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
   
 protected:
-  int size;
+  unsigned int size;
 };
 
 HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);

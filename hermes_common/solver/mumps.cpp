@@ -89,17 +89,16 @@ void MumpsMatrix::alloc()
 {
   _F_
   assert(pages != NULL);
-  assert(size > 0);
 
   // initialize the arrays Ap and Ai
-  Ap = new int [size + 1];
+  Ap = new unsigned int [size + 1];
   MEM_CHECK(Ap);
   int aisize = get_num_indices();
   Ai = new int [aisize];
   MEM_CHECK(Ai);
 
   // sort the indices and remove duplicities, insert into Ai
-  int i, pos = 0;
+  unsigned int i, pos = 0;
   for (unsigned i = 0; i < size; i++) {
     Ap[i] = pos;
     pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
@@ -116,7 +115,7 @@ void MumpsMatrix::alloc()
 
   irn = new int[nnz];
   jcn = new int[nnz];
-  for (int i = 0; i < nnz; i++)
+  for (unsigned int i = 0; i < nnz; i++)
   {
     irn[i] = 1;
     jcn[i] = 1;
@@ -134,7 +133,7 @@ void MumpsMatrix::free()
   delete[] jcn; jcn = NULL;
 }
 
-scalar MumpsMatrix::get(int m, int n)
+scalar MumpsMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find m-th row in the n-th column.
@@ -156,7 +155,7 @@ void MumpsMatrix::zero()
   memset(Ax, 0, sizeof(mumps_scalar) * Ap[size]);
 }
 
-void MumpsMatrix::add(int m, int n, scalar v)
+void MumpsMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
   // WARNING: The additional condition v != 0.0 used in (Pardiso/Umfpack)Matrix
@@ -182,11 +181,11 @@ void MumpsMatrix::add(int m, int n, scalar v)
   }
 }
 
-void MumpsMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
+void MumpsMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
 {
   _F_
-  for (int i = 0; i < m; i++)       // rows
-    for (int j = 0; j < n; j++)     // cols
+  for (unsigned int i = 0; i < m; i++)       // rows
+    for (unsigned int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 
@@ -210,14 +209,14 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     case DF_PLAIN_ASCII:
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
-      for (int i = 0; i < nnz; i++)
+      for (unsigned int i = 0; i < nnz; i++)
         fprintf(file, "%d %d " SCALAR_FMT "\n", irn[i], jcn[i], MUMPS_SCALAR(Ax[i]));
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (unsigned int j = 0; j < size; j++)
-        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+        for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)          
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
 #else          
@@ -245,13 +244,13 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   }
 }
 
-int MumpsMatrix::get_matrix_size() const
+unsigned int MumpsMatrix::get_matrix_size() const
 {
   _F_
   return size;
 }
 
-int MumpsMatrix::get_nnz() const
+unsigned int MumpsMatrix::get_nnz() const
 {
   _F_
   return nnz;
@@ -289,7 +288,7 @@ MumpsVector::~MumpsVector()
   free();
 }
 
-void MumpsVector::alloc(int n)
+void MumpsVector::alloc(unsigned int n)
 {
   _F_
   free();
@@ -302,9 +301,9 @@ void MumpsVector::change_sign()
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  for (int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 #else
-  for (int i = 0; i < size; i++) {
+  for (unsigned int i = 0; i < size; i++) {
     v[i].r *= -1.;
     v[i].i *= -1.;
   }
@@ -325,7 +324,7 @@ void MumpsVector::free()
   size = 0;
 }
 
-void MumpsVector::set(int idx, scalar y)
+void MumpsVector::set(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
@@ -338,7 +337,7 @@ void MumpsVector::set(int idx, scalar y)
 #endif
 }
 
-void MumpsVector::add(int idx, scalar y)
+void MumpsVector::add(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
@@ -351,10 +350,10 @@ void MumpsVector::add(int idx, scalar y)
 #endif
 }
 
-void MumpsVector::add(int n, int *idx, scalar *y)
+void MumpsVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
-  for (int i = 0; i < n; i++)
+  for (unsigned int i = 0; i < n; i++)
     if (idx[i] >= 0) {
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
       v[idx[i]] += y[i];
@@ -372,14 +371,14 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      for (int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < size; i++)
         fprintf(file, SCALAR_FMT "\n", MUMPS_SCALAR(v[i]));
 
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < size; i++)
         fprintf(file, SCALAR_FMT "\n", MUMPS_SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;

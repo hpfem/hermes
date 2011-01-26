@@ -43,14 +43,14 @@ class HERMES_API Table
 {
 public:
   Table();
-  Table(int size);
-  virtual void alloc(int size); 
-  int get_size(); 
-  double get_A(int i, int j);
-  void set_A(int i, int j, double val);
+  Table(unsigned int size);
+  virtual void alloc(unsigned int size); 
+  unsigned int get_size(); 
+  double get_A(unsigned int i, unsigned int j);
+  void set_A(unsigned int i, unsigned int j, double val);
 
 protected:
-  int size;
+  unsigned int size;
   double** A;
 };
 
@@ -61,13 +61,13 @@ public:
   ButcherTable();
   ButcherTable(int size);
   ButcherTable(ButcherTableType butcher_table);
-  virtual void alloc(int size);
-  double get_B(int i);
-  double get_B2(int i);
-  double get_C(int i);
-  void set_B(int i, double val);
-  void set_B2(int i, double val);
-  void set_C(int i, double val); 
+  virtual void alloc(unsigned int size);
+  double get_B(unsigned int i);
+  double get_B2(unsigned int i);
+  double get_C(unsigned int i);
+  void set_B(unsigned int i, double val);
+  void set_B2(unsigned int i, double val);
+  void set_C(unsigned int i, double val); 
 
 protected:
   double* B;

@@ -18,46 +18,46 @@
 
 Table::Table() 
 {
-  this->size = -1;
+  this->size = 0;
   this->A = NULL;
 }
 
-Table::Table(int size) 
+Table::Table(unsigned int size) 
 {
   // Size.
   this->size = size;
   // A array.
   this->A = new_matrix<double>(size, size);
-  for (int i=0; i<size; i++) {
-    for (int j=0; j<size; j++) this->A[i][j] = 0;
+  for (unsigned int i=0; i<size; i++) {
+    for (unsigned int j=0; j<size; j++) this->A[i][j] = 0;
   }
 }
 
-void Table::alloc(int size) 
+void Table::alloc(unsigned int size) 
 {
   // Size.
   this->size = size;
   // A array.
   this->A = new_matrix<double>(size, size);
-  for (int i=0; i<size; i++) {
-    for (int j=0; j<size; j++) this->A[i][j] = 0;
+  for (unsigned int i=0; i<size; i++) {
+    for (unsigned int j=0; j<size; j++) this->A[i][j] = 0;
   }
 }
 
-int Table::get_size() 
+unsigned int Table::get_size() 
 {
   return this->size;
 }
 
-double Table::get_A(int i, int j) 
+double Table::get_A(unsigned int i, unsigned int j) 
 {
-  if (i < 0 || i > size || j < 0 || j > size) error("Invalid access to a Butcher's table.");
+  if (i > size || j > size) error("Invalid access to a Butcher's table.");
   return this->A[i][j];
 }
 
-void Table::set_A(int i, int j, double val) 
+void Table::set_A(unsigned int i, unsigned int j, double val) 
 {
-  if (i < 0 || i > size || j < 0 || j > size) error("Invalid access to a Butcher's table.");
+  if (i > size || j > size) error("Invalid access to a Butcher's table.");
   this->A[i][j] = val;
 }
 
@@ -72,13 +72,13 @@ ButcherTable::ButcherTable(int size) : Table(size)
 {
   // B array.
   this->B = new double[size];
-  for (int j=0; j<size; j++) this->B[j] = 0;
+  for (unsigned int j=0; j<size; j++) this->B[j] = 0;
   // B2 array.
   this->B2 = new double[size];
-  for (int j=0; j<size; j++) this->B2[j] = 0;
+  for (unsigned int j=0; j<size; j++) this->B2[j] = 0;
   // C array.
   this->C = new double[size];
-  for (int j=0; j<size; j++) this->C[j] = 0;
+  for (unsigned int j=0; j<size; j++) this->C[j] = 0;
 }
 
 
@@ -257,59 +257,59 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
   }
 }
 
-void ButcherTable::alloc(int size) 
+void ButcherTable::alloc(unsigned int size) 
 {
   // Size.
   this->size = size;
   // A array.
   this->A = new_matrix<double>(size, size);
-  for (int i=0; i<size; i++) {
-    for (int j=0; j<size; j++) this->A[i][j] = 0;
+  for (unsigned int i=0; i<size; i++) {
+    for (unsigned int j=0; j<size; j++) this->A[i][j] = 0;
   }
   // B array.
   this->B = new double[size];
-  for (int j=0; j<size; j++) this->B[j] = 0;
+  for (unsigned int j=0; j<size; j++) this->B[j] = 0;
   // B2 array.
   this->B2 = new double[size];
-  for (int j=0; j<size; j++) this->B2[j] = 0;
+  for (unsigned int j=0; j<size; j++) this->B2[j] = 0;
   // C array.
   this->C = new double[size];
-  for (int j=0; j<size; j++) this->C[j] = 0;
+  for (unsigned int j=0; j<size; j++) this->C[j] = 0;
 }
 
-double ButcherTable::get_B(int i) 
+double ButcherTable::get_B(unsigned int i) 
 {
-  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  if (i > size) error("Invalid access to a Butcher's table.");
   return this->B[i];
 }
 
-double ButcherTable::get_B2(int i) 
+double ButcherTable::get_B2(unsigned int i) 
 {
-  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  if (i > size) error("Invalid access to a Butcher's table.");
   return this->B2[i];
 }
 
-double ButcherTable::get_C(int i) 
+double ButcherTable::get_C(unsigned int i) 
 {
-  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  if (i > size) error("Invalid access to a Butcher's table.");
   return this->C[i];
 }
 
-void ButcherTable::set_B(int i, double val) 
+void ButcherTable::set_B(unsigned int i, double val) 
 {
-  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  if (i > size) error("Invalid access to a Butcher's table.");
   this->B[i] = val;
 }
 
-void ButcherTable::set_B2(int i, double val) 
+void ButcherTable::set_B2(unsigned int i, double val) 
 {
-  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  if (i > size) error("Invalid access to a Butcher's table.");
   this->B2[i] = val;
 }
 
-void ButcherTable::set_C(int i, double val) 
+void ButcherTable::set_C(unsigned int i, double val) 
 {
-  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  if (i > size) error("Invalid access to a Butcher's table.");
   this->C[i] = val;
 }
 

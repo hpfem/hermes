@@ -182,8 +182,6 @@ void L2Space::assign_bubble_dofs()
 
 void L2Space::get_element_assembly_list(Element* e, AsmList* al)
 {
-  int i;
-
   // some checks
   if (e->id >= esize || edata[e->id].order < 0)
     error("Uninitialized element order (id = #%d).", e->id);

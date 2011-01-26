@@ -287,9 +287,9 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
 
                   // pretend assembling of the element stiffness matrix
                   // register nonzero elements
-                  for (int i = 0; i < am->cnt; i++) {
+                  for (unsigned int i = 0; i < am->cnt; i++) {
                     if (am->dof[i] >= 0) {
-                      for (int j = 0; j < an->cnt; j++) {
+                      for (unsigned int j = 0; j < an->cnt; j++) {
                         if (an->dof[j] >= 0) {
                           if(blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
                           if(blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
@@ -336,9 +336,9 @@ void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
             AsmList *an = &(al[n]);
 
             // Pretend assembling of the element stiffness matrix.
-            for (int i = 0; i < am->cnt; i++) {
+            for (unsigned int i = 0; i < am->cnt; i++) {
               if (am->dof[i] >= 0) {
-                for (int j = 0; j < an->cnt; j++) {
+                for (unsigned int j = 0; j < an->cnt; j++) {
                   if (an->dof[j] >= 0) {
                     mat->pre_add_ij(am->dof[i], an->dof[j]);
                   }
@@ -645,14 +645,14 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
       if(rhsonly == false)
         local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
 
-      for (int i = 0; i < al[m]->cnt; i++) {
+      for (unsigned int i = 0; i < al[m]->cnt; i++) {
         if (!tra && al[m]->dof[i] < 0) 
           continue;
         spss[m]->set_active_shape(al[m]->idx[i]);
         
         // Unsymmetric block .
         if (!sym) {
-          for (int j = 0; j < al[n]->cnt; j++) {
+          for (unsigned int j = 0; j < al[n]->cnt; j++) {
             
             pss[n]->set_active_shape(al[n]->idx[j]);
             
@@ -673,7 +673,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
         }
         // Symmetric block.
         else {
-          for (int j = 0; j < al[n]->cnt; j++) {
+          for (unsigned int j = 0; j < al[n]->cnt; j++) {
             if (j < i && al[n]->dof[j] >= 0) 
               continue;
             
@@ -712,9 +712,9 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
 
         // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
         if (rhs != NULL && this->is_linear)
-          for (int j = 0; j < al[m]->cnt; j++)
+          for (unsigned int j = 0; j < al[m]->cnt; j++)
             if (al[m]->dof[j] < 0)
-              for (int i = 0; i < al[n]->cnt; i++)
+              for (unsigned int i = 0; i < al[n]->cnt; i++)
                 if (al[n]->dof[i] >= 0)
                   rhs->add(al[n]->dof[i], -local_stiffness_matrix[i][j]);
       }
@@ -738,7 +738,7 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
     if (vfv->area != HERMES_ANY && !this->wf->is_in_area(marker, vfv->area)) 
       continue;
 
-    for (int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) 
         continue;
       
@@ -830,10 +830,10 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
     surf_pos.space_u = spaces[n];
 
     scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
-    for (int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
-      for (int j = 0; j < al[n]->cnt; j++) {
+      for (unsigned int j = 0; j < al[n]->cnt; j++) {
         pss[n]->set_active_shape(al[n]->idx[j]);
         if (al[n]->dof[j] < 0) {
           // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
@@ -876,7 +876,7 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
       surf_pos.base = trav_base;
       surf_pos.space_v = spaces[m];
 
-      for (int i = 0; i < al[m]->cnt; i++) {
+      for (unsigned int i = 0; i < al[m]->cnt; i++) {
         if (al[m]->dof[i] < 0) continue;
         spss[m]->set_active_shape(al[m]->idx[i]);
 
@@ -1021,7 +1021,7 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
               // Here we use the standard pss, possibly just transformed by NeighborSearch if there are more
               // than one segment (i.e. a "go-down" neighborhood as defined in the NeighborSearch class).
               // This is done automatically by NeighborSearch since we've attached to it the pss a few lines above.
-              for (int i = 0; i < al[m]->cnt; i++) {
+              for (unsigned int i = 0; i < al[m]->cnt; i++) {
                 if (al[m]->dof[i] < 0) continue;
                 nbs_v->get_pss()->set_active_shape(al[m]->idx[i]);
 

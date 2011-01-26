@@ -152,7 +152,7 @@ void PetscMatrix::finish()
 #endif
 }
 
-scalar PetscMatrix::get(int m, int n)
+scalar PetscMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
   scalar v = 0.0;
@@ -169,7 +169,7 @@ void PetscMatrix::zero() {
 #endif
 }
 
-void PetscMatrix::add(int m, int n, scalar v) {
+void PetscMatrix::add(unsigned int m, unsigned int n, scalar v) {
   _F_
 #ifdef WITH_PETSC
   if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
@@ -185,7 +185,7 @@ void PetscMatrix::add_to_diagonal(scalar v)
   }
 };
 
-void PetscMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
+void PetscMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) {
   _F_
 #ifdef WITH_PETSC
   // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
@@ -203,12 +203,12 @@ bool PetscMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
   return false;
 }
 
-int PetscMatrix::get_matrix_size() const {
+unsigned int PetscMatrix::get_matrix_size() const {
   _F_
   return size;
 }
 
-int PetscMatrix::get_nnz() const {
+unsigned int PetscMatrix::get_nnz() const {
   _F_
   return nnz;
 }
@@ -236,7 +236,7 @@ PetscVector::~PetscVector() {
   remove_petsc_object();
 }
 
-void PetscVector::alloc(int n) {
+void PetscVector::alloc(unsigned int n) {
   _F_
 #ifdef WITH_PETSC
   free();
@@ -263,7 +263,7 @@ void PetscVector::finish()
 #endif
 }
 
-scalar PetscVector::get(int idx) {
+scalar PetscVector::get(unsigned int idx) {
   _F_
   scalar y = 0;
 #ifdef WITH_PETSC
@@ -301,21 +301,21 @@ void PetscVector::change_sign() {
 }
 
 
-void PetscVector::set(int idx, scalar y) {
+void PetscVector::set(unsigned int idx, scalar y) {
   _F_
 #ifdef WITH_PETSC
   if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
 #endif
 }
 
-void PetscVector::add(int idx, scalar y) {
+void PetscVector::add(unsigned int idx, scalar y) {
   _F_
 #ifdef WITH_PETSC
   if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, ADD_VALUES);
 #endif
 }
 
-void PetscVector::add(int n, int *idx, scalar *y) {
+void PetscVector::add(unsigned int n, unsigned int *idx, scalar *y) {
   _F_
 #ifdef WITH_PETSC
   for (int i = 0; i < n; i++)

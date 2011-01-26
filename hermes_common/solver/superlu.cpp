@@ -70,18 +70,17 @@ void SuperLUMatrix::alloc()
 {
   _F_
   assert(pages != NULL);
-  assert(size > 0);
   
   // Initialize the arrays Ap and Ai.
-  Ap = new int [size + 1];
+  Ap = new unsigned int [size + 1];
   MEM_CHECK(Ap);
   int aisize = get_num_indices();
   Ai = new int [aisize];
   MEM_CHECK(Ai);
   
   // sort the indices and remove duplicities, insert into Ai
-  int i, pos = 0;
-  for (unsigned i = 0; i < size; i++) {
+  unsigned int i, pos = 0;
+  for (i = 0; i < size; i++) {
     Ap[i] = pos;
     pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
   }
@@ -105,7 +104,7 @@ void SuperLUMatrix::free()
   delete [] Ax; Ax = NULL;
 }
 
-scalar SuperLUMatrix::get(int m, int n)
+scalar SuperLUMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find m-th row in the n-th column.
@@ -127,7 +126,7 @@ void SuperLUMatrix::zero()
   memset(Ax, 0, sizeof(slu_scalar) * nnz);
 }
 
-void SuperLUMatrix::add(int m, int n, scalar v)
+void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
   if (v != 0.0 && m >= 0 && n >= 0) // ignore dirichlet DOFs
@@ -157,11 +156,11 @@ void SuperLUMatrix::add_to_diagonal(scalar v)
 };
 
 
-void SuperLUMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
+void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
 {
   _F_
-  for (int i = 0; i < m; i++)       // rows
-    for (int j = 0; j < n; j++)     // cols
+  for (unsigned int i = 0; i < m; i++)       // rows
+    for (unsigned int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 
@@ -176,7 +175,7 @@ bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (unsigned int j = 0; j < size; j++)
-        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+        for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)          
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SUPERLU_SCALAR(Ax[i]));
 #else          
@@ -204,7 +203,7 @@ bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   }
 }
 
-int SuperLUMatrix::get_matrix_size() const
+unsigned int SuperLUMatrix::get_matrix_size() const
 {
   return size;
 }
@@ -218,7 +217,7 @@ int SuperLUMatrix::get_matrix_size() const
 }
 */
 
-int SuperLUMatrix::get_nnz() const
+unsigned int SuperLUMatrix::get_nnz() const
 {
   return nnz;
 }
@@ -244,7 +243,7 @@ SuperLUVector::~SuperLUVector()
   this->free();
 }
 
-void SuperLUVector::alloc(int n)
+void SuperLUVector::alloc(unsigned int n)
 {
   _F_
   this->free();
@@ -263,7 +262,7 @@ void SuperLUVector::change_sign()
 {
   _F_
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  for (int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 #else
   for (int i = 0; i < size; i++) {
     v[i].r *= -1.;
@@ -279,7 +278,7 @@ void SuperLUVector::free()
   size = 0;
 }
 
-void SuperLUVector::set(int idx, scalar y)
+void SuperLUVector::set(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
@@ -292,7 +291,7 @@ void SuperLUVector::set(int idx, scalar y)
 #endif
 }
 
-void SuperLUVector::add(int idx, scalar y)
+void SuperLUVector::add(unsigned int idx, scalar y)
 {
   _F_
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
@@ -305,10 +304,10 @@ void SuperLUVector::add(int idx, scalar y)
 #endif
 }
 
-void SuperLUVector::add(int n, int *idx, scalar *y)
+void SuperLUVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
-  for (int i = 0; i < n; i++)
+  for (unsigned int i = 0; i < n; i++)
     if (idx[i] >= 0) {
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
       v[idx[i]] += y[i];
@@ -326,14 +325,14 @@ bool SuperLUVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      for (int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < size; i++)
         fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
       
       return true;
       
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < size; i++)
         fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;
@@ -355,20 +354,15 @@ bool SuperLUVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 // SUPERLU solver ////////////////////////////////////////////////////////////////////////////////////
 
-bool SuperLUSolver::check_status(int info)
+bool SuperLUSolver::check_status(unsigned int info)
 {
   _F_
-  if (info < 0)
-  {
-    warning("SuperLU: %d-th argument had an illegal value.", -info);
-    return false;
-  }
-  else if (info == 0)
+  if (info == 0)
   {
     // Success.
     return true;
   }
-  else if (info > 0 && info <= m->size)
+  else if (info <= m->size)
   {
     warning("SuperLU: Factor U is singular, solution could not be computed.");
     return false;

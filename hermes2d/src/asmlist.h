@@ -32,8 +32,8 @@ public:
   int* idx;      ///< array of shape function indices
   int* dof;      ///< array of basis function numbers (DOFs)
   scalar* coef;  ///< array of coefficients
-  int cnt;       ///< the number of items in the arrays idx, dof and coef
-  int cap;       ///< internal
+  unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
+  unsigned int cap;       ///< internal
 
   AsmList()
   {

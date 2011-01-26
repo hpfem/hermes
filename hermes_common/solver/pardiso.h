@@ -30,17 +30,17 @@ public:
   PardisoMatrix();
   virtual ~PardisoMatrix();
 
-  virtual void pre_add_ij(int row, int col);
+  virtual void pre_add_ij(unsigned int row, unsigned int col);
   virtual void alloc();
   virtual void free();
-  virtual scalar get(int m, int n);
+  virtual scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(int m, int n, scalar v);
+  virtual void add(unsigned int m, unsigned int n, scalar v);
   virtual void add_to_diagonal(scalar v);
-  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-  virtual int get_matrix_size() const;
-  virtual int get_nnz() const;
+  virtual unsigned int get_matrix_size() const;
+  virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
 
 protected:
@@ -48,7 +48,7 @@ protected:
   scalar *Ax;   // Matrix entries (row-wise). 
   int *Ai;      // Column indices of values in Ax.
   int *Ap;      // Index to Ax/Ai, where each row starts.
-  int nnz;      // Number of non-zero entries (= Ap[size]).
+  unsigned int nnz;      // Number of non-zero entries (= Ap[size]).
   
   friend class PardisoLinearSolver;
 };
@@ -59,22 +59,22 @@ public:
   PardisoVector();
   virtual ~PardisoVector();
 
-  virtual void alloc(int ndofs);
+  virtual void alloc(unsigned int ndofs);
   virtual void free();
-  virtual scalar get(int idx) { return v[idx]; }
+  virtual scalar get(unsigned int idx) { return v[idx]; }
   virtual void zero();
   virtual void change_sign();
-  virtual void set(int idx, scalar y);
-  virtual void add(int idx, scalar y);
+  virtual void set(unsigned int idx, scalar y);
+  virtual void add(unsigned int idx, scalar y);
   virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
-    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };
   virtual void add_vector(scalar* vec) {
-    for (int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
   };
   virtual void extract(scalar *v) const;
-  virtual void add(int n, int *idx, scalar *y);
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:

@@ -159,7 +159,7 @@ SparseMatrix::~SparseMatrix()
   delete [] pages;
 }
 
-void SparseMatrix::prealloc(int n)
+void SparseMatrix::prealloc(unsigned int n)
 {
   _F_
   this->size = n;
@@ -169,7 +169,7 @@ void SparseMatrix::prealloc(int n)
   memset(pages, 0, n * sizeof(Page *));
 }
 
-void SparseMatrix::pre_add_ij(int row, int col)
+void SparseMatrix::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
   if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {

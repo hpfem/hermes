@@ -87,7 +87,7 @@ PardisoMatrix::~PardisoMatrix()
   free();
 }
 
-void PardisoMatrix::pre_add_ij(int row, int col) 
+void PardisoMatrix::pre_add_ij(unsigned int row, unsigned int col) 
 {
   _F_
   SparseMatrix::pre_add_ij(col, row);
@@ -132,7 +132,7 @@ void PardisoMatrix::free() {
   delete [] Ax; Ax = NULL;
 }
 
-scalar PardisoMatrix::get(int m, int n)
+scalar PardisoMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find n-th column in the m-th row.
@@ -149,7 +149,7 @@ void PardisoMatrix::zero() {
   memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
-void PardisoMatrix::add(int m, int n, scalar v) {
+void PardisoMatrix::add(unsigned int m, unsigned int n, scalar v) {
   _F_
   if (v != 0.0 && m >= 0 && n >= 0) // ignore dirichlet DOFs
   {   
@@ -171,11 +171,11 @@ void PardisoMatrix::add_to_diagonal(scalar v)
   }
 };
 
-void PardisoMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) 
+void PardisoMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) 
 {
   _F_
-  for (int i = 0; i < m; i++)       // rows
-    for (int j = 0; j < n; j++)     // cols
+  for (unsigned int i = 0; i < m; i++)       // rows
+    for (unsigned int j = 0; j < n; j++)     // cols
       add(rows[i], cols[j], mat[i][j]);
 }
 
@@ -215,13 +215,13 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   }
 }
 
-int PardisoMatrix::get_matrix_size() const
+unsigned int PardisoMatrix::get_matrix_size() const
 {
   _F_
   return size;
 }
 
-int PardisoMatrix::get_nnz() const
+unsigned int PardisoMatrix::get_nnz() const
 {
   _F_
   return nnz;
@@ -260,7 +260,7 @@ PardisoVector::~PardisoVector()
   free();
 }
 
-void PardisoVector::alloc(int n) 
+void PardisoVector::alloc(unsigned int n) 
 {
   _F_
   free();
@@ -278,7 +278,7 @@ void PardisoVector::zero()
 
 void PardisoVector::change_sign() {
   _F_
-  for (int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 }
 
 void PardisoVector::free() 
@@ -289,13 +289,13 @@ void PardisoVector::free()
   size = 0;
 }
 
-void PardisoVector::set(int idx, scalar y) 
+void PardisoVector::set(unsigned int idx, scalar y) 
 {
   _F_
   if (idx >= 0) v[idx] = y;
 }
 
-void PardisoVector::add(int idx, scalar y) 
+void PardisoVector::add(unsigned int idx, scalar y) 
 {
   _F_
   if (idx >= 0) v[idx] += y;
@@ -306,10 +306,10 @@ void PardisoVector::extract(scalar *v) const
   return;
 }
 
-void PardisoVector::add(int n, int *idx, scalar *y) 
+void PardisoVector::add(unsigned int n, unsigned int *idx, scalar *y) 
 {
   _F_
-  for (int i = 0; i < n; i++)
+  for (unsigned int i = 0; i < n; i++)
     if (idx[i] >= 0) v[idx[i]] += y[i];
 }
 
@@ -320,7 +320,7 @@ bool PardisoVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (int i = 0; i < this->size; i++)
+      for (unsigned int i = 0; i < this->size; i++)
         fprintf(file, SCALAR_FMT ";\n", SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;

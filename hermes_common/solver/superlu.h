@@ -141,22 +141,22 @@ public:
 
   virtual void alloc();
   virtual void free();
-  virtual scalar get(int m, int n);
+  virtual scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(int m, int n, scalar v);
+  virtual void add(unsigned int m, unsigned int n, scalar v);
   virtual void add_to_diagonal(scalar v);
-  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-  virtual int get_matrix_size() const;
-  virtual int get_nnz() const;
+  virtual unsigned int get_matrix_size() const;
+  virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
 
 protected:
   // SUPERLU specific data structures for storing the matrix (CSC format).
   slu_scalar *Ax; // Matrix entries (column-wise).
   int *Ai;        // Row indices of values in Ax.
-  int *Ap;        // Index to Ax/Ai, where each column starts.
-  int nnz;        // Number of non-zero entries (= Ap[size]).
+  unsigned int *Ap;        // Index to Ax/Ai, where each column starts.
+  unsigned int nnz;        // Number of non-zero entries (= Ap[size]).
   
   friend class SuperLUSolver;
 };
@@ -167,25 +167,25 @@ public:
   SuperLUVector();
   virtual ~SuperLUVector();
 
-  virtual void alloc(int ndofs);
+  virtual void alloc(unsigned int ndofs);
   virtual void free();
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  virtual scalar get(int idx) { return v[idx]; }
+  virtual scalar get(unsigned int idx) { return v[idx]; }
 #else
-  virtual scalar get(int idx) { return cplx(v[idx].r, v[idx].i); }
+  virtual scalar get(unsigned int idx) { return cplx(v[idx].r, v[idx].i); }
 #endif
   virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
   virtual void zero();
   virtual void change_sign();
-  virtual void set(int idx, scalar y);
-  virtual void add(int idx, scalar y);
-  virtual void add(int n, int *idx, scalar *y);
+  virtual void set(unsigned int idx, scalar y);
+  virtual void add(unsigned int idx, scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
   virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
-    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };
   virtual void add_vector(scalar* vec) {
-    for (int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
@@ -217,7 +217,7 @@ protected:
                                 // internally during factorization or externally by
                                 // the user.
                                 
-  bool check_status(int info);  // Check the status returned from the solver routine.
+  bool check_status(unsigned int info);  // Check the status returned from the solver routine.
   
   // Deep copies of matrix and rhs data vectors (they may be changed by the solver driver,
   // hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
