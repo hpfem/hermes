@@ -117,10 +117,32 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(0, 1.);
     break;
 
+    case Implicit_SIRK_2_2: // Implicit SIRK-22 (second-order).
+      this->alloc(2);
+      this->set_A(0, 0, (5. - 3.*sqrt(2.))/4.);
+      this->set_A(0, 1, (7. - 5.*sqrt(2.))/4.);
+      this->set_A(1, 0, (1. + 1.*sqrt(2.))/4.);
+      this->set_A(1, 1, (3. - 1.*sqrt(2.))/4.);
+      this->set_B(0, (1. + 1.*sqrt(2.))/4.);
+      this->set_B(1, (3. - 1.*sqrt(2.))/4.);
+      this->set_C(0, 3. - 2.*sqrt(2.));
+      this->set_C(1, 1.);  
+    break;
+
+    case Implicit_ESIRK_2_2: // Implicit ESIRK-22 (second-order).
+      this->alloc(2);
+      this->set_A(0, 0, (9. - 6.*sqrt(2.))/4.);
+      this->set_A(0, 1, (-3. + 2.*sqrt(2.))/4.);
+      this->set_A(1, 0, (11. - 6.*sqrt(2.))/4.);
+      this->set_A(1, 1, (-1. + 2.*sqrt(2.))/4.);
+      this->set_B(0, 2. - sqrt(2.0));
+      this->set_B(1, -1. + sqrt(2.0));
+      this->set_C(1, 1.);  
+    break;
+
     case Implicit_SDIRK_2_2: // Implicit SDIRK-22 (second-order).
       this->alloc(2);
       this->set_A(0, 0, 1. - gamma);
-      this->set_A(0, 1, 0.);
       this->set_A(1, 0, gamma);
       this->set_A(1, 1, 1. - gamma);
       this->set_B(0, gamma);
@@ -156,7 +178,6 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_A(1, 1, 1./2.);
       this->set_B(0, 1./2.);
       this->set_B(1, 1./2.);
-      this->set_C(0, 0.);
       this->set_C(1, 1.);
     break;
 
@@ -251,6 +272,35 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(0, (4. - sqrt((double)6)) / 10 );
       this->set_C(1, (4. + sqrt((double)6)) / 10 );
       this->set_C(2, 1.);
+    break;
+
+    case Implicit_SDIRK_4_5: // Implicit SDIRK-45 (fifth-order).
+      this->alloc(5);
+      this->set_A(0, 0, 1./4.);
+      this->set_A(1, 0, 1./2.);
+      this->set_A(1, 1, 1./4.);
+      this->set_A(2, 0, 17./50.);
+      this->set_A(2, 1, -1./25.);
+      this->set_A(2, 2, 1./4.);
+      this->set_A(3, 0, 371./1360.);
+      this->set_A(3, 1, -137./2720.);
+      this->set_A(3, 2, 15./544.);
+      this->set_A(3, 3, 1./4.);
+      this->set_A(4, 0, 25./24.);
+      this->set_A(4, 1, -49./48.);
+      this->set_A(4, 2, 125./16.);
+      this->set_A(4, 3, -85./12.);
+      this->set_A(4, 4, 1./4.);
+      this->set_B(0, 25./24.);
+      this->set_B(1, -49./48.);
+      this->set_B(2, 125./16.);
+      this->set_B(3, -85./12.);
+      this->set_B(4, 1./4.);
+      this->set_C(0, 1./4.);
+      this->set_C(1, 3./4.);  
+      this->set_C(2, 11./20.);  
+      this->set_C(3, 1./2.);  
+      this->set_C(4, 1.);  
     break;
 
     default: error("Unknown Butcher's table.");
