@@ -14,17 +14,17 @@ using namespace RefinementSelectors;
  *   - P_INIT=1
  *   - THERSHOLD=0.5
  *   - STRATEGY=1
- *   - CAND_LIST=HP_ANISO
+ *   - CAND_LIST=HP_ANISO_H
  *   - MESH_REGULARITY=-1
- *   - ERR_STOP=0.1
+ *   - ERR_STOP=1.0
  *   - CONV_EXP=1.0
- *   - NDOF_STOP=40000
- *   - ERROR_WEIGHTS=(H: 1; P: 1; ANISO: 1)
- *
+ *   - NDOF_STOP=50000
+ *   - matrix_solver = SOLVER_UMFPACK
+ *   
  *  \section s_res Results
- *   - DOFs: 3994
- *   - Error estimate: 9.22E-2%
- *   - Iterations: 36 (the last iteration at which ERR_STOP is fulfilled)
+ *   - DOFs: 1383
+ *   - Error estimate: 0.907777 %
+ *   - Iterations: 9 (the last iteration at which ERR_STOP is fulfilled)
  */
 
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 1650;
+  int n_dof_allowed = 1390;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
