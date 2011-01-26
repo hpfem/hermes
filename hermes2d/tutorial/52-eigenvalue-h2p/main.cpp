@@ -8,7 +8,7 @@
 using Teuchos::ptr;
 using Teuchos::RCP;
 using Teuchos::rcp;
-using Schroedinger::EigenSolver;
+using Hermes::EigenSolver;
 
 //using namespace std;
 

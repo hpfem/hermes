@@ -1,9 +1,11 @@
 #ifndef __H2D_EIGENSOLVER_H
 #define __H2D_EIGENSOLVER_H
 
-#include "hermes2d.h"
+#include "../matrix.h"
+#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#include "../python/python_api.h"
 
-namespace Schroedinger {
+namespace Hermes {
 
 using Teuchos::RCP;
 using Teuchos::Ptr;

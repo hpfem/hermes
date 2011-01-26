@@ -1,6 +1,7 @@
 #include "eigensolver.h"
+#include "../matrix_csc.h"
 
-namespace Schroedinger {
+namespace Hermes {
 
 using Teuchos::RCP;
 using Teuchos::Ptr;
