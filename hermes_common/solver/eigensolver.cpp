@@ -25,7 +25,11 @@ void wrap_CSC(const Ptr<Python> p, const std::string name,
 {
     p->push_numpy_int_inplace("_IA", A->get_Ai(), A->get_nnz());
     p->push_numpy_int_inplace("_JA", A->get_Ap(), A->get_size()+1);
+#ifdef H2D_COMPLEX
+    throw std::runtime_error("Eigenproblem with complex numbers is not supported.");
+#else
     p->push_numpy_double_inplace("_A", A->get_Ax(), A->get_nnz());
+#endif
     p->push_int("n", A->get_size());
     p->exec("from scipy.sparse import csc_matrix\n");
     p->exec(name + " = csc_matrix((_A, _IA, _JA), shape=(n, n))");
