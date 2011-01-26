@@ -1,17 +1,16 @@
 # max values in rho and z of of the mesh
 rhomax = 16.0 
-zmax =  16.0        # dont change zmax !!
-
+zmax =  16.0 # dont change zmax !!
 vertices =
-{ 
-  { 0 , 0},         # vertex 0
+{
+  { 0 , 0},     # vertex 0
   { rhomax, 0 },    # vertex 1
-  { rhomax, zmax }, # vertex 2
-  { 0, zmax }       # vertex3
+  { rhomax, zmax },    # vertex 2
+  { 0, zmax }    # vertex3
 }
 elements =
 {
-  {0,1,2,3,1}
+{0,1,2,3,1}
 }
 
 boundaries =
