@@ -1,12 +1,16 @@
-#include "hermes2d.h"
 #include <stdio.h>
 #include <cmath>
-using namespace std;
 
-// This test makes sure that example 52-eigenvalue-h2p works correctly.
+#include "hermes2d.h"
+
+using Teuchos::ptr;
+using Teuchos::RCP;
+using Teuchos::rcp;
+using Hermes::EigenSolver;
+
 
 const int NUMBER_OF_EIGENVALUES = 1;             // Desired number of eigenvalues.
-int P_INIT =4;  // Uniform polynomial degree of mesh elements.
+int P_INIT = 4;  // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 4; // DON'T CHANGE THIS!!
 const int FINAL_REF_NUM = 0; // final global refinement 
 const double TARGET_VALUE = -2.0;                  // JDSYM parameter: Eigenvalues in the vicinity of this number will be computed. 
@@ -43,29 +47,6 @@ double  wfun (double rho,double z){
 const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
 
 #include "forms.cpp"
-// Write the matrix in Matrix Market format.
-void write_matrix_mm(const char* filename, Matrix* mat) 
-{
-  int ndof = mat->get_size();
-  FILE *out = fopen(filename, "w" );
-  int nz=0;
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) nz++;
-    }
-  } 
-
-  fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
-  fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i+1, j+1, tmp);
-    }
-  } 
-  fclose(out);
-}
 
 int main(int argc, char* argv[])
 {
@@ -89,12 +70,8 @@ int main(int argc, char* argv[])
 	      vertex_id_nucleus=node->id;
     }
   }
-  if (vertex_id_nucleus == -1)
-    {
-      printf("nucleus is not a vertex! Slow convergence would result\n");
-      exit(0);
-    }
-  printf("vertex_id_nucleus=%d\n",vertex_id_nucleus);
+  if (vertex_id_nucleus == -1) error("Nucleus is not a vertex! Slow convergence would result.");
+  info("Vertex_id_nucleus = %d",vertex_id_nucleus);
   mesh.refine_towards_vertex(vertex_id_nucleus,10);
   for (int i=0;i<FINAL_REF_NUM;i++) mesh.refine_all_elements();
 
@@ -109,68 +86,49 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-  printf("ndof = %d\n", ndof);
+  info("ndof = %d", ndof);
   // Initialize the weak formulation for the left hand side, i.e., H.
   WeakForm wfH, wfU;
   wfH.add_matrix_form(bilinear_form_H,bilinear_form_ord);
   wfU.add_matrix_form(bilinear_form_U,bilinear_form_ord);
 
   // Initialize matrices.
-  SparseMatrix* Hmat = create_matrix(matrix_solver);
-  SparseMatrix* Umat = create_matrix(matrix_solver);
+  RCP<SparseMatrix> Hmat = rcp(new CSCMatrix());
+  RCP<SparseMatrix> Umat = rcp(new CSCMatrix());
 
   // Assemble the matrices.
   bool is_linear = true;
   DiscreteProblem dpH(&wfH, &space, is_linear);
-  dpH.assemble(Hmat);
+  dpH.assemble(Hmat.get());
   DiscreteProblem dpU(&wfU, &space, is_linear);
-  dpU.assemble(Umat);
+  dpU.assemble(Umat.get());
   cpu_time.tick();
-  printf("Total running time for assembling matrices : %g s\n", cpu_time.accumulated());
+  info("Total running time for assembling matrices : %g s.", cpu_time.accumulated());
+
   cpu_time.reset();
-  write_matrix_mm("mat_left.mtx" ,Hmat);
-  write_matrix_mm("mat_right.mtx", Umat);
+  EigenSolver es(Hmat, Umat);
   cpu_time.tick();
-  printf("Total running time for writing matrices to disk : %g s\n", cpu_time.accumulated());
+  info("Total running time for initializing EigenSolver : %g s.", cpu_time.accumulated());
+
   cpu_time.reset();
-  printf("Calling JDSYM...\n");
-  char call_cmd[255];
-  double TOL=1e-10;
-  int MAX_ITER=1000;
-  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	  TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
-  system(call_cmd);
-  printf("JDSYM finished.\n");
-  cpu_time.tick();
-  printf("Total running time for solving generalized eigenvalue problem: %g s\n", cpu_time.accumulated());
-  double* coeff_vec = new double[ndof];
+  es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE);
+  es.print_eigenvalues();
+  info("Total running time for solving generalized eigenvalue problem (new approach): %g s.", cpu_time.accumulated());
+
+  double* coeff_vec;
   Solution sln;
   // Reading solution vectors from file and visualizing.
   double* eigenval = new double[NUMBER_OF_EIGENVALUES];
-  FILE *file = fopen("eivecs.dat", "r");
-  char line [64];                  // Maximum line size.
-  fgets(line, sizeof line, file);  // ndof
-  int n = atoi(line);            
-  if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
-  fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
-  int neig = atoi(line);
-  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+  int neig = es.get_n_eigs();
+  int n;
+  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver versus requested number.");
   for (int ieig = 0; ieig < neig; ieig++) {
-    // Get next eigenvalue from the file
-    fgets(line, sizeof line, file);
-    eigenval[ieig] = atof(line);            
-    // Get the corresponding eigenvector.
-    for (int i = 0; i < ndof; i++) {  
-      fgets(line, sizeof line, file);
-      coeff_vec[i] = atof(line);
-    }
-
+    eigenval[ieig] = es.get_eigenvalue(ieig);
     // Convert coefficient vector into a Solution.
+    es.get_eigenvector(ieig, &coeff_vec, &n);
     Solution::vector_to_solution(coeff_vec, &space, &sln);
-  }  
-  fclose(file);
+  }
 
-  delete [] coeff_vec;
 
   double E=eigenval[0];
   printf("E=%.16f   Delta E=%.16e\n",E ,E-E_LITERATURE);
