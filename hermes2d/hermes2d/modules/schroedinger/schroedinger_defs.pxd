@@ -5,7 +5,7 @@ from libcpp.pair cimport pair
 from hermes2d.hermes2d_defs cimport Solution
 from hermes2d.hermes_common.matrix cimport SparseMatrix
 
-cdef extern from "hermes2d.h":
+cdef extern from "hermes2d.h" namespace "Teuchos":
 
     cdef cppclass RCP[T]:
         pass
@@ -13,7 +13,7 @@ cdef extern from "hermes2d.h":
     cdef cppclass Ptr[T]:
         pass
 
-cdef extern from "schroedinger.h":
+cdef extern from "schroedinger.h" namespace "Schroedinger":
 
     cdef cppclass Potential:
         double get_value(double x, double y)

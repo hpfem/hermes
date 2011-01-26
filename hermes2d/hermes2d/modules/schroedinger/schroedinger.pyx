@@ -33,7 +33,9 @@ cdef class ModuleSchroedinger:
         pass
 
     def set_potential(self, Potential potential):
-        self.thisptr.set_potential(potential.thisptr)
+        pass
+        #self.thisptr.set_potential(potential.thisptr)
 
     def assemble(self, Matrix A, Matrix B):
-        self.thisptr.assemble(A.thisptr.ptr(), B.this.ptr.ptr())
+        pass
+        #self.thisptr.assemble(A.thisptr.ptr(), B.this.ptr.ptr())
