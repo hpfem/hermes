@@ -122,7 +122,7 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
 			//debug_log("active neighbor el: %d", neighb_el->id);
 
       // Get local number of the edge used by the neighbor.
-			for (int j = 0; j < neighb_el->nvert; j++)
+			for (unsigned int j = 0; j < neighb_el->nvert; j++)
 				if (central_el->en[active_edge] == neighb_el->en[j])
 				{
 					neighbor_edge = j;
@@ -244,7 +244,7 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 
 				// Get local number of the edge used by the neighbor.
 				neighbor_edge = -1;
-				for(int j = 0; j < neighb_el->nvert; j++)
+				for(unsigned int j = 0; j < neighb_el->nvert; j++)
 					if(neighb_el->en[j] == edge)
 					{
 						neighbor_edge = j;
@@ -362,7 +362,7 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
 
           // Get local number of the edge used by the neighbor.
           neighbor_edge = -1;
-          for(int k = 0; k < neighb_el->nvert; k++)
+          for(unsigned int k = 0; k < neighb_el->nvert; k++)
             if(neighb_el->en[k] == edge)
             {
               neighbor_edge = k;

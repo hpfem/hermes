@@ -106,7 +106,8 @@ void PardisoMatrix::alloc() {
   MEM_CHECK(Ai);
 
   // sort the indices and remove duplicities, insert into Ai
-  int i, pos = 0;
+  unsigned int i;
+  int pos = 0;
   for (i = 0; i < size; i++) {
     Ap[i] = pos;
     pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
@@ -165,7 +166,7 @@ void PardisoMatrix::add(int m, int n, scalar v) {
 /// Add a number to each diagonal entry.
 void PardisoMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
@@ -185,7 +186,7 @@ bool PardisoMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, nnz, nnz);
-      for (int j = 0; j < size; j++)
+      for (unsigned int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT ";\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);

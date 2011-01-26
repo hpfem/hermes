@@ -46,7 +46,7 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
   seq++;
 }
 
-void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
+void WeakForm::add_matrix_form(unsigned int i, unsigned int j, matrix_form_val_t fn,
                                matrix_form_ord_t ord, SymFlag sym, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
@@ -70,7 +70,7 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
+void WeakForm::add_matrix_form(unsigned int i, unsigned int j, matrix_form_val_t fn,
                                matrix_form_ord_t ord, SymFlag sym, std::string area,
                                Hermes::vector<MeshFunction*>ext)
 {
@@ -150,7 +150,7 @@ void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
   seq++;
 }
 
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord,
+void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_val_t fn, matrix_form_ord_t ord,
                                     int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
@@ -168,7 +168,7 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
+void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
                                     std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
@@ -224,7 +224,7 @@ void WeakForm::add_vector_form(VectorFormVol* form)
   seq++;
 }
 
-void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
+void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq)
@@ -240,7 +240,7 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
+void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
   if (i < 0 || i >= neq)
@@ -295,7 +295,7 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
   seq++;
 }
 
-void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area,
+void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, int area,
                                     Hermes::vector<MeshFunction*>ext)
 {
   _F_
@@ -313,7 +313,7 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area,
+void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area,
                                     Hermes::vector<MeshFunction*>ext)
 {
   _F_
@@ -519,8 +519,8 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 {
   _F_
   bool** blocks = new_matrix<bool>(neq, neq);
-  for (int i = 0; i < neq; i++) {
-    for (int j = 0; j < neq; j++) {
+  for (unsigned int i = 0; i < neq; i++) {
+    for (unsigned int j = 0; j < neq; j++) {
       blocks[i][j] = false;
     }
     if (force_diagonal_blocks == true) blocks[i][i] = true;

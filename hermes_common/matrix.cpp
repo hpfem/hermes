@@ -143,7 +143,7 @@ SparseMatrix::SparseMatrix()
   col_storage = false;
 }
 
-SparseMatrix::SparseMatrix(int size)
+SparseMatrix::SparseMatrix(unsigned int size)
 {
   _F_
   this->size = size;
@@ -207,7 +207,7 @@ int SparseMatrix::get_num_indices()
 {
   _F_
   int total = 0;
-  for (int i = 0; i < size; i++)
+  for (unsigned int i = 0; i < size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
       total += page->count;
 

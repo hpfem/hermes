@@ -52,7 +52,7 @@ void Node::unref_element(HashTable* ht, Element* e)
 
 void Element::ref_all_nodes()
 {
-  for (int i = 0; i < nvert; i++)
+  for (unsigned int i = 0; i < nvert; i++)
   {
     vn[i]->ref_element();
     en[i]->ref_element(this);
@@ -62,7 +62,7 @@ void Element::ref_all_nodes()
 
 void Element::unref_all_nodes(HashTable* ht)
 {
-  for (int i = 0; i < nvert; i++)
+  for (unsigned int i = 0; i < nvert; i++)
   {
     vn[i]->unref_element(ht);
     en[i]->unref_element(ht, this);
@@ -542,11 +542,12 @@ void Mesh::refine_quad(Element* e, int refinement)
 void Mesh::unrefine_element_internal(Element* e)
 {
   assert(!e->active);
-  int i, s1, s2;
+  unsigned int i;
+  int s1, s2;
 
   // obtain markers and bnds from son elements
   int mrk[4], bnd[4];
-  for (i = 0; i < e->nvert; i++)
+  for (unsigned i = 0; i < e->nvert; i++)
   {
     get_edge_sons(e, i, s1, s2);
     assert(e->sons[s1]->active);
@@ -629,7 +630,7 @@ static int rtv_id;
 
 static int rtv_criterion(Element* e)
 {
-  for (int i = 0; i < e->nvert; i++)
+  for (unsigned int i = 0; i < e->nvert; i++)
     if (e->vn[i]->id == rtv_id)
       return 0;
   return -1;
@@ -648,7 +649,7 @@ static char* rtb_vert;
 
 static int rtb_criterion(Element* e)
 {
-  int i;
+  unsigned int i;
   for (i = 0; i < e->nvert; i++) {
     if (e->en[i]->marker == rtb_marker || rtb_vert[e->vn[i]->id]) {
       break;
@@ -691,7 +692,7 @@ void Mesh::refine_towards_boundary(int marker, int depth, bool aniso, bool tria_
 
     Element* e;
     for_all_active_elements(e, this)
-      for (int j = 0; j < e->nvert; j++) {
+      for (unsigned int j = 0; j < e->nvert; j++) {
         if (e->en[j]->marker == marker) {
           rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
         }
@@ -734,7 +735,7 @@ void Mesh::unrefine_all_elements(bool keep_initial_refinements)
   for_all_inactive_elements(e, this)
   {
     bool found = true;
-    for (int i = 0; i < 4; i++)
+    for (unsigned int i = 0; i < 4; i++)
       if (e->sons[i] != NULL && (!e->sons[i]->active ||
           (keep_initial_refinements && e->sons[i]->id < ninitial))  )
         { found = false; break; }
@@ -926,7 +927,7 @@ void Mesh::create(int nv, double2* verts, int nt, int4* tris,
 
 void Mesh::copy(const Mesh* mesh)
 {
-  int i;
+  unsigned int i;
 
   //printf("Calling Mesh::free() in Mesh::copy().\n");
   free();
@@ -1026,7 +1027,7 @@ void Mesh::copy_base(Mesh* mesh)
       enew = create_quad(e->marker, v0, v1, v2, &nodes[e->vn[3]->id], NULL);
 
     // copy edge markers
-    for (int j = 0; j < e->nvert; j++)
+    for (unsigned int j = 0; j < e->nvert; j++)
     {
       Node* en = get_base_edge_node(e, j);
       enew->en[j]->bnd = en->bnd; // copy bnd data from the active el.
@@ -1130,7 +1131,7 @@ void Mesh::copy_converted(Mesh* mesh)
     }
 
     // copy edge markers
-    for (int j = 0; j < e->nvert; j++)
+    for (unsigned int j = 0; j < e->nvert; j++)
     {
       Node* en = get_base_edge_node(e, j);
       enew->en[j]->bnd = en->bnd;
@@ -1491,7 +1492,7 @@ void Mesh::refine_quad_to_triangles(Element* e)
   }
 
   double angle2;
-  int idx;
+  unsigned int idx;
   CurvMap* cm[2];
   memset(cm, 0, sizeof(cm));
 
@@ -1527,7 +1528,7 @@ void Mesh::refine_quad_to_triangles(Element* e)
       i_case2 = 1; //switch to the shorter diagonal
     }
 
-    for (int k = 0; k < 2; k++)
+    for (unsigned int k = 0; k < 2; k++)
     {
       for (idx = 0 + 2*k; idx < 2 + 2*k; idx++)
       {
@@ -1536,7 +1537,7 @@ void Mesh::refine_quad_to_triangles(Element* e)
           angle2 = e->cm->nurbs[(idx + i_case2)%4]->angle;
 
           int p1, p2;
-          int idx2 = idx;
+          unsigned int idx2 = idx;
 
           p1 = e->vn[(idx + i_case2)%4]->id;
           p2 = e->vn[(idx + i_case2 + 1)%4]->id;  //node_temp->id;
@@ -1752,14 +1753,14 @@ void Mesh::save_raw(FILE* f)
         output(e->userdata, int);
         output(e->iro_cache, int);
 
-        for (i = 0; i < e->nvert; i++)
+        for (unsigned i = 0; i < e->nvert; i++)
           output(e->vn[i]->id, int);
 
         if (e->active)
-          for (i = 0; i < e->nvert; i++)
+          for (unsigned i = 0; i < e->nvert; i++)
             output(e->en[i]->id, int);
         else
-          for (i = 0; i < 4; i++)
+          for (unsigned i = 0; i < 4; i++)
             output(e->sons[i] ? e->sons[i]->id : null, int);
 
         if (e->is_curved()) error("Not implemented for curved elements yet.");
@@ -1774,7 +1775,7 @@ void Mesh::save_raw(FILE* f)
 
 void Mesh::load_raw(FILE* f)
 {
-  int i, j, nv, mv, ne, me, id;
+  int i, nv, mv, ne, me, id;
 
   assert(sizeof(int) == 4);
   assert(sizeof(double) == 8);
@@ -1864,7 +1865,7 @@ void Mesh::load_raw(FILE* f)
       input(e->iro_cache, int);
 
       // load vertex node ids
-      for (j = 0; j < e->nvert; j++)
+      for (unsigned int j = 0; j < e->nvert; j++)
       {
         input(id, int);
         if (id < 0 || id >= mv) error("Corrupt data.");
@@ -1874,7 +1875,7 @@ void Mesh::load_raw(FILE* f)
       if (e->active)
       {
         // load edge node ids
-        for (j = 0; j < e->nvert; j++)
+        for (unsigned int j = 0; j < e->nvert; j++)
         {
           input(id, int);
           if (id < 0 || id >= mv) error("Corrupt data.");
@@ -1884,7 +1885,7 @@ void Mesh::load_raw(FILE* f)
       else
       {
         // load son ids
-        for (j = 0; j < 4; j++)
+        for (unsigned int j = 0; j < 4; j++)
         {
           input(id, int);
           if (id < 0)
@@ -1902,7 +1903,7 @@ void Mesh::load_raw(FILE* f)
   // update edge node element pointers
   Node* n;
   for_all_edge_nodes(n, this)
-    for (j = 0; j < 2; j++)
+    for (unsigned int j = 0; j < 2; j++)
       if ((int) (long) n->elem[j] == -1)
         n->elem[j] = NULL;
       else

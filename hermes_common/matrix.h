@@ -27,24 +27,24 @@
 /// The entries can be accessed by matrix[i][j]. To delete the matrix, just
 /// do "delete matrix".
 template<typename T>
-T **new_matrix(int m, int n = 0)
+T **new_matrix(unsigned int m, unsigned int n = 0)
 {
   if (!n) n = m;
   T **vec = (T **) new char[sizeof(T *) * m + sizeof(T) * m * n];
   MEM_CHECK(vec);
   memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
   T *row = (T *) (vec + m);
-  for (int i = 0; i < m; i++, row += n) vec[i] = row;
+  for (unsigned int i = 0; i < m; i++, row += n) vec[i] = row;
   return vec;
 }
 
 /// Copies a matrix. Both matrices has to be equal to or larger than provideded sizes.
 /// Size compatibility check is not done.
 template<typename T>
-void copy_matrix(T** dest, T** src, int m, int n = 0) 
+void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0) 
 {
   if (n == 0) n = m;
-  for(int i = 0; i < m; i++) {
+  for(unsigned int i = 0; i < m; i++) {
     memcpy(dest[i], src[i], n*sizeof(T));
   }
 }
@@ -56,7 +56,7 @@ void copy_matrix(T** dest, T** src, int m, int n = 0)
 /// \param[in] n A number of columns of the matrix. If zero, it is assumed to be equal to m.
 /// \param[in] filename An output filename. If not specified, matrix_name will be used by concatenating it with a suffix '.mat'.
 template<typename T>
-void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n = 0, const std::string& filename = std::string()) 
+void save_matrix_octave(const std::string& matrix_name, T** matrix, unsigned int m, unsigned int n = 0, const std::string& filename = std::string()) 
 {
   if (n == 0) n = m;
 
@@ -79,8 +79,8 @@ void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n
   fout << std::string("# columns: ") << n << std::endl;
 
   //write contents
-  for(int i = 0; i < m; i++) {
-    for(int k = 0; k < n; k++)
+  for(unsigned int i = 0; i < m; i++) {
+    for(unsigned int k = 0; k < n; k++)
       fout << ' ' << matrix[i][k];
     fout << std::endl;
   }
@@ -92,7 +92,7 @@ void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n
 /// Saves MxM sparse matrix to a octave file format.
 template<typename T>
 void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, const int* Ap, const int* Ai, 
-                               int m, const std::string& filename = std::string()) 
+                               unsigned int m, const std::string& filename = std::string()) 
 {
   // create filename
   std::string fname = filename;
@@ -125,30 +125,30 @@ void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, cons
 /// Transposes an m by n matrix. If m != n, the array matrix in fact has to be
 /// a square matrix of the size max(m, n) in order for the transpose to fit inside it.
 template<typename T>
-void transpose(T **matrix, int m, int n) 
+void transpose(T **matrix, unsigned int m, unsigned int n) 
 {
-  int min = std::min(m, n);
-  for (int i = 0; i < min; i++)
-    for (int j = i+1; j < min; j++)
+  unsigned int min = std::min(m, n);
+  for (unsigned int i = 0; i < min; i++)
+    for (unsigned int j = i+1; j < min; j++)
        std::swap(matrix[i][j], matrix[j][i]);
 
   if (m < n)
-    for (int i = 0; i < m; i++)
-      for (int j = m; j < n; j++)
-	matrix[j][i] = matrix[i][j];
+    for (unsigned int i = 0; i < m; i++)
+      for (unsigned int j = m; j < n; j++)
+	      matrix[j][i] = matrix[i][j];
   else if (n < m)
-    for (int i = n; i < m; i++)
-      for (int j = 0; j < n; j++)
-	matrix[j][i] = matrix[i][j];
+    for (unsigned int i = n; i < m; i++)
+      for (unsigned int j = 0; j < n; j++)
+	      matrix[j][i] = matrix[i][j];
 }
 
 
 /// Changes the sign of a matrix
 template<typename T>
-void chsgn(T **matrix, int m, int n) 
+void chsgn(T **matrix, unsigned int m, unsigned int n) 
 {
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < n; j++)
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
       matrix[i][j] = -matrix[i][j];
 }
 
@@ -239,9 +239,9 @@ enum EMatrixDumpFormat {
 
 class HERMES_API Matrix {
 public:
-  int get_size() { return this->size;};
+  unsigned int get_size() { return this->size;};
 
-  Matrix(int size) { this->size = size;};
+  Matrix(unsigned int size) { this->size = size;};
 
   ~Matrix() {};
 
@@ -289,13 +289,13 @@ public:
 
 protected:
 
-  int size;  // matrix size
+  unsigned int size;  // matrix size
 };
 
 class HERMES_API SparseMatrix : public Matrix {
 public:
   SparseMatrix();
-  SparseMatrix(int size);
+  SparseMatrix(unsigned int size);
   virtual ~SparseMatrix();
 
   /// prepare memory

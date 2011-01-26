@@ -81,7 +81,7 @@ void SuperLUMatrix::alloc()
   
   // sort the indices and remove duplicities, insert into Ai
   int i, pos = 0;
-  for (i = 0; i < size; i++) {
+  for (unsigned i = 0; i < size; i++) {
     Ap[i] = pos;
     pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
   }
@@ -151,7 +151,7 @@ void SuperLUMatrix::add(int m, int n, scalar v)
 /// Add a number to each diagonal entry.
 void SuperLUMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
@@ -175,7 +175,7 @@ bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   {      
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
-      for (int j = 0; j < size; j++)
+      for (unsigned int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)          
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SUPERLU_SCALAR(Ax[i]));

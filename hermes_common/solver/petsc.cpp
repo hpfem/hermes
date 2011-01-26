@@ -180,7 +180,7 @@ void PetscMatrix::add(int m, int n, scalar v) {
 /// Add a number to each diagonal entry.
 void PetscMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
