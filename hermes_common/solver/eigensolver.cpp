@@ -35,7 +35,8 @@ void wrap_CSC(const Ptr<Python> p, const std::string name,
     p->exec(name + " = csc_matrix((_A, _IA, _JA), shape=(n, n))");
 }
 
-void EigenSolver::solve(int n_eigs, double target_value) {
+void EigenSolver::solve(int n_eigs, double target_value, double tol,
+        int max_iter) {
     // Support CSCMatrix only for now:
     RCP<CSCMatrix> A = rcp_dynamic_cast<CSCMatrix>(this->A, true);
     RCP<CSCMatrix> B = rcp_dynamic_cast<CSCMatrix>(this->B, true);
@@ -44,9 +45,11 @@ void EigenSolver::solve(int n_eigs, double target_value) {
     this->p.exec("from eigen import solve_eig_pysparse");
     this->p.push_double("target_value", target_value);
     this->p.push_int("n_eigs", n_eigs);
+    this->p.push_double("jdtol", tol);
+    this->p.push_int("max_iter", maxiter);
 
     printf("Solving the system A * x = lambda * B * x\n");
-    this->p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value, n_eigs=n_eigs)");
+    this->p.exec("eigs = solve_eig_pysparse(A, B, target_value=target_value, n_eigs=n_eigs, jdtol=jdtol, max_iter=max_iter)");
     this->p.exec("n_eigs = len(eigs)");
     this->n_eigs = this->p.pull_int("n_eigs");
 }

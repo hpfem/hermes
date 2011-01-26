@@ -78,7 +78,8 @@ def convert_mat(mtx):
         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
     return A
 
-def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False):
+def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,
+        jdtol=1e-6, max_iter=150):
     """
     Solves the generalized eigenvalue problem.
 
@@ -104,8 +105,8 @@ def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False):
     K = precon.jacobi(Atau)
     A = A.to_sss()
     B = B.to_sss()
-    kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, 1e-6, 150,
-            itsolvers.qmrs)
+    kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
+            max_iter, itsolvers.qmrs)
     if verbose:
         print "number of converged eigenvalues:", kconv
 

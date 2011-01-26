@@ -20,7 +20,8 @@ public:
     // Solves for 'n_eigs' eigenvectors, around the 'target_value'. Use
     // 'get_eigenvalue' and 'get_eigenvector' to retrieve the
     // eigenvalues/eigenvectors:
-    void solve(int n_eigs=4, double target_value=-1);
+    void solve(int n_eigs=4, double target_value=-1, double tol=1e-6,
+            int max_iter=150);
 
     // Returns the number of calculated eigenvalues
     int get_n_eigs() {
