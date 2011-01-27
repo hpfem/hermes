@@ -42,19 +42,19 @@ class CTUInfo
         {
             for(unsigned i=0;i<nodes.size();i++)
             {
-                delete[] nodes.at(i);
+                delete nodes.at(i);
             }
             nodes.clear();
 
             for(unsigned i=0;i<hexs.size();i++)
             {
-                delete[] hexs.at(i);
+                delete hexs.at(i);
             }
             hexs.clear();
 
             for(unsigned i=0;i<quads.size();i++)
             {
-                delete[] quads.at(i);
+                delete quads.at(i);
             }
             quads.clear();
         }
@@ -286,6 +286,9 @@ int main()
         //break;
     }
 
+    h3d_f << endl << "# prisms" << endl << 0 << endl << endl;
+    h3d_f << "# tris" << endl << 0 << endl << endl;
+
     cout << "Generating QUADS for mesh.mesh3d ..." << endl;
     h3d_f << endl << "# quads" << endl << ci.quads.size() << endl;
 
@@ -294,9 +297,6 @@ int main()
         _Quad_ *q = ci.quads.at(i);
         h3d_f << q->n[0] << " " << q->n[1] << " " << q->n[2] << " " << q->n[3] << endl;
     }
-
-    h3d_f << endl << "# prisms" << endl << 0 << endl << endl;
-    h3d_f << "# tris" << endl << 0 << endl << endl;
 
     h3d_f.close();
     p_dbc_f.close();
