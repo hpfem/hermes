@@ -580,15 +580,18 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   _F_
   // Assembly list vector.
   Hermes::vector<AsmList *> al;
-  for(unsigned int i = 0; i < wf->get_neq(); i++) al.push_back(new AsmList);
+  for(unsigned int i = 0; i < wf->get_neq(); i++) 
+    al.push_back(new AsmList);
 
   // Natural boundary condition flag.
   Hermes::vector<bool> nat;
-  for(unsigned int i = 0; i < wf->get_neq(); i++) nat.push_back(false);
+  for(unsigned int i = 0; i < wf->get_neq(); i++) 
+    nat.push_back(false);
 
   // Element usage flag: iempty[i] == true := The current state does not posses an active element in the i-th space.
   Hermes::vector<bool> isempty;
-  for(unsigned int i = 0; i < wf->get_neq(); i++) isempty.push_back(false);
+  for(unsigned int i = 0; i < wf->get_neq(); i++) 
+    isempty.push_back(false);
     
   // Initialize the state, return a non-NULL element, if no such Element found, return.
   Element* rep_element = init_state(stage, spss, refmap, e, isempty, al);
@@ -607,6 +610,10 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++)
    assemble_surface_integrals(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
    surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf], nat, isurf, e, trav_base, rep_element);
+  
+  // Delete assembly lists.
+  for(unsigned int i = 0; i < wf->get_neq(); i++) 
+    delete al[i];
 
   delete_cache();
 }
