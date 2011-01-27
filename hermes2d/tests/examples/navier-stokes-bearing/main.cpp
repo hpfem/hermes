@@ -284,11 +284,11 @@ int main(int argc, char* argv[])
     printf("Coordinate ( 0.1, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.1, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.5, 0.0) - (-0.000347)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.5, 0.0) - (-0.000403)) > eps) {
     printf("Coordinate ( 0.5, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.5, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.000047)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.000057)) > eps) {
     printf("Coordinate ( 0.9, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }

@@ -69,34 +69,66 @@ public:
   typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi,
                                    Geom<Ord> *e, ExtData<Ord> *);
 
+// Matrix forms for error calculation.
+  typedef scalar (*error_matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
+                                             Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
+                                             ExtData<scalar> *); ///< Error bilinear form callback function.
+  typedef Ord (*error_matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
+                                          Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
+                                          ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
+
+// Vector forms for error calculation.
+  typedef scalar (*error_vector_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
+                                             Func<scalar> *u, Geom<double> *e,
+                                             ExtData<scalar> *); ///< Error linear form callback function.
+  typedef Ord (*error_vector_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
+                                          Func<Ord> *u, Geom<Ord> *e,
+                                          ExtData<Ord> *); ///< Error linear form to estimate order of a function.
+
   // General case.
   struct MatrixFormVol  {
     int i, j, sym, area;
     matrix_form_val_t fn;
     matrix_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
   struct MatrixFormSurf {
     int i, j, area;
     matrix_form_val_t fn;
     matrix_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
   struct VectorFormVol  {
     int i, area;
     vector_form_val_t fn;
     vector_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
   struct VectorFormSurf {
     int i, area;
     vector_form_val_t fn;
     vector_form_ord_t ord;
     Hermes::vector<MeshFunction *> ext;
-    double scaling_factor;
+    double scaling_factor;     // Form will be always multiplied (scaled) with this number.
+    int u_ext_offset;          // External solutions for this form will start 
+                               // with u_ext[u_ext_offset] where u_ext[] are external
+                               // solutions coming to the assembling procedure via the 
+                               // external coefficient vector.
   };
 
   // General case.

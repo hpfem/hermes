@@ -70,8 +70,15 @@ set(SRC
   ${HERMES_COMMON_DIR}/solver/superlu.cpp
   ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
   ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
+  ${HERMES_COMMON_DIR}/solver/eigensolver.cpp
+  ${HERMES_COMMON_DIR}/solver/eigen.cpp
   ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
   ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
+
+  ${TEUCHOS_SOURCES}
+
+  ${HERMES_COMMON_DIR}/python/python_api.cpp
+  ${HERMES_COMMON_DIR}/python/python_engine.cpp
 )
 
 include(PickRealOrCplxLibs)
@@ -108,6 +115,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
 	  ${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
       ${ADDITIONAL_LIBS}        
+      ${PYTHON_LIBRARY}
   )
 endmacro(LIBRARY_SETTINGS)
 

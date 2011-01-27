@@ -240,8 +240,8 @@ public:
     VertexIdKey(double x, double y, double z)
     {
       this->x = x;
-      this->y = x;
-      this->z = x;
+      this->y = y;
+      this->z = z;
     };
     bool operator<(const VertexIdKey & other) const
     {
@@ -262,7 +262,7 @@ public:
     };
   };
 
-	std::map<VertexIdKey, int> vertex_id;					// mapping: CEDKey => ced function index
+	std::map<VertexIdKey, int> vertex_id;
 	std::map<unsigned int, Vertex *> points;
 	std::map<unsigned int, Cell *> cells;
 	std::map<unsigned int, double> cell_data;

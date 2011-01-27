@@ -1,4 +1,4 @@
-NIST-02 (Elliptic)
+NIST-02 (Reentrant Corner)
 ------------------
 
 **Git reference:** Benchmark `nist-02 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-02>`_.

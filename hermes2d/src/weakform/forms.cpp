@@ -26,7 +26,7 @@ template<> double DiscontinuousFunc<double>::zero = 0.0;
   template<> std::complex<double> DiscontinuousFunc<std::complex<double> >::zero = std::complex<double>(0);
 #endif
 
-// Integration order for coordinates, normals and tangents is one
+/// Integration order for coordinates, normals and tangents is one.
 Geom<Ord>* init_geom_ord()
 {
 	Geom<Ord>* e = new Geom<Ord>;
@@ -51,7 +51,7 @@ Geom<Ord>* init_geom_ord()
 	return e;
 }
 
-// Initialize element marker and coordinates
+/// Initialize element marker and coordinates.
 Geom<double>* init_geom_vol(RefMap *rm, const int order)
 {
     Geom<double>* e = new Geom<double>;
@@ -64,7 +64,7 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order)
     return e;
 }
 
-// Initialize edge marker, coordinates, tangent and normals
+/// Initialize edge marker, coordinates, tangent and normals.
 Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 {
   Geom<double>* e = new Geom<double>;
@@ -92,7 +92,7 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
 	return e;
 }
 
-// Initialize integration order for function values and derivatives
+/// Initialize integration order for function values and derivatives.
 Func<Ord>* init_fn_ord(const int order)
 {
   Ord *d = new Ord(order);
@@ -111,14 +111,15 @@ Func<Ord>* init_fn_ord(const int order)
 	return f;
 }
 
-// Transformation of shape functions using reference mapping
+/// Transformation of shape functions using reference mapping.
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
   int nc = fu->get_num_components();
   ESpaceType space_type = fu->get_space_type();
   Quad2D* quad = fu->get_quad_2d();
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-  if (space_type == 0) fu->set_quad_order(order, H2D_FN_ALL);
+  if (space_type == HERMES_H1_SPACE)
+    fu->set_quad_order(order, H2D_FN_ALL);
   else
 #endif
     fu->set_quad_order(order);
@@ -326,7 +327,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
   return u;
 }
 
-// Preparation of mesh-functions
+/// Preparation of mesh functions.
 Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order)
 {
   // sanity checks
@@ -348,6 +349,80 @@ Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order)
     memcpy(u->val, fu->get_fn_values(), np * sizeof(scalar));
     memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
     memcpy(u->dy, fu->get_dy_values(), np * sizeof(scalar));
+  }
+  else if (u->nc == 2)
+  {
+    u->val0 = new scalar [np];
+    u->val1 = new scalar [np];
+    u->curl = new scalar [np];
+    u->div = new scalar [np];
+
+    memcpy(u->val0, fu->get_fn_values(0), np * sizeof(scalar));
+    memcpy(u->val1, fu->get_fn_values(1), np * sizeof(scalar));
+
+    // This works.
+    scalar *dx1 = fu->get_dx_values(1);
+    scalar *dy0 = fu->get_dy_values(0);
+    for (int i = 0; i < np; i++) u->curl[i] = dx1[i] - dy0[i];
+    // This was never tested but it should work.
+    scalar *dx0 = fu->get_dx_values(0);
+    scalar *dy1 = fu->get_dy_values(1);
+    for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
+  }
+  return u;
+}
+
+/// Preparation of solutions.
+Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
+{
+  // sanity checks
+  if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
+  if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
+
+  ESpaceType space_type = fu->get_space_type();
+  ESolutionType sln_type = fu->get_type();
+
+  int nc = fu->get_num_components();
+  Quad2D* quad = fu->get_quad_2d();
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+  if (space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
+    fu->set_quad_order(order, H2D_FN_ALL);
+  else
+#endif
+    fu->set_quad_order(order);
+
+  double3* pt = quad->get_points(order);
+  int np = quad->get_num_points(order);
+  Func<scalar>* u = new Func<scalar>(np, nc);
+
+  if (u->nc == 1)
+  {
+    u->val = new scalar [np];
+    u->dx  = new scalar [np];
+    u->dy  = new scalar [np];
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+    if (space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
+      u->laplace = new scalar [np];
+#endif
+    memcpy(u->val, fu->get_fn_values(), np * sizeof(scalar));
+    memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
+    memcpy(u->dy, fu->get_dy_values(), np * sizeof(scalar));
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+    if (space_type == HERMES_H1_SPACE)
+    {
+      if(sln_type == HERMES_SLN)
+      {
+        scalar *dxx = fu->get_dxx_values();
+        scalar *dyy = fu->get_dyy_values();
+        for (int i = 0; i < np; i++)
+          u->laplace[i] = dxx[i] + dyy[i];
+      }
+      else if (sln_type == HERMES_CONST)
+      {
+        memset(u->laplace, 0, np * sizeof(scalar));
+      }
+    }
+#endif
   }
   else if (u->nc == 2)
   {

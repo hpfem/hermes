@@ -1,4 +1,4 @@
-NIST-08 (Elliptic)
+NIST-08 (Oscillatory)
 ------------------
 
 **Git reference:** Benchmark `nist-08 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-08>`_.

@@ -34,6 +34,9 @@
 #include "../hermes_common/solver/precond_ifpack.h"
 #include "../hermes_common/solver/precond_ml.h"
 
+// Eigensolver
+#include "../hermes_common/solver/eigensolver.h"
+
 // RCP
 #include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
 
@@ -104,6 +107,7 @@
 #include "ref_selectors/hcurl_proj_based_selector.h"
 
 #include "adapt/adapt.h"
+#include "adapt/kelly_type_adapt.h"
 #include "neighbor.h"
 #include "ogprojection.h"
 

@@ -8,14 +8,14 @@ vertices =
 
 elements =
 {
-  { 0, 1, 2, 3; Material A }
+  { 0, 1, 2, 3, "Material A" }
 }
 
 boundaries =
 {
-  { 0, 1, 1 },
-  { 1, 2; Boundary vertical },
-  { 2, 3, 1 },
-  { 3, 0; Boundary vertical }
+  { 0, 1, "Boundary horizontal" },
+  { 1, 2, "Boundary vertical" },
+  { 2, 3, "Boundary horizontal" },
+  { 3, 0, "Boundary vertical" }
 }
 

@@ -611,289 +611,292 @@ static inline void vec_x_vec_p_num(int n, scalar *y, scalar *x, scalar num) {
 }
 
 // y = y .* x + z
-static inline void vec_x_vec_p_vec(int n, scalar *y, scalar *x, scalar *z) {
-	for (int i = 0; i < n; i++)
-		y[i] = y[i] * x[i] + z[i];
+static inline void vec_x_vec_p_vec(int n, scalar *y, scalar *x, scalar *z) 
+{
+  for (int i = 0; i < n; i++) y[i] = y[i] * x[i] + z[i];
 }
 
-void Solution::precalculate(const int np, const QuadPt3D *pt, int mask) {
-	_F_
-	switch (type) {
-		case HERMES_SLN: precalculate_fe(np, pt, mask); break;
-		case HERMES_EXACT: precalculate_exact(np, pt, mask); break;
-                case HERMES_CONST: precalculate_const(np, pt, mask); break;
+void Solution::precalculate(const int np, const QuadPt3D *pt, int mask) 
+{
+  _F_
+  switch (this->type) {
+    case HERMES_SLN: precalculate_fe(np, pt, mask); break;
+    case HERMES_EXACT: precalculate_exact(np, pt, mask); break;
+    case HERMES_CONST: precalculate_const(np, pt, mask); break;
 
-		default: EXIT("WTF?");
-	}
+    default: EXIT("Unknown solution type in Solution::precalculate().");
+  }
 }
 
-void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) {
-	_F_
+void Solution::precalculate_fe(const int np, const QuadPt3D *pt, int mask) 
+{
+  _F_
 
-	// if we are required to transform vectors, we must precalculate both their components
-	const int GRAD = FN_DX_0 | FN_DY_0 | FN_DZ_0;
-	const int CURL = FN_DX | FN_DY | FN_DZ;
-	if (transform) {
-		if (num_components == 1) {
-			if ((mask & FN_DX_0) || (mask & FN_DY_0) || (mask & FN_DZ_0))  mask |= GRAD;
-		}
-		else {
-			if ((mask & FN_VAL_0) || (mask & FN_VAL_1) || (mask & FN_VAL_2)) mask |= FN_VAL;
-			if ((mask & FN_DX_0) || (mask & FN_DX_1) || (mask & FN_DX_2) ||
-				(mask & FN_DY_0) || (mask & FN_DY_1) || (mask & FN_DY_2) ||
-				(mask & FN_DZ_0) || (mask & FN_DZ_1) || (mask & FN_DZ_2))
-				mask |= CURL;
-		}
-	}
+  // if we are required to transform vectors, we must precalculate both their components
+  const int GRAD = FN_DX_0 | FN_DY_0 | FN_DZ_0;
+  const int CURL = FN_DX | FN_DY | FN_DZ;
+  if (transform) {
+    if (num_components == 1) {
+      if ((mask & FN_DX_0) || (mask & FN_DY_0) || (mask & FN_DZ_0))  mask |= GRAD;
+    }
+    else {
+      if ((mask & FN_VAL_0) || (mask & FN_VAL_1) || (mask & FN_VAL_2)) mask |= FN_VAL;
+      if ((mask & FN_DX_0) || (mask & FN_DX_1) || (mask & FN_DX_2) ||
+	  (mask & FN_DY_0) || (mask & FN_DY_1) || (mask & FN_DY_2) ||
+	  (mask & FN_DZ_0) || (mask & FN_DZ_1) || (mask & FN_DZ_2))
+	   mask |= CURL;
+    }
+  }
 
-	int newmask = mask;
-	Node *node = new_node(newmask, np);
+  int newmask = mask;
+  Node *node = new_node(newmask, np);
 
-	// transform integration points by the current matrix
-	scalar * x = new scalar[np];
+  // transform integration points by the current matrix
+  scalar * x = new scalar[np];
   scalar * y = new scalar[np];
   scalar * z = new scalar[np];
   scalar * tx = new scalar[np];
   scalar * ty = new scalar[np];
-	for (int i = 0; i < np; i++) {
-		x[i] = pt[i].x * ctm->m[0] + ctm->t[0];
-		y[i] = pt[i].y * ctm->m[1] + ctm->t[1];
-		z[i] = pt[i].z * ctm->m[2] + ctm->t[2];
+  for (int i = 0; i < np; i++) {
+    x[i] = pt[i].x * ctm->m[0] + ctm->t[0];
+    y[i] = pt[i].y * ctm->m[1] + ctm->t[1];
+    z[i] = pt[i].z * ctm->m[2] + ctm->t[2];
+  }
+
+  // obtain the solution values, this is the core of the whole module
+  Ord3 ord = elem_orders[element->id];
+  for (int l = 0; l < num_components; l++) {
+    for (int v = 0; v < 6; v++) {
+      if (newmask & idx2mask[v][l]) {
+	scalar *result = node->values[l][v];
+	// calculate the solution values using Horner's scheme
+        scalar *mono = dxdydz_coefs[l][v];
+	switch (mode) {
+	  case HERMES_MODE_TET:
+	  for (int k = 0; k <= ord.order; k++) {					// z
+	    for (int i = 0; i <= k; i++) {				// y
+	      set_vec_num(np, tx, *mono++);
+	      for (int j = 1; j <= i; j++)			// x
+	        vec_x_vec_p_num(np, tx, x, *mono++);
+
+	      if (i == 0) memcpy(ty, tx, sizeof(scalar) * np);
+	      else vec_x_vec_p_vec(np, ty, y, tx);
+	    }
+
+	    if (k == 0) memcpy(result, ty, sizeof(scalar) * np);
+	    else vec_x_vec_p_vec(np, result, z, ty);
+          }
+          break;
+
+	  case HERMES_MODE_HEX:
+	    for (int k = 0; k <= ord.z; k++) {					// z
+	      for (int i = 0; i <= ord.y; i++) {				// y
+	        set_vec_num(np, tx, *mono++);
+		for (int j = 1; j <= ord.x; j++)			// x
+		  vec_x_vec_p_num(np, tx, x, *mono++);
+
+		if (i == 0) memcpy(ty, tx, sizeof(scalar) * np);
+		else vec_x_vec_p_vec(np, ty, y, tx);
+	      }
+
+	      if (k == 0) memcpy(result, ty, sizeof(scalar) * np);
+	      else vec_x_vec_p_vec(np, result, z, ty);
+	    }
+	    break;
+	}
+      }
+    }
+  }
+
+  // transform gradient or vector solution, if required
+  if (transform) {
+    bool trans1 = false, trans2 = false;
+    scalar *tab1, *tab2, *tab3;
+    scalar *tabx[3], *taby[3], *tabz[3];
+    if (num_components == 1 && (newmask & GRAD) == GRAD) { // && (oldmask & GRAD) != GRAD) {
+      trans1 = true;
+      tab1 = node->values[0][DX];
+      tab2 = node->values[0][DY];
+      tab3 = node->values[0][DZ];
+    }
+    else if (num_components == 3 && (newmask & FN_VAL) == FN_VAL) { // && (oldmask & FN_VAL) != FN_VAL) {
+      trans1 = true;
+      tab1 = node->values[0][FN];
+      tab2 = node->values[1][FN];
+      tab3 = node->values[2][FN];
+    }
+
+    if (num_components == 3 && (newmask & CURL) == CURL) { // && (oldmask & CURL) != CURL) {
+      trans2 = true;
+      for (int i = 0; i < 3; i++) {
+	tabx[i] = node->values[i][DX];
+	taby[i] = node->values[i][DY];
+	tabz[i] = node->values[i][DZ];
+      }
+    }
+
+    double3x3 *mat = NULL, *m;
+    if (trans1 || trans2) mat = refmap->get_inv_ref_map(np, pt);
+
+    // transformation of derivatives in H1 or transformation of values in Hcurl
+    int i;
+    if (trans1) {
+      for (i = 0, m = mat; i < np; i++, m++) {
+        scalar vx = tab1[i], vy = tab2[i], vz = tab3[i];
+        tab1[i] = (*m)[0][0]*vx + (*m)[0][1]*vy + (*m)[0][2]*vz;
+        tab2[i] = (*m)[1][0]*vx + (*m)[1][1]*vy + (*m)[1][2]*vz;
+        tab3[i] = (*m)[2][0]*vx + (*m)[2][1]*vy + (*m)[2][2]*vz;
+      }
+    }
+
+    // transformation of derivatives in Hcurl
+    if (trans2) {
+      for (i = 0, m = mat; i < np; i++, m++) {
+	scalar vhx[3], vhy[3], vhz[3];
+	for(int c = 0; c < 3; c++) {
+	  vhx[c] = (*m)[0][0] * tabx[c][i] + (*m)[0][1] * taby[c][i] + (*m)[0][2] * tabz[c][i];
+	  vhy[c] = (*m)[1][0] * tabx[c][i] + (*m)[1][1] * taby[c][i] + (*m)[1][2] * tabz[c][i];
+	  vhz[c] = (*m)[2][0] * tabx[c][i] + (*m)[2][1] * taby[c][i] + (*m)[2][2] * tabz[c][i];
 	}
 
-	// obtain the solution values, this is the core of the whole module
-	Ord3 ord = elem_orders[element->id];
-	for (int l = 0; l < num_components; l++) {
-		for (int v = 0; v < 6; v++) {
-			if (newmask & idx2mask[v][l]) {
-				scalar *result = node->values[l][v];
-				// calculate the solution values using Horner's scheme
-				scalar *mono = dxdydz_coefs[l][v];
-				switch (mode) {
-					case HERMES_MODE_TET:
-						for (int k = 0; k <= ord.order; k++) {					// z
-							for (int i = 0; i <= k; i++) {				// y
-								set_vec_num(np, tx, *mono++);
-								for (int j = 1; j <= i; j++)			// x
-									vec_x_vec_p_num(np, tx, x, *mono++);
-
-								if (i == 0) memcpy(ty, tx, sizeof(scalar) * np);
-								else vec_x_vec_p_vec(np, ty, y, tx);
-							}
-
-							if (k == 0) memcpy(result, ty, sizeof(scalar) * np);
-							else vec_x_vec_p_vec(np, result, z, ty);
-						}
-						break;
-
-					case HERMES_MODE_HEX:
-						for (int k = 0; k <= ord.z; k++) {					// z
-							for (int i = 0; i <= ord.y; i++) {				// y
-								set_vec_num(np, tx, *mono++);
-								for (int j = 1; j <= ord.x; j++)			// x
-									vec_x_vec_p_num(np, tx, x, *mono++);
-
-								if (i == 0) memcpy(ty, tx, sizeof(scalar) * np);
-								else vec_x_vec_p_vec(np, ty, y, tx);
-							}
-
-							if (k == 0) memcpy(result, ty, sizeof(scalar) * np);
-							else vec_x_vec_p_vec(np, result, z, ty);
-						}
-						break;
-				}
-			}
-		}
+	for(int c = 0; c < 3; c++) {
+	  node->values[c][DX][i] = (*m)[c][0] * vhx[0] + (*m)[c][1] * vhx[1] + (*m)[c][2] * vhx[2];
+	  node->values[c][DY][i] = (*m)[c][0] * vhy[0] + (*m)[c][1] * vhy[1] + (*m)[c][2] * vhy[2];
+	  node->values[c][DZ][i] = (*m)[c][0] * vhz[0] + (*m)[c][1] * vhz[1] + (*m)[c][2] * vhz[2];
 	}
+      }
+    }
 
-	// transform gradient or vector solution, if required
-	if (transform) {
-		bool trans1 = false, trans2 = false;
-		scalar *tab1, *tab2, *tab3;
-		scalar *tabx[3], *taby[3], *tabz[3];
-		if (num_components == 1 && (newmask & GRAD) == GRAD) { // && (oldmask & GRAD) != GRAD) {
-			trans1 = true;
-			tab1 = node->values[0][DX];
-			tab2 = node->values[0][DY];
-			tab3 = node->values[0][DZ];
-		}
-		else if (num_components == 3 && (newmask & FN_VAL) == FN_VAL) { // && (oldmask & FN_VAL) != FN_VAL) {
-			trans1 = true;
-			tab1 = node->values[0][FN];
-			tab2 = node->values[1][FN];
-			tab3 = node->values[2][FN];
-		}
-
-		if (num_components == 3 && (newmask & CURL) == CURL) { // && (oldmask & CURL) != CURL) {
-			trans2 = true;
-			for (int i = 0; i < 3; i++) {
-				tabx[i] = node->values[i][DX];
-				taby[i] = node->values[i][DY];
-				tabz[i] = node->values[i][DZ];
-			}
-		}
-
-		double3x3 *mat = NULL, *m;
-		if (trans1 || trans2)
-			mat = refmap->get_inv_ref_map(np, pt);
-
-		// transformation of derivatives in H1 or transformation of values in Hcurl
-		int i;
-		if (trans1) {
-			for (i = 0, m = mat; i < np; i++, m++) {
-				scalar vx = tab1[i], vy = tab2[i], vz = tab3[i];
-				tab1[i] = (*m)[0][0]*vx + (*m)[0][1]*vy + (*m)[0][2]*vz;
-				tab2[i] = (*m)[1][0]*vx + (*m)[1][1]*vy + (*m)[1][2]*vz;
-				tab3[i] = (*m)[2][0]*vx + (*m)[2][1]*vy + (*m)[2][2]*vz;
-			}
-		}
-		// transformation of derivatives in Hcurl
-		if (trans2) {
-			for (i = 0, m = mat; i < np; i++, m++) {
-				scalar vhx[3], vhy[3], vhz[3];
-				for(int c = 0; c < 3; c++) {
-					vhx[c] = (*m)[0][0] * tabx[c][i] + (*m)[0][1] * taby[c][i] + (*m)[0][2] * tabz[c][i];
-					vhy[c] = (*m)[1][0] * tabx[c][i] + (*m)[1][1] * taby[c][i] + (*m)[1][2] * tabz[c][i];
-					vhz[c] = (*m)[2][0] * tabx[c][i] + (*m)[2][1] * taby[c][i] + (*m)[2][2] * tabz[c][i];
-				}
-
-				for(int c = 0; c < 3; c++) {
-					node->values[c][DX][i] = (*m)[c][0] * vhx[0] + (*m)[c][1] * vhx[1] + (*m)[c][2] * vhx[2];
-					node->values[c][DY][i] = (*m)[c][0] * vhy[0] + (*m)[c][1] * vhy[1] + (*m)[c][2] * vhy[2];
-					node->values[c][DZ][i] = (*m)[c][0] * vhz[0] + (*m)[c][1] * vhz[1] + (*m)[c][2] * vhz[2];
-				}
-			}
-		}
-
-		delete [] mat;
-	}
+    delete [] mat;
+  }
 
   delete [] x;
   delete [] y;
   delete [] z;
   delete [] tx;
   delete [] ty;
-	replace_cur_node(node);
+  replace_cur_node(node);
 }
 
-void Solution::precalculate_exact(const int np, const QuadPt3D *pt, int mask) {
-	_F_
+void Solution::precalculate_exact(const int np, const QuadPt3D *pt, int mask) 
+{
+  _F_
 
-	mask = FN_DEFAULT;
-	Node *node = new_node(mask, np);
+  mask = FN_DEFAULT;
+  Node *node = new_node(mask, np);
 
-	// transform points from ref. domain to physical one
-	double *x = refmap->get_phys_x(np, pt);
-	double *y = refmap->get_phys_y(np, pt);
-	double *z = refmap->get_phys_z(np, pt);
+  // transform points from ref. domain to physical one
+  double *x = refmap->get_phys_x(np, pt);
+  double *y = refmap->get_phys_y(np, pt);
+  double *z = refmap->get_phys_z(np, pt);
 
-	// evaluate the exact solution
-	if (num_components == 1) {
-		if (transform) {
-			for (int i = 0; i < np; i++) {
-				scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
-				val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
-				node->values[0][FN][i] = val;
-				node->values[0][DX][i] = dx;
-				node->values[0][DY][i] = dy;
-				node->values[0][DZ][i] = dz;
-			}
-		}
-		else {
-			// untransform values
-			double3x3 *mat = NULL, *m;
-			mat = refmap->get_ref_map(np, pt);
+  // evaluate the exact solution
+  if (num_components == 1) {
+    if (transform) {
+       for (int i = 0; i < np; i++) {
+	 scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
+	 val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
+	 node->values[0][FN][i] = val;
+	 node->values[0][DX][i] = dx;
+	 node->values[0][DY][i] = dy;
+	 node->values[0][DZ][i] = dz;
+       }
+     }
+     else {
+       // untransform values
+       double3x3 *mat = NULL, *m;
+       mat = refmap->get_ref_map(np, pt);
 
-			int i;
-			for (i = 0, m = mat; i < np; i++, m++) {
-				scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
-				val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
+       int i;
+       for (i = 0, m = mat; i < np; i++, m++) {
+         scalar val, dx = 0.0, dy = 0.0, dz = 0.0;
+         val = exact_fn(x[i], y[i], z[i], dx, dy, dz);
 
-				node->values[0][FN][i] = val;
-				node->values[0][DX][i] = ((*m)[0][0]*dx + (*m)[0][1]*dy + (*m)[0][2]*dz);
-				node->values[0][DY][i] = ((*m)[1][0]*dx + (*m)[1][1]*dy + (*m)[1][2]*dz);
-				node->values[0][DZ][i] = ((*m)[2][0]*dx + (*m)[2][1]*dy + (*m)[2][2]*dz);
-			}
+         node->values[0][FN][i] = val;
+         node->values[0][DX][i] = ((*m)[0][0]*dx + (*m)[0][1]*dy + (*m)[0][2]*dz);
+         node->values[0][DY][i] = ((*m)[1][0]*dx + (*m)[1][1]*dy + (*m)[1][2]*dz);
+         node->values[0][DZ][i] = ((*m)[2][0]*dx + (*m)[2][1]*dy + (*m)[2][2]*dz);
+       }
 
-			delete [] mat;
-		}
-	}
-	else if (num_components == 3) {
-		// TODO: untransform Hcurl and vector-valued functions
-		assert(transform == true);
-		for (int i = 0; i < np; i++) {
-			scalar3  dx = { 0.0, 0.0, 0.0 };
-			scalar3  dy = { 0.0, 0.0, 0.0 };
-			scalar3  dz = { 0.0, 0.0, 0.0 };
-			scalar3 &fn = exact_vec_fn(x[i], y[i], z[i], dx, dy, dz);
-			for (int j = 0; j < num_components; j++) {
-				node->values[j][FN][i] = fn[j];
-				node->values[j][DX][i] = dx[j];
-				node->values[j][DY][i] = dy[j];
-				node->values[j][DZ][i] = dz[j];
-			}
-		}
-	}
-	else
-		EXIT("Invalid number of components.");
+       delete [] mat;
+     }
+   }
+   else if (num_components == 3) {
+     // TODO: untransform Hcurl and vector-valued functions
+     assert(transform == true);
+     for (int i = 0; i < np; i++) {
+       scalar3  dx = { 0.0, 0.0, 0.0 };
+       scalar3  dy = { 0.0, 0.0, 0.0 };
+       scalar3  dz = { 0.0, 0.0, 0.0 };
+       scalar3 &fn = exact_vec_fn(x[i], y[i], z[i], dx, dy, dz);
+       for (int j = 0; j < num_components; j++) {
+	 node->values[j][FN][i] = fn[j];
+	 node->values[j][DX][i] = dx[j];
+	 node->values[j][DY][i] = dy[j];
+	 node->values[j][DZ][i] = dz[j];
+       }
+     }
+   }
+   else
+   EXIT("Invalid number of components.");
 
-	replace_cur_node(node);
+   replace_cur_node(node);
 
-	delete [] x;
-	delete [] y;
-	delete [] z;
+   delete [] x;
+   delete [] y;
+   delete [] z;
 }
 
-void Solution::precalculate_const(const int np, const QuadPt3D *pt, int mask) {
-	_F_
-	mask = FN_DEFAULT;
-	Node *node = new_node(mask, np);
+void Solution::precalculate_const(const int np, const QuadPt3D *pt, int mask) 
+{
+  _F_
+  mask = FN_DEFAULT;
+  Node *node = new_node(mask, np);
 
-	assert(num_components == 1 || num_components == 3);
-	for (int i = 0; i < np; i++) {
-		for (int j = 0; j < num_components; j++) {
-			node->values[j][FN][i] = cnst[j];
-			node->values[j][DX][i] = 0.0;
-			node->values[j][DY][i] = 0.0;
-			node->values[j][DZ][i] = 0.0;
-		}
-	}
+  assert(num_components == 1 || num_components == 3);
+  for (int i = 0; i < np; i++) {
+    for (int j = 0; j < num_components; j++) {
+      node->values[j][FN][i] = cnst[j];
+      node->values[j][DX][i] = 0.0;
+      node->values[j][DY][i] = 0.0;
+      node->values[j][DZ][i] = 0.0;
+    }
+  }
 
-	replace_cur_node(node);
+  replace_cur_node(node);
 }
 
-void Solution::enable_transform(bool enable) {
-	_F_
-	transform = enable;
+void Solution::enable_transform(bool enable) 
+{
+  _F_
+  transform = enable;
 }
 
 Ord3 Solution::get_order()
 {
-	_F_
-	switch (element->get_mode()) {
-		case HERMES_MODE_HEX:
-			switch (type) {
-				case HERMES_SLN: return elem_orders[element->id];
-				case HERMES_EXACT: return Ord3(10, 10, 10);
-                                case HERMES_CONST: return Ord3(0, 0, 0);
+  _F_
+  switch (element->get_mode()) {
+    case HERMES_MODE_HEX:
+      switch (type) {
+	case HERMES_SLN: return elem_orders[element->id];
+	case HERMES_EXACT: return Ord3(10, 10, 10);
+        case HERMES_CONST: return Ord3(0, 0, 0);
+	default: EXIT("Internal error in Solution::get_order() - A.");
+      }
+      break;
 
-				default: EXIT("WTF?");
-			}
-			break;
+    case HERMES_MODE_TET:
+      switch (type) {
+	case HERMES_SLN: return elem_orders[element->id];
+	case HERMES_EXACT: return Ord3(10);
+        case HERMES_CONST: return Ord3(0);
+	default: EXIT("Internal error in Solution::get_order() - A.");
+      }
+      break;
 
-		case HERMES_MODE_TET:
-			switch (type) {
-				case HERMES_SLN: return elem_orders[element->id];
-				case HERMES_EXACT: return Ord3(10);
-                                case HERMES_CONST: return Ord3(0);
-				default: EXIT("WTF?");
-			}
-			break;
+    default: EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+    break;
+  }
 
-		default:
-			EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-			break;
-	}
-
-	return Ord3(0);
+  return Ord3(0);
 }

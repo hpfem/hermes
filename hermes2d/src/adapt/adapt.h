@@ -30,19 +30,15 @@
 /** \defgroup g_adapt Adaptivity
  *  \brief Adaptivity provides framework for modyfying elements in order to decrease errors of the solution.
  *
- *  Adaptivity classes calculates error of every element.
- *  An error of an element is calculated by comparing an
- *  coarse solution with a reference solution. Errors of
- *  elements defines an order in which elements are examined.
+ *  Adaptivity classes calculate error of every element.
+ *  An error of an element is calculated either by comparing a
+ *  coarse solution with a reference solution or by evaluating
+ *  suitable error estimate. Errors of
+ *  elements define the order in which elements are examined.
  *  During examining an element, a refinement is proposed
  *  and the element is refined if applicable. The refinement
  *  is proposed through refinement selectors, see \ref g_selectors.
  *
- *  All adaptivity classes have to be derived from the class Adapt.
- *  Currently available classes are:
- *  - H1Adapt
- *  - L2Adapt
- *    \if H2D_COMPLEX # -HcurlAdapt \endif
  */
 
 #define H2D_MAX_COMPONENTS 10 ///< A maximum number of components.
@@ -72,6 +68,7 @@
                                           ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
 
 ///< Structure to hold adaptivity parameters together.
+//NOTE: Seem to be unused in current version of Hermes.
 struct AdaptivityParamType {
   double err_stop;
   int ndof_stop;
@@ -109,7 +106,7 @@ struct AdaptivityParamType {
 
   void set_error_form(int i, int j, error_matrix_form_val_t mfv, error_matrix_form_ord_t mfo)
   {
-    if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::add_error_form().");
+    if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::set_error_form().");
     this->error_form_i.push_back(i);
     this->error_form_j.push_back(j);
     this->error_form_val.push_back(mfv);
@@ -117,11 +114,10 @@ struct AdaptivityParamType {
   }
 };
 
-/// Evaluation of an error between a (coarse) solution and a refernece solution and adaptivity. \ingroup g_adapt
+/// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity. \ingroup g_adapt
 /** The class provides basic functionality necessary to adaptively refine elements.
  *  Given a reference solution and a coarse solution, it calculates error estimates
  *  and it acts as a container for the calculated errors.
- *  The class has to be inherited in order to be used.
  */
 class HERMES_API Adapt
 {
@@ -282,7 +278,7 @@ protected: //object state
 
 protected: // spaces & solutions
   int num;                              ///< Number of solution components (as in wf->neq).
-  Hermes::vector<Space*> spaces;                 ///< Spaces.
+  Hermes::vector<Space*> spaces;        ///< Spaces.
   Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
   Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
 
@@ -291,9 +287,12 @@ protected: // element error arrays
                                       ///< method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
   double  errors_squared_sum;         ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
 
-  double error_time;			// time needed to calculate error
+  double error_time;                  ///< Time needed to calculate the error.
 
 protected: //forms and error evaluation
+  static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal
+  static const unsigned char HERMES_ELEMENT_ERROR_MASK = 0xF0;  ///< A mask which masks-out element error type. Used by Adapt::calc_err_internal(). \internal
+
   error_matrix_form_val_t error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
   error_matrix_form_ord_t error_ord[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS];  ///< Bilinear forms to calculate error
 

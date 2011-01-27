@@ -12,7 +12,7 @@ const int INIT_GLOB_REF_NUM = 4;                  // Number of initial uniform m
 const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 10.0;                      // Time interval length.
+const double T_FINAL = 1.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
@@ -263,26 +263,26 @@ int main(int argc, char* argv[])
   int success = 1;
   double eps = 1e-5;
   if (fabs(T_prev_time.get_pt_value(0.0, 0.0) - 0.000000) > eps) {
-    info("Coordinate (  0,  0) T value = %lf\n", T_prev_time.get_pt_value(0.0, 0.0));
+    printf("Coordinate (  0,  0) T value = %lf\n", T_prev_time.get_pt_value(0.0, 0.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(25.0, 25.0) - 1.024859) > eps) {
+  if (fabs(T_prev_time.get_pt_value(25.0, 25.0) - 0.915885) > eps) {
     printf("Coordinate ( 25, 25) T value = %lf\n", T_prev_time.get_pt_value(25.0, 25.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(75.0, 25.0) - 1.024859) > eps) {
+  if (fabs(T_prev_time.get_pt_value(75.0, 25.0) - 0.915885) > eps) {
     printf("Coordinate ( 75, 25) T value = %lf\n", T_prev_time.get_pt_value(75.0, 25.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(25.0, 75.0) - 1.024859) > eps) {
+  if (fabs(T_prev_time.get_pt_value(25.0, 75.0) - 0.915885) > eps) {
     printf("Coordinate ( 25, 75) T value = %lf\n", T_prev_time.get_pt_value(25.0, 75.0));
     success = 0;
   }
 
-  if (fabs(T_prev_time.get_pt_value(75.0, 75.0) - 1.024859) > eps) {
+  if (fabs(T_prev_time.get_pt_value(75.0, 75.0) - 0.915885) > eps) {
     printf("Coordinate ( 75, 75) T value = %lf\n", T_prev_time.get_pt_value(75.0, 75.0));
     success = 0;
   }
@@ -292,22 +292,22 @@ int main(int argc, char* argv[])
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(25.0, 25.0) - 0.411794) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(25.0, 25.0) - 0.071349) > eps) {
     printf("Coordinate ( 25, 25) phi value = %lf\n", phi_prev_time.get_pt_value(25.0, 25.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(75.0, 25.0) - 1.235474) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(75.0, 25.0) - 0.214063) > eps) {
     printf("Coordinate ( 75, 25) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 25.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(25.0, 75.0) - 1.235474) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(25.0, 75.0) - 0.214063) > eps) {
     printf("Coordinate ( 25, 75) phi value = %lf\n", phi_prev_time.get_pt_value(25.0, 75.0));
     success = 0;
   }
 
-  if (fabs(phi_prev_time.get_pt_value(75.0, 75.0) - 3.706641) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(75.0, 75.0) - 0.642226) > eps) {
     printf("Coordinate ( 75, 75) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 75.0));
     success = 0;
   }

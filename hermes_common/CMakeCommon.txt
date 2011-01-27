@@ -43,9 +43,10 @@ IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND H
 ENDIF()
 
 
-# Tests
-add_custom_target(test COMMAND ctest)
-add_custom_target(test-quick COMMAND ctest -LE slow -j9)
+# FIXME: Tests are disabled for now, as they would clash with different
+# hermeses:
+#add_custom_target(test COMMAND ctest)
+#add_custom_target(test-quick COMMAND ctest -LE slow -j9)
 
 # Teuchos RCP
 SET(TEUCHOS_SOURCES

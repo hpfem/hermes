@@ -20,10 +20,10 @@
 #include "../function/solution.h"
 
 
-const double HERMES_EPS_LOW      = 0.0014;
-const double HERMES_EPS_NORMAL   = 0.0008;
-const double HERMES_EPS_HIGH     = 0.0003;
-const double HERMES_EPS_VERYHIGH = 0.00005;
+const double HERMES_EPS_LOW      = 0.007;
+const double HERMES_EPS_NORMAL   = 0.0004;
+const double HERMES_EPS_HIGH     = 0.0001;
+const double HERMES_EPS_VERYHIGH = 0.000002;
 
 /// Linearizer is a utility class which converts a higher-order FEM solution defined on
 /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,

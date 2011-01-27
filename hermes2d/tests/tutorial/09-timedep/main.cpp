@@ -1,68 +1,57 @@
-#define HERMES_REPORT_INFO
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
+#include "runge_kutta.h"
 
 // This test makes sure that example 09-timedep works correctly.
-// CAUTION: This test will fail when any changes to the shapeset
-// are made, but it is easy to fix (see below).
 
-const int P_INIT = 3;                             // initial polynomial degree in elements
-const int INIT_REF_NUM = 0;                       // number of initial uniform refinements
-const double TAU = 200.0;                         // time step in seconds
+
+const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
+const double time_step = 3e+2;                    // Time step in seconds.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Problem constants
-const double T_INIT = 10;                         // temperature of the ground (also initial temperature)
-const double ALPHA = 10;                          // heat flux coefficient for Newton's boundary condition
-const double LAMBDA = 1e5;                        // thermal conductivity of the material
-const double HEATCAP = 1e6;                       // heat capacity
-const double RHO = 3000;                          // material density
-const double FINAL_TIME = 2100;                   // length of time interval (24 hours) in seconds
+// Time integration. Choose one of the following methods, or define your own Butcher's table:
+// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SDIRK_2_2, 
+// Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4,
+// Implicit_Lobatto_IIIA_3_4, Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5. 
 
-// Global variable.
-double TIME = 0;
-
-// Time-dependent exterior temperature.
-double temp_ext(double t) {
-  return T_INIT + 10. * sin(2*M_PI*t/FINAL_TIME);
-}
+ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Boundary markers.
-const int BDY_GROUND = 1, BDY_AIR = 2;
+const std::string BDY_GROUND = "Boundary ground";
+const std::string BDY_AIR = "Boundary air";
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return HEATCAP * RHO * int_u_v<Real, Scalar>(n, wt, u, v) / TAU +
-         LAMBDA * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+// Problem parameters.
+const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
+const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e5;         // Thermal conductivity of the material.
+const double HEATCAP = 1e6;        // Heat capacity.
+const double RHO = 3000;           // Material density.
+const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
+
+// Time-dependent exterior temperature.
+template<typename Real>
+Real temp_ext(Real t) {
+  return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
 }
 
-template<typename Real, typename Scalar>
-Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return HEATCAP * RHO * int_u_v<Real, Scalar>(n, wt, ext->fn[0], v) / TAU;
-}
+// Heat sources (can be a general function of 'x' and 'y').
+template<typename Real>
+Real heat_src(Real x, Real y) { return 0.0;}
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return LAMBDA * ALPHA * int_u_v<Real, Scalar>(n, wt, u, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return LAMBDA * ALPHA * temp_ext(TIME) * int_v<Real, Scalar>(n, wt, v);
-}
-
+// Weak forms.
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Choose a Butcher's table or define your own.
+  ButcherTable bt(butcher_table_type);
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -70,78 +59,77 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(2, 5);
+  mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_GROUND);
+  bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND));
   bc_types.add_bc_newton(BDY_AIR);
 
   // Enter Dirichlet boundary values.
   BCValues bc_values;
-  bc_values.add_const(BDY_GROUND, T_INIT);
+  bc_values.add_const(BDY_GROUND, TEMP_INIT);
 
   // Initialize an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  
-  // Initialize the solution.
-  Solution tsln;
-
-  // Set the initial condition.
-  tsln.set_const(&mesh, T_INIT);
+  // Previous time level solution (initialized by the external temperature).
+  Solution u_prev_time(&mesh, TEMP_INIT);
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+  wf.add_matrix_form(callback(stac_jacobian));
+  wf.add_vector_form(callback(stac_residual));
+  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_AIR);
+  wf.add_vector_form_surf(callback(linear_form_surf), BDY_AIR);
+
+  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
+  info("Projecting initial condition to translate initial condition into a vector.");
+  scalar* coeff_vec = new scalar[ndof];
+  OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
-  bool is_linear = true;
+  bool is_linear = false;
   DiscreteProblem dp(&wf, &space, is_linear);
 
-  // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-  // Time stepping:
-  int nsteps = (int)(FINAL_TIME/TAU + 0.5);
-  bool rhs_only = false;
-  for(int ts = 1; ts <= nsteps; ts++)
+  // Time stepping loop:
+  double current_time = 0.0; int ts = 1;
+  do 
   {
-    info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
+    // Perform one Runge-Kutta time step according to the selected Butcher's table.
+    info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
+         current_time, time_step, bt.get_size());
+    bool verbose = true;
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+		      verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
+      error("Runge-Kutta time step failed, try to decrease time step size.");
+    }
 
-    // First time assemble both the stiffness matrix and right-hand side vector,
-    // then just the right-hand side vector.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
-    dp.assemble(matrix, rhs, rhs_only);
-    rhs_only = true;
+    // Convert coeff_vec into a new time level solution.
+    Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
-    // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
-    else 
-      error ("Matrix solver failed.\n");
+    // Update time.
+    current_time += time_step;
 
-    // Update the time variable.
-    TIME += TAU;
-  }
+    // Increase counter of time steps.
+    ts++;
+  } 
+  while (current_time < time_step*5);
 
   double sum = 0;
-  for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
-  printf("coefficient sum = %g\n", sum);
+  for (int i = 0; i < ndof; i++) 
+    sum += coeff_vec[i];
 
-  // Actual test. The value of 'sum' depend on the
-  // current shapeset. If you change the shapeset,
-  // you need to correct this number.
+  printf("sum = %g\n", sum);
+
   int success = 1;
-  if (fabs(sum - 4737.73) > 1e-1) success = 0;
+  if (fabs(sum - 3617.55) > 1e-1) success = 0;
+
+  // Cleanup.
+  delete [] coeff_vec;
 
   if (success == 1) {
     printf("Success!\n");

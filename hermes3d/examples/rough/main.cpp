@@ -158,72 +158,73 @@ int main(int argc, char **args)
 
 	columnList myCols ;
 	bool further =true ;
-	for(int iter=0 ; iter < 7 && further == true ; iter++)
+	for(int iter = 0 ; iter < 7 && further == true ; iter++)
 	{
 		std::cout << "Performing Refinement Level: " << iter << std::endl ;
 		further = false ;
-		for ( unsigned int idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
-		if ( mesh.elements[idx]->used) if (mesh.elements[idx]->active)
-		{
-			std::vector<unsigned int> vtcs(mesh.elements[idx]->get_num_vertices()) ;
-			//unsigned int vtcs[mesh.elements[idx]->get_num_vertices()] ;
-			mesh.elements[idx]->get_vertices(&vtcs[0]) ;
-			//mesh.vertices[vtcs[0]]->dump() ;
-			double minX=+std::numeric_limits<double>::max() ;
-			double maxX=-std::numeric_limits<double>::max() ; 
-			double minY=+std::numeric_limits<double>::max() ;
-			double maxY=-std::numeric_limits<double>::max() ; 
-			double minZ=+std::numeric_limits<double>::max() ;
-			double maxZ=-std::numeric_limits<double>::max() ; 
+	  for(std::map<unsigned int, Element*>::iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++)
+      if ( it->second->used)
+        if (it->second->active)
+		    {
+          std::vector<unsigned int> vtcs(it->second->get_num_vertices()) ;
+			    //unsigned int vtcs[mesh.elements[idx]->get_num_vertices()] ;
+			    it->second->get_vertices(&vtcs[0]) ;
+			    //mesh.vertices[vtcs[0]]->dump() ;
+			    double minX=+std::numeric_limits<double>::max() ;
+			    double maxX=-std::numeric_limits<double>::max() ; 
+			    double minY=+std::numeric_limits<double>::max() ;
+			    double maxY=-std::numeric_limits<double>::max() ; 
+			    double minZ=+std::numeric_limits<double>::max() ;
+			    double maxZ=-std::numeric_limits<double>::max() ; 
 
-			for( int i=0 ; i<vtcs.size() ; i++)
-			{
-				double x = mesh.vertices[vtcs[i]]->x ;
-				double y = mesh.vertices[vtcs[i]]->y ;
-				if(minX > x) minX = x ;
-				if(maxX < x) maxX = x ;      
-				if(minY > y) minY = y ;
-				if(maxY < y) maxY = y ;
-			}
+			    for( int i=0 ; i<vtcs.size() ; i++)
+			    {
+				    double x = mesh.vertices[vtcs[i]]->x ;
+				    double y = mesh.vertices[vtcs[i]]->y ;
+				    if(minX > x) minX = x ;
+				    if(maxX < x) maxX = x ;      
+				    if(minY > y) minY = y ;
+				    if(maxY < y) maxY = y ;
+			    }
 
-			double sX = 0.05e-6;
-			double sY = 0.05e-6;
-			double deltaX = (maxX-minX) ;
-			double deltaY = (maxY-minY) ;
-			int nX = (int)floor(deltaX/sX) ;
-			int nY = (int)floor(deltaY/sY) ;
-			for( int u=0 ; u<=nX ; u++) for( int v=0 ; v<nY ; v++)
-			{
-				double x = minX + u*sX ;
-				double y = minY + v*sY ;
-				double z = r1.interpolate(x, y) ;
-				if(minZ > z) minZ = z ;
-				if(maxZ < z) maxZ = z ;
-			}
-			myCols[corner(minX,minY)].elements.insert(idx) ;
-			myCols[corner(minX,minY)].lo = minZ ;
-			myCols[corner(minX,minY)].hi = maxZ ;
+			    double sX = 0.05e-6;
+			    double sY = 0.05e-6;
+			    double deltaX = (maxX-minX) ;
+			    double deltaY = (maxY-minY) ;
+			    int nX = (int)floor(deltaX/sX) ;
+			    int nY = (int)floor(deltaY/sY) ;
+			    for( int u=0 ; u<=nX ; u++) for( int v=0 ; v<nY ; v++)
+			    {
+				    double x = minX + u*sX ;
+				    double y = minY + v*sY ;
+				    double z = r1.interpolate(x, y) ;
+				    if(minZ > z) minZ = z ;
+				    if(maxZ < z) maxZ = z ;
+			    }
+          myCols[corner(minX,minY)].elements.insert(it->first) ;
+			    myCols[corner(minX,minY)].lo = minZ ;
+			    myCols[corner(minX,minY)].hi = maxZ ;
 
-			double deltaZ = std::abs(maxZ - minZ) ;
-			if( deltaZ > 2.e-6)
-			{
-				//std::cout << "\n Iter., element, A.R., deltaZ: " << iter << " " << idx << " " << 2.*3.e-6/deltaX << " " << deltaZ ;
-				if(mesh.can_refine_element(idx, H3D_H3D_REFT_HEX_XY)) mesh.refine_element(idx, H3D_H3D_REFT_HEX_XY) ;
-				further = true ;
-			}
-			//mesh.elements[idx]->dump() ;
-		}  
+			    double deltaZ = std::abs(maxZ - minZ) ;
+			    if( deltaZ > 2.e-6)
+			    {
+				    //std::cout << "\n Iter., element, A.R., deltaZ: " << iter << " " << idx << " " << 2.*3.e-6/deltaX << " " << deltaZ ;
+            if(mesh.can_refine_element(it->first, H3D_H3D_REFT_HEX_XY)) mesh.refine_element(it->first, H3D_H3D_REFT_HEX_XY) ;
+				    further = true ;
+			    }
+			    //mesh.elements[idx]->dump() ;
+		    }  
 	}
 
 
-	for ( unsigned int idx = mesh.vertices.first(), _max = mesh.vertices.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.vertices.next(idx) )
-		if( std::abs(mesh.vertices[idx]->z - 0.) < 1e-32 ) mesh.vertices[idx]->z = r1.interpolate(mesh.vertices[idx]->x,mesh.vertices[idx]->y) ;	
+	for(std::map<unsigned int, Vertex*>::iterator it = mesh.vertices.begin(); it != mesh.vertices.end(); it++)
+    if( std::abs(mesh.vertices[it->first]->z - 0.) < 1e-32 ) mesh.vertices[it->first]->z = r1.interpolate(mesh.vertices[it->first]->x,mesh.vertices[it->first]->y) ;	
 
-	for ( unsigned int idx = mesh.elements.first(), _max = mesh.elements.count(); idx <= _max && idx != INVALID_IDX; idx = mesh.elements.next(idx) )
-		if ( mesh.elements[idx]->used) if (mesh.elements[idx]->active)
+	for(std::map<unsigned int, Element*>::iterator it = mesh.elements.begin(); it != mesh.elements.end(); it++)
+		if ( mesh.elements[it->first]->used) if (mesh.elements[it->first]->active)
 		{
-			std::vector<unsigned int> vtcs(mesh.elements[idx]->get_num_vertices()) ;
-			mesh.elements[idx]->get_vertices(&vtcs[0]) ;
+			std::vector<unsigned int> vtcs(mesh.elements[it->first]->get_num_vertices()) ;
+			mesh.elements[it->first]->get_vertices(&vtcs[0]) ;
 			double minZ=+std::numeric_limits<double>::max() ;
 			double maxZ=-std::numeric_limits<double>::max() ;
 			double deltaZ=-std::numeric_limits<double>::max() ;
@@ -237,11 +238,7 @@ int main(int argc, char **args)
 			}
 			//std::cout << std::endl ;
 			if(deltaZ > 4e-6)
-			{
-				if( mesh.can_refine_element(idx, H3D_REFT_HEX_Z) ) mesh.refine_element(idx, H3D_REFT_HEX_Z) ;
-				//else if( mesh.can_refine_element(idx, H3D_H3D_H3D_REFT_HEX_XYZ) ) mesh.refine_element(idx, H3D_H3D_H3D_REFT_HEX_XYZ) ;
-				//mesh.refine_element(idx, H3D_H3D_H3D_REFT_HEX_XYZ) ;
-			}
+				if( mesh.can_refine_element(it->first, H3D_REFT_HEX_Z) ) mesh.refine_element(it->first, H3D_REFT_HEX_Z) ;
 		}
 
 	out_mesh_vtk(&mesh, "mesh");

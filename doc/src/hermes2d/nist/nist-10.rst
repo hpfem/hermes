@@ -1,4 +1,4 @@
-NIST-10 (Elliptic)
+NIST-10 (Interior Line Singularity)
 ------------------
 
 **Git reference:** Benchmark `nist-10 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-10>`_.

@@ -53,7 +53,7 @@ const double kappa  = 1.0;
 const double lambda = 1.0;
 const double OMEGA = 2*3.14*1000;
 const double SIGMA = 57*10^6;
-const double J[3] = {1e+7 *  1 / sqrt(2), 0, 1e+7 *   1/ sqrt(2)};
+const double J[3] = {1e+7 *  1 / sqrt((double)2), 0, 1e+7 *   1/ sqrt((double)2)};
 //const double J[3] = {1e+7 *  z / sqrt(x^2 + z^2), 0, 1e+7 *  z / sqrt(x^2 + z^2)};
 
 

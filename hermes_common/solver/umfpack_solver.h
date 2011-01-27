@@ -23,11 +23,14 @@
 #include "solver.h"
 #include "../matrix.h"
 
-class HERMES_API UMFPackMatrix : public SparseMatrix {
+
+// General CSC Matrix class (can be used in umfpack, in that case use the
+// UMFPackMatrix subclass, or with EigenSolver, or anything else)
+class HERMES_API CSCMatrix : public SparseMatrix {
 public:
-  UMFPackMatrix();
-  UMFPackMatrix(int size);
-  virtual ~UMFPackMatrix();
+  CSCMatrix();
+  CSCMatrix(int size);
+  virtual ~CSCMatrix();
 
   virtual void alloc();
   virtual void free();
@@ -36,11 +39,11 @@ public:
   virtual void add(int m, int n, scalar v);
   virtual void add_to_diagonal(scalar v);
   // TODO: implement this for other matrix types.
-  virtual void add_matrix(UMFPackMatrix* mat);
+  virtual void add_matrix(CSCMatrix* mat);
   // TODO: implement this for other matrix types.
-  virtual void add_to_diagonal_blocks(int num_stages, UMFPackMatrix* mat);
+  virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix* mat);
   // TODO: implement this for other matrix types.
-  virtual void add_as_block(int i, int j, UMFPackMatrix* mat);
+  virtual void add_as_block(int i, int j, CSCMatrix* mat);
   virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual int get_matrix_size() const;
@@ -69,6 +72,10 @@ protected:
   int *Ap;      // Index to Ax/Ai, where each column starts.
   int nnz;      // Number of non-zero entries (= Ap[size]).
 
+};
+
+// This class is to be used with UMFPack solver only:
+class HERMES_API UMFPackMatrix : public CSCMatrix {
   friend class UMFPackLinearSolver;
 };
 
@@ -135,7 +142,7 @@ protected:
 
 class UMFPackIterator {
 public:
-  UMFPackIterator(UMFPackMatrix* mat) 
+  UMFPackIterator(CSCMatrix* mat) 
   {
     this->size = mat->get_size();
     this->nnz = mat->get_nnz();

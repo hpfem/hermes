@@ -1,4 +1,4 @@
-project(schroedinger-eigen)
+project(h3d-schroedinger-eigen)
 add_executable(${PROJECT_NAME} main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)

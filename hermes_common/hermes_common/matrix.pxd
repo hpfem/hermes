@@ -1,5 +1,5 @@
 from cpp.matrix cimport (Matrix as cMatrix,
-        SparseMatrix as cSparseMatrix, UMFPackMatrix as cUMFPackMatrix,
+        SparseMatrix as cSparseMatrix, CSCMatrix as cCSCMatrix,
         UMFPackVector as cUMFPackVector, Vector as cVector)
 
 cdef class Matrix:
@@ -13,7 +13,7 @@ cdef class SparseMatrix(Matrix):
 
 cdef class CSCMatrix(SparseMatrix):
 
-    cdef cUMFPackMatrix* as_UMFPackMatrix(self)
+    cdef cCSCMatrix* as_CSCMatrix(self)
 
 cdef class Vector:
     cdef cVector *thisptr

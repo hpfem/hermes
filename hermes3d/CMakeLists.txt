@@ -1,4 +1,3 @@
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/../hermes_common/cmake/cxx_flag_overrides.cmake) # this is in H2D
 project(hermes3d)
 
 cmake_minimum_required(VERSION 2.6)
@@ -220,6 +219,13 @@ include_directories(${HERMES_COMMON_DIR})
 
 include(../hermes_common/CMakeCommon.txt)
 
+# We require Python for the mesh parser (it also needs NumPy)
+find_package(Python REQUIRED)
+find_package(NumPy REQUIRED)
+include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+set(PYTHON_INSTALL_PATH lib/python/site-packages)
+
+
 #
 add_subdirectory(src)
 if(WITH_TESTS)
@@ -240,7 +246,7 @@ endif(WITH_PYTHON)
 
 
 # examples
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+add_subdirectory(examples)
 add_custom_target(examples)
 add_custom_command(
 	TARGET    examples
@@ -248,7 +254,7 @@ add_custom_command(
 )
 
 # benchmarks
-add_subdirectory(benchmarks EXCLUDE_FROM_ALL)
+add_subdirectory(benchmarks)
 add_custom_target(benchmarks)
 add_custom_command(
 	TARGET    benchmarks

@@ -3,12 +3,14 @@
 #include "hermes2d.h"
 #include "runge_kutta.h"
 
-//  This example shows how to solve a time-dependent PDE discretized
-//  in time via the implicit Euler method. The St. Vitus Cathedral
-//  in Prague (http://en.wikipedia.org/wiki/St._Vitus_Cathedral)
-//  responds to changes in the surrounding air temperature
-//  during one 24-hour cycle. You will also learn how to use the
-//  solution calculated in the previous time step.
+//  This example shows how to solve a time-dependent PDE. The model describes 
+//  how the St. Vitus Cathedral in Prague (http://en.wikipedia.org/wiki/St._Vitus_Cathedral)
+//  responds to changes in the surrounding air temperature during one 24-hour 
+//  cycle. Many different Runge-Kutta methods, represented in terms of Butcher's tables,  
+//  can be used for time integration. Some of them can be found on the Wikipedia 
+//  page http://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods. If you 
+//  know about some R-K method that is missing in our predefined tables, please 
+//  let us know!
 //
 //  PDE: non-stationary heat transfer equation
 //  HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
@@ -19,7 +21,7 @@
 //  BC:  T = TEMP_INIT on the bottom edge ... Dirichlet,
 //       dT/dn = ALPHA*(t_exterior(time) - T) ... Newton, time-dependent.
 //
-//  Time-stepping: implicit Euler.
+//  Time-stepping: various Runge-Kutta methods.
 //
 //  The following parameters can be changed:
 
@@ -32,12 +34,13 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Time integration. Choose one of the following methods, or define your own Butcher's table:
-// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2, Implicit_SDIRK_2, 
-// Implicit_Lobatto_IIIA_2, Implicit_Lobatto_IIIB_2, Implicit_Lobatto_IIIC_2, Explicit_RK_3, Explicit_RK_4,
-// Implicit_Lobatto_IIIA_4, Implicit_Lobatto_IIIB_4, Implicit_Lobatto_IIIC_4. 
+// Time integration. Choose one of the following methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
+// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SDIRK_2_2, 
+// Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4,
+// Implicit_Lobatto_IIIA_3_4, Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5. 
 
-ButcherTableType butcher_table_type = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Boundary markers.
 const std::string BDY_GROUND = "Boundary ground";
@@ -125,8 +128,9 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
+    bool is_linear = true;
     if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
-		      verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
+		      verbose, is_linear)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 

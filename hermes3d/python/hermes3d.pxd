@@ -4,7 +4,7 @@ cdef extern from "Python.h":
 	void Py_DECREF(PyObject *x)
 
 
-cdef extern from "mesh.h":
+cdef extern from "../src/mesh.h":
 	cdef struct c_Mesh "Mesh":
 		pass
 	c_Mesh *new_Mesh "new Mesh" ()

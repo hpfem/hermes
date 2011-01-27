@@ -1,5 +1,6 @@
 # Higher-order Runge-Kutta methods (via Butcher's tables)
 add_subdirectory(butcher)
+add_subdirectory(butcher-adapt)
 add_subdirectory(butcher-comparison)
 
 # Elasticity
@@ -43,6 +44,7 @@ add_subdirectory(schroedinger-quantum-billiard)
 # Richards
 add_subdirectory(richards)
 add_subdirectory(richards-capillary-barrier-adapt)
+add_subdirectory(richards-capillary-barrier-rk)
 add_subdirectory(richards-seepage-adapt)
 add_subdirectory(richards-tracy-adapt)
 
@@ -53,4 +55,5 @@ add_subdirectory(eigen-schroedinger-iter)
 # Miscellaneous
 add_subdirectory(singular-perturbation)
 add_subdirectory(optimal-meshes)
+add_subdirectory(poisson-kelly-adapt)
 

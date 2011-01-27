@@ -1,4 +1,4 @@
-project(quadrature)
+project(h3d-quadrature)
 
 if(H3D_REAL)
 

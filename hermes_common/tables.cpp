@@ -64,6 +64,7 @@ void Table::set_A(int i, int j, double val)
 ButcherTable::ButcherTable() : Table() 
 {
   this->B = NULL;
+  this->B2 = NULL;
   this->C = NULL;
 }
 
@@ -72,6 +73,9 @@ ButcherTable::ButcherTable(int size) : Table(size)
   // B array.
   this->B = new double[size];
   for (int j=0; j<size; j++) this->B[j] = 0;
+  // B2 array.
+  this->B2 = new double[size];
+  for (int j=0; j<size; j++) this->B2[j] = 0;
   // C array.
   this->C = new double[size];
   for (int j=0; j<size; j++) this->C[j] = 0;
@@ -82,7 +86,6 @@ ButcherTable::ButcherTable(int size) : Table(size)
 ButcherTable::ButcherTable(ButcherTableType butcher_table)
 {
   double gamma = 1./sqrt(2.);
-
   switch (butcher_table) {
     case Explicit_RK_1: // Explicit Euler.
       this->alloc(1);
@@ -105,7 +108,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(0, 2./3.);
     break;
 
-    case Implicit_Crank_Nicolson_2: // Implicit Crank Nicolson.
+    case Implicit_Crank_Nicolson_2_2: // Implicit Crank Nicolson.
       this->alloc(2);
       this->set_A(0, 0, 1./2.);
       this->set_A(0, 1, 1./2.);
@@ -114,7 +117,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(0, 1.);
     break;
 
-    case Implicit_SDIRK_2: // Implicit SDIRK-2 (second-order).
+    case Implicit_SDIRK_2_2: // Implicit SDIRK-22 (second-order).
       this->alloc(2);
       this->set_A(0, 0, 1. - gamma);
       this->set_A(0, 1, 0.);
@@ -126,7 +129,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(1, 1.);  
     break;
 
-    case Implicit_Lobatto_IIIA_2: // Implicit Lobatto IIIA (second-order).
+    case Implicit_Lobatto_IIIA_2_2: // Implicit Lobatto IIIA (second-order).
       this->alloc(2);
       this->set_A(1, 0, 1./2.);
       this->set_A(1, 1, 1./2.);
@@ -135,7 +138,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(1, 1.);
     break;
 
-    case Implicit_Lobatto_IIIB_2: // Implicit Lobatto IIIB (second-order).
+    case Implicit_Lobatto_IIIB_2_2: // Implicit Lobatto IIIB (second-order).
       this->alloc(2);
       this->set_A(0, 0, 1./2.);
       this->set_A(0, 1, 1./2.);
@@ -145,7 +148,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(1, 1./2.);
     break;
 
-    case Implicit_Lobatto_IIIC_2: // Implicit Lobatto IIIC (second-order).
+    case Implicit_Lobatto_IIIC_2_2: // Implicit Lobatto IIIC (second-order).
       this->alloc(2);
       this->set_A(0, 0, 1./2.);
       this->set_A(0, 1, -1./2.);
@@ -183,7 +186,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(3, 1.);
     break;
 
-    case Implicit_Lobatto_IIIA_4: // Implicit Lobatto IIIA (fourth-order).
+    case Implicit_Lobatto_IIIA_3_4: // Implicit Lobatto IIIA (fourth-order).
       this->alloc(3);
       this->set_A(1, 0, 5./24.);
       this->set_A(2, 0, 1./6.);
@@ -198,7 +201,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Implicit_Lobatto_IIIB_4: // Implicit Lobatto IIIB (fourth-order).
+    case Implicit_Lobatto_IIIB_3_4: // Implicit Lobatto IIIB (fourth-order).
       this->alloc(3);
       this->set_A(0, 0, 1./6.);
       this->set_A(1, 0, 1./6.);
@@ -213,7 +216,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Implicit_Lobatto_IIIC_4: // Implicit Lobatto IIIC (fourth-order).
+    case Implicit_Lobatto_IIIC_3_4: // Implicit Lobatto IIIC (fourth-order).
       this->alloc(3);
       this->set_A(0, 0, 1./6.);
       this->set_A(1, 0, 1./6.);
@@ -228,6 +231,25 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_B(1, 2./3.);
       this->set_B(2, 1./6.);
       this->set_C(1, 1./2.);
+      this->set_C(2, 1.);
+    break;
+
+    case Implicit_Radau_IIA_3_5: // Implicit Radau IIA (fifth-order).
+      this->alloc(3);
+      this->set_A(0, 0, (88. - 7*sqrt((double)6)) / 360 );
+      this->set_A(1, 0, (296 + 169 * sqrt((double)6)) / 1800 );
+      this->set_A(2, 0, (16. - sqrt((double)6)) / 36 );
+      this->set_A(0, 1, (296 - 169 * sqrt((double)6)) / 1800);
+      this->set_A(1, 1, (88. + 7*sqrt((double)6)) / 360);
+      this->set_A(2, 1, (16. + sqrt((double)6)) / 36); 
+      this->set_A(0, 2, (-2. + 3 * sqrt((double)6)) / 225 );
+      this->set_A(1, 2, (-2. - 3 * sqrt((double)6)) / 225 );
+      this->set_A(2, 2, 1./9.);
+      this->set_B(0, (16. - sqrt((double)6)) / 36 );
+      this->set_B(1, (16. + sqrt((double)6)) / 36 );
+      this->set_B(2, 1./9.);
+      this->set_C(0, (4. - sqrt((double)6)) / 10 );
+      this->set_C(1, (4. + sqrt((double)6)) / 10 );
       this->set_C(2, 1.);
     break;
 
@@ -247,6 +269,9 @@ void ButcherTable::alloc(int size)
   // B array.
   this->B = new double[size];
   for (int j=0; j<size; j++) this->B[j] = 0;
+  // B2 array.
+  this->B2 = new double[size];
+  for (int j=0; j<size; j++) this->B2[j] = 0;
   // C array.
   this->C = new double[size];
   for (int j=0; j<size; j++) this->C[j] = 0;
@@ -256,6 +281,12 @@ double ButcherTable::get_B(int i)
 {
   if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
   return this->B[i];
+}
+
+double ButcherTable::get_B2(int i) 
+{
+  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  return this->B2[i];
 }
 
 double ButcherTable::get_C(int i) 
@@ -268,6 +299,12 @@ void ButcherTable::set_B(int i, double val)
 {
   if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
   this->B[i] = val;
+}
+
+void ButcherTable::set_B2(int i, double val) 
+{
+  if (i < 0 || i > size) error("Invalid access to a Butcher's table.");
+  this->B2[i] = val;
 }
 
 void ButcherTable::set_C(int i, double val) 

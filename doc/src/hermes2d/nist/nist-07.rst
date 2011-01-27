@@ -1,4 +1,4 @@
-NIST-07 (Elliptic)
+NIST-07 (Boundary Line Singularity)
 ------------------
 
 **Git reference:** Benchmark `nist-07 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-07>`_.

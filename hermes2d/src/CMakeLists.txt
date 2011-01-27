@@ -8,6 +8,7 @@ endif(MSVC)
 # source files for the hermes2d library
 set(SRC
        adapt/adapt.cpp
+       adapt/kelly_type_adapt.cpp
 
        function/solution.cpp 
        function/filter.cpp
@@ -25,12 +26,11 @@ set(SRC
        mesh/hash.cpp 
        mesh/h2d_reader.cpp
        mesh/mesh.cpp 
-       mesh/mesh_parser.cpp 
-       mesh/mesh_lexer.cpp
        mesh/regul.cpp 
        mesh/transform.cpp 
        mesh/traverse.cpp
        mesh/trans.cpp
+       mesh/python_reader.cpp
 
        quadrature/limit_order.cpp
        quadrature/quad_std.cpp
@@ -103,10 +103,15 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
        ${HERMES_COMMON_DIR}/solver/precond_ml.cpp 
        ${HERMES_COMMON_DIR}/solver/precond_ifpack.cpp 
+       ${HERMES_COMMON_DIR}/solver/eigensolver.cpp 
+       ${HERMES_COMMON_DIR}/solver/eigen.cpp 
        ${HERMES_COMMON_DIR}/compat/fmemopen.cpp 
        ${HERMES_COMMON_DIR}/compat/c99_functions.cpp
 
        ${TEUCHOS_SOURCES}
+
+       ${HERMES_COMMON_DIR}/python/python_api.cpp
+       ${HERMES_COMMON_DIR}/python/python_engine.cpp
        )
 
 include(PickRealOrCplxLibs)
@@ -143,7 +148,7 @@ macro(LIBRARY_SETTINGS BIN)
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
 	  ${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
       ${ADDITIONAL_LIBS}
-      ${PYTHON_LIBRARIES}
+      ${PYTHON_LIBRARY}
       ${EXODUSII_LIBRARY}
   )
 endmacro(LIBRARY_SETTINGS)

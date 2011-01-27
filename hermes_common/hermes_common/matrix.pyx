@@ -16,20 +16,20 @@ cdef class CSCMatrix(SparseMatrix):
     """
 
     def __cinit__(self):
-        self.thisptr = new cUMFPackMatrix()
+        self.thisptr = new cCSCMatrix()
 
     def __dealloc__(self):
         del self.thisptr
 
-    cdef cUMFPackMatrix* as_UMFPackMatrix(self):
-        return <cUMFPackMatrix*> self.thisptr
+    cdef cCSCMatrix* as_CSCMatrix(self):
+        return <cCSCMatrix*> self.thisptr
 
     @property
     def IA(self):
         """
         Returns (row, col, data) arrays.
         """
-        cdef cUMFPackMatrix *this = self.as_UMFPackMatrix()
+        cdef cCSCMatrix *this = self.as_CSCMatrix()
         return c2numpy_int_inplace(this.get_Ai(), this.get_nnz())
 
     @property
@@ -37,7 +37,7 @@ cdef class CSCMatrix(SparseMatrix):
         """
         Returns (row, col, data) arrays.
         """
-        cdef cUMFPackMatrix *this = self.as_UMFPackMatrix()
+        cdef cCSCMatrix *this = self.as_CSCMatrix()
         return c2numpy_int_inplace(this.get_Ap(), self.get_size()+1)
 
     @property
@@ -45,7 +45,7 @@ cdef class CSCMatrix(SparseMatrix):
         """
         Returns (row, col, data) arrays.
         """
-        cdef cUMFPackMatrix *this = self.as_UMFPackMatrix()
+        cdef cCSCMatrix *this = self.as_CSCMatrix()
         return c2numpy_double_inplace(this.get_Ax(), this.get_nnz())
 
     def to_scipy_csc(self):

@@ -19,7 +19,7 @@ const int P_INIT = 1;                      // Initial polynomial degree of all m
 
 // Time-stepping:
 const double TAU = 0.1;                    // Time step.
-const double T_FINAL = 10.0;               // Time interval length.
+const double T_FINAL = 0.3;                // Time interval length.
 
 // Adaptivity:
 const int UNREF_FREQ = 10;                 // Every UNREF_FREQ time step the mesh is unrefined.
@@ -438,13 +438,13 @@ int main(int argc, char* argv[])
     phi_prev_time.copy(&phi_fine);
   }
 
-  info("Coordinate ( 0.0, 0.0) T value = %lf", T_prev_time.get_pt_value(0.0, 0.0));
-  info("Coordinate ( 25.0,  25.0) T value = %lf", T_prev_time.get_pt_value(25.0, 25.0));
-  info("Coordinate ( 25.0,  75.0) T value = %lf", T_prev_time.get_pt_value(25.0, 75.0));
+  info("Coordinate ( 0.0,  0.0) T value = %lf", T_prev_time.get_pt_value(0.0, 0.0));
+  info("Coordinate ( 25.0, 25.0) T value = %lf", T_prev_time.get_pt_value(25.0, 25.0));
+  info("Coordinate ( 25.0, 75.0) T value = %lf", T_prev_time.get_pt_value(25.0, 75.0));
   info("Coordinate ( 75.0, 25.0) T value = %lf", T_prev_time.get_pt_value(75.0, 25.0));
   info("Coordinate ( 75.0, 75.0) T value = %lf", T_prev_time.get_pt_value(75.0, 75.0));
 
-  info("Coordinate ( 0.0, 0.0) phi value = %lf", phi_prev_time.get_pt_value(0.0, 0.0));
+  info("Coordinate ( 0.0,  0.0) phi value = %lf", phi_prev_time.get_pt_value(0.0, 0.0));
   info("Coordinate ( 25.0, 25.0) phi value = %lf", phi_prev_time.get_pt_value(25.0, 25.0));
   info("Coordinate ( 25.0, 75.0) phi value = %lf", phi_prev_time.get_pt_value(25.0, 75.0));
   info("Coordinate ( 75.0, 25.0) phi value = %lf", phi_prev_time.get_pt_value(75.0, 25.0));
@@ -459,22 +459,22 @@ int main(int argc, char* argv[])
     success = 0;
   }
   
-  if (fabs(T_prev_time.get_pt_value(25.0, 25.0) - 1.024837) > eps) {
+  if (fabs(T_prev_time.get_pt_value(25.0, 25.0) - 0.693146) > eps) {
     printf("Coordinate ( 25, 25) T value = %lf\n", T_prev_time.get_pt_value(25.0, 25.0));
     success = 0;
   }
   
-  if (fabs(T_prev_time.get_pt_value(75.0, 25.0) - 1.024837) > eps) {
-    printf("Coordinate ( 75, 25) T value = %lf\n", T_prev_time.get_pt_value(75.0, 25.0));
-    success = 0;
-  }
-  
-  if (fabs(T_prev_time.get_pt_value(25.0, 75.0) - 1.024837) > eps) {
+  if (fabs(T_prev_time.get_pt_value(25.0, 75.0) - 0.693146) > eps) {
     printf("Coordinate ( 25, 75) T value = %lf\n", T_prev_time.get_pt_value(25.0, 75.0));
     success = 0;
   }
   
-  if (fabs(T_prev_time.get_pt_value(75.0, 75.0) - 1.024837) > eps) {
+  if (fabs(T_prev_time.get_pt_value(75.0, 25.0) - 0.693146) > eps) {
+    printf("Coordinate ( 75, 25) T value = %lf\n", T_prev_time.get_pt_value(75.0, 25.0));
+    success = 0;
+  }
+  
+  if (fabs(T_prev_time.get_pt_value(75.0, 75.0) - 0.693146) > eps) {
     printf("Coordinate ( 75, 75) T value = %lf\n", T_prev_time.get_pt_value(75.0, 75.0));
     success = 0;
   }
@@ -484,29 +484,29 @@ int main(int argc, char* argv[])
     success = 0;
   }
   
-  if (fabs(phi_prev_time.get_pt_value(25.0, 25.0) - 0.411794) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(25.0, 25.0) - 0.064914) > eps) {
     printf("Coordinate ( 25, 25) phi value = %lf\n", phi_prev_time.get_pt_value(25.0, 25.0));
     success = 0;
   }
   
-  if (fabs(phi_prev_time.get_pt_value(75.0, 25.0) - 1.235474) > eps) {
-    printf("Coordinate ( 75, 25) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 25.0));
-    success = 0;
-  }
-  
-  if (fabs(phi_prev_time.get_pt_value(25.0, 75.0) - 1.235474) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(25.0, 75.0) - 0.194752) > eps) {
     printf("Coordinate ( 25, 75) phi value = %lf\n", phi_prev_time.get_pt_value(25.0, 75.0));
     success = 0;
   }
   
-  if (fabs(phi_prev_time.get_pt_value(75.0, 75.0) - 3.706600) > eps) {
+  if (fabs(phi_prev_time.get_pt_value(75.0, 25.0) - 0.194752) > eps) {
+    printf("Coordinate ( 75, 25) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 25.0));
+    success = 0;
+  }
+  
+  if (fabs(phi_prev_time.get_pt_value(75.0, 75.0) - 0.584277) > eps) {
     printf("Coordinate ( 75, 75) phi value = %lf\n", phi_prev_time.get_pt_value(75.0, 75.0));
     success = 0;
   }
   
   // Test adaptivity.
-  int ndof_allowed_T = 60;
-  int ndof_allowed_phi = 100;
+  int ndof_allowed_T = 85;
+  int ndof_allowed_phi = 85;
   int ndof_T = Space::get_num_dofs(&space_T);
   int ndof_phi = Space::get_num_dofs(&space_phi);
   printf("ndof_actual_T = %d\n", ndof_T);
@@ -514,7 +514,7 @@ int main(int argc, char* argv[])
   printf("ndof_allowed_T = %d\n", ndof_allowed_T);
   printf("ndof_allowed_phi = %d\n", ndof_allowed_phi);
   if ((ndof_T > ndof_allowed_T) || (ndof_phi > ndof_allowed_phi)) {
-    // ndofs_T was 49 and ndof_phi was 81 at the time this test was created
+    // ndofs_T was 81 and ndof_phi was 81 at the time this test was created
     printf("Adaptivity failed.");
     success = 0;
   }

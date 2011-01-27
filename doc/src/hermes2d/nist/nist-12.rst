@@ -1,4 +1,4 @@
-NIST-12 (Elliptic)
+NIST-12 (Multiple Difficulties)
 ------------------
 
 **Git reference:** Benchmark `nist-12 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-12>`_.
