@@ -6,6 +6,7 @@
 if(WITH_HEX)
     # H1
 	if(H3D_REAL)
+		add_subdirectory(bridge)
 		add_subdirectory(elasticity-cubit-hex)
 		add_subdirectory(heat-conduction)
 		add_subdirectory(heat-cubit)
