@@ -4,18 +4,14 @@
 #include "config.h"
 #include <hermes3d.h>
 
-
 // This test makes sure that the example elasticity-cubit-hex works correctly.
-//
-// The following parameters can be changed:
 
+// The following parameters can be changed:
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
 bool solution_output = true;                      // Generate output files (if true).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -23,6 +19,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters. 
 

@@ -6,22 +6,23 @@
 
 // This test makes sure that the example heat-conduction works correctly.
 
+// The following parameters can be changed:
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT_X = 2,
           P_INIT_Y = 2,
           P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
 const double TAU = 0.05;                          // Time step in seconds. 
 bool solution_output = true;                      // Generate output files (if true).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  // preconditioner from IFPACK (see solver/aztecoo.h)                                                  
-
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                               
 // Problem parameters. 
 const double FINAL_TIME = 2 * M_PI;		            // Length of time interval in seconds. 
 

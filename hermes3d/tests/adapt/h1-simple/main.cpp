@@ -11,13 +11,11 @@
 //
 
 // The following parameters can be changed:
-int P_INIT_X, P_INIT_Y, P_INIT_Z;       // Initial polynomial degree of all mesh elements taken from the command line arguments passed.
-const double ERR_STOP = 1.0;            // Stopping criterion for adaptivity (rel. error tolerance between the
-                                        // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;           // Adaptivity process stops when the number of degrees of freedom grows
-                                        // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+int P_INIT_X, P_INIT_Y, P_INIT_Z;                 // Initial polynomial degree of all mesh elements taken from the command line arguments passed.
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
+                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -25,8 +23,10 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
-const double TOLERANCE = 0.001;		                // error tolerance in percent
-const double THRESHOLD = 0.5;		                  // error threshold for element refinement
+const double TOLERANCE = 0.001;		          // error tolerance in percent.
+const double THRESHOLD = 0.5;		          // error threshold for element refinement.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // The error should be smaller than this epsilon.
 #define EPS								10e-10F

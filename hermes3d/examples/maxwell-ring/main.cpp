@@ -25,19 +25,17 @@ const int INIT_REF_NUM = 0;                       // Number of initial uniform m
 const int P_INIT_X = 1,
           P_INIT_Y = 1,
           P_INIT_Z = 1;                           // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.7;       // Error threshold for element refinement of the adapt(...) function 
-                                    // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
-                                    // times total error is processed. If more elements have similar errors, 
-                                    // refine all to keep the mesh symmetric.
-                                    // STRATEGY = 1 ... refine all elements whose error is larger
-                                    // than THRESHOLD times maximum element error.
-const double ERR_STOP = 1.0;        // Stopping criterion for adaptivity (rel. error tolerance between the
-                                    // fine mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;       // Adaptivity process stops when the number of degrees of freedom grows
-                                    // over this limit. This is to prevent h-adaptivity to go on forever.
+const double THRESHOLD = 0.7;                     // Error threshold for element refinement of the adapt(...) function 
+                                                  // (default) STRATEGY = 0 ... refine elements elements until sqrt(THRESHOLD) 
+                                                  // times total error is processed. If more elements have similar errors, 
+                                                  // refine all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  // than THRESHOLD times maximum element error.
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
+                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
 bool solution_output = true;                      // Generate output files (if true).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
@@ -45,6 +43,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double mu_0   = 4*M_PI*1e-7;
