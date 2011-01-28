@@ -13,10 +13,11 @@ int main(int argc, char **args)
     //CTUReader mloader;
     H3DReader mloader;
 
-    std::cout << "Loading ...\n" ;
+    std::cout << "Loading mesh ...\n" ;
     mloader.load("./ctu2h3d/mesh.mesh3d", &mesh);
 
-    std::cout << "Saveing ...\n" ;
+    std::cout << "Saving mesh...\n" ;
     mloader.save("new.mesh.mesh3d", &mesh);
+
     return 0;
 }
