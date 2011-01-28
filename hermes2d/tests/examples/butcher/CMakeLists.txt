@@ -23,6 +23,10 @@ set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 #   Implicit_Lobatto_IIIB_3_4,   // Implicit Lobatto IIIB-4 method.
 #   Implicit_Lobatto_IIIC_3_4,   // Implicit Lobatto IIIB-4 method.
 #   Implicit_Radau_IIA_3_5       // Implicit Radau IIA-5 method.
+#   Implicit_SIRK_2_2,           // Implicit SIRK-2-2 method.
+#   Implicit_ESIRK_2_2,          // Implicit ESIRK-2-2 method.
+#   Implicit_SDIRK_4_5           // Implicit SDIRK-2-2 method.
+
 
 add_test(example-butcher-Explicit_RK_1 ${BIN} 1)
 add_test(example-butcher-Implicit_RK_1 ${BIN} 2)
@@ -42,4 +46,8 @@ add_test(example-butcher-Implicit_Lobatto_IIIB_3_4 ${BIN} 12)
 add_test(example-butcher-Implicit_Lobatto_IIIC_3_4 ${BIN} 13)
 
 add_test(example-butcher-Implicit_Radau_IIA_3_5 ${BIN} 14)
+
+add_test(example-butcher-Implicit_SIRK_2_2 ${BIN} 15)
+add_test(example-butcher-Implicit_ESIRK_2_2 ${BIN} 16)
+add_test(example-butcher-Implicit_SDIRK_4_5 ${BIN} 17)
 

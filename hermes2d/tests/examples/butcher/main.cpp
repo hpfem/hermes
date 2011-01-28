@@ -83,24 +83,23 @@ int main(int argc, char* argv[])
   {
     case 1: butcher_table_type = Explicit_RK_1; break;
     case 2: butcher_table_type = Implicit_RK_1; break;
-
     case 3: butcher_table_type = Explicit_RK_2; break;
     case 4: butcher_table_type = Implicit_Crank_Nicolson_2_2; break;
     case 5: butcher_table_type = Implicit_SDIRK_2_2; break;
     case 6: butcher_table_type = Implicit_Lobatto_IIIA_2_2; break;
     case 7: butcher_table_type = Implicit_Lobatto_IIIB_2_2; break;
     case 8: butcher_table_type = Implicit_Lobatto_IIIC_2_2; break;
-
     case 9: butcher_table_type = Explicit_RK_3; break;
-
     case 10: butcher_table_type = Explicit_RK_4; break;
     case 11: butcher_table_type = Implicit_Lobatto_IIIA_3_4; break;
     case 12: butcher_table_type = Implicit_Lobatto_IIIB_3_4; break;
     case 13: butcher_table_type = Implicit_Lobatto_IIIC_3_4; break;
-
     case 14: butcher_table_type = Implicit_Radau_IIA_3_5; break;
+    case 15: butcher_table_type = Implicit_SIRK_2_2; break;
+    case 16: butcher_table_type = Implicit_ESIRK_2_2; break;
+    case 17: butcher_table_type = Implicit_SDIRK_4_5; break;
 
-    default: error("Admissible command-line options are from 1 to 14.");
+    default: error("Admissible command-line options are from 1 to 17.");
   }
 
   // Choose a Butcher's table or define your own.
@@ -308,7 +307,35 @@ int main(int argc, char* argv[])
              if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
              if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
              break;
-    default: error("Admissible command-line options are from 1 to 14.");
+
+    case 15: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255790) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265493) > 1E-6) success = false;
+             break;
+
+    case 16: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255790) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265493) > 1E-6) success = false;
+             break;
+
+    case 17: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
+             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
+             break;
+
+    default: error("Admissible command-line options are from 1 to 17.");
   }
 
   // Cleanup.
