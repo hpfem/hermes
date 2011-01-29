@@ -635,7 +635,8 @@ bool SuperLUSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_SUPERLU
-  if (has_A && factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && (int)A.nrow != m->size)
+  unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
+  if (has_A && factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
   {
     warning("You cannot reuse factorization structures for factorizing matrices of different sizes.");
     return false;
