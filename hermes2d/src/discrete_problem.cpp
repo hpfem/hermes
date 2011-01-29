@@ -673,7 +673,8 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
               if (rhs != NULL && this->is_linear) {
                 scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
                         refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                rhs->add(al[m]->dof[i], -val);
+                if(al[m]->dof[i] >= 0)
+                  rhs->add(al[m]->dof[i], -val);
               }
             }
             else if (rhsonly == false) {
@@ -696,7 +697,8 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
               if (rhs != NULL && this->is_linear) {
                 scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
                         refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                rhs->add(al[m]->dof[i], -val);
+                if(al[m]->dof[i] >= 0)
+                  rhs->add(al[m]->dof[i], -val);
               }
             }
             else if (rhsonly == false) {
