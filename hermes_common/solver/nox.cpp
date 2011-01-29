@@ -86,7 +86,7 @@ NoxProblemInterface::~NoxProblemInterface()
 void NoxProblemInterface::prealloc_jacobian()
 {
   // preallocate jacobian structure
-  fep->create(&jacobian);
+  fep->create_sparse_structure(&jacobian);
   // jacobian.finish();
 }
 

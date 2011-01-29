@@ -92,7 +92,7 @@ public:
   virtual void alloc(unsigned int ndofs);
   virtual void free();
 #ifdef HAVE_EPETRA
-  virtual scalar get(int idx) { return (*vec)[idx]; }
+  virtual scalar get(unsigned int idx) { return (*vec)[idx]; }
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
   virtual void extract(double *v) const { vec->ExtractCopy(v); }
 #else
