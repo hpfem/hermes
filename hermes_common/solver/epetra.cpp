@@ -70,7 +70,7 @@ EpetraMatrix::~EpetraMatrix()
 #endif
 }
 
-void EpetraMatrix::prealloc(int n)
+void EpetraMatrix::prealloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -81,7 +81,7 @@ void EpetraMatrix::prealloc(int n)
 #endif
 }
 
-void EpetraMatrix::pre_add_ij(int row, int col)
+void EpetraMatrix::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -128,7 +128,7 @@ void EpetraMatrix::free()
 #endif
 }
 
-scalar EpetraMatrix::get(int m, int n)
+scalar EpetraMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -141,7 +141,7 @@ scalar EpetraMatrix::get(int m, int n)
     return 0.0;
 }
 
-int EpetraMatrix::get_num_row_entries(int row)
+int EpetraMatrix::get_num_row_entries(unsigned int row)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -151,7 +151,7 @@ int EpetraMatrix::get_num_row_entries(int row)
 #endif
 }
 
-void EpetraMatrix::extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs)
+void EpetraMatrix::extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -170,11 +170,11 @@ void EpetraMatrix::zero()
 #endif
 }
 
-void EpetraMatrix::add(int m, int n, scalar v)
+void EpetraMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (v != 0.0 && m >= 0 && n >= 0) {		// ignore dirichlet DOFs
+  if (v != 0.0) {		// ignore zero values
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
     int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n);
     if (ierr != 0) error("Failed to insert into Epetra matrix");
@@ -193,18 +193,19 @@ void EpetraMatrix::add(int m, int n, scalar v)
 /// Add a number to each diagonal entry.
 void EpetraMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i=0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-void EpetraMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
+void EpetraMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
 {
   _F_
 #ifdef HAVE_EPETRA
   for (int i = 0; i < m; i++)				// rows
     for (int j = 0; j < n; j++)			// cols
-      add(rows[i], cols[j], mat[i][j]);
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 
@@ -216,7 +217,7 @@ bool EpetraMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   return false;
 }
 
-int EpetraMatrix::get_matrix_size() const
+unsigned int EpetraMatrix::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -236,7 +237,7 @@ double EpetraMatrix::get_fill_in() const
 #endif
 }
 
-int EpetraMatrix::get_nnz() const
+unsigned int EpetraMatrix::get_nnz() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -281,7 +282,7 @@ EpetraVector::~EpetraVector()
 #endif
 }
 
-void EpetraVector::alloc(int n)
+void EpetraVector::alloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -331,7 +332,7 @@ void EpetraVector::free()
 #endif
 }
 
-void EpetraVector::set(int idx, scalar y)
+void EpetraVector::set(unsigned int idx, scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -346,7 +347,7 @@ void EpetraVector::set(int idx, scalar y)
 #endif
 }
 
-void EpetraVector::add(int idx, scalar y)
+void EpetraVector::add(unsigned int idx, scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -361,11 +362,11 @@ void EpetraVector::add(int idx, scalar y)
 #endif
 }
 
-void EpetraVector::add(int n, int *idx, scalar *y)
+void EpetraVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (int i = 0; i < n; i++)
+  for (unsigned int i = 0; i < n; i++)
     add(idx[i], y[i]);
 #endif
 }

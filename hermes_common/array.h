@@ -264,6 +264,75 @@ public:
 
 };
 
+/// \brief A light version of the array.
+/// For ordinal types or pointers, does not provide memory handling.
+template<class TYPE>
+class LightArray
+{
+protected:
+  std::vector<TYPE*> pages; // todo: standard array for maximum access speed
+  std::vector<bool*> presence; // todo: standard array for maximum access speed
+  unsigned int size;
 
+  const unsigned int page_bits;
+  const unsigned int page_size;
+  const unsigned int page_mask;
+
+public:
+
+  LightArray(unsigned int page_bits = 9) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1) {
+    size = 0;
+  }
+
+  ~LightArray() {
+    for(unsigned int i = 0; i < pages.size(); i++) {
+      delete [] pages[i];
+      delete [] presence[i];
+    }
+    pages.clear();
+    presence.clear();
+  }
+
+  /// Adds a new item to the array.
+  void add(TYPE item, unsigned int id)
+  {
+    TYPE* temp;
+    while(id >= pages.size() * page_size) {
+      TYPE* new_page = new TYPE[page_size];
+      pages.push_back(new_page);
+
+      bool* new_page_presence = new bool[page_size];
+      memset(new_page_presence, 0, page_size * sizeof(bool));
+      presence.push_back(new_page_presence);
+    }
+    
+    temp = pages[id >> page_bits] + (id & page_mask);
+    *temp = item;
+    
+    presence[id >> page_bits][id & page_mask] = true;
+
+    if(id >= size)
+      size = id + 1;
+    return;
+  }
+
+  unsigned int get_size() const { 
+    return size; 
+  }
+
+  /// Checks the id position for presence.
+  bool present(unsigned int id) const {
+    if(id >= size)
+      return false;
+    return presence[id >> page_bits][id & page_mask];
+  }
+
+  /// After successful check for presence, the value can be retrieved.
+  TYPE& get(unsigned int id) const {
+    assert(id < size);
+    return pages[id >> page_bits][id & page_mask]; 
+  }
+
+};
 
 #endif

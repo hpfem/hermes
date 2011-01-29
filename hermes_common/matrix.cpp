@@ -143,7 +143,7 @@ SparseMatrix::SparseMatrix()
   col_storage = false;
 }
 
-SparseMatrix::SparseMatrix(int size)
+SparseMatrix::SparseMatrix(unsigned int size)
 {
   _F_
   this->size = size;
@@ -159,7 +159,7 @@ SparseMatrix::~SparseMatrix()
   delete [] pages;
 }
 
-void SparseMatrix::prealloc(int n)
+void SparseMatrix::prealloc(unsigned int n)
 {
   _F_
   this->size = n;
@@ -169,7 +169,7 @@ void SparseMatrix::prealloc(int n)
   memset(pages, 0, n * sizeof(Page *));
 }
 
-void SparseMatrix::pre_add_ij(int row, int col)
+void SparseMatrix::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
   if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {
@@ -207,7 +207,7 @@ int SparseMatrix::get_num_indices()
 {
   _F_
   int total = 0;
-  for (int i = 0; i < size; i++)
+  for (unsigned int i = 0; i < size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
       total += page->count;
 
