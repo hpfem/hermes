@@ -303,6 +303,59 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(4, 1.);  
     break;
 
+    case Implicit_DIRK_7_45_embedded: // Implicit embedded DIRK method with orders 4 and 5.
+      this->alloc(7);
+      this->set_A(0, 0, 0);
+      this->set_A(1, 0, 0.28589);
+      this->set_A(2, 0, 0.142945);
+      this->set_A(3, 0, 0.16803599);
+      this->set_A(4, 0, 0.182315);
+      this->set_A(5, 0, 0.24756392);
+      this->set_A(6, 0, 0.13001804);
+      this->set_A(1, 1, 0.28589);
+      this->set_A(2, 1, 0.924011005);
+      this->set_A(3, 1, -0.049416510);
+      this->set_A(4, 1, -0.112951603);
+      this->set_A(5, 1, -0.425378071);
+      this->set_A(6, 1, 0);
+      this->set_A(2, 2, 0.28589);
+      this->set_A(3, 2, -0.004509476);
+      this->set_A(4, 2, -0.0277933233);
+      this->set_A(5, 2, -0.107036282);
+      this->set_A(6, 2, -0.019290177);
+      this->set_A(3, 3, 0.28589);
+      this->set_A(4, 3, 0.422539833);
+      this->set_A(5, 3, 0.395700134);
+      this->set_A(6, 3, 0.535386266);
+      this->set_A(4, 4, 0.28589);
+      this->set_A(5, 4, 0.503260302);
+      this->set_A(6, 4, 0.234313169);
+      this->set_A(5, 5, 0.28589);
+      this->set_A(6, 5, -0.166317293);
+      this->set_A(6, 6, 0.28589);
+      this->set_B(0, 0.13001804);
+      this->set_B(1, 0);
+      this->set_B(2, -0.019290177);
+      this->set_B(3, 0.535386266);
+      this->set_B(4, 0.234313169);
+      this->set_B(5, -0.166317293);
+      this->set_B(6, 0.28589);
+      this->set_B2(0, -0.094388662);
+      this->set_B2(1, 0);
+      this->set_B2(2, -0.039782614);
+      this->set_B2(3, 0.745608552);
+      this->set_B2(4, -0.505129807);
+      this->set_B2(5, 0.704915206);
+      this->set_B2(6, 0.28589);
+      this->set_C(0, 0);
+      this->set_C(1, 0.57178);
+      this->set_C(2, 1.352846);
+      this->set_C(3, 0.4);
+      this->set_C(4, 0.75);
+      this->set_C(5, 0.9);
+      this->set_C(6, 1.0);
+    break;
+
     default: error("Unknown Butcher's table.");
   }
 }

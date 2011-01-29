@@ -38,7 +38,11 @@ enum ButcherTableType
    Implicit_Lobatto_IIIB_3_4,   // Implicit Lobatto IIIB-4 method.
    Implicit_Lobatto_IIIC_3_4,   // Implicit Lobatto IIIB-4 method.
    Implicit_Radau_IIA_3_5,      // Implicit Radau IIA-5 method.
-   Implicit_SDIRK_4_5           // Implicit SDIRK-2-2 method.
+   Implicit_SDIRK_4_5,          // Implicit SDIRK-4-5 method.
+   Implicit_DIRK_7_45_embedded  // Implicit embedded DIRK method pair of orders four in five (from the paper 
+                                // Fudziah Ismail et all: Embedded Pair of Diagonally Implicit Runge-Kutta  
+                                // Method for Solving Ordinary Differential Equations). The method has
+                                // 7 stages but the first one is explicit.
 };
 
 // General square table of real numbers.
@@ -74,7 +78,8 @@ public:
 
 protected:
   double* B;
-  double* B2;  // This is the second B-row for adaptivity.
+  double* B2;  // This is the second B-row for adaptivity based
+               // on embedded R-K methods.
   double* C;
 };
 
