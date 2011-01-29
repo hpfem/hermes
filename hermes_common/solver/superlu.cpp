@@ -606,7 +606,7 @@ bool SuperLUSolver::solve()
     
     slu_scalar *sol = (slu_scalar*) ((DNformat*) X.Store)->nzval; 
     
-    for (int i = 0; i < rhs->size; i++)
+    for (unsigned int i = 0; i < rhs->size; i++)
 #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)      
       sln[i] = sol[i];
 #else
@@ -635,7 +635,7 @@ bool SuperLUSolver::setup_factorization()
 {
   _F_
 #ifdef WITH_SUPERLU
-  if (has_A && factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A.nrow != m->size)
+  if (has_A && factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && (int)A.nrow != m->size)
   {
     warning("You cannot reuse factorization structures for factorizing matrices of different sizes.");
     return false;
