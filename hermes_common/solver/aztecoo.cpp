@@ -139,7 +139,7 @@ bool AztecOOSolver::solve()
   memset(sln, 0, m->size * sizeof(scalar));
 
   // copy the solution into sln vector
-  for (int i = 0; i < m->size; i++) sln[i] = x[i];
+  for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
 #else
   double c0r = 1.0, c0i = 0.0;
   double c1r = 0.0, c1i = 1.0;
@@ -162,7 +162,7 @@ bool AztecOOSolver::solve()
   memset(sln, 0, m->size * sizeof(scalar));
 
   // copy the solution into sln vector
-  for (int i = 0; i < m->size; i++) sln[i] = scalar(xr[i], xi[i]);
+  for (unsigned int i = 0; i < m->size; i++) sln[i] = scalar(xr[i], xi[i]);
 #endif
   return true;
 #else

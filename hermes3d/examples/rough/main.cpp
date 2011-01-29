@@ -177,7 +177,7 @@ int main(int argc, char **args)
 			    double minZ=+std::numeric_limits<double>::max() ;
 			    double maxZ=-std::numeric_limits<double>::max() ; 
 
-			    for( int i=0 ; i<vtcs.size() ; i++)
+			    for(unsigned int i=0 ; i<vtcs.size() ; i++)
 			    {
 				    double x = mesh.vertices[vtcs[i]]->x ;
 				    double y = mesh.vertices[vtcs[i]]->y ;

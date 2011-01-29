@@ -190,7 +190,7 @@ void MumpsMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, i
 /// Add a number to each diagonal entry.
 void MumpsMatrix::add_to_diagonal(scalar v) 
 {
-  for (unsigned int i = 0; i<size; i++) {
+  for (unsigned int i = 0; i < size; i++) {
     add(i, i, v);
   }
 };
@@ -527,10 +527,10 @@ bool MumpsSolver::solve()
     delete [] sln;
     sln = new scalar[m->size];
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    for (int i = 0; i < rhs->size; i++)
+    for (unsigned int i = 0; i < rhs->size; i++)
       sln[i] = param.rhs[i];
 #else
-    for (int i = 0; i < rhs->size; i++)
+    for (unsigned int i = 0; i < rhs->size; i++)
       sln[i] = cplx(param.rhs[i].r, param.rhs[i].i);
 #endif
   }

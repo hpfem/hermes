@@ -75,7 +75,8 @@ int roughSurface::loadSurface(void)
      std::cout << "\n" << "The (x,y) dimensions of the surface are: " << dx*Dx << ", " << dy*Dy ;
      std::cout << "\n" << "The original (x,y) steps size are: " << dx << ", " << dy ;
      return 0 ;
-  }  
+  }
+  return 0;
 }
 
 double roughSurface::interpolate(double x, double y)

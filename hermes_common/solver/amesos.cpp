@@ -125,7 +125,7 @@ bool AmesosSolver::solve()
   
 #if defined(H1D_COMPLEX) || defined(H2D_COMPLEX) || defined (H3D_COMPLEX)
 #else 
-  for (int i = 0; i < m->size; i++) sln[i] = x[i];
+  for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
 #endif
 
   return true;
