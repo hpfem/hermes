@@ -1002,7 +1002,7 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
             if (isempty[m]) continue;
             if (fabs(vfs->scaling_factor) < 1e-12) continue;
             if (vfs->area != H2D_DG_INNER_EDGE) continue;
-
+            
             NeighborSearch *nbs_v = new NeighborSearch(refmap[m]->get_active_element(), spaces[m]->get_mesh());
             nbs_v->set_active_edge(isurf, false);
             nbs_v->attach_pss_and_rm(spss[m], refmap[m]);
@@ -1285,7 +1285,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<S
   // Clean up.
   for(int i = 0; i < prev_size; i++)
     if (prev[i] != NULL) { 
-      prev[i]->free_ord(); 
+      prev[i]->free_fn(); 
       delete prev[i]; 
     }
   delete [] prev;
@@ -1425,7 +1425,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
   // Clean up.
   for(int i = 0; i < prev_size; i++)
     if (prev[i] != NULL) { 
-      prev[i]->free_ord(); 
+      prev[i]->free_fn(); 
       delete prev[i]; 
     }
   delete [] prev;
@@ -1561,7 +1561,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<
   // Clean up.
   for(int i = 0; i < prev_size; i++)
     if (prev[i] != NULL) { 
-      prev[i]->free_ord(); 
+      prev[i]->free_fn(); 
       delete prev[i]; 
     }
   delete [] prev;
@@ -1692,7 +1692,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
   // Clean up.
   for(int i = 0; i < prev_size; i++)
     if (prev[i] != NULL) { 
-      prev[i]->free_ord(); 
+      prev[i]->free_fn(); 
       delete prev[i]; 
     }
   delete [] prev;
