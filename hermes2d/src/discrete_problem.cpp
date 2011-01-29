@@ -1003,21 +1003,9 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
             if (fabs(vfs->scaling_factor) < 1e-12) continue;
             if (vfs->area != H2D_DG_INNER_EDGE) continue;
 
-            // Find all neighbors of active element across active edge and partition it into segments
-            // shared by the active element and distinct neighbors.
-            NeighborSearch::MainKey nbs_key_m(rep_element->id, isurf);
-            if (NeighborSearch::main_cache_m[nbs_key_m] == NULL) {
-              NeighborSearch::main_cache_m[nbs_key_m] = new NeighborSearch(rep_element, this->get_space(0)->get_mesh());
-              NeighborSearch::main_cache_m[nbs_key_m]->set_active_edge(isurf, false);
-              PrecalcShapeset *fv_for_main_cache = new PrecalcShapeset(pss[0]->get_shapeset());
-              fv_for_main_cache->set_active_element(rep_element);
-              fv_for_main_cache->set_transform(refmap[0]->get_transform());
-              RefMap *rm_for_main_cache = new RefMap();
-              rm_for_main_cache->set_active_element(rep_element);
-              rm_for_main_cache->set_transform(refmap[0]->get_transform());
-              NeighborSearch::main_cache_m[nbs_key_m]->attach_pss_and_rm(fv_for_main_cache, rm_for_main_cache);
-            }
-            NeighborSearch *nbs_v = NeighborSearch::main_cache_m[nbs_key_m];
+            NeighborSearch *nbs_v = new NeighborSearch(refmap[m]->get_active_element(), spaces[m]->get_mesh());
+            nbs_v->set_active_edge(isurf, false);
+            nbs_v->attach_pss_and_rm(spss[m], refmap[m]);
 
             // Assemble DG inner surface vector form - a single mesh version.
             // Go through each segment of the active edge. Do not skip if the segment has already been
@@ -1046,6 +1034,7 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
                 }
               }
             }
+            delete nbs_v;
           }
 }
 
