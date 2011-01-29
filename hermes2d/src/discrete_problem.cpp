@@ -475,8 +475,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // traverses through the union mesh. On the other hand, if you don't use multi-mesh
   // at all, there will always be only one stage in which all forms are assembled as usual.
   for (unsigned ss = 0; ss < stages.size(); ss++) 
+    // Assemble one stage. One stage is a collection of functions, and meshes that can not be further minimized.
+    // E.g. if a linear form uses two external solution, each of which is defined on a different mesh, and different to the
+    // mesh of the current test function, then the stage would have three meshes.
+    // By stage functions, all functions are meant: shape function (their precalculated values), and mesh functions.
     assemble_one_stage(stages[ss], mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext);
-
   
   // Deinitialize matrix buffer.
   if(matrix_buffer != NULL)
@@ -520,8 +523,10 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
   // Assemble each one.
   Element** e;
   while ((e = trav.get_next_state(bnd, surf_pos)) != NULL)
+    // One state is a collection of (virtual) elements sharing the same physical location on (possibly) different meshes.
+    // This is then the same element of the virtual union mesh. The proper sub-element mappings to all the functions of
+    // this stage is supplied by the function Traverse::get_next_state() called in the while loop.
     assemble_one_state(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, e, bnd, surf_pos, trav.get_base());
-
 
   if (mat != NULL) mat->finish();
   if (rhs != NULL) rhs->finish();
