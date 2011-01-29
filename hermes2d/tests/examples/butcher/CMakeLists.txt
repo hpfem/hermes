@@ -25,7 +25,7 @@ set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 #   Implicit_Radau_IIA_3_5       // Implicit Radau IIA-5 method.
 #   Implicit_SIRK_2_2,           // Implicit SIRK-2-2 method.
 #   Implicit_ESIRK_2_2,          // Implicit ESIRK-2-2 method.
-#   Implicit_SDIRK_4_5           // Implicit SDIRK-2-2 method.
+#   Implicit_SDIRK_4_5           // Implicit SDIRK-4-5 method.
 
 
 add_test(example-butcher-Explicit_RK_1 ${BIN} 1)
