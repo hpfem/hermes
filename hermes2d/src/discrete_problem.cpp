@@ -175,7 +175,7 @@ bool DiscreteProblem::is_up_to_date()
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
-void DiscreteProblem::create(SparseMatrix* mat, Vector* rhs, bool rhsonly,
+void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bool rhsonly,
                              bool force_diagonal_blocks, Table* block_weights)
 {
   _F_
@@ -441,7 +441,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   assemble_sanity_checks(block_weights);
 
   // Creating matrix sparse structure.
-  create(mat, rhs, rhsonly, force_diagonal_blocks, block_weights);
+  create_sparse_structure(mat, rhs, rhsonly, force_diagonal_blocks, block_weights);
  
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::vector 'u_ext'.
   Hermes::vector<Solution *> u_ext = Hermes::vector<Solution *>();
