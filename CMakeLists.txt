@@ -16,6 +16,7 @@ set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
 set(WITH_H1D           YES)
 set(WITH_H2D           YES)
 set(WITH_H3D           YES)
+set(WITH_TESTS         YES)
 
 # Allow to override the default values in CMake.vars:
 if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
@@ -33,6 +34,10 @@ endif(WITH_H2D)
 if(WITH_H3D)
     add_subdirectory(hermes3d)
 endif(WITH_H3D)
+
+if(WITH_TESTS)
+  enable_testing()
+endif(WITH_TESTS)
 
 message("\nConfiguration results")
 message("---------------------")
