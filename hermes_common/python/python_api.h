@@ -10,6 +10,7 @@
 #undef _XOPEN_SOURCE
 #undef HAVE_SYS_TIME_H
 #include "Python.h"
+#include "compat.h"
 
 /*
     This is a nice C++ Python API and the only header file that you should
@@ -30,7 +31,7 @@
 
 */
 
-class Python {
+class HERMES_API Python {
 public:
     Python();
     Python(int argc, char* argv[]);

@@ -28,8 +28,8 @@ Table::Table(unsigned int size)
   this->size = size;
   // A array.
   this->A = new_matrix<double>(size, size);
-  for (unsigned int i=0; i<size; i++) {
-    for (unsigned int j=0; j<size; j++) this->A[i][j] = 0;
+  for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
   }
 }
 
@@ -39,8 +39,8 @@ void Table::alloc(unsigned int size)
   this->size = size;
   // A array.
   this->A = new_matrix<double>(size, size);
-  for (unsigned int i=0; i<size; i++) {
-    for (unsigned int j=0; j<size; j++) this->A[i][j] = 0;
+  for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
   }
 }
 
@@ -72,13 +72,13 @@ ButcherTable::ButcherTable(unsigned int size) : Table(size)
 {
   // B array.
   this->B = new double[size];
-  for (unsigned int j=0; j<size; j++) this->B[j] = 0;
+  for (unsigned int j = 0; j < size; j++) this->B[j] = 0;
   // B2 array.
   this->B2 = new double[size];
-  for (unsigned int j=0; j<size; j++) this->B2[j] = 0;
+  for (unsigned int j = 0; j < size; j++) this->B2[j] = 0;
   // C array.
   this->C = new double[size];
-  for (unsigned int j=0; j<size; j++) this->C[j] = 0;
+  for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
 }
 
 
@@ -366,18 +366,18 @@ void ButcherTable::alloc(unsigned int size)
   this->size = size;
   // A array.
   this->A = new_matrix<double>(size, size);
-  for (unsigned int i=0; i<size; i++) {
-    for (unsigned int j=0; j<size; j++) this->A[i][j] = 0;
+  for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
   }
   // B array.
   this->B = new double[size];
-  for (unsigned int j=0; j<size; j++) this->B[j] = 0;
+  for (unsigned int j = 0; j < size; j++) this->B[j] = 0;
   // B2 array.
   this->B2 = new double[size];
-  for (unsigned int j=0; j<size; j++) this->B2[j] = 0;
+  for (unsigned int j = 0; j < size; j++) this->B2[j] = 0;
   // C array.
   this->C = new double[size];
-  for (unsigned int j=0; j<size; j++) this->C[j] = 0;
+  for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
 }
 
 double ButcherTable::get_B(unsigned int i) 
@@ -419,8 +419,8 @@ void ButcherTable::set_C(unsigned int i, double val)
 bool ButcherTable::is_explicit()
 {
   bool result = true;
-  for (int i=0; i<size; i++) {
-    for (int j=0; j<size; j++) {
+  for (unsigned int i = 0; i<size; i++) {
+    for (unsigned int j = 0; j<size; j++) {
       double val_ij = get_A(i, j);
       if (j >= i && fabs(val_ij) > 1e-12) result = false;
     }
@@ -432,8 +432,8 @@ bool ButcherTable::is_explicit()
 bool ButcherTable::is_diagonally_implicit()
 {
   bool result = true;
-  for (int i=0; i<size; i++) {
-    for (int j=0; j<size; j++) {
+  for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int j = 0; j < size; j++) {
       double val_ij = get_A(i, j);
       if (j > i && fabs(val_ij) > 1e-12) result = false;
     }
@@ -445,8 +445,8 @@ bool ButcherTable::is_diagonally_implicit()
 bool ButcherTable::is_fully_implicit()
 {
   bool result = false;
-  for (int i=0; i<size; i++) {
-    for (int j=0; j<size; j++) {
+  for (unsigned int i = 0; i < size; i++) {
+    for (unsigned int j = 0; j < size; j++) {
       double val_ij = get_A(i, j);
       if (j > i && fabs(val_ij) > 1e-12) result = true;
     }
