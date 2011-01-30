@@ -11,113 +11,56 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 
-# Build with debugging symbols:
-set(DEBUG                   YES)
-set(RELEASE                 NO)
+IF(H2D_DEBUG)
+	set(DEBUG YES)
+ELSE(H2D_DEBUG)
+	set(DEBUG NO)
+ENDIF(H2D_DEBUG)
 
-# Real/complex version of the library (you can build either one or both):
-set(H2D_REAL                YES)
-set(H2D_COMPLEX             YES)
-
-# Optional parts of the library:
-set(WITH_EXAMPLES           YES)
-set(WITH_BENCHMARKS         YES)
-set(WITH_MODULES            YES)
-set(WITH_TUTORIAL           YES)
-set(WITH_TESTS              YES)
-
-# Optional functionality:
-set(WITH_PYTHON             NO)
-set(WITH_GLUT               YES)
-set(WITH_VIEWER_GUI         NO)
-set(WITH_UTIL               YES)
-
-#
-# Select which solvers will be available:
-#
-set(WITH_UMFPACK            YES)
-set(WITH_TRILINOS           NO)
-
-# If PETSc is enabled, PETSC_ROOT and PETSC_ARCH must be set as well;
-# if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
-#
-set(WITH_PETSC              NO)
-set(PETSC_ROOT              /opt/petsc/petsc-3.1-p4)
-set(PETSC_ARCH              petsc-arch-without-scalar-type)
-
-# Sequential version of MUMPS may be enabled by setting YES on the following line
-# and pointing to the package installation directory with MUMPS_ROOT. To enable the 
-# parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
-# problems arise, it may be that the automatically found SCALAPACK libraries (reported
-# during the CMake configuration phase) do not match those used when compiling MUMPS.
-# In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
-#
-set(WITH_MUMPS              NO)
-# set(MUMPS_ROOT            root/dir/of/mumps/)
-# set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
-
-# First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
-# and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
-# for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
-# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or 
-# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if 
-# WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
-# SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
-# header files as the serial library. 
-#
-set(WITH_SUPERLU            NO)
-set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
-set(SUPERLU_MT              NO)
-
-# If PARDISO is enabled, WITH_OPENMP must be set as well (and perhaps some other libraries
-# added to ADDITIONAL_LIBS according to PARDISO user guide).
-#
-set(WITH_PARDISO            NO)
-set(PARDISO_LIB             /opt/pardiso/libpardiso400_GNU430_AMD_IA64.so)
-
-#
-# Parallel execution (tells the linker to use parallel versions of the selected solvers, if available):
-#
-# Enable OpenMP for shared memory processing. Note that this is required when PARDISO is enabled.
-#  
-set(WITH_OPENMP             NO)
-
-# If MPI is enabled, the MPI library installed on the system should be found by 
-# CMake automatically. If the found library doesn't match the one used to compile the
-# particular MPI-dependent package, the other two options should be used to specify it.
-#
-set(WITH_MPI                NO)
-# set(MPI_LIBRARIES         -lmpi)
-# set(MPI_INCLUDE_PATH      /usr/include/openmpi
+IF(H2D_RELEASE)
+	set(RELEASE NO)
+ELSE(H2D_RELEASE)
+	set(RELEASE NO)
+ENDIF(H2D_RELEASE)
 
 
-# Additional data formats:
-set(WITH_EXODUSII           NO)
-set(WITH_HDF5               NO)
+IF(H2D_WITH_EXAMPLES)
+	set(WITH_EXAMPLES YES)
+ELSE(H2D_WITH_EXAMPLES)
+	set(WITH_EXAMPLES NO)
+ENDIF(H2D_WITH_EXAMPLES)
 
-# Additional libraries required by some of the above:
-# set(ADDITIONAL_LIBS       -lgfortran -lm)
+IF(H2D_WITH_BENCHMARKS)
+	set(WITH_BENCHMARKS YES)
+ELSE(H2D_WITH_BENCHMARKS)
+	set(WITH_BENCHMARKS NO)
+ENDIF(H2D_WITH_BENCHMARKS)
 
-# Reporting and logging:
-set(HERMES_REPORT_WITH_LOGO        NO)   #logo will be shown
-set(HERMES_REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(HERMES_REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
-                                  #The runtime control is intended just for Python wrappers.
-set(HERMES_REPORT_ALL              NO)   #do not report all events, just selected ones
-set(HERMES_REPORT_WARNING          YES)  #warnings will be reported
-set(HERMES_REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
-set(HERMES_REPORT_INFO             YES)  #info will be reported
-set(HERMES_REPORT_VERBOSE          NO)   #info details will not be reported
-set(HERMES_REPORT_TRACE            NO)   #code execution tracing will not be reported
-set(HERMES_REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
-#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
+IF(H2D_WITH_TESTS)
+	set(WITH_TESTS YES)
+ELSE(H2D_WITH_TESTS)
+	set(WITH_TESTS NO)
+ENDIF(H2D_WITH_TESTS)
+
+IF(H2D_WITH_MODULES)
+	set(WITH_MODULES YES)
+ELSE(H2D_WITH_MODULES)
+	set(WITH_MODULES NO)
+ENDIF(H2D_WITH_MODULES)
+
+IF(H2D_WITH_TUTORIAL)
+	set(WITH_TUTORIAL YES)
+ELSE(H2D_WITH_TUTORIAL)
+	set(WITH_TUTORIAL NO)
+ENDIF(H2D_WITH_TUTORIAL)
+
 
 # Allow to override the default values in CMake.vars:
 if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
   include(CMake.vars)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 
-# Set overrides:
+# Python inclusion is different in H1D, H2D, H3D.
 if(WITH_PYTHON)
   set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
 endif(WITH_PYTHON)
@@ -125,9 +68,6 @@ endif(WITH_PYTHON)
 #
 # end of configuration section
 #---------------------------------------------------------
-
-include(../hermes_common/CMakeCommon.txt)
-
 if(H2D_REAL)
     list(APPEND VERS "real")
 endif(H2D_REAL)
@@ -162,103 +102,17 @@ else(MSVC)
   endif(RELEASE)
 endif(MSVC)
 
-find_package(PTHREAD REQUIRED)
-
-if(WITH_GLUT)
+if(H2D_WITH_GLUT)
   find_package(GLUT REQUIRED)
   find_package(GLEW REQUIRED)
-else(WITH_GLUT)
+else(H2D_WITH_GLUT)
   add_definitions(-DNOGLUT)
-endif(WITH_GLUT)
+endif(H2D_WITH_GLUT)
 
-if(WITH_VIEWER_GUI)
+if(H2D_WITH_VIEWER_GUI)
   find_package(ANTTWEAKBAR REQUIRED)
   include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
-endif(WITH_VIEWER_GUI)
-
-if(WITH_EXODUSII)
-  find_package(EXODUSII REQUIRED)
-  include_directories(${EXODUSII_INCLUDE_DIR})
-endif(WITH_EXODUSII)
-
-if(WITH_HDF5)
-	find_package(HDF5 REQUIRED)
-	include_directories(${HDF5_INCLUDE_DIR})
-endif(WITH_HDF5)
-
-# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC)
-if(WITH_MPI)
-  if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
-    find_package(MPI REQUIRED)
-  else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-    if(NOT EXISTS MPI_INCLUDE_PATH)
-      message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
-    endif(NOT EXISTS MPI_INCLUDE_PATH)
-  endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-  include_directories(MPI_INCLUDE_PATH)	  
-endif(WITH_MPI)
-
-if(WITH_OPENMP)
-  find_package(OpenMP REQUIRED)
-  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
-endif(WITH_OPENMP)
-
-if(MSVC)
-	if(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-		find_package(CLAPACK REQUIRED)
-	endif(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-else(MSVC)
-  # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
-  # FindLAPACK is Fortran-only so Fortran must be enabled as well.
-  if(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-    enable_language(Fortran)
-    find_package(LAPACK REQUIRED)
-    add_definitions(-DWITH_BLAS)
-  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-endif(MSVC)  
- 
-# Solvers:
-if(WITH_UMFPACK)
-  find_package(UMFPACK REQUIRED)
-  include_directories(${UMFPACK_INCLUDE_DIRS})
-endif(WITH_UMFPACK)
-
-if(WITH_TRILINOS)
-  find_package(TRILINOS REQUIRED)
-  include_directories(${TRILINOS_INCLUDE_DIR})
-endif(WITH_TRILINOS)
-
-if(WITH_MUMPS)
-  find_package(MUMPS REQUIRED)
-  if(WITH_MPI)
-    find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
-  endif(WITH_MPI)
-  include_directories(${MUMPS_INCLUDE_DIR})
-endif(WITH_MUMPS)
-
-if(WITH_PETSC)
-  find_package(PETSC REQUIRED)
-  # For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
-  # different directories), so we can't globally set the architecture-specific include directory here, but 
-  # rather on a per-target basis.
-  include_directories(${COMMON_PETSC_INCLUDE_DIRS})
-endif(WITH_PETSC)
-
-if(WITH_PARDISO)
-  find_package(PARDISO REQUIRED) 
-endif(WITH_PARDISO)
-
-if(WITH_SUPERLU)
-  find_package(SUPERLU REQUIRED)
-  include_directories(${SUPERLU_INCLUDE_DIR})
-  if(SUPERLU_MT)
-    set(MT "_MT")
-    add_definitions(-DSLU_MT)
-  endif(SUPERLU_MT)
-endif(WITH_SUPERLU)
-
-include_directories(${HERMES_COMMON_DIR})
+endif(H2D_WITH_VIEWER_GUI)
 
 # We require Python for the mesh parser (it also needs NumPy)
 find_package(Python REQUIRED)
@@ -266,7 +120,12 @@ find_package(NumPy REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 set(PYTHON_INSTALL_PATH lib/python/site-packages)
 
-#add_subdirectory(hermes_common)
+if(WITH_PYTHON)
+  find_package(Cython REQUIRED)
+  add_subdirectory(hermes2d)
+endif(WITH_PYTHON)
+
+# Subdirectories.
 add_subdirectory(src)
 
 if(WITH_TESTS)
@@ -274,10 +133,6 @@ if(WITH_TESTS)
   add_subdirectory(tests)
 endif(WITH_TESTS)
 
-if(WITH_PYTHON)
-  find_package(Cython REQUIRED)
-  add_subdirectory(hermes2d)
-endif(WITH_PYTHON)
 
 if(WITH_EXAMPLES)
   add_subdirectory(examples)
@@ -295,9 +150,9 @@ if(WITH_TUTORIAL)
   add_subdirectory(tutorial)
 endif(WITH_TUTORIAL)
 
-if(WITH_UTIL)
+if(H2D_WITH_UTIL)
   add_subdirectory(util)
-endif(WITH_UTIL)
+endif(H2D_WITH_UTIL)
 
 # Documentation
 # This doesn't work yet:
@@ -326,9 +181,9 @@ message("Build with examples: ${WITH_EXAMPLES}")
 message("Build with benchmarks: ${WITH_BENCHMARKS}")
 message("Build with modules: ${WITH_MODULES}")
 message("Build with tutorial: ${WITH_TUTORIAL}")
-message("Build with GLUT: ${WITH_GLUT}")
-message("Build with viewer GUI: ${WITH_VIEWER_GUI}")
-message("Build with util: ${WITH_UTIL}")
+message("Build with GLUT: ${H2D_WITH_GLUT}")
+message("Build with viewer GUI: ${H2D_WITH_VIEWER_GUI}")
+message("Build with util: ${H2D_WITH_UTIL}")
 message("Build with tests: ${WITH_TESTS}")
 message("Build with UMFPACK: ${WITH_UMFPACK}")
 message("Build with PETSC: ${WITH_PETSC}")
