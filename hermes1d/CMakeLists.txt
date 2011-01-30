@@ -41,11 +41,6 @@ set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
 
 set(SPHINX_BUILD_BIN sphinx-build)
 
-# allow to override the default values in CMake.vars
-if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
-    include(CMake.vars)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
-
 # For use in the common code.
 set(H1D_REAL YES)
 add_definitions(-DH1D_REAL)

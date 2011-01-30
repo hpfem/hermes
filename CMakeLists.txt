@@ -149,7 +149,6 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
   include(CMake.vars)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 
-
 # Find necessary packages.
 find_package(PTHREAD REQUIRED)
 
@@ -157,6 +156,7 @@ find_package(PTHREAD REQUIRED)
 if(MSVC)
 	if(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 		find_package(CLAPACK REQUIRED)
+		include_directories(${CLAPACK_INCLUDE_DIRS})
 	endif(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 else(MSVC)
   # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).

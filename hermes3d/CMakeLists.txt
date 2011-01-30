@@ -43,9 +43,6 @@ ENDIF(H3D_WITH_DEV_TESTS)
 
 #set(SPHINX_BUILD_BIN sphinx-build)
 
-# allow to override default values via CMake.vars 
-include(${PROJECT_BINARY_DIR}/CMake.vars OPTIONAL)
-
 # need at least real or complex version
 if(H3D_REAL)
 	list(APPEND VERS "real")

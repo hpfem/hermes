@@ -54,12 +54,6 @@ ELSE(H2D_WITH_TUTORIAL)
 	set(WITH_TUTORIAL NO)
 ENDIF(H2D_WITH_TUTORIAL)
 
-
-# Allow to override the default values in CMake.vars:
-if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
-  include(CMake.vars)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
-
 # Python inclusion is different in H1D, H2D, H3D.
 if(WITH_PYTHON)
   set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
