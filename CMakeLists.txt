@@ -31,7 +31,7 @@ set(WITH_H2D                  YES)
 	set(H2D_COMPLEX           YES)
 	# Release and debug versions.
 	set(H2D_DEBUG             YES)
-	set(H2D_RELEASE           NO)
+	set(H2D_RELEASE           YES)
 	# Optional parts of the library.
 	set(H2D_WITH_EXAMPLES     YES)
 	set(H2D_WITH_BENCHMARKS   YES)
@@ -149,24 +149,9 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
   include(CMake.vars)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
 
-if(WITH_H1D)
-    add_subdirectory(hermes1d)
-endif(WITH_H1D)
-
-if(WITH_H2D)
-    add_subdirectory(hermes2d)
-endif(WITH_H2D)
-
-if(WITH_H3D)
-    add_subdirectory(hermes3d)
-endif(WITH_H3D)
-
-include(../hermes_common/CMakeCommon.txt)
-include_directories(${HERMES_COMMON_DIR})
 
 # Find necessary packages.
 find_package(PTHREAD REQUIRED)
-
 
 # Solvers.
 if(MSVC)
@@ -193,7 +178,7 @@ endif(WITH_PETSC)
 
 if(WITH_UMFPACK)
 	find_package(UMFPACK REQUIRED)
-  include_directories(${UMFPACK_INCLUDE_DIRS})
+	include_directories(${UMFPACK_INCLUDE_DIRS})
 endif(WITH_UMFPACK)
 
 if(WITH_PARDISO)
@@ -250,6 +235,21 @@ if(WITH_MPI)
   endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
   include_directories(MPI_INCLUDE_PATH)	  
 endif(WITH_MPI)
+
+include(hermes_common/CMakeCommon.txt)
+include_directories(${HERMES_COMMON_DIR})
+
+if(WITH_H1D)
+    add_subdirectory(hermes1d)
+endif(WITH_H1D)
+
+if(WITH_H2D)
+    add_subdirectory(hermes2d)
+endif(WITH_H2D)
+
+if(WITH_H3D)
+    add_subdirectory(hermes3d)
+endif(WITH_H3D)
 
 if(WITH_TESTS)
   enable_testing()

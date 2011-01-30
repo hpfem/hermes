@@ -7,8 +7,6 @@ option(DEBUG         "Build debug version" YES)
 # Directory where the output will be written.
 set(OUTPUT_DIR "" CACHE STRING "Directory were the output will be written")
 
-include_directories(${PROJECT_SOURCE_DIR})
-
 IF(H3D_WITH_EXAMPLES)
 	set(WITH_EXAMPLES YES)
 ELSE(H3D_WITH_EXAMPLES)

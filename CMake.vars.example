@@ -1,0 +1,10 @@
+set(WITH_MUMPS YES)
+set(WITH_SUPERLU YES)
+
+set(WITH_TRILINOS YES)
+set(TRILINOS_ROOT /opt/packages/trilinos)
+
+SET(WITH_EXODUSII YES)
+SET(EXODUSII_ROOT /opt/packages/exodusii)
+SET(NETCDF_ROOT /opt/packages/netcdf)
+
