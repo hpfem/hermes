@@ -69,7 +69,7 @@ void HERMES_API set_coeff_vector(scalar *y, Space *space, int sln=0);
 void HERMES_API get_coeff_vector(Space *space, Vector *y, int sln=0);
 void HERMES_API set_coeff_vector(Vector *y, Space *space, int sln=0);
 
-class Space {
+class HERMES_API Space {
     public:
         Space();
         // Creates equidistant space with uniform polynomial degree of elements.

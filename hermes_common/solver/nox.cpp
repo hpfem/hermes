@@ -206,7 +206,9 @@ NoxSolver::~NoxSolver()
 #ifdef HAVE_NOX
   // FIXME: this does not destroy the "interface_", and Trilinos 
   // complains at closing main.cpp.
+#ifndef H1D_REAL
   interface_->fep->invalidate_matrix();
+#endif
 #endif
 }
 
