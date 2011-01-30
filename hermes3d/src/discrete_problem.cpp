@@ -155,7 +155,7 @@ bool DiscreteProblem::is_up_to_date()
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
-void DiscreteProblem::create(SparseMatrix *mat, Vector* rhs, bool rhsonly)
+void DiscreteProblem::create_sparse_structure(SparseMatrix *mat, Vector* rhs, bool rhsonly)
 {
   _F_
 
@@ -266,7 +266,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
-  this->create(mat, rhs, rhsonly);
+  this->create_sparse_structure(mat, rhs, rhsonly);
 
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::vector 'u_ext'.
   Hermes::vector<Solution*> u_ext;
