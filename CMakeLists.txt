@@ -236,8 +236,11 @@ if(WITH_MPI)
   include_directories(MPI_INCLUDE_PATH)	  
 endif(WITH_MPI)
 
+add_subdirectory(${HERMES_COMMON_DIR})
+
 include(hermes_common/CMakeCommon.txt)
 include_directories(${HERMES_COMMON_DIR})
+
 
 if(WITH_H1D)
     add_subdirectory(hermes1d)

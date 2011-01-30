@@ -137,7 +137,7 @@ scalar EpetraMatrix::get(unsigned int m, unsigned int n)
     std::vector<double> vals(n_entries);
     std::vector<int> idxs(n_entries);
     mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
-    for (int i = 0; i < n_entries; i++) if (idxs[i] == n) return vals[i];
+    for (int i = 0; i < n_entries; i++) if (idxs[i] == (int)n) return vals[i];
 #endif
     return 0.0;
 }

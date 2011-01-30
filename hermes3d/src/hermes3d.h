@@ -20,6 +20,17 @@
 #ifndef _HERMES_3D_
 #define _HERMES_3D_
 
+#include "h3d_common.h"
+
+#include "config.h"
+
+// RCP
+#ifndef WITH_TRILINOS
+#include "../../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#else
+#include "Teuchos_RCP.hpp"
+#endif
+
 // hermes_common
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/utils.h"
@@ -44,11 +55,6 @@
 
 // Eigensolver
 #include "../../hermes_common/solver/eigensolver.h"
-
-// RCP
-#include "../../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
-
-#include "h3d_common.h"
 
 // mesh
 #include "mesh.h"

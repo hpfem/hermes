@@ -1,6 +1,13 @@
 #ifndef __H2D_SCHROEDINGER_H
 #define __H2D_SCHROEDINGER_H
 
+// The module is a library.
+#ifndef EXPORT_HERMES_MODULE
+#define EXPORT_HERMES_MODULE
+#endif
+
+#include "config.h"
+
 #include "hermes2d.h"
 
 namespace Schroedinger {
@@ -10,7 +17,7 @@ using Teuchos::Ptr;
 using Teuchos::rcp;
 using Teuchos::null;
 
-class Potential {
+class HERMES_MODULE_API Potential {
     public:
         // Returns the value in the point "x" and "y"
         virtual double get_value(double x, double y) = 0;
@@ -24,7 +31,7 @@ class Potential {
         }
 };
 
-class PotentialHarmonicOscillator: public Potential {
+class HERMES_MODULE_API PotentialHarmonicOscillator: public Potential {
     public:
         PotentialHarmonicOscillator() {
             this->omega = 1.0;
@@ -41,7 +48,7 @@ class PotentialHarmonicOscillator: public Potential {
         double omega;
 };
 
-class HERMES_API ModuleSchroedinger {
+class HERMES_MODULE_API ModuleSchroedinger {
 public:
     ModuleSchroedinger() {
         this->potential = null;

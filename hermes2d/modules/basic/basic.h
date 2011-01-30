@@ -1,5 +1,11 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_FILE "application.log"
+
+// The module is a library.
+#ifndef EXPORT_HERMES_MODULE
+#define EXPORT_HERMES_MODULE
+#endif
+
 #include "hermes2d.h"
 
 // This is a simple generic module for a linear second-order PDE based on the Hermes 
@@ -24,7 +30,7 @@
 
 typedef std::pair<double, double> double_pair;
 
-class HERMES_API ModuleBasic {
+class HERMES_MODULE_API ModuleBasic {
 public:
   ModuleBasic();
 
