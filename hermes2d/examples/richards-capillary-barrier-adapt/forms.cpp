@@ -15,9 +15,9 @@ double jac_form_vol_euler(int n, double *wt, Func<double> *u_ext[], Func<double>
 
   for (int i = 0; i < n; i++)
     result += wt[i] * (
-		         C(h_prev_newton->val[i], elem_marker) * u->val[i] * v->val[i] / TAU
-		         + dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->val[i] * v->val[i] / TAU
-		         - dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_time->val[i] * v->val[i] / TAU
+		         C(h_prev_newton->val[i], elem_marker) * u->val[i] * v->val[i] / time_step
+		         + dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->val[i] * v->val[i] / time_step
+		         - dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_time->val[i] * v->val[i] / time_step
 			 + K(h_prev_newton->val[i], elem_marker) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
                          + dKdh(h_prev_newton->val[i], elem_marker) * u->val[i] * 
                            (h_prev_newton->dx[i]*v->dx[i] + h_prev_newton->dy[i]*v->dy[i])
@@ -41,9 +41,9 @@ double jac_form_vol_cranic(int n, double *wt, Func<double> *u_ext[], Func<double
   Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++)
     result += wt[i] * 0.5 * ( // implicit Euler part:
-		         C(h_prev_newton->val[i], elem_marker) * u->val[i] * v->val[i] / TAU
-		         + dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->val[i] * v->val[i] / TAU
-		         - dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_time->val[i] * v->val[i] / TAU
+		         C(h_prev_newton->val[i], elem_marker) * u->val[i] * v->val[i] / time_step
+		         + dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->val[i] * v->val[i] / time_step
+		         - dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_time->val[i] * v->val[i] / time_step
 			 + K(h_prev_newton->val[i], elem_marker) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
                          + dKdh(h_prev_newton->val[i], elem_marker) * u->val[i] * 
                            (h_prev_newton->dx[i]*v->dx[i] + h_prev_newton->dy[i]*v->dy[i])
@@ -51,7 +51,7 @@ double jac_form_vol_cranic(int n, double *wt, Func<double> *u_ext[], Func<double
                          - ddKdhh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->dy[i] * v->val[i]
                        )
             + wt[i] * 0.5 * ( // explicit Euler part, 
-		         C(h_prev_time->val[i], elem_marker) * u->val[i] * v->val[i] / TAU
+		         C(h_prev_time->val[i], elem_marker) * u->val[i] * v->val[i] / time_step
                        );
   return result;
 }
@@ -73,7 +73,7 @@ double res_form_vol_euler(int n, double *wt, Func<double> *u_ext[], Func<double>
   Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * (
-		       C(h_prev_newton->val[i], elem_marker) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / TAU
+		       C(h_prev_newton->val[i], elem_marker) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / time_step
                        + K(h_prev_newton->val[i], elem_marker) * (h_prev_newton->dx[i] * v->dx[i] + h_prev_newton->dy[i] * v->dy[i])
                        - dKdh(h_prev_newton->val[i], elem_marker) * h_prev_newton->dy[i] * v->val[i]
                       );
@@ -91,12 +91,12 @@ double res_form_vol_cranic(int n, double *wt, Func<double> *u_ext[], Func<double
   Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
     result += wt[i] * 0.5 * ( // implicit Euler part
-		       C(h_prev_newton->val[i], elem_marker) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / TAU
+		       C(h_prev_newton->val[i], elem_marker) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / time_step
                        + K(h_prev_newton->val[i], elem_marker) * (h_prev_newton->dx[i] * v->dx[i] + h_prev_newton->dy[i] * v->dy[i])
                        - dKdh(h_prev_newton->val[i], elem_marker) * h_prev_newton->dy[i] * v->val[i]
                       )
             + wt[i] * 0.5 * ( // explicit Euler part
-		       C(h_prev_time->val[i], elem_marker) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / TAU
+		       C(h_prev_time->val[i], elem_marker) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / time_step
                        + K(h_prev_time->val[i], elem_marker) * (h_prev_time->dx[i] * v->dx[i] + h_prev_time->dy[i] * v->dy[i])
                        - dKdh(h_prev_time->val[i], elem_marker) * h_prev_time->dy[i] * v->val[i]
 		       );
@@ -123,7 +123,7 @@ double bilinear_form_picard_euler(int n, double *wt, Func<double> *u_ext[], Func
 
   for (int i = 0; i < n; i++) {
     result += wt[i] * (
-                         C(h_prev_picard->val[i], elem_marker) * u->val[i] * v->val[i] / TAU
+                         C(h_prev_picard->val[i], elem_marker) * u->val[i] * v->val[i] / time_step
                          + K(h_prev_picard->val[i], elem_marker) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
                          - dKdh(h_prev_picard->val[i], elem_marker) * u->dy[i] * v->val[i]
 		       );
@@ -146,7 +146,7 @@ double linear_form_picard_euler(int n, double *wt, Func<double> *u_ext[], Func<d
   double result = 0;
   Func<double>* h_prev_picard = ext->fn[0];
   Func<double>* h_prev_time = ext->fn[1];
-  for (int i = 0; i < n; i++) result += wt[i] * C(h_prev_picard->val[i], elem_marker) * h_prev_time->val[i] * v->val[i] / TAU;
+  for (int i = 0; i < n; i++) result += wt[i] * C(h_prev_picard->val[i], elem_marker) * h_prev_time->val[i] * v->val[i] / time_step;
   return result;
 }
 

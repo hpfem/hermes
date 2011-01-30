@@ -42,17 +42,16 @@ const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
 // Adaptive time stepping.
-double TAU = 1.0;                                 // Time step (in days).
-double TIMESTEP_DEC = 0.75;                       // Timestep decrease ratio after unsuccessful nonlinear solve.
-double TIMESTEP_INC = 1.5;                        // Timestep increase ratio after successful nonlinear solve.
-double TAU_MIN = 1e-8; 				  // Computation will stop if time step drops below this value. 
-double TAU_MAX = 1.0;                             // Maximal time step.
-                       
+double time_step = 0.5;                           // Time step (in days).
+double time_step_dec = 0.75;                      // Timestep decrease ratio after unsuccessful nonlinear solve.
+double time_step_inc = 1.5;                       // Timestep increase ratio after successful nonlinear solve.
+double time_step_min = 1e-8; 			  // Computation will stop if time step drops below this value. 
+double time_step_max = 1.0;                       // Maximal time step.
 
 // Elements orders and initial refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refinements towards the top edge.
+const int INIT_REF_NUM_BDY_TOP = 0;               // Number of initial mesh refinements towards the top edge.
 
 // Adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -99,15 +98,15 @@ int PICARD_MAX_ITER = 23;                         // Maximum allowed number of P
 
 
 // Times.
-const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
+const double STARTUP_TIME = 5.0;                  // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 const double PULSE_END_TIME = 1000.0;             // Time interval of the top layer infiltration.
-double TIME = TAU;                                // Global time variable initialized with first time step.
+double current_time = time_step;                        // Global time variable initialized with first time step.
 
 
 
 // Problem parameters.
-double H_INIT = -50.0;                            // Initial pressure head.
+double H_INIT = -15.0;                            // Initial pressure head.
 double H_ELEVATION = 10.0;                        // Top constant pressure head -- an infiltration experiment.
 const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64}; 
 const double ALPHA_vals[4] = {0.01, 1.0, 0.01, 0.01};
@@ -123,7 +122,7 @@ const double STORATIVITY_vals[4] = {0.1, 0.1, 0.1, 0.1};
 const int MATERIAL_COUNT = 4;
 const int CONSTITUTIVE_TABLE_METHOD = 2;          // 0 - constitutive functions are evaluated directly (slow performance).
 					          // 1 - constitutive functions are linearly approximated on interval <TABLE_LIMIT; LOW_LIMIT> 
-						  //	 (very efficient CPU utilization less efficient memory consumption (depending on TABLE_PRECISSION)).
+						  //	 (very efficient CPU utilization less efficient memory consumption (depending on TABLE_PRECISION)).
 						  // 2 - constitutive functions are aproximated by quintic splines.
 						  
 //!Use only if 	CONSTITUTIVE_TABLE_METHOD == 2 !//					  
@@ -174,10 +173,10 @@ double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
 #endif
 
 // Boundary markers.
-const int BDY_1 = 1;
-const int BDY_2 = 2;
-const int BDY_3 = 3;
-const int BDY_4 = 4;
+const int BDY_TOP = 1;
+const int BDY_RIGHT = 2;
+const int BDY_BOTTOM = 3;
+const int BDY_LEFT = 4;
 
 // Initial condition.
 double init_cond(double x, double y, double& dx, double& dy) {
@@ -221,7 +220,6 @@ int main(int argc, char* argv[])
   // In case of CONSTITUTIVE_TABLE_METHOD==2, all constitutive functions are approximated by polynomials.
   info("Initializing polynomial approximations.");
   for (int i=0; i < MATERIAL_COUNT; i++) {
-    info("Processing layer %d", i);
     init_polynomials(6 + NUM_OF_INSIDE_PTS, LOW_LIMIT, points, NUM_OF_INSIDE_PTS, i);
   }
   POLYNOMIALS_READY = true;
@@ -241,23 +239,19 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load(mesh_file, &basemesh);
   
-  // Initial refinements.
-  //basemesh.refine_towards_boundary(1, 1);
-  //basemesh.refine_towards_boundary(3, 1);
-  //basemesh.refine_towards_boundary(4, 1);
-
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY_TOP);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_1);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_3, BDY_4));
+  bc_types.add_bc_dirichlet(BDY_TOP);
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_RIGHT, BDY_BOTTOM, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
-  BCValues bc_values(&TIME);
-  bc_values.add_timedep_function(BDY_1, essential_bc_values);
+  BCValues bc_values(&current_time);
+  bc_values.add_timedep_function(BDY_TOP, essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -325,7 +319,7 @@ int main(int argc, char* argv[])
   //View::wait();
 
   // Time stepping loop.
-  int num_time_steps = (int)(T_FINAL/TAU + 0.5);
+  int num_time_steps = (int)(T_FINAL/time_step + 0.5);
   for(int ts = 1; ts <= num_time_steps; ts++)
   {
     info("---- Time step %d:", ts);
@@ -349,7 +343,7 @@ int main(int argc, char* argv[])
     double err_est_rel;
     do
     {
-      info("---- Time step %d, time step lenght %g, time %g (days), adaptivity step %d:", ts, TAU, TIME, as);
+      info("---- Time step %d, time step lenght %g, time %g (days), adaptivity step %d:", ts, time_step, current_time, as);
 
       // Construct globally refined reference mesh
       // and setup reference space.
@@ -384,7 +378,7 @@ int main(int argc, char* argv[])
         // Perform Newton's iteration on the reference mesh. If necessary, 
         // reduce time step to make it converge, but then restore time step 
         // size to its original value.
-        info("Performing Newton's iteration (tau = %g days):", TAU);
+        info("Performing Newton's iteration (tau = %g days):", time_step);
         bool success, verbose = true;
         double* save_coeff_vec = new double[ndof];
         // Save coefficient vector.
@@ -396,10 +390,10 @@ int main(int argc, char* argv[])
           for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
           // Reducing time step to 50%.
           info("Reducing time step size from %g to %g days for the rest of this time step.", 
-               TAU, TAU * TIMESTEP_DEC);
-          TAU *= TIMESTEP_DEC;
-          // If TAU less than the prescribed minimum, stop.
-          if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
+               time_step, time_step * time_step_dec);
+          time_step *= time_step_dec;
+          // If time_step less than the prescribed minimum, stop.
+          if (time_step < time_step_min) error("Time step dropped below prescribed minimum value.");
         }  
         // Delete the saved coefficient vector.
         delete [] save_coeff_vec;
@@ -428,17 +422,17 @@ int main(int argc, char* argv[])
         // Perform Picard iteration on the reference mesh. If necessary, 
         // reduce time step to make it converge, but then restore time step 
         // size to its original value.
-        info("Performing Picard's iteration (tau = %g days):", TAU);
+        info("Performing Picard's iteration (tau = %g days):", time_step);
         bool success, verbose = true;
         while(!solve_picard(&wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                             PICARD_MAX_ITER, verbose)) {
           // Restore solution from the beginning of time step.
           sln_prev_iter.copy(&sln_prev_time);
           // Reducing time step to 50%.
-          info("Reducing time step size from %g to %g days for the rest of this time step", TAU, TAU * TIMESTEP_DEC);
-          TAU *= TIMESTEP_DEC;
-          // If TAU less than the prescribed minimum, stop.
-          if (TAU < TAU_MIN) error("Time step dropped below prescribed minimum value.");
+          info("Reducing time step size from %g to %g days for the rest of this time step", time_step, time_step * time_step_inc);
+          time_step *= time_step_dec;
+          // If time_step less than the prescribed minimum, stop.
+          if (time_step < time_step_min) error("Time step dropped below prescribed minimum value.");
         }	
 
         ref_sln.copy(&sln_prev_iter);
@@ -481,42 +475,42 @@ int main(int argc, char* argv[])
     while (!done);
 
     // Add entries to graphs.
-    graph_time_err_est.add_values(TIME, err_est_rel);
+    graph_time_err_est.add_values(current_time, err_est_rel);
     graph_time_err_est.save("time_error_est.dat");
-    graph_time_dof.add_values(TIME, Space::get_num_dofs(&space));
+    graph_time_dof.add_values(current_time, Space::get_num_dofs(&space));
     graph_time_dof.save("time_dof.dat");
-    graph_time_cpu.add_values(TIME, cpu_time.accumulated());
+    graph_time_cpu.add_values(current_time, cpu_time.accumulated());
     graph_time_cpu.save("time_cpu.dat");
-    graph_time_step.add_values(TIME, TAU);
+    graph_time_step.add_values(current_time, time_step);
     graph_time_step.save("time_step_history.dat");
 
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time %g days", TIME);
+    sprintf(title, "Solution, time %g days", current_time);
     view.set_title(title);
     view.show(&sln, HERMES_EPS_VERYHIGH);
-    sprintf(title, "Mesh, time %g days", TIME);
+    sprintf(title, "Mesh, time %g days", current_time);
     ordview.set_title(title);
     ordview.show(&space);
     
     // Save complete Solution.
     char* filename = new char[100];
-    sprintf(filename, "outputs/tsln_%f.dat", TIME);
+    sprintf(filename, "outputs/tsln_%f.dat", current_time);
     bool compress = false;   // Gzip compression not used as it only works on Linux.
     sln.save(filename, compress);
-    info("Solution at time %g saved to file %s.", TIME, filename);
+    info("Solution at time %g saved to file %s.", current_time, filename);
 
     // Copy new reference level solution into sln_prev_time.
     // This starts new time step.
     sln_prev_time.copy(&ref_sln);
 
-    // Updating time step. Note that TAU might have been reduced during adaptivity.
-    TIME += TAU;
+    // Updating time step. Note that time_step might have been reduced during adaptivity.
+    current_time += time_step;
 
     // Increase time step.
-    if (TAU < TAU_MAX) {
-      info("Increasing time step from %g to %g days.", TAU, TAU * TIMESTEP_INC);
-      TAU *= TIMESTEP_INC;
+    if (time_step < time_step_max) {
+      info("Increasing time step from %g to %g days.", time_step, time_step * time_step_inc);
+      time_step *= time_step_inc;
     }
   }
 

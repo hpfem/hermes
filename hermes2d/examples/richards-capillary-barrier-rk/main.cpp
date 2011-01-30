@@ -34,7 +34,7 @@ using namespace RefinementSelectors;
 const char* mesh_file = "domain-half.mesh";
 
 // Adaptive time stepping.
-double time_step = 1.0;                           // Time step (in days).
+double time_step = 0.5;                           // Time step (in days).
 double time_step_dec = 0.75;                      // Timestep decrease ratio after unsuccessful nonlinear solve.
 double time_step_inc = 1.5;                       // Timestep increase ratio after successful nonlinear solve.
 double time_step_min = 1e-8; 			  // Computation will stop if time step drops below this value. 
@@ -42,9 +42,9 @@ double time_step_max = 1.0;                       // Maximal time step.
                        
 
 // Elements orders and initial refinements.
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 0;                   // Number of initial mesh refinements towards the top edge.
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY_TOP = 1;               // Number of initial mesh refinements towards the top edge.
 
 // Matrix solver.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -64,13 +64,13 @@ const double NEWTON_TOL = 1e-5;                   // Stopping criterion for Newt
 int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of Newton iterations.
 
 // Times.
-const double STARTUP_TIME = 5e-2;                 // Start-up time for time-dependent Dirichlet boundary condition.
+const double STARTUP_TIME = 5.0;                  // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 const double PULSE_END_TIME = 1000.0;             // Time interval of the top layer infiltration.
-double current_time = 0;                          // Global time variable initialized with first time step.
+double current_time = time_step;                  // Global time variable initialized with first time step.
 
 // Problem parameters.
-double H_INIT = -50.0;                            // Initial pressure head.
+double H_INIT = -15.0;                            // Initial pressure head.
 double H_ELEVATION = 10.0;                        // Top constant pressure head -- an infiltration experiment.
 const double K_S_vals[4] = {350.2, 712.8, 1.68, 18.64}; 
 const double ALPHA_vals[4] = {0.01, 1.0, 0.01, 0.01};
@@ -87,7 +87,7 @@ const int MATERIAL_COUNT = 4;
 const int CONSTITUTIVE_TABLE_METHOD = 2;          // 0 - constitutive functions are evaluated directly (slow performance).
 					          // 1 - constitutive functions are linearly approximated on interval 
                                                   //     <TABLE_LIMIT; LOW_LIMIT> (very efficient CPU utilization less 
-                                                  //     efficient memory consumption (depending on TABLE_PRECISSION)).
+                                                  //     efficient memory consumption (depending on TABLE_PRECISION)).
 						  // 2 - constitutive functions are aproximated by quintic splines.
 						  
 //!Use only if 	CONSTITUTIVE_TABLE_METHOD == 2 !//					  
@@ -140,10 +140,10 @@ double K_S, ALPHA, THETA_R, THETA_S, N, M, STORATIVITY;
 #endif
 
 // Boundary markers.
-const int BDY_1 = 1;
-const int BDY_2 = 2;
-const int BDY_3 = 3;
-const int BDY_4 = 4;
+const int BDY_TOP = 1;
+const int BDY_RIGHT = 2;
+const int BDY_BOTTOM = 3;
+const int BDY_LEFT = 4;
 
 // Initial condition.
 double init_cond(double x, double y, double& dx, double& dy) {
@@ -186,7 +186,6 @@ int main(int argc, char* argv[])
   // In case of CONSTITUTIVE_TABLE_METHOD==2, all constitutive functions are approximated by polynomials.
   info("Initializing polynomial approximations.");
   for (int i=0; i < MATERIAL_COUNT; i++) {
-    info("Processing layer %d", i);
     init_polynomials(6 + NUM_OF_INSIDE_PTS, LOW_LIMIT, points, NUM_OF_INSIDE_PTS, i);
   }
   POLYNOMIALS_READY = true;
@@ -207,23 +206,19 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load(mesh_file, &basemesh);
   
-  // Initial refinements.
-  //basemesh.refine_towards_boundary(1, 1);
-  //basemesh.refine_towards_boundary(3, 1);
-  //basemesh.refine_towards_boundary(4, 1);
-
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY_TOP);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_1);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_3, BDY_4));
+  bc_types.add_bc_dirichlet(BDY_TOP);
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_RIGHT, BDY_BOTTOM, BDY_LEFT));
 
   // Enter Dirichlet boundary values.
   BCValues bc_values(&current_time);
-  bc_values.add_timedep_function(BDY_1, essential_bc_values);
+  bc_values.add_timedep_function(BDY_TOP, essential_bc_values);
 
   // Create an H1 space with default shapeset.
   H1Space* space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
@@ -236,8 +231,8 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   info("Registering forms for the Newton's method.");
-  wf.add_matrix_form(jac_form_vol, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, (MeshFunction*)sln);
-  wf.add_vector_form(res_form_vol, res_form_vol_ord, HERMES_ANY, (MeshFunction*)sln);
+  wf.add_matrix_form(jac_form_vol, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, sln);
+  wf.add_vector_form(res_form_vol, res_form_vol_ord, HERMES_ANY, sln);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
@@ -254,9 +249,6 @@ int main(int argc, char* argv[])
   sview.show(sln, HERMES_EPS_VERYHIGH);
   OrderView oview("Initial mesh", new WinGeom(640, 0, 600, 350));
   oview.show(space);
-  //MeshView mview("Mesh", new WinGeom(840, 0, 600, 350));
-  //mview.show(&mesh);
-  //View::wait();
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
