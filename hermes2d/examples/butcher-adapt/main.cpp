@@ -32,7 +32,7 @@ double time_step = 0.2;                            // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
-const double TIME_TOL_LOWER = 0.1;               // If rel. temporal error is less than this threshold, increase time step
+const double TIME_TOL_LOWER = 0.1;                 // If rel. temporal error is less than this threshold, increase time step
                                                    // but do not repeat time step (this might need further research).
 const double TIME_TOL_UPPER = 1.0;                 // If rel. temporal error is greater than this threshold, decrease time 
                                                    // step size and repeat time step.
@@ -99,6 +99,9 @@ int main(int argc, char* argv[])
 {
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
+  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
+  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
+  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
 
   // Load the mesh.
   Mesh mesh;
@@ -144,9 +147,10 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, space, is_linear);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
-  OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
+  OrderView oview("Mesh", new WinGeom(0, 0, 480, 400));
   oview.show(space);
+  ScalarView eview("Error", new WinGeom(490, 0, 500, 400));
+  ScalarView sview("Solution", new WinGeom(1000, 0, 500, 400));
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
@@ -162,12 +166,20 @@ int main(int argc, char* argv[])
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
-    // Convert err_vec into an error function (Dirichlet lift must not 
-    // be included).
+    // Convert err_vec into an error function (Dirichlet lift turned off).
     Solution* error_function = new Solution(&mesh);
     bool add_dir_lift = false;
     Solution::vector_to_solution(err_vec, space, error_function, add_dir_lift);
 
+    // Plot error function.
+    // Show the new time level solution.
+    char title[100];
+    sprintf(title, "Error, t = %g", current_time);
+    eview.set_title(title);
+    eview.show(error_function, HERMES_EPS_VERYHIGH);
+
+    /* DEBUG - THE B2-ROW IN TABLE "Implicit_DIRK_7_45_embedded" IS PROBABLY
+               WRONG, SO ADAPTIVITY IS TEMPORARILY DISABLED.
     // Calculate relative time stepping error and decide whether the 
     // time step can be accepted. If not, then the time step size is 
     // reduced and the entire time step repeated. If yes, then another
@@ -186,6 +198,7 @@ int main(int argc, char* argv[])
       time_step *= TIME_STEP_INC_RATIO;
       continue;
     }
+    */
    
     // Convert coeff_vec into a new time level solution.
     Solution::vector_to_solution(coeff_vec, space, sln);
@@ -194,7 +207,6 @@ int main(int argc, char* argv[])
     current_time += time_step;
 
     // Show the new time level solution.
-    char title[100];
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
     sview.show(sln, HERMES_EPS_VERYHIGH);

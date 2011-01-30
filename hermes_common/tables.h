@@ -75,6 +75,9 @@ public:
   void set_B(unsigned int i, double val);
   void set_B2(unsigned int i, double val);
   void set_C(unsigned int i, double val); 
+  bool is_explicit();
+  bool is_diagonally_implicit();
+  bool is_fully_implicit();
 
 protected:
   double* B;

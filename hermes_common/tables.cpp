@@ -415,3 +415,42 @@ void ButcherTable::set_C(unsigned int i, double val)
   if (i > size) error("Invalid access to a Butcher's table.");
   this->C[i] = val;
 }
+
+bool ButcherTable::is_explicit()
+{
+  bool result = true;
+  for (int i=0; i<size; i++) {
+    for (int j=0; j<size; j++) {
+      double val_ij = get_A(i, j);
+      if (j >= i && fabs(val_ij) > 1e-12) result = false;
+    }
+  }
+
+  return result;
+} 
+
+bool ButcherTable::is_diagonally_implicit()
+{
+  bool result = true;
+  for (int i=0; i<size; i++) {
+    for (int j=0; j<size; j++) {
+      double val_ij = get_A(i, j);
+      if (j > i && fabs(val_ij) > 1e-12) result = false;
+    }
+  }
+
+  return result;
+} 
+
+bool ButcherTable::is_fully_implicit()
+{
+  bool result = false;
+  for (int i=0; i<size; i++) {
+    for (int j=0; j<size; j++) {
+      double val_ij = get_A(i, j);
+      if (j > i && fabs(val_ij) > 1e-12) result = true;
+    }
+  }
+
+  return result;
+} 

@@ -393,18 +393,12 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     return false;
   }
 
-  // Calculate the vector \sum_{j=1}^s b_j k_j.
-  Vector* rk_increment_vector = create_vector(matrix_solver);
-  rk_increment_vector->alloc(ndof);
+  // Calculate the vector Y^{n+1} = Y^n + h \sum_{j=1}^s b_j k_j.
   for (int i = 0; i < ndof; i++) {
-    rk_increment_vector->set(i, 0);
     for (int j = 0; j < num_stages; j++) {
-      rk_increment_vector->add(i, bt->get_B(j) * K_vector[j*ndof + i]);
+      coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j*ndof + i];
     }
   }
-
-  // Calculate Y^{n+1} = Y^n + h \sum_{j=1}^s b_j k_j.
-  for (int i = 0; i < ndof; i++) coeff_vec[i] += time_step * rk_increment_vector->get(i);
 
   // If err_vec is not NULL, use the second B-row in the Butcher's
   // table to calculate the second approximation Y_{n+1}. Then 
@@ -412,13 +406,12 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // error vector err_vec.
   if (err_vec != NULL) {
     for (int i = 0; i < ndof; i++) {
-      rk_increment_vector->set(i, 0);
+      err_vec[i] = 0;
       for (int j = 0; j < num_stages; j++) {
-        rk_increment_vector->add(i, bt->get_B2(j) * K_vector[j*ndof + i]);
+        err_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j*ndof + i];
       }
+      err_vec[i] *= time_step;
     }
-    for (int i = 0; i < ndof; i++) err_vec[i] = time_step * rk_increment_vector->get(i);
-    for (int i = 0; i < ndof; i++) err_vec[i] = err_vec[i] - coeff_vec[i];
   }
 
   // Clean up.
@@ -426,7 +419,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   delete matrix_right;
   delete vector_right;
   delete solver;
-  delete rk_increment_vector;
 
   // Delete stage spaces, but not the first (original) one.
   for (int i = 1; i < num_stages; i++) delete stage_spaces[i];
@@ -454,7 +446,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm) 
 {
   return rk_time_step(current_time, time_step, bt,
-	       coeff_vec, NULL, dp, matrix_solver,
-		      verbose, is_linear, newton_tol, newton_max_iter,
-               newton_damping_coeff, newton_max_allowed_residual_norm);
+	              coeff_vec, NULL, dp, matrix_solver,
+	              verbose, is_linear, newton_tol, newton_max_iter,
+                      newton_damping_coeff, newton_max_allowed_residual_norm);
 }
