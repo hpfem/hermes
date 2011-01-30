@@ -41,17 +41,13 @@ const double LAMBDA = 1e5;         // Thermal conductivity of the material.
 const double HEATCAP = 1e6;        // Heat capacity.
 const double RHO = 3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
-double current_time = 0;
+double current_time = time_step;
 
 // Time-dependent exterior temperature.
 template<typename Real>
 Real temp_ext(Real t) {
   return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
 }
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y) { return 0.0;}
 
 // Weak forms.
 #include "forms.cpp"
@@ -87,10 +83,10 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+  wf.add_matrix_form(callback(bilinear_form));
+  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_AIR);
+  wf.add_vector_form(callback(linear_form), HERMES_ANY, &tsln);
+  wf.add_vector_form_surf(callback(linear_form_surf), BDY_AIR);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -107,7 +103,7 @@ int main(int argc, char* argv[])
   Tview.fix_scale_width(30);
 
   // Time stepping:
-  double current_time = 0.0; int ts = 1;
+  int ts = 1;
   bool rhs_only = false;
   do 
   {
@@ -122,19 +118,20 @@ int main(int argc, char* argv[])
 
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
-    else
-    error ("Matrix solver failed.\n");
-
-    // Update the time variable.
-    current_time += time_step;
+    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
+    else error ("Matrix solver failed.\n");
 
     // Visualize the solution.
     char title[100];
     sprintf(title, "Time %3.2f, exterior temperature %3.5f", current_time, temp_ext(current_time));
     Tview.set_title(title);
     Tview.show(&tsln);
+
+    // Update global time.
+    current_time += time_step;
+
+    // Increase time step counter
+    ts++;
   }
   while (current_time < T_FINAL);
 
