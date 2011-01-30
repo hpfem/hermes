@@ -35,8 +35,8 @@ const char* mesh_file = "domain-half.mesh";
 
 // Adaptive time stepping.
 double time_step = 0.5;                           // Time step (in days).
-double time_step_dec = 0.75;                      // Timestep decrease ratio after unsuccessful nonlinear solve.
-double time_step_inc = 1.5;                       // Timestep increase ratio after successful nonlinear solve.
+double time_step_dec = 0.5;                       // Timestep decrease ratio after unsuccessful nonlinear solve.
+double time_step_inc = 1.1;                       // Timestep increase ratio after successful nonlinear solve.
 double time_step_min = 1e-8; 			  // Computation will stop if time step drops below this value. 
 double time_step_max = 1.0;                       // Maximal time step.
                        
@@ -288,7 +288,7 @@ int main(int argc, char* argv[])
     info("Solution at time %g saved to file %s.", current_time, filename);
 
     // Increase time step.
-    if (time_step < time_step_max) {
+    if (time_step*time_step_inc < time_step_max) {
       info("Increasing time step from %g to %g days.", time_step, time_step * time_step_inc);
       time_step *= time_step_inc;
     }

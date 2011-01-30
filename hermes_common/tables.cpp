@@ -320,7 +320,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_A(6, 1, 0);
       this->set_A(2, 2, 0.28589);
       this->set_A(3, 2, -0.004509476);
-      this->set_A(4, 2, -0.0277933233);
+      this->set_A(4, 2, -0.027793233);
       this->set_A(5, 2, -0.107036282);
       this->set_A(6, 2, -0.019290177);
       this->set_A(3, 3, 0.28589);
