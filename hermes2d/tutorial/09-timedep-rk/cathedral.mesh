@@ -1,0 +1,59 @@
+w0 = 4   # width of middle part
+w1 = 3   # width of sides
+h1 = 6   # height of lower part
+h2 = 4.5 # height of middle part of towers
+h3 = 4   # height of tip of middle part
+h4 = 7   # height of tip of towers
+
+vertices =
+{
+  { -w0/2 - w1, 0 },
+  { -w0/2, 0 },
+  { w0/2, 0 },
+  { w0/2 + w1, 0 },
+  { -w0/2 - w1, h1 },
+  { -w0/2, h1 },
+  { w0/2, h1 },
+  { w0/2 + w1, h1 },
+  { -w0/2 - w1, h1 + h2},
+  { -w0/2, h1 + h2 },
+  { 0, h1 + h3 },
+  { w0/2, h1 + h2 },
+  { w0/2 + w1, h1 + h2 },
+  { -w0/2 - w1/2, h1 + h2 + h4},
+  { w0/2 + w1/2, h1 + h2 + h4}
+}
+
+elements =
+{
+  { 0, 1, 5, 4, 0 },
+  { 1, 2, 6, 5, 0 },
+  { 2, 3, 7, 6, 0 },
+  { 4, 5, 9, 8, 0 },
+  { 5, 6, 10, 0 },
+  { 6, 7, 12, 11, 0 },
+  { 8, 9, 13, 0 },
+  { 11, 12, 14, 0 }
+}
+
+boundaries =
+{
+  { 0, 1, "Boundary ground" },
+  { 1, 2, "Boundary ground" },
+  { 2, 3, "Boundary ground" },
+  { 3, 7, "Boundary air" },
+  { 7, 12, "Boundary air" },
+  { 12, 14, "Boundary air" },
+  { 14, 11, "Boundary air" },
+  { 11, 6, "Boundary air" },
+  { 6, 10, "Boundary air" },
+  { 10, 5, "Boundary air" },
+  { 5, 9, "Boundary air" },
+  { 9, 13, "Boundary air" },
+  { 13, 8, "Boundary air" },
+  { 8, 4, "Boundary air" },
+  { 4, 0, "Boundary air" }
+}
+
+
+

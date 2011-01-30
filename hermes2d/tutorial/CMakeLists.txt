@@ -7,7 +7,8 @@ add_subdirectory(05-bc-neumann)
 add_subdirectory(06-bc-newton)
 add_subdirectory(07-general)
 add_subdirectory(08-system)
-add_subdirectory(09-timedep)
+add_subdirectory(09-timedep-basic)
+add_subdirectory(09-timedep-rk)
 
 # Adaptivity
 add_subdirectory(10-adapt)

@@ -3,19 +3,26 @@
 #include "hermes2d.h"
 #include "runge_kutta.h"
 
-//  This example shows how to solve a time-dependent PDE. The model describes 
-//  how the St. Vitus Cathedral in Prague (http://en.wikipedia.org/wiki/St._Vitus_Cathedral)
-//  responds to changes in the surrounding air temperature during one 24-hour 
-//  cycle. Many different Runge-Kutta methods, represented in terms of Butcher's tables,  
-//  can be used for time integration. Some of them can be found on the Wikipedia 
-//  page http://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods. If you 
-//  know about some R-K method that is missing in our predefined tables, please 
-//  let us know!
+//  This example is a continuation of the example "09-timedep-basic" and it shows how 
+//  to perform time integration with Runge-Kutta methods using arbitrary Butcher's 
+//  tables. Currently (as of January 2011) approx. 20 tables are available by default,
+//  as can be seen below. They are taken from various sources including J. Butcher's
+//  book and the Wikipedia page http://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods. 
+//  If you know about some other interesting R-K methods that are missing in our database,
+//  please let us know!
 //
 //  PDE: non-stationary heat transfer equation
-//  HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
+//       HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
+//  This equation is, however, written in such a way that the time-derivative 
+//  is on the left and everything else on the right:
 //
-//  Domain: St. Vitus cathedral (cathedral.mesh).
+//  dT/dt = LAMBDA * Laplace T / (HEATCAP * RHO).
+//
+//  As opposed to the previous example where the time-discretization was hardwired
+//  into the weak formulation, now we only need the weak formulation of the 
+//  right-hand side.
+//
+//  Domain: St. Vitus cathedral (file cathedral.mesh).
 //
 //  IC:  T = TEMP_INIT.
 //  BC:  T = TEMP_INIT on the bottom edge ... Dirichlet,
@@ -122,7 +129,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
-  //Tview.set_min_max_range(0,20);
+  Tview.set_min_max_range(0,20);
   Tview.fix_scale_width(30);
 
   // Time stepping loop:
