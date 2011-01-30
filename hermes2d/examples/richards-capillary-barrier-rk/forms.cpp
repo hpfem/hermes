@@ -8,18 +8,19 @@ double jac_form_vol(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
   int elem_marker = e->elem_marker;
   double result = 0;
   Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
 
   for (int i = 0; i < n; i++)
     result += wt[i] * (
 		       //C(h_prev_newton->val[i], elem_marker) * u->val[i] * v->val[i] / TAU
 		       //+ dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->val[i] * v->val[i] / TAU
 		       //- dCdh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_time->val[i] * v->val[i] / TAU
-			 + K(h_prev_newton->val[i], elem_marker) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
-                         + dKdh(h_prev_newton->val[i], elem_marker) * u->val[i] * 
+			 - K(h_prev_newton->val[i], elem_marker) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
+                         - dKdh(h_prev_newton->val[i], elem_marker) * u->val[i] * 
                            (h_prev_newton->dx[i]*v->dx[i] + h_prev_newton->dy[i]*v->dy[i])
-                         - dKdh(h_prev_newton->val[i], elem_marker) * u->dy[i] * v->val[i]
-                         - ddKdhh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->dy[i] * v->val[i]
-                      );
+                         + dKdh(h_prev_newton->val[i], elem_marker) * u->dy[i] * v->val[i]
+                         + ddKdhh(h_prev_newton->val[i], elem_marker) * u->val[i] * h_prev_newton->dy[i] * v->val[i]
+		       ) / C(h_prev_time->val[i], elem_marker);
   return result;
 }
 
@@ -37,11 +38,12 @@ double res_form_vol(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
   int elem_marker = e->elem_marker;
   double result = 0;
   Func<double>* h_prev_newton = u_ext[0];
+  Func<double>* h_prev_time = ext->fn[0];
   for (int i = 0; i < n; i++) {
-    result += -wt[i] * (
-                       K(h_prev_newton->val[i], elem_marker) * (h_prev_newton->dx[i] * v->dx[i] + h_prev_newton->dy[i] * v->dy[i])
-                       - dKdh(h_prev_newton->val[i], elem_marker) * h_prev_newton->dy[i] * v->val[i]
-		       ) / C(h_prev_newton->val[i], elem_marker);
+    result += wt[i] * (
+                       -K(h_prev_newton->val[i], elem_marker) * (h_prev_newton->dx[i] * v->dx[i] + h_prev_newton->dy[i] * v->dy[i])
+                       + dKdh(h_prev_newton->val[i], elem_marker) * h_prev_newton->dy[i] * v->val[i]
+		       ) / C(h_prev_time->val[i], elem_marker);
   }
   return result;
 }

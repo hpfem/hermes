@@ -86,7 +86,7 @@ public:
                                           ExtData<Ord> *); ///< Error linear form to estimate order of a function.
 
   // General case.
-  struct MatrixFormVol  {
+  struct MatrixFormVol {
     unsigned int i, j;
     int sym, area;
     matrix_form_val_t fn;

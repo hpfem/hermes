@@ -470,7 +470,7 @@ double get_l2_norm(Vector* vec)
 {
   _F_
   double val = 0;
-  for (int i = 0; i < vec->length(); i++)
+  for (unsigned int i = 0; i < vec->length(); i++)
     val = val + vec->get(i)*vec->get(i);
   return sqrt(std::abs(val));
 }

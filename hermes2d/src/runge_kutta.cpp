@@ -78,7 +78,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 
   // Create constant Solutions to represent the stage times,
   // stage_time = current_time + c_i*time_step.
-  // (Temporary workaround. these should be passed as numbers.)
+  // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
+  // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
+  // SOLUTIONS IN ExtData.
   Solution** stage_time_sol = new Solution*[num_stages];
   for (int i = 0; i < num_stages; i++) {
     stage_time_sol[i] = new Solution(mesh);
@@ -108,14 +110,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfv_ij.area = mfv_base.area;
         mfv_ij.fn = mfv_base.fn;
         mfv_ij.ord = mfv_base.ord;
-        std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin());
         mfv_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
-        // Set offset for u_ext[] external solutions.
-        mfv_ij.u_ext_offset = i;
+        // Duplicate external solutions.
+        // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+        // std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin()); 
+        for (unsigned int f_idx = 0; f_idx < mfv_base.ext.size(); f_idx++) 
+          mfv_ij.ext.push_back(mfv_base.ext[f_idx]);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfv_ij.ext.push_back(stage_time_sol[i]);
+
+        // Set offset for u_ext[] external solutions.
+        mfv_ij.u_ext_offset = i;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
@@ -137,14 +144,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.area = mfs_base.area;
         mfs_ij.fn = mfs_base.fn;
         mfs_ij.ord = mfs_base.ord;
-        std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin());
         mfs_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
-        // Set offset for u_ext[] external solutions.
-        mfs_ij.u_ext_offset = i;
+        // Duplicate external solutions.
+        // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+        // std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin()); 
+        for (unsigned int f_idx = 0; f_idx < mfs_base.ext.size(); f_idx++) 
+          mfs_ij.ext.push_back(mfs_base.ext[f_idx]);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfs_ij.ext.push_back(stage_time_sol[i]);
+
+        // Set offset for u_ext[] external solutions.
+        mfs_ij.u_ext_offset = i;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
@@ -164,14 +176,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfv_i.area = vfv_base.area;
       vfv_i.fn = vfv_base.fn;
       vfv_i.ord = vfv_base.ord;
-      std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_i.ext.begin());
       vfv_i.scaling_factor = -1.0;
 
-      // Set offset for u_ext[] external solutions.
-      vfv_i.u_ext_offset = i;
+      // Duplicate external solutions.
+      // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+      // std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_ij.ext.begin()); 
+      for (unsigned int f_idx = 0; f_idx < vfv_base.ext.size(); f_idx++) 
+        vfv_i.ext.push_back(vfv_base.ext[f_idx]);
 
       // Add stage_time_sol[i] as an external function to the form.
       vfv_i.ext.push_back(stage_time_sol[i]);
+
+      // Set offset for u_ext[] external solutions.
+      vfv_i.u_ext_offset = i;
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
@@ -190,14 +207,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.area = vfs_base.area;
       vfs_i.fn = vfs_base.fn;
       vfs_i.ord = vfs_base.ord;
-      std::copy(vfs_base.ext.begin(), vfs_base.ext.end(), vfs_i.ext.begin());
       vfs_i.scaling_factor = -1.0;
+
+      // Duplicate external solutions.
+      // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+      // std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_ij.ext.begin()); 
+      for (unsigned int f_idx = 0; f_idx < vfs_base.ext.size(); f_idx++) 
+        vfs_i.ext.push_back(vfs_base.ext[f_idx]);
+  
+      // Add stage_time_sol[i] as an external function to the form.
+      vfs_i.ext.push_back(stage_time_sol[i]);
 
       // Set offset for u_ext[] external solutions.
       vfs_i.u_ext_offset = i;
-
-      // Add stage_time_sol[i] as an external function to the form.
-      vfs_i.ext.push_back(stage_time_sol[i]);
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.

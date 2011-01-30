@@ -15,8 +15,6 @@ using namespace RefinementSelectors;
 //        C(h) = alpha*(theta_s - theta_r)*exp(alpha*h)    for h < 0,
 //        C(h) = alpha*(theta_s - theta_r)                 for h >= 0.
 //
-//  Picard's linearization: C(h^k)dh^{k+1}/dt - div(K(h^k)grad(h^{k+1})) - (dK/dh(h^k))*(dh^{k+1}/dy) = 0
-//                          Note: the index 'k' does not refer to time stepping.
 //  Newton's method is more involved, see the file forms.cpp.
 //
 //  Domain: rectangle (0, 8) x (0, 6.5).
@@ -238,8 +236,8 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakForm wf;
   info("Registering forms for the Newton's method.");
-  wf.add_matrix_form(jac_form_vol, jac_form_vol_ord);
-  wf.add_vector_form(res_form_vol, res_form_vol_ord);
+  wf.add_matrix_form(jac_form_vol, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, (MeshFunction*)sln);
+  wf.add_vector_form(res_form_vol, res_form_vol_ord, HERMES_ANY, (MeshFunction*)sln);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");
