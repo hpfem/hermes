@@ -69,10 +69,6 @@ Real temp_ext(Real t) {
   return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
 }
 
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y) { return 0.0;}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -113,10 +109,10 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian));
-  wf.add_vector_form(callback(stac_residual));
-  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_AIR);
-  wf.add_vector_form_surf(callback(linear_form_surf), BDY_AIR);
+  wf.add_matrix_form(callback(stac_jacobian_vol));
+  wf.add_vector_form(callback(stac_residual_vol));
+  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR);
+  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR);
 
   // Project the initial condition on the FE space to obtain initial solution coefficient vector.
   info("Projecting initial condition to translate initial condition into a vector.");

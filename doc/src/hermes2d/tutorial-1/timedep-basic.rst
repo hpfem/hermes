@@ -1,14 +1,14 @@
-Time-Dependent Problems (09)
-----------------------------
+Time-Dependent Problems (09-basic)
+----------------------------------
 
-**Git reference:** Tutorial example `09-timedep <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/09-timedep>`_. 
+**Git reference:** Tutorial example `09-timedep-basic <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/09-timedep-basic>`_. 
 
 Model problem
 ~~~~~~~~~~~~~
 
 This section describes the implementation of a simple time-dependent
-heat transfer model that describes, in a naive approximation, how the St. Vitus cathedral
-in Prague responds to changes in the surrounding air temperature
+heat transfer model that describes, in a naive approximation, how the St. Vitus 
+cathedral in Prague responds to changes in the surrounding air temperature
 during one 24-hour cycle. The geometry is shown below:
 
 .. image:: 09/vitus1.png
@@ -50,7 +50,7 @@ $T_{ext}$ is time-dependent of the form
 
 where $T_{final}$ is 24 hours (translated into seconds).
 
-Equation :eq:`eqvit1` is also equipped with an initial condition of the
+Equation :eq:`eqvit1` is equipped with an initial condition of the
 form
 
 .. math::
@@ -59,7 +59,6 @@ form
 
 For simplicity we will use the implicit Euler method with a constant
 time step $\tau$, which transforms equation :eq:`eqvit1` into
-
 
 .. math::
 
@@ -91,7 +90,7 @@ Values for Dirichlet boundary conditions are set via the BCValues class::
 
     // Enter Dirichlet boundary values.
     BCValues bc_values;
-    bc_values.add_const(BDY_GROUND, T_INIT);
+    bc_values.add_const(BDY_GROUND, TEMP_INIT);
 
 Then the space for the temperature $T$ is set up::
 
@@ -147,8 +146,7 @@ using the methods set_zero(), set_const() and set_exact(), respectively.
 Here we simply call set_const() and supply the initial temperature::
 
     // Set constant initial condition.
-    Solution tsln;
-    tsln.set_const(&mesh, T_INIT);
+    Solution tsln(&mesh, TEMP_INIT);
 
 Registering external functions in weak forms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -157,13 +155,13 @@ The weak forms are registered as follows::
 
     // Initialize weak formulation.
     WeakForm wf;
-    wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-    wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-    wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+    wf.add_matrix_form(callback(bilinear_form));
+    wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_AIR);
+    wf.add_vector_form(callback(linear_form), HERMES_ANY, &tsln);
+    wf.add_vector_form_surf(callback(linear_form_surf), BDY_AIR);
 
 Notice how the previous time level solution 'tsln' is registered. A few lines above
-we saw how it is accessed from inside the weak form:: 
+we saw how it is accessed from inside the weak form. 
 
 Initializing the discrete problem
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -190,11 +188,11 @@ which is set to false before the time stepping begins. For completeness, we show
 the entire time stepping loop below::
 
     // Time stepping:
-    int nsteps = (int)(FINAL_TIME/TAU + 0.5);
+    int ts = 1;
     bool rhs_only = false;
-    for(int ts = 1; ts <= nsteps; ts++)
+    do 
     {
-      info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
+      info("---- Time step %d, time %3.5f, ext_temp %g", ts, current_time, temp_ext(current_time));
 
       // First time assemble both the stiffness matrix and right-hand side vector,
       // then just the right-hand side vector.
@@ -205,17 +203,21 @@ the entire time stepping loop below::
 
       // Solve the linear system and if successful, obtain the solution.
       info("Solving the matrix problem.");
-      if(solver->solve())
-        Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
-      else 
-        error ("Matrix solver failed.\n");
-
-      // Update the time variable.
-      TIME += TAU;
+      if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
+      else error ("Matrix solver failed.\n");
 
       // Visualize the solution.
-      sprintf(title, "Time %3.2f, exterior temperature %3.5f", TIME, temp_ext(TIME));
+      char title[100];
+      sprintf(title, "Time %3.2f, exterior temperature %3.5f", current_time, temp_ext(current_time));
       Tview.set_title(title);
       Tview.show(&tsln);
+
+      // Update global time.
+      current_time += time_step;
+
+      // Increase time step counter
+      ts++;
     }
+    while (current_time < T_FINAL);
+
 
