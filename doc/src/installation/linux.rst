@@ -33,13 +33,35 @@ Once you have a local copy of the Hermes repository on your computer, change dir
 to hermes/. There you will find a CMakeLists.txt file that contains the lines
 ::
 
+    # Testing.
+    set(WITH_TESTS                YES)
+    
     # Optional parts of the library:
-    set(WITH_H1D           YES)
-    set(WITH_H2D           YES)
-    set(WITH_H3D           YES)
+    set(WITH_H1D                  YES)
+        # Release and debug versions.
+        set(H1D_DEBUG             YES)
+        ...
+  
+    set(WITH_H2D                  YES)
+        # Real/complex version of the library (you can build either one or both):
+        set(H2D_REAL              YES)
+        set(H2D_COMPLEX           YES)
+        # Release and debug versions.
+        set(H2D_DEBUG             YES)
+        ...
+  
+    set(WITH_H3D                  YES)
+        # Real/complex version of the library.
+        set(H3D_REAL              YES)
+        ...
+    set(WITH_SUPERLU            NO)
+    ...
 
-Thus by default, all Hermes1D, Hermes2D and Hermes3D will be built. You can
-disable any of them here. After that, type::
+
+You are advised to create a file called "CMake.vars" where you set all 
+these variables according to your needs. Examples of CMake.vars files can
+be found in the CMakeVars folder.
+After that, type::
 
     cmake .
     make
@@ -80,17 +102,6 @@ installable on OS X. To do so, just put the following line into your
 CMake.vars::
 
     set(WITH_GLUT NO)
-
-
-For development, it is good to say (in global CMake.vars)::
-
-    set(DEBUG YES) to compile debug versions
-    set(RELEASE YES) to compile release versions
-
-Then type::
- 
-    make debug    (to build debug versions)
-    make release  (to build release versions)
 
 Debugging with Eclipse
 ~~~~~~~~~~~~~~~~~~~~~~

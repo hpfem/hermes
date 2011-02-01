@@ -15,8 +15,8 @@ Building Hermes
  In order to build the library and examples, you need to:
 
  - Prepare dependecy libraries, see 'Dependency Check-list'.
- - Copy a file 'my_hermes_root\\MSVC2008\\CMake.vars' to 'my_hermes_root'. The file contains settings for the project.
- - Modify the file 'my_hermes_root\\CMake.vars'. Only the first line has to be modified, the rest of lines depends on project settings. Please, follow comments in the file. For example, you 
+ - Copy a file 'my_hermes_root\\CMakeVars\\MSVC\\CMake.vars' to 'my_hermes_root'. The file contains settings for the project.
+ - Modify the file 'my_hermes_root\\CMakeVars\\MSVC\\CMake.vars'. The first line has to be modified, for info about the rest of the file, please refer to Linus installation instructions. Please, follow comments in the file. For example, you 
    could set the first line as::
 
        set(DEP_ROOT "../dependencies")
