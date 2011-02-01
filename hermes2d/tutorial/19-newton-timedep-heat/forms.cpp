@@ -11,7 +11,7 @@ Scalar jac(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
   return result;
 }
 
-// Fesidual vector
+// Residual vector
 template<typename Real, typename Scalar>
 Scalar res(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {

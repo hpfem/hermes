@@ -48,6 +48,9 @@ add_subdirectory(richards-capillary-barrier-rk)
 add_subdirectory(richards-seepage-adapt)
 add_subdirectory(richards-tracy-adapt)
 
+# Wave equation.
+add_subdirectory(wave-1)
+
 # Eigenproblems
 add_subdirectory(eigen-schroedinger)
 add_subdirectory(eigen-schroedinger-iter)
