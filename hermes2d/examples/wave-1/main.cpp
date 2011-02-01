@@ -21,8 +21,8 @@
 
 const int P_INIT = 6;                              // Initial polynomial degree of all elements.
 const int INIT_REF_NUM = 2;                        // Number of initial mesh refinements.
-const double TAU = 0.05;                           // Time step.
-const double T_FINAL = 5.0;                        // Final time.
+const double TAU = 0.01;                           // Time step.
+const double T_FINAL = 2.2;                        // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -97,13 +97,17 @@ int main(int argc, char* argv[])
 
   // Time stepping loop.
   double current_time = TAU; int ts = 1;
+  bool rhs_only = false;
   do 
   {
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
-    // Assemble the stiffness matrix and right-hand side vector.
-    info("Assembling the stiffness matrix and right-hand side vector.");
-    dp.assemble(matrix, rhs);
+    // First time assemble both the stiffness matrix and right-hand side vector,
+    // then just the right-hand side vector.
+    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+    else info("Assembling the right-hand side vector (only).");
+    dp.assemble(matrix, rhs, rhs_only);
+    rhs_only = true;
 
     // Solve the linear system and if successful, obtain the solutions.
     info("Solving the matrix problem.");
