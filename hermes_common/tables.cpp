@@ -303,6 +303,42 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(4, 1.);  
     break;
 
+    /* EMBEDDED IMPLICIT METHODS */
+
+    case Implicit_ESDIRK_TRBDF2_3_23_embedded:
+      this->alloc(3);
+      this->set_A(1, 0, (2 - sqrt(2)) / 2.);
+      this->set_A(2, 0, sqrt(2) / 4.);
+      this->set_A(1, 1, (2 - sqrt(2)) / 2.);
+      this->set_A(2, 1, sqrt(2) / 4.);
+      this->set_A(2, 2, (2 - sqrt(2)) / 2.);
+      this->set_B(0, sqrt(2) / 4.);
+      this->set_B(1, sqrt(2) / 4.);
+      this->set_B(2, (2 - sqrt(2)) / 2.);
+      this->set_B2(0, (1 - sqrt(2)/4.) / 3.);
+      this->set_B2(1, (3 * sqrt(2) / 4. + 1.) / 3.);
+      this->set_B2(2, (2 - sqrt(2)) / 6.);
+      this->set_C(1, 2 - sqrt(2));
+      this->set_C(2, 1.0);
+    break;
+
+    case Implicit_ESDIRK_TRX2_3_23_embedded:
+      this->alloc(3);
+      this->set_A(1, 0, 0.25);
+      this->set_A(2, 0, 0.25);
+      this->set_A(1, 1, 0.25);
+      this->set_A(2, 1, 0.5);
+      this->set_A(2, 2, 0.25);
+      this->set_B(0, 0.25);
+      this->set_B(1, 0.5);
+      this->set_B(2, 0.25);
+      this->set_B2(0, 1./6.);
+      this->set_B2(1, 2./3.);
+      this->set_B2(2, 1./6.);
+      this->set_C(1, 0.5);
+      this->set_C(2, 1.0);
+    break;
+
     case Implicit_DIRK_7_45_embedded: // Implicit embedded DIRK method with orders 4 and 5.
       this->alloc(7);
       this->set_A(0, 0, 0);
@@ -367,6 +403,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(5, 0.9);
       this->set_C(6, 1.0);
     break;
+
+
 
     default: error("Unknown Butcher's table.");
   }
