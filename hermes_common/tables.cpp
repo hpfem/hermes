@@ -340,6 +340,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_B(4, 0.234313169);
       this->set_B(5, -0.166317293);
       this->set_B(6, 0.28589);
+      /* ORIGINAL FROM FUDZIAH's PAPER
+         AND PROBABLY WRONG
       this->set_B2(0, -0.094388662);
       this->set_B2(1, 0);
       this->set_B2(2, -0.039782614);
@@ -347,6 +349,16 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_B2(4, -0.505129807);
       this->set_B2(5, 0.704915206);
       this->set_B2(6, 0.28589);
+      */
+      // Correction by Nikola Mirkov
+      this->set_B2(0, 0);
+      this->set_B2(1, 0);
+      this->set_B2(2, -0.15424);
+      this->set_B2(3, 1.2474);
+      this->set_B2(4, -1.7664);
+      this->set_B2(5, 1.3873);
+      this->set_B2(6, 0.28589);
+
       this->set_C(0, 0);
       this->set_C(1, 0.57178);
       this->set_C(2, 1.352846);
