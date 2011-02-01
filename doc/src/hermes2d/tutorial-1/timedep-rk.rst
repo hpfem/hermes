@@ -21,7 +21,8 @@ Butcher's tables currently available in Hermes
 
 Here is a list of predefined Runge-Kutta methods that can be found 
 in the file `hermes_common/tables.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes_common/tables.cpp>`_.
-Besides this, the user is free to define any Butcher's table of his own::
+The names of the tables are self-explanatory. The last number is the order of the 
+method (a pair of orders for embedded ones). The second-to-last, if provided, is the number of stages::
 
 * Explicit_RK_1, 
 * Implicit_RK_1, 
@@ -39,11 +40,15 @@ Besides this, the user is free to define any Butcher's table of his own::
 * Implicit_Lobatto_IIIB_3_4, 
 * Implicit_Lobatto_IIIC_3_4, 
 * Implicit_Radau_IIA_3_5, 
-* Implicit_SDIRK_4_5, 
+* Implicit_SDIRK_4_5.
+
+Embedded implicit methods suitable for temporal adaptivity::
+
+* Implicit_ESDIRK_TRBDF2_3_23_embedded, 
+* Implicit_ESDIRK_TRX2_3_23_embedded,
 * Implicit_DIRK_7_45_embedded. 
 
-The names of the tables should be self-explanatory. The last number is the order of the 
-method. The one before last, if provided, is the number of stages. 
+Plus, the user is free to define any Butcher's table of his own.
 
 Model problem
 ~~~~~~~~~~~~~
