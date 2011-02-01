@@ -10,5 +10,3 @@ add_dependencies(${PROJECT_NAME} _hermes1d)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(example-schroedinger ${BIN})
-
-target_link_libraries(${PROJECT_NAME} ${HERMES_BIN})

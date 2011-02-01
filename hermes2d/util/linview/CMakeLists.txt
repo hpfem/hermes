@@ -16,7 +16,7 @@ macro(LINVIEW_SETTINGS VIEW)
 		  include_directories(${DEP_ROOT}/include)
 	  endif(MSVC)
 	  
-	  PICK_REAL_OR_CPLX_LIBS(${HERMES_REAL_BIN} ${PROJECT_NAME})
+	  PICK_REAL_OR_CPLX_LIBS(${HERMES_REAL_BIN} ${PROJECT_NAME} ${TRILINOS_LIBRARIES})
     get_property(FLAGS TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS)
 
     # Should debugging information be included?
@@ -27,7 +27,7 @@ macro(LINVIEW_SETTINGS VIEW)
     set(FLAGS "${FLAGS} -DWHATVIEW=${VIEW}")
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${FLAGS})
         
-    target_link_libraries(${PROJECT_NAME} ${HERMES_REAL_BIN})
+    target_link_libraries(${PROJECT_NAME} ${HERMES_REAL_BIN} ${TRILINOS_LIBRARIES})
     add_dependencies(${PROJECT_NAME} ${HERMES_REAL_BIN})
 endmacro(LINVIEW_SETTINGS)
 

@@ -36,5 +36,5 @@ include_directories(${hermes2d_SOURCE_DIR}/src)
 include(PickRealOrCplxLibs)
 PICK_REAL_OR_CPLX_LIBS(${HERMES} ${PROJECT_NAME})
 
-target_link_libraries(${PROJECT_NAME} ${HERMES})
+target_link_libraries(${PROJECT_NAME} ${HERMES} ${TRILINOS_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${HERMES})
