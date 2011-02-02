@@ -90,14 +90,19 @@ else(DEBUG)
 	set(CMAKE_BUILD_TYPE Release)
 endif(DEBUG)
 
-# H3D needs BLAS.
+# H3D needs BLAS. However, if it was needed before, there is no need to look for it again.
 add_definitions(-DWITH_BLAS)
 if(MSVC)
-	find_package(CLAPACK REQUIRED) # also searches for BLAS
+	if(NOT(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+		find_package(CLAPACK REQUIRED)
+		include_directories(${CLAPACK_INCLUDE_DIRS})
+	endif(NOT(WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
 else(MSVC)
-	enable_language(Fortran)	# need a fortran compiler for checking BLAS
-	find_package(LAPACK REQUIRED) # also searches for BLAS
-endif(MSVC)
+  if(NOT(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+    enable_language(Fortran)
+    find_package(LAPACK REQUIRED)
+  endif(NOT(WITH_UMFPACK OR WITH_PETSC OR WITH_PARDISO OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+endif(MSVC)  
 
 # We require Python for the mesh parser (it also needs NumPy)
 find_package(Python REQUIRED)
