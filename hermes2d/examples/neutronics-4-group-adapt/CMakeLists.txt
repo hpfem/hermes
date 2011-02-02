@@ -3,8 +3,7 @@ if(NOT H2D_REAL)
 endif(NOT H2D_REAL)
 
 project(neutronics-4-group-adapt)
-set(HERMES ${HERMES_REAL_BIN})
 
 add_executable(${PROJECT_NAME} main.cpp)
-include (../CMake.common)
-
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME})

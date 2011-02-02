@@ -11,4 +11,4 @@ add_executable(${PROJECT_NAME} main.cpp forms.cpp)
 
 SET(CYTHON_INCLUDE_DIRECTORIES . -I../../hermes_common/ -I../../)
 cython_add_module(forms_wrapper forms.cpp)
-target_link_libraries(forms_wrapper ${HERMES_BIN})
+target_link_libraries(forms_wrapper ${HERMES1D})

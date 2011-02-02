@@ -2,10 +2,8 @@ IF(H2D_COMPLEX)
 
 project(hcurl-adapt)
 
-# use the complex version of the library:
-set(HERMES ${HERMES_CPLX_BIN})
-
 add_executable(${PROJECT_NAME} main.cpp bessel.cpp)
-include (../CMake.common)
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME} ${HERMES2D_CPLX})
 
 ENDIF(H2D_COMPLEX)

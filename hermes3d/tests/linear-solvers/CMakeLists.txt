@@ -4,11 +4,11 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 	
 if(H3D_REAL)
   add_executable(${PROJECT_NAME} main.cpp)
-  set_common_target_properties(${PROJECT_NAME} ${HERMES_REAL_BIN})
+  set_common_target_properties(${PROJECT_NAME} ${HERMES3D_REAL})
 endif(H3D_REAL)
 if(H3D_COMPLEX)
   add_executable(${PROJECT_NAME}-cplx main.cpp)
-  set_common_target_properties(${PROJECT_NAME}-cplx ${HERMES_CPLX_BIN})
+  set_common_target_properties(${PROJECT_NAME}-cplx ${HERMES3D_CPLX})
 endif(H3D_COMPLEX)
 
 # Tests

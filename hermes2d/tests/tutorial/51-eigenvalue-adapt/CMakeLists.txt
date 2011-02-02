@@ -4,8 +4,8 @@ endif(NOT H2D_REAL)
 project(tutorial-51-eigenvalue-adapt)
 
 add_executable(${PROJECT_NAME} main.cpp)
-include (../../../examples/CMake.common)
-
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME})
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(tutorial-51-eigenvalue-adapt ${BIN})
 set_tests_properties(tutorial-51-eigenvalue-adapt PROPERTIES LABELS slow)

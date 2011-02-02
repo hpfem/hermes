@@ -2,10 +2,7 @@ IF(H2D_COMPLEX)
 
 project(screen)
 
-# use the complex version of the library:
-set(HERMES ${HERMES_CPLX_BIN})
-
 add_executable(${PROJECT_NAME} main.cpp fresnl.c)
-include (../CMake.common)
-
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME} ${HERMES2D_CPLX})
 ENDIF(H2D_COMPLEX)

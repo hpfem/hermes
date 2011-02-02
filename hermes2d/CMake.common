@@ -5,11 +5,11 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
   # define anything, in which case the "real" version will be used if hermes was
   # built with "real" support, otherwise the "complex" version will be used:
   if(${ARGC} EQUAL 1)
-    if(H3D_REAL)
-        set(HERMES ${HERMES3D_REAL})
-    else(H3D_REAL)
-        set(HERMES ${HERMES3D_CPLX})
-    endif(H3D_REAL)
+    if(H2D_REAL)
+        set(HERMES ${HERMES2D_REAL})
+    else(H2D_REAL)
+        set(HERMES ${HERMES2D_CPLX)
+    endif(H2D_REAL)
   elseif(${ARGC} EQUAL 2)
     set(HERMES ${ARGV1})
   endif(${ARGC} EQUAL 1) 
@@ -17,27 +17,27 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
   set(FLAGS)
   
   # Should debugging information be included for the test?
-  if(DEBUG)
-    set(FLAGS "${FLAGS} -g")
-  endif(DEBUG)
+  if(H2D_DEBUG)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS "-g")
+  endif(H2D_DEBUG)
 
   # If the complex version is being used, define 'H3D_COMPLEX'.
-  if(H3D_COMPLEX)
-    if(${HERMES} STREQUAL ${HERMES3D_CPLX})
-        set(FLAGS "${FLAGS} -DH3D_COMPLEX")
-    endif(${HERMES} STREQUAL ${HERMES3D_CPLX})
-  endif(H3D_COMPLEX)
-  # If the real version is being used, define 'H3D_REAL'.
-  if(H3D_REAL)
-    if(${HERMES} STREQUAL ${HERMES3D_REAL})
-        set(FLAGS "${FLAGS} -DH3D_REAL")
-    endif(${HERMES} STREQUAL ${HERMES3D_REAL})
-  endif(H3D_REAL)
+  if(H2D_COMPLEX)
+    if(${HERMES} STREQUAL ${HERMES2D_CPLX})
+        set(FLAGS "${FLAGS} -DH2D_COMPLEX")
+    endif(${HERMES} STREQUAL ${HERMES2D_CPLX})
+  endif(H2D_COMPLEX)
+  # If the real version is being used, define 'H2D_REAL'.
+  if(H2D_REAL)
+    if(${HERMES} STREQUAL ${HERMES2D_REAL})
+        set(FLAGS "${FLAGS} -DH2D_REAL")
+    endif(${HERMES} STREQUAL ${HERMES2D_REAL})
+  endif(H2D_REAL)
   
   set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS ${FLAGS})
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-  include_directories(${hermes3d_SOURCE_DIR}/src)
+  include_directories(${hermes2d_SOURCE_DIR}/src)
 
   PICK_REAL_OR_CPLX_LIBS(${HERMES} ${TRGT})
 

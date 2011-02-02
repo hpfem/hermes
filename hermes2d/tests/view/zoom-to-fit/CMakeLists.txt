@@ -4,7 +4,8 @@ endif(NOT H2D_REAL)
 project(zoom-to-fit)
 
 add_executable(${PROJECT_NAME} main.cpp)
-include (../../CMake.common)
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME})
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(zoom-to-fit_const-on-square "${BIN}" 0 square.mesh)

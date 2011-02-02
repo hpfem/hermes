@@ -4,8 +4,8 @@ endif(NOT H2D_REAL)
 project(example-richards)
 
 add_executable(${PROJECT_NAME} main.cpp)
-include (../../../examples/CMake.common)
-
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME})
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(example-richards ${BIN})
 set_tests_properties(example-richards PROPERTIES LABELS slow)

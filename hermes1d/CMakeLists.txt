@@ -46,11 +46,11 @@ set(H1D_REAL YES)
 add_definitions(-DH1D_REAL)
 
 if(DEBUG)
-        set(HERMES_BIN hermes1d-debug)
+        set(HERMES1D hermes1d-debug)
 endif(DEBUG)
 
 if(RELEASE)
-        set(HERMES_BIN hermes1d)
+        set(HERMES1D hermes1d)
 endif(RELEASE)
 
 # Python inclusion is different in H1D, H2D, H3D.

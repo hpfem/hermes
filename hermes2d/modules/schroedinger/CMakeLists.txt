@@ -15,7 +15,7 @@ set(SRC
 include_directories(${hermes2d_SOURCE_DIR}/src)
 
 add_library(hermes_schroedinger SHARED ${SRC})
-target_link_libraries(hermes_schroedinger ${HERMES_REAL_BIN})
+target_link_libraries(hermes_schroedinger ${HERMES2D_REAL})
 
 install(TARGETS hermes_schroedinger
     RUNTIME DESTINATION bin
