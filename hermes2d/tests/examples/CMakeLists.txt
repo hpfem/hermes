@@ -14,6 +14,7 @@ add_subdirectory(maxwell-waveguide)
 
 # Fluid mechanics
 add_subdirectory(linear-advection-diffusion)
+add_subdirectory(euler-gamm-explicit)
 
 # Miscellaneous
 add_subdirectory(singular-perturbation)
