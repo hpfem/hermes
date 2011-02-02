@@ -41,7 +41,7 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
 
   PICK_REAL_OR_CPLX_LIBS(${HERMES} ${TRGT})
 
-  target_link_libraries(${TRGT} ${HERMES})
+  target_link_libraries(${TRGT} ${HERMES} ${TRILINOS_LIBRARIES})
   add_dependencies(${TRGT} ${HERMES})
   
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake)

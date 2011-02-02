@@ -2,5 +2,5 @@ include_directories(${hermes1d_SOURCE_DIR}/src)
 
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 
-target_link_libraries(${PROJECT_NAME} ${HERMES1D})
+target_link_libraries(${PROJECT_NAME} ${HERMES1D} ${TRILINOS_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${HERMES1D})
