@@ -62,18 +62,8 @@ set(WITH_H3D                  YES)
 	set(H3D_WITH_DEV_TESTS    NO)
 	
 
-# Reporting and logging:
-set(REPORT_WITH_LOGO        YES)  #logo will be shown
-#set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-#set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. The runtime control is intended just for Python wrappers.
-#set(REPORT_ALL              NO)   #do not report all events, just selected ones
-#set(REPORT_WARNING          YES)  #warnings will be reported
-#set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
-#set(REPORT_INFO             YES)  #info will be reported
-#set(REPORT_VERBOSE          NO)   #info details will not be reported
-#set(REPORT_TRACE            NO)   #code execution tracing will not be reported
-#set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
-#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
+# Logo will be shown:
+set(REPORT_WITH_LOGO        YES)
 
 #### Solvers ###
 # Standard UMFPACK.

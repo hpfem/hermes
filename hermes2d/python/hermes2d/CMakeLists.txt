@@ -6,7 +6,7 @@ add_custom_target(convert_api ./convert_api.py
     )
 add_dependencies(_hermes2d convert_api)
 target_link_libraries(_hermes2d hermes_common ${HERMES_REAL_BIN})
-set_property(TARGET _hermes2d PROPERTY COMPILE_FLAGS "-g -DH2D_REPORT_ALL -DH2D_REPORT_RUNTIME_CONTROL")
+set_property(TARGET _hermes2d PROPERTY COMPILE_FLAGS "-g -DH2D_REPORT_RUNTIME_CONTROL")
 if(WITH_PYTHON_UMFPACK)
     find_package(UMFPACK REQUIRED)
     include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
