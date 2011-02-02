@@ -27,7 +27,7 @@ macro(LINVIEW_SETTINGS VIEW)
     set(FLAGS "${FLAGS} -DWHATVIEW=${VIEW}")
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${FLAGS})
         
-    target_link_libraries(${PROJECT_NAME} ${HERMES2D_REAL})
+    target_link_libraries(${PROJECT_NAME} ${HERMES2D_REAL} ${TRILINOS_LIBRARIES})
     add_dependencies(${PROJECT_NAME} ${HERMES2D_REAL})
 endmacro(LINVIEW_SETTINGS)
 
