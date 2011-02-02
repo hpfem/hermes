@@ -96,6 +96,7 @@ int main(int argc, char* argv[])
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));

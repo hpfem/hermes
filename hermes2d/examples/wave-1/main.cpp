@@ -20,9 +20,8 @@
 // The following parameters can be changed:
 
 const int P_INIT = 6;                              // Initial polynomial degree of all elements.
-const int INIT_REF_NUM = 2;                        // Number of initial mesh refinements.
 const double TAU = 0.01;                           // Time step.
-const double T_FINAL = 2.2;                        // Final time.
+const double T_FINAL = 2.15;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -49,8 +48,14 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
 
-  // Perform uniform mesh refinement.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  // Convert to quadrilaterals.
+  mesh.convert_triangles_to_quads();
+
+  // Refine once towards vertex #4.
+  mesh.refine_towards_vertex(4, 1);
+
+  // Refine towards boundary.
+  mesh.refine_towards_boundary(1, 1);
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -112,7 +117,8 @@ int main(int argc, char* argv[])
 
     // Solve the linear system and if successful, obtain the solutions.
     info("Solving the matrix problem.");
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&u_space, &v_space), 
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), 
+                                                      Hermes::vector<Space *>(&u_space, &v_space), 
                                                       Hermes::vector<Solution *>(&u_sln, &v_sln));
     else error ("Matrix solver failed.\n");
   
