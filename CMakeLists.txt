@@ -67,7 +67,7 @@ set(REPORT_WITH_LOGO        YES)
 
 #### Solvers ###
 # Standard UMFPACK.
-option(WITH_UMFPACK  "Enable support for UMFPACK" YES)
+set(WITH_UMFPACK			YES)
 
 # First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
 # and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
@@ -106,17 +106,16 @@ set(WITH_MUMPS              NO)
 # set(MUMPS_ROOT            root/dir/of/mumps/)
 # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
 
-option(WITH_TRILINOS "Enable support for Trilinos solvers" NO)
+# Enable support for Trilinos solvers.
+set(WITH_TRILINOS			NO)
 
 
 ### Mesh format ###
-
 option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
 option(WITH_HDF5     "Enable support for HDF5" NO)
 
 
 ### Others ###
-
 # Parallel execution (tells the linker to use parallel versions of the selected solvers, if available):
 #
 # Enable OpenMP for shared memory processing. Note that this is required when PARDISO is enabled.
@@ -231,7 +230,6 @@ add_subdirectory(${HERMES_COMMON_DIR})
 include(hermes_common/CMakeCommon.txt)
 include_directories(${HERMES_COMMON_DIR})
 
-
 if(WITH_H1D)
     add_subdirectory(hermes1d)
 endif(WITH_H1D)
@@ -250,8 +248,70 @@ endif(WITH_TESTS)
 
 message("\nConfiguration results")
 message("---------------------")
+message("Build with Python: ${WITH_PYTHON}")
+message("Build with UMFPACK: ${WITH_UMFPACK}")
+message("Build with PETSC: ${WITH_PETSC}")
+message("Build with PARDISO: ${WITH_PARDISO}")
+message("Build with MUMPS: ${WITH_MUMPS}")
+message("Build with SUPERLU${MT}: ${WITH_SUPERLU}")
+message("Build with TRILINOS: ${WITH_TRILINOS}")
+message("Build with MPI: ${WITH_MPI}")
+message("Build with OPENMP: ${WITH_OPENMP}")
+if(HAVE_TEUCHOS_STACKTRACE)
+    message("Print Teuchos stacktrace on segfault: YES")
+else(HAVE_TEUCHOS_STACKTRACE)
+    message("Print Teuchos stacktrace on segfault: NO")
+endif(HAVE_TEUCHOS_STACKTRACE)
+if(REPORT_RUNTIME_CONTROL)
+  if(WITH_PYTHON)
+    message("Report controlled by: RUNTIME and PREP. DIRECTIVES (enforced by Python)")
+  else(WITH_PYTHON)
+    message("Report controlled by: RUNTIME and PREP. DIRECTIVES (enforced by Python)")
+  endif(WITH_PYTHON)
+else(REPORT_RUNTIME_CONTROL)
+  message("Report controlled by: PREPROCESSOR DIRECTIVES")
+endif(REPORT_RUNTIME_CONTROL)
+message("Report with logo: ${REPORT_WITH_LOGO}")
+message("---------------------")
 message("Build Hermes1D: ${WITH_H1D}")
-message("Build Hermes2D: ${WITH_H2D}")
-message("Build Hermes3D: ${WITH_H3D}")
+if(WITH_H1D)
+	message("\tBuild Hermes1D Debug version: ${H1D_DEBUG}")
+	message("\tBuild Hermes1D Release version: ${H1D_RELEASE}")
+		# Optional parts of the library.
+	message("\tBuild Hermes1D examples: ${H1D_WITH_EXAMPLES}")
+	message("\tBuild Hermes1D benchmarks: ${H1D_WITH_BENCHMARKS}")
+	message("\tBuild Hermes1D tests: ${H1D_WITH_TESTS}")
+endif(WITH_H1D)
 
+message("Build Hermes2D: ${WITH_H2D}")
+if(WITH_H2D)
+	message("\tBuild Hermes2D real version: ${H2D_REAL}")
+	message("\tBuild Hermes2D complex version: ${H2D_COMPLEX}")
+	message("\tBuild Hermes2D Debug version: ${H2D_DEBUG}")
+	message("\tBuild Hermes2D Release version: ${H2D_RELEASE}")
+	message("\tBuild Hermes2D examples: ${H2D_WITH_EXAMPLES}")
+	message("\tBuild Hermes2D benchmarks: ${H2D_WITH_BENCHMARKS}")
+	message("\tBuild Hermes2D tests: ${H2D_WITH_TESTS}")
+	message("\tBuild Hermes2D modules: ${H2D_WITH_MODULES}")
+	message("\tBuild Hermes2D tutorial: ${H2D_WITH_TUTORIAL}")
+	message("\tBuild Hermes2D with GLUT: ${H2D_WITH_GLUT}")
+	message("\tBuild Hermes2D with VIEWER_GUI: ${H2D_WITH_VIEWER_GUI}")
+	message("\tBuild Hermes2D with util: ${H2D_WITH_UTIL}")
+endif(WITH_H2D)
+
+message("Build Hermes3D: ${WITH_H3D}")
+if(WITH_H3D)
+	message("\tBuild Hermes3D real version: ${H3D_REAL}")
+	message("\tBuild Hermes3D complex version: ${H3D_COMPLEX}")
+	message("\tBuild Hermes3D with Debug order: ${H3D_DEBUG_ORDER}")
+	message("\tBuild Hermes3D with profiling: ${H3D_PROFILING}")
+	message("\tBuild Hermes3D with Tetra: ${WITH_TETRA}")
+	message("\tBuild Hermes3D with Hex: ${WITH_HEX}")
+	message("\tBuild Hermes3D with Prism: ${WITH_PRISM}")
+	message("\tBuild Hermes3D examples: ${H3D_WITH_EXAMPLES}")
+	message("\tBuild Hermes3D with benchmarks: ${H3D_WITH_BENCHMARKS}")
+	message("\tBuild Hermes3D with tests: ${H3D_WITH_TESTS}")
+	message("\tBuild Hermes3D with tools: ${H3D_WITH_TOOLS}")
+	message("\tBuild Hermes3D with development tests: ${H3D_WITH_DEV_TESTS}")
+endif(WITH_H3D)
 message("\n")

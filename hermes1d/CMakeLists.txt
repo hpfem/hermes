@@ -62,7 +62,6 @@ if(WITH_PYTHON)
   set(PYTHON_INSTALL_PATH lib/python/site-packages)
   # This is needed to make hermes_common working properly:
   SET(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/hermes_common)
-
   add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 
@@ -100,11 +99,3 @@ add_custom_command(
 	OUTPUT    ${PROJECT_BINARY_DIR}/doc.old/xml/index.xml
 	COMMAND   ${DOXYGEN_BINARY} ${DOXYGEN_CONFIG_FILE}
 )
-
-message("\nConfiguration results:")
-message("----------------------")
-message("Build with Python: ${WITH_PYTHON}")
-message("Build with debug: ${DEBUG}")
-message("Build with release: ${RELEASE}")
-message("Build with tests: ${WITH_TESTS}")
-message("\n")

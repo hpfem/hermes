@@ -52,11 +52,9 @@ if(H3D_COMPLEX)
 endif(H3D_COMPLEX)
 
 list(LENGTH VERS VERS_LEN)
-if(VERS_LEN GREATER 0)
-	message(STATUS "Will build versions: ${VERS}")
-else(VERS_LEN GREATER 0)
-	message(FATAL_ERROR "No versions specified. Re-run with REAL and/or COMPLEX set to YES")
-endif(VERS_LEN GREATER 0)
+if(NOT(VERS_LEN GREATER 0))
+	message(FATAL_ERROR "H3D: No versions specified. Re-run with REAL and/or COMPLEX set to YES")
+endif(NOT(VERS_LEN GREATER 0))
 
 if(WITH_TETRA)
 	list(APPEND ELEMTYPES "tetra")
@@ -69,11 +67,9 @@ if(WITH_PRISM)
 endif(WITH_PRISM)
 
 list(LENGTH ELEMTYPES ELEMTYPES_LEN)
-if(ELEMTYPES_LEN GREATER 0)
-	message(STATUS "Will build with element types: ${ELEMTYPES}")
-else(ELEMTYPES_LEN GREATER 0)
-	message(FATAL_ERROR "No element types selected. Re-run with WITH_TETRA, WITH_HEX or WITH_PRISM set to YES")
-endif(ELEMTYPES_LEN GREATER 0)
+if(NOT(ELEMTYPES_LEN GREATER 0))
+	message(FATAL_ERROR "H3D: No element types selected. Re-run with WITH_TETRA, WITH_HEX or WITH_PRISM set to YES")
+endif(NOT(ELEMTYPES_LEN GREATER 0))
 
 # internals regarding build type
 if(DEBUG)
@@ -114,7 +110,6 @@ if(WITH_PYTHON)
 	find_package(PythonLibs REQUIRED)
 	find_package(Cython REQUIRED)
 	add_subdirectory(python)
-	message(STATUS "Compiling with python support")
 	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 endif(WITH_PYTHON)
 
@@ -191,9 +186,3 @@ set(CPACK_SOURCE_IGNORE_FILES
 )
 
 include(CPack)
-
-if(HAVE_TEUCHOS_STACKTRACE)
-    message("-- Print Teuchos stacktrace on segfault: YES")
-else(HAVE_TEUCHOS_STACKTRACE)
-    message("-- Print Teuchos stacktrace on segfault: NO")
-endif(HAVE_TEUCHOS_STACKTRACE)
