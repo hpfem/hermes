@@ -1,0 +1,53 @@
+set(WITH_TESTS                YES)
+set(WITH_H1D                  YES)
+	# Release and debug versions.
+	set(H1D_DEBUG             YES)
+	set(H1D_RELEASE           YES)
+	# Optional parts of the library.
+	set(H1D_WITH_EXAMPLES     YES)
+	set(H1D_WITH_BENCHMARKS   YES)
+	set(H1D_WITH_TESTS        YES)
+set(WITH_H2D                  YES)
+	# Real/complex version of the library (you can build either one or both):
+	set(H2D_REAL              YES)
+	set(H2D_COMPLEX           YES)
+	# Release and debug versions.
+	set(H2D_DEBUG             YES)
+	set(H2D_RELEASE           YES)
+	# Optional parts of the library.
+	set(H2D_WITH_EXAMPLES     YES)
+	set(H2D_WITH_BENCHMARKS   YES)
+	set(H2D_WITH_TESTS        YES)
+	set(H2D_WITH_MODULES      YES)
+	set(H2D_WITH_TUTORIAL     YES)
+	set(H2D_WITH_GLUT         YES)
+	set(H2D_WITH_UTIL         YES)
+		
+set(WITH_H3D                  YES)
+	# Real/complex version of the library.
+	set(H3D_REAL              YES)
+	set(H3D_COMPLEX           YES)
+	# Supported element types.
+	set(WITH_TETRA            YES)
+	set(WITH_HEX              YES)
+	# Optional parts of the library.
+	set(H3D_WITH_EXAMPLES     YES)
+	set(H3D_WITH_BENCHMARKS   YES)
+	set(H3D_WITH_TESTS        YES)
+	
+set(WITH_UMFPACK YES)
+set(WITH_SUPERLU YES)
+set(SUPERLU_ROOT /opt/SuperLU_4.0/)
+set(SUPERLU_MT NO)
+set(WITH_PETSC YES)
+set(PETSC_ROOT /opt/petsc/petsc-3.1-p4)
+set(PETSC_ARCH petsc-arch-without-scalar-type)
+set(WITH_PARDISO YES)
+set(PARDISO_LIB /opt/pardiso/libpardiso400_GNU430_AMD_IA64.so)
+set(WITH_MUMPS YES)
+set(WITH_TRILINOS YES)
+set(WITH_EXODUSII YES)
+set(WITH_HDF5 YES)
+set(WITH_OPENMP YES)
+set(WITH_MPI YES)
+set(WITH_PYTHON YES)
