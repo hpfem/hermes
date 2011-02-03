@@ -44,8 +44,11 @@ method (a pair of orders for embedded ones). The second-to-last, if provided, is
 
 Embedded implicit methods suitable for temporal adaptivity::
 
+* Implicit_SDIRK_CASH_3_23_embedded,
 * Implicit_ESDIRK_TRBDF2_3_23_embedded, 
 * Implicit_ESDIRK_TRX2_3_23_embedded,
+* Implicit_SDIRK_CASH_5_24_embedded,
+* Implicit_SDIRK_CASH_5_34_embedded,
 * Implicit_DIRK_7_45_embedded. 
 
 Plus, the user is free to define any Butcher's table of his own.

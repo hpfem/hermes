@@ -85,7 +85,6 @@ ButcherTable::ButcherTable(unsigned int size) : Table(size)
 
 ButcherTable::ButcherTable(ButcherTableType butcher_table)
 {
-  double gamma = 1./sqrt(2.);
   switch (butcher_table) {
     case Explicit_RK_1: // Explicit Euler.
       this->alloc(1);
@@ -142,12 +141,12 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
 
     case Implicit_SDIRK_2_2: // Implicit SDIRK-22 (second-order).
       this->alloc(2);
-      this->set_A(0, 0, 1. - gamma);
-      this->set_A(1, 0, gamma);
-      this->set_A(1, 1, 1. - gamma);
-      this->set_B(0, gamma);
-      this->set_B(1, 1. - gamma);
-      this->set_C(0, 1. - gamma);
+      this->set_A(0, 0, 1. - 1./sqrt(2.));
+      this->set_A(1, 0, 1./sqrt(2.));
+      this->set_A(1, 1, 1. - 1./sqrt(2.));
+      this->set_B(0, 1./sqrt(2.));
+      this->set_B(1, 1. - 1./sqrt(2.));
+      this->set_C(0, 1. - 1./sqrt(2.));
       this->set_C(1, 1.);  
     break;
 
@@ -339,6 +338,93 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.0);
     break;
 
+    case Implicit_SDIRK_CASH_3_23_embedded:
+      this->alloc(3);
+      this->set_A(0, 0, 0.435866521508);
+      this->set_A(1, 0, -0.7 - 0.435866521508);
+      this->set_A(2, 0, 0.896869652944);
+      this->set_A(1, 1, 0.435866521508);
+      this->set_A(2, 1, 0.0182725272734);
+      this->set_A(2, 2, 0.435866521508);
+      this->set_B(0, 0.896869652944);
+      this->set_B(1, 0.0182725272734);
+      this->set_B(2, 0.435866521508);
+      this->set_B2(0, 0.776691932910);
+      this->set_B2(1, 0.0297472791484);
+      this->set_C(0, 0.435866521508);
+      this->set_C(1, -0.7);
+      this->set_C(2, 1.);
+    break;
+
+    case Implicit_SDIRK_CASH_5_24_embedded:
+      this->alloc(5);
+      this->set_A(0, 0, 0.435866521508);
+      this->set_A(1, 0, -1.13586652150);
+      this->set_A(2, 0, 1.08543330679);
+      this->set_A(3, 0, 0.416349501547);
+      this->set_A(4, 0, 0.896869652944);
+      this->set_A(1, 1, 0.435866521508);
+      this->set_A(2, 1, -0.721299828287);
+      this->set_A(3, 1, 0.190984004184);
+      this->set_A(4, 1, 0.0182725272734);
+      this->set_A(2, 2, 0.435866521508);
+      this->set_A(3, 2, -0.118643265417);
+      this->set_A(4, 2, -0.0845900310706);
+      this->set_A(3, 3, 0.435866521508);
+      this->set_A(4, 3, -0.266418670647);
+      this->set_A(4, 4, 0.435866521508);
+      this->set_B(0, 0.896869652944);
+      this->set_B(1, 0.0182725272734);
+      this->set_B(2, -0.0845900310706);
+      this->set_B(3, -0.266418670647);
+      this->set_B(4, 0.435866521508);
+      this->set_B2(0, (-0.7 - 0.5) / (-0.7 - 0.435866521508));
+      this->set_B2(1, (0.5 - 0.435866521508) / (-0.7 - 0.435866521508));
+      this->set_B2(2, 0.0);
+      this->set_B2(3, 0.0);
+      this->set_B2(4, 0.0);
+      this->set_C(0, 0.435866521508);
+      this->set_C(1, -0.7);
+      this->set_C(2, 0.8);
+      this->set_C(3, 0.924556761814);
+      this->set_C(4, 1.0);
+    break;
+
+    case Implicit_SDIRK_CASH_5_34_embedded:
+      this->alloc(5);
+      this->set_A(0, 0, 0.435866521508);
+      this->set_A(1, 0, -1.13586652150);
+      this->set_A(2, 0, 1.08543330679);
+      this->set_A(3, 0, 0.416349501547);
+      this->set_A(4, 0, 0.896869652944);
+      this->set_A(1, 1, 0.435866521508);
+      this->set_A(2, 1, -0.721299828287);
+      this->set_A(3, 1, 0.190984004184);
+      this->set_A(4, 1, 0.0182725272734);
+      this->set_A(2, 2, 0.435866521508);
+      this->set_A(3, 2, -0.118643265417);
+      this->set_A(4, 2, -0.0845900310706);
+      this->set_A(3, 3, 0.435866521508);
+      this->set_A(4, 3, -0.266418670647);
+      this->set_A(4, 4, 0.435866521508);
+      this->set_B(0, 0.896869652944);
+      this->set_B(1, 0.0182725272734);
+      this->set_B(2, -0.0845900310706);
+      this->set_B(3, -0.266418670647);
+      this->set_B(4, 0.435866521508);
+      this->set_B2(0, 0.776691932910);
+      this->set_B2(1, 0.0297472791484);
+      this->set_B2(2, -0.0267440239074);
+      this->set_B2(3, 0.220304811849);
+      this->set_B2(4, 0.0);
+      this->set_C(0, 0.435866521508);
+      this->set_C(1, -0.7);
+      this->set_C(2, 0.8);
+      this->set_C(3, 0.924556761814);
+      this->set_C(4, 1.0);
+    break;
+
+    // WARNING; THIS METHOD IS NOT CORRECT.
     case Implicit_DIRK_7_45_embedded: // Implicit embedded DIRK method with orders 4 and 5.
       this->alloc(7);
       this->set_A(0, 0, 0);
@@ -403,8 +489,6 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(5, 0.9);
       this->set_C(6, 1.0);
     break;
-
-
 
     default: error("Unknown Butcher's table.");
   }

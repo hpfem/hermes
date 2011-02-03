@@ -46,11 +46,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, 
 // Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4, Implicit_Lobatto_IIIA_3_4, 
 // Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5,
-// Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, Implicit_DIRK_7_45_embedded. 
+// Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
+// Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 
 ButcherTableType butcher_table_type = Implicit_ESDIRK_TRBDF2_3_23_embedded;
-//ButcherTableType butcher_table_type = Implicit_ESDIRK_TRX2_3_23_embedded;
-//ButcherTableType butcher_table_type = Implicit_DIRK_7_45_embedded;
+
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
