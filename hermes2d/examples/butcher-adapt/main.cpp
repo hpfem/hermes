@@ -49,8 +49,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 // Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 
-ButcherTableType butcher_table_type = Implicit_ESDIRK_TRBDF2_3_23_embedded;
-
+ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.

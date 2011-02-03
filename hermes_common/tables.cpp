@@ -79,9 +79,7 @@ ButcherTable::ButcherTable(unsigned int size) : Table(size)
   // C array.
   this->C = new double[size];
   for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
-}
-
-
+} 
 
 ButcherTable::ButcherTable(ButcherTableType butcher_table)
 {
@@ -588,3 +586,17 @@ bool ButcherTable::is_fully_implicit()
 
   return result;
 } 
+
+void ButcherTable::switch_B_rows()
+{
+  // Test whether B2 row is not zero.
+  double sum = 0;
+  for (int i=0; i < size; i++) sum += fabs(B2[i]);
+  if (sum < 1e-10) error("ButcherTable::switch_B_rows(): Zero B2 row detected.");
+  // Switch B rows.
+  for (int i=0; i < size; i++) {
+    double tmp = B[i];
+    B[i] = B2[i];
+    B2[i] = tmp;
+  }
+}
