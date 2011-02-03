@@ -1,5 +1,4 @@
-#include "neighbor.h"
-
+#include "hermes2d.h"
 
 int NeighborSearch::max_neighbors = 1;
 
@@ -773,17 +772,17 @@ void NeighborSearch::ExtendedShapeset::combine_assembly_lists()
 void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(unsigned int index, AsmList* central_al, AsmList* neighb_al)
 {
   _F_
-  ensure_active_segment(neibhood);
-  ensure_central_pss_rm(neibhood);
-  assert_msg(neibhood->neighb_pss != NULL, "Cannot activate extended shape function."
+  ensure_active_segment(neighbhood);
+  ensure_central_pss_rm(neighbhood);
+  assert_msg(neighbhood->neighb_pss != NULL, "Cannot activate extended shape function."
                                            "PrecalcShapeset for neighbor has not been set."  );
   if (index >= central_al->cnt)
   {
     // Active shape is nonzero on the neighbor element
     support_on_neighbor = true;
 
-    active_pss = neibhood->neighb_pss;
-    active_rm = neibhood->neighb_rm;
+    active_pss = neighbhood->neighb_pss;
+    active_rm = neighbhood->neighb_rm;
 
     // AsmList entries for the active shape, taken from neighbor.
     int idx_loc = index - central_al->cnt;
@@ -796,8 +795,8 @@ void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(unsigned 
     // Active shape is nonzero on the central element
     support_on_neighbor = false;
 
-    active_pss = neibhood->central_pss;
-    active_rm = neibhood->central_rm;
+    active_pss = neighbhood->central_pss;
+    active_rm = neighbhood->central_rm;
 
     // AsmList entries for the active shape, taken from central.
     idx = central_al->idx[index];
@@ -806,23 +805,6 @@ void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(unsigned 
   }
 
   active_pss->set_active_shape(idx);
-  reverse_neighbor_side = (neibhood->neighbor_edges[neibhood->active_segment].orientation == 1);
-  order = active_pss->get_edge_fn_order(neibhood->active_edge);
-}
-
-DiscontinuousFunc<double>*
-NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::get_fn(  std::map< PrecalcShapeset::Key,
-                                                                            Func< double >*,
-                                                                            PrecalcShapeset::Compare >& ext_cache_fn  )
-{
-  int eo = neibhood->get_quad_eo(support_on_neighbor);
-  PrecalcShapeset::Key key( 256 - active_pss->get_active_shape(),
-                            eo,
-                            active_pss->get_transform(),
-                            active_pss->get_shapeset()->get_id()  );
-
-  if (ext_cache_fn[key] == NULL)
-    ext_cache_fn[key] = init_fn(active_pss, active_rm, eo);
-
-  return extend_by_zero( ext_cache_fn[key] );
+  reverse_neighbor_side = (neighbhood->neighbor_edges[neighbhood->active_segment].orientation == 1);
+  order = active_pss->get_edge_fn_order(neighbhood->active_edge);
 }

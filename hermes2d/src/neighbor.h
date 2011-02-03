@@ -590,7 +590,7 @@ public:
       class ExtendedShapeFunction
       {
         private:
-          NeighborSearch *neibhood;   ///< Neighborhood on which the extended shape function is defined.
+          NeighborSearch *neighbhood;   ///< Neighborhood on which the extended shape function is defined.
           PrecalcShapeset *active_pss;///< Pointer to the precalc. shapeset from which the active shape function
                                       ///< is drawn. Depending on the index of the active shape fn. within the
                                       ///< extended shapeset, it may be the local shapeset precalculated either on the
@@ -610,7 +610,7 @@ public:
           /// Constructor.
           /// \param[in] neighborhood Neighborhood on which the extended shape function is defined.
           ///
-          ExtendedShapeFunction(NeighborSearch* neighborhood) : neibhood(neighborhood) {};
+          ExtendedShapeFunction(NeighborSearch* neighborhood) : neighbhood(neighborhood) {};
 
         public:
 
@@ -625,15 +625,8 @@ public:
           RefMap* get_activated_refmap() { return active_rm; }
           PrecalcShapeset* get_activated_pss() { return active_pss; }
           int get_fn_order() { return order; }
-
-          /// Get function values, derivatives, etc. of the extended shape function in quadrature points along the
-          /// active segment.
-          ///
-          /// \param[in,out]  ext_cache_fn  Reference to the cache of shape functions obtained from Discrete/FeProblem.
-          /// \return         Pointer to a \c DiscontinuousFunc object which may be queried for values on either side
-          ///                 of the active segment.
-          ///
-          DiscontinuousFunc<double>* get_fn(std::map< PrecalcShapeset::Key, Func< double >*, PrecalcShapeset::Compare >& ext_cache_fn);
+          NeighborSearch* get_neighbhood() { return neighbhood; }
+          bool get_support_on_neighbor() { return support_on_neighbor; }
 
           /// Get \c DiscontinuousFunc representation of the active shape function's polynomial order.
           DiscontinuousFunc<Ord>* get_fn_ord() {

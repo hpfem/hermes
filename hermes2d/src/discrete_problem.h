@@ -318,9 +318,8 @@ protected:
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
+  Func<Ord>* get_fn_ord(const int order);
 
-  /// Caching transformed values for element
-  std::map<PrecalcShapeset::Key, Func<double>*, PrecalcShapeset::Compare> cache_fn;
   Geom<double>* cache_e[g_max_quad + 1 + 4 * g_max_quad + 4];
   double* cache_jwt[g_max_quad + 1 + 4 * g_max_quad + 4];
 
@@ -343,6 +342,143 @@ protected:
   scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> sln,
                       NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
                       SurfPos* ep);
+  /// Class handling various caches used in assembling.
+  class AssemblingCaches {
+  public:
+    /// Basic constructor and destructor.
+    AssemblingCaches();
+    ~AssemblingCaches();
+
+    /// Key for caching precalculated shapeset values on transformed elements with constant
+    /// jacobians.
+    struct KeyConst
+    {
+      int index;
+      int order;
+#ifdef _MSC_VER
+      UINT64 sub_idx;
+#else
+      unsigned int sub_idx;
+#endif
+      int shapeset_type;
+      double inv_ref_map[2][2];
+#ifdef _MSC_VER
+      KeyConst(int index, int order, UINT64 sub_idx, int shapeset_type, double2x2* inv_ref_map) {
+        this->index = index;
+        this->order = order;
+        this->sub_idx = sub_idx;
+        this->shapeset_type = shapeset_type;
+        this->inv_ref_map[0][0] = (*inv_ref_map)[0][0];
+        this->inv_ref_map[0][1] = (*inv_ref_map)[0][1];
+        this->inv_ref_map[1][0] = (*inv_ref_map)[1][0];
+        this->inv_ref_map[1][1] = (*inv_ref_map)[1][1];
+      }
+#else
+      KeyConst(int index, int order, unsigned int sub_idx, int shapeset_type, double2x2* inv_ref_map) {
+        this->index = index;
+        this->order = order;
+        this->sub_idx = sub_idx;
+        this->shapeset_type = shapeset_type;
+        this->inv_ref_map[0][0] = (*inv_ref_map)[0][0];
+        this->inv_ref_map[0][1] = (*inv_ref_map)[0][1];
+        this->inv_ref_map[1][0] = (*inv_ref_map)[1][0];
+        this->inv_ref_map[1][1] = (*inv_ref_map)[1][1];
+      }
+#endif
+    };
+
+    /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
+    struct CompareConst {
+      bool operator()(KeyConst a, KeyConst b) const {
+        if(a.inv_ref_map[0][0] < b.inv_ref_map[0][0]) return true;
+        else if(a.inv_ref_map[0][0] > b.inv_ref_map[0][0]) return false;
+        else
+          if(a.inv_ref_map[0][1] < b.inv_ref_map[0][1]) return true;
+          else if(a.inv_ref_map[0][1] > b.inv_ref_map[0][1]) return false;
+          else
+            if(a.inv_ref_map[1][0] < b.inv_ref_map[1][0]) return true;
+            else if(a.inv_ref_map[1][0] > b.inv_ref_map[1][0]) return false;
+            else
+              if(a.inv_ref_map[1][1] < b.inv_ref_map[1][1]) return true;
+              else if(a.inv_ref_map[1][1] > b.inv_ref_map[1][1]) return false;
+              else
+                if (a.index < b.index) return true;
+                else if (a.index > b.index) return false;
+                else
+                  if (a.order < b.order) return true;
+                  else if (a.order > b.order) return false;
+                  else
+                    if (a.sub_idx < b.sub_idx) return true;
+                    else if (a.sub_idx > b.sub_idx) return false;
+                    else
+                      if (a.shapeset_type < b.shapeset_type) return true;
+                      else return false;
+      };
+    };
+
+    /// PrecalcShapeset stored values for Elements with constant jacobian of the reference mapping.
+    /// For triangles.
+    std::map<KeyConst, Func<double>*, CompareConst> const_cache_fn_triangles;
+    /// For quads
+    std::map<KeyConst, Func<double>*, CompareConst> const_cache_fn_quads;
+    
+    /// The same setup for elements with non-constant jacobians.
+    /// This cache is deleted with every change of the state in assembling.
+    struct KeyNonConst {
+      int index;
+      int order;
+#ifdef _MSC_VER
+      UINT64 sub_idx;
+#else
+      unsigned int sub_idx;
+#endif
+      int shapeset_type;
+#ifdef _MSC_VER
+      KeyNonConst(int index, int order, UINT64 sub_idx, int shapeset_type) {
+        this->index = index;
+        this->order = order;
+        this->sub_idx = sub_idx;
+        this->shapeset_type = shapeset_type;
+      }
+#else
+      KeyNonConst(int index, int order, unsigned int sub_idx, int shapeset_type) {
+        this->index = index;
+        this->order = order;
+        this->sub_idx = sub_idx;
+        this->shapeset_type = shapeset_type;
+      }
+#endif
+    };
+
+    /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
+    struct CompareNonConst {
+      bool operator()(KeyNonConst a, KeyNonConst b) const {
+        if (a.index < b.index) return true;
+        else if (a.index > b.index) return false;
+        else {
+          if (a.order < b.order) return true;
+          else if (a.order > b.order) return false;
+          else {
+            if (a.sub_idx < b.sub_idx) return true;
+            else if (a.sub_idx > b.sub_idx) return false;
+            else {
+              if (a.shapeset_type < b.shapeset_type) return true;
+              else return false;
+            }
+          }
+        }
+      }
+    };
+    
+    /// PrecalcShapeset stored values for Elements with constant jacobian of the reference mapping.
+    /// For triangles.
+    std::map<KeyNonConst, Func<double>*, CompareNonConst> cache_fn_triangles;
+    /// For quads
+    std::map<KeyNonConst, Func<double>*, CompareNonConst> cache_fn_quads;
+
+    LightArray<Func<Ord>*> cache_fn_ord;
+  };
+  AssemblingCaches assembling_caches;
 };
 
 /// Create globally refined space.
