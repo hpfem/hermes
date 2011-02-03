@@ -304,18 +304,18 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
 
     case Implicit_ESDIRK_TRBDF2_3_23_embedded:
       this->alloc(3);
-      this->set_A(1, 0, (2 - sqrt(2)) / 2.);
-      this->set_A(2, 0, sqrt(2) / 4.);
-      this->set_A(1, 1, (2 - sqrt(2)) / 2.);
-      this->set_A(2, 1, sqrt(2) / 4.);
-      this->set_A(2, 2, (2 - sqrt(2)) / 2.);
-      this->set_B(0, sqrt(2) / 4.);
-      this->set_B(1, sqrt(2) / 4.);
-      this->set_B(2, (2 - sqrt(2)) / 2.);
-      this->set_B2(0, (1 - sqrt(2)/4.) / 3.);
-      this->set_B2(1, (3 * sqrt(2) / 4. + 1.) / 3.);
-      this->set_B2(2, (2 - sqrt(2)) / 6.);
-      this->set_C(1, 2 - sqrt(2));
+      this->set_A(1, 0, (2 - sqrt((double)2)) / 2.);
+      this->set_A(2, 0, sqrt((double)2) / 4.);
+      this->set_A(1, 1, (2 - sqrt((double)2)) / 2.);
+      this->set_A(2, 1, sqrt((double)2) / 4.);
+      this->set_A(2, 2, (2 - sqrt((double)2)) / 2.);
+      this->set_B(0, sqrt((double)2) / 4.);
+      this->set_B(1, sqrt((double)2) / 4.);
+      this->set_B(2, (2 - sqrt((double)2)) / 2.);
+      this->set_B2(0, (1 - sqrt((double)2)/4.) / 3.);
+      this->set_B2(1, (3 * sqrt((double)2) / 4. + 1.) / 3.);
+      this->set_B2(2, (2 - sqrt((double)2)) / 6.);
+      this->set_C(1, 2 - sqrt((double)2));
       this->set_C(2, 1.0);
     break;
 
