@@ -1209,6 +1209,7 @@ void DiscreteProblem::delete_cache()
 int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1328,6 +1329,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<S
 int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1448,6 +1450,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
 int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1563,6 +1566,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<
 int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1677,6 +1681,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
                                      ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
                                      SurfPos* surf_pos)
 {
+  _F_
   // FIXME for treating a discontinuous previous Newton iteration.
   int order;
   int u_ext_length = u_ext.size();      // Number of external solutions.
@@ -1691,11 +1696,11 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     if (u_ext != Hermes::vector<Solution *>()) {
       for (int i = u_ext_offset; i < u_ext_length; i++) {
         if (u_ext[i] != NULL) oi[i - u_ext_offset] = nbs_u->init_ext_fn_ord(u_ext[i]);
-        else oi[i - u_ext_offset] = get_fn_ord(0);
+        else oi[i - u_ext_offset] = init_fn_ord(0);
       }
     }
     else {
-      for (int i = u_ext_offset; i < u_ext_length; i++) oi[i - u_ext_offset] = get_fn_ord(0);
+      for (int i = u_ext_offset; i < u_ext_length; i++) oi[i - u_ext_offset] = init_fn_ord(0);
     }
 
     // Order of shape functions.
@@ -1731,8 +1736,6 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     if (ov != NULL) {
       ov->free_ord(); delete ov;
     }
-    if (fake_e != NULL) delete fake_e;
-    if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
   }
 
   // Evaluate the form.
@@ -1795,6 +1798,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
                                      NeighborSearch* nbs_v, PrecalcShapeset *fv, RefMap *rv,
                                      SurfPos* surf_pos)
 {
+  _F_
   // FIXME for treating a discontinuous previous Newton iteration.
   int order;
   int u_ext_length = u_ext.size();      // Number of external solutions.
@@ -1808,11 +1812,11 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     if (u_ext != Hermes::vector<Solution *>()) {
       for (int i = u_ext_offset; i < u_ext_length; i++) {
         if (u_ext[i] != NULL) oi[i - u_ext_offset] = nbs_v->init_ext_fn_ord(u_ext[i]);
-        else oi[i - u_ext_offset] = get_fn_ord(0);
+        else oi[i - u_ext_offset] = init_fn_ord(0);
       }
     }
     else {
-      for (int i = u_ext_offset; i < u_ext_length; i++) oi[i - u_ext_offset] = get_fn_ord(0);
+      for (int i = u_ext_offset; i < u_ext_length; i++) oi[i - u_ext_offset] = init_fn_ord(0);
     }
 
     // Order of the shape function.
@@ -1839,13 +1843,11 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
 
     // Clean up.
     for (int i = u_ext_offset; i < u_ext_length; i++) {
-      if (oi[i - u_ext_offset] != NULL) {
-        oi[i - u_ext_offset]->free_ord(); delete oi[i - u_ext_offset];
-      }
+      if (oi[i - u_ext_offset] != NULL) { oi[i - u_ext_offset]->free_ord(); delete oi[i - u_ext_offset]; }
     }
-    if (ov != NULL) {ov->free_ord(); delete ov;}
-    if (fake_e != NULL) delete fake_e;
-    if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
+    if (ov != NULL) {
+      ov->free_ord(); delete ov;
+    }
   }
 
   // Evaluate the form using the quadrature of the just calculated order.
@@ -1893,6 +1895,7 @@ DiscreteProblem::AssemblingCaches::AssemblingCaches()
 
 DiscreteProblem::AssemblingCaches::~AssemblingCaches()
 {
+  _F_
   for (std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_triangles.begin();
        it != const_cache_fn_triangles.end(); it++)
   {
