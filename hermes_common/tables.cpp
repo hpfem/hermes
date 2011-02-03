@@ -591,10 +591,10 @@ void ButcherTable::switch_B_rows()
 {
   // Test whether B2 row is not zero.
   double sum = 0;
-  for (int i=0; i < size; i++) sum += fabs(B2[i]);
+  for (unsigned  int i = 0; i < size; i++) sum += fabs(B2[i]);
   if (sum < 1e-10) error("ButcherTable::switch_B_rows(): Zero B2 row detected.");
   // Switch B rows.
-  for (int i=0; i < size; i++) {
+  for (unsigned int i = 0; i < size; i++) {
     double tmp = B[i];
     B[i] = B2[i];
     B2[i] = tmp;
