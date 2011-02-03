@@ -32,10 +32,10 @@ double time_step = 0.2;                            // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
-const double TIME_TOL_LOWER = 0.1;                 // If rel. temporal error is less than this threshold, increase time step
-                                                   // but do not repeat time step (this might need further research).
 const double TIME_TOL_UPPER = 1.0;                 // If rel. temporal error is greater than this threshold, decrease time 
                                                    // step size and repeat time step.
+const double TIME_TOL_LOWER = 0.5;                 // If rel. temporal error is less than this threshold, increase time step
+                                                   // but do not repeat time step (this might need further research).
 const double TIME_STEP_INC_RATIO = 1.1;            // Time step increase ratio (applied when rel. temporal error is too small).
 const double TIME_STEP_DEC_RATIO = 0.5;            // Time step decrease ratio (applied when rel. temporal error is too large).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -50,6 +50,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
+//ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_5_34_embedded;
+
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -103,6 +105,9 @@ int main(int argc, char* argv[])
   if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
   if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
   if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
+
+  // This is for experimental purposes.
+  //bt.switch_B_rows();
 
   // Load the mesh.
   Mesh mesh;
@@ -179,27 +184,25 @@ int main(int argc, char* argv[])
     eview.set_title(title);
     eview.show(error_function, HERMES_EPS_VERYHIGH);
 
-    /* DEBUG - THE B2-ROW IN TABLE "Implicit_DIRK_7_45_embedded" IS PROBABLY
-               WRONG, SO ADAPTIVITY IS TEMPORARILY DISABLED.
     // Calculate relative time stepping error and decide whether the 
     // time step can be accepted. If not, then the time step size is 
     // reduced and the entire time step repeated. If yes, then another
     // check is run, and if the relative error is very low, time step 
     // is increased.
-    double rel_err = calc_norm(error_function, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
-    if (rel_err > TIME_TOL_UPPER) {
-      info("rel_err = %g%% (above upper limit %g%%) -> decreasing time step from %g to %g.", 
-           rel_err, TIME_TOL_UPPER, time_step, time_step * TIME_STEP_DEC_RATIO);
+    double rel_err_time = calc_norm(error_function, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
+    info("rel_err_time = %g%%", rel_err_time);
+    if (rel_err_time > TIME_TOL_UPPER) {
+      info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g and repeating time step.", 
+           TIME_TOL_UPPER, time_step, time_step * TIME_STEP_DEC_RATIO);
       time_step *= TIME_STEP_DEC_RATIO;
       continue;
     }
-    if (rel_err < TIME_TOL_LOWER) {
-      info("rel_err = %g%% (below lower limit %g%%) -> increasing time step from %g to %g.", 
-           rel_err, TIME_TOL_UPPER, time_step, time_step * TIME_STEP_INC_RATIO);
+    if (rel_err_time < TIME_TOL_LOWER) {
+      info("rel_err_time = below lower limit %g%% -> increasing time step from %g to %g", 
+           TIME_TOL_UPPER, time_step, time_step * TIME_STEP_INC_RATIO);
       time_step *= TIME_STEP_INC_RATIO;
       continue;
     }
-    */
    
     // Convert coeff_vec into a new time level solution.
     Solution::vector_to_solution(coeff_vec, space, sln);
