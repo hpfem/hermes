@@ -400,3 +400,29 @@ void WeakForm::update_markers_acc_to_conversion(Mesh::MarkersConversion* markers
     }
     */
 }
+
+
+WeakForm::Form::Form(int area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : 
+    area(area), ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
+{
+}
+
+WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym, 
+    int area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+{
+}
+
+WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, int area, 
+    Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
+{
+}
+
+WeakForm::VectorFormVol::VectorFormVol(unsigned int i, int area, 
+          Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
+{
+}
+
+WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, int area, 
+          Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
+{
+}
