@@ -160,13 +160,21 @@ int main(int argc, char* argv[])
   // Initialize views.
   OrderView oview("Mesh", new WinGeom(0, 0, 480, 400));
   oview.show(space);
-  ScalarView eview("Error", new WinGeom(490, 0, 500, 400));
+  ScalarView eview("Temporal error", new WinGeom(490, 0, 500, 400));
   ScalarView sview("Solution", new WinGeom(1000, 0, 500, 400));
+
+  // Graph for time step history.
+  SimpleGraph time_step_graph;
+  info("Time step history will be saved to file time_step_history.dat.");
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
   do 
   {
+    // Add entry to the timestep graph.
+    time_step_graph.add_values(current_time, time_step);
+    time_step_graph.save("time_step_history.dat");
+
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
@@ -184,7 +192,7 @@ int main(int argc, char* argv[])
     // Plot error function.
     // Show the new time level solution.
     char title[100];
-    sprintf(title, "Error, t = %g", current_time);
+    sprintf(title, "Temporal error, t = %g", current_time);
     eview.set_title(title);
     eview.show(error_fn, HERMES_EPS_VERYHIGH);
 

@@ -248,23 +248,34 @@ int main(int argc, char* argv[])
  
   // Initialize an error vector and error function for adaptive time stepping.
   scalar* error_vec = new scalar[ndof];
-  Solution* error_fn = new Solution(&mesh);
+  Solution* error_fn = new Solution(&mesh, 0.0);
 
   // Initialize the FE problem.
   bool is_linear = false;
   DiscreteProblem dp(&wf, space, is_linear);
 
   // Visualize the projection and mesh.
-  ScalarView sview("Initial condition", new WinGeom(0, 0, 630, 350));
+  ScalarView sview("Initial condition", new WinGeom(0, 0, 400, 350));
   sview.fix_scale_width(50);
   sview.show(sln, HERMES_EPS_VERYHIGH);
-  OrderView oview("Initial mesh", new WinGeom(640, 0, 600, 350));
+  ScalarView eview("Temporal error", new WinGeom(405, 0, 400, 350));
+  eview.fix_scale_width(50);
+  eview.show(error_fn, HERMES_EPS_VERYHIGH);
+  OrderView oview("Initial mesh", new WinGeom(810, 0, 350, 350));
   oview.show(space);
+
+  // Graph for time step history.
+  SimpleGraph time_step_graph;
+  info("Time step history will be saved to file time_step_history.dat.");
 
   // Time stepping loop:
   int ts = 1;
   do 
   {
+    // Add entry to the timestep graph.
+    time_step_graph.add_values(current_time, time_step);
+    time_step_graph.save("time_step_history.dat");
+
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
@@ -282,6 +293,12 @@ int main(int argc, char* argv[])
     // Convert error_vec into an error function (Dirichlet lift turned off).
     bool add_dir_lift = false;
     Solution::vector_to_solution(error_vec, space, error_fn, add_dir_lift);
+
+    // Show error function.
+    char title[100];
+    sprintf(title, "Temporal error, t = %g", current_time);
+    eview.set_title(title);
+    eview.show(error_fn, HERMES_EPS_VERYHIGH);
 
     // Calculate relative time stepping error and decide whether the 
     // time step can be accepted. If not, then the time step size is 
@@ -309,7 +326,6 @@ int main(int argc, char* argv[])
     current_time += time_step;
 
     // Show the new time level solution.
-    char title[100];
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
     sview.show(sln, HERMES_EPS_VERYHIGH);
