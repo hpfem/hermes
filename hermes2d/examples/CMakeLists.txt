@@ -49,7 +49,7 @@ add_subdirectory(richards-seepage-adapt)
 add_subdirectory(richards-tracy-adapt)
 
 # Hemholtz eqaution
-add_subdirectory(hemholtz-waveguide)
+add_subdirectory(helmholtz-waveguide)
 
 # Wave equation.
 add_subdirectory(wave-1)

@@ -3,10 +3,10 @@
 #include "hermes2d.h"
 
 // This example shows how to model harmonic steady state in parallel plate waveguide.
-// The Hemholtz equation is solved and there are demonstrated two typical boundary
+// The Helmholtz equation is solved and there are demonstrated two typical boundary
 // conditions used in high frequency domain.
 //
-// PDE: Hemholtz equation for electric field
+// PDE: Helmholtz equation for electric field
 //
 //    Delta E  + (omega^2*mu*epsilon - j*omega*sigma*mu)*E = 0
 //
@@ -23,10 +23,11 @@
 //          dE/dn = j*beta*E
 //
 // The following parameters can be changed:
-const int P_INIT = 4;                                      // Initial polynomial degree of all elements.
-const int N_REFINE = 5;                                    // Refinement
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+const int P_INIT = 6;                                  // Initial polynomial degree of all elements.
+const int INIT_REF_NUM = 3;                            // Number of initial mesh refinements.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;       // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                       // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_PERFECT = 1, BDY_LEFT = 2, BDY_IMPEDANCE = 3;
@@ -61,10 +62,7 @@ int main(int argc, char* argv[])
     mloader.load("domain.mesh", &mesh);
 
     // Perform uniform mesh refinement.
-    for(int i = 0; i < N_REFINE; i++)
-    {
-      mesh.refine_all_elements();
-    }
+    for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
     // Enter boundary markers.
     BCTypes bc_types;    
