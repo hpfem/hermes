@@ -82,11 +82,19 @@ WeakForm::VectorFormVol::VectorFormVol(unsigned int i, int area,
 
 WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, int area,
                                          Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
+<<<<<<< HEAD
 {
 }
 
 scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
 {
+=======
+{
+}
+
+scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+{
+>>>>>>> Fixed forms and 07-general
   error("WeakForm::VectorFormSurf::value must be overrided.");
   return 0.0;
 }
@@ -98,13 +106,17 @@ Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> Fixes & comments & old code deletion.
+=======
+
+>>>>>>> Fixed forms and 07-general
 WeakForm::WeakForm(unsigned int neq, bool mat_free)
 {
   _F_
-  this->neq = neq;
+      this->neq = neq;
   seq = 0;
   this->is_matfree = mat_free;
 }
@@ -113,8 +125,8 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
 {
   _F_
 
-  if (form->i >= neq || form->j >= neq)
-    error("Invalid equation number.");
+      if (form->i >= neq || form->j >= neq)
+      error("Invalid equation number.");
   if (form->sym < -1 || form->sym > 1)
     error("\"sym\" must be -1, 0 or 1.");
   if (form->sym < 0 && form->i == form->j)
@@ -133,6 +145,7 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
 void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
   _F_
       if (form->i >= neq || form->j >= neq)
       error("Invalid equation number.");
@@ -146,22 +159,32 @@ void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
 =======
     _F_
     if (form->i >= neq || form->j >= neq)
+=======
+  _F_
+      if (form->i >= neq || form->j >= neq)
+>>>>>>> Fixed forms and 07-general
       error("Invalid equation number.");
-    if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
-    H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
-      error("Invalid area number.");
+  if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
+      H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
+    error("Invalid area number.");
 
+<<<<<<< HEAD
     form->set_weakform(this);
     mfsurf.push_back(form);
     seq++;
 >>>>>>> Fixes & comments & old code deletion.
+=======
+  form->set_weakform(this);
+  mfsurf.push_back(form);
+  seq++;
+>>>>>>> Fixed forms and 07-general
 }
 
 void WeakForm::add_vector_form(VectorFormVol* form)
 {
   _F_
-  if (form->i >= neq)
-    error("Invalid equation number.");
+      if (form->i >= neq)
+      error("Invalid equation number.");
   if (form->area != HERMES_ANY && form->area < 0 && (unsigned) (-form->area) > areas.size())
     error("Invalid area number.");
 
@@ -173,10 +196,10 @@ void WeakForm::add_vector_form(VectorFormVol* form)
 void WeakForm::add_vector_form_surf(VectorFormSurf* form)
 {
   _F_
-  if (form->i >= neq)
-    error("Invalid equation number.");
+      if (form->i >= neq)
+      error("Invalid equation number.");
   if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
-  H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
+      H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
     error("Invalid area number.");
 
   form->set_weakform(this);
@@ -187,7 +210,7 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
 void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  error("Not implemented yet.");
+      error("Not implemented yet.");
 }
 
 
@@ -199,10 +222,10 @@ void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext)
 /// This function is identical in H2D and H3D.
 ///
 void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solution *>& u_ext,
-          std::vector<WeakForm::Stage>& stages, bool rhsonly)
+                          std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
-  unsigned int i;
+      unsigned int i;
   stages.clear();
 
   // process volume matrix forms
@@ -281,19 +304,19 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 /// This function is the same in H2D and H3D.
 ///
 WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
-              Mesh* m1, Mesh* m2,
-              Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext)
+                                      Mesh* m1, Mesh* m2,
+                                      Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext)
 {
   _F_
-  // first create a list of meshes the form uses
-  std::set<unsigned> seq;
+      // first create a list of meshes the form uses
+      std::set<unsigned> seq;
   seq.insert(m1->get_seq());
   seq.insert(m2->get_seq());
   Mesh *mmm;
   for (unsigned i = 0; i < ext.size(); i++) {
     mmm = ext[i]->get_mesh();
     if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
-      seq.insert(mmm->get_seq());
+    seq.insert(mmm->get_seq());
   }
   for (unsigned i = 0; i < u_ext.size(); i++) {
     if (u_ext[i] != NULL) {
@@ -308,10 +331,14 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
   for (unsigned i = 0; i < stages.size(); i++)
     if (seq.size() == stages[i].seq_set.size() &&
 <<<<<<< HEAD
+<<<<<<< HEAD
         equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) {
       s = &stages[i]; break;
 =======
     equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) { 
+=======
+        equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) {
+>>>>>>> Fixed forms and 07-general
       s = &stages[i]; break; 
 >>>>>>> Fixes & comments & old code deletion.
     }
@@ -345,7 +372,7 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
 bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 {
   _F_
-  bool** blocks = new_matrix<bool>(neq, neq);
+      bool** blocks = new_matrix<bool>(neq, neq);
   for (unsigned int i = 0; i < neq; i++) {
     for (unsigned int j = 0; j < neq; j++) {
       blocks[i][j] = false;
@@ -371,12 +398,12 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 bool WeakForm::is_in_area_2(int marker, int area) const
 {
   _F_
-  if (-area > (int)(areas.size())) error("Invalid area number.");
+      if (-area > (int)(areas.size())) error("Invalid area number.");
   const Area* a = &areas[-area-1];
 
   for (unsigned int i = 0; i < a->markers.size(); i++)
     if (a->markers[i] == marker)
-  return true;
+      return true;
 
   return false;
 }
@@ -421,6 +448,7 @@ void WeakForm::update_markers_acc_to_conversion(Mesh::MarkersConversion* markers
     }
     */
 }
+<<<<<<< HEAD
 
 
 WeakForm::Form::Form(int area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : 
@@ -447,3 +475,5 @@ WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, int area,
       Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
 {
 }
+=======
+>>>>>>> Fixed forms and 07-general

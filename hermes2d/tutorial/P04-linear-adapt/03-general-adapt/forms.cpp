@@ -31,8 +31,7 @@ private:
       sym = HERMES_SYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
       scalar result = 0;
       for (int i=0; i < n; i++) {
@@ -49,8 +48,7 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
       return u->val[0] * v->val[0] * e->x[0] * e->x[0]; // returning the sum of the degrees of the basis
       // and test function plus two
@@ -62,8 +60,7 @@ private:
   public:
     VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) {}
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -71,8 +68,7 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
@@ -83,8 +79,7 @@ private:
   public:
     VectorFormSurfTutorial(int i, int area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area) {}
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -92,8 +87,7 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
