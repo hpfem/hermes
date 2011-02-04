@@ -22,11 +22,18 @@ Butcher's tables currently available in Hermes
 Here is a list of predefined Runge-Kutta methods that can be found 
 in the file `hermes_common/tables.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes_common/tables.cpp>`_.
 The names of the tables are self-explanatory. The last number is the order of the 
-method (a pair of orders for embedded ones). The second-to-last, if provided, is the number of stages::
+method (a pair of orders for embedded ones). The second-to-last, if provided, is the number of stages.
+
+Explicit methods::
 
 * Explicit_RK_1, 
-* Implicit_RK_1, 
 * Explicit_RK_2, 
+* Explicit_RK_3, 
+* Explicit_RK_4. 
+
+Implicit methods::
+
+* Implicit_RK_1, 
 * Implicit_Crank_Nicolson_2_2, 
 * Implicit_SIRK_2_2, 
 * Implicit_ESIRK_2_2, 
@@ -34,15 +41,21 @@ method (a pair of orders for embedded ones). The second-to-last, if provided, is
 * Implicit_Lobatto_IIIA_2_2, 
 * Implicit_Lobatto_IIIB_2_2, 
 * Implicit_Lobatto_IIIC_2_2, 
-* Explicit_RK_3, 
-* Explicit_RK_4, 
 * Implicit_Lobatto_IIIA_3_4, 
 * Implicit_Lobatto_IIIB_3_4, 
 * Implicit_Lobatto_IIIC_3_4, 
 * Implicit_Radau_IIA_3_5, 
 * Implicit_SDIRK_4_5.
 
-Embedded implicit methods suitable for temporal adaptivity::
+Embedded explicit methods::
+
+* Explicit_HEUN_EULER_2_12_embedded, 
+* Explicit_BOGACKI_SHAMPINE_4_23_embedded, 
+* Explicit_FEHLBERG_6_45_embedded,
+* Explicit_CASH_KARP_6_45_embedded, 
+* Explicit_DORMAND_PRINCE_7_45_embedded.
+
+Embedded implicit methods::
 
 * Implicit_SDIRK_CASH_3_23_embedded,
 * Implicit_ESDIRK_TRBDF2_3_23_embedded, 
