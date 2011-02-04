@@ -9,7 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(SRC
 	hermes3d.cpp
 	filter.cpp
-	forms.cpp
+	weakform/forms.cpp
 	function.cpp
 	mesh.cpp
 	discrete_problem.cpp
@@ -43,7 +43,7 @@ set(SRC
 	space/hcurl.cpp
 	transform.cpp
 	traverse.cpp
-	weakform.cpp
+	weakform/weakform.cpp
         adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp

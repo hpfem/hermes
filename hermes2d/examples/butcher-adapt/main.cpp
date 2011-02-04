@@ -41,17 +41,21 @@ const double TIME_STEP_DEC_RATIO = 0.5;            // Time step decrease ratio (
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Time integration. Choose one of the following methods, or define your own Butcher's table:
-// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, 
-// Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, 
-// Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4, Implicit_Lobatto_IIIA_3_4, 
-// Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5,
-// Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-// Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
-
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
+// Explicit methods:
+//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
+// Implicit methods: 
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5.
+// Embedded explicit methods:
+//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
+//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
+// Embedded implicit methods:
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
+//   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
-//ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_5_34_embedded;
-
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -145,8 +149,9 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[ndof];
   OGProjection::project_global(space, sln, coeff_vec, matrix_solver);
 
-  // Initialize an error vector for adaptive time stepping.
-  scalar* err_vec = new scalar[ndof];
+  // Initialize an error vector and error function for adaptive time stepping.
+  scalar* error_vec = new scalar[ndof];
+  Solution* error_fn = new Solution(&mesh);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -167,29 +172,28 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, err_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, error_vec, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
-    // Convert err_vec into an error function (Dirichlet lift turned off).
-    Solution* error_function = new Solution(&mesh);
+    // Convert error_vec into an error function (Dirichlet lift turned off).
     bool add_dir_lift = false;
-    Solution::vector_to_solution(err_vec, space, error_function, add_dir_lift);
+    Solution::vector_to_solution(error_vec, space, error_fn, add_dir_lift);
 
     // Plot error function.
     // Show the new time level solution.
     char title[100];
     sprintf(title, "Error, t = %g", current_time);
     eview.set_title(title);
-    eview.show(error_function, HERMES_EPS_VERYHIGH);
+    eview.show(error_fn, HERMES_EPS_VERYHIGH);
 
     // Calculate relative time stepping error and decide whether the 
     // time step can be accepted. If not, then the time step size is 
     // reduced and the entire time step repeated. If yes, then another
     // check is run, and if the relative error is very low, time step 
     // is increased.
-    double rel_err_time = calc_norm(error_function, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
+    double rel_err_time = calc_norm(error_fn, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
     info("rel_err_time = %g%%", rel_err_time);
     if (rel_err_time > TIME_TOL_UPPER) {
       info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g and repeating time step.", 
@@ -201,7 +205,6 @@ int main(int argc, char* argv[])
       info("rel_err_time = below lower limit %g%% -> increasing time step from %g to %g", 
            TIME_TOL_UPPER, time_step, time_step * TIME_STEP_INC_RATIO);
       time_step *= TIME_STEP_INC_RATIO;
-      continue;
     }
    
     // Convert coeff_vec into a new time level solution.
@@ -223,8 +226,10 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete [] coeff_vec;
+  delete [] error_vec;
   delete space;
   delete sln;
+  delete error_fn;
 
   // Wait for all views to be closed.
   View::wait();

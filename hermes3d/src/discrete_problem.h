@@ -21,7 +21,7 @@
 #define _DISCRETE_PROBLEM_H_
 
 #include "h3d_common.h"
-#include "weakform.h"
+#include "weakform/weakform.h"
 #include "vector.h"
 #include "matrix.h"
 #include "solver/solver.h"

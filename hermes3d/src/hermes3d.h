@@ -75,7 +75,7 @@
 // quadrature
 #include "quad.h"
 #include "quadstd.h"
-#include "forms.h"
+#include "weakform/forms.h"
 
 #include "refmap.h"
 #include "integrals/h1.h"
@@ -103,7 +103,7 @@
 #include "asmlist.h"
 #include "solution.h"
 #include "filter.h"
-#include "weakform.h"
+#include "weakform/weakform.h"
 #include "discrete_problem.h"
 
 // adapt

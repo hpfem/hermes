@@ -23,7 +23,7 @@
 #include "../quad.h"
 #include "../traverse.h"
 #include "../norm.h"
-#include "../forms.h"
+#include "../weakform/forms.h"
 #include "adapt.h"
 #include "h1projipol.h"
 #include "h1proj.h"

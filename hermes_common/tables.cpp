@@ -84,19 +84,17 @@ ButcherTable::ButcherTable(unsigned int size) : Table(size)
 ButcherTable::ButcherTable(ButcherTableType butcher_table)
 {
   switch (butcher_table) {
-    case Explicit_RK_1: // Explicit Euler.
+
+    /* EXPLICIT METHODS */
+
+    // Explicit Euler.
+    case Explicit_RK_1: 
       this->alloc(1);
       this->set_B(0, 1.);
     break;
 
-    case Implicit_RK_1: // Implicit Euler.
-      this->alloc(1);
-      this->set_A(0, 0, 1.);
-      this->set_B(0, 1.);
-      this->set_C(0, 1.);
-    break;
-
-    case Explicit_RK_2: // Explicit RK-2.
+    // Explicit RK-2.
+    case Explicit_RK_2:
       this->alloc(2);
       this->set_A(1, 0, 2./3.);
       this->set_A(1, 1, 0.);
@@ -105,80 +103,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(0, 2./3.);
     break;
 
-    case Implicit_Crank_Nicolson_2_2: // Implicit Crank Nicolson.
-      this->alloc(2);
-      this->set_A(0, 0, 1./2.);
-      this->set_A(0, 1, 1./2.);
-      this->set_B(0, 1./2.);
-      this->set_B(1, 1./2.);
-      this->set_C(0, 1.);
-    break;
-
-    case Implicit_SIRK_2_2: // Implicit SIRK-22 (second-order).
-      this->alloc(2);
-      this->set_A(0, 0, (5. - 3.*sqrt(2.))/4.);
-      this->set_A(0, 1, (7. - 5.*sqrt(2.))/4.);
-      this->set_A(1, 0, (1. + 1.*sqrt(2.))/4.);
-      this->set_A(1, 1, (3. - 1.*sqrt(2.))/4.);
-      this->set_B(0, (1. + 1.*sqrt(2.))/4.);
-      this->set_B(1, (3. - 1.*sqrt(2.))/4.);
-      this->set_C(0, 3. - 2.*sqrt(2.));
-      this->set_C(1, 1.);  
-    break;
-
-    case Implicit_ESIRK_2_2: // Implicit ESIRK-22 (second-order).
-      this->alloc(2);
-      this->set_A(0, 0, (9. - 6.*sqrt(2.))/4.);
-      this->set_A(0, 1, (-3. + 2.*sqrt(2.))/4.);
-      this->set_A(1, 0, (11. - 6.*sqrt(2.))/4.);
-      this->set_A(1, 1, (-1. + 2.*sqrt(2.))/4.);
-      this->set_B(0, 2. - sqrt(2.0));
-      this->set_B(1, -1. + sqrt(2.0));
-      this->set_C(1, 1.);  
-    break;
-
-    case Implicit_SDIRK_2_2: // Implicit SDIRK-22 (second-order).
-      this->alloc(2);
-      this->set_A(0, 0, 1. - 1./sqrt(2.));
-      this->set_A(1, 0, 1./sqrt(2.));
-      this->set_A(1, 1, 1. - 1./sqrt(2.));
-      this->set_B(0, 1./sqrt(2.));
-      this->set_B(1, 1. - 1./sqrt(2.));
-      this->set_C(0, 1. - 1./sqrt(2.));
-      this->set_C(1, 1.);  
-    break;
-
-    case Implicit_Lobatto_IIIA_2_2: // Implicit Lobatto IIIA (second-order).
-      this->alloc(2);
-      this->set_A(1, 0, 1./2.);
-      this->set_A(1, 1, 1./2.);
-      this->set_B(0, 1./2.);
-      this->set_B(1, 1./2.);
-      this->set_C(1, 1.);
-    break;
-
-    case Implicit_Lobatto_IIIB_2_2: // Implicit Lobatto IIIB (second-order).
-      this->alloc(2);
-      this->set_A(0, 0, 1./2.);
-      this->set_A(0, 1, 1./2.);
-      this->set_B(0, 1./2.);
-      this->set_B(1, 1./2.);
-      this->set_C(0, 1./2.);
-      this->set_C(1, 1./2.);
-    break;
-
-    case Implicit_Lobatto_IIIC_2_2: // Implicit Lobatto IIIC (second-order).
-      this->alloc(2);
-      this->set_A(0, 0, 1./2.);
-      this->set_A(0, 1, -1./2.);
-      this->set_A(1, 0, 1./2.);
-      this->set_A(1, 1, 1./2.);
-      this->set_B(0, 1./2.);
-      this->set_B(1, 1./2.);
-      this->set_C(1, 1.);
-    break;
-
-    case Explicit_RK_3: // Explicit RK-3.
+    // Explicit RK-3.
+    case Explicit_RK_3: 
       this->alloc(3);
       this->set_A(1, 0, 1./2.);
       this->set_A(2, 0, -1.);
@@ -190,7 +116,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Explicit_RK_4: // Explicit RK-4.
+    // Explicit RK-4.
+    case Explicit_RK_4: 
       this->alloc(4);
       this->set_A(1, 0, 1./2.);
       this->set_A(2, 1, 1./2.);
@@ -204,7 +131,98 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(3, 1.);
     break;
 
-    case Implicit_Lobatto_IIIA_3_4: // Implicit Lobatto IIIA (fourth-order).
+    /* IMPLICIT METHODS */
+
+    // Implicit Euler.
+    case Implicit_RK_1: 
+      this->alloc(1);
+      this->set_A(0, 0, 1.);
+      this->set_B(0, 1.);
+      this->set_C(0, 1.);
+    break;
+
+    // Implicit Crank Nicolson.
+    case Implicit_Crank_Nicolson_2_2: 
+      this->alloc(2);
+      this->set_A(0, 0, 1./2.);
+      this->set_A(0, 1, 1./2.);
+      this->set_B(0, 1./2.);
+      this->set_B(1, 1./2.);
+      this->set_C(0, 1.);
+    break;
+
+    // Implicit SIRK-22 (second-order).
+    case Implicit_SIRK_2_2: 
+      this->alloc(2);
+      this->set_A(0, 0, (5. - 3.*sqrt(2.))/4.);
+      this->set_A(0, 1, (7. - 5.*sqrt(2.))/4.);
+      this->set_A(1, 0, (1. + 1.*sqrt(2.))/4.);
+      this->set_A(1, 1, (3. - 1.*sqrt(2.))/4.);
+      this->set_B(0, (1. + 1.*sqrt(2.))/4.);
+      this->set_B(1, (3. - 1.*sqrt(2.))/4.);
+      this->set_C(0, 3. - 2.*sqrt(2.));
+      this->set_C(1, 1.);  
+    break;
+
+    // Implicit ESIRK-22 (second-order).
+    case Implicit_ESIRK_2_2: 
+      this->alloc(2);
+      this->set_A(0, 0, (9. - 6.*sqrt(2.))/4.);
+      this->set_A(0, 1, (-3. + 2.*sqrt(2.))/4.);
+      this->set_A(1, 0, (11. - 6.*sqrt(2.))/4.);
+      this->set_A(1, 1, (-1. + 2.*sqrt(2.))/4.);
+      this->set_B(0, 2. - sqrt(2.0));
+      this->set_B(1, -1. + sqrt(2.0));
+      this->set_C(1, 1.);  
+    break;
+
+    // Implicit SDIRK-2-2 (second-order).
+    case Implicit_SDIRK_2_2: 
+      this->alloc(2);
+      this->set_A(0, 0, 1. - 1./sqrt(2.));
+      this->set_A(1, 0, 1./sqrt(2.));
+      this->set_A(1, 1, 1. - 1./sqrt(2.));
+      this->set_B(0, 1./sqrt(2.));
+      this->set_B(1, 1. - 1./sqrt(2.));
+      this->set_C(0, 1. - 1./sqrt(2.));
+      this->set_C(1, 1.);  
+    break;
+
+    // Implicit Lobatto IIIA (second-order).
+    case Implicit_Lobatto_IIIA_2_2: 
+      this->alloc(2);
+      this->set_A(1, 0, 1./2.);
+      this->set_A(1, 1, 1./2.);
+      this->set_B(0, 1./2.);
+      this->set_B(1, 1./2.);
+      this->set_C(1, 1.);
+    break;
+
+    // Implicit Lobatto IIIB (second-order).
+    case Implicit_Lobatto_IIIB_2_2: 
+      this->alloc(2);
+      this->set_A(0, 0, 1./2.);
+      this->set_A(0, 1, 1./2.);
+      this->set_B(0, 1./2.);
+      this->set_B(1, 1./2.);
+      this->set_C(0, 1./2.);
+      this->set_C(1, 1./2.);
+    break;
+
+    // Implicit Lobatto IIIC (second-order).
+    case Implicit_Lobatto_IIIC_2_2: 
+      this->alloc(2);
+      this->set_A(0, 0, 1./2.);
+      this->set_A(0, 1, -1./2.);
+      this->set_A(1, 0, 1./2.);
+      this->set_A(1, 1, 1./2.);
+      this->set_B(0, 1./2.);
+      this->set_B(1, 1./2.);
+      this->set_C(1, 1.);
+    break;
+
+    // Implicit Lobatto IIIA (fourth-order).
+    case Implicit_Lobatto_IIIA_3_4: 
       this->alloc(3);
       this->set_A(1, 0, 5./24.);
       this->set_A(2, 0, 1./6.);
@@ -219,7 +237,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Implicit_Lobatto_IIIB_3_4: // Implicit Lobatto IIIB (fourth-order).
+    // Implicit Lobatto IIIB (fourth-order).
+    case Implicit_Lobatto_IIIB_3_4: 
       this->alloc(3);
       this->set_A(0, 0, 1./6.);
       this->set_A(1, 0, 1./6.);
@@ -234,7 +253,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Implicit_Lobatto_IIIC_3_4: // Implicit Lobatto IIIC (fourth-order).
+    // Implicit Lobatto IIIC (fourth-order).
+    case Implicit_Lobatto_IIIC_3_4: 
       this->alloc(3);
       this->set_A(0, 0, 1./6.);
       this->set_A(1, 0, 1./6.);
@@ -252,7 +272,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Implicit_Radau_IIA_3_5: // Implicit Radau IIA (fifth-order).
+    // Implicit Radau IIA (fifth-order).
+    case Implicit_Radau_IIA_3_5: 
       this->alloc(3);
       this->set_A(0, 0, (88. - 7*sqrt((double)6)) / 360 );
       this->set_A(1, 0, (296 + 169 * sqrt((double)6)) / 1800 );
@@ -271,7 +292,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    case Implicit_SDIRK_4_5: // Implicit SDIRK-45 (fifth-order).
+    // Implicit SDIRK-4-5 (fifth-order).
+    case Implicit_SDIRK_4_5: 
       this->alloc(5);
       this->set_A(0, 0, 1./4.);
       this->set_A(1, 0, 1./2.);
@@ -298,6 +320,160 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 11./20.);  
       this->set_C(3, 1./2.);  
       this->set_C(4, 1.);  
+    break;
+
+    /* EMBEDDED EXPLICIT METHODS */
+
+    // Explicit Heun-Euler.
+    case Explicit_HEUN_EULER_2_12_embedded: 
+      this->alloc(2);
+      this->set_A(1, 0, 1.0);
+      this->set_B(0, 0.5);
+      this->set_B(1, 0.5);
+      this->set_B2(0, 1.0);
+      this->set_B2(1, 0.0);
+      this->set_C(0, 0.0);
+      this->set_C(1, 1.0);
+    break;
+
+    // Explicit Bogacki-Shampine.
+    case Explicit_BOGACKI_SHAMPINE_4_23_embedded: 
+      this->alloc(4);
+      this->set_A(1, 0, 1./2.);
+      this->set_A(3, 0, 2./9.);
+      this->set_A(2, 1, 3./4.);
+      this->set_A(3, 1, 1./3.);
+      this->set_A(3, 2, 4./9.);
+      this->set_B(0, 2./9.);
+      this->set_B(1, 1./3.);
+      this->set_B(2, 4./9.);
+      this->set_B(3, 0.0);
+      this->set_B2(0, 7./24.);
+      this->set_B2(1, 1./4.);
+      this->set_B2(2, 1./3.);
+      this->set_B2(3, 1./8.);
+      this->set_C(1, 1./2.);
+      this->set_C(2, 3./4.);
+      this->set_C(3, 1.0);
+    break;
+
+    // Explicit Fehlberg.
+    case Explicit_FEHLBERG_6_45_embedded: 
+      this->alloc(6);
+      this->set_A(1, 0, 1./4.);
+      this->set_A(2, 0, 3./32.);
+      this->set_A(3, 0, 1932./2197.);
+      this->set_A(4, 0, 439./216.);
+      this->set_A(5, 0, -8./27.);
+      this->set_A(2, 1, 9./32.);
+      this->set_A(3, 1, -7200./2197.);
+      this->set_A(4, 1, -8.);
+      this->set_A(5, 1, 2.);
+      this->set_A(3, 2, 7296./2197.);
+      this->set_A(4, 2, 3680./513.);
+      this->set_A(5, 2, -3544./2565.);
+      this->set_A(4, 3, -845./4104.);
+      this->set_A(5, 3, 1859./4104.);
+      this->set_A(5, 4, -11./40.);
+      this->set_B(0, 16./135.);
+      this->set_B(1, 0);
+      this->set_B(2, 6656./12825.);
+      this->set_B(3, 28561./56430.);
+      this->set_B(4, -9./50.);
+      this->set_B(5, 2./55.);
+      this->set_B2(0, 25./216.);
+      this->set_B2(1, 0);
+      this->set_B2(2, 1408./2565.);
+      this->set_B2(3, 2197./4104.);
+      this->set_B2(4, -1./5.);
+      this->set_C(1, 1./4.);
+      this->set_C(2, 3./8.);
+      this->set_C(3, 12./13.);
+      this->set_C(4, 1.);
+      this->set_C(5, 1./2.);
+    break;
+
+    // Explicit Cash-Karp.
+    case Explicit_CASH_KARP_6_45_embedded: 
+      this->alloc(6);
+      this->set_A(1, 0, 1./5.);
+      this->set_A(2, 0, 3./40.);
+      this->set_A(3, 0, 3./10.);
+      this->set_A(4, 0, -11./54.);
+      this->set_A(5, 0, 1631./55296.);
+      this->set_A(2, 1, 9./40.);
+      this->set_A(3, 1, -9./10.);
+      this->set_A(4, 1, 5./2.);
+      this->set_A(5, 1, 175./512.);
+      this->set_A(3, 2, 6./5.);
+      this->set_A(4, 2, -70./27.);
+      this->set_A(5, 2, 575./13824.);
+      this->set_A(4, 3, 35./27.);
+      this->set_A(5, 3, 44275./110592.);
+      this->set_A(5, 4, 253./4096.);
+      this->set_B(0, 37./378.);
+      this->set_B(1, 0);
+      this->set_B(2, 250./621.);
+      this->set_B(3, 125./594.);
+      this->set_B(4, 0);
+      this->set_B(5, 512./1771.);
+      this->set_B2(0, 2825./27648.);
+      this->set_B2(1, 0);
+      this->set_B2(2, 18575./48384.);
+      this->set_B2(3, 13525./55296.);
+      this->set_B2(4, 277./14336.);
+      this->set_B2(5, 1./4.);
+      this->set_C(1, 1./5.);
+      this->set_C(2, 3./10.);
+      this->set_C(3, 3./5.);
+      this->set_C(4, 1.);
+      this->set_C(5, 7./8.);
+    break;
+
+    // Explicit Dormand-Prince.
+    case Explicit_DORMAND_PRINCE_7_45_embedded: 
+      this->alloc(7);
+      this->set_A(1, 0, 1./5.);
+      this->set_A(2, 0, 3./40.);
+      this->set_A(3, 0, 44./45.);
+      this->set_A(4, 0, 19372./6561.);
+      this->set_A(5, 0, 9017./3168.);
+      this->set_A(6, 0, 35./384.);
+      this->set_A(2, 1, 9./40.);
+      this->set_A(3, 1, -56./15.);
+      this->set_A(4, 1, -25360./2187.);
+      this->set_A(5, 1, -355./33.);
+      this->set_A(6, 1, 0.);
+      this->set_A(3, 2, 32./9.);
+      this->set_A(4, 2, 64448./6561.);
+      this->set_A(5, 2, 46732./5247.);
+      this->set_A(6, 2, 500./1113.);
+      this->set_A(4, 3, -212./729.);
+      this->set_A(5, 3, 49./176.);
+      this->set_A(6, 3, 125./192.);
+      this->set_A(5, 4, -5103./18656.);
+      this->set_A(6, 4, -2187./6784.);
+      this->set_A(6, 5, 11./84.);
+      this->set_B(0, 35./384.);
+      this->set_B(1, 0.);
+      this->set_B(2, 500./1113.);
+      this->set_B(3, 125./192.);
+      this->set_B(4, -2187./6784.);
+      this->set_B(5, 11./84.);
+      this->set_B(6, 0.);
+      this->set_B2(0, 5179./57600.);
+      this->set_B2(1, 0.);
+      this->set_B2(2, 7571./16695.);
+      this->set_B2(3, 393./640.);
+      this->set_B2(4, -92097./339200.);
+      this->set_B2(5, 187./2100.);
+      this->set_B2(6, 1./40.);
+      this->set_C(1, 1./5.);
+      this->set_C(2, 3./10.);
+      this->set_C(3, 4./5.);
+      this->set_C(4, 8./9.);
+      this->set_C(5, 1.);
+      this->set_C(6, 1.);
     break;
 
     /* EMBEDDED IMPLICIT METHODS */
@@ -591,10 +767,10 @@ void ButcherTable::switch_B_rows()
 {
   // Test whether B2 row is not zero.
   double sum = 0;
-  for (int i=0; i < size; i++) sum += fabs(B2[i]);
+  for (unsigned int i=0; i < size; i++) sum += fabs(B2[i]);
   if (sum < 1e-10) error("ButcherTable::switch_B_rows(): Zero B2 row detected.");
   // Switch B rows.
-  for (int i=0; i < size; i++) {
+  for (unsigned int i=0; i < size; i++) {
     double tmp = B[i];
     B[i] = B2[i];
     B2[i] = tmp;

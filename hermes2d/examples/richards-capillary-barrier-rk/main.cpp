@@ -2,20 +2,18 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-
 using namespace RefinementSelectors;
 
 //  This example solves the time-dependent Richard's equation using 
-//  many different time stepping methods. The nonlinear solver in 
-//  each time step is the Newton's method. 
+//  adaptive time integration (no dynamical meshes in space yet).
+//  Many different time stepping methods can be used. The nonlinear 
+//  solver in each time step is the Newton's method. 
 //
 //  PDE: C(h)dh/dt - div(K(h)grad(h)) - (dK/dh)*(dh/dy) = 0
 //  where K(h) = K_S*exp(alpha*h)                          for h < 0,
 //        K(h) = K_S                                       for h >= 0,
 //        C(h) = alpha*(theta_s - theta_r)*exp(alpha*h)    for h < 0,
 //        C(h) = alpha*(theta_s - theta_r)                 for h >= 0.
-//
-//  Newton's method is more involved, see the file forms.cpp.
 //
 //  Domain: rectangle (0, 8) x (0, 6.5).
 //  Units: length: cm
@@ -35,12 +33,14 @@ const char* mesh_file = "domain-half.mesh";
 
 // Adaptive time stepping.
 double time_step = 0.5;                           // Time step (in days).
+const double time_tol_upper = 1.0;                // If rel. temporal error is greater than this threshold, decrease time 
+                                                  // step size and repeat time step.
+const double time_tol_lower = 0.5;                // If rel. temporal error is less than this threshold, increase time step
+                                                  // but do not repeat time step (this might need further research).
 double time_step_dec = 0.5;                       // Timestep decrease ratio after unsuccessful nonlinear solve.
 double time_step_inc = 1.1;                       // Timestep increase ratio after successful nonlinear solve.
 double time_step_min = 1e-8; 			  // Computation will stop if time step drops below this value. 
-double time_step_max = 1.0;                       // Maximal time step.
                        
-
 // Elements orders and initial refinements.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
@@ -49,16 +49,22 @@ const int INIT_REF_NUM_BDY_TOP = 1;               // Number of initial mesh refi
 // Matrix solver.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-// Time integration. Choose one of the following methods, or define your own Butcher's table. The last number 
-// in the name of each method is its order. The one before last, if present, is the number of stages.
-// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, 
-// Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, 
-// Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4, Implicit_Lobatto_IIIA_3_4, 
-// Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5, 
-// Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-// Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
+// Explicit methods:
+//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
+// Implicit methods: 
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5.
+// Embedded explicit methods:
+//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
+//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
+// Embedded implicit methods:
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
+//   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
+ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
 // Newton's method.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for Newton on fine mesh.
@@ -240,6 +246,10 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[ndof];
   OGProjection::project_global(space, sln, coeff_vec, matrix_solver);
  
+  // Initialize an error vector and error function for adaptive time stepping.
+  scalar* error_vec = new scalar[ndof];
+  Solution* error_fn = new Solution(&mesh);
+
   // Initialize the FE problem.
   bool is_linear = false;
   DiscreteProblem dp(&wf, space, is_linear);
@@ -252,7 +262,7 @@ int main(int argc, char* argv[])
   oview.show(space);
 
   // Time stepping loop:
-  double current_time = 0.0; int ts = 1;
+  int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
@@ -260,12 +270,36 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, error_vec, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       info("Runge-Kutta time step failed, decreasing time step size from %g to %g days.", 
            time_step, time_step * time_step_dec);
            time_step *= time_step_dec;
+           if (time_step < time_step_min) error("Time step became too small.");
 	   continue;
+    }
+
+    // Convert error_vec into an error function (Dirichlet lift turned off).
+    bool add_dir_lift = false;
+    Solution::vector_to_solution(error_vec, space, error_fn, add_dir_lift);
+
+    // Calculate relative time stepping error and decide whether the 
+    // time step can be accepted. If not, then the time step size is 
+    // reduced and the entire time step repeated. If yes, then another
+    // check is run, and if the relative error is very low, time step 
+    // is increased.
+    double rel_err_time = calc_norm(error_fn, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
+    info("rel_err_time = %g%%", rel_err_time);
+    if (rel_err_time > time_tol_upper) {
+      info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g days and repeating time step.", 
+           time_tol_upper, time_step, time_step * time_step_dec);
+      time_step *= time_step_dec;
+      continue;
+    }
+    if (rel_err_time < time_tol_lower) {
+      info("rel_err_time = below lower limit %g%% -> increasing time step from %g to %g days", 
+           time_tol_lower, time_step, time_step * time_step_inc);
+      time_step *= time_step_inc;
     }
 
     // Convert coeff_vec into a new time level solution.
@@ -288,12 +322,6 @@ int main(int argc, char* argv[])
     sln->save(filename, compress);
     info("Solution at time %g saved to file %s.", current_time, filename);
 
-    // Increase time step.
-    if (time_step*time_step_inc < time_step_max) {
-      info("Increasing time step from %g to %g days.", time_step, time_step * time_step_inc);
-      time_step *= time_step_inc;
-    }
-
     // Increase counter of time steps.
     ts++;
   } 
@@ -301,8 +329,10 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete [] coeff_vec;
+  delete [] error_vec;
   delete space;
   delete sln;
+  delete error_fn;
 
   // Wait for all views to be closed.
   View::wait();

@@ -22,9 +22,16 @@
 // the one before last (if provided) is the number of stages.
 enum ButcherTableType 
 {
-   Explicit_RK_1,               // Explicit Runge-Kutta RK-1, or explicit Euler method.
-   Implicit_RK_1,               // Implicit Runge-Kutta RK-1, or implicit Euler method.
+   /* EXPLICIT METHODS */
+
+   Explicit_RK_1,               // Explicit Runge-Kutta RK-1 (explicit Euler).
    Explicit_RK_2,               // Explicit Runge-Kutta RK-2 method.
+   Explicit_RK_3,               // Explicit Runge-Kutta RK-3 method.
+   Explicit_RK_4,               // Explicit Runge-Kutta RK-4 method.
+
+   /* IMPLICIT METHODS */
+
+   Implicit_RK_1,               // Implicit Runge-Kutta RK-1 (implicit Euler).
    Implicit_Crank_Nicolson_2_2, // Implicit Crank_Nicolson method.
    Implicit_SIRK_2_2,           // Implicit SIRK-2-2 method.
    Implicit_ESIRK_2_2,          // Implicit ESIRK-2-2 method.
@@ -32,13 +39,19 @@ enum ButcherTableType
    Implicit_Lobatto_IIIA_2_2,   // Implicit Lobatto IIIA-2 method.
    Implicit_Lobatto_IIIB_2_2,   // Implicit Lobatto IIIB-2 method.
    Implicit_Lobatto_IIIC_2_2,   // Implicit Lobatto IIIB-2 method.
-   Explicit_RK_3,               // Explicit Runge-Kutta RK-3 method.
-   Explicit_RK_4,               // Explicit Runge-Kutta RK-4 method.
    Implicit_Lobatto_IIIA_3_4,   // Implicit Lobatto IIIA-4 method.
    Implicit_Lobatto_IIIB_3_4,   // Implicit Lobatto IIIB-4 method.
    Implicit_Lobatto_IIIC_3_4,   // Implicit Lobatto IIIB-4 method.
    Implicit_Radau_IIA_3_5,      // Implicit Radau IIA-5 method.
    Implicit_SDIRK_4_5,          // Implicit SDIRK-4-5 method.
+
+   /* EMBEDDED EXPLICIT METHODS */
+
+   Explicit_HEUN_EULER_2_12_embedded,          // Heun-Euler (orders 1 and 2),
+   Explicit_BOGACKI_SHAMPINE_4_23_embedded,    // Bogacki-Shampine (orders 2 and 3),
+   Explicit_FEHLBERG_6_45_embedded,            // Fehlberg (orders 4 and 5),
+   Explicit_CASH_KARP_6_45_embedded,           // Cash-Karp (orders 4 and 5),
+   Explicit_DORMAND_PRINCE_7_45_embedded,      // Dormand-Prince (orders 4 and 5),
 
    /* EMBEDDED IMPLICIT METHODS */
 
