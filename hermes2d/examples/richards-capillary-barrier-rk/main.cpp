@@ -32,12 +32,12 @@ using namespace RefinementSelectors;
 const char* mesh_file = "domain-half.mesh";
 
 // Adaptive time stepping.
-double time_step = 0.5;                           // Time step (in days).
+double time_step = 0.3;                           // Time step (in days).
 const double time_tol_upper = 1.0;                // If rel. temporal error is greater than this threshold, decrease time 
                                                   // step size and repeat time step.
 const double time_tol_lower = 0.5;                // If rel. temporal error is less than this threshold, increase time step
                                                   // but do not repeat time step (this might need further research).
-double time_step_dec = 0.5;                       // Timestep decrease ratio after unsuccessful nonlinear solve.
+double time_step_dec = 0.8;                       // Timestep decrease ratio after unsuccessful nonlinear solve.
 double time_step_inc = 1.1;                       // Timestep increase ratio after successful nonlinear solve.
 double time_step_min = 1e-8; 			  // Computation will stop if time step drops below this value. 
                        
@@ -272,10 +272,6 @@ int main(int argc, char* argv[])
   int ts = 1;
   do 
   {
-    // Add entry to the timestep graph.
-    time_step_graph.add_values(current_time, time_step);
-    time_step_graph.save("time_step_history.dat");
-
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
@@ -322,6 +318,10 @@ int main(int argc, char* argv[])
     // Convert coeff_vec into a new time level solution.
     Solution::vector_to_solution(coeff_vec, space, sln);
 
+    // Add entry to the timestep graph.
+    time_step_graph.add_values(current_time, time_step);
+    time_step_graph.save("time_step_history.dat");
+
     // Update time.
     current_time += time_step;
 
@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
     oview.show(space);
 
     // Save complete Solution.
-    char* filename = new char[100];
+    char filename[100];
     sprintf(filename, "outputs/tsln_%f.dat", current_time);
     bool compress = false;   // Gzip compression not used as it only works on Linux.
     sln->save(filename, compress);

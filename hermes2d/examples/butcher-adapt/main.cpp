@@ -28,7 +28,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
-double time_step = 0.2;                            // Time step.
+double time_step = 0.05;                            // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
@@ -37,7 +37,7 @@ const double TIME_TOL_UPPER = 1.0;                 // If rel. temporal error is 
 const double TIME_TOL_LOWER = 0.5;                 // If rel. temporal error is less than this threshold, increase time step
                                                    // but do not repeat time step (this might need further research).
 const double TIME_STEP_INC_RATIO = 1.1;            // Time step increase ratio (applied when rel. temporal error is too small).
-const double TIME_STEP_DEC_RATIO = 0.5;            // Time step decrease ratio (applied when rel. temporal error is too large).
+const double TIME_STEP_DEC_RATIO = 0.8;            // Time step decrease ratio (applied when rel. temporal error is too large).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -171,10 +171,6 @@ int main(int argc, char* argv[])
   double current_time = 0.0; int ts = 1;
   do 
   {
-    // Add entry to the timestep graph.
-    time_step_graph.add_values(current_time, time_step);
-    time_step_graph.save("time_step_history.dat");
-
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
@@ -217,6 +213,10 @@ int main(int argc, char* argv[])
    
     // Convert coeff_vec into a new time level solution.
     Solution::vector_to_solution(coeff_vec, space, sln);
+
+    // Add entry to the timestep graph.
+    time_step_graph.add_values(current_time, time_step);
+    time_step_graph.save("time_step_history.dat");
 
     // Update time.
     current_time += time_step;
