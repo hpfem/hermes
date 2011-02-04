@@ -193,7 +193,7 @@ protected:
       this->ext = Hermes::vector<MeshFunction *>(ext);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                  Geom<double> *e, ExtData<scalar> *ext)
     {
       switch (projNormType)
@@ -213,7 +213,7 @@ protected:
       }
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext)
     {
       switch (projNormType)
