@@ -52,7 +52,7 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   for (int i = 0; i < 100; i++) found[i] = 0;
   for (int i = 0; i < n; i++)
   {
-    int norm = -1.0;
+    ProjNormType norm;
     if (proj_norms == Hermes::vector<ProjNormType>()) {
       ESpaceType space_type = spaces[i]->get_type();
       switch (space_type) {
@@ -64,42 +64,10 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
       }
     }
     else norm = proj_norms[i];
-    if (norm == HERMES_H1_NORM)
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, (WeakForm::matrix_form_val_t)(H1projection_biform<double, scalar>), 
-                               (WeakForm::matrix_form_ord_t)(H1projection_biform<Ord, Ord>));
-      proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_H1_SEMINORM)
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, H1_semi_projection_biform<double, scalar>, H1_semi_projection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, H1_semi_projection_liform<double, scalar>, H1_semi_projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_HCURL_NORM)
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_HDIV_NORM)
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, Hdivprojection_biform<double, scalar>, Hdivprojection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, Hdivprojection_liform<double, scalar>, Hdivprojection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
-    if (norm == HERMES_L2_NORM)
-    {
-      found[i] = 1;
-      proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
-      proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
-    }
+
+    found[i] = 1;
+    proj_wf->add_matrix_form(new ProjectionMatrixVolForm(i, i, norm));
+    proj_wf->add_vector_form(new ProjectionVectorVolForm(i, source_meshfns[i], norm));
   }
   for (int i=0; i < n; i++)
   {
@@ -132,19 +100,17 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
 }
 
 void OGProjection::project_global(Hermes::vector<Space *> spaces,
-                                  Hermes::vector< std::pair<WeakForm::matrix_form_val_t,
-                                  WeakForm::matrix_form_ord_t> > proj_biforms,
-                                  Hermes::vector< std::pair<WeakForm::vector_form_val_t,
-                                  WeakForm::vector_form_ord_t> > proj_liforms,
+                                  Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
+                                  Hermes::vector<WeakForm::VectorFormVol *> vfvol,
                                   Hermes::vector<MeshFunction*> source_meshfns,
                                   scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
   unsigned int n = spaces.size();
-  unsigned int n_biforms = proj_biforms.size();
+  unsigned int n_biforms = mfvol.size();
   if (n_biforms == 0)
     error("Please use the simpler version of project_global with the argument Hermes::vector<ProjNormType> proj_norms if you do not provide your own projection norm.");
-  if (n_biforms != proj_liforms.size())
+  if (n_biforms != vfvol.size())
     error("Mismatched numbers of projection forms in project_global().");
   if (n != n_biforms)
     error("Mismatched numbers of projected functions and projection forms in project_global().");
@@ -156,9 +122,9 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces,
   // Define projection weak form.
   WeakForm* proj_wf = new WeakForm(n);
   for (unsigned int i = 0; i < n; i++) {
-    proj_wf->add_matrix_form(i, i, proj_biforms[i].first, proj_biforms[i].second);
-    proj_wf->add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second,
-                    HERMES_ANY, source_meshfns[i]);
+    proj_wf->add_matrix_form(mfvol[i]);
+    // FIXME
+    // proj_wf->add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second, HERMES_ANY, source_meshfns[i]);
   }
 
   project_internal(spaces, proj_wf, target_vec, matrix_solver);

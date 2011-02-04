@@ -55,9 +55,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form(callback(linear_form));
+  WeakFormTutorial wf;
 
   // Initialize the FE problem.
   bool is_linear = true;

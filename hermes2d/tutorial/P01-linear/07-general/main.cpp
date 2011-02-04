@@ -31,20 +31,9 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary markers.
-const std::string BDY_HORIZONTAL = "Boundary horizontal";
-const std::string BDY_VERTICAL = "Boundary vertical";
+const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
 
-// Problem parameters.
-double a_11(double x, double y) { if (y > 0) return 1 + x*x + y*y; else return 1;}
-double a_22(double x, double y) { if (y > 0) return 1; else return 1 + x*x + y*y;}
-double a_12(double x, double y) { return 1; }
-double a_21(double x, double y) { return 1;}
-double a_1(double x, double y) { return 0.0;}
-double a_2(double x, double y) { return 0.0;}
-double a_0(double x, double y) { return 0.0;}
-double rhs(double x, double y) { return 1 + x*x + y*y;}
 double g_D(double x, double y) { return -cos(M_PI*x);}
-double g_N(double x, double y) { return 0;}
 
 // Essential (Dirichlet) boundary condition values.
 scalar essential_bc_values(double x, double y)
@@ -83,11 +72,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  bool matrix_free = false;
-  WeakForm wf;
-  wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
-  wf.add_vector_form(linear_form, linear_form_ord);
-  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
+  WeakFormTutorial wf;
 
   // Initialize the FE problem.
   bool is_linear = true;

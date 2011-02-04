@@ -219,6 +219,21 @@ public:
 
 protected:
   /// Assembling.
+  /// Experimental caching of vector valued (vector) forms.
+  struct SurfVectorFormsKey
+  {
+    WeakForm::VectorFormSurf* vfs;
+    int element_id, isurf, shape_fn;
+#ifdef _MSC_VER
+    UINT64 sub_idx;
+    SurfVectorFormsKey(WeakForm::VectorFormSurf* vfs, int element_id, int isurf, int shape_fn, UINT64 sub_idx)
+      : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
+#else
+    unsigned int sub_idx;
+    SurfVectorFormsKey(WeakForm::VectorFormSurf* vfs, int element_id, int isurf, int shape_fn, unsigned int sub_idx)
+      : vfs(vfs), element_id(element_id), isurf(isurf), shape_fn(shape_fn), sub_idx(sub_idx) {};
+#endif
+  };
 
   DiscontinuousFunc<Ord>* init_ext_fn_ord(NeighborSearch* ns, MeshFunction* fu);
 
@@ -329,6 +344,14 @@ protected:
 
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
   Func<Ord>* get_fn_ord(const int order);
+
+  struct VolVectorFormsKey
+  {
+    WeakForm::VectorFormVol* vfv;
+    int element_id, shape_fn;
+    VolVectorFormsKey(WeakForm::VectorFormVol* vfv, int element_id, int shape_fn)
+      : vfv(vfv), element_id(element_id), shape_fn(shape_fn) {};
+  };
 
 
   /// Pure DG functionality.

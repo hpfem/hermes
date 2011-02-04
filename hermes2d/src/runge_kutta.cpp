@@ -70,6 +70,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
                      WeakForm* stage_wf_right, Solution** stage_time_sol) 
 {
   // First let's do the mass matrix (only one block ndof times ndof).
+
+  /*
+  FIXME
   WeakForm::MatrixFormVol mfv_00;
   mfv_00.i = 0;
   mfv_00.j = 0;
@@ -84,6 +87,8 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   mfv_00.adapt_order_increase = -1;
   mfv_00.adapt_rel_error_tol = -1;
   stage_wf_left->add_matrix_form_internal(&mfv_00);
+  */
+  stage_wf_left->add_matrix_form(new MatrixFormVolL2(0, 0, HERMES_SYM));
 
   // In the rest we will take the stationary jacobian and residual forms 
   // (right-hand side) and use them to create a block Jacobian matrix of
@@ -112,15 +117,18 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   // Extracting volume and surface matrix and vector forms from the
   // original weak formulation.
   if (wf->get_neq() != 1) error("wf->neq != 1 not implemented yet.");
-  Hermes::vector<WeakForm::MatrixFormVol> mfvol_base = wf->get_mfvol();
-  Hermes::vector<WeakForm::MatrixFormSurf> mfsurf_base = wf->get_mfsurf();
-  Hermes::vector<WeakForm::VectorFormVol> vfvol_base = wf->get_vfvol();
-  Hermes::vector<WeakForm::VectorFormSurf> vfsurf_base = wf->get_vfsurf();
+  Hermes::vector<WeakForm::MatrixFormVol *> mfvol_base = wf->get_mfvol();
+  Hermes::vector<WeakForm::MatrixFormSurf *> mfsurf_base = wf->get_mfsurf();
+  Hermes::vector<WeakForm::VectorFormVol *> vfvol_base = wf->get_vfvol();
+  Hermes::vector<WeakForm::VectorFormSurf *> vfsurf_base = wf->get_vfsurf();
 
   // Duplicate matrix volume forms, scale them according
   // to the Butcher's table, enhance them with additional
   // external solutions, and anter them as blocks to the
   // new stage Jacobian.
+
+  // FIXME
+  /*
   for (unsigned int m = 0; m < mfvol_base.size(); m++) {
     WeakForm::MatrixFormVol mfv_base = mfvol_base[m];
     for (int i = 0; i < num_stages; i++) {
@@ -157,6 +165,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       }
     }
   }
+
 
   // Duplicate matrix surface forms, enhance them with
   // additional external solutions, and anter them as
@@ -268,6 +277,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       stage_wf_right->add_vector_form_surf_internal(&vfs_i);
     }
   }
+  */
 }
 
 // This takes a matrix, and uses it to formally construct a block-diagonal

@@ -33,14 +33,20 @@ public:
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
+<<<<<<< HEAD
   static void project_global(Hermes::vector<Space *> spaces, Hermes::vector< std::pair<WeakForm::matrix_form_val_t,
 									      WeakForm::matrix_form_ord_t> > proj_biforms,
                              Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms,
+=======
+  static void project_global(Hermes::vector<Space *> spaces,
+                             Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
+                             Hermes::vector<WeakForm::VectorFormVol *> vfvol,
+>>>>>>> Replaced callbacks with classes
                              Hermes::vector<MeshFunction*> source_meshfns,
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   static void project_global(Space *space,
-                             std::pair<WeakForm::matrix_form_val_t, WeakForm::matrix_form_ord_t> proj_biform,
+                             Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
                              std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
                              ExactFunction source_fn, scalar* target_vec,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK);
@@ -67,131 +73,230 @@ protected:
   static void project_internal(Hermes::vector<Space *> spaces, WeakForm *proj_wf, scalar* target_vec,
                                MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
-  // The projection functionality below is identical in H2D and H3D.
-
-  // H1 projection.
-  template<typename Real, typename Scalar>
-  static Scalar H1projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                    Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+  class ProjectionMatrixVolForm : public WeakForm::MatrixFormVol
   {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-    return result;
-  }
+  public:
+    ProjectionMatrixVolForm(int i, int j, ProjNormType projNormType) : WeakForm::MatrixFormVol(i, j)
+    {
+      this->projNormType = projNormType;
+    }
 
-  template<typename Real, typename Scalar>
-  static Scalar H1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                 Geom<double> *e, ExtData<scalar> *ext)
+    {
+      switch (projNormType)
+      {
+      case HERMES_L2_NORM:
+        return l2_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_NORM:
+        return h1_semi_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_SEMINORM:
+            return h1_semi_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HCURL_NORM:
+            return hcurl_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HDIV_NORM:
+            return hdiv_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+      default:
+        error("Unknown projection type");
+      }
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+            Geom<Ord> *e, ExtData<Ord> *ext)
+    {
+      switch (projNormType)
+      {
+      case HERMES_L2_NORM:
+        return l2_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_NORM:
+        return h1_semi_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_SEMINORM:
+            return h1_semi_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HCURL_NORM:
+            return hcurl_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HDIV_NORM:
+            return hdiv_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      default:
+        error("Unknown projection type");
+      }
+    }
+
+  private:
+    ProjNormType projNormType;
+
+    template<typename Real, typename Scalar>
+    static Scalar h1_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      _F_
+          Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+      return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar h1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      _F_
+          Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+      return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar l2_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      _F_
+          Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->val[i] * v->val[i]);
+      return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar hcurl_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      _F_
+          Scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        result += wt[i] * (u->curl[i] * conj(v->curl[i]));
+        result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+      }
+      return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar hdiv_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      _F_
+          Scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        result += wt[i] * (u->div[i] * conj(v->div[i]));
+        result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+      }
+      return result;
+    }
+  };
+
+  class ProjectionVectorVolForm : public WeakForm::VectorFormVol
   {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-    return result;
-  }
+  public:
+    ProjectionVectorVolForm(int i, MeshFunction* ext, ProjNormType projNormType) : WeakForm::VectorFormVol(i)
+    {
+      this->projNormType = projNormType;
+      this->ext = Hermes::vector<MeshFunction *>(ext);
+    }
 
-  template<typename Real, typename Scalar>
-  static Scalar H1projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                    Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * (ext->fn[0]->val[i] * v->val[i] + ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
-    return result;
-  }
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                 Geom<double> *e, ExtData<scalar> *ext)
+    {
+      switch (projNormType)
+      {
+      case HERMES_L2_NORM:
+        return l2_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+      case HERMES_H1_NORM:
+        return h1_semi_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+      case HERMES_H1_SEMINORM:
+            return h1_semi_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+      case HERMES_HCURL_NORM:
+            return hcurl_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+      case HERMES_HDIV_NORM:
+            return hdiv_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+      default:
+        error("Unknown projection type");
+      }
+    }
 
-  template<typename Real, typename Scalar>
-  static Scalar H1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+            Geom<Ord> *e, ExtData<Ord> *ext)
+    {
+      switch (projNormType)
+      {
+      case HERMES_L2_NORM:
+        return l2_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      case HERMES_H1_NORM:
+        return h1_semi_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      case HERMES_H1_SEMINORM:
+            return h1_semi_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      case HERMES_HCURL_NORM:
+            return hcurl_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      case HERMES_HDIV_NORM:
+            return hdiv_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      default:
+        error("Unknown projection type");
+      }
+    }
+
+  private:
+    ProjNormType projNormType;
+
+    template<typename Real, typename Scalar>
+    static Scalar h1_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                       Geom<Real> *e, ExtData<Scalar> *ext)
+     {
+       _F_
+           Scalar result = 0;
+       for (int i = 0; i < n; i++)
+         result += wt[i] * (ext->fn[0]->val[i] * v->val[i] + ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
+       return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar h1_semi_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                            Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      _F_
+          Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
+      return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar l2_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                       Geom<Real> *e, ExtData<Scalar> *ext)
+     {
+       _F_
+           Scalar result = 0;
+       for (int i = 0; i < n; i++)
+         result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
+       return result;
+    }
+
+    template<typename Real, typename Scalar>
+    static Scalar hcurl_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                           Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * (ext->fn[0]->dx[i] * v->dx[i] + ext->fn[0]->dy[i] * v->dy[i]);
-    return result;
-  }
+     {
+       _F_
+           Scalar result = 0;
+       for (int i = 0; i < n; i++) {
+         result += wt[i] * (ext->fn[0]->curl[i] * conj(v->curl[i]));
+         result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
+       }
 
-  // L2 projection.
-  template<typename Real, typename Scalar>
-  static Scalar L2projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                    Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * (u->val[i] * v->val[i]);
-    return result;
-  }
-
-  template<typename Real, typename Scalar>
-  static Scalar L2projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                    Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
-    return result;
-  }
-
-  // Hcurl projection.
-  template<typename Real, typename Scalar>
-  static Scalar Hcurlprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++) {
-      result += wt[i] * (u->curl[i] * conj(v->curl[i]));
-      result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-    }
-    return result;
-  }
-
-  template<typename Real, typename Scalar>
-  static Scalar Hcurlprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++) {
-      result += wt[i] * (ext->fn[0]->curl[i] * conj(v->curl[i]));
-      result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
+       return result;
     }
 
-    return result;
-  }
+    template<typename Real, typename Scalar>
+    static Scalar hdiv_projection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                         Geom<Real> *e, ExtData<Scalar> *ext)
+     {
+       _F_
+           Scalar result = 0;
+       for (int i = 0; i < n; i++) {
+         result += wt[i] * (ext->fn[0]->div[i] * conj(v->div[i]));
+         result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
+       }
 
-  // Hdiv projection.
-  template<typename Real, typename Scalar>
-  static Scalar Hdivprojection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++) {
-      result += wt[i] * (u->div[i] * conj(v->div[i]));
-      result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+       return result;
     }
-    return result;
-  }
-
-  template<typename Real, typename Scalar>
-  static Scalar Hdivprojection_liform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    _F_
-    Scalar result = 0;
-    for (int i = 0; i < n; i++) {
-      result += wt[i] * (ext->fn[0]->div[i] * conj(v->div[i]));
-      result += wt[i] * (ext->fn[0]->val0[i] * conj(v->val0[i]) + ext->fn[0]->val1[i] * conj(v->val1[i]));
-    }
-
-    return result;
-  }
+  };
 };
 
 #endif

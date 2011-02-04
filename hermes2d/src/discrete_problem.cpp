@@ -168,13 +168,13 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
   // account for over-edge calculations.
   bool is_DG = false;
   for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++) {
-    if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
+    if(this->wf->mfsurf[i]->area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
   }
   for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++) {
-    if(this->wf->vfsurf[i].area == H2D_DG_INNER_EDGE) {
+    if(this->wf->vfsurf[i]->area == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
@@ -1915,7 +1915,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
 
   // The actual calculation takes place here.
-  scalar res = mfv->fn(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
+  scalar res = mfv->value(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
@@ -2171,7 +2171,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormVol 
   ExtData<scalar>* ext = init_ext_fns(vfv->ext, rv, order);
 
   // The actual calculation takes place here.
-  scalar res = vfv->fn(np, jwt, prev, v, e, ext) * vfv->scaling_factor;
+  scalar res = vfv->value(np, jwt, prev, v, e, ext) * vfv->scaling_factor;
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
@@ -2410,7 +2410,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormSurf
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
 
   // The actual calculation takes place here.
-  scalar res = mfs->fn(np, jwt, prev, u, v, e, ext) * mfs->scaling_factor;
+  scalar res = mfs->value(np, jwt, prev, u, v, e, ext) * mfs->scaling_factor;
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
@@ -2651,7 +2651,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormSurf
   ExtData<scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
 
   // The actual calculation takes place here.
-  scalar res = vfs->fn(np, jwt, prev, v, e, ext) * vfs->scaling_factor;
+  scalar res = vfs->value(np, jwt, prev, v, e, ext) * vfs->scaling_factor;
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
@@ -2884,7 +2884,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 
-  scalar res = mfs->fn(np, jwt, prev, u, v, e, ext);
+  scalar res = mfs->value(np, jwt, prev, u, v, e, ext);
 
   // Clean up.
   for (int i = 0; i < prev_size; i++) {
@@ -2895,6 +2895,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   }
 
   delete [] prev;
+
 
   if (ext != NULL) {
     ext->free(); 
@@ -3026,7 +3027,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
   Func<double>* v = get_fn(fv, rv, eo);
   ExtData<scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
 
-  scalar res = vfs->fn(np, jwt, prev, v, e, ext);
+  scalar res = vfs->value(np, jwt, prev, v, e, ext);
 
   // Clean up.
   for (int i = 0; i < prev_size; i++) {
