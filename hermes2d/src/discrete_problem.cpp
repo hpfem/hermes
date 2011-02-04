@@ -42,6 +42,7 @@ DiscreteProblem::vol_forms_cache =
 
 DiscreteProblem::SurfVectorFormsKey DiscreteProblem::surf_forms_key =
   DiscreteProblem::SurfVectorFormsKey(NULL, 0, 0, 0, 0);
+
 DiscreteProblem::VolVectorFormsKey DiscreteProblem::vol_forms_key =
   DiscreteProblem::VolVectorFormsKey(NULL, 0, 0);
 
@@ -605,9 +606,10 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
 
   init_cache();
 
+  /// Assemble volume matrix forms.
   assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, rep_element->marker, al);
-    //// assemble volume matrix forms //////////////////////////////////////
-   
+
+  /// Assemble volume vector forms.
   if (rhs != NULL)
     assemble_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, rep_element->marker, al);
 
@@ -936,7 +938,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
             // The following variables will be used to search for neighbors of the currently assembled element on
             // the u- and v- meshes and work with the produced elemental neighborhoods.
 
-            // Find all neighbors of active element across active edge and partition it into segements
+            // Find all neighbors of active element across active edge and partition it into segments
             // shared by the active element and distinct neighbors.
             NeighborSearch *nbs_v = new NeighborSearch(refmap[m]->get_active_element(), spaces[m]->get_mesh());
             nbs_v->set_active_edge(isurf);
@@ -1055,7 +1057,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &
   fake_ext->nf = ext.size();
   Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
   for (int i = 0; i < fake_ext->nf; i++)
-    fake_ext_fn[i] = init_fn_ord(ext[i]->get_fn_order());
+    fake_ext_fn[i] = get_fn_ord(ext[i]->get_fn_order());
   fake_ext->fn = fake_ext_fn;
 
   return fake_ext;
@@ -1086,7 +1088,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &
   fake_ext->nf = ext.size();
   Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
   for (int i = 0; i < fake_ext->nf; i++)
-    fake_ext_fn[i] = init_fn_ord(ext[i]->get_edge_fn_order(edge));
+    fake_ext_fn[i] = get_fn_ord(ext[i]->get_edge_fn_order(edge));
   fake_ext->fn = fake_ext_fn;
 
   return fake_ext;
@@ -1125,11 +1127,43 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &
 Func<double>* DiscreteProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
   _F_
-  PrecalcShapeset::Key key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
-  if (cache_fn[key] == NULL)
-    cache_fn[key] = init_fn(fu, rm, order);
+  if(rm->is_jacobian_const()) {
+    AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());
+    if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
+      if(assembling_caches.const_cache_fn_triangles.find(key) == assembling_caches.const_cache_fn_triangles.end())
+        assembling_caches.const_cache_fn_triangles[key] = init_fn(fu, rm, order);
+      return assembling_caches.const_cache_fn_triangles[key];
+    }
+    else {
+      if(assembling_caches.const_cache_fn_quads.find(key) == assembling_caches.const_cache_fn_quads.end())
+        assembling_caches.const_cache_fn_quads[key] = init_fn(fu, rm, order);
+      return assembling_caches.const_cache_fn_quads[key];
+    }
+  }
+  else {
+    AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
+    if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
+      if(assembling_caches.cache_fn_triangles.find(key) == assembling_caches.cache_fn_triangles.end())
+        assembling_caches.cache_fn_triangles[key] = init_fn(fu, rm, order);
+      return assembling_caches.cache_fn_triangles[key];
+    }
+    else {
+      if(assembling_caches.cache_fn_quads.find(key) == assembling_caches.cache_fn_quads.end())
+        assembling_caches.cache_fn_quads[key] = init_fn(fu, rm, order);
+      return assembling_caches.cache_fn_quads[key];
+    }
+  }
+}
 
-  return cache_fn[key];
+// Initialize shape function values and derivatives (fill in the cache)
+Func<Ord>* DiscreteProblem::get_fn_ord(const int order)
+{
+  _F_
+  assert(order >= 0);
+  unsigned int cached_order = (unsigned int) order;
+  if(!assembling_caches.cache_fn_ord.present(cached_order))
+    assembling_caches.cache_fn_ord.add(init_fn_ord(cached_order), cached_order);
+  return assembling_caches.cache_fn_ord.get(cached_order);
 }
 
 // Caching transformed values
@@ -1154,12 +1188,20 @@ void DiscreteProblem::delete_cache()
       delete [] cache_jwt[i];
     }
   }
-  for (std::map<PrecalcShapeset::Key, Func<double>*, PrecalcShapeset::Compare>::const_iterator it = cache_fn.begin();
-       it != cache_fn.end(); it++)
+  
+  for (std::map<AssemblingCaches::KeyNonConst, Func<double>*, AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_quads.begin();
+       it != assembling_caches.cache_fn_quads.end(); it++)
   {
     (it->second)->free_fn(); delete (it->second);
   }
-  cache_fn.clear();
+  assembling_caches.cache_fn_quads.clear();
+
+  for (std::map<AssemblingCaches::KeyNonConst, Func<double>*, AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_triangles.begin();
+       it != assembling_caches.cache_fn_triangles.end(); it++)
+  {
+    (it->second)->free_fn(); delete (it->second);
+  }
+  assembling_caches.cache_fn_triangles.clear();
 }
 
 //  Evaluation of forms  ///////////////////////////////////////////////////////////////////////
@@ -1167,6 +1209,7 @@ void DiscreteProblem::delete_cache()
 int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1185,16 +1228,16 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
     if (u_ext != Hermes::vector<Solution *>())
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
         if (u_ext[i + u_ext_offset] != NULL)
-          oi[i] = init_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
+          oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
         else
-          oi[i] = init_fn_ord(0);
+          oi[i] = get_fn_ord(0);
     else
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-        oi[i] = init_fn_ord(0);
+        oi[i] = get_fn_ord(0);
 
     // Order of shape functions.
-    Func<Ord>* ou = init_fn_ord(fu->get_fn_order() + inc);
-    Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
+    Func<Ord>* ou = get_fn_ord(fu->get_fn_order() + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
 
     // Order of additional external functions.
     ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
@@ -1210,29 +1253,6 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
     order = ru->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
-
-    // Clean up.
-    for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-      if (oi[i] != NULL) { 
-        oi[i]->free_ord(); 
-        delete oi[i]; 
-      }
-    delete [] oi;
-
-    if (ou != NULL) {
-      ou->free_ord(); 
-      delete ou;
-    }
-    if (ov != NULL) {
-      ov->free_ord(); 
-      delete ov;
-    }
-    if (fake_e != NULL) 
-      delete fake_e;
-    if (fake_ext != NULL) {
-      fake_ext->free_ord(); 
-      delete fake_ext;
-    }
   }
   return order;
 }
@@ -1309,6 +1329,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<S
 int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1327,15 +1348,15 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, He
     if (u_ext != Hermes::vector<Solution *>())
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
         if (u_ext[i + u_ext_offset] != NULL)
-          oi[i] = init_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
+          oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
         else
-          oi[i] = init_fn_ord(0);
+          oi[i] = get_fn_ord(0);
     else
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-        oi[i] = init_fn_ord(0);
+        oi[i] = get_fn_ord(0);
 
     // Order of the shape function.
-    Func<Ord>* ov = init_fn_ord(fv->get_fn_order() + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
 
     // Order of additional external functions.
     ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
@@ -1351,25 +1372,6 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, He
     order = rv->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
-
-    // Clean up.
-    for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-      if (oi[i] != NULL) { 
-        oi[i]->free_ord(); 
-        delete oi[i]; 
-      }
-    delete [] oi;
-
-    if (ov != NULL) {
-      ov->free_ord(); 
-      delete ov;
-    }
-    if (fake_e != NULL) 
-      delete fake_e;
-    if (fake_ext != NULL) {
-      fake_ext->free_ord(); 
-      delete fake_ext;
-    }
   }
   return order;
 }
@@ -1448,6 +1450,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
 int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1466,16 +1469,16 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
     if (u_ext != Hermes::vector<Solution *>())
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
         if (u_ext[i + u_ext_offset] != NULL)
-          oi[i] = init_fn_ord(u_ext[i + u_ext_offset]->get_edge_fn_order(surf_pos->surf_num) + inc);
+          oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_edge_fn_order(surf_pos->surf_num) + inc);
         else
-          oi[i] = init_fn_ord(0);
+          oi[i] = get_fn_ord(0);
     else
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-        oi[i] = init_fn_ord(0);
+        oi[i] = get_fn_ord(0);
 
     // Order of shape functions.
-    Func<Ord>* ou = init_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc);
-    Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
+    Func<Ord>* ou = get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
     // Order of additional external functions.
     ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, surf_pos->surf_num);
@@ -1491,29 +1494,6 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
     order = ru->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
-
-    // Clean up.
-    for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-      if (oi[i] != NULL) { 
-        oi[i]->free_ord(); 
-        delete oi[i]; 
-      }
-    delete [] oi;
-
-    if (ou != NULL) {
-      ou->free_ord(); 
-      delete ou;
-    }
-    if (ov != NULL) {
-      ov->free_ord(); 
-      delete ov;
-    }
-    if (fake_e != NULL) 
-      delete fake_e;
-    if (fake_ext != NULL) {
-      fake_ext->free_ord(); 
-      delete fake_ext;
-    }
   }
   return order;
 }
@@ -1586,6 +1566,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<
 int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
+  _F_
   // Order that will be returned.
   int order;
 
@@ -1604,15 +1585,15 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
     if (u_ext != Hermes::vector<Solution *>())
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
         if (u_ext[i + u_ext_offset] != NULL)
-          oi[i] = init_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
+          oi[i] = get_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
         else
-          oi[i] = init_fn_ord(0);
+          oi[i] = get_fn_ord(0);
     else
       for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-        oi[i] = init_fn_ord(0);
+        oi[i] = get_fn_ord(0);
 
     // Order of the shape function.
-    Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
     // Order of additional external functions.
     ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext);
@@ -1628,25 +1609,6 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
     order = rv->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
-
-    // Clean up.
-    for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-      if (oi[i] != NULL) { 
-        oi[i]->free_ord(); 
-        delete oi[i]; 
-      }
-    delete [] oi;
-
-    if (ov != NULL) {
-      ov->free_ord(); 
-      delete ov;
-    }
-    if (fake_e != NULL) 
-      delete fake_e;
-    if (fake_ext != NULL) {
-      fake_ext->free_ord(); 
-      delete fake_ext;
-    }
   }
   return order;
 }
@@ -1719,6 +1681,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
                                      ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
                                      SurfPos* surf_pos)
 {
+  _F_
   // FIXME for treating a discontinuous previous Newton iteration.
   int order;
   int u_ext_length = u_ext.size();      // Number of external solutions.
@@ -1773,8 +1736,6 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     if (ov != NULL) {
       ov->free_ord(); delete ov;
     }
-    if (fake_e != NULL) delete fake_e;
-    if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
   }
 
   // Evaluate the form.
@@ -1798,8 +1759,12 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   }
 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-  DiscontinuousFunc<double>* u = efu->get_fn(cache_fn);
-  DiscontinuousFunc<double>* v = efv->get_fn(cache_fn);
+  DiscontinuousFunc<double>* u = efu->extend_by_zero( get_fn(efu->get_activated_pss(), 
+                                                      efu->get_activated_refmap(), 
+                                                      efu->get_neighbhood()->get_quad_eo(efu->get_support_on_neighbor())));
+  DiscontinuousFunc<double>* v = efv->extend_by_zero( get_fn(efv->get_activated_pss(), 
+                                                      efv->get_activated_refmap(), 
+                                                      efv->get_neighbhood()->get_quad_eo(efv->get_support_on_neighbor())));
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, nbs_v);
 
   scalar res = mfs->fn(nbs_v->get_quad_np(), jwt, prev, u, v, e, ext);
@@ -1833,6 +1798,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
                                      NeighborSearch* nbs_v, PrecalcShapeset *fv, RefMap *rv,
                                      SurfPos* surf_pos)
 {
+  _F_
   // FIXME for treating a discontinuous previous Newton iteration.
   int order;
   int u_ext_length = u_ext.size();      // Number of external solutions.
@@ -1856,7 +1822,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     // Order of the shape function.
     // Determine the integration order.
     int inc = (fv->get_num_components() == 2) ? 1 : 0;
-    Func<Ord>* ov = init_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
     // Order of additional external functions.
     ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, nbs_v);
@@ -1877,13 +1843,11 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
 
     // Clean up.
     for (int i = u_ext_offset; i < u_ext_length; i++) {
-      if (oi[i - u_ext_offset] != NULL) {
-        oi[i - u_ext_offset]->free_ord(); delete oi[i - u_ext_offset];
-      }
+      if (oi[i - u_ext_offset] != NULL) { oi[i - u_ext_offset]->free_ord(); delete oi[i - u_ext_offset]; }
     }
-    if (ov != NULL) {ov->free_ord(); delete ov;}
-    if (fake_e != NULL) delete fake_e;
-    if (fake_ext != NULL) {fake_ext->free_ord(); delete fake_ext;}
+    if (ov != NULL) {
+      ov->free_ord(); delete ov;
+    }
   }
 
   // Evaluate the form using the quadrature of the just calculated order.
@@ -1922,6 +1886,36 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
 }
+
+
+DiscreteProblem::AssemblingCaches::AssemblingCaches()
+{
+
+};
+
+DiscreteProblem::AssemblingCaches::~AssemblingCaches()
+{
+  _F_
+  for (std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_triangles.begin();
+       it != const_cache_fn_triangles.end(); it++)
+  {
+    (it->second)->free_fn(); delete (it->second);
+  }
+  const_cache_fn_triangles.clear();
+
+  for (std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_quads.begin();
+       it != const_cache_fn_quads.end(); it++)
+  {
+    (it->second)->free_fn(); delete (it->second);
+  }
+  const_cache_fn_quads.clear();
+
+  for(unsigned int i = 0; i < cache_fn_ord.get_size(); i++)
+    if(cache_fn_ord.present(i)) {
+      cache_fn_ord.get(i)->free_ord(); 
+      delete cache_fn_ord.get(i);
+    }
+};
 
 double get_l2_norm(Vector* vec)
 {

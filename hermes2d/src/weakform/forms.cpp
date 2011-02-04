@@ -122,7 +122,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     fu->set_quad_order(order, H2D_FN_ALL);
   else
 #endif
-    fu->set_quad_order(order);
+  fu->set_quad_order(order);
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
   Func<double>* u = new Func<double>(np, nc);
