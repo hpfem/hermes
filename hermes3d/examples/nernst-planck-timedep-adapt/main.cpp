@@ -226,7 +226,9 @@ int main (int argc, char* argv[]) {
 
         // Construct globally refined reference mesh
         // and setup reference space.
-        Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&C_space, &phi_space), 1);
+        int order_increase = 1;
+        Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&C_space, &phi_space), 
+                                                                       order_increase);
         scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
         DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
         SparseMatrix* matrix = create_matrix(matrix_solver);

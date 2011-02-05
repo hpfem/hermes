@@ -156,8 +156,8 @@ protected:
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
 
-HERMES_API Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase);
-HERMES_API Space* construct_refined_space(Space* coarse, int order_increase);
+HERMES_API Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase, int refinement = 0);
+HERMES_API Space* construct_refined_space(Space* coarse, int order_increase, int refinement = 0);
 
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
            Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
