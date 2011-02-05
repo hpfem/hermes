@@ -316,7 +316,7 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
     //  break;
     for(int i = 0; i < n_neighbors; i++) {
       // If the found neighbor is not a neighbor of this subelement.
-      if(!compatible transformations(central_transformations[i][level], transformations[level], active_edge))
+      if(!compatible_transformations(central_transformations[i][level], transformations[level], active_edge))
         delete_neighbor(i);
       else
         // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
@@ -397,14 +397,14 @@ void NeighborSearch::clear_initial_sub_idx(uint64_t sub_idx)
       if(++j > transformations.size() - 1)
         break;
     // Create a new array of transformations.
-    int shifted_trfs[] = new int[NeighborSearch::max_n_trans];
+    int* shifted_trfs = new int[NeighborSearch::max_n_trans];
     // Move the old one to the new one.
-    for(unsigned int k = j; k < central_n_trans; k++)
+    for(unsigned int k = j; k < central_n_trans[i]; k++)
       shifted_trfs[k -j] = central_transformations[i][k];
     // Point to the new one and delete the old one.
     delete central_transformations[i];
     central_transformations[i] = shifted_trfs;
-  s}
+  }
 }
 
 void NeighborSearch::delete_neighbor(unsigned int position)
