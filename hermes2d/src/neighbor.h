@@ -316,7 +316,7 @@ public:
   ///
   /// \return The number of neighbors.
   ///
-  int get_num_neighbors() { return n_neighbors; }
+  int get_num_neighbors() const { return n_neighbors; }
 
   /// Retrieve all neighbor elements.
   ///

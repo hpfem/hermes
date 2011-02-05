@@ -241,6 +241,28 @@ protected:
   /// Pure DG functionality.
   std::map<unsigned int, NeighborSearch> init_neighbors(const WeakForm::Stage& stage, const int& isurf);
 
+  /// Multimesh neighbors traversal class.
+  class NeighborNode
+  {
+  public:
+    NeighborNode(NeighborNode* parent, unsigned int transformation);
+    ~NeighborNode();
+    void set_left_son(NeighborNode* left_son);
+    void set_right_son(NeighborNode* right_son);
+    void set_transformation(unsigned int transformation);
+    NeighborNode* get_left_son();
+    NeighborNode* get_right_son();
+    unsigned int get_transformation();
+  private:
+    NeighborNode* parent;
+    NeighborNode* left_son;
+    NeighborNode* right_son;
+    unsigned int transformation;
+  };
+
+  /// Initialize the tree for traversing multimesh neighbors.
+  void build_multimesh_tree(NeighborNode* root, const std::map<unsigned int, NeighborSearch>& neighbor_searches);
+
 
   /// Members.
   WeakForm* wf;
