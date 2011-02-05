@@ -326,6 +326,14 @@ void CSCMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, sc
   } 
 }
 
+CSCMatrix* CSCMatrix::duplicate()
+{
+  _F_
+  CSCMatrix* new_matrix = new CSCMatrix();
+  create(this->get_size(), this->get_nnz(), this->get_Ap(),  this->get_Ai(),  this->get_Ax());
+  return new_matrix;
+}
+
 
 // UMFPackVector ///////
 

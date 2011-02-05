@@ -56,6 +56,8 @@ public:
   void multiply_with_scalar(scalar value);
   // Creates matrix in CSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  // Duplicates a matrix (including allocation).
+  CSCMatrix* duplicate();
   // Exposes pointers to the CSC arrays.
   int *get_Ap() {
       return this->Ap;
