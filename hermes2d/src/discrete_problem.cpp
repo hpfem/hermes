@@ -809,6 +809,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else {
+    std::map<unsigned int, NeighborSearch> neighbor_searches = init_neighbors(stage, isurf);
     if (mat != NULL)
       assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
@@ -816,6 +817,29 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
   }
+}
+
+std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const WeakForm::Stage& stage, const int& isurf)
+{
+  // Setup a mapping of mesh sequence numbers to current subelement transformations.
+  std::map<unsigned int, uint64_t> initial_sub_idxs;
+
+  // Initialize the NeighborSearches.
+  std::map<unsigned int, NeighborSearch> neighbor_searches;
+  for(unsigned int i = 0; i < stage.meshes.size(); i++) {
+    neighbor_searches.insert(std::pair<unsigned int, NeighborSearch>(stage.meshes[i]->get_seq(), NeighborSearch(stage.fns[i]->get_active_element(), stage.meshes[i])));
+    initial_sub_idxs.insert(std::pair<unsigned int, uint64_t>(stage.meshes[i]->get_seq(), stage.fns[i]->get_transform()));
+  }
+
+  // Calculate respective neighbors.
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+    it->second.set_active_edge_multimesh(isurf, initial_sub_idxs[it->first]);
+
+  // Clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+    it->second.clear_initial_sub_idx(initial_sub_idxs[it->first]);
+
+  return neighbor_searches;
 }
 
 void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage, 
@@ -1258,10 +1282,8 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
     limit_order_nowarn(order);
     
     // Cleanup.
-    delete fake_e;
     delete [] oi;
-    delete [] fake_ext->fn;
-    delete [] fake_ext;
+    delete fake_e;
   }
   return order;
 }
@@ -1383,10 +1405,7 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, He
     limit_order_nowarn(order);
     
     // Cleanup.
-    delete fake_e;
     delete [] oi;
-    delete [] fake_ext->fn;
-    delete [] fake_ext;
   }
   return order;
 }
@@ -1511,10 +1530,7 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
     limit_order_nowarn(order);
 
     // Cleanup.
-    delete fake_e;
     delete [] oi;
-    delete [] fake_ext->fn;
-    delete [] fake_ext;
   }
   return order;
 }
@@ -1632,10 +1648,7 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
     limit_order_nowarn(order);
     
     // Cleanup.
-    delete fake_e;
     delete [] oi;
-    delete [] fake_ext->fn;
-    delete [] fake_ext;
   }
   return order;
 }
