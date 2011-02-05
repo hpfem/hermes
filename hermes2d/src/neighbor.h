@@ -122,6 +122,32 @@ public:
   ///
   void set_active_edge(int edge, bool ignore_visited_segments = true);
 
+  /// Enhancement of set_active_edge for multimesh assembling.
+  void set_active_edge_multimesh(const int& edge, const uint64_t& sub_idx);
+
+  /// Extract transformations in the correct direction from the provided sub_idx.
+  Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx);
+
+  /// Gives an info if edge is an intra- or inter- element edge.
+  bool is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations);
+
+  /// Update according to the subelement mapping of the central element.
+  void update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations);
+
+  /// Special function for handling subelement transformations in the case of more than one neighboring active elements.
+  void handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations);
+
+  /// Give the info if the two transformations are correct, w.r.t. the edge.
+  /// Simply compares a to b in case of triangles, does more work in case of quads.
+  bool compatible_transformations(unsigned int a, unsigned int b, int edge);
+
+  /// Clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
+  /// Does nothing in the opposite case.
+  void clear_initial_sub_idx(uint64_t sub_idx);
+
+  /// In case we determine a neighbor is not correct due to a subelement mapping, we delete it.
+  void delete_neighbor(unsigned int position);
+
   /// Set the part of active edge shared by the central element and a given neighbor.
   ///
   /// \param[in] neighbor   Number of the neighbor as enumerated in \c set_active_edge (i.e. its index in \c neighbors).
@@ -318,18 +344,6 @@ public:
     return neighb_el;
   }
 
-  /// Get transfomations that must be pushed to a Transormable either on the central or neighbor element in order for
-  /// its values from both sides to match.
-  ///
-  /// \param[in] segment Part of active edge shared by the central element and selected neighbor.
-  /// \return the array of transformation sub-indices.
-  ///
-  int* get_transformations(int segment) {
-    ensure_active_edge(this);
-    assert(segment >= 0 && segment < n_neighbors);
-    return transformations[segment];
-  }
-
   /// Return local number of the selected active edge segment relatively to the neighboring element.
   ///
   /// \param[in] segment Part of active edge shared by the central element and selected neighbor.
@@ -416,12 +430,15 @@ private:
 /*** Transformations. ***/
 
   static const int max_n_trans = 20;              ///< Number of allowed transformations (or equiv. number of neighbors
-                                                  ///< in a go-down neighborhood) - see Transformable::push_transform.
-                                                  ///< TODO: Revise this for multimesh.
-  std::vector<int *> transformations;             ///< Vector of transformations of the central element to each neighbor
-                                                  ///< (in a go-down neighborhood; stored row-wise for each neighbor)
-                                                  ///< or of the neighbor to the central element (go-up).
-  std::vector<int> n_trans;                       ///< Number of transforms stored in each row of \c transformations.
+                                                  ///< (in a go-down neighborhood; stored row-wise for each neighbor).
+  std::vector<int *> central_transformations;     ///< Vector of transformations of the central element to each neighbor
+                                                  ///< (in a go-down neighborhood; stored row-wise for each neighbor).
+  std::vector<int> central_n_trans;               ///< Number of transforms stored in each row of \c central_transformations.
+  
+  std::vector<int *> neighbor_transformations;    ///< Vector of transformations of the neighbor to the central element (go-up).
+  std::vector<int> neighbor_n_trans;              ///< Number of transforms stored in each row of \c neighbor_transformations.
+  
+  
   unsigned int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the
                                                   ///< assembly, before transforms from \c transformations are pushed
                                                   ///< to it.
