@@ -17,7 +17,7 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
+int TARGET_EIGENFUNCTION = 3;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
 int ITERATIVE_METHOD = 2;                         // 1 = Newton, 2 = Picard.
 
