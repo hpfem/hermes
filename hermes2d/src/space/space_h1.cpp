@@ -18,6 +18,7 @@
 #include "../quadrature/quad_all.h"
 #include "../shapeset/shapeset_h1_all.h"
 #include "../../../hermes_common/matrix.h"
+#include "../boundaryconditions/boundaryconditions.h"
 
 double** H1Space::h1_proj_mat = NULL;
 double*  H1Space::h1_chol_p   = NULL;
@@ -70,6 +71,13 @@ H1Space::H1Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init
 
 H1Space::H1Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, bc_types, bc_values, Ord2(p_init, p_init))
+{
+  _F_
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+H1Space::H1Space(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init, Shapeset* shapeset)
+    : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -242,7 +250,8 @@ void H1Space::assign_vertex_dofs()
             int ndofs = get_edge_order_internal(en) - 1;
             nd->n = ndofs;
 
-            if (en->bnd && this->bc_types->get_type(en->marker) == BC_ESSENTIAL)
+            if (en->bnd
+                && boundary_conditions->get_boundary_condition(e->en[i]->marker)->get_type() == BoundaryCondition::BC_DIRICHLET)
             {
               nd->dof = H2D_CONSTRAINED_DOF;
             }
@@ -362,25 +371,29 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
     proj[1] = bc_value_callback_by_edge(surf_pos);
   }
   // If BCValues class is used.
-  else {
+  else
+  {
     // If the BC on this part of the boundary is constant.
-    if(bc_values->is_const(surf_pos->marker)) {
-      proj[0] = proj[1] = bc_values->calculate(surf_pos->marker);
-    }
-    // If the BC is not constant.
-    else {
+    DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(surf_pos->marker));
+
+    if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
+    {
+      proj[0] = proj[1] = bc->value;
+    } // If the BC is not constant.
+    else if (bc->get_value_type() == BoundaryCondition::BC_FUNCTION)
+    {
       surf_pos->t = surf_pos->lo;
       // Find out the (x,y) coordinates for the first endpoint.
       double x, y;
       Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
       nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
       // Calculate.
-      proj[0] = bc_values->calculate(surf_pos->marker, x, y);
+      proj[0] = bc->function(x, y);
       surf_pos->t = surf_pos->hi;
       // Find out the (x,y) coordinates for the second endpoint.
       nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
       // Calculate.
-      proj[1] = bc_values->calculate(surf_pos->marker, x, y);
+      proj[1] = bc->function(x, y);
     }
   }
 
@@ -406,20 +419,24 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
                            * (bc_value_callback_by_edge(surf_pos) - l);
         // If BCValues class is used.
-        else {
+        else
+        {
           // If the BC on this part of the boundary is constant.
-          if(bc_values->is_const(surf_pos->marker))
+          DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(surf_pos->marker));
+
+          if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
             rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-            * (bc_values->calculate(surf_pos->marker) - l);
+                     * (bc->value - l);
           // If the BC is not constant.
-          else {
+          else if (bc->get_value_type() == BoundaryCondition::BC_FUNCTION)
+          {
             // Find out the (x,y) coordinate.
             double x, y;
             Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
             nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
             // Calculate.
             rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-              * (bc_values->calculate(surf_pos->marker, x, y) - l);
+              * (bc->function(x, y) - l);
           }
         }
       }

@@ -28,6 +28,7 @@
 #include "neighbor.h"
 #include "views/scalar_view.h"
 #include "views/base_view.h"
+#include "boundaryconditions/boundaryconditions.h"
 
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, 
          bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
@@ -832,7 +833,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     // for them it is not important what value (true/false) is set, as it
     // is not read anywhere.
     if(marker > 0)
-      nat[j] = (spaces[j]->bc_types->get_type(marker) == BC_NATURAL);
+      nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(marker)->get_type() != BoundaryCondition::BC_DIRICHLET);
     spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);
   }
 
@@ -3170,7 +3171,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
                   double damping_coeff, double max_allowed_residual_norm)
 {
   // Prepare solutions for measuring residual norm.
-  int num_spaces = dp->get_num_spaces();
+  int num_spaces = dp->get_spaces().size();
   Hermes::vector<Solution*> solutions;
   Hermes::vector<bool> dir_lift_false;
   for (int i=0; i < num_spaces; i++) {

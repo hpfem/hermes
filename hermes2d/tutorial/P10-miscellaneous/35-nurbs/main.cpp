@@ -2,7 +2,7 @@
 #include "hermes2d.h"
 
 // This example illustrates how to use full-featured NURBS. Simplified
-// format is enabled for circular arcs (see example 03-poisson). 
+// format is enabled for circular arcs (see example 03-poisson).
 //
 // PDE: Poisson equation -Laplace u = CONST_F with homogeneous (zero)
 //      Dirichlet boundary conditions.
@@ -27,7 +27,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const int BDY_MARKER = 1;
 
 // Problem parameters.
-const double CONST_F = 1.0;  
+const double CONST_F = 1.0;
 
 // Weak forms.
 #include "forms.cpp"
@@ -55,7 +55,9 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakFormTutorial wf;
+  WeakForm wf;
+  wf.add_matrix_form(callback(bilinear_form));
+  wf.add_vector_form(callback(linear_form));
 
   // Initialize the FE problem.
   bool is_linear = true;

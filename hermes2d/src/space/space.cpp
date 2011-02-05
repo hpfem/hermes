@@ -17,6 +17,7 @@
 #include "space.h"
 #include "../../../hermes_common/matrix.h"
 #include "../auto_local_array.h"
+#include "../boundaryconditions/boundaryconditions.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
@@ -53,6 +54,42 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
   own_shapeset = (shapeset == NULL);
 }
 
+Space::Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_conditions, Ord2 p_init)
+        : shapeset(shapeset), mesh(mesh)
+{
+  _F_
+  if (mesh == NULL) error("Space must be initialized with an existing mesh.");
+  this->default_tri_order = -1;
+  this->default_quad_order = -1;
+  this->ndata = NULL;
+  this->edata = NULL;
+  this->nsize = esize = 0;
+  this->ndata_allocated = 0;
+  this->mesh_seq = -1;
+  this->seq = 0;
+  this->was_assigned = false;
+  this->ndof = 0;
+
+  if(boundary_conditions == NULL) error("Boundary conditions pointer cannot be NULL in Space::Space().");
+  this->boundary_conditions = boundary_conditions;
+
+  // Before adding, update the boundary variables with the user-supplied string markers
+  // according to the conversion table contained in the mesh.
+  // FIXME
+  /*
+  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
+  if(bc_values != NULL)
+    this->update_markers_acc_to_conversion(bc_values, mesh->markers_conversion);
+  this->set_bc_types_init(bc_types);
+  this->set_essential_bc_values(bc_values);
+  this->bc_value_callback_by_coord = NULL;
+  */
+
+  // This will not be needed once we get rid of the old Space constructors etc.
+  this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
+
+  own_shapeset = (shapeset == NULL);
+}
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init)
@@ -485,7 +522,8 @@ void Space::reset_dof_assignment()
   {
     for (unsigned int i = 0; i < e->nvert; i++)
     {
-      if (e->en[i]->bnd && this->bc_types->get_type(e->en[i]->marker) == BC_ESSENTIAL)
+      if (e->en[i]->bnd
+          && boundary_conditions->get_boundary_condition(e->en[i]->marker)->get_type() == BoundaryCondition::BC_DIRICHLET)
       {
         j = e->next_vert(i);
         ndata[e->vn[i]->id].n = BC_ESSENTIAL;
@@ -673,7 +711,9 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
     NodeData* nd = &ndata[en->id];
     nd->edge_bc_proj = NULL;
 
-    if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd && this->bc_types->get_type(en->marker) == BC_ESSENTIAL)
+    if (nd->dof != H2D_UNASSIGNED_DOF
+        && en->bnd
+        && boundary_conditions->get_boundary_condition(en->marker)->get_type() == BoundaryCondition::BC_DIRICHLET)
     {
       int order = get_edge_order_internal(en);
       surf_pos->marker = en->marker;

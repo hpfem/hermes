@@ -20,27 +20,12 @@
 #ifndef __HERMES_COMMON_BOUNDARYCONDITIONS_H
 #define __HERMES_COMMON_BOUNDARYCONDITIONS_H
 
-# include "vector.h"
+#include "vector.h"
+#include "map"
 
 /// Abstract class representing a general boundary condition.
 class HERMES_API BoundaryCondition {
-public:
-  /// Default constructor.
-  BoundaryCondition();
-
-  /// Default destructor
-  ~BoundaryCondition();
-
-  /// Sets the current time for time-dependent boundary conditions.
-  void set_current_time(double time);
-
-  /// Gets the type of this boundary condition. Pure virtual function making this class abstract.
-  virtual BCType get_type() const = 0;
-
-protected:
-  /// Current time.
-  double current_time;
-
+public: 
   /// Types of boundary conditions.
   /// There is no need to a special marker BC_NONE, as the default condition is zero Dirichlet.
   enum BoundaryConditionType {
@@ -54,6 +39,22 @@ protected:
     BC_FUNCTION,
     BC_VALUE
   };
+
+  /// Default constructor.
+  BoundaryCondition();
+
+  /// Default destructor
+  ~BoundaryCondition();
+
+  /// Sets the current time for time-dependent boundary conditions.
+  void set_current_time(double time);
+
+  /// Gets the type of this boundary condition. Pure virtual function making this class abstract.
+  virtual BoundaryConditionType get_type() const = 0;
+
+protected:
+  /// Current time.
+  double current_time;
 
   /// Markers where this boundary condition is present.
   /// This facilitates the creation, that one condition can be imposed on multiple parts of the boundary.
@@ -78,14 +79,23 @@ public:
   virtual BoundaryConditionValueType get_value_type() const = 0;
 
   /// Gets the type of this boundary condition.
-  BoundaryConditionType get_type();
+  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_DIRICHLET; }
 
-protected:
   /// Represents a function prescribed on the boundary.
   virtual scalar function(double x, double y) const;
 
   /// Special case of a constant function.
   scalar value;
+};
+
+/// Class representing Dirichlet boundary condition of the form u|_{\Gamma_Dirichlet} = u_Dirichlet given by value.
+class HERMES_API DirichletValueBoundaryCondition : public DirichletBoundaryCondition {
+public:
+  /// Constructor.
+  DirichletValueBoundaryCondition(Hermes::vector<int> markers, scalar value);
+
+  /// Function giving info that u_Dirichlet is a constant.
+  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
 };
 
 
@@ -103,9 +113,8 @@ public:
   virtual BoundaryConditionValueType get_value_type() const = 0;
 
   /// Gets the type of this boundary condition.
-  BoundaryConditionType get_type();
+  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NEUMANN; }
 
-protected:
   /// Represents a function prescribed on the boundary.
   virtual scalar function(double x, double y) const;
 
@@ -113,6 +122,15 @@ protected:
   scalar value;
 };
 
+/// Class representing Neumann boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} = u_Neumann given by value.
+class HERMES_API NeumannValueBoundaryCondition : public NeumannBoundaryCondition {
+public:
+  /// Constructor.
+  NeumannValueBoundaryCondition(Hermes::vector<int> markers, scalar value);
+
+  /// Function giving info that u_Dirichlet is a constant.
+  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
+};
 
 
 /// Abstract class representing Newton (mixed) boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} + g * u = u_Newton.
@@ -131,7 +149,7 @@ public:
   virtual BoundaryConditionValueType get_value_type_g() const = 0;
 
   /// Gets the type of this boundary condition.
-  BoundaryConditionType get_type();
+  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NEWTON; }
 
 protected:
   /// Represents a function prescribed on the boundary.
@@ -180,6 +198,12 @@ public:
   Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_begin() const;
   Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_end() const;
 
+  std::map<int, BoundaryCondition *>::const_iterator markers_iterator;
+  std::map<int, BoundaryCondition *>::const_iterator markers_begin() const;
+  std::map<int, BoundaryCondition *>::const_iterator markers_end() const;
+
+  BoundaryCondition* get_boundary_condition(int marker);
+
 private:
   /// All boundary conditions together.
   Hermes::vector<BoundaryCondition *> all;
@@ -192,6 +216,12 @@ private:
 
   /// Newton boundary conditions.
   Hermes::vector<NewtonBoundaryCondition *> newton;
+
+  /// Boundary markers cache
+  std::map<int, BoundaryCondition *> markers;
+
+  /// Create boundary markers cache for assembling
+  void create_marker_cache();
 };
 
 #endif

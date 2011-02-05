@@ -1,5 +1,23 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
+#include "boundaryconditions/boundaryconditions.h"
+
+
+// FIXME - include in WeakForm class descendant
+class DirichletFunctionBoundaryConditionTutorial : public DirichletBoundaryCondition {
+public:
+  DirichletFunctionBoundaryConditionTutorial(Hermes::vector<int> markers)
+  {
+    this->markers = markers;
+  }
+
+  scalar function(double x, double y) const
+  {
+    return -cos(M_PI*x);
+  }
+
+  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+};
 
 class WeakFormTutorial : public WeakForm
 {

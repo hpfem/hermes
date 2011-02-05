@@ -228,7 +228,11 @@ protected:
 
   Hermes::vector<Area> areas;
 
+<<<<<<< HEAD
 public:
+=======
+public:  
+>>>>>>> Added BoundaryConditions class to the Space class
   // General case.
   Hermes::vector<MatrixFormVol *> mfvol;
   Hermes::vector<MatrixFormSurf *> mfsurf;

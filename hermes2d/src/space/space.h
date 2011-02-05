@@ -91,6 +91,7 @@
 /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.
 ///
 class Ord2;
+class BoundaryConditions;
 
 class HERMES_API Space
 {
@@ -98,12 +99,14 @@ public:
   // TODO: After successful testing, this will be the only constructor.
   Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init);
 
+  Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_conditions, Ord2 p_init);
+
+  // DEPRECATED
+  Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
+          scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
+
   // Constructor.
   Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types,
-        scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
-
-  // DEPRECATED: Constructor that uses a callback to set boundary conditions types.
-  Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
         scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
 
   virtual ~Space();
@@ -187,6 +190,9 @@ public:
   /// Number of degrees of freedom (dimension of the space).
   int ndof;
 
+  /// Obtains an boundary conditions
+  inline BoundaryConditions* get_boundary_conditions() { return boundary_conditions; }
+
   /// Obtains an assembly list for the given element.
   virtual void get_element_assembly_list(Element* e, AsmList* al);
 
@@ -212,6 +218,9 @@ protected:
 
   Shapeset* shapeset;
   bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
+
+  // Boundary conditions
+  BoundaryConditions* boundary_conditions;
 
   /// FE mesh
   Mesh* mesh;

@@ -98,6 +98,7 @@ protected:
             return hdiv_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
+        return 0.0;
       }
     }
 
@@ -118,6 +119,7 @@ protected:
             return hdiv_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
+        return Ord();
       }
     }
 
@@ -210,6 +212,7 @@ protected:
             return hdiv_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
       default:
         error("Unknown projection type");
+        return 0.0;
       }
     }
 
@@ -230,6 +233,7 @@ protected:
             return hdiv_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
       default:
         error("Unknown projection type");
+        return Ord();
       }
     }
 

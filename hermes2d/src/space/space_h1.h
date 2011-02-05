@@ -37,6 +37,9 @@ public:
   H1Space(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init = 1,
           Shapeset* shapeset = NULL);
 
+  H1Space(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init = 1,
+          Shapeset* shapeset = NULL);
+
   // Common code for the constructors.
   void init(Shapeset* shapeset, Ord2 p_init);
 

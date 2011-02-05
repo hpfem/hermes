@@ -66,6 +66,7 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> spaces, b
 
   this->wf = wf;
   this->spaces = spaces;
+  this->BoundaryConditions = boundary_conditions;
   this->is_linear = is_linear;
 
   sp_seq = new int[wf->neq];
@@ -1146,7 +1147,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 {
   info("Solve newton");
   // Prepare solutions for measuring residual norm.
-  int num_spaces = dp->get_num_spaces();
+  int num_spaces = dp->spaces.size();
 
   Hermes::vector<Solution*> solutions;
   Hermes::vector<double> dir_lift_false;
