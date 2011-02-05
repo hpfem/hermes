@@ -1108,7 +1108,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase, int refinement)
+Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase)
 {
   _F_
   Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
@@ -1116,7 +1116,7 @@ Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coars
   {
     Mesh* ref_mesh = new Mesh;
     ref_mesh->copy(*coarse[i]->get_mesh());
-    ref_mesh->refine_all_elements(refinement);
+    ref_mesh->refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
     ref_spaces->push_back(coarse[i]->dup(ref_mesh));
     (*ref_spaces)[i]->copy_orders(*coarse[i], order_increase);
   }
