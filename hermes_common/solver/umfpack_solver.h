@@ -51,7 +51,9 @@ public:
   virtual double get_fill_in() const;
 
   // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply(scalar* vector_in, scalar* vector_out);
+  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
+  // Multiplies matrix with a scalar.
+  void multiply_with_scalar(scalar value);
   // Creates matrix in CSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
   // Exposes pointers to the CSC arrays.
@@ -67,9 +69,9 @@ public:
 
 protected:
   // UMFPack specific data structures for storing the system matrix (CSC format).
-  scalar *Ax;   // Matrix entries (column-wise).
-  int *Ai;      // Row indices of values in Ax.
-  int *Ap;      // Index to Ax/Ai, where each column starts.
+  scalar *Ax;            // Matrix entries (column-wise).
+  int *Ai;               // Row indices of values in Ax.
+  int *Ap;               // Index to Ax/Ai, where each column starts.
   unsigned int nnz;      // Number of non-zero entries (= Ap[size]).
 
 };

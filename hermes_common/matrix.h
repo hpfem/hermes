@@ -38,7 +38,7 @@ T **new_matrix(unsigned int m, unsigned int n = 0)
   return vec;
 }
 
-/// Copies a matrix. Both matrices has to be equal to or larger than provideded sizes.
+/// Copies a matrix. Both matrices has to be equal to or larger than provided sizes.
 /// Size compatibility check is not done.
 template<typename T>
 void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0) 
@@ -331,7 +331,9 @@ public:
   /// @param[out] n_entries - number of nonzero entries extracted.
   /// @param[out] vals - extracted values for this row.
   /// @param[out] idxs - extracted global column indices for the corresponding values.
-  virtual void extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs) { }
+  virtual void extract_row_copy(unsigned int row, unsigned int len, 
+                                unsigned int &n_entries, double *vals, 
+                                unsigned int *idxs) { }
 
   /// Return the number of entries in a specified column
   ///
@@ -346,13 +348,20 @@ public:
   /// @param[out] n_entries - number of nonzero entries extracted.
   /// @param[out] vals - extracted values for this column.
   /// @param[out] idxs - extracted global row indices for the corresponding values.
-  virtual void extract_col_copy(unsigned int col, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs) { }
+  virtual void extract_col_copy(unsigned int col, unsigned int len, 
+                                unsigned int &n_entries, double *vals, 
+                                unsigned int *idxs) { }
 
-  // virtual function for multiplying a vector by a 
-  // derived type of SparseMatrix
-  virtual void multiply(scalar* vector_in, scalar* vector_out){ };
+  /// Multiply with a vector.
+  virtual void multiply_with_vector(scalar* vector_in, scalar* vector_out) { };
 	
-  //
+  /// Multiply with a scalar.
+  virtual void multiply_with_scalar(scalar value) { };
+
+  /// Duplicate sparse matrix (including allocation).
+  virtual SparseMatrix* duplicate() { };
+
+  /// Get fill-in.
   virtual double get_fill_in() const = 0;
 
   unsigned row_storage:1;

@@ -76,7 +76,7 @@ CSCMatrix::~CSCMatrix() {
   free();
 }
 
-void CSCMatrix::multiply(scalar* vector_in, scalar* vector_out) 
+void CSCMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out) 
 {
   int n = this->size;
   for (int j=0; j<n; j++) vector_out[j] = 0;
@@ -85,6 +85,11 @@ void CSCMatrix::multiply(scalar* vector_in, scalar* vector_out)
       vector_out[j] += vector_in[Ai[i]]*Ax[i];
     }
   }
+}
+
+void CSCMatrix::multiply_with_scalar(scalar value) 
+{
+  for (int i = 0; i < this->nnz; i++) Ax[i] *= value;
 }
 
 void CSCMatrix::alloc() {

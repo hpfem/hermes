@@ -236,7 +236,7 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
 {
   int size = matrix->get_size();
   for (int i = 0; i < num_blocks; i++) {
-    matrix->multiply(source_vec + i*size, target_vec + i*size);
+    matrix->multiply_with_vector(source_vec + i*size, target_vec + i*size);
   }
 }
 

@@ -35,7 +35,7 @@ double calc_mass_product(UMFPackMatrix* mat, double* vec, int length)
 {
   double result = 0;
   double* product = new double[length];
-  mat->multiply(vec, product);
+  mat->multiply_with_vector(vec, product);
   for (int i=0; i<length; i++) result += vec[i]*product[i];
   delete [] product;
   return result;
@@ -72,7 +72,7 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
 
   // Calculating the vector MY.
   double* my_vec = new double[size+1];
-  ((UMFPackMatrix*)matrix_M_ref)->multiply(coeff_vec_ref, my_vec);
+  ((UMFPackMatrix*)matrix_M_ref)->multiply_with_vector(coeff_vec_ref, my_vec);
 
 
   // Debug.
@@ -152,10 +152,10 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
   // Create the residual vector.
   // Multiply S times Y.
   double* vec_SY = new double[ndof_ref];
-  ((UMFPackMatrix*)matrix_S_ref)->multiply(coeff_vec_ref, vec_SY);
+  ((UMFPackMatrix*)matrix_S_ref)->multiply_with_vector(coeff_vec_ref, vec_SY);
   // Multiply M times Y.
   double* vec_MY = new double[ndof_ref];
-  ((UMFPackMatrix*)matrix_M_ref)->multiply(coeff_vec_ref, vec_MY);
+  ((UMFPackMatrix*)matrix_M_ref)->multiply_with_vector(coeff_vec_ref, vec_MY);
   // Calculate SY - lambda MY.
   double* residual = new double[ndof_ref+1];
   for (int i=0; i<ndof_ref; i++) residual[i] = vec_SY[i] - lambda * vec_MY[i];
@@ -269,7 +269,7 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
       break;
     }
   
-    matrix_M_ref->multiply(coeff_vec_ref, vec_MY);
+    matrix_M_ref->multiply_with_vector(coeff_vec_ref, vec_MY);
     for (int i=0; i<ndof_ref; i++) vec_lambda_MY->set(i, lambda*vec_MY[i]);
 
     // Solve the matrix problem.
