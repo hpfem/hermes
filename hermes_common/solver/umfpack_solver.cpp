@@ -89,7 +89,7 @@ void CSCMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out)
 
 void CSCMatrix::multiply_with_scalar(scalar value) 
 {
-  for (int i = 0; i < this->nnz; i++) Ax[i] *= value;
+  for (unsigned int i = 0; i < this->nnz; i++) Ax[i] *= value;
 }
 
 void CSCMatrix::alloc() {
