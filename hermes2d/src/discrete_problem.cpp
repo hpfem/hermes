@@ -1253,6 +1253,12 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
     order = ru->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
+    
+    // Cleanup.
+    delete fake_e;
+    delete [] oi;
+    delete [] fake_ext->fn;
+    delete [] fake_ext;
   }
   return order;
 }
@@ -1372,6 +1378,12 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, He
     order = rv->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
+    
+    // Cleanup.
+    delete fake_e;
+    delete [] oi;
+    delete [] fake_ext->fn;
+    delete [] fake_ext;
   }
   return order;
 }
@@ -1494,6 +1506,12 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
     order = ru->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
+
+    // Cleanup.
+    delete fake_e;
+    delete [] oi;
+    delete [] fake_ext->fn;
+    delete [] fake_ext;
   }
   return order;
 }
@@ -1609,6 +1627,12 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
     order = rv->get_inv_ref_order();
     order += o.get_order();
     limit_order_nowarn(order);
+    
+    // Cleanup.
+    delete fake_e;
+    delete [] oi;
+    delete [] fake_ext->fn;
+    delete [] fake_ext;
   }
   return order;
 }
