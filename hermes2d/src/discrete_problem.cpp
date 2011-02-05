@@ -810,6 +810,8 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else {
     std::map<unsigned int, NeighborSearch> neighbor_searches = init_neighbors(stage, isurf);
+    DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
+    build_multimesh_tree(root, neighbor_searches);
     if (mat != NULL)
       assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
@@ -841,6 +843,19 @@ std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const Wea
 
   return neighbor_searches;
 }
+
+
+void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, const std::map<unsigned int, NeighborSearch>& neighbor_searches)
+{
+  for(std::map<unsigned int, NeighborSearch>::const_iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
+    if(it->second.get_num_neighbors() == 1)
+      break;
+    for(unsigned int i = 0; i < it->second.get_num_neighbors(); i++)
+      insert_into_multimesh_tree(root, it->second;
+  }
+
+}
+
 
 void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -1928,6 +1943,38 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
 }
 
 
+DiscreteProblem::NeighborNode::NeighborNode(NeighborNode* parent, unsigned int transformation) : parent(parent), transformation(transformation)
+{
+}
+DiscreteProblem::NeighborNode::~NeighborNode()
+{
+}
+void DiscreteProblem::NeighborNode::set_left_son(DiscreteProblem::NeighborNode* left_son)
+{
+  this->left_son = left_son;
+}
+void DiscreteProblem::NeighborNode::set_right_son(DiscreteProblem::NeighborNode* right_son)
+{
+  this->right_son = right_son;
+}
+void DiscreteProblem::NeighborNode::set_transformation(unsigned int transformation)
+{
+  this->transformation = transformation;
+}
+DiscreteProblem::NeighborNode* DiscreteProblem::NeighborNode::get_left_son()
+{
+  return left_son;
+}
+DiscreteProblem::NeighborNode* DiscreteProblem::NeighborNode::get_right_son()
+{
+  return right_son;
+}
+unsigned int DiscreteProblem::NeighborNode::get_transformation()
+{
+  return this->transformation;
+}
+
+
 DiscreteProblem::AssemblingCaches::AssemblingCaches()
 {
 
@@ -2127,4 +2174,3 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
     iter_count++;
   }
 }
-
