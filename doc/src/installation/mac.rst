@@ -39,22 +39,30 @@ libraries and applications on your Mac) by doing the following:
 
 **Step 4**: Get the Hermes source code as described at the beginning of the Linux section
 above. Change to the directory where you want 
-to download the Hermes source and clone the git repository by typing 
-'git clone http://git.hpfem.org/git/hermes.git'.
+to download the Hermes source and clone the git repository either
+from the hpfem.org server::
 
-**Step 5**: Configure and build Hermes by changing dir to 'hermes1d/', 'hermes2d/' 
-or 'hermes3d/', and then typing 'cmake .' and 'make'.
+    git clone git://github.com/hpfem/hermes.git
+
+or from Github::
+
+    git clone git://github.com/hpfem/hermes.git
+
+These two repositories are synchronized. For more advanced users we recommend 
+to create a free account at Github (if you do not have one yet), fork the 
+Hermes repository, and then clone your Github copy of Hermes to your local computer. 
+This will establish links between your local copy and the master repository, and 
+you’ll become part of the Hermes network at Github.
+
+**Step 5**: Configure and build Hermes by changing dir to 'hermes/', 
+and then typing 'cmake .' and 'make'.
 If you have more than one CPU, you can use 'make -jN' where N is the 
 number of CPUs of your computer. To set the location where Hermes 
 will be installed, pass the -DCMAKE_INSTALL_PREFIX=<your location> 
 flag to cmake (i.e. to install in /usr/local, replace the cmake 
 command above with 'cmake -DCMAKE_INSTALL_PREFIX=/usr/local .').
 
-**Step 6**: To execute all tests, do 'make test'. Note that some of the tests can 
-take a long time to finish. To just execute the short running tests, 
-do 'make test-quick'.
-
-**Step 7**: Install Hermes by doing 'make install'.
+**Step 6**: Install Hermes by doing 'make install'.
 
 Tests
 ~~~~~

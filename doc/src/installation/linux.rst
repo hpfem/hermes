@@ -4,9 +4,7 @@ Linux
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you are using a Debian-based system, install the required libraries first:
-
-:: 
+If you are using a Debian-based system, install the required libraries first:: 
 
     apt-get install cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev python-dev python-numpy python-scipy cython python-matplotlib
 
@@ -27,7 +25,7 @@ create a free account at `Github <http://github.com>`_ (if you do not have one y
 fork the `Hermes repository <http://github.com/hpfem/hermes>`_, and then clone your 
 Github copy of Hermes to your local computer. This will establish links between
 your local copy and the master repository, and you'll become part of the Hermes 
-network at Github
+network at Github.
 
 Once you have a local copy of the Hermes repository on your computer, change dir 
 to hermes/. There you will find a CMakeLists.txt file that contains the lines
