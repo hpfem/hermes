@@ -260,6 +260,16 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   Solution ref_sln_prev;
   Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_prev);
   bool success = true;
+  double shift = lambda;
+  // Construct shifted matrx.
+  double *Sx = ((UMFPackMatrix*)matrix_S_ref)->get_Ax();
+  double *Mx = ((UMFPackMatrix*)matrix_M_ref)->get_Ax();
+  for (int i=0; i<((UMFPackMatrix*)matrix_S_ref)->get_nnz(); i++) Sx[i] = Sx[i] + shift * Mx[i];
+  // Normalize the eigenvector.
+  normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+  // Init the eigenvalue for the shifted problem.
+  lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
   int it = 1;
   do {
     // Check the number of iterations.
@@ -283,6 +293,9 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     // Copy the new eigen vector to coeff_vec_ref.
     for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] = new_eigen_vec[i];
 
+    // Normalize the eigenvector.
+    normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
     // Update the eigenvalue.
     lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
              / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
@@ -296,10 +309,12 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     ref_sln_prev.copy(&ref_sln_new);
     
     info("---- Picard iter %d, ndof %d, eigenvalue: %.12f, picard_err_rel %g%%", 
-         it++, ndof_ref, lambda, picard_err_rel);
+         it++, ndof_ref, lambda-shift, picard_err_rel);
   }
   while (picard_err_rel > picard_tol);
-
+  
+  // Unshift lambda
+  lambda = lambda-shift;
   return success;
 
 }
