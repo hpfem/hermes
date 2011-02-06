@@ -148,10 +148,13 @@ void BoundaryConditions::create_marker_cache() {
     for(Hermes::vector<int>::const_iterator it = (*all_iterator)->markers.begin(); it != (*all_iterator)->markers.end(); it++)
     {
       // FIXME - check consistency
+      if (markers[*it])
+        error("Attempt to define more than one description of the BC on the same part of the boundary with marker '%d'.", *it);
+
       std::cout << "marker = " << *it
                 << ", type = " << (*all_iterator)->get_type()
-                // << ", value = " << static_cast<DirichletBoundaryCondition *>(*all_iterator)->value
                 << std::endl;
+
       markers[*it] = *all_iterator;
     }
 }
