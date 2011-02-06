@@ -42,7 +42,7 @@ above. Change to the directory where you want
 to download the Hermes source and clone the git repository either
 from the hpfem.org server::
 
-    git clone git://github.com/hpfem/hermes.git
+    git clone http://git.hpfem.org/git/hermes.git
 
 or from Github::
 
