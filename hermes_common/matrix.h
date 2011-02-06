@@ -359,7 +359,7 @@ public:
   virtual void multiply_with_scalar(scalar value) { };
 
   /// Duplicate sparse matrix (including allocation).
-  virtual SparseMatrix* duplicate() { };
+  virtual SparseMatrix* duplicate() { return (SparseMatrix*)NULL;};
 
   /// Get fill-in.
   virtual double get_fill_in() const = 0;

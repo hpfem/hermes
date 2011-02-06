@@ -74,17 +74,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
   double* my_vec = new double[size+1];
   ((UMFPackMatrix*)matrix_M_ref)->multiply_with_vector(coeff_vec_ref, my_vec);
 
-
-  // Debug.
-  //info("coeff_vec_ref:");
-  //for (int i=0; i<ndof_ref; i++) printf("%g ", coeff_vec_ref[i]);
-  //printf("\n");
-  //info("my_vec:");
-  //for (int i=0; i<ndof_ref; i++) printf("%g ", my_vec[i]);
-  //printf("\n");
-
-
-
   // Construct the augmented matrix for Newton's method.
   int new_size =  size + 1;
   int new_nnz = nnz + 2*size;
@@ -97,18 +86,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
   for (int i=1; i < size+1; i++) new_Ap[i] = ap[i] + i;
   new_Ap[size+1] = new_Ap[size] + size;
 
-
-  // Debug.
-  //info("old Ap:");
-  //for (int i=0; i<size+1; i++) printf("%d ", ap[i]);
-  //printf("\n");
-  //info("new Ap:");
-  //for (int i=0; i<new_size+1; i++) printf("%d ", new_Ap[i]);
-  //printf("\n");
-
-
-
-
   // Fill the new Ai array.
   int count = 0;
   for (int j=0; j < size; j++) {                                // Index of a column.
@@ -118,18 +95,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
     new_Ai[count++] = size;                                     // Accounting for last item in columns 0, 1, size-1.
   }
   for (int i=0; i < size; i++) new_Ai[count++] = i;             // Accounting for last column.
-
-
-  // Debug.
-  //info("old Ai:");
-  //for (int i=0; i<nnz; i++) printf("%d ", ai[i]);
-  //printf("\n");
-  //info("new Ai:");
-  //for (int i=0; i<new_nnz; i++) printf("%d ", new_Ai[i]);
-  //printf("\n");
-
-
-
 
   // Fill the new Ax array.  
   //double max = 0;
@@ -248,6 +213,9 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   return success;
 }
 
+// This method always converges to the eigenvalue closest to the value of the argument lambda. 
+// This is possible because the spectrum of the problem is shifted in such a way that the sought 
+// eigenvalue comes to be very close to the origin where the method tends to converge.
 bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMatrix* matrix_M_ref, 
                         double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
                         double picard_tol, int picard_max_iter)
@@ -264,7 +232,7 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   // Construct shifted matrx.
   double *Sx = ((UMFPackMatrix*)matrix_S_ref)->get_Ax();
   double *Mx = ((UMFPackMatrix*)matrix_M_ref)->get_Ax();
-  for (int i=0; i<((UMFPackMatrix*)matrix_S_ref)->get_nnz(); i++) Sx[i] = Sx[i] + shift * Mx[i];
+  for (unsigned int i=0; i<((UMFPackMatrix*)matrix_S_ref)->get_nnz(); i++) Sx[i] = Sx[i] + shift * Mx[i];
   // Normalize the eigenvector.
   normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
   // Init the eigenvalue for the shifted problem.

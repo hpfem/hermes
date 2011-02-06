@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
   fclose(file);
 
   // Eigenvalue.
-  double lambda = eigenval[neig-1];
+  double lambda = eigenval[TARGET_EIGENFUNCTION-1];
   info("Eigenvalue on coarse mesh: %g", lambda);
   info("Once more just to check: %g", calc_mass_product((UMFPackMatrix*)matrix_S, coeff_vec, ndof)
       / calc_mass_product((UMFPackMatrix*)matrix_M, coeff_vec, ndof));
