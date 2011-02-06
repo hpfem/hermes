@@ -91,11 +91,7 @@ public:
   public:
     Form(int area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> Fixes & comments & old code deletion.
     inline void set_weakform(WeakForm* wf) { this->wf = wf; }
 
     int area;
@@ -120,11 +116,7 @@ public:
 
     unsigned int i, j;
     int sym;
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> Fixes & comments & old code deletion.
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<scalar> *ext);
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -138,11 +130,7 @@ public:
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     unsigned int i, j;
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> Fixes & comments & old code deletion.
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                          Geom<double> *e, ExtData<scalar> *ext);
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -170,15 +158,7 @@ public:
     unsigned int i;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext);
-<<<<<<< HEAD
-<<<<<<< HEAD
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext);
-=======
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext);
->>>>>>> Fixes & comments & old code deletion.
-=======
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext);
->>>>>>> Fixed forms and 07-general
   };
 
   // General case.
@@ -228,11 +208,7 @@ protected:
 
   Hermes::vector<Area> areas;
 
-<<<<<<< HEAD
 public:
-=======
-public:  
->>>>>>> Added BoundaryConditions class to the Space class
   // General case.
   Hermes::vector<MatrixFormVol *> mfvol;
   Hermes::vector<MatrixFormSurf *> mfsurf;

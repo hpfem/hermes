@@ -27,31 +27,11 @@
 class HERMES_API HcurlSpace : public Space
 {
 public:
-  // Constructors for problems without Dirichlet BC.
-  HcurlSpace(Mesh* mesh, BCTypes* bc_types, int p_init, Shapeset* shapeset = NULL);
-  HcurlSpace(Mesh* mesh, BCTypes* bc_types, Ord2 p_init, Shapeset* shapeset = NULL);
-
-  HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, int p_init, Shapeset* shapeset = NULL);
-  HcurlSpace(Mesh* mesh, BCTypes* bc_types, BCValues* bc_values, Ord2 p_init, Shapeset* shapeset = NULL);
+  HcurlSpace(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init = 1,
+          Shapeset* shapeset = NULL);
 
   // Common code for the constructors.
   void init(Shapeset* shapeset, Ord2 p_init);
-
-  // For backward compatibility.
-  HcurlSpace(Mesh* mesh, BCTypes* bc_types,
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
-                 Shapeset* shapeset = NULL);
-  HcurlSpace(Mesh* mesh = NULL, BCTypes* bc_types=NULL,
-                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
-                 Shapeset* shapeset = NULL);
-
-  // DEPRECATED:
-  HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
-                 scalar (*bc_value_callback_by_coord)(int, double, double), int p_init,
-                 Shapeset* shapeset = NULL);
-  HcurlSpace(Mesh* mesh, BCType (*bc_type_callback)(int),
-                 scalar (*bc_value_callback_by_coord)(int, double, double) = NULL, Ord2 p_init = Ord2(1,1),
-                 Shapeset* shapeset = NULL);
 
   virtual ~HcurlSpace();
 

@@ -33,15 +33,9 @@ public:
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
-<<<<<<< HEAD
-  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector< std::pair<WeakForm::matrix_form_val_t,
-									      WeakForm::matrix_form_ord_t> > proj_biforms,
-                             Hermes::vector< std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> > proj_liforms,
-=======
   static void project_global(Hermes::vector<Space *> spaces,
                              Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
                              Hermes::vector<WeakForm::VectorFormVol *> vfvol,
->>>>>>> Replaced callbacks with classes
                              Hermes::vector<MeshFunction*> source_meshfns,
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 

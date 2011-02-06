@@ -96,18 +96,13 @@ class BoundaryConditions;
 class HERMES_API Space
 {
 public:
+<<<<<<< HEAD
   // TODO: After successful testing, this will be the only constructor.
   Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init);
 
+=======
+>>>>>>> Partially removed BCValue class
   Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_conditions, Ord2 p_init);
-
-  // DEPRECATED
-  Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
-          scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
-
-  // Constructor.
-  Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types,
-        scalar (*bc_value_callback_by_coord)(int, double, double), Ord2 p_init);
 
   virtual ~Space();
   virtual void free();
@@ -120,14 +115,8 @@ public:
   /// Sets the BCTypes variable; does not call assign_dofs(). To be
   /// used in constructor of the Space class only.
   void set_bc_types_init(BCTypes *bc_types);
-  /// DEPRECATED
-  void set_bc_types_init(BCType (*bc_type_callback)(int marker));
-  /// Sets the BC values, checks according to bc_types and sets default values (zero BC) where appropriate.
-  void set_essential_bc_values(BCValues *bc_values);
-  /// Sets the BC values callback function, which takes absolute boundary coordinates.
-  void set_essential_bc_values(scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y));
-  /// Sets the BC values callback function, which takes parametric edge position.
-  void set_essential_bc_values(scalar (*bc_value_callback_by_edge)(SurfPos* surf_pos)); // for SurfPos, see traverse.h
+  /// Sets the BC
+  void set_boundary_conditions(BoundaryConditions* boundary_conditions);
   /// Sets element polynomial order. Can be called by the user. Should not be called
   /// for many elements at once, since assign_dofs() is called at the end of this function.
   virtual void set_element_order(int id, int order);
@@ -330,10 +319,6 @@ protected: //debugging support
   void propagate_zero_orders(Element* e);
 
 public:
-
-  scalar (*bc_value_callback_by_coord)(int ess_bdy_marker, double x, double y);
-  scalar (*bc_value_callback_by_edge)(SurfPos* surf_pos);
-
   /// Internal. Used by DiscreteProblem to detect changes in the space.
   int get_seq() const { return seq; }
   int set_seq(int seq_) { seq = seq_; return seq;}
