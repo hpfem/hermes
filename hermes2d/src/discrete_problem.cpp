@@ -809,9 +809,22 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else {
+    // Initialize the NeighborSearches.
     std::map<unsigned int, NeighborSearch> neighbor_searches = init_neighbors(stage, isurf);
+    
+    // Create a multimesh tree;
     DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
     build_multimesh_tree(root, neighbor_searches);
+    
+    // Traverse the tree and obtain global set of neighbor transformations.
+    Hermes::vector<Hermes::vector<int>*> multimesh_neighbor_transformations = get_multimesh_neighbors_transformations(root);
+
+    // Update all NeighborSearches according to the multimesh tree.
+    for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+      update_the_neighbor_search(it->second, root);
+
+
+
     if (mat != NULL)
       assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
@@ -851,9 +864,196 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
     if(it->second.get_num_neighbors() == 1)
       break;
     for(unsigned int i = 0; i < it->second.get_num_neighbors(); i++)
-      insert_into_multimesh_tree(root, it->second;
+      insert_into_multimesh_tree(root, it->second.central_transformations[i], it->second.central_n_trans[i]);
+  }
+}
+
+void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, int* transformations, unsigned int transformation_count)
+{
+  // If we are already in the leaf.
+  if(transformation_count == 0)
+    return;
+  // Both sons are null. We have to add a new Node. Let us do it for the left sone of node.
+  if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
+    node->set_left_son(new NeighborNode(node, transformations[0]));
+    insert_into_multimesh_tree(node->get_left_son(), transformations + 1, transformation_count - 1);
+  }
+  // At least the left son is not null (it is impossible only for the right one to be not null, because
+  // the left one always gets into the tree first, as seen above).
+  else {
+    // The existing left son is the right one to continue through.
+    if(node->get_left_son()->get_transformation() == transformations[0])
+      insert_into_multimesh_tree(node->get_left_son(), transformations + 1, transformation_count - 1);
+    // The right one also exists, check that it is the right one, or return an error.
+    else if(node->get_right_son() != NULL) {
+      if(node->get_right_son()->get_transformation() == transformations[0])
+        insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
+      else error("More than two possible sons in insert_into_multimesh_tree().");
+    }
+    // If the right one does not exist and the left one was not correct, create a right son and continue this way.
+    else {
+      node->set_right_son(new NeighborNode(node, transformations[0]));
+      insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
+    }
+  }
+}
+
+Hermes::vector<Hermes::vector<int>*> DiscreteProblem::get_multimesh_neighbors_transformations(DiscreteProblem::NeighborNode* multimesh_tree)
+{
+  // Initialize the vector.
+  Hermes::vector<Hermes::vector<int>*> running_transformations;
+  // Prepare the first neighbor's vector.
+  running_transformations.push_back(new Hermes::vector<int>);
+  // Fill the vector.
+  traverse_multimesh_tree(multimesh_tree, running_transformations);
+  return running_transformations;
+}
+
+void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_transformations)
+{
+  // If we are in the root.
+  if(node->get_transformation() == 0) {
+    if(node->get_left_son() != NULL)
+      traverse_multimesh_tree(node->get_left_son(), running_transformations);
+    if(node->get_right_son() != NULL)
+      traverse_multimesh_tree(node->get_right_son(), running_transformations);
+    // Delete the vector prepared by the last accessed leaf.
+    running_transformations.pop_back();
+    return;
+  }
+  // If we are in a leaf.
+  if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
+    // Create a vector for the new neighbor.
+    Hermes::vector<int>* new_neighbor_transformations = new Hermes::vector<int>;
+    // Copy there the whole path except for this leaf.
+    for(unsigned int i = 0; i < running_transformations.back()->size(); i++)
+      new_neighbor_transformations->push_back((*running_transformations.back())[i]);
+    // Insert this leaf into the current running transformation, thus complete it.
+    running_transformations.back()->push_back(node->get_transformation());
+    // Make the new_neighbor_transformations the current running transformation.
+    running_transformations.push_back(new_neighbor_transformations);
+    return;
+  }
+  else {
+    running_transformations.back()->push_back(node->get_transformation());
+    if(node->get_left_son() != NULL)
+      traverse_multimesh_tree(node->get_left_son(), running_transformations);
+    if(node->get_right_son() != NULL)
+      traverse_multimesh_tree(node->get_right_son(), running_transformations);
+    running_transformations.back()->pop_back();
+    return;
+  }
+  return;
+}
+
+void DiscreteProblem::update_the_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree)
+{
+  for(unsigned int i = 0; i < ns.get_num_neighbors(); i++) {
+    // Find the node corresponding to this neighbor in the tree.
+    NeighborNode* node = find_node(ns.central_transformations[i], ns.central_n_trans[i], multimesh_tree);
+    // Update the NeighborSearch.
+    update_ns_subtree(ns, node, i);
   }
 
+}
+
+DiscreteProblem::NeighborNode* DiscreteProblem::find_node(int* transformations, int transformation_count, DiscreteProblem::NeighborNode* node)
+{
+  // If there are no transformations left.
+  if(transformation_count == 0)
+    return node;
+  else {
+    if(node->get_left_son() != NULL) {
+      if(node->get_left_son()->get_transformation() == transformations[0])
+        return find_node(transformations + 1, transformation_count - 1, node->get_left_son());
+  }
+    if(node->get_right_son() != NULL) {
+      if(node->get_right_son()->get_transformation() == transformations[0])
+        return find_node(transformations + 1, transformation_count - 1, node->get_right_son());
+    }
+  }
+  // We always should be able to empty the transformations array.
+  error("Transformation of a central element not found in the multimesh tree.");
+  return NULL;
+}
+    
+void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::NeighborNode* node, unsigned int ith_neighbor)
+{
+  // No subtree => no work.
+  // Also check the assertion that if one son is null, then the other too.
+  if(node->get_left_son() == NULL) {
+    if(node->get_right_son() != NULL)
+      error("Only one son not null in DiscreteProblem::update_ns_subtree.");
+    return;
+  }
+
+  // Key part.
+  // Begin with storing the info about the current neighbor.
+  Element* neighbor = ns.neighbors[ith_neighbor];
+  NeighborSearch::NeighborEdgeInfo edge_info = ns.neighbor_edges[ith_neighbor];
+
+  // Initialize the vector for central transformations.
+  Hermes::vector<Hermes::vector<int>*> running_central_transformations;
+  // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
+  running_central_transformations.push_back(new Hermes::vector<int>);
+  for(unsigned int i = 0; i < ns.central_n_trans[ith_neighbor]; i++)
+    running_central_transformations.back()->push_back(ns.central_transformations[ith_neighbor][i]);
+
+  // Initialize the vector for neighbor transformations.
+  Hermes::vector<Hermes::vector<int>*> running_neighbor_transformations;
+  // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
+  running_neighbor_transformations.push_back(new Hermes::vector<int>);
+  for(unsigned int i = 0; i < ns.neighbor_n_trans[ith_neighbor]; i++)
+    running_neighbor_transformations.back()->push_back(ns.neighbor_transformations[ith_neighbor][i]);
+
+  // Delete the current neighbor.
+  ns.delete_neighbor(ith_neighbor);
+
+
+}
+
+void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
+      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations)
+{
+  // If we are in a leaf.
+  if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
+    // Create vectors for the new neighbor.
+    Hermes::vector<int>* new_neighbor_central_transformations = new Hermes::vector<int>;
+    Hermes::vector<int>* new_neighbor_neighbor_transformations = new Hermes::vector<int>;
+    
+    // Copy there the whole path except for this leaf.
+    for(unsigned int i = 0; i < running_central_transformations.back()->size(); i++)
+      new_neighbor_central_transformations->push_back((*running_central_transformations.back())[i]);
+     for(unsigned int i = 0; i < running_neighbor_transformations.back()->size(); i++)
+      new_neighbor_neighbor_transformations->push_back((*running_neighbor_transformations.back())[i]);
+
+    // Insert this leaf into the current running central transformation, thus complete it.
+    running_central_transformations.back()->push_back(node->get_transformation());
+    
+    // Make the new_neighbor_central_transformations the current running transformation.
+    running_central_transformations.push_back(new_neighbor_central_transformations);
+
+
+
+
+    // Take care of the freakin' neighbor transformation, also when not in a bloody leaf.
+    
+    
+    
+    
+    
+    return;
+  }
+  else {
+    running_transformations.back()->push_back(node->get_transformation());
+    if(node->get_left_son() != NULL)
+      traverse_multimesh_tree(node->get_left_son(), running_transformations);
+    if(node->get_right_son() != NULL)
+      traverse_multimesh_tree(node->get_right_son(), running_transformations);
+    running_transformations.back()->pop_back();
+    return;
+  }
+  return;
 }
 
 
@@ -1945,6 +2145,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
 
 DiscreteProblem::NeighborNode::NeighborNode(NeighborNode* parent, unsigned int transformation) : parent(parent), transformation(transformation)
 {
+  left_son = right_son = NULL;
 }
 DiscreteProblem::NeighborNode::~NeighborNode()
 {

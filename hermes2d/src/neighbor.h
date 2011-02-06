@@ -747,6 +747,8 @@ public:
   /// When creating sparse structure of a matrix using this class, we want to ignore errors
   /// and do nothing instead when set_active_edge() function is called for a non-boundary edge.
   bool ignore_errors;
+
+  friend class DiscreteProblem;
 };
 
 typedef NeighborSearch::ExtendedShapeset::ExtendedShapeFunction* ExtendedShapeFnPtr;
