@@ -826,15 +826,36 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       update_neighbor_search(it->second, root);
 
     // Check that every NeighborSearch has the same number of neighbor elements.
-    unsigned int num_neighbors = neighbor_searches[0].get_num_neighbors();
-    for(unsigned int i = 0; i < neighbor_searches.size(); i++)
-      if(neighbor_searches[i].get_num_neighbors() != num_neighbors)
+    unsigned int num_neighbors = neighbor_searches.begin()->second.get_num_neighbors();
+    for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+      if(it->second.get_num_neighbors() != num_neighbors)
         error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem::assemble_surface_integrals().");
 
     for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
       // Set the active segment in all NeighborSearches.
-      for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
-        it->second.set_active_segment(neighbor_i);
+
+      // Push all the necessary transformations to all functions of this stage.
+      // The important thing is that the transformations to the current subelement are already there.
+      for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+        for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[fns_i]->get_seq()].central_n_trans[neighbor_i]; trf_i++) {
+          neighbor_searches[stage.meshes[fns_i]->get_seq()].original_central_el_transform = stage.fns[fns_i]->get_transform();
+          stage.fns[fns_i]->push_transform(neighbor_searches[stage.meshes[fns_i]->get_seq()].central_transformations[neighbor_i][trf_i]);
+        }
+
+      // Also push the transformations to the slave psss and refmaps.
+      for (unsigned int i = 0; i < stage.idx.size(); i++) {
+        if(isempty[stage.idx[i]])
+          continue;
+        spss[stage.idx[i]]->set_master_transform();
+        refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
+      }
+
+
+
+      // Handle the neighbor_pss, neighbor_refmaps.
+
+
+
 
 
 
@@ -844,6 +865,21 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     if (rhs != NULL)
       assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+
+      // Clear the transformations from the RefMaps and all functions.
+      for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+        for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[fns_i]->get_seq()].central_n_trans[neighbor_i]; trf_i++) {
+          stage.fns[fns_i]->set_transform(neighbor_searches[stage.meshes[fns_i]->get_seq()].original_central_el_transform);
+        }
+
+      // Also clear the transformations from the slave psss and refmaps.
+      for (unsigned int i = 0; i < stage.idx.size(); i++) {
+        if(isempty[stage.idx[i]])
+          continue;
+        spss[stage.idx[i]]->set_master_transform();
+        refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
+      }
+    }
   }
 }
 

@@ -458,7 +458,6 @@ private:
   int active_edge;              ///< Local number of the currently assembled edge, w.r.t. the central element.
   int neighbor_edge;            ///< Local number of the currently assembled edge, w.r.t. the element on the other side.
   int active_segment;           ///< Part of the active edge shared by central and neighbor elements.
-  bool ignore_visited_segments; ///< True if each edge should be assembled only from one side.
 
   /// Structure containing all the needed information about the active edge from the neighbor's side.
   struct NeighborEdgeInfo
@@ -487,17 +486,6 @@ private:
                           ///< parent. Corresponding transformations will be pushed in reverse order to the neighbor.
   };
   NeighborhoodType neighborhood_type;
-
-  /*
-  enum MultiMeshNeighborhoodType
-  {
-    H2D_DG_INTER_ELEM = 1,  ///< For multimesh, intra-element.
-    H2D_DG_MULTI_DOWN = 2,  ///< For multimesh, smaller neighbors.
-    H2D_DG_MULTI_UP = 3,    ///< For multimesh, bigger neighbor.
-    H2D_DG_MULTI_NONE = 4   ///< For multimesh, neighbor of the same sizes.
-  };
-  MultiMeshNeighborhoodType multi_neighborhood_type;
-  */
 
   /// Find the neighbor element to a smaller central element.
   ///
