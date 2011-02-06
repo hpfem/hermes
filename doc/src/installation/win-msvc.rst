@@ -76,10 +76,10 @@ This list works for 32-bit version of Hermes. If you intend to cross-compile 64-
   - Python(2.6.5)
 	
     - Download Python source code from http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2 and unpack it.
-    - Navigate to Python-2.6.5\PC\VS8.0\, you will find a MSVC 8.0 sln file pcbuild.sln.
+    - Navigate to Python-2.6.5\\PC\VS8.0\\, you will find a MSVC 8.0 sln file pcbuild.sln.
     - Open it using your version of MSVC (newer versions will automatically convert the solution file).
-    - Now build the solution and from the same directory copy python26_d.lib to dependencies\\lib.
-    - Copy Python.h from Python-2.6.5\Include\ to dependencies\\include. This is for the Python library.
+    - Now build the solution (ignore any errors in optional packages) and from the same directory copy python26_d.lib to dependencies\\lib and python26_d.dll to dependencies\\bin.
+    - Copy Python.h from Python-2.6.5\\Include\\ to dependencies\\include. This is for the Python library.
     - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64)
     - Install Python.
     - Open a command prompt, execute python, and you will see something like::
