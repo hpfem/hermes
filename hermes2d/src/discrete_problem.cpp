@@ -812,16 +812,29 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     // Initialize the NeighborSearches.
     std::map<unsigned int, NeighborSearch> neighbor_searches = init_neighbors(stage, isurf);
     
+    if(neighbor_searches.empty())
+      error("Empty neighbor_searches in DiscreteProblem::assemble_surface_integrals().");
+
     // Create a multimesh tree;
     DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
     build_multimesh_tree(root, neighbor_searches);
     
-    // Traverse the tree and obtain global set of neighbor transformations.
-    Hermes::vector<Hermes::vector<int>*> multimesh_neighbor_transformations = get_multimesh_neighbors_transformations(root);
-
     // Update all NeighborSearches according to the multimesh tree.
+    // After this, all NeighborSearches in neighbor_searches should have the same count of neighbors and proper set of transformations
+    // for the central and the neighbor element(s) alike.
     for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
-      update_the_neighbor_search(it->second, root);
+      update_neighbor_search(it->second, root);
+
+    // Check that every NeighborSearch has the same number of neighbor elements.
+    unsigned int num_neighbors = neighbor_searches[0].get_num_neighbors();
+    for(unsigned int i = 0; i < neighbor_searches.size(); i++)
+      if(neighbor_searches[i].get_num_neighbors() != num_neighbors)
+        error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem::assemble_surface_integrals().");
+
+    for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
+      // Set the active segment in all NeighborSearches.
+      for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+        it->second.set_active_segment(neighbor_i);
 
 
 
@@ -898,6 +911,7 @@ void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, int* transf
   }
 }
 
+/* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
 Hermes::vector<Hermes::vector<int>*> DiscreteProblem::get_multimesh_neighbors_transformations(DiscreteProblem::NeighborNode* multimesh_tree)
 {
   // Initialize the vector.
@@ -909,6 +923,7 @@ Hermes::vector<Hermes::vector<int>*> DiscreteProblem::get_multimesh_neighbors_tr
   return running_transformations;
 }
 
+/* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
 void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_transformations)
 {
   // If we are in the root.
@@ -946,15 +961,17 @@ void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* nod
   return;
 }
 
-void DiscreteProblem::update_the_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree)
+void DiscreteProblem::update_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree)
 {
-  for(unsigned int i = 0; i < ns.get_num_neighbors(); i++) {
+  // This has to be done, because we pass ns by reference and the number of neighbors is changing.
+  unsigned int num_neighbors = ns.get_num_neighbors();
+
+  for(unsigned int i = 0; i < num_neighbors; i++) {
     // Find the node corresponding to this neighbor in the tree.
     NeighborNode* node = find_node(ns.central_transformations[i], ns.central_n_trans[i], multimesh_tree);
     // Update the NeighborSearch.
     update_ns_subtree(ns, node, i);
   }
-
 }
 
 DiscreteProblem::NeighborNode* DiscreteProblem::find_node(int* transformations, int transformation_count, DiscreteProblem::NeighborNode* node)
@@ -983,9 +1000,13 @@ void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::Nei
   // Also check the assertion that if one son is null, then the other too.
   if(node->get_left_son() == NULL) {
     if(node->get_right_son() != NULL)
-      error("Only one son not null in DiscreteProblem::update_ns_subtree.");
+      error("Only one son (right) not null in DiscreteProblem::update_ns_subtree.");
     return;
   }
+  // Check the opposite and proceed.
+  else
+    if(node->get_right_son() == NULL)
+      error("Only one son (left) not null in DiscreteProblem::update_ns_subtree.");
 
   // Key part.
   // Begin with storing the info about the current neighbor.
@@ -1009,11 +1030,34 @@ void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::Nei
   // Delete the current neighbor.
   ns.delete_neighbor(ith_neighbor);
 
+  // Move down the subtree.
+  if(node->get_left_son() != NULL)
+    traverse_multimesh_subtree(node->get_left_son(), running_central_transformations, running_neighbor_transformations, edge_info, ns.active_edge, ns.central_el->get_mode());
+  if(node->get_right_son() != NULL)
+    traverse_multimesh_subtree(node->get_right_son(), running_central_transformations, running_neighbor_transformations, edge_info, ns.active_edge, ns.central_el->get_mode());
 
+  // Delete the last neighbors' info (this is a dead end, caused by the function traverse_multimesh_subtree.
+  running_central_transformations.pop_back();
+  running_neighbor_transformations.pop_back();
+
+  // Insert new neighbors.
+  for(unsigned int i = 0; i < running_central_transformations.size(); i++) {
+    ns.neighbors.insert(ns.neighbors.begin() + ith_neighbor + i, neighbor);
+    ns.neighbor_edges.insert(ns.neighbor_edges.begin() + ith_neighbor + i, edge_info);
+    ns.central_n_trans.insert(ns.central_n_trans.begin() + ith_neighbor + i, running_central_transformations[i]->size());
+    ns.neighbor_n_trans.insert(ns.neighbor_n_trans.begin() + ith_neighbor + i, running_neighbor_transformations[i]->size());
+    ns.central_transformations.insert(ns.central_transformations.begin() + ith_neighbor + i, new int[NeighborSearch::max_n_trans]);
+    for(unsigned int ii = 0; ii < ns.central_n_trans[ith_neighbor + i]; ii++)
+      ns.central_transformations[ith_neighbor + i][ii] = (*running_central_transformations[i])[ii];
+    ns.neighbor_transformations.insert(ns.neighbor_transformations.begin() + ith_neighbor + i, new int[NeighborSearch::max_n_trans]);
+    for(unsigned int ii = 0; ii < ns.neighbor_n_trans[ith_neighbor + i]; ii++)
+      ns.neighbor_transformations[ith_neighbor + i][ii] = (*running_neighbor_transformations[i])[ii];
+    ns.n_neighbors++;
+  }
 }
 
 void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
-      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations)
+      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
 {
   // If we are in a leaf.
   if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
@@ -1030,27 +1074,67 @@ void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* 
     // Insert this leaf into the current running central transformation, thus complete it.
     running_central_transformations.back()->push_back(node->get_transformation());
     
-    // Make the new_neighbor_central_transformations the current running transformation.
+    // Make the new_neighbor_central_transformations the current running central transformation.
     running_central_transformations.push_back(new_neighbor_central_transformations);
 
+    // Take care of the neighbor transformation.
+    // Insert appropriate info from this leaf into the current running neighbor transformation, thus complete it.
+    if(mode == HERMES_MODE_TRIANGLE)
+      if ((active_edge == 0 && node->get_transformation() == 1) ||
+          (active_edge == 1 && node->get_transformation() == 2) ||
+          (active_edge == 2 && node->get_transformation() == 3))
+        running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+			else
+        running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+	    // Quads.
+	  else
+      if ((active_edge == 0 && (node->get_transformation() == 1 || node->get_transformation() == 7)) ||
+          (active_edge == 1 && (node->get_transformation() == 2 || node->get_transformation() == 5)) ||
+          (active_edge == 2 && (node->get_transformation() == 3 || node->get_transformation() == 0)) ||
+          (active_edge == 3 && (node->get_transformation() == 4 || node->get_transformation() == 6)))
+        running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+      else
+        running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
 
-
-
-    // Take care of the freakin' neighbor transformation, also when not in a bloody leaf.
-    
-    
-    
-    
+    // Make the new_neighbor_neighbor_transformations the current running neighbor transformation.
+    running_central_transformations.push_back(new_neighbor_neighbor_transformations);
     
     return;
   }
   else {
-    running_transformations.back()->push_back(node->get_transformation());
+    // Insert this leaf into the current running central transformation, thus complete it.
+    running_central_transformations.back()->push_back(node->get_transformation());
+
+    // Insert appropriate info from this leaf into the current running neighbor transformation, thus complete it.
+    // Triangles.
+    if(mode == HERMES_MODE_TRIANGLE)
+      if ((active_edge == 0 && node->get_transformation() == 1) ||
+          (active_edge == 1 && node->get_transformation() == 2) ||
+          (active_edge == 2 && node->get_transformation() == 3))
+        running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+			else
+        running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+	  // Quads.
+	  else
+      if ((active_edge == 0 && (node->get_transformation() == 1 || node->get_transformation() == 7)) ||
+          (active_edge == 1 && (node->get_transformation() == 2 || node->get_transformation() == 5)) ||
+          (active_edge == 2 && (node->get_transformation() == 3 || node->get_transformation() == 0)) ||
+          (active_edge == 3 && (node->get_transformation() == 4 || node->get_transformation() == 6)))
+        running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+      else
+        running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+
+    // Move down.
     if(node->get_left_son() != NULL)
-      traverse_multimesh_tree(node->get_left_son(), running_transformations);
+      traverse_multimesh_subtree(node->get_left_son(), running_central_transformations, running_neighbor_transformations, 
+          edge_info, active_edge, mode);
     if(node->get_right_son() != NULL)
-      traverse_multimesh_tree(node->get_right_son(), running_transformations);
-    running_transformations.back()->pop_back();
+      traverse_multimesh_subtree(node->get_right_son(), running_central_transformations, running_neighbor_transformations, 
+          edge_info, active_edge, mode);
+
+    // Take this transformation out.
+    running_central_transformations.back()->pop_back();
+    running_neighbor_transformations.back()->pop_back();
     return;
   }
   return;

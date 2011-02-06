@@ -637,7 +637,6 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 {
   _F_
   ensure_active_edge(this);
-
   active_segment = neighbor;
   ensure_active_segment(this);
 

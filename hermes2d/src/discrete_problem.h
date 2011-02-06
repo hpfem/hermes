@@ -273,7 +273,7 @@ protected:
   void traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_transformations);
 
   /// Update the NeighborSearch according to the multimesh tree.
-  void update_the_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree);
+  void update_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree);
 
   /// Finds a node in the multimesh tree that corresponds to the array transformations, with the length of transformation_count,
   /// starting to look for it in the NeighborNode node.
@@ -284,7 +284,7 @@ protected:
 
   /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
   void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
-      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations);
+      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
   /// Members.
   WeakForm* wf;
