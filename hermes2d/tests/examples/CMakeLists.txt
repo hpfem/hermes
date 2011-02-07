@@ -50,3 +50,6 @@ add_subdirectory(richards-seepage-adapt)
 add_subdirectory(eigen-schroedinger)
 add_subdirectory(eigen-schroedinger-iter)
 
+# Helmholtz
+add_subdirectory(helmholtz-waveguide)
+
