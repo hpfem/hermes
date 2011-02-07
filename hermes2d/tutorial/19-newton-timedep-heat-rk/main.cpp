@@ -5,11 +5,11 @@
 
 using namespace RefinementSelectors;
 
-//  This example is derived from the tutorial example 19.
-//  It uses general Butcher's tables to perform arbitrary 
-//  explicit or implicit low-order or higher-order Runge-Kutta
-//  time integration. Example 19 can just do implicit Euler.
-//  The model problem is a simple nonlinear parabolic PDE.
+//  This example is derived from example 19-newton-timedep-heat-basic
+//  and it does basically the same, but the time discretization is 
+//  now performed using arbitrary (explicit or implicit, low-order 
+//  or higher-order) Runge-Kutta methods entered via their Butcher's
+//  tables. 
 //
 //  The function rk_time_step() needs more optimisation, see
 //  a todo list at the beginning of file src/runge-kutta.cpp.
@@ -48,7 +48,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_SIRK_2_2;
+ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -144,11 +144,11 @@ int main(int argc, char* argv[])
   oview.show(space);
 
   // Time stepping loop:
-  double current_time = 0.0; int ts = 1;
+  double current_time = time_step; int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
+    info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;

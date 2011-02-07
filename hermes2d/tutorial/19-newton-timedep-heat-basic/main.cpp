@@ -5,12 +5,15 @@
 
 using namespace RefinementSelectors;
 
-//  This example shows how the Newton's method is used for
-//  a simple nonlinear parabolic PDE discretized in time
-//  via the implicit Euler method.
+//  This example shows how the Newton's method can be used 
+//  in conjunction with implicit time stepping for time-dependent
+//  problems. Time discretization is done using the implicit 
+//  Euler method.
 //
-//  PDE: time-dependent heat transfer equation with nonlinear thermal
-//  conductivity, du/dt - div[lambda(u)grad u] = f.
+//  PDE: time-dependent heat transfer equation with nonlinear
+//  thermal conductivity:
+//
+//  du/dt - div[lambda(u)grad u] = f.
 //
 //  Domain: square (-10,10)^2.
 //
@@ -22,7 +25,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-const double TAU = 0.2;                           // Time step.
+const double time_step = 0.2;                     // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -127,22 +130,20 @@ int main(int argc, char* argv[])
   oview.show(&space);
 
   // Time stepping loop:
-  double current_time = 0.0; int ts = 1;
+  double current_time = time_step; int ts = 1;
   do 
   {
-    info("---- Time step %d, t = %g s.", ts, current_time); ts++;
+    info("---- Time step %d, t = %g s.", ts, current_time);
 
     // Perform Newton's iteration.
-    info("Solving on coarse mesh:");
     bool verbose = true;
     if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
+      error("Newton's iteration failed.");
+    }
 
     // Update previous time level solution.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
-
-    // Update time.
-    current_time += TAU;
 
     // Show the new time level solution.
     char title[100];
@@ -150,7 +151,11 @@ int main(int argc, char* argv[])
     sview.set_title(title);
     sview.show(&u_prev_time);
     oview.show(&space);
-  } 
+
+    // Increase current time and counter of time steps.
+    current_time += time_step;
+    ts++;
+  }
   while (current_time < T_FINAL);
 
   // Cleanup.

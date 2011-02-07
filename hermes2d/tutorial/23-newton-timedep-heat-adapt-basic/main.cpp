@@ -4,12 +4,14 @@
 
 using namespace RefinementSelectors;
 
-//  This example shows how to combine automatic adaptivity with the Newton's
-//  method for a nonlinear time-dependent PDE discretized implicitly in time
-//  using implicit Euler or Crank-Nicolson.
+//  This example is derived from example 19-newton-timedep-heat-basic
+//  and it shows a simple way to combine automatic adaptivity in space 
+//  with the implicit Euler method for a nonlinear time-dependent PDE.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
-//  conductivity, du/dt - div[lambda(u)grad u] = f.
+//  conductivity:
+//
+//  du/dt - div[lambda(u)grad u] = f.
 //
 //  Domain: square (-10,10)^2.
 //
@@ -20,10 +22,7 @@ using namespace RefinementSelectors;
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
-const double TAU = 0.5;                           // Time step. Note: The Crank-Nicolson method is known 
-                                                  // to have problems with large time steps on coarse meshes. 
-                                                  // Do not use it here with TAU > 0.1.
+const double time_step = 0.5;                     // Time step. 
 const double T_FINAL = 2.0;                       // Time interval length.
 
 // Adaptivity
@@ -83,8 +82,8 @@ Real dlam_du(Real u) {
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
+  dx = (y+10)/100.;
+  dy = (x+10)/100.;
   return (x+10)*(y+10)/100.;
 }
 
@@ -146,14 +145,8 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  if(TIME_DISCR == 1) {
-    wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
-    wf.add_vector_form(callback(F_euler), HERMES_ANY, &sln_prev_time);
-  }
-  else {
-    wf.add_matrix_form(callback(J_cranic), HERMES_NONSYM, HERMES_ANY);
-    wf.add_vector_form(callback(F_cranic), HERMES_ANY, &sln_prev_time);
-  }
+  wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
+  wf.add_vector_form(callback(F_euler), HERMES_ANY, &sln_prev_time);
 
   // Initialize the discrete problem.
   bool is_linear = false;
@@ -170,8 +163,8 @@ int main(int argc, char* argv[])
   ordview.show(&space);
   
   // Time stepping loop.
-  int num_time_steps = (int)(T_FINAL/TAU + 0.5);
-  for(int ts = 1; ts <= num_time_steps; ts++)
+  double current_time = time_step; int ts = 1;
+  do 
   {
     // Periodic global derefinement.
     if (ts > 1 && ts % UNREF_FREQ == 0) 
@@ -290,17 +283,22 @@ int main(int argc, char* argv[])
 
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time %g", ts*TAU);
+    sprintf(title, "Solution, time %g", current_time);
     view.set_title(title);
     view.show_mesh(false);
     view.show(&sln);
-    sprintf(title, "Mesh, time %g", ts*TAU);
+    sprintf(title, "Mesh, time %g", current_time);
     ordview.set_title(title);
     ordview.show(&space);
 
     // Copy last reference solution into sln_prev_time.
     sln_prev_time.copy(&ref_sln);
+
+    // Increase current time and counter of time steps.
+    current_time += time_step;
+    ts++;
   }
+  while (current_time < T_FINAL);
 
   // Wait for all views to be closed.
   View::wait();

@@ -3,10 +3,11 @@
 #include "hermes2d.h"
 #include "runge_kutta.h"
 
-//  This example shows how to solve a time-dependent PDE. The model describes 
+//  This example shows the simplest way to solve a linear time-dependent
+//  PDE in Hermes using the implicit Euler method in time. The model describes 
 //  in a naive approximation how the St. Vitus Cathedral in Prague 
-//  (http://en.wikipedia.org/wiki/St._Vitus_Cathedral) responds to changes in 
-//  the surrounding air temperature during one 24-hour cycle. 
+//  (http://en.wikipedia.org/wiki/St._Vitus_Cathedral) responds to changes 
+//  in the surrounding air temperature during one 24-hour cycle. 
 //
 //  PDE: non-stationary heat transfer equation
 //  HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
@@ -104,11 +105,10 @@ int main(int argc, char* argv[])
   Tview.fix_scale_width(30);
 
   // Time stepping:
-  int ts = 1;
-  bool rhs_only = false;
+  int ts = 1; bool rhs_only = false;
   do 
   {
-    info("---- Time step %d, time %3.5f, ext_temp %g", ts, current_time, temp_ext(current_time));
+    info("---- Time step %d, time %3.5f s, ext_temp %g C", ts, current_time, temp_ext(current_time));
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
@@ -124,14 +124,12 @@ int main(int argc, char* argv[])
 
     // Visualize the solution.
     char title[100];
-    sprintf(title, "Time %3.2f, exterior temperature %3.5f", current_time, temp_ext(current_time));
+    sprintf(title, "Time %3.2f s, exterior temperature %3.5f C", current_time, temp_ext(current_time));
     Tview.set_title(title);
     Tview.show(&tsln);
 
-    // Update global time.
+    // Increase current time and time step counter.
     current_time += time_step;
-
-    // Increase time step counter
     ts++;
   }
   while (current_time < T_FINAL);

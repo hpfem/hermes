@@ -1,7 +1,7 @@
 if(NOT H2D_REAL)
     return()
 endif(NOT H2D_REAL)
-project(newton-timedep-heat-adapt)
+project(newton-timedep-heat-rk)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)

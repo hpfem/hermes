@@ -4,12 +4,13 @@
 #include "runge_kutta.h"
 
 //  This example is a continuation of the example "09-timedep-basic" and it shows how 
-//  to perform time integration with Runge-Kutta methods using arbitrary Butcher's 
-//  tables. Currently (as of January 2011) approx. 20 tables are available by default,
-//  as can be seen below. They are taken from various sources including J. Butcher's
-//  book and the Wikipedia page http://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods. 
-//  If you know about some other interesting R-K methods that are missing in our database,
-//  please let us know!
+//  to perform time integration with arbitrary Runge-Kutta methods, using Butcher's 
+//  tables as input parameters. Currently (as of January 2011) approx. 30 tables are 
+//  available by default, as can be seen below. They are taken from various sources 
+//  including J. Butcher's book, journal articles, and the Wikipedia page 
+//  http://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods. If you know 
+//  about some other interesting R-K method that we are missing here, please let us 
+//  know!
 //
 //  PDE: non-stationary heat transfer equation
 //       HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
@@ -28,7 +29,7 @@
 //  BC:  T = TEMP_INIT on the bottom edge ... Dirichlet,
 //       dT/dn = ALPHA*(t_exterior(time) - T) ... Newton, time-dependent.
 //
-//  Time-stepping: various Runge-Kutta methods.
+//  Time-stepping: Arbitrary Runge-Kutta methods.
 //
 //  The following parameters can be changed:
 
@@ -130,11 +131,11 @@ int main(int argc, char* argv[])
   Tview.fix_scale_width(30);
 
   // Time stepping loop:
-  double current_time = 0.0; int ts = 1;
+  double current_time = time_step; int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
+    info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = true;
@@ -143,16 +144,14 @@ int main(int argc, char* argv[])
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
-    // Update time.
-    current_time += time_step;
-
     // Show the new time level solution.
     char title[100];
-    sprintf(title, "Time %3.2f, exterior temperature %3.5f", current_time, temp_ext(current_time));
+    sprintf(title, "Time %3.2f s, exterior temperature %3.5f C", current_time, temp_ext(current_time));
     Tview.set_title(title);
     Tview.show(sln);
 
-    // Increase counter of time steps.
+    // Increase current time and time step counter.
+    current_time += time_step;
     ts++;
   } 
   while (current_time < T_FINAL);
