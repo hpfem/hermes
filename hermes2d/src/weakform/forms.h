@@ -309,7 +309,6 @@ public:
   }
 };
 
-
 /// Geometry (coordinates, normals, tangents) of either an element or an edge.
 template<typename T>
 class Geom
@@ -413,9 +412,9 @@ Func<Ord>* init_fn_ord(const int order);
 /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 /// Init the mesh-function for the evaluation of the volumetric/surface integral.
-Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order);
+Func<scalar>* init_fn(MeshFunction *fu, const int order);
 /// Init the solution for the evaluation of the volumetric/surface integral.
-Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order);
+Func<scalar>* init_fn(Solution *fu, const int order);
 
 
 

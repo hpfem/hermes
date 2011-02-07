@@ -457,6 +457,7 @@ private:
 
   int active_edge;              ///< Local number of the currently assembled edge, w.r.t. the central element.
   int neighbor_edge;            ///< Local number of the currently assembled edge, w.r.t. the element on the other side.
+  int neighbor_edge_orientation;///< Local orientation of the neighboring edge.
   int active_segment;           ///< Part of the active edge shared by central and neighbor elements.
 
   /// Structure containing all the needed information about the active edge from the neighbor's side.
@@ -619,9 +620,6 @@ public:
           bool reverse_neighbor_side; ///< True if the orientation of the neighbor edge w.r.t. the active edge is
                                       ///< reversed.
 
-          ///
-          void activate(unsigned int index, AsmList* central_al, AsmList* neighb_al);
-
           /// Constructor.
           /// \param[in] neighborhood Neighborhood on which the extended shape function is defined.
           ///
@@ -672,31 +670,18 @@ public:
           friend class NeighborSearch::ExtendedShapeset;
       };
 
-      /// Set active element, push neccessary transforms and set the active shape for \c active_pss.
-      ///
-      /// If the given index is lower than the number of shape functions in central element's assembly list for active
-      /// edge, the corresponding function from central element's precalculated shapeset is selected and go-down
-      /// transformations (if any) are pushed to it. The resulting extended shape function will be equal to this
-      /// function on the central element and will be zero on the neighbor.
-      ///
-      /// If the index is greater than the number of shape functions in central element's assembly list and lower than
-      /// that in neighbor element's assembly list, active shape function is drawn from the neighbor element's pss.
-      /// The resulting extended shape function will attain zero values on the central element and be equal to the
-      /// active shape function on the neighbor.
-      ///
-      /// \param[in]  index index of selected extended shape function
-      ///                   (ranging from zero to <tt>central_al->cnt + neighbor_al->cnt</tt>)
-      /// \return     Pointer to the active extended shape function.
-      ///
-      ExtendedShapeFunction* get_extended_shape_fn(int index) {
-        active_shape->activate(index, central_al, neighbor_al);
-        return active_shape;
+      /// Extend by zero the \c Func representation of the active shape's polynomial order to the other element.
+      static DiscontinuousFunc<Ord>* extend_by_zero(Func<Ord>* fu, bool support_on_neighbor) {
+        return new DiscontinuousFunc<Ord>(fu, support_on_neighbor);
       }
+      
+      bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
 
-    private:
-      ExtendedShapeFunction *active_shape;    ///< Extended shape function with activated \c active_pss.
       AsmList* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
       AsmList* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
+    private:
+      ExtendedShapeFunction *active_shape;    ///< Extended shape function with activated \c active_pss.
+      
 
       /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
       void combine_assembly_lists();

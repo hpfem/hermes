@@ -355,7 +355,7 @@ double KellyTypeAdapt::eval_solution_norm(error_matrix_form_val_t val, error_mat
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>* u = init_fn(sln, rm, order);
+  Func<scalar>* u = init_fn(sln, order);
   scalar res = val(np, jwt, NULL, u, u, e, NULL);
 
   e->free(); delete e;
@@ -389,7 +389,7 @@ ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, c
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
   for (unsigned i = 0; i < ext.size(); i++) {
-    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], rm, order);
+    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
     else ext_fn[i] = NULL;
   }
   ext_data->nf = ext.size();
@@ -486,7 +486,7 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
   // function values
   Func<scalar>** ui = new Func<scalar>* [num];
   for (int i = 0; i < num; i++)
-    ui[i] = init_fn(this->sln[i], rm, order);
+    ui[i] = init_fn(this->sln[i], order);
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, order);
 
   scalar res = volumetric_scaling_const *
@@ -544,7 +544,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
   // function values
   Func<scalar>** ui = new Func<scalar>* [num];
   for (int i = 0; i < num; i++)
-    ui[i] = init_fn(this->sln[i], rm, eo);
+    ui[i] = init_fn(this->sln[i], eo);
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, eo);
 
   scalar res = boundary_scaling_const *

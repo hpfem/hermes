@@ -223,16 +223,17 @@ protected:
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
   scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
-  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> sln,
-                      NeighborSearch* nbs_u, NeighborSearch* nbs_v, ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
-                      SurfPos* ep);
+  scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
+                                     PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, 
+                                     bool neighbor_supp_u, bool neighbor_supp_v,
+                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches);
   scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> sln,
                       NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
                       SurfPos* ep);
 
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge);
-  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
 

@@ -853,17 +853,16 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       // The important thing is that the transformations to the current subelement are already there.
       // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-        for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[fns_i]->get_seq()].central_n_trans[neighbor_i]; trf_i++) {
-          neighbor_searches[stage.meshes[fns_i]->get_seq()].original_central_el_transform = stage.fns[fns_i]->get_transform();
-          neighbor_searches[stage.meshes[fns_i]->get_seq()].neighb_el = neighbor_searches[stage.meshes[fns_i]->get_seq()].neighbors[neighbor_i];
-          neighbor_searches[stage.meshes[fns_i]->get_seq()].neighbor_edge = neighbor_searches[stage.meshes[fns_i]->get_seq()].neighbor_edges[neighbor_i].local_num_of_edge;
-          stage.fns[fns_i]->push_transform(neighbor_searches[stage.meshes[fns_i]->get_seq()].central_transformations[neighbor_i][trf_i]);
+        for(unsigned int trf_i = 0; trf_i < neighbor_searches.at(stage.meshes[fns_i]->get_seq()).central_n_trans[neighbor_i]; trf_i++) {
+          neighbor_searches.at(stage.meshes[fns_i]->get_seq()).original_central_el_transform = stage.fns[fns_i]->get_transform();
+          neighbor_searches.at(stage.meshes[fns_i]->get_seq()).active_segment = neighbor_i;
+          stage.fns[fns_i]->push_transform(neighbor_searches.at(stage.meshes[fns_i]->get_seq()).central_transformations[neighbor_i][trf_i]);
         }
       // For neighbor psss.
       for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
-        npss[idx_i]->set_active_element((*neighbor_searches[stage.meshes[idx_i]->get_seq()].get_neighbors())[neighbor_i]);
-        for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[idx_i]->get_seq()].neighbor_n_trans[neighbor_i]; trf_i++)
-          npss[idx_i]->push_transform(neighbor_searches[stage.meshes[idx_i]->get_seq()].neighbor_transformations[neighbor_i][trf_i]);
+        npss[idx_i]->set_active_element((*neighbor_searches.at(stage.meshes[idx_i]->get_seq()).get_neighbors())[neighbor_i]);
+        for(unsigned int trf_i = 0; trf_i < neighbor_searches.at(stage.meshes[idx_i]->get_seq()).neighbor_n_trans[neighbor_i]; trf_i++)
+          npss[idx_i]->push_transform(neighbor_searches.at(stage.meshes[idx_i]->get_seq()).neighbor_transformations[neighbor_i][trf_i]);
       }
 
       // Also push the transformations to the slave psss and refmaps.
@@ -893,8 +892,8 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-        for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[fns_i]->get_seq()].central_n_trans[neighbor_i]; trf_i++) {
-          stage.fns[fns_i]->set_transform(neighbor_searches[stage.meshes[fns_i]->get_seq()].original_central_el_transform);
+        for(unsigned int trf_i = 0; trf_i < neighbor_searches.at(stage.meshes[fns_i]->get_seq()).central_n_trans[neighbor_i]; trf_i++) {
+          stage.fns[fns_i]->set_transform(neighbor_searches.at(stage.meshes[fns_i]->get_seq()).original_central_el_transform);
         }
 
       // Also clear the transformations from the slave psss and refmaps.
@@ -1332,44 +1331,70 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
             surf_pos.space_u = spaces[n];
 
               // Create the extended shapeset on the union of the central element and its current neighbor.
-    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches[stage.meshes[n]->get_seq()].create_extended_asmlist(spaces[n], al[n]);
-    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches[stage.meshes[m]->get_seq()].create_extended_asmlist(spaces[m], al[m]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.at(stage.meshes[n]->get_seq()).create_extended_asmlist(spaces[n], al[n]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.at(stage.meshes[m]->get_seq()).create_extended_asmlist(spaces[m], al[m]);
+
+    // Precalc shapeset and refmaps used for the evaluation.
+    PrecalcShapeset* fu;
+    PrecalcShapeset* fv;
+    RefMap* ru;
+    RefMap* rv;
+    bool support_neigh_u, support_neigh_v;
 
     scalar **local_stiffness_matrix = get_matrix_buffer(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
     for (int i = 0; i < ext_asmlist_v->cnt; i++) {
-      if (ext_asmlist_v->dof[i] < 0) continue;
-
-                // Get a pointer to the i-th shape function from the extended shapeset. If i is less than the
-                // number of shape functions on the central element, the extended shape function will have non-zero
-                // values on the central element and will be zero on neighbor. Otherwise vice-versa.
-      ExtendedShapeFnPtr active_shape_v = ext_asmlist_v->get_extended_shape_fn(i);
+      if (ext_asmlist_v->dof[i] < 0) 
+        continue;
+      // Choose the correct shapeset for the test function.
+      if (!ext_asmlist_v->has_support_on_neighbor(i)) {
+        spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
+        fv = spss[m];
+        rv = refmap[m];
+        support_neigh_v = false;
+      }
+      else {
+        nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
+        fv = nspss[m];
+        rv = nrefmap[m];
+        support_neigh_v = true;
+      }
       for (int j = 0; j < ext_asmlist_u->cnt; j++) {
-        ExtendedShapeFnPtr active_shape_u = ext_asmlist_u->get_extended_shape_fn(j);
+        // Choose the correct shapeset for the solution function.
+        if (!ext_asmlist_v->has_support_on_neighbor(i)) {
+          pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[i]);
+          fu = pss[n];
+          ru = refmap[n];
+          support_neigh_u = false;
+        }
+        else {
+          npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[i - ext_asmlist_u->central_al->cnt]);
+          fu = npss[n];
+          ru = nrefmap[n];
+          support_neigh_u = true;
+        }
+
         if (ext_asmlist_u->dof[j] < 0) {
                     if (rhs != NULL && this->is_linear) {
                       // Evaluate the form with the activated discontinuous shape functions.
-                      scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, &surf_pos)
-                                      * active_shape_v->coef * active_shape_u->coef;
+            scalar val = eval_dg_form(mfs, u_ext, fu, fv, ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches)
+              * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[i - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[i]
+              * support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i];
                       // Add the contribution to the global dof index.
-                      rhs->add(nbs_v->supported_shapes->dof[i], -val);
+            rhs->add(ext_asmlist_v->dof[i], -val);
                     }
                   }
                   else if (rhsonly == false) {
-                    scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, &surf_pos)
-                                      * active_shape_v->coef * active_shape_u->coef;
+          scalar val = eval_dg_form(mfs, u_ext, fu, fv, ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches)
+            * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[i - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[i]
+            * support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i];
                     local_stiffness_matrix[i][j] = val;
                   }
                 }
               if (rhsonly == false)
-                mat->add(v_shapes_cnt, u_shapes_cnt, local_stiffness_matrix,
-                        nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof);
+        mat->add(ext_asmlist_u->cnt, ext_asmlist_v->cnt, local_stiffness_matrix,
+                ext_asmlist_v->dof, ext_asmlist_u->dof);
             }
-            // This automatically restores the transformations pushed to the attached PrecalcShapesets fu/fv, so that
-            // they are ready for any further form evaluation.
-            delete nbs_u;
-            delete nbs_v;
           }
-
 }
 
 void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage, 
@@ -1445,7 +1470,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &e
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
   for (unsigned i = 0; i < ext.size(); i++) {
-    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], rm, order);
+    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
     else ext_fn[i] = NULL;
   }
   ext_data->nf = ext.size();
@@ -1485,11 +1510,11 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &e
 }
 
 // Initialize integration order for discontinuous external functions.
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches)
 {
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
   for (unsigned int j = 0; j < ext.size(); j++)
-    fake_ext_fns[j] = nbs->init_ext_fn_ord(ext[j]);
+    fake_ext_fns[j] = neighbor_searches.at(ext[j]->get_mesh()->get_seq())->init_ext_fn_ord(ext[j]);
 
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
   fake_ext->fn = fake_ext_fns;
@@ -1673,7 +1698,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<S
   if (u_ext != Hermes::vector<Solution *>())
     for (int i = 0; i < prev_size; i++)
       if (u_ext[i + mfv->u_ext_offset] != NULL) 
-        prev[i] = init_fn(u_ext[i + mfv->u_ext_offset], rv, order);
+        prev[i] = init_fn(u_ext[i + mfv->u_ext_offset], order);
       else 
         prev[i] = NULL;
   else
@@ -1800,7 +1825,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
   if (u_ext != Hermes::vector<Solution *>())
     for (int i = 0; i < prev_size; i++)
       if (u_ext[i + vfv->u_ext_offset] != NULL) 
-        prev[i] = init_fn(u_ext[i + vfv->u_ext_offset], rv, order);
+        prev[i] = init_fn(u_ext[i + vfv->u_ext_offset], order);
       else 
         prev[i] = NULL;
   else
@@ -1916,7 +1941,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<
   if (u_ext != Hermes::vector<Solution *>())
     for (int i = 0; i < prev_size; i++)
       if (u_ext[i + mfs->u_ext_offset] != NULL) 
-        prev[i] = init_fn(u_ext[i + mfs->u_ext_offset], rv, eo);
+        prev[i] = init_fn(u_ext[i + mfs->u_ext_offset], eo);
       else 
         prev[i] = NULL;
   else
@@ -2033,7 +2058,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
   if (u_ext != Hermes::vector<Solution *>())
     for (int i = 0; i < prev_size; i++)
       if (u_ext[i + vfs->u_ext_offset] != NULL) 
-        prev[i] = init_fn(u_ext[i + vfs->u_ext_offset], rv, eo);
+        prev[i] = init_fn(u_ext[i + vfs->u_ext_offset], eo);
       else 
         prev[i] = NULL;
   else
@@ -2065,51 +2090,47 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
 }
 
 scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
-                                     NeighborSearch* nbs_u, NeighborSearch* nbs_v,
-                                     ExtendedShapeFnPtr efu, ExtendedShapeFnPtr efv,
-                                     SurfPos* surf_pos)
+                                     PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, 
+                                     bool neighbor_supp_u, bool neighbor_supp_v,
+                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches)
 {
   _F_
-  // FIXME for treating a discontinuous previous Newton iteration.
   int order;
   int u_ext_length = u_ext.size();      // Number of external solutions.
   int u_ext_offset = mfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
                                         // and there will be only u_ext_length - u_ext_offset of them.
   if(this->is_fvm)
-    order = std::max(efu->get_activated_refmap()->get_inv_ref_order(),
-                         efv->get_activated_refmap()->get_inv_ref_order());
+    order = ru->get_inv_ref_order();
   else {
     // Order of solutions from the previous Newton iteration.
     AUTOLA_OR(Func<Ord>*, oi, u_ext_length - u_ext_offset);
-    if (u_ext != Hermes::vector<Solution *>()) {
-      for (int i = u_ext_offset; i < u_ext_length; i++) {
-        if (u_ext[i] != NULL) oi[i - u_ext_offset] = nbs_u->init_ext_fn_ord(u_ext[i]);
-        else oi[i - u_ext_offset] = init_fn_ord(0);
-      }
-    }
-    else {
-      for (int i = u_ext_offset; i < u_ext_length; i++) oi[i - u_ext_offset] = init_fn_ord(0);
-    }
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = u_ext_offset; i < u_ext_length; i++)
+        if (u_ext[i] != NULL) 
+          oi[i - u_ext_offset] = neighbor_searches.at(u_ext[i]->get_mesh()->get_seq()).init_ext_fn_ord(u_ext[i]);
+        else 
+          oi[i - u_ext_offset] = init_fn_ord(0);
+    else
+      for (int i = u_ext_offset; i < u_ext_length; i++) 
+        oi[i - u_ext_offset] = init_fn_ord(0);
 
     // Order of shape functions.
-    DiscontinuousFunc<Ord>* ou = efu->get_fn_ord();
-    DiscontinuousFunc<Ord>* ov = efv->get_fn_ord();
+    int inc = (fv->get_num_components() == 2) ? 1 : 0;
+    DiscontinuousFunc<Ord>* ou = new DiscontinuousFunc<Ord>(get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_u);
+    DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_v);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, nbs_v);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, neighbor_searches);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Element *neighb_el = nbs_v->get_current_neighbor_element();
-    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), neighb_el->marker, neighb_el->id, 
-                            neighb_el->get_diameter());
     double fake_wt = 1.0;
+    Geom<Ord>* fake_e = init_geom_ord();
 
     // Total order of the matrix form.
     Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
 
     // Increase due to reference maps.
-    order = std::max(efu->get_activated_refmap()->get_inv_ref_order(),
-                         efv->get_activated_refmap()->get_inv_ref_order());
+    order = ru->get_inv_ref_order();
 
     order += o.get_order();
     limit_order(order);
@@ -2127,18 +2148,22 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   }
 
   // Evaluate the form.
-  nbs_u->set_quad_order(order);
-  nbs_v->set_quad_order(order);
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+    it->second.set_quad_order(order);
 
   // Init geometry and jacobian*weights.
-  Geom<double>* e = nbs_u->init_geometry(cache_e, surf_pos);
-  double* jwt = nbs_u->init_jwt(cache_jwt);
+  // This is done for one NeighborSearch, as it should be the same for all of them, if all the transformations are correct.
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
+    Geom<double>* e = it->second.init_geometry(cache_e, surf_pos);
+    double* jwt = it->second.init_jwt(cache_jwt);
+    break;
+  }
 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   AUTOLA_OR(Func<scalar>*, prev, u_ext_length - u_ext_offset);
   if (u_ext != Hermes::vector<Solution *>()) {
     for (int i = u_ext_offset; i < u_ext_length; i++) {
-      if (u_ext[i] != NULL) prev[i - u_ext_offset]  = nbs_v->init_ext_fn(u_ext[i]);
+      if (u_ext[i] != NULL) prev[i - u_ext_offset]  = neighbor_searches.at(u_ext[i]->get_mesh()->get_seq()).init_ext_fn(u_ext[i]);
       else prev[i - u_ext_offset] = NULL;
     }
   }
@@ -2147,12 +2172,14 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   }
 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-  DiscontinuousFunc<double>* u = efu->extend_by_zero( get_fn(efu->get_activated_pss(), 
+  DiscontinuousFunc<double>* u = NULL;/*efu->extend_by_zero( get_fn(efu->get_activated_pss(), 
                                                       efu->get_activated_refmap(), 
                                                       efu->get_neighbhood()->get_quad_eo(efu->get_support_on_neighbor())));
-  DiscontinuousFunc<double>* v = efv->extend_by_zero( get_fn(efv->get_activated_pss(), 
+                                      */
+  DiscontinuousFunc<double>* v = NULL;/*efv->extend_by_zero( get_fn(efv->get_activated_pss(), 
                                                       efv->get_activated_refmap(), 
                                                       efv->get_neighbhood()->get_quad_eo(efv->get_support_on_neighbor())));
+                                      */
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, nbs_v);
 
   scalar res = mfs->fn(nbs_v->get_quad_np(), jwt, prev, u, v, e, ext);

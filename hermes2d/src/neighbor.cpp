@@ -123,7 +123,6 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
 	reset_neighb_info();
 
 	active_edge = edge;
-  ignore_visited_segments = ignore_visited;
 
 	//debug_log("central element: %d", central_el->id);
 	if (central_el->en[active_edge]->bnd == 0)
@@ -753,10 +752,8 @@ NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space 
 void NeighborSearch::set_quad_order(int order)
 {
   _F_
-  ensure_active_segment(this);
-
-  quad->set_mode(neighb_el->get_mode());
-  neighb_quad.init(quad, quad->get_edge_points(neighbor_edge, order));
+  quad->set_mode(neighbors[active_segment]->get_mode());
+  neighb_quad.init(quad, quad->get_edge_points(neighbor_edges[active_segment].local_num_of_edge, order));
   quad->set_mode(central_el->get_mode());
   central_quad.init(quad, quad->get_edge_points(active_edge, order));
 }
@@ -871,52 +868,35 @@ double* NeighborSearch::calculate_jwt(int edge_order)
 DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
 {
   _F_
-  ensure_active_segment(this);
-  Func<Ord>* fo1 = init_fn_ord(fu->get_edge_fn_order(active_edge));
-  Func<Ord>* fo2 = init_fn_ord(fu->get_edge_fn_order(active_edge));
-  return new DiscontinuousFunc<Ord>(fo1, fo2);
-}
-
-DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
-{
-  _F_
-  ensure_active_segment(this);
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   int central_order = fu->get_edge_fn_order(active_edge) + inc;
   int neighbor_order = fu->get_edge_fn_order(neighbor_edge) + inc;
   return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
 }
 
+DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
+{
+  _F_
+  int inc = (fu->get_num_components() == 2) ? 1 : 0;
+  int central_order = fu->get_edge_fn_order(active_edge) + inc;
+  int neighbor_order = fu->get_edge_fn_order(neighbor_edges[active_segment].local_num_of_edge) + inc;
+  return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
+}
+
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 {
   _F_
-  ensure_active_segment(this);
-  ensure_set_quad_order(central_quad);
-  ensure_set_quad_order(neighb_quad);
+  Func<scalar>* fn_central = init_fn(fu, get_quad_eo(false));
 
-  if(fu->get_active_element() != central_el) {
-    // Just in case - the input function should have the active element set to the central element from get_next_state
-    // called in the assembling procedure.
-    fu->set_active_element(central_el);
-    fu->set_transform(original_central_el_transform);
-  }
-
-  if (neighborhood_type == H2D_DG_GO_DOWN)
-    // Shrink the bigger central element to match the smaller neighbor (shrinks the active edge to the active segment).
-    for(int i = 0; i < central_n_trans[active_segment]; i++)
-      fu->push_transform(central_transformations[active_segment][i]);
-
-  Func<scalar>* fn_central = init_fn(fu, fu->get_refmap(), get_quad_eo(false));
+  uint64_t original_transform = fu->get_transform();
 
   // Change the active element of the function. Note that this also resets the transformations on the function.
-  fu->set_active_element(neighb_el);
+  fu->set_active_element(neighbors[active_segment]);
+  
+  for(int i = 0; i < neighbor_n_trans[active_segment]; i++)
+    fu->push_transform(neighbor_transformations[active_segment][i]);
 
-  if (neighborhood_type == H2D_DG_GO_UP)
-    // Shrink the bigger neighbor to match the smaller central element.
-    for(int i = 0; i < neighbor_n_trans[active_segment]; i++)
-      fu->push_transform(neighbor_transformations[active_segment][i]);
-
-  Func<scalar>* fn_neighbor = init_fn(fu, fu->get_refmap(), get_quad_eo(true));
+  Func<scalar>* fn_neighbor = init_fn(fu, get_quad_eo(true));
 
   // Restore the original function.
   fu->set_active_element(central_el);
@@ -977,44 +957,4 @@ void NeighborSearch::ExtendedShapeset::combine_assembly_lists()
   dof = new int [cnt];
   memcpy(dof, central_al->dof, sizeof(int)*central_al->cnt);
   memcpy(dof + central_al->cnt, neighbor_al->dof, sizeof(int)*neighbor_al->cnt);
-}
-
-void NeighborSearch::ExtendedShapeset::ExtendedShapeFunction::activate(unsigned int index, AsmList* central_al, AsmList* neighb_al)
-{
-  _F_
-  ensure_active_segment(neighbhood);
-  ensure_central_pss_rm(neighbhood);
-  assert_msg(neighbhood->neighb_pss != NULL, "Cannot activate extended shape function."
-                                           "PrecalcShapeset for neighbor has not been set."  );
-  if (index >= central_al->cnt)
-  {
-    // Active shape is nonzero on the neighbor element
-    support_on_neighbor = true;
-
-    active_pss = neighbhood->neighb_pss;
-    active_rm = neighbhood->neighb_rm;
-
-    // AsmList entries for the active shape, taken from neighbor.
-    int idx_loc = index - central_al->cnt;
-    idx = neighb_al->idx[idx_loc];
-    dof = neighb_al->dof[idx_loc];
-    coef = neighb_al->coef[idx_loc];
-  }
-  else
-  {
-    // Active shape is nonzero on the central element
-    support_on_neighbor = false;
-
-    active_pss = neighbhood->central_pss;
-    active_rm = neighbhood->central_rm;
-
-    // AsmList entries for the active shape, taken from central.
-    idx = central_al->idx[index];
-    dof = central_al->dof[index];
-    coef = central_al->coef[index];
-  }
-
-  active_pss->set_active_shape(idx);
-  reverse_neighbor_side = (neighbhood->neighbor_edges[neighbhood->active_segment].orientation == 1);
-  order = active_pss->get_edge_fn_order(neighbhood->active_edge);
 }
