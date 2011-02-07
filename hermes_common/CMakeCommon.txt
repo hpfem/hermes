@@ -45,8 +45,8 @@ ENDIF()
 
 # FIXME: Tests are disabled for now, as they would clash with different
 # hermeses:
-#add_custom_target(test COMMAND ctest)
-#add_custom_target(test-quick COMMAND ctest -LE slow -j9)
+add_custom_target(test COMMAND ctest)
+add_custom_target(test-quick COMMAND ctest -LE slow -j9)
 
 # Teuchos RCP
 if (NOT WITH_TRILINOS)
