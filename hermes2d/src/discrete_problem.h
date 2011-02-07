@@ -202,8 +202,7 @@ public:
   /// Assemble DG vector forms.
   void assemble_DG_vector_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element);
 
@@ -224,18 +223,18 @@ protected:
   scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
   scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
-                                     PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, 
+                                     PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru_central, RefMap * ru_actual, RefMap *rv, 
                                      bool neighbor_supp_u, bool neighbor_supp_v,
-                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches);
-  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> sln,
-                      NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
-                      SurfPos* ep);
+                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
+  scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> u_ext,
+                                     PrecalcShapeset *fv, RefMap *rv, 
+                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches, int neighbor_index_v);
 
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge);
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order);
-  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs);
+  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches);
 
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
   Func<Ord>* get_fn_ord(const int order);

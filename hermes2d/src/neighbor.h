@@ -457,7 +457,6 @@ private:
 
   int active_edge;              ///< Local number of the currently assembled edge, w.r.t. the central element.
   int neighbor_edge;            ///< Local number of the currently assembled edge, w.r.t. the element on the other side.
-  int neighbor_edge_orientation;///< Local orientation of the neighboring edge.
   int active_segment;           ///< Part of the active edge shared by central and neighbor elements.
 
   /// Structure containing all the needed information about the active edge from the neighbor's side.
@@ -670,10 +669,6 @@ public:
           friend class NeighborSearch::ExtendedShapeset;
       };
 
-      /// Extend by zero the \c Func representation of the active shape's polynomial order to the other element.
-      static DiscontinuousFunc<Ord>* extend_by_zero(Func<Ord>* fu, bool support_on_neighbor) {
-        return new DiscontinuousFunc<Ord>(fu, support_on_neighbor);
-      }
       
       bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
 

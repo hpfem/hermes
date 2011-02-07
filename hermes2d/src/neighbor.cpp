@@ -795,9 +795,6 @@ int NeighborSearch::get_quad_np()
 
 Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos *ep)
 {
-  ensure_active_segment(this);
-  ensure_central_rm(this);
-
   int eo = get_quad_eo();
 
   // Do not use the caches at all.
@@ -826,9 +823,6 @@ Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos 
 
 double* NeighborSearch::init_jwt(double** ext_cache_jwt)
 {
-  ensure_active_segment(this);
-  ensure_central_rm(this);
-
   int eo = get_quad_eo();
 
   // Do not use the cache at all.
@@ -900,7 +894,7 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
   // Restore the original function.
   fu->set_active_element(central_el);
-  fu->set_transform(original_central_el_transform);
+  fu->set_transform(original_transform);
 
   return new DiscontinuousFunc<scalar>(fn_central, fn_neighbor, (neighbor_edges[active_segment].orientation == 1));
 
