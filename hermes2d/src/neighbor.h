@@ -203,7 +203,7 @@ public:
   /// \param[in]  al    Assembly list for the central element.
   /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
   ///
-  int create_extended_shapeset(Space* space, AsmList* al);
+  NeighborSearch::ExtendedShapeset* create_extended_asmlist(Space* space, AsmList* al);
 
   /// Assign a precalculated shapeset and associated reference mapping to the central element.
   ///

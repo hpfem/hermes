@@ -831,16 +831,40 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       if(it->second.get_num_neighbors() != num_neighbors)
         error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem::assemble_surface_integrals().");
 
+    // Create neighbor psss, refmaps.
+    Hermes::vector<PrecalcShapeset *> npss;
+    Hermes::vector<PrecalcShapeset *> nspss;
+    Hermes::vector<RefMap *> nrefmap;
+
+    // Initialize neighbor precalc shapesets and refmaps.      
+    for (unsigned int i = 0; i < stage.idx.size(); i++) {
+      npss.push_back(new PrecalcShapeset(pss[i]->get_shapeset()));
+      npss[i]->set_quad_2d(&g_quad_2d_std);
+      nspss.push_back(new PrecalcShapeset(npss[i]));
+      nspss[i]->set_quad_2d(&g_quad_2d_std);
+      nrefmap.push_back(new RefMap());
+      nrefmap[i]->set_quad_2d(&g_quad_2d_std);
+    }
+
     for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
       // Set the active segment in all NeighborSearches.
 
       // Push all the necessary transformations to all functions of this stage.
       // The important thing is that the transformations to the current subelement are already there.
+      // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
         for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[fns_i]->get_seq()].central_n_trans[neighbor_i]; trf_i++) {
           neighbor_searches[stage.meshes[fns_i]->get_seq()].original_central_el_transform = stage.fns[fns_i]->get_transform();
+          neighbor_searches[stage.meshes[fns_i]->get_seq()].neighb_el = neighbor_searches[stage.meshes[fns_i]->get_seq()].neighbors[neighbor_i];
+          neighbor_searches[stage.meshes[fns_i]->get_seq()].neighbor_edge = neighbor_searches[stage.meshes[fns_i]->get_seq()].neighbor_edges[neighbor_i].local_num_of_edge;
           stage.fns[fns_i]->push_transform(neighbor_searches[stage.meshes[fns_i]->get_seq()].central_transformations[neighbor_i][trf_i]);
         }
+      // For neighbor psss.
+      for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
+        npss[idx_i]->set_active_element((*neighbor_searches[stage.meshes[idx_i]->get_seq()].get_neighbors())[neighbor_i]);
+        for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[idx_i]->get_seq()].neighbor_n_trans[neighbor_i]; trf_i++)
+          npss[idx_i]->push_transform(neighbor_searches[stage.meshes[idx_i]->get_seq()].neighbor_transformations[neighbor_i][trf_i]);
+      }
 
       // Also push the transformations to the slave psss and refmaps.
       for (unsigned int i = 0; i < stage.idx.size(); i++) {
@@ -848,24 +872,25 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
           continue;
         spss[stage.idx[i]]->set_master_transform();
         refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
+
+        // Neighbor.
+        nspss[stage.idx[i]]->set_active_element(npss[stage.idx[i]]->get_active_element());
+        nspss[stage.idx[i]]->set_master_transform();
+        nrefmap[stage.idx[i]]->set_active_element(npss[stage.idx[i]]->get_active_element());
+        nrefmap[stage.idx[i]]->force_transform(npss[stage.idx[i]]->get_transform(), npss[stage.idx[i]]->get_ctm());
       }
 
 
-
-      // Handle the neighbor_pss, neighbor_refmaps.
-
-
-
-
-
-
+      // The computation takes place here.
     if (mat != NULL)
-      assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
+        assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
     if (rhs != NULL)
-      assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
+        assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
 
+
+      // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
         for(unsigned int trf_i = 0; trf_i < neighbor_searches[stage.meshes[fns_i]->get_seq()].central_n_trans[neighbor_i]; trf_i++) {
@@ -879,6 +904,14 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         spss[stage.idx[i]]->set_master_transform();
         refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
       }
+
+       // Deinitialize neighbor pss's, refmaps.
+      for(std::vector<PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
+        delete *it;
+      for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
+        delete *it;
+      for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
+        delete *it;
     }
   }
 }
@@ -1277,11 +1310,15 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
 
 void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
+  // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
+  if(pss[0]->get_active_element()->visited)
+    return;
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
             WeakForm::MatrixFormSurf* mfs = stage.mfsurf[ww];
             int m = mfs->i;
@@ -1294,45 +1331,21 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
             surf_pos.space_v = spaces[m];
             surf_pos.space_u = spaces[n];
 
-            // Assemble DG inner surface matrix form - a single mesh version (all functions are defined on the
-            // same mesh, with the same neighborhood of active element.
-
-            // The following variables will be used to search for neighbors of the currently assembled element on
-            // the u- and v- meshes and work with the produced elemental neighborhoods.
-
-            // Find all neighbors of active element across active edge and partition it into segments
-            // shared by the active element and distinct neighbors.
-            NeighborSearch *nbs_v = new NeighborSearch(refmap[m]->get_active_element(), spaces[m]->get_mesh());
-            nbs_v->set_active_edge(isurf);
-            nbs_v->attach_pss_and_rm(spss[m], refmap[m]);
-
-            NeighborSearch *nbs_u = new NeighborSearch(refmap[n]->get_active_element(), spaces[n]->get_mesh());
-            nbs_u->set_active_edge(isurf);
-            nbs_u->attach_pss_and_rm(pss[n], refmap[n]);
-
-            // Go through each segment of the active edge. If the active segment has already
-            // been processed (when the neighbor element was assembled), it is skipped.
-            for (int neighbor = 0; neighbor < nbs_v->get_num_neighbors(); neighbor++) {
-              bool needs_processing_u = nbs_u->set_active_segment(neighbor);
-              bool needs_processing_v = nbs_v->set_active_segment(neighbor);
-
-              if (!needs_processing_u) continue;
-
               // Create the extended shapeset on the union of the central element and its current neighbor.
-              int u_shapes_cnt = nbs_u->create_extended_shapeset(spaces[n], al[n]);
-              int v_shapes_cnt = nbs_v->create_extended_shapeset(spaces[m], al[m]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches[stage.meshes[n]->get_seq()].create_extended_asmlist(spaces[n], al[n]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches[stage.meshes[m]->get_seq()].create_extended_asmlist(spaces[m], al[m]);
 
-              scalar **local_stiffness_matrix = get_matrix_buffer(std::max(u_shapes_cnt, v_shapes_cnt));
-              for (int i = 0; i < v_shapes_cnt; i++) {
-                if (nbs_v->supported_shapes->dof[i] < 0) continue;
+    scalar **local_stiffness_matrix = get_matrix_buffer(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
+    for (int i = 0; i < ext_asmlist_v->cnt; i++) {
+      if (ext_asmlist_v->dof[i] < 0) continue;
 
                 // Get a pointer to the i-th shape function from the extended shapeset. If i is less than the
                 // number of shape functions on the central element, the extended shape function will have non-zero
                 // values on the central element and will be zero on neighbor. Otherwise vice-versa.
-                ExtendedShapeFnPtr active_shape_v = nbs_v->supported_shapes->get_extended_shape_fn(i);
-                for (int j = 0; j < u_shapes_cnt; j++) {
-                  ExtendedShapeFnPtr active_shape_u = nbs_u->supported_shapes->get_extended_shape_fn(j);
-                  if (nbs_u->supported_shapes->dof[j] < 0) {
+      ExtendedShapeFnPtr active_shape_v = ext_asmlist_v->get_extended_shape_fn(i);
+      for (int j = 0; j < ext_asmlist_u->cnt; j++) {
+        ExtendedShapeFnPtr active_shape_u = ext_asmlist_u->get_extended_shape_fn(j);
+        if (ext_asmlist_u->dof[j] < 0) {
                     if (rhs != NULL && this->is_linear) {
                       // Evaluate the form with the activated discontinuous shape functions.
                       scalar val = eval_dg_form(mfs, u_ext, nbs_u, nbs_v, active_shape_u, active_shape_v, &surf_pos)
@@ -1347,7 +1360,6 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
                     local_stiffness_matrix[i][j] = val;
                   }
                 }
-              }
               if (rhsonly == false)
                 mat->add(v_shapes_cnt, u_shapes_cnt, local_stiffness_matrix,
                         nbs_v->supported_shapes->dof, nbs_u->supported_shapes->dof);
@@ -1362,7 +1374,8 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
 
 void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {

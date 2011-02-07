@@ -739,18 +739,15 @@ void NeighborSearch::detach_rm()
     central_rm->set_transform(original_central_el_transform);
 }
 
-int NeighborSearch::create_extended_shapeset(Space *space, AsmList* al)
+NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space *space, AsmList* al)
 {
   _F_
-  ensure_central_pss_rm(this);
-  ensure_active_segment(this);
-
   if (supported_shapes == NULL)
     supported_shapes = new ExtendedShapeset(this, al, space);
   else
     supported_shapes->update(this, space);
 
-  return supported_shapes->cnt;
+  return supported_shapes;
 }
 
 void NeighborSearch::set_quad_order(int order)
