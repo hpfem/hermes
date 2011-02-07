@@ -42,8 +42,8 @@ Real dlam_du(Real u) { return ALPHA*pow(u, ALPHA - 1);}
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
+  dx = (y+10)/100.;
+  dy = (x+10)/100.;
   return (x+10)*(y+10)/100.;
 }
 

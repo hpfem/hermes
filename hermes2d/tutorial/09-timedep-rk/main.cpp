@@ -111,19 +111,14 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
  
   // Previous time level solution (initialized by the external temperature).
-  Solution u_prev_time(&mesh, TEMP_INIT);
+  Solution* sln = new Solution(&mesh, TEMP_INIT);
 
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(stac_jacobian_vol));
-  wf.add_vector_form(callback(stac_residual_vol));
-  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR);
-  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR);
-
-  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
-  info("Projecting initial condition to translate initial condition into a vector.");
-  scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
+  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln);
+  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR, sln);
+  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR, sln);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -143,13 +138,10 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = true;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln, &space, &dp, matrix_solver,
 		      verbose, is_linear)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
-
-    // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
 
     // Update time.
     current_time += time_step;
@@ -158,7 +150,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Time %3.2f, exterior temperature %3.5f", current_time, temp_ext(current_time));
     Tview.set_title(title);
-    Tview.show(&u_prev_time);
+    Tview.show(sln);
 
     // Increase counter of time steps.
     ts++;
@@ -166,7 +158,7 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Cleanup.
-  delete [] coeff_vec;
+  delete sln;
 
   // Wait for the view to be closed.
   View::wait();

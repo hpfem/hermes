@@ -379,7 +379,9 @@ void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly,
                                bool force_diagonal_blocks, Table* block_weights)
 {
   _F_
-  assemble(NULL, mat, rhs, rhsonly, force_diagonal_blocks, block_weights);
+  scalar* coeff_vec = NULL;
+  bool add_dir_lift = false;
+  assemble(coeff_vec, mat, rhs, rhsonly, force_diagonal_blocks, add_dir_lift, block_weights);
 }
 
 
@@ -398,13 +400,14 @@ void DiscreteProblem::assemble_sanity_checks(Table* block_weights)
       error ("Bad dimension of block scaling table in DiscreteProblem::assemble().");
 }
 
-void DiscreteProblem::convert_coeff_vec(scalar* coeff_vec, Hermes::vector<Solution *> & u_ext) 
+void DiscreteProblem::convert_coeff_vec(scalar* coeff_vec, Hermes::vector<Solution *> & u_ext,
+                                        bool add_dir_lift) 
 {
   _F_
   if (coeff_vec != NULL) {
     for (unsigned int i = 0; i < wf->get_neq(); i++) {
       Solution* external_solution_i = new Solution(spaces[i]->get_mesh());
-      Solution::vector_to_solution(coeff_vec, spaces[i], external_solution_i);
+      Solution::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift);
       u_ext.push_back(external_solution_i);
     }
   }
@@ -435,7 +438,7 @@ void DiscreteProblem::initialize_refmaps(Hermes::vector<RefMap *>& refmap)
 // The Table is here for optional weighting of matrix blocks in systems.
 
 void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly,
-                               bool force_diagonal_blocks, Table* block_weights)
+                               bool force_diagonal_blocks, bool add_dir_lift, Table* block_weights)
 {
   _F_
   // Sanity checks.
@@ -446,7 +449,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
  
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::vector 'u_ext'.
   Hermes::vector<Solution *> u_ext = Hermes::vector<Solution *>();
-  convert_coeff_vec(coeff_vec, u_ext);
+  convert_coeff_vec(coeff_vec, u_ext, add_dir_lift);
   
   // Reset the warnings about insufficiently high integration order.
   reset_warn_order();

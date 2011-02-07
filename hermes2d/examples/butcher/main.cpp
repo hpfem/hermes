@@ -48,7 +48,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+ButcherTableType butcher_table_type = Implicit_SIRK_2_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -67,8 +67,8 @@ Real dlam_du(Real u)
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
+  dx = (y+10)/100.;
+  dy = (x+10)/100.;
   return (x+10)*(y+10)/100.;
 }
 
@@ -126,18 +126,13 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
-  // Previous time level solution (initialized by the initial condition).
+  // Solution (initialized by the initial condition).
   Solution* sln = new Solution(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian));
-  wf.add_vector_form(callback(stac_residual));
-
-  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
-  info("Projecting initial condition to translate initial condition into a vector.");
-  scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(space, sln, coeff_vec, matrix_solver);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -157,13 +152,10 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln, space, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
-
-    // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, space, sln);
 
     // Update time.
     current_time += time_step;
@@ -181,7 +173,6 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Cleanup.
-  delete [] coeff_vec;
   delete space;
   delete sln;
 

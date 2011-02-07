@@ -28,7 +28,7 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
-double time_step = 0.05;                            // Time step.
+double time_step = 0.05;                           // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
@@ -74,8 +74,8 @@ Real dlam_du(Real u)
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
+  dx = (y+10)/100.;
+  dy = (x+10)/100.;
   return (x+10)*(y+10)/100.;
 }
 
@@ -136,22 +136,14 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
-  // Previous time level solution (initialized by the initial condition).
+  // Solution (initialized by the initial condition) and error function.
   Solution* sln = new Solution(&mesh, init_cond);
+  Solution* error_fn = new Solution(&mesh, 0.0);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian));
-  wf.add_vector_form(callback(stac_residual));
-
-  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
-  info("Projecting initial condition to translate initial condition into a vector.");
-  scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(space, sln, coeff_vec, matrix_solver);
-
-  // Initialize an error vector and error function for adaptive time stepping.
-  scalar* error_vec = new scalar[ndof];
-  Solution* error_fn = new Solution(&mesh);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -176,14 +168,10 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, error_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln, space, error_fn, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
-
-    // Convert error_vec into an error function (Dirichlet lift turned off).
-    bool add_dir_lift = false;
-    Solution::vector_to_solution(error_vec, space, error_fn, add_dir_lift);
 
     // Plot error function.
     // Show the new time level solution.
@@ -211,9 +199,6 @@ int main(int argc, char* argv[])
       time_step *= TIME_STEP_INC_RATIO;
     }
    
-    // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, space, sln);
-
     // Add entry to the timestep graph.
     time_step_graph.add_values(current_time, time_step);
     time_step_graph.save("time_step_history.dat");
@@ -233,8 +218,6 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Cleanup.
-  delete [] coeff_vec;
-  delete [] error_vec;
   delete space;
   delete sln;
   delete error_fn;

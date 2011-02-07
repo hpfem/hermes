@@ -232,23 +232,15 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
-  // Solutions for the time stepping and the Newton's method.
+  // Solution (initialized by the initial condition) and error function.
   Solution* sln = new Solution(&mesh, init_cond);
+  Solution* error_fn = new Solution(&mesh, 0.0);
   
   // Initialize the weak formulation.
   WeakForm wf;
   info("Registering forms for the Newton's method.");
   wf.add_matrix_form(jac_form_vol, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, sln);
   wf.add_vector_form(res_form_vol, res_form_vol_ord, HERMES_ANY, sln);
-
-  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
-  info("Projecting initial condition to translate initial condition into a vector.");
-  scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(space, sln, coeff_vec, matrix_solver);
- 
-  // Initialize an error vector and error function for adaptive time stepping.
-  scalar* error_vec = new scalar[ndof];
-  Solution* error_fn = new Solution(&mesh, 0.0);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -277,7 +269,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, error_vec, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln, space, error_fn, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       info("Runge-Kutta time step failed, decreasing time step size from %g to %g days.", 
            time_step, time_step * time_step_dec);
@@ -285,10 +277,6 @@ int main(int argc, char* argv[])
            if (time_step < time_step_min) error("Time step became too small.");
 	   continue;
     }
-
-    // Convert error_vec into an error function (Dirichlet lift turned off).
-    bool add_dir_lift = false;
-    Solution::vector_to_solution(error_vec, space, error_fn, add_dir_lift);
 
     // Show error function.
     char title[100];
@@ -314,9 +302,6 @@ int main(int argc, char* argv[])
            time_tol_lower, time_step, time_step * time_step_inc);
       time_step *= time_step_inc;
     }
-
-    // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, space, sln);
 
     // Add entry to the timestep graph.
     time_step_graph.add_values(current_time, time_step);
@@ -344,8 +329,6 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Cleanup.
-  delete [] coeff_vec;
-  delete [] error_vec;
   delete space;
   delete sln;
   delete error_fn;
