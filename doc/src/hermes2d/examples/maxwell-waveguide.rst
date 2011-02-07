@@ -1,5 +1,5 @@
-Waveguide (Electromagnetics)
-----------------------------
+Waveguide (Maxwell's Equation - Electromagnetics)
+-------------------------------------------------
 
 **Git reference:** Example `maxwell-waveguide <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/maxwell-waveguide>`_.
 

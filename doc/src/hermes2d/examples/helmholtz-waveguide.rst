@@ -1,56 +1,56 @@
-Helmholtz equation - waveguides (Electromagnetics)
-------------------------------
+Waveguide (Helmholtz Equation - Electromagnetics)
+-------------------------------------------------
 
 Mathematical description of waveguides
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The most general mathematical description of the phenomena in waveguides is given by Maxwell equations  
+Mathematical description of waveguides is given by the Maxwell's equations  
 
 .. math::
-	:label: 1. Maxwell equation
+	:label: 1. Maxwell's equation
 		
 		\nabla \times {\pmb{H}} &= {\pmb{J}} +
 		\frac{\partial {\pmb{D}}}{\partial t}, 
 
 .. math::
-	:label: 2. Maxwell equation	
+	:label: 2. Maxwell's equation	
 		
 		\nabla \times {\pmb{E}} &= 
 		- \frac{\partial {\pmb{B}}}{\partial t},
 	
 .. math::
-	:label: 3. Maxwell equation		
+	:label: 3. Maxwell's equation		
 		
 		\nabla \cdot {\pmb{D}} &= \rho, 
 		
 .. math::
-	:label: 4. Maxwell equation		
+	:label: 4. Maxwell's equation		
 		
-		\nabla \cdot {\pmb{B}} &= 0, 	
+		\nabla \cdot {\pmb{B}} &= 0	
 
-with respect
+where
 
 .. math::
 	:label: Material properties
 	
 		{\pmb{B}} = \mu {\pmb{H}}, \ 
 		{\pmb{J}} = \sigma {\pmb{E}}, \
-		{\pmb{D}} = \varepsilon {\pmb{E}},
+		{\pmb{D}} = \varepsilon {\pmb{E}}.
 		
-where  :math:`\varepsilon` means permitivity, :math:`\mu` permeability and :math:`\sigma` stands for electric conductivity. For the waveguides analysis purpose material properties are often considered as constants and isotropic. After substituting material properties :eq:`Material properties` into equations :eq:`1. Maxwell equation` and :eq:`2. Maxwell equation`,  we get
+Here  :math:`\varepsilon` means permittivity, :math:`\mu` permeability and :math:`\sigma` stands for electric conductivity. For waveguides analysis, material properties are often considered constant and isotropic. After substituting material properties :eq:`Material properties` into equations :eq:`1. Maxwell's equation` and :eq:`2. Maxwell's equation`,  we get
 
 .. math::
-	:label: 1.a Maxwell equation	
+	:label: 1.a Maxwell's equation	
 
 		 \nabla \times \frac{1}{\mu} {\pmb{B}} &= \sigma {\pmb{E}} +
 		\varepsilon \frac{\partial {\pmb{E}}}{\partial t}, 
 
 .. math::
-	:label: 2.a Maxwell equation	
+	:label: 2.a Maxwell's equation	
 
 		 \nabla \times {\pmb{E}} &= 
 		- \frac{\partial {\pmb{B}}}{\partial t}. 
 
-If the vector operator :math:`\mathrm{curl}` is applied on the equation :eq:`2.a Maxwell equation`, it is possible to substitute :math:`\nabla \times \pmb{E}` from the equation :eq:`1.a Maxwell equation` and get the wave equation for the electric field in the form
+If the vector operator :math:`\mathrm{curl}` is applied on the equation :eq:`2.a Maxwell's equation`, it is possible to substitute :math:`\nabla \times \pmb{E}` from the equation :eq:`1.a Maxwell's equation` and get the wave equation for the electric field in the form
 
 .. math::
 	:label: Wave equation
@@ -59,45 +59,41 @@ If the vector operator :math:`\mathrm{curl}` is applied on the equation :eq:`2.a
 		- \mu \sigma \frac{\partial {\pmb{E}}}{\partial t} 
 		- \mu \varepsilon \frac{\partial^2 {\pmb{E}}}{\partial t^2}. 
 
-In a medium with the zero charge density :math:`\rho` it is usefull to apply the vector identity (because :math:`\nabla \cdot \pmb{E} = 0`)
+In a medium with zero charge density :math:`\rho` it is useful to apply the vector identity 
 
 .. math::
 	:label: 1. vector identity
 	
-		\nabla \times \nabla \times \pmb{E} = \nabla \nabla \cdot \pmb{E} - \Delta \pmb{E}
+		\nabla \times \nabla \times \pmb{E} = \nabla \nabla \cdot \pmb{E} - \Delta \pmb{E}.
 
 
-The wave equation :eq:`Wave equation` can be siplified to the most common form
+Since :math:`\nabla \cdot \pmb{E} = 0`), the wave equation :eq:`Wave equation` can be 
+simplified to
 
 .. math::
 	:label: a. Wave equation
 	
 		\Delta \pmb{E} - \mu \sigma \frac{\partial {\pmb{E}}}{\partial t} - \mu \varepsilon \frac{\partial^2 {\pmb{E}}}{\partial t^2} = \mathbf{0}.
 	
-For many technical problems it is sufficient to know the solution in the frequency domain. After applying Fourier transform, the equation :eq:`a. Wave equation` becomes 
+For many technical problems it is sufficient to know the solution in the frequency domain. After applying the Fourier transform, equation :eq:`a. Wave equation` becomes 
 
 .. math::
-	:label: Hemlholtz equation
+	:label: Helmholtz equation
 
 	\Delta \overline{\pmb{E}} - \mathrm{j} \mu \sigma \omega \overline{\pmb{E}} + \omega^2 \mu \varepsilon \overline{{\pmb{E}}} = \mathbf{0},
 
 	
-which is in fact the Hemlholtz equation.
+which is the Helmholtz equation.
 
-Parallel plate waveguide - harmonic analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The parallel plate waveguide is the simplest type of guide that supports TM (transversal magnetic) and TE (transversal electric) modes. This kind of guide allows also TEM (transversal elektric and magnetic) mode.
+Parallel plate waveguide is the simplest type of guide that supports TM (transversal magnetic) and TE (transversal electric) modes. This kind of guide allows also TEM (transversal electric and magnetic) mode.
 
-Geometry
-^^^^^^^^
-
-.. image:: hemlholtz-waveguide/waveguide.png
+.. image:: helmholtz-waveguide/waveguide.png
    :scale: 50 %   
    :align: center 	
-   :alt: Paralel plate waveguide geometry
+   :alt: Parallel plate waveguide geometry
 	
 Mathematical model - TE modes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Suppose that the electromagnetic wave is propagating in the direction :math:`z`, then the component of the vector :math:`\pmb{E}` in the direction of the propagation is equal to zero
 
@@ -106,23 +102,24 @@ Suppose that the electromagnetic wave is propagating in the direction :math:`z`,
 
 	\overline{E_z} = 0,
 
-thus it is possible to solve the electric field in the parallel plate waveguide as a two-dimensional problem. 
-
-On the whole area the wave equation (Helmholtz equation) is fulfilled 
+thus it is possible to solve the electric field in the parallel plate waveguide as a two-dimensional 
+Helmholtz problem
 
 .. math::
     :label: a. Helmholtz equation
 
        \Delta \overline{\pmb{E}} - \mathrm{j} \mu \sigma \omega \overline{\pmb{E}} + \omega^2 \mu \varepsilon \overline{{\pmb{E}}} = \mathbf{0}.
 
-The conducting plates (boundary :math:`\Gamma_1, \Gamma_2`) are usually supposed as *perfectly conductive*, that can be modelled using the boundary condition
+The conducting plates (boundary :math:`\Gamma_1, \Gamma_2`) are usually supposed to be *perfectly conductive*, 
+which can be modeled using the perfect conductor boundary condition
 
 .. math::
 	:label: Perfect conductor
 
 	\pmb{n} \times \overline{\pmb{E}} = 0.
 
-for the geometry on the picture the whole expression :eq:`Perfect conductor` is reduced to the zero Dirichlet boundary condition
+For the geometry in the above figure the expression :eq:`Perfect conductor` is reduced 
+to a zero Dirichlet boundary condition
 
 .. math::
 		:label: Reduced Perfect conductor
@@ -130,7 +127,8 @@ for the geometry on the picture the whole expression :eq:`Perfect conductor` is 
 		\overline{E_x} = 0.
 
 
-For the bounderies :math:`\Gamma_3, \Gamma_4` there are commonly used several types of boundery conditions:
+For the boundaries :math:`\Gamma_3, \Gamma_4`, the following types of boundary conditions
+can be used:
 
 Electric field (Dirichlet boundary condition)
 """""""""""""""""""""""""""""""""""""""""""""
@@ -140,50 +138,49 @@ Electric field (Dirichlet boundary condition)
 
 			\overline{\pmb{E}}(\Gamma) = \overline{E_0} = \mathrm{const}.
 
-	Note that for TE modes (and for the geometry on the picture) the natural boundery condition is described by the expression
+Note that for TE modes (and for the geometry shown above), a natural boundary condition is described by the expression
 
 	.. math::
 		:label: TE Electric field
 
 		\overline{E}_x(y) = \overline{E_0} \cos\left(\frac{y \cdot n \pi}{h} \right),
 
-	where :math:`n` stands for mode.
+where :math:`n` stands for a mode.
 
 Impedance matching (Newton boundary condition)
 """"""""""""""""""""""""""""""""""""""""""""""
 
-	For harmonic TE mode waves the following relation is valid
+For harmonic TE mode waves the following relation holds:
 
 	.. math::
 		:label: Impedance definition
 
 		\overline{\pmb{E}} = Z_0 (\overline{H_y} \pmb{i} - \overline{H_x} \pmb{j}) = Z_0 \cdot \pmb{n} \times \overline{\pmb{H}},
 
-	where :math:`Z_0` is *the wave impedance*. At the same time the second Maxwell equation
+where :math:`Z_0` is *the wave impedance*. At the same time the second Maxwell equation
 
 	.. math::
 		:label: Harmonic Maxwell equation
 
 		\nabla\times \overline{{\pmb{E}}} = -j \omega \mu \overline{\pmb{H}}
 	
-	must be satisfied. From quations :eq:`Impedance definition` and :eq:`Harmonic Maxwell equation` it is possible to derive impedance matching boundary condition in the form
+must be satisfied. From quations :eq:`Impedance definition` and :eq:`Harmonic Maxwell equation` it is possible to derive impedance matching boundary condition in the form
 
 	.. math::
 		:label: Impedance matching
 
 		\pmb{n} \times \nabla \times \overline{\pmb{E}} =  \frac{j \omega \mu }{Z_0} \overline{\pmb{E}} =  j \beta \overline{\pmb{E}}.
 
-	For given geometry the equation :eq:`Impedance matching` can be reduced to the Newton boundary condition in a form
+For a given geometry the equation :eq:`Impedance matching` can be reduced to the Newton boundary condition in the form
 
 	..  math::
 		:label: Newton boundary condition
 
 		\frac{\partial \overline{E_x}}{\partial y} = j \beta \overline{E_x}.
 
-Program
-^^^^^^^
+
 Material parameters
-"""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~
 ::
 
 	const double epsr = 1.0;                    // Relative permittivity
@@ -195,8 +192,9 @@ Material parameters
 	const double sigma = 0;                     // Conductivity Ohm/m
 
 Boundary conditions
-"""""""""""""""""""
-There are three types of boundary conditions:
+~~~~~~~~~~~~~~~~~~~
+
+There are three possible types of boundary conditions:
 
 	* Zero Dirichlet boundary condition on boundaries :math:`\Gamma_1, \Gamma_2`:
 	::
@@ -232,7 +230,8 @@ There are three types of boundary conditions:
 
 
 Weak forms
-""""""""""
+~~~~~~~~~~
+
 	* registration (in function ``main()``) ::
 
 		WeakForm wf(2);
@@ -245,8 +244,9 @@ Weak forms
 	
 	The function ``magnetic_matrix_form_real_real`` describes behaviour of the of the component of electric field :math:`\overline{E_x}` and ``magnetic_matrix_form_imag_imag`` describes behaviour of the imaginary part of the component of electric field :math:`\overline{E_x}` in this code. Functions ``magnetic_matrix_form_imag_real`` and ``magnetic_matrix_form_real_imag`` represent the conection between real and imaginary part. The functions ``magnetic_vector_form_surface_imag_real`` and ``magnetic_vector_form_surface_imag_real`` express the Newton boundary condition and also the conection between the real and the imaginary part of the component of the electric field :math:`\overline{E_x}`. 
 
-Results
-^^^^^^^
+Sample results
+~~~~~~~~~~~~~~
+
 .. image:: helmholtz-waveguide/real_part.png
    :scale: 50 %   
    :align: center 	

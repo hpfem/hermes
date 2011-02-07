@@ -16,7 +16,7 @@ in the source code.
    examples/neutronics-iron-water
    examples/neutronics-4-group-adapt
    examples/maxwell-waveguide
-   examples/hemholtz-waveguide
+   examples/helmholtz-waveguide
    examples/navier-stokes-timedep-adapt
    examples/navier-stokes-bearing
    examples/nernst-planck-timedep-adapt
