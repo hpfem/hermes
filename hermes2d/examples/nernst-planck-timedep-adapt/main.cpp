@@ -68,7 +68,7 @@ const scalar C0 = 1200;	                          // [mol/m^3] Anion and counter
 /* Simulation parameters */
 const double T_FINAL = 1;
 double INIT_TAU = 0.05;
-double *TAU = &INIT_TAU;                        // Size of the time step
+double *TAU = &INIT_TAU;                          // Size of the time step
 const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
 const int REF_INIT = 3;     	                  // Number of initial refinements.
 const bool MULTIMESH = true;	                  // Multimesh?

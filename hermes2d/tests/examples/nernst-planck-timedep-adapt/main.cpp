@@ -12,10 +12,6 @@ using namespace RefinementSelectors;
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
 
-#define SIDE_MARKER 1
-#define TOP_MARKER 2
-#define BOT_MARKER 3
-
 // Parameters to tweak the amount of output to the console.
 #define NOSCREENSHOT
 
@@ -71,7 +67,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const int NDOF_STOP = 5000;	                  // To prevent adaptivity from going on forever.
-const double ERR_STOP = 1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1;                        // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
