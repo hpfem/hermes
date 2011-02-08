@@ -241,6 +241,11 @@ protected:
 
 
   /// Pure DG functionality.
+
+  /// There is a form set on DG_INNER_EDGE area or not.
+  bool DG_needed_in_current_stage;
+
+  /// Initialize neighbors.
   std::map<unsigned int, NeighborSearch> init_neighbors(const WeakForm::Stage& stage, const int& isurf);
 
   /// Multimesh neighbors traversal class.
@@ -287,6 +292,8 @@ protected:
   /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
   void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
       Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
+
+
 
   /// Members.
   WeakForm* wf;

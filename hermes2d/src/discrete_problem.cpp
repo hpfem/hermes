@@ -420,7 +420,6 @@ void DiscreteProblem::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss)
   for (unsigned int i = 0; i < wf->get_neq(); i++) {
     spss.push_back(new PrecalcShapeset(pss[i]));
     spss[i]->set_quad_2d(&g_quad_2d_std);
-    spss[i]->set_quad_2d(&g_quad_2d_std);
   }
 }
 
@@ -522,6 +521,11 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
     stage.ext[i]->set_quad_2d(&g_quad_2d_std);
   trav.begin(stage.meshes.size(), &(stage.meshes.front()), &(stage.fns.front()));
 
+  // Check that there is a DG form, so that the whole process is needed to do.
+  DG_needed_in_current_stage = false;
+  for(unsigned int i = 0; i < stage.mfsurf.size(); i++)
+    if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE) 
+      DG_needed_in_current_stage = true;
 
   // Loop through all assembling states.
   // Assemble each one.
@@ -809,6 +813,10 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else {
+    // DG is really needed or not.
+    if(!DG_needed_in_current_stage)
+      return;
+
     // Initialize the NeighborSearches.
     std::map<unsigned int, NeighborSearch> neighbor_searches = init_neighbors(stage, isurf);
     
@@ -917,23 +925,25 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
 
 std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const WeakForm::Stage& stage, const int& isurf)
 {
+  _F_
   // Setup a mapping of mesh sequence numbers to current subelement transformations.
   std::map<unsigned int, uint64_t> initial_sub_idxs;
 
   // Initialize the NeighborSearches.
   std::map<unsigned int, NeighborSearch> neighbor_searches;
   for(unsigned int i = 0; i < stage.meshes.size(); i++) {
-    neighbor_searches.insert(std::pair<unsigned int, NeighborSearch>(stage.meshes[i]->get_seq(), NeighborSearch(stage.fns[i]->get_active_element(), stage.meshes[i])));
+    NeighborSearch ns(stage.fns[i]->get_active_element(), stage.meshes[i]);
+    neighbor_searches.insert(std::pair<unsigned int, NeighborSearch>(stage.meshes[i]->get_seq(), ns));
     initial_sub_idxs.insert(std::pair<unsigned int, uint64_t>(stage.meshes[i]->get_seq(), stage.fns[i]->get_transform()));
   }
 
   // Calculate respective neighbors.
-  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
-    it->second.set_active_edge_multimesh(isurf, initial_sub_idxs[it->first]);
-
-  // Clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
-  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
-    it->second.clear_initial_sub_idx(initial_sub_idxs[it->first]);
+  // Also clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
+    uint64_t sub_idx = initial_sub_idxs.at(it->first);
+    it->second.set_active_edge_multimesh(isurf, sub_idx);
+    it->second.clear_initial_sub_idx(sub_idx);
+  }
 
   return neighbor_searches;
 }
@@ -941,6 +951,7 @@ std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const Wea
 
 void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, const std::map<unsigned int, NeighborSearch>& neighbor_searches)
 {
+  _F_
   for(std::map<unsigned int, NeighborSearch>::const_iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
     if(it->second.get_num_neighbors() == 1)
       break;
@@ -951,6 +962,7 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
 
 void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, int* transformations, unsigned int transformation_count)
 {
+  _F_
   // If we are already in the leaf.
   if(transformation_count == 0)
     return;
@@ -982,6 +994,7 @@ void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, int* transf
 /* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
 Hermes::vector<Hermes::vector<int>*> DiscreteProblem::get_multimesh_neighbors_transformations(DiscreteProblem::NeighborNode* multimesh_tree)
 {
+  _F_
   // Initialize the vector.
   Hermes::vector<Hermes::vector<int>*> running_transformations;
   // Prepare the first neighbor's vector.
@@ -994,6 +1007,7 @@ Hermes::vector<Hermes::vector<int>*> DiscreteProblem::get_multimesh_neighbors_tr
 /* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
 void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_transformations)
 {
+  _F_
   // If we are in the root.
   if(node->get_transformation() == 0) {
     if(node->get_left_son() != NULL)
@@ -1031,6 +1045,7 @@ void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* nod
 
 void DiscreteProblem::update_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree)
 {
+  _F_
   // This has to be done, because we pass ns by reference and the number of neighbors is changing.
   unsigned int num_neighbors = ns.get_num_neighbors();
 
@@ -1044,6 +1059,7 @@ void DiscreteProblem::update_neighbor_search(NeighborSearch& ns, NeighborNode* m
 
 DiscreteProblem::NeighborNode* DiscreteProblem::find_node(int* transformations, int transformation_count, DiscreteProblem::NeighborNode* node)
 {
+  _F_
   // If there are no transformations left.
   if(transformation_count == 0)
     return node;
@@ -1064,6 +1080,7 @@ DiscreteProblem::NeighborNode* DiscreteProblem::find_node(int* transformations, 
     
 void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::NeighborNode* node, unsigned int ith_neighbor)
 {
+  _F_
   // No subtree => no work.
   // Also check the assertion that if one son is null, then the other too.
   if(node->get_left_son() == NULL) {
@@ -1127,6 +1144,7 @@ void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::Nei
 void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
       Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
 {
+  _F_
   // If we are in a leaf.
   if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
     // Create vectors for the new neighbor.
@@ -1489,6 +1507,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &
 // supplied NeighborSearch's active edge).
 ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches)
 {
+  _F_
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
   for(unsigned int j = 0; j < ext.size(); j++)
     ext_fns[j] = neighbor_searches.at(ext[j]->get_mesh()->get_seq()).init_ext_fn(ext[j]);
@@ -1503,6 +1522,7 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &e
 // Initialize integration order for discontinuous external functions.
 ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches)
 {
+  _F_
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
   for (unsigned int j = 0; j < ext.size(); j++)
     fake_ext_fns[j] = neighbor_searches.at(ext[j]->get_mesh()->get_seq()).init_ext_fn_ord(ext[j]);

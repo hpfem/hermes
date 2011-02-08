@@ -97,6 +97,7 @@ public:
   /// \param[in]  mesh  Mesh on which we search for the neighbors.
   ///
   NeighborSearch(Element* el, Mesh* mesh);
+  NeighborSearch(const NeighborSearch& ns);
 
 /*** Methods for changing active state for further calculations. ***/
 
@@ -123,7 +124,7 @@ public:
   void set_active_edge(int edge, bool ignore_visited_segments = true);
 
   /// Enhancement of set_active_edge for multimesh assembling.
-  void set_active_edge_multimesh(const int& edge, const uint64_t& sub_idx);
+  void set_active_edge_multimesh(const int& edge, uint64_t sub_idx);
 
   /// Extract transformations in the correct direction from the provided sub_idx.
   Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx);

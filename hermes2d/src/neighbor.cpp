@@ -68,6 +68,45 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   ignore_errors = false;
 }
 
+NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
+  supported_shapes(NULL),
+  mesh(ns.mesh),
+  central_el(ns.central_el),
+  neighb_el(NULL),
+  central_rm(NULL),
+  neighb_rm(NULL),
+  central_pss(NULL),
+  neighb_pss(NULL),
+  quad(&g_quad_2d_std)
+{
+  for(int i = 0; i < ns.central_transformations.size(); i++) {
+    this->central_transformations.push_back(new int[ns.central_n_trans[i]]);
+    for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
+      this->central_transformations[i][j] = ns.central_transformations[i][j];
+  }
+
+  for(int i = 0; i < ns.central_n_trans.size(); i++)
+    this->central_n_trans.push_back(ns.central_n_trans[i]);
+
+  for(int i = 0; i < ns.neighbor_transformations.size(); i++) {
+    this->neighbor_transformations.push_back(new int[ns.neighbor_n_trans[i]]);
+    for(unsigned int j = 0; j < ns.neighbor_n_trans[i]; j++)
+      this->neighbor_transformations[i][j] = ns.neighbor_transformations[i][j];
+  }
+
+  for(int i = 0; i < ns.neighbor_n_trans.size(); i++)
+    this->neighbor_n_trans.push_back(ns.neighbor_n_trans[i]);
+
+  assert_msg(central_el != NULL && central_el->active == 1,
+             "You must pass an active element to the NeighborSearch constructor.");
+
+  for(int i = 0; i < ns.neighbors.size(); i++)
+    this->neighbors.push_back(ns.neighbors[i]);
+  for(int i = 0; i < ns.neighbor_edges.size(); i++)
+    this->neighbor_edges.push_back(ns.neighbor_edges[i]);
+
+  ignore_errors = ns.ignore_errors;
+}
 
 NeighborSearch::~NeighborSearch()
 {
@@ -210,7 +249,7 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
   neighbor_edge = -1;
 }
 
-void NeighborSearch::set_active_edge_multimesh(const int& edge, const uint64_t& sub_idx)
+void NeighborSearch::set_active_edge_multimesh(const int& edge, uint64_t sub_idx)
 {
   Hermes::vector<unsigned int> transformations = get_transforms(sub_idx);
   // Inter-element edge.
