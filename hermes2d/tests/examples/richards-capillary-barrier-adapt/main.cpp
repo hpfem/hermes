@@ -2,39 +2,13 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-
 using namespace RefinementSelectors;
 
-//  This example uses adaptivity with dynamical meshes to solve
-//  the time-dependent Richard's equation. The time discretization 
-//  is backward Euler or Crank-Nicolson, and the nonlinear solver 
-//  in each time step is either Newton or Picard. 
-//
-//  PDE: C(h)dh/dt - div(K(h)grad(h)) - (dK/dh)*(dh/dy) = 0
-//  where K(h) = K_S*exp(alpha*h)                          for h < 0,
-//        K(h) = K_S                                       for h >= 0,
-//        C(h) = alpha*(theta_s - theta_r)*exp(alpha*h)    for h < 0,
-//        C(h) = alpha*(theta_s - theta_r)                 for h >= 0.
-//
-//  Picard's linearization: C(h^k)dh^{k+1}/dt - div(K(h^k)grad(h^{k+1})) - (dK/dh(h^k))*(dh^{k+1}/dy) = 0
-//                          Note: the index 'k' does not refer to time stepping.
-//  Newton's method is more involved, see the file forms.cpp.
-//
-//  Domain: rectangle (0, 8) x (0, 6.5).
-//  Units: length: cm
-//         time: days
-//
-//
-//  BC: Dirichlet, given by the initial condition.
-//  IC: See the function init_cond().
-//
-//  The following parameters can be changed:
+// This test makes sure that the example "richards-capillary-barrier-adapt" works correctly.
 
 // Constitutive relations.
 #define CONSTITUTIVE_GENUCHTEN                    // Van Genuchten or Gardner.
 
-// Choose full domain or half domain.
-//const char* mesh_file = "domain-full.mesh";
 const char* mesh_file = "domain-half.mesh";
 
 // Methods.
@@ -99,7 +73,7 @@ int PICARD_MAX_ITER = 23;                         // Maximum allowed number of P
 
 // Times.
 const double STARTUP_TIME = 5.0;                  // Start-up time for time-dependent Dirichlet boundary condition.
-const double T_FINAL = 1000.0;                    // Time interval length.
+const double T_FINAL = 1.0;                       // Time interval length.
 const double PULSE_END_TIME = 1000.0;             // Time interval of the top layer infiltration.
 double current_time = time_step;                  // Global time variable initialized with first time step.
 
@@ -229,7 +203,6 @@ int main(int argc, char* argv[])
     TABLE_LIMIT = INTERVALS_4_APPROX[NUM_OF_INTERVALS-1];
   }
   
-
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -307,16 +280,6 @@ int main(int argc, char* argv[])
   // Error estimate and discrete problem size as a function of physical time.
   SimpleGraph graph_time_err_est, graph_time_err_exact, 
     graph_time_dof, graph_time_cpu, graph_time_step;
- 
-  // Visualize the projection and mesh.
-  ScalarView view("Initial condition", new WinGeom(0, 0, 630, 350));
-  view.fix_scale_width(50);
-  OrderView ordview("Initial mesh", new WinGeom(640, 0, 600, 350));
-  view.show(&sln_prev_time, HERMES_EPS_VERYHIGH);
-  ordview.show(&space);
-  //MeshView mview("Mesh", new WinGeom(840, 0, 600, 350));
-  //mview.show(&mesh);
-  //View::wait();
 
   // Time stepping loop.
   int num_time_steps = (int)(T_FINAL/time_step + 0.5);
@@ -473,7 +436,7 @@ int main(int argc, char* argv[])
       delete ref_space;
     }
     while (!done);
-
+   
     // Add entries to graphs.
     graph_time_err_est.add_values(current_time, err_est_rel);
     graph_time_err_est.save("time_error_est.dat");
@@ -483,16 +446,7 @@ int main(int argc, char* argv[])
     graph_time_cpu.save("time_cpu.dat");
     graph_time_step.add_values(current_time, time_step);
     graph_time_step.save("time_step_history.dat");
-
-    // Visualize the solution and mesh.
-    char title[100];
-    sprintf(title, "Solution, time %g days", current_time);
-    view.set_title(title);
-    view.show(&sln, HERMES_EPS_VERYHIGH);
-    sprintf(title, "Mesh, time %g days", current_time);
-    ordview.set_title(title);
-    ordview.show(&space);
-    
+ 
     // Save complete Solution.
     char* filename = new char[100];
     sprintf(filename, "outputs/tsln_%f.dat", current_time);
@@ -514,7 +468,17 @@ int main(int argc, char* argv[])
     }
   }
 
-  // Wait for all views to be closed.
-  View::wait();
-  return 0;
+  ndof = Space::get_num_dofs(&space);
+
+
+  printf("ndof allowed = %d\n", 30);
+  printf("ndof actual = %d\n", ndof);
+  if (ndof < 30) {      // ndofs was 24 at the time this test was created
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
 }

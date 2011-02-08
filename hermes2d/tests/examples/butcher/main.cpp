@@ -17,12 +17,20 @@ const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Time integration. Choose one of the following methods, or define your own Butcher's table:
-// Explicit_RK_1, Implicit_RK_1, Explicit_RK_2, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, 
-// Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, 
-// Implicit_Lobatto_IIIC_2_2, Explicit_RK_3, Explicit_RK_4, Implicit_Lobatto_IIIA_3_4, 
-// Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5. 
-
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
+// Explicit methods:
+//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
+// Implicit methods: 
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5.
+// Embedded explicit methods:
+//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
+//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
+// Embedded implicit methods:
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
+//   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Thermal conductivity (temperature-dependent).
@@ -104,6 +112,9 @@ int main(int argc, char* argv[])
 
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
+  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
+  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
+  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
 
   // Load the mesh.
   Mesh mesh;
@@ -128,18 +139,13 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
-  // Previous time level solution (initialized by the initial condition).
-  Solution* u_prev_time = new Solution(&mesh, init_cond);
+  // Solution (initialized by the initial condition).
+  Solution* sln = new Solution(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian));
-  wf.add_vector_form(callback(stac_residual));
-
-  // Project the initial condition on the FE space to obtain initial solution coefficient vector.
-  info("Projecting initial condition to translate initial condition into a vector.");
-  scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(space, u_prev_time, coeff_vec, matrix_solver);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -153,13 +159,11 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    if (!rk_time_step(current_time, time_step, &bt, coeff_vec, &dp, matrix_solver,
-		      verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
+    bool is_linear = false;
+    if (!rk_time_step(current_time, time_step, &bt, sln, space, &dp, matrix_solver,
+		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
-
-    // Convert coeff_vec into a new time level solution.
-    Solution::vector_to_solution(coeff_vec, space, u_prev_time);
 
     // Update time.
     current_time += time_step;
@@ -169,179 +173,178 @@ int main(int argc, char* argv[])
   } 
   while (current_time < T_FINAL);
 
-  info("Coordinate (-8.0, -8.0) value = %lf", u_prev_time->get_pt_value(-8.0, -8.0));
-  info("Coordinate (-5.0, -5.0) value = %lf", u_prev_time->get_pt_value(-5.0, -5.0));
-  info("Coordinate (-3.0, -3.0) value = %lf", u_prev_time->get_pt_value(-3.0, -3.0));
-  info("Coordinate ( 0.0,  0.0) value = %lf", u_prev_time->get_pt_value(0.0,  0.0));
-  info("Coordinate ( 3.0,  3.0) value = %lf", u_prev_time->get_pt_value(3.0,  3.0));
-  info("Coordinate ( 5.0,  5.0) value = %lf", u_prev_time->get_pt_value(5.0,  5.0));
-  info("Coordinate ( 8.0,  8.0) value = %lf", u_prev_time->get_pt_value(8.0,  8.0));
+  info("Coordinate (-8.0, -8.0) value = %lf", sln->get_pt_value(-8.0, -8.0));
+  info("Coordinate (-5.0, -5.0) value = %lf", sln->get_pt_value(-5.0, -5.0));
+  info("Coordinate (-3.0, -3.0) value = %lf", sln->get_pt_value(-3.0, -3.0));
+  info("Coordinate ( 0.0,  0.0) value = %lf", sln->get_pt_value(0.0,  0.0));
+  info("Coordinate ( 3.0,  3.0) value = %lf", sln->get_pt_value(3.0,  3.0));
+  info("Coordinate ( 5.0,  5.0) value = %lf", sln->get_pt_value(5.0,  5.0));
+  info("Coordinate ( 8.0,  8.0) value = %lf", sln->get_pt_value(8.0,  8.0));
 
   double coor_x_y[7] = {-8.0, -5.0, -3.0, 0.0, 3.0, 5.0, 8.0};
   bool success = true;
 
   switch (b_type)
   {
-    case 1: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492025) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002150) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693363) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255564) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.266989) > 1E-6) success = false;
+    case 1: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251884) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251884) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 2: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251887) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002152) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693351) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255920) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.264228) > 1E-6) success = false;
+    case 2: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251886) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242559) > 1E-6) success = false;
             break;
 
-    case 3: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251887) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693354) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255821) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265520) > 1E-6) success = false;
+    case 3: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 4: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255783) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265500) > 1E-6) success = false;
+    case 4: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 5: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255790) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265493) > 1E-6) success = false;
+    case 5: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 6: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255783) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265500) > 1E-6) success = false;
+    case 6: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 7: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255783) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265500) > 1E-6) success = false;
+    case 7: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 8: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251887) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693354) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255818) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265444) > 1E-6) success = false;
+    case 8: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 9: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255795) > 1E-6) success = false;
-            if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265465) > 1E-6) success = false;
+    case 9: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+            if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
             break;
 
-    case 10: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255796) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265492) > 1E-6) success = false;
+    case 10: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 11: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
+    case 11: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 12: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
+    case 12: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 13: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
+    case 13: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 14: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
+    case 14: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 15: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255790) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265493) > 1E-6) success = false;
+    case 15: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 16: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693356) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255790) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265493) > 1E-6) success = false;
+    case 16: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
-    case 17: if (fabs(u_prev_time->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042559) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251886) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492024) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.002151) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.693355) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.255798) > 1E-6) success = false;
-             if (fabs(u_prev_time->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.265488) > 1E-6) success = false;
+    case 17: if (fabs(sln->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.042560) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.492015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.001993) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.692015) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.251885) > 1E-6) success = false;
+             if (fabs(sln->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.242560) > 1E-6) success = false;
              break;
 
     default: error("Admissible command-line options are from 1 to 17.");
   }
 
   // Cleanup.
-  delete [] coeff_vec;
   delete space;
-  delete u_prev_time;
+  delete sln;
 
   if (success) {
     printf("Success!\n");

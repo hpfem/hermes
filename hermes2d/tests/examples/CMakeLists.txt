@@ -1,7 +1,7 @@
 # Higher-order Runge-Kutta methods (via Butcher's tables)
-#add_subdirectory(butcher)
-#add_subdirectory(butcher-adapt)
-#add_subdirectory(butcher-comparison)
+add_subdirectory(butcher)
+add_subdirectory(butcher-adapt)
+add_subdirectory(butcher-comparison)
 
 # Elasticity
 add_subdirectory(elasticity-bracket)
@@ -29,7 +29,7 @@ add_subdirectory(neutronics-4-group-adapt)
 
 # Nernst-Planck
 add_subdirectory(nernst-planck-timedep-adapt)
-#add_subdirectory(nernst-planck-ipmc)
+add_subdirectory(nernst-planck-ipmc)
 
 # Navier-Stokes
 add_subdirectory(navier-stokes-bearing)
