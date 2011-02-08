@@ -127,7 +127,7 @@ public:
   void set_active_edge_multimesh(const int& edge);
 
   /// Extract transformations in the correct direction from the provided sub_idx.
-  Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx);
+  Hermes::vector<unsigned int> get_transforms(uint64_t sub_idx);
 
   /// Gives an info if edge is an intra- or inter- element edge.
   bool is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations);
@@ -157,7 +157,7 @@ public:
   /// \return false if NeighborSearch is set to ignore already visited segments and the given one has already been visited
   /// \return true otherwise.
   ///
-  bool set_active_segment(int neighbor, bool with_neighbor_pss = true);
+  //bool set_active_segment(int neighbor, bool with_neighbor_pss = true);
 
 /*** Methods for computing values of external functions. ***/
 
@@ -331,7 +331,6 @@ public:
   ///
   Element* get_current_central_element()
   {
-    ensure_active_segment(this);
     return central_el;
   }
 
@@ -341,7 +340,6 @@ public:
   ///
   Element* get_current_neighbor_element()
   {
-    ensure_active_segment(this);
     return neighb_el;
   }
 
@@ -392,7 +390,7 @@ public:
 
   /// This variable has the meaning how many neighbors have been used for a single edge so far,
   /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
-  static int max_neighbors;
+  static unsigned int max_neighbors;
 
   /// Function that sets the variable ignore_errors. See the variable description.
   void set_ignore_errors(bool value) {this->ignore_errors = value;};
@@ -432,12 +430,12 @@ private:
 
   static const int max_n_trans = 20;              ///< Number of allowed transformations (or equiv. number of neighbors
                                                   ///< in a go-down neighborhood) - see Transformable::push_transform.
-  std::vector<int *> central_transformations;     ///< Vector of transformations of the central element to each neighbor
+  std::vector<unsigned int *> central_transformations;     ///< Vector of transformations of the central element to each neighbor
                                                   ///< (in a go-down neighborhood; stored row-wise for each neighbor).
-  std::vector<int> central_n_trans;               ///< Number of transforms stored in each row of \c central_transformations.
+  std::vector<unsigned int> central_n_trans;               ///< Number of transforms stored in each row of \c central_transformations.
   
-  std::vector<int *> neighbor_transformations;    ///< Vector of transformations of the neighbor to the central element (go-up).
-  std::vector<int> neighbor_n_trans;              ///< Number of transforms stored in each row of \c neighbor_transformations.
+  std::vector<unsigned int *> neighbor_transformations;    ///< Vector of transformations of the neighbor to the central element (go-up).
+  std::vector<unsigned int> neighbor_n_trans;              ///< Number of transforms stored in each row of \c neighbor_transformations.
   
   uint64_t original_central_el_transform;              ///< Sub-element transformation of any function that comes from the
                                                   ///< assembly, before transforms from \c transformations are pushed
@@ -473,7 +471,7 @@ private:
   
   std::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
   std::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
-  int n_neighbors;                                ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
+  unsigned int n_neighbors;                                ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
 
   /// Possible neighborhood types, according to which way we went on the neighbor element in order to get to the
   /// other side of the neighbor. The way is characterized by transformations needed to be pushed either on the
@@ -523,7 +521,7 @@ private:
   ///                               \c transformations array corresponding to that neighbor.
   /// \param[in] n_sons             Number of sons that lead to the current neighbor's counterpart.
   ///
-  void find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, int n_sons);
+  void find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons);
 
 
   /// Determine relative orientation of the neighbor edge w.r.t. the active edge.

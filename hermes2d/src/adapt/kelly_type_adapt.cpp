@@ -192,8 +192,10 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
           }
           else              // Interface
           {
+	    
             if (error_estimators_surf[iest].area != H2D_DG_INNER_EDGE) continue;
-
+	    error("Not yet implemented");
+	    /*
             nbs->set_active_edge(isurf, ignore_visited_segments);
 
             // Go through all segments of the currently processed interface (segmentation is caused
@@ -234,6 +236,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               else
                 err += central_err;
             }
+            */
           }
         }
       }

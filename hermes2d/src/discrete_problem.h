@@ -271,27 +271,27 @@ protected:
   void build_multimesh_tree(NeighborNode* root, const std::map<unsigned int, NeighborSearch>& neighbor_searches);
 
   /// Recursive insertion function into the tree.
-  void insert_into_multimesh_tree(NeighborNode* node, int* transformations, unsigned int transformation_count);
+  void insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count);
 
   /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
-  Hermes::vector<Hermes::vector<int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree); 
+  Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree); 
 
   /// Traverse the multimesh tree. Used in the function get_multimesh_neighbors_transformations().
-  void traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_transformations);
+  void traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
 
   /// Update the NeighborSearch according to the multimesh tree.
   void update_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree);
 
   /// Finds a node in the multimesh tree that corresponds to the array transformations, with the length of transformation_count,
   /// starting to look for it in the NeighborNode node.
-  NeighborNode* find_node(int* transformations, int transformation_count, NeighborNode* node);
+  NeighborNode* find_node(unsigned int* transformations, unsigned int transformation_count, NeighborNode* node);
 
   /// Updates the NeighborSearch ns according to the subtree of NeighborNode node.
   void update_ns_subtree(NeighborSearch& ns, NeighborNode* node, unsigned int ith_neighbor);
 
   /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
-  void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
-      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
+  void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
+      Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
 
 

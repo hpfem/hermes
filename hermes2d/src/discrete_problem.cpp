@@ -836,7 +836,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     // Check that every NeighborSearch has the same number of neighbor elements.
     unsigned int num_neighbors = neighbor_searches.begin()->second.get_num_neighbors();
     for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
-      if(it->second.get_num_neighbors() != num_neighbors)
+      if(it->second.n_neighbors != num_neighbors)
         error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem::assemble_surface_integrals().");
 
     // Create neighbor psss, refmaps.
@@ -870,7 +870,6 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         it->second.active_segment = neighbor_i;
         it->second.neighb_el = it->second.neighbors[neighbor_i];
         it->second.neighbor_edge = it->second.neighbor_edges[neighbor_i];
-        it->second.active_segment = neighbor_i;
       }
 
       // Push all the necessary transformations to all functions of this stage.
@@ -903,7 +902,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         nrefmap[stage.idx[i]]->force_transform(npss[stage.idx[i]]->get_transform(), npss[stage.idx[i]]->get_ctm());
       }
 
-
+      /***/
 
       // The computation takes place here.
     if (mat != NULL)
@@ -913,7 +912,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, neighbor_searches, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
 
-
+      /***/
 
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
@@ -927,6 +926,9 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         spss[stage.idx[i]]->set_master_transform();
         refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
       }
+    }
+    // Delete the multimesh tree;
+    delete root;
 
        // Deinitialize neighbor pss's, refmaps.
       for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
@@ -935,7 +937,6 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         delete *it;
     }
   }
-}
 
 std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const WeakForm::Stage& stage, const int& isurf)
 {
@@ -965,12 +966,12 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
   for(std::map<unsigned int, NeighborSearch>::const_iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
     if(it->second.get_num_neighbors() == 1)
       break;
-    for(unsigned int i = 0; i < it->second.get_num_neighbors(); i++)
+    for(unsigned int i = 0; i < it->second.n_neighbors; i++)
       insert_into_multimesh_tree(root, it->second.central_transformations[i], it->second.central_n_trans[i]);
   }
 }
 
-void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, int* transformations, unsigned int transformation_count)
+void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count)
 {
   _F_
   // If we are already in the leaf.
@@ -1002,20 +1003,20 @@ void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, int* transf
 }
 
 /* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
-Hermes::vector<Hermes::vector<int>*> DiscreteProblem::get_multimesh_neighbors_transformations(DiscreteProblem::NeighborNode* multimesh_tree)
+Hermes::vector<Hermes::vector<unsigned int>*> DiscreteProblem::get_multimesh_neighbors_transformations(DiscreteProblem::NeighborNode* multimesh_tree)
 {
   _F_
   // Initialize the vector.
-  Hermes::vector<Hermes::vector<int>*> running_transformations;
+  Hermes::vector<Hermes::vector<unsigned int>*> running_transformations;
   // Prepare the first neighbor's vector.
-  running_transformations.push_back(new Hermes::vector<int>);
+  running_transformations.push_back(new Hermes::vector<unsigned int>);
   // Fill the vector.
   traverse_multimesh_tree(multimesh_tree, running_transformations);
   return running_transformations;
 }
 
 /* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
-void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_transformations)
+void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations)
 {
   _F_
   // If we are in the root.
@@ -1031,7 +1032,7 @@ void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* nod
   // If we are in a leaf.
   if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
     // Create a vector for the new neighbor.
-    Hermes::vector<int>* new_neighbor_transformations = new Hermes::vector<int>;
+    Hermes::vector<unsigned int>* new_neighbor_transformations = new Hermes::vector<unsigned int>;
     // Copy there the whole path except for this leaf.
     for(unsigned int i = 0; i < running_transformations.back()->size(); i++)
       new_neighbor_transformations->push_back((*running_transformations.back())[i]);
@@ -1067,7 +1068,7 @@ void DiscreteProblem::update_neighbor_search(NeighborSearch& ns, NeighborNode* m
   }
 }
 
-DiscreteProblem::NeighborNode* DiscreteProblem::find_node(int* transformations, int transformation_count, DiscreteProblem::NeighborNode* node)
+DiscreteProblem::NeighborNode* DiscreteProblem::find_node(unsigned int* transformations, unsigned int transformation_count, DiscreteProblem::NeighborNode* node)
 {
   _F_
   // If there are no transformations left.
@@ -1109,16 +1110,16 @@ void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::Nei
   NeighborSearch::NeighborEdgeInfo edge_info = ns.neighbor_edges[ith_neighbor];
 
   // Initialize the vector for central transformations.
-  Hermes::vector<Hermes::vector<int>*> running_central_transformations;
+  Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
   // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
-  running_central_transformations.push_back(new Hermes::vector<int>);
+  running_central_transformations.push_back(new Hermes::vector<unsigned int>);
   for(unsigned int i = 0; i < ns.central_n_trans[ith_neighbor]; i++)
     running_central_transformations.back()->push_back(ns.central_transformations[ith_neighbor][i]);
 
   // Initialize the vector for neighbor transformations.
-  Hermes::vector<Hermes::vector<int>*> running_neighbor_transformations;
+  Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
   // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
-  running_neighbor_transformations.push_back(new Hermes::vector<int>);
+  running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
   for(unsigned int i = 0; i < ns.neighbor_n_trans[ith_neighbor]; i++)
     running_neighbor_transformations.back()->push_back(ns.neighbor_transformations[ith_neighbor][i]);
 
@@ -1141,25 +1142,25 @@ void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::Nei
     ns.neighbor_edges.insert(ns.neighbor_edges.begin() + ith_neighbor + i, edge_info);
     ns.central_n_trans.insert(ns.central_n_trans.begin() + ith_neighbor + i, running_central_transformations[i]->size());
     ns.neighbor_n_trans.insert(ns.neighbor_n_trans.begin() + ith_neighbor + i, running_neighbor_transformations[i]->size());
-    ns.central_transformations.insert(ns.central_transformations.begin() + ith_neighbor + i, new int[NeighborSearch::max_n_trans]);
+    ns.central_transformations.insert(ns.central_transformations.begin() + ith_neighbor + i, new unsigned int[NeighborSearch::max_n_trans]);
     for(unsigned int ii = 0; ii < ns.central_n_trans[ith_neighbor + i]; ii++)
       ns.central_transformations[ith_neighbor + i][ii] = (*running_central_transformations[i])[ii];
-    ns.neighbor_transformations.insert(ns.neighbor_transformations.begin() + ith_neighbor + i, new int[NeighborSearch::max_n_trans]);
+    ns.neighbor_transformations.insert(ns.neighbor_transformations.begin() + ith_neighbor + i, new unsigned int[NeighborSearch::max_n_trans]);
     for(unsigned int ii = 0; ii < ns.neighbor_n_trans[ith_neighbor + i]; ii++)
       ns.neighbor_transformations[ith_neighbor + i][ii] = (*running_neighbor_transformations[i])[ii];
     ns.n_neighbors++;
   }
 }
 
-void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<int>*>& running_central_transformations,
-      Hermes::vector<Hermes::vector<int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
+void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
+      Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
 {
   _F_
   // If we are in a leaf.
   if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
     // Create vectors for the new neighbor.
-    Hermes::vector<int>* new_neighbor_central_transformations = new Hermes::vector<int>;
-    Hermes::vector<int>* new_neighbor_neighbor_transformations = new Hermes::vector<int>;
+    Hermes::vector<unsigned int>* new_neighbor_central_transformations = new Hermes::vector<unsigned int>;
+    Hermes::vector<unsigned int>* new_neighbor_neighbor_transformations = new Hermes::vector<unsigned int>;
     
     // Copy there the whole path except for this leaf.
     for(unsigned int i = 0; i < running_central_transformations.back()->size(); i++)
@@ -1403,7 +1404,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
                     if (rhs != NULL && this->is_linear) {
                       // Evaluate the form with the activated discontinuous shape functions.
             scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
-              * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[i - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[i]
+              * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j]
               * support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i];
                       // Add the contribution to the global dof index.
             rhs->add(ext_asmlist_v->dof[i], -val);
@@ -1411,7 +1412,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
                   }
                   else if (rhsonly == false) {
           scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
-            * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[i - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[i]
+            * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j]
             * support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i];
                     local_stiffness_matrix[i][j] = val;
                   }
@@ -2137,8 +2138,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, neighbor_searches);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), nbs_u->neighbors[nbs_u->active_segment]->marker, 
-      nbs_u->neighbors[nbs_u->active_segment]->id, nbs_u->neighbors[nbs_u->active_segment]->get_diameter());
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), nbs_u->neighb_el->marker, 
+      nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
     double fake_wt = 1.0;
 
     // Total order of the matrix form.
@@ -2342,6 +2343,14 @@ DiscreteProblem::NeighborNode::NeighborNode(NeighborNode* parent, unsigned int t
 }
 DiscreteProblem::NeighborNode::~NeighborNode()
 {
+  if(left_son != NULL) {
+    delete left_son;
+    left_son = NULL;
+  }
+  if(right_son != NULL) {
+    delete right_son;
+    right_son = NULL;
+  }
 }
 void DiscreteProblem::NeighborNode::set_left_son(DiscreteProblem::NeighborNode* left_son)
 {
