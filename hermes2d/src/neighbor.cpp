@@ -77,10 +77,24 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   neighb_rm(NULL),
   central_pss(NULL),
   neighb_pss(NULL),
-  quad(&g_quad_2d_std)
+  quad(&g_quad_2d_std),
+  ignore_errors(ns.ignore_errors),
+  n_neighbors(ns.n_neighbors),
+  neighborhood_type(ns.neighborhood_type),
+  original_central_el_transform(ns.original_central_el_transform),
+  active_edge(ns.active_edge),
+  neighbor_edge(ns.neighbor_edge),
+  active_segment(ns.active_segment)
 {
+  central_transformations.reserve(NeighborSearch::max_neighbors * 2);
+  central_n_trans.reserve(NeighborSearch::max_neighbors*2);
+  neighbor_transformations.reserve(NeighborSearch::max_neighbors * 2);
+  neighbor_n_trans.reserve(NeighborSearch::max_neighbors*2);
+  neighbors.reserve(NeighborSearch::max_neighbors * 2);
+  neighbor_edges.reserve(NeighborSearch::max_neighbors * 2);
+
   for(int i = 0; i < ns.central_transformations.size(); i++) {
-    this->central_transformations.push_back(new int[ns.central_n_trans[i]]);
+  this->central_transformations.push_back(new int[ns.central_n_trans[i]]);
     for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
       this->central_transformations[i][j] = ns.central_transformations[i][j];
   }
@@ -105,7 +119,7 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   for(int i = 0; i < ns.neighbor_edges.size(); i++)
     this->neighbor_edges.push_back(ns.neighbor_edges[i]);
 
-  ignore_errors = ns.ignore_errors;
+
 }
 
 NeighborSearch::~NeighborSearch()
@@ -132,7 +146,7 @@ void NeighborSearch::reset_neighb_info()
   active_segment = -1;
   active_edge = -1;
   neighb_el = NULL;
-  neighbor_edge = -1;
+  neighbor_edge.local_num_of_edge = -1;
 
   // Clear vectors with neighbor elements and their edge info for the active edge.
   neighbor_edges.clear();
@@ -177,12 +191,12 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
 			for (unsigned int j = 0; j < neighb_el->nvert; j++)
 				if (central_el->en[active_edge] == neighb_el->en[j])
 				{
-					neighbor_edge = j;
+          neighbor_edge.local_num_of_edge = j;
 					break;
 				}
 
 			NeighborEdgeInfo local_edge_info;
-			local_edge_info.local_num_of_edge = neighbor_edge;
+      local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
 
       // Query the orientation of the neighbor edge relative to the central el.
       int p1 = central_el->vn[active_edge]->id;
@@ -243,15 +257,11 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
 	else
     if(!ignore_errors)
 		  error("The given edge isn't inner");
-
-  // Reset the neighbor information to force the user to set the correct active segment.
-  neighb_el = NULL;
-  neighbor_edge = -1;
 }
 
-void NeighborSearch::set_active_edge_multimesh(const int& edge, uint64_t sub_idx)
+void NeighborSearch::set_active_edge_multimesh(const int& edge)
 {
-  Hermes::vector<unsigned int> transformations = get_transforms(sub_idx);
+  Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
   // Inter-element edge.
   if(is_inter_edge(edge, transformations)) {
     set_active_edge(edge);
@@ -265,9 +275,9 @@ void NeighborSearch::set_active_edge_multimesh(const int& edge, uint64_t sub_idx
       neighbor_transformations[0][i] = transformations[i];
     neighbor_n_trans[0] = transformations.size();
 
-	  neighbor_edge = active_edge = edge;
+    neighbor_edge.local_num_of_edge = active_edge = edge;
     NeighborEdgeInfo local_edge_info;
-	  local_edge_info.local_num_of_edge = neighbor_edge;
+    local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
 	  //! The "opposite" view of the same edge has the same orientation.
 	  local_edge_info.orientation = 0;
 	  neighbor_edges.push_back(local_edge_info);
@@ -327,18 +337,18 @@ void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned i
         if ((active_edge == 0 && transformations[i] == 1) ||
             (active_edge == 1 && transformations[i] == 2) ||
             (active_edge == 2 && transformations[i] == 3))
-          neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
 				else
-          neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
 	    // Quads.
 	    else
         if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
             (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
             (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 0)) ||
             (active_edge == 3 && (transformations[i] == 4 || transformations[i] == 6)))
-          neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
         else
-          neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
   }
   else handle_sub_idx_way_down(transformations);
 }
@@ -366,18 +376,18 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
               if ((active_edge == 0 && transformations[i] == 1) ||
                   (active_edge == 1 && transformations[i] == 2) ||
                   (active_edge == 2 && transformations[i] == 3))
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
 				      else
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
 	          // Quads.
 	          else
               if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
                   (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
                   (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 0)) ||
                   (active_edge == 3 && (transformations[i] == 4 || transformations[i] == 6)))
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
               else
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
         }
       }
   }
@@ -414,12 +424,12 @@ bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, 
   return false;
 }
 
-void NeighborSearch::clear_initial_sub_idx(uint64_t sub_idx)
+void NeighborSearch::clear_initial_sub_idx()
 {
   if(!neighborhood_type == H2D_DG_GO_DOWN)
     return;
   // Obtain the transformations sequence.
-  Hermes::vector<unsigned int> transformations = get_transforms(sub_idx);
+  Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
   // Test for active element.
   if(transformations.empty())
     return;
@@ -500,14 +510,14 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 				neighb_el = edge->elem[i];  //debug_log("way up neighbor: %d", neighb_el->id);
 
 				// Get local number of the edge used by the neighbor.
-				neighbor_edge = -1;
+        neighbor_edge.local_num_of_edge = -1;
 				for(unsigned int j = 0; j < neighb_el->nvert; j++)
 					if(neighb_el->en[j] == edge)
 					{
-						neighbor_edge = j;
+            neighbor_edge.local_num_of_edge = j;
 						break;
 					}
-				if(neighbor_edge == -1) error("Neighbor edge wasn't found");
+        if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
 				Node* n = NULL;
 
@@ -531,19 +541,19 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
           n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
           if(n == NULL)
           {
-            neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge;
+            neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge.local_num_of_edge;
             p1 = par_mid_vertices[j]->id;
           }
           else
           {
             if(n->id == par_mid_vertices[j-1]->id)
             {
-              neighbor_transformations[n_neighbors][n_parents - j - 1] = (neighbor_edge + 1) % neighb_el->nvert;
+              neighbor_transformations[n_neighbors][n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
               p2 = par_mid_vertices[j]->id;
             }
             else
             {
-              neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge;
+              neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge.local_num_of_edge;
               p1 = par_mid_vertices[j]->id;
             }
           }
@@ -551,13 +561,13 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 
 				// Final transformation to the central element itself.
         if (orig_vertex_id[0] == par_mid_vertices[0]->id)
-					neighbor_transformations[n_neighbors][n_parents - 1] = neighbor_edge;
+          neighbor_transformations[n_neighbors][n_parents - 1] = neighbor_edge.local_num_of_edge;
 				else
-					neighbor_transformations[n_neighbors][n_parents - 1] = (neighbor_edge + 1) % neighb_el->nvert;
+          neighbor_transformations[n_neighbors][n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
 
 
 				NeighborEdgeInfo local_edge_info;
-				local_edge_info.local_num_of_edge = neighbor_edge;
+        local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
         // Query the orientation of the neighbor edge relative to the central el.
 				local_edge_info.orientation = neighbor_edge_orientation(id_of_par_orient_1, id_of_par_orient_2, 0);
 
@@ -618,14 +628,14 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
           neighb_el = mesh->get_element(edge->elem[j]->id);  //debug_log("way down neighbor: %d", edge->elem[j]->id);
 
           // Get local number of the edge used by the neighbor.
-          neighbor_edge = -1;
+          neighbor_edge.local_num_of_edge = -1;
           for(unsigned int k = 0; k < neighb_el->nvert; k++)
             if(neighb_el->en[k] == edge)
             {
-              neighbor_edge = k;
+              neighbor_edge.local_num_of_edge = k;
               break;
             }
-          if(neighbor_edge == -1) error("Neighbor edge wasn't found");
+          if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
           // Construct the transformation path to the current neighbor.
           for(int k = 0; k < n_sons; k++)
@@ -635,7 +645,7 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
 
 
           NeighborEdgeInfo local_edge_info;
-          local_edge_info.local_num_of_edge = neighbor_edge;
+          local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
           // Query the orientation of the neighbor edge relative to the central el.
           local_edge_info.orientation = neighbor_edge_orientation(bnd_verts[0], bnd_verts[1], i);
 
@@ -657,13 +667,13 @@ int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_v
   if (segment == 0)
   {
     // neighbor edge goes from parent1 to middle vertex
-    if (neighb_el->vn[neighbor_edge]->id != bounding_vert1)
+    if (neighb_el->vn[neighbor_edge.local_num_of_edge]->id != bounding_vert1)
       return 1; // orientation reversed
   }
   else
   {
     // neighbor edge goes from middle vertex to parent2
-    if (neighb_el->vn[neighbor_edge]->id == bounding_vert2)
+    if (neighb_el->vn[neighbor_edge.local_num_of_edge]->id == bounding_vert2)
       return 1; // orientation reversed
   }
   return 0;
@@ -678,7 +688,7 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   ensure_active_segment(this);
 
   neighb_el = neighbors[active_segment];
-  neighbor_edge = neighbor_edges[active_segment].local_num_of_edge;
+  neighbor_edge = neighbor_edges[active_segment];
 
   if(central_pss != NULL)
   {
@@ -792,7 +802,7 @@ void NeighborSearch::set_quad_order(int order)
 {
   _F_
   quad->set_mode(neighbors[active_segment]->get_mode());
-  neighb_quad.init(quad, quad->get_edge_points(neighbor_edges[active_segment].local_num_of_edge, order));
+  neighb_quad.init(quad, quad->get_edge_points(neighbor_edge.local_num_of_edge, order));
   quad->set_mode(central_el->get_mode());
   central_quad.init(quad, quad->get_edge_points(active_edge, order));
 }
@@ -903,7 +913,7 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
   _F_
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   int central_order = fu->get_edge_fn_order(active_edge) + inc;
-  int neighbor_order = fu->get_edge_fn_order(neighbor_edge) + inc;
+  int neighbor_order = fu->get_edge_fn_order(neighbor_edge.local_num_of_edge) + inc;
   return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
 }
 
@@ -912,7 +922,7 @@ DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
   _F_
   int inc = (fu->get_num_components() == 2) ? 1 : 0;
   int central_order = fu->get_edge_fn_order(active_edge) + inc;
-  int neighbor_order = fu->get_edge_fn_order(neighbor_edges[active_segment].local_num_of_edge) + inc;
+  int neighbor_order = fu->get_edge_fn_order(neighbor_edge.local_num_of_edge) + inc;
   return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
 }
 
@@ -935,7 +945,7 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
   fu->set_active_element(central_el);
   fu->set_transform(original_transform);
 
-  return new DiscontinuousFunc<scalar>(fn_central, fn_neighbor, (neighbor_edges[active_segment].orientation == 1));
+  return new DiscontinuousFunc<scalar>(fn_central, fn_neighbor, (neighbor_edge.orientation == 1));
 
   //NOTE: This function is not very efficient, since it sets the active elements and possibly pushes transformations
   // for each mesh function in each cycle of the innermost assembly loop. This is neccessary because only in
@@ -978,9 +988,8 @@ NeighborSearch::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood,
 {
   _F_
   neighbor_al = new AsmList();
-  space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
+  space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
   combine_assembly_lists();
-  active_shape = new ExtendedShapeFunction(neighborhood);
 }
 
 void NeighborSearch::ExtendedShapeset::combine_assembly_lists()

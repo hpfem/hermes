@@ -124,7 +124,7 @@ public:
   void set_active_edge(int edge, bool ignore_visited_segments = true);
 
   /// Enhancement of set_active_edge for multimesh assembling.
-  void set_active_edge_multimesh(const int& edge, uint64_t sub_idx);
+  void set_active_edge_multimesh(const int& edge);
 
   /// Extract transformations in the correct direction from the provided sub_idx.
   Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx);
@@ -144,7 +144,7 @@ public:
 
   /// Clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
   /// Does nothing in the opposite case.
-  void clear_initial_sub_idx(uint64_t sub_idx);
+  void clear_initial_sub_idx();
 
   /// In case we determine a neighbor is not correct due to a subelement mapping, we delete it.
   void delete_neighbor(unsigned int position);
@@ -439,7 +439,7 @@ private:
   std::vector<int *> neighbor_transformations;    ///< Vector of transformations of the neighbor to the central element (go-up).
   std::vector<int> neighbor_n_trans;              ///< Number of transforms stored in each row of \c neighbor_transformations.
   
-  unsigned int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the
+  uint64_t original_central_el_transform;              ///< Sub-element transformation of any function that comes from the
                                                   ///< assembly, before transforms from \c transformations are pushed
                                                   ///< to it.
 
@@ -455,20 +455,22 @@ private:
 
 
 /*** Neighborhood information. ***/
-
-  int active_edge;              ///< Local number of the currently assembled edge, w.r.t. the central element.
-  int neighbor_edge;            ///< Local number of the currently assembled edge, w.r.t. the element on the other side.
-  int active_segment;           ///< Part of the active edge shared by central and neighbor elements.
-
   /// Structure containing all the needed information about the active edge from the neighbor's side.
-  struct NeighborEdgeInfo
+  class NeighborEdgeInfo
   {
+  public:
+    NeighborEdgeInfo() : local_num_of_edge(-1), orientation(-1) {};
+
     int local_num_of_edge;  ///< Local number of the edge on neighbor element.
     int orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
                             ///< (0 - same orientation, 1 - reverse orientation).
-    NeighborEdgeInfo() : local_num_of_edge(-1), orientation(-1) {};
   };
 
+  int active_edge;               ///< Local number of the currently assembled edge, w.r.t. the central element.
+  NeighborEdgeInfo neighbor_edge;///< Assembled edge, w.r.t. the element on the other side.
+  int active_segment;            ///< Part of the active edge shared by central and neighbor elements.
+
+  
   std::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
   std::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
   int n_neighbors;                                ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
@@ -676,7 +678,6 @@ public:
       AsmList* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
       AsmList* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
     private:
-      ExtendedShapeFunction *active_shape;    ///< Extended shape function with activated \c active_pss.
       
 
       /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
@@ -689,7 +690,7 @@ public:
       ///
       void update(NeighborSearch* neighborhood, Space* space) {
         delete [] this->dof;
-        space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge, neighbor_al);
+        space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
         combine_assembly_lists();
       }
 
@@ -703,7 +704,7 @@ public:
 
       /// Destructor.
       ~ExtendedShapeset() {
-        delete [] dof; delete active_shape; delete neighbor_al;
+        delete [] dof; delete neighbor_al;
       }
 
     public:

@@ -855,17 +855,33 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     }
 
     for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
+      // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
+      // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
+      // will be marked as visited, even though the edge was not calculated.
+      bool processed = true;
+      for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
+        if(!it->second.neighbors.at(neighbor_i)->visited)
+          processed = false;
+      if(processed)
+        continue;
+
       // Set the active segment in all NeighborSearches.
+      for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
+        it->second.active_segment = neighbor_i;
+        it->second.neighb_el = it->second.neighbors[neighbor_i];
+        it->second.neighbor_edge = it->second.neighbor_edges[neighbor_i];
+        it->second.active_segment = neighbor_i;
+      }
 
       // Push all the necessary transformations to all functions of this stage.
       // The important thing is that the transformations to the current subelement are already there.
       // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
-      for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+      for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++) {
+        
         for(unsigned int trf_i = 0; trf_i < neighbor_searches.at(stage.meshes[fns_i]->get_seq()).central_n_trans[neighbor_i]; trf_i++) {
-          neighbor_searches.at(stage.meshes[fns_i]->get_seq()).original_central_el_transform = stage.fns[fns_i]->get_transform();
-          neighbor_searches.at(stage.meshes[fns_i]->get_seq()).active_segment = neighbor_i;
           stage.fns[fns_i]->push_transform(neighbor_searches.at(stage.meshes[fns_i]->get_seq()).central_transformations[neighbor_i][trf_i]);
         }
+      }
       // For neighbor psss.
       for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
         npss[idx_i]->set_active_element((*neighbor_searches.at(stage.meshes[idx_i]->get_seq()).get_neighbors())[neighbor_i]);
@@ -888,6 +904,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       }
 
 
+
       // The computation takes place here.
     if (mat != NULL)
         assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
@@ -897,12 +914,11 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
 
 
+
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-        for(unsigned int trf_i = 0; trf_i < neighbor_searches.at(stage.meshes[fns_i]->get_seq()).central_n_trans[neighbor_i]; trf_i++) {
           stage.fns[fns_i]->set_transform(neighbor_searches.at(stage.meshes[fns_i]->get_seq()).original_central_el_transform);
-        }
 
       // Also clear the transformations from the slave psss and refmaps.
       for (unsigned int i = 0; i < stage.idx.size(); i++) {
@@ -913,8 +929,6 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
       }
 
        // Deinitialize neighbor pss's, refmaps.
-      for(std::vector<PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
-        delete *it;
       for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
         delete *it;
       for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
@@ -926,26 +940,22 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
 std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const WeakForm::Stage& stage, const int& isurf)
 {
   _F_
-  // Setup a mapping of mesh sequence numbers to current subelement transformations.
-  std::map<unsigned int, uint64_t> initial_sub_idxs;
-
   // Initialize the NeighborSearches.
-  std::map<unsigned int, NeighborSearch> neighbor_searches;
+  std::map<unsigned int, NeighborSearch>* neighbor_searches = new std::map<unsigned int, NeighborSearch>;
   for(unsigned int i = 0; i < stage.meshes.size(); i++) {
     NeighborSearch ns(stage.fns[i]->get_active_element(), stage.meshes[i]);
-    neighbor_searches.insert(std::pair<unsigned int, NeighborSearch>(stage.meshes[i]->get_seq(), ns));
-    initial_sub_idxs.insert(std::pair<unsigned int, uint64_t>(stage.meshes[i]->get_seq(), stage.fns[i]->get_transform()));
+    ns.original_central_el_transform = stage.fns[i]->get_transform();
+    neighbor_searches->insert(std::pair<unsigned int, NeighborSearch>(stage.meshes[i]->get_seq(), ns));
   }
 
   // Calculate respective neighbors.
   // Also clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
-  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
-    uint64_t sub_idx = initial_sub_idxs.at(it->first);
-    it->second.set_active_edge_multimesh(isurf, sub_idx);
-    it->second.clear_initial_sub_idx(sub_idx);
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches->begin(); it != neighbor_searches->end(); it++) {
+    it->second.set_active_edge_multimesh(isurf);
+    it->second.clear_initial_sub_idx();
   }
 
-  return neighbor_searches;
+  return *neighbor_searches;
 }
 
 
@@ -1333,17 +1343,6 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
-
-  // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
-  // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
-  // will be marked as visited, even though the edge was not calculated.
-  bool processed = true;
-  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
-    if(!it->second.neighbors[it->second.active_segment]->visited)
-      processed = false;
-  if(processed)
-    return;
-
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
             WeakForm::MatrixFormSurf* mfs = stage.mfsurf[ww];
             int m = mfs->i;
@@ -1387,14 +1386,14 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
       }
       for (int j = 0; j < ext_asmlist_u->cnt; j++) {
         // Choose the correct shapeset for the solution function.
-        if (!ext_asmlist_v->has_support_on_neighbor(i)) {
-          pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[i]);
+        if (!ext_asmlist_u->has_support_on_neighbor(j)) {
+          pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
           fu = pss[n];
           ru = refmap[n];
           support_neigh_u = false;
         }
         else {
-          npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[i - ext_asmlist_u->central_al->cnt]);
+          npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
           fu = npss[n];
           ru = nrefmap[n];
           support_neigh_u = true;
@@ -2138,8 +2137,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, neighbor_searches);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), nbs_u->neighb_el->marker, 
-        nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), nbs_u->neighbors[nbs_u->active_segment]->marker, 
+      nbs_u->neighbors[nbs_u->active_segment]->id, nbs_u->neighbors[nbs_u->active_segment]->get_diameter());
     double fake_wt = 1.0;
 
     // Total order of the matrix form.
@@ -2155,12 +2154,6 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     for (int i = u_ext_offset; i < u_ext_length; i++) {
       if (oi[i - u_ext_offset] != NULL) { oi[i - u_ext_offset]->free_ord(); delete oi[i - u_ext_offset]; }
     }
-    if (ou != NULL) {
-      ou->free_ord(); delete ou;
-    }
-    if (ov != NULL) {
-      ov->free_ord(); delete ov;
-    }
   }
 
   // Evaluate the form using just calculated order.
@@ -2174,7 +2167,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
 
   // Init geometry and jacobian*weights.
   // TODO: A cache.
-  assert(surf_pos->surf_num = neighbor_searches.at(neighbor_index_u).active_edge);
+  assert(surf_pos->surf_num == neighbor_searches.at(neighbor_index_u).active_edge);
 
   Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(ru_central, surf_pos, eo), nbs_u->neighb_el->marker, 
     nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
@@ -2199,9 +2192,9 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
   DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(get_fn(fu, ru_actual, nbs_u->get_quad_eo(neighbor_supp_u)),
-    neighbor_supp_u, nbs_u->neighbor_edges[nbs_u->active_segment].orientation);
+    neighbor_supp_u, nbs_u->neighbor_edge.orientation);
   DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(get_fn(fv, rv, nbs_v->get_quad_eo(neighbor_supp_v)),
-    neighbor_supp_v, nbs_v->neighbor_edges[nbs_v->active_segment].orientation);
+    neighbor_supp_v, nbs_v->neighbor_edge.orientation);
   
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches);
 
