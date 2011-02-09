@@ -198,7 +198,7 @@ public:
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element);
 
-  void assemble_DG_one_neighbor(unsigned int neighbor_i, WeakForm::Stage& stage, 
+  void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
        Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
@@ -258,6 +258,8 @@ protected:
 
   /// There is a form set on DG_INNER_EDGE area or not.
   bool DG_needed_in_current_stage;
+  /// There is a matrix form set on DG_INNER_EDGE area or not.
+  bool DG_neighbor_test_fns_needed;
 
   /// Initialize neighbors.
   std::map<unsigned int, NeighborSearch> init_neighbors(const WeakForm::Stage& stage, const int& isurf);
