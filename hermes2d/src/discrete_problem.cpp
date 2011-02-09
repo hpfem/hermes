@@ -524,16 +524,14 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
   trav.begin(stage.meshes.size(), &(stage.meshes.front()), &(stage.fns.front()));
 
   // Check that there is a DG form, so that the whole process is needed to do.
-  DG_needed_in_current_stage = false;
-  DG_neighbor_test_fns_needed = false;
+  DG_matrix_forms_present = false;
+  DG_vector_forms_present = false;
   for(unsigned int i = 0; i < stage.mfsurf.size(); i++)
-    if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE) {
-      DG_needed_in_current_stage = true;
-      DG_neighbor_test_fns_needed = true;
-    }
+    if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE)
+      DG_matrix_forms_present = true;
   for(unsigned int i = 0; i < stage.vfsurf.size(); i++)
     if (stage.vfsurf[i]->area == H2D_DG_INNER_EDGE) 
-      DG_needed_in_current_stage = true;
+      DG_vector_forms_present = true;
 
   // Loop through all assembling states.
   // Assemble each one.
@@ -820,11 +818,11 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
-  else {
+  else
+    if(DG_vector_forms_present || DG_matrix_forms_present)
     assemble_DG_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
           marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
   }
-}
 
 void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -833,10 +831,6 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
-    // DG is really needed or not.
-    if(!DG_needed_in_current_stage)
-      return;
-
     // Initialize the NeighborSearches.
     std::map<unsigned int, NeighborSearch> neighbor_searches = init_neighbors(stage, isurf);
     
@@ -866,7 +860,7 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
 
     // Initialize neighbor precalc shapesets and refmaps.      
   // This is only needed when there are matrix DG forms present.
-  if(DG_neighbor_test_fns_needed)
+  if(DG_matrix_forms_present)
     for (unsigned int i = 0; i < stage.idx.size(); i++) {
       npss.push_back(new PrecalcShapeset(pss[i]->get_shapeset()));
       npss[i]->set_quad_2d(&g_quad_2d_std);
@@ -884,6 +878,8 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
       for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++)
         if(!it->second.neighbors.at(neighbor_i)->visited)
           processed = false;
+    if(!DG_vector_forms_present && processed)
+      continue;
     assemble_DG_one_neighbor(processed, neighbor_i, stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
       marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
   }
@@ -924,7 +920,7 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
         }
       }
       // For neighbor psss.
-  if(DG_neighbor_test_fns_needed)
+  if(DG_matrix_forms_present && !edge_processed)
       for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
         npss[idx_i]->set_active_element((*neighbor_searches.at(stage.meshes[idx_i]->get_seq()).get_neighbors())[neighbor_i]);
         for(unsigned int trf_i = 0; trf_i < neighbor_searches.at(stage.meshes[idx_i]->get_seq()).neighbor_n_trans[neighbor_i]; trf_i++)
@@ -939,7 +935,7 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
         refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
 
         // Neighbor.
-    if(DG_neighbor_test_fns_needed) {
+    if(DG_matrix_forms_present && !edge_processed) {
         nspss[stage.idx[i]]->set_active_element(npss[stage.idx[i]]->get_active_element());
         nspss[stage.idx[i]]->set_master_transform();
         nrefmap[stage.idx[i]]->set_active_element(npss[stage.idx[i]]->get_active_element());
@@ -951,10 +947,10 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
 
       // The computation takes place here.
     if (mat != NULL)
-    if(!edge_processed)
+    if(DG_matrix_forms_present && !edge_processed)
         assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
-    if (rhs != NULL)
+  if (DG_vector_forms_present && rhs != NULL)
         assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, neighbor_searches, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
 

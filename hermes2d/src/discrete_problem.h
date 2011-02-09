@@ -256,10 +256,10 @@ protected:
 
   /// Pure DG functionality.
 
-  /// There is a form set on DG_INNER_EDGE area or not.
-  bool DG_needed_in_current_stage;
   /// There is a matrix form set on DG_INNER_EDGE area or not.
-  bool DG_neighbor_test_fns_needed;
+  bool DG_matrix_forms_present;
+  /// There is a vector form set on DG_INNER_EDGE area or not.
+  bool DG_vector_forms_present;
 
   /// Initialize neighbors.
   std::map<unsigned int, NeighborSearch> init_neighbors(const WeakForm::Stage& stage, const int& isurf);
