@@ -191,6 +191,20 @@ public:
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base);
 
+  /// Assemble DG forms.
+  void assemble_DG_forms(WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base, Element* rep_element);
+
+  void assemble_DG_one_neighbor(unsigned int neighbor_i, WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base, Element* rep_element);
+
   /// Assemble DG matrix forms.
   void assemble_DG_matrix_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,

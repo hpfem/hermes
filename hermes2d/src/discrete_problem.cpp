@@ -369,6 +369,8 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bo
 
   struct_changed = true;
   have_matrix = true;
+
+  NeighborSearch::max_neighbors = 1;
 }
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
@@ -525,6 +527,9 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
   DG_needed_in_current_stage = false;
   for(unsigned int i = 0; i < stage.mfsurf.size(); i++)
     if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE) 
+      DG_needed_in_current_stage = true;
+  for(unsigned int i = 0; i < stage.vfsurf.size(); i++)
+    if (stage.vfsurf[i]->area == H2D_DG_INNER_EDGE) 
       DG_needed_in_current_stage = true;
 
   // Loop through all assembling states.
@@ -813,6 +818,17 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else {
+    assemble_DG_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
+          marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+  }
+}
+
+void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base, Element* rep_element)
+{
     // DG is really needed or not.
     if(!DG_needed_in_current_stage)
       return;
@@ -864,7 +880,28 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
           processed = false;
       if(processed)
         continue;
+    assemble_DG_one_neighbor(neighbor_i, stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
+      marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+  }
 
+  // Delete the multimesh tree;
+  delete root;
+
+  // Deinitialize neighbor pss's, refmaps.
+  for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
+    delete *it;
+  for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
+    delete *it;
+}
+
+
+void DiscreteProblem::assemble_DG_one_neighbor(unsigned int neighbor_i, WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base, Element* rep_element)
+{
       // Set the active segment in all NeighborSearches.
       for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
         it->second.active_segment = neighbor_i;
@@ -927,16 +964,8 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
         refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
       }
     }
-    // Delete the multimesh tree;
-    delete root;
 
-       // Deinitialize neighbor pss's, refmaps.
-      for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
-        delete *it;
-      for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
-        delete *it;
-    }
-  }
+
 
 std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const WeakForm::Stage& stage, const int& isurf)
 {
@@ -1346,12 +1375,12 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
   _F_
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
             WeakForm::MatrixFormSurf* mfs = stage.mfsurf[ww];
+    if (mfs->area != H2D_DG_INNER_EDGE) continue;
             int m = mfs->i;
             int n = mfs->j;
 
             if (isempty[m] || isempty[n]) continue;
             if (fabs(mfs->scaling_factor) < 1e-12) continue;
-            if (mfs->area != H2D_DG_INNER_EDGE) continue;
 
             surf_pos.base = trav_base;
             surf_pos.space_v = spaces[m];
@@ -1404,23 +1433,21 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
                     if (rhs != NULL && this->is_linear) {
                       // Evaluate the form with the activated discontinuous shape functions.
             scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
-              * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j]
-              * support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i];
+              * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+              * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
                       // Add the contribution to the global dof index.
             rhs->add(ext_asmlist_v->dof[i], -val);
                     }
                   }
                   else if (rhsonly == false) {
           scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
-            * support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j]
-            * support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i];
-                    local_stiffness_matrix[i][j] = val;
+            * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+            * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
                   }
                 }
-              if (rhsonly == false)
-        mat->add(ext_asmlist_u->cnt, ext_asmlist_v->cnt, local_stiffness_matrix,
-                ext_asmlist_v->dof, ext_asmlist_u->dof);
             }
+    if (rhsonly == false)
+      mat->add(ext_asmlist_u->cnt, ext_asmlist_v->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
           }
 }
 
@@ -1433,10 +1460,10 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
   _F_
   for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) {
             WeakForm::VectorFormSurf* vfs = stage.vfsurf[ww];
+    if (vfs->area != H2D_DG_INNER_EDGE) continue;
             int m = vfs->i;
             if (isempty[m]) continue;
             if (fabs(vfs->scaling_factor) < 1e-12) continue;
-            if (vfs->area != H2D_DG_INNER_EDGE) continue;
             
     // Here we use the standard pss, possibly just transformed by NeighborSearch.
               for (unsigned int i = 0; i < al[m]->cnt; i++) {
@@ -2292,7 +2319,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
 
   // Init geometry and jacobian*weights.
   // TODO: A cache.
-  assert(surf_pos->surf_num = nbs_v->active_edge);
+  assert(surf_pos->surf_num == nbs_v->active_edge);
 
   Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rv, surf_pos, eo), nbs_v->neighb_el->marker, 
     nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
