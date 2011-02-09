@@ -259,22 +259,24 @@ polynomial solution using linear triangles::
 
   // Output solution in VTK format.
   Linearizer lin;
-  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature");
+  bool mode_3D = true;
+  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
   info("Solution in VTK format saved to file %s.", "sln.vtk");
 
 The function save_solution_vtk() can be found in hermes2d/src/linearizer/ and its 
-complete header is ::
+complete header is::
 
   // Saves a MeshFunction (Solution, Filter) in VTK format.
   virtual void save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char* quantity_name,
-                                 int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL, 
-                                 double max_abs = -1.0,
+                                 bool mode_3D = true, int item = H2D_FN_VAL_0, 
+                                 double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
                                  MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
                                  double dmult = 1.0);
 
 Only the first three arguments are mandatory, the remaining ones are optional.
 Their meaning is as follows:
 
+ * mode_3D ... select either 2D or 3D rendering (default is 3D).
  * item:
    H2D_FN_VAL_0 ... show function values, 
    H2D_FN_DX_0  ... show x-derivative,
@@ -290,25 +292,25 @@ Their meaning is as follows:
  * max_abs: technical parameter, see file src/linearizer/linear.h.
  * xdisp, ydisp, dmult: Can be used to deform the domain. Typical applications are elasticity, plasticity, etc.
  
-The following figure shows the corresponding VTK file in Paraview.
+The following figure shows the corresponding Paraview visualization:
 
 .. image:: 03/vtk.png
    :align: center
-   :width: 500
+   :width: 530
    :alt: Solution of the Poisson equation.
 
 
 Visualizing the solution using OpenGL (optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The solution can be visualized via the ScalarView class::
+The solution can also be visualized via the ScalarView class::
 
     // Visualize the solution.
     ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
     view.show(&sln);
     View::wait();
 
-The following figure shows the OpenGL visualization (press '3' for 3D view).
+Hermes' built-in OpenGL visualization looks as follows:
 
 .. image:: 03/poisson.png
    :align: center

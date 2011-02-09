@@ -82,7 +82,8 @@ int main(int argc, char* argv[])
 
   // Output solution in VTK format.
   Linearizer lin;
-  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", H2D_FN_VAL_0);
+  bool mode_3D = true;
+  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
   info("Solution in VTK format saved to file %s.", "sln.vtk");
 
   // Visualize the solution.

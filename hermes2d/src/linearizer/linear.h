@@ -67,12 +67,12 @@ public:
   virtual void load_data(const char* filename);
   // Saves a MeshFunction (Solution, Filter) in VTK format.
   virtual void save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char* quantity_name,
-                                 int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL, 
-                                 double max_abs = -1.0,
+                                 bool mode_3D = true, int item = H2D_FN_VAL_0, 
+                                 double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
                                  MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
                                  double dmult = 1.0);
   // This function is used by save_solution_vtk().
-  virtual void save_data_vtk(const char* filename, const char* name);
+  virtual void save_data_vtk(const char* filename, const char* name, bool mode_3D);
 
   void free();
 
