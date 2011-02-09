@@ -316,9 +316,9 @@ int Linearizer::add_cell(Linearizer::Cell::EType type, int n, int *vtcs)
 
 //// FileFormatter /////////////////////////////////////////////////////////////////////////////////
 
-/// Produces a files in VTK format
+/// Produces a file in VTK format
 ///
-/// This class taker a Linearizer class, reads the info stored in there and produces a VTK
+/// This class takes a Linearizer class, reads the info stored in there and produces a VTK
 /// legacy file.
 class HERMES_API FileFormatter {
 public:

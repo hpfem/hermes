@@ -59,7 +59,7 @@ public:
   virtual void handle_overflow_idx();
 
   /// See Transformable::push_transform.
-	virtual void push_transform(int son);
+  virtual void push_transform(int son);
 
 protected:
 
