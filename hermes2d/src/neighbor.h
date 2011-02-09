@@ -121,7 +121,7 @@ public:
   ///                 (a sum of edge-integrals over elements appears in the mathematical formulation). Note that this may
   ///                 be also use in the edge-based form., e.g. to specify linear forms.
   ///
-  void set_active_edge(int edge, bool ignore_visited_segments = true);
+  void set_active_edge(int edge);
 
   /// Enhancement of set_active_edge for multimesh assembling.
   void set_active_edge_multimesh(const int& edge);

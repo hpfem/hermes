@@ -174,8 +174,6 @@ bool DiscreteProblem::is_up_to_date()
 }
 
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
-
-// This functions is identical in H2D and H3D.
 void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bool rhsonly,
                              bool force_diagonal_blocks, Table* block_weights)
 {
@@ -256,7 +254,7 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bo
           ns.set_ignore_errors(true);
 
           for(int ed = 0; ed < num_edges; ed++) {
-            ns.set_active_edge(ed, false);
+            ns.set_active_edge(ed);
             std::vector<Element *> *neighbors = ns.get_neighbors();
 
             neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
@@ -1458,6 +1456,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
           scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
             * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
             * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
+          local_stiffness_matrix[i][j] = val;
                   }
                 }
             }

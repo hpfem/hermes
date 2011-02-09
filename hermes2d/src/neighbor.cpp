@@ -169,7 +169,7 @@ void NeighborSearch::reset_neighb_info()
   neighborhood_type = H2D_DG_NOT_INITIALIZED;
 }
 
-void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
+void NeighborSearch::set_active_edge(int edge)
 {
   reset_neighb_info();
   active_edge = edge;
