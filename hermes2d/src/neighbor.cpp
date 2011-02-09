@@ -156,12 +156,12 @@ void NeighborSearch::reset_neighb_info()
   n_neighbors = 0;
 
   // Reset transformations.
-  for(int i = 0; i < central_n_trans.size(); i++) {
+  for(unsigned int i = 0; i < central_n_trans.size(); i++) {
     for(unsigned int j = 0; j < central_n_trans[i]; j++)
       central_transformations[i][j] = -1;
     central_n_trans[i] = 0;
   }
-  for(int i = 0; i < neighbor_n_trans.size(); i++) {
+  for(unsigned int i = 0; i < neighbor_n_trans.size(); i++) {
     for(unsigned int j = 0; j < neighbor_n_trans[i]; j++)
       neighbor_transformations[i][j] = -1;
     neighbor_n_trans[i] = 0;

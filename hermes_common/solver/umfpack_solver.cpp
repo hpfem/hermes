@@ -95,8 +95,6 @@ void CSCMatrix::multiply_with_scalar(scalar value)
 void CSCMatrix::alloc() {
   _F_
   assert(pages != NULL);
-  if (size <= 0)
-      error("UMFPack failed, matrix size must be greater than 0.");
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];
