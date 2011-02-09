@@ -44,7 +44,6 @@ add_subdirectory(35-markers-typical)
 add_subdirectory(36-markers-nontypical)
 add_subdirectory(37-nurbs)
 add_subdirectory(38-matrix-solvers)
-add_subdirectory(39-vtk-output)
 
 # Trilinos
 if(WITH_TRILINOS)
