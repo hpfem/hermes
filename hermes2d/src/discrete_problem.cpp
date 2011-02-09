@@ -1397,6 +1397,14 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
     NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.at(stage.meshes[n]->get_seq()).create_extended_asmlist(spaces[n], al[n]);
     NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.at(stage.meshes[m]->get_seq()).create_extended_asmlist(spaces[m], al[m]);
 
+    // If a block scaling table is provided, and if the scaling coefficient
+    // A_mn for this block is zero, then the form does not need to be assembled.
+    scalar block_scaling_coeff = 1.;
+    if (block_weights != NULL) {
+      if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
+      block_scaling_coeff = block_weights->get_A(m, n);
+    }
+
     // Precalc shapeset and refmaps used for the evaluation.
     PrecalcShapeset* fu;
     PrecalcShapeset* fv;
@@ -1447,7 +1455,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
                     }
                   }
                   else if (rhsonly == false) {
-          scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
+          scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
             * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
             * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
                   }
