@@ -4,11 +4,12 @@ Mac OS
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Known issues**: For some reason tutorial example 34-remote-computing, the 
-corresponding test, and the test views/zoom-to-fit do not compile (as of 
-November 24, 2010). We work on this as time permits, so perhaps you will not 
-have this problem anymore. If you do, please comment out this example and 
-tests in the corresponding CMakeLists.txt files. 
+**Known issues**: Hermes has built-in OpenGL visualization based on FreeGlut, but this package 
+comes with certain installation difficulties. If you encounter Glut-related problems, set 
+H2D_WITH_GLUT to NO in Cmake.vars, build Hermes without Glut, and use VTK output for visualization. 
+For some reason tutorial example 34-remote-computing, the corresponding test, and the test 
+views/zoom-to-fit do not compile (as of November 24, 2010). We work on these problems as time 
+permits. 
 
 **Step 1**: Make sure you have XCode installed. This should be on the installation 
 disks which came with your Mac. XCode contains the GNU compilers, make 
@@ -21,7 +22,10 @@ your operating system, but it will probably be out of date. Once this
 is installed, go to the Python 2.6 directory which will be in your 
 Applications folder and double click the 'Update Shell 
 Profile.command' script to run it. This will update your system to use 
-the latest version of Python.
+the latest version of Python. We also found the Chris Fonnesbeck's
+`SciPy Superpack for Python 2.6 (64-bit) <http://stronginference.com/scipy-superpack/>`_ very useful.
+If you are on a 64-bit machine, you can force 64-bit version of Python by running
+"arch -x86_64 /usr/bin/python".
 
 **Step 3**: Install the following libraries and applications: Suitesparse, 
 glew, cmake, git. If you don't already have these on your Mac, then 
