@@ -3,12 +3,13 @@
 
 // This example shows how to solve a first simple PDE:
 //   - load the mesh,
-//   - perform initial refinements
-//   - create a H1 space over the mesh
-//   - define weak formulation
-//   - initialize matrix solver
-//   - assemble and solve the matrix system
-//   - visualize the solution
+//   - perform initial refinements,
+//   - create a H1 space over the mesh,
+//   - define weak formulation,
+//   - initialize matrix solver,
+//   - assemble and solve the matrix system,
+//   - output the solution in VTK format (to be visualized, e.g., using Paraview),
+//   - visualize the solution using Hermes' native OpenGL-based functionality.
 //
 // PDE: Poisson equation -Laplace u = CONST_F with homogeneous (zero)
 //      Dirichlet boundary conditions.
@@ -17,6 +18,7 @@
 // initial polynomial degree P_INIT, and play with various initial
 // mesh refinements at the beginning of the main() function.
 
+const bool USE_HERMES_VISUALIZATION = true;       // Set to "false" to suppress Hermes OpenGL visualization. 
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -66,7 +68,7 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-   // Initialize the solution.
+  // Initialize the solution.
   Solution sln;
 
   // Assemble the stiffness matrix and right-hand side vector.
@@ -75,17 +77,20 @@ int main(int argc, char* argv[])
 
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
-  if(solver->solve())
-    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-  else
-    error ("Matrix solver failed.\n");
+  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  else error ("Matrix solver failed.\n");
+
+  // Output solution in VTK format.
+  Linearizer lin;
+  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature");
+  info("Solution in VTK format saved to file %s.", "sln.vtk");
 
   // Visualize the solution.
-  ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
-  view.show(&sln);
-
-  // Wait for the view to be closed.
-  View::wait();
+  if (USE_HERMES_VISUALIZATION) {
+    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+    view.show(&sln);
+    View::wait();
+  }
 
   // Clean up.
   delete solver;
