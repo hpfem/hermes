@@ -888,10 +888,12 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
   delete root;
 
   // Deinitialize neighbor pss's, refmaps.
+  if(DG_matrix_forms_present) {
   for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
     delete *it;
   for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
     delete *it;
+}
 }
 
 
@@ -1452,7 +1454,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
                 }
             }
     if (rhsonly == false)
-      mat->add(ext_asmlist_u->cnt, ext_asmlist_v->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
+      mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
           }
 }
 
