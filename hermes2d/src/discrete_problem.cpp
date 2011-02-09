@@ -887,6 +887,8 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
 
   // Deinitialize neighbor pss's, refmaps.
   if(DG_matrix_forms_present) {
+  for(std::vector<PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
+    delete *it;
   for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
     delete *it;
   for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
@@ -2196,6 +2198,9 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     for (int i = u_ext_offset; i < u_ext_length; i++) {
       if (oi[i - u_ext_offset] != NULL) { oi[i - u_ext_offset]->free_ord(); delete oi[i - u_ext_offset]; }
     }
+    delete fake_e;
+    delete ou;
+    delete ov;
   }
 
   // Evaluate the form using just calculated order.
@@ -2249,6 +2254,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     }
   }
   if (ext != NULL) {ext->free(); delete ext;}
+
+  delete e;
 
   // Delete the DiscontinuousFunctions. This does not clear their component functions (DiscontinuousFunc::free_fn()
   // must be called in order to do that) as they are contained in cache_fn and may be used by another form - they
@@ -2320,6 +2327,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     if (ov != NULL) {
       ov->free_ord(); delete ov;
     }
+    delete fake_e;
   }
 
   // Evaluate the form.
@@ -2368,6 +2376,9 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     }
   }
   if (ext != NULL) {ext->free(); delete ext;}
+
+  delete e;
+  delete [] jwt;
 
   // Scaling.
   res *= vfs->scaling_factor;
