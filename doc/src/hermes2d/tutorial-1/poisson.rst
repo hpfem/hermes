@@ -249,24 +249,70 @@ The matrix solver can fail for various reasons -- direct solvers (UMFPACK,
 SUPERLU, MUMPS) may run out of memory if the number of equations is large,
 iterative solvers may fail to converge if the matrix is ill-conditioned.  
 
-Visualizing the solution
-~~~~~~~~~~~~~~~~~~~~~~~~
+Saving solution in VTK format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The solution can be saved in the VTK format to be visualized, for example,
+using `Paraview <http://www.paraview.org/>`_. To do this, one uses the 
+Linearizer class that has the ability to approximate adaptively a higher-order
+polynomial solution using linear triangles::
+
+  // Output solution in VTK format.
+  Linearizer lin;
+  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature");
+  info("Solution in VTK format saved to file %s.", "sln.vtk");
+
+The function save_solution_vtk() can be found in hermes2d/src/linearizer/ and its 
+complete header is ::
+
+  // Saves a MeshFunction (Solution, Filter) in VTK format.
+  virtual void save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char* quantity_name,
+                                 int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL, 
+                                 double max_abs = -1.0,
+                                 MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
+                                 double dmult = 1.0);
+
+Only the first three arguments are mandatory, the remaining ones are optional.
+Their meaning is as follows:
+
+ * item:
+   H2D_FN_VAL_0 ... show function values, 
+   H2D_FN_DX_0  ... show x-derivative,
+   H2D_FN_DY_0  ... show y-derivative,
+   H2D_FN_DXX_0 ... show xx-derivative,
+   H2D_FN_DXY_0 ... show xy-derivative,
+   H2D_FN_DYY_0 ... show yy-derivative,
+ * eps:
+   HERMES_EPS_LOW      ... low resolution (small output file),
+   HERMES_EPS_NORMAL   ... normal resolution (medium output file),
+   HERMES_EPS_HIGH     ... high resolution (large output file),
+   HERMES_EPS_VERYHIGH ... high resolution (very large output file).
+ * max_abs: technical parameter, see file src/linearizer/linear.h.
+ * xdisp, ydisp, dmult: Can be used to deform the domain. Typical applications are elasticity, plasticity, etc.
+ 
+The following figure shows the corresponding VTK file in Paraview.
+
+.. image:: 03/vtk.png
+   :align: center
+   :width: 500
+   :alt: Solution of the Poisson equation.
+
+
+Visualizing the solution using OpenGL (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The solution can be visualized via the ScalarView class::
 
     // Visualize the solution.
     ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
     view.show(&sln);
-
-    // Wait for the view to be closed.
     View::wait();
 
-The following figure shows the output of this example (again, press '3' for 3D view).
+The following figure shows the OpenGL visualization (press '3' for 3D view).
 
 .. image:: 03/poisson.png
    :align: center
    :width: 400
-   :height: 350
    :alt: Solution of the Poisson equation.
 
 Cleaning up
@@ -278,3 +324,5 @@ We finish the main.cpp file with::
     delete solver;
     delete matrix;
     delete rhs;
+
+
