@@ -1,12 +1,10 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 23-newton-timedep-heat-adapt-basic works correctly.
+// This test makes sure that example 23-newton-timedep-heat-adapt-rk works correctly.
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
@@ -48,11 +46,26 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
 // Newton's method
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on fine mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
+
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
+// Explicit methods:
+//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
+// Implicit methods: 
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5.
+// Embedded explicit methods:
+//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
+//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
+// Embedded implicit methods:
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
+//   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
+ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.
@@ -70,8 +83,8 @@ Real dlam_du(Real u) {
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
+  dx = (y+10)/100.;
+  dy = (x+10)/100.;
   return (x+10)*(y+10)/100.;
 }
 
@@ -99,10 +112,16 @@ Real heat_src(Real x, Real y)
 }
 
 // Weak forms.
-# include "forms.cpp"
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Choose a Butcher's table or define your own.
+  ButcherTable bt(butcher_table_type);
+  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
+  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
+  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
+
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
@@ -124,17 +143,17 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
+  // Convert initial condition into a Solution.
+  Solution* sln_prev_time = new Solution(&mesh, init_cond);
+
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
-
-  // Convert initial condition into a Solution.
-  Solution sln_prev_time;
-  sln_prev_time.set_exact(&mesh, init_cond);
+  sln.copy(sln_prev_time);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
-  wf.add_vector_form(callback(F_euler), HERMES_ANY, &sln_prev_time);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_prev_time);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_prev_time);
 
   // Initialize the discrete problem.
   bool is_linear = false;
@@ -160,28 +179,15 @@ int main(int argc, char* argv[])
     // The following is done only in the first time step, 
     // when the nonlinear problem was never solved before.
     if (ts == 1) {
-      // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-      SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
-      Vector* rhs_coarse = create_vector(matrix_solver);
-      Solver* solver_coarse = create_linear_solver(matrix_solver, matrix_coarse, rhs_coarse);
-      scalar* coeff_vec_coarse = new scalar[ndof];
-
-      // Calculate initial coefficient vector for Newton on the coarse mesh.
-      info("Projecting initial condition to obtain coefficient vector on coarse mesh.");
-      OGProjection::project_global(&space, &sln_prev_time, coeff_vec_coarse, matrix_solver);
-
-      // Newton's loop on the coarse mesh.
-      info("Solving on coarse mesh:");
+      // Runge-Kutta step on the coarse mesh.
       bool verbose = true;
-      if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
-          NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-      Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
-
-      // Cleanup after the Newton loop on the coarse mesh.
-      delete matrix_coarse;
-      delete rhs_coarse;
-      delete solver_coarse;
-      delete [] coeff_vec_coarse;
+      bool is_linear = false;
+      info("Runge-Kutta time step on coarse mesh (t = %g s, tau = %g s, stages: %d).", 
+         current_time, time_step, bt.get_size());
+      if (!rk_time_step(current_time, time_step, &bt, &sln, &space, &dp_coarse, matrix_solver,
+		        verbose, is_linear, NEWTON_TOL_COARSE, NEWTON_MAX_ITER)) {
+        error("Runge-Kutta time step failed, try to decrease time step size.");
+      }
     }
 
     // Spatial adaptivity loop. Note: sln_prev_time must not be changed during spatial adaptivity. 
@@ -193,36 +199,31 @@ int main(int argc, char* argv[])
       // Construct globally refined reference mesh and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
-      // Initialize matrix solver.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-      scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
-
       // Initialize discrete problem on reference mesh.
       DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
 
-      // Calculate initial coefficient vector for Newton on the fine mesh.
+      // Calculate initial solution on the fine mesh.
       if (ts == 1 && as == 1) {
-        info("Projecting coarse mesh solution to obtain coefficient vector on fine mesh.");
-        OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
+        info("Projecting coarse mesh solution to obtain initial solution on fine mesh.");
+        OGProjection::project_global(ref_space, &sln, &ref_sln, matrix_solver);
       }
       else {
-        info("Projecting last fine mesh solution to obtain coefficient vector on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
+        info("Projecting last fine mesh solution to obtain initial solution on new fine mesh.");
+        OGProjection::project_global(ref_space, &ref_sln, &ref_sln, matrix_solver);
       }
 
       // Now we can deallocate the previous fine mesh.
-      if(as > 1) delete ref_sln.get_mesh();
+      //if(as > 1) delete ref_sln.get_mesh();
 
-      // Newton's loop on the fine mesh.
-      info("Solving on fine mesh:");
+      // Runge-Kutta step on the fine mesh.
+      info("Runge-Kutta time step on fine mesh (t = %g s, tau = %g s, stages: %d).", 
+         current_time, time_step, bt.get_size());
       bool verbose = true;
-      if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
-	  	        NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-
-      // Store the result in ref_sln.
-      Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+      bool is_linear = false;
+      if (!rk_time_step(current_time, time_step, &bt, &ref_sln, ref_space, dp, matrix_solver,
+		        verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
+        error("Runge-Kutta time step failed, try to decrease time step size.");
+      }
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting fine mesh solution on coarse mesh for error estimation.");
@@ -252,18 +253,14 @@ int main(int argc, char* argv[])
       }
       
       // Clean up.
-      delete solver;
-      delete matrix;
-      delete rhs;
       delete adaptivity;
       delete ref_space;
       delete dp;
-      delete [] coeff_vec;
     }
     while (done == false);
 
     // Copy last reference solution into sln_prev_time.
-    sln_prev_time.copy(&ref_sln);
+    sln_prev_time->copy(&ref_sln);
 
     // Increase current time and counter of time steps.
     current_time += time_step;
@@ -271,11 +268,14 @@ int main(int argc, char* argv[])
   }
   while (current_time < T_FINAL);
 
+  // Clean up.
+  delete sln_prev_time;
+
   ndof = Space::get_num_dofs(&space);
 
-  printf("ndof allowed = %d\n", 140);
+  printf("ndof allowed = %d\n", 160);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 140) {      // ndofs was 132 at the time this test was created.
+  if (ndof < 160) {      // ndofs was 153 at the time this test was created.
     printf("Success!\n");
     return ERR_SUCCESS;
   }
@@ -284,4 +284,3 @@ int main(int argc, char* argv[])
     return ERR_FAILURE;
   }
 }
-

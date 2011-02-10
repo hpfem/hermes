@@ -26,6 +26,7 @@ add_subdirectory(20-newton-timedep-flame)
 add_subdirectory(21-newton-timedep-ns)
 add_subdirectory(22-newton-timedep-gp)
 add_subdirectory(23-newton-timedep-heat-adapt-basic)
+add_subdirectory(23-newton-timedep-heat-adapt-rk)
 add_subdirectory(24-heat-and-moisture-adapt)
 add_subdirectory(25-newton-timedep-gp-adapt)
 
