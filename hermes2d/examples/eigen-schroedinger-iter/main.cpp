@@ -23,7 +23,7 @@ int TARGET_EIGENFUNCTION = 1;                     // Desired eigenfunction: 1 fo
 int ITERATIVE_METHOD = 2;                         // 1 = Newton, 2 = Picard.
 
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
+const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain_lshape.mesh", &mesh);
+  mloader.load("domain_lshape_tria.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
