@@ -122,12 +122,12 @@ void NeighborSearch::reset_neighb_info()
   // Reset transformations.
   for(unsigned int i = 0; i < central_n_trans.size(); i++) {
     for(unsigned int j = 0; j < central_n_trans[i]; j++)
-      central_transformations[i][j] = -1;
+      central_transformations[i][j] = 0;
     central_n_trans[i] = 0;
   }
   for(unsigned int i = 0; i < neighbor_n_trans.size(); i++) {
     for(unsigned int j = 0; j < neighbor_n_trans[i]; j++)
-      neighbor_transformations[i][j] = -1;
+      neighbor_transformations[i][j] = 0;
     neighbor_n_trans[i] = 0;
   }
   neighborhood_type = H2D_DG_NOT_INITIALIZED;
@@ -422,10 +422,10 @@ void NeighborSearch::clear_initial_sub_idx()
 void NeighborSearch::delete_neighbor(unsigned int position)
 {
   delete [] central_transformations[position];
-  central_transformations.erase (central_transformations.begin()+position);
-  central_n_trans.erase (central_n_trans.begin()+position);
-  neighbor_edges.erase (neighbor_edges.begin()+position);
-  neighbors.erase (neighbors.begin()+position);
+  central_transformations.erase (central_transformations.begin() + position);
+  central_n_trans.erase (central_n_trans.begin() + position);
+  neighbor_edges.erase (neighbor_edges.begin() + position);
+  neighbors.erase (neighbors.begin() + position);
   n_neighbors--;
 }
 
@@ -493,31 +493,23 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
         if(n_neighbors > NeighborSearch::max_neighbors)
           NeighborSearch::max_neighbors = n_neighbors;
 
-        /*
-        for(int k = 0 ; k < n_parents; k++)
-          debug_log("vertices on the way: %d", parents[k]->id);
-        debug_log("\n");
-        */
-
+        if(neighbor_transformations.size() <= n_neighbors)
+              neighbor_transformations.insert(neighbor_transformations.begin() + n_neighbors, new unsigned int[NeighborSearch::max_n_trans]);
+            
         // Go back through the intermediate inactive parents down to the central element and stack corresponding
         // neighbor_transformations into the array 'neighbor_transformations'.
-        for(int j = n_parents - 1; j > 0; j-- )
-        {
+        for(int j = n_parents - 1; j > 0; j-- ) {
           n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
-          if(n == NULL)
-          {
+          if(n == NULL) {
             neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge.local_num_of_edge;
             p1 = par_mid_vertices[j]->id;
           }
-          else
-          {
-            if(n->id == par_mid_vertices[j-1]->id)
-            {
+          else {
+            if(n->id == par_mid_vertices[j-1]->id) {
               neighbor_transformations[n_neighbors][n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
               p2 = par_mid_vertices[j]->id;
             }
-            else
-            {
+            else {
               neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge.local_num_of_edge;
               p1 = par_mid_vertices[j]->id;
             }
@@ -530,9 +522,9 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
         else
           neighbor_transformations[n_neighbors][n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
 
-
         NeighborEdgeInfo local_edge_info;
         local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
+
         // Query the orientation of the neighbor edge relative to the central el.
         local_edge_info.orientation = neighbor_edge_orientation(id_of_par_orient_1, id_of_par_orient_2, 0);
 
@@ -603,11 +595,13 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
           if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
           // Construct the transformation path to the current neighbor.
-          for(unsigned int k = 0; k < n_sons; k++)
-            central_transformations[n_neighbors][k] = sons[k];
+          for(unsigned int k = 0; k < n_sons; k++) {
+            if(central_transformations.size() <= n_neighbors)
+              central_transformations.insert(central_transformations.begin() + n_neighbors, new unsigned int[NeighborSearch::max_n_trans]);
+              central_transformations[n_neighbors][k] = sons[k];
+          }
 
           central_n_trans[n_neighbors] = n_sons;
-
 
           NeighborEdgeInfo local_edge_info;
           local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
@@ -667,34 +661,21 @@ void NeighborSearch::set_quad_order(int order)
 double3* NeighborSearch::get_quad_pt(bool on_neighbor)
 {
   if (on_neighbor)
-  {
-    ensure_set_quad_order(neighb_quad);
     return neighb_quad.pt;
-  }
   else
-  {
-    ensure_set_quad_order(central_quad);
     return central_quad.pt;
-  }
 }
 
 int NeighborSearch::get_quad_eo(bool on_neighbor)
 {
   if (on_neighbor)
-  {
-    ensure_set_quad_order(neighb_quad);
     return neighb_quad.eo;
-  }
   else
-  {
-    ensure_set_quad_order(central_quad);
     return central_quad.eo;
-  }
 }
 
 int NeighborSearch::get_quad_np()
 {
-  ensure_set_quad_order(central_quad);
   return central_quad.np;
 }
 
@@ -733,7 +714,6 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
 int NeighborSearch::get_neighb_edge_number(int segment)
 {
-  ensure_active_edge(this);
   if( (unsigned) segment >= neighbor_edges.size())
     error("given number is bigger than actual number of neighbors ");
   else
@@ -743,7 +723,6 @@ int NeighborSearch::get_neighb_edge_number(int segment)
 
 int NeighborSearch::get_neighb_edge_orientation(int segment)
 {
-  ensure_active_edge(this);
   if( (unsigned) segment >= neighbor_edges.size())
     error("given number is bigger than actual number of neighbors ");
   else
