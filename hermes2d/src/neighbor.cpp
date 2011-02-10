@@ -8,40 +8,11 @@ std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> 
 std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_n =
   *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>();
 
-void NeighborSearch::empty_main_caches()
-{
-  std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>::iterator it;
-  for(it = NeighborSearch::main_cache_m.begin(); it != NeighborSearch::main_cache_m.end(); it++) {
-    delete (*it).second->central_pss;
-    (*it).second->central_pss = NULL;
-    delete (*it).second->central_rm;
-    (*it).second->central_rm = NULL;
-    delete (*it).second;
-  }
-  // This maybe is not needed.
-  NeighborSearch::main_cache_m.clear();
-
-  for(it = NeighborSearch::main_cache_n.begin(); it != NeighborSearch::main_cache_n.end(); it++) {
-    delete (*it).second->central_pss;
-    (*it).second->central_pss = NULL;
-    delete (*it).second->central_rm;
-    (*it).second->central_rm = NULL;
-    delete (*it).second;
-  }
-  // This maybe is not needed.
-  NeighborSearch::main_cache_n.clear();
-}
-
-
 NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   supported_shapes(NULL),
   mesh(mesh),
   central_el(el),
   neighb_el(NULL),
-  central_rm(NULL),
-  neighb_rm(NULL),
-  central_pss(NULL),
-  neighb_pss(NULL),
   quad(&g_quad_2d_std)
 {
   central_transformations.reserve(NeighborSearch::max_neighbors * 2);
@@ -76,10 +47,6 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   mesh(ns.mesh),
   central_el(ns.central_el),
   neighb_el(NULL),
-  central_rm(NULL),
-  neighb_rm(NULL),
-  central_pss(NULL),
-  neighb_pss(NULL),
   neighbor_edge(ns.neighbor_edge),
   active_segment(ns.active_segment)
 {
@@ -128,10 +95,7 @@ NeighborSearch::~NeighborSearch()
 {
   neighbor_edges.clear();
   neighbors.clear();
-  clear_caches();
   clear_supported_shapes();
-  clear_neighbor_pss();
-  detach_pss_and_rm();
   for(unsigned int i = 0; i < central_transformations.size(); i++)
     delete [] central_transformations.at(i);
   central_transformations.clear();
@@ -680,109 +644,6 @@ int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_v
   return 0;
 }
 
-/*
-bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
-{
-  _F_
-  ensure_active_edge(this);
-  active_segment = neighbor;
-
-  neighb_el = neighbors[active_segment];
-  neighbor_edge = neighbor_edges[active_segment];
-
-  if(central_pss != NULL)
-  {
-    ensure_central_pss_rm(this);
-
-    // Reset the transformation of the pss on central element.
-    if(central_pss->get_transform() != original_central_el_transform)
-      central_pss->set_transform(original_central_el_transform);
-
-    // Push the central element's transformation to the central pss and refmap.
-    if (neighborhood_type == H2D_DG_GO_DOWN)
-      for(unsigned int i = 0; i < central_n_trans[active_segment]; i++)
-        central_pss->push_transform(central_transformations[active_segment][i]);
-
-    central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
-  }
-  else if (central_rm != NULL)
-  {
-    // Push the central element's transformation to the central refmap.
-    if (neighborhood_type == H2D_DG_GO_DOWN)
-      for(unsigned int i = 0; i < central_n_trans[active_segment]; i++)
-        central_rm->push_transform(central_transformations[active_segment][i]);
-  }
-
-  if (with_neighbor_pss) // If the extended shapeset is needed...
-  {
-    if (neighb_pss == NULL) // Create the neighbor objects for the first time.
-    {
-      neighb_pss = new PrecalcShapeset(central_pss->get_shapeset());
-      neighb_pss->set_quad_2d(quad);
-      neighb_rm = new RefMap();
-      neighb_rm->set_quad_2d(quad);
-    }
-
-    // Set active element for the neighbor objects or update it in the case of a go-down neighborhood.
-    neighb_pss->set_active_element(neighb_el);
-    neighb_rm->set_active_element(neighb_el);
-    // Reset the transformation on the neighbor (this has an effect only when the active edge is changed
-    // and the previous one defined a go-up neighborhood).
-    neighb_pss->reset_transform();
-    neighb_rm->reset_transform();
-    neighb_pss->set_active_shape(central_pss->get_active_shape());
-
-    // Push the neighbor element's transformations in the case of a go-up neighborhood.
-    if (neighborhood_type == H2D_DG_GO_UP) {
-      for(unsigned int i = 0; i < neighbor_n_trans[active_segment]; i++)
-        neighb_pss->push_transform(neighbor_transformations[active_segment][i]);
-      neighb_rm->force_transform(neighb_pss->get_transform(), neighb_pss->get_ctm());
-    }
-  }
-  return true;
-}
-*/
-void NeighborSearch::attach_pss_and_rm(PrecalcShapeset *pss, RefMap *rm)
-{
-  _F_
-  central_pss = pss;
-  central_rm = rm;
-
-  original_central_el_transform = pss->get_transform();
-  assert_msg( original_central_el_transform == rm->get_transform(),
-              "Cannot use a RefMap that is transformed differently than the supplied PrecalcShapeset." );
-}
-
-void NeighborSearch::attach_rm(RefMap *rm)
-{
-  central_rm = rm;
-  original_central_el_transform = rm->get_transform();
-}
-
-void NeighborSearch::detach_pss_and_rm()
-{
-  _F_
-  if (central_pss == NULL)
-  {
-    if (central_rm != NULL)
-      detach_rm();
-    return;
-  }
-
-  if (neighborhood_type == H2D_DG_GO_DOWN) {
-    if (central_pss->get_transform() != original_central_el_transform) {
-      central_pss->set_transform(original_central_el_transform);
-      central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
-    }
-  }
-}
-
-void NeighborSearch::detach_rm()
-{
-  if (central_rm != NULL && neighborhood_type == H2D_DG_GO_DOWN && central_rm->get_transform() != original_central_el_transform)
-    central_rm->set_transform(original_central_el_transform);
-}
-
 NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space *space, AsmList* al)
 {
   _F_
@@ -837,72 +698,6 @@ int NeighborSearch::get_quad_np()
   return central_quad.np;
 }
 
-
-Geom<double>* NeighborSearch::init_geometry(Geom<double>** ext_cache_e, SurfPos *ep)
-{
-  int eo = get_quad_eo();
-
-  // Do not use the caches at all.
-  if (ext_cache_e == NULL)
-    return new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo),
-                                      neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
-
-  if (n_neighbors == 1) // go-up or no-transf neighborhood
-  {
-    // Do the same as if assembling standard (non-DG) surface forms.
-    if (ext_cache_e[eo] == NULL)
-      ext_cache_e[eo] = new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo),
-                                                   neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
-    return ext_cache_e[eo];
-  }
-  else // go-down neighborhood
-  {
-    // Also take into account the transformations of the central element.
-    Key key(eo, active_segment);
-    if (cache_e[key] == NULL)
-      cache_e[key] = new InterfaceGeom<double> (init_geom_surf(central_rm, ep, eo),
-                                                neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
-    return cache_e[key];
-  }
-}
-
-double* NeighborSearch::init_jwt(double** ext_cache_jwt)
-{
-  int eo = get_quad_eo();
-
-  // Do not use the cache at all.
-  if (ext_cache_jwt == NULL)
-    return calculate_jwt(eo);
-
-  if (n_neighbors == 1) // go-up or no-transf neighborhood
-  {
-    // Do the same as if assembling standard (non-DG) surface forms.
-    if (ext_cache_jwt[eo] == NULL)
-      ext_cache_jwt[eo] = calculate_jwt(eo);
-    return ext_cache_jwt[eo];
-  }
-  else  // go-down neighborhood
-  {
-    // Also take into account the transformations of the central element.
-    Key key(eo, active_segment);
-    if (cache_jwt[key] == NULL)
-      cache_jwt[key] = calculate_jwt(eo);
-    return cache_jwt[key];
-  }
-}
-
-double* NeighborSearch::calculate_jwt(int edge_order)
-{
-  int np = get_quad_np();
-  double3* pt = get_quad_pt();
-  double3* tan = central_rm->get_tangent(active_edge, edge_order);
-
-  double *jwt = new double[np];
-  for(int i = 0; i < np; i++)
-    jwt[i] = pt[i][2] * tan[i][2];
-
-  return jwt;
-}
 
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 {

@@ -8,30 +8,6 @@
 #include "weakform/forms.h"
 #include "mesh/refmap.h"
 
-/*** Global sanity checks for the NeighborSearch class ***/
-
-#define ensure_active_edge(obj) \
-  assert_msg( obj->active_edge >= 0 && obj->active_edge < obj->central_el->nvert,\
-              "Wrong active edge or active edge not set." )
-
-#define ensure_active_segment(obj) \
-  assert_msg( obj->active_segment >= 0 && obj->active_segment < obj->n_neighbors,\
-              "Active segment of the active edge has not been set or exceeds the number of neighbors" )
-
-#define ensure_central_pss_rm(obj) \
-  assert_msg( obj->central_pss != NULL && obj->central_pss->get_active_element() == obj->central_el &&\
-              obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
-              "Precalculated shapeset and refmap have not been attached or have a wrong active element." )
-
-#define ensure_central_rm(obj) \
-  assert_msg( obj->central_rm != NULL && obj->central_rm->get_active_element() == obj->central_el,\
-              "Reference mapping has not been attached or has a wrong active element." )
-
-//TODO: Add a test for overshooting the maximum allowed edge order.
-#define ensure_set_quad_order(obj) \
-  assert_msg( obj.eo > 0 && obj.np > 0 && obj.pt != NULL, \
-              "Quadrature order must be set before calculating geometry and function values." )
-
 /*** Class NeighborSearch. ***/
 
 /*!\class NeighborSearch neighbor.h "src/neighbor.h"
@@ -44,9 +20,6 @@
  * In order to search for the neighboring elements, one selects a particular edge of the central element and calls
  * the method \c set_active_edge. This enumerates the neighbors and fills in the array \c transformations, which
  * will be needed later for getting function values at matching points from both sides of the selected (active) edge.
- * If values of a test function will be needed, a precalculated shapeset that will receive the transformations
- * must also be attached via \c attach_pss_and_rm (so that a call to \c detach_pss_and_rm may be performed afterwards
- * to return the pss to its original state).
  *
  * The actual procedure depends on the relative size of the central element with respect to the neighbor element(s)
  * across the active edge:
@@ -148,17 +121,7 @@ public:
 
   /// In case we determine a neighbor is not correct due to a subelement mapping, we delete it.
   void delete_neighbor(unsigned int position);
-
-  /// Set the part of active edge shared by the central element and a given neighbor.
-  ///
-  /// \param[in] neighbor   Number of the neighbor as enumerated in \c set_active_edge (i.e. its index in \c neighbors).
-  /// \param[in] with_neighbor_pss  If true, also creates and/or sets the transformation of a PrecalcShapeset on the
-  ///                               given neighbor element; this is then used for forming the extended shapeset.
-  /// \return false if NeighborSearch is set to ignore already visited segments and the given one has already been visited
-  /// \return true otherwise.
-  ///
-  //bool set_active_segment(int neighbor, bool with_neighbor_pss = true);
-
+  
 /*** Methods for computing values of external functions. ***/
 
   /// Fill arrays with function values / derivatives at both sides of the active segment of active edge.
@@ -186,35 +149,6 @@ public:
   /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
   ///
   NeighborSearch::ExtendedShapeset* create_extended_asmlist(Space* space, AsmList* al);
-
-  /// Assign a precalculated shapeset and associated reference mapping to the central element.
-  ///
-  /// Apart from setting the corresponding pointers, it also stores the original transformation of the pss and refmap.
-  /// This is required for a <em>way down</em>-type neighborhood (big central element with several neighbors), where
-  /// transforms from the \c transfomations array need to be pushed to the active element's pss and refmap, in order to
-  /// later allow resetting the pss and refmap to their original active element.
-  ///
-  /// \param[in]  pss Pointer to a PrecalcShapeset object (typically from the assembling procedure).
-  /// \param[in]  rm  Pointer to a RefMap object associated with the pss.
-  ///
-  void attach_pss_and_rm(PrecalcShapeset* pss, RefMap* rm);
-
-  /// Assign a reference mapping to the central element.
-  ///
-  /// If geometric data about the neighborhood is needed (see function \c init_geometry), a reference mapping with
-  /// the correctly pushed <em>way down</em> transformations is required. If the extended shapesets will not be used,
-  /// this method may be used for this purpose instead of \c attach_pss_and_rm.
-  ///
-  /// \param[in]  rm  Pointer to a RefMap object associated with the pss.
-  ///
-  void attach_rm(RefMap* rm);
-
-  /// Restore the transformation set for central element's pss and refmap to that before their attachment to the
-  /// NeighborSearch.
-  void detach_pss_and_rm();
-
-  /// Restore the transformation set for central element's refmap to that before its attachment to the NeighborSearch.
-  void detach_rm();
 
 /*** Methods for working with quadrature on the active edge. ***/
 
@@ -246,51 +180,6 @@ public:
   ///          neighboring elements.
   ///
   int get_quad_np();
-
-  /// Get the precalculated shapeset on the central element.
-  PrecalcShapeset * get_pss() {return this->central_pss;}
-
-  /// Get the refmap on the central element.
-  RefMap * get_rm() {return this->central_rm;}
-
-
-/*** Methods for getting geometry and integration data. ***/
-
-  /// Initialize the geometry data for the active segment.
-  ///
-  /// Calculates physical points, normals, etc. at the integration points, using cached values whenever possible.
-  /// This function assumes that integration order has been set by \c set_quad_order.
-  ///
-  /// \param[in,out]  ext_cache_e   Geometry cache from the assembling procedure. A key to this cache is the sole
-  ///                               edge integration pseudo-order (which contains information about the true order
-  ///                               and local edge number).
-  ///
-  ///                               If no transformations are to be pushed on the central element (not a
-  ///                               <em>way-down</em> neighborhood), the returned value is either fetched from this
-  ///                               cache or a new entry is created and the cache is updated.
-  ///
-  ///                               When central element requires transformation to a son matching the current
-  ///                               neighbor, an internal cache is used which is queried by both edge pseudo-order
-  ///                               and active segment (which uniquely determines the transformation).
-  ///
-  ///                               If ext_cache_e == NULL, no cache is used whatsoever.
-  ///
-  /// \param[in] ep Active edge data required by the \c init_geom_surf function.
-  /// \return Pointer to a structure holding the geometry data as well as diameter, id and marker of elements on both
-  ///         sides of the edge.
-  ///
-  Geom<double>* init_geometry(Geom< double >** ext_cache_e, SurfPos* ep);
-
-  /// Initialize the products of Jacobian and quadrature weights.
-  ///
-  /// This function uses both internal cache and cache from the assembling procedure, in the same way as
-  /// \c init_geometry.
-  /// This function assumes that integration order has been set by \c set_quad_order.
-  ///
-  /// \param[in,out]  ext_cache_jwt   Cache from the assembling procedure (may be set to NULL to bypass the caching).
-  /// \return         The array of Jacobian * weights.
-  ///
-  double* init_jwt(double** ext_cache_jwt);
 
 /*** Methods for retrieving additional information about the neighborhood. ***/
 
@@ -339,33 +228,10 @@ public:
   ///
   int get_neighb_edge_orientation(int segment);
 
-/*** Methods for cleaning up. ***/
-
   /// Frees the memory occupied by the extended shapeset.
   void clear_supported_shapes() {
     if (supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
   }
-
-  /// Frees the memory occupied by the neighbor element's precalc. shapeset and reference mapping.
-  void clear_neighbor_pss() {
-    if (neighb_pss != NULL) delete neighb_pss;
-    if (neighb_rm != NULL) delete neighb_rm;
-  }
-
-  /// Frees the memory occupied by the internal geometric and jac*wt caches.
-  void clear_caches() {
-    for (std::map<Key, Geom<double>*, Compare>::iterator it = cache_e.begin(); it != cache_e.end(); it++)
-    {
-      (it->second)->free();
-      delete it->second;
-    }
-    cache_e.clear();
-
-    for (std::map<Key, double*, Compare>::iterator it = cache_jwt.begin(); it != cache_jwt.end(); it++)
-      delete [] it->second;
-    cache_jwt.clear();
-  }
-
   /// Destructor.
   ~NeighborSearch();
 
@@ -409,7 +275,8 @@ private:
 
 /*** Transformations. ***/
 
-  static const int max_n_trans = 20;              ///< Number of allowed transformations (or equiv. number of neighbors
+  static const int max_n_trans = Transformable::H2D_MAX_TRN_LEVEL;
+                                                  ///< Number of allowed transformations (or equiv. number of neighbors
                                                   ///< in a go-down neighborhood) - see Transformable::push_transform.
   std::vector<unsigned int *> central_transformations;     ///< Vector of transformations of the central element to each neighbor
                                                   ///< (in a go-down neighborhood; stored row-wise for each neighbor).
@@ -424,15 +291,9 @@ private:
 
 
 /*** Significant objects of the neighborhood. ***/
-
   Element* central_el;          ///< Central (currently assembled) element.
   Element* neighb_el;           ///< Currently selected neighbor element (on the other side of active segment).
-  RefMap* central_rm;           ///< Reference mapping of the central element.
-  RefMap* neighb_rm;            ///< Reference mapping of the neighbor element.
-  PrecalcShapeset *central_pss; ///< Precalculated shapeset on the central element.
-  PrecalcShapeset *neighb_pss;  ///< Precalculated shapeset on the neighbor element.
-
-
+  
 /*** Neighborhood information. ***/
   /// Structure containing all the needed information about the active edge from the neighbor's side.
   class NeighborEdgeInfo
@@ -550,32 +411,6 @@ private:
   };
   QuadInfo central_quad;  ///< Quadrature data of the active edge with respect to the central element.
   QuadInfo neighb_quad;   ///< Quadrature data of the active edge with respect to the element on the other side.
-
-
-/*** Caching data for the poosibly transformed central element ***/
-
-  struct Key
-  {
-    int order, active_segment;
-    Key(int order, int active_segment) : order(order), active_segment(active_segment) {};
-  };
-
-  struct Compare
-  {
-    bool operator()(Key a, Key b) const
-    {
-      if (a.order < b.order) return true;
-      else if (a.order > b.order) return false;
-      else return (a.active_segment < b.active_segment);
-    }
-  };
-
-  std::map<Key, Geom<double>*, Compare> cache_e;
-  std::map<Key, double*, Compare> cache_jwt;
-
-/*** Geometric calculations. ***/
-
-  double* calculate_jwt(int edge_order);
 
 public:
   /// This class represents the extended shapeset, consisting of shape functions from both the central element and

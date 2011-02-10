@@ -123,7 +123,6 @@ public:
   /// \return The depth of the current transformation.
   int get_depth() const { return top; }
 
-
 protected:
 
   /// The active element.
@@ -133,14 +132,18 @@ protected:
   Trf* ctm;
   /// Sub-element transformation index.
   uint64_t sub_idx;
+
   /// The largest sub_idx for top <= 10.
-  /// FIXME: Why it was only 0x4000?
-  static const uint64_t H2D_MAX_IDX = 0x4000;
+  /// FIXME: Why it is only 0x4000?
+  static const unsigned int H2D_MAX_TRN_LEVEL = 5;
+  static const uint64_t H2D_MAX_IDX = 1 << 3 * H2D_MAX_TRN_LEVEL;
 
   /// Transformation matrix stack.
   Trf stack[21];
   /// Stack top.
   int top;
+
+  friend class NeighborSearch;
 };
 
 

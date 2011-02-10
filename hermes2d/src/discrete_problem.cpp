@@ -2277,7 +2277,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   
   ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches);
 
-  scalar res = mfs->fn(nbs_v->get_quad_np(), jwt, prev, u, v, e, ext);
+  scalar res = mfs->fn(np, jwt, prev, u, v, e, ext);
 
   // Clean up.
   for (int i = u_ext_offset; i < u_ext_length; i++) {

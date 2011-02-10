@@ -150,10 +150,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       // Set maximum integration order for use in integrals, see limit_order()
       update_limit_table(ee[i]->get_mode());
 
-      NeighborSearch *nbs = new NeighborSearch(ee[i], meshes[i]);
-
       RefMap *rm = sln[i]->get_refmap();
-      nbs->attach_rm(rm); // This is needed for querying the geometric and quadrature data.
 
       double err = 0.0;
 
@@ -194,7 +191,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
           {
 	    
             if (error_estimators_surf[iest].area != H2D_DG_INNER_EDGE) continue;
-	    error("Not yet implemented");
+	          error("Not yet implemented");
 	    /*
             nbs->set_active_edge(isurf, ignore_visited_segments);
 
@@ -253,8 +250,6 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       errors[i][ee[i]->id] += err;
 
       ee[i]->visited = true;
-
-      delete nbs;
 
     }
   }
