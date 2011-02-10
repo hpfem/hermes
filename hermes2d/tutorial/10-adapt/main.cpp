@@ -32,7 +32,7 @@ using namespace RefinementSelectors;
 // The following parameters can be changed:
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = false;                    // Set to "true" to enable VTK output.
+const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
