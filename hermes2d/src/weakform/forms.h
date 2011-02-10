@@ -439,11 +439,6 @@ public:
 
   void free_ord()
   {
-    for (int i = 0; i < nf; i++)
-    {
-      fn[i]->free_ord();
-      delete fn[i];
-    }
     delete [] fn;
   }
 };

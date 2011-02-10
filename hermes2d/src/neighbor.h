@@ -169,25 +169,6 @@ public:
   ///
   DiscontinuousFunc<scalar>* init_ext_fn(MeshFunction* fu);
 
-  /// Initialize the polynomial orders of the given function at both sides of the active segment of active edge.
-  ///
-  /// \param[in] fu MeshFunction whose order is requested.
-  /// \return Pointer to a discontinuous function allowing to access the order from each side of the active edge.
-  ///
-  DiscontinuousFunc<Ord>* init_ext_fn_ord(Solution* fu);
-
-  /// Initialize the polynomial orders of the given function at both sides of the active segment of active edge.
-  ///
-  /// The order can be computed more precisely for Solutions than for general MeshFunctions, since we know the individual
-  /// orders of the solution on both the central and neighbor elements. Note that we could even obtain the appropriate
-  /// axial orders for the active edge, if we could obtain the pointer to the Solution's approximation space (this is
-  /// currently impossible).
-  ///
-  /// \param[in] fu Solution whose order is requested.
-  /// \return Pointer to a discontinuous function allowing to access the order from each side of the active edge.
-  ///
-  DiscontinuousFunc<Ord>* init_ext_fn_ord(MeshFunction* fu);
-
 /*** Methods for working with shape functions. ***/
 
   class ExtendedShapeset;

@@ -91,7 +91,7 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   neighbor_edges.reserve(NeighborSearch::max_neighbors * 2);
 
   for(unsigned int i = 0; i < ns.central_transformations.size(); i++) {
-  this->central_transformations.push_back(new unsigned int[ns.central_n_trans[i]]);
+  this->central_transformations.push_back(new unsigned int[NeighborSearch::max_n_trans]);
     for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
       this->central_transformations[i][j] = ns.central_transformations[i][j];
   }
@@ -100,7 +100,7 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
     this->central_n_trans.push_back(ns.central_n_trans[i]);
 
   for(unsigned int i = 0; i < ns.neighbor_transformations.size(); i++) {
-    this->neighbor_transformations.push_back(new unsigned int[ns.neighbor_n_trans[i]]);
+    this->neighbor_transformations.push_back(new unsigned int[NeighborSearch::max_n_trans]);
     for(unsigned int j = 0; j < ns.neighbor_n_trans[i]; j++)
       this->neighbor_transformations[i][j] = ns.neighbor_transformations[i][j];
   }
@@ -902,24 +902,6 @@ double* NeighborSearch::calculate_jwt(int edge_order)
     jwt[i] = pt[i][2] * tan[i][2];
 
   return jwt;
-}
-
-DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(MeshFunction* fu)
-{
-  _F_
-  int inc = (fu->get_num_components() == 2) ? 1 : 0;
-  int central_order = fu->get_edge_fn_order(active_edge) + inc;
-  int neighbor_order = fu->get_edge_fn_order(neighbor_edge.local_num_of_edge) + inc;
-  return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
-}
-
-DiscontinuousFunc<Ord>* NeighborSearch::init_ext_fn_ord(Solution* fu)
-{
-  _F_
-  int inc = (fu->get_num_components() == 2) ? 1 : 0;
-  int central_order = fu->get_edge_fn_order(active_edge) + inc;
-  int neighbor_order = fu->get_edge_fn_order(neighbor_edge.local_num_of_edge) + inc;
-  return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
 }
 
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)

@@ -430,20 +430,6 @@ ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearc
   return ext_data;
 }
 
-// Initialize integration order for discontinuous external functions.
-ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
-{
-  Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
-  for (unsigned int j = 0; j < ext.size(); j++)
-    fake_ext_fns[j] = nbs->init_ext_fn_ord(ext[j]);
-
-  ExtData<Ord>* fake_ext = new ExtData<Ord>;
-  fake_ext->fn = fake_ext_fns;
-  fake_ext->nf = ext.size();
-
-  return fake_ext;
-}
-
 // END COPIED FROM discrete_problem.cpp
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -564,10 +550,12 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
                               // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                               // the weights.
 }
-
 double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
                                                 RefMap *rm, SurfPos* surf_pos, NeighborSearch* nbs)
 {
+  error("Not yet implemented.");
+  return 0.0;
+  /*
   // Determine integration order.
   Func<Ord>** oi = new Func<Ord>* [num];
   for (int i = 0; i < num; i++)
@@ -620,4 +608,5 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
   return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                               // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                               // the weights.
+  */
 }

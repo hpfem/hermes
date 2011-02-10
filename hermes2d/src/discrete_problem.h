@@ -228,6 +228,9 @@ public:
 
 protected:
   /// Assembling.
+
+  DiscontinuousFunc<Ord>* init_ext_fn_ord(NeighborSearch* ns, MeshFunction* fu);
+
   scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
   scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
@@ -309,10 +312,10 @@ protected:
   void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
       Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
-
-
   /// Members.
   WeakForm* wf;
+
+  Geom<Ord> geom_ord;
 
   /// If the problem has only constant test functions, there is no need for order calculation,
   /// which saves time.
