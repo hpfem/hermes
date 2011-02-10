@@ -435,6 +435,8 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
   Node* edge = NULL;
   Node* vertex = NULL;
 
+  assert(n_parents <= max_n_trans);
+
   // IDs of vertices bounding the current intermediate parent edge.
   int p1 = elem->vn[active_edge]->id;
   int p2 = elem->vn[(active_edge + 1) % elem->nvert]->id;
@@ -489,7 +491,7 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
         // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
         // adjacent to the single big neighbor.
         assert(n_neighbors == 0);
-        neighbor_n_trans[n_neighbors] = n_parents;
+        neighbor_n_trans.insert(neighbor_n_trans.begin() + n_neighbors, n_parents);
         if(n_neighbors > NeighborSearch::max_neighbors)
           NeighborSearch::max_neighbors = n_neighbors;
 
@@ -548,6 +550,8 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
   bnd_verts[0] = bounding_verts_id[0];
   bnd_verts[1] = bounding_verts_id[1];
 
+  assert(n_sons < max_n_trans);
+
   for (int i = 0; i < 2; i++)
   {
     sons[n_sons-1] = (active_edge + i) % central_el->nvert;
@@ -598,10 +602,10 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
           for(unsigned int k = 0; k < n_sons; k++) {
             if(central_transformations.size() <= n_neighbors)
               central_transformations.insert(central_transformations.begin() + n_neighbors, new unsigned int[NeighborSearch::max_n_trans]);
-              central_transformations[n_neighbors][k] = sons[k];
+            central_transformations[n_neighbors][k] = sons[k];
           }
 
-          central_n_trans[n_neighbors] = n_sons;
+          central_n_trans.insert(central_n_trans.begin() + n_neighbors, n_sons);
 
           NeighborEdgeInfo local_edge_info;
           local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
