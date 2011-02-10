@@ -84,7 +84,7 @@ Orderizer::Orderizer()
 }
 
 
-void Orderizer::process_solution(Space* space)
+void Orderizer::process_space(Space* space)
 {
   // sanity check
   if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
@@ -229,7 +229,6 @@ void Orderizer::save_data(const char* filename)
   fclose(f);
 }
 
-
 void Orderizer::load_data(const char* filename)
 {
   FILE* f = fopen(filename, "rb");
@@ -270,6 +269,64 @@ void Orderizer::load_data(const char* filename)
     ltext[i] = labels[H2D_GET_H_ORDER(orders[i])][H2D_GET_V_ORDER(orders[i])];
 
   find_min_max();
+  unlock_data();
+  fclose(f);
+}
+
+void Orderizer::save_orders_vtk(Space* space, const char* file_name)
+{
+  // Create an Orderizer. This class creates a triangular mesh 
+  // with "solution values" that represent the polynomial 
+  // degrees of mesh elements. 
+  Orderizer ord;
+
+  // Create a piecewise-linear approximation, and save it to a file in VTK format.
+  ord.process_space(space);
+  ord.save_data_vtk(file_name);
+}
+
+void Orderizer::save_data_vtk(const char* file_name)
+{
+  FILE* f = fopen(file_name, "wb");
+  if (f == NULL) error("Could not open %s for writing.", file_name);
+  lock_data();
+
+  // Output header for vertices.
+  fprintf(f, "# vtk DataFile Version 2.0\n");
+  fprintf(f, "\n");
+  fprintf(f, "ASCII\n\n");
+  fprintf(f, "DATASET UNSTRUCTURED_GRID\n");
+
+  // Output vertices.
+  fprintf(f, "POINTS %d %s\n", this->nv, "float");
+  for (int i=0; i < this->nv; i++) {
+    fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
+  }
+
+  // Output elements.
+  fprintf(f, "\n");
+  fprintf(f, "CELLS %d %d\n", this->nt, 4 * this->nt);
+  for (int i=0; i < this->nt; i++) {
+    fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
+  }
+
+  // Output cell types.
+  fprintf(f, "\n");
+  fprintf(f, "CELL_TYPES %d\n", this->nt);
+  for (int i=0; i < this->nt; i++) {
+    fprintf(f, "5\n");    // The "5" means triangle in VTK.
+  }
+
+  // This outputs scalar solution values. Look into hermes3d/src/output/vtk.cpp 
+  // for how it is done for vectors.
+  fprintf(f, "\n");
+  fprintf(f, "POINT_DATA %d\n", this->nv);
+  fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
+  fprintf(f, "LOOKUP_TABLE %s\n", "default");
+  for (int i=0; i < this->nv; i++) {
+    fprintf(f, "%g\n", this->verts[i][2]);
+  }
+
   unlock_data();
   fclose(f);
 }

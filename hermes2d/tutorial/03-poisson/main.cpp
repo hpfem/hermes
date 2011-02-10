@@ -8,7 +8,8 @@
 //   - define weak formulation,
 //   - initialize matrix solver,
 //   - assemble and solve the matrix system,
-//   - output the solution in VTK format (to be visualized, e.g., using Paraview),
+//   - output the solution and element orders in VTK format 
+//     (to be visualized, e.g., using Paraview),
 //   - visualize the solution using Hermes' native OpenGL-based functionality.
 //
 // PDE: Poisson equation -Laplace u = CONST_F with homogeneous (zero)
@@ -18,7 +19,8 @@
 // initial polynomial degree P_INIT, and play with various initial
 // mesh refinements at the beginning of the main() function.
 
-const bool USE_HERMES_VISUALIZATION = true;       // Set to "false" to suppress Hermes OpenGL visualization. 
+const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
+const bool VTK_OUTPUT = false;                    // Set to "true" to enable VTK output.
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -80,14 +82,22 @@ int main(int argc, char* argv[])
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
-  // Output solution in VTK format.
-  Linearizer lin;
-  bool mode_3D = true;
-  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
-  info("Solution in VTK format saved to file %s.", "sln.vtk");
+  // VTK output.
+  if (VTK_OUTPUT) {
+    // Output solution in VTK format.
+    Linearizer lin;
+    bool mode_3D = true;
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
+    info("Solution in VTK format saved to file %s.", "sln.vtk");
+
+    // Output mesh and element orders in VTK format.
+    Orderizer ord;
+    ord.save_orders_vtk(&space, "ord.vtk");
+    info("Element orders in VTK format saved to file %s.", "ord.vtk");
+  }
 
   // Visualize the solution.
-  if (USE_HERMES_VISUALIZATION) {
+  if (HERMES_VISUALIZATION) {
     ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
     view.show(&sln);
     View::wait();

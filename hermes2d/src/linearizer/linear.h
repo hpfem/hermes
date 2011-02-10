@@ -72,7 +72,7 @@ public:
                                  MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
                                  double dmult = 1.0);
   // This function is used by save_solution_vtk().
-  virtual void save_data_vtk(const char* filename, const char* name, bool mode_3D);
+  virtual void save_data_vtk(const char* file_name, const char* quantity_name, bool mode_3D);
 
   void free();
 
@@ -168,13 +168,17 @@ public:
   Orderizer();
   ~Orderizer();
 
-  void process_solution(Space* space);
+  void process_space(Space* space);
 
   int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
         { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
 
   virtual void save_data(const char* filename);
   virtual void load_data(const char* filename);
+  // Saves a MeshFunction (Solution, Filter) in VTK format.
+  virtual void save_orders_vtk(Space* space, const char* file_name);
+  // This function is used by save_solution_vtk().
+  virtual void save_data_vtk(const char* file_name);
 
 protected:
 
