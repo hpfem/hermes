@@ -20,7 +20,7 @@
 // mesh refinements at the beginning of the main() function.
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = false;                    // Set to "true" to enable VTK output.
+const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
