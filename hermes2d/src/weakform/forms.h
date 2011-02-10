@@ -388,7 +388,7 @@ public:
     this->orientation = geom->orientation;
   }
 
-  ~InterfaceGeom() {}
+  virtual ~InterfaceGeom() {}
 
   int get_neighbor_marker() const { return neighb_marker; }
   int get_neighbor_id()     const { return neighb_id; }

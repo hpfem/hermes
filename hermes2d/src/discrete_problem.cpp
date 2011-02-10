@@ -2201,6 +2201,10 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     delete fake_e;
     delete ou;
     delete ov;
+    if (fake_ext != NULL) {
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
   }
 
   // Evaluate the form using just calculated order.
@@ -2254,8 +2258,9 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
     }
   }
   if (ext != NULL) {ext->free(); delete ext;}
-
+  e->free();
   delete e;
+  delete [] jwt;
 
   // Delete the DiscontinuousFunctions. This does not clear their component functions (DiscontinuousFunc::free_fn()
   // must be called in order to do that) as they are contained in cache_fn and may be used by another form - they
@@ -2327,6 +2332,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     if (ov != NULL) {
       ov->free_ord(); delete ov;
     }
+    fake_e->free();
     delete fake_e;
   }
 
@@ -2376,7 +2382,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     }
   }
   if (ext != NULL) {ext->free(); delete ext;}
-
+  e->free();
   delete e;
   delete [] jwt;
 
