@@ -829,6 +829,12 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
+
+  // Determine the minimum mesh seq in this stage.
+  for(unsigned int i = 0; i < stage.meshes.size(); i++)
+    if(stage.meshes[i]->get_seq() < min_dg_mesh_seq || i == 0)
+      min_dg_mesh_seq = stage.meshes[i]->get_seq();
+  
     // Initialize the NeighborSearches.
   // 5 is for bits per page in the array.
   LightArray<NeighborSearch*> neighbor_searches(5);
@@ -841,14 +847,11 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
     // Update all NeighborSearches according to the multimesh tree.
     // After this, all NeighborSearches in neighbor_searches should have the same count of neighbors and proper set of transformations
     // for the central and the neighbor element(s) alike.
-  for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
-    if(neighbor_searches.present(i))
-      update_neighbor_search(neighbor_searches.get(i), root);
-
-    // Check that every NeighborSearch has the same number of neighbor elements.
+  // Also check that every NeighborSearch has the same number of neighbor elements.
   unsigned int num_neighbors = 0;
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
     if(neighbor_searches.present(i)) {
+      update_neighbor_search(neighbor_searches.get(i), root);
       if(num_neighbors == 0)
         num_neighbors = neighbor_searches.get(i)->n_neighbors;
       if(neighbor_searches.get(i)->n_neighbors != num_neighbors)
@@ -939,16 +942,16 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
   // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
   for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++) {
         
-    for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq())->central_n_trans[neighbor_i]; trf_i++) {
-      stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq())->central_transformations[neighbor_i][trf_i]);
+    for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->central_n_trans[neighbor_i]; trf_i++) {
+      stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->central_transformations[neighbor_i][trf_i]);
     }
   }
   // For neighbor psss.
   if(DG_matrix_forms_present && !edge_processed)
     for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
-      npss[idx_i]->set_active_element((*neighbor_searches.get(stage.meshes[idx_i]->get_seq())->get_neighbors())[neighbor_i]);
-      for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[idx_i]->get_seq())->neighbor_n_trans[neighbor_i]; trf_i++)
-        npss[idx_i]->push_transform(neighbor_searches.get(stage.meshes[idx_i]->get_seq())->neighbor_transformations[neighbor_i][trf_i]);
+      npss[idx_i]->set_active_element((*neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->get_neighbors())[neighbor_i]);
+      for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_n_trans[neighbor_i]; trf_i++)
+        npss[idx_i]->push_transform(neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_transformations[neighbor_i][trf_i]);
     }
 
   // Also push the transformations to the slave psss and refmaps.
@@ -983,7 +986,7 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
   // This is just cleaning after ourselves.
   // Clear the transformations from the RefMaps and all functions.
   for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-      stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq())->original_central_el_transform);
+      stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->original_central_el_transform);
 
   // Also clear the transformations from the slave psss and refmaps.
   for (unsigned int i = 0; i < stage.idx.size(); i++) {
@@ -1001,10 +1004,10 @@ void DiscreteProblem::init_neighbors(LightArray<NeighborSearch*>& neighbor_searc
   _F_
   // Initialize the NeighborSearches.
   for(unsigned int i = 0; i < stage.meshes.size(); i++) {
-    if(!neighbor_searches.present(stage.meshes[i]->get_seq())) {
+    if(!neighbor_searches.present(stage.meshes[i]->get_seq() - min_dg_mesh_seq)) {
       NeighborSearch* ns = new NeighborSearch(stage.fns[i]->get_active_element(), stage.meshes[i]);
       ns->original_central_el_transform = stage.fns[i]->get_transform();
-      neighbor_searches.add(ns, stage.meshes[i]->get_seq());
+      neighbor_searches.add(ns, stage.meshes[i]->get_seq() - min_dg_mesh_seq);
     }
   }
 
@@ -1024,9 +1027,8 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
   _F_
     for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
       if(neighbor_searches.present(i)) {
-        NeighborSearch ns = *neighbor_searches.get(i);
         if(neighbor_searches.get(i)->n_neighbors == 1)
-          break;
+          continue;
         for(unsigned int j = 0; j < neighbor_searches.get(i)->n_neighbors; j++)
           insert_into_multimesh_tree(root, neighbor_searches.get(i)->central_transformations[j], neighbor_searches.get(i)->central_n_trans[j]);
       }
@@ -1417,8 +1419,8 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
     surf_pos.space_u = spaces[n];
             
     // Create the extended shapeset on the union of the central element and its current neighbor.
-    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq())->create_extended_asmlist(spaces[n], al[n]);
-    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq())->create_extended_asmlist(spaces[m], al[m]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1470,7 +1472,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
         if (ext_asmlist_u->dof[j] < 0) {
           if (rhs != NULL && this->is_linear) {
             // Evaluate the form with the activated discontinuous shape functions.
-            scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
+            scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
               * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
               * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
             // Add the contribution to the global dof index.
@@ -1478,7 +1480,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
           }
         }
         else if (rhsonly == false) {
-          scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq(), stage.meshes[m]->get_seq())
+          scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
             * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
             * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
           local_stiffness_matrix[i][j] = val;
@@ -1512,12 +1514,12 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
         surf_forms_key = SurfVectorFormsKey(vfs->fn, spss[m]->get_active_element()->id, isurf,
             al[m]->idx[i], spss[m]->get_transform());
         if(surf_forms_cache[surf_forms_key] == NULL)
-          rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq()) * al[m]->coef[i]);
+          rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
         else
           rhs->add(al[m]->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
       }
       else
-        rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq()) * al[m]->coef[i]);
+        rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
     }
   }
 }
@@ -1571,12 +1573,14 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &
 
 // Initialize discontinuous external functions (obtain values, derivatives,... on both sides of the
 // supplied NeighborSearch's active edge).
-ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches)
+ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches, int order)
 {
   _F_
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
-  for(unsigned int j = 0; j < ext.size(); j++)
-    ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq())->init_ext_fn(ext[j]);
+  for(unsigned int j = 0; j < ext.size(); j++) {
+    neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+    ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(ext[j]);
+  }
 
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   ext_data->fn = ext_fns;
@@ -1591,7 +1595,7 @@ ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &
   _F_
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
   for (unsigned int j = 0; j < ext.size(); j++)
-    fake_ext_fns[j] = init_ext_fn_ord(neighbor_searches.get(ext[j]->get_mesh()->get_seq()), ext[j]);
+    fake_ext_fns[j] = init_ext_fn_ord(neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq), ext[j]);
 
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
   fake_ext->fn = fake_ext_fns;
@@ -2208,7 +2212,7 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
     if (u_ext != Hermes::vector<Solution *>())
       for (int i = u_ext_offset; i < u_ext_length; i++)
         if (u_ext[i] != NULL) 
-          oi[i - u_ext_offset] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq()), u_ext[i]);
+          oi[i - u_ext_offset] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
         else 
           oi[i - u_ext_offset] = get_fn_ord(0);
     else
@@ -2264,10 +2268,6 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   int order = calc_order_dg_matrix_form(mfs, u_ext, fu, fv, ru_actual, surf_pos, neighbor_supp_u, neighbor_supp_v, neighbor_searches, neighbor_index_u);
 
   // Evaluate the form using just calculated order.
-  for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
-    if(neighbor_searches.present(i))
-      neighbor_searches.get(i)->set_quad_order(order);
-
   Quad2D* quad = fu->get_quad_2d();
   int eo = quad->get_edge_points(surf_pos->surf_num, order);
   int np = quad->get_num_points(eo);
@@ -2295,20 +2295,24 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   Func<scalar>** prev = new Func<scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution *>())
     for (int i = 0; i < prev_size; i++)
-      if (u_ext[i + mfs->u_ext_offset] != NULL)
-        prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq())->init_ext_fn(u_ext[i]);
+      if (u_ext[i + mfs->u_ext_offset] != NULL) {
+        neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+        prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
+      }
       else prev[i] = NULL;
   else
     for (int i = 0; i < prev_size; i++) 
       prev[i] = NULL;
 
   // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  nbs_u->set_quad_order(order);
   DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(get_fn(fu, ru_actual, nbs_u->get_quad_eo(neighbor_supp_u)),
     neighbor_supp_u, nbs_u->neighbor_edge.orientation);
+  nbs_v->set_quad_order(order);
   DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(get_fn(fv, rv, nbs_v->get_quad_eo(neighbor_supp_v)),
     neighbor_supp_v, nbs_v->neighbor_edge.orientation);
   
-  ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches);
+  ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 
   scalar res = mfs->fn(np, jwt, prev, u, v, e, ext);
 
@@ -2360,7 +2364,7 @@ int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, He
     if (u_ext != Hermes::vector<Solution *>())
       for (int i = u_ext_offset; i < u_ext_length; i++)
         if (u_ext[i] != NULL) 
-          oi[i - u_ext_offset] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq()), u_ext[i]);
+          oi[i - u_ext_offset] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
         else 
           oi[i - u_ext_offset] = get_fn_ord(0);
     else
@@ -2409,10 +2413,6 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
   int order = calc_order_dg_vector_form(vfs, u_ext, fv, rv, surf_pos, neighbor_searches, neighbor_index_v);
   
   // Evaluate the form using just calculated order.
-  for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
-    if(neighbor_searches.present(i))
-      neighbor_searches.get(i)->set_quad_order(order);
-
   Quad2D* quad = fv->get_quad_2d();
   int eo = quad->get_edge_points(surf_pos->surf_num, order);
   int np = quad->get_num_points(eo);
@@ -2440,15 +2440,17 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
   Func<scalar>** prev = new Func<scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution *>())
     for (int i = 0; i < prev_size; i++)
-      if (u_ext[i + vfs->u_ext_offset] != NULL)
-        prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq())->init_ext_fn(u_ext[i]);
+      if (u_ext[i + vfs->u_ext_offset] != NULL) {
+        neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+        prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
+      }
       else prev[i] = NULL;
   else
     for (int i = 0; i < prev_size; i++) 
       prev[i] = NULL;
 
-  Func<double>* v = get_fn(fv, rv, nbs_v->get_quad_eo());
-  ExtData<scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches);
+  Func<double>* v = get_fn(fv, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
 
   scalar res = vfs->fn(np, jwt, prev, v, e, ext);
 

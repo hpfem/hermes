@@ -262,7 +262,7 @@ protected:
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge);
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order);
-  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches);
+  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches, int order);
 
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
   Func<Ord>* get_fn_ord(const int order);
@@ -322,6 +322,10 @@ protected:
   /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
   void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
       Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
+
+  /// Minimum identifier of the meshes used in DG assembling in one stage.
+  unsigned int min_dg_mesh_seq;
+
 
   /// Members.
   WeakForm* wf;
