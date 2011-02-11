@@ -1,11 +1,5 @@
 #include "hermes2d.h"
 
-std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_m =
-  *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>();
-
-std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_n =
-  *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>();
-
 NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   supported_shapes(NULL),
   mesh(mesh),
@@ -622,14 +616,6 @@ void NeighborSearch::set_quad_order(int order)
   central_quad.init(quad, quad->get_edge_points(active_edge, order));
 }
 
-double3* NeighborSearch::get_quad_pt(bool on_neighbor)
-{
-  if (on_neighbor)
-    return neighb_quad.pt;
-  else
-    return central_quad.pt;
-}
-
 int NeighborSearch::get_quad_eo(bool on_neighbor)
 {
   if (on_neighbor)
@@ -637,12 +623,6 @@ int NeighborSearch::get_quad_eo(bool on_neighbor)
   else
     return central_quad.eo;
 }
-
-int NeighborSearch::get_quad_np()
-{
-  return central_quad.np;
-}
-
 
 DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 {

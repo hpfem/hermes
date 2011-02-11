@@ -542,9 +542,6 @@ int main(int argc, char* argv[])
           as++;
       }
 
-      // We have to empty the cache of NeighborSearch class instances.
-      NeighborSearch::empty_main_caches();
-
 // If used, we need to clean the vector valued form caches.
 #ifdef HERMES_USE_VECTOR_VALUED_FORMS
       DiscreteProblem::empty_form_caches();
@@ -561,27 +558,6 @@ int main(int argc, char* argv[])
     }
     while (done == false);
 
-    // Debugging.
-    /*    
-    std::ofstream out("matrix");
-    for(int i = 0; i < matrix->get_size(); i++)
-      for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(matrix->get(i,j)) != 0)
-          out << '(' << i << ',' << j << ')' << ':' << matrix->get(i,j) << std::endl;
-    out.close();
-
-    out.open("rhs");
-      for(int j = 0; j < matrix->get_size(); j++)
-        if(std::abs(rhs->get(j)) != 0)
-          out << '(' << j << ')' << ':' << rhs->get(j) << std::endl;
-    out.close();
-     
-    out.open("sol");
-      for(int j = 0; j < matrix->get_size(); j++)
-        out << '(' << j << ')' << ':' << solver->get_solution()[j] << std::endl;
-    out.close();
-    */
-
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&rsln_rho);
     prev_rho_v_x.copy(&rsln_rho_v_x);
@@ -592,15 +568,6 @@ int main(int argc, char* argv[])
     delete rsln_rho_v_x.get_mesh(); 
     delete rsln_rho_v_y.get_mesh();
     delete rsln_e.get_mesh(); 
-
-    // Visualization.
-    /*
-    pressure.reinit();
-    u.reinit();
-    w.reinit();
-    sview.show(&pressure);
-    vview.show(&u,&w);
-    */
   }
   
   time_der_out.close();

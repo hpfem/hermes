@@ -158,28 +158,12 @@ public:
   ///
   void set_quad_order(int order);
 
-  /// Get quadrature points on the active edge (assumes that integration order has been set by \c set_quad_order).
-  ///
-  /// \param[in] on_neighbor  If true, points are returned for the neighbor el. (using its local active edge number).
-  /// \return    Pointer to the array of quadrature points.
-  ///
-  double3* get_quad_pt(bool on_neighbor = false);
-
   /// Get the integration pseudo-order for the active edge (assumes the true order has been set by \c set_quad_order).
   ///
   /// \param[in] on_neighbor  If true, order is returned for the neighbor el. (using its local active edge number).
   /// \return    The edge "pseudo-order" (determined by the true order and local edge number).
   ///
   int get_quad_eo(bool on_neighbor = false);
-
-
-  /// Get the number of integration points on the active edge (assumes that integration order has been set by
-  /// \c set_quad_order).
-  ///
-  /// \return  The number of integration points corresponding to the set order. Note that it is the same for both
-  ///          neighboring elements.
-  ///
-  int get_quad_np();
 
 /*** Methods for retrieving additional information about the neighborhood. ***/
 
@@ -235,36 +219,8 @@ public:
   /// Destructor.
   ~NeighborSearch();
 
-
   /// Function that sets the variable ignore_errors. See the variable description.
   void set_ignore_errors(bool value) {this->ignore_errors = value;};
-
-  /// Functionality for caching of NeighborSearch instances.
-  struct MainKey
-  {
-    int element_id, isurf;
-    MainKey(int element_id, int isurf) : element_id(element_id), isurf(isurf) {};
-  };
-
-  struct MainCompare
-  {
-    bool operator()(MainKey a, MainKey b) const
-    {
-      if (a.element_id < b.element_id)
-        return true;
-      else if (a.element_id > b.element_id)
-        return false;
-      else
-        return (a.isurf < b.isurf);
-    }
-  };
-
-  /// Two caches of NeighborSearch class instances.
-  static std::map<MainKey, NeighborSearch*, MainCompare> main_cache_m;
-  static std::map<MainKey, NeighborSearch*, MainCompare> main_cache_n;
-
-  /// Method to empty the above caches.
-  static void empty_main_caches();
 
 private:
 
@@ -399,15 +355,11 @@ private:
   struct QuadInfo
   {
     int eo;       ///< Edge pseudo-order.
-    int np;       ///< Number of integration points on the active edge (segment).
-    double3* pt;  ///< Array of physical points and weights on the active segment.
 
-    QuadInfo() : eo(0), np(0), pt(NULL) {};
+    QuadInfo() : eo(0) {};
 
     void init(Quad2D* quad, int eo) {
       this->eo = eo;
-      this->np = quad->get_num_points(eo);
-      this->pt = quad->get_points(eo);
     }
   };
   QuadInfo central_quad;  ///< Quadrature data of the active edge with respect to the central element.
@@ -418,115 +370,44 @@ public:
   /// current neighbor element, extended by zero to the union of these elements.
   class ExtendedShapeset
   {
-    public:
-      /// This class represents a concrete shape function from the extended shapeset.
-      class ExtendedShapeFunction
-      {
-        private:
-          NeighborSearch *neighbhood;   ///< Neighborhood on which the extended shape function is defined.
-          PrecalcShapeset *active_pss;///< Pointer to the precalc. shapeset from which the active shape function
-                                      ///< is drawn. Depending on the index of the active shape fn. within the
-                                      ///< extended shapeset, it may be the local shapeset precalculated either on the
-                                      ///< central element or on the neighbor element (see \c activate).
-          RefMap *active_rm;          ///< Reference mapping associated with the \c active_pss.
+  private:
+    /// Constructor.
+    ///
+    /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
+    /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
+    /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
+    ///
+    ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space *space);
 
-          int order;                  ///< Polynomial order of the active shape function on the active edge
-                                      ///< (for quads vertical or horizontal as appropriate).
-          bool support_on_neighbor;   ///< True if the active shape fn. is nonzero on the neighbor element (and thus
-                                      ///< zero on the central element), false otherwise.
-          bool reverse_neighbor_side; ///< True if the orientation of the neighbor edge w.r.t. the active edge is
-                                      ///< reversed.
+    /// Destructor.
+    ~ExtendedShapeset() {
+      delete [] dof; delete neighbor_al;
+    }
 
-          /// Constructor.
-          /// \param[in] neighborhood Neighborhood on which the extended shape function is defined.
-          ///
-          ExtendedShapeFunction(NeighborSearch* neighborhood) : neighbhood(neighborhood) {};
+    /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
+    void combine_assembly_lists();
 
-        public:
+    /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new neighbor).
+    ///
+    /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
+    /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
+    ///
+    void update(NeighborSearch* neighborhood, Space* space) {
+      delete [] this->dof;
+      space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
+      combine_assembly_lists();
+    }
 
-          /*** Assembly list information for the active shape ***/
+  public:
+    int cnt;  ///< Number of shape functions in the extended shapeset.
+    int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.
+    
+    bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
 
-          int idx;      ///< shape function index
-          int dof;      ///< basis function number
-          scalar coef;  ///< coefficient
+    AsmList* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
+    AsmList* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
 
-          /*** Get methods ***/
-
-          RefMap* get_activated_refmap() { return active_rm; }
-          PrecalcShapeset* get_activated_pss() { return active_pss; }
-          int get_fn_order() { return order; }
-          NeighborSearch* get_neighbhood() { return neighbhood; }
-          bool get_support_on_neighbor() { return support_on_neighbor; }
-
-          /// Get \c DiscontinuousFunc representation of the active shape function's polynomial order.
-          DiscontinuousFunc<Ord>* get_fn_ord() {
-            int inc = (active_pss->get_num_components() == 2) ? 1 : 0;
-            return extend_by_zero( init_fn_ord(this->order + inc) );
-          }
-
-          /// Extend by zero the active shape function to the other element.
-          ///
-          /// It uses the \c support_on_neighbor and \c reverse_neighbor_side of the activated shape function to
-          /// correctly set the zero and the non-zero part of the resulting discontinuous shape function.
-          ///
-          /// \param[in]  fu  \c Func representation of the active shape function as obtained from
-          ///                 \c DiscreteProblem::get_fn
-          /// \return     Pointer to a \c DiscontinuousFunc object which may be queried for values on either side
-          ///             of the discontinuity.
-          ///
-          DiscontinuousFunc<double>* extend_by_zero(Func<double>* fu) {
-            return new DiscontinuousFunc<double>(fu, support_on_neighbor, reverse_neighbor_side);
-          }
-
-          /// Extend by zero the \c Func representation of the active shape's polynomial order to the other element.
-          DiscontinuousFunc<Ord>* extend_by_zero(Func<Ord>* fu) {
-            return new DiscontinuousFunc<Ord>(fu, support_on_neighbor);
-          }
-
-          // Only an ExtendedShapeset is allowed to create an ExtendedShapeFunction.
-          friend class NeighborSearch::ExtendedShapeset;
-      };
-
-      
-      bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
-
-      AsmList* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
-      AsmList* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
-    private:
-      
-
-      /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
-      void combine_assembly_lists();
-
-      /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new neighbor).
-      ///
-      /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
-      /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
-      ///
-      void update(NeighborSearch* neighborhood, Space* space) {
-        delete [] this->dof;
-        space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
-        combine_assembly_lists();
-      }
-
-      /// Constructor.
-      ///
-      /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
-      /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
-      /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
-      ///
-      ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space *space);
-
-      /// Destructor.
-      ~ExtendedShapeset() {
-        delete [] dof; delete neighbor_al;
-      }
-
-    public:
-      int cnt;  ///< Number of shape functions in the extended shapeset.
-      int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.
-
-      friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
+    friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
   };
 
   /// When creating sparse structure of a matrix using this class, we want to ignore errors
@@ -535,8 +416,5 @@ public:
 
   friend class DiscreteProblem;
 };
-
-typedef NeighborSearch::ExtendedShapeset::ExtendedShapeFunction* ExtendedShapeFnPtr;
-
 
 #endif /* NEIGHBOR_H_ */
