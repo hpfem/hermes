@@ -894,6 +894,7 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
   for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
     delete *it;
 }
+  neighbor_searches.clear();
 }
 
 
@@ -2283,6 +2284,10 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   }
   if (ext != NULL) {ext->free(); delete ext;}
 
+  delete u;
+  delete v;
+  delete e;
+
   // Scaling.
   res *= mfs->scaling_factor;
 
@@ -2400,6 +2405,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
     }
   }
   if (ext != NULL) {ext->free(); delete ext;}
+
+  delete e;
 
   // Scaling.
   res *= vfs->scaling_factor;
