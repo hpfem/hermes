@@ -144,19 +144,11 @@ public:
         Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, Element** e, 
                           bool* bnd, SurfPos* surf_pos, Element* trav_base);
 
-  /// Calculates the integration order for assemble_volume_matrix_forms().
-  int calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                 PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
-
   /// Assemble volume matrix forms.
   void assemble_volume_matrix_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al);
-
-  /// Calculates the integration order for assemble_volume_vector_forms().
-  int calc_order_vector_form_vol(WeakForm::VectorFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                 PrecalcShapeset *fv, RefMap *rv);
 
   /// Assemble volume vector forms.
   void assemble_volume_vector_forms(WeakForm::Stage& stage, 
@@ -171,9 +163,6 @@ public:
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element);
 
-  /// Calculates the integration order for assemble_surface_matrix_forms().
-  int calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
   /// Assemble surface matrix forms.
   void assemble_surface_matrix_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -181,9 +170,6 @@ public:
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base);
 
-  /// Calculates the integration order for assemble_surface_vector_forms().
-  int calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
   /// Assemble surface vector forms.
   void assemble_surface_vector_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -231,18 +217,43 @@ protected:
 
   DiscontinuousFunc<Ord>* init_ext_fn_ord(NeighborSearch* ns, MeshFunction* fu);
 
+  int calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
+
   scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
+  
+  int calc_order_vector_form_vol(WeakForm::VectorFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv);
+
   scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv);
-  scalar eval_form(WeakForm::MatrixFormSurf *mfv, Hermes::vector<Solution *> u_ext,
+  
+  int calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
-  scalar eval_form(WeakForm::VectorFormSurf *vfv, Hermes::vector<Solution *> u_ext,
+
+  scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
+  
+  int calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
          PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+
+  scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+
+  int calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, SurfPos* surf_pos,
+                                  bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_u);
+  
   scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
                                      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru_central, RefMap * ru_actual, RefMap *rv, 
                                      bool neighbor_supp_u, bool neighbor_supp_v,
                                      SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
+  
+  int calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *ru, SurfPos* surf_pos,
+                                  LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v);
+
   scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> u_ext,
                                      PrecalcShapeset *fv, RefMap *rv, 
                                      SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v);
