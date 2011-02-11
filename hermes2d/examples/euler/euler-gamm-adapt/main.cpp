@@ -22,7 +22,7 @@ using namespace RefinementSelectors;
 #define HERMES_USE_VECTOR_VALUED_FORMS
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
 
@@ -181,36 +181,40 @@ int criterion(Element * e)
 int main(int argc, char* argv[])
 {
   // Load the mesh.
-  Mesh mesh, basemesh;
+  Mesh basemesh;
+  Mesh mesh1, mesh2, mesh3, mesh4;
   H2DReader mloader;
   mloader.load("GAMM-channel.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
-  basemesh.refine_by_criterion(criterion, 4);
-  mesh.copy(&basemesh);
+  basemesh.refine_by_criterion(criterion, 3);
+  mesh1.copy(&basemesh);
+  mesh2.copy(&basemesh);
+  mesh3.copy(&basemesh);
+  mesh4.copy(&basemesh);
 
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
 
   // Create L2 spaces with default shapesets.
-  L2Space space_rho(&mesh, &bc_types, P_INIT);
-  L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
-  L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);
-  L2Space space_e(&mesh, &bc_types, P_INIT);
+  L2Space space_rho(&mesh1, &bc_types, P_INIT);
+  L2Space space_rho_v_x(&mesh2, &bc_types, P_INIT);
+  L2Space space_rho_v_y(&mesh3, &bc_types, P_INIT);
+  L2Space space_e(&mesh4, &bc_types, P_INIT);
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;
   Solution rsln_rho, rsln_rho_v_x, rsln_rho_v_y, rsln_e;
-  sln_rho.set_exact(&mesh, ic_density);
-  sln_rho_v_x.set_exact(&mesh, ic_density_vel_x);
-  sln_rho_v_y.set_exact(&mesh, ic_density_vel_y);
-  sln_e.set_exact(&mesh, ic_energy);
-  prev_rho.set_exact(&mesh, ic_density);
-  prev_rho_v_x.set_exact(&mesh, ic_density_vel_x);
-  prev_rho_v_y.set_exact(&mesh, ic_density_vel_y);
-  prev_e.set_exact(&mesh, ic_energy);
+  sln_rho.set_exact(&mesh1, ic_density);
+  sln_rho_v_x.set_exact(&mesh2, ic_density_vel_x);
+  sln_rho_v_y.set_exact(&mesh3, ic_density_vel_y);
+  sln_e.set_exact(&mesh4, ic_energy);
+  prev_rho.set_exact(&mesh1, ic_density);
+  prev_rho_v_x.set_exact(&mesh2, ic_density_vel_x);
+  prev_rho_v_y.set_exact(&mesh3, ic_density_vel_y);
+  prev_e.set_exact(&mesh4, ic_energy);
 
   // Initialize weak formulation.
   WeakForm wf(4);
@@ -410,7 +414,10 @@ int main(int argc, char* argv[])
     if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
       REFINEMENT_COUNT = 0;
       info("Global mesh derefinement.");
-      mesh.unrefine_all_elements();
+      mesh1.unrefine_all_elements();
+      mesh2.unrefine_all_elements();
+      mesh3.unrefine_all_elements();
+      mesh4.unrefine_all_elements();
       space_rho.set_uniform_order(P_INIT);
       space_rho_v_x.set_uniform_order(P_INIT);
       space_rho_v_y.set_uniform_order(P_INIT);
@@ -492,8 +499,8 @@ int main(int argc, char* argv[])
       Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
       double min_condition = 0;
       Element *e;
-      for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
-            if (((e) = mesh.get_element_fast(_id))->used) \
+      for (int _id = 0, _max = mesh1.get_max_element_id(); _id < _max; _id++) \
+            if (((e) = mesh1.get_element_fast(_id))->used) \
               if ((e)->active)
       {
         AsmList al;
@@ -519,10 +526,10 @@ int main(int argc, char* argv[])
       delete [] solution_vector;
 
       // Visualization.
-      s1.show(&sln_rho);
-      s2.show(&sln_rho_v_x);
-      s3.show(&sln_rho_v_y);
-      s4.show(&sln_e);
+      //s1.show(&sln_rho);
+      //s2.show(&sln_rho_v_x);
+      //s3.show(&sln_rho_v_y);
+      //s4.show(&sln_e);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP && (*error_components)[1] * 100 < ERR_STOP_VEL_X) 
