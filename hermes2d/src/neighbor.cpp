@@ -1,7 +1,5 @@
 #include "hermes2d.h"
 
-unsigned int NeighborSearch::max_neighbors = 1;
-
 std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare> NeighborSearch::main_cache_m =
   *new std::map<NeighborSearch::MainKey, NeighborSearch*, NeighborSearch::MainCompare>();
 
@@ -15,26 +13,10 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   neighb_el(NULL),
   quad(&g_quad_2d_std)
 {
-  central_transformations.reserve(NeighborSearch::max_neighbors * 2);
-  for(unsigned int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
-    central_transformations.push_back(new unsigned int[NeighborSearch::max_n_trans]);
-
-  central_n_trans.reserve(NeighborSearch::max_neighbors*2);
-  for(unsigned int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
-    central_n_trans.push_back(0);
-
-  neighbor_transformations.reserve(NeighborSearch::max_neighbors * 2);
-  for(unsigned int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
-    neighbor_transformations.push_back(new unsigned int[NeighborSearch::max_n_trans]);
-
-  neighbor_n_trans.reserve(NeighborSearch::max_neighbors*2);
-  for(unsigned int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
-    neighbor_n_trans.push_back(0);
-
   assert_msg(central_el != NULL && central_el->active == 1,
              "You must pass an active element to the NeighborSearch constructor.");
-  neighbors.reserve(NeighborSearch::max_neighbors * 2);
-  neighbor_edges.reserve(NeighborSearch::max_neighbors * 2);
+  neighbors.reserve(NeighborSearch::max_neighbors);
+  neighbor_edges.reserve(NeighborSearch::max_neighbors);
     
   ignore_errors = false;
   n_neighbors = 0;
@@ -50,30 +32,22 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   neighbor_edge(ns.neighbor_edge),
   active_segment(ns.active_segment)
 {
-  central_transformations.reserve(NeighborSearch::max_neighbors * 2);
-  central_n_trans.reserve(NeighborSearch::max_neighbors*2);
-  neighbor_transformations.reserve(NeighborSearch::max_neighbors * 2);
-  neighbor_n_trans.reserve(NeighborSearch::max_neighbors*2);
-  neighbors.reserve(NeighborSearch::max_neighbors * 2);
-  neighbor_edges.reserve(NeighborSearch::max_neighbors * 2);
+  neighbors.reserve(NeighborSearch::max_neighbors);
+  neighbor_edges.reserve(NeighborSearch::max_neighbors);
 
-  for(unsigned int i = 0; i < ns.central_transformations.size(); i++) {
-  this->central_transformations.push_back(new unsigned int[NeighborSearch::max_n_trans]);
+  for(unsigned int i = 0; i < ns.n_neighbors; i++)
     for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
       this->central_transformations[i][j] = ns.central_transformations[i][j];
-  }
 
-  for(unsigned int i = 0; i < ns.central_n_trans.size(); i++)
-    this->central_n_trans.push_back(ns.central_n_trans[i]);
+  for(unsigned int i = 0; i < ns.n_neighbors; i++)
+    this->central_n_trans[i] = ns.central_n_trans[i];
 
-  for(unsigned int i = 0; i < ns.neighbor_transformations.size(); i++) {
-    this->neighbor_transformations.push_back(new unsigned int[NeighborSearch::max_n_trans]);
+  for(unsigned int i = 0; i < ns.n_neighbors; i++)
     for(unsigned int j = 0; j < ns.neighbor_n_trans[i]; j++)
       this->neighbor_transformations[i][j] = ns.neighbor_transformations[i][j];
-  }
 
-  for(unsigned int i = 0; i < ns.neighbor_n_trans.size(); i++)
-    this->neighbor_n_trans.push_back(ns.neighbor_n_trans[i]);
+  for(unsigned int i = 0; i < ns.n_neighbors; i++)
+    this->neighbor_n_trans[i] = ns.neighbor_n_trans[i];
 
   assert_msg(central_el != NULL && central_el->active == 1,
              "You must pass an active element to the NeighborSearch constructor.");
@@ -96,14 +70,6 @@ NeighborSearch::~NeighborSearch()
   neighbor_edges.clear();
   neighbors.clear();
   clear_supported_shapes();
-  for(unsigned int i = 0; i < central_transformations.size(); i++)
-    delete [] central_transformations.at(i);
-  central_transformations.clear();
-  central_n_trans.clear();
-  for(unsigned int i = 0; i < neighbor_transformations.size(); i++)
-    delete [] neighbor_transformations.at(i);
-  neighbor_transformations.clear();
-  neighbor_n_trans.clear();
 }
 
 void NeighborSearch::reset_neighb_info()
@@ -120,14 +86,12 @@ void NeighborSearch::reset_neighb_info()
   n_neighbors = 0;
 
   // Reset transformations.
-  for(unsigned int i = 0; i < central_n_trans.size(); i++) {
-    for(unsigned int j = 0; j < central_n_trans[i]; j++)
+  for(unsigned int i = 0; i < max_neighbors; i++) {
+    for(unsigned int j = 0; j < max_n_trans; j++) {
       central_transformations[i][j] = 0;
-    central_n_trans[i] = 0;
-  }
-  for(unsigned int i = 0; i < neighbor_n_trans.size(); i++) {
-    for(unsigned int j = 0; j < neighbor_n_trans[i]; j++)
       neighbor_transformations[i][j] = 0;
+    }
+    central_n_trans[i] = 0;
     neighbor_n_trans[i] = 0;
   }
   neighborhood_type = H2D_DG_NOT_INITIALIZED;
@@ -194,7 +158,7 @@ void NeighborSearch::set_active_edge(int edge)
         // Number of visited intermediate parents.
         int n_parents = 0;
 
-        for (int j = 0; j < max_n_trans; j++)
+        for (unsigned int j = 0; j < max_n_trans; j++)
           par_mid_vertices[j] = NULL;
 
         find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
@@ -409,21 +373,26 @@ void NeighborSearch::clear_initial_sub_idx()
       if(++j > transformations.size() - 1)
         break;
     // Create a new array of transformations.
-    unsigned int* shifted_trfs = new unsigned int[NeighborSearch::max_n_trans];
+    unsigned int* shifted_trfs = new unsigned int[max_n_trans];
     // Move the old one to the new one.
     for(unsigned int k = j; k < central_n_trans[i]; k++)
       shifted_trfs[k -j] = central_transformations[i][k];
-    // Point to the new one and delete the old one.
-    delete central_transformations[i];
-    central_transformations[i] = shifted_trfs;
+    // Point to the new one.
+    for(unsigned int l = 0; l > max_n_trans; l++)
+      central_transformations[i][l] = shifted_trfs[l];
   }
 }
 
 void NeighborSearch::delete_neighbor(unsigned int position)
 {
-  delete [] central_transformations[position];
-  central_transformations.erase (central_transformations.begin() + position);
-  central_n_trans.erase (central_n_trans.begin() + position);
+  for(unsigned int i = position - 1; i < max_neighbors - 1; i++)
+    for(unsigned int j = 0; j < max_n_trans; j++)
+      central_transformations[i][j] = central_transformations[i + 1][j];
+  for(unsigned int j = 0; j < max_n_trans; j++)
+      central_transformations[max_neighbors - 1][j] = 0;
+  for(unsigned int i = position - 1; i < max_neighbors - 1; i++)
+    central_n_trans[i] = central_n_trans[i + 1];
+  central_n_trans[max_neighbors - 1] = 0;
   neighbor_edges.erase (neighbor_edges.begin() + position);
   neighbors.erase (neighbors.begin() + position);
   n_neighbors--;
@@ -435,7 +404,7 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
   Node* edge = NULL;
   Node* vertex = NULL;
 
-  assert(n_parents <= max_n_trans);
+  assert(n_parents <= (int)max_n_trans);
 
   // IDs of vertices bounding the current intermediate parent edge.
   int p1 = elem->vn[active_edge]->id;
@@ -491,12 +460,8 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
         // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
         // adjacent to the single big neighbor.
         assert(n_neighbors == 0);
-        neighbor_n_trans.insert(neighbor_n_trans.begin() + n_neighbors, n_parents);
-        if(n_neighbors > NeighborSearch::max_neighbors)
-          NeighborSearch::max_neighbors = n_neighbors;
-
-        if(neighbor_transformations.size() <= n_neighbors)
-              neighbor_transformations.insert(neighbor_transformations.begin() + n_neighbors, new unsigned int[NeighborSearch::max_n_trans]);
+        
+        neighbor_n_trans[n_neighbors] = n_parents;
             
         // Go back through the intermediate inactive parents down to the central element and stack corresponding
         // neighbor_transformations into the array 'neighbor_transformations'.
@@ -599,13 +564,10 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
           if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
           // Construct the transformation path to the current neighbor.
-          for(unsigned int k = 0; k < n_sons; k++) {
-            if(central_transformations.size() <= n_neighbors)
-              central_transformations.insert(central_transformations.begin() + n_neighbors, new unsigned int[NeighborSearch::max_n_trans]);
+          for(unsigned int k = 0; k < n_sons; k++)
             central_transformations[n_neighbors][k] = sons[k];
-          }
 
-          central_n_trans.insert(central_n_trans.begin() + n_neighbors, n_sons);
+          central_n_trans[n_neighbors] = n_sons;
 
           NeighborEdgeInfo local_edge_info;
           local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
@@ -616,8 +578,6 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
 
           // Append the new neighbor.
           n_neighbors++;
-          if(n_neighbors > NeighborSearch::max_neighbors)
-            NeighborSearch::max_neighbors = n_neighbors;
           neighbors.push_back(neighb_el);
         }
       }

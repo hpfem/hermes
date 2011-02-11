@@ -235,9 +235,6 @@ public:
   /// Destructor.
   ~NeighborSearch();
 
-  /// This variable has the meaning how many neighbors have been used for a single edge so far,
-  /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
-  static unsigned int max_neighbors;
 
   /// Function that sets the variable ignore_errors. See the variable description.
   void set_ignore_errors(bool value) {this->ignore_errors = value;};
@@ -275,19 +272,23 @@ private:
 
 /*** Transformations. ***/
 
-  static const int max_n_trans = Transformable::H2D_MAX_TRN_LEVEL;
-                                                  ///< Number of allowed transformations (or equiv. number of neighbors
-                                                  ///< in a go-down neighborhood) - see Transformable::push_transform.
-  std::vector<unsigned int *> central_transformations;     ///< Vector of transformations of the central element to each neighbor
-                                                  ///< (in a go-down neighborhood; stored row-wise for each neighbor).
-  std::vector<unsigned int> central_n_trans;               ///< Number of transforms stored in each row of \c central_transformations.
+  static const unsigned int max_n_trans = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
+                                                                   ///< in a go-down neighborhood) - see Transformable::push_transform.
   
-  std::vector<unsigned int *> neighbor_transformations;    ///< Vector of transformations of the neighbor to the central element (go-up).
-  std::vector<unsigned int> neighbor_n_trans;              ///< Number of transforms stored in each row of \c neighbor_transformations.
+  /// This variable has the meaning how many neighbors have been used for a single edge so far,
+  /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
+  static const unsigned int max_neighbors = 1 << max_n_trans;
+
+  unsigned int central_transformations[max_neighbors][max_n_trans]; ///< Vector of transformations of the central element to each neighbor
+                                                                    ///< (in a go-down neighborhood; stored row-wise for each neighbor).
+  unsigned int central_n_trans[max_neighbors];                      ///< Number of transforms stored in each row of \c central_transformations.
   
-  uint64_t original_central_el_transform;              ///< Sub-element transformation of any function that comes from the
-                                                  ///< assembly, before transforms from \c transformations are pushed
-                                                  ///< to it.
+  unsigned int neighbor_transformations[max_neighbors][max_n_trans];///< Vector of transformations of the neighbor to the central element (go-up).
+  unsigned int neighbor_n_trans[max_neighbors];                     ///< Number of transforms stored in each row of \c neighbor_transformations.
+  
+  uint64_t original_central_el_transform;                           ///< Sub-element transformation of any function that comes from the
+                                                                    ///< assembly, before transforms from \c transformations are pushed
+                                                                    ///< to it.
 
 
 /*** Significant objects of the neighborhood. ***/

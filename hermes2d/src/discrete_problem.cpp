@@ -369,8 +369,6 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bo
 
   struct_changed = true;
   have_matrix = true;
-
-  NeighborSearch::max_neighbors = 1;
 }
 
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
@@ -998,10 +996,10 @@ std::map<unsigned int, NeighborSearch> DiscreteProblem::init_neighbors(const Wea
 }
 
 
-void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, const std::map<unsigned int, NeighborSearch>& neighbor_searches)
+void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, std::map<unsigned int, NeighborSearch>& neighbor_searches)
 {
   _F_
-  for(std::map<unsigned int, NeighborSearch>::const_iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
+  for(std::map<unsigned int, NeighborSearch>::iterator it = neighbor_searches.begin(); it != neighbor_searches.end(); it++) {
     if(it->second.get_num_neighbors() == 1)
       break;
     for(unsigned int i = 0; i < it->second.n_neighbors; i++)
@@ -1009,7 +1007,7 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
   }
 }
 
-void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count)
+void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, unsigned int transformations [NeighborSearch::max_n_trans], unsigned int transformation_count)
 {
   _F_
   // If we are already in the leaf.
@@ -1178,12 +1176,10 @@ void DiscreteProblem::update_ns_subtree(NeighborSearch& ns, DiscreteProblem::Nei
   for(unsigned int i = 0; i < running_central_transformations.size(); i++) {
     ns.neighbors.insert(ns.neighbors.begin() + ith_neighbor + i, neighbor);
     ns.neighbor_edges.insert(ns.neighbor_edges.begin() + ith_neighbor + i, edge_info);
-    ns.central_n_trans.insert(ns.central_n_trans.begin() + ith_neighbor + i, running_central_transformations[i]->size());
-    ns.neighbor_n_trans.insert(ns.neighbor_n_trans.begin() + ith_neighbor + i, running_neighbor_transformations[i]->size());
-    ns.central_transformations.insert(ns.central_transformations.begin() + ith_neighbor + i, new unsigned int[NeighborSearch::max_n_trans]);
+    ns.central_n_trans[ith_neighbor + i] = running_central_transformations[i]->size();
+    ns.neighbor_n_trans[ith_neighbor + i] = running_neighbor_transformations[i]->size();
     for(unsigned int ii = 0; ii < ns.central_n_trans[ith_neighbor + i]; ii++)
       ns.central_transformations[ith_neighbor + i][ii] = (*running_central_transformations[i])[ii];
-    ns.neighbor_transformations.insert(ns.neighbor_transformations.begin() + ith_neighbor + i, new unsigned int[NeighborSearch::max_n_trans]);
     for(unsigned int ii = 0; ii < ns.neighbor_n_trans[ith_neighbor + i]; ii++)
       ns.neighbor_transformations[ith_neighbor + i][ii] = (*running_neighbor_transformations[i])[ii];
     ns.n_neighbors++;

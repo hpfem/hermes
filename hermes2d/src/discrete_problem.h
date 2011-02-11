@@ -287,10 +287,10 @@ protected:
   };
 
   /// Initialize the tree for traversing multimesh neighbors.
-  void build_multimesh_tree(NeighborNode* root, const std::map<unsigned int, NeighborSearch>& neighbor_searches);
+  void build_multimesh_tree(NeighborNode* root, std::map<unsigned int, NeighborSearch>& neighbor_searches);
 
   /// Recursive insertion function into the tree.
-  void insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count);
+  void insert_into_multimesh_tree(NeighborNode* node, unsigned int transformations [NeighborSearch::max_n_trans], unsigned int transformation_count);
 
   /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
   Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree); 
