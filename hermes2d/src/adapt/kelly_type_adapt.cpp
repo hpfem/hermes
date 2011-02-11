@@ -150,7 +150,15 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       // Set maximum integration order for use in integrals, see limit_order()
       update_limit_table(ee[i]->get_mode());
 
+      NeighborSearch *nbs = new NeighborSearch(ee[i], meshes[i]);
+
       RefMap *rm = sln[i]->get_refmap();
+      
+      // MULTIMESH DG CHANGE
+      /*
+      nbs->attach_rm(rm); // This is needed for querying the geometric and quadrature data.
+      */
+      // MULTIMESH DG CHANGE
 
       double err = 0.0;
 
@@ -189,19 +197,24 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
           }
           else              // Interface
           {
-	    
             if (error_estimators_surf[iest].area != H2D_DG_INNER_EDGE) continue;
-	          error("Not yet implemented");
-	    /*
-            nbs->set_active_edge(isurf, ignore_visited_segments);
 
+            // MULTIMESH DG CHANGE
+            /*
+            nbs->set_active_edge(isurf, ignore_visited_segments);
+            */
+            // MULTIMESH DG CHANGE
             // Go through all segments of the currently processed interface (segmentation is caused
             // by hanging nodes on the other side of the interface).
             for (int neighbor = 0; neighbor < nbs->get_num_neighbors(); neighbor++)
             {
               bool use_extended_shapeset = false;
+              // MULTIMESH DG CHANGE
+              /*
               bool needs_processing = nbs->set_active_segment(neighbor, use_extended_shapeset);
               if (!needs_processing) continue;
+              */
+              // MULTIMESH DG CHANGE
 
               // The estimate is multiplied by 0.5 in order to distribute the error equally onto
               // the two neighboring elements.
@@ -233,7 +246,6 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               else
                 err += central_err;
             }
-            */
           }
         }
       }
@@ -250,6 +262,8 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       errors[i][ee[i]->id] += err;
 
       ee[i]->visited = true;
+
+      delete nbs;
 
     }
   }
@@ -386,10 +400,14 @@ ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, c
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
+  // MULTIMESH DG CHANGE
+  /*
   for (unsigned i = 0; i < ext.size(); i++) {
-    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
+    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], rm, order);
     else ext_fn[i] = NULL;
   }
+  */
+  // MULTIMESH DG CHANGE
   ext_data->nf = ext.size();
   ext_data->fn = ext_fn;
 
@@ -423,6 +441,24 @@ ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearc
   ext_data->nf = ext.size();
 
   return ext_data;
+}
+
+// Initialize integration order for discontinuous external functions.
+ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
+{
+  Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
+  // MULTIMESH DG CHANGE
+  /*
+  for (unsigned int j = 0; j < ext.size(); j++)
+    fake_ext_fns[j] = nbs->init_ext_fn_ord(ext[j]);
+  */
+  // MULTIMESH DG CHANGE
+
+  ExtData<Ord>* fake_ext = new ExtData<Ord>;
+  fake_ext->fn = fake_ext_fns;
+  fake_ext->nf = ext.size();
+
+  return fake_ext;
 }
 
 // END COPIED FROM discrete_problem.cpp
@@ -469,8 +505,12 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
 
   // function values
   Func<scalar>** ui = new Func<scalar>* [num];
+  // MULTIMESH DG CHANGE
+  /*
   for (int i = 0; i < num; i++)
-    ui[i] = init_fn(this->sln[i], order);
+    ui[i] = init_fn(this->sln[i], rm, order);
+  */
+  // MULTIMESH DG CHANGE
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, order);
 
   scalar res = volumetric_scaling_const *
@@ -545,17 +585,18 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
                               // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                               // the weights.
 }
+
 double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
                                                 RefMap *rm, SurfPos* surf_pos, NeighborSearch* nbs)
 {
-  error("Not yet implemented.");
-  return 0.0;
+  // MULTIMESH DG CHANGE
   /*
   // Determine integration order.
   Func<Ord>** oi = new Func<Ord>* [num];
+  
   for (int i = 0; i < num; i++)
     oi[i] = nbs->init_ext_fn_ord(this->sln[i]);
-
+  
   // Order of additional external functions.
   ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext, nbs);
 
@@ -583,6 +624,7 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
   // Init geometry and jacobian*weights (do not use the NeighborSearch caching mechanism).
   Geom<double>* e = nbs->init_geometry(NULL, surf_pos);
   double* jwt = nbs->init_jwt(NULL);
+  
 
   // function values
   Func<scalar>** ui = new Func<scalar>* [num];
@@ -604,4 +646,6 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
                               // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                               // the weights.
   */
+  // MULTIMESH DG CHANGE
+  return 0.0; // added for MULTIMESH DG CHANGE
 }
