@@ -5,7 +5,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example "butcher" works correctly.
+// This test makes sure that example 19-newton-timedep-heat-rk works correctly.
 
 const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 0;                    // Number of initial refinements towards boundary.
