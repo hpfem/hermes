@@ -201,7 +201,7 @@ public:
   void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element);
 
@@ -209,14 +209,14 @@ public:
   void assemble_DG_matrix_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element);
 
   /// Assemble DG vector forms.
   void assemble_DG_vector_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, NeighborSearch>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element);
 
@@ -242,16 +242,16 @@ protected:
   scalar eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
                                      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru_central, RefMap * ru_actual, RefMap *rv, 
                                      bool neighbor_supp_u, bool neighbor_supp_v,
-                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
+                                     SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
   scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> u_ext,
                                      PrecalcShapeset *fv, RefMap *rv, 
-                                     SurfPos* surf_pos, std::map<unsigned int, NeighborSearch>& neighbor_searches, int neighbor_index_v);
+                                     SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v);
 
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge);
-  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order);
-  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, std::map<unsigned int, NeighborSearch>& neighbor_searches);
+  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches);
 
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
   Func<Ord>* get_fn_ord(const int order);
@@ -265,7 +265,7 @@ protected:
   bool DG_vector_forms_present;
 
   /// Initialize neighbors.
-  std::map<unsigned int, NeighborSearch> init_neighbors(const WeakForm::Stage& stage, const int& isurf);
+  void init_neighbors(LightArray<NeighborSearch*>& neighbor_searches, const WeakForm::Stage& stage, const int& isurf);
 
   /// Multimesh neighbors traversal class.
   class NeighborNode
@@ -287,7 +287,7 @@ protected:
   };
 
   /// Initialize the tree for traversing multimesh neighbors.
-  void build_multimesh_tree(NeighborNode* root, std::map<unsigned int, NeighborSearch>& neighbor_searches);
+  void build_multimesh_tree(NeighborNode* root, LightArray<NeighborSearch*>& neighbor_searches);
 
   /// Recursive insertion function into the tree.
   void insert_into_multimesh_tree(NeighborNode* node, unsigned int transformations [NeighborSearch::max_n_trans], unsigned int transformation_count);
@@ -299,14 +299,14 @@ protected:
   void traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
 
   /// Update the NeighborSearch according to the multimesh tree.
-  void update_neighbor_search(NeighborSearch& ns, NeighborNode* multimesh_tree);
+  void update_neighbor_search(NeighborSearch* ns, NeighborNode* multimesh_tree);
 
   /// Finds a node in the multimesh tree that corresponds to the array transformations, with the length of transformation_count,
   /// starting to look for it in the NeighborNode node.
   NeighborNode* find_node(unsigned int* transformations, unsigned int transformation_count, NeighborNode* node);
 
   /// Updates the NeighborSearch ns according to the subtree of NeighborNode node.
-  void update_ns_subtree(NeighborSearch& ns, NeighborNode* node, unsigned int ith_neighbor);
+  void update_ns_subtree(NeighborSearch* ns, NeighborNode* node, unsigned int ith_neighbor);
 
   /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
   void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
