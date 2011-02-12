@@ -7,6 +7,15 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   neighb_el(NULL),
   quad(&g_quad_2d_std)
 {
+  for(unsigned int i = 0; i < max_neighbors; i++) {
+    for(unsigned int j = 0; j < max_n_trans; j++) {
+      central_transformations[i][j] = 0;
+      neighbor_transformations[i][j] = 0;
+    }
+    central_n_trans[i] = 0;
+    neighbor_n_trans[i] = 0;
+  }
+
   assert_msg(central_el != NULL && central_el->active == 1,
              "You must pass an active element to the NeighborSearch constructor.");
   neighbors.reserve(NeighborSearch::max_neighbors);
@@ -26,6 +35,15 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   neighbor_edge(ns.neighbor_edge),
   active_segment(ns.active_segment)
 {
+  for(unsigned int i = 0; i < max_neighbors; i++) {
+    for(unsigned int j = 0; j < max_n_trans; j++) {
+      central_transformations[i][j] = 0;
+      neighbor_transformations[i][j] = 0;
+    }
+    central_n_trans[i] = 0;
+    neighbor_n_trans[i] = 0;
+  }
+
   neighbors.reserve(NeighborSearch::max_neighbors);
   neighbor_edges.reserve(NeighborSearch::max_neighbors);
 
@@ -190,8 +208,12 @@ void NeighborSearch::set_active_edge_multimesh(const int& edge)
   else {
     neighb_el = central_el;
     
-    for(unsigned int i = 0; i < transformations.size(); i++)
-      neighbor_transformations[0][i] = transformations[i];
+    for(unsigned int i = 0; i < transformations.size(); i++) {
+      // We have to change the transformations we put into neighbor_transformations.
+      if (transformations[i] == 0)
+        transformations[i] = 8;
+      neighbor_transformations[0][i] = transformations[i] - 1;
+    }
     neighbor_n_trans[0] = transformations.size();
 
     neighbor_edge.local_num_of_edge = active_edge = edge;
@@ -211,13 +233,13 @@ void NeighborSearch::set_active_edge_multimesh(const int& edge)
 Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
 {
   Hermes::vector<unsigned int> transformations_backwards;
-  int i = 0;
-  while(sub_idx >> 3 > 0)
-    transformations_backwards[i++] = sub_idx % 8;
-  
+  int sub_idx_i = 0;
+  while((sub_idx >> (3 * sub_idx_i++)) > 0)
+    transformations_backwards.push_back(sub_idx % 8);
+    
   Hermes::vector<unsigned int> transformations;
   for(unsigned int i = 0; i < transformations_backwards.size(); i++)
-    transformations[i] = transformations_backwards[transformations_backwards.size() - i];
+    transformations.push_back(transformations_backwards[transformations_backwards.size() - 1 - i]);
 
   return transformations;
 }
@@ -274,6 +296,9 @@ void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned i
 
 void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
 {
+  
+  Hermes::vector<unsigned int> neighbors_to_be_deleted;
+
   // We basically identify the neighbors that are not compliant with the current sub-element mapping on the central element.
   for(unsigned int level = 0; level < transformations.size(); level++) {
     // In case of bigger (i.e. ~ way up) neighbor, there will be one neighbor left, so this saves time.
@@ -283,8 +308,8 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
     for(unsigned int i = 0; i < n_neighbors; i++) {
       // If the found neighbor is not a neighbor of this subelement.
       if(!compatible_transformations(central_transformations[i][level], transformations[level], active_edge))
-        delete_neighbor(i);
-      else
+        neighbors_to_be_deleted.push_back(i);
+      else {
         // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
         central_transformations[i][level] = transformations[level];
         // If we are already on a bigger (i.e. ~ way up) neighbor.
@@ -309,37 +334,40 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
                 neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
         }
       }
+    }
   }
+  for(unsigned int i = 0; i < neighbors_to_be_deleted.size(); i++)
+    delete_neighbor(i);
 }
 
 bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, int edge)
 {
-  if(a == b)
+  if(a == b - 1)
     return true;
   if(edge == 0) {
-    if ((a == 1 && b == 7) ||
-        (a == 2 && b == 0))
+    if ((a == 0 && b == 7) ||
+        (a == 1 && b == 0))
       return true;
     else
       return false;
   }
   if(edge == 1) {
-    if ((a == 2 && b == 5) ||
-        (a == 3 && b == 6))
+    if ((a == 1 && b == 5) ||
+        (a == 2 && b == 6))
       return true;
     else
       return false;
   }
   if(edge == 2) {
-    if ((a == 3 && b == 0) ||
-        (a == 4 && b == 7))
+    if ((a == 2 && b == 0) ||
+        (a == 3 && b == 7))
       return true;
     else
       return false;
   }
   if(edge == 3) {
-    if ((a == 4 && b == 6) ||
-        (a == 1 && b == 5))
+    if ((a == 3 && b == 6) ||
+        (a == 0 && b == 5))
       return true;
     else
       return false;
@@ -379,14 +407,24 @@ void NeighborSearch::clear_initial_sub_idx()
 
 void NeighborSearch::delete_neighbor(unsigned int position)
 {
-  for(unsigned int i = position - 1; i < max_neighbors - 1; i++)
+  for(unsigned int i = position; i < max_neighbors - 1; i++)
     for(unsigned int j = 0; j < max_n_trans; j++)
       central_transformations[i][j] = central_transformations[i + 1][j];
   for(unsigned int j = 0; j < max_n_trans; j++)
-      central_transformations[max_neighbors - 1][j] = 0;
-  for(unsigned int i = position - 1; i < max_neighbors - 1; i++)
+    central_transformations[max_neighbors - 1][j] = 0;
+  for(unsigned int i = position; i < max_neighbors - 1; i++)
     central_n_trans[i] = central_n_trans[i + 1];
   central_n_trans[max_neighbors - 1] = 0;
+
+  for(unsigned int i = position; i < max_neighbors - 1; i++)
+    for(unsigned int j = 0; j < max_n_trans; j++)
+      neighbor_transformations[i][j] = neighbor_transformations[i + 1][j];
+  for(unsigned int j = 0; j < max_n_trans; j++)
+    neighbor_transformations[max_neighbors - 1][j] = 0;
+  for(unsigned int i = position; i < max_neighbors - 1; i++)
+    neighbor_n_trans[i] = neighbor_n_trans[i + 1];
+  neighbor_n_trans[max_neighbors - 1] = 0;
+
   neighbor_edges.erase (neighbor_edges.begin() + position);
   neighbors.erase (neighbors.begin() + position);
   n_neighbors--;

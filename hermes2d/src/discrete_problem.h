@@ -317,7 +317,8 @@ protected:
   NeighborNode* find_node(unsigned int* transformations, unsigned int transformation_count, NeighborNode* node);
 
   /// Updates the NeighborSearch ns according to the subtree of NeighborNode node.
-  void update_ns_subtree(NeighborSearch* ns, NeighborNode* node, unsigned int ith_neighbor);
+  /// Returns 0 if no neighbor was deleted, -1 otherwise.
+  unsigned int update_ns_subtree(NeighborSearch* ns, NeighborNode* node, unsigned int ith_neighbor);
 
   /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
   void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
