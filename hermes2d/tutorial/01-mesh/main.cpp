@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 // This example shows how to load a mesh, perform various types
@@ -28,6 +29,14 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
+
+  // Optional rescaling of mesh (all vertex x- and y-coordinates are 
+  // divided by x_ref and y_ref, respectively). Mesh with curved edges 
+  // cannot be rescaled. So to try this feature, comment out the "curves" 
+  // section in the mesh file.
+  double x_ref = 2.0, y_ref = 3.0;
+  if(!mesh.rescale(x_ref, y_ref)) info("Mesh was not rescaled.");
+  else {info("Mesh has been rescaled by the factors of %g and %g in the x- and y- direction, respectively.", x_ref, y_ref);}
 
   // Conversion between triangular and quadrilateral meshes (optional). 
   // Need to be done before any other type of mesh refinement.
