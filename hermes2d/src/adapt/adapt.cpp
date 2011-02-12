@@ -262,7 +262,7 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
       int* parents;
       parents = meshes[i]->regularize(regularize);
       this->spaces[i]->distribute_orders(meshes[i], parents);
-      delete [] parents;
+      ::free(parents);
     }
   }
 

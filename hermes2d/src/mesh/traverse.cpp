@@ -92,7 +92,8 @@ static void move_to_son(Rect* rnew, Rect* rold, int son)
 {
   uint64_t hmid = (rold->l + rold->r) >> 1;
   uint64_t vmid = (rold->t + rold->b) >> 1;
-  memcpy(rnew, rold, sizeof(Rect));
+  if(rnew != rold)
+    memcpy(rnew, rold, sizeof(Rect));
 
   switch (son)
   {
