@@ -235,7 +235,7 @@ Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
   Hermes::vector<unsigned int> transformations_backwards;
   int sub_idx_i = 0;
   while((sub_idx >> (3 * sub_idx_i++)) > 0)
-    transformations_backwards.push_back(sub_idx % 8);
+    transformations_backwards.push_back((sub_idx >> (3 * (sub_idx_i -1))) % 8);
     
   Hermes::vector<unsigned int> transformations;
   for(unsigned int i = 0; i < transformations_backwards.size(); i++)

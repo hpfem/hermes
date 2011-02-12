@@ -32,37 +32,6 @@
 #include "views/scalar_view.h"
 #include "views/base_view.h"
 
-std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>
-DiscreteProblem::surf_forms_cache =
-    *new std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>();
-
-std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>
-DiscreteProblem::vol_forms_cache =
-    *new std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>();
-
-DiscreteProblem::SurfVectorFormsKey DiscreteProblem::surf_forms_key =
-  DiscreteProblem::SurfVectorFormsKey(NULL, 0, 0, 0, 0);
-
-DiscreteProblem::VolVectorFormsKey DiscreteProblem::vol_forms_key =
-  DiscreteProblem::VolVectorFormsKey(NULL, 0, 0);
-
-void DiscreteProblem::empty_form_caches()
-{
-  std::map<DiscreteProblem::SurfVectorFormsKey, double*, DiscreteProblem::SurfVectorFormsKeyCompare>::iterator its;
-  for(its = DiscreteProblem::surf_forms_cache.begin(); its != DiscreteProblem::surf_forms_cache.end(); its++)
-    delete [] (*its).second;
-
-  // This maybe is not needed.
-  DiscreteProblem::surf_forms_cache.clear();
-
-  std::map<DiscreteProblem::VolVectorFormsKey, double*, DiscreteProblem::VolVectorFormsKeyCompare>::iterator itv;
-  for(itv = DiscreteProblem::vol_forms_cache.begin(); itv != DiscreteProblem::vol_forms_cache.end(); itv++)
-    delete [] (*itv).second;
-
-  // This maybe is not needed.
-  DiscreteProblem::vol_forms_cache.clear();
-};
-
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear) :
   wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
 {
@@ -770,18 +739,7 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
         continue;
       
       spss[m]->set_active_shape(al[m]->idx[i]);
-      
-      if(vector_valued_forms) {
-        vol_forms_key = VolVectorFormsKey(vfv->fn, spss[m]->get_active_element()->id, al[m]->idx[i]);
-        if(vol_forms_cache[vol_forms_key] == NULL) 
           rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
-        else
-          rhs->add(al[m]->dof[i], vol_forms_cache[vol_forms_key][m]);
-      }
-      else {
-        scalar val = eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i];
-        rhs->add(al[m]->dof[i], val);
-      }
     }
   }
 }
@@ -1378,20 +1336,7 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
-
-      if (vector_valued_forms) {
-        surf_forms_key = SurfVectorFormsKey(vfs->fn, spss[m]->get_active_element()->id, isurf, al[m]->idx[i],
-            spss[m]->get_transform());
-        if(surf_forms_cache[surf_forms_key] == NULL)
-          rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], 
-                    &surf_pos) * al[m]->coef[i]);
-        else
-          rhs->add(al[m]->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
-      }
-      else {
-        scalar val = eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i];
-        rhs->add(al[m]->dof[i], val);
-      }
+      rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
     }
   }
 }
@@ -1509,15 +1454,6 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
-      if(vector_valued_forms) {
-        surf_forms_key = SurfVectorFormsKey(vfs->fn, spss[m]->get_active_element()->id, isurf,
-            al[m]->idx[i], spss[m]->get_transform());
-        if(surf_forms_cache[surf_forms_key] == NULL)
-          rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
-        else
-          rhs->add(al[m]->dof[i], 0.5 * surf_forms_cache[surf_forms_key][m]);
-      }
-      else
         rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
     }
   }
