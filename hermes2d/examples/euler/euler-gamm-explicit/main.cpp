@@ -359,8 +359,7 @@ int main(int argc, char* argv[])
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
 
-  for(t = 0.0; t < 10; t += TAU)
-  {
+  for(t = 0.0; t < 10; t += TAU) {
     info("---- Time step %d, time %3.5f.", iteration, t);
 
     iteration++;
@@ -392,8 +391,7 @@ int main(int argc, char* argv[])
       delete adapt_for_time_der_calc;
 
       // Info about the approximate time derivative.
-      if(iteration > 1)
-      {
+      if(iteration > 1) {
         info("Approximate the norm time derivative : %g.", difference);
         time_der_out << iteration << '\t' << difference << std::endl;
       }
@@ -406,23 +404,22 @@ int main(int argc, char* argv[])
     Element *e;
     for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
           if (((e) = mesh.get_element_fast(_id))->used) \
-            if ((e)->active)
-    {
-      AsmList al;
-      space_rho.get_element_assembly_list(e, &al);
-      double rho = solution_vector[al.dof[0]];
-      space_rho_v_x.get_element_assembly_list(e, &al);
-      double v1 = solution_vector[al.dof[0]] / rho;
-      space_rho_v_y.get_element_assembly_list(e, &al);
-      double v2 = solution_vector[al.dof[0]] / rho;
-      space_e.get_element_assembly_list(e, &al);
-      double energy = solution_vector[al.dof[0]];
+            if ((e)->active) {
+              AsmList al;
+              space_rho.get_element_assembly_list(e, &al);
+              double rho = solution_vector[al.dof[0]];
+              space_rho_v_x.get_element_assembly_list(e, &al);
+              double v1 = solution_vector[al.dof[0]] / rho;
+              space_rho_v_y.get_element_assembly_list(e, &al);
+              double v2 = solution_vector[al.dof[0]] / rho;
+              space_e.get_element_assembly_list(e, &al);
+              double energy = solution_vector[al.dof[0]];
       
-      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
+              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
       
-      if(condition < min_condition || min_condition == 0.)
-        min_condition = condition;
-    }
+              if(condition < min_condition || min_condition == 0.)
+                min_condition = condition;
+            }
     if(TAU > min_condition)
       TAU = min_condition;
     if(TAU < min_condition * 0.9)

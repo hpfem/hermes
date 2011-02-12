@@ -396,7 +396,7 @@ bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, 
 void NeighborSearch::clear_initial_sub_idx()
 {
   _F_
-  if(!neighborhood_type == H2D_DG_GO_DOWN)
+  if(neighborhood_type != H2D_DG_GO_DOWN)
     return;
   // Obtain the transformations sequence.
   Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
