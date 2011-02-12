@@ -923,6 +923,33 @@ void Mesh::create(int nv, double2* verts, int nt, int4* tris,
   seq = g_mesh_seq++;
 }
 
+bool Mesh::rescale(double x_ref, double y_ref) 
+{
+  // Sanity checks.
+  if (fabs(x_ref) < 1e-10) return false;
+  if (fabs(y_ref) < 1e-10) return false;
+
+  // If curvilinear, the mesh cannot be rescaled.
+  bool curved = false;
+  Element* e;
+  for_all_elements(e, this) {
+    if (e->cm != NULL) {
+      curved = true;
+      break;
+    }
+  }
+  if (curved == true) return false;
+
+  // Go through all vertices and rescale coordinates.
+  Node* n;
+  for_all_vertex_nodes(n, this) {
+    n->x /= x_ref;
+    n->y /= y_ref;
+  }
+
+  return true;
+}
+
 //// mesh copy /////////////////////////////////////////////////////////////////////////////////////
 
 void Mesh::copy(const Mesh* mesh)
@@ -1049,7 +1076,6 @@ void Mesh::copy_base(Mesh* mesh)
 
 void Mesh::free()
 {
-  //printf("Inside Mesh::free().\n");
   Element* e;
   for_all_elements(e, this)
     if (e->cm != NULL)
@@ -1067,7 +1093,7 @@ void Mesh::copy_converted(Mesh* mesh)
   //printf("Calling Mesh::free() in Mesh::copy_converted().\n");
   free();
   HashTable::copy(mesh);
- // clear refernce for all nodes
+  // clear refernce for all nodes
   for(int i = 0; i < nodes.get_size(); i++)
   {
     Node& node = nodes[i];

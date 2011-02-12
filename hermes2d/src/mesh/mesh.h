@@ -157,7 +157,6 @@ public:
 
   Mesh();
   ~Mesh() {
-    //printf("Calling Mesh::free() in ~Mesh().\n");
     free();
     dump_hash_stat();
   }
@@ -185,9 +184,14 @@ public:
   /// \param filename [in] The name of the file.
   void save(const char* filename);
 
-  /// Creates the mesh from the given vertex, triangle, quad and marker arrays
+  /// Creates a mesh from given vertex, triangle, quad, and marker arrays
   void create(int nv, double2* verts, int nt, int4* tris,
               int nq, int5* quads, int nm, int3* mark);
+
+  /// Rescales the mesh in the x- and y- directions. Mesh must not 
+  /// be curvilinear. All x-coordinates are divided by x_ref and 
+  /// all y-coordinates by y_ref.
+  bool rescale(double x_ref, double y_ref);
 
   /// Retrieves an element by its id number.
   Element* get_element(int id) const;
@@ -268,6 +272,7 @@ public:
   /// refine_all_elements().
   void unrefine_all_elements(bool keep_initial_refinements = true);
 
+  /// FIXME: Where are these functions implemented?
   void transform(double2x2 m, double2 t);
   void transform(void (*fn)(double* x, double* y));
 
