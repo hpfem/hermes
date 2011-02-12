@@ -810,10 +810,11 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
   unsigned int num_neighbors = 0;
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
     if(neighbor_searches.present(i)) {
-      update_neighbor_search(neighbor_searches.get(i), root);
+      NeighborSearch* ns = neighbor_searches.get(i);
+      update_neighbor_search(ns, root);
       if(num_neighbors == 0)
-        num_neighbors = neighbor_searches.get(i)->n_neighbors;
-      if(neighbor_searches.get(i)->n_neighbors != num_neighbors)
+        num_neighbors = ns->n_neighbors;
+      if(ns->n_neighbors != num_neighbors)
         error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem::assemble_surface_integrals().");
     }
 
@@ -983,10 +984,11 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
   _F_
     for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
       if(neighbor_searches.present(i)) {
-        if(neighbor_searches.get(i)->n_neighbors == 1 && neighbor_searches.get(i)->central_n_trans[0] == 0)
+        NeighborSearch* ns = neighbor_searches.get(i);
+        if(ns->n_neighbors == 1 && ns->central_n_trans[0] == 0)
           continue;
-        for(unsigned int j = 0; j < neighbor_searches.get(i)->n_neighbors; j++)
-          insert_into_multimesh_tree(root, neighbor_searches.get(i)->central_transformations[j], neighbor_searches.get(i)->central_n_trans[j]);
+        for(unsigned int j = 0; j < ns->n_neighbors; j++)
+          insert_into_multimesh_tree(root, ns->central_transformations[j], ns->central_n_trans[j]);
       }
 }
 

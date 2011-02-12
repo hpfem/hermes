@@ -35,6 +35,7 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   neighbor_edge(ns.neighbor_edge),
   active_segment(ns.active_segment)
 {
+  _F_
   for(unsigned int i = 0; i < max_neighbors; i++) {
     for(unsigned int j = 0; j < max_n_trans; j++) {
       central_transformations[i][j] = 0;
@@ -79,6 +80,7 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
 
 NeighborSearch::~NeighborSearch()
 {
+  _F_
   neighbor_edges.clear();
   neighbors.clear();
   clear_supported_shapes();
@@ -86,6 +88,7 @@ NeighborSearch::~NeighborSearch()
 
 void NeighborSearch::reset_neighb_info()
 {
+  _F_
   // Reset information about the neighborhood's active state.
   active_segment = 0;
   active_edge = 0;
@@ -111,6 +114,7 @@ void NeighborSearch::reset_neighb_info()
 
 void NeighborSearch::set_active_edge(int edge)
 {
+  _F_
   reset_neighb_info();
   active_edge = edge;
 
@@ -198,6 +202,7 @@ void NeighborSearch::set_active_edge(int edge)
 
 void NeighborSearch::set_active_edge_multimesh(const int& edge)
 {
+  _F_
   Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
   // Inter-element edge.
   if(is_inter_edge(edge, transformations)) {
@@ -208,12 +213,8 @@ void NeighborSearch::set_active_edge_multimesh(const int& edge)
   else {
     neighb_el = central_el;
     
-    for(unsigned int i = 0; i < transformations.size(); i++) {
-      // We have to change the transformations we put into neighbor_transformations.
-      if (transformations[i] == 0)
-        transformations[i] = 8;
-      neighbor_transformations[0][i] = transformations[i] - 1;
-    }
+    for(unsigned int i = 0; i < transformations.size(); i++)
+      neighbor_transformations[0][i] = transformations[i];
     neighbor_n_trans[0] = transformations.size();
 
     neighbor_edge.local_num_of_edge = active_edge = edge;
@@ -232,11 +233,12 @@ void NeighborSearch::set_active_edge_multimesh(const int& edge)
 
 Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
 {
+  _F_
   Hermes::vector<unsigned int> transformations_backwards;
-  int sub_idx_i = 0;
-  while((sub_idx >> (3 * sub_idx_i++)) > 0)
-    transformations_backwards.push_back((sub_idx >> (3 * (sub_idx_i -1))) % 8);
-    
+  while (sub_idx > 0) {
+    transformations_backwards.push_back((sub_idx - 1) & 7);
+    sub_idx = (sub_idx - 1) >> 3;
+  }
   Hermes::vector<unsigned int> transformations;
   for(unsigned int i = 0; i < transformations_backwards.size(); i++)
     transformations.push_back(transformations_backwards[transformations_backwards.size() - 1 - i]);
@@ -246,6 +248,7 @@ Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
 
 bool NeighborSearch::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations)
 {
+  _F_
   // No subelements => of course this edge is an inter-element one.
   if(transformations.size() == 0)
     return true;
@@ -253,17 +256,17 @@ bool NeighborSearch::is_inter_edge(const int& edge, const Hermes::vector<unsigne
   // Triangles.
   for(unsigned int i = 0; i < transformations.size(); i++)
     if(central_el->get_mode() == HERMES_MODE_TRIANGLE) {
-      if ((edge == 0 && (transformations[i] == 3 || transformations[i] == 4)) ||
-          (edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
-          (edge == 2 && (transformations[i] == 2 || transformations[i] == 4)))
+      if ((edge == 0 && (transformations[i] == 2 || transformations[i] == 3)) ||
+          (edge == 1 && (transformations[i] == 0 || transformations[i] == 3)) ||
+          (edge == 2 && (transformations[i] == 1 || transformations[i] == 3)))
         return false;
     }
     // Quads.
     else {
-      if ((edge == 0 && (transformations[i] == 3 || transformations[i] == 4 || transformations[i] == 6)) ||
-          (edge == 1 && (transformations[i] == 1 || transformations[i] == 4 || transformations[i] == 7)) ||
-          (edge == 2 && (transformations[i] == 1 || transformations[i] == 2 || transformations[i] == 5)) ||
-          (edge == 3 && (transformations[i] == 2 || transformations[i] == 3 || transformations[i] == 0)))
+      if ((edge == 0 && (transformations[i] == 2 || transformations[i] == 3 || transformations[i] == 5)) ||
+          (edge == 1 && (transformations[i] == 0 || transformations[i] == 3 || transformations[i] == 6)) ||
+          (edge == 2 && (transformations[i] == 0 || transformations[i] == 1 || transformations[i] == 4)) ||
+          (edge == 3 && (transformations[i] == 1 || transformations[i] == 2 || transformations[i] == 7)))
         return false;
     }
   return true;
@@ -271,22 +274,23 @@ bool NeighborSearch::is_inter_edge(const int& edge, const Hermes::vector<unsigne
 
 void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
 {
+  _F_
   if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP) {
     for(unsigned int i = 0; i < transformations.size(); i++)
       // Triangles.
       if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
-        if ((active_edge == 0 && transformations[i] == 1) ||
-            (active_edge == 1 && transformations[i] == 2) ||
-            (active_edge == 2 && transformations[i] == 3))
+        if ((active_edge == 0 && transformations[i] == 0) ||
+            (active_edge == 1 && transformations[i] == 1) ||
+            (active_edge == 2 && transformations[i] == 2))
           neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
         else
           neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
       // Quads.
       else
-        if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
-            (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
-            (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 0)) ||
-            (active_edge == 3 && (transformations[i] == 4 || transformations[i] == 6)))
+        if ((active_edge == 0 && (transformations[i] == 0 || transformations[i] == 6)) ||
+            (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
+            (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
+            (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
           neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
         else
           neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
@@ -296,78 +300,92 @@ void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned i
 
 void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
 {
-  
+  _F_
   Hermes::vector<unsigned int> neighbors_to_be_deleted;
+  Hermes::vector<unsigned int> neighbors_not_to_be_deleted;
 
   // We basically identify the neighbors that are not compliant with the current sub-element mapping on the central element.
-  for(unsigned int level = 0; level < transformations.size(); level++) {
-    // In case of bigger (i.e. ~ way up) neighbor, there will be one neighbor left, so this saves time.
-    // Commented out for debugging, as the check should pass.
-    //if(n_neighbors == 1)
-    //  break;
-    for(unsigned int i = 0; i < n_neighbors; i++) {
+  for(unsigned int neighbor_i = 0; neighbor_i < n_neighbors; neighbor_i++) {
+    bool deleted = false;
+    for(unsigned int level = 0; level < std::min(transformations.size(), central_n_trans[neighbor_i]); level++)
       // If the found neighbor is not a neighbor of this subelement.
-      if(!compatible_transformations(central_transformations[i][level], transformations[level], active_edge))
-        neighbors_to_be_deleted.push_back(i);
-      else {
-        // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
-        central_transformations[i][level] = transformations[level];
-        // If we are already on a bigger (i.e. ~ way up) neighbor.
-        if(central_n_trans[i] == level + 1) {
-          for(unsigned int i = level + 1; i < transformations.size(); i++)
-            // Triangles.
-            if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
-              if ((active_edge == 0 && transformations[i] == 1) ||
-                  (active_edge == 1 && transformations[i] == 2) ||
-                  (active_edge == 2 && transformations[i] == 3))
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
-              else
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
-            // Quads.
+      if(!compatible_transformations(central_transformations[neighbor_i][level], transformations[level], active_edge)) {
+        deleted = true;
+        break;
+      }
+    if(deleted)
+      neighbors_to_be_deleted.push_back(neighbor_i);
+    else
+      neighbors_not_to_be_deleted.push_back(neighbor_i);
+  }
+
+  // Now for the compliant ones, we need to adjust the transformations.
+  for(unsigned int neighbors_not_to_be_deleted_i = 0; neighbors_not_to_be_deleted_i < neighbors_not_to_be_deleted.size(); neighbors_not_to_be_deleted_i++) {
+    unsigned int neighbor_i = neighbors_not_to_be_deleted[neighbors_not_to_be_deleted_i];
+    for(unsigned int level = 0; level < transformations.size(); level++) {
+      // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
+      central_transformations[neighbor_i][level] = transformations[level];
+      // If we are already on a bigger (i.e. ~ way up) neighbor.
+      if(central_n_trans[neighbor_i] == level + 1) {
+        for(unsigned int i = level + 1; i < transformations.size(); i++)
+          // Triangles.
+          if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
+            if ((active_edge == 0 && transformations[i] == 0) ||
+                (active_edge == 1 && transformations[i] == 1) ||
+                (active_edge == 2 && transformations[i] == 2))
+              neighbor_transformations[neighbor_i][neighbor_n_trans[i]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
             else
-              if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
-                  (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
-                  (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 0)) ||
-                  (active_edge == 3 && (transformations[i] == 4 || transformations[i] == 6)))
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
-              else
-                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
-        }
+              neighbor_transformations[neighbor_i][neighbor_n_trans[i]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
+          // Quads.
+          else
+            if ((active_edge == 0 && (transformations[i] == 0 || transformations[i] == 6)) ||
+                (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
+                (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
+                (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
+              neighbor_transformations[neighbor_i][neighbor_n_trans[neighbor_i]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+            else
+              neighbor_transformations[neighbor_i][neighbor_n_trans[neighbor_i]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
       }
     }
+    if(transformations.size() > central_n_trans[neighbor_i])
+      central_n_trans[neighbor_i] = transformations.size(); 
   }
-  for(unsigned int i = 0; i < neighbors_to_be_deleted.size(); i++)
-    delete_neighbor(i);
+
+  // Now we truly delete (in the reverse order) the neighbors.
+  if(neighbors_to_be_deleted.size() > 0)
+    for(unsigned int neighbors_to_be_deleted_i = neighbors_to_be_deleted.size(); neighbors_to_be_deleted_i >= 1; neighbors_to_be_deleted_i--)
+      delete_neighbor(neighbors_to_be_deleted[neighbors_to_be_deleted_i - 1]);
 }
 
 bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, int edge)
 {
-  if(a == b - 1)
+  _F_
+  if(a == b)
     return true;
   if(edge == 0) {
-    if ((a == 0 && b == 7) ||
-        (a == 1 && b == 0))
+    if ((a == 0 && b == 6) ||
+        (a == 1 && b == 7))
       return true;
     else
       return false;
   }
   if(edge == 1) {
-    if ((a == 1 && b == 5) ||
-        (a == 2 && b == 6))
+    if ((a == 1 && b == 4) ||
+        (a == 2 && b == 5))
       return true;
     else
       return false;
   }
   if(edge == 2) {
-    if ((a == 2 && b == 0) ||
-        (a == 3 && b == 7))
+    if ((a == 2 && b == 7) ||
+        (a == 3 && b == 6))
       return true;
     else
       return false;
   }
   if(edge == 3) {
-    if ((a == 3 && b == 6) ||
-        (a == 0 && b == 5))
+    if ((a == 3 && b == 5) ||
+        (a == 0 && b == 4))
       return true;
     else
       return false;
@@ -377,6 +395,7 @@ bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, 
 
 void NeighborSearch::clear_initial_sub_idx()
 {
+  _F_
   if(!neighborhood_type == H2D_DG_GO_DOWN)
     return;
   // Obtain the transformations sequence.
@@ -396,17 +415,22 @@ void NeighborSearch::clear_initial_sub_idx()
         break;
     // Create a new array of transformations.
     unsigned int* shifted_trfs = new unsigned int[max_n_trans];
+    // Clear it.
+    memset(shifted_trfs, 0, max_n_trans * sizeof(unsigned int));
     // Move the old one to the new one.
     for(unsigned int k = j; k < central_n_trans[i]; k++)
-      shifted_trfs[k -j] = central_transformations[i][k];
+      shifted_trfs[k - j] = central_transformations[i][k];
     // Point to the new one.
-    for(unsigned int l = 0; l > max_n_trans; l++)
+    for(unsigned int l = 0; l < max_n_trans; l++)
       central_transformations[i][l] = shifted_trfs[l];
+    // We also have to store the information about length of the transformation array for this neighbor.
+    central_n_trans[i] -= j;
   }
 }
 
 void NeighborSearch::delete_neighbor(unsigned int position)
 {
+  _F_
   for(unsigned int i = position; i < max_neighbors - 1; i++)
     for(unsigned int j = 0; j < max_n_trans; j++)
       central_transformations[i][j] = central_transformations[i + 1][j];
@@ -433,6 +457,7 @@ void NeighborSearch::delete_neighbor(unsigned int position)
 
 void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
 {
+  _F_
   Node* edge = NULL;
   Node* vertex = NULL;
 
@@ -542,6 +567,7 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 
 void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons)
 {
+  _F_
   int mid_vert = vertex->id; // ID of vertex in between vertices from par_vertex_id.
   int bnd_verts[2];
   bnd_verts[0] = bounding_verts_id[0];
@@ -619,6 +645,7 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
 
 int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment)
 {
+  _F_
   if (segment == 0)
   {
     // neighbor edge goes from parent1 to middle vertex
@@ -656,6 +683,7 @@ void NeighborSearch::set_quad_order(int order)
 
 int NeighborSearch::get_quad_eo(bool on_neighbor)
 {
+  _F_
   if (on_neighbor)
     return neighb_quad.eo;
   else
