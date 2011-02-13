@@ -97,25 +97,25 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview_1("", new WinGeom(0, 0, 350, 250));
+  ScalarView sview_1("", new WinGeom(0, 0, 400, 360));
   sview_1.show_mesh(false);
   sview_1.fix_scale_width(60);
-  ScalarView sview_2("", new WinGeom(360, 0, 350, 250));
+  ScalarView sview_2("", new WinGeom(405, 0, 400, 360));
   sview_2.show_mesh(false);
   sview_2.fix_scale_width(60);
-  ScalarView sview_3("", new WinGeom(720, 0, 350, 250));
+  ScalarView sview_3("", new WinGeom(810, 0, 400, 360));
   sview_3.show_mesh(false);
   sview_3.fix_scale_width(60);
-  ScalarView sview_4("", new WinGeom(0, 305, 350, 250));
+  ScalarView sview_4("", new WinGeom(0, 410, 400, 360));
   sview_4.show_mesh(false);
   sview_4.fix_scale_width(60);
-  ScalarView sview_5("", new WinGeom(360, 305, 350, 250));
+  ScalarView sview_5("", new WinGeom(405, 410, 400, 360));
   sview_5.show_mesh(false);
   sview_5.fix_scale_width(60);
-  ScalarView sview_6("", new WinGeom(720, 305, 350, 250));
+  ScalarView sview_6("", new WinGeom(810, 410, 400, 360));
   sview_6.show_mesh(false);
   sview_6.fix_scale_width(60);
-  OrderView  oview("Polynomial orders", new WinGeom(1080, 0, 410, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(1215, 0, 400, 360));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
@@ -263,6 +263,9 @@ int main(int argc, char* argv[])
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
+
+    // Wait for keypress.
+    View::wait(HERMES_WAIT_KEYPRESS);
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
