@@ -67,53 +67,6 @@
                                           Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
                                           ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
 
-///< Structure to hold adaptivity parameters together.
-//NOTE: Seem to be unused in current version of Hermes.
-struct AdaptivityParamType {
-  double err_stop;
-  int ndof_stop;
-  double threshold;
-  int strategy;
-  int mesh_regularity;
-  double to_be_processed;
-  int total_error_flag;
-  int elem_error_flag;
-
-  Hermes::vector<int> error_form_i;
-  Hermes::vector<int> error_form_j;
-  Hermes::vector<error_matrix_form_val_t> error_form_val;
-  Hermes::vector<error_matrix_form_ord_t> error_form_ord;
-
-  AdaptivityParamType(double err_stop = 1.0, int ndof_stop = 50000,
-	  	      double threshold = 0.3, int strategy = 0,
-                      int mesh_regularity = -1, double to_be_processed = 0.0,
-                      int total_error_flag = HERMES_TOTAL_ERROR_REL,
-                      int elem_error_flag = HERMES_ELEMENT_ERROR_REL)
-  {
-    this->err_stop = err_stop;
-    this->ndof_stop = ndof_stop;
-    this->threshold = threshold;
-    this->strategy = strategy;
-    this->mesh_regularity = mesh_regularity;
-    this->to_be_processed = to_be_processed;
-    this->total_error_flag = total_error_flag;
-    this->elem_error_flag = elem_error_flag;
-    error_form_i = Hermes::vector<int>();
-    error_form_j = Hermes::vector<int>();
-    error_form_val = Hermes::vector<error_matrix_form_val_t>();
-    error_form_ord = Hermes::vector<error_matrix_form_ord_t>();
-  };
-
-  void set_error_form(int i, int j, error_matrix_form_val_t mfv, error_matrix_form_ord_t mfo)
-  {
-    if (error_form_val.size() > 100) error("too many error forms in AdaptivityParamType::set_error_form().");
-    this->error_form_i.push_back(i);
-    this->error_form_j.push_back(j);
-    this->error_form_val.push_back(mfv);
-    this->error_form_ord.push_back(mfo);
-  }
-};
-
 /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity. \ingroup g_adapt
 /** The class provides basic functionality necessary to adaptively refine elements.
  *  Given a reference solution and a coarse solution, it calculates error estimates
