@@ -18,9 +18,17 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-int TARGET_EIGENFUNCTION = 1;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
+int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
-int ITERATIVE_METHOD = 2;                         // 1 = Newton, 2 = Picard.
+int DIMENSION_SUBSPACE = 3;              	  // Dimension of the subspace to use, it should be greater or equal to TARGET_EIGENFUNCTION
+
+int ITERATIVE_METHOD = 3;                         // 1 = Newton, 2 = Picard, 3 = Eigensolver.
+
+int RECONSTRUCTION = 1;                           // Eigenfunction reconstruction: 0 = Off, 1 = On. 
+
+int DIMENSION_TARGET_EIGENSPACE = 1;              // Dimension of the target eigenspace
+
+int FIRST_INDEX_EIGENSPACE = 2;                   // Index of the first eigenfunction in the target eigenspace
 
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
@@ -62,7 +70,9 @@ const int PYSPARSE_MAX_ITER = 1000;               // PySparse parameter: Maximum
 const double NEWTON_TOL = 1e-3;
 const int NEWTON_MAX_ITER = 10;
 const double PICARD_TOL = 1e-3;
-const int PICARD_MAX_ITER = 50;
+const int PICARD_MAX_ITER = 1000;
+const int USE_ORTHO = 0;
+const int USE_SHIFT = 0;
 
 // Problem parameters.
 double V(double x, double y) {
@@ -89,6 +99,7 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("domain_lshape_tria.mesh", &mesh);
+  //mloader.load("domain_square.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -133,7 +144,7 @@ int main(int argc, char* argv[])
   dp_S.assemble(matrix_S);
   DiscreteProblem dp_M(&wf_M, &space, is_linear);
   dp_M.assemble(matrix_M);
-
+  
   // Write matrix_S in MatrixMarket format.
   write_matrix_mm("mat_S.mtx", matrix_S);
 
@@ -143,16 +154,20 @@ int main(int argc, char* argv[])
   // Call Python eigensolver. Solution will be written to "eivecs.dat".
   info("Calling Pysparse.");
   char call_cmd[255];
+  // Compute the approximation of all discrete eigenfunctions corresponding to the eigenvlaue of the target eigenfunction
   sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_S.mtx mat_M.mtx %g %d %g %d", 
-	  PYSPARSE_TARGET_VALUE, TARGET_EIGENFUNCTION, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
+	  PYSPARSE_TARGET_VALUE, DIMENSION_SUBSPACE, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
   system(call_cmd);
   info("Pysparse finished.");
 
-  // Initialize eigenvector.
-  double* coeff_vec = new double[ndof];
+  // Initialize subspace - coefficients for all computed eigenfunctions
+  double* coeff_space[DIMENSION_SUBSPACE];
+  for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
+    coeff_space[i] = new double[ndof];
+  }
 
   // Read solution vectors from file and visualize it.
-  double* eigenval =new double[TARGET_EIGENFUNCTION];
+  double* eigenval =new double[DIMENSION_SUBSPACE];
   FILE *file = fopen("eivecs.dat", "r");
   char line [64];                  // Maximum line size.
   fgets(line, sizeof line, file);  // ndof
@@ -160,32 +175,36 @@ int main(int argc, char* argv[])
   if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
   fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
   int neig = atoi(line);
-  if (neig != TARGET_EIGENFUNCTION) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+  if (neig != DIMENSION_SUBSPACE) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
     // Get next eigenvalue from the file
     fgets(line, sizeof line, file);  // eigenval
-    eigenval[ieig] = atof(line);            
-    // Get the corresponding eigenvector.
+    eigenval[ieig] = atof(line);          
     for (int i = 0; i < ndof; i++) {  
       fgets(line, sizeof line, file);
-      coeff_vec[i] = atof(line);
+      coeff_space[ieig][i] = atof(line);
     }
     // Normalize the eigenvector.
-    normalize((UMFPackMatrix*)matrix_M, coeff_vec, ndof);
-  }  
+    normalize((UMFPackMatrix*)matrix_M, coeff_space[ieig], ndof);
+  }
   fclose(file);
 
+  
   // Eigenvalue.
   double lambda = eigenval[TARGET_EIGENFUNCTION-1];
   info("Eigenvalue on coarse mesh: %g", lambda);
-  info("Once more just to check: %g", calc_mass_product((UMFPackMatrix*)matrix_S, coeff_vec, ndof)
-      / calc_mass_product((UMFPackMatrix*)matrix_M, coeff_vec, ndof));
 
   // Convert eigenvector into eigenfunction. After this, the 
   // eigenvector on the coarse mesh will not be needed anymore.
   Solution sln;
-  Solution::vector_to_solution(coeff_vec, &space, &sln);
-  delete [] coeff_vec;
+  Solution::vector_to_solution(coeff_space[TARGET_EIGENFUNCTION-1], &space, &sln);
+  Solution sln_space[DIMENSION_SUBSPACE];
+  for (int i = 0; i < DIMENSION_SUBSPACE; i++) {  
+    Solution::vector_to_solution(coeff_space[i], &space, &sln_space[i]);
+  }
+  for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
+    delete [] coeff_space[i];
+  }
 
   // Visualize the eigenfunction.
   info("Plotting initial eigenfunction on coarse mesh.");
@@ -197,12 +216,13 @@ int main(int argc, char* argv[])
   sprintf(title, "Initial mesh");
   oview.set_title(title);
   oview.show(&space);
-  //View::wait(HERMES_WAIT_KEYPRESS);
+  View::wait(HERMES_WAIT_KEYPRESS);
 
   /*** Begin adaptivity ***/
 
   // Adaptivity loop:
   Solution ref_sln;
+  Solution ref_sln_space[DIMENSION_SUBSPACE];
   Space* ref_space = NULL;  
   int as = 1; 
   bool done = false;
@@ -217,17 +237,30 @@ int main(int argc, char* argv[])
 
     // Obtain initial approximation on new reference mesh.
     double* coeff_vec_ref = new double[ndof_ref];
+    double* coeff_space_ref[DIMENSION_SUBSPACE];
+    for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
+      coeff_space_ref[i] = new double[ndof_ref];
+    }
     if (as == 1) {
       // Project the coarse mesh eigenfunction to the reference mesh.
       info("Projecting coarse mesh solution to reference mesh.");
       OGProjection::project_global(ref_space, &sln, coeff_vec_ref, matrix_solver);     
+      for (int i = 0; i < DIMENSION_SUBSPACE; i++) {  
+        OGProjection::project_global(ref_space, &sln_space[i], coeff_space_ref[i], matrix_solver);
+      }
     }
     else {
       // Project the last reference mesh solution to the reference mesh.
       info("Projecting last reference mesh solution to new reference mesh.");
       OGProjection::project_global(ref_space, &ref_sln, coeff_vec_ref, matrix_solver);     
+      for (int i = 0; i < DIMENSION_SUBSPACE; i++) {  
+        OGProjection::project_global(ref_space, &ref_sln_space[i], coeff_space_ref[i], matrix_solver);
+      }
     }
-    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);      
+    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln); 
+    for (int i = 0; i < DIMENSION_SUBSPACE; i++) {  
+      Solution::vector_to_solution(coeff_space_ref[i], ref_space, &ref_sln_space[i]); 
+    }     
 
     // Initialize matrices and matrix solver on reference mesh.
     SparseMatrix* matrix_S_ref = create_matrix(matrix_solver);
@@ -244,28 +277,108 @@ int main(int argc, char* argv[])
     dp_M_ref.assemble(matrix_M_ref);
 
     // Calculate eigenvalue corresponding to the new reference solution.
-    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
-             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_space_ref[TARGET_EIGENFUNCTION-1], ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[TARGET_EIGENFUNCTION-1], ndof_ref);
     info("Initial guess for eigenvalue on reference mesh: %.12f", lambda);
 
     if (ITERATIVE_METHOD == 1) {
       // Newton's method on the reference mesh.
       if(!solve_newton_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
-	  		     coeff_vec_ref, lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
+	  		     coeff_space_ref[TARGET_EIGENFUNCTION-1], lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
         error("Newton's method failed.");
     }
-    else {
-      // Picard's method on the reference mesh.
+    else if (ITERATIVE_METHOD == 2) {
+      lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_space_ref[0], ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[0], ndof_ref);
+      // Picard's method on the reference mesh for the first eigenfunction in the eigenspace.
       if(!solve_picard_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
-	  		     coeff_vec_ref, lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER))
+	  		     coeff_space_ref[0], lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER, USE_SHIFT))
         error("Picard's method failed.");
+      for (int i = 1; i < DIMENSION_SUBSPACE; i++) {  
+        lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_space_ref[i], ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[i], ndof_ref);
+        if(!solve_picard_eigen_ortho(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
+	  		     coeff_space_ref[i], lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER,USE_ORTHO, USE_SHIFT,
+                             coeff_space_ref,i,DIMENSION_SUBSPACE))
+          error("Picard's method failed.");
+      }
     }
-    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);
+    else {
+        // Write matrix_S in MatrixMarket format.
+        write_matrix_mm("mat_S.mtx", matrix_S_ref);
+
+        // Write matrix_M in MatrixMarket format.
+        write_matrix_mm("mat_M.mtx", matrix_M_ref);
+
+        // Call Python eigensolver. Solution will be written to "eivecs.dat".
+        info("Calling Pysparse.");
+        char call_cmd[255];
+        // Compute the approximation of all discrete eigenfunctions corresponding to the eigenvlaue of the target eigenfunction
+        sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_S.mtx mat_M.mtx %g %d %g %d", 
+	       PYSPARSE_TARGET_VALUE, DIMENSION_SUBSPACE, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
+        system(call_cmd);
+        info("Pysparse finished.");
+
+        // Read solution vectors from file and visualize it.
+        double* eigenval =new double[DIMENSION_SUBSPACE];
+        FILE *file = fopen("eivecs.dat", "r");
+        char line [64];                  // Maximum line size.
+        fgets(line, sizeof line, file);  // ndof
+        int n = atoi(line);            
+        if (n != ndof_ref) error("Mismatched ndof in the eigensolver output file.");  
+        fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
+        int neig = atoi(line); 
+        if (neig != DIMENSION_SUBSPACE) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+        for (int ieig = 0; ieig < neig; ieig++) {
+          // Get next eigenvalue from the file
+          fgets(line, sizeof line, file);  // eigenval
+          eigenval[ieig] = atof(line);            
+          // Get the corresponding eigenvector.
+          for (int i = 0; i < ndof_ref; i++) {  
+            fgets(line, sizeof line, file);
+            coeff_space_ref[ieig][i] = atof(line);
+          }
+        // Normalize the eigenvector.
+          normalize((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[ieig], ndof_ref);
+        }
+        fclose(file);
+      
+    }
+    for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
+      Solution::vector_to_solution(coeff_space_ref[i], ref_space, &ref_sln_space[i]);
+    }
+
+    // Reconstruction.
+    if (RECONSTRUCTION == 0) { 
+      Solution::vector_to_solution(coeff_space_ref[TARGET_EIGENFUNCTION-1], ref_space, &ref_sln);
+    }
+    else {
+      double inners[DIMENSION_TARGET_EIGENSPACE];
+      double* coeff_vec_rec = new double[ndof_ref];
+      for (int i = 0; i < DIMENSION_TARGET_EIGENSPACE; i++) { 
+         inners[i] = calc_inner_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[FIRST_INDEX_EIGENSPACE-1+i], coeff_vec_ref, ndof_ref);
+      }
+      for (int j = 0; j < ndof_ref; j++) {  
+        coeff_vec_rec[j] = 0.0;
+        for (int i = 0; i < DIMENSION_TARGET_EIGENSPACE; i++) { 
+          coeff_vec_rec[j] += inners[i] * coeff_space_ref[FIRST_INDEX_EIGENSPACE-1+i][j];
+        }
+      }
+      normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_rec, ndof_ref);
+      lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_rec, ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_rec, ndof_ref);
+      info("Reconstructed eigenvalue lambda: %.12f", lambda);
+      Solution::vector_to_solution(coeff_vec_rec, ref_space, &ref_sln);
+      delete [] coeff_vec_rec;
+    }
 
     // Clean up.
     delete matrix_S_ref;
     delete matrix_M_ref;
     delete [] coeff_vec_ref;
+    for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
+      delete [] coeff_space_ref[i];
+    }
 
     // Project reference solution to coarse mesh for error estimation.
     if (as > 1) {
@@ -317,7 +430,7 @@ int main(int argc, char* argv[])
     delete ref_space;
 
     // Wait for keypress.
-    //View::wait(HERMES_WAIT_KEYPRESS);
+    View::wait(HERMES_WAIT_KEYPRESS);
   }
   while (done == false);
 
